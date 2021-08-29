@@ -55,6 +55,8 @@ __all__ = (
     'InteractionType',
     'InteractionResponseType',
     'NSFWLevel',
+    'OptionType',
+    'ApplicationCommandType'
 )
 
 
@@ -574,6 +576,12 @@ class ButtonStyle(Enum):
 
     def __int__(self):
         return self.value
+
+
+class ApplicationCommandType(Enum):
+    chat_input = 1
+    user = 2
+    message = 3
 
 
 class OptionType(Enum):

@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from .bot import BotBase
     from .context import Context
     from .core import Command
+    from ..application_commands import InvokableApplicationCommand
 
 __all__ = (
     'CogMeta',
@@ -107,6 +108,7 @@ class CogMeta(type):
     __cog_name__: str
     __cog_settings__: Dict[str, Any]
     __cog_commands__: List[Command]
+    __cog_app_commands__: List[InvokableApplicationCommand]
     __cog_listeners__: List[Tuple[str, str]]
 
     def __new__(cls: Type[CogMeta], *args: Any, **kwargs: Any) -> CogMeta:
@@ -120,6 +122,7 @@ class CogMeta(type):
         attrs['__cog_description__'] = description
 
         commands = {}
+        app_commands = {}
         listeners = {}
         no_bot_cog = 'Commands or listeners must not start with cog_ or bot_ (in method {0.__name__}.{1})'
 
@@ -128,6 +131,8 @@ class CogMeta(type):
             for elem, value in base.__dict__.items():
                 if elem in commands:
                     del commands[elem]
+                if elem in app_commands:
+                    del app_commands[elem]
                 if elem in listeners:
                     del listeners[elem]
 
@@ -140,6 +145,12 @@ class CogMeta(type):
                     if elem.startswith(('cog_', 'bot_')):
                         raise TypeError(no_bot_cog.format(base, elem))
                     commands[elem] = value
+                elif isinstance(value, InvokableApplicationCommand):
+                    if is_static_method:
+                        raise TypeError(f'Application command in method {base}.{elem!r} must not be staticmethod.')
+                    if elem.startswith(('cog_', 'bot_')):
+                        raise TypeError(no_bot_cog.format(base, elem))
+                    app_commands[elem] = value
                 elif inspect.iscoroutinefunction(value):
                     try:
                         getattr(value, '__cog_listener__')
@@ -151,6 +162,7 @@ class CogMeta(type):
                         listeners[elem] = value
 
         new_cls.__cog_commands__ = list(commands.values()) # this will be copied in Cog.__new__
+        new_cls.__cog_app_commands__ = list(app_commands.values())
 
         listeners_as_list = []
         for listener in listeners.values():
@@ -186,6 +198,7 @@ class Cog(metaclass=CogMeta):
     __cog_name__: ClassVar[str]
     __cog_settings__: ClassVar[Dict[str, Any]]
     __cog_commands__: ClassVar[List[Command]]
+    __cog_app_commands__: ClassVar[List[Any]] # InvokableApplicationCommand is in another subpkg
     __cog_listeners__: ClassVar[List[Tuple[str, str]]]
 
     def __new__(cls: Type[CogT], *args: Any, **kwargs: Any) -> CogT:
@@ -198,6 +211,7 @@ class Cog(metaclass=CogMeta):
         # Either update the command with the cog provided defaults or copy it.
         # r.e type ignore, type-checker complains about overriding a ClassVar
         self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore
+        self.__cog_app_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_app_commands__)  # type: ignore
 
         lookup = {
             cmd.qualified_name: cmd
@@ -231,6 +245,20 @@ class Cog(metaclass=CogMeta):
                 This does not include subcommands.
         """
         return [c for c in self.__cog_commands__ if c.parent is None]
+    
+    def get_application_commands(self) -> List[InvokableApplicationCommand]:
+        r"""
+        Returns
+        --------
+        List[:class:`.InvokableApplicationCommand`]
+            A :class:`list` of :class:`.InvokableApplicationCommand`\s that are
+            defined inside this cog.
+
+            .. note::
+
+                This does not include subcommands.
+        """
+        return [c for c in self.__cog_app_commands__]
 
     @property
     def qualified_name(self) -> str:

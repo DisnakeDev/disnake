@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import List, Optional, TYPE_CHECKING
 
 from .base import Interaction
@@ -15,7 +16,6 @@ if TYPE_CHECKING:
     from ..types.interactions import (
         Interaction as InteractionPayload,
         ComponentInteractionData as ComponentInteractionDataPayload,
-        ApplicationCommandType,
         ComponentType
     )
     from ..state import ConnectionState
@@ -96,9 +96,6 @@ class MessageInteractionData:
     """
 
     __slots__ = (
-        'id',
-        'name',
-        'type',
         'custom_id',
         'component_type',
         'values'
@@ -106,9 +103,6 @@ class MessageInteractionData:
 
     def __init__(self, *, data: ComponentInteractionDataPayload):
         data = {} if data is None else data
-        self.id: int = int(data['id'])
-        self.name: str = data['name']
-        self.type: ApplicationCommandType = data['type']
         self.custom_id: str = data.get('custom_id')
         self.component_type: ComponentType = data.get('component_type')
         self.values: Optional[List[str]] = data.get('values')

@@ -22,6 +22,7 @@ from typing import NamedTuple, Literal
 
 from .client import *
 from .appinfo import *
+from .app_commands import *
 from .user import *
 from .emoji import *
 from .partial_emoji import *

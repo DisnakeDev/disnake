@@ -1,4 +1,5 @@
-from typing import Any, Dict, Optional, TYPE_CHECKING, Union
+from __future__ import annotations
+from typing import Any, Dict, Optional, TYPE_CHECKING, Union, TypeVar
 
 from .base import Interaction
 
@@ -66,7 +67,9 @@ class ApplicationCommandInteraction(Interaction):
             data=data.get('data'),
             state=state
         )
-    
+        self.application_command = None
+        self.command_failed = False
+
     @property
     def target(self):
         return self.data.target

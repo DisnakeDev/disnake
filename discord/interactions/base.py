@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union, TypeVar
 import asyncio
 
 from .. import utils
@@ -57,6 +57,7 @@ if TYPE_CHECKING:
     from ..ui.view import View
     from ..channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, PartialMessageable
     from ..threads import Thread
+    from datetime import datetime
 
     InteractionChannel = Union[
         VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, Thread, PartialMessageable
@@ -142,6 +143,14 @@ class Interaction:
                 self.author = User(state=self._state, data=data['user'])
             except KeyError:
                 pass
+
+    @property
+    def created_at(self) -> datetime:
+        return utils.snowflake_time(self.id)
+
+    @property
+    def client(self):
+        return self._state._get_client()
 
     @property
     def user(self) -> User:
