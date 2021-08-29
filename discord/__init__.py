@@ -24,6 +24,7 @@ from .client import *
 from .appinfo import *
 from .user import *
 from .emoji import *
+from .together import *
 from .partial_emoji import *
 from .activity import *
 from .channel import *
