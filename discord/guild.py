@@ -232,6 +232,15 @@ class Guild(Hashable):
         The guild's NSFW level.
 
         .. versionadded:: 2.0
+        
+    bots: :class:`Member`
+        Returns the list of bots currently in the guild
+    
+    humans: :class:`Member`
+        Returns the list of humans currently in the guild
+    
+    try_getting_member: :classs:`Member`
+        Tries to get the member from the bot's cache, else makes an API call to get the member.
     """
 
     __slots__ = (
