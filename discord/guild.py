@@ -762,7 +762,9 @@ class Guild(Hashable):
         return self._members.get(user_id)
     
     async def try_getting_member(self, user_id: int) -> Member:
-        """Returns a member with the given ID. Beware that this method might an API call if the member isn't found in the bot's cache (unlikely in most of the cases)
+        """|coro|
+        
+        Returns a member with the given ID. Beware that this method might an API call if the member isn't found in the bot's cache (unlikely in most of the cases)
         
         Parameters
         -----------
