@@ -192,6 +192,19 @@ class Client:
         To enable these events, this must be set to ``True``. Defaults to ``False``.
 
         .. versionadded:: 2.0
+    try_getting_user: :class:`User`
+        This method will first try to get the requested user from the cache but if it is not found in the
+        cache, then it will make an API request for the same.
+    
+    .. container:: operations
+    
+        .. describe:: str(x)
+            
+            Returns the client's name with the discriminator.
+            
+        .. describe:: int(x)
+        
+            Returns the client's user ID
 
     Attributes
     -----------
