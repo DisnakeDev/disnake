@@ -28,17 +28,17 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union
 import asyncio
 
-from . import utils
-from .enums import try_enum, InteractionType, InteractionResponseType
-from .errors import InteractionResponded, HTTPException, ClientException
-from .channel import PartialMessageable, ChannelType
+from .. import utils
+from ..enums import try_enum, InteractionType, InteractionResponseType
+from ..errors import InteractionResponded, HTTPException, ClientException
+from ..channel import PartialMessageable, ChannelType
 
-from .user import User
-from .member import Member
-from .message import Message, Attachment
-from .object import Object
-from .permissions import Permissions
-from .webhook.async_ import async_context, Webhook, handle_message_parameters
+from ..user import User
+from ..member import Member
+from ..message import Message, Attachment
+from ..object import Object
+from ..permissions import Permissions
+from ..webhook.async_ import async_context, Webhook, handle_message_parameters
 
 __all__ = (
     'Interaction',
@@ -47,19 +47,16 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from .types.interactions import (
-        Interaction as InteractionPayload,
-        InteractionData,
-    )
-    from .guild import Guild
-    from .state import ConnectionState
-    from .file import File
-    from .mentions import AllowedMentions
+    from ..types.interactions import Interaction as InteractionPayload
+    from ..guild import Guild
+    from ..state import ConnectionState
+    from ..file import File
+    from ..mentions import AllowedMentions
     from aiohttp import ClientSession
-    from .embeds import Embed
-    from .ui.view import View
-    from .channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, PartialMessageable
-    from .threads import Thread
+    from ..embeds import Embed
+    from ..ui.view import View
+    from ..channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, PartialMessageable
+    from ..threads import Thread
 
     InteractionChannel = Union[
         VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, Thread, PartialMessageable
@@ -69,10 +66,10 @@ MISSING: Any = utils.MISSING
 
 
 class Interaction:
-    """Represents a Discord interaction.
+    """A base class representing a Discord interaction.
 
     An interaction happens when a user does an action that needs to
-    be notified. Current examples are slash commands and components.
+    be notified. Current examples are application commands and components.
 
     .. versionadded:: 2.0
 
@@ -88,15 +85,11 @@ class Interaction:
         The channel ID the interaction was sent from.
     application_id: :class:`int`
         The application ID that the interaction was for.
-    user: Optional[Union[:class:`User`, :class:`Member`]]
+    author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
-    message: Optional[:class:`Message`]
-        The message that sent this interaction.
     token: :class:`str`
         The token to continue the interaction. These are valid
         for 15 minutes.
-    data: :class:`dict`
-        The raw interaction data.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -104,10 +97,8 @@ class Interaction:
         'type',
         'guild_id',
         'channel_id',
-        'data',
         'application_id',
-        'message',
-        'user',
+        'author',
         'token',
         'version',
         '_permissions',
@@ -128,20 +119,12 @@ class Interaction:
     def _from_data(self, data: InteractionPayload):
         self.id: int = int(data['id'])
         self.type: InteractionType = try_enum(InteractionType, data['type'])
-        self.data: Optional[InteractionData] = data.get('data')
         self.token: str = data['token']
         self.version: int = data['version']
         self.channel_id: Optional[int] = utils._get_as_snowflake(data, 'channel_id')
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, 'guild_id')
         self.application_id: int = int(data['application_id'])
-
-        self.message: Optional[Message]
-        try:
-            self.message = Message(state=self._state, channel=self.channel, data=data['message'])  # type: ignore
-        except KeyError:
-            self.message = None
-
-        self.user: Optional[Union[User, Member]] = None
+        self.author: Optional[Union[User, Member]] = None
         self._permissions: int = 0
 
         # TODO: there's a potential data loss here
@@ -152,13 +135,17 @@ class Interaction:
             except KeyError:
                 pass
             else:
-                self.user = Member(state=self._state, guild=guild, data=member)  # type: ignore
+                self.author = Member(state=self._state, guild=guild, data=member)  # type: ignore
                 self._permissions = int(member.get('permissions', 0))
         else:
             try:
-                self.user = User(state=self._state, data=data['user'])
+                self.author = User(state=self._state, data=data['user'])
             except KeyError:
                 pass
+
+    @property
+    def user(self) -> User:
+        return self.author
 
     @property
     def guild(self) -> Optional[Guild]:

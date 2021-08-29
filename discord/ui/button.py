@@ -239,7 +239,7 @@ def button(
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`discord.ui.View`, the :class:`discord.ui.Button` being pressed and
-    the :class:`discord.Interaction` you receive.
+    the :class:`discord.MessageInteraction` you receive.
 
     .. note::
 

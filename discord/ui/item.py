@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Coroutine, Dict, Generic, Optional, TYPE_CHECKING, Tuple, Type, TypeVar
 
-from ..interactions import Interaction
+from ..interactions import MessageInteraction
 
 __all__ = (
     'Item',
@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
 I = TypeVar('I', bound='Item')
 V = TypeVar('V', bound='View', covariant=True)
-ItemCallbackType = Callable[[Any, I, Interaction], Coroutine[Any, Any, Any]]
+ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 
 class Item(Generic[V]):
@@ -73,7 +73,7 @@ class Item(Generic[V]):
     def refresh_component(self, component: Component) -> None:
         return None
 
-    def refresh_state(self, interaction: Interaction) -> None:
+    def refresh_state(self, interaction: MessageInteraction) -> None:
         return None
 
     @classmethod
@@ -116,7 +116,7 @@ class Item(Generic[V]):
         """Optional[:class:`View`]: The underlying view for this item."""
         return self._view
 
-    async def callback(self, interaction: Interaction):
+    async def callback(self, interaction: MessageInteraction):
         """|coro|
 
         The callback associated with this UI item.
@@ -125,7 +125,7 @@ class Item(Generic[V]):
 
         Parameters
         -----------
-        interaction: :class:`.Interaction`
+        interaction: :class:`.MessageInteraction`
             The interaction that triggered this UI item.
         """
         pass

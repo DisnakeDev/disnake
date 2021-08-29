@@ -615,7 +615,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when an interaction happened.
 
-    This currently happens due to slash command invocations or components being used.
+    This currently happens due to application command invocations or components being used.
 
     .. warning::
 

@@ -152,6 +152,7 @@ class ApplicationCommandInteractionDataResolved(TypedDict, total=False):
     members: Dict[Snowflake, Member]
     roles: Dict[Snowflake, Role]
     channels: Dict[Snowflake, ApplicationCommandResolvedPartialChannel]
+    messages: Dict[Snowflake, Message]
 
 
 class _ApplicationCommandInteractionDataOptional(TypedDict, total=False):

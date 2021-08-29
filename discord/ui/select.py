@@ -31,7 +31,7 @@ from .item import Item, ItemCallbackType
 from ..enums import ComponentType
 from ..partial_emoji import PartialEmoji
 from ..emoji import Emoji
-from ..interactions import Interaction
+from ..interactions import MessageInteraction, MessageInteractionData
 from ..utils import MISSING
 from ..components import (
     SelectOption,
@@ -270,9 +270,8 @@ class Select(Item[V]):
     def refresh_component(self, component: SelectMenu) -> None:
         self._underlying = component
 
-    def refresh_state(self, interaction: Interaction) -> None:
-        data: ComponentInteractionData = interaction.data  # type: ignore
-        self._selected_values = data.get('values', [])
+    def refresh_state(self, interaction: MessageInteraction) -> None:
+        self._selected_values = interaction.values
 
     @classmethod
     def from_component(cls: Type[S], component: SelectMenu) -> S:
@@ -308,7 +307,7 @@ def select(
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`discord.ui.View`, the :class:`discord.ui.Select` being pressed and
-    the :class:`discord.Interaction` you receive.
+    the :class:`discord.MessageInteraction` you receive.
 
     In order to get the selected items that the user has chosen within the callback
     use :attr:`Select.values`.

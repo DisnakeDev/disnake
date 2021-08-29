@@ -47,7 +47,7 @@ __all__ = (
 
 
 if TYPE_CHECKING:
-    from ..interactions import Interaction
+    from ..interactions import MessageInteraction
     from ..message import Message
     from ..types.components import Component as ComponentPayload
     from ..state import ConnectionState
@@ -292,7 +292,7 @@ class View:
         self.children.clear()
         self.__weights.clear()
 
-    async def interaction_check(self, interaction: Interaction) -> bool:
+    async def interaction_check(self, interaction: MessageInteraction) -> bool:
         """|coro|
 
         A callback that is called when an interaction happens within the view
@@ -310,7 +310,7 @@ class View:
 
         Parameters
         -----------
-        interaction: :class:`~discord.Interaction`
+        interaction: :class:`~discord.MessageInteraction`
             The interaction that occurred.
 
         Returns
@@ -327,7 +327,7 @@ class View:
         """
         pass
 
-    async def on_error(self, error: Exception, item: Item, interaction: Interaction) -> None:
+    async def on_error(self, error: Exception, item: Item, interaction: MessageInteraction) -> None:
         """|coro|
 
         A callback that is called when an item's callback or :meth:`interaction_check`
@@ -341,13 +341,13 @@ class View:
             The exception that was raised.
         item: :class:`Item`
             The item that failed the dispatch.
-        interaction: :class:`~discord.Interaction`
+        interaction: :class:`~discord.MessageInteraction`
             The interaction that led to the failure.
         """
         print(f'Ignoring exception in view {self} for item {item}:', file=sys.stderr)
         traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
 
-    async def _scheduled_task(self, item: Item, interaction: Interaction):
+    async def _scheduled_task(self, item: Item, interaction: MessageInteraction):
         try:
             if self.timeout:
                 self.__timeout_expiry = time.monotonic() + self.timeout
@@ -379,7 +379,7 @@ class View:
         self.__stopped.set_result(True)
         asyncio.create_task(self.on_timeout(), name=f'discord-ui-view-timeout-{self.id}')
 
-    def _dispatch_item(self, item: Item, interaction: Interaction):
+    def _dispatch_item(self, item: Item, interaction: MessageInteraction):
         if self.__stopped.done():
             return
 
@@ -503,9 +503,11 @@ class ViewStore:
                 del self._synced_message_views[key]
                 break
 
-    def dispatch(self, component_type: int, custom_id: str, interaction: Interaction):
+    def dispatch(self, interaction: MessageInteraction):
         self.__verify_integrity()
         message_id: Optional[int] = interaction.message and interaction.message.id
+        component_type = interaction.data.component_type
+        custom_id = interaction.data.custom_id
         key = (component_type, message_id, custom_id)
         # Fallback to None message_id searches in case a persistent view
         # was added without an associated message_id

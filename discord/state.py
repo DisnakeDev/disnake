@@ -53,8 +53,9 @@ from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .object import Object
 from .invite import Invite
 from .integrations import _integration_factory
-from .interactions import Interaction
+from .interactions import Interaction, ApplicationCommandInteraction, MessageInteraction
 from .ui.view import ViewStore, View
+from .ext.application_commands import ApplicationCommandStore
 from .stage_instance import StageInstance
 from .threads import Thread, ThreadMember
 from .sticker import GuildSticker
@@ -235,7 +236,7 @@ class ConnectionState:
 
         self.clear()
 
-    def clear(self, *, views: bool = True) -> None:
+    def clear(self, *, views: bool = True, application_commands: bool = True) -> None:
         self.user: Optional[ClientUser] = None
         # Originally, this code used WeakValueDictionary to maintain references to the
         # global user mapping.
@@ -255,6 +256,8 @@ class ConnectionState:
         self._guilds: Dict[int, Guild] = {}
         if views:
             self._view_store: ViewStore = ViewStore(self)
+        if application_commands:
+            self._app_command_store: ApplicationCommandStore = ApplicationCommandStore(self)
 
         self._voice_clients: Dict[int, VoiceProtocol] = {}
 
@@ -699,11 +702,18 @@ class ConnectionState:
                     self.dispatch('reaction_clear_emoji', reaction)
 
     def parse_interaction_create(self, data) -> None:
-        interaction = Interaction(data=data, state=self)
-        if data['type'] == 3:  # interaction component
-            custom_id = interaction.data['custom_id']  # type: ignore
-            component_type = interaction.data['component_type']  # type: ignore
-            self._view_store.dispatch(component_type, custom_id, interaction)
+        if data['type'] == 1:
+            interaction = Interaction(data=data, state=self)
+        elif data['type'] == 2:
+            interaction = ApplicationCommandInteraction(data=data, state=self)
+            self._app_command_store.dispatch(interaction)
+            self.dispatch('application_command', interaction)
+        elif data['type'] == 3:
+            interaction = MessageInteraction(data=data, state=self)
+            self._view_store.dispatch(interaction)
+            self.dispatch('message_interaction', interaction)
+        else:
+            pass
 
         self.dispatch('interaction', interaction)
 

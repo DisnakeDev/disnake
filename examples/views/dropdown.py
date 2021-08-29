@@ -21,7 +21,7 @@ class Dropdown(discord.ui.Select):
         # The options parameter defines the dropdown options. We defined this above
         super().__init__(placeholder='Choose your favourite colour...', min_values=1, max_values=1, options=options)
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.MessageInteraction):
         # Use the interaction object to send a response message containing
         # the user's favourite colour or choice. The self object refers to the
         # Select object, and the values attribute gets a list of the user's 
