@@ -60,12 +60,12 @@ from .appinfo import AppInfo
 from .ui.view import View
 from .stage_instance import StageInstance
 from .threads import Thread
+from .message import Message
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
 
 if TYPE_CHECKING:
     from .abc import SnowflakeTime, PrivateChannel, GuildChannel, Snowflake
     from .channel import DMChannel
-    from .message import Message
     from .member import Member
     from .voice_client import VoiceProtocol
 
@@ -250,6 +250,15 @@ class Client:
 
     def _handle_ready(self) -> None:
         self._ready.set()
+        
+    def __str__(self):
+        return self._connection.user.name
+    
+    def __int__(self):
+        return self._connection.user.id
+    
+    def __repr__(self):
+        return f"<Username={self._connection.user.name} id={self._connection.user.id} guilds={len(self._connection.guilds)} users={len(self._connection._users.values())} emojis={len(self._connection.emojis)} stickers={len(self._connection.stickers)} cached_messages={len(utils.SequenceProxy(self._connection._messages or []))}>"
 
     @property
     def latency(self) -> float:
@@ -321,6 +330,21 @@ class Client:
         These are usually :class:`.VoiceClient` instances.
         """
         return self._connection.voice_clients
+    
+    def get_message(self, id: int) -> Optional[Message]:
+        """Gets the message with the ID from the bot's message cache or None if not found.
+        
+        Parameters
+        -----------
+        id: :class:`int`
+            The message ID to look for.
+        Returns
+        --------
+        Optional[:class:`.Message`]
+            The message asked for.
+        
+        """
+        return utils.get(self.cached_messages, id=id)
 
     @property
     def application_id(self) -> Optional[int]:
@@ -826,6 +850,27 @@ class Client:
             The user or ``None`` if not found.
         """
         return self._connection.get_user(id)
+    
+    async def try_getting_user(self, id: int) -> User:
+        """|coro|
+        
+        Returns a message with the given ID. Beware that this method might an API call if the message isn't found in the bot's cache (unlikely in most of the cases)
+        
+        Parameters
+        -----------
+        user_id: :class:`int`
+            The ID to search for.
+        Returns
+        --------
+        :class:`Member`
+            The message with the given ID
+        """
+        try_user = self._connection.get_user(id)
+        if try_user is not None:
+            return try_user
+        if try_user is None:
+            data = await self.http.get_user(user_id)
+            return User(state=self._connection, data=data)
 
     def get_emoji(self, id: int, /) -> Optional[Emoji]:
         """Returns an emoji with the given ID.
