@@ -193,8 +193,12 @@ class Client:
 
         .. versionadded:: 2.0
     try_getting_user: :class:`User`
-        This method will first try to get the requested user from the cache but if it is not found in the
+        First try to get the requested user from the cache but if it is not found in the
         cache, then it will make an API request for the same.
+        
+    get_message: :class:`Message`
+        Try to get the message from the client's cache or return None if the message isn't found in
+        the cache
     
     .. container:: operations
     
