@@ -1,5 +1,5 @@
 disnake
-==========
+=======
 
 .. image:: https://discord.com/api/guilds/808030843078836254/embed.png
    :target: https://discord.gg/G2p7sCss7D
@@ -13,13 +13,18 @@ disnake
 
 A modern, easy to use, feature-rich, and async ready API wrapper for Discord written in Python.
 
-About disnake
---------------------------
+Warning
+-------
 
-All the contributers and developers, associated with disnake, are trying their best to add new features to the library as soon as possible. We strive to become a complete substitute to the discord.py library, which once ruled the Python Bot Making Community and become an all in one library with every functionality you can ever imagine!
+The library is still in development and isn't usable yet. We hope to publish a stable release before the 10th of september.
+
+About disnake
+-------------
+
+All the contributers and developers, associated with disnake, are trying their best to add new features to the library as soon as possible. We strive to revive the greatest Python wrapper for Discord API and keep it up to date.
 
 Key Features
--------------
+------------
 
 - Modern Pythonic API using ``async`` and ``await``.
 - Added features for ease of coding
@@ -62,7 +67,7 @@ To install the development version, do the following:
 
 
 Optional Packages
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 * `PyNaCl <https://pypi.org/project/PyNaCl/>`__ (for voice support)
 
@@ -72,7 +77,7 @@ Please note that on Linux installing voice you must install the following packag
 * python-dev (e.g. ``python3.6-dev`` for Python 3.6)
 
 Quick Example
---------------
+-------------
 
 .. code:: py
 
@@ -94,7 +99,7 @@ Quick Example
     client.run('token')
 
 Bot Example
-~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 .. code:: py
 
@@ -106,6 +111,22 @@ Bot Example
     @bot.command()
     async def ping(ctx):
         await ctx.send('pong')
+
+    bot.run('token')
+
+Slash Commands Example
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: py
+
+    import disnake
+    from disnake.ext import commands
+
+    bot = commands.Bot(command_prefix='>', test_guilds=[12345])
+
+    @bot.slash_command()
+    async def ping(inter):
+        await inter.response.send_message('pong')
 
     bot.run('token')
 
