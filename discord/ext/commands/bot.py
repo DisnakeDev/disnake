@@ -33,7 +33,7 @@ import importlib.util
 import sys
 import traceback
 import types
-from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union
+from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union, Set
 
 import discord
 
@@ -44,9 +44,10 @@ from . import errors
 from .help import HelpCommand, DefaultHelpCommand
 from .cog import Cog
 
-from ..application_commands.base_core import _ApplicationCommandStore
+from ..application_commands import slash_command, user_command, message_command
 
 from discord.enums import ApplicationCommandType
+from discord._hub import _ApplicationCommandStore
 
 if TYPE_CHECKING:
     import importlib.machinery
@@ -56,6 +57,11 @@ if TYPE_CHECKING:
     from ._types import (
         Check,
         CoroFunc,
+    )
+    from ..application_commands import (
+        InvokableSlashCommand,
+        InvokableUserCommand,
+        InvokableMessageCommand
     )
 
 __all__ = (
@@ -151,6 +157,159 @@ class BotBase(GroupMixin):
             self.help_command = DefaultHelpCommand()
         else:
             self.help_command = help_command
+
+    @property
+    def slash_commands(self) -> Set[InvokableSlashCommand]:
+        return set(_ApplicationCommandStore.slash_commands.values())
+
+    @property
+    def user_commands(self) -> Set[InvokableUserCommand]:
+        return set(_ApplicationCommandStore.user_commands.values())
+
+    @property
+    def message_commands(self) -> Set[InvokableMessageCommand]:
+        return set(_ApplicationCommandStore.message_commands.values())
+
+    def get_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
+        """Get a :class:`.InvokableSlashCommand` from the internal list
+        of commands.
+
+        Parameters
+        -----------
+        name: :class:`str`
+            The name of the slash command to get.
+
+        Returns
+        --------
+        Optional[:class:`InvokableSlashCommand`]
+            The slash command that was requested. If not found, returns ``None``.
+        """
+        return _ApplicationCommandStore.slash_commands.get(name)
+
+    def get_user_command(self, name: str) -> Optional[InvokableUserCommand]:
+        """Get a :class:`.InvokableUserCommand` from the internal list
+        of commands.
+
+        Parameters
+        -----------
+        name: :class:`str`
+            The name of the user command to get.
+
+        Returns
+        --------
+        Optional[:class:`InvokableUserCommand`]
+            The user command that was requested. If not found, returns ``None``.
+        """
+        return _ApplicationCommandStore.user_commands.get(name)
+
+    def get_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
+        """Get a :class:`.InvokableMessageCommand` from the internal list
+        of commands.
+
+        Parameters
+        -----------
+        name: :class:`str`
+            The name of the message command to get.
+
+        Returns
+        --------
+        Optional[:class:`InvokableMessageCommand`]
+            The message command that was requested. If not found, returns ``None``.
+        """
+        return _ApplicationCommandStore.message_commands.get(name)
+
+    def slash_command(
+        self,
+        *,
+        name: str = None,
+        description: str = None,
+        options: List[discord.app_commands.Option] = None,
+        default_permission: bool = True,
+        guild_ids: List[int] = None,
+        connectors: Dict[str, str] = None,
+        auto_sync: bool = True,
+        **kwargs
+    ) -> InvokableSlashCommand:
+        """
+        A decorator that builds a slash command.
+
+        Parameters
+        ----------
+        auto_sync: :class:`bool`
+            whether to automatically register the command or not. Defaults to ``True``
+        name: :class:`str`
+            name of the slash command you want to respond to (equals to function name by default).
+        description: :class:`str`
+            the description of the slash command. It will be visible in Discord.
+        options: List[:class:`Option`]
+            the list of slash command options. The options will be visible in Discord.
+        default_permission: :class:`bool`
+            whether the command is enabled by default when the app is added to a guild.
+        guild_ids: List[:class:`int`]
+            if specified, the client will register a command in these guilds.
+            Otherwise this command will be registered globally.
+        connectors: Dict[:class:`str`, :class:`str`]
+            binds function names to option names. If the name
+            of an option already matches the corresponding function param,
+            you don't have to specify the connectors. Connectors template:
+            ``{"option-name": "param_name", ...}``
+        """
+        return slash_command(
+            name=name,
+            description=description,
+            options=options,
+            default_permission=default_permission,
+            guild_ids=guild_ids,
+            connectors=connectors,
+            auto_sync=auto_sync,
+            **kwargs
+        )
+
+    def user_command(
+        self,
+        *,
+        name: str = None,
+        guild_ids: List[int] = None,
+        auto_sync: bool = True,
+        **kwargs
+    ) -> InvokableUserCommand:
+        """
+        A decorator that builds a user command.
+
+        Parameters
+        ----------
+        auto_sync: :class:`bool`
+            whether to automatically register the command or not. Defaults to ``True``
+        name: :class:`str`
+            name of the user command you want to respond to (equals to function name by default).
+        guild_ids: List[:class:`int`]
+            if specified, the client will register the command in these guilds.
+            Otherwise this command will be registered globally.
+        """
+        return user_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
+
+    def message_command(
+        self,
+        *,
+        name: str = None,
+        guild_ids: List[int] = None,
+        auto_sync: bool = True,
+        **kwargs
+    ) -> InvokableMessageCommand:
+        """
+        A decorator that builds a message command.
+
+        Parameters
+        ----------
+        auto_sync: :class:`bool`
+            whether to automatically register the command or not. Defaults to ``True``
+        name: :class:`str`
+            name of the message command you want to respond to (equals to function name by default).
+        guild_ids: List[:class:`int`]
+            if specified, the client will register the command in these guilds.
+            Otherwise this command will be registered globally.
+        """
+        return message_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
 
     # internal helpers
 

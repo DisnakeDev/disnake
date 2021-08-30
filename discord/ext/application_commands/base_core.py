@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import (
-    Dict,
     List,
     Optional,
     TypeVar,
@@ -9,7 +8,7 @@ from typing import (
 import asyncio
 import datetime
 
-from discord.utils import async_all, maybe_coroutine
+from discord.utils import async_all
 
 from ..commands.errors import *
 from ..commands.cooldowns import BucketType, CooldownMapping, MaxConcurrency
@@ -17,16 +16,11 @@ from ..commands.cooldowns import BucketType, CooldownMapping, MaxConcurrency
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
-
     from discord.interactions import ApplicationCommandInteraction
-
     from ..commands._types import Check, Hook, Error
 
 
-__all__ = (
-    'InvokableApplicationCommand',
-    '_ApplicationCommandStore'
-)
+__all__ = ('InvokableApplicationCommand',)
 
 
 T = TypeVar('T')
@@ -83,6 +77,7 @@ class InvokableApplicationCommand:
 
         self.cog: Optional[CogT] = None
         self.guild_ids: List[int] = None
+        self.auto_sync: bool = True
     
     @property
     def callback(self):
@@ -320,12 +315,3 @@ class InvokableApplicationCommand:
             return await async_all(predicate(ctx) for predicate in predicates)  # type: ignore
         finally:
             inter.application_command = original
-
-
-class _ApplicationCommandStore:
-    # I feel like this is a terrible solution,
-    # but I don't know any exact reasons why.
-    # If you know them, please tell me.
-    slash_commands: Dict[str, InvokableApplicationCommand] = {}
-    user_commands: Dict[str, InvokableApplicationCommand] = {}
-    message_commands: Dict[str, InvokableApplicationCommand] = {}

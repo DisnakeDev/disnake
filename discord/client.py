@@ -61,6 +61,9 @@ from .ui.view import View
 from .stage_instance import StageInstance
 from .threads import Thread
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
+from .app_commands import application_command_factory, ApplicationCommand, ApplicationCommandPermissions
+
+from ._hub import _ordered_unsynced_commands
 
 if TYPE_CHECKING:
     from .abc import SnowflakeTime, PrivateChannel, GuildChannel, Snowflake
@@ -220,7 +223,8 @@ class Client:
         self.http: HTTPClient = HTTPClient(connector, proxy=proxy, proxy_auth=proxy_auth, unsync_clock=unsync_clock, loop=self.loop)
 
         self._handlers: Dict[str, Callable] = {
-            'ready': self._handle_ready
+            'ready': self._handle_ready,
+            'connect_internal': self._schedule_app_command_preparation
         }
 
         self._hooks: Dict[str, Callable] = {
@@ -228,12 +232,15 @@ class Client:
         }
 
         self._enable_debug_events: bool = options.pop('enable_debug_events', False)
+        self._sync_commands: bool = options.pop('sync_commands', True)
+        self._test_guilds: List[int] = options.pop('test_guilds')
         self._connection: ConnectionState = self._get_state(**options)
         self._connection.shard_count = self.shard_count
         self._closed: bool = False
         self._ready: asyncio.Event = asyncio.Event()
         self._connection._get_websocket = self._get_websocket
         self._connection._get_client = lambda: self
+        self._times_connected = 0
 
         if VoiceClient.warn_nacl:
             VoiceClient.warn_nacl = False
@@ -413,6 +420,104 @@ class Client:
         """
         print(f'Ignoring exception in {event_method}', file=sys.stderr)
         traceback.print_exc()
+
+    async def _cache_application_commands(self) -> None:
+        _, guilds = _ordered_unsynced_commands(self._test_guilds)
+        try:
+            commands = await self.fetch_global_commands()
+            self._connection._global_application_commands = {
+                command.id: command for command in commands
+            }
+        except Exception:
+            pass
+        for guild_id in guilds:
+            try:
+                commands = await self.fetch_guild_commands(guild_id)
+                self._connection._guild_application_commands[guild_id] = {
+                    command.id: command for command in commands
+                }
+            except Exception:
+                pass
+    
+    async def _sync_application_commands(self) -> None:
+        # We assume that all commands are already cached
+        
+        if not self._sync_commands:
+            return
+        # Sort all invokable commands between guild IDs
+        global_cmds, guild_cmds = _ordered_unsynced_commands(self._test_guilds)
+        # This is for the event
+        global_commands_patched = False
+        patched_guilds = []
+        # Update global commands first
+        update_required = False
+        deletion_required = False
+        for cmd in global_cmds:
+            old_cmd = self.get_global_command_named(cmd.name)
+            if old_cmd is None:
+                update_required = True
+                break
+            elif old_cmd.type != cmd.type:
+                update_required = True
+                deletion_required = True
+                break
+            elif cmd != old_cmd:
+                update_required = True
+                break
+        if update_required or len(global_cmds) != len(self._connection._global_application_commands):
+            try:
+                if deletion_required:
+                    await self.bulk_overwrite_global_commands([])
+                new_commands = await self.bulk_overwrite_global_commands(global_cmds)
+                self._connection._global_application_commands = {
+                    command.id: command for command in new_commands
+                }
+                global_commands_patched = True
+            except Exception as e:
+                print(f"[WARNING] Failed to overwrite global commands due to {e}")
+        # Update guild commands
+        for guild_id, cmds in guild_cmds.items():
+            update_required = False
+            deletion_required = False
+            for cmd in cmds:
+                old_cmd = self.get_guild_command_named(guild_id, cmd.name)
+                if old_cmd is None:
+                    update_required = True
+                    break
+                elif old_cmd.type != cmd.type:
+                    update_required = True
+                    deletion_required = True
+                    break
+                elif cmd != old_cmd:
+                    update_required = True
+                    break
+            current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
+            if update_required or len(cmds) != len(current_guild_cmds):
+                try:
+                    if deletion_required:
+                        await self.bulk_overwrite_guild_commands(guild_id, [])
+                    new_commands = await self.bulk_overwrite_guild_commands(guild_id, cmds)
+                    self._connection._guild_application_commands[guild_id] = {
+                        command.id: command for command in new_commands
+                    }
+                    patched_guilds.append(guild_id)
+                except Exception as e:
+                    print(f"[WARNING] Failed to overwrite commands in <Guild id={guild_id}> due to {e}")
+        # Dispatch an event
+        self.dispatch('auto_sync', global_commands_patched, patched_guilds)
+
+    async def _prepare_application_commands(self) -> None:
+        await self._cache_application_commands()
+        await self._sync_application_commands()
+
+    def _schedule_app_command_preparation(self) -> None:
+        self._times_connected += 1
+        if self._times_connected > 1:
+            return
+        return asyncio.create_task(
+            self._prepare_application_commands(),
+            name='disnake: app_command_preparation'
+        )
 
     # hooks
 
@@ -899,6 +1004,18 @@ class Client:
         """
         for guild in self.guilds:
             yield from guild.members
+
+    def get_global_command(self, id: int) -> Optional[ApplicationCommand]:
+        return self._connection._get_global_application_command(id)
+    
+    def get_guild_command(self, guild_id: int, id: int) -> Optional[ApplicationCommand]:
+        return self._connection._get_guild_application_command(guild_id, id)
+
+    def get_global_command_named(self, name: str) -> Optional[ApplicationCommand]:
+        return self._connection._get_global_command_named(name)
+    
+    def get_guild_command_named(self, guild_id: int, name: str) -> Optional[ApplicationCommand]:
+        return self._connection._get_guild_command_named(guild_id, name)
 
     # listeners/waiters
 
@@ -1640,3 +1757,44 @@ class Client:
         .. versionadded:: 2.0
         """
         return self._connection.persistent_views
+
+    # Application commands (global)
+
+    async def fetch_global_commands(self):
+        results = await self.http.get_global_commands(self.application_id)
+        return [application_command_factory(data) for data in results]
+    
+    async def bulk_overwrite_global_commands(self, application_commands: List[ApplicationCommand]):
+        payload = [cmd.to_dict() for cmd in application_commands]
+        results = await self.http.bulk_upsert_global_commands(self.application_id, payload)
+        return [application_command_factory(data) for data in results]
+    
+    # Application commands (guild)
+
+    async def fetch_guild_commands(self, guild_id: int):
+        results = await self.http.get_guild_commands(self.application_id, guild_id)
+        return [application_command_factory(data) for data in results]
+    
+    async def bulk_overwrite_guild_commands(self, guild_id: int, application_commands: List[ApplicationCommand]):
+        payload = [cmd.to_dict() for cmd in application_commands]
+        results = await self.http.bulk_upsert_guild_commands(self.application_id, guild_id, payload)
+        return [application_command_factory(data) for data in results]
+
+    # Application command permissions
+
+    async def fetch_guild_command_permissions(self, guild_id: int):
+        array = await self.http.get_guild_application_command_permissions(self.application_id, guild_id)
+        return {int(obj["id"]): ApplicationCommandPermissions.from_dict(obj) for obj in array}
+    
+    async def bulk_edit_guild_command_permissions(self, guild_id: int, permissions: Dict[int, ApplicationCommandPermissions]):
+        payload = []
+        for cmd_id, perms in permissions.items():
+            data = perms.to_dict()
+            data["id"] = cmd_id
+            payload.append(data)
+        array = await self.http.bulk_edit_guild_application_command_permissions(
+            self.application_id,
+            guild_id=guild_id,
+            payload=payload
+        )
+        return {int(obj["id"]): ApplicationCommandPermissions.from_dict(obj) for obj in array}

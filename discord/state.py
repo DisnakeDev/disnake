@@ -60,6 +60,7 @@ from .threads import Thread, ThreadMember
 from .sticker import GuildSticker
 
 if TYPE_CHECKING:
+    from .app_commands import ApplicationCommand
     from .abc import PrivateChannel
     from .message import MessageableChannel
     from .guild import GuildChannel, VocalGuildChannel
@@ -253,6 +254,8 @@ class ConnectionState:
         self._emojis: Dict[int, Emoji] = {}
         self._stickers: Dict[int, GuildSticker] = {}
         self._guilds: Dict[int, Guild] = {}
+        self._global_application_commands: Dict[int, ApplicationCommand] = {}
+        self._guild_application_commands: Dict[int, Dict[int, ApplicationCommand]] = {}
         if views:
             self._view_store: ViewStore = ViewStore(self)
 
@@ -390,6 +393,55 @@ class ConnectionState:
             self._stickers.pop(sticker.id, None)
 
         del guild
+
+    def _get_global_application_command(self, application_command_id: int) -> ApplicationCommand:
+        return self._global_application_commands.get(application_command_id)
+
+    def _add_global_application_command(self, application_command: ApplicationCommand, /) -> None:
+        self._global_application_commands[application_command.id] = application_command
+
+    def _remove_global_application_command(self, application_command_id: int, /) -> None:
+        self._global_application_commands.pop(application_command_id, None)
+
+    def _clear_global_application_commands(self) -> None:
+        self._global_application_commands.clear()
+
+    def _get_guild_application_command(self, guild_id: int, application_command_id: int) -> ApplicationCommand:
+        granula = self._guild_application_commands.get(guild_id)
+        if granula is not None:
+            return granula.get(application_command_id)
+
+    def _add_guild_application_command(self, guild_id: int, application_command: ApplicationCommand) -> None:
+        try:
+            granula = self._guild_application_commands[guild_id]
+            granula[application_command.id] = application_command
+        except KeyError:
+            self._guild_application_commands[guild_id] = {
+                application_command.id: application_command
+            }
+
+    def _remove_guild_application_command(self, guild_id: int, application_command_id: int) -> None:
+        try:
+            granula = self._guild_application_commands[guild_id]
+            granula.pop(application_command_id, None)
+        except KeyError:
+            pass
+
+    def _clear_guild_application_commands(self, guild_id: int) -> None:
+        self._guild_application_commands.pop(guild_id, None)
+
+    def _get_global_command_named(self, name: str) -> Optional[ApplicationCommand]:
+        for cmd in self._global_application_commands.values():
+            if cmd.name == name:
+                return cmd
+    
+    def _get_guild_command_named(self, guild_id: int, name: str) -> Optional[ApplicationCommand]:
+        granula = self._guild_application_commands.get(guild_id)
+        if granula is None:
+            return None
+        for cmd in granula.values():
+            if cmd.name == name:
+                return cmd
 
     @property
     def emojis(self) -> List[Emoji]:
@@ -568,6 +620,7 @@ class ConnectionState:
             self._add_guild_from_data(guild_data)
 
         self.dispatch('connect')
+        self.call_handlers('connect_internal')
         self._ready_task = asyncio.create_task(self._delay_ready())
 
     def parse_resumed(self, data) -> None:
@@ -1527,6 +1580,7 @@ class AutoShardedConnectionState(ConnectionState):
 
         self.dispatch('connect')
         self.dispatch('shard_connect', data['__shard_id__'])
+        self.call_handlers('connect_internal')
 
         if self._ready_task is None:
             self._ready_task = asyncio.create_task(self._delay_ready())

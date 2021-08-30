@@ -97,6 +97,7 @@ if TYPE_CHECKING:
     from .webhook import Webhook
     from .state import ConnectionState
     from .voice_client import VoiceProtocol
+    from .app_commands import ApplicationCommand
 
     import datetime
 
@@ -274,6 +275,7 @@ class Guild(Hashable):
         '_public_updates_channel_id',
         '_stage_instances',
         '_threads',
+        '_application_commands',
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
@@ -289,6 +291,7 @@ class Guild(Hashable):
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
         self._threads: Dict[int, Thread] = {}
+        self._application_commands: Dict[int, ApplicationCommand] = {}
         self._state: ConnectionState = state
         self._from_data(data)
 
@@ -395,6 +398,18 @@ class Guild(Hashable):
             r.position -= r.position > role.position
 
         return role
+
+    def get_command(self, application_command_id: int, /) -> ApplicationCommand:
+        self._state._get_guild_application_command(self.id, application_command_id)
+
+    def _add_application_command(self, application_command: ApplicationCommand, /) -> None:
+        self._state._add_guild_application_command(self.id, application_command)
+
+    def _remove_application_command(self, application_command_id: int, /) -> None:
+        self._state._remove_guild_application_command(self.id, application_command_id)
+
+    def _clear_application_commands(self) -> None:
+        self._state._clear_guild_application_commands(self.id)
 
     def _from_data(self, guild: GuildPayload) -> None:
         # according to Stan, this is always available even if the guild is unavailable

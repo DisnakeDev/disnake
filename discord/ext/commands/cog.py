@@ -30,7 +30,9 @@ from typing import Any, Callable, ClassVar, Dict, Generator, List, Optional, TYP
 
 from ._types import _BaseCommand
 
-from ..application_commands import _ApplicationCommandStore, InvokableApplicationCommand
+from ..application_commands import InvokableApplicationCommand
+
+from discord._hub import _ApplicationCommandStore
 
 if TYPE_CHECKING:
     from .bot import BotBase

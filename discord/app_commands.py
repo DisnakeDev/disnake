@@ -213,9 +213,10 @@ class ApplicationCommand:
         self.application_id: Optional[int] = kwargs.pop('application_id', None)
         if self.application_id:
             self.application_id = int(self.application_id)
+        self._always_synced: bool = False
     
     def __eq__(self, other):
-        return False
+        return self._always_synced
 
 
 class UserCommand(ApplicationCommand):
@@ -227,7 +228,7 @@ class UserCommand(ApplicationCommand):
         return f"<UserCommand name={self.name!r}>"
     
     def __eq__(self, other):
-        return (
+        return self._always_synced or (
             self.type == other.type and
             self.name == other.name
         )
@@ -253,7 +254,7 @@ class MessageCommand(ApplicationCommand):
         return f"<MessageCommand name={self.name!r}>"
     
     def __eq__(self, other):
-        return (
+        return self._always_synced or (
             self.type == other.type and
             self.name == other.name
         )
@@ -312,7 +313,7 @@ class SlashCommand(ApplicationCommand):
         )
 
     def __eq__(self, other):
-        return (
+        return self._always_synced or (
             self.type == other.type and
             self.name == other.name and
             self.description == other.description and
@@ -321,7 +322,7 @@ class SlashCommand(ApplicationCommand):
 
     @classmethod
     def from_dict(cls, payload: dict):
-        if payload.pop("type", 1) != ApplicationCommandType.chat_input:
+        if payload.pop("type", 1) != ApplicationCommandType.chat_input.value:
             return None
         if 'options' in payload:
             payload['options'] = [Option.from_dict(p) for p in payload['options']]

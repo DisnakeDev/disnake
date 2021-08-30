@@ -1,9 +1,10 @@
 from __future__ import annotations
 from typing import Any, Dict, List, Tuple, Union, TYPE_CHECKING
-from .base_core import InvokableApplicationCommand, _ApplicationCommandStore
+from .base_core import InvokableApplicationCommand
 
 from discord.app_commands import SlashCommand, Option
 from discord.enums import OptionType
+from discord._hub import _ApplicationCommandStore
 
 from ..commands.errors import *
 
@@ -41,7 +42,14 @@ class SubCommandGroup(InvokableApplicationCommand):
             options=[]
         )
 
-    def sub_command(self, name: str = None, description: str = None, options: list = None, connectors: dict = None, **kwargs):
+    def sub_command(
+        self,
+        name: str = None,
+        description: str = None,
+        options: list = None,
+        connectors: dict = None,
+        **kwargs
+    ) -> SubCommand:
         """
         A decorator that creates a subcommand in the
         subcommand group.
@@ -121,7 +129,14 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             default_permission=default_permission,
         )
     
-    def sub_command(self, name: str = None, description: str = None, options: list = None, connectors: dict = None, **kwargs):
+    def sub_command(
+        self,
+        name: str = None,
+        description: str = None,
+        options: list = None,
+        connectors: dict = None,
+        **kwargs
+    ) -> SubCommand:
         """
         A decorator that creates a subcommand under the base command.
 
@@ -156,7 +171,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             return new_func
         return decorator
 
-    def sub_command_group(self, name: str = None, **kwargs):
+    def sub_command_group(
+        self,
+        name: str = None,
+        **kwargs
+    ) -> SubCommandGroup:
         """
         A decorator that creates a subcommand group under the base command.
         Remember that the group must have at least one subcommand.
@@ -232,7 +251,7 @@ def slash_command(
     connectors: Dict[str, str] = None,
     auto_sync: bool = True,
     **kwargs
-):
+) -> InvokableSlashCommand:
     """
     A decorator that builds a slash command.
 

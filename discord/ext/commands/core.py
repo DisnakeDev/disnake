@@ -54,6 +54,7 @@ from ._types import _BaseCommand
 from .cog import Cog
 from .context import Context
 
+from discord._hub import _ApplicationCommandStore
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, TypeGuard
@@ -67,8 +68,6 @@ if TYPE_CHECKING:
         Hook,
         Error,
     )
-
-    from ..application_commands import InvokableApplicationCommand
 
 
 __all__ = (
@@ -1383,6 +1382,7 @@ class GroupMixin(Generic[CogT]):
             return result
 
         return decorator
+
 
 class Group(GroupMixin[CogT], Command[CogT, P, T]):
     """A class that implements a grouping protocol for commands to be
