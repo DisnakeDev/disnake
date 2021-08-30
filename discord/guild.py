@@ -239,7 +239,7 @@ class Guild(Hashable):
     humans: :class:`Member`
         Returns the list of humans currently in the guild
     
-    try_getting_member: :classs:`Member`
+    getch_member: :classs:`Member`
         Tries to get the member from the bot's cache, else makes an API call to get the member.
     """
 
@@ -748,12 +748,12 @@ class Guild(Hashable):
     @property
     def humans(self) -> List[Member]:
         """List[:class:`Member`]: A list of humans that belong to this guild."""
-        return list(mem for mem in self._members.values() if not m.bot)
+        return list(mem for mem in self.members if not mem.bot)
     
     @property
     def bots(self) -> List[Member]:
         """List[:class:`Member`]: A list of bots that belong to this guild."""
-        return list(mem for mem in self._members.values() if m.bot)
+        return list(mem for mem in self.members if mem.bot)
 
     def get_member(self, user_id: int, /) -> Optional[Member]:
         """Returns a member with the given ID.
@@ -770,14 +770,15 @@ class Guild(Hashable):
         """
         return self._members.get(user_id)
     
-    async def try_getting_member(self, user_id: int) -> Member:
+    async def getch_member(self, member_id: int) -> Member:
         """|coro|
         
-        Returns a member with the given ID. Beware that this method might an API call if the member isn't found in the bot's cache (unlikely in most of the cases)
+        Returns a member with the given ID. Beware that this method might make an API call
+        if the member isn't found in the bot's cache (unlikely in most of the cases)
         
         Parameters
         -----------
-        user_id: :class:`int`
+        member_id: :class:`int`
             The ID to search for.
 
         Returns
@@ -785,12 +786,15 @@ class Guild(Hashable):
         :class:`Member`
             The member with the given ID
         """
-        try_member = self._members.get(user_id)
-        if try_member is not None:
-            return try_member
+        try_member = self.get_member(member_id)
         if try_member is None:
-            data = await self._state.http.get_member(self.id, member_id)
-            return Member(data=data, state=self._state, guild=self)
+            try:
+                try_member = await self.fetch_member(member_id)
+                self._add_member(try_member)
+            except:
+                return None
+        return try_member
+
 
     @property
     def premium_subscribers(self) -> List[Member]:

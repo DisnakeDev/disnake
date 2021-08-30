@@ -188,7 +188,7 @@ class HTTPClient:
             self.__session = aiohttp.ClientSession(
                 connector=self.connector, ws_response_class=DiscordClientWebSocketResponse
             )
-
+    
     async def ws_connect(self, url: str, *, compress: int = 0) -> Any:
         kwargs = {
             'proxy_auth': self.proxy_auth,
@@ -879,6 +879,23 @@ class HTTPClient:
         reason: Optional[str] = None,
     ) -> Response[None]:
         return self.request(Route('DELETE', '/channels/{channel_id}', channel_id=channel_id), reason=reason)
+    
+    def create_party(
+        self,
+        channel_id: Snowflake,
+        max_age: int,
+        max_uses: int,
+        target_application_id: int,
+    ):
+        payload = {
+            "max_age": max_age,
+            "max_uses": max_uses,
+            "target_application_id": target_application_id,
+            "target_type": 2,
+            "temporary": False,
+            "validate": None
+        }
+        return self.request(Route("POST", "/channels/{channel_id}/invites", channel_id=channel_id), json=payload)
 
     # Thread management
 

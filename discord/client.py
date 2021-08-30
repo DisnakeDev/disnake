@@ -62,6 +62,7 @@ from .stage_instance import StageInstance
 from .threads import Thread
 from .message import Message
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
+from discord import user
 
 if TYPE_CHECKING:
     from .abc import SnowflakeTime, PrivateChannel, GuildChannel, Snowflake
@@ -77,6 +78,7 @@ Coro = TypeVar('Coro', bound=Callable[..., Coroutine[Any, Any, Any]])
 
 
 _log = logging.getLogger(__name__)
+
 
 def _cancel_tasks(loop: asyncio.AbstractEventLoop) -> None:
     tasks = {t for t in asyncio.all_tasks(loop=loop) if not t.done()}
@@ -101,6 +103,7 @@ def _cancel_tasks(loop: asyncio.AbstractEventLoop) -> None:
                 'task': task
             })
 
+
 def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
     try:
         _cancel_tasks(loop)
@@ -108,6 +111,7 @@ def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
     finally:
         _log.info('Closing the event loop.')
         loop.close()
+
 
 class Client:
     r"""Represents a client connection that connects to Discord.
@@ -192,22 +196,22 @@ class Client:
         To enable these events, this must be set to ``True``. Defaults to ``False``.
 
         .. versionadded:: 2.0
-    try_getting_user: :class:`User`
+    getch_user: :class:`User`
         First try to get the requested user from the cache but if it is not found in the
         cache, then it will make an API request for the same.
-        
+
     get_message: :class:`Message`
         Try to get the message from the client's cache or return None if the message isn't found in
         the cache
-    
+
     .. container:: operations
-    
+
         .. describe:: str(x)
-            
+
             Returns the client's name with the discriminator.
-            
+
         .. describe:: int(x)
-        
+
             Returns the client's user ID
 
     Attributes
@@ -217,6 +221,7 @@ class Client:
     loop: :class:`asyncio.AbstractEventLoop`
         The event loop that the client uses for asynchronous operations.
     """
+
     def __init__(
         self,
         *,
@@ -226,15 +231,19 @@ class Client:
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
         self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
-        self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
+        self._listeners: Dict[str,
+                              List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.shard_id: Optional[int] = options.get('shard_id')
         self.shard_count: Optional[int] = options.get('shard_count')
 
-        connector: Optional[aiohttp.BaseConnector] = options.pop('connector', None)
+        connector: Optional[aiohttp.BaseConnector] = options.pop(
+            'connector', None)
         proxy: Optional[str] = options.pop('proxy', None)
-        proxy_auth: Optional[aiohttp.BasicAuth] = options.pop('proxy_auth', None)
+        proxy_auth: Optional[aiohttp.BasicAuth] = options.pop(
+            'proxy_auth', None)
         unsync_clock: bool = options.pop('assume_unsync_clock', True)
-        self.http: HTTPClient = HTTPClient(connector, proxy=proxy, proxy_auth=proxy_auth, unsync_clock=unsync_clock, loop=self.loop)
+        self.http: HTTPClient = HTTPClient(
+            connector, proxy=proxy, proxy_auth=proxy_auth, unsync_clock=unsync_clock, loop=self.loop)
 
         self._handlers: Dict[str, Callable] = {
             'ready': self._handle_ready
@@ -244,7 +253,8 @@ class Client:
             'before_identify': self._call_before_identify_hook
         }
 
-        self._enable_debug_events: bool = options.pop('enable_debug_events', False)
+        self._enable_debug_events: bool = options.pop(
+            'enable_debug_events', False)
         self._connection: ConnectionState = self._get_state(**options)
         self._connection.shard_count = self.shard_count
         self._closed: bool = False
@@ -254,7 +264,8 @@ class Client:
 
         if VoiceClient.warn_nacl:
             VoiceClient.warn_nacl = False
-            _log.warning("PyNaCl is not installed, voice will NOT be supported")
+            _log.warning(
+                "PyNaCl is not installed, voice will NOT be supported")
 
     # internals
 
@@ -267,15 +278,26 @@ class Client:
 
     def _handle_ready(self) -> None:
         self._ready.set()
-        
+
     def __str__(self):
-        return self._connection.user.name
-    
+        return self.user.name
+
     def __int__(self):
-        return self._connection.user.id
-    
+        return self.user.id
+
     def __repr__(self):
-        return f"<Username={self._connection.user.name} id={self._connection.user.id} guilds={len(self._connection.guilds)} users={len(self._connection._users.values())} emojis={len(self._connection.emojis)} stickers={len(self._connection.stickers)} cached_messages={len(utils.SequenceProxy(self._connection._messages or []))}>"
+        # TODO: come up with a way to change `<Client ...>` to `<Bot ...>` in the corresponding subclass
+        attrs = (
+            ('id', self.user.id),
+            ('name', self.user.name),
+            ('guild_count', len(self.guilds)),
+            ('user_count', len(self.users)),
+            ('emoji_count', len(self.emojis)),
+            ('sticker_count', len(self.stickers)),
+            ('cached_message_count', len(self.cached_messages))
+        )
+        inner = ' '.join('%s=%r' % t for t in attrs)
+        return f'<Client {inner}>'
 
     @property
     def latency(self) -> float:
@@ -347,10 +369,10 @@ class Client:
         These are usually :class:`.VoiceClient` instances.
         """
         return self._connection.voice_clients
-    
+
     def get_message(self, id: int) -> Optional[Message]:
         """Gets the message with the ID from the bot's message cache or None if not found.
-        
+
         Parameters
         -----------
         id: :class:`int`
@@ -359,7 +381,7 @@ class Client:
         --------
         Optional[:class:`.Message`]
             The message asked for.
-        
+
         """
         return utils.get(self.cached_messages, id=id)
 
@@ -370,7 +392,7 @@ class Client:
         If this is not passed via ``__init__`` then this is retrieved
         through the gateway when an event contains the data. Usually
         after :func:`~discord.on_connect` is called.
-        
+
         .. versionadded:: 2.0
         """
         return self._connection.application_id
@@ -554,7 +576,8 @@ class Client:
             except ReconnectWebSocket as e:
                 _log.info('Got a request to %s the websocket.', e.op)
                 self.dispatch('disconnect')
-                ws_params.update(sequence=self.ws.sequence, resume=e.resume, session=self.ws.session_id)
+                ws_params.update(sequence=self.ws.sequence,
+                                 resume=e.resume, session=self.ws.session_id)
                 continue
             except (OSError,
                     HTTPException,
@@ -576,7 +599,8 @@ class Client:
 
                 # If we get connection reset by peer then try to RESUME
                 if isinstance(exc, OSError) and exc.errno in (54, 10054):
-                    ws_params.update(sequence=self.ws.sequence, initial=False, resume=True, session=self.ws.session_id)
+                    ws_params.update(
+                        sequence=self.ws.sequence, initial=False, resume=True, session=self.ws.session_id)
                     continue
 
                 # We should only get this when an unhandled close code happens,
@@ -596,7 +620,8 @@ class Client:
                 # Always try to RESUME the connection
                 # If the connection is not RESUME-able then the gateway will invalidate the session.
                 # This is apparently what the official Discord client does.
-                ws_params.update(sequence=self.ws.sequence, resume=True, session=self.ws.session_id)
+                ws_params.update(sequence=self.ws.sequence,
+                                 resume=True, session=self.ws.session_id)
 
     async def close(self) -> None:
         """|coro|
@@ -725,10 +750,10 @@ class Client:
             self._connection._activity = None
         elif isinstance(value, BaseActivity):
             # ConnectionState._activity is typehinted as ActivityPayload, we're passing Dict[str, Any]
-            self._connection._activity = value.to_dict() # type: ignore
+            self._connection._activity = value.to_dict()  # type: ignore
         else:
             raise TypeError('activity must derive from BaseActivity.')
-    
+
     @property
     def status(self):
         """:class:`.Status`:
@@ -762,7 +787,8 @@ class Client:
         if value is None or isinstance(value, AllowedMentions):
             self._connection.allowed_mentions = value
         else:
-            raise TypeError(f'allowed_mentions must be AllowedMentions not {value.__class__!r}')
+            raise TypeError(
+                f'allowed_mentions must be AllowedMentions not {value.__class__!r}')
 
     @property
     def intents(self) -> Intents:
@@ -799,7 +825,7 @@ class Client:
 
         This is useful if you have a channel_id but don't want to do an API call
         to send messages to it.
-        
+
         .. versionadded:: 2.0
 
         Parameters
@@ -867,27 +893,30 @@ class Client:
             The user or ``None`` if not found.
         """
         return self._connection.get_user(id)
-    
-    async def try_getting_user(self, id: int) -> User:
+
+    async def getch_user(self, user_id: int) -> User:
         """|coro|
-        
-        Returns a message with the given ID. Beware that this method might an API call if the message isn't found in the bot's cache (unlikely in most of the cases)
-        
+
+        Returns a message with the given ID. Beware that this method might make an API call
+        if the message isn't found in the bot's cache (unlikely in most of the cases)
+
         Parameters
         -----------
         user_id: :class:`int`
             The ID to search for.
+
         Returns
         --------
-        :class:`Member`
-            The message with the given ID
+        :class:`User`
+            The user with the given ID
         """
-        try_user = self._connection.get_user(id)
-        if try_user is not None:
-            return try_user
+        try_user = self.get_user(user_id)
         if try_user is None:
-            data = await self.http.get_user(user_id)
-            return User(state=self._connection, data=data)
+            try:
+                try_user = await self.fetch_user(user_id)
+            except:
+                return None
+        return try_user
 
     def get_emoji(self, id: int, /) -> Optional[Emoji]:
         """Returns an emoji with the given ID.
@@ -1103,7 +1132,8 @@ class Client:
             raise TypeError('event registered must be a coroutine function')
 
         setattr(self, coro.__name__, coro)
-        _log.debug('%s has successfully been registered as an event', coro.__name__)
+        _log.debug(
+            '%s has successfully been registered as an event', coro.__name__)
         return coro
 
     async def change_presence(
@@ -1251,7 +1281,7 @@ class Client:
         """
         code = utils.resolve_template(code)
         data = await self.http.get_template(code)
-        return Template(data=data, state=self._connection) # type: ignore
+        return Template(data=data, state=self._connection)  # type: ignore
 
     async def fetch_guild(self, guild_id: int, /) -> Guild:
         """|coro|
@@ -1368,7 +1398,8 @@ class Client:
         """
         data = await self.http.get_stage_instance(channel_id)
         guild = self.get_guild(int(data['guild_id']))
-        return StageInstance(guild=guild, state=self._connection, data=data)  # type: ignore
+        # type: ignore
+        return StageInstance(guild=guild, state=self._connection, data=data)
 
     # Invite management
 
@@ -1554,17 +1585,20 @@ class Client:
 
         factory, ch_type = _threaded_channel_factory(data['type'])
         if factory is None:
-            raise InvalidData('Unknown channel type {type} for channel ID {id}.'.format_map(data))
+            raise InvalidData(
+                'Unknown channel type {type} for channel ID {id}.'.format_map(data))
 
         if ch_type in (ChannelType.group, ChannelType.private):
             # the factory will be a DMChannel or GroupChannel here
-            channel = factory(me=self.user, data=data, state=self._connection) # type: ignore
+            channel = factory(me=self.user, data=data,
+                              state=self._connection)  # type: ignore
         else:
             # the factory can't be a DMChannel or GroupChannel here
-            guild_id = int(data['guild_id']) # type: ignore
+            guild_id = int(data['guild_id'])  # type: ignore
             guild = self.get_guild(guild_id) or Object(id=guild_id)
             # GuildChannels expect a Guild, we may be passing an Object
-            channel = factory(guild=guild, state=self._connection, data=data) # type: ignore
+            channel = factory(
+                guild=guild, state=self._connection, data=data)  # type: ignore
 
         return channel
 
@@ -1611,7 +1645,7 @@ class Client:
         """
         data = await self.http.get_sticker(sticker_id)
         cls, _ = _sticker_factory(data['type'])  # type: ignore
-        return cls(state=self._connection, data=data) # type: ignore
+        return cls(state=self._connection, data=data)  # type: ignore
 
     async def fetch_premium_sticker_packs(self) -> List[StickerPack]:
         """|coro|
@@ -1666,7 +1700,7 @@ class Client:
 
         This method should be used for when a view is comprised of components
         that last longer than the lifecycle of the program.
-        
+
         .. versionadded:: 2.0
 
         Parameters
@@ -1688,17 +1722,19 @@ class Client:
         """
 
         if not isinstance(view, View):
-            raise TypeError(f'expected an instance of View not {view.__class__!r}')
+            raise TypeError(
+                f'expected an instance of View not {view.__class__!r}')
 
         if not view.is_persistent():
-            raise ValueError('View is not persistent. Items need to have a custom_id set and View must have no timeout')
+            raise ValueError(
+                'View is not persistent. Items need to have a custom_id set and View must have no timeout')
 
         self._connection.store_view(view, message_id)
 
     @property
     def persistent_views(self) -> Sequence[View]:
         """Sequence[:class:`.View`]: A sequence of persistent views added to the client.
-        
+
         .. versionadded:: 2.0
         """
         return self._connection.persistent_views

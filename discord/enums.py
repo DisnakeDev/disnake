@@ -187,6 +187,12 @@ class ChannelType(Enum):
     def __str__(self):
         return self.name
 
+class PartyType(Enum):
+    youtube = 755600276941176913
+    poker = 755827207812677713
+    betrayal = 773336526917861400
+    fishing = 814288819477020702
+    chess = 832012774040141894
 
 class MessageType(Enum):
     default = 0

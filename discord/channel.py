@@ -45,11 +45,12 @@ import datetime
 
 import discord.abc
 from .permissions import PermissionOverwrite, Permissions
-from .enums import ChannelType, StagePrivacyLevel, try_enum, VoiceRegion, VideoQualityMode
+from .enums import ChannelType, StagePrivacyLevel, try_enum, VoiceRegion, VideoQualityMode, PartyType
 from .mixins import Hashable
 from .object import Object
 from . import utils
 from .utils import MISSING
+from .party import Party
 from .asset import Asset
 from .errors import ClientException, InvalidArgument
 from .stage_instance import StageInstance
@@ -187,15 +188,18 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
     def _update(self, guild: Guild, data: TextChannelPayload) -> None:
         self.guild: Guild = guild
         self.name: str = data['name']
-        self.category_id: Optional[int] = utils._get_as_snowflake(data, 'parent_id')
+        self.category_id: Optional[int] = utils._get_as_snowflake(
+            data, 'parent_id')
         self.topic: Optional[str] = data.get('topic')
         self.position: int = data['position']
         self.nsfw: bool = data.get('nsfw', False)
         # Does this need coercion into `int`? No idea yet.
         self.slowmode_delay: int = data.get('rate_limit_per_user', 0)
-        self.default_auto_archive_duration: ThreadArchiveDuration = data.get('default_auto_archive_duration', 1440)
+        self.default_auto_archive_duration: ThreadArchiveDuration = data.get(
+            'default_auto_archive_duration', 1440)
         self._type: int = data.get('type', self._type)
-        self.last_message_id: Optional[int] = utils._get_as_snowflake(data, 'last_message_id')
+        self.last_message_id: Optional[int] = utils._get_as_snowflake(
+            data, 'last_message_id')
         self._fill_overwrites(data)
 
     async def _get_channel(self):
@@ -275,7 +279,8 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
         slowmode_delay: int = ...,
         default_auto_archive_duration: ThreadArchiveDuration = ...,
         type: ChannelType = ...,
-        overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = ...,
+        overwrites: Mapping[Union[Role, Member, Snowflake],
+                            PermissionOverwrite] = ...,
     ) -> Optional[TextChannel]:
         ...
 
@@ -352,7 +357,8 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)
 
     @utils.copy_doc(discord.abc.GuildChannel.clone)
     async def clone(self, *, name: Optional[str] = None, reason: Optional[str] = None) -> TextChannel:
@@ -404,7 +410,8 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
             return
 
         if len(messages) > 100:
-            raise ClientException('Can only bulk delete messages up to 100 messages')
+            raise ClientException(
+                'Can only bulk delete messages up to 100 messages')
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -477,13 +484,15 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
         """
 
         if check is MISSING:
-            check = lambda m: True
+            def check(m): return True
 
-        iterator = self.history(limit=limit, before=before, after=after, oldest_first=oldest_first, around=around)
+        iterator = self.history(
+            limit=limit, before=before, after=after, oldest_first=oldest_first, around=around)
         ret: List[Message] = []
         count = 0
 
-        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60)
+                           * 1000.0 - 1420070400000) << 22
         strategy = self.delete_messages if bulk else _single_delete_strategy
 
         async for message in iterator:
@@ -624,7 +633,8 @@ class TextChannel(discord.abc.Messageable, discord.abc.GuildChannel, Hashable):
             raise ClientException('The channel must be a news channel.')
 
         if not isinstance(destination, TextChannel):
-            raise InvalidArgument(f'Expected TextChannel received {destination.__class__.__name__}')
+            raise InvalidArgument(
+                f'Expected TextChannel received {destination.__class__.__name__}')
 
         from .webhook import Webhook
 
@@ -816,9 +826,12 @@ class VocalGuildChannel(discord.abc.Connectable, discord.abc.GuildChannel, Hasha
         self.guild = guild
         self.name: str = data['name']
         rtc = data.get('rtc_region')
-        self.rtc_region: Optional[VoiceRegion] = try_enum(VoiceRegion, rtc) if rtc is not None else None
-        self.video_quality_mode: VideoQualityMode = try_enum(VideoQualityMode, data.get('video_quality_mode', 1))
-        self.category_id: Optional[int] = utils._get_as_snowflake(data, 'parent_id')
+        self.rtc_region: Optional[VoiceRegion] = try_enum(
+            VoiceRegion, rtc) if rtc is not None else None
+        self.video_quality_mode: VideoQualityMode = try_enum(
+            VideoQualityMode, data.get('video_quality_mode', 1))
+        self.category_id: Optional[int] = utils._get_as_snowflake(
+            data, 'parent_id')
         self.position: int = data['position']
         self.bitrate: int = data.get('bitrate')
         self.user_limit: int = data.get('user_limit')
@@ -946,6 +959,37 @@ class VoiceChannel(VocalGuildChannel):
         """:class:`ChannelType`: The channel's Discord type."""
         return ChannelType.voice
 
+    async def create_party(
+        self,
+        application_id: PartyType,
+        max_age: int = 86400,
+        max_uses: int = 0
+    ) -> Party:
+        """|coro|
+        Creates a party in this voice channel.
+
+        Parameters
+        ----------
+        application_id : :class:`PartyType`
+            The id of the application the party belongs to. currently any of
+            ``PartyType.youtube``, ``PartyType.poker``, ``PartyType.betrayal``, ``PartyType.fishing``, ``PartyType.chess``.
+        max_age : :class:`int`
+            Duration in seconds after which the invite expires, by default 1 day.
+        max_uses : :class:`int`
+            maximum number of times this invite can be used, by default unlimited.
+        Raises
+        -------
+        Forbidden
+            You do not have permissions to create a party.
+        HTTPException
+            Party creation failed.
+        Returns
+        --------
+        :class:`Party`
+            The created party.
+        """
+        return Party(await self._state.http.create_party(self.id, application_id.value, max_age=max_age, max_uses=max_uses))
+
     @utils.copy_doc(discord.abc.GuildChannel.clone)
     async def clone(self, *, name: Optional[str] = None, reason: Optional[str] = None) -> VoiceChannel:
         return await self._clone_impl({'bitrate': self.bitrate, 'user_limit': self.user_limit}, name=name, reason=reason)
@@ -1035,7 +1079,8 @@ class VoiceChannel(VocalGuildChannel):
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)
 
 
 class StageChannel(VocalGuildChannel):
@@ -1201,7 +1246,8 @@ class StageChannel(VocalGuildChannel):
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
-                raise InvalidArgument('privacy_level field must be of type PrivacyLevel')
+                raise InvalidArgument(
+                    'privacy_level field must be of type PrivacyLevel')
 
             payload['privacy_level'] = privacy_level.value
 
@@ -1308,7 +1354,8 @@ class StageChannel(VocalGuildChannel):
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)
 
 
 class CategoryChannel(discord.abc.GuildChannel, Hashable):
@@ -1353,7 +1400,8 @@ class CategoryChannel(discord.abc.GuildChannel, Hashable):
             To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
     """
 
-    __slots__ = ('name', 'id', 'guild', 'nsfw', '_state', 'position', '_overwrites', 'category_id')
+    __slots__ = ('name', 'id', 'guild', 'nsfw', '_state',
+                 'position', '_overwrites', 'category_id')
 
     def __init__(self, *, state: ConnectionState, guild: Guild, data: CategoryChannelPayload):
         self._state: ConnectionState = state
@@ -1366,7 +1414,8 @@ class CategoryChannel(discord.abc.GuildChannel, Hashable):
     def _update(self, guild: Guild, data: CategoryChannelPayload) -> None:
         self.guild: Guild = guild
         self.name: str = data['name']
-        self.category_id: Optional[int] = utils._get_as_snowflake(data, 'parent_id')
+        self.category_id: Optional[int] = utils._get_as_snowflake(
+            data, 'parent_id')
         self.nsfw: bool = data.get('nsfw', False)
         self.position: int = data['position']
         self._fill_overwrites(data)
@@ -1451,7 +1500,8 @@ class CategoryChannel(discord.abc.GuildChannel, Hashable):
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)
 
     @utils.copy_doc(discord.abc.GuildChannel.move)
     async def move(self, **kwargs):
@@ -1475,14 +1525,16 @@ class CategoryChannel(discord.abc.GuildChannel, Hashable):
     @property
     def text_channels(self) -> List[TextChannel]:
         """List[:class:`TextChannel`]: Returns the text channels that are under this category."""
-        ret = [c for c in self.guild.channels if c.category_id == self.id and isinstance(c, TextChannel)]
+        ret = [c for c in self.guild.channels if c.category_id ==
+               self.id and isinstance(c, TextChannel)]
         ret.sort(key=lambda c: (c.position, c.id))
         return ret
 
     @property
     def voice_channels(self) -> List[VoiceChannel]:
         """List[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
-        ret = [c for c in self.guild.channels if c.category_id == self.id and isinstance(c, VoiceChannel)]
+        ret = [c for c in self.guild.channels if c.category_id ==
+               self.id and isinstance(c, VoiceChannel)]
         ret.sort(key=lambda c: (c.position, c.id))
         return ret
 
@@ -1492,7 +1544,8 @@ class CategoryChannel(discord.abc.GuildChannel, Hashable):
 
         .. versionadded:: 1.7
         """
-        ret = [c for c in self.guild.channels if c.category_id == self.id and isinstance(c, StageChannel)]
+        ret = [c for c in self.guild.channels if c.category_id ==
+               self.id and isinstance(c, StageChannel)]
         ret.sort(key=lambda c: (c.position, c.id))
         return ret
 
@@ -1599,7 +1652,8 @@ class StoreChannel(discord.abc.GuildChannel, Hashable):
     def _update(self, guild: Guild, data: StoreChannelPayload) -> None:
         self.guild: Guild = guild
         self.name: str = data['name']
-        self.category_id: Optional[int] = utils._get_as_snowflake(data, 'parent_id')
+        self.category_id: Optional[int] = utils._get_as_snowflake(
+            data, 'parent_id')
         self.position: int = data['position']
         self.nsfw: bool = data.get('nsfw', False)
         self._fill_overwrites(data)
@@ -1701,7 +1755,8 @@ class StoreChannel(discord.abc.GuildChannel, Hashable):
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)
 
 
 DMC = TypeVar('DMC', bound='DMChannel')
@@ -1744,7 +1799,8 @@ class DMChannel(discord.abc.Messageable, Hashable):
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload):
         self._state: ConnectionState = state
-        self.recipient: Optional[User] = state.store_user(data['recipients'][0])
+        self.recipient: Optional[User] = state.store_user(
+            data['recipients'][0])
         self.me: ClientUser = me
         self.id: int = int(data['id'])
 
@@ -1872,7 +1928,8 @@ class GroupChannel(discord.abc.Messageable, Hashable):
         The group channel's name if provided.
     """
 
-    __slots__ = ('id', 'recipients', 'owner_id', 'owner', '_icon', 'name', 'me', '_state')
+    __slots__ = ('id', 'recipients', 'owner_id', 'owner',
+                 '_icon', 'name', 'me', '_state')
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: GroupChannelPayload):
         self._state: ConnectionState = state
@@ -1881,16 +1938,19 @@ class GroupChannel(discord.abc.Messageable, Hashable):
         self._update_group(data)
 
     def _update_group(self, data: GroupChannelPayload) -> None:
-        self.owner_id: Optional[int] = utils._get_as_snowflake(data, 'owner_id')
+        self.owner_id: Optional[int] = utils._get_as_snowflake(
+            data, 'owner_id')
         self._icon: Optional[str] = data.get('icon')
         self.name: Optional[str] = data.get('name')
-        self.recipients: List[User] = [self._state.store_user(u) for u in data.get('recipients', [])]
+        self.recipients: List[User] = [self._state.store_user(
+            u) for u in data.get('recipients', [])]
 
         self.owner: Optional[BaseUser]
         if self.owner_id == self.me.id:
             self.owner = self.me
         else:
-            self.owner = utils.find(lambda u: u.id == self.owner_id, self.recipients)
+            self.owner = utils.find(
+                lambda u: u.id == self.owner_id, self.recipients)
 
     async def _get_channel(self):
         return self

@@ -24,7 +24,6 @@ from .client import *
 from .appinfo import *
 from .user import *
 from .emoji import *
-from .together import *
 from .partial_emoji import *
 from .activity import *
 from .channel import *
@@ -70,6 +69,7 @@ class VersionInfo(NamedTuple):
     serial: int
 
 
-version_info: VersionInfo = VersionInfo(major=2, minor=0, micro=0, releaselevel='alpha', serial=0)
+version_info: VersionInfo = VersionInfo(
+    major=2, minor=0, micro=0, releaselevel='alpha', serial=0)
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
