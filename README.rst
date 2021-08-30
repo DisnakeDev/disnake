@@ -1,27 +1,28 @@
-discord.py
+disnake
 ==========
 
 .. image:: https://discord.com/api/guilds/808030843078836254/embed.png
    :target: https://discord.gg/G2p7sCss7D
    :alt: Discord server invite
-.. image:: https://img.shields.io/pypi/v/discord.py.svg
-   :target: https://pypi.python.org/pypi/discord.py
+.. image:: https://img.shields.io/pypi/v/disnake.svg
+   :target: https://pypi.python.org/pypi/disnake
    :alt: PyPI version info
-.. image:: https://img.shields.io/pypi/pyversions/discord.py.svg
-   :target: https://pypi.python.org/pypi/discord.py
+.. image:: https://img.shields.io/pypi/pyversions/disnake.svg
+   :target: https://pypi.python.org/pypi/disnake
    :alt: PyPI supported Python versions
 
 A modern, easy to use, feature-rich, and async ready API wrapper for Discord written in Python.
 
-The Future of discord.py
+About disnake
 --------------------------
 
-Please read the `gist <https://gist.github.com/Rapptz/4a2f62751b9600a31a0d3c78100287f1>`_ for the future of this project. It's been a good one.
+All the contributers and developers, associated with disnake, are trying their best to add new features to the library as soon as possible. We strive to become a complete substitute to the discord.py library, which once ruled the Python Bot Making Community and become an all in one library with every functionality you can ever imagine!
 
 Key Features
 -------------
 
 - Modern Pythonic API using ``async`` and ``await``.
+- Added features for ease of coding
 - Proper rate limit handling.
 - Optimised in both speed and memory.
 
@@ -35,28 +36,28 @@ To install the library without full voice support, you can just run the followin
 .. code:: sh
 
     # Linux/macOS
-    python3 -m pip install -U discord.py
+    python3 -m pip install -U disnake
 
     # Windows
-    py -3 -m pip install -U discord.py
+    py -3 -m pip install -U disnake
 
 Otherwise to get voice support you should run the following command:
 
 .. code:: sh
 
     # Linux/macOS
-    python3 -m pip install -U "discord.py[voice]"
+    python3 -m pip install -U "disnake[voice]"
 
     # Windows
-    py -3 -m pip install -U discord.py[voice]
+    py -3 -m pip install -U disnake[voice]
 
 
 To install the development version, do the following:
 
 .. code:: sh
 
-    $ git clone https://github.com/Rapptz/discord.py
-    $ cd discord.py
+    $ git clone https://github.com/EQUENOS/disnake
+    $ cd disnake
     $ python3 -m pip install -U .[voice]
 
 
@@ -75,9 +76,9 @@ Quick Example
 
 .. code:: py
 
-    import discord
+    import disnake
 
-    class MyClient(discord.Client):
+    class MyClient(disnake.Client):
         async def on_ready(self):
             print('Logged on as', self.user)
 
@@ -97,8 +98,8 @@ Bot Example
 
 .. code:: py
 
-    import discord
-    from discord.ext import commands
+    import disnake
+    from disnake.ext import commands
 
     bot = commands.Bot(command_prefix='>')
 
@@ -114,5 +115,5 @@ Links
 ------
 
 - `Documentation <https://discordpy.readthedocs.io/en/latest/index.html>`_
-- `Official Discord Server <https://discord.gg/r3sSKJJ>`_
+- `Official Discord Server <https://discord.gg/G2p7sCss7D>`_
 - `Discord API <https://discord.gg/discord-api>`_
