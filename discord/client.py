@@ -142,7 +142,7 @@ class Client:
     intents: :class:`Intents`
         The intents that you want to enable for the session. This is a way of
         disabling and enabling certain gateway events from triggering and being sent.
-        If not given, defaults to a regularly constructed :class:`Intents` class.
+        If not given, defaults to a constructed :func:`Intents.all()` class.
 
         .. versionadded:: 1.5
     member_cache_flags: :class:`MemberCacheFlags`
