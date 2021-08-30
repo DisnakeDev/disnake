@@ -1136,15 +1136,12 @@ class GroupMixin(Generic[CogT]):
     all_commands: :class:`dict`
         A mapping of command name to :class:`.Command`
         objects.
-    all_application_commands: :class:`dict`
-        A mapping of application command name to :class:`InvokableApplicationCommand`
     case_insensitive: :class:`bool`
         Whether the commands should be case insensitive. Defaults to ``False``.
     """
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         case_insensitive = kwargs.get('case_insensitive', False)
         self.all_commands: Dict[str, Command[CogT, Any, Any]] = _CaseInsensitiveDict() if case_insensitive else {}
-        self.all_application_commands: Dict[str, InvokableApplicationCommand] = {}
         self.case_insensitive: bool = case_insensitive
         super().__init__(*args, **kwargs)
 
@@ -1153,11 +1150,6 @@ class GroupMixin(Generic[CogT]):
         """Set[:class:`.Command`]: A unique set of commands without aliases that are registered."""
         return set(self.all_commands.values())
     
-    @property
-    def application_commands(self) -> Set[InvokableApplicationCommand]:
-        """Set[:class:`.InvokableApplicationCommand`]: A unique set of app commands that are registered."""
-        return set(self.all_application_commands.values())
-
     def recursively_remove_all_commands(self) -> None:
         for command in self.all_commands.copy().values():
             if isinstance(command, GroupMixin):
@@ -1294,63 +1286,6 @@ class GroupMixin(Generic[CogT]):
                 return None
 
         return obj
-
-    def add_application_command(self, command: InvokableApplicationCommand) -> None:
-        """Adds a :class:`.InvokableApplicationCommand` into the internal list of app commands.
-
-        This is usually not called, instead shortcut decorators are used.
-
-        Parameters
-        -----------
-        command: :class:`InvokableApplicationCommand`
-            The application command to add.
-
-        Raises
-        -------
-        :exc:`.CommandRegistrationError`
-            If the command is already registered by different command.
-        """
-
-        if command.name in self.all_application_commands:
-            raise CommandRegistrationError(command.name)
-        self.all_application_commands[command.name] = command
-
-    def remove_application_command(self, name: str) -> Optional[InvokableApplicationCommand]:
-        """Remove a :class:`.InvokableApplicationCommand` from the internal list
-        of application commands.
-
-        This could also be used as a way to remove aliases.
-
-        Parameters
-        -----------
-        name: :class:`str`
-            The name of the command to remove.
-
-        Returns
-        --------
-        Optional[:class:`.InvokableApplicationCommand`]
-            The command that was removed. If the name is not valid then
-            ``None`` is returned instead.
-        """
-        return self.all_application_commands.pop(name, None)
-
-    def get_application_command(self, name: str) -> Optional[InvokableApplicationCommand]:
-        """Get a :class:`.InvokableApplicationCommand` from the internal list
-        of commands.
-
-        Parameters
-        -----------
-        name: :class:`str`
-            The name of the application command to get.
-
-        Returns
-        --------
-        Optional[:class:`InvokableApplicationCommand`]
-            The application command that was requested. If not found, returns ``None``.
-        """
-
-        # fast path, no space in name.
-        return self.all_application_commands.get(name)
 
     @overload
     def command(

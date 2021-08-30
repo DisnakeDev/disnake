@@ -44,10 +44,15 @@ from . import errors
 from .help import HelpCommand, DefaultHelpCommand
 from .cog import Cog
 
+from ..application_commands.base_core import _ApplicationCommandStore
+
+from discord.enums import ApplicationCommandType
+
 if TYPE_CHECKING:
     import importlib.machinery
 
     from discord.message import Message
+    from discord.interactions import ApplicationCommandInteraction
     from ._types import (
         Check,
         CoroFunc,
@@ -1029,9 +1034,47 @@ class BotBase(GroupMixin):
 
         ctx = await self.get_context(message)
         await self.invoke(ctx)
+    
+    async def process_application_commands(self, interaction: ApplicationCommandInteraction) -> None:
+        """|coro|
+
+        This function processes the application commands that have been registered
+        to the bot and other groups. Without this coroutine, none of the
+        application commands will be triggered.
+
+        By default, this coroutine is called inside the :func:`.on_application_command`
+        event. If you choose to override the :func:`.on_application_command` event, then
+        you should invoke this coroutine as well.
+
+        Parameters
+        -----------
+        interaction: :class:`discord.ApplicationCommandInteraction`
+            The interaction to process commands for.
+        """
+        command_type = interaction.data.type
+        command_name = interaction.data.name
+        if command_type is ApplicationCommandType.chat_input:
+            app_command = _ApplicationCommandStore.slash_commands.get(command_name)
+        elif command_type is ApplicationCommandType.user:
+            app_command = _ApplicationCommandStore.user_commands.get(command_name)
+        elif command_type is ApplicationCommandType.message:
+            app_command = _ApplicationCommandStore.message_commands.get(command_name)
+        else:
+            app_command = None
+        if app_command is None:
+            # TODO: unregister this command from API
+            return
+        if app_command.guild_ids is None or interaction.guild_id in app_command.guild_ids:
+            await app_command.invoke(interaction)
+        else:
+            # TODO: unregister this command from API
+            pass
 
     async def on_message(self, message):
         await self.process_commands(message)
+    
+    async def on_application_command(self, interaction: ApplicationCommandInteraction):
+        await self.process_application_commands(interaction)
 
 class Bot(BotBase, discord.Client):
     """Represents a discord bot.

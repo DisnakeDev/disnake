@@ -1,11 +1,9 @@
 from __future__ import annotations
 from typing import (
-    Any,
     Dict,
     List,
     Optional,
     TypeVar,
-    Type,
     TYPE_CHECKING
 )
 import asyncio
@@ -14,8 +12,7 @@ import datetime
 from discord.utils import async_all, maybe_coroutine
 
 from ..commands.errors import *
-from ..commands.cooldowns import BucketType, CooldownMapping, MaxConcurrency, DynamicCooldownMapping
-from ..commands.cog import Cog
+from ..commands.cooldowns import BucketType, CooldownMapping, MaxConcurrency
 
 
 if TYPE_CHECKING:
@@ -28,12 +25,13 @@ if TYPE_CHECKING:
 
 __all__ = (
     'InvokableApplicationCommand',
+    '_ApplicationCommandStore'
 )
 
 
 T = TypeVar('T')
 AppCommandT = TypeVar('AppCommandT', bound='InvokableApplicationCommand')
-CogT = TypeVar('CogT', bound='Cog')
+CogT = TypeVar('CogT')
 HookT = TypeVar('HookT', bound='Hook')
 ErrorT = TypeVar('ErrorT', bound='Error')
 
@@ -49,13 +47,6 @@ class InvokableApplicationCommand:
     These are not created manually, instead they are created via the
     decorator or functional interface.
     """
-
-    __original_kwargs__: Dict[str, Any]
-
-    def __new__(cls: Type[AppCommandT], *args: Any, **kwargs: Any) -> AppCommandT:
-        self = super().__new__(cls)
-        self.__original_kwargs__ = kwargs.copy()
-        return self
 
     def __init__(self, func, *, name: str = None, **kwargs):
         self._callback = func
@@ -91,6 +82,7 @@ class InvokableApplicationCommand:
         self._max_concurrency: Optional[MaxConcurrency] = max_concurrency
 
         self.cog: Optional[CogT] = None
+        self.guild_ids: List[int] = None
     
     @property
     def callback(self):
@@ -142,41 +134,6 @@ class InvokableApplicationCommand:
             return await self.callback(self.cog, interaction, *args, **kwargs)  # type: ignore
         else:
             return await self.callback(interaction, *args, **kwargs)  # type: ignore
-
-    def _ensure_assignment_on_copy(self, other: AppCommandT) -> AppCommandT:
-        if self.checks != other.checks:
-            other.checks = self.checks.copy()
-        if self._buckets.valid and not other._buckets.valid:
-            other._buckets = self._buckets.copy()
-        if self._max_concurrency != other._max_concurrency:
-            # _max_concurrency won't be None at this point
-            other._max_concurrency = self._max_concurrency.copy()  # type: ignore
-
-        try:
-            other.on_error = self.on_error
-        except AttributeError:
-            pass
-        return other
-
-    def copy(self: AppCommandT):
-        """Creates a copy of this command.
-
-        Returns
-        --------
-        :class:`ApplicationCommandInteraction`
-            A new instance of this command.
-        """
-        ret = self.__class__(self.callback, **self.__original_kwargs__)
-        return self._ensure_assignment_on_copy(ret)
-
-    def _update_copy(self: AppCommandT, kwargs: Dict[str, Any]) -> AppCommandT:
-        if kwargs:
-            kw = kwargs.copy()
-            kw.update(self.__original_kwargs__)
-            copy = self.__class__(self.callback, **kw)
-            return self._ensure_assignment_on_copy(copy)
-        else:
-            return self.copy()
 
     def _prepare_cooldowns(self, inter: ApplicationCommandInteraction) -> None:
         if self._buckets.valid:
@@ -301,6 +258,15 @@ class InvokableApplicationCommand:
         """
         return hasattr(self, 'on_error')
 
+    def dispatch_error(self, inter: ApplicationCommandInteraction, error: CommandError):
+        if not self.has_error_handler():
+            return
+        if self.cog is None:
+            args = (inter, error)
+        else:
+            args = (self.cog, inter, error)
+        asyncio.create_task(self.on_error(*args), name=f'discord-ext-app-command-error-{inter.id}')
+
     @property
     def cog_name(self) -> Optional[str]:
         """Optional[:class:`str`]: The name of the cog this application command belongs to, if any."""
@@ -337,13 +303,14 @@ class InvokableApplicationCommand:
             # if not await inter.bot.can_run(inter):
             #     raise CheckFailure(f'The global check functions for application command {self.qualified_name} failed.')
 
-            cog = self.cog
-            if cog is not None:
-                local_check = Cog._get_overridden_method(cog.cog_check)
-                if local_check is not None:
-                    ret = await maybe_coroutine(local_check, inter)
-                    if not ret:
-                        return False
+            # TODO: cog checks for application commands
+            # cog = self.cog
+            # if cog is not None:
+            #     local_check = Cog._get_overridden_method(cog.cog_check)
+            #     if local_check is not None:
+            #         ret = await maybe_coroutine(local_check, inter)
+            #         if not ret:
+            #             return False
 
             predicates = self.checks
             if not predicates:
@@ -354,3 +321,11 @@ class InvokableApplicationCommand:
         finally:
             inter.application_command = original
 
+
+class _ApplicationCommandStore:
+    # I feel like this is a terrible solution,
+    # but I don't know any exact reasons why.
+    # If you know them, please tell me.
+    slash_commands: Dict[str, InvokableApplicationCommand] = {}
+    user_commands: Dict[str, InvokableApplicationCommand] = {}
+    message_commands: Dict[str, InvokableApplicationCommand] = {}

@@ -629,3 +629,22 @@ def try_enum(cls: Type[T], val: Any) -> T:
         return cls._enum_value_map_[val]  # type: ignore
     except (KeyError, TypeError, AttributeError):
         return create_unknown_value(cls, val)
+
+
+def enum_if_int(cls: Type[T], val: Any) -> T:
+    """A function that tries to turn the value into enum ``cls``.
+
+    If it fails it returns a proxy invalid value instead.
+    """
+    if not isinstance(val, int):
+        return val
+    return try_enum(cls, val)
+
+
+def try_enum_to_int(val: Any):
+    if isinstance(val, int):
+        return val
+    try:
+        return val.value
+    except Exception:
+        return val

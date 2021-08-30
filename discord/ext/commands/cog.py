@@ -30,11 +30,12 @@ from typing import Any, Callable, ClassVar, Dict, Generator, List, Optional, TYP
 
 from ._types import _BaseCommand
 
+from ..application_commands import _ApplicationCommandStore, InvokableApplicationCommand
+
 if TYPE_CHECKING:
     from .bot import BotBase
     from .context import Context
     from .core import Command
-    from ..application_commands import InvokableApplicationCommand
 
 __all__ = (
     'CogMeta',
@@ -198,7 +199,7 @@ class Cog(metaclass=CogMeta):
     __cog_name__: ClassVar[str]
     __cog_settings__: ClassVar[Dict[str, Any]]
     __cog_commands__: ClassVar[List[Command]]
-    __cog_app_commands__: ClassVar[List[Any]] # InvokableApplicationCommand is in another subpkg
+    __cog_app_commands__: ClassVar[List[InvokableApplicationCommand]]
     __cog_listeners__: ClassVar[List[Tuple[str, str]]]
 
     def __new__(cls: Type[CogT], *args: Any, **kwargs: Any) -> CogT:
@@ -211,7 +212,6 @@ class Cog(metaclass=CogMeta):
         # Either update the command with the cog provided defaults or copy it.
         # r.e type ignore, type-checker complains about overriding a ClassVar
         self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore
-        self.__cog_app_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_app_commands__)  # type: ignore
 
         lookup = {
             cmd.qualified_name: cmd
@@ -460,6 +460,9 @@ class Cog(metaclass=CogMeta):
                         if to_undo.parent is None:
                             bot.remove_command(to_undo.name)
                     raise e
+        
+        for app_command in self.__cog_app_commands__:
+            app_command.cog = self
 
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
@@ -484,6 +487,12 @@ class Cog(metaclass=CogMeta):
             for command in self.__cog_commands__:
                 if command.parent is None:
                     bot.remove_command(command.name)
+
+            for app_command in self.__cog_app_commands__:
+                name = app_command.name
+                _ApplicationCommandStore.slash_commands.pop(name, None)
+                _ApplicationCommandStore.user_commands.pop(name, None)
+                _ApplicationCommandStore.message_commands.pop(name, None)
 
             for _, method_name in self.__cog_listeners__:
                 bot.remove_listener(getattr(self, method_name))

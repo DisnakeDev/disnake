@@ -1,6 +1,6 @@
 import re
 from typing import Dict, List, Optional, Union
-from .enums import ApplicationCommandType, OptionType
+from .enums import ApplicationCommandType, OptionType, try_enum, enum_if_int, try_enum_to_int
 from .errors import InvalidArgument
 from .role import Role
 from .user import User
@@ -20,14 +20,13 @@ __all__ = (
 
 
 def application_command_factory(data: dict):
-    cmd_type = data.get("type", 1)
+    cmd_type = try_enum(ApplicationCommandType, data.get("type", 1))
     if cmd_type is ApplicationCommandType.chat_input:
         return SlashCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.user:
         return UserCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.message:
         return MessageCommand.from_dict(data)
-
 
 
 class OptionChoice:
@@ -55,7 +54,7 @@ class OptionChoice:
             self.value == other.value
         )
     
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             'name': self.name,
             'value': self.value
@@ -89,7 +88,7 @@ class Option:
         self,
         name: str,
         description: str = None,
-        type: int = None,
+        type: OptionType = None,
         required: bool = False,
         choices: List[OptionChoice] = None,
         options: list = None
@@ -97,7 +96,7 @@ class Option:
         assert name.islower(), f"Option name {name!r} must be lowercase"
         self.name: str = name
         self.description: str = description
-        self.type: OptionType = type or 3
+        self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
         self.choices: List[OptionChoice] = choices or []
         self.options: List[Option] = options or []
@@ -139,7 +138,7 @@ class Option:
             payload['choices'] = [OptionChoice(**p) for p in payload['choices']]
         return Option(**payload)
 
-    def add_choice(self, name: str, value: Union[str, int]):
+    def add_choice(self, name: str, value: Union[str, int]) -> None:
         """
         Adds an OptionChoice to the list of current choices
         Parameters are the same as for :class:`OptionChoice`
@@ -165,7 +164,7 @@ class Option:
         required: bool = False,
         choices: List[OptionChoice] = None,
         options: list = None
-    ):
+    ) -> None:
         """
         Adds an option to the current list of options
         Parameters are the same as for :class:`Option`
@@ -187,11 +186,11 @@ class Option:
             )
         )
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         payload = {
             'name': self.name,
             'description': self.description,
-            'type': self.type
+            'type': try_enum_to_int(self.type)
         }
         if self.required:
             payload['required'] = True
@@ -207,7 +206,7 @@ class ApplicationCommand:
     Base class for application commands
     """
     def __init__(self, type: ApplicationCommandType, **kwargs):
-        self.type: ApplicationCommandType = type
+        self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.id: Optional[int] = kwargs.pop('id', None)
         if self.id:
             self.id = int(self.id)
@@ -233,15 +232,15 @@ class UserCommand(ApplicationCommand):
             self.name == other.name
         )
 
-    def to_dict(self, **kwargs):
+    def to_dict(self, **kwargs) -> dict:
         return {
-            "type": self.type,
+            "type": try_enum_to_int(self.type),
             "name": self.name
         }
     
     @classmethod
     def from_dict(cls, data: dict):
-        if data.pop("type", 1) is ApplicationCommandType.user:
+        if data.pop("type", 0) == ApplicationCommandType.user.value:
             return UserCommand(**data)
 
 
@@ -259,15 +258,15 @@ class MessageCommand(ApplicationCommand):
             self.name == other.name
         )
 
-    def to_dict(self, **kwargs):
+    def to_dict(self, **kwargs) -> dict:
         return {
-            "type": self.type,
+            "type": try_enum_to_int(self.type),
             "name": self.name
         }
     
     @classmethod
     def from_dict(cls, data: dict):
-        if data.pop("type", 0) == ApplicationCommandType.message:
+        if data.pop("type", 0) == ApplicationCommandType.message.value:
             return MessageCommand(**data)
 
 
@@ -336,7 +335,7 @@ class SlashCommand(ApplicationCommand):
         required: bool = False,
         choices: List[OptionChoice] = None,
         options: list = None
-    ):
+    ) -> None:
         """
         Adds an option to the current list of options
         Parameters are the same as for :class:`Option`
@@ -352,9 +351,9 @@ class SlashCommand(ApplicationCommand):
             )
         )
 
-    def to_dict(self, *, hide_name=False):
+    def to_dict(self, *, hide_name=False) -> dict:
         res = {
-            "type": self.type,
+            "type": try_enum_to_int(self.type),
             "description": self.description,
             "options": [o.to_dict() for o in self.options]
         }
@@ -408,7 +407,7 @@ class RawApplicationCommandPermission:
             permission=data["permission"]
         )
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "type": self.type,
@@ -421,7 +420,7 @@ class ApplicationCommandPermissions:
     Represents application command permissions.
     Roughly equivalent to a list of :class:`RawApplicationCommandPermission`
     Application command permissions are checked on the server side.
-    Only local application commands can have this type of permissions.
+    Only guild application commands can have this type of permissions.
 
     Parameters
     ----------
@@ -432,20 +431,21 @@ class ApplicationCommandPermissions:
     """
 
     def __init__(self, raw_permissions: List[RawApplicationCommandPermission] = None):
-        self.permissions = raw_permissions or []
+        self.permissions: List[RawApplicationCommandPermission] = raw_permissions or []
 
     def __repr__(self):
-        return "<SlashCommandPermissions permissions={0.permissions!r}>".format(self)
+        return "<ApplicationCommandPermissions permissions={0.permissions!r}>".format(self)
 
     @classmethod
-    def from_pairs(cls, permissions: Dict[Role, User]):
+    def from_pairs(cls, permissions: Dict[Union[Role, User], bool]):
         """
-        Creates :class:`SlashCommandPermissions` using
+        Creates :class:`ApplicationCommandPermissions` using
         instances of :class:`discord.Role` and :class:`discord.User`
+
         Parameters
         ----------
-        permissions : :class:`dict`
-            a dictionary of {:class:`Role | User`: :class:`bool`}
+        permissions: Dict[Union[:class:`Role`, :class:`User`], :class:`bool`]
+            a dictionary with permissions for users and roles.
         """
         raw_perms = [
             RawApplicationCommandPermission.from_pair(target, perm)
@@ -455,15 +455,16 @@ class ApplicationCommandPermissions:
         return ApplicationCommandPermissions(raw_perms)
 
     @classmethod
-    def from_ids(cls, role_perms: dict = None, user_perms: dict = None):
+    def from_ids(cls, role_perms: Dict[int, bool] = None, user_perms: Dict[int, bool] = None):
         """
-        Creates :class:`SlashCommandPermissions` from
+        Creates :class:`ApplicationCommandPermissions` from
         2 dictionaries of IDs and permissions.
+
         Parameters
         ----------
-        role_perms : :class:`dict`
+        role_perms: Dict[:class:`int`, :class:`bool`]
             a dictionary of {``role_id``: :class:`bool`}
-        user_perms : :class:`dict`
+        user_perms: Dict[:class:`int`, :class:`bool`]
             a dictionary of {``user_id``: :class:`bool`}
         """
         role_perms = role_perms or {}
@@ -484,7 +485,7 @@ class ApplicationCommandPermissions:
             for perm in data["permissions"]
         ])
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "permissions": [perm.to_dict() for perm in self.permissions]
         }

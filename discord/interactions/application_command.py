@@ -1,10 +1,10 @@
 from __future__ import annotations
-from typing import Any, Dict, Optional, TYPE_CHECKING, Union, TypeVar
+from typing import Any, Dict, Optional, TYPE_CHECKING, Union
 
 from .base import Interaction
 
 from ..channel import _threaded_channel_factory
-from ..enums import OptionType
+from ..enums import OptionType, ApplicationCommandType, try_enum, enum_if_int
 from ..guild import Guild
 from ..role import Role
 from ..user import User
@@ -21,9 +21,7 @@ if TYPE_CHECKING:
     from ..types.interactions import (
         Interaction as InteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
-        ApplicationCommandInteractionDataResolved as ApplicationCommandInteractionDataResolvedPayload,
-        ApplicationCommandType,
-        ApplicationCommandOptionType
+        ApplicationCommandInteractionDataResolved as ApplicationCommandInteractionDataResolvedPayload
     )
     from ..state import ConnectionState
     from ..channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, PartialMessageable
@@ -65,7 +63,8 @@ class ApplicationCommandInteraction(Interaction):
         super().__init__(data=data, state=state)
         self.data = ApplicationCommandInteractionData(
             data=data.get('data'),
-            state=state
+            state=state,
+            guild=self.guild
         )
         self.application_command = None
         self.command_failed = False
@@ -116,7 +115,7 @@ class ApplicationCommandInteractionData:
         data = {} if data is None else data
         self.id: int = int(data['id'])
         self.name: str = data['name']
-        self.type: ApplicationCommandType = data['type']
+        self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data['type'])
         self.resolved = ApplicationCommandInteractionDataResolved(
             data=data.get('resolved'),
             state=state,
@@ -168,6 +167,8 @@ class ApplicationCommandInteractionDataResolved:
     )
 
     def __init__(self, *, data: ApplicationCommandInteractionDataResolvedPayload, state: ConnectionState, guild: Guild):
+        data = data or {}
+
         self.members: Dict[int, Member] = {}
         self.users: Dict[int, User] = {}
         self.roles: Dict[int, Role] = {}
@@ -208,7 +209,9 @@ class ApplicationCommandInteractionDataResolved:
                 channel = state.get_channel(channel_id)
             self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)
     
-    def get_with_type(self, key: Any, option_type: ApplicationCommandOptionType, default: Any = None):
+    def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
+        if isinstance(option_type, int):
+            option_type = try_enum(OptionType, option_type)
         if option_type is OptionType.mentionable:
             key = int(key)
             result = self.members.get(key)
