@@ -112,7 +112,7 @@ def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
         _log.info('Closing the event loop.')
         loop.close()
 
-class Client:
+class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEASE HELP :D
     r"""Represents a client connection that connects to Discord.
     This class is used to interact with the Discord WebSocket and API.
 
@@ -195,6 +195,14 @@ class Client:
         To enable these events, this must be set to ``True``. Defaults to ``False``.
 
         .. versionadded:: 2.0
+    
+    get_or_fetch_user: :class:`User`
+        First try to get the requested user from the cache but if it is not found in the
+        cache, then it will make an API request for the same.
+
+    get_message: :class:`Message`
+        Try to get the message from the client's cache or return None if the message isn't found in
+        the cache
 
     Attributes
     -----------
@@ -202,16 +210,21 @@ class Client:
         The websocket gateway the client is currently connected to. Could be ``None``.
     loop: :class:`asyncio.AbstractEventLoop`
         The event loop that the client uses for asynchronous operations.
+    asyncio_debug: :class:`bool`
+        Whether to enable asyncio debugging when the client starts.
+        Defaults to False.
     """
     def __init__(
         self,
         *,
+        asyncio_debug: bool = False,
         loop: Optional[asyncio.AbstractEventLoop] = None,
         **options: Any,
     ):
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
         self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
+        self.loop.set_debug(asyncio_debug)
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.shard_id: Optional[int] = options.get('shard_id')
         self.shard_count: Optional[int] = options.get('shard_count')
@@ -348,6 +361,45 @@ class Client:
         .. versionadded:: 2.0
         """
         return self._connection.application_flags  # type: ignore
+    
+    def get_message(self, id: int) -> Optional[Message]:
+        """Gets the message with the ID from the bot's message cache or None if not found.
+
+        Parameters
+        -----------
+        id: :class:`int`
+            The message ID to look for.
+        Returns
+        --------
+        Optional[:class:`.Message`]
+            The message asked for.
+
+        """
+        return utils.get(self.cached_messages, id=id)
+    
+    async def get_or_fetch_user(self, user_id: int) -> User:
+        """|coro|
+
+        Returns a message with the given ID. Beware that this method might make an API call
+        if the message isn't found in the bot's cache (unlikely in most of the cases)
+
+        Parameters
+        -----------
+        user_id: :class:`int`
+            The ID to search for.
+
+        Returns
+        --------
+        :class:`User`
+            The user with the given ID
+        """
+        try_user = self.get_user(user_id)
+        if try_user is None:
+            try:
+                try_user = await self.fetch_user(user_id)
+            except:
+                return None
+        return try_user
 
     def is_ready(self) -> bool:
         """:class:`bool`: Specifies if the client's internal cache is ready for use."""
