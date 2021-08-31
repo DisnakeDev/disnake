@@ -215,6 +215,12 @@ class MessageType(Enum):
     thread_starter_message = 21
     guild_invite_reminder = 22
 
+class PartyType(Enum):
+    youtube = 755600276941176913
+    poker = 755827207812677713
+    betrayal = 773336526917861400
+    fishing = 814288819477020702
+    chess = 832012774040141894
 
 class VoiceRegion(Enum):
     us_west = 'us-west'

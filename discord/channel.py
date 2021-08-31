@@ -45,9 +45,10 @@ import datetime
 
 import discord.abc
 from .permissions import PermissionOverwrite, Permissions
-from .enums import ChannelType, StagePrivacyLevel, try_enum, VoiceRegion, VideoQualityMode
+from .enums import ChannelType, StagePrivacyLevel, try_enum, VoiceRegion, VideoQualityMode, PartyType
 from .mixins import Hashable
 from .object import Object
+from .party import Party
 from . import utils
 from .utils import MISSING
 from .asset import Asset
@@ -966,6 +967,38 @@ class VoiceChannel(VocalGuildChannel):
         reason: Optional[str] = ...,
     ) -> Optional[VoiceChannel]:
         ...
+    
+    async def create_party(
+        self, application_id: PartyType, max_age: int = 86400, max_uses: int = 0
+    ) -> Party:
+        """|coro|
+        Creates a party in this voice channel.
+
+        Parameters
+        ----------
+        application_id : :class:`PartyType`
+            The id of the application the party belongs to. currently any of
+            ``PartyType.youtube``, ``PartyType.poker``, ``PartyType.betrayal``, ``PartyType.fishing``, ``PartyType.chess``.
+        max_age : :class:`int`
+            Duration in seconds after which the invite expires, by default 1 day.
+        max_uses : :class:`int`
+            maximum number of times this invite can be used, by default unlimited.
+        Raises
+        -------
+        Forbidden
+            You do not have permissions to create a party.
+        HTTPException
+            Party creation failed.
+        Returns
+        --------
+        :class:`Party`
+            The created party.
+        """
+        return Party(
+            await self._state.http.create_party(
+                self.id, application_id.value, max_age=max_age, max_uses=max_uses
+            )
+        )
 
     @overload
     async def edit(self) -> Optional[VoiceChannel]:
