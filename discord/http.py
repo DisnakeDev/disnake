@@ -385,6 +385,23 @@ class HTTPClient:
             raise
 
         return data
+    
+    def create_party(
+        self,
+        channel_id: Snowflake,
+        max_age: int,
+        max_uses: int,
+        target_application_id: int,
+    ):
+        payload = {
+            "max_age": max_age,
+            "max_uses": max_uses,
+            "target_application_id": target_application_id,
+            "target_type": 2,
+            "temporary": False,
+            "validate": None
+        }
+        return self.request(Route("POST", "/channels/{channel_id}/invites", channel_id=channel_id), json=payload)
 
     def logout(self) -> Response[None]:
         return self.request(Route('POST', '/auth/logout'))

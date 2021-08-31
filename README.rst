@@ -21,7 +21,7 @@ The library is still in development and isn't usable yet. We hope to publish a s
 About disnake
 -------------
 
-All the contributers and developers, associated with disnake, are trying their best to add new features to the library as soon as possible. We strive to revive the greatest Python wrapper for Discord API and keep it up to date.
+All the contributors and developers, associated with disnake, are trying their best to add new features to the library as soon as possible. We strive to revive the greatest Python wrapper for Discord API and keep it up to date.
 
 Key Features
 ------------

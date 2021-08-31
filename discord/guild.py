@@ -233,6 +233,15 @@ class Guild(Hashable):
         The guild's NSFW level.
 
         .. versionadded:: 2.0
+    
+    bots: :class:`Member`
+        Returns the list of bots currently in the guild
+    
+    humans: :class:`Member`
+        Returns the list of humans currently in the guild
+    
+    get_or_fetch_member: :classs:`Member`
+        Tries to get the member from the bot's cache, else makes an API call to get the member.
     """
 
     __slots__ = (
@@ -516,6 +525,16 @@ class Guild(Hashable):
         .. versionadded:: 2.0
         """
         return list(self._threads.values())
+    
+    @property
+    def humans(self) -> List[Member]:
+        """List[:class:`Member`]: A list of humans that belong to this guild."""
+        return list(mem for mem in self.members if not mem.bot)
+    
+    @property
+    def bots(self) -> List[Member]:
+        """List[:class:`Member`]: A list of bots that belong to this guild."""
+        return list(mem for mem in self.members if mem.bot)
 
     @property
     def large(self) -> bool:
@@ -627,6 +646,31 @@ class Guild(Hashable):
             return
 
         return self._channels.get(id) or self._threads.get(id)
+    
+    async def get_or_fetch_member(self, member_id: int) -> Member:
+        """|coro|
+        
+        Returns a member with the given ID. Beware that this method might make an API call
+        if the member isn't found in the bot's cache (unlikely in most of the cases)
+        
+        Parameters
+        -----------
+        member_id: :class:`int`
+            The ID to search for.
+
+        Returns
+        --------
+        :class:`Member`
+            The member with the given ID
+        """
+        try_member = self.get_member(member_id)
+        if try_member is None:
+            try:
+                try_member = await self.fetch_member(member_id)
+                self._add_member(try_member)
+            except:
+                return None
+        return try_member
 
     def get_channel_or_thread(self, channel_id: int, /) -> Optional[Union[Thread, GuildChannel]]:
         """Returns a channel or thread with the given ID.
