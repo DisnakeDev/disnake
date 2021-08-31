@@ -101,7 +101,7 @@ A quick example to showcase how events work:
 
     import discord
 
-    class MyClient(discord.Client):
+    class MyClient(disnake.Client):
         async def on_ready(self):
             print(f'Logged on as {self.user}!')
 

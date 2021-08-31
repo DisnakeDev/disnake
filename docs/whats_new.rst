@@ -221,7 +221,7 @@ Miscellaneous
 
 - Members are now loaded during ``GUILD_MEMBER_UPDATE`` events if :attr:`MemberCacheFlags.joined` is set. (:issue:`5930`)
 - |commands| :class:`MemberConverter <ext.commands.MemberConverter>` now properly lazily fetches members if not available from cache.
-    - This is the same as having ``discord.Member`` as the type-hint.
+    - This is the same as having ``disnake.Member`` as the type-hint.
 - :meth:`Guild.chunk` now allows concurrent calls without spamming the gateway with requests.
 
 .. _vp1p5p0:
@@ -764,7 +764,7 @@ New Features
 - Add :meth:`Attachment.read` to fetch the bytes content of an attachment (:issue:`2118`)
 - Add support for voice kicking by passing ``None`` to :meth:`Member.move_to`.
 
-``discord.ext.commands``
+``disnake.ext.commands``
 ++++++++++++++++++++++++++
 
 - Add new :func:`~.commands.dm_only` check.
@@ -785,7 +785,7 @@ Bug Fixes
 - Fix bug where updating your own user did not update your member instances.
 - Tighten constraints of ``__eq__`` in :class:`Spotify` objects (:issue:`2113`, :issue:`2117`)
 
-``discord.ext.commands``
+``disnake.ext.commands``
 ++++++++++++++++++++++++++
 
 - Fix lambda converters in a non-module context (e.g. ``eval``).
@@ -804,7 +804,7 @@ Miscellaneous
 - The loop cleanup facility has been rewritten again.
 - The signal handling in :meth:`Client.run` has been removed.
 
-``discord.ext.commands``
+``disnake.ext.commands``
 ++++++++++++++++++++++++++
 
 - Custom exception classes are now used for all default checks in the library (:issue:`2101`)
@@ -1152,7 +1152,7 @@ New Features
 - Added a way to remove the messages of the user that just got banned in :meth:`Client.ban`.
 - Added :meth:`Client.wait_until_ready` to facilitate easy creation of tasks that require the client cache to be ready.
 - Added :meth:`Client.wait_until_login` to facilitate easy creation of tasks that require the client to be logged in.
-- Add :class:`discord.Game` to represent any game with custom text to send to :meth:`Client.change_status`.
+- Add :class:`disnake.Game` to represent any game with custom text to send to :meth:`Client.change_status`.
 - Add :attr:`Message.nonce` attribute.
 - Add :meth:`Member.permissions_in` as another way of doing :meth:`Channel.permissions_for`.
 - Add :meth:`Client.move_member` to move a member to another voice channel.

@@ -303,7 +303,7 @@ event loop then doing so is quite straightforward:
     import discord
     import asyncio
 
-    client = discord.Client()
+    client = disnake.Client()
 
     @asyncio.coroutine
     def main_task():

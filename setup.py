@@ -6,7 +6,7 @@ with open('requirements.txt') as f:
   requirements = f.read().splitlines()
 
 version = ''
-with open('discord/__init__.py') as f:
+with open('disnake/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 if not version:
@@ -46,20 +46,20 @@ extras_require = {
 }
 
 packages = [
-    'discord',
-    'discord.types',
-    'discord.ui',
-    'discord.webhook',
-    'discord.ext.commands',
-    'discord.ext.tasks',
+    'disnake',
+    'disnake.types',
+    'disnake.ui',
+    'disnake.webhook',
+    'disnake.ext.commands',
+    'disnake.ext.tasks',
 ]
 
-setup(name='discord.py',
-      author='Rapptz',
-      url='https://github.com/Rapptz/discord.py',
+setup(name='disnake',
+      author='Rapptz & EQUENOS',
+      url='https://github.com/EQUENOS/disnake',
       project_urls={
         "Documentation": "https://discordpy.readthedocs.io/en/latest/",
-        "Issue tracker": "https://github.com/Rapptz/discord.py/issues",
+        "Issue tracker": "https://github.com/EQUENOS/disnake/issues",
       },
       version=version,
       packages=packages,

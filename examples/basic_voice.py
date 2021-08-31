@@ -3,7 +3,7 @@ import asyncio
 import discord
 import youtube_dl
 
-from discord.ext import commands
+from disnake.ext import commands
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -57,7 +57,7 @@ class Music(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def join(self, ctx, *, channel: discord.VoiceChannel):
+    async def join(self, ctx, *, channel: disnake.VoiceChannel):
         """Joins a voice channel"""
 
         if ctx.voice_client is not None:

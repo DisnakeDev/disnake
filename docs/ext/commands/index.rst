@@ -1,6 +1,6 @@
 .. _discord_ext_commands:
 
-``discord.ext.commands`` -- Bot commands framework
+``disnake.ext.commands`` -- Bot commands framework
 ====================================================
 
 ``discord.py`` offers a lower level aspect on interacting with Discord. Often times, the library is used for the creation of

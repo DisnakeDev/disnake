@@ -141,7 +141,7 @@ msgstr ""
 #: ../../faq.rst:82
 msgid ""
 "Example code can be found in the `examples folder "
-"<https://github.com/Rapptz/discord.py/tree/master/examples>`_ in the "
+"<https://github.com/EQUENOS/disnake/tree/master/examples>`_ in the "
 "repository."
 msgstr ""
 
@@ -357,10 +357,10 @@ msgstr "バックグラウンドで何かを動かすにはどうすればいい
 #: ../../faq.rst:247
 msgid ""
 "`Check the background_task.py example. "
-"<https://github.com/Rapptz/discord.py/blob/master/examples/background_task.py>`_"
+"<https://github.com/EQUENOS/disnake/blob/master/examples/background_task.py>`_"
 msgstr ""
 "`background_task.pyの例を参照してください。 "
-"<https://github.com/Rapptz/discord.py/blob/master/examples/background_task.py>`_"
+"<https://github.com/EQUENOS/disnake/blob/master/examples/background_task.py>`_"
 
 #: ../../faq.rst:250
 msgid "How do I get a specific model?"
@@ -500,8 +500,8 @@ msgid "Commands Extension"
 msgstr "コマンド拡張"
 
 #: ../../faq.rst:333
-msgid "Questions regarding ``discord.ext.commands`` belong here."
-msgstr "``discord.ext.commands`` に関する質問。"
+msgid "Questions regarding ``disnake.ext.commands`` belong here."
+msgstr "``disnake.ext.commands`` に関する質問。"
 
 #: ../../faq.rst:336
 msgid "Why does ``on_message`` make my commands stop working?"

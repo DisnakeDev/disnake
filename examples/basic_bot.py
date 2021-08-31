@@ -1,15 +1,15 @@
 # This example requires the 'members' privileged intents
 
 import discord
-from discord.ext import commands
+from disnake.ext import commands
 import random
 
-description = '''An example bot to showcase the discord.ext.commands extension
+description = '''An example bot to showcase the disnake.ext.commands extension
 module.
 
 There are a number of utility commands being showcased here.'''
 
-intents = discord.Intents.default()
+intents = disnake.Intents.default()
 intents.members = True
 
 bot = commands.Bot(command_prefix='?', description=description, intents=intents)
@@ -48,7 +48,7 @@ async def repeat(ctx, times: int, content='repeating...'):
         await ctx.send(content)
 
 @bot.command()
-async def joined(ctx, member: discord.Member):
+async def joined(ctx, member: disnake.Member):
     """Says when a member joined."""
     await ctx.send(f'{member.name} joined in {member.joined_at}')
 

@@ -49,7 +49,7 @@ autodoc_typehints = 'none'
 # napoleon_attr_annotations = False
 
 extlinks = {
-    'issue': ('https://github.com/Rapptz/discord.py/issues/%s', 'GH-'),
+    'issue': ('https://github.com/EQUENOS/disnake/issues/%s', 'GH-'),
 }
 
 # Links used for cross-referencing stuff in other documentation
@@ -161,16 +161,16 @@ html_theme = 'basic'
 html_context = {
   'discord_invite': 'https://discord.gg/r3sSKJJ',
   'discord_extensions': [
-    ('discord.ext.commands', 'ext/commands'),
-    ('discord.ext.tasks', 'ext/tasks'),
+    ('disnake.ext.commands', 'ext/commands'),
+    ('disnake.ext.tasks', 'ext/tasks'),
   ],
 }
 
 resource_links = {
   'discord': 'https://discord.gg/r3sSKJJ',
-  'issues': 'https://github.com/Rapptz/discord.py/issues',
-  'discussions': 'https://github.com/Rapptz/discord.py/discussions',
-  'examples': f'https://github.com/Rapptz/discord.py/tree/{branch}/examples',
+  'issues': 'https://github.com/EQUENOS/disnake/issues',
+  'discussions': 'https://github.com/EQUENOS/disnake/discussions',
+  'examples': f'https://github.com/EQUENOS/disnake/tree/{branch}/examples',
 }
 
 # Theme options are theme-specific and customize the look and feel of a theme

@@ -298,15 +298,15 @@ The types are split into two different :ref:`discord_api_abcs`:
 
 So to check if something is a guild channel you would do: ::
 
-    isinstance(channel, discord.abc.GuildChannel)
+    isinstance(channel, disnake.abc.GuildChannel)
 
 And to check if it's a private channel you would do: ::
 
-    isinstance(channel, discord.abc.PrivateChannel)
+    isinstance(channel, disnake.abc.PrivateChannel)
 
 Of course, if you're looking for only a specific type you can pass that too, e.g. ::
 
-    isinstance(channel, discord.TextChannel)
+    isinstance(channel, disnake.TextChannel)
 
 With this type split also came event changes, which are enumerated in :ref:`migrating_1_0_event_changes`.
 
@@ -343,7 +343,7 @@ They will be enumerated here.
 - ``Channel.is_private``
 
     - Use ``isinstance`` instead with one of the :ref:`discord_api_abcs` instead.
-    - e.g. ``isinstance(channel, discord.abc.GuildChannel)`` will check if it isn't a private channel.
+    - e.g. ``isinstance(channel, disnake.abc.GuildChannel)`` will check if it isn't a private channel.
 
 - ``Client.accept_invite``
 
@@ -430,7 +430,7 @@ Basically: ::
 
 This supports everything that the old ``send_message`` supported such as embeds: ::
 
-    e = discord.Embed(title='foo')
+    e = disnake.Embed(title='foo')
     await channel.send('Hello', embed=e)
 
 There is a caveat with sending files however, as this functionality was expanded to support multiple
@@ -440,13 +440,13 @@ file attachments, you must now use a :class:`File` pseudo-namedtuple to upload a
     await client.send_file(channel, 'cool.png', filename='testing.png', content='Hello')
 
     # after
-    await channel.send('Hello', file=discord.File('cool.png', 'testing.png'))
+    await channel.send('Hello', file=disnake.File('cool.png', 'testing.png'))
 
 This change was to facilitate multiple file uploads: ::
 
     my_files = [
-        discord.File('cool.png', 'testing.png'),
-        discord.File(some_fp, 'cool_filename.png'),
+        disnake.File('cool.png', 'testing.png'),
+        disnake.File(some_fp, 'cool_filename.png'),
     ]
 
     await channel.send('Your images:', files=my_files)

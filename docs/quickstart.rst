@@ -21,7 +21,7 @@ It looks something like this:
 
     import discord
 
-    client = discord.Client()
+    client = disnake.Client()
 
     @client.event
     async def on_ready():

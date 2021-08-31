@@ -171,9 +171,9 @@ msgstr "Botを追加する人には「サーバー管理」権限が必要です
 #: ../../discord.rst:93
 msgid ""
 "If you want to generate this URL dynamically at run-time inside your bot "
-"and using the :class:`discord.Permissions` interface, you can use "
+"and using the :class:`disnake.Permissions` interface, you can use "
 ":func:`discord.utils.oauth_url`."
 msgstr ""
-"このURLを実行時に動的に生成したい場合は、 :class:`discord.Permissions` インターフェイスから "
+"このURLを実行時に動的に生成したい場合は、 :class:`disnake.Permissions` インターフェイスから "
 ":func:`discord.utils.oauth_url` を使用できます。"
 

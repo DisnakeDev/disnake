@@ -934,10 +934,10 @@ msgstr "代わりに ``isinstance`` と :ref:`discord_api_abcs` を使用して�
 
 #: ../../migrating.rst:346
 msgid ""
-"e.g. ``isinstance(channel, discord.abc.GuildChannel)`` will check if it "
+"e.g. ``isinstance(channel, disnake.abc.GuildChannel)`` will check if it "
 "isn't a private channel."
 msgstr ""
-"例を挙げると ``isinstance(channel, discord.abc.GuildChannel)`` "
+"例を挙げると ``isinstance(channel, disnake.abc.GuildChannel)`` "
 "でプライベートチャンネルであるかを確認できます。"
 
 #: ../../migrating.rst:348

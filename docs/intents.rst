@@ -24,14 +24,14 @@ For example, if you want a bot that functions without spammy events like presenc
    :emphasize-lines: 7,9,10
 
     import discord
-    intents = discord.Intents.default()
+    intents = disnake.Intents.default()
     intents.typing = False
     intents.presences = False
 
     # Somewhere else:
-    # client = discord.Client(intents=intents)
+    # client = disnake.Client(intents=intents)
     # or
-    # from discord.ext import commands
+    # from disnake.ext import commands
     # bot = commands.Bot(command_prefix='!', intents=intents)
 
 Note that this doesn't enable :attr:`Intents.members` since it's a privileged intent.
@@ -42,14 +42,14 @@ Another example showing a bot that only deals with messages and guild informatio
    :emphasize-lines: 7,9,10
 
     import discord
-    intents = discord.Intents(messages=True, guilds=True)
+    intents = disnake.Intents(messages=True, guilds=True)
     # If you also want reaction events enable the following:
     # intents.reactions = True
 
     # Somewhere else:
-    # client = discord.Client(intents=intents)
+    # client = disnake.Client(intents=intents)
     # or
-    # from discord.ext import commands
+    # from disnake.ext import commands
     # bot = commands.Bot(command_prefix='!', intents=intents)
 
 .. _privileged_intents:
@@ -163,13 +163,13 @@ For example:
    :emphasize-lines: 3,6,8,9
 
     import discord
-    intents = discord.Intents.default()
+    intents = disnake.Intents.default()
     intents.members = True
 
     # Somewhere else:
-    # client = discord.Client(intents=intents)
+    # client = disnake.Client(intents=intents)
     # or
-    # from discord.ext import commands
+    # from disnake.ext import commands
     # bot = commands.Bot(command_prefix='!', intents=intents)
 
 Why does ``on_ready`` take so long to fire?

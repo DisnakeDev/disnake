@@ -1,7 +1,7 @@
 import typing
 
 import discord
-from discord.ext import commands
+from disnake.ext import commands
 
 bot = commands.Bot(command_prefix=commands.when_mentioned, description="Nothing to see here!")
 
@@ -17,7 +17,7 @@ def create_overwrites(ctx, *objects):
     voice/text channels.
 
     A `discord.PermissionOverwrite` allows you to determine the permissions
-    of an object, whether it be a `discord.Role` or a `discord.Member`.
+    of an object, whether it be a `discord.Role` or a `disnake.Member`.
 
     In this case, the `view_channel` permission is being used to hide the channel
     from being viewed by whoever does not meet the criteria, thus creating a
@@ -25,7 +25,7 @@ def create_overwrites(ctx, *objects):
     """
 
     # a dict comprehension is being utilised here to set the same permission overwrites
-    # for each `discord.Role` or `discord.Member`.
+    # for each `discord.Role` or `disnake.Member`.
     overwrites = {
         obj: discord.PermissionOverwrite(view_channel=True)
         for obj in objects
@@ -44,7 +44,7 @@ def create_overwrites(ctx, *objects):
 # it is best to lock it to be guild-only.
 @secret.command()
 @commands.guild_only()
-async def text(ctx: commands.Context, name: str, *objects: typing.Union[discord.Role, discord.Member]):
+async def text(ctx: commands.Context, name: str, *objects: typing.Union[discord.Role, disnake.Member]):
     """This makes a text channel with a specified name 
     that is only visible to roles or members that are specified.
     """
@@ -60,7 +60,7 @@ async def text(ctx: commands.Context, name: str, *objects: typing.Union[discord.
 
 @secret.command()
 @commands.guild_only()
-async def voice(ctx: commands.Context, name: str, *objects: typing.Union[discord.Role, discord.Member]):
+async def voice(ctx: commands.Context, name: str, *objects: typing.Union[discord.Role, disnake.Member]):
     """This does the same thing as the `text` subcommand
     but instead creates a voice channel.
     """
@@ -75,7 +75,7 @@ async def voice(ctx: commands.Context, name: str, *objects: typing.Union[discord
 
 @secret.command()
 @commands.guild_only()
-async def emoji(ctx: commands.Context, emoji: discord.PartialEmoji, *roles: discord.Role):
+async def emoji(ctx: commands.Context, emoji: disnake.PartialEmoji, *roles: discord.Role):
     """This clones a specified emoji that only specified roles
     are allowed to use.
     """

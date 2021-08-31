@@ -2,7 +2,7 @@ import discord
 import random
 import asyncio
 
-class MyClient(discord.Client):
+class MyClient(disnake.Client):
     async def on_ready(self):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
         print('------')
