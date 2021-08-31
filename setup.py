@@ -54,12 +54,12 @@ packages = [
     'discord.ext.tasks',
 ]
 
-setup(name='discord.py',
-      author='Rapptz',
-      url='https://github.com/Rapptz/discord.py',
+setup(name='disnake',
+      author='EQUENOS & Rapptz',
+      url='https://github.com/EQUENOS/disnake',
       project_urls={
-        "Documentation": "https://discordpy.readthedocs.io/en/latest/",
-        "Issue tracker": "https://github.com/Rapptz/discord.py/issues",
+        "Documentation": "https://discordpy.readthedocs.io/en/latest/",  # TODO: docs link
+        "Issue tracker": "https://github.com/EQUENOS/disnake/issues",
       },
       version=version,
       packages=packages,
