@@ -239,7 +239,7 @@ class Guild(Hashable):
     humans: :class:`Member`
         Returns the list of humans currently in the guild
     
-    getch_member: :classs:`Member`
+    get_or_fetch_member: :classs:`Member`
         Tries to get the member from the bot's cache, else makes an API call to get the member.
     """
 
@@ -770,7 +770,7 @@ class Guild(Hashable):
         """
         return self._members.get(user_id)
     
-    async def getch_member(self, member_id: int) -> Member:
+    async def get_or_fetch_member(self, member_id: int) -> Member:
         """|coro|
         
         Returns a member with the given ID. Beware that this method might make an API call

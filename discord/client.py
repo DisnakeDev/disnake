@@ -209,7 +209,7 @@ class Client:
         To enable these events, this must be set to ``True``. Defaults to ``False``.
 
         .. versionadded:: 2.0
-    getch_user: :class:`User`
+    get_or_fetch_user: :class:`User`
         First try to get the requested user from the cache but if it is not found in the
         cache, then it will make an API request for the same.
 
@@ -958,7 +958,7 @@ class Client:
         """
         return self._connection.get_user(id)
 
-    async def getch_user(self, user_id: int) -> User:
+    async def get_or_fetch_user(self, user_id: int) -> User:
         """|coro|
 
         Returns a message with the given ID. Beware that this method might make an API call
