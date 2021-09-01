@@ -1,19 +1,19 @@
 import typing
 
-import discord
-from discord.ext import commands
+import disnake
+from disnake.ext import commands
 
 # Defines a custom Select containing colour options
 # that the user can choose. The callback function
 # of this class is called when the user changes their choice
-class Dropdown(discord.ui.Select):
+class Dropdown(disnake.ui.Select):
     def __init__(self):
 
         # Set the options that will be presented inside the dropdown
         options = [
-            discord.SelectOption(label='Red', description='Your favourite colour is red', emoji='🟥'),
-            discord.SelectOption(label='Green', description='Your favourite colour is green', emoji='🟩'),
-            discord.SelectOption(label='Blue', description='Your favourite colour is blue', emoji='🟦')
+            disnake.SelectOption(label='Red', description='Your favourite colour is red', emoji='🟥'),
+            disnake.SelectOption(label='Green', description='Your favourite colour is green', emoji='🟩'),
+            disnake.SelectOption(label='Blue', description='Your favourite colour is blue', emoji='🟦')
         ]
 
         # The placeholder is what will be shown when no option is chosen
@@ -21,7 +21,7 @@ class Dropdown(discord.ui.Select):
         # The options parameter defines the dropdown options. We defined this above
         super().__init__(placeholder='Choose your favourite colour...', min_values=1, max_values=1, options=options)
 
-    async def callback(self, interaction: discord.MessageInteraction):
+    async def callback(self, interaction: disnake.MessageInteraction):
         # Use the interaction object to send a response message containing
         # the user's favourite colour or choice. The self object refers to the
         # Select object, and the values attribute gets a list of the user's 
@@ -29,7 +29,7 @@ class Dropdown(discord.ui.Select):
         await interaction.response.send_message(f'Your favourite colour is {self.values[0]}')
 
 
-class DropdownView(discord.ui.View):
+class DropdownView(disnake.ui.View):
     def __init__(self):
         super().__init__()
 

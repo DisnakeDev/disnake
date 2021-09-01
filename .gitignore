@@ -17,3 +17,4 @@ docs/crowdin.py
 .gitignore
 test.py
 zzz.py
+TODO.md

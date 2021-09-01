@@ -58,9 +58,9 @@
     {#- The main navigation header #}
     <header class="grid-item">
       <nav>
-        <a href="{{ pathto(master_doc)|e }}" class="main-heading">discord.py</a>
-        <a href="https://github.com/Rapptz/discord.py" title="GitHub"><span class="material-icons custom-icons">github</span></a>
-        <a href="{{ discord_invite }}" title="{{ _('Discord') }}"><span class="material-icons custom-icons">discord</span></a>
+        <a href="{{ pathto(master_doc)|e }}" class="main-heading">disnake</a>
+        <a href="https://github.com/Rapptz/disnake" title="GitHub"><span class="material-icons custom-icons">github</span></a>
+        <a href="{{ discord_invite }}" title="{{ _('Discord') }}"><span class="material-icons custom-icons">disnake</span></a>
         <a href="{{ pathto('faq') }}" title="FAQ"><span class="material-icons">help_center</span></a>
         {#- If we have more links we can put them here #}
         <a onclick="mobileSearch.open();" title="{{ _('Search') }}" id="open-search" class="mobile-only"><span class="material-icons">search</span></a>
@@ -82,9 +82,9 @@
       <label for="documentation_select">{{ _('View Documentation For') }}</label>
       <select id="documentation_select" onchange="window.location = this.value;">
         {%- if pagename is prefixedwith 'ext/' %}
-        <option value="{{ pathto(master_doc)|e }}">discord</option>
+        <option value="{{ pathto(master_doc)|e }}">disnake</option>
         {%- else %}
-        <option value="{{ pathto(pagename) }}" selected>discord</option>
+        <option value="{{ pathto(pagename) }}" selected>disnake</option>
         {%- endif %}
         {%- for ext, p in discord_extensions %}
         <option value="{{ pathto(p + '/index')|e }}" {% if pagename is prefixedwith p %}selected{% endif %}>{{ ext }}</option>

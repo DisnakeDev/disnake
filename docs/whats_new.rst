@@ -1,4 +1,4 @@
-.. currentmodule:: discord
+.. currentmodule:: disnake
 
 .. |commands| replace:: [:ref:`ext.commands <discord_ext_commands>`]
 .. |tasks| replace:: [:ref:`ext.tasks <discord_ext_tasks>`]
@@ -112,7 +112,7 @@ Bug Fixes
 - Fix ``__str__`` magic method raising when a :class:`Guild` is unavailable.
 - Fix potential :exc:`AttributeError` when accessing :attr:`VoiceChannel.members` (:issue:`6602`)
 - :class:`Embed` constructor parameters now implicitly convert to :class:`str` (:issue:`6574`)
-- Ensure ``discord`` package is only run if executed as a script (:issue:`6483`)
+- Ensure ``disnake`` package is only run if executed as a script (:issue:`6483`)
 - |commands| Fix irrelevant commands potentially being unloaded during cog unload due to failure.
 - |commands| Fix attribute errors when setting a cog to :class:`~.ext.commands.HelpCommand` (:issue:`5154`)
 - |commands| Fix :attr:`Context.invoked_with <ext.commands.Context.invoked_with>` being improperly reassigned during a :meth:`~ext.commands.Context.reinvoke` (:issue:`6451`, :issue:`6462`)
@@ -125,7 +125,7 @@ Miscellaneous
 
 - User endpoints and all userbot related functionality has been deprecated and will be removed in the next major version of the library.
 - :class:`Permission` class methods were updated to match the UI of the Discord client (:issue:`6476`)
-- ``_`` and ``-`` characters are now stripped when making a new cog using the ``discord`` package (:issue:`6313`)
+- ``_`` and ``-`` characters are now stripped when making a new cog using the ``disnake`` package (:issue:`6313`)
 
 .. _vp1p6p0:
 
@@ -221,7 +221,7 @@ Miscellaneous
 
 - Members are now loaded during ``GUILD_MEMBER_UPDATE`` events if :attr:`MemberCacheFlags.joined` is set. (:issue:`5930`)
 - |commands| :class:`MemberConverter <ext.commands.MemberConverter>` now properly lazily fetches members if not available from cache.
-    - This is the same as having ``discord.Member`` as the type-hint.
+    - This is the same as having ``disnake.Member`` as the type-hint.
 - :meth:`Guild.chunk` now allows concurrent calls without spamming the gateway with requests.
 
 .. _vp1p5p0:
@@ -522,7 +522,7 @@ New Features
 - Add :attr:`VoiceRegion.europe` and :attr:`VoiceRegion.dubai`. (:issue:`2358`, :issue:`2490`)
 - Add :meth:`TextChannel.follow` to follow a news channel. (:issue:`2367`)
 - Add :attr:`Permissions.view_guild_insights` permission. (:issue:`2415`)
-- Add support for new audit log types. See :ref:`discord-api-audit-logs` for more information. (:issue:`2427`)
+- Add support for new audit log types. See :ref:`disnake-api-audit-logs` for more information. (:issue:`2427`)
     - Note that integration support is not finalized.
 
 - Add :attr:`Webhook.type` to query the type of webhook (:class:`WebhookType`). (:issue:`2441`)
@@ -764,7 +764,7 @@ New Features
 - Add :meth:`Attachment.read` to fetch the bytes content of an attachment (:issue:`2118`)
 - Add support for voice kicking by passing ``None`` to :meth:`Member.move_to`.
 
-``discord.ext.commands``
+``disnake.ext.commands``
 ++++++++++++++++++++++++++
 
 - Add new :func:`~.commands.dm_only` check.
@@ -785,7 +785,7 @@ Bug Fixes
 - Fix bug where updating your own user did not update your member instances.
 - Tighten constraints of ``__eq__`` in :class:`Spotify` objects (:issue:`2113`, :issue:`2117`)
 
-``discord.ext.commands``
+``disnake.ext.commands``
 ++++++++++++++++++++++++++
 
 - Fix lambda converters in a non-module context (e.g. ``eval``).
@@ -800,11 +800,11 @@ Miscellaneous
 ~~~~~~~~~~~~~~~
 
 - Improve the performance of internal enum creation in the library by about 5x.
-- Make the output of ``python -m discord --version`` a bit more useful.
+- Make the output of ``python -m disnake --version`` a bit more useful.
 - The loop cleanup facility has been rewritten again.
 - The signal handling in :meth:`Client.run` has been removed.
 
-``discord.ext.commands``
+``disnake.ext.commands``
 ++++++++++++++++++++++++++
 
 - Custom exception classes are now used for all default checks in the library (:issue:`2101`)
@@ -1142,7 +1142,7 @@ New Features
 - Added :data:`version_info` named tuple to check version info of the library.
 - Login credentials are now cached to have a faster login experience. You can disable this by passing in ``cache_auth=False``
   when constructing a :class:`Client`.
-- New utility function, :func:`discord.utils.get` to simplify retrieval of items based on attributes.
+- New utility function, :func:`disnake.utils.get` to simplify retrieval of items based on attributes.
 - All data classes now support ``!=``, ``==``, ``hash(obj)`` and ``str(obj)``.
 - Added :meth:`Client.get_bans` to get banned members from a server.
 - Added :meth:`Client.invites_from` to get currently active invites in a server.
@@ -1152,7 +1152,7 @@ New Features
 - Added a way to remove the messages of the user that just got banned in :meth:`Client.ban`.
 - Added :meth:`Client.wait_until_ready` to facilitate easy creation of tasks that require the client cache to be ready.
 - Added :meth:`Client.wait_until_login` to facilitate easy creation of tasks that require the client to be logged in.
-- Add :class:`discord.Game` to represent any game with custom text to send to :meth:`Client.change_status`.
+- Add :class:`disnake.Game` to represent any game with custom text to send to :meth:`Client.change_status`.
 - Add :attr:`Message.nonce` attribute.
 - Add :meth:`Member.permissions_in` as another way of doing :meth:`Channel.permissions_for`.
 - Add :meth:`Client.move_member` to move a member to another voice channel.
@@ -1178,10 +1178,10 @@ Bug Fixes
 - Fix bug where guilds being updated did not edit the items in cache.
 - Fix bug where ``member.roles`` were empty upon joining instead of having the ``@everyone`` role.
 - Fix bug where :meth:`Role.is_everyone` was not being set properly when the role was being edited.
-- :meth:`Client.logs_from` now handles cases where limit > 100 to sidestep the discord API limitation.
+- :meth:`Client.logs_from` now handles cases where limit > 100 to sidestep the disnake API limitation.
 - Fix bug where a role being deleted would trigger a ``ValueError``.
 - Fix bug where :meth:`Permissions.kick_members` and :meth:`Permissions.ban_members` were flipped.
-- Mentions are now triggered normally. This was changed due to the way discord handles it internally.
+- Mentions are now triggered normally. This was changed due to the way disnake handles it internally.
 - Fix issue when a :class:`Message` would attempt to upgrade a :attr:`Message.server` when the channel is
   a :class:`Object`.
 - Unavailable servers were not being added into cache, this has been corrected.

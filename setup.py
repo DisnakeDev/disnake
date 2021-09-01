@@ -6,7 +6,7 @@ with open('requirements.txt') as f:
   requirements = f.read().splitlines()
 
 version = ''
-with open('discord/__init__.py') as f:
+with open('disnake/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 if not version:
@@ -46,14 +46,14 @@ extras_require = {
 }
 
 packages = [
-    'discord',
-    'discord.types',
-    'discord.ui',
-    'discord.webhook',
-    'discord.interactions',
-    'discord.ext.application_commands',
-    'discord.ext.commands',
-    'discord.ext.tasks',
+    'disnake',
+    'disnake.types',
+    'disnake.ui',
+    'disnake.webhook',
+    'disnake.interactions',
+    'disnake.ext.application_commands',
+    'disnake.ext.commands',
+    'disnake.ext.tasks',
 ]
 
 setup(name='disnake',

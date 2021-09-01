@@ -440,7 +440,7 @@ msgstr ""
 "Discordタグ、または普通のユーザー名かどうかをチェックすることで機能しています。デフォルトで定義されているコンバーターは、できるだけ簡単に使えるように作られています。"
 
 #: ../../ext/commands/commands.rst:372
-msgid "A lot of discord models work out of the gate as a parameter:"
+msgid "A lot of disnake models work out of the gate as a parameter:"
 msgstr "Discordモデルの多くがコンバーターとして動作します。"
 
 #: ../../ext/commands/commands.rst:374 ../../ext/commands/commands.rst:396
@@ -597,17 +597,17 @@ msgstr ":data:`typing.Union` はコマンドが単数の型の代わりに、複
 
 #: ../../ext/commands/commands.rst:459
 msgid ""
-"The ``what`` parameter would either take a :class:`discord.TextChannel` "
-"converter or a :class:`discord.Member` converter. The way this works is "
+"The ``what`` parameter would either take a :class:`disnake.TextChannel` "
+"converter or a :class:`disnake.Member` converter. The way this works is "
 "through a left-to-right order. It first attempts to convert the input to "
-"a :class:`discord.TextChannel`, and if it fails it tries to convert it to"
-" a :class:`discord.Member`. If all converters fail, then a special error "
+"a :class:`disnake.TextChannel`, and if it fails it tries to convert it to"
+" a :class:`disnake.Member`. If all converters fail, then a special error "
 "is raised, :exc:`~ext.commands.BadUnionArgument`."
 msgstr ""
-"``what`` パラメータには :class:`discord.TextChannel` コンバーターか "
-":class:`discord.Member` "
+"``what`` パラメータには :class:`disnake.TextChannel` コンバーターか "
+":class:`disnake.Member` "
 "コンバーターのいずれかが用いられます。これは左から右の順で変換できるか試行することになります。最初に渡された値を "
-":class:`discord.TextChannel` へ変換しようと試み、失敗した場合は :class:`discord.Member` "
+":class:`disnake.TextChannel` へ変換しようと試み、失敗した場合は :class:`disnake.Member` "
 "に変換しようとします。すべてのコンバーターで失敗した場合は :exc:`~ext.commands.BadUnionArgument` "
 "というエラーが発生します。"
 
@@ -720,7 +720,7 @@ msgstr ""
 #: ../../ext/commands/commands.rst:549
 msgid ""
 "For example, a signature expecting a :data:`typing.Optional` of a "
-":class:`discord.Member` followed by a :class:`int` could catch a member "
+":class:`disnake.Member` followed by a :class:`int` could catch a member "
 "named after a number due to the different ways a "
 ":class:`~ext.commands.MemberConverter` decides to fetch members. You "
 "should take care to not introduce unintended parsing ambiguities in your "
@@ -754,7 +754,7 @@ msgstr ""
 msgid ""
 "In order to handle our errors, we must use something called an error "
 "handler. There is a global error handler, called :func:`on_command_error`"
-" which works like any other event in the :ref:`discord-api-events`. This "
+" which works like any other event in the :ref:`disnake-api-events`. This "
 "global error handler is called for every error reached."
 msgstr ""
 

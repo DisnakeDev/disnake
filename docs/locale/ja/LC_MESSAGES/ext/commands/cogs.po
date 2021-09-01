@@ -58,8 +58,8 @@ msgid "Quick Example"
 msgstr "簡単な例"
 
 #: ../../ext/commands/cogs.rst:23
-msgid "This example cog defines a ``Greetings`` category for your commands, with a single :ref:`command <ext_commands_commands>` named ``hello`` as well as a listener to listen to an :ref:`Event <discord-api-events>`."
-msgstr "この例で紹介するコグは ``hello`` という名前の :ref:`command <ext_commands_commands>` と、 :ref:`Event <discord-api-events>` をリッスンするリスナーを実装した ``Greetings`` という名前のコマンドカテゴリを定義しています。"
+msgid "This example cog defines a ``Greetings`` category for your commands, with a single :ref:`command <ext_commands_commands>` named ``hello`` as well as a listener to listen to an :ref:`Event <disnake-api-events>`."
+msgstr "この例で紹介するコグは ``hello`` という名前の :ref:`command <ext_commands_commands>` と、 :ref:`Event <disnake-api-events>` をリッスンするリスナーを実装した ``Greetings`` という名前のコマンドカテゴリを定義しています。"
 
 #: ../../ext/commands/cogs.rst:48
 msgid "A couple of technical notes to take into consideration:"

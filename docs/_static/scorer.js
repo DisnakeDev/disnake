@@ -24,7 +24,7 @@ function __score(haystack, regex) {
 
 // unused for now
 function __cleanNamespaces(query) {
-    return query.replace(/(discord\.(ext\.)?)?(.+)/, '$3');
+    return query.replace(/(disnake\.(ext\.)?)?(.+)/, '$3');
 }
 
 Scorer = {
@@ -36,7 +36,7 @@ Scorer = {
         // only inflate the score of things that are actual API reference things
         const [, title, , , score] = result;
 
-        if (pattern !== null && title.startsWith('discord.')) {
+        if (pattern !== null && title.startsWith('disnake.')) {
             let _score = __score(title, pattern);
             if (_score === Number.MAX_VALUE) {
                 return score;

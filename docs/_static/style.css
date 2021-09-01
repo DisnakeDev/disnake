@@ -1152,7 +1152,7 @@ table.docutils tbody tr td ol.last {
 }
 
 /* hide the welcome text */
-section#welcome-to-discord-py > h1 {
+section#welcome-to-disnake-py > h1 {
   display: none;
 }
 
