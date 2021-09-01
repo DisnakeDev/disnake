@@ -419,6 +419,14 @@ class Member(discord.abc.Messageable, _UserTag):
     def status(self, value: Status) -> None:
         # internal use only
         self._client_status[None] = str(value)
+    
+    @property
+    def tag(self) -> int:
+        return self._user.discriminator
+    
+    @property
+    def discriminator(self) -> int:
+        return self._user.discriminator
 
     @property
     def mobile_status(self) -> Status:
