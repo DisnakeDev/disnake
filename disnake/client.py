@@ -1483,7 +1483,7 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
     async def fetch_invite(self, url: Union[Invite, str], *, with_counts: bool = True, with_expiration: bool = True) -> Invite:
         """|coro|
 
-        Gets an :class:`.Invite` from a disnake.gg URL or ID.
+        Gets an :class:`.Invite` from a discord.gg URL or ID.
 
         .. note::
 
@@ -1494,7 +1494,7 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
         Parameters
         -----------
         url: Union[:class:`.Invite`, :class:`str`]
-            The Discord invite ID or URL (must be a disnake.gg URL).
+            The Discord invite ID or URL (must be a discord.gg URL).
         with_counts: :class:`bool`
             Whether to include count information in the invite. This fills the
             :attr:`.Invite.approximate_member_count` and :attr:`.Invite.approximate_presence_count`
