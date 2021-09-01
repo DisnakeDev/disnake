@@ -360,6 +360,57 @@ class BotBase(GroupMixin):
         print(f'Ignoring exception in command {context.command}:', file=sys.stderr)
         traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
 
+    async def on_slash_command_error(
+        self,
+        interaction: ApplicationCommandInteraction,
+        exception: errors.CommandError
+    ) -> None:
+        if self.extra_events.get('on_slash_command_error', None):
+            return
+
+        command = interaction.application_command
+        if command and command.has_error_handler():
+            return
+
+        cog = command.cog
+        if cog and cog.has_slash_error_handler():
+            return
+
+        print(f'Ignoring exception in slash command {command.name!r}:', file=sys.stderr)
+        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+
+    async def on_user_command_error(
+        self,
+        interaction: ApplicationCommandInteraction,
+        exception: errors.CommandError
+    ) -> None:
+        if self.extra_events.get('on_user_command_error', None):
+            return
+        command = interaction.application_command
+        if command and command.has_error_handler():
+            return
+        cog = command.cog
+        if cog and cog.has_user_error_handler():
+            return
+        print(f'Ignoring exception in user command {command.name!r}:', file=sys.stderr)
+        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+
+    async def on_message_command_error(
+        self,
+        interaction: ApplicationCommandInteraction,
+        exception: errors.CommandError
+    ) -> None:
+        if self.extra_events.get('on_message_command_error', None):
+            return
+        command = interaction.application_command
+        if command and command.has_error_handler():
+            return
+        cog = command.cog
+        if cog and cog.has_message_error_handler():
+            return
+        print(f'Ignoring exception in message command {command.name!r}:', file=sys.stderr)
+        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+
     # global check registration
 
     def check(self, func: T) -> T:
@@ -1210,21 +1261,29 @@ class BotBase(GroupMixin):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
+        interaction.bot = self
         command_type = interaction.data.type
         command_name = interaction.data.name
+        error_event = None
         if command_type is ApplicationCommandType.chat_input:
             app_command = _ApplicationCommandStore.slash_commands.get(command_name)
+            error_event = 'slash_command_error'
         elif command_type is ApplicationCommandType.user:
             app_command = _ApplicationCommandStore.user_commands.get(command_name)
+            error_event = 'user_command_error'
         elif command_type is ApplicationCommandType.message:
             app_command = _ApplicationCommandStore.message_commands.get(command_name)
+            error_event = 'message_command_error'
         else:
             app_command = None
         if app_command is None:
             # TODO: unregister this command from API
             return
         if app_command.guild_ids is None or interaction.guild_id in app_command.guild_ids:
-            await app_command.invoke(interaction)
+            try:
+                await app_command.invoke(interaction)
+            except Exception as exc:
+                self.dispatch(error_event, interaction, exc)
         else:
             # TODO: unregister this command from API
             pass

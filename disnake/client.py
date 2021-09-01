@@ -380,8 +380,8 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
     async def get_or_fetch_user(self, user_id: int) -> User:
         """|coro|
 
-        Returns a message with the given ID. Beware that this method might make an API call
-        if the message isn't found in the bot's cache (unlikely in most of the cases)
+        Tries to get a user from the cache. If fails, it tries to
+        fetch the user from the API.
 
         Parameters
         -----------
@@ -393,13 +393,14 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
         :class:`User`
             The user with the given ID
         """
-        try_user = self.get_user(user_id)
-        if try_user is None:
-            try:
-                try_user = await self.fetch_user(user_id)
-            except:
-                return None
-        return try_user
+        user = self.get_user(user_id)
+        if user is not None:
+            return user
+        try:
+            user = await self.fetch_user(user_id)
+        except Exception:
+            return None
+        return user
 
     def is_ready(self) -> bool:
         """:class:`bool`: Specifies if the client's internal cache is ready for use."""

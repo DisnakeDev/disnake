@@ -30,7 +30,7 @@ from typing import Any, Callable, ClassVar, Dict, Generator, List, Optional, TYP
 
 from ._types import _BaseCommand
 
-from ..application_commands import InvokableApplicationCommand
+from ..application_commands.base_core import InvokableApplicationCommand
 
 from disnake._hub import _ApplicationCommandStore
 
@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from .bot import BotBase
     from .context import Context
     from .core import Command
+    from disnake.interactions import ApplicationCommandInteraction
 
 __all__ = (
     'CogMeta',
@@ -354,6 +355,18 @@ class Cog(metaclass=CogMeta):
         """
         return not hasattr(self.cog_command_error.__func__, '__cog_special_method__')
 
+    def has_slash_error_handler(self) -> bool:
+        """:class:`bool`: Checks whether the cog has a slash error handler."""
+        return not hasattr(self.cog_slash_command_error.__func__, '__cog_special_method__')
+    
+    def has_user_error_handler(self) -> bool:
+        """:class:`bool`: Checks whether the cog has a slash error handler."""
+        return not hasattr(self.cog_user_command_error.__func__, '__cog_special_method__')
+    
+    def has_message_error_handler(self) -> bool:
+        """:class:`bool`: Checks whether the cog has a slash error handler."""
+        return not hasattr(self.cog_message_command_error.__func__, '__cog_special_method__')
+
     @_cog_special_method
     def cog_unload(self) -> None:
         """A special method that is called when the cog gets removed.
@@ -412,6 +425,18 @@ class Cog(metaclass=CogMeta):
         error: :class:`CommandError`
             The error that happened.
         """
+        pass
+
+    @_cog_special_method
+    async def cog_slash_command_error(self, inter: ApplicationCommandInteraction, error: Exception) -> None:
+        pass
+
+    @_cog_special_method
+    async def cog_user_command_error(self, inter: ApplicationCommandInteraction, error: Exception) -> None:
+        pass
+
+    @_cog_special_method
+    async def cog_message_command_error(self, inter: ApplicationCommandInteraction, error: Exception) -> None:
         pass
 
     @_cog_special_method

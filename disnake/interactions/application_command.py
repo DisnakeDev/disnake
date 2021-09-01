@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, TYPE_CHECKING, Union
 from .base import Interaction
 
 from ..channel import _threaded_channel_factory
-from ..enums import OptionType, ApplicationCommandType, try_enum, enum_if_int
+from ..enums import OptionType, ApplicationCommandType, try_enum
 from ..guild import Guild
 from ..role import Role
 from ..user import User
@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, PartialMessageable
     from ..threads import Thread
+    from ..ext.application_commands import InvokableApplicationCommand
 
     InteractionChannel = Union[
         VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, Thread, PartialMessageable
@@ -66,15 +67,15 @@ class ApplicationCommandInteraction(Interaction):
             state=state,
             guild=self.guild
         )
-        self.application_command = None
-        self.command_failed = False
+        self.application_command: InvokableApplicationCommand = None
+        self.command_failed: bool = False
 
     @property
-    def target(self):
+    def target(self) -> Optional[Union[User, Member, Message]]:
         return self.data.target
     
     @property
-    def options(self):
+    def options(self) -> Optional[Dict[str, Any]]:
         return self.data.options
 
 
