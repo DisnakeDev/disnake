@@ -969,16 +969,19 @@ class VoiceChannel(VocalGuildChannel):
         ...
     
     async def create_party(
-        self, application_id: PartyType, max_age: int = 86400, max_uses: int = 0
+        self,
+        application_name: PartyType,
+        max_age: int = 86400,
+        max_uses: int = 0
     ) -> Party:
         """|coro|
         Creates a party in this voice channel.
 
         Parameters
         ----------
-        application_id : :class:`PartyType`
+        application_name : :class:`PartyType`
             The id of the application the party belongs to. currently any of
-            ``PartyType.youtube``, ``PartyType.poker``, ``PartyType.betrayal``, ``PartyType.fishing``, ``PartyType.chess``.
+            ``youtube``, ``poker``, ``betrayal``, ``fishing``, ``chess``.
         max_age : :class:`int`
             Duration in seconds after which the invite expires, by default 1 day.
         max_uses : :class:`int`
@@ -995,9 +998,7 @@ class VoiceChannel(VocalGuildChannel):
             The created party.
         """
         return Party(
-            await self._state.http.create_party(
-                self.id, application_id.value, max_age=max_age, max_uses=max_uses
-            )
+            await self._state.http.create_party(self.id, max_age, max_uses, PartyType[application_name].value)
         )
 
     @overload

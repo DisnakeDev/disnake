@@ -391,7 +391,7 @@ class HTTPClient:
         channel_id: Snowflake,
         max_age: int,
         max_uses: int,
-        target_application_id: int,
+        target_application_id: Snowflake,
     ):
         payload = {
             "max_age": max_age,
