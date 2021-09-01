@@ -20,19 +20,19 @@ msgstr "ログの設定"
 
 #: ../../logging.rst:7
 msgid ""
-"*discord.py* logs errors and debug information via the :mod:`logging` "
+"*disnake* logs errors and debug information via the :mod:`logging` "
 "python module. It is strongly recommended that the logging module is "
 "configured, as no errors or warnings will be output if it is not set up. "
 "Configuration of the ``logging`` module can be as simple as::"
 msgstr ""
-"*discord.py* はPythonの :mod:`logging` "
+"*disnake* はPythonの :mod:`logging` "
 "モジュールを介してエラーやデバッグの情報を記録します。loggingモジュールが設定されていない場合は、エラーや警告が出力されないため、設定するとを強くおすすめします。loggingモジュールの設定は下記手順で簡単に実装が可能です。"
 
 #: ../../logging.rst:16
 #, fuzzy
 msgid ""
 "Placed at the start of the application. This will output the logs from "
-"discord as well as other libraries that use the ``logging`` module "
+"disnake as well as other libraries that use the ``logging`` module "
 "directly to the console."
 msgstr ""
 "アプリケーションの始めにこれを書き加えるだけです。これはdiscordからのログを ``logging`` "
@@ -53,11 +53,11 @@ msgstr ""
 #, fuzzy
 msgid ""
 "More advanced setups are possible with the :mod:`logging` module. For "
-"example to write the logs to a file called ``discord.log`` instead of "
+"example to write the logs to a file called ``disnake.log`` instead of "
 "outputting them to the console the following snippet can be used::"
 msgstr ""
 "また、 :mod:`logging` モジュールでは更に高度な設定が可能です。たとえば、コンソールへ出力するのではなく、 "
-"``discord.log`` というファイルにログを出力するには、以下のスニペットが利用できます。"
+"``disnake.log`` というファイルにログを出力するには、以下のスニペットが利用できます。"
 
 #: ../../logging.rst:37
 #, fuzzy

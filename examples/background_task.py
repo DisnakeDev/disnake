@@ -1,8 +1,8 @@
-from discord.ext import tasks
+from disnake.ext import tasks
 
-import discord
+import disnake
 
-class MyClient(discord.Client):
+class MyClient(disnake.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

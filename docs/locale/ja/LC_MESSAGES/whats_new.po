@@ -105,7 +105,7 @@ msgid ""
 msgstr ""
 
 #: ../../whats_new.rst:36
-msgid "This is the same as having ``discord.Member`` as the type-hint."
+msgid "This is the same as having ``disnake.Member`` as the type-hint."
 msgstr ""
 
 #: ../../whats_new.rst:37
@@ -1056,7 +1056,7 @@ msgstr ""
 
 #: ../../whats_new.rst:338
 msgid ""
-"Add support for new audit log types. See :ref:`discord-api-audit-logs` "
+"Add support for new audit log types. See :ref:`disnake-api-audit-logs` "
 "for more information. (:issue:`2427`)"
 msgstr ""
 
@@ -1889,7 +1889,7 @@ msgid ""
 msgstr ""
 
 #: ../../whats_new.rst:580 ../../whats_new.rst:601 ../../whats_new.rst:620
-msgid "``discord.ext.commands``"
+msgid "``disnake.ext.commands``"
 msgstr ""
 
 #: ../../whats_new.rst:582
@@ -1991,7 +1991,7 @@ msgid ""
 msgstr ""
 
 #: ../../whats_new.rst:615
-msgid "Make the output of ``python -m discord --version`` a bit more useful."
+msgid "Make the output of ``python -m disnake --version`` a bit more useful."
 msgstr ""
 
 #: ../../whats_new.rst:616
@@ -2750,7 +2750,7 @@ msgstr ""
 
 #: ../../whats_new.rst:957
 msgid ""
-"New utility function, :func:`discord.utils.get` to simplify retrieval of "
+"New utility function, :func:`disnake.utils.get` to simplify retrieval of "
 "items based on attributes."
 msgstr ""
 
@@ -2808,7 +2808,7 @@ msgstr ""
 
 #: ../../whats_new.rst:967
 msgid ""
-"Add :class:`discord.Game` to represent any game with custom text to send "
+"Add :class:`disnake.Game` to represent any game with custom text to send "
 "to :meth:`Client.change_status`."
 msgstr ""
 
@@ -2904,7 +2904,7 @@ msgstr ""
 #: ../../whats_new.rst:993
 msgid ""
 ":meth:`Client.logs_from` now handles cases where limit > 100 to sidestep "
-"the discord API limitation."
+"the disnake API limitation."
 msgstr ""
 
 #: ../../whats_new.rst:994
@@ -2920,7 +2920,7 @@ msgstr ""
 #: ../../whats_new.rst:996
 msgid ""
 "Mentions are now triggered normally. This was changed due to the way "
-"discord handles it internally."
+"disnake handles it internally."
 msgstr ""
 
 #: ../../whats_new.rst:997

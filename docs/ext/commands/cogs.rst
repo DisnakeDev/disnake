@@ -1,4 +1,4 @@
-.. currentmodule:: discord
+.. currentmodule:: disnake
 
 .. _ext_commands_cogs:
 
@@ -20,7 +20,7 @@ It should be noted that cogs are typically used alongside with :ref:`ext_command
 Quick Example
 ---------------
 
-This example cog defines a ``Greetings`` category for your commands, with a single :ref:`command <ext_commands_commands>` named ``hello`` as well as a listener to listen to an :ref:`Event <discord-api-events>`.
+This example cog defines a ``Greetings`` category for your commands, with a single :ref:`command <ext_commands_commands>` named ``hello`` as well as a listener to listen to an :ref:`Event <disnake-api-events>`.
 
 .. code-block:: python3
 
@@ -36,7 +36,7 @@ This example cog defines a ``Greetings`` category for your commands, with a sing
                 await channel.send(f'Welcome {member.mention}.')
 
         @commands.command()
-        async def hello(self, ctx, *, member: discord.Member = None):
+        async def hello(self, ctx, *, member: disnake.Member = None):
             """Says hello"""
             member = member or ctx.author
             if self._last_member is None or self._last_member.id != member.id:

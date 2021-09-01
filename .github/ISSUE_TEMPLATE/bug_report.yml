@@ -6,7 +6,7 @@ body:
     attributes:
       value: >
         Thanks for taking the time to fill out a bug.
-        If you want real-time support, consider joining our Discord at https://discord.gg/r3sSKJJ instead.
+        If you want real-time support, consider joining our Discord at https://discord.gg/gJDbCw8aQy instead.
 
         Please note that this form is for bugs only!
   - type: input
@@ -47,14 +47,14 @@ body:
       label: Intents
       description: >
         What intents are you using for your bot?
-        This is the `discord.Intents` class you pass to the client.
+        This is the `disnake.Intents` class you pass to the client.
     validations:
       required: true
   - type: textarea
     attributes:
       label: System Information
       description: >
-        Run `python -m discord -v` and paste this information below.
+        Run `python -m disnake -v` and paste this information below.
 
         This command required v1.1.0 or higher of the library. If this errors out then show some basic
         information involving your system such as operating system and Python version.

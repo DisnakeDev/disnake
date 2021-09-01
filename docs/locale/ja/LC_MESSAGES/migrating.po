@@ -51,8 +51,8 @@ msgid ""
 "to remove support for Python versions lower than 3.5.3, which essentially"
 " means that **support for Python 3.4 is dropped**."
 msgstr ""
-"discord.py の開発をより簡単にし，またその依存関係にあるライブラリをアップグレードして Python 3.7 "
-"以上を使えるようにするために，discord.py は Python 3.5.3 "
+"disnake の開発をより簡単にし，またその依存関係にあるライブラリをアップグレードして Python 3.7 "
+"以上を使えるようにするために，disnake は Python 3.5.3 "
 "より古いバージョンに対するサポートを諦めざるを得ませんでした。これはつまり **Python 3.4 に対するサポートは打ち切られた** "
 "ということです。"
 
@@ -934,10 +934,10 @@ msgstr "代わりに ``isinstance`` と :ref:`discord_api_abcs` を使用して�
 
 #: ../../migrating.rst:346
 msgid ""
-"e.g. ``isinstance(channel, discord.abc.GuildChannel)`` will check if it "
+"e.g. ``isinstance(channel, disnake.abc.GuildChannel)`` will check if it "
 "isn't a private channel."
 msgstr ""
-"例を挙げると ``isinstance(channel, discord.abc.GuildChannel)`` "
+"例を挙げると ``isinstance(channel, disnake.abc.GuildChannel)`` "
 "でプライベートチャンネルであるかを確認できます。"
 
 #: ../../migrating.rst:348
@@ -961,10 +961,10 @@ msgstr ""
 #: ../../migrating.rst:354
 msgid ""
 "The concept of a default channel was removed from Discord. See `#329 "
-"<https://github.com/hammerandchisel/discord-api-docs/pull/329>`_."
+"<https://github.com/hammerandchisel/disnake-api-docs/pull/329>`_."
 msgstr ""
 "デフォルトチャンネルの概念は、Discordから削除されました。 `#329 "
-"<https://github.com/hammerandchisel/discord-api-docs/pull/329>`_ "
+"<https://github.com/hammerandchisel/disnake-api-docs/pull/329>`_ "
 "を参照してください。"
 
 #: ../../migrating.rst:357
@@ -1058,7 +1058,7 @@ msgid "**Added**"
 msgstr "**追加**"
 
 #: ../../migrating.rst:391
-msgid ":class:`Attachment` to represent a discord attachment."
+msgid ":class:`Attachment` to represent a disnake attachment."
 msgstr "Discordのアタッチメントを表す :class:`Attachment` 。"
 
 #: ../../migrating.rst:392
@@ -1241,12 +1241,12 @@ msgstr ""
 
 #: ../../migrating.rst:484
 msgid ""
-"You can also get single elements a la :func:`discord.utils.find` or "
-":func:`discord.utils.get` via :meth:`AsyncIterator.get` or "
+"You can also get single elements a la :func:`disnake.utils.find` or "
+":func:`disnake.utils.get` via :meth:`AsyncIterator.get` or "
 ":meth:`AsyncIterator.find`: ::"
 msgstr ""
 ":meth:`AsyncIterator.get` または :meth:`AsyncIterator.find` を介して "
-":func:`discord.utils.get` または :func:`discord.utils.find` "
+":func:`disnake.utils.get` または :func:`disnake.utils.find` "
 "で単一の要素を取得することもできます。"
 
 #: ../../migrating.rst:489
@@ -2499,7 +2499,7 @@ msgid ""
 "This system was eventually expanded to support a "
 ":class:`~ext.commands.Converter` system to allow plugging in the "
 ":class:`~ext.commands.Context` and do more complicated conversions such "
-"as the built-in \"discord\" converters."
+"as the built-in \"disnake\" converters."
 msgstr ""
 
 #: ../../migrating.rst:1149

@@ -1,4 +1,4 @@
-.. currentmodule:: discord
+.. currentmodule:: disnake
 
 .. _migrating_1_0:
 
@@ -298,15 +298,15 @@ The types are split into two different :ref:`discord_api_abcs`:
 
 So to check if something is a guild channel you would do: ::
 
-    isinstance(channel, discord.abc.GuildChannel)
+    isinstance(channel, disnake.abc.GuildChannel)
 
 And to check if it's a private channel you would do: ::
 
-    isinstance(channel, discord.abc.PrivateChannel)
+    isinstance(channel, disnake.abc.PrivateChannel)
 
 Of course, if you're looking for only a specific type you can pass that too, e.g. ::
 
-    isinstance(channel, discord.TextChannel)
+    isinstance(channel, disnake.TextChannel)
 
 With this type split also came event changes, which are enumerated in :ref:`migrating_1_0_event_changes`.
 
@@ -343,7 +343,7 @@ They will be enumerated here.
 - ``Channel.is_private``
 
     - Use ``isinstance`` instead with one of the :ref:`discord_api_abcs` instead.
-    - e.g. ``isinstance(channel, discord.abc.GuildChannel)`` will check if it isn't a private channel.
+    - e.g. ``isinstance(channel, disnake.abc.GuildChannel)`` will check if it isn't a private channel.
 
 - ``Client.accept_invite``
 
@@ -352,7 +352,7 @@ They will be enumerated here.
 - ``Guild.default_channel`` / ``Server.default_channel`` and ``Channel.is_default``
 
     - The concept of a default channel was removed from Discord.
-      See `#329 <https://github.com/hammerandchisel/discord-api-docs/pull/329>`_.
+      See `#329 <https://github.com/hammerandchisel/disnake-api-docs/pull/329>`_.
 
 - ``Message.edited_timestamp``
 
@@ -388,7 +388,7 @@ They will be enumerated here.
 
 **Added**
 
-- :class:`Attachment` to represent a discord attachment.
+- :class:`Attachment` to represent a disnake attachment.
 - :class:`CategoryChannel` to represent a channel category.
 - :attr:`VoiceChannel.members` for fetching members connected to a voice channel.
 - :attr:`TextChannel.members` for fetching members that can see the channel.
@@ -430,7 +430,7 @@ Basically: ::
 
 This supports everything that the old ``send_message`` supported such as embeds: ::
 
-    e = discord.Embed(title='foo')
+    e = disnake.Embed(title='foo')
     await channel.send('Hello', embed=e)
 
 There is a caveat with sending files however, as this functionality was expanded to support multiple
@@ -440,13 +440,13 @@ file attachments, you must now use a :class:`File` pseudo-namedtuple to upload a
     await client.send_file(channel, 'cool.png', filename='testing.png', content='Hello')
 
     # after
-    await channel.send('Hello', file=discord.File('cool.png', 'testing.png'))
+    await channel.send('Hello', file=disnake.File('cool.png', 'testing.png'))
 
 This change was to facilitate multiple file uploads: ::
 
     my_files = [
-        discord.File('cool.png', 'testing.png'),
-        discord.File(some_fp, 'cool_filename.png'),
+        disnake.File('cool.png', 'testing.png'),
+        disnake.File(some_fp, 'cool_filename.png'),
     ]
 
     await channel.send('Your images:', files=my_files)
@@ -481,7 +481,7 @@ A handy aspect of returning :class:`AsyncIterator` is that it allows you to chai
 The functions passed to :meth:`AsyncIterator.map` or :meth:`AsyncIterator.filter` can be either coroutines or regular
 functions.
 
-You can also get single elements a la :func:`discord.utils.find` or :func:`discord.utils.get` via
+You can also get single elements a la :func:`disnake.utils.find` or :func:`disnake.utils.get` via
 :meth:`AsyncIterator.get` or :meth:`AsyncIterator.find`: ::
 
     my_last_message = await channel.history().get(author=client.user)
@@ -627,7 +627,7 @@ Before: ::
 After: ::
 
     vc = await channel.connect()
-    vc.play(discord.FFmpegPCMAudio('testing.mp3'), after=lambda e: print('done', e))
+    vc.play(disnake.FFmpegPCMAudio('testing.mp3'), after=lambda e: print('done', e))
     vc.is_playing()
     vc.pause()
     vc.resume()
@@ -639,7 +639,7 @@ playing at runtime via :attr:`VoiceClient.source`.
 
 For example, you can add a :class:`PCMVolumeTransformer` to allow changing the volume: ::
 
-    vc.source = discord.PCMVolumeTransformer(vc.source)
+    vc.source = disnake.PCMVolumeTransformer(vc.source)
     vc.source.volume = 0.6
 
 An added benefit of the redesign is that it will be much more resilient towards reconnections:
@@ -741,7 +741,7 @@ logic and state handling.
 
 Usage is as simple as doing: ::
 
-    client = discord.AutoShardedClient()
+    client = disnake.AutoShardedClient()
 
 instead of using :class:`Client`.
 
@@ -751,10 +751,10 @@ per shard.
 If you want more control over the sharding you can specify ``shard_count`` and ``shard_ids``. ::
 
     # launch 10 shards regardless
-    client = discord.AutoShardedClient(shard_count=10)
+    client = disnake.AutoShardedClient(shard_count=10)
 
     # launch specific shard IDs in this process
-    client = discord.AutoShardedClient(shard_count=10, shard_ids=(1, 2, 5, 6))
+    client = disnake.AutoShardedClient(shard_count=10, shard_ids=(1, 2, 5, 6))
 
 For users of the command extension, there is also :class:`~ext.commands.AutoShardedBot` which behaves similarly.
 
@@ -1144,7 +1144,7 @@ with a singular argument denoting the argument passed by the user as a string.
 
 This system was eventually expanded to support a :class:`~ext.commands.Converter` system to
 allow plugging in the :class:`~ext.commands.Context` and do more complicated conversions such
-as the built-in "discord" converters.
+as the built-in "disnake" converters.
 
 In v1.0 this converter system was revamped to allow instances of :class:`~ext.commands.Converter` derived
 classes to be passed. For consistency, the :meth:`~ext.commands.Converter.convert` method was changed to

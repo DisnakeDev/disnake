@@ -1,9 +1,9 @@
-.. currentmodule:: discord
+.. currentmodule:: disnake
 
 API Reference
 ===============
 
-The following section outlines the API of discord.py.
+The following section outlines the API of disnake.
 
 .. note::
 
@@ -11,7 +11,7 @@ The following section outlines the API of discord.py.
     in an output independent way.  If the logging module is not configured,
     these logs will not be output anywhere.  See :ref:`logging_setup` for
     more information on how to set up and use the logging module with
-    discord.py.
+    disnake.
 
 Version Related Info
 ---------------------
@@ -162,9 +162,9 @@ PCMVolumeTransformer
 Opus Library
 ~~~~~~~~~~~~~
 
-.. autofunction:: discord.opus.load_opus
+.. autofunction:: disnake.opus.load_opus
 
-.. autofunction:: discord.opus.is_loaded
+.. autofunction:: disnake.opus.is_loaded
 
 .. _discord-api-events:
 
@@ -177,9 +177,9 @@ There are two ways to register an event, the first way is through the use of
 :meth:`Client.event`. The second way is through subclassing :class:`Client` and
 overriding the specific events. For example: ::
 
-    import discord
+    import disnake
 
-    class MyClient(discord.Client):
+    class MyClient(disnake.Client):
         async def on_message(self, message):
             if message.author == self.user:
                 return
@@ -621,7 +621,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
         This is a low level function that is not generally meant to be used.
         If you are working with components, consider using the callbacks associated
-        with the :class:`~discord.ui.View` instead as it provides a nicer user experience.
+        with the :class:`~disnake.ui.View` instead as it provides a nicer user experience.
 
     .. versionadded:: 2.0
 
@@ -1099,31 +1099,31 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 Utility Functions
 -----------------
 
-.. autofunction:: discord.utils.find
+.. autofunction:: disnake.utils.find
 
-.. autofunction:: discord.utils.get
+.. autofunction:: disnake.utils.get
 
-.. autofunction:: discord.utils.snowflake_time
+.. autofunction:: disnake.utils.snowflake_time
 
-.. autofunction:: discord.utils.oauth_url
+.. autofunction:: disnake.utils.oauth_url
 
-.. autofunction:: discord.utils.remove_markdown
+.. autofunction:: disnake.utils.remove_markdown
 
-.. autofunction:: discord.utils.escape_markdown
+.. autofunction:: disnake.utils.escape_markdown
 
-.. autofunction:: discord.utils.escape_mentions
+.. autofunction:: disnake.utils.escape_mentions
 
-.. autofunction:: discord.utils.resolve_invite
+.. autofunction:: disnake.utils.resolve_invite
 
-.. autofunction:: discord.utils.resolve_template
+.. autofunction:: disnake.utils.resolve_template
 
-.. autofunction:: discord.utils.sleep_until
+.. autofunction:: disnake.utils.sleep_until
 
-.. autofunction:: discord.utils.utcnow
+.. autofunction:: disnake.utils.utcnow
 
-.. autofunction:: discord.utils.format_dt
+.. autofunction:: disnake.utils.format_dt
 
-.. autofunction:: discord.utils.as_chunks
+.. autofunction:: disnake.utils.as_chunks
 
 .. _discord-api-enums:
 
@@ -3249,7 +3249,7 @@ AuditLogDiff
 Webhook Support
 ------------------
 
-discord.py offers support for creating, editing, and executing webhooks through the :class:`Webhook` class.
+disnake offers support for creating, editing, and executing webhooks through the :class:`Webhook` class.
 
 Webhook
 ~~~~~~~~~
@@ -3300,56 +3300,56 @@ This library has a module related to abstract base classes, in which all the ABC
 Snowflake
 ~~~~~~~~~~
 
-.. attributetable:: discord.abc.Snowflake
+.. attributetable:: disnake.abc.Snowflake
 
-.. autoclass:: discord.abc.Snowflake()
+.. autoclass:: disnake.abc.Snowflake()
     :members:
 
 User
 ~~~~~
 
-.. attributetable:: discord.abc.User
+.. attributetable:: disnake.abc.User
 
-.. autoclass:: discord.abc.User()
+.. autoclass:: disnake.abc.User()
     :members:
 
 PrivateChannel
 ~~~~~~~~~~~~~~~
 
-.. attributetable:: discord.abc.PrivateChannel
+.. attributetable:: disnake.abc.PrivateChannel
 
-.. autoclass:: discord.abc.PrivateChannel()
+.. autoclass:: disnake.abc.PrivateChannel()
     :members:
 
 GuildChannel
 ~~~~~~~~~~~~~
 
-.. attributetable:: discord.abc.GuildChannel
+.. attributetable:: disnake.abc.GuildChannel
 
-.. autoclass:: discord.abc.GuildChannel()
+.. autoclass:: disnake.abc.GuildChannel()
     :members:
 
 Messageable
 ~~~~~~~~~~~~
 
-.. attributetable:: discord.abc.Messageable
+.. attributetable:: disnake.abc.Messageable
 
-.. autoclass:: discord.abc.Messageable()
+.. autoclass:: disnake.abc.Messageable()
     :members:
     :exclude-members: history, typing
 
-    .. automethod:: discord.abc.Messageable.history
+    .. automethod:: disnake.abc.Messageable.history
         :async-for:
 
-    .. automethod:: discord.abc.Messageable.typing
+    .. automethod:: disnake.abc.Messageable.typing
         :async-with:
 
 Connectable
 ~~~~~~~~~~~~
 
-.. attributetable:: discord.abc.Connectable
+.. attributetable:: disnake.abc.Connectable
 
-.. autoclass:: discord.abc.Connectable()
+.. autoclass:: disnake.abc.Connectable()
 
 .. _discord_api_models:
 
@@ -3370,7 +3370,7 @@ the user of the library.
     If you want to get one of these model classes instances they'd have to be through
     the cache, and a common way of doing so is through the :func:`utils.find` function
     or attributes of model classes that you receive from the events specified in the
-    :ref:`discord-api-events`.
+    :ref:`disnake-api-events`.
 
 .. note::
 
@@ -4121,40 +4121,40 @@ The library has helpers to help create component-based UIs.
 View
 ~~~~~~~
 
-.. attributetable:: discord.ui.View
+.. attributetable:: disnake.ui.View
 
-.. autoclass:: discord.ui.View
+.. autoclass:: disnake.ui.View
     :members:
 
 Item
 ~~~~~~~
 
-.. attributetable:: discord.ui.Item
+.. attributetable:: disnake.ui.Item
 
-.. autoclass:: discord.ui.Item
+.. autoclass:: disnake.ui.Item
     :members:
 
 Button
 ~~~~~~~
 
-.. attributetable:: discord.ui.Button
+.. attributetable:: disnake.ui.Button
 
-.. autoclass:: discord.ui.Button
+.. autoclass:: disnake.ui.Button
     :members:
     :inherited-members:
 
-.. autofunction:: discord.ui.button
+.. autofunction:: disnake.ui.button
 
 Select
 ~~~~~~~
 
-.. attributetable:: discord.ui.Select
+.. attributetable:: disnake.ui.Select
 
-.. autoclass:: discord.ui.Select
+.. autoclass:: disnake.ui.Select
     :members:
     :inherited-members:
 
-.. autofunction:: discord.ui.select
+.. autofunction:: disnake.ui.select
 
 
 Exceptions
@@ -4191,9 +4191,9 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: InteractionResponded
 
-.. autoexception:: discord.opus.OpusError
+.. autoexception:: disnake.opus.OpusError
 
-.. autoexception:: discord.opus.OpusNotLoaded
+.. autoexception:: disnake.opus.OpusNotLoaded
 
 Exception Hierarchy
 ~~~~~~~~~~~~~~~~~~~~~

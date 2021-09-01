@@ -77,8 +77,8 @@ msgid "Some events in v0.9.0 were considered pretty useless due to having no sep
 msgstr "v0.9.0でいくつかのイベントは、別の状態を持たないために、役に立たないと考えられていました。変更された主なイベントは、更新前と更新後の二つの状態を持つ ``_update`` イベントです。"
 
 #: ../../migrating_to_async.rst:93
-msgid "Note that ``on_status`` was removed. If you want its functionality, use :func:`on_member_update`. See :ref:`discord-api-events` for more information. Other removed events include ``on_socket_closed``, ``on_socket_receive``, and ``on_socket_opened``."
-msgstr "``on_status`` が削除されていることに注意してください。似たような機能が使いたい場合は、  :func:`on_member_update` を使用します。詳細は :ref:`discord-api-events` を参照してください。他に、 ``on_socket_closed`` 、 ``on_socket_receive`` や ``on_socket_opened`` も削除されています。"
+msgid "Note that ``on_status`` was removed. If you want its functionality, use :func:`on_member_update`. See :ref:`disnake-api-events` for more information. Other removed events include ``on_socket_closed``, ``on_socket_receive``, and ``on_socket_opened``."
+msgstr "``on_status`` が削除されていることに注意してください。似たような機能が使いたい場合は、  :func:`on_member_update` を使用します。詳細は :ref:`disnake-api-events` を参照してください。他に、 ``on_socket_closed`` 、 ``on_socket_receive`` や ``on_socket_opened`` も削除されています。"
 
 #: ../../migrating_to_async.rst:98
 msgid "Coroutines"
@@ -145,8 +145,8 @@ msgid "The common places where this was changed was in the server region, member
 msgstr "変更された主な場所は、サーバーリージョン、メンバーのステータス、およびチャンネルタイプです。"
 
 #: ../../migrating_to_async.rst:182
-msgid "The main reason for this change was to reduce the use of finicky strings in the API as this could give users a false sense of power. More information can be found in the :ref:`discord-api-enums` page."
-msgstr "この変更の主な理由は、APIでの厄介な文字列の使用を削減することでした。ユーザーに誤った感覚を与える可能性があったためです。詳細は :ref:`discord-api-enums` を参照してください。"
+msgid "The main reason for this change was to reduce the use of finicky strings in the API as this could give users a false sense of power. More information can be found in the :ref:`disnake-api-enums` page."
+msgstr "この変更の主な理由は、APIでの厄介な文字列の使用を削減することでした。ユーザーに誤った感覚を与える可能性があったためです。詳細は :ref:`disnake-api-enums` を参照してください。"
 
 #: ../../migrating_to_async.rst:186
 msgid "Properties"
@@ -346,7 +346,7 @@ msgid "Running the Client"
 msgstr "クライアントの実行"
 
 #: ../../migrating_to_async.rst:273
-msgid "In earlier versions of discord.py, ``client.run()`` was a blocking call to the main thread that called it. In v0.10.0 it is still a blocking call but it handles the event loop for you. However, in order to do that you must pass in your credentials to :meth:`Client.run`."
+msgid "In earlier versions of disnake, ``client.run()`` was a blocking call to the main thread that called it. In v0.10.0 it is still a blocking call but it handles the event loop for you. However, in order to do that you must pass in your credentials to :meth:`Client.run`."
 msgstr "以前のバージョンのdiscord.pyでは ``client.run()`` は呼び出したメインスレッドをブロッキングするブロック付き呼び出しでした。v0.10.0でも未だブロック付き呼び出しですが、イベントループで処理を行います。ただし、それを行うためには認証情報を :meth:`Client.run` に渡す必要があります。"
 
 #: ../../migrating_to_async.rst:277
