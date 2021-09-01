@@ -246,7 +246,7 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
 
         self._enable_debug_events: bool = options.pop('enable_debug_events', False)
         self._sync_commands: bool = options.pop('sync_commands', True)
-        self._test_guilds: List[int] = options.pop('test_guilds')
+        self._test_guilds: Optional[List[int]] = options.pop('test_guilds', None)
         self._connection: ConnectionState = self._get_state(**options)
         self._connection.shard_count = self.shard_count
         self._closed: bool = False

@@ -229,7 +229,7 @@ class BotBase(GroupMixin):
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
         **kwargs
-    ) -> InvokableSlashCommand:
+    ) -> Callable:
         """
         A decorator that builds a slash command.
 
@@ -272,7 +272,7 @@ class BotBase(GroupMixin):
         guild_ids: List[int] = None,
         auto_sync: bool = True,
         **kwargs
-    ) -> InvokableUserCommand:
+    ) -> Callable:
         """
         A decorator that builds a user command.
 
@@ -295,7 +295,7 @@ class BotBase(GroupMixin):
         guild_ids: List[int] = None,
         auto_sync: bool = True,
         **kwargs
-    ) -> InvokableMessageCommand:
+    ) -> Callable:
         """
         A decorator that builds a message command.
 
