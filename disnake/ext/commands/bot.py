@@ -130,6 +130,7 @@ class _DefaultRepr:
 
 _default = _DefaultRepr()
 
+
 class BotBase(GroupMixin):
     def __init__(self, command_prefix, help_command=_default, description=None, **options):
         super().__init__(**options)
@@ -157,6 +158,19 @@ class BotBase(GroupMixin):
             self.help_command = DefaultHelpCommand()
         else:
             self.help_command = help_command
+
+    @property
+    def owner(self):
+        if self.owner_id and not self.owner_ids:
+            return self.get_user(self.owner_id)
+    
+    @property
+    def owners(self):
+        if self.owner_ids and not self.owner_id:
+            list_of_owners = []
+            for owner_id in self.owner_ids:
+                list_of_owners.append(self.get_user(owner_id))
+        return list_of_owners
 
     @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:

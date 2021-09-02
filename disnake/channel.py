@@ -983,9 +983,9 @@ class VoiceChannel(VocalGuildChannel):
             The id of the application the party belongs to. currently any of
             ``youtube``, ``poker``, ``betrayal``, ``fishing``, ``chess``.
         max_age : :class:`int`
-            Duration in seconds after which the invite expires, by default 1 day.
+            Duration in seconds after which the invite expires, defaults to 86400.
         max_uses : :class:`int`
-            maximum number of times this invite can be used, by default unlimited.
+            maximum number of times this invite can be used, defaults to 0 (unlimited).
         Raises
         -------
         Forbidden
