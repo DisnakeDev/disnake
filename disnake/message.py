@@ -706,6 +706,13 @@ class Message(Hashable):
             except KeyError:
                 continue
 
+    def __len__(self, clean = False) -> int:
+        if clean:
+            content = self.clean_content
+        else:
+            content = self.content
+        return len(content)
+
     def __repr__(self) -> str:
         name = self.__class__.__name__
         return (
