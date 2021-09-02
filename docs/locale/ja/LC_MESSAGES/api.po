@@ -1630,7 +1630,7 @@ msgstr ":class:`.Invite` をdiscord.gg URLやIDから取得します。"
 #: disnake.Client.fetch_template:5 of
 #, fuzzy
 msgid "The Discord Template Code or URL (must be a disnake.new URL)."
-msgstr "Discordの招待ID、またはURL（disnake.gg URLである必要があります）。"
+msgstr "Discordの招待ID、またはURL（discord.gg URLである必要があります）。"
 
 #: disnake.Client.fetch_template:8 of
 #, fuzzy
@@ -1744,7 +1744,7 @@ msgid "The guild created. This is not the same guild that is added to cache."
 msgstr "作成されたギルド。キャッシュに追加されるギルドとは別物です。"
 
 #: disnake.Client.fetch_invite:3 of
-msgid "Gets an :class:`.Invite` from a disnake.gg URL or ID."
+msgid "Gets an :class:`.Invite` from a discord.gg URL or ID."
 msgstr ":class:`.Invite` をdiscord.gg URLやIDから取得します。"
 
 #: disnake.Client.fetch_invite:7 of
@@ -1759,8 +1759,8 @@ msgstr ""
 ":class:`.PartialInviteGuild` と :class:`PartialInviteChannel` になります。"
 
 #: disnake.Client.fetch_invite:11 of
-msgid "The Discord invite ID or URL (must be a disnake.gg URL)."
-msgstr "Discordの招待ID、またはURL（disnake.gg URLである必要があります）。"
+msgid "The Discord invite ID or URL (must be a discord.gg URL)."
+msgstr "Discordの招待ID、またはURL（discord.gg URLである必要があります）。"
 
 #: disnake.Client.fetch_invite:13 of
 msgid ""
@@ -10237,7 +10237,7 @@ msgstr ""
 
 #: disnake.Guild:149 of
 msgid ""
-"``VANITY_URL``: Guild can have a vanity invite URL (e.g. disnake.gg"
+"``VANITY_URL``: Guild can have a vanity invite URL (e.g. discord.gg"
 "/disnake-api)"
 msgstr ""
 

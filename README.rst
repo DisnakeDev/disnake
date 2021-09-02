@@ -2,7 +2,7 @@ disnake
 =======
 
 .. image:: https://discord.com/api/guilds/808030843078836254/embed.png
-   :target: https://disnake.gg/G2p7sCss7D
+   :target: https://discord.gg/gJDbCw8aQy
    :alt: Discord server invite
 .. image:: https://img.shields.io/pypi/v/disnake.svg
    :target: https://pypi.python.org/pypi/disnake
@@ -136,5 +136,5 @@ Links
 ------
 
 - `Documentation <https://discordpy.readthedocs.io/en/latest/index.html>`_
-- `Official Discord Server <https://disnake.gg/G2p7sCss7D>`_
-- `Discord API <https://disnake.gg/disnake-api>`_
+- `Official Discord Server <https://discord.gg/gJDbCw8aQy>`_
+- `Discord API <https://discord.gg/disnake-api>`_

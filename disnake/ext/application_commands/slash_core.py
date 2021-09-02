@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Tuple, Union, TYPE_CHECKING
-from .base_core import InvokableApplicationCommand
+from typing import Any, Dict, List, Tuple, Union, TYPE_CHECKING, Callable
+from .base_core import InvokableApplicationCommand, _get_overridden_method
 
 from disnake.app_commands import SlashCommand, Option
 from disnake.enums import OptionType
@@ -49,14 +49,14 @@ class SubCommandGroup(InvokableApplicationCommand):
         options: list = None,
         connectors: dict = None,
         **kwargs
-    ) -> SubCommand:
+    ) -> Callable:
         """
         A decorator that creates a subcommand in the
         subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
         """
 
-        def decorator(func):
+        def decorator(func) -> SubCommand:
             new_func = SubCommand(
                 func,
                 name=name,
@@ -90,17 +90,6 @@ class SubCommand(InvokableApplicationCommand):
             type=OptionType.sub_command,
             options=options
         )
-    
-    async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs):
-        await self.prepare(inter)
-        try:
-            await self(inter, *args, **kwargs)
-        except Exception as exc:
-            inter.command_failed = True
-            raise CommandInvokeError(exc) from exc
-        finally:
-            if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)
 
 
 class InvokableSlashCommand(InvokableApplicationCommand):
@@ -136,7 +125,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         options: list = None,
         connectors: dict = None,
         **kwargs
-    ) -> SubCommand:
+    ) -> Callable:
         """
         A decorator that creates a subcommand under the base command.
 
@@ -154,8 +143,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``
         """
-        def decorator(func):
-            if not self.children:
+        def decorator(func) -> SubCommand:
+            if len(self.children) == 0:
                 if len(self.body.options) > 0:
                     self.body.options = []
             new_func = SubCommand(
@@ -175,7 +164,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         name: str = None,
         **kwargs
-    ) -> SubCommandGroup:
+    ) -> Callable:
         """
         A decorator that creates a subcommand group under the base command.
         Remember that the group must have at least one subcommand.
@@ -185,8 +174,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name : :class:`str`
             the name of the subcommand group. Defaults to the function name
         """
-        def decorator(func):
-            if not self.children:
+        def decorator(func) -> SubCommandGroup:
+            if len(self.children) == 0:
                 if len(self.body.options) > 0:
                     self.body.options = []
 
@@ -196,8 +185,19 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             return new_func
         return decorator
 
+    async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+        cog = self.cog
+        try:
+            if cog is not None:
+                local = _get_overridden_method(cog.cog_slash_command_error)
+                if local is not None:
+                    await local(inter, error)
+        finally:
+            inter.bot.dispatch('slash_command_error', inter, error)
+
     async def invoke_children(self, inter: ApplicationCommandInteraction):
         chain, kwargs = options_as_route(inter.options)
+        
         if len(chain) == 0:
             group = None
             subcmd = None
@@ -206,36 +206,29 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             subcmd = self.children.get(chain[0])
         elif len(chain) == 2:
             group = self.children.get(chain[0])
-            subcmd = group.children.get(chain[1]) if group else None
+            subcmd = group.children.get(chain[1]) if group is not None else None
 
         if group is not None:
-            try:
-                await group.invoke(inter)
-            except Exception as err:
-                group.dispatch_error(inter, err)
-                raise err
-
+            await group.invoke(inter)
+        
         if subcmd is not None:
-            try:
-                await subcmd.invoke(inter, **kwargs)
-            except Exception as err:
-                subcmd.dispatch_error(inter, err)
-                raise err
+            await subcmd.invoke(inter, **kwargs)
 
     async def invoke(self, inter: ApplicationCommandInteraction):
         # interaction._wrap_choices(self.body)
         inter.application_command = self
-        await self.prepare(inter)
         try:
-            if self.children:
+            await self.prepare(inter)
+            if len(self.children) > 0:
                 await self(inter)
                 await self.invoke_children(inter)
             else:
                 await self(inter, **inter.options)
         except Exception as exc:
             inter.command_failed = True
-            self.dispatch_error(inter, exc)
-            raise CommandInvokeError(exc) from exc
+            if not isinstance(exc, CommandError):
+                exc = CommandInvokeError(exc)
+            await self.dispatch_error(inter, exc)
         finally:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)
@@ -251,7 +244,7 @@ def slash_command(
     connectors: Dict[str, str] = None,
     auto_sync: bool = True,
     **kwargs
-) -> InvokableSlashCommand:
+) -> Callable:
     """
     A decorator that builds a slash command.
 
@@ -277,7 +270,7 @@ def slash_command(
         ``{"option-name": "param_name", ...}``
     """
 
-    def decorator(func):
+    def decorator(func) -> InvokableSlashCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
         new_func = InvokableSlashCommand(

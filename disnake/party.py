@@ -54,7 +54,7 @@ class Party:
 
     @property
     def guild_vanity_url(self):
-        return f'https://disnake.gg/{self.guild_info["vanity_url_code"]}' or None
+        return f'https://discord.gg/{self.guild_info["vanity_url_code"]}' or None
 
     @property
     def guild_is_nsfw(self):
@@ -65,7 +65,7 @@ class Party:
         return self.guild_info["nsfw_level"]
 
     def __repr__(self):
-        return f"https://disnake.gg/{self.code}"
+        return f"https://discord.gg/{self.code}"
 
     def __str__(self):
-        return f"https://disnake.gg/{self.code}"
+        return f"https://discord.gg/{self.code}"

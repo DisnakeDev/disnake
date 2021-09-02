@@ -57,7 +57,7 @@ packages = [
 ]
 
 setup(name='disnake',
-      author='EQUENOS & Rapptz',
+      author='Rapptz, EQUENOS',
       url='https://github.com/EQUENOS/disnake',
       project_urls={
         "Documentation": "https://discordpy.readthedocs.io/en/latest/",  # TODO: docs link

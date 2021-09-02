@@ -216,7 +216,7 @@ class Guild(Hashable):
         - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads.
         - ``THREE_DAY_THREAD_ARCHIVE``: Guild has access to the three day archive time for threads.
         - ``TICKETED_EVENTS_ENABLED``: Guild has enabled ticketed events.
-        - ``VANITY_URL``: Guild can have a vanity invite URL (e.g. disnake.gg/disnake-api).
+        - ``VANITY_URL``: Guild can have a vanity invite URL (e.g. discord.gg/disnake-api).
         - ``VERIFIED``: Guild is a verified server.
         - ``VIP_REGIONS``: Guild has VIP voice regions.
         - ``WELCOME_SCREEN_ENABLED``: Guild has enabled the welcome screen.
@@ -647,31 +647,6 @@ class Guild(Hashable):
 
         return self._channels.get(id) or self._threads.get(id)
     
-    async def get_or_fetch_member(self, member_id: int) -> Member:
-        """|coro|
-        
-        Returns a member with the given ID. Beware that this method might make an API call
-        if the member isn't found in the bot's cache (unlikely in most of the cases)
-        
-        Parameters
-        -----------
-        member_id: :class:`int`
-            The ID to search for.
-
-        Returns
-        --------
-        :class:`Member`
-            The member with the given ID
-        """
-        try_member = self.get_member(member_id)
-        if try_member is None:
-            try:
-                try_member = await self.fetch_member(member_id)
-                self._add_member(try_member)
-            except:
-                return None
-        return try_member
-
     def get_channel_or_thread(self, channel_id: int, /) -> Optional[Union[Thread, GuildChannel]]:
         """Returns a channel or thread with the given ID.
 
@@ -2443,6 +2418,32 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_roles(self.id)
         return [Role(guild=self, state=self._state, data=d) for d in data]
+
+    async def get_or_fetch_member(self, member_id: int) -> Member:
+        """|coro|
+        
+        Tries to get a member from the cache by ID. If fails, it fetcehs
+        the user from the API and caches it.
+        
+        Parameters
+        -----------
+        member_id: :class:`int`
+            The ID to search for.
+
+        Returns
+        --------
+        :class:`Member`
+            The member with the given ID
+        """
+        member = self.get_member(member_id)
+        if member is not None:
+            return member
+        try:
+            member = await self.fetch_member(member_id)
+            self._add_member(member)
+        except:
+            return None
+        return member
 
     @overload
     async def create_role(

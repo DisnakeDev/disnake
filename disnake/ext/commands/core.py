@@ -385,6 +385,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         else:
             self.after_invoke(after_invoke)
 
+        self.__command_flag__ = None
+
     @property
     def callback(self) -> Union[
             Callable[Concatenate[CogT, Context, P], Coro[T]],
@@ -1573,7 +1575,7 @@ def command(
             Callable[Concatenate[ContextT, P], Coro[Any]],
             Callable[Concatenate[CogT, ContextT, P], Coro[Any]],
         ]) -> CommandT:
-        if isinstance(func, Command):
+        if hasattr(func, '__command_flag__'):
             raise TypeError('Callback is already a command.')
         return cls(func, name=name, **attrs)
 
@@ -1705,7 +1707,7 @@ def check(predicate: Check) -> Callable[[T], T]:
     """
 
     def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
-        if isinstance(func, Command):
+        if hasattr(func, '__command_flag__'):
             func.checks.append(predicate)
         else:
             if not hasattr(func, '__commands_checks__'):
@@ -2153,7 +2155,7 @@ def cooldown(rate: int, per: float, type: Union[BucketType, Callable[[Message], 
     """
 
     def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
-        if isinstance(func, Command):
+        if hasattr(func, '__command_flag__'):
             func._buckets = CooldownMapping(Cooldown(rate, per), type)
         else:
             func.__commands_cooldown__ = CooldownMapping(Cooldown(rate, per), type)
@@ -2193,7 +2195,7 @@ def dynamic_cooldown(cooldown: Union[BucketType, Callable[[Message], Any]], type
         raise TypeError("A callable must be provided")
 
     def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
-        if isinstance(func, Command):
+        if hasattr(func, '__command_flag__'):
             func._buckets = DynamicCooldownMapping(cooldown, type)
         else:
             func.__commands_cooldown__ = DynamicCooldownMapping(cooldown, type)
@@ -2226,7 +2228,7 @@ def max_concurrency(number: int, per: BucketType = BucketType.default, *, wait: 
 
     def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
         value = MaxConcurrency(number, per=per, wait=wait)
-        if isinstance(func, Command):
+        if hasattr(func, '__command_flag__'):
             func._max_concurrency = value
         else:
             func.__commands_max_concurrency__ = value
@@ -2272,7 +2274,7 @@ def before_invoke(coro) -> Callable[[T], T]:
         bot.add_cog(What())
     """
     def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
-        if isinstance(func, Command):
+        if hasattr(func, '__command_flag__'):
             func.before_invoke(coro)
         else:
             func.__before_invoke__ = coro
@@ -2288,7 +2290,7 @@ def after_invoke(coro) -> Callable[[T], T]:
     .. versionadded:: 1.4
     """
     def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
-        if isinstance(func, Command):
+        if hasattr(func, '__command_flag__'):
             func.after_invoke(coro)
         else:
             func.__after_invoke__ = coro

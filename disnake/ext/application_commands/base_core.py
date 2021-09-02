@@ -10,14 +10,15 @@ import datetime
 
 from disnake.utils import async_all
 
-from ..commands.errors import *
 from ..commands.cooldowns import BucketType, CooldownMapping, MaxConcurrency
+from ..commands.errors import *
 
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
     from disnake.interactions import ApplicationCommandInteraction
     from ..commands._types import Check, Hook, Error
+    from ..commands.cog import Cog
 
 
 __all__ = ('InvokableApplicationCommand',)
@@ -25,7 +26,7 @@ __all__ = ('InvokableApplicationCommand',)
 
 T = TypeVar('T')
 AppCommandT = TypeVar('AppCommandT', bound='InvokableApplicationCommand')
-CogT = TypeVar('CogT')
+CogT = TypeVar('CogT', bound='Cog')
 HookT = TypeVar('HookT', bound='Hook')
 ErrorT = TypeVar('ErrorT', bound='Error')
 
@@ -33,6 +34,10 @@ if TYPE_CHECKING:
     P = ParamSpec('P')
 else:
     P = TypeVar('P')
+
+
+def _get_overridden_method(method):
+    return getattr(method.__func__, '__cog_special_method__', method)
 
 
 class InvokableApplicationCommand:
@@ -43,6 +48,7 @@ class InvokableApplicationCommand:
     """
 
     def __init__(self, func, *, name: str = None, **kwargs):
+        self.__command_flag__ = None
         self._callback = func
         self.name: str = name or func.__name__
         if not isinstance(self.name, str):
@@ -214,16 +220,18 @@ class InvokableApplicationCommand:
 
         return 0.0
 
-    async def invoke(self, inter: ApplicationCommandInteraction) -> None:
+    async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
         """
         This method isn't really usable in this class, but it's usable in subclasses.
         """
-        await self.prepare(inter)
         try:
-            await self(inter)
+            await self.prepare(inter)
+            await self(inter, *args, **kwargs)
         except Exception as exc:
             inter.command_failed = True
-            raise CommandInvokeError(exc) from exc
+            if not isinstance(exc, CommandError):
+                exc = CommandInvokeError(exc)
+            await self.dispatch_error(inter, exc)
         finally:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)
@@ -256,14 +264,21 @@ class InvokableApplicationCommand:
         """
         return hasattr(self, 'on_error')
 
-    def dispatch_error(self, inter: ApplicationCommandInteraction, error: CommandError):
+    async def _call_local_error_handler(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
         if not self.has_error_handler():
             return
         if self.cog is None:
-            args = (inter, error)
+            await self.on_error(inter, error)
         else:
-            args = (self.cog, inter, error)
-        asyncio.create_task(self.on_error(*args), name=f'disnake-ext-app-command-error-{inter.id}')
+            await self.on_error(self.cog, inter, error)
+
+    async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+        """Overwritten in subclasses"""
+        raise error
+
+    async def dispatch_error(self, inter: ApplicationCommandInteraction, error: CommandError):
+        await self._call_local_error_handler(inter, error)
+        await self._call_external_error_handlers(inter, error)
 
     async def call_before_hooks(self, inter: ApplicationCommandInteraction) -> None:
         # now that we're done preparing we can call the pre-command hooks

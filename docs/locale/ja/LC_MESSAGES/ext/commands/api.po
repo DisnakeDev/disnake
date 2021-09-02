@@ -1256,7 +1256,7 @@ msgid ":class:`.Guild` -- The guild with the guild data parsed."
 msgstr ":class:`.Guild` -- データを解析したGuild。"
 
 #: disnake.ext.commands.Bot.fetch_invite:3 of
-msgid "Gets an :class:`.Invite` from a disnake.gg URL or ID."
+msgid "Gets an :class:`.Invite` from a discord.gg URL or ID."
 msgstr ""
 
 #: disnake.ext.commands.Bot.fetch_invite:7 of
@@ -1268,7 +1268,7 @@ msgid ""
 msgstr ""
 
 #: disnake.ext.commands.Bot.fetch_invite:11 of
-msgid "The Discord invite ID or URL (must be a disnake.gg URL)."
+msgid "The Discord invite ID or URL (must be a discord.gg URL)."
 msgstr ""
 
 #: disnake.ext.commands.Bot.fetch_invite:13 of

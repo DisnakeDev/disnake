@@ -159,7 +159,7 @@ html_experimental_html5_writer = True
 html_theme = 'basic'
 
 html_context = {
-  'discord_invite': 'https://disnake.gg/r3sSKJJ',
+  'discord_invite': 'https://discord.gg/r3sSKJJ',
   'discord_extensions': [
     ('disnake.ext.commands', 'ext/commands'),
     ('disnake.ext.tasks', 'ext/tasks'),
@@ -167,7 +167,7 @@ html_context = {
 }
 
 resource_links = {
-  'disnake': 'https://disnake.gg/r3sSKJJ',
+  'disnake': 'https://discord.gg/r3sSKJJ',
   'issues': 'https://github.com/Rapptz/disnake/issues',
   'discussions': 'https://github.com/Rapptz/disnake/discussions',
   'examples': f'https://github.com/Rapptz/disnake/tree/{branch}/examples',
@@ -357,5 +357,5 @@ texinfo_documents = [
 def setup(app):
   if app.config.language == 'ja':
     app.config.intersphinx_mapping['py'] = ('https://docs.python.org/ja/3', None)
-    app.config.html_context['discord_invite'] = 'https://disnake.gg/nXzj3dg'
-    app.config.resource_links['disnake'] = 'https://disnake.gg/nXzj3dg'
+    app.config.html_context['discord_invite'] = 'https://discord.gg/nXzj3dg'
+    app.config.resource_links['disnake'] = 'https://discord.gg/nXzj3dg'

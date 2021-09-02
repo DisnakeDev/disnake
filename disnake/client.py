@@ -246,7 +246,7 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
 
         self._enable_debug_events: bool = options.pop('enable_debug_events', False)
         self._sync_commands: bool = options.pop('sync_commands', True)
-        self._test_guilds: List[int] = options.pop('test_guilds')
+        self._test_guilds: Optional[List[int]] = options.pop('test_guilds', None)
         self._connection: ConnectionState = self._get_state(**options)
         self._connection.shard_count = self.shard_count
         self._closed: bool = False
@@ -380,8 +380,8 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
     async def get_or_fetch_user(self, user_id: int) -> User:
         """|coro|
 
-        Returns a message with the given ID. Beware that this method might make an API call
-        if the message isn't found in the bot's cache (unlikely in most of the cases)
+        Tries to get a user from the cache. If fails, it tries to
+        fetch the user from the API.
 
         Parameters
         -----------
@@ -393,13 +393,14 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
         :class:`User`
             The user with the given ID
         """
-        try_user = self.get_user(user_id)
-        if try_user is None:
-            try:
-                try_user = await self.fetch_user(user_id)
-            except:
-                return None
-        return try_user
+        user = self.get_user(user_id)
+        if user is not None:
+            return user
+        try:
+            user = await self.fetch_user(user_id)
+        except Exception:
+            return None
+        return user
 
     def is_ready(self) -> bool:
         """:class:`bool`: Specifies if the client's internal cache is ready for use."""
@@ -1482,7 +1483,7 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
     async def fetch_invite(self, url: Union[Invite, str], *, with_counts: bool = True, with_expiration: bool = True) -> Invite:
         """|coro|
 
-        Gets an :class:`.Invite` from a disnake.gg URL or ID.
+        Gets an :class:`.Invite` from a discord.gg URL or ID.
 
         .. note::
 
@@ -1493,7 +1494,7 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
         Parameters
         -----------
         url: Union[:class:`.Invite`, :class:`str`]
-            The Discord invite ID or URL (must be a disnake.gg URL).
+            The Discord invite ID or URL (must be a discord.gg URL).
         with_counts: :class:`bool`
             Whether to include count information in the invite. This fills the
             :attr:`.Invite.approximate_member_count` and :attr:`.Invite.approximate_presence_count`

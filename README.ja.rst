@@ -2,7 +2,7 @@ disnake
 ==========
 
 .. image:: https://discord.com/api/guilds/336642139381301249/embed.png
-   :target: https://disnake.gg/nXzj3dg
+   :target: https://discord.gg/nXzj3dg
    :alt: Discordサーバーの招待
 .. image:: https://img.shields.io/pypi/v/disnake.svg
    :target: https://pypi.python.org/pypi/disnake
@@ -109,5 +109,5 @@ examplesディレクトリに更に多くのサンプルがあります。
 ------
 
 - `ドキュメント <https://discordpy.readthedocs.io/ja/latest/index.html>`_
-- `公式Discordサーバー <https://disnake.gg/nXzj3dg>`_
-- `Discord API <https://disnake.gg/disnake-api>`_
+- `公式Discordサーバー <https://discord.gg/nXzj3dg>`_
+- `Discord API <https://discord.gg/disnake-api>`_

@@ -47,6 +47,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from ..ext.commands.bot import Bot
     from ..types.interactions import Interaction as InteractionPayload
     from ..guild import Guild
     from ..state import ConnectionState
@@ -102,6 +103,7 @@ class Interaction:
         'author',
         'token',
         'version',
+        'bot',
         '_permissions',
         '_state',
         '_session',
@@ -116,6 +118,7 @@ class Interaction:
         self._session: ClientSession = state.http._HTTPClient__session
         self._original_message: Optional[InteractionMessage] = None
         self._from_data(data)
+        self.bot: Optional[Bot] = None
 
     def _from_data(self, data: InteractionPayload):
         self.id: int = int(data['id'])
@@ -149,8 +152,8 @@ class Interaction:
         return utils.snowflake_time(self.id)
 
     @property
-    def client(self):
-        return self._state._get_client()
+    def client(self) -> Optional[Bot]:
+        return self.bot
 
     @property
     def user(self) -> User:
