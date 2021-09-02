@@ -240,7 +240,7 @@ class Guild(Hashable):
     humans: :class:`Member`
         Returns the list of humans currently in the guild
     
-    get_or_fetch_member: :classs:`Member`
+    get_or_fetch_member: :class:`Member`
         Tries to get the member from the bot's cache, else makes an API call to get the member.
     """
 
