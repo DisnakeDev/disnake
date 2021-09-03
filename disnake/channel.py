@@ -149,6 +149,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         The default auto archive duration in minutes for threads created in this channel.
 
         .. versionadded:: 2.0
+    
+    can_send: :class:`bool`
+        If the Bot has the permissions to send messages in the Text Channel
+    
+    can_read: :class:`bool`
+        If the Bot has the permissions to read messages in the Text Channel
     """
 
     __slots__ = (
@@ -224,6 +230,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
         return [m for m in self.guild.members if self.permissions_for(m).read_messages]
+    
+    @property
+    def can_send(self) -> bool:
+        return self.permissions_for(self.guild.me).send_messages
+    
+    @property
+    def can_read(self) -> bool:
+        return self.permissions_for(self.guild.me).read_messages
 
     @property
     def threads(self) -> List[Thread]:
@@ -922,6 +936,9 @@ class VoiceChannel(VocalGuildChannel):
         .. versionadded:: 1.7
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
+    
+    can_connect: :class:`bool`
+        If the Bot has the permissions to connect to the Voice Channel
 
         .. versionadded:: 2.0
     """
@@ -946,6 +963,10 @@ class VoiceChannel(VocalGuildChannel):
     def type(self) -> ChannelType:
         """:class:`ChannelType`: The channel's Discord type."""
         return ChannelType.voice
+    
+    @property
+    def can_connect(self) -> bool:
+        return self.permissions_for(self.guild.me).connect
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(self, *, name: Optional[str] = None, reason: Optional[str] = None) -> VoiceChannel:
