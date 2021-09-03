@@ -1,8 +1,6 @@
-from .enums import ChannelType, InviteTarget, NSFWLevel, PartyType, UserFlags, try_enum, VerificationLevel
+from .enums import ChannelType, InviteTarget, NSFWLevel, UserFlags, try_enum, VerificationLevel
 
 # Seems like all the things from https://mystb.in/AdvertisersExperiencesMothers.json have been added 
-
-# Docs for the newly added things are left. Will do those later, cz.... it is 3 in the morning :c
 
 
 class Party:
@@ -31,6 +29,10 @@ class Party:
         The maximum age of the invite in seconds.
     temporary: :class:`bool`
         If the invite is temporary or permanent.
+    target_type: :class:`InviteTarget`
+        The type of the target of the invite.
+    created_at: :class:`str`
+        The time of the creation of the invite.
     guild_id: :class:`int`
         The ID of the guild, for whose voice channel, the invite was created.
     guild_name: :class:`int`
@@ -51,8 +53,47 @@ class Party:
         The NSFW status of the guild, for whose voice channel, the invite was created.
     guild_nsfw_level: :class:`NSFWLevel`
         The NSFW level of the guild, for whose voice channel, the invite was created.
+    channe_id: :class:`int`
+        The ID of the voice channel, for which, the invite was created.
+    channel_name: :class:`str`
+        The name of the voice channel, for which, the invite was created.
+    channel_type: :class:`ChannelType`
+        The type of the channel, for which, the invite was created. (Always ``VoiceChannel``)
+    inviter_id: :class:`int`
+        The ID of the inviter.
+    inviter_username: :class:`str`
+        The username (without discriminator) of the inviter.
+    inviter_avatar: :class:`str`
+        The avatar of the inviter.
+    inviter_discriminator: :class:`int`
+        The discriminator (tag) of the inviter.
+    inviter_tag: :class:`int`
+        The discriminator (tag) of the inviter.
+    inviter_name: :class:`str`
+        The username (with discriminator) of the inviter.
+    inviter_public_flags: :class:`UserFlags`
+        The flags of the inviter.
+    inviter_is_bot: :class:`bool`
+        If the inviter is a bot (Always True)
+    application_id: :class:`int`
+        The ID of the target application.
+    application_name: :class:`str`
+        The name of the target application.
+    application_icon: :class:`str`
+        The icon of the target application.
+    application_description: :class:`str`
+        The description of the target application.
+    application_summary: :class:`str`
+        The summary of the target application.
+    application_cover_image: :class:`str`
+        The cover image of the target application.
+    application_hook: :class:`bool`
+        Is there a hook for the target application.
+    application_verify_key: :class:`str`
+        The verification key of the target application.
+    application_max_participants: :class:`int`
+        The maximum number of participants allowed (-1 means unlimited)
     
-
     """
 
     def __init__(self, data: dict):
@@ -61,9 +102,7 @@ class Party:
         self.max_uses: int = data.get('max_uses')
         self.max_age: int = data.get('max_age')
         self.temporary: bool = data.get('temporary')
-        self.created_at: str = data.get("created_at")
-        self.verify_key: str = data.get("verify_key")  # Gotta see what this thing does tbh
-        self.max_participants: int = data.get("max_participants")  # -1 means unlimited? idk tbh, but we will take this as unlimited for now
+        self.created_at: str = data.get("created_at")        
         self.target_type: InviteTarget = try_enum(InviteTarget, data.get("target_type"))
 
         # Nested Dicts
@@ -191,6 +230,14 @@ class Party:
     @property
     def application_rpc_origins(self) -> list:  # Gotta see a list of what objects this returns
         return self.application_info["rpc_origins"]
+    
+    @property
+    def application_max_participants(self) -> int:
+        return self.application_info.get("max_participants")  # -1 means unlimited? idk tbh, but we will take this as unlimited for now
+
+    @property
+    def application_verify_key(self) -> str:
+        return self.application_info.get("verify_key")  # Gotta see what this thing does tbh
 
     def __str__(self) -> str:
         return f"https://discord.gg/{self.code}"
