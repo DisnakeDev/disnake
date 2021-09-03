@@ -289,6 +289,8 @@ class Colour:
     def og_blurple(cls: Type[CT]) -> CT:
         """A factory method that returns a :class:`Colour` with a value of ``0x7289da``."""
         return cls(0x7289da)
+    
+    old_blurple = og_blurple
 
     @classmethod
     def blurple(cls: Type[CT]) -> CT:
