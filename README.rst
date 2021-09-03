@@ -56,6 +56,15 @@ Otherwise to get voice support you should run the following command:
     # Windows
     py -3 -m pip install -U disnake[voice]
 
+To install additional packages for speedup, you should run the following:
+
+.. code:: sh
+
+    # Linux/macOS
+    python3 -m pip install -U "disnake[speedups]"
+
+    # Windows
+    py -3 -m pip install -U disnake[speedups]
 
 To install the development version, do the following:
 
