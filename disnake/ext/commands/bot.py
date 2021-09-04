@@ -43,8 +43,8 @@ from .context import Context
 from . import errors
 from .help import HelpCommand, DefaultHelpCommand
 from .cog import Cog
-
-from ..application_commands import slash_command, user_command, message_command
+from .slash_core import slash_command
+from .ctx_menus_core import user_command, message_command
 
 from disnake.enums import ApplicationCommandType
 from disnake._hub import _ApplicationCommandStore
@@ -58,11 +58,8 @@ if TYPE_CHECKING:
         Check,
         CoroFunc,
     )
-    from ..application_commands import (
-        InvokableSlashCommand,
-        InvokableUserCommand,
-        InvokableMessageCommand
-    )
+    from .slash_core import InvokableSlashCommand
+    from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
 
 __all__ = (
     'when_mentioned',

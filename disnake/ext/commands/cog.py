@@ -29,8 +29,7 @@ import disnake.utils
 from typing import Any, Callable, ClassVar, Dict, Generator, List, Optional, TYPE_CHECKING, Tuple, TypeVar, Type
 
 from ._types import _BaseCommand
-
-from ..application_commands.base_core import InvokableApplicationCommand
+from .base_core import InvokableApplicationCommand
 
 from disnake._hub import _ApplicationCommandStore
 

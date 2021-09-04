@@ -3,13 +3,13 @@ from typing import TYPE_CHECKING, List, Dict, Tuple
 
 
 if TYPE_CHECKING:
-    from .ext.application_commands import (
+    from .ext.commands import (
         InvokableApplicationCommand,
         InvokableSlashCommand,
         InvokableUserCommand,
         InvokableMessageCommand
     )
-    from .app_commands import ApplicationCommand
+    from disnake.app_commands import ApplicationCommand
 
 
 def _get_all_commands() -> List[InvokableApplicationCommand]:

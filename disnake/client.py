@@ -62,7 +62,6 @@ from .stage_instance import StageInstance
 from .threads import Thread
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
 from .app_commands import application_command_factory, ApplicationCommand, ApplicationCommandPermissions
-
 from ._hub import _ordered_unsynced_commands
 
 if TYPE_CHECKING:
@@ -494,7 +493,6 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
     
     async def _sync_application_commands(self) -> None:
         # We assume that all commands are already cached
-        
         if not self._sync_commands:
             return
         # Sort all invokable commands between guild IDs

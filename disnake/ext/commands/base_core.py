@@ -10,15 +10,15 @@ import datetime
 
 from disnake.utils import async_all
 
-from ..commands.cooldowns import BucketType, CooldownMapping, MaxConcurrency
-from ..commands.errors import *
+from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
+from .errors import *
 
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
     from disnake.interactions import ApplicationCommandInteraction
-    from ..commands._types import Check, Hook, Error
-    from ..commands.cog import Cog
+    from ._types import Check, Hook, Error
+    from .cog import Cog
 
 
 __all__ = ('InvokableApplicationCommand',)
@@ -34,10 +34,6 @@ if TYPE_CHECKING:
     P = ParamSpec('P')
 else:
     P = TypeVar('P')
-
-
-def _get_overridden_method(method):
-    return getattr(method.__func__, '__cog_special_method__', method)
 
 
 class InvokableApplicationCommand:

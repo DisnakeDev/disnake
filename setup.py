@@ -54,7 +54,6 @@ packages = [
     'disnake.ui',
     'disnake.webhook',
     'disnake.interactions',
-    'disnake.ext.application_commands',
     'disnake.ext.commands',
     'disnake.ext.tasks',
 ]
