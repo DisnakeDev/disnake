@@ -54,6 +54,8 @@ from ._types import _BaseCommand
 from .cog import Cog
 from .context import Context
 
+from disnake.interactions import ApplicationCommandInteraction
+
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, TypeGuard
 
@@ -101,10 +103,11 @@ T = TypeVar('T')
 CogT = TypeVar('CogT', bound='Cog')
 CommandT = TypeVar('CommandT', bound='Command')
 ContextT = TypeVar('ContextT', bound='Context')
-# CHT = TypeVar('CHT', bound='Check')
+AnyContextT = Union[Context, ApplicationCommandInteraction]
 GroupT = TypeVar('GroupT', bound='Group')
 HookT = TypeVar('HookT', bound='Hook')
 ErrorT = TypeVar('ErrorT', bound='Error')
+
 
 if TYPE_CHECKING:
     P = ParamSpec('P')
@@ -1780,7 +1783,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         else:
             unwrapped.append(pred)
 
-    async def predicate(ctx: Context) -> bool:
+    async def predicate(ctx: AnyContextT) -> bool:
         errors = []
         for func in unwrapped:
             try:
@@ -1822,7 +1825,7 @@ def has_role(item: Union[int, str]) -> Callable[[T], T]:
         The name or ID of the role to check.
     """
 
-    def predicate(ctx: Context) -> bool:
+    def predicate(ctx: AnyContextT) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
 
@@ -1868,7 +1871,7 @@ def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
         async def cool(ctx):
             await ctx.send('You are cool indeed')
     """
-    def predicate(ctx):
+    def predicate(ctx: AnyContextT) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
 
@@ -1894,7 +1897,7 @@ def bot_has_role(item: int) -> Callable[[T], T]:
         instead of generic :exc:`.CheckFailure`
     """
 
-    def predicate(ctx):
+    def predicate(ctx: AnyContextT) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
 
@@ -1921,7 +1924,7 @@ def bot_has_any_role(*items: int) -> Callable[[T], T]:
         Raise :exc:`.BotMissingAnyRole` or :exc:`.NoPrivateMessage`
         instead of generic checkfailure
     """
-    def predicate(ctx):
+    def predicate(ctx: AnyContextT) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
 
@@ -1966,7 +1969,7 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
-    def predicate(ctx: Context) -> bool:
+    def predicate(ctx: AnyContextT) -> bool:
         ch = ctx.channel
         permissions = ch.permissions_for(ctx.author)  # type: ignore
 
@@ -1991,10 +1994,8 @@ def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
-    def predicate(ctx: Context) -> bool:
-        guild = ctx.guild
-        me = guild.me if guild is not None else ctx.bot.user
-        permissions = ctx.channel.permissions_for(me)  # type: ignore
+    def predicate(ctx: AnyContextT) -> bool:
+        permissions = ctx.channel.permissions_for(ctx.me)  # type: ignore
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
@@ -2019,7 +2020,7 @@ def has_guild_permissions(**perms: bool) -> Callable[[T], T]:
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
-    def predicate(ctx: Context) -> bool:
+    def predicate(ctx: AnyContextT) -> bool:
         if not ctx.guild:
             raise NoPrivateMessage
 
@@ -2044,7 +2045,7 @@ def bot_has_guild_permissions(**perms: bool) -> Callable[[T], T]:
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
-    def predicate(ctx: Context) -> bool:
+    def predicate(ctx: AnyContextT) -> bool:
         if not ctx.guild:
             raise NoPrivateMessage
 
@@ -2069,7 +2070,7 @@ def dm_only() -> Callable[[T], T]:
     .. versionadded:: 1.1
     """
 
-    def predicate(ctx: Context) -> bool:
+    def predicate(ctx: AnyContextT) -> bool:
         if ctx.guild is not None:
             raise PrivateMessageOnly()
         return True
@@ -2085,7 +2086,7 @@ def guild_only() -> Callable[[T], T]:
     that is inherited from :exc:`.CheckFailure`.
     """
 
-    def predicate(ctx: Context) -> bool:
+    def predicate(ctx: AnyContextT) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
         return True
@@ -2102,11 +2103,11 @@ def is_owner() -> Callable[[T], T]:
     from :exc:`.CheckFailure`.
     """
 
-    async def predicate(ctx: Context) -> bool:
+    async def predicate(ctx: AnyContextT) -> bool:
         if not await ctx.bot.is_owner(ctx.author):
             raise NotOwner('You do not own this bot.')
         return True
-
+    
     return check(predicate)
 
 def is_nsfw() -> Callable[[T], T]:
@@ -2120,7 +2121,7 @@ def is_nsfw() -> Callable[[T], T]:
         Raise :exc:`.NSFWChannelRequired` instead of generic :exc:`.CheckFailure`.
         DM channels will also now pass this check.
     """
-    def pred(ctx: Context) -> bool:
+    def pred(ctx: AnyContextT) -> bool:
         ch = ctx.channel
         if ctx.guild is None or (isinstance(ch, (disnake.TextChannel, disnake.Thread)) and ch.is_nsfw()):
             return True

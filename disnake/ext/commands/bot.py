@@ -1275,26 +1275,27 @@ class BotBase(GroupMixin):
         interaction.bot = self
         command_type = interaction.data.type
         command_name = interaction.data.name
-        error_event = None
+        event_name = None
         if command_type is ApplicationCommandType.chat_input:
             app_command = _ApplicationCommandStore.slash_commands.get(command_name)
-            error_event = 'slash_command_error'
+            event_name = 'slash_command'
         elif command_type is ApplicationCommandType.user:
             app_command = _ApplicationCommandStore.user_commands.get(command_name)
-            error_event = 'user_command_error'
+            event_name = 'user_command'
         elif command_type is ApplicationCommandType.message:
             app_command = _ApplicationCommandStore.message_commands.get(command_name)
-            error_event = 'message_command_error'
+            event_name = 'message_command'
         else:
             app_command = None
         if app_command is None:
             # TODO: unregister this command from API
             return
         if app_command.guild_ids is None or interaction.guild_id in app_command.guild_ids:
+            self.dispatch(event_name, interaction)
             try:
                 await app_command.invoke(interaction)
-            except Exception as exc:
-                self.dispatch(error_event, interaction, exc)
+            except errors.CommandError as exc:
+                await app_command.dispatch_error(interaction, exc)
         else:
             # TODO: unregister this command from API
             pass

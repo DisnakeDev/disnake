@@ -47,6 +47,7 @@ class InvokableApplicationCommand:
         self.__command_flag__ = None
         self._callback = func
         self.name: str = name or func.__name__
+        self.qualified_name: str = self.name
         if not isinstance(self.name, str):
             raise TypeError('Name of a command must be a string.')
 
@@ -147,9 +148,9 @@ class InvokableApplicationCommand:
 
     async def prepare(self, inter: ApplicationCommandInteraction) -> None:
         inter.application_command = self
-
+        
         if not await self.can_run(inter):
-            raise CheckFailure(f'The check functions for command {self.qualified_name} failed.')
+            raise CheckFailure(f'The check functions for command {self.qualified_name!r} failed.')
 
         if self._max_concurrency is not None:
             await self._max_concurrency.acquire(inter)  # type: ignore
@@ -220,17 +221,24 @@ class InvokableApplicationCommand:
         """
         This method isn't really usable in this class, but it's usable in subclasses.
         """
+        await self.prepare(inter)
+
         try:
-            await self.prepare(inter)
             await self(inter, *args, **kwargs)
+        except CommandError:
+            inter.command_failed = True
+            raise
+        except asyncio.CancelledError:
+            inter.command_failed = True
+            return
         except Exception as exc:
             inter.command_failed = True
-            if not isinstance(exc, CommandError):
-                exc = CommandInvokeError(exc)
-            await self.dispatch_error(inter, exc)
+            raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)
+
+            await self.call_after_hooks(inter)
 
     def error(self, coro: ErrorT) -> ErrorT:
         """A decorator that registers a coroutine as a local error handler.
@@ -399,24 +407,13 @@ class InvokableApplicationCommand:
         inter.application_command = self
 
         try:
-            # TODO: add Interaction.bot attribute
-            # if not await inter.bot.can_run(inter):
-            #     raise CheckFailure(f'The global check functions for application command {self.qualified_name} failed.')
-
             # TODO: cog checks for application commands
-            # cog = self.cog
-            # if cog is not None:
-            #     local_check = Cog._get_overridden_method(cog.cog_check)
-            #     if local_check is not None:
-            #         ret = await maybe_coroutine(local_check, inter)
-            #         if not ret:
-            #             return False
 
             predicates = self.checks
             if not predicates:
                 # since we have no checks, then we just return True.
                 return True
-
-            return await async_all(predicate(ctx) for predicate in predicates)  # type: ignore
+            
+            return await async_all(predicate(inter) for predicate in predicates)  # type: ignore
         finally:
             inter.application_command = original
