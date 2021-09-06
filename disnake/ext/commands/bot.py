@@ -157,17 +157,18 @@ class BotBase(GroupMixin):
             self.help_command = help_command
 
     @property
-    def owner(self):
-        if self.owner_id and not self.owner_ids:
+    def owner(self) -> Optional[disnake.User]:
+        if self.owner_id:
             return self.get_user(self.owner_id)
     
     @property
-    def owners(self):
-        if self.owner_ids and not self.owner_id:
-            list_of_owners = []
-            for owner_id in self.owner_ids:
-                list_of_owners.append(self.get_user(owner_id))
-        return list_of_owners
+    def owners(self) -> Set[disnake.User]:
+        all_owners = set()
+        for owner_id in self.owner_ids:
+            one_owner = self.get_user(owner_id)
+            if one_owner is not None:
+                all_owners.add(one_owner)
+        return all_owners
 
     @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:
