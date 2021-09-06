@@ -242,7 +242,8 @@ class BotBase(GroupMixin):
         **kwargs
     ) -> Callable:
         """
-        A decorator that builds a slash command.
+        A shortcut decorator that invokes :func:`.slash_command` and adds it to
+        the internal command list.
 
         Parameters
         ----------
@@ -264,7 +265,13 @@ class BotBase(GroupMixin):
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``
+        
+        Returns
+        --------
+        Callable[..., :class:`InvokableSlashCommand`]
+            A decorator that converts the provided method into a InvokableSlashCommand, adds it to the bot, then returns it.
         """
+
         return slash_command(
             name=name,
             description=description,
@@ -285,7 +292,8 @@ class BotBase(GroupMixin):
         **kwargs
     ) -> Callable:
         """
-        A decorator that builds a user command.
+        A shortcut decorator that invokes :func:`.user_command` and adds it to
+        the internal command list.
 
         Parameters
         ----------
@@ -296,6 +304,11 @@ class BotBase(GroupMixin):
         guild_ids: List[:class:`int`]
             if specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally.
+        
+        Returns
+        --------
+        Callable[..., :class:`InvokableUserCommand`]
+            A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
         return user_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
 
@@ -308,7 +321,8 @@ class BotBase(GroupMixin):
         **kwargs
     ) -> Callable:
         """
-        A decorator that builds a message command.
+        A shortcut decorator that invokes :func:`.message_command` and adds it to
+        the internal command list.
 
         Parameters
         ----------
@@ -319,6 +333,11 @@ class BotBase(GroupMixin):
         guild_ids: List[:class:`int`]
             if specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally.
+        
+        Returns
+        --------
+        Callable[..., :class:`InvokableUserCommand`]
+            A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
         return message_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
 

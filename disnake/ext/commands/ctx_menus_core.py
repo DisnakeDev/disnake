@@ -65,7 +65,7 @@ def user_command(
     **kwargs
 ) -> Callable:
     """
-    A decorator that builds a user command.
+    A shortcut decorator that builds a user command.
 
     Parameters
     ----------
@@ -76,6 +76,11 @@ def user_command(
     guild_ids: List[:class:`int`]
         if specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally.
+    
+    Returns
+    --------
+    Callable[..., :class:`InvokableUserCommand`]
+        A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
     """
 
     def decorator(func) -> InvokableUserCommand:
@@ -112,6 +117,11 @@ def message_command(
     guild_ids: List[:class:`int`]
         if specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally.
+    
+    Returns
+    --------
+    Callable[..., :class:`InvokableMessageCommand`]
+        A decorator that converts the provided method into a InvokableMessageCommand, adds it to the bot, then returns it.
     """
 
     def decorator(func) -> InvokableMessageCommand:
