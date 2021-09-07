@@ -176,10 +176,12 @@ application:
 
 .. code:: py
 
-    import os from disnake.ext import commands
+    import os
+    from disnake.ext import commands
 
     if os.name != "nt":
-        import uvloop uvloop.install()
+        import uvloop
+        uvloop.install()
 
     bot = commands.Bot(...)
 
