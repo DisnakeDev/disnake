@@ -660,7 +660,7 @@ def resolve_invite(invite: Union[Invite, str]) -> str:
     if isinstance(invite, Invite):
         return invite.code
     else:
-        rx = r'(?:https?\:\/\/)?disnake(?:\.gg|(?:app)?\.com\/invite)\/(.+)'
+        rx = r'(?:https?\:\/\/)?discord(?:\.gg|(?:app)?\.com\/invite)\/(.+)'
         m = re.match(rx, invite)
         if m:
             return m.group(1)
@@ -688,7 +688,7 @@ def resolve_template(code: Union[Template, str]) -> str:
     if isinstance(code, Template):
         return code.code
     else:
-        rx = r'(?:https?\:\/\/)?disnake(?:\.new|(?:app)?\.com\/template)\/(.+)'
+        rx = r'(?:https?\:\/\/)?discord(?:\.new|(?:app)?\.com\/template)\/(.+)'
         m = re.match(rx, code)
         if m:
             return m.group(1)
