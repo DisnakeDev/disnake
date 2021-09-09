@@ -30,8 +30,11 @@ import collections
 import collections.abc
 import inspect
 import importlib.util
+import logging
+import os
 import sys
 import traceback
+import time
 import types
 from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union, Set
 
@@ -144,6 +147,7 @@ class BotBase(GroupMixin):
         self.owner_id = options.get('owner_id')
         self.owner_ids = options.get('owner_ids', set())
         self.strip_after_prefix = options.get('strip_after_prefix', False)
+        self.reload: bool = options.get('reload', False)
 
         if self.owner_id and self.owner_ids:
             raise TypeError('Both owner_id and owner_ids are set.')
@@ -1325,6 +1329,52 @@ class BotBase(GroupMixin):
     
     async def on_application_command(self, interaction: ApplicationCommandInteraction):
         await self.process_application_commands(interaction)
+    
+    async def _watchdog(self):
+        """|coro|
+        
+        Starts the bot watchdog which will watch currently loaded extensions 
+        and reload them when they're modified.
+        """
+        reload_log = logging.getLogger(__name__)
+        # ensure the message actually shows up
+        if logging.root.level > logging.INFO:
+            logging.basicConfig()
+            reload_log.setLevel(logging.INFO)
+        
+        if isinstance(self, disnake.Client):
+            is_closed = self.is_closed
+        else:
+            is_closed = lambda: False
+        
+        last = time.time()
+        while not is_closed():
+            t = time.time()
+            
+            extensions = set()
+            for name, module in self.extensions.items():
+                file = module.__file__
+                if os.stat(file).st_mtime > last:
+                    extensions.add(name)
+            
+            for name in extensions:
+                try:
+                    self.reload_extension(name)
+                except errors.ExtensionError as e:
+                    reload_log.exception(e)
+                else:
+                    reload_log.info(f"Reloaded '{name}'")
+            
+            await asyncio.sleep(1)
+            last = t
+    
+    async def on_connect(self):
+        if not self.reload:
+            return
+        
+        asyncio.create_task(self._watchdog())
+    
+    on_shard_connect = on_connect
 
 class Bot(BotBase, disnake.Client):
     """Represents a disnake bot.
@@ -1395,6 +1445,14 @@ class Bot(BotBase, disnake.Client):
         the ``command_prefix`` is set to ``!``. Defaults to ``False``.
 
         .. versionadded:: 1.7
+    reload: :class:`bool`
+        Whether to enable automatic extension reloading on file modification for debugging.
+        Whenever you save an extension with reloading enabled the file will be automatically
+        reloaded for you so you do not have to reload the extension manually. 
+        This will not work if you overwrite :meth:`~.Bot.on_connect()` or :meth:`~.Bot.on_shard_connect()` 
+        without calling `~.Bot._watchdog()`.
+        
+        .. versionadded:: 2.0
     """
     pass
 
