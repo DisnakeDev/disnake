@@ -141,8 +141,8 @@ class BotBase(GroupMixin):
         self._after_invoke = None
         self._help_command = None
         self.description = inspect.cleandoc(description) if description else ''
-        self.owner_id = options.get('owner_id')
-        self.owner_ids = options.get('owner_ids', set())
+        self.owner: Optional[disnake.User] = None
+        self.owners: Set[disnake.User] = set()
         self.strip_after_prefix = options.get('strip_after_prefix', False)
 
         if self.owner_id and self.owner_ids:
@@ -155,20 +155,17 @@ class BotBase(GroupMixin):
             self.help_command = DefaultHelpCommand()
         else:
             self.help_command = help_command
+        
+        self.add_listener(self._fill_owners, 'on_connect')
 
     @property
-    def owner(self) -> Optional[disnake.User]:
-        if self.owner_id:
-            return self.get_user(self.owner_id)
+    def owner_id(self) -> Optional[int]:
+        if self.owner is not None:
+            return self.owner.id
     
     @property
-    def owners(self) -> Set[disnake.User]:
-        all_owners = set()
-        for owner_id in self.owner_ids:
-            one_owner = self.get_user(owner_id)
-            if one_owner is not None:
-                all_owners.add(one_owner)
-        return all_owners
+    def owner_ids(self) -> Set[int]:
+        return {user.id for user in self.owners}
 
     @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:
@@ -366,6 +363,15 @@ class BotBase(GroupMixin):
                 pass
 
         await super().close()  # type: ignore
+
+    async def _fill_owners(self):
+        if self.owner or self.owners:
+            return
+        app = await self.application_info()  # type: ignore
+        if app.team:
+            self.owners = set(app.team.members)
+        else:
+            self.owner = app.owner
 
     async def on_command_error(self, context: Context, exception: errors.CommandError) -> None:
         """|coro|
@@ -585,19 +591,18 @@ class BotBase(GroupMixin):
             Whether the user is the owner.
         """
 
-        if self.owner_id:
-            return user.id == self.owner_id
+        if self.owner is not None:
+            return user.id == self.owner.id
         elif self.owner_ids:
-            return user.id in self.owner_ids
+            return user in self.owners
         else:
-
             app = await self.application_info()  # type: ignore
             if app.team:
-                self.owner_ids = ids = {m.id for m in app.team.members}
-                return user.id in ids
+                self.owners = owners = set(app.team.members)
+                return user in owners
             else:
-                self.owner_id = owner_id = app.owner.id
-                return user.id == owner_id
+                self.owner = owner = app.owner
+                return user == owner
 
     def before_invoke(self, coro: CFT) -> CFT:
         """A decorator that registers a coroutine as a pre-invoke hook.
@@ -679,7 +684,7 @@ class BotBase(GroupMixin):
         Example
         --------
 
-        .. code-block:: python3
+        .. code-block:: python
 
             async def on_ready(): pass
             async def my_message(message): pass
