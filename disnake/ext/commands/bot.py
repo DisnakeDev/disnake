@@ -148,6 +148,7 @@ class BotBase(GroupMixin):
         self.owner_ids = options.get('owner_ids', set())
         self.strip_after_prefix = options.get('strip_after_prefix', False)
         self.reload: bool = options.get('reload', False)
+        self.__reloading = False
 
         if self.owner_id and self.owner_ids:
             raise TypeError('Both owner_id and owner_ids are set.')
@@ -1368,10 +1369,11 @@ class BotBase(GroupMixin):
             await asyncio.sleep(1)
             last = t
     
-    async def on_connect(self):
-        if not self.reload:
+    async def on_connect(self, shard_id = None) -> None:
+        if not self.reload and not self.__reloading:
             return
         
+        self.__reloading = True
         asyncio.create_task(self._watchdog())
     
     on_shard_connect = on_connect
