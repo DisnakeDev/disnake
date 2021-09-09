@@ -332,7 +332,7 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
     def _get_id_matches(ctx, argument):
         id_regex = re.compile(r'(?:(?P<channel_id>[0-9]{15,20})-)?(?P<message_id>[0-9]{15,20})$')
         link_regex = re.compile(
-            r'https?://(?:(ptb|canary|www)\.)?disnake(?:app)?\.com/channels/'
+            r'https?://(?:(ptb|canary|www)\.)?discord(?:app)?\.com/channels/'
             r'(?P<guild_id>[0-9]{15,20}|@me)'
             r'/(?P<channel_id>[0-9]{15,20})/(?P<message_id>[0-9]{15,20})/?$'
         )
