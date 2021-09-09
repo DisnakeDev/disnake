@@ -8,11 +8,11 @@ from typing import (
 import asyncio
 import datetime
 
+from disnake.app_commands import ApplicationCommand
 from disnake.utils import async_all
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import *
-
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
@@ -48,6 +48,7 @@ class InvokableApplicationCommand:
         self._callback = func
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
+        self.body = ApplicationCommand(0)
         if not isinstance(self.name, str):
             raise TypeError('Name of a command must be a string.')
 

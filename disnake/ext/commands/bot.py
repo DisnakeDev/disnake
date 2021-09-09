@@ -40,6 +40,7 @@ import disnake
 from .core import GroupMixin
 from .view import StringView
 from .context import Context
+from .errors import CommandRegistrationError
 from . import errors
 from .help import HelpCommand, DefaultHelpCommand
 from .cog import Cog
@@ -144,6 +145,9 @@ class BotBase(GroupMixin):
         self.owner: Optional[disnake.User] = None
         self.owners: Set[disnake.User] = set()
         self.strip_after_prefix = options.get('strip_after_prefix', False)
+        self.all_slash_commands: Dict[str, InvokableSlashCommand] = {}
+        self.all_user_commands: Dict[str, InvokableUserCommand] = {}
+        self.all_message_commands: Dict[str, InvokableMessageCommand] = {}
 
         if self.owner_id and self.owner_ids:
             raise TypeError('Both owner_id and owner_ids are set.')
@@ -167,17 +171,98 @@ class BotBase(GroupMixin):
     def owner_ids(self) -> Set[int]:
         return {user.id for user in self.owners}
 
-    @property
+    @property # FIXME: no global dicts pls
     def slash_commands(self) -> Set[InvokableSlashCommand]:
         return set(_ApplicationCommandStore.slash_commands.values())
 
-    @property
+    @property # FIXME: no global dicts pls
     def user_commands(self) -> Set[InvokableUserCommand]:
         return set(_ApplicationCommandStore.user_commands.values())
 
-    @property
+    @property # FIXME: no global dicts pls
     def message_commands(self) -> Set[InvokableMessageCommand]:
         return set(_ApplicationCommandStore.message_commands.values())
+
+    def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
+        """Adds an :class:`.InvokableSlashCommand` into the internal list of slash commands.
+
+        This is usually not called, instead the :meth:`~.BotBase.slash_command` or
+        shortcut decorators are used.
+
+        Parameters
+        -----------
+        slash_command: :class:`InvokableSlashCommand`
+            The slash command to add.
+
+        Raises
+        -------
+        :exc:`.CommandRegistrationError`
+            If the slash command is already registered.
+        TypeError
+            If the slash command passed is not an instance of :class:`.InvokableSlashCommand`.
+        """
+
+        if not isinstance(slash_command, InvokableSlashCommand):
+            raise TypeError('The slash_command passed must be an instance of InvokableSlashCommand')
+
+        if slash_command.name in self.all_slash_commands:
+            raise CommandRegistrationError(slash_command.name)
+
+        self.all_slash_commands[slash_command.name] = slash_command
+
+    def add_user_command(self, user_command: InvokableUserCommand) -> None:
+        """Adds an :class:`.InvokableUserCommand` into the internal list of user commands.
+
+        This is usually not called, instead the :meth:`~.BotBase.user_command` or
+        shortcut decorators are used.
+
+        Parameters
+        -----------
+        user_command: :class:`InvokableUserCommand`
+            The user command to add.
+
+        Raises
+        -------
+        :exc:`.CommandRegistrationError`
+            If the user command is already registered.
+        TypeError
+            If the user command passed is not an instance of :class:`.InvokableUserCommand`.
+        """
+
+        if not isinstance(user_command, InvokableUserCommand):
+            raise TypeError('The user_command passed must be an instance of InvokableUserCommand')
+
+        if user_command.name in self.all_user_commands:
+            raise CommandRegistrationError(user_command.name)
+
+        self.all_user_commands[user_command.name] = user_command
+
+    def add_message_command(self, message_command: InvokableMessageCommand) -> None:
+        """Adds an :class:`.InvokableMessageCommand` into the internal list of message commands.
+
+        This is usually not called, instead the :meth:`~.BotBase.message_command` or
+        shortcut decorators are used.
+
+        Parameters
+        -----------
+        message_command: :class:`InvokableMessageCommand`
+            The message command to add.
+
+        Raises
+        -------
+        :exc:`.CommandRegistrationError`
+            If the message command is already registered.
+        TypeError
+            If the message command passed is not an instance of :class:`.InvokableMessageCommand`.
+        """
+
+        if not isinstance(message_command, InvokableMessageCommand):
+            raise TypeError('The message_command passed must be an instance of InvokableMessageCommand')
+
+        if message_command.name in self.all_message_commands:
+            raise CommandRegistrationError(message_command.name)
+
+        self.all_message_commands[message_command.name] = message_command
 
     def get_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
         """Get a :class:`.InvokableSlashCommand` from the internal list
