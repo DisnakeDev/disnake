@@ -30,6 +30,7 @@ import signal
 import sys
 import traceback
 from typing import Any, Callable, Coroutine, Dict, Generator, List, Optional, Sequence, TYPE_CHECKING, Tuple, TypeVar, Union
+from datetime import datetime
 
 import aiohttp
 
@@ -252,6 +253,8 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
         self._connection._get_websocket = self._get_websocket
         self._connection._get_client = lambda: self
         self._times_connected = 0
+        self._sync_queued: bool = False
+        self._last_sync_at: datetime = None
 
         if VoiceClient.warn_nacl:
             VoiceClient.warn_nacl = False
@@ -577,6 +580,24 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
         await self._cache_application_commands()
         await self._sync_application_commands()
 
+    async def _delayed_command_sync(self) -> None:
+        if not self._sync_commands or not self.is_ready() or self._sync_queued:
+            return # We don't do this task on login or in parallel with a similar task
+        self._sync_queued = True
+        # Wait a little bit, maybe other cogs are loading
+        await asyncio.sleep(2)
+        # Respect the local rate limit
+        now = datetime.now()
+        if (
+            self._last_sync_at is not None and
+            (now - self._last_sync_at).total_seconds() < 2
+        ):
+            return
+        self._last_sync_at = now
+        # Do the operation and leave the queue
+        await self._sync_application_commands()
+        self._sync_queued = False
+
     def _schedule_app_command_preparation(self) -> None:
         self._times_connected += 1
         if self._times_connected > 1:
@@ -584,6 +605,12 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
         return asyncio.create_task(
             self._prepare_application_commands(),
             name='disnake: app_command_preparation'
+        )
+    
+    def _schedule_delayed_command_sync(self) -> None:
+        self.loop.create_task(
+            self._delayed_command_sync(),
+            name='disnake: delayed_command_sync'
         )
 
     # hooks

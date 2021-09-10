@@ -28,7 +28,6 @@ from __future__ import annotations
 import asyncio
 import collections
 import collections.abc
-from disnake.ext.commands.base_core import InvokableApplicationCommand
 import inspect
 import importlib.util
 import sys
@@ -39,6 +38,7 @@ from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, 
 import disnake
 
 from .core import GroupMixin
+from .base_core import InvokableApplicationCommand
 from .slash_core import InvokableSlashCommand
 from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
 from .view import StringView

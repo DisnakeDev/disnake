@@ -564,6 +564,11 @@ class Cog(metaclass=CogMeta):
         for name, method_name in self.__cog_listeners__:
             bot.add_listener(getattr(self, method_name), name)
 
+        try:
+            bot._schedule_delayed_command_sync()
+        except Exception:
+            pass
+
         return self
 
     def _eject(self, bot: BotBase) -> None:
@@ -591,6 +596,10 @@ class Cog(metaclass=CogMeta):
             if cls.bot_check_once is not Cog.bot_check_once:
                 bot.remove_check(self.bot_check_once, call_once=True)
         finally:
+            try:
+                bot._schedule_delayed_command_sync()
+            except Exception:
+                pass
             try:
                 self.cog_unload()
             except Exception:
