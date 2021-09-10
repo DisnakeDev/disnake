@@ -28,16 +28,19 @@ from __future__ import annotations
 import asyncio
 import collections
 import collections.abc
+from disnake.ext.commands.base_core import InvokableApplicationCommand
 import inspect
 import importlib.util
 import sys
 import traceback
 import types
-from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union, Set
+from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union, Set, Tuple
 
 import disnake
 
 from .core import GroupMixin
+from .slash_core import InvokableSlashCommand
+from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
 from .view import StringView
 from .context import Context
 from .errors import CommandRegistrationError
@@ -47,8 +50,8 @@ from .cog import Cog
 from .slash_core import slash_command
 from .ctx_menus_core import user_command, message_command
 
+from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
-from disnake._hub import _ApplicationCommandStore
 
 if TYPE_CHECKING:
     import importlib.machinery
@@ -59,8 +62,6 @@ if TYPE_CHECKING:
         Check,
         CoroFunc,
     )
-    from .slash_core import InvokableSlashCommand
-    from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
 
 __all__ = (
     'when_mentioned',
@@ -171,17 +172,28 @@ class BotBase(GroupMixin):
     def owner_ids(self) -> Set[int]:
         return {user.id for user in self.owners}
 
-    @property # FIXME: no global dicts pls
+    @property
+    def application_commands(self) -> Set[InvokableApplicationCommand]:
+        result = set()
+        for cmd in self.all_slash_commands.values():
+            result.add(cmd)
+        for cmd in self.all_user_commands.values():
+            result.add(cmd)
+        for cmd in self.all_message_commands.values():
+            result.add(cmd)
+        return result
+
+    @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:
-        return set(_ApplicationCommandStore.slash_commands.values())
+        return set(self.all_slash_commands.values())
 
-    @property # FIXME: no global dicts pls
+    @property
     def user_commands(self) -> Set[InvokableUserCommand]:
-        return set(_ApplicationCommandStore.user_commands.values())
+        return set(self.all_user_commands.values())
 
-    @property # FIXME: no global dicts pls
+    @property
     def message_commands(self) -> Set[InvokableMessageCommand]:
-        return set(_ApplicationCommandStore.message_commands.values())
+        return set(self.all_message_commands.values())
 
     def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
         """Adds an :class:`.InvokableSlashCommand` into the internal list of slash commands.
@@ -264,6 +276,66 @@ class BotBase(GroupMixin):
 
         self.all_message_commands[message_command.name] = message_command
 
+    def remove_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
+        """Remove a :class:`.InvokableSlashCommand` from the internal list
+        of slash commands.
+
+        Parameters
+        -----------
+        name: :class:`str`
+            The name of the command to remove.
+
+        Returns
+        --------
+        Optional[:class:`.InvokableSlashCommand`]
+            The command that was removed. If the name is not valid then
+            ``None`` is returned instead.
+        """
+        command = self.all_slash_commands.pop(name, None)
+        if command is None:
+            return None
+        return command
+
+    def remove_user_command(self, name: str) -> Optional[InvokableUserCommand]:
+        """Remove a :class:`.InvokableUserCommand` from the internal list
+        of user commands.
+
+        Parameters
+        -----------
+        name: :class:`str`
+            The name of the command to remove.
+
+        Returns
+        --------
+        Optional[:class:`.InvokableUserCommand`]
+            The command that was removed. If the name is not valid then
+            ``None`` is returned instead.
+        """
+        command = self.all_user_commands.pop(name, None)
+        if command is None:
+            return None
+        return command
+    
+    def remove_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
+        """Remove a :class:`.InvokableMessageCommand` from the internal list
+        of message commands.
+
+        Parameters
+        -----------
+        name: :class:`str`
+            The name of the command to remove.
+
+        Returns
+        --------
+        Optional[:class:`.InvokableMessageCommand`]
+            The command that was removed. If the name is not valid then
+            ``None`` is returned instead.
+        """
+        command = self.all_message_commands.pop(name, None)
+        if command is None:
+            return None
+        return command
+
     def get_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
         """Get a :class:`.InvokableSlashCommand` from the internal list
         of commands.
@@ -278,7 +350,7 @@ class BotBase(GroupMixin):
         Optional[:class:`InvokableSlashCommand`]
             The slash command that was requested. If not found, returns ``None``.
         """
-        return _ApplicationCommandStore.slash_commands.get(name)
+        return self.all_slash_commands.get(name)
 
     def get_user_command(self, name: str) -> Optional[InvokableUserCommand]:
         """Get a :class:`.InvokableUserCommand` from the internal list
@@ -294,7 +366,7 @@ class BotBase(GroupMixin):
         Optional[:class:`InvokableUserCommand`]
             The user command that was requested. If not found, returns ``None``.
         """
-        return _ApplicationCommandStore.user_commands.get(name)
+        return self.all_user_commands.get(name)
 
     def get_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
         """Get a :class:`.InvokableMessageCommand` from the internal list
@@ -310,7 +382,7 @@ class BotBase(GroupMixin):
         Optional[:class:`InvokableMessageCommand`]
             The message command that was requested. If not found, returns ``None``.
         """
-        return _ApplicationCommandStore.message_commands.get(name)
+        return self.all_message_commands.get(name)
 
     def slash_command(
         self,
@@ -354,17 +426,20 @@ class BotBase(GroupMixin):
         Callable[..., :class:`InvokableSlashCommand`]
             A decorator that converts the provided method into a InvokableSlashCommand, adds it to the bot, then returns it.
         """
-
-        return slash_command(
-            name=name,
-            description=description,
-            options=options,
-            default_permission=default_permission,
-            guild_ids=guild_ids,
-            connectors=connectors,
-            auto_sync=auto_sync,
-            **kwargs
-        )
+        def decorator(func) -> InvokableSlashCommand:
+            result = slash_command(
+                name=name,
+                description=description,
+                options=options,
+                default_permission=default_permission,
+                guild_ids=guild_ids,
+                connectors=connectors,
+                auto_sync=auto_sync,
+                **kwargs
+            )(func)
+            self.add_slash_command(result)
+            return result
+        return decorator
 
     def user_command(
         self,
@@ -393,7 +468,11 @@ class BotBase(GroupMixin):
         Callable[..., :class:`InvokableUserCommand`]
             A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
-        return user_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
+        def decorator(func):
+            result = user_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
+            self.add_user_command(result)
+            return result
+        return decorator
 
     def message_command(
         self,
@@ -422,7 +501,11 @@ class BotBase(GroupMixin):
         Callable[..., :class:`InvokableUserCommand`]
             A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
-        return message_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
+        def decorator(func):
+            result = message_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
+            self.add_message_command(result)
+            return result
+        return decorator
 
     # internal helpers
 
@@ -432,6 +515,25 @@ class BotBase(GroupMixin):
         ev = 'on_' + event_name
         for event in self.extra_events.get(ev, []):
             self._schedule_event(event, ev, *args, **kwargs)  # type: ignore
+
+    def _ordered_unsynced_commands(
+        self, test_guilds: List[int] = None
+    ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
+        global_cmds = []
+        guilds = {}
+        for cmd in self.application_commands:
+            if not cmd.auto_sync:
+                cmd.body._always_synced = True
+            guild_ids = cmd.guild_ids or test_guilds
+            if guild_ids is None:
+                global_cmds.append(cmd.body)
+            else:
+                for guild_id in guild_ids:
+                    if guild_id not in guilds:
+                        guilds[guild_id] = [cmd.body]
+                    else:
+                        guilds[guild_id].append(cmd.body)
+        return global_cmds, guilds
 
     @disnake.utils.copy_doc(disnake.Client.close)
     async def close(self) -> None:
@@ -1387,13 +1489,13 @@ class BotBase(GroupMixin):
         command_name = interaction.data.name
         event_name = None
         if command_type is ApplicationCommandType.chat_input:
-            app_command = _ApplicationCommandStore.slash_commands.get(command_name)
+            app_command = self.all_slash_commands.get(command_name)
             event_name = 'slash_command'
         elif command_type is ApplicationCommandType.user:
-            app_command = _ApplicationCommandStore.user_commands.get(command_name)
+            app_command = self.all_user_commands.get(command_name)
             event_name = 'user_command'
         elif command_type is ApplicationCommandType.message:
-            app_command = _ApplicationCommandStore.message_commands.get(command_name)
+            app_command = self.all_message_commands.get(command_name)
             event_name = 'message_command'
         else:
             app_command = None

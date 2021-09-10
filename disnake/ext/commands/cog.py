@@ -30,8 +30,8 @@ from typing import Any, Callable, ClassVar, Dict, Generator, List, Optional, TYP
 
 from ._types import _BaseCommand
 from .base_core import InvokableApplicationCommand
-
-from disnake._hub import _ApplicationCommandStore
+from .slash_core import InvokableSlashCommand
+from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
 
 if TYPE_CHECKING:
     from .bot import BotBase
@@ -261,6 +261,49 @@ class Cog(metaclass=CogMeta):
                 This does not include subcommands.
         """
         return [c for c in self.__cog_app_commands__]
+    
+    def get_slash_commands(self) -> List[InvokableSlashCommand]:
+        r"""
+        Returns
+        --------
+        List[:class:`.InvokableSlashCommand`]
+            A :class:`list` of :class:`.InvokableSlashCommand`\s that are
+            defined inside this cog.
+
+            .. note::
+
+                This does not include subcommands.
+        """
+        return [
+            c for c in self.__cog_app_commands__
+            if isinstance(c, InvokableSlashCommand)
+        ]
+    
+    def get_user_commands(self) -> List[InvokableUserCommand]:
+        r"""
+        Returns
+        --------
+        List[:class:`.InvokableUserCommand`]
+            A :class:`list` of :class:`.InvokableUserCommand`\s that are
+            defined inside this cog.
+        """
+        return [
+            c for c in self.__cog_app_commands__
+            if isinstance(c, InvokableUserCommand)
+        ]
+    
+    def get_message_commands(self) -> List[InvokableMessageCommand]:
+        r"""
+        Returns
+        --------
+        List[:class:`.InvokableMessageCommand`]
+            A :class:`list` of :class:`.InvokableMessageCommand`\s that are
+            defined inside this cog.
+        """
+        return [
+            c for c in self.__cog_app_commands__
+            if isinstance(c, InvokableMessageCommand)
+        ]
 
     @property
     def qualified_name(self) -> str:
@@ -487,8 +530,25 @@ class Cog(metaclass=CogMeta):
                             bot.remove_command(to_undo.name)
                     raise e
         
-        for app_command in self.__cog_app_commands__:
-            app_command.cog = self
+        for index, command in enumerate(self.__cog_app_commands__):
+            command.cog = self
+            try:
+                if isinstance(command, InvokableSlashCommand):
+                    bot.add_slash_command(command)
+                elif isinstance(command, InvokableUserCommand):
+                    bot.add_user_command(command)
+                elif isinstance(command, InvokableMessageCommand):
+                    bot.add_message_command(command)
+            except Exception as e:
+                # undo our additions
+                for to_undo in self.__cog_app_commands__[:index]:
+                    if isinstance(to_undo, InvokableSlashCommand):
+                        bot.remove_slash_command(to_undo.name)
+                    elif isinstance(to_undo, InvokableUserCommand):
+                        bot.remove_user_command(to_undo.name)
+                    elif isinstance(to_undo, InvokableMessageCommand):
+                        bot.remove_message_command(to_undo.name)
+                raise e
 
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
@@ -515,10 +575,12 @@ class Cog(metaclass=CogMeta):
                     bot.remove_command(command.name)
 
             for app_command in self.__cog_app_commands__:
-                name = app_command.name
-                _ApplicationCommandStore.slash_commands.pop(name, None)
-                _ApplicationCommandStore.user_commands.pop(name, None)
-                _ApplicationCommandStore.message_commands.pop(name, None)
+                if isinstance(app_command, InvokableSlashCommand):
+                    bot.remove_slash_command(app_command.name)
+                elif isinstance(app_command, InvokableUserCommand):
+                    bot.remove_user_command(app_command.name)
+                elif isinstance(app_command, InvokableMessageCommand):
+                    bot.remove_message_command(app_command.name)
 
             for _, method_name in self.__cog_listeners__:
                 bot.remove_listener(getattr(self, method_name))

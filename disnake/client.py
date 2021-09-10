@@ -62,7 +62,6 @@ from .stage_instance import StageInstance
 from .threads import Thread
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
 from .app_commands import application_command_factory, ApplicationCommand, ApplicationCommandPermissions
-from ._hub import _ordered_unsynced_commands
 
 if TYPE_CHECKING:
     from .abc import SnowflakeTime, PrivateChannel, GuildChannel, Snowflake
@@ -473,8 +472,16 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
         print(f'Ignoring exception in {event_method}', file=sys.stderr)
         traceback.print_exc()
 
+    def _ordered_unsynced_commands(
+        self, test_guilds: List[int] = None
+    ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
+        """In :class:`.Bot` instance, this method is overridden"""
+        return None, None
+
     async def _cache_application_commands(self) -> None:
-        _, guilds = _ordered_unsynced_commands(self._test_guilds)
+        _, guilds = self._ordered_unsynced_commands(self._test_guilds)
+        if guilds is None:
+            return
         try:
             commands = await self.fetch_global_commands()
             self._connection._global_application_commands = {
@@ -496,7 +503,9 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
             return
         # We assume that all commands are already cached
         # Sort all invokable commands between guild IDs
-        global_cmds, guild_cmds = _ordered_unsynced_commands(self._test_guilds)
+        global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
+        if global_cmds is None:
+            return
         # This is for the event
         global_commands_patched = False
         patched_guilds = []

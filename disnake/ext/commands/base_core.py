@@ -36,6 +36,10 @@ else:
     P = TypeVar('P')
 
 
+def _get_overridden_method(method):
+    return getattr(method.__func__, '__cog_special_method__', method)
+
+
 class InvokableApplicationCommand:
     """A base class that implements the protocol for a bot application command.
 
