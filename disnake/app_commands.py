@@ -216,7 +216,7 @@ class ApplicationCommand:
         self._always_synced: bool = False
     
     def __eq__(self, other):
-        return self._always_synced
+        return isinstance(other, ApplicationCommand)
 
 
 class UserCommand(ApplicationCommand):
@@ -228,7 +228,7 @@ class UserCommand(ApplicationCommand):
         return f"<UserCommand name={self.name!r}>"
     
     def __eq__(self, other):
-        return self._always_synced or (
+        return (
             self.type == other.type and
             self.name == other.name
         )
@@ -254,7 +254,7 @@ class MessageCommand(ApplicationCommand):
         return f"<MessageCommand name={self.name!r}>"
     
     def __eq__(self, other):
-        return self._always_synced or (
+        return (
             self.type == other.type and
             self.name == other.name
         )
@@ -313,7 +313,7 @@ class SlashCommand(ApplicationCommand):
         )
 
     def __eq__(self, other):
-        return self._always_synced or (
+        return (
             self.type == other.type and
             self.name == other.name and
             self.description == other.description and

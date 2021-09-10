@@ -1,13 +1,11 @@
 from __future__ import annotations
 from typing import Any, Dict, List, Tuple, Union, TYPE_CHECKING, Callable
 
-from .base_core import InvokableApplicationCommand
-from .cog import Cog
+from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
 
 from disnake.app_commands import SlashCommand, Option
 from disnake.enums import OptionType
-from disnake._hub import _ApplicationCommandStore
 
 import asyncio
 
@@ -209,7 +207,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         cog = self.cog
         try:
             if cog is not None:
-                local = Cog._get_overridden_method(cog.cog_slash_command_error)
+                local = _get_overridden_method(cog.cog_slash_command_error)
                 if local is not None:
                     await local(inter, error)
         finally:
@@ -306,6 +304,8 @@ def slash_command(
     def decorator(func) -> InvokableSlashCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
+        if hasattr(func, '__command_flag__'):
+            raise TypeError('Callback is already a command.')
         new_func = InvokableSlashCommand(
             func,
             name=name,
@@ -317,6 +317,5 @@ def slash_command(
             auto_sync=auto_sync,
             **kwargs
         )
-        _ApplicationCommandStore.slash_commands[new_func.name] = new_func
         return new_func
     return decorator

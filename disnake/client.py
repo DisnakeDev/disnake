@@ -62,7 +62,6 @@ from .stage_instance import StageInstance
 from .threads import Thread
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
 from .app_commands import application_command_factory, ApplicationCommand, ApplicationCommandPermissions
-from ._hub import _ordered_unsynced_commands
 
 if TYPE_CHECKING:
     from .abc import SnowflakeTime, PrivateChannel, GuildChannel, Snowflake
@@ -473,8 +472,16 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
         print(f'Ignoring exception in {event_method}', file=sys.stderr)
         traceback.print_exc()
 
+    def _ordered_unsynced_commands(
+        self, test_guilds: List[int] = None
+    ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
+        """In :class:`.Bot` instance, this method is overridden"""
+        return None, None
+
     async def _cache_application_commands(self) -> None:
-        _, guilds = _ordered_unsynced_commands(self._test_guilds)
+        _, guilds = self._ordered_unsynced_commands(self._test_guilds)
+        if guilds is None:
+            return
         try:
             commands = await self.fetch_global_commands()
             self._connection._global_application_commands = {
@@ -492,34 +499,39 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
                 pass
     
     async def _sync_application_commands(self) -> None:
-        # We assume that all commands are already cached
         if not self._sync_commands:
             return
+        # We assume that all commands are already cached
         # Sort all invokable commands between guild IDs
-        global_cmds, guild_cmds = _ordered_unsynced_commands(self._test_guilds)
+        global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
+        if global_cmds is None:
+            return
         # This is for the event
         global_commands_patched = False
         patched_guilds = []
         # Update global commands first
+        to_upsert = []
         update_required = False
         deletion_required = False
         for cmd in global_cmds:
             old_cmd = self.get_global_command_named(cmd.name)
             if old_cmd is None:
                 update_required = True
-                break
             elif old_cmd.type != cmd.type:
                 update_required = True
                 deletion_required = True
-                break
+            elif cmd._always_synced:
+                to_upsert.append(old_cmd)
+                continue
             elif cmd != old_cmd:
                 update_required = True
-                break
-        if update_required or len(global_cmds) != len(self._connection._global_application_commands):
+            to_upsert.append(cmd)
+        # Do API requests and cache
+        if update_required or len(to_upsert) != len(self._connection._global_application_commands):
             try:
                 if deletion_required:
                     await self.bulk_overwrite_global_commands([])
-                new_commands = await self.bulk_overwrite_global_commands(global_cmds)
+                new_commands = await self.bulk_overwrite_global_commands(to_upsert)
                 self._connection._global_application_commands = {
                     command.id: command for command in new_commands
                 }
@@ -528,26 +540,30 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
                 print(f"[WARNING] Failed to overwrite global commands due to {e}")
         # Update guild commands
         for guild_id, cmds in guild_cmds.items():
+            # Form the list of commands to upsert
+            to_upsert = []
             update_required = False
             deletion_required = False
             for cmd in cmds:
                 old_cmd = self.get_guild_command_named(guild_id, cmd.name)
                 if old_cmd is None:
                     update_required = True
-                    break
                 elif old_cmd.type != cmd.type:
                     update_required = True
                     deletion_required = True
-                    break
+                elif cmd._always_synced:
+                    to_upsert.append(old_cmd)
+                    continue
                 elif cmd != old_cmd:
                     update_required = True
-                    break
+                to_upsert.append(cmd)
+            # Do API requests and cache
             current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
-            if update_required or len(cmds) != len(current_guild_cmds):
+            if update_required or len(to_upsert) != len(current_guild_cmds):
                 try:
                     if deletion_required:
                         await self.bulk_overwrite_guild_commands(guild_id, [])
-                    new_commands = await self.bulk_overwrite_guild_commands(guild_id, cmds)
+                    new_commands = await self.bulk_overwrite_guild_commands(guild_id, to_upsert)
                     self._connection._guild_application_commands[guild_id] = {
                         command.id: command for command in new_commands
                     }
