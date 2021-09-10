@@ -150,7 +150,6 @@ class BotBase(GroupMixin):
         self.owners: Set[disnake.User] = set()
         self.strip_after_prefix = options.get('strip_after_prefix', False)
         self.reload: bool = options.get('reload', False)
-        self.__reloading = False
 
         self.all_slash_commands: Dict[str, InvokableSlashCommand] = {}
         self.all_user_commands: Dict[str, InvokableUserCommand] = {}
@@ -168,6 +167,7 @@ class BotBase(GroupMixin):
             self.help_command = help_command
         
         self.add_listener(self._fill_owners, 'on_connect')
+        self.add_listener(self._watchdog, 'on_ready')
 
     @property
     def owner_id(self) -> Optional[int]:
@@ -1530,6 +1530,7 @@ class BotBase(GroupMixin):
         Starts the bot watchdog which will watch currently loaded extensions 
         and reload them when they're modified.
         """
+        del self.extra_events['on_ready'][0]
         reload_log = logging.getLogger(__name__)
         # ensure the message actually shows up
         if logging.root.level > logging.INFO:
@@ -1540,6 +1541,8 @@ class BotBase(GroupMixin):
             is_closed = self.is_closed
         else:
             is_closed = lambda: False
+        
+        reload_log.info(f"WATCHDOG: Watching extensions")
         
         last = time.time()
         while not is_closed():
@@ -1557,19 +1560,10 @@ class BotBase(GroupMixin):
                 except errors.ExtensionError as e:
                     reload_log.exception(e)
                 else:
-                    reload_log.info(f"Reloaded '{name}'")
+                    reload_log.info(f"WATCHDOG: Reloaded '{name}'")
             
             await asyncio.sleep(1)
             last = t
-    
-    async def on_connect(self, shard_id = None) -> None:
-        if not self.reload and not self.__reloading:
-            return
-        
-        self.__reloading = True
-        asyncio.create_task(self._watchdog())
-    
-    on_shard_connect = on_connect
 
 class Bot(BotBase, disnake.Client):
     """Represents a disnake bot.
@@ -1643,9 +1637,7 @@ class Bot(BotBase, disnake.Client):
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
-        reloaded for you so you do not have to reload the extension manually. 
-        This will not work if you overwrite :meth:`~.Bot.on_connect()` or :meth:`~.Bot.on_shard_connect()` 
-        without calling `~.Bot._watchdog()`.
+        reloaded for you so you do not have to reload the extension manually.
         
         .. versionadded:: 2.0
     """
