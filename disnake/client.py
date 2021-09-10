@@ -592,6 +592,7 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
             self._last_sync_at is not None and
             (now - self._last_sync_at).total_seconds() < 2
         ):
+            self._sync_queued = False
             return
         self._last_sync_at = now
         # Do the operation and leave the queue
