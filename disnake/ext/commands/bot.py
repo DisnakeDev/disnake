@@ -167,7 +167,8 @@ class BotBase(GroupMixin):
             self.help_command = help_command
         
         self.add_listener(self._fill_owners, 'on_connect')
-        self.add_listener(self._watchdog, 'on_ready')
+        if self.reload:
+            self.add_listener(self._watchdog, 'on_ready')
 
     @property
     def owner_id(self) -> Optional[int]:
