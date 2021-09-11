@@ -30,8 +30,11 @@ import collections
 import collections.abc
 import inspect
 import importlib.util
+import logging
+import os
 import sys
 import traceback
+import time
 import types
 from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union, Set, Tuple
 
@@ -146,6 +149,8 @@ class BotBase(GroupMixin):
         self.owner: Optional[disnake.User] = None
         self.owners: Set[disnake.User] = set()
         self.strip_after_prefix = options.get('strip_after_prefix', False)
+        self.reload: bool = options.get('reload', False)
+
         self.all_slash_commands: Dict[str, InvokableSlashCommand] = {}
         self.all_user_commands: Dict[str, InvokableUserCommand] = {}
         self.all_message_commands: Dict[str, InvokableMessageCommand] = {}
@@ -162,6 +167,7 @@ class BotBase(GroupMixin):
             self.help_command = help_command
         
         self.add_listener(self._fill_owners, 'on_connect')
+        self.add_listener(self._watchdog, 'on_ready')
 
     @property
     def owner_id(self) -> Optional[int]:
@@ -1517,6 +1523,47 @@ class BotBase(GroupMixin):
     
     async def on_application_command(self, interaction: ApplicationCommandInteraction):
         await self.process_application_commands(interaction)
+    
+    async def _watchdog(self):
+        """|coro|
+        
+        Starts the bot watchdog which will watch currently loaded extensions 
+        and reload them when they're modified.
+        """
+        del self.extra_events['on_ready'][0]
+        reload_log = logging.getLogger(__name__)
+        # ensure the message actually shows up
+        if logging.root.level > logging.INFO:
+            logging.basicConfig()
+            reload_log.setLevel(logging.INFO)
+        
+        if isinstance(self, disnake.Client):
+            is_closed = self.is_closed
+        else:
+            is_closed = lambda: False
+        
+        reload_log.info(f"WATCHDOG: Watching extensions")
+        
+        last = time.time()
+        while not is_closed():
+            t = time.time()
+            
+            extensions = set()
+            for name, module in self.extensions.items():
+                file = module.__file__
+                if os.stat(file).st_mtime > last:
+                    extensions.add(name)
+            
+            for name in extensions:
+                try:
+                    self.reload_extension(name)
+                except errors.ExtensionError as e:
+                    reload_log.exception(e)
+                else:
+                    reload_log.info(f"WATCHDOG: Reloaded '{name}'")
+            
+            await asyncio.sleep(1)
+            last = t
 
 class Bot(BotBase, disnake.Client):
     """Represents a disnake bot.
@@ -1587,6 +1634,12 @@ class Bot(BotBase, disnake.Client):
         the ``command_prefix`` is set to ``!``. Defaults to ``False``.
 
         .. versionadded:: 1.7
+    reload: :class:`bool`
+        Whether to enable automatic extension reloading on file modification for debugging.
+        Whenever you save an extension with reloading enabled the file will be automatically
+        reloaded for you so you do not have to reload the extension manually.
+        
+        .. versionadded:: 2.0
     """
     pass
 

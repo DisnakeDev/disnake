@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, PartialMessageable
     from ..threads import Thread
-    from ..ext.application_commands import InvokableApplicationCommand
+    from ..ext.commands import InvokableApplicationCommand
 
     InteractionChannel = Union[
         VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, Thread, PartialMessageable
