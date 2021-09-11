@@ -481,6 +481,8 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
         """In :class:`.Bot` instance, this method is overridden"""
         return None, None
 
+    # command synchronisation
+
     async def _cache_application_commands(self) -> None:
         _, guilds = self._ordered_unsynced_commands(self._test_guilds)
         if guilds is None:
@@ -583,21 +585,20 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
     async def _delayed_command_sync(self) -> None:
         if not self._sync_commands or not self.is_ready() or self._sync_queued:
             return # We don't do this task on login or in parallel with a similar task
-        self._sync_queued = True
         # Wait a little bit, maybe other cogs are loading
+        self._sync_queued = True
         await asyncio.sleep(2)
+        self._sync_queued = False
         # Respect the local rate limit
         now = datetime.now()
         if (
             self._last_sync_at is not None and
             (now - self._last_sync_at).total_seconds() < 2
         ):
-            self._sync_queued = False
             return
         self._last_sync_at = now
         # Do the operation and leave the queue
         await self._sync_application_commands()
-        self._sync_queued = False
 
     def _schedule_app_command_preparation(self) -> None:
         self._times_connected += 1
