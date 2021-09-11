@@ -56,6 +56,12 @@ packages = [
     'disnake.interactions',
     'disnake.ext.commands',
     'disnake.ext.tasks',
+    'discord',
+    'discord.types',
+    'discord.ui',
+    'discord.webhook',
+    'discord.interactions',
+    'discord.ext',
 ]
 
 setup(name='disnake',

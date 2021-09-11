@@ -584,20 +584,12 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
 
     async def _delayed_command_sync(self) -> None:
         if not self._sync_commands or not self.is_ready() or self._sync_queued:
-            return # We don't do this task on login or in parallel with a similar task
+            return
+        # We don't do this task on login or in parallel with a similar task
         # Wait a little bit, maybe other cogs are loading
         self._sync_queued = True
         await asyncio.sleep(2)
         self._sync_queued = False
-        # Respect the local rate limit
-        now = datetime.now()
-        if (
-            self._last_sync_at is not None and
-            (now - self._last_sync_at).total_seconds() < 2
-        ):
-            return
-        self._last_sync_at = now
-        # Do the operation and leave the queue
         await self._sync_application_commands()
 
     def _schedule_app_command_preparation(self) -> None:

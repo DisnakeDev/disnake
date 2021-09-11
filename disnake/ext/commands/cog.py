@@ -26,7 +26,20 @@ from __future__ import annotations
 import inspect
 import disnake.utils
 
-from typing import Any, Callable, ClassVar, Dict, Generator, List, Optional, TYPE_CHECKING, Tuple, TypeVar, Type
+from typing import (
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    TYPE_CHECKING,
+    Tuple,
+    TypeVar,
+    Type,
+    Union
+)
 
 from ._types import _BaseCommand
 from .base_core import InvokableApplicationCommand
@@ -34,10 +47,11 @@ from .slash_core import InvokableSlashCommand
 from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
 
 if TYPE_CHECKING:
-    from .bot import BotBase
+    from .bot import Bot, AutoShardedBot
     from .context import Context
     from .core import Command
     from disnake.interactions import ApplicationCommandInteraction
+    AnyBotT = TypeVar('AnyBotT', bound=Union[Bot, AutoShardedBot])
 
 __all__ = (
     'CogMeta',
@@ -511,7 +525,7 @@ class Cog(metaclass=CogMeta):
         """
         pass
 
-    def _inject(self: CogT, bot: BotBase) -> CogT:
+    def _inject(self: CogT, bot: AnyBotT) -> CogT:
         cls = self.__class__
 
         # realistically, the only thing that can cause loading errors
@@ -571,7 +585,7 @@ class Cog(metaclass=CogMeta):
 
         return self
 
-    def _eject(self, bot: BotBase) -> None:
+    def _eject(self, bot: AnyBotT) -> None:
         cls = self.__class__
 
         try:

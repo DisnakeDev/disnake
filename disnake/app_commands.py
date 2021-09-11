@@ -72,14 +72,14 @@ class Option:
     description: :class:`str`
         option's description
     type: :class:`OptionType`
-        the option type, e.g. ``OptionType.USER``
+        the option type, e.g. :class:`OptionType.user`
     required: :class:`bool`
         whether this option is required or not
-    choices: List[:class:`OptionChoice`]
+    choices: Union[List[:class:`OptionChoice`], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         the list of option choices
     options: List[:class:`Option`]
-        the list of sub options. You can only specify this parameter if
-        the ``type`` is :class:`OptionType.SUB_COMMAND` or :class:`OptionType.SUB_COMMAND_GROUP`
+        the list of sub options. Normally you don't have to specify it directly,
+        instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
     """
 
     __slots__ = ("name", "description", "type", "required", "choices", "options", "_choice_connectors")
@@ -90,28 +90,28 @@ class Option:
         description: str = None,
         type: OptionType = None,
         required: bool = False,
-        choices: List[OptionChoice] = None,
+        choices: Union[List[OptionChoice], Dict[str, Union[str, int]]] = None,
         options: list = None
     ):
         assert name.islower(), f"Option name {name!r} must be lowercase"
+
         self.name: str = name
         self.description: str = description
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
-        self.choices: List[OptionChoice] = choices or []
         self.options: List[Option] = options or []
-        # self._choice_connectors = {}
+
+        if choices is None:
+            choices = []
+        elif isinstance(choices, dict):
+            choices = [OptionChoice(name, value) for name, value in choices.items()]
+        elif (
+            isinstance(choices, (tuple, list)) and choices
+            and isinstance(choices[0], (tuple, list))
+        ):
+            choices = [OptionChoice(name, value) for name, value in choices]
         
-        # for i, choice in enumerate(self.choices):
-        #     if self.type == Type.INTEGER:
-        #         if not isinstance(choice.value, int):
-        #             self._choice_connectors[i] = choice.value
-        #             choice.value = i
-        #     elif self.type == Type.STRING:
-        #         if not isinstance(choice.value, str):
-        #             valid_value = f"option_choice_{i}"
-        #             self._choice_connectors[valid_value] = choice.value
-        #             choice.value = valid_value
+        self.choices: List[OptionChoice] = choices
 
     def __repr__(self):
         return (
