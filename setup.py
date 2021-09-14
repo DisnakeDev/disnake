@@ -61,14 +61,15 @@ packages = [
     'discord.ui',
     'discord.webhook',
     'discord.interactions',
-    'discord.ext',
+    'discord.ext.commands',
+    'discord.ext.tasks',
 ]
 
 setup(name='disnake',
       author='Rapptz, EQUENOS',
       url='https://github.com/EQUENOS/disnake',
       project_urls={
-        "Documentation": "https://discordpy.readthedocs.io/en/latest/",  # TODO: docs link
+        "Documentation": "https://disnake.readthedocs.io/en/latest/",
         "Issue tracker": "https://github.com/EQUENOS/disnake/issues",
       },
       version=version,
