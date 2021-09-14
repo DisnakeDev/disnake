@@ -1,1 +1,2 @@
-from disnake.webhook.__init__ import *
+from .async_ import *
+from .sync import *

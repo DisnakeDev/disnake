@@ -30,7 +30,6 @@ import signal
 import sys
 import traceback
 from typing import Any, Callable, Coroutine, Dict, Generator, List, Optional, Sequence, TYPE_CHECKING, Tuple, TypeVar, Union
-from datetime import datetime
 
 import aiohttp
 
@@ -111,7 +110,7 @@ def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
         _log.info('Closing the event loop.')
         loop.close()
 
-class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEASE HELP :D
+class Client:
     r"""Represents a client connection that connects to Discord.
     This class is used to interact with the Discord WebSocket and API.
 
@@ -254,7 +253,6 @@ class Client:  # I NEED A REVIEW REGARDING THE DOCSTRING OF THIS CLASS, SO PLEAS
         self._connection._get_client = lambda: self
         self._times_connected = 0
         self._sync_queued: bool = False
-        self._last_sync_at: datetime = None
 
         if VoiceClient.warn_nacl:
             VoiceClient.warn_nacl = False
