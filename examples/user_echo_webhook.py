@@ -21,8 +21,13 @@ async def userecho(ctx, member: disnake.Member, *, content):
   
     await ctx.message.delete() # We don't want users to see who initiated the command, to make it more realistic :P
     
-    # We create the webhook via which our message will be sent.
-    new_webhook = await ctx.message.channel.create_webhook(name='Butternaan Webhook', reason="Bot Webhook") 
+    # We check if the bot's webhook already exists in the channel.
+    webhooks = await ctx.channel.webhooks()
+    webhook = disnake.utils.get(webhook, "Bot's Webhook")
+    
+    # If the webhook does not exist, it will be created.
+    if webhook is None:
+    webhook = await ctx.channel.create_webhook(name="Bot's Webhook", reason="Bot Webhook") 
     
     # Finally, sending the message via the webhook - the bot will fetch the user's display name and avatar.
     # NOTE: This method cannot impersonate the member's roles, since it works using webhooks.
