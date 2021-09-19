@@ -33,20 +33,18 @@ async def rps(inter: Interaction, choice):  # NOTICE: The param which defines th
         await inter.response.send_message(f'Draw. Both you and the bot chose: {choice}', ephemeral=True)
 
     # First we check if the user lost.
-    elif choice == 'rock' and bot_choice == 'paper':
-        await inter.response.send_message(lost_message, ephemeral=True)
-    elif choice == 'paper' and bot_choice == 'scissors':
-        await inter.response.send_message(lost_message, ephemeral=True)
-    elif choice == 'scissors' and bot_choice == 'rock':
-        await inter.response.send_message(lost_message, ephemeral=True)
+    if (
+        (choice == 'rock' and bot_choice == 'paper') or 
+        (choice == 'paper' and bot_choice == 'scissors') or 
+        (choice == 'scissors' and bot_choice == 'rock')
+    ):
+        content = f'You lost. The bot chose **{bot_choice}** while you chose **{choice}**'
+    elif choice == bot_choice:
+        content = f'Draw. Both you and the bot chose: {choice}'
+    else:
+        content = f'You won. You chose **{choice}** while the bot chose **{bot_choice}**'
     
-    # Now we check if the user won.
-    elif bot_choice == 'rock' and choice == 'paper':
-        await inter.response.send_message(won_message, ephemeral=True)
-    elif bot_choice == 'paper' and choice == 'scissors':
-        await inter.response.send_message(won_message, ephemeral=True)
-    elif bot_choice == 'scissors' and choice == 'rock':
-        await inter.response.send_message(won_message, ephemeral=True)
+    await inter.response.send_message(content, ephemeral=True)
 
 # Now we run the bot, and there you have it.
 bot.run('token')
