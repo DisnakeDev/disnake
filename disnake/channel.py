@@ -48,7 +48,6 @@ from .permissions import PermissionOverwrite, Permissions
 from .enums import ChannelType, StagePrivacyLevel, try_enum, VoiceRegion, VideoQualityMode, PartyType
 from .mixins import Hashable
 from .object import Object
-from .party import Party
 from . import utils
 from .utils import MISSING
 from .asset import Asset
@@ -171,6 +170,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         '_type',
         'last_message_id',
         'default_auto_archive_duration',
+        'can_send',
+        'can_read'
     )
 
     def __init__(self, *, state: ConnectionState, guild: Guild, data: TextChannelPayload):
@@ -232,12 +233,17 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return [m for m in self.guild.members if self.permissions_for(m).read_messages]
     
     @property
-    def can_send(self) -> bool:
-        return self.permissions_for(self.guild.me).send_messages
+    def can_send(self, with_embeds: bool = True):
+        can = self.permissions_for(self.guild.me)
+        if with_embeds:
+            return can.send_messages and can.embed_links
+        return can.send_messages
     
     @property
-    def can_read(self) -> bool:
-        return self.permissions_for(self.guild.me).read_messages
+    def can_read(self, with_history: bool = True) -> bool:
+        can = self.permissions_for(self.guild.me)
+        if with_history:
+            return can.read_message_history and can.read_messages
 
     @property
     def threads(self) -> List[Thread]:
@@ -988,39 +994,6 @@ class VoiceChannel(VocalGuildChannel):
         reason: Optional[str] = ...,
     ) -> Optional[VoiceChannel]:
         ...
-    
-    async def create_party(
-        self,
-        application_name: PartyType,
-        max_age: int = 86400,
-        max_uses: int = 0
-    ) -> Party:
-        """|coro|
-        Creates a party in this voice channel.
-
-        Parameters
-        ----------
-        application_name : :class:`PartyType`
-            The id of the application the party belongs to. currently any of
-            ``youtube``, ``poker``, ``betrayal``, ``fishing``, ``chess``.
-        max_age : :class:`int`
-            Duration in seconds after which the invite expires, defaults to 86400.
-        max_uses : :class:`int`
-            maximum number of times this invite can be used, defaults to 0 (unlimited).
-        Raises
-        -------
-        Forbidden
-            You do not have permissions to create a party.
-        HTTPException
-            Party creation failed.
-        Returns
-        --------
-        :class:`Party`
-            The created party.
-        """
-        return Party(
-            await self._state.http.create_party(self.id, max_age, max_uses, PartyType[application_name].value)
-        )
 
     @overload
     async def edit(self) -> Optional[VoiceChannel]:
