@@ -324,7 +324,7 @@ def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
     
     Parameters
     -----------
-    token: :class:`token`
+    token: :class:`str`
         The bot token
     
     Returns
