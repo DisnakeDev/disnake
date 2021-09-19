@@ -24,7 +24,6 @@ bot = commands.Bot(intents=intents)
 async def rps(inter: Interaction, choice):  # NOTICE: The param which defines the option must have the exact same name.
     choices = ('rock', 'paper', 'scissors')  # We define a variable which holds a tuple with all the possible choices.
     bot_choice = random.choice(choices)  # We get the bot to pick a random value from ``choices``
-    # This is not necessary, but here we define the lost message so we don't have to repeat ourselves each time the user loses
 
     # First we check if the user lost.
     if (
@@ -33,9 +32,9 @@ async def rps(inter: Interaction, choice):  # NOTICE: The param which defines th
         (choice == 'scissors' and bot_choice == 'rock')
     ):
         content = f'You lost. The bot chose **{bot_choice}** while you chose **{choice}**'
-    elif choice == bot_choice:
+    elif choice == bot_choice:  # The user and the bot picked the same choice
         content = f'Draw. Both you and the bot chose: {choice}'
-    else:
+    else:  # The author won
         content = f'You won. You chose **{choice}** while the bot chose **{bot_choice}**'
     
     await inter.response.send_message(content, ephemeral=True)
