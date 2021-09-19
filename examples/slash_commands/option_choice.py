@@ -25,12 +25,6 @@ async def rps(inter: Interaction, choice):  # NOTICE: The param which defines th
     choices = ('rock', 'paper', 'scissors')  # We define a variable which holds a tuple with all the possible choices.
     bot_choice = random.choice(choices)  # We get the bot to pick a random value from ``choices``
     # This is not necessary, but here we define the lost message so we don't have to repeat ourselves each time the user loses
-    lost_message = f'You lost. The bot chose **{bot_choice}** while you chose **{choice}**'
-    # We do the same with the won message
-    won_message = f'You won. You chose **{choice}** while the bot chose **{bot_choice}**'
-
-    if choice == bot_choice:  # Check if the choice that the user picked is equal with the choice the bot picked.
-        await inter.response.send_message(f'Draw. Both you and the bot chose: {choice}', ephemeral=True)
 
     # First we check if the user lost.
     if (
