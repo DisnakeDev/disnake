@@ -18,7 +18,7 @@ Bot
 .. autoclass:: disnake.ext.commands.Bot
     :members:
     :inherited-members:
-    :exclude-members: after_invoke, before_invoke, check, check_once, command, event, group, listen
+    :exclude-members: after_invoke, before_invoke, check, check_once, command, event, group, listen, slash_command, user_command, message_command
 
     .. automethod:: Bot.after_invoke()
         :decorator:
@@ -33,6 +33,15 @@ Bot
         :decorator:
 
     .. automethod:: Bot.command(*args, **kwargs)
+        :decorator:
+    
+    .. automethod:: Bot.slash_command(*args, **kwargs)
+        :decorator:
+    
+    .. automethod:: Bot.user_command(*args, **kwargs)
+        :decorator:
+    
+    .. automethod:: Bot.message_command(*args, **kwargs)
         :decorator:
     
     .. automethod:: Bot.event()
@@ -80,6 +89,45 @@ are custom to the command extension module.
     :param error: The error that was raised.
     :type error: :class:`.CommandError` derived
 
+.. function:: disnake.ext.commands.on_slash_command_error(inter, error)
+
+    An error handler that is called when an error is raised
+    inside a slash command either through user input error, check
+    failure, or an error in your own code.
+
+    A default one is provided (:meth:`.Bot.on_slash_command_error`).
+
+    :param inter: The interaction that invoked this slash command.
+    :type inter: :class:`.ApplicationCommandInteraction`
+    :param error: The error that was raised.
+    :type error: :class:`.CommandError` derived
+
+.. function:: disnake.ext.commands.on_user_command_error(inter, error)
+
+    An error handler that is called when an error is raised
+    inside a user command either through check
+    failure, or an error in your own code.
+
+    A default one is provided (:meth:`.Bot.on_user_command_error`).
+
+    :param inter: The interaction that invoked this user command.
+    :type inter: :class:`.ApplicationCommandInteraction`
+    :param error: The error that was raised.
+    :type error: :class:`.CommandError` derived
+
+.. function:: disnake.ext.commands.on_message_command_error(inter, error)
+
+    An error handler that is called when an error is raised
+    inside a message command either through check
+    failure, or an error in your own code.
+
+    A default one is provided (:meth:`.Bot.on_message_command_error`).
+
+    :param inter: The interaction that invoked this message command.
+    :type inter: :class:`.ApplicationCommandInteraction`
+    :param error: The error that was raised.
+    :type error: :class:`.CommandError` derived
+
 .. function:: disnake.ext.commands.on_command(ctx)
 
     An event that is called when a command is found and is about to be invoked.
@@ -89,6 +137,36 @@ are custom to the command extension module.
 
     :param ctx: The invocation context.
     :type ctx: :class:`.Context`
+
+.. function:: disnake.ext.commands.on_slash_command(inter)
+
+    An event that is called when a slash command is found and is about to be invoked.
+
+    This event is called regardless of whether the slash command itself succeeds via
+    error or completes.
+
+    :param inter: The interaction that invoked this slash command.
+    :type inter: :class:`.ApplicationCommandInteraction`
+
+.. function:: disnake.ext.commands.on_user_command(inter)
+
+    An event that is called when a user command is found and is about to be invoked.
+
+    This event is called regardless of whether the user command itself succeeds via
+    error or completes.
+
+    :param inter: The interaction that invoked this user command.
+    :type inter: :class:`.ApplicationCommandInteraction`
+
+.. function:: disnake.ext.commands.on_message_command(inter)
+
+    An event that is called when a message command is found and is about to be invoked.
+
+    This event is called regardless of whether the message command itself succeeds via
+    error or completes.
+
+    :param inter: The interaction that invoked this message command.
+    :type inter: :class:`.ApplicationCommandInteraction`
 
 .. function:: disnake.ext.commands.on_command_completion(ctx)
 
@@ -111,8 +189,80 @@ Decorators
 .. autofunction:: disnake.ext.commands.command
     :decorator:
 
+.. autofunction:: disnake.ext.commands.slash_command
+    :decorator:
+
+.. autofunction:: disnake.ext.commands.user_command
+    :decorator:
+
+.. autofunction:: disnake.ext.commands.message_command
+    :decorator:
+
 .. autofunction:: disnake.ext.commands.group
     :decorator:
+
+Slash Command
+~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.InvokableSlashCommand
+
+.. autoclass:: disnake.ext.commands.InvokableSlashCommand
+    :members:
+    :special-members: __call__
+    :exclude-members: sub_command, sub_command_group, after_invoke, before_invoke, error
+
+    .. automethod:: InvokableSlashCommand.sub_command(*args, **kwargs)
+        :decorator:
+
+    .. automethod:: InvokableSlashCommand.sub_command_group(*args, **kwargs)
+        :decorator:
+    
+    .. automethod:: InvokableSlashCommand.after_invoke()
+        :decorator:
+
+    .. automethod:: InvokableSlashCommand.before_invoke()
+        :decorator:
+
+    .. automethod:: InvokableSlashCommand.error()
+        :decorator:
+
+User Command
+~~~~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.InvokableUserCommand
+
+.. autoclass:: disnake.ext.commands.InvokableUserCommand
+    :members:
+    :special-members: __call__
+    :exclude-members: after_invoke, before_invoke, error
+
+    .. automethod:: InvokableUserCommand.after_invoke()
+        :decorator:
+
+    .. automethod:: InvokableUserCommand.before_invoke()
+        :decorator:
+
+    .. automethod:: InvokableUserCommand.error()
+        :decorator:
+
+Message Command
+~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.InvokableMessageCommand
+
+.. autoclass:: disnake.ext.commands.InvokableMessageCommand
+    :members:
+    :special-members: __call__
+    :exclude-members: after_invoke, before_invoke, error
+
+    .. automethod:: InvokableMessageCommand.after_invoke()
+        :decorator:
+
+    .. automethod:: InvokableMessageCommand.before_invoke()
+        :decorator:
+
+    .. automethod:: InvokableMessageCommand.error()
+        :decorator:
 
 Command
 ~~~~~~~~~

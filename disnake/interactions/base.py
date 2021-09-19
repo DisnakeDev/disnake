@@ -33,7 +33,7 @@ from ..enums import try_enum, InteractionType, InteractionResponseType
 from ..errors import InteractionResponded, HTTPException, ClientException
 from ..channel import PartialMessageable, ChannelType
 
-from ..user import User
+from ..user import User, ClientUser
 from ..member import Member
 from ..message import Message, Attachment
 from ..object import Object
@@ -111,6 +111,7 @@ class Interaction:
         '_cs_response',
         '_cs_followup',
         '_cs_channel',
+        '_cs_me',
     )
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
@@ -163,6 +164,15 @@ class Interaction:
     def guild(self) -> Optional[Guild]:
         """Optional[:class:`Guild`]: The guild the interaction was sent from."""
         return self._state and self._state._get_guild(self.guild_id)
+
+    @utils.cached_slot_property('_cs_me')
+    def me(self) -> Optional[Union[Member, ClientUser]]:
+        """Union[:class:`.Member`, :class:`.ClientUser`]:
+        Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
+        """
+        if self.guild is None:
+            return None if self.bot is None else self.bot.user
+        return self.guild.me
 
     @utils.cached_slot_property('_cs_channel')
     def channel(self) -> Optional[InteractionChannel]:

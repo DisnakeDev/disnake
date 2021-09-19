@@ -30,24 +30,31 @@ import collections
 import collections.abc
 import inspect
 import importlib.util
+import logging
+import os
 import sys
 import traceback
+import time
 import types
-from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union, Set
+from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union, Set, Tuple
 
 import disnake
 
 from .core import GroupMixin
+from .base_core import InvokableApplicationCommand
+from .slash_core import InvokableSlashCommand
+from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
 from .view import StringView
 from .context import Context
+from .errors import CommandRegistrationError
 from . import errors
 from .help import HelpCommand, DefaultHelpCommand
 from .cog import Cog
+from .slash_core import slash_command
+from .ctx_menus_core import user_command, message_command
 
-from ..application_commands import slash_command, user_command, message_command
-
+from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
-from disnake._hub import _ApplicationCommandStore
 
 if TYPE_CHECKING:
     import importlib.machinery
@@ -57,11 +64,6 @@ if TYPE_CHECKING:
     from ._types import (
         Check,
         CoroFunc,
-    )
-    from ..application_commands import (
-        InvokableSlashCommand,
-        InvokableUserCommand,
-        InvokableMessageCommand
     )
 
 __all__ = (
@@ -144,9 +146,14 @@ class BotBase(GroupMixin):
         self._after_invoke = None
         self._help_command = None
         self.description = inspect.cleandoc(description) if description else ''
-        self.owner_id = options.get('owner_id')
-        self.owner_ids = options.get('owner_ids', set())
+        self.owner: Optional[disnake.User] = None
+        self.owners: Set[disnake.User] = set()
         self.strip_after_prefix = options.get('strip_after_prefix', False)
+        self.reload: bool = options.get('reload', False)
+
+        self.all_slash_commands: Dict[str, InvokableSlashCommand] = {}
+        self.all_user_commands: Dict[str, InvokableUserCommand] = {}
+        self.all_message_commands: Dict[str, InvokableMessageCommand] = {}
 
         if self.owner_id and self.owner_ids:
             raise TypeError('Both owner_id and owner_ids are set.')
@@ -158,31 +165,183 @@ class BotBase(GroupMixin):
             self.help_command = DefaultHelpCommand()
         else:
             self.help_command = help_command
+        
+        self.add_listener(self._fill_owners, 'on_connect')
+        if self.reload:
+            self.add_listener(self._watchdog, 'on_ready')
 
     @property
-    def owner(self):
-        if self.owner_id and not self.owner_ids:
-            return self.get_user(self.owner_id)
+    def owner_id(self) -> Optional[int]:
+        if self.owner is not None:
+            return self.owner.id
     
     @property
-    def owners(self):
-        if self.owner_ids and not self.owner_id:
-            list_of_owners = []
-            for owner_id in self.owner_ids:
-                list_of_owners.append(self.get_user(owner_id))
-        return list_of_owners
+    def owner_ids(self) -> Set[int]:
+        return {user.id for user in self.owners}
+
+    @property
+    def application_commands(self) -> Set[InvokableApplicationCommand]:
+        result = set()
+        for cmd in self.all_slash_commands.values():
+            result.add(cmd)
+        for cmd in self.all_user_commands.values():
+            result.add(cmd)
+        for cmd in self.all_message_commands.values():
+            result.add(cmd)
+        return result
 
     @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:
-        return set(_ApplicationCommandStore.slash_commands.values())
+        return set(self.all_slash_commands.values())
 
     @property
     def user_commands(self) -> Set[InvokableUserCommand]:
-        return set(_ApplicationCommandStore.user_commands.values())
+        return set(self.all_user_commands.values())
 
     @property
     def message_commands(self) -> Set[InvokableMessageCommand]:
-        return set(_ApplicationCommandStore.message_commands.values())
+        return set(self.all_message_commands.values())
+
+    def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
+        """Adds an :class:`.InvokableSlashCommand` into the internal list of slash commands.
+
+        This is usually not called, instead the :meth:`~.BotBase.slash_command` or
+        shortcut decorators are used.
+
+        Parameters
+        -----------
+        slash_command: :class:`InvokableSlashCommand`
+            The slash command to add.
+
+        Raises
+        -------
+        :exc:`.CommandRegistrationError`
+            If the slash command is already registered.
+        TypeError
+            If the slash command passed is not an instance of :class:`.InvokableSlashCommand`.
+        """
+
+        if not isinstance(slash_command, InvokableSlashCommand):
+            raise TypeError('The slash_command passed must be an instance of InvokableSlashCommand')
+
+        if slash_command.name in self.all_slash_commands:
+            raise CommandRegistrationError(slash_command.name)
+
+        self.all_slash_commands[slash_command.name] = slash_command
+
+    def add_user_command(self, user_command: InvokableUserCommand) -> None:
+        """Adds an :class:`.InvokableUserCommand` into the internal list of user commands.
+
+        This is usually not called, instead the :meth:`~.BotBase.user_command` or
+        shortcut decorators are used.
+
+        Parameters
+        -----------
+        user_command: :class:`InvokableUserCommand`
+            The user command to add.
+
+        Raises
+        -------
+        :exc:`.CommandRegistrationError`
+            If the user command is already registered.
+        TypeError
+            If the user command passed is not an instance of :class:`.InvokableUserCommand`.
+        """
+
+        if not isinstance(user_command, InvokableUserCommand):
+            raise TypeError('The user_command passed must be an instance of InvokableUserCommand')
+
+        if user_command.name in self.all_user_commands:
+            raise CommandRegistrationError(user_command.name)
+
+        self.all_user_commands[user_command.name] = user_command
+
+    def add_message_command(self, message_command: InvokableMessageCommand) -> None:
+        """Adds an :class:`.InvokableMessageCommand` into the internal list of message commands.
+
+        This is usually not called, instead the :meth:`~.BotBase.message_command` or
+        shortcut decorators are used.
+
+        Parameters
+        -----------
+        message_command: :class:`InvokableMessageCommand`
+            The message command to add.
+
+        Raises
+        -------
+        :exc:`.CommandRegistrationError`
+            If the message command is already registered.
+        TypeError
+            If the message command passed is not an instance of :class:`.InvokableMessageCommand`.
+        """
+
+        if not isinstance(message_command, InvokableMessageCommand):
+            raise TypeError('The message_command passed must be an instance of InvokableMessageCommand')
+
+        if message_command.name in self.all_message_commands:
+            raise CommandRegistrationError(message_command.name)
+
+        self.all_message_commands[message_command.name] = message_command
+
+    def remove_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
+        """Remove a :class:`.InvokableSlashCommand` from the internal list
+        of slash commands.
+
+        Parameters
+        -----------
+        name: :class:`str`
+            The name of the command to remove.
+
+        Returns
+        --------
+        Optional[:class:`.InvokableSlashCommand`]
+            The command that was removed. If the name is not valid then
+            ``None`` is returned instead.
+        """
+        command = self.all_slash_commands.pop(name, None)
+        if command is None:
+            return None
+        return command
+
+    def remove_user_command(self, name: str) -> Optional[InvokableUserCommand]:
+        """Remove a :class:`.InvokableUserCommand` from the internal list
+        of user commands.
+
+        Parameters
+        -----------
+        name: :class:`str`
+            The name of the command to remove.
+
+        Returns
+        --------
+        Optional[:class:`.InvokableUserCommand`]
+            The command that was removed. If the name is not valid then
+            ``None`` is returned instead.
+        """
+        command = self.all_user_commands.pop(name, None)
+        if command is None:
+            return None
+        return command
+    
+    def remove_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
+        """Remove a :class:`.InvokableMessageCommand` from the internal list
+        of message commands.
+
+        Parameters
+        -----------
+        name: :class:`str`
+            The name of the command to remove.
+
+        Returns
+        --------
+        Optional[:class:`.InvokableMessageCommand`]
+            The command that was removed. If the name is not valid then
+            ``None`` is returned instead.
+        """
+        command = self.all_message_commands.pop(name, None)
+        if command is None:
+            return None
+        return command
 
     def get_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
         """Get a :class:`.InvokableSlashCommand` from the internal list
@@ -198,7 +357,7 @@ class BotBase(GroupMixin):
         Optional[:class:`InvokableSlashCommand`]
             The slash command that was requested. If not found, returns ``None``.
         """
-        return _ApplicationCommandStore.slash_commands.get(name)
+        return self.all_slash_commands.get(name)
 
     def get_user_command(self, name: str) -> Optional[InvokableUserCommand]:
         """Get a :class:`.InvokableUserCommand` from the internal list
@@ -214,7 +373,7 @@ class BotBase(GroupMixin):
         Optional[:class:`InvokableUserCommand`]
             The user command that was requested. If not found, returns ``None``.
         """
-        return _ApplicationCommandStore.user_commands.get(name)
+        return self.all_user_commands.get(name)
 
     def get_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
         """Get a :class:`.InvokableMessageCommand` from the internal list
@@ -230,7 +389,7 @@ class BotBase(GroupMixin):
         Optional[:class:`InvokableMessageCommand`]
             The message command that was requested. If not found, returns ``None``.
         """
-        return _ApplicationCommandStore.message_commands.get(name)
+        return self.all_message_commands.get(name)
 
     def slash_command(
         self,
@@ -245,7 +404,8 @@ class BotBase(GroupMixin):
         **kwargs
     ) -> Callable:
         """
-        A decorator that builds a slash command.
+        A shortcut decorator that invokes :func:`.slash_command` and adds it to
+        the internal command list.
 
         Parameters
         ----------
@@ -267,17 +427,26 @@ class BotBase(GroupMixin):
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``
+        
+        Returns
+        --------
+        Callable[..., :class:`InvokableSlashCommand`]
+            A decorator that converts the provided method into a InvokableSlashCommand, adds it to the bot, then returns it.
         """
-        return slash_command(
-            name=name,
-            description=description,
-            options=options,
-            default_permission=default_permission,
-            guild_ids=guild_ids,
-            connectors=connectors,
-            auto_sync=auto_sync,
-            **kwargs
-        )
+        def decorator(func) -> InvokableSlashCommand:
+            result = slash_command(
+                name=name,
+                description=description,
+                options=options,
+                default_permission=default_permission,
+                guild_ids=guild_ids,
+                connectors=connectors,
+                auto_sync=auto_sync,
+                **kwargs
+            )(func)
+            self.add_slash_command(result)
+            return result
+        return decorator
 
     def user_command(
         self,
@@ -288,7 +457,8 @@ class BotBase(GroupMixin):
         **kwargs
     ) -> Callable:
         """
-        A decorator that builds a user command.
+        A shortcut decorator that invokes :func:`.user_command` and adds it to
+        the internal command list.
 
         Parameters
         ----------
@@ -299,8 +469,17 @@ class BotBase(GroupMixin):
         guild_ids: List[:class:`int`]
             if specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally.
+        
+        Returns
+        --------
+        Callable[..., :class:`InvokableUserCommand`]
+            A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
-        return user_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
+        def decorator(func):
+            result = user_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
+            self.add_user_command(result)
+            return result
+        return decorator
 
     def message_command(
         self,
@@ -311,7 +490,8 @@ class BotBase(GroupMixin):
         **kwargs
     ) -> Callable:
         """
-        A decorator that builds a message command.
+        A shortcut decorator that invokes :func:`.message_command` and adds it to
+        the internal command list.
 
         Parameters
         ----------
@@ -322,8 +502,17 @@ class BotBase(GroupMixin):
         guild_ids: List[:class:`int`]
             if specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally.
+        
+        Returns
+        --------
+        Callable[..., :class:`InvokableUserCommand`]
+            A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
-        return message_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
+        def decorator(func):
+            result = message_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
+            self.add_message_command(result)
+            return result
+        return decorator
 
     # internal helpers
 
@@ -333,6 +522,25 @@ class BotBase(GroupMixin):
         ev = 'on_' + event_name
         for event in self.extra_events.get(ev, []):
             self._schedule_event(event, ev, *args, **kwargs)  # type: ignore
+
+    def _ordered_unsynced_commands(
+        self, test_guilds: List[int] = None
+    ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
+        global_cmds = []
+        guilds = {}
+        for cmd in self.application_commands:
+            if not cmd.auto_sync:
+                cmd.body._always_synced = True
+            guild_ids = cmd.guild_ids or test_guilds
+            if guild_ids is None:
+                global_cmds.append(cmd.body)
+            else:
+                for guild_id in guild_ids:
+                    if guild_id not in guilds:
+                        guilds[guild_id] = [cmd.body]
+                    else:
+                        guilds[guild_id].append(cmd.body)
+        return global_cmds, guilds
 
     @disnake.utils.copy_doc(disnake.Client.close)
     async def close(self) -> None:
@@ -349,6 +557,15 @@ class BotBase(GroupMixin):
                 pass
 
         await super().close()  # type: ignore
+
+    async def _fill_owners(self):
+        if self.owner or self.owners:
+            return
+        app = await self.application_info()  # type: ignore
+        if app.team:
+            self.owners = set(app.team.members)
+        else:
+            self.owner = app.owner
 
     async def on_command_error(self, context: Context, exception: errors.CommandError) -> None:
         """|coro|
@@ -568,19 +785,18 @@ class BotBase(GroupMixin):
             Whether the user is the owner.
         """
 
-        if self.owner_id:
-            return user.id == self.owner_id
+        if self.owner is not None:
+            return user.id == self.owner.id
         elif self.owner_ids:
-            return user.id in self.owner_ids
+            return user in self.owners
         else:
-
             app = await self.application_info()  # type: ignore
             if app.team:
-                self.owner_ids = ids = {m.id for m in app.team.members}
-                return user.id in ids
+                self.owners = owners = set(app.team.members)
+                return user in owners
             else:
-                self.owner_id = owner_id = app.owner.id
-                return user.id == owner_id
+                self.owner = owner = app.owner
+                return user == owner
 
     def before_invoke(self, coro: CFT) -> CFT:
         """A decorator that registers a coroutine as a pre-invoke hook.
@@ -662,7 +878,7 @@ class BotBase(GroupMixin):
         Example
         --------
 
-        .. code-block:: python3
+        .. code-block:: python
 
             async def on_ready(): pass
             async def my_message(message): pass
@@ -1278,26 +1494,27 @@ class BotBase(GroupMixin):
         interaction.bot = self
         command_type = interaction.data.type
         command_name = interaction.data.name
-        error_event = None
+        event_name = None
         if command_type is ApplicationCommandType.chat_input:
-            app_command = _ApplicationCommandStore.slash_commands.get(command_name)
-            error_event = 'slash_command_error'
+            app_command = self.all_slash_commands.get(command_name)
+            event_name = 'slash_command'
         elif command_type is ApplicationCommandType.user:
-            app_command = _ApplicationCommandStore.user_commands.get(command_name)
-            error_event = 'user_command_error'
+            app_command = self.all_user_commands.get(command_name)
+            event_name = 'user_command'
         elif command_type is ApplicationCommandType.message:
-            app_command = _ApplicationCommandStore.message_commands.get(command_name)
-            error_event = 'message_command_error'
+            app_command = self.all_message_commands.get(command_name)
+            event_name = 'message_command'
         else:
             app_command = None
         if app_command is None:
             # TODO: unregister this command from API
             return
         if app_command.guild_ids is None or interaction.guild_id in app_command.guild_ids:
+            self.dispatch(event_name, interaction)
             try:
                 await app_command.invoke(interaction)
-            except Exception as exc:
-                self.dispatch(error_event, interaction, exc)
+            except errors.CommandError as exc:
+                await app_command.dispatch_error(interaction, exc)
         else:
             # TODO: unregister this command from API
             pass
@@ -1307,6 +1524,47 @@ class BotBase(GroupMixin):
     
     async def on_application_command(self, interaction: ApplicationCommandInteraction):
         await self.process_application_commands(interaction)
+    
+    async def _watchdog(self):
+        """|coro|
+        
+        Starts the bot watchdog which will watch currently loaded extensions 
+        and reload them when they're modified.
+        """
+        del self.extra_events['on_ready'][0]
+        reload_log = logging.getLogger(__name__)
+        # ensure the message actually shows up
+        if logging.root.level > logging.INFO:
+            logging.basicConfig()
+            reload_log.setLevel(logging.INFO)
+        
+        if isinstance(self, disnake.Client):
+            is_closed = self.is_closed
+        else:
+            is_closed = lambda: False
+        
+        reload_log.info(f"WATCHDOG: Watching extensions")
+        
+        last = time.time()
+        while not is_closed():
+            t = time.time()
+            
+            extensions = set()
+            for name, module in self.extensions.items():
+                file = module.__file__
+                if os.stat(file).st_mtime > last:
+                    extensions.add(name)
+            
+            for name in extensions:
+                try:
+                    self.reload_extension(name)
+                except errors.ExtensionError as e:
+                    reload_log.exception(e)
+                else:
+                    reload_log.info(f"WATCHDOG: Reloaded '{name}'")
+            
+            await asyncio.sleep(1)
+            last = t
 
 class Bot(BotBase, disnake.Client):
     """Represents a disnake bot.
@@ -1377,6 +1635,12 @@ class Bot(BotBase, disnake.Client):
         the ``command_prefix`` is set to ``!``. Defaults to ``False``.
 
         .. versionadded:: 1.7
+    reload: :class:`bool`
+        Whether to enable automatic extension reloading on file modification for debugging.
+        Whenever you save an extension with reloading enabled the file will be automatically
+        reloaded for you so you do not have to reload the extension manually.
+        
+        .. versionadded:: 2.0
     """
     pass
 

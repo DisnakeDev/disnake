@@ -42,6 +42,9 @@ extras_require = {
     ],
     'speed': [
         'orjson>=3.5.4',
+        'aiodns>=1.1',
+        'Brotli',
+        'cchardet',
     ]
 }
 
@@ -51,16 +54,22 @@ packages = [
     'disnake.ui',
     'disnake.webhook',
     'disnake.interactions',
-    'disnake.ext.application_commands',
     'disnake.ext.commands',
     'disnake.ext.tasks',
+    'discord',
+    'discord.types',
+    'discord.ui',
+    'discord.webhook',
+    'discord.interactions',
+    'discord.ext.commands',
+    'discord.ext.tasks',
 ]
 
 setup(name='disnake',
       author='Rapptz, EQUENOS',
       url='https://github.com/EQUENOS/disnake',
       project_urls={
-        "Documentation": "https://discordpy.readthedocs.io/en/latest/",  # TODO: docs link
+        "Documentation": "https://disnake.readthedocs.io/en/latest/",
         "Issue tracker": "https://github.com/EQUENOS/disnake/issues",
       },
       version=version,

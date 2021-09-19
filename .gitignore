@@ -14,7 +14,9 @@ docs/crowdin.py
 *.jpg
 *.flac
 *.mo
-.gitignore
 test.py
-zzz.py
 TODO.md
+build
+tests
+dist
+ADVANCED.rst

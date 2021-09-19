@@ -1,0 +1,1 @@
+from disnake.appinfo import *

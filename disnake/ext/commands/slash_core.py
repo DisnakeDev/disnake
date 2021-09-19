@@ -1,14 +1,16 @@
 from __future__ import annotations
 from typing import Any, Dict, List, Tuple, Union, TYPE_CHECKING, Callable
+
 from .base_core import InvokableApplicationCommand, _get_overridden_method
+from .errors import *
 
 from disnake.app_commands import SlashCommand, Option
 from disnake.enums import OptionType
-from disnake._hub import _ApplicationCommandStore
-
-from ..commands.errors import *
 
 import asyncio
+
+if TYPE_CHECKING:
+    from disnake.interactions import ApplicationCommandInteraction
 
 __all__ = (
     'InvokableSlashCommand',
@@ -16,9 +18,6 @@ __all__ = (
     'SubCommand',
     'slash_command'
 )
-
-if TYPE_CHECKING:
-    from disnake.interactions import ApplicationCommandInteraction
 
 
 def options_as_route(options: Dict[str, Any]) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
@@ -41,6 +40,7 @@ class SubCommandGroup(InvokableApplicationCommand):
             type=OptionType.sub_command_group,
             options=[]
         )
+        self.qualified_name: str = None
 
     def sub_command(
         self,
@@ -54,6 +54,11 @@ class SubCommandGroup(InvokableApplicationCommand):
         A decorator that creates a subcommand in the
         subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
+
+        Returns
+        --------
+        Callable[..., :class:`SubCommand`]
+            A decorator that converts the provided method into a SubCommand, adds it to the bot, then returns it.
         """
 
         def decorator(func) -> SubCommand:
@@ -65,6 +70,8 @@ class SubCommandGroup(InvokableApplicationCommand):
                 connectors=connectors,
                 **kwargs
             )
+            qualified_name = self.qualified_name or self.name
+            new_func.qualified_name = f'{qualified_name} {new_func.name}'
             self.children[new_func.name] = new_func
             self.option.options.append(new_func.option)
             return new_func
@@ -90,6 +97,7 @@ class SubCommand(InvokableApplicationCommand):
             type=OptionType.sub_command,
             options=options
         )
+        self.qualified_name = None
 
 
 class InvokableSlashCommand(InvokableApplicationCommand):
@@ -142,6 +150,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``
+        
+        Returns
+        --------
+        Callable[..., :class:`SubCommand`]
+            A decorator that converts the provided method into a SubCommand, adds it to the bot, then returns it.
         """
         def decorator(func) -> SubCommand:
             if len(self.children) == 0:
@@ -155,6 +168,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 connectors=connectors,
                 **kwargs
             )
+            new_func.qualified_name = f'{self.qualified_name} {new_func.name}'
             self.children[new_func.name] = new_func
             self.body.options.append(new_func.option)
             return new_func
@@ -167,19 +181,23 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     ) -> Callable:
         """
         A decorator that creates a subcommand group under the base command.
-        Remember that the group must have at least one subcommand.
 
         Parameters
         ----------
         name : :class:`str`
             the name of the subcommand group. Defaults to the function name
+        
+        Returns
+        --------
+        Callable[..., :class:`SubCommandGroup`]
+            A decorator that converts the provided method into a SubCommandGroup, adds it to the bot, then returns it.
         """
         def decorator(func) -> SubCommandGroup:
             if len(self.children) == 0:
                 if len(self.body.options) > 0:
                     self.body.options = []
-
             new_func = SubCommandGroup(func, name=name, **kwargs)
+            new_func.qualified_name = f'{self.qualified_name} {new_func.name}'
             self.children[new_func.name] = new_func
             self.body.options.append(new_func.option)
             return new_func
@@ -209,29 +227,42 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             subcmd = group.children.get(chain[1]) if group is not None else None
 
         if group is not None:
-            await group.invoke(inter)
+            try:
+                await group.invoke(inter)
+            except Exception as exc:
+                await group._call_local_error_handler(inter, exc)
+                raise
         
         if subcmd is not None:
-            await subcmd.invoke(inter, **kwargs)
+            try:
+                await subcmd.invoke(inter, **kwargs)
+            except Exception as exc:
+                await subcmd._call_local_error_handler(inter, exc)
+                raise
 
     async def invoke(self, inter: ApplicationCommandInteraction):
-        # interaction._wrap_choices(self.body)
-        inter.application_command = self
+        await self.prepare(inter)
+
         try:
-            await self.prepare(inter)
             if len(self.children) > 0:
                 await self(inter)
                 await self.invoke_children(inter)
             else:
                 await self(inter, **inter.options)
+        except CommandError:
+            inter.command_failed = True
+            raise
+        except asyncio.CancelledError:
+            inter.command_failed = True
+            return
         except Exception as exc:
             inter.command_failed = True
-            if not isinstance(exc, CommandError):
-                exc = CommandInvokeError(exc)
-            await self.dispatch_error(inter, exc)
+            raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)
+
+            await self.call_after_hooks(inter)
 
 
 def slash_command(
@@ -273,6 +304,8 @@ def slash_command(
     def decorator(func) -> InvokableSlashCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
+        if hasattr(func, '__command_flag__'):
+            raise TypeError('Callback is already a command.')
         new_func = InvokableSlashCommand(
             func,
             name=name,
@@ -284,6 +317,5 @@ def slash_command(
             auto_sync=auto_sync,
             **kwargs
         )
-        _ApplicationCommandStore.slash_commands[new_func.name] = new_func
         return new_func
     return decorator

@@ -11,6 +11,9 @@ An extension module to facilitate creation of bot commands.
 from .bot import *
 from .context import *
 from .core import *
+from .base_core import *
+from .slash_core import *
+from .ctx_menus_core import *
 from .errors import *
 from .help import *
 from .converter import *
