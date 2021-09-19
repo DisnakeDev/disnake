@@ -7,7 +7,7 @@ import random
 intents = Intents.all()
 # In production please choose the intents coresponding to your use case.
 
-# We create the instance of the bot
+# We create the instance of the bot.
 bot = commands.Bot(intents=intents)
 
 # For this example we're going to make a rock-paper-scissors game
@@ -21,7 +21,7 @@ bot = commands.Bot(intents=intents)
         ],
         required=True)  # We're going to make this be a required option.
     ])
-async def rps(inter: Interaction, choice):	# NOTICE: The param which defines the option must have the exact same name.
+async def rps(inter: Interaction, choice):  # NOTICE: The param which defines the option must have the exact same name.
     choices = ('rock', 'paper', 'scissors')  # We define a variable which holds a tuple with all the possible choices.
     bot_choice = random.choice(choices)  # We get the bot to pick a random value from ``choices``
     # This is not necessary, but here we define the lost message so we don't have to repeat ourselves each time the user loses
