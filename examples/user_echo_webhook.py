@@ -27,7 +27,8 @@ async def userecho(ctx, member: disnake.Member, *, content):
 
     # We check if the bot's webhook already exists in the channel.
     for webhook in channel_webhooks:
-        if webhook.name == "Bot Webhook":
+        # We will check if the creator of the webhook is the same as the bot, and if the name is the same.
+        if webhook.user.id == client.user.id and webhook.name == "Bot Webhook":
             await webhook.send(content=content, username=member.display_name, avatar_url=member.avatar)
             return # The program will not go further.
     
