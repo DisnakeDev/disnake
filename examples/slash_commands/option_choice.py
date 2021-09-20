@@ -1,6 +1,5 @@
 from disnake import Option, OptionChoice, Interaction, Intents
 from disnake.ext import commands
-from disnake.ext.commands import slash_command
 
 import random
 
@@ -12,7 +11,7 @@ bot = commands.Bot(intents=intents)
 
 # For this example we're going to make a rock-paper-scissors game
 # which will use OptionChoice as the input.
-@slash_command(name='rps', description='Play a game of rock-paper-scissors with the bot.',
+@bot.slash_command(name='rps', description='Play a game of rock-paper-scissors with the bot.',
     options=[
         Option(name='choice', description='Select your choice for rock-paper-scissors.', choices=[
             OptionChoice(name='Rock', value='rock'),
