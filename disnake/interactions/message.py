@@ -4,6 +4,7 @@ from typing import List, Optional, TYPE_CHECKING
 from .base import Interaction
 
 from ..components import ActionRow, Component
+from ..enums import ComponentType, try_enum
 from ..utils import cached_slot_property
 from ..message import Message
 
@@ -15,8 +16,7 @@ __all__ = (
 if TYPE_CHECKING:
     from ..types.interactions import (
         Interaction as InteractionPayload,
-        ComponentInteractionData as ComponentInteractionDataPayload,
-        ComponentType
+        ComponentInteractionData as ComponentInteractionDataPayload
     )
     from ..state import ConnectionState
 
@@ -81,18 +81,12 @@ class MessageInteractionData:
 
     Attributes
     ----------
-    id: :class:`int`
-        The application command ID.
-    name: :class:`str`
-        The application command name.
-    type: :class:`ApplicationCommandType`
-        The application command type.
     custom_id: :class:`str`
         The custom ID of the component.
     component_type: :class:`ComponentType`
         The type of the component.
     values: Optional[List[:class:`str`]]
-        The values the user selected
+        The values the user has selected.
     """
 
     __slots__ = (
@@ -104,5 +98,5 @@ class MessageInteractionData:
     def __init__(self, *, data: ComponentInteractionDataPayload):
         data = {} if data is None else data
         self.custom_id: str = data.get('custom_id')
-        self.component_type: ComponentType = data.get('component_type')
+        self.component_type: ComponentType = try_enum(ComponentType, data.get('component_type', 0))
         self.values: Optional[List[str]] = data.get('values')

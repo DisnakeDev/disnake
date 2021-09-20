@@ -49,7 +49,7 @@ from typing import (
     TYPE_CHECKING,
 )
 import unicodedata
-from base64 import b64encode
+from base64 import b64encode, urlsafe_b64decode as b64decode
 from bisect import bisect_left
 import datetime
 import functools
@@ -73,6 +73,7 @@ else:
 
 __all__ = (
     'oauth_url',
+    'parse_token',
     'snowflake_time',
     'time_snowflake',
     'find',
@@ -315,6 +316,32 @@ def oauth_url(
         url += '&disable_guild_select=true'
     return url
 
+
+def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
+    """Parse a token into its parts
+    
+    Returns 
+    
+    Parameters
+    -----------
+    token: :class:`str`
+        The bot token
+    
+    Returns
+    --------
+    Tuple[:class:`int`, :class:`datetime.datetime`, :class:`bytes`]
+        the bot's id, the time when the token was generated and the hmac.
+    """
+    parts = token.split('.')
+    
+    user_id = int(b64decode(parts[0]))
+    
+    timestamp = int.from_bytes(b64decode(parts[1] + '=='), 'big')
+    created_at = datetime.datetime.fromtimestamp(timestamp, datetime.timezone.utc)
+    
+    hmac = b64decode(parts[2] + '==')
+    
+    return user_id, created_at, hmac
 
 def snowflake_time(id: int) -> datetime.datetime:
     """
