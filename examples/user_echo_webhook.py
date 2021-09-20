@@ -28,12 +28,12 @@ async def userecho(ctx, member: disnake.Member, *, content):
     # We check if the bot's webhook already exists in the channel.
     for webhook in channel_webhooks:
         if webhook.name == "Bot Webhook":
-            webhook_count += 1
             await webhook.send(content=content, username=member.display_name, avatar_url=member.avatar)
+            return # The program will not go further.
+    
     # If the webhook does not exist, it will be created.
-    if webhook_count == 0:
-        new_webhook = await ctx.channel.create_webhook(name="Bot Webhook", reason="Bot Webhook")
-        await new_webhook.send(content=content, username=member.display_name, avatar_url=member.avatar)
+    new_webhook = await ctx.channel.create_webhook(name="Bot Webhook", reason="Bot Webhook")
+    await new_webhook.send(content=content, username=member.display_name, avatar_url=member.avatar)
 
     # Finally, sending the message via the webhook - the bot will fetch the user's display name and avatar.
     # TO_NOTE: This method cannot impersonate the member's roles, since it works using webhooks.
