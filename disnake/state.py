@@ -47,7 +47,7 @@ from .channel import _channel_factory
 from .raw_models import *
 from .member import Member
 from .role import Role
-from .enums import ChannelType, try_enum, Status
+from .enums import ChannelType, ComponentType, Status, try_enum
 from . import utils
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .object import Object
@@ -761,6 +761,10 @@ class ConnectionState:
             interaction = MessageInteraction(data=data, state=self)
             self._view_store.dispatch(interaction)
             self.dispatch('message_interaction', interaction)
+            if interaction.data.component_type is ComponentType.button:
+                self.dispatch('button_click', interaction)
+            elif interaction.data.component_type is ComponentType.select:
+                self.dispatch('dropdown', interaction)
         else:
             pass
 
