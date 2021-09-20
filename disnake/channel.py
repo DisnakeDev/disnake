@@ -232,14 +232,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         """List[:class:`Member`]: Returns all members that can see this channel."""
         return [m for m in self.guild.members if self.permissions_for(m).read_messages]
     
-    @property
     def can_send(self, with_embeds: bool = True):
         can = self.permissions_for(self.guild.me)
         if with_embeds:
             return can.send_messages and can.embed_links
         return can.send_messages
     
-    @property
     def can_read(self, with_history: bool = True) -> bool:
         can = self.permissions_for(self.guild.me)
         if with_history:
