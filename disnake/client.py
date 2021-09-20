@@ -1846,10 +1846,25 @@ class Client:
 
     # Application commands (global)
 
-    async def fetch_global_commands(self):
+    async def fetch_global_commands(self) -> List[ApplicationCommand]:
         results = await self.http.get_global_commands(self.application_id)
         return [application_command_factory(data) for data in results]
     
+    async def fetch_global_command(self, command_id: int) -> ApplicationCommand:
+        result = await self.http.get_global_command(self.application_id, command_id)
+        return application_command_factory(result)
+
+    async def create_global_command(self, application_command: ApplicationCommand) -> ApplicationCommand:
+        result = await self.http.upsert_global_command(self.application_id, application_command.to_dict())
+        return application_command_factory(result)
+
+    async def edit_global_command(self, command_id: int, new_command: ApplicationCommand) -> ApplicationCommand:
+        result = await self.http.edit_global_command(self.application_id, command_id, new_command)
+        return application_command_factory(result)
+
+    async def delete_global_command(self, command_id: int) -> None:
+        await self.http.delete_global_command(self.application_id, command_id)
+
     async def bulk_overwrite_global_commands(self, application_commands: List[ApplicationCommand]):
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_global_commands(self.application_id, payload)
@@ -1861,6 +1876,21 @@ class Client:
         results = await self.http.get_guild_commands(self.application_id, guild_id)
         return [application_command_factory(data) for data in results]
     
+    async def fetch_guild_command(self, guild_id: int, command_id: int) -> ApplicationCommand:
+        result = await self.http.get_guild_command(self.application_id, guild_id, command_id)
+        return application_command_factory(result)
+
+    async def create_guild_command(self, guild_id: int, application_command: ApplicationCommand) -> ApplicationCommand:
+        result = await self.http.upsert_guild_command(self.application_id, guild_id, application_command.to_dict())
+        return application_command_factory(result)
+
+    async def edit_guild_command(self, guild_id: int, command_id: int, new_command: ApplicationCommand) -> ApplicationCommand:
+        result = await self.http.edit_guild_command(self.application_id, guild_id, command_id, new_command)
+        return application_command_factory(result)
+
+    async def delete_guild_command(self, guild_id: int, command_id: int) -> None:
+        await self.http.delete_guild_command(self.application_id, guild_id, command_id)
+
     async def bulk_overwrite_guild_commands(self, guild_id: int, application_commands: List[ApplicationCommand]):
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_guild_commands(self.application_id, guild_id, payload)
@@ -1868,10 +1898,25 @@ class Client:
 
     # Application command permissions
 
-    async def fetch_guild_command_permissions(self, guild_id: int):
+    async def fetch_guild_command_permissions(
+        self, guild_id: int
+    ) -> Dict[int, ApplicationCommandPermissions]:
         array = await self.http.get_guild_application_command_permissions(self.application_id, guild_id)
         return {int(obj["id"]): ApplicationCommandPermissions.from_dict(obj) for obj in array}
     
+    async def fetch_command_permissions(
+        self, guild_id: int, command_id: int
+    ) -> ApplicationCommandPermissions:
+        data = await self.http.get_application_command_permissions(self.application_id, guild_id, command_id)
+        return ApplicationCommandPermissions.from_dict(data)
+
+    async def edit_command_permissions(
+        self, guild_id: int, command_id: int, new_permissions: ApplicationCommandPermissions
+    ) -> None:
+        await self.http.edit_application_command_permissions(
+            self.application_id, guild_id, command_id, new_permissions.to_dict()
+        )
+
     async def bulk_edit_guild_command_permissions(self, guild_id: int, permissions: Dict[int, ApplicationCommandPermissions]):
         payload = []
         for cmd_id, perms in permissions.items():

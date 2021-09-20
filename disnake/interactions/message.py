@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, Union, TYPE_CHECKING
 
 from .base import Interaction
 
-from ..components import ActionRow, Component
+from ..components import ActionRow
 from ..enums import ComponentType, try_enum
 from ..utils import cached_slot_property
 from ..message import Message
@@ -18,6 +18,7 @@ if TYPE_CHECKING:
         Interaction as InteractionPayload,
         ComponentInteractionData as ComponentInteractionDataPayload
     )
+    from ..components import Button, SelectMenu
     from ..state import ConnectionState
 
 
@@ -65,7 +66,7 @@ class MessageInteraction(Interaction):
         return self.data.values
 
     @cached_slot_property('_cs_component')
-    def component(self) -> Component:
+    def component(self) -> Union[Button, SelectMenu]:
         for action_row in self.message.components:
             if not isinstance(action_row, ActionRow):
                 continue
