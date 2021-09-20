@@ -1,4 +1,4 @@
-from disnake import Option, OptionChoice, Interaction, Intents
+from disnake import Option, OptionChoice, ApplicationCommandInteraction, Intents
 from disnake.ext import commands
 
 import random
@@ -20,7 +20,7 @@ bot = commands.Bot(intents=intents)
         ],
         required=True)  # We're going to make this be a required option.
     ])
-async def rps(inter: Interaction, choice):  # NOTICE: The param which defines the option must have the exact same name.
+async def rps(inter: ApplicationCommandInteraction, choice):  # NOTICE: The param which defines the option must have the exact same name.
     choices = ('rock', 'paper', 'scissors')  # We define a variable which holds a tuple with all the possible choices.
     bot_choice = random.choice(choices)  # We get the bot to pick a random value from ``choices``
 
