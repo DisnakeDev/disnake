@@ -96,10 +96,14 @@ class Param:
     def __repr__(self):
         return f"<Param default={self.default!r} name={self.name!r} description={self.description!r}>"
 
-    def get_default(self, inter: Interaction) -> Any:
+    async def get_default(self, inter: Interaction) -> Any:
         """Gets the default for an interaction"""
         if callable(self.default):
-            return self.default(inter)
+            default = self.default(inter)
+            if inspect.isawaitable(default):
+                return await default
+            
+            return default
         
         return self.default
 
@@ -168,7 +172,7 @@ def create_connector(params: List[Param]) -> Dict[str, Any]:
     }
 
 
-def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     """Resolves a call with kwargs and transforms into normal kwargs
     
     Depends on the fact that optionparams already contain all info.
@@ -182,7 +186,7 @@ def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[str, A
         if not isinstance(param, Param):
             continue
 
-        kwargs.setdefault(param.param_name, param.get_default(inter))
+        kwargs.setdefault(param.param_name, await param.get_default(inter))
         # TODO: Converters
 
     return kwargs

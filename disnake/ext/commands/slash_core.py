@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Tuple, Union, TYPE_CHECKING, Callable
+from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING, Callable
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -107,7 +107,7 @@ class SubCommand(InvokableApplicationCommand):
         self.qualified_name = ''
     
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
-        kwargs = resolve_param_kwargs(self.callback, inter, kwargs)
+        kwargs = await resolve_param_kwargs(self.callback, inter, kwargs)
         return await super().invoke(inter, *args, **kwargs)
 
 
@@ -129,7 +129,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = auto_sync
-        self.guild_ids: List[int] = guild_ids or []
+        self.guild_ids: Optional[List[int]] = guild_ids
 
         if not options:
             params = extract_params(func, self.cog)
@@ -268,7 +268,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 await self(inter)
                 await self.invoke_children(inter)
             else:
-                kwargs = resolve_param_kwargs(self.callback, inter, inter.options or {})
+                kwargs = await resolve_param_kwargs(self.callback, inter, inter.options or {})
                 await self(inter, **kwargs)
         except CommandError:
             inter.command_failed = True
