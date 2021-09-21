@@ -22,6 +22,7 @@ import disnake
 from disnake.app_commands import Option, OptionChoice
 from disnake.enums import OptionType, try_enum_to_int
 from . import errors
+from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction as Interaction
@@ -170,6 +171,10 @@ class Param:
             self.type = type(self.choices[0].value)
         elif annotation in self.TYPES:
             self.type = annotation
+        elif annotation in CONVERTER_MAPPING:
+            if self.converter:
+                raise TypeError("Cannot use an implicit converter annotation and a converter argument at the same time")
+            self.converter = CONVERTER_MAPPING[annotation]().convert
         else:
             raise TypeError(f"{annotation!r} is not a valid Param annotation")
 
