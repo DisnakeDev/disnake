@@ -292,9 +292,9 @@ class Client:
         return False
 
     @property
-    def user(self) -> Optional[ClientUser]:
+    def user(self) -> ClientUser:
         """Optional[:class:`.ClientUser`]: Represents the connected client. ``None`` if not logged in."""
-        return self._connection.user
+        return self._connection.user # type: ignore
 
     @property
     def guilds(self) -> List[Guild]:

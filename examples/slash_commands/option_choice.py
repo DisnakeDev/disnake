@@ -7,7 +7,7 @@ intents = Intents.all()
 # In production please choose the intents coresponding to your use case.
 
 # We create the instance of the bot.
-bot = commands.Bot(intents=intents)
+bot = commands.Bot('!', intents=intents)
 
 # For this example we're going to make a rock-paper-scissors game
 # which will use OptionChoice as the input.

@@ -75,7 +75,7 @@ class ApplicationCommandInteraction(Interaction):
         return self.data.target
     
     @property
-    def options(self) -> Optional[Dict[str, Any]]:
+    def options(self) -> Dict[str, Any]:
         return self.data.options
 
 

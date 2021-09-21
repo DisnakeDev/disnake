@@ -1,8 +1,9 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Tuple, Union, TYPE_CHECKING, Callable
+from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING, Callable
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
+from .params import extract_params, create_connectors, resolve_param_kwargs
 
 from disnake.app_commands import SlashCommand, Option
 from disnake.enums import OptionType
@@ -40,7 +41,7 @@ class SubCommandGroup(InvokableApplicationCommand):
             type=OptionType.sub_command_group,
             options=[]
         )
-        self.qualified_name: str = None
+        self.qualified_name: str = ''
 
     def sub_command(
         self,
@@ -90,14 +91,27 @@ class SubCommand(InvokableApplicationCommand):
         **kwargs
     ):
         super().__init__(func, name=name, **kwargs)
-        self.connectors: Dict[str, str] = connectors
+        self.connectors: Dict[str, str] = connectors or {}
+        
+        if not options:
+            params = extract_params(func, self.cog)
+            options = [param.to_option() for param in params]
+            self.connectors.update(create_connectors(params))
+        
         self.option = Option(
             name=self.name,
             description=description or '-',
             type=OptionType.sub_command,
             options=options
         )
-        self.qualified_name = None
+        self.qualified_name = ''
+    
+    async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
+        for k, v in self.connectors.items():
+            if k in kwargs:
+                kwargs[v] = kwargs.pop(k)
+        kwargs = await resolve_param_kwargs(self.callback, inter, kwargs)
+        return await super().invoke(inter, *args, **kwargs)
 
 
 class InvokableSlashCommand(InvokableApplicationCommand):
@@ -115,10 +129,16 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         **kwargs
     ):
         super().__init__(func, name=name, **kwargs)
-        self.connectors: Dict[str, str] = connectors
+        self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = auto_sync
-        self.guild_ids: List[int] = guild_ids
+        self.guild_ids: Optional[List[int]] = guild_ids
+
+        if not options:
+            params = extract_params(func, self.cog)
+            options = [param.to_option() for param in params]
+            self.connectors.update(create_connectors(params))
+        
         self.body = SlashCommand(
             name=self.name,
             description=description or '-',
@@ -211,7 +231,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 if local is not None:
                     await local(inter, error)
         finally:
-            inter.bot.dispatch('slash_command_error', inter, error)
+            inter.bot.dispatch('slash_command_error', inter, error) # type: ignore
 
     async def invoke_children(self, inter: ApplicationCommandInteraction):
         chain, kwargs = options_as_route(inter.options)
@@ -224,19 +244,22 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             subcmd = self.children.get(chain[0])
         elif len(chain) == 2:
             group = self.children.get(chain[0])
+            assert isinstance(group, SubCommandGroup)
             subcmd = group.children.get(chain[1]) if group is not None else None
+        else:
+            raise ValueError("Chain too long")
 
         if group is not None:
             try:
                 await group.invoke(inter)
-            except Exception as exc:
+            except CommandError as exc:
                 await group._call_local_error_handler(inter, exc)
                 raise
         
         if subcmd is not None:
             try:
                 await subcmd.invoke(inter, **kwargs)
-            except Exception as exc:
+            except CommandError as exc:
                 await subcmd._call_local_error_handler(inter, exc)
                 raise
 
@@ -248,7 +271,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 await self(inter)
                 await self.invoke_children(inter)
             else:
-                await self(inter, **inter.options)
+                kwargs = inter.options or {}
+                for k, v in self.connectors.items():
+                    if k in kwargs:
+                        kwargs[v] = kwargs.pop(k)
+                kwargs = await resolve_param_kwargs(self.callback, inter, kwargs)
+                await self(inter, **kwargs)
         except CommandError:
             inter.command_failed = True
             raise
@@ -260,7 +288,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)
+                await self._max_concurrency.release(inter) # type: ignore
 
             await self.call_after_hooks(inter)
 
@@ -306,7 +334,7 @@ def slash_command(
             raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
         if hasattr(func, '__command_flag__'):
             raise TypeError('Callback is already a command.')
-        new_func = InvokableSlashCommand(
+        return InvokableSlashCommand(
             func,
             name=name,
             description=description,
@@ -317,5 +345,4 @@ def slash_command(
             auto_sync=auto_sync,
             **kwargs
         )
-        return new_func
     return decorator
