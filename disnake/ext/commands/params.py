@@ -98,14 +98,26 @@ class Param:
 
     async def get_default(self, inter: Interaction) -> Any:
         """Gets the default for an interaction"""
-        if callable(self.default):
-            default = self.default(inter)
-            if inspect.isawaitable(default):
-                return await default
-            
-            return default
+        if not callable(self.default):
+            return self.default
         
-        return self.default
+        default = self.default(inter)
+        if inspect.isawaitable(default):
+            return await default
+        
+        return default
+
+    async def convert_argument(self, inter: Interaction, argument: Any) -> Any:
+        """Convert a value if a converter is given"""
+        if self.converter is None:
+            return argument
+        
+        argument = self.converter(inter, argument)
+        if inspect.isawaitable(argument):
+            return await argument
+        
+        return argument
+        
 
     def parse_annotation(self, annotation: Any) -> None:
         if annotation is inspect.Parameter.empty or annotation is Any:
@@ -186,8 +198,10 @@ async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[
         if not isinstance(param, Param):
             continue
 
-        kwargs.setdefault(param.param_name, await param.get_default(inter))
-        # TODO: Converters
+        if param.param_name in kwargs:
+            kwargs[param.param_name] = await param.convert_argument(inter, kwargs[param.param_name])
+        else:
+            kwargs[param.param_name] = await param.get_default(inter)
 
     return kwargs
 
