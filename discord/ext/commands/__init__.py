@@ -1,12 +1,11 @@
-from .bot import *
-from .context import *
-from .core import *
-from .base_core import *
-from .slash_core import *
-from .ctx_menus_core import *
-from .errors import *
-from .help import *
-from .converter import *
-from .cooldowns import *
-from .cog import *
-from .flags import *
+"""
+disnake.ext.commands
+~~~~~~~~~~~~~~~~~~~~~
+
+An extension module to facilitate creation of bot commands.
+
+:copyright: (c) 2015-present Rapptz
+:license: MIT, see LICENSE for more details.
+"""
+
+from disnake.ext.commands.__init__ import ArgumentParsingError, AutoShardedBot, BadArgument, BadBoolArgument, BadColorArgument, BadColourArgument, BadFlagArgument, BadInviteArgument, BadLiteralArgument, BadUnionArgument, Bot, BotMissingAnyRole, BotMissingPermissions, BotMissingRole, BucketType, CategoryChannelConverter, ChannelNotFound, ChannelNotReadable, CheckAnyFailure, CheckFailure, Cog, CogMeta, ColorConverter, ColourConverter, Command, CommandError, CommandInvokeError, CommandNotFound, CommandOnCooldown, CommandRegistrationError, Context, ConversionError, Converter, Cooldown, CooldownMapping, DefaultHelpCommand, DisabledCommand, DynamicCooldownMapping, EmojiConverter, EmojiNotFound, ExpectedClosingQuoteError, ExtensionAlreadyLoaded, ExtensionError, ExtensionFailed, ExtensionNotFound, ExtensionNotLoaded, Flag, FlagConverter, FlagError, GameConverter, Greedy, Group, GroupMixin, GuildChannelConverter, GuildConverter, GuildNotFound, GuildStickerConverter, GuildStickerNotFound, HelpCommand, IDConverter, InvalidEndOfQuotedStringError, InviteConverter, InvokableApplicationCommand, InvokableMessageCommand, InvokableSlashCommand, InvokableUserCommand, MaxConcurrency, MaxConcurrencyReached, MemberConverter, MemberNotFound, MessageConverter, MessageNotFound, MinimalHelpCommand, MissingAnyRole, MissingFlagArgument, MissingPermissions, MissingRequiredArgument, MissingRequiredFlag, MissingRole, NSFWChannelRequired, NoEntryPointError, NoPrivateMessage, NotOwner, ObjectConverter, ObjectNotFound, Paginator, PartialEmojiConversionFailure, PartialEmojiConverter, PartialMessageConverter, PrivateMessageOnly, RoleConverter, RoleNotFound, StageChannelConverter, StoreChannelConverter, SubCommand, SubCommandGroup, TextChannelConverter, ThreadConverter, ThreadNotFound, TooManyArguments, TooManyFlags, UnexpectedQuoteError, UserConverter, UserInputError, UserNotFound, VoiceChannelConverter, after_invoke, before_invoke, bot_has_any_role, bot_has_guild_permissions, bot_has_permissions, bot_has_role, check, check_any, clean_content, command, cooldown, dm_only, dynamic_cooldown, flag, group, guild_only, has_any_role, has_guild_permissions, has_permissions, has_role, is_nsfw, is_owner, max_concurrency, message_command, run_converters, slash_command, user_command, when_mentioned, when_mentioned_or
