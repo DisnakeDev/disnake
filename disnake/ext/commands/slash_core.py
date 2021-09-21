@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING, Calla
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
-from .params import extract_params, create_connector, resolve_param_kwargs
+from .params import extract_params, create_connectors, resolve_param_kwargs
 
 from disnake.app_commands import SlashCommand, Option
 from disnake.enums import OptionType
@@ -96,7 +96,7 @@ class SubCommand(InvokableApplicationCommand):
         if not options:
             params = extract_params(func, self.cog)
             options = [param.to_option() for param in params]
-            self.connectors.update(create_connector(params))
+            self.connectors.update(create_connectors(params))
         
         self.option = Option(
             name=self.name,
@@ -107,6 +107,9 @@ class SubCommand(InvokableApplicationCommand):
         self.qualified_name = ''
     
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
+        for k, v in self.connectors.items():
+            if k in kwargs:
+                kwargs[v] = kwargs.pop(k)
         kwargs = await resolve_param_kwargs(self.callback, inter, kwargs)
         return await super().invoke(inter, *args, **kwargs)
 
@@ -134,7 +137,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         if not options:
             params = extract_params(func, self.cog)
             options = [param.to_option() for param in params]
-            self.connectors.update(create_connector(params))
+            self.connectors.update(create_connectors(params))
         
         self.body = SlashCommand(
             name=self.name,
@@ -268,7 +271,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 await self(inter)
                 await self.invoke_children(inter)
             else:
-                kwargs = await resolve_param_kwargs(self.callback, inter, inter.options or {})
+                kwargs = inter.options or {}
+                for k, v in self.connectors.items():
+                    if k in kwargs:
+                        kwargs[v] = kwargs.pop(k)
+                kwargs = await resolve_param_kwargs(self.callback, inter, kwargs)
                 await self(inter, **kwargs)
         except CommandError:
             inter.command_failed = True
@@ -327,7 +334,7 @@ def slash_command(
             raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
         if hasattr(func, '__command_flag__'):
             raise TypeError('Callback is already a command.')
-        new_func = InvokableSlashCommand(
+        return InvokableSlashCommand(
             func,
             name=name,
             description=description,
@@ -338,5 +345,4 @@ def slash_command(
             auto_sync=auto_sync,
             **kwargs
         )
-        return new_func
     return decorator

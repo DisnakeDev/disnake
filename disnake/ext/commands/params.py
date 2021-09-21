@@ -3,11 +3,25 @@ from __future__ import annotations
 
 import inspect
 from enum import Enum, EnumMeta
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Type, TypeVar, Union, get_origin, get_type_hints
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    List,
+    Literal,
+    Type,
+    TypeVar,
+    Union,
+    get_origin,
+    get_type_hints,
+)
 
 import disnake
 from disnake.app_commands import Option, OptionChoice
 from disnake.enums import OptionType, try_enum_to_int
+from . import errors
 
 if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction as Interaction
@@ -15,7 +29,6 @@ if TYPE_CHECKING:
 TChoice = TypeVar("TChoice", str, int)
 
 __all__ = (
-    "extract_params",
     "param",
     "option_enum",
 )
@@ -37,7 +50,7 @@ class Param:
     type: :class:`type`
     """
 
-    TYPES: Dict[type, int] = {
+    TYPES: ClassVar[Dict[type, int]] = {
         str: 3,
         int: 4,
         bool: 5,
@@ -60,7 +73,7 @@ class Param:
         self,
         default: Any = ...,
         *,
-        name: str = '',
+        name: str = "",
         description: str = None,
         converter: Callable[[Interaction, Any], Any] = None,
         choices: List[OptionChoice] = None,
@@ -100,24 +113,51 @@ class Param:
         """Gets the default for an interaction"""
         if not callable(self.default):
             return self.default
-        
+
         default = self.default(inter)
         if inspect.isawaitable(default):
             return await default
-        
+
         return default
+
+    async def verify_type(self, inter: Interaction, argument: Any) -> Any:
+        """Check if a type of an argument is correct and possibly fix it"""
+        # these types never need to be verified
+        if self.discord_type.value in [3, 4, 5, 8, 9, 10]:
+            return argument
+
+        # members need to be corrected
+        if issubclass(self.type, disnake.Member):
+            if isinstance(argument, disnake.Member):
+                return argument
+
+            if inter.bot and inter.guild:
+                member = inter.guild.get_member(argument.id)
+                if member:
+                    return member
+
+            raise errors.MemberNotFound(str(argument.id))
+
+        # channels can only be raised for
+        if issubclass(self.type, disnake.abc.GuildChannel):
+            if isinstance(argument, self.type):
+                return argument
+
+            raise errors.ChannelNotFound(str(argument.id))
+
+        # unexpected types may just be
+        return argument
 
     async def convert_argument(self, inter: Interaction, argument: Any) -> Any:
         """Convert a value if a converter is given"""
         if self.converter is None:
-            return argument
-        
+            return await self.verify_type(inter, argument)
+
         argument = self.converter(inter, argument)
         if inspect.isawaitable(argument):
             return await argument
-        
+
         return argument
-        
 
     def parse_annotation(self, annotation: Any) -> None:
         if annotation is inspect.Parameter.empty or annotation is Any:
@@ -138,7 +178,7 @@ class Param:
         self.param_name = param.name
 
     def to_option(self) -> Option:
-        if self.name == '':
+        if self.name == "":
             raise TypeError("Param must be parsed first")
 
         return Option(
@@ -156,7 +196,7 @@ def extract_params(func: Callable, cog: Any = None) -> List[Param]:
     parameters = list(sig.parameters.values())
     if cog is None:
         # hacky I suppose
-        cog = parameters[0].name == 'self'
+        cog = parameters[0].name == "self"
     parameters = parameters[2:] if cog else parameters[1:]
     type_hints = get_type_hints(func)
 
@@ -175,18 +215,14 @@ def extract_params(func: Callable, cog: Any = None) -> List[Param]:
     return params
 
 
-def create_connector(params: List[Param]) -> Dict[str, Any]:
+def create_connectors(params: List[Param]) -> Dict[str, Any]:
     """Create a connector for each param"""
-    return {
-        param.name: param.param_name
-        for param in params
-        if param.name != param.param_name
-    }
+    return {param.name: param.param_name for param in params if param.name != param.param_name}
 
 
 async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     """Resolves a call with kwargs and transforms into normal kwargs
-    
+
     Depends on the fact that optionparams already contain all info.
     """
     sig = inspect.signature(func)
@@ -205,10 +241,11 @@ async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[
 
     return kwargs
 
+
 def param(
     default: Any = ...,
     *,
-    name: str = '',
+    name: str = "",
     desc: str = None,
     description: str = None,
     conv: Callable[[Interaction, Any], Any] = None,
