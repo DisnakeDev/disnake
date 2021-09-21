@@ -22,4 +22,4 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-from disnake.http import Any, ClassVar, Coroutine, Dict, DiscordClientWebSocketResponse, DiscordServerError, Forbidden, GatewayNotFound, HTTPClient, HTTPException, InvalidArgument, Iterable, List, LoginFailure, MISSING, MaybeUnlock, NotFound, Optional, Route, Sequence, TYPE_CHECKING, Tuple, Type, TypeVar, Union, _log, _uriquote, aiohttp, annotations, asyncio, json, json_or_text, logging, sys, utils, weakref
+from disnake.http import Any, ClassVar, Coroutine, Dict, DiscordClientWebSocketResponse, DiscordServerError, Forbidden, GatewayNotFound, HTTPClient, HTTPException, InvalidArgument, Iterable, List, LoginFailure, MISSING, MaybeUnlock, NotFound, Optional, Route, Sequence, TYPE_CHECKING, Tuple, Type, TypeVar, Union, __version__, _log, _uriquote, aiohttp, annotations, asyncio, json, json_or_text, logging, sys, utils, weakref
