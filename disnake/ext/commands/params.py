@@ -161,6 +161,24 @@ class Param:
         return argument
 
     def parse_annotation(self, annotation: Any) -> None:
+        if self.converter is not None:
+            # try to parse the converter's annotation, fall back on the annotation itself
+            parameters = list(inspect.signature(self.converter).parameters.values())
+            parameter = parameters[2] if inspect.ismethod(self.converter) else parameters[1]
+            conv_annot = get_type_hints(self.converter).get(parameter.name, Any)
+
+            if conv_annot in self.TYPES:
+                self.type = conv_annot
+                return
+            elif conv_annot is not Any:
+                # TODO: Implement at least enum for converters
+                raise TypeError("Converters cannot use converter annotations")
+            elif annotation in CONVERTER_MAPPING:
+                raise TypeError(
+                    "Cannot use an implicit converter annotation and an unnanotated converter at the same time"
+                )
+            # otherwise just parse the annotation normally and hope for the best
+
         if annotation is inspect.Parameter.empty or annotation is Any:
             pass
         elif isinstance(annotation, EnumMeta):
@@ -172,8 +190,6 @@ class Param:
         elif annotation in self.TYPES:
             self.type = annotation
         elif annotation in CONVERTER_MAPPING:
-            if self.converter:
-                raise TypeError("Cannot use an implicit converter annotation and a converter argument at the same time")
             self.converter = CONVERTER_MAPPING[annotation]().convert
         else:
             raise TypeError(f"{annotation!r} is not a valid Param annotation")

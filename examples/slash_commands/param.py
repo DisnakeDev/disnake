@@ -59,29 +59,42 @@ async def converters(
     ...
 
 
+# converters may also dictate the type of the option
+# (In case no annotation is present the code falls back to the normal annotation)
+def get_username(inter, user: disnake.User) -> str:
+    return user.name + '#' + user.discriminator # str(user) is better here but shhhh
+
+@bot.slash_command()
+async def advanced_converters(
+    inter: disnake.ApplicationCommandInteraction,
+    username: str = Param(name="user", desc="A user", conv=get_username)
+):
+    ...
+
 # Enumeration (choices) is allowed using enum.Enum, commands.option_enum or Literal
 # The user will see the enum member name or the dict key and the bot will receive the value.
 from enum import Enum
 from typing import Literal
 
 
-class Language(int, Enum):
-    en = 1
-    fr = 2
-    de = 3
-    es = 4
+class Color(int, Enum):
+    red = 0xe74c3c
+    green = 0x2ecc71
+    blue = 0x3498db
+    yellow = 0xfee75c
 
 
-Color = commands.option_enum(["Red", "Green", "Blue", "Yellow"])
-Gender = commands.option_enum({"Male": "M", "Female": "F", "Other": "O", "Prefer Not To Say": "P"})
+
+Gender = commands.option_enum(["Male", "Female", "Other", "Prefer Not To Say"])
+Language = commands.option_enum({"English": "en", "French": "fr", "Spanish": "es"})
 
 
 @bot.slash_command()
 async def enumeration(
     inter: disnake.ApplicationCommandInteraction,
-    langs: Language = Param(desc="Your language"),
     color: Color = Param(desc="Your favorite color"),
     gender: Gender = Param(desc="Your gender"),
+    language: Language = Param(desc="Your language"),
     mode: Literal[1, 2, 3] = Param(desc="Mode of your choosing"),
 ):
     ...
