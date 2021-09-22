@@ -36,7 +36,7 @@ import sys
 import traceback
 import time
 import types
-from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union, Set, Tuple
+from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union, Set, Tuple, Coroutine
 
 import disnake
 
@@ -59,12 +59,15 @@ from disnake.enums import ApplicationCommandType
 if TYPE_CHECKING:
     import importlib.machinery
 
+    from typing_extensions import Concatenate, ParamSpec
     from disnake.message import Message
     from disnake.interactions import ApplicationCommandInteraction
     from ._types import (
         Check,
         CoroFunc,
     )
+    
+    P = ParamSpec('P')
 
 __all__ = (
     'when_mentioned',
@@ -402,7 +405,15 @@ class BotBase(GroupMixin):
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
         **kwargs
-    ) -> Callable:
+    ) -> Callable[
+        [
+            Union[
+                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            ]
+        ],
+        InvokableSlashCommand
+    ]:
         """
         A shortcut decorator that invokes :func:`.slash_command` and adds it to
         the internal command list.
@@ -433,7 +444,12 @@ class BotBase(GroupMixin):
         Callable[..., :class:`InvokableSlashCommand`]
             A decorator that converts the provided method into a InvokableSlashCommand, adds it to the bot, then returns it.
         """
-        def decorator(func) -> InvokableSlashCommand:
+        def decorator(
+            func: Union[
+                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            ]
+        ) -> InvokableSlashCommand:
             result = slash_command(
                 name=name,
                 description=description,
@@ -455,7 +471,15 @@ class BotBase(GroupMixin):
         guild_ids: List[int] = None,
         auto_sync: bool = True,
         **kwargs
-    ) -> Callable:
+    ) -> Callable[
+        [
+            Union[
+                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            ]
+        ],
+        InvokableUserCommand
+    ]:
         """
         A shortcut decorator that invokes :func:`.user_command` and adds it to
         the internal command list.
@@ -475,7 +499,12 @@ class BotBase(GroupMixin):
         Callable[..., :class:`InvokableUserCommand`]
             A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
-        def decorator(func):
+        def decorator(
+            func: Union[
+                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            ]
+        ) -> InvokableUserCommand:
             result = user_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
             self.add_user_command(result)
             return result
@@ -488,7 +517,15 @@ class BotBase(GroupMixin):
         guild_ids: List[int] = None,
         auto_sync: bool = True,
         **kwargs
-    ) -> Callable:
+    ) -> Callable[
+        [
+            Union[
+                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            ]
+        ],
+        InvokableMessageCommand
+    ]:
         """
         A shortcut decorator that invokes :func:`.message_command` and adds it to
         the internal command list.
@@ -508,7 +545,12 @@ class BotBase(GroupMixin):
         Callable[..., :class:`InvokableUserCommand`]
             A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
-        def decorator(func):
+        def decorator(
+            func: Union[
+                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            ]
+        ) -> InvokableMessageCommand:
             result = message_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
             self.add_message_command(result)
             return result

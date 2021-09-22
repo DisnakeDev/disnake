@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, TYPE_CHECKING, Callable
+from typing import List, TYPE_CHECKING, Callable, Coroutine, Union
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -9,7 +9,11 @@ from disnake.app_commands import UserCommand, MessageCommand
 import asyncio
 
 if TYPE_CHECKING:
+    from typing_extensions import Concatenate, ParamSpec
     from disnake.interactions import ApplicationCommandInteraction
+    from .cog import CogT
+
+    P = ParamSpec('P')
 
 __all__ = (
     'InvokableUserCommand',
@@ -61,7 +65,15 @@ def user_command(
     guild_ids: List[int] = None,
     auto_sync: bool = True,
     **kwargs
-) -> Callable:
+) -> Callable[
+    [
+        Union[
+            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+        ]
+    ],
+    InvokableUserCommand
+]:
     """
     A shortcut decorator that builds a user command.
 
@@ -81,7 +93,12 @@ def user_command(
         A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
     """
 
-    def decorator(func) -> InvokableUserCommand:
+    def decorator(
+        func: Union[
+            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+        ]
+    ) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
         if hasattr(func, '__command_flag__'):
@@ -103,7 +120,15 @@ def message_command(
     guild_ids: List[int] = None,
     auto_sync: bool = True,
     **kwargs
-) -> Callable:
+) -> Callable[
+    [
+        Union[
+            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+        ]
+    ],
+    InvokableMessageCommand
+]:
     """
     A decorator that builds a message command.
 
@@ -123,7 +148,12 @@ def message_command(
         A decorator that converts the provided method into a InvokableMessageCommand, adds it to the bot, then returns it.
     """
 
-    def decorator(func) -> InvokableMessageCommand:
+    def decorator(
+        func: Union[
+            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+        ]
+    ) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
         if hasattr(func, '__command_flag__'):
