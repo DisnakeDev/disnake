@@ -171,7 +171,7 @@ class BotBase(GroupMixin):
         
         self.add_listener(self._fill_owners, 'on_connect')
         if self.reload:
-            self.add_listener(self._watchdog, 'on_ready')
+            asyncio.create_task(self._watchdog())
 
     @property
     def owner_id(self) -> Optional[int]:
@@ -1573,7 +1573,9 @@ class BotBase(GroupMixin):
         Starts the bot watchdog which will watch currently loaded extensions 
         and reload them when they're modified.
         """
-        del self.extra_events['on_ready'][0]
+        if isinstance(self, disnake.Client):
+            await self.wait_until_ready()
+        
         reload_log = logging.getLogger(__name__)
         # ensure the message actually shows up
         if logging.root.level > logging.INFO:
