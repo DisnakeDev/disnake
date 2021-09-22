@@ -143,16 +143,34 @@ class BotBase(GroupMixin):
         self.extra_events: Dict[str, List[CoroFunc]] = {}
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
+
         self._checks: List[Check] = []
         self._check_once = []
+        self._slash_command_checks = []
+        self._slash_command_check_once = []
+        self._user_command_checks = []
+        self._user_command_check_once = []
+        self._message_command_checks = []
+        self._message_command_check_once = []
+
         self._before_invoke = None
         self._after_invoke = None
+        self._before_slash_command_invoke = None
+        self._after_slash_command_invoke = None
+        self._before_user_command_invoke = None
+        self._after_user_command_invoke = None
+        self._before_message_command_invoke = None
+        self._after_message_command_invoke = None
+
         self._help_command = None
-        self.description = inspect.cleandoc(description) if description else ''
+        self.description: str = inspect.cleandoc(description) if description else ''
+        self.strip_after_prefix: bool = options.get('strip_after_prefix', False)
+        self.reload: bool = options.get('reload', False)
+
+        self.owner_id: Optional[int] = options.get('owner_id')
+        self.owner_ids: Set[int] = options.get('owner_ids', set())
         self.owner: Optional[disnake.User] = None
         self.owners: Set[disnake.User] = set()
-        self.strip_after_prefix = options.get('strip_after_prefix', False)
-        self.reload: bool = options.get('reload', False)
 
         self.all_slash_commands: Dict[str, InvokableSlashCommand] = {}
         self.all_user_commands: Dict[str, InvokableUserCommand] = {}
@@ -169,18 +187,10 @@ class BotBase(GroupMixin):
         else:
             self.help_command = help_command
         
-        self.add_listener(self._fill_owners, 'on_connect')
         if self.reload:
             asyncio.create_task(self._watchdog())
-
-    @property
-    def owner_id(self) -> Optional[int]:
-        if self.owner is not None:
-            return self.owner.id
-    
-    @property
-    def owner_ids(self) -> Set[int]:
-        return {user.id for user in self.owners}
+        
+        self.add_listener(self._fill_owners, 'on_connect')
 
     @property
     def application_commands(self) -> Set[InvokableApplicationCommand]:
@@ -600,14 +610,16 @@ class BotBase(GroupMixin):
 
         await super().close()  # type: ignore
 
-    async def _fill_owners(self):
-        if self.owner or self.owners:
+    async def _fill_owners(self) -> None:
+        if self.owner_id or self.owner_ids:
             return
         app = await self.application_info()  # type: ignore
         if app.team:
             self.owners = set(app.team.members)
+            self.owner_ids = {m.id for m in app.team.members}
         else:
             self.owner = app.owner
+            self.owner_id = app.owner.id
 
     async def on_command_error(self, context: Context, exception: errors.CommandError) -> None:
         """|coro|
@@ -686,6 +698,142 @@ class BotBase(GroupMixin):
 
     # global check registration
 
+    def add_check(
+        self,
+        func: Check,
+        *,
+        call_once: bool = False,
+        text_commands: bool = False,
+        slash_commands: bool = False,
+        user_commands: bool = False,
+        message_commands: bool = False,
+    ) -> None:
+        """Adds a global check to the bot.
+
+        This is the non-decorator interface to :meth:`.check`,
+        :meth:`.check_once`, :meth:`.slash_command_check` and etc.
+
+        If none of bool params are specified, the check is for
+        text commands only.
+
+        Parameters
+        -----------
+        func
+            The function that was used as a global check.
+        call_once: :class:`bool`
+            If the function should only be called once per
+            :meth:`.invoke` call.
+        text_commands: :class:`bool`
+            If this check is for text commands.
+        slash_commands: :class:`bool`
+            If this check is for slash commands.
+        user_commands: :class:`bool`
+            If this check is for user commands.
+        message_commands: :class:`bool`
+            If this check is for message commands.
+        """
+        if not (
+            text_commands or
+            slash_commands or
+            user_commands or
+            message_commands
+        ):
+            text_commands = True
+
+        if text_commands:
+            if call_once:
+                self._check_once.append(func)
+            else:
+                self._checks.append(func)
+        
+        if slash_commands:
+            if call_once:
+                self._slash_command_check_once.append(func)
+            else:
+                self._slash_command_checks.append(func)
+        
+        if user_commands:
+            if call_once:
+                self._user_command_check_once.append(func)
+            else:
+                self._user_command_checks.append(func)
+        
+        if message_commands:
+            if call_once:
+                self._message_command_check_once.append(func)
+            else:
+                self._message_command_checks.append(func)
+
+    def remove_check(
+        self,
+        func: Check,
+        *,
+        call_once: bool = False,
+        text_commands: bool = False,
+        slash_commands: bool = False,
+        user_commands: bool = False,
+        message_commands: bool = False,
+    ) -> None:
+        """Removes a global check from the bot.
+
+        This function is idempotent and will not raise an exception
+        if the function is not in the global checks.
+
+        If none of bool params are specified, the check is for
+        text commands only.
+
+        Parameters
+        -----------
+        func
+            The function to remove from the global checks.
+        call_once: :class:`bool`
+            If the function was added with ``call_once=True`` in
+            the :meth:`.Bot.add_check` call or using :meth:`.check_once`.
+        text_commands: :class:`bool`
+            If this check was for text commands.
+        slash_commands: :class:`bool`
+            If this check was for slash commands.
+        user_commands: :class:`bool`
+            If this check was for user commands.
+        message_commands: :class:`bool`
+            If this check was for message commands.
+        """
+        if not (
+            text_commands or
+            slash_commands or
+            user_commands or
+            message_commands
+        ):
+            text_commands = True
+
+        if text_commands:
+            l = self._check_once if call_once else self._checks
+            try:
+                l.remove(func)
+            except ValueError:
+                pass
+        
+        if slash_commands:
+            l = self._slash_command_check_once if call_once else self._slash_command_checks
+            try:
+                l.remove(func)
+            except ValueError:
+                pass
+        
+        if user_commands:
+            l = self._user_command_check_once if call_once else self._user_command_checks
+            try:
+                l.remove(func)
+            except ValueError:
+                pass
+        
+        if message_commands:
+            l = self._message_command_check_once if call_once else self._message_command_checks
+            try:
+                l.remove(func)
+            except ValueError:
+                pass
+
     def check(self, func: T) -> T:
         r"""A decorator that adds a global check to the bot.
 
@@ -714,47 +862,6 @@ class BotBase(GroupMixin):
         # T was used instead of Check to ensure the type matches on return
         self.add_check(func)  # type: ignore
         return func
-
-    def add_check(self, func: Check, *, call_once: bool = False) -> None:
-        """Adds a global check to the bot.
-
-        This is the non-decorator interface to :meth:`.check`
-        and :meth:`.check_once`.
-
-        Parameters
-        -----------
-        func
-            The function that was used as a global check.
-        call_once: :class:`bool`
-            If the function should only be called once per
-            :meth:`.invoke` call.
-        """
-
-        if call_once:
-            self._check_once.append(func)
-        else:
-            self._checks.append(func)
-
-    def remove_check(self, func: Check, *, call_once: bool = False) -> None:
-        """Removes a global check from the bot.
-
-        This function is idempotent and will not raise an exception
-        if the function is not in the global checks.
-
-        Parameters
-        -----------
-        func
-            The function to remove from the global checks.
-        call_once: :class:`bool`
-            If the function was added with ``call_once=True`` in
-            the :meth:`.Bot.add_check` call or using :meth:`.check_once`.
-        """
-        l = self._check_once if call_once else self._checks
-
-        try:
-            l.remove(func)
-        except ValueError:
-            pass
 
     def check_once(self, func: CFT) -> CFT:
         r"""A decorator that adds a "call once" global check to the bot.
@@ -794,6 +901,106 @@ class BotBase(GroupMixin):
         self.add_check(func, call_once=True)
         return func
 
+    def slash_command_check(self, func: T) -> T:
+        """Similar to :meth:`.check` but for slash commands."""
+        # T was used instead of Check to ensure the type matches on return
+        self.add_check(func, slash_commands=True)  # type: ignore
+        return func
+
+    def slash_command_check_once(self, func: CFT) -> CFT:
+        """Similar to :meth:`.check_once` but for slash commands."""
+        self.add_check(func, call_once=True, slash_commands=True)
+        return func
+    
+    def user_command_check(self, func: T) -> T:
+        """Similar to :meth:`.check` but for user commands."""
+        # T was used instead of Check to ensure the type matches on return
+        self.add_check(func, user_commands=True)  # type: ignore
+        return func
+
+    def user_command_check_once(self, func: CFT) -> CFT:
+        """Similar to :meth:`.check_once` but for user commands."""
+        self.add_check(func, call_once=True, user_commands=True)
+        return func
+    
+    def message_command_check(self, func: T) -> T:
+        """Similar to :meth:`.check` but for message commands."""
+        # T was used instead of Check to ensure the type matches on return
+        self.add_check(func, message_commands=True)  # type: ignore
+        return func
+
+    def message_command_check_once(self, func: CFT) -> CFT:
+        """Similar to :meth:`.check_once` but for message commands."""
+        self.add_check(func, call_once=True, message_commands=True)
+        return func
+
+    def application_command_check(
+        self,
+        *,
+        call_once: bool = False,
+        slash_commands: bool = False,
+        user_commands: bool = False,
+        message_commands: bool = False,
+    ) -> Callable[
+        [Callable[[ApplicationCommandInteraction], Any]],
+        Callable[[ApplicationCommandInteraction], Any]
+    ]:
+        r"""A decorator that adds a global check to the bot.
+
+        A global check is similar to a :func:`.check` that is applied
+        on a per command basis except it is run before any application command checks
+        have been verified and applies to every application command the bot has.
+
+        .. note::
+
+            This function can either be a regular function or a coroutine.
+
+        Similar to a command :func:`.check`\, this takes a single parameter
+        of type :class:`.ApplicationCommandInteraction` and can only raise exceptions inherited from
+        :exc:`.CommandError`.
+
+        Example
+        -------
+
+        .. code-block:: python3
+
+            @bot.application_command_check()
+            def check_app_commands(inter):
+                return inter.channel_id in whitelisted_channels
+        
+        Parameters
+        ----------
+        call_once: :class:`bool`
+            If the function should only be called once per
+            :meth:`.invoke` call.
+        text_commands: :class:`bool`
+            If this check is for text commands.
+        slash_commands: :class:`bool`
+            If this check is for slash commands.
+        user_commands: :class:`bool`
+            If this check is for user commands.
+        message_commands: :class:`bool`
+            If this check is for message commands.
+        """
+        if not (slash_commands or user_commands or message_commands):
+            slash_commands = True
+            user_commands = True
+            message_commands = True
+        
+        def decorator(
+            func: Callable[[ApplicationCommandInteraction], Any]
+        ) -> Callable[[ApplicationCommandInteraction], Any]:
+            # T was used instead of Check to ensure the type matches on return
+            self.add_check(
+                func,
+                call_once=call_once,
+                slash_commands=slash_commands,
+                user_commands=user_commands,
+                message_commands=message_commands
+            )  # type: ignore
+            return func
+        return decorator
+
     async def can_run(self, ctx: Context, *, call_once: bool = False) -> bool:
         data = self._check_once if call_once else self._checks
 
@@ -802,6 +1009,31 @@ class BotBase(GroupMixin):
 
         # type-checker doesn't distinguish between functions and methods
         return await disnake.utils.async_all(f(ctx) for f in data)  # type: ignore
+    
+    async def application_command_can_run(
+        self,
+        inter: ApplicationCommandInteraction,
+        *,
+        call_once: bool = False
+    ) -> bool:
+
+        if inter.data.type is ApplicationCommandType.chat_input:
+            checks = self._slash_command_check_once if call_once else self._slash_command_checks
+        
+        elif inter.data.type is ApplicationCommandType.user:
+            checks = self._user_command_check_once if call_once else self._user_command_checks
+
+        elif inter.data.type is ApplicationCommandType.message:
+            checks = self._message_command_check_once if call_once else self._message_command_checks
+        
+        else:
+            return True
+
+        if len(checks) == 0:
+            return True
+
+        # type-checker doesn't distinguish between functions and methods
+        return await disnake.utils.async_all(f(inter) for f in checks)  # type: ignore
 
     async def is_owner(self, user: disnake.User) -> bool:
         """|coro|
@@ -827,18 +1059,20 @@ class BotBase(GroupMixin):
             Whether the user is the owner.
         """
 
-        if self.owner is not None:
-            return user.id == self.owner.id
+        if self.owner_id:
+            return user.id == self.owner_id
         elif self.owner_ids:
-            return user in self.owners
+            return user.id in self.owner_ids
         else:
             app = await self.application_info()  # type: ignore
             if app.team:
-                self.owners = owners = set(app.team.members)
-                return user in owners
+                self.owners = set(app.team.members)
+                self.owner_ids = ids = {m.id for m in app.team.members}
+                return user.id in ids
             else:
-                self.owner = owner = app.owner
-                return user == owner
+                self.owner = app.owner
+                self.owner_id = owner_id = app.owner.id
+                return user.id == owner_id
 
     def before_invoke(self, coro: CFT) -> CFT:
         """A decorator that registers a coroutine as a pre-invoke hook.
@@ -904,6 +1138,8 @@ class BotBase(GroupMixin):
 
         self._after_invoke = coro
         return coro
+
+    # TODO: invoke hooks for app commands
 
     # listener registration
 
@@ -1537,24 +1773,33 @@ class BotBase(GroupMixin):
         command_type = interaction.data.type
         command_name = interaction.data.name
         event_name = None
+
         if command_type is ApplicationCommandType.chat_input:
             app_command = self.all_slash_commands.get(command_name)
             event_name = 'slash_command'
+        
         elif command_type is ApplicationCommandType.user:
             app_command = self.all_user_commands.get(command_name)
             event_name = 'user_command'
+        
         elif command_type is ApplicationCommandType.message:
             app_command = self.all_message_commands.get(command_name)
             event_name = 'message_command'
+        
         else:
             app_command = None
+        
         if app_command is None:
             # TODO: unregister this command from API
             return
+        
         if app_command.guild_ids is None or interaction.guild_id in app_command.guild_ids:
             self.dispatch(event_name, interaction)
             try:
-                await app_command.invoke(interaction)
+                if await self.application_command_can_run(interaction, call_once=True):
+                    await app_command.invoke(interaction)
+                else:
+                    raise errors.CheckFailure('The global check once functions failed.')
             except errors.CommandError as exc:
                 await app_command.dispatch_error(interaction, exc)
         else:
@@ -1609,6 +1854,7 @@ class BotBase(GroupMixin):
             
             await asyncio.sleep(1)
             last = t
+
 
 class Bot(BotBase, disnake.Client):
     """Represents a disnake bot.
@@ -1687,6 +1933,7 @@ class Bot(BotBase, disnake.Client):
         .. versionadded:: 2.0
     """
     pass
+
 
 class AutoShardedBot(BotBase, disnake.AutoShardedClient):
     """This is similar to :class:`.Bot` except that it is inherited from
