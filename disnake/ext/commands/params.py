@@ -154,11 +154,14 @@ class Param:
         if self.converter is None:
             return await self.verify_type(inter, argument)
 
-        argument = self.converter(inter, argument)
-        if inspect.isawaitable(argument):
-            return await argument
+        try:
+            argument = self.converter(inter, argument)
+            if inspect.isawaitable(argument):
+                return await argument
 
-        return argument
+            return argument
+        except Exception as e:
+            raise errors.ConversionError(self.converter, e) from e
 
     def parse_annotation(self, annotation: Any) -> None:
         if self.converter is not None:

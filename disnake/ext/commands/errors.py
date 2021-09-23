@@ -130,8 +130,8 @@ class ConversionError(CommandError):
         The original exception that was raised. You can also get this via
         the ``__cause__`` attribute.
     """
-    def __init__(self, converter: Converter, original: Exception) -> None:
-        self.converter: Converter = converter
+    def __init__(self, converter: Any, original: Exception) -> None:
+        self.converter: Any = converter
         self.original: Exception = original
 
 class UserInputError(CommandError):
