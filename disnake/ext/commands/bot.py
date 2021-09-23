@@ -1139,7 +1139,59 @@ class BotBase(GroupMixin):
         self._after_invoke = coro
         return coro
 
-    # TODO: invoke hooks for app commands
+    def before_slash_command_invoke(self, coro: CFT) -> CFT:
+        """Similar to :meth:`.before_invoke` but for slash commands."""
+
+        if not asyncio.iscoroutinefunction(coro):
+            raise TypeError('The pre-invoke hook must be a coroutine.')
+
+        self._before_slash_command_invoke = coro
+        return coro
+
+    def after_slash_command_invoke(self, coro: CFT) -> CFT:
+        """Similar to :meth:`.after_invoke` but for slash commands."""
+
+        if not asyncio.iscoroutinefunction(coro):
+            raise TypeError('The post-invoke hook must be a coroutine.')
+
+        self._after_slash_command_invoke = coro
+        return coro
+    
+    def before_user_command_invoke(self, coro: CFT) -> CFT:
+        """Similar to :meth:`.before_invoke` but for user commands."""
+
+        if not asyncio.iscoroutinefunction(coro):
+            raise TypeError('The pre-invoke hook must be a coroutine.')
+
+        self._before_user_command_invoke = coro
+        return coro
+
+    def after_user_command_invoke(self, coro: CFT) -> CFT:
+        """Similar to :meth:`.after_invoke` but for user commands."""
+
+        if not asyncio.iscoroutinefunction(coro):
+            raise TypeError('The post-invoke hook must be a coroutine.')
+
+        self._after_user_command_invoke = coro
+        return coro
+
+    def before_message_command_invoke(self, coro: CFT) -> CFT:
+        """Similar to :meth:`.before_invoke` but for message commands."""
+
+        if not asyncio.iscoroutinefunction(coro):
+            raise TypeError('The pre-invoke hook must be a coroutine.')
+
+        self._before_message_command_invoke = coro
+        return coro
+
+    def after_message_command_invoke(self, coro: CFT) -> CFT:
+        """Similar to :meth:`.after_invoke` but for message commands."""
+
+        if not asyncio.iscoroutinefunction(coro):
+            raise TypeError('The post-invoke hook must be a coroutine.')
+
+        self._after_message_command_invoke = coro
+        return coro
 
     # listener registration
 

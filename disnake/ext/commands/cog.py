@@ -455,6 +455,30 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
+    def bot_slash_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+        return True
+
+    @_cog_special_method
+    def bot_slash_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+        return True
+
+    @_cog_special_method
+    def bot_user_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+        return True
+
+    @_cog_special_method
+    def bot_user_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+        return True
+    
+    @_cog_special_method
+    def bot_message_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+        return True
+
+    @_cog_special_method
+    def bot_message_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+        return True
+
+    @_cog_special_method
     def cog_check(self, ctx: Context) -> bool:
         """A special method that registers as a :func:`~disnake.ext.commands.check`
         for every command and subcommand in this cog.
@@ -523,6 +547,30 @@ class Cog(metaclass=CogMeta):
         ctx: :class:`.Context`
             The invocation context.
         """
+        pass
+
+    @_cog_special_method
+    async def cog_before_slash_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+        pass
+
+    @_cog_special_method
+    async def cog_after_slash_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+        pass
+
+    @_cog_special_method
+    async def cog_before_user_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+        pass
+
+    @_cog_special_method
+    async def cog_after_user_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+        pass
+
+    @_cog_special_method
+    async def cog_before_message_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+        pass
+
+    @_cog_special_method
+    async def cog_after_message_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
         pass
 
     def _inject(self: CogT, bot: AnyBotT) -> CogT:

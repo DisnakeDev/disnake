@@ -9,6 +9,7 @@ import asyncio
 import datetime
 
 from disnake.app_commands import ApplicationCommand
+from disnake.enums import ApplicationCommandType
 from disnake.utils import async_all
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
@@ -162,6 +163,7 @@ class InvokableApplicationCommand:
 
         try:
             self._prepare_cooldowns(inter)
+            await self.call_before_hooks(inter) # type: ignore
         except:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)  # type: ignore
@@ -303,16 +305,26 @@ class InvokableApplicationCommand:
             else:
                 await self._before_invoke(inter)  # type: ignore
 
-        # TODO: call the cog local hook if applicable:
-        # if cog is not None:
-        #     hook = Cog._get_overridden_method(cog.cog_before_invoke)
-        #     if hook is not None:
-        #         await hook(ctx)
+        if inter.data.type is ApplicationCommandType.chat_input:
+            partial_attr_name = 'slash_command'
+        elif inter.data.type is ApplicationCommandType.user:
+            partial_attr_name = 'user_command'
+        elif inter.data.type is ApplicationCommandType.message:
+            partial_attr_name = 'message_command'
+        else:
+            return
 
-        # TODO: call the bot global hook if necessary
-        # hook = ctx.bot._before_invoke
-        # if hook is not None:
-        #     await hook(ctx)
+        # call the cog local hook if applicable:
+        if cog is not None:
+            meth = getattr(cog, f'cog_before_{partial_attr_name}_invoke', None)
+            hook = _get_overridden_method(meth)
+            if hook is not None:
+                await hook(inter)
+
+        # call the bot global hook if necessary
+        hook = getattr(inter.bot, f'_before_{partial_attr_name}_invoke', None)
+        if hook is not None:
+            await hook(inter)
 
     async def call_after_hooks(self, inter: ApplicationCommandInteraction) -> None:
         cog = self.cog
@@ -323,16 +335,26 @@ class InvokableApplicationCommand:
             else:
                 await self._after_invoke(inter)  # type: ignore
 
-        # TODO: call the cog local hook if applicable:
-        # if cog is not None:
-        #     hook = Cog._get_overridden_method(cog.cog_after_invoke)
-        #     if hook is not None:
-        #         await hook(ctx)
+        if inter.data.type is ApplicationCommandType.chat_input:
+            partial_attr_name = 'slash_command'
+        elif inter.data.type is ApplicationCommandType.user:
+            partial_attr_name = 'user_command'
+        elif inter.data.type is ApplicationCommandType.message:
+            partial_attr_name = 'message_command'
+        else:
+            return
 
-        # TODO: call the global hook
-        # hook = ctx.bot._after_invoke
-        # if hook is not None:
-        #     await hook(ctx)
+        # call the cog local hook if applicable:
+        if cog is not None:
+            meth = getattr(cog, f'cog_after_{partial_attr_name}_invoke', None)
+            hook = _get_overridden_method(meth)
+            if hook is not None:
+                await hook(inter)
+
+        # call the bot global hook if necessary
+        hook = getattr(inter.bot, f'_after_{partial_attr_name}_invoke', None)
+        if hook is not None:
+            await hook(inter)
 
     def before_invoke(self, coro: HookT) -> HookT:
         """A decorator that registers a coroutine as a pre-invoke hook.

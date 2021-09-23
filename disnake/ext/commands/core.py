@@ -205,6 +205,7 @@ class _CaseInsensitiveDict(dict):
     def __setitem__(self, k, v):
         super().__setitem__(k.casefold(), v)
 
+
 class Command(_BaseCommand, Generic[CogT, P, T]):
     r"""A class that implements the protocol for a bot text command.
 
@@ -1129,6 +1130,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             return await disnake.utils.async_all(predicate(ctx) for predicate in predicates)  # type: ignore
         finally:
             ctx.command = original
+
 
 class GroupMixin(Generic[CogT]):
     """A mixin that implements common functionality for classes that behave
