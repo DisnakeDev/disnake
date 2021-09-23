@@ -27,7 +27,9 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, overload, TYPE_CHE
 
 from .permissions import Permissions
 from .errors import InvalidArgument
+from .asset import Asset
 from .colour import Colour
+from .partial_emoji import PartialEmoji
 from .mixins import Hashable
 from .utils import snowflake_time, _get_as_snowflake, MISSING
 
@@ -181,6 +183,8 @@ class Role(Hashable):
         'managed',
         'mentionable',
         'hoist',
+        '_icon',
+        '_emoji',
         'guild',
         'tags',
         '_state',
@@ -240,6 +244,8 @@ class Role(Hashable):
         self.position: int = data.get('position', 0)
         self._colour: int = data.get('color', 0)
         self.hoist: bool = data.get('hoist', False)
+        self._icon: Optional[str] = data.get('icon', None)
+        self._emoji: Optional[str] = data.get('unicode_emoji')
         self.managed: bool = data.get('managed', False)
         self.mentionable: bool = data.get('mentionable', False)
         self.tags: Optional[RoleTags]
@@ -297,6 +303,26 @@ class Role(Hashable):
         """:class:`Colour`: Returns the role color. An alias exists under ``colour``."""
         return self.colour
 
+    @property
+    def icon(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the role's icon asset, if available.
+
+        .. versionadded:: 2.0
+        """
+        if self._icon is None:
+            return None
+        return Asset._from_role_icon(self._state, self.id, self._icon)
+    
+    @property
+    def emoji(self) -> Optional[PartialEmoji]:
+        """Optional[:class:`PartialEmoji`]: Returns the role's emoji, if available.
+
+        .. versionadded:: 2.0
+        """
+        if self._emoji is None:
+            return None
+        return PartialEmoji(name=self._emoji)
+    
     @property
     def created_at(self) -> datetime.datetime:
         """:class:`datetime.datetime`: Returns the role's creation time in UTC."""
