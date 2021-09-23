@@ -13,11 +13,6 @@ disnake
 
 A modern, easy to use, feature-rich, and async ready API wrapper for Discord written in Python.
 
-Warning
--------
-
-The library is still in development and isn't usable yet. We hope to publish a stable release before the 10th of september.
-
 About disnake
 -------------
 
@@ -127,6 +122,24 @@ Slash Commands Example
     @bot.slash_command()
     async def ping(inter):
         await inter.response.send_message('pong')
+
+    bot.run('token')
+
+Context Menus Example
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: py
+
+    import disnake
+    from disnake.ext import commands
+
+    bot = commands.Bot(command_prefix='>', test_guilds=[12345])
+
+    @bot.user_command()
+    async def avatar(inter):
+        embed = disnake.Embed(title=str(inter.author))
+        embed.set_image(url=inter.author.avatar.url)
+        await inter.response.send_message(embed=embed)
 
     bot.run('token')
 
