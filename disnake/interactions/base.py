@@ -465,6 +465,8 @@ class InteractionResponse:
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
+        file: File = MISSING,
+        files: List[File] = MISSING,
         view: View = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
@@ -483,6 +485,10 @@ class InteractionResponse:
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with
             ``embeds`` parameter.
+        file: :class:`~disnake.File`
+            The file to upload.
+        files: List[:class:`~disnake.File`]
+            A list of files to upload. Must be a maximum of 10.
         tts: :class:`bool`
             Indicates if the message should be sent using text-to-speech.
         view: :class:`disnake.ui.View`
@@ -520,6 +526,18 @@ class InteractionResponse:
             if len(embeds) > 10:
                 raise ValueError('embeds cannot exceed maximum of 10 elements')
             payload['embeds'] = [e.to_dict() for e in embeds]
+        
+        if file is not MISSING and files is not MISSING:
+            raise TypeError('cannot mix file and files keyword arguments')
+        
+        if file is not MISSING:
+            files = [file]
+
+        if files is not MISSING:
+            if len(files) > 10:
+                raise ValueError('files cannot exceed maximum of 10 elements')
+        else:
+            files = None
 
         if content is not None:
             payload['content'] = str(content)
@@ -538,7 +556,12 @@ class InteractionResponse:
             session=parent._session,
             type=InteractionResponseType.channel_message.value,
             data=payload,
+            files=files,
         )
+
+        if files is not None:
+            for f in files:
+                f.close()
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:

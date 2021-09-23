@@ -349,14 +349,8 @@ class AsyncWebhookAdapter:
         session: aiohttp.ClientSession,
         type: int,
         data: Optional[Dict[str, Any]] = None,
+        files: Optional[List[File]] = None,
     ) -> Response[None]:
-        payload: Dict[str, Any] = {
-            'type': type,
-        }
-
-        if data is not None:
-            payload['data'] = data
-
         route = Route(
             'POST',
             '/interactions/{webhook_id}/{webhook_token}/callback',
@@ -364,7 +358,30 @@ class AsyncWebhookAdapter:
             webhook_token=token,
         )
 
-        return self.request(route, session=session, payload=payload)
+        payload: Dict[str, Any] = {
+            'type': type,
+        }
+
+        if data is not None:
+            payload['data'] = data
+
+        if files is None:
+            return self.request(route, session=session, payload=payload)
+        
+        else:
+            multipart = [{'name': 'payload_json', 'value': utils._to_json(payload)}]
+            single = len(files) == 1
+            for index, file in enumerate(files):
+                name = "file" if single else f"file{index}"
+                multipart.append(
+                    {
+                        "name": name,
+                        "value": file.fp,
+                        "filename": file.filename,
+                        "content_type": "application/octet-stream",
+                    }
+                )
+            return self.request(route, session=session, multipart=multipart, files=files)
 
     def get_original_interaction_response(
         self,
