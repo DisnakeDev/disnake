@@ -1,5 +1,6 @@
 """
 An example of old-style options.
+Not the most convenient syntax.
 """
 import disnake
 from disnake.ext import commands

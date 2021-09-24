@@ -106,9 +106,69 @@ from typing import Union
 
 @bot.slash_command()
 async def constraint(
-    inter: disnake.ApplicationCommandInteraction, 
+    inter: disnake.ApplicationCommandInteraction,
     text: disnake.TextChannel = Param(desc="A text channel"),
     voice: disnake.VoiceChannel = Param(desc="A voice channel"),
     fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Param("A fancy new channel")
 ):
+    ...
+
+
+# You can use docstrings to set the description of the command
+# or even the description of options. You follow the ReStructuredText or numpy markdown.
+@bot.slash_command()
+async def docstrings(
+    inter: disnake.ApplicationCommandInteraction,
+    user: disnake.User,
+    reason: str,
+):
+    """
+    This command shows how docstrings are being parsed.
+
+    Parameters
+    ----------
+    user: :class:`disnake.User`
+        Enter the user
+    reason: :class:`str`
+        Enter the reason
+    """
+    ...
+
+# Types of parameters in docstrings are optional.
+# You can specify the descriptions without them.
+@bot.slash_command()
+async def docstrings(
+    inter: disnake.ApplicationCommandInteraction,
+    user: disnake.User,
+    reason: str,
+):
+    """
+    This command shows how docstrings are being parsed.
+
+    Parameters
+    ----------
+    user
+        Enter the user
+    reason
+        Enter the reason
+    """
+    ...
+
+
+# If you don't want to waste too many lines,
+# use ':' so separate the param name and description.
+@bot.slash_command()
+async def docstrings(
+    inter: disnake.ApplicationCommandInteraction,
+    user: disnake.User,
+    reason: str,
+):
+    """
+    This command shows how docstrings are being parsed.
+
+    Parameters
+    ----------
+    user: Enter the user
+    reason: Enter the reason
+    """
     ...
