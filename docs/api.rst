@@ -1393,6 +1393,22 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 1.5
 
+.. class:: ApplicationCommandType
+
+    Represents the type of an application command.
+
+    .. versionadded:: 2.1
+
+    .. attribute:: chat_input
+
+        Represents a slash command.
+    .. attribute:: user
+
+        Represents a user command from the context menu.
+    .. attribute:: message
+
+        Represents a message command from the context menu.
+
 .. class:: InteractionType
 
     Specifies the type of :class:`Interaction`.
@@ -1457,6 +1473,41 @@ of :class:`enum.Enum`.
     .. attribute:: select
 
         Represents a select component.
+
+.. class:: OptionType
+
+    Represents the type of an option.
+
+    .. versionadded:: 2.1
+
+    .. attribute:: sub_command
+
+        Represents a sub command of the main command or group.
+    .. attribute:: sub_command_group
+
+        Represents a sub command group of the main command.
+    .. attribute:: string
+
+        Represents a string option.
+    .. attribute:: integer
+
+        Represents an integer option.
+    .. attribute:: boolean
+
+        Represents a boolean option.
+    .. attribute:: user
+
+        Represents a user option.
+    .. attribute:: channel
+
+        Represents a channel option.
+    .. attribute:: role
+
+        Represents a role + user option
+    .. attribute:: mentionable
+
+        Represents a float option.
+    .. attribute:: number
 
 
 .. class:: ButtonStyle
@@ -3435,6 +3486,54 @@ Message
 .. autoclass:: Message()
     :members:
 
+ApplicationCommand
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationCommand
+
+.. autoclass:: ApplicationCommand()
+    :members:
+
+SlashCommand
+~~~~~~~~~~~~
+
+.. attributetable:: SlashCommand
+
+.. autoclass:: SlashCommand()
+    :members:
+
+UserCommand
+~~~~~~~~~~~
+
+.. attributetable:: UserCommand
+
+.. autoclass:: UserCommand()
+    :members:
+
+MessageCommand
+~~~~~~~~~~~~~~
+
+.. attributetable:: MessageCommand
+
+.. autoclass:: MessageCommand()
+    :members:
+
+Option
+~~~~~~
+
+.. attributetable:: Option
+
+.. autoclass:: Option()
+    :members:
+
+OptionChoice
+~~~~~~~~~~~~
+
+.. attributetable:: OptionChoice
+
+.. autoclass:: OptionChoice()
+    :members:
+
 Component
 ~~~~~~~~~~
 
@@ -3546,6 +3645,22 @@ Interaction
 .. attributetable:: Interaction
 
 .. autoclass:: Interaction()
+    :members:
+
+ApplicationCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationCommandInteraction
+
+.. autoclass:: ApplicationCommandInteraction()
+    :members:
+
+MessageInteraction
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: MessageInteraction
+
+.. autoclass:: MessageInteraction()
     :members:
 
 InteractionResponse

@@ -1,6 +1,6 @@
 import re
-from typing import Dict, List, Optional, Union
-from .enums import ApplicationCommandType, OptionType, try_enum, enum_if_int, try_enum_to_int
+from typing import Any, Dict, List, Optional, Union
+from .enums import ApplicationCommandType, ChannelType, OptionType, try_enum, enum_if_int, try_enum_to_int
 from .errors import InvalidArgument
 from .role import Role
 from .user import User
@@ -19,7 +19,7 @@ __all__ = (
 )
 
 
-def application_command_factory(data: dict):
+def application_command_factory(data: Dict[str, Any]):
     cmd_type = try_enum(ApplicationCommandType, data.get("type", 1))
     if cmd_type is ApplicationCommandType.chat_input:
         return SlashCommand.from_dict(data)
@@ -45,16 +45,16 @@ class OptionChoice:
         self.name: str = name
         self.value: Union[str, int] = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<OptionChoice name={self.name} value={self.value}>'
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return (
             self.name == other.name and
             self.value == other.value
         )
     
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, str]:
         return {
             'name': self.name,
             'value': self.value
@@ -80,9 +80,12 @@ class Option:
     options: List[:class:`Option`]
         the list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
+    channel_types: List[:class:`ChannelType`]
+        the list of channel types that your option supports, if the type is :class:`OptionType.channel`.
+        By default, it supports all channel types.
     """
 
-    __slots__ = ("name", "description", "type", "required", "choices", "options")
+    __slots__ = ("name", "description", "type", "required", "choices", "options", "channel_types")
 
     def __init__(
         self,
@@ -91,7 +94,8 @@ class Option:
         type: OptionType = None,
         required: bool = False,
         choices: Union[List[OptionChoice], Dict[str, Union[str, int]]] = None,
-        options: list = None
+        options: list = None,
+        channel_types: List[ChannelType] = None,
     ):
         assert name.islower(), f"Option name {name!r} must be lowercase"
 
@@ -100,6 +104,14 @@ class Option:
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
         self.options: List[Option] = options or []
+
+        if (
+            channel_types is not None and
+            not all(isinstance(t, ChannelType) for t in channel_types)
+        ):
+            raise InvalidArgument('channel_types must be instances of ChannelType')
+
+        self.channel_types: List[ChannelType] = channel_types or []
 
         if choices is None:
             choices = []
@@ -113,21 +125,22 @@ class Option:
         
         self.choices: List[OptionChoice] = choices
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f'<Option name={self.name!r} description={self.description!r} '
             f'type={self.type!r} required={self.required!r} choices={self.choices!r} '
             f'options={self.options!r}>'
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return (
             self.name == other.name and
             self.description == other.description and
             self.type == other.type and
             self.required == other.required and
             self.choices == other.choices and
-            self.options == other.options
+            self.options == other.options and
+            self.channel_types == other.channel_types
         )
 
     @classmethod
@@ -136,6 +149,8 @@ class Option:
             payload['options'] = [Option.from_dict(p) for p in payload['options']]
         if 'choices' in payload:
             payload['choices'] = [OptionChoice(**p) for p in payload['choices']]
+        if 'channel_types' in payload:
+            payload['channel_types'] = [try_enum(ChannelType, v) for v in payload['channel_types']]
         return Option(**payload)
 
     def add_choice(self, name: str, value: Union[str, int]) -> None:
@@ -163,7 +178,8 @@ class Option:
         type: OptionType = None,
         required: bool = False,
         choices: List[OptionChoice] = None,
-        options: list = None
+        options: list = None,
+        channel_types: List[ChannelType] = None,
     ) -> None:
         """
         Adds an option to the current list of options
@@ -182,11 +198,12 @@ class Option:
                 type=type,
                 required=required,
                 choices=choices,
-                options=options
+                options=options,
+                channel_types=channel_types,
             )
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         payload = {
             'name': self.name,
             'description': self.description,
@@ -198,6 +215,8 @@ class Option:
             payload['choices'] = [c.to_dict() for c in self.choices]
         if len(self.options) > 0:
             payload['options'] = [o.to_dict() for o in self.options]
+        if len(self.channel_types) > 0:
+            payload['channel_types'] = [v.value for v in self.channel_types]
         return payload
 
 
@@ -218,7 +237,7 @@ class ApplicationCommand:
     def __repr__(self) -> str:
         return f'<ApplicationCommand id={self.id!r} type={self.type!r}>'
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return isinstance(other, ApplicationCommand)
 
 
@@ -227,23 +246,23 @@ class UserCommand(ApplicationCommand):
         super().__init__(ApplicationCommandType.user, **kwargs)
         self.name: str = name
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<UserCommand name={self.name!r}>"
     
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return (
             self.type == other.type and
             self.name == other.name
         )
 
-    def to_dict(self, **kwargs) -> dict:
+    def to_dict(self, **kwargs) -> Dict[str, Any]:
         return {
             "type": try_enum_to_int(self.type),
             "name": self.name
         }
     
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: Dict[str, Any]):
         if data.pop("type", 0) == ApplicationCommandType.user.value:
             return UserCommand(**data)
 
@@ -253,23 +272,23 @@ class MessageCommand(ApplicationCommand):
         super().__init__(ApplicationCommandType.message, **kwargs)
         self.name: str = name
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<MessageCommand name={self.name!r}>"
     
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return (
             self.type == other.type and
             self.name == other.name
         )
 
-    def to_dict(self, **kwargs) -> dict:
+    def to_dict(self, **kwargs) -> Dict[str, Any]:
         return {
             "type": try_enum_to_int(self.type),
             "name": self.name
         }
     
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: Dict[str, Any]):
         if data.pop("type", 0) == ApplicationCommandType.message.value:
             return MessageCommand(**data)
 
@@ -309,16 +328,16 @@ class SlashCommand(ApplicationCommand):
         self.default_permission: bool = default_permission
         self.permissions = ApplicationCommandPermissions()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f'<SlashCommand name={self.name!r} description={self.description!r} '
             f'default_permission={self.default_permission!r} options={self.options!r}>'
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'<SlashCommand name={self.name!r}>'
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return (
             self.type == other.type and
             self.name == other.name and
@@ -327,7 +346,7 @@ class SlashCommand(ApplicationCommand):
         )
 
     @classmethod
-    def from_dict(cls, payload: dict):
+    def from_dict(cls, payload: Dict[str, Any]):
         if payload.pop("type", 1) != ApplicationCommandType.chat_input.value:
             return None
         if 'options' in payload:
@@ -341,7 +360,8 @@ class SlashCommand(ApplicationCommand):
         type: int = None,
         required: bool = False,
         choices: List[OptionChoice] = None,
-        options: list = None
+        options: list = None,
+        channel_types: List[ChannelType] = None,
     ) -> None:
         """
         Adds an option to the current list of options
@@ -354,11 +374,12 @@ class SlashCommand(ApplicationCommand):
                 type=type,
                 required=required,
                 choices=choices,
-                options=options
+                options=options,
+                channel_types=channel_types
             )
         )
 
-    def to_dict(self, *, hide_name=False) -> dict:
+    def to_dict(self, *, hide_name: bool = False) -> Dict[str, Any]:
         res = {
             "type": try_enum_to_int(self.type),
             "description": self.description,
