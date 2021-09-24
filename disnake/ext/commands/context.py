@@ -287,7 +287,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         return self.message.guild
 
     @disnake.utils.cached_property
-    def channel(self) -> MessageableChannel:
+    def channel(self) -> disnake.abc.PartialMessageable:
         """Union[:class:`.abc.Messageable`]: Returns the channel associated with this context's command.
         Shorthand for :attr:`.Message.channel`.
         """

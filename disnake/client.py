@@ -249,14 +249,23 @@ class Client:
         To enable these events, this must be set to ``True``. Defaults to ``False``.
 
         .. versionadded:: 2.0
-    
-    get_or_fetch_user: :class:`User`
-        First try to get the requested user from the cache but if it is not found in the
-        cache, then it will make an API request for the same.
+    test_guilds: List[:class:`int`]
+        The list of IDs of the guilds where you're going to test your app commands.
+        Defaults to ``None``, which means global registration of commands across
+        all guilds.
 
-    get_message: :class:`Message`
-        Try to get the message from the client's cache or return None if the message isn't found in
-        the cache
+        .. versionadded:: 2.1
+    sync_commands: :class:`bool`
+        Whether to enable automatic synchronization of application commands in your code.
+        Defaults to ``True``, which means that commands in API are automatically synced
+        with the commands specified in your code.
+
+        .. versionadded:: 2.1
+    sync_commands_debug: :class:`bool`
+        Whether to enable messages logging the synchronization process.
+        Useful for tracking the commands being registered in the API.
+
+        .. versionadded:: 2.1
 
     Attributes
     -----------
@@ -419,24 +428,24 @@ class Client:
         return self._connection.application_flags  # type: ignore
     
     def get_message(self, id: int) -> Optional[Message]:
-        """Gets the message with the ID from the bot's message cache or None if not found.
+        """Gets the message with the ID from the bot's message cache.
 
         Parameters
         -----------
         id: :class:`int`
-            The message ID to look for.
+            The ID of the message to look for.
+        
         Returns
         --------
         Optional[:class:`.Message`]
-            The message asked for.
-
+            The corresponding message.
         """
         return utils.get(self.cached_messages, id=id)
     
     async def get_or_fetch_user(self, user_id: int) -> User:
         """|coro|
 
-        Tries to get a user from the cache. If fails, it tries to
+        Tries to get the user from the cache. If fails, it tries to
         fetch the user from the API.
 
         Parameters
@@ -574,6 +583,8 @@ class Client:
         if self._sync_commands_debug:
             print(
                 'GLOBAL COMMANDS\n===============',
+                '| NOTE: global commands can take up to 1 hour to show up after registration.',
+                '|',
                 f'| Update is required: {update_required}',
                 sep='\n'
             )
