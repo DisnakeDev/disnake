@@ -46,7 +46,7 @@ class OptionChoice:
         self.value: Union[str, int] = value
 
     def __repr__(self):
-        return "<OptionChoice name='{0.name}' value={0.value}>".format(self)
+        return f'<OptionChoice name={self.name} value={self.value}>'
 
     def __eq__(self, other):
         return (
@@ -82,7 +82,7 @@ class Option:
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
     """
 
-    __slots__ = ("name", "description", "type", "required", "choices", "options", "_choice_connectors")
+    __slots__ = ("name", "description", "type", "required", "choices", "options")
 
     def __init__(
         self,
@@ -203,7 +203,7 @@ class Option:
 
 class ApplicationCommand:
     """
-    Base class for application commands
+    The base class for application commands
     """
     def __init__(self, type: ApplicationCommandType, **kwargs):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
@@ -215,6 +215,9 @@ class ApplicationCommand:
             self.application_id = int(self.application_id)
         self._always_synced: bool = False
     
+    def __repr__(self) -> str:
+        return f'<ApplicationCommand id={self.id!r} type={self.type!r}>'
+
     def __eq__(self, other):
         return isinstance(other, ApplicationCommand)
 
@@ -308,9 +311,12 @@ class SlashCommand(ApplicationCommand):
 
     def __repr__(self):
         return (
-            f'<SlashCommand name={self.name!r} description={self.description!r}'
-            f'options={self.options!r} default_permission={self.default_permission!r}>'
+            f'<SlashCommand name={self.name!r} description={self.description!r} '
+            f'default_permission={self.default_permission!r} options={self.options!r}>'
         )
+
+    def __str__(self):
+        return f'<SlashCommand name={self.name!r}>'
 
     def __eq__(self, other):
         return (
