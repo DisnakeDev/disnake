@@ -20,7 +20,8 @@ from typing import (
 
 import disnake
 from disnake.app_commands import Option, OptionChoice
-from disnake.enums import OptionType, try_enum_to_int
+from disnake.enums import OptionType, try_enum_to_int, ChannelType
+from disnake.channel import _channel_type_factory
 from . import errors
 from .converter import CONVERTER_MAPPING
 
@@ -58,12 +59,8 @@ class Param:
         disnake.abc.User: 6,
         disnake.User: 6,
         disnake.Member: 6,
+        # channels handled separately
         disnake.abc.GuildChannel: 7,
-        disnake.TextChannel: 7,
-        disnake.VoiceChannel: 7,
-        disnake.CategoryChannel: 7,
-        disnake.StageChannel: 7,
-        disnake.StoreChannel: 7,
         disnake.Role: 8,
         Union[disnake.Member, disnake.Role]: 9,
         disnake.abc.Snowflake: 9,
@@ -79,6 +76,7 @@ class Param:
         converter: Callable[[Interaction, Any], Any] = None,
         choices: List[OptionChoice] = None,
         type: type = str,
+        channel_types: List[ChannelType] = None
     ) -> None:
         self.default = default
         self.name = name
@@ -88,9 +86,10 @@ class Param:
 
         self.choices = choices or []
         self.type = type
+        self.channel_types = channel_types or []
 
     @property
-    def required(self):
+    def required(self) -> bool:
         return self.default is ...
 
     @property
@@ -127,26 +126,19 @@ class Param:
         if self.discord_type.value in [3, 4, 5, 8, 9, 10]:
             return argument
 
-        # members need to be corrected
         if issubclass(self.type, disnake.Member):
             if isinstance(argument, disnake.Member):
                 return argument
 
-            if inter.bot and inter.guild:
-                member = inter.guild.get_member(argument.id)
-                if member:
-                    return member
-
             raise errors.MemberNotFound(str(argument.id))
 
-        # channels can only be raised for
         if issubclass(self.type, disnake.abc.GuildChannel):
             if isinstance(argument, self.type):
                 return argument
 
             raise errors.ChannelNotFound(str(argument.id))
 
-        # unexpected types may just be
+        # unexpected types may just be ignored
         return argument
 
     async def convert_argument(self, inter: Interaction, argument: Any) -> Any:
@@ -190,6 +182,20 @@ class Param:
         elif get_origin(annotation) is Literal:
             self.choices = [OptionChoice(str(i), i) for i in annotation.__args__]
             self.type = type(self.choices[0].value)
+        
+        elif get_origin(annotation) is Union:
+            args = annotation.__args__
+            if all(issubclass(channel, disnake.abc.GuildChannel) for channel in args):
+                self.type = disnake.abc.GuildChannel
+                self.channel_types = []
+                for channel in args:
+                    self.channel_types += _channel_type_factory(channel)
+            else:
+                raise TypeError("Unions for anything else other than channels are not supported")
+        elif issubclass(annotation, disnake.abc.GuildChannel):
+            self.type = disnake.abc.GuildChannel
+            self.channel_types = _channel_type_factory(annotation)
+        
         elif annotation in self.TYPES:
             self.type = annotation
         elif annotation in CONVERTER_MAPPING:
@@ -211,6 +217,7 @@ class Param:
             type=self.discord_type,
             required=self.required,
             choices=self.choices,
+            channel_types=self.channel_types
         )
 
 

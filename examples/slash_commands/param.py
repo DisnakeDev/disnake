@@ -11,15 +11,15 @@ bot = commands.Bot("!")
 # features easier to use.
 # Not only that but using Param even adds support for a ton of other features.
 
-# We create a new command with two options: required (a requistring) and optional (an integer).
+# We create a new command with two options: "req" (a required string) and "opt" (an integer).
 # Param takes care of parsing the annotation and adding a description for it.
 # If you want to provide a default value and make the option optional simply provide it as the first argument.
 # "description" may be shortened to "desc" if you so choose.
-@bot.slash_command()
+@bot.slash_command(name="Simple Command", description="Some Simple command")
 async def simple(
     inter: disnake.ApplicationCommandInteraction,
-    required: str = Param(description="The required argument"),
-    optional: int = Param(0, desc="The optional argument"),
+    req: str = Param(description="The required argument"),
+    opt: int = Param(0, desc="The optional argument"),
 ):
     ...
 
@@ -100,19 +100,15 @@ async def enumeration(
     ...
 
 
-# Specific types may be required of the user.
-# If they provide the wrong one a BadArgument exception is raised.
+# Specific channel types may be specified
+# This is the only case where you're able to use Union
+from typing import Union
+
 @bot.slash_command()
-async def verify(
+async def constraint(
     inter: disnake.ApplicationCommandInteraction, 
-    channel: disnake.TextChannel = Param(desc="a TEXT channel")
+    text: disnake.TextChannel = Param(desc="A text channel"),
+    voice: disnake.VoiceChannel = Param(desc="A voice channel"),
+    fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Param("A fancy new channel")
 ):
-    ...
-
-
-@verify.error
-async def on_verify_errror(inter, exception):
-    if isinstance(exception, commands.ChannelNotFound):
-        await inter.response.send_message("The channel must be a text channel")
-        return
     ...

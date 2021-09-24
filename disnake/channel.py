@@ -63,6 +63,7 @@ __all__ = (
     'StageChannel',
     'DMChannel',
     'CategoryChannel',
+    'NewsChannel',
     'StoreChannel',
     'GroupChannel',
     'PartialMessageable',
@@ -1569,6 +1570,13 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return await self.guild.create_stage_channel(name, category=self, **options)
 
 
+class NewsChannel(TextChannel):
+    """Represents a Discord news channel
+    
+    An exact 1:1 copy of :class:`TextChannel` meant for command annotations
+    """
+    type: ChannelType = ChannelType.news
+
 class StoreChannel(disnake.abc.GuildChannel, Hashable):
     """Represents a Discord guild store channel.
 
@@ -2113,3 +2121,20 @@ def _threaded_guild_channel_factory(channel_type: int):
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
     return cls, value
+
+def _channel_type_factory(cls: Type[disnake.abc.GuildChannel]) -> List[ChannelType]:
+    return {
+        disnake.abc.GuildChannel: list(ChannelType.__members__.values()),
+        VocalGuildChannel: [ChannelType.voice, ChannelType.stage_voice],
+        disnake.abc.PrivateChannel: [ChannelType.private, ChannelType.group],
+        
+        TextChannel: [ChannelType.text, ChannelType.news],
+        DMChannel: [ChannelType.private],
+        VoiceChannel: [ChannelType.voice],
+        GroupChannel: [ChannelType.group],
+        CategoryChannel: [ChannelType.category],
+        StoreChannel: [ChannelType.store],
+        NewsChannel: [ChannelType.news],
+        Thread: [ChannelType.news_thread, ChannelType.public_thread, ChannelType.private_thread],
+        StageChannel: [ChannelType.stage_voice]
+    }.get(cls, [])
