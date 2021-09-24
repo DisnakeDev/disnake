@@ -887,12 +887,17 @@ def _get_option_desc(lines: List[str]) -> Dict[str, Any]:
     maybe_type = None
     for line in lines[start:end]:
         spaces = _count_left_spaces(line)
-        if spaces == 0 and ':' in line:
+        if spaces == 0:
             # Add previous param desc
             add_param(param, desc_lines, maybe_type)
             # Prepare new param desc
-            param, maybe_type = line.split(':', 1)
-            maybe_type = maybe_type.strip()
+            if ':' in line:
+                param, maybe_type = line.split(':', 1)
+                param = param.strip()
+                maybe_type = maybe_type.strip()
+            else:
+                param = line.strip()
+                maybe_type = None
             desc_lines = []
         elif spaces > 0:
             desc_lines.append(line.strip())
