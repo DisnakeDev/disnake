@@ -53,7 +53,7 @@ from base64 import b64encode, urlsafe_b64decode as b64decode
 from bisect import bisect_left
 import datetime
 import functools
-from inspect import isawaitable as _isawaitable, signature as _signature
+from inspect import isawaitable as _isawaitable, signature as _signature, getdoc as _getdoc
 from operator import attrgetter
 import json
 import re
@@ -64,7 +64,7 @@ import warnings
 from .errors import InvalidArgument
 
 try:
-    import orjson
+    import orjson # type: ignore
 except ModuleNotFoundError:
     HAS_ORJSON = False
 else:
@@ -835,24 +835,81 @@ def escape_mentions(text: str) -> str:
     """
     return re.sub(r'@(everyone|here|[!&]?[0-9]{17,20})', '@\u200b\\1', text)
 
+# Custom docstring parser
+
+def _count_left_spaces(string: str) -> int:
+    res = 0
+    for s in string:
+        if not s.isspace():
+            return res
+        res += 1
+    return res
+
+def _get_header_line(lines: List[str], header: str, underline: str):
+    underlining = len(header) * underline
+    for i, line in enumerate(lines):
+        if (
+            line.rstrip() == header and
+            i + 1 < len(lines) and
+            lines[i + 1].startswith(underlining)
+        ):
+            return i
+    return len(lines)
+
+def _get_description(lines: List[str]) -> str:
+    end = _get_header_line(lines, 'Parameters', '-')
+    return '\n'.join(lines[:end]).strip()
+
+def _get_option_desc(lines: List[str]) -> Dict[str, Any]:
+    start = _get_header_line(lines, 'Parameters', '-') + 2
+    end = _get_header_line(lines, 'Raises', '-')
+    if start >= len(lines):
+        return {}
+    # Read option descriptions
+    options = {}
+    def add_param(param, desc_lines, maybe_type):
+        if param is None:
+            return
+        desc = None
+        if desc_lines:
+            desc = '\n'.join(desc_lines)
+        elif maybe_type:
+            desc = maybe_type
+        if desc is not None:
+            # TODO: maybe parse types in the future
+            options[param] = {
+                'name': param,
+                'type': None,
+                'description': desc
+            }
+    desc_lines = []
+    param = None
+    maybe_type = None
+    for line in lines[start:end]:
+        spaces = _count_left_spaces(line)
+        if spaces == 0 and ':' in line:
+            # Add previous param desc
+            add_param(param, desc_lines, maybe_type)
+            # Prepare new param desc
+            param, maybe_type = line.split(':', 1)
+            maybe_type = maybe_type.strip()
+            desc_lines = []
+        elif spaces > 0:
+            desc_lines.append(line.strip())
+    # After the last iteration
+    add_param(param, desc_lines, maybe_type)
+    return options
 
 def parse_docstring(func: Callable) -> Dict[str, Any]:
-    # return this if the parsing fails
-    return {'description': '', 'params': {}}
-    
-    # TODO: Add actual code UwU
-    
+    if func.__doc__ is None:
+        return {'description': '', 'params': {}}
+    lines = _getdoc(func).splitlines()
     return {
-        'description': "SHORT DESCRIPTION",
-        'params': {
-            "PARAMETER NAME": {
-                'name': "PARAMETER NAME (UNUSED BUT COOL)",
-                'type': resolve_annotation("RAW ANNOTATION", func.__globals__, None, None) if "RAW ANNOTATION PRESENT" else None,
-                'description': "PARAMETER DESCRIPTION",
-            },
-            ...: ...
-        }
+        'description': _get_description(lines),
+        'params': _get_option_desc(lines)
     }
+
+# Chunkers
 
 def _chunk(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
     ret = []
