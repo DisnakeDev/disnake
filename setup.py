@@ -48,6 +48,16 @@ extras_require = {
     ]
 }
 
+# [
+#     'discord',
+#     'discord.types',
+#     'discord.ui',
+#     'discord.webhook',
+#     'discord.interactions',
+#     'discord.ext.commands',
+#     'discord.ext.tasks',
+# ]
+
 packages = [
     'disnake',
     'disnake.types',
@@ -56,13 +66,6 @@ packages = [
     'disnake.interactions',
     'disnake.ext.commands',
     'disnake.ext.tasks',
-    'discord',
-    'discord.types',
-    'discord.ui',
-    'discord.webhook',
-    'discord.interactions',
-    'discord.ext.commands',
-    'discord.ext.tasks',
 ]
 
 setup(name='disnake',

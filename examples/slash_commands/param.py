@@ -114,8 +114,8 @@ async def constraint(
     ...
 
 
-# You can use docstrings to set the description of the command
-# or even the description of options. You follow the ReStructuredText or numpy markdown.
+# You can use docstrings to set the description of the command or even
+# the description of options. You should follow the ReStructuredText or numpy format.
 @bot.slash_command()
 async def docstrings(
     inter: disnake.ApplicationCommandInteraction,
