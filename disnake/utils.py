@@ -836,6 +836,24 @@ def escape_mentions(text: str) -> str:
     return re.sub(r'@(everyone|here|[!&]?[0-9]{17,20})', '@\u200b\\1', text)
 
 
+def parse_docstring(func: Callable) -> Dict[str, Any]:
+    # return this if the parsing fails
+    return {'description': '', 'params': {}}
+    
+    # TODO: Add actual code UwU
+    
+    return {
+        'description': "SHORT DESCRIPTION",
+        'params': {
+            "PARAMETER NAME": {
+                'name': "PARAMETER NAME (UNUSED BUT COOL)",
+                'type': resolve_annotation("RAW ANNOTATION", func.__globals__, None, None) if "RAW ANNOTATION PRESENT" else None,
+                'description': "PARAMETER DESCRIPTION",
+            },
+            ...: ...
+        }
+    }
+
 def _chunk(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
     ret = []
     n = 0

@@ -7,6 +7,7 @@ from .params import extract_params, create_connectors, resolve_param_kwargs
 
 from disnake.app_commands import SlashCommand, Option
 from disnake.enums import OptionType
+from disnake import utils
 
 import asyncio
 
@@ -110,8 +111,11 @@ class SubCommand(InvokableApplicationCommand):
         super().__init__(func, name=name, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
         
+        docstring = utils.parse_docstring(func)
+        description = description or docstring['description']
+        
         if not options:
-            params = extract_params(func, self.cog)
+            params = extract_params(func, self.cog, docstring['params'])
             options = [param.to_option() for param in params]
             self.connectors.update(create_connectors(params))
         
@@ -150,9 +154,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = auto_sync
         self.guild_ids: Optional[List[int]] = guild_ids
-
+        
+        docstring = utils.parse_docstring(func)
+        description = description or docstring['description']
+        
         if not options:
-            params = extract_params(func, self.cog)
+            params = extract_params(func, self.cog, docstring['params'])
             options = [param.to_option() for param in params]
             self.connectors.update(create_connectors(params))
         

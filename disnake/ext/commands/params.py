@@ -20,8 +20,9 @@ from typing import (
 
 import disnake
 from disnake.app_commands import Option, OptionChoice
-from disnake.enums import OptionType, try_enum_to_int, ChannelType
 from disnake.channel import _channel_type_factory
+from disnake.enums import ChannelType, OptionType, try_enum_to_int
+
 from . import errors
 from .converter import CONVERTER_MAPPING
 
@@ -76,12 +77,12 @@ class Param:
         converter: Callable[[Interaction, Any], Any] = None,
         choices: List[OptionChoice] = None,
         type: type = str,
-        channel_types: List[ChannelType] = None
+        channel_types: List[ChannelType] = None,
     ) -> None:
         self.default = default
         self.name = name
         self.param_name = name
-        self.description = description or "\u200b"
+        self.description = description
         self.converter = converter
 
         self.choices = choices or []
@@ -182,7 +183,7 @@ class Param:
         elif get_origin(annotation) is Literal:
             self.choices = [OptionChoice(str(i), i) for i in annotation.__args__]
             self.type = type(self.choices[0].value)
-        
+
         elif get_origin(annotation) is Union:
             args = annotation.__args__
             if all(issubclass(channel, disnake.abc.GuildChannel) for channel in args):
@@ -190,12 +191,14 @@ class Param:
                 self.channel_types = []
                 for channel in args:
                     self.channel_types += _channel_type_factory(channel)
+            elif any(get_origin(arg) for arg in args):
+                raise TypeError("Unions do not support nesting")
             else:
                 raise TypeError("Unions for anything else other than channels are not supported")
         elif issubclass(annotation, disnake.abc.GuildChannel):
             self.type = disnake.abc.GuildChannel
             self.channel_types = _channel_type_factory(annotation)
-        
+
         elif annotation in self.TYPES:
             self.type = annotation
         elif annotation in CONVERTER_MAPPING:
@@ -206,6 +209,11 @@ class Param:
     def parse_parameter(self, param: inspect.Parameter) -> None:
         self.name = self.name or param.name.replace("_", "-")
         self.param_name = param.name
+    
+    def parse_doc(self, doc_type: Any, doc_description: str) -> None:
+        self.description = self.description or doc_description
+        if self.type == str and doc_type is not None:
+            self.parse_annotation(doc_type)
 
     def to_option(self) -> Option:
         if self.name == "":
@@ -213,15 +221,15 @@ class Param:
 
         return Option(
             name=self.name,
-            description=self.description,
+            description=self.description or "\u200b",
             type=self.discord_type,
             required=self.required,
             choices=self.choices,
-            channel_types=self.channel_types
+            channel_types=self.channel_types,
         )
 
 
-def extract_params(func: Callable, cog: Any = None) -> List[Param]:
+def extract_params(func: Callable, cog: Any = None, doc_params: Dict[str, Dict[str, Any]] = {}) -> List[Param]:
     """Extract params from a function signature"""
     sig = inspect.signature(func)
     parameters = list(sig.parameters.values())
@@ -239,7 +247,11 @@ def extract_params(func: Callable, cog: Any = None) -> List[Param]:
         if not isinstance(param, Param):
             param = Param(param if param is not parameter.empty else ...)
 
+        doc_param = doc_params.get(parameter.name)
+        
         param.parse_parameter(parameter)
+        if doc_param:
+            param.parse_doc(doc_param['type'], doc_param['description'])
         param.parse_annotation(type_hints.get(parameter.name, Any))
         params.append(param)
 
