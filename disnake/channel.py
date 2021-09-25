@@ -921,11 +921,6 @@ class VoiceChannel(VocalGuildChannel):
         .. versionadded:: 1.7
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
-    
-    can_connect: :class:`bool`
-        If the Bot has the permissions to connect to the Voice Channel
-
-        .. versionadded:: 2.0
     """
 
     __slots__ = ()
@@ -948,10 +943,6 @@ class VoiceChannel(VocalGuildChannel):
     def type(self) -> ChannelType:
         """:class:`ChannelType`: The channel's Discord type."""
         return ChannelType.voice
-    
-    @property
-    def can_connect(self) -> bool:
-        return self.permissions_for(self.guild.me).connect
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(self, *, name: Optional[str] = None, reason: Optional[str] = None) -> VoiceChannel:
