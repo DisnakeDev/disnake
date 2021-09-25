@@ -48,7 +48,6 @@ from .permissions import PermissionOverwrite, Permissions
 from .enums import ChannelType, StagePrivacyLevel, try_enum, VoiceRegion, VideoQualityMode, PartyType
 from .mixins import Hashable
 from .object import Object
-from .party import Party
 from . import utils
 from .utils import MISSING
 from .asset import Asset
@@ -225,7 +224,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
         return [m for m in self.guild.members if self.permissions_for(m).read_messages]
-
+    
     @property
     def threads(self) -> List[Thread]:
         """List[:class:`Thread`]: Returns all the threads that you can see.
@@ -923,8 +922,6 @@ class VoiceChannel(VocalGuildChannel):
         .. versionadded:: 1.7
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
-
-        .. versionadded:: 2.0
     """
 
     __slots__ = ()
@@ -968,39 +965,6 @@ class VoiceChannel(VocalGuildChannel):
         reason: Optional[str] = ...,
     ) -> Optional[VoiceChannel]:
         ...
-    
-    async def create_party(
-        self,
-        application_name: PartyType,
-        max_age: int = 86400,
-        max_uses: int = 0
-    ) -> Party:
-        """|coro|
-        Creates a party in this voice channel.
-
-        Parameters
-        ----------
-        application_name : :class:`PartyType`
-            The id of the application the party belongs to. currently any of
-            ``youtube``, ``poker``, ``betrayal``, ``fishing``, ``chess``.
-        max_age : :class:`int`
-            Duration in seconds after which the invite expires, defaults to 86400.
-        max_uses : :class:`int`
-            maximum number of times this invite can be used, defaults to 0 (unlimited).
-        Raises
-        -------
-        Forbidden
-            You do not have permissions to create a party.
-        HTTPException
-            Party creation failed.
-        Returns
-        --------
-        :class:`Party`
-            The created party.
-        """
-        return Party(
-            await self._state.http.create_party(self.id, max_age, max_uses, PartyType[application_name].value)
-        )
 
     @overload
     async def edit(self) -> Optional[VoiceChannel]:
