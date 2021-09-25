@@ -160,6 +160,11 @@ class Param:
             raise errors.ConversionError(self.converter, e) from e
 
     def parse_annotation(self, annotation: Any) -> None:
+        if isinstance(annotation, Param):
+            default = "..." if self.required else repr(annotation.default)
+            r = f'Param({default}, description={annotation.description or "description"!r})'
+            raise TypeError(f"Param must be a parameter default, not an annotation: \"option: type = {r}\"")
+
         if self.converter is not None:
             # try to parse the converter's annotation, fall back on the annotation itself
             parameters = list(inspect.signature(self.converter).parameters.values())
@@ -198,7 +203,7 @@ class Param:
                 raise TypeError("Unions do not support nesting")
             else:
                 raise TypeError("Unions for anything else other than channels are not supported")
-        elif issubclass(annotation, disnake.abc.GuildChannel):
+        elif isinstance(annotation, type) and issubclass(annotation, disnake.abc.GuildChannel):
             self.type = disnake.abc.GuildChannel
             self.channel_types = _channel_type_factory(annotation)
 
@@ -270,6 +275,7 @@ def create_connectors(params: List[Param]) -> Dict[str, Any]:
 def create_autocompleters(params: List[Param]) -> Dict[str, Callable[[Interaction, str], Any]]:
     """Create an autocomplete for each param"""
     return {param.name: param.autocomplete for param in params if param.autocomplete}
+
 
 async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     """Resolves a call with kwargs and transforms into normal kwargs
