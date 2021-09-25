@@ -83,9 +83,20 @@ class Option:
     channel_types: List[:class:`ChannelType`]
         the list of channel types that your option supports, if the type is :class:`OptionType.channel`.
         By default, it supports all channel types.
+    autocomplete: :class:`bool`
+        whether this option can be autocompleted.
     """
 
-    __slots__ = ("name", "description", "type", "required", "choices", "options", "channel_types")
+    __slots__ = (
+        'name',
+        'description',
+        'type',
+        'required',
+        'choices',
+        'options',
+        'channel_types',
+        'autocomplete',
+    )
 
     def __init__(
         self,
@@ -96,6 +107,7 @@ class Option:
         choices: Union[List[OptionChoice], Dict[str, Union[str, int]]] = None,
         options: list = None,
         channel_types: List[ChannelType] = None,
+        autocomplete: bool = False,
     ):
         assert name.islower(), f"Option name {name!r} must be lowercase"
 
@@ -113,6 +125,9 @@ class Option:
 
         self.channel_types: List[ChannelType] = channel_types or []
 
+        if choices is not None and autocomplete:
+            raise InvalidArgument("can not specify both choices and autocomplete args")
+
         if choices is None:
             choices = []
         elif isinstance(choices, dict):
@@ -124,6 +139,7 @@ class Option:
             choices = [OptionChoice(name, value) for name, value in choices]
         
         self.choices: List[OptionChoice] = choices
+        self.autocomplete: bool = autocomplete
 
     def __repr__(self) -> str:
         return (
@@ -140,7 +156,8 @@ class Option:
             self.required == other.required and
             self.choices == other.choices and
             self.options == other.options and
-            self.channel_types == other.channel_types
+            self.channel_types == other.channel_types and
+            self.autocomplete == other.autocomplete
         )
 
     @classmethod
@@ -180,6 +197,7 @@ class Option:
         choices: List[OptionChoice] = None,
         options: list = None,
         channel_types: List[ChannelType] = None,
+        autocomplete: bool = False,
     ) -> None:
         """
         Adds an option to the current list of options
@@ -200,6 +218,7 @@ class Option:
                 choices=choices,
                 options=options,
                 channel_types=channel_types,
+                autocomplete=autocomplete,
             )
         )
 
@@ -211,6 +230,8 @@ class Option:
         }
         if self.required:
             payload['required'] = True
+        if self.autocomplete:
+            payload['autocomplete'] = True
         if len(self.choices) > 0:
             payload['choices'] = [c.to_dict() for c in self.choices]
         if len(self.options) > 0:
@@ -362,6 +383,7 @@ class SlashCommand(ApplicationCommand):
         choices: List[OptionChoice] = None,
         options: list = None,
         channel_types: List[ChannelType] = None,
+        autocomplete: bool = False,
     ) -> None:
         """
         Adds an option to the current list of options
@@ -375,7 +397,8 @@ class SlashCommand(ApplicationCommand):
                 required=required,
                 choices=choices,
                 options=options,
-                channel_types=channel_types
+                channel_types=channel_types,
+                autocomplete=autocomplete,
             )
         )
 

@@ -765,6 +765,9 @@ class ConnectionState:
                 self.dispatch('button_click', interaction)
             elif interaction.data.component_type is ComponentType.select:
                 self.dispatch('dropdown', interaction)
+        elif data['type'] == 4:
+            interaction = ApplicationCommandInteraction(data=data, state=self)
+            self.dispatch('application_command_autocomplete', interaction)
         else:
             pass
 

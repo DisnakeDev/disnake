@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union, TypeV
 import asyncio
 
 from .. import utils
+from ..app_commands import OptionChoice
 from ..enums import try_enum, InteractionType, InteractionResponseType
 from ..errors import InteractionResponded, HTTPException, ClientException
 from ..channel import PartialMessageable, ChannelType
@@ -157,7 +158,7 @@ class Interaction:
         return self.bot
 
     @property
-    def user(self) -> User:
+    def user(self) -> Optional[Union[User, Member]]:
         return self.author
 
     @property
@@ -660,6 +661,57 @@ class InteractionResponse:
 
         if view and not view.is_finished():
             state.store_view(view, message_id)
+
+        self._responded = True
+
+    async def autocomplete(
+        self,
+        *,
+        choices: Union[
+            Dict[str, str],
+            List[Tuple[str, str]],
+            List[OptionChoice]
+        ]
+    ) -> None:
+        """|coro|
+        Responds to this interaction by displaying a list of possible autocomplete results.
+        Only works for autocomplete interactions.
+
+        Parameters
+        -----------
+        choices: Union[Dict[:class:`str`, :class:`str`], List[:class:`OptionChoice`]]
+            The list of choices to suggest.
+
+        Raises
+        -------
+        HTTPException
+            Autocomplete response has failed.
+        InteractionResponded
+            This interaction has already been responded to before.
+        """
+        if self._responded:
+            raise InteractionResponded(self._parent)
+        
+        data = {}
+        if isinstance(choices, dict):
+            data['choices'] = [{'name': n, 'value': v} for n, v in choices.items()]
+        elif isinstance(choices, list):
+            if not choices:
+                data['choices'] = []
+            elif isinstance(choices[0], OptionChoice):
+                data['choices'] = [ch.to_dict() for ch in choices]
+            else:
+                data['choices'] = [{'name': n, 'value': v} for n, v in choices]
+
+        parent = self._parent
+        adapter = async_context.get()
+        await adapter.create_interaction_response(
+            parent.id,
+            parent.token,
+            session=parent._session,
+            type=InteractionResponseType.application_command_autocomplete_result.value,
+            data=data,
+        )
 
         self._responded = True
 

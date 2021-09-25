@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, Optional, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 
 from .base import Interaction
 
@@ -76,7 +76,10 @@ class ApplicationCommandInteraction(Interaction):
     
     @property
     def options(self) -> Dict[str, Any]:
-        return self.data.options
+        return {
+            opt.name: opt._simplified_value()
+            for opt in self.data.options
+        }
 
 
 class ApplicationCommandInteractionData:
@@ -94,8 +97,8 @@ class ApplicationCommandInteractionData:
         The application command type.
     resolved: :class:`ApplicationCommandInteractionDataResolved`
         All resolved objects related to this interaction.
-    options: Dict[:class:`str`, :class:`Any`]
-        Slash command option names and values entered by a user.
+    options: List[:class:`ApplicationCommandInteractionDataOption`]
+        A list of options from the API.
     target_id: :class:`int`
         ID of the user or message targetted by a user or message command
     target: Union[:class:`User`, :class:`Member`, :class:`Message`]
@@ -109,7 +112,7 @@ class ApplicationCommandInteractionData:
         'target_id',
         'target',
         'resolved',
-        'options'
+        'options',
     )
 
     def __init__(self, *, data: ApplicationCommandInteractionDataPayload, state: ConnectionState, guild: Guild):
@@ -125,18 +128,51 @@ class ApplicationCommandInteractionData:
         target_id = data.get('target_id')
         self.target_id: Optional[int] = None if target_id is None else int(target_id)
         self.target: Optional[Union[User, Member, Message]] = self.resolved.get(self.target_id)
-        def option_payload_to_value(payload):
-            value = payload.get('value')
-            if value is not None:
-                return self.resolved.get_with_type(value, payload['type'], value)
-            return {
-                option['name']: option_payload_to_value(option)
-                for option in payload.get('options', [])
-            }
-        self.options: Dict[str, Any] = {
-            option['name']: option_payload_to_value(option)
-            for option in data.get('options', [])
-        }
+        self.options: List[ApplicationCommandInteractionDataOption] = [
+            ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
+            for d in data.get('options', [])
+        ]
+
+
+class ApplicationCommandInteractionDataOption:
+    """
+    This class represents the structure of an interaction data option from the API.
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The name of the option.
+    type: :class:`OptionType`
+        The type of the option.
+    value: :class:`Any`
+        The value of the option.
+    options: List[:class:`ApplicationCommandInteractionDataOption`]
+        The list of options of this option. Only exists for subcommands and groups.
+    focused: :class:`bool`
+        Whether this option is focused by the user. May be ``True`` in
+        case of :class:`ApplicationCommandAutocompleteInteraction`.
+    """
+
+    __slots__ = ('name', 'type', 'value', 'options', 'focused')
+
+    def __init__(self, *, data: Dict[str, Any], resolved: ApplicationCommandInteractionDataResolved):
+        self.name: str = data['name']
+        self.type: OptionType = try_enum(OptionType, data['type'])
+        value = data.get('value')
+        if value is not None:
+            self.value: Any = resolved.get_with_type(value, self.type.value, value)
+        else:
+            self.value: Any = None
+        self.options: List[ApplicationCommandInteractionDataOption] = [
+            ApplicationCommandInteractionDataOption(data=d, resolved=resolved)
+            for d in data.get('options', [])
+        ]
+        self.focused: bool = data.get('focused', False)
+    
+    def _simplified_value(self) -> Any:
+        if self.value is not None:
+            return self.value
+        return {opt.name: opt._simplified_value() for opt in self.options}
 
 
 class ApplicationCommandInteractionDataResolved:
@@ -254,3 +290,6 @@ class ApplicationCommandInteractionDataResolved:
         if res is not None:
             return res
         return self.messages.get(key)
+
+# People asked about shorter aliases
+AppCommandInter = ApplicationCommandInteraction

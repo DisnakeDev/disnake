@@ -45,18 +45,11 @@ extras_require = {
         'aiodns>=1.1',
         'Brotli',
         'cchardet',
+    ],
+    'discord': [
+        'discord-disnake'
     ]
 }
-
-# [
-#     'discord',
-#     'discord.types',
-#     'discord.ui',
-#     'discord.webhook',
-#     'discord.interactions',
-#     'discord.ext.commands',
-#     'discord.ext.tasks',
-# ]
 
 packages = [
     'disnake',

@@ -546,6 +546,7 @@ class InteractionResponseType(Enum):
     deferred_channel_message = 5  # (with source)
     deferred_message_update = 6  # for components
     message_update = 7  # for components
+    application_command_autocomplete_result = 8 # for autocomplete
 
 
 class VideoQualityMode(Enum):
