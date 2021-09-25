@@ -148,12 +148,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         The default auto archive duration in minutes for threads created in this channel.
 
         .. versionadded:: 2.0
-    
-    can_send: :class:`bool`
-        If the Bot has the permissions to send messages in the Text Channel
-    
-    can_read: :class:`bool`
-        If the Bot has the permissions to read messages in the Text Channel
     """
 
     __slots__ = (
@@ -170,8 +164,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         '_type',
         'last_message_id',
         'default_auto_archive_duration',
-        'can_send',
-        'can_read'
     )
 
     def __init__(self, *, state: ConnectionState, guild: Guild, data: TextChannelPayload):
@@ -232,17 +224,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         """List[:class:`Member`]: Returns all members that can see this channel."""
         return [m for m in self.guild.members if self.permissions_for(m).read_messages]
     
-    def can_send(self, with_embeds: bool = True):
-        can = self.permissions_for(self.guild.me)
-        if with_embeds:
-            return can.send_messages and can.embed_links
-        return can.send_messages
-    
-    def can_read(self, with_history: bool = True) -> bool:
-        can = self.permissions_for(self.guild.me)
-        if with_history:
-            return can.read_message_history and can.read_messages
-
     @property
     def threads(self) -> List[Thread]:
         """List[:class:`Thread`]: Returns all the threads that you can see.
