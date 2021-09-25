@@ -147,13 +147,14 @@ class SubCommand(InvokableApplicationCommand):
     
     async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Any:
         autocomp = self.autocompleters.get(param)
-        if autocomp is not None:
-            if callable(autocomp):
-                choices = autocomp(inter, user_input)
-                if inspect.isawaitable(choices):
-                    return await choices
-                return choices
+        if autocomp is None:
+            return None
+        if not callable(autocomp):
             return autocomp
+        choices = autocomp(inter, user_input)
+        if inspect.isawaitable(choices):
+            return await choices
+        return choices
 
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
         for k, v in self.connectors.items():
@@ -315,13 +316,14 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Any:
         autocomp = self.autocompleters.get(param)
-        if autocomp is not None:
-            if callable(autocomp):
-                choices = autocomp(inter, user_input)
-                if inspect.isawaitable(choices):
-                    return await choices
-                return choices
+        if autocomp is None:
+            return None
+        if not callable(autocomp):
             return autocomp
+        choices = autocomp(inter, user_input)
+        if inspect.isawaitable(choices):
+            return await choices
+        return choices
 
     async def _call_relevant_autocompleter(self, inter: ApplicationCommandInteraction) -> None:
         chain, _ = options_as_route(inter.options)
@@ -338,13 +340,16 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             raise ValueError("Command chain is too long")
         
         focused_option = inter.data._get_focused_option()
+
         if subcmd is None or isinstance(subcmd, SubCommandGroup):
             call_autocompleter = self._call_autocompleter
         else:
             call_autocompleter = subcmd._call_autocompleter
+        
         choices = await call_autocompleter(focused_option.name, inter, focused_option.value)
-
-        await inter.response.autocomplete(choices=choices)
+        
+        if choices is not None:
+            await inter.response.autocomplete(choices=choices)
 
     async def invoke_children(self, inter: ApplicationCommandInteraction):
         chain, kwargs = options_as_route(inter.options)
