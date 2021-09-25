@@ -8,7 +8,7 @@ from disnake.ext import commands
 bot = commands.Bot("!")
 
 @bot.slash_command(
-    name="Slash Command",
+    name="slash_command",
     description="A Simple Slash Command",
     options=[
         disnake.Option("string", description="A string to send", required=True),
