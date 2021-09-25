@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union, TypeVar
 
 from .base import Interaction
 
@@ -31,6 +31,9 @@ if TYPE_CHECKING:
     InteractionChannel = Union[
         VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, Thread, PartialMessageable
     ]
+
+
+AppCmdDataOptionT = TypeVar('AppCmdDataOptionT', bound='ApplicationCommandInteractionDataOption')
 
 
 class ApplicationCommandInteraction(Interaction):
@@ -128,10 +131,17 @@ class ApplicationCommandInteractionData:
         target_id = data.get('target_id')
         self.target_id: Optional[int] = None if target_id is None else int(target_id)
         self.target: Optional[Union[User, Member, Message]] = self.resolved.get(self.target_id)
-        self.options: List[ApplicationCommandInteractionDataOption] = [
+        self.options: List[AppCmdDataOptionT] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
             for d in data.get('options', [])
         ]
+    
+    def _get_focused_option(self) -> AppCmdDataOptionT:
+        for option in self.options:
+            if option.focused:
+                return option
+            if option.value is None:
+                return option._get_focused_option()
 
 
 class ApplicationCommandInteractionDataOption:
@@ -163,7 +173,7 @@ class ApplicationCommandInteractionDataOption:
             self.value: Any = resolved.get_with_type(value, self.type.value, value)
         else:
             self.value: Any = None
-        self.options: List[ApplicationCommandInteractionDataOption] = [
+        self.options: List[AppCmdDataOptionT] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=resolved)
             for d in data.get('options', [])
         ]
@@ -173,6 +183,13 @@ class ApplicationCommandInteractionDataOption:
         if self.value is not None:
             return self.value
         return {opt.name: opt._simplified_value() for opt in self.options}
+    
+    def _get_focused_option(self) -> AppCmdDataOptionT:
+        for option in self.options:
+            if option.focused:
+                return option
+            if option.value is None:
+                return option._get_focused_option()
 
 
 class ApplicationCommandInteractionDataResolved:

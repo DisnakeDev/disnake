@@ -1805,6 +1805,33 @@ class BotBase(GroupMixin):
         ctx = await self.get_context(message)
         await self.invoke(ctx)
     
+    async def process_app_command_autocompletion(self, inter: ApplicationCommandInteraction) -> None:
+        """|coro|
+
+        This function processes the application command autocompletions.
+        Without this coroutine, none of the autocompletions will be performed.
+
+        By default, this coroutine is called inside the :func:`.on_application_command_autocompletion`
+        event. If you choose to override the :func:`.on_application_command_autocompletion` event, then
+        you should invoke this coroutine as well.
+
+        Parameters
+        -----------
+        inter: :class:`disnake.ApplicationCommandInteraction`
+            The interaction to process.
+        """
+        slash_command = self.all_slash_commands.get(inter.data.name)
+        
+        if slash_command is None:
+            return
+        
+        inter.bot = self
+        if slash_command.guild_ids is None or inter.guild_id in slash_command.guild_ids:
+            try:
+                await slash_command._call_relevant_autocompleter(inter)
+            except Exception:
+                pass
+
     async def process_application_commands(self, interaction: ApplicationCommandInteraction) -> None:
         """|coro|
 
@@ -1863,6 +1890,9 @@ class BotBase(GroupMixin):
     
     async def on_application_command(self, interaction: ApplicationCommandInteraction):
         await self.process_application_commands(interaction)
+    
+    async def on_application_command_autocomplete(self, interaction: ApplicationCommandInteraction):
+        await self.process_app_command_autocompletion(interaction)
     
     async def _watchdog(self):
         """|coro|

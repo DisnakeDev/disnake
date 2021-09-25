@@ -1,5 +1,19 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING, Callable, Coroutine
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Awaitable,
+    Callable,
+    Coroutine,
+    Iterable,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -7,13 +21,14 @@ from .params import extract_params, create_connectors, resolve_param_kwargs
 
 from disnake.app_commands import SlashCommand, Option
 from disnake.enums import OptionType
+from disnake.interactions import ApplicationCommandInteraction
 from disnake import utils
 
 import asyncio
+import inspect
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
-    from disnake.interactions import ApplicationCommandInteraction
     from .cog import CogT
 
     P = ParamSpec('P')
@@ -24,6 +39,13 @@ __all__ = (
     'SubCommand',
     'slash_command'
 )
+
+
+T = TypeVar('T')
+MaybeAwaitable = Union[T, Awaitable[T]]
+ChoiceValue = Union[int, str]
+Choices = Union[Mapping[str, ChoiceValue], Iterable[ChoiceValue]]
+AutocompT = Callable[[ApplicationCommandInteraction, str], MaybeAwaitable[Choices]]
 
 
 def options_as_route(options: Dict[str, Any]) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
@@ -110,6 +132,7 @@ class SubCommand(InvokableApplicationCommand):
     ):
         super().__init__(func, name=name, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
+        self.autocompleters: Dict[str, AutocompT] = kwargs.get('autocompleters', {})
         
         docstring = utils.parse_docstring(func)
         description = description or docstring['description']
@@ -118,6 +141,7 @@ class SubCommand(InvokableApplicationCommand):
             params = extract_params(func, self.cog, docstring['params'])
             options = [param.to_option() for param in params]
             self.connectors.update(create_connectors(params))
+            # TODO: update autocompleters
         
         self.option = Option(
             name=self.name,
@@ -127,6 +151,16 @@ class SubCommand(InvokableApplicationCommand):
         )
         self.qualified_name = ''
     
+    async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Choices:
+        autocomp = self.autocompleters.get(param)
+        if autocomp is not None:
+            if callable(autocomp):
+                choices = autocomp(inter, user_input)
+                if inspect.isawaitable(choices):
+                    return await choices
+                return choices
+            return autocomp
+
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
         for k, v in self.connectors.items():
             if k in kwargs:
@@ -154,6 +188,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = auto_sync
         self.guild_ids: Optional[List[int]] = guild_ids
+        self.autocompleters: Dict[str, AutocompT] = kwargs.get('autocompleters', {})
         
         docstring = utils.parse_docstring(func)
         description = description or docstring['description']
@@ -283,6 +318,39 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         finally:
             inter.bot.dispatch('slash_command_error', inter, error) # type: ignore
 
+    async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Choices:
+        autocomp = self.autocompleters.get(param)
+        if autocomp is not None:
+            if callable(autocomp):
+                choices = autocomp(inter, user_input)
+                if inspect.isawaitable(choices):
+                    return await choices
+                return choices
+            return autocomp
+
+    async def _call_relevant_autocompleter(self, inter: ApplicationCommandInteraction) -> None:
+        chain, _ = options_as_route(inter.options)
+
+        if len(chain) == 0:
+            subcmd = None
+        elif len(chain) == 1:
+            subcmd = self.children.get(chain[0])
+        elif len(chain) == 2:
+            group = self.children.get(chain[0])
+            assert isinstance(group, SubCommandGroup)
+            subcmd = group.children.get(chain[1]) if group is not None else None
+        else:
+            raise ValueError("Command chain is too long")
+        
+        focused_option = inter.data._get_focused_option()
+        if subcmd is None:
+            call_autocompleter = self._call_autocompleter
+        else:
+            call_autocompleter = subcmd._call_autocompleter
+        choices = await call_autocompleter(focused_option.name, inter, focused_option.value)
+
+        await inter.response.autocomplete(choices=choices)
+
     async def invoke_children(self, inter: ApplicationCommandInteraction):
         chain, kwargs = options_as_route(inter.options)
         
@@ -297,7 +365,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             assert isinstance(group, SubCommandGroup)
             subcmd = group.children.get(chain[1]) if group is not None else None
         else:
-            raise ValueError("Chain too long")
+            raise ValueError("Command chain is too long")
 
         if group is not None:
             try:
