@@ -54,7 +54,7 @@ async def names(
 async def converters(
     inter: disnake.ApplicationCommandInteraction,
     emoji: disnake.Emoji = Param(desc="An emoji"),
-    content: str = Param(desc="Clean content", converter=lambda inter, arg: arg.replace("@", "\\@")),
+    content: str = Param(description="Clean content", converter=lambda inter, arg: arg.replace("@", "\\@")),
 ):
     ...
 
@@ -114,6 +114,22 @@ async def constraint(
     ...
 
 
+# You may even add autocompletion for your commands.
+# This requires the type to be a string and for you to not use enumeration.
+# Your autocompleter may return either a dict of names to values or a list of names
+# but the amount of options cannot be more than 20.
+
+LANGUAGES = ["Python", "JavaScript", "TypeScript", "Java", "Rust", "Lisp", "Elixir"]
+async def autocomplete_langs(inter: disnake.ApplicationCommandInteraction, string: str):
+    return [lang for lang in LANGUAGES if string.lower() in lang]
+
+@bot.slash_command()
+async def autocomplete(
+    inter: disnake.ApplicationCommandInteraction,
+    language: str = Param(desc="Your favorite language", autocomp=autocomplete_langs)
+):
+    ...
+
 # You can use docstrings to set the description of the command or even
 # the description of options. You should follow the ReStructuredText or numpy format.
 @bot.slash_command()
@@ -137,7 +153,7 @@ async def docstrings(
 # Types of parameters in docstrings are optional.
 # You can specify the descriptions without them.
 @bot.slash_command()
-async def docstrings(
+async def partial_docstrings(
     inter: disnake.ApplicationCommandInteraction,
     user: disnake.User,
     reason: str,
@@ -155,10 +171,10 @@ async def docstrings(
     ...
 
 
-# If you don't want to waste too many lines,
-# use ':' so separate the param name and description.
+# If you don't want to waste too many lines
+# use ':' to separate the param name and description.
 @bot.slash_command()
-async def docstrings(
+async def simple_docstrings(
     inter: disnake.ApplicationCommandInteraction,
     user: disnake.User,
     reason: str,
