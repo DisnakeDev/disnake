@@ -856,13 +856,26 @@ def _get_header_line(lines: List[str], header: str, underline: str):
             return i
     return len(lines)
 
+def _get_next_header_line(lines: List[str], underline: str, start: int = 0) -> int:
+    for idx, line in enumerate(lines[start:]):
+        i = start + idx
+        clean_line = line.rstrip()
+        if (
+            i > 0 and
+            clean_line.count(underline) == len(clean_line) and
+            _count_left_spaces(lines[i - 1]) == 0 and
+            len(lines[i - 1].rstrip()) <= len(clean_line)
+        ):
+            return i - 1
+    return len(lines)
+
 def _get_description(lines: List[str]) -> str:
-    end = _get_header_line(lines, 'Parameters', '-')
+    end = _get_next_header_line(lines, '-')
     return '\n'.join(lines[:end]).strip()
 
 def _get_option_desc(lines: List[str]) -> Dict[str, Any]:
     start = _get_header_line(lines, 'Parameters', '-') + 2
-    end = _get_header_line(lines, 'Raises', '-')
+    end = _get_next_header_line(lines, '-', start)
     if start >= len(lines):
         return {}
     # Read option descriptions

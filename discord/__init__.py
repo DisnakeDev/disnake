@@ -19,7 +19,6 @@ from .user import *
 from .emoji import *
 from .partial_emoji import *
 from .activity import *
-from .party import *
 from .channel import *
 from .guild import *
 from .flags import *

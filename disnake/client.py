@@ -61,7 +61,14 @@ from .ui.view import View
 from .stage_instance import StageInstance
 from .threads import Thread
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
-from .app_commands import application_command_factory, ApplicationCommand, ApplicationCommandPermissions
+from .app_commands import (
+    application_command_factory,
+    ApplicationCommandPermissions,
+    ApplicationCommand,
+    SlashCommand,
+    UserCommand,
+    MessageCommand,
+)
 
 if TYPE_CHECKING:
     from .abc import SnowflakeTime, PrivateChannel, GuildChannel, Snowflake
@@ -427,6 +434,31 @@ class Client:
         """
         return self._connection.application_flags  # type: ignore
     
+    @property
+    def global_application_commands(self) -> List[ApplicationCommand]:
+        return list(self._connection._global_application_commands.values())
+
+    @property
+    def global_slash_commands(self) -> List[SlashCommand]:
+        return [
+            cmd for cmd in self._connection._global_application_commands.values()
+            if isinstance(cmd, SlashCommand)
+        ]
+
+    @property
+    def global_user_commands(self) -> List[UserCommand]:
+        return [
+            cmd for cmd in self._connection._global_application_commands.values()
+            if isinstance(cmd, UserCommand)
+        ]
+    
+    @property
+    def global_message_commands(self) -> List[MessageCommand]:
+        return [
+            cmd for cmd in self._connection._global_application_commands.values()
+            if isinstance(cmd, MessageCommand)
+        ]
+
     def get_message(self, id: int) -> Optional[Message]:
         """Gets the message with the ID from the bot's message cache.
 
@@ -1149,16 +1181,140 @@ class Client:
         for guild in self.guilds:
             yield from guild.members
 
+    def get_guild_application_commands(self, guild_id: int) -> List[ApplicationCommand]:
+        """
+        Returns a list of all application commands in the guild.
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The ID to search for.
+        
+        Returns
+        -------
+        List[:class:`ApplicationCommand`]
+            The list of application commands.
+        """
+        data = self._connection._guild_application_commands.get(guild_id, {})
+        return list(data.values())
+    
+    def get_guild_slash_commands(self, guild_id: int) -> List[SlashCommand]:
+        """
+        Returns a list of all slash commands in the guild.
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The ID to search for.
+        
+        Returns
+        -------
+        List[:class:`SlashCommand`]
+            The list of slash commands.
+        """
+        data = self._connection._guild_application_commands.get(guild_id, {})
+        return [cmd for cmd in data.values() if isinstance(cmd, SlashCommand)]
+    
+    def get_guild_user_commands(self, guild_id: int) -> List[UserCommand]:
+        """
+        Returns a list of all user commands in the guild.
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The ID to search for.
+        
+        Returns
+        -------
+        List[:class:`UserCommand`]
+            The list of user commands.
+        """
+        data = self._connection._guild_application_commands.get(guild_id, {})
+        return [cmd for cmd in data.values() if isinstance(cmd, UserCommand)]
+    
+    def get_guild_message_commands(self, guild_id: int) -> List[MessageCommand]:
+        """
+        Returns a list of all message commands in the guild.
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The ID to search for.
+        
+        Returns
+        -------
+        List[:class:`MessageCommand`]
+            The list of message commands.
+        """
+        data = self._connection._guild_application_commands.get(guild_id, {})
+        return [cmd for cmd in data.values() if isinstance(cmd, MessageCommand)]
+    
     def get_global_command(self, id: int) -> Optional[ApplicationCommand]:
+        """
+        Returns a global application command.
+
+        Parameters
+        ----------
+        id: :class:`int`
+            The ID to search for.
+        
+        Returns
+        -------
+        :class:`ApplicationCommand`
+            The application command.
+        """
         return self._connection._get_global_application_command(id)
     
     def get_guild_command(self, guild_id: int, id: int) -> Optional[ApplicationCommand]:
+        """
+        Returns a guild application command.
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The guild ID to search for.
+        id: :class:`int`
+            The command ID to search for.
+        
+        Returns
+        -------
+        :class:`ApplicationCommand`
+            The application command.
+        """
         return self._connection._get_guild_application_command(guild_id, id)
 
     def get_global_command_named(self, name: str) -> Optional[ApplicationCommand]:
+        """
+        Returns a global application command matching the specified name.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name to search for.
+        
+        Returns
+        -------
+        :class:`ApplicationCommand`
+            The application command.
+        """
         return self._connection._get_global_command_named(name)
     
     def get_guild_command_named(self, guild_id: int, name: str) -> Optional[ApplicationCommand]:
+        """
+        Returns a guild application command matching the name.
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The guild ID to search for.
+        name: :class:`str`
+            The command name to search for.
+        
+        Returns
+        -------
+        :class:`ApplicationCommand`
+            The application command.
+        """
         return self._connection._get_guild_command_named(guild_id, name)
 
     # listeners/waiters
