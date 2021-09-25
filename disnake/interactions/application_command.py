@@ -142,6 +142,10 @@ class ApplicationCommandInteractionData:
                 return option
             if option.value is None:
                 return option._get_focused_option()
+    
+    @property
+    def focused_option(self):
+        return self._get_focused_option()
 
 
 class ApplicationCommandInteractionDataOption:

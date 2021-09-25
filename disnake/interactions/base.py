@@ -669,8 +669,9 @@ class InteractionResponse:
         *,
         choices: Union[
             Dict[str, str],
+            List[str],
             List[Tuple[str, str]],
-            List[OptionChoice]
+            List[OptionChoice],
         ]
     ) -> None:
         """|coro|
@@ -700,8 +701,10 @@ class InteractionResponse:
                 data['choices'] = []
             elif isinstance(choices[0], OptionChoice):
                 data['choices'] = [ch.to_dict() for ch in choices]
-            else:
+            elif len(choices[0]) == 2:
                 data['choices'] = [{'name': n, 'value': v} for n, v in choices]
+            else:
+                data['choices'] = [{'name': n, 'value': n} for n in choices]
 
         parent = self._parent
         adapter = async_context.get()

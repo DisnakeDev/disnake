@@ -76,6 +76,7 @@ class Param:
         name: str = "",
         description: str = None,
         converter: Callable[[Interaction, Any], Any] = None,
+        autcomplete: Callable[[Interaction, str], Any] = None,
         choices: List[OptionChoice] = None,
         type: type = str,
         channel_types: List[ChannelType] = None,
@@ -85,6 +86,7 @@ class Param:
         self.param_name = name
         self.description = description
         self.converter = converter
+        self.autocomplete = autcomplete
 
         self.choices = choices or []
         self.type = type
@@ -210,7 +212,7 @@ class Param:
     def parse_parameter(self, param: inspect.Parameter) -> None:
         self.name = self.name or param.name.replace("_", "-")
         self.param_name = param.name
-    
+
     def parse_doc(self, doc_type: Any, doc_description: str) -> None:
         self.description = self.description or doc_description
         if self.type == str and doc_type is not None:
@@ -225,8 +227,9 @@ class Param:
             description=self.description or "\u200b",
             type=self.discord_type,
             required=self.required,
-            choices=self.choices,
+            choices=self.choices or None,
             channel_types=self.channel_types,
+            autocomplete=self.autocomplete is not None,
         )
 
 
@@ -249,10 +252,10 @@ def extract_params(func: Callable, cog: Any = None, doc_params: Dict[str, Dict[s
             param = Param(param if param is not parameter.empty else ...)
 
         doc_param = doc_params.get(parameter.name)
-        
+
         param.parse_parameter(parameter)
         if doc_param:
-            param.parse_doc(doc_param['type'], doc_param['description'])
+            param.parse_doc(doc_param["type"], doc_param["description"])
         param.parse_annotation(type_hints.get(parameter.name, Any))
         params.append(param)
 
@@ -263,6 +266,10 @@ def create_connectors(params: List[Param]) -> Dict[str, Any]:
     """Create a connector for each param"""
     return {param.name: param.param_name for param in params if param.name != param.param_name}
 
+
+def create_autocompleters(params: List[Param]) -> Dict[str, Callable[[Interaction, str], Any]]:
+    """Create an autocomplete for each param"""
+    return {param.name: param.autocomplete for param in params if param.autocomplete}
 
 async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     """Resolves a call with kwargs and transforms into normal kwargs
@@ -293,6 +300,7 @@ def param(
     name: str = "",
     desc: str = None,
     conv: Callable[[Interaction, Any], Any] = None,
+    autocomp: Callable[[Interaction, str], Any] = None,
     choices: List[OptionChoice] = None,
 ) -> Any:
     ...
@@ -305,6 +313,7 @@ def param(
     name: str = "",
     description: str = None,
     converter: Callable[[Interaction, Any], Any] = None,
+    autocomplete: Callable[[Interaction, str], Any] = None,
     choices: List[OptionChoice] = None,
 ) -> Any:
     ...
@@ -318,9 +327,18 @@ def param(
     description: str = None,
     conv: Callable[[Interaction, Any], Any] = None,
     converter: Callable[[Interaction, Any], Any] = None,
+    autocomp: Callable[[Interaction, str], Any] = None,
+    autocomplete: Callable[[Interaction, str], Any] = None,
     choices: List[OptionChoice] = None,
 ) -> Any:
-    return Param(default, name=name, description=desc or description, converter=conv or converter, choices=choices)
+    return Param(
+        default,
+        name=name,
+        description=desc or description,
+        converter=conv or converter,
+        choices=choices,
+        autcomplete=autocomp or autocomplete,
+    )
 
 
 def option_enum(choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice) -> Type[TChoice]:

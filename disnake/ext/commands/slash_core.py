@@ -17,7 +17,7 @@ from typing import (
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
-from .params import extract_params, create_connectors, resolve_param_kwargs
+from .params import extract_params, create_autocompleters, create_connectors, resolve_param_kwargs
 
 from disnake.app_commands import SlashCommand, Option
 from disnake.enums import OptionType
@@ -40,12 +40,6 @@ __all__ = (
     'slash_command'
 )
 
-
-T = TypeVar('T')
-MaybeAwaitable = Union[T, Awaitable[T]]
-ChoiceValue = Union[int, str]
-Choices = Union[Mapping[str, ChoiceValue], Iterable[ChoiceValue]]
-AutocompT = Callable[[ApplicationCommandInteraction, str], MaybeAwaitable[Choices]]
 
 
 def options_as_route(options: Dict[str, Any]) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
@@ -132,7 +126,7 @@ class SubCommand(InvokableApplicationCommand):
     ):
         super().__init__(func, name=name, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
-        self.autocompleters: Dict[str, AutocompT] = kwargs.get('autocompleters', {})
+        self.autocompleters: Dict[str, Any] = kwargs.get('autocompleters', {})
         
         docstring = utils.parse_docstring(func)
         description = description or docstring['description']
@@ -141,7 +135,7 @@ class SubCommand(InvokableApplicationCommand):
             params = extract_params(func, self.cog, docstring['params'])
             options = [param.to_option() for param in params]
             self.connectors.update(create_connectors(params))
-            # TODO: update autocompleters
+            self.autocompleters.update(create_autocompleters(params))
         
         self.option = Option(
             name=self.name,
@@ -151,7 +145,7 @@ class SubCommand(InvokableApplicationCommand):
         )
         self.qualified_name = ''
     
-    async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Choices:
+    async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Any:
         autocomp = self.autocompleters.get(param)
         if autocomp is not None:
             if callable(autocomp):
@@ -188,7 +182,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = auto_sync
         self.guild_ids: Optional[List[int]] = guild_ids
-        self.autocompleters: Dict[str, AutocompT] = kwargs.get('autocompleters', {})
+        self.autocompleters: Dict[str, Any] = kwargs.get('autocompleters', {})
         
         docstring = utils.parse_docstring(func)
         description = description or docstring['description']
@@ -197,6 +191,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             params = extract_params(func, self.cog, docstring['params'])
             options = [param.to_option() for param in params]
             self.connectors.update(create_connectors(params))
+            self.autocompleters.update(create_autocompleters(params))
         
         self.body = SlashCommand(
             name=self.name,
@@ -318,7 +313,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         finally:
             inter.bot.dispatch('slash_command_error', inter, error) # type: ignore
 
-    async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Choices:
+    async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Any:
         autocomp = self.autocompleters.get(param)
         if autocomp is not None:
             if callable(autocomp):
@@ -343,7 +338,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             raise ValueError("Command chain is too long")
         
         focused_option = inter.data._get_focused_option()
-        if subcmd is None:
+        if subcmd is None or isinstance(subcmd, SubCommandGroup):
             call_autocompleter = self._call_autocompleter
         else:
             call_autocompleter = subcmd._call_autocompleter
