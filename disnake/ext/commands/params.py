@@ -16,6 +16,7 @@ from typing import (
     Union,
     get_origin,
     get_type_hints,
+    overload,
 )
 
 import disnake
@@ -283,6 +284,30 @@ async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[
             kwargs[param.param_name] = await param.get_default(inter)
 
     return kwargs
+
+
+@overload
+def param(
+    default: Any = ...,
+    *,
+    name: str = "",
+    desc: str = None,
+    conv: Callable[[Interaction, Any], Any] = None,
+    choices: List[OptionChoice] = None,
+) -> Any:
+    ...
+
+
+@overload
+def param(
+    default: Any = ...,
+    *,
+    name: str = "",
+    description: str = None,
+    converter: Callable[[Interaction, Any], Any] = None,
+    choices: List[OptionChoice] = None,
+) -> Any:
+    ...
 
 
 def param(
