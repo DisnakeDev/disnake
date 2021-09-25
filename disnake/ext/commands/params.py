@@ -161,7 +161,7 @@ class Param:
 
     def parse_annotation(self, annotation: Any) -> None:
         if isinstance(annotation, Param):
-            default = "..." if self.required else repr(annotation.default)
+            default = "..." if annotation.required else repr(annotation.default)
             r = f'Param({default}, description={annotation.description or "description"!r})'
             raise TypeError(f"Param must be a parameter default, not an annotation: \"option: type = {r}\"")
 
