@@ -535,7 +535,7 @@ class InteractionResponse:
         if file is not MISSING:
             files = [file]
 
-        if files is not None and len(files) > 10:
+        if files is not MISSING and len(files) > 10:
             raise ValueError('files cannot exceed maximum of 10 elements')
 
         if content is not None:

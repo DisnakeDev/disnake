@@ -136,23 +136,23 @@ class ApplicationCommandInteractionData:
             for d in data.get('options', [])
         ]
     
-    def _get_focused_option(self) -> ApplicationCommandInteractionDataOption:
+    def _get_focused_option(self) -> Optional[ApplicationCommandInteractionDataOption]:
         for option in self.options:
             if option.focused:
                 return option
-            if option.value is not None:
-                return option
-            
-            focused = option._get_focused_option()
-            if focused is not None:
-                return focused
+            if option.value is None:
+                # This means that we're inside a group/subcmd now
+                # We can use 'return' here because user can only
+                # choose one subcommand per interaction
+                return option._get_focused_option()
         
-        # TODO: What if we get here?
-        return None # type: ignore
+        return None
     
     @property
-    def focused_option(self):
-        return self._get_focused_option()
+    def focused_option(self) -> ApplicationCommandInteraction:
+        """The focused option"""
+        # don't annotate as None for user experience
+        return self._get_focused_option() # type: ignore
 
 
 class ApplicationCommandInteractionDataOption:

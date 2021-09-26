@@ -29,53 +29,69 @@ import logging
 import signal
 import sys
 import traceback
-from typing import Any, Callable, Coroutine, Dict, Generator, List, Literal, Optional, Sequence, TYPE_CHECKING, Tuple, TypeVar, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 
 import aiohttp
 
-from .user import User, ClientUser
-from .invite import Invite
-from .template import Template
-from .widget import Widget
-from .guild import Guild
-from .emoji import Emoji
-from .channel import _threaded_channel_factory, PartialMessageable
-from .enums import ChannelType
-from .mentions import AllowedMentions
-from .errors import *
-from .enums import Status, VoiceRegion
-from .flags import ApplicationFlags, Intents
-from .gateway import *
-from .activity import ActivityTypes, BaseActivity, create_activity
-from .voice_client import VoiceClient
-from .http import HTTPClient
-from .state import ConnectionState
 from . import utils
-from .utils import MISSING
-from .object import Object
-from .backoff import ExponentialBackoff
-from .webhook import Webhook
-from .iterators import GuildIterator
-from .appinfo import AppInfo
-from .ui.view import View
-from .stage_instance import StageInstance
-from .threads import Thread
-from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
+from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
-    application_command_factory,
-    ApplicationCommandPermissions,
     ApplicationCommand,
+    ApplicationCommandPermissions,
+    MessageCommand,
     SlashCommand,
     UserCommand,
-    MessageCommand,
+    application_command_factory,
 )
+from .appinfo import AppInfo
+from .backoff import ExponentialBackoff
+from .channel import PartialMessageable, _threaded_channel_factory
+from .emoji import Emoji
+from .enums import ChannelType, Status, VoiceRegion
+from .errors import *
+from .flags import ApplicationFlags, Intents
+from .gateway import *
+from .guild import Guild
+from .http import HTTPClient
+from .invite import Invite
+from .iterators import GuildIterator
+from .mentions import AllowedMentions
+from .object import Object
+from .stage_instance import StageInstance
+from .state import ConnectionState
+from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
+from .template import Template
+from .threads import Thread
+from .ui.view import View
+from .user import ClientUser, User
+from .utils import MISSING
+from .voice_client import VoiceClient
+from .webhook import Webhook
+from .widget import Widget
 
 if TYPE_CHECKING:
-    from .abc import SnowflakeTime, PrivateChannel, GuildChannel, Snowflake
+    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
     from .channel import DMChannel
-    from .message import Message
     from .member import Member
+    from .message import Message
     from .voice_client import VoiceProtocol
+
 
 __all__ = (
     'Client',
@@ -118,8 +134,8 @@ def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
         loop.close()
 
 def _app_commands_diff(
-    new_commands: List[ApplicationCommand],
-    old_commands: List[ApplicationCommand],
+    new_commands: Iterable[ApplicationCommand],
+    old_commands: Iterable[ApplicationCommand],
 ) -> Dict[str, List[ApplicationCommand]]:
     new_cmds = {cmd.name: cmd for cmd in new_commands}
     old_cmds = {cmd.name: cmd for cmd in old_commands}
@@ -621,7 +637,7 @@ class Client:
             return
         
         # Update global commands first
-        diff = _app_commands_diff(global_cmds, list(self._connection._global_application_commands.values()))
+        diff = _app_commands_diff(global_cmds, self._connection._global_application_commands.values())
         update_required = bool(diff['upsert']) or bool(diff['edit']) or bool(diff['change_type']) or bool(diff['delete'])
         # Show diff
         if self._sync_commands_debug:
@@ -651,7 +667,7 @@ class Client:
         # Update guild commands
         for guild_id, cmds in guild_cmds.items():
             current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
-            diff = _app_commands_diff(cmds, list(current_guild_cmds.values()))
+            diff = _app_commands_diff(cmds, current_guild_cmds.values())
             update_required = bool(diff['upsert']) or bool(diff['edit']) or bool(diff['change_type']) or bool(diff['delete'])
             # Show diff
             if self._sync_commands_debug:
