@@ -44,7 +44,7 @@ from typing import (
 
 from .iterators import HistoryIterator
 from .context_managers import Typing
-from .enums import ChannelType, PartyType
+from .enums import ChannelType, PartyType, try_enum_to_int
 from .errors import InvalidArgument, ClientException
 from .mentions import AllowedMentions
 from .permissions import PermissionOverwrite, Permissions
@@ -1097,9 +1097,9 @@ class GuildChannel:
             max_uses=max_uses,
             temporary=temporary,
             unique=unique,
-            target_type=target_type.value if target_type else None,
+            target_type=try_enum_to_int(target_type),
             target_user_id=target_user.id if target_user else None,
-            target_application_id=target_application.value if target_application else None,
+            target_application_id=try_enum_to_int(target_application),
         )
         return Invite.from_incomplete(data=data, state=self._state)
 
