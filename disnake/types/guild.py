@@ -150,7 +150,7 @@ class GuildWithCounts(Guild, _GuildPreviewUnique):
 
 
 class GuildPrune(TypedDict):
-    pruned: Optional[int]
+    pruned: int
 
 
 class ChannelPositionUpdate(TypedDict):

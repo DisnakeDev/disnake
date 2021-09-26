@@ -23,6 +23,7 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
+from abc import ABC
 
 import copy
 import asyncio
@@ -31,6 +32,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Mapping,
     Optional,
     TYPE_CHECKING,
     Protocol,
@@ -38,6 +40,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    cast,
     overload,
     runtime_checkable,
 )
@@ -218,7 +221,7 @@ class _Overwrites:
 GCH = TypeVar('GCH', bound='GuildChannel')
 
 
-class GuildChannel:
+class GuildChannel(ABC):
     """An ABC that details the common operations on a Discord guild channel.
 
     The following implement this ABC:
@@ -254,7 +257,7 @@ class GuildChannel:
 
     if TYPE_CHECKING:
 
-        def __init__(self, *, state: ConnectionState, guild: Guild, data: Dict[str, Any]):
+        def __init__(self, *, state: ConnectionState, guild: Guild, data: Mapping[str, Any]):
             ...
 
     def __str__(self) -> str:
@@ -280,7 +283,8 @@ class GuildChannel:
 
         http = self._state.http
         bucket = self._sorting_bucket
-        channels: List[GuildChannel] = [c for c in self.guild.channels if c._sorting_bucket == bucket]
+        channels = [c for c in self.guild.channels if c._sorting_bucket == bucket]
+        channels = cast(List[GuildChannel], channels)
 
         channels.sort(key=lambda c: c.position)
 
@@ -973,7 +977,6 @@ class GuildChannel:
         bucket = self._sorting_bucket
         parent_id = kwargs.get('category', MISSING)
         # fmt: off
-        channels: List[GuildChannel]
         if parent_id not in (MISSING, None):
             parent_id = parent_id.id
             channels = [
@@ -992,6 +995,7 @@ class GuildChannel:
         # fmt: on
 
         channels.sort(key=lambda c: (c.position, c.id))
+        channels = cast(List[GuildChannel], channels)
 
         try:
             # Try to remove ourselves from the channel list
@@ -1614,6 +1618,8 @@ class Connectable(Protocol):
 
     __slots__ = ()
     _state: ConnectionState
+    guild: Guild
+    id: int
 
     def _get_voice_client_key(self) -> Tuple[int, str]:
         raise NotImplementedError

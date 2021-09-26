@@ -31,14 +31,20 @@ import sys
 import time
 import threading
 import traceback
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, Optional
 import zlib
 
 import aiohttp
 
 from . import utils
+from .utils import MISSING
 from .activity import BaseActivity
 from .enums import SpeakingState
 from .errors import ConnectionClosed, InvalidArgument
+
+if TYPE_CHECKING:
+    from .state import ConnectionState
+    from .voice_client import VoiceClient
 
 _log = logging.getLogger(__name__)
 
@@ -107,7 +113,7 @@ class GatewayRatelimiter:
 
 class KeepAliveHandler(threading.Thread):
     def __init__(self, *args, **kwargs):
-        ws = kwargs.pop('ws', None)
+        ws = kwargs.pop('ws')
         interval = kwargs.pop('interval', None)
         shard_id = kwargs.pop('shard_id', None)
         threading.Thread.__init__(self, *args, **kwargs)
@@ -251,6 +257,22 @@ class DiscordWebSocket:
     token
         The authentication token for disnake.
     """
+    if TYPE_CHECKING:
+        # TODO: figure all the types out and move this elsewhere
+        token: str
+        gateway: Any # ???
+        call_hooks: Callable # ???
+        shard_id: Optional[int]
+        shard_count: int
+        session_id: Optional[int]
+        sequence: Optional[Any] # ???
+        
+        _connection: ConnectionState
+        _discord_parsers: Dict[str, Callable] # ???
+        _dispatch: Callable # ???
+        _initial_identify: Any # ???
+        _rate_limiter: GatewayRatelimiter
+        _max_heartbeat_timeout: int
 
     DISPATCH           = 0
     HEARTBEAT          = 1
@@ -720,18 +742,22 @@ class DiscordVoiceWebSocket:
     RESUMED             = 9
     CLIENT_CONNECT      = 12
     CLIENT_DISCONNECT   = 13
+    
+    if TYPE_CHECKING:
+        # TODO: same as in normal websocket gateway
+        thread_id: int
+        gateway: DiscordWebSocket
+        
+        _connection: VoiceClient
+        _max_heartbeat_timeout: float
 
-    def __init__(self, socket, loop, *, hook=None):
+    def __init__(self, socket, loop, *, hook = MISSING):
         self.ws = socket
         self.loop = loop
-        self._keep_alive = None
-        self._close_code = None
-        self.secret_key = None
-        if hook:
-            self._hook = hook
-
-    async def _hook(self, *args):
-        pass
+        self._keep_alive: VoiceKeepAliveHandler = MISSING
+        self._close_code = MISSING
+        self.secret_key = MISSING
+        self._hook: Callable[..., Awaitable[Any]] = hook
 
     async def send_as_json(self, data):
         _log.debug('Sending voice websocket frame: %s.', data)
