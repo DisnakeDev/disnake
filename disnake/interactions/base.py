@@ -131,7 +131,8 @@ class Interaction:
         self.channel_id: Optional[int] = utils._get_as_snowflake(data, 'channel_id')
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, 'guild_id')
         self.application_id: int = int(data['application_id'])
-        self.author: Optional[Union[User, Member]] = None
+        # think about the user's experience
+        self.author: Union[User, Member] = None # type: ignore
         self._permissions: int = 0
 
         # TODO: there's a potential data loss here

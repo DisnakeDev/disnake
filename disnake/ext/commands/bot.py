@@ -993,12 +993,12 @@ class BotBase(GroupMixin):
         ) -> Callable[[ApplicationCommandInteraction], Any]:
             # T was used instead of Check to ensure the type matches on return
             self.add_check(
-                func,
+                func, # type: ignore
                 call_once=call_once,
                 slash_commands=slash_commands,
                 user_commands=user_commands,
                 message_commands=message_commands
-            )  # type: ignore
+            )
             return func
         return decorator
 
@@ -1036,7 +1036,7 @@ class BotBase(GroupMixin):
         # type-checker doesn't distinguish between functions and methods
         return await disnake.utils.async_all(f(inter) for f in checks)  # type: ignore
 
-    async def is_owner(self, user: disnake.User) -> bool:
+    async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
         """|coro|
 
         Checks if a :class:`~disnake.User` or :class:`~disnake.Member` is the owner of
@@ -1327,7 +1327,8 @@ class BotBase(GroupMixin):
                 raise disnake.ClientException(f'Cog named {cog_name!r} already loaded')
             self.remove_cog(cog_name)
 
-        cog = cog._inject(self)
+        # NOTE: Should be covariant
+        cog = cog._inject(self) # type: ignore
         self.__cogs[cog_name] = cog
 
     def get_cog(self, name: str) -> Optional[Cog]:
@@ -1375,7 +1376,8 @@ class BotBase(GroupMixin):
         help_command = self._help_command
         if help_command and help_command.cog is cog:
             help_command.cog = None
-        cog._eject(self)
+        # NOTE: Should be covariant
+        cog._eject(self) # type: ignore
 
         return cog
 
@@ -1826,7 +1828,7 @@ class BotBase(GroupMixin):
         if slash_command is None:
             return
         
-        inter.bot = self
+        inter.bot = self # type: ignore
         if slash_command.guild_ids is None or inter.guild_id in slash_command.guild_ids:
             try:
                 await slash_command._call_relevant_autocompleter(inter)
@@ -1849,9 +1851,10 @@ class BotBase(GroupMixin):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
-        interaction.bot = self
+        interaction.bot = self # type: ignore
         command_type = interaction.data.type
         command_name = interaction.data.name
+        app_command = None
         event_name = None
 
         if command_type is ApplicationCommandType.chat_input:
@@ -1866,10 +1869,7 @@ class BotBase(GroupMixin):
             app_command = self.all_message_commands.get(command_name)
             event_name = 'message_command'
         
-        else:
-            app_command = None
-        
-        if app_command is None:
+        if event_name is None or app_command is None:
             # TODO: unregister this command from API
             return
         

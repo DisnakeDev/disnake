@@ -37,6 +37,7 @@ if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
     from disnake.abc import MessageableChannel
+    from disnake.channel import TextChannel, Thread, DMChannel
     from disnake.guild import Guild
     from disnake.member import Member
     from disnake.state import ConnectionState
@@ -287,11 +288,11 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         return self.message.guild
 
     @disnake.utils.cached_property
-    def channel(self) -> disnake.abc.PartialMessageable:
+    def channel(self) -> Union[TextChannel, Thread, DMChannel]:
         """Union[:class:`.abc.Messageable`]: Returns the channel associated with this context's command.
         Shorthand for :attr:`.Message.channel`.
         """
-        return self.message.channel
+        return self.message.channel # type: ignore
 
     @disnake.utils.cached_property
     def author(self) -> Union[User, Member]:

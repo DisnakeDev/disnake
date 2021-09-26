@@ -15,7 +15,9 @@ from ..message import Message
 __all__ = (
     'ApplicationCommandInteraction',
     'ApplicationCommandInteractionData',
-    'ApplicationCommandInteractionDataResolved'
+    'ApplicationCommandInteractionDataResolved',
+    'AppCommandInter',
+    'AppCmdInter'
 )
 
 if TYPE_CHECKING:
@@ -27,7 +29,9 @@ if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, PartialMessageable
     from ..threads import Thread
-    from ..ext.commands import InvokableApplicationCommand
+    from ..ext.commands import InvokableApplicationCommand, Bot, AutoShardedBot
+    
+    BotBase = Union[Bot, AutoShardedBot]
 
     InteractionChannel = Union[
         VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, Thread, PartialMessageable
@@ -64,6 +68,8 @@ class ApplicationCommandInteraction(Interaction):
     data: :class:`ApplicationCommandInteractionData`
         The wrapped interaction data.
     """
+    bot: BotBase
+    
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
         self.data = ApplicationCommandInteractionData(
@@ -149,7 +155,7 @@ class ApplicationCommandInteractionData:
         return None
     
     @property
-    def focused_option(self) -> ApplicationCommandInteraction:
+    def focused_option(self) -> ApplicationCommandInteractionDataOption:
         """The focused option"""
         # don't annotate as None for user experience
         return self._get_focused_option() # type: ignore
@@ -323,3 +329,4 @@ class ApplicationCommandInteractionDataResolved:
 
 # People asked about shorter aliases
 AppCommandInter = ApplicationCommandInteraction
+AppCmdInter = ApplicationCommandInteraction

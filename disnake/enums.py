@@ -667,7 +667,7 @@ def enum_if_int(cls: Type[T], val: Any) -> T:
     return try_enum(cls, val)
 
 
-def try_enum_to_int(val: Any):
+def try_enum_to_int(val: Any) -> Any:
     if isinstance(val, int):
         return val
     try:
