@@ -44,7 +44,7 @@ from typing import (
 
 from .iterators import HistoryIterator
 from .context_managers import Typing
-from .enums import ChannelType
+from .enums import ChannelType, PartyType
 from .errors import InvalidArgument, ClientException
 from .mentions import AllowedMentions
 from .permissions import PermissionOverwrite, Permissions
@@ -1035,7 +1035,7 @@ class GuildChannel:
         unique: bool = True,
         target_type: Optional[InviteTarget] = None,
         target_user: Optional[User] = None,
-        target_application_id: Optional[int] = None,
+        target_application_id: Optional[PartyType] = None,
     ) -> Invite:
         """|coro|
 
@@ -1071,7 +1071,7 @@ class GuildChannel:
 
             .. versionadded:: 2.0
 
-        target_application_id:: Optional[:class:`int`]
+        target_application_id:: Optional[:class:`.PartyType`]
             The id of the embedded application for the invite, required if `target_type` is `TargetType.embedded_application`.
 
             .. versionadded:: 2.0
