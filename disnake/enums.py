@@ -234,6 +234,9 @@ class PartyType(Enum):
     betrayal = 773336526917861400
     fishing = 814288819477020702
     chess = 832012774040141894
+    letter_tile = 879863686565621790
+    word_snack = 879863976006127627
+    doodle_crew = 878067389634314250
 
 class VoiceRegion(Enum):
     us_west = 'us-west'
@@ -604,6 +607,7 @@ class ApplicationCommandType(Enum):
     chat_input = 1
     user = 2
     message = 3
+
 
 
 class OptionType(Enum):
