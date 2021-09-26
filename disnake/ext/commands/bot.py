@@ -188,7 +188,8 @@ class BotBase(GroupMixin):
             self.help_command = help_command
         
         if self.reload:
-            asyncio.create_task(self._watchdog())
+            loop = asyncio.get_event_loop()
+            loop.create_task(self._watchdog())
         
         self.add_listener(self._fill_owners, 'on_connect')
 
