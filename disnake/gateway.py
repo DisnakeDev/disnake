@@ -699,6 +699,10 @@ class DiscordWebSocket:
         self._close_code = code
         await self.socket.close(code=code)
 
+# helper function
+async def _hook(*args, **kwargs):
+    pass
+
 class DiscordVoiceWebSocket:
     """Implements the websocket protocol for handling voice connections.
 
@@ -751,13 +755,13 @@ class DiscordVoiceWebSocket:
         _connection: VoiceClient
         _max_heartbeat_timeout: float
 
-    def __init__(self, socket, loop, *, hook = MISSING):
+    def __init__(self, socket, loop, *, hook = None):
         self.ws = socket
         self.loop = loop
         self._keep_alive: VoiceKeepAliveHandler = MISSING
         self._close_code = MISSING
         self.secret_key = MISSING
-        self._hook: Callable[..., Awaitable[Any]] = hook
+        self._hook: Callable[..., Awaitable[Any]] = hook or _hook
 
     async def send_as_json(self, data):
         _log.debug('Sending voice websocket frame: %s.', data)

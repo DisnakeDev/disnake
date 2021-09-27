@@ -210,7 +210,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return self.body.options
     
     @property
-    def default_permissions(self) -> bool:
+    def default_permission(self) -> bool:
         return self.body.default_permission
     
     def sub_command(

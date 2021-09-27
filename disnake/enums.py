@@ -436,7 +436,7 @@ class AuditLogAction(Enum):
         return lookup[self]
 
     @property
-    def target_type(self) -> str:
+    def target_type(self) -> Optional[str]:
         v = self.value
         if v == -1:
             return 'all'
@@ -467,7 +467,7 @@ class AuditLogAction(Enum):
         elif v < 113:
             return 'thread'
         else:
-            return ''
+            return None
 
 
 class UserFlags(Enum):
