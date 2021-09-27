@@ -704,13 +704,15 @@ class InteractionResponse:
             raise InteractionResponded(self._parent)
         
         data = {}
-        if isinstance(choices, Mapping):
+        if not choices:
+            data['choices'] = []
+        elif isinstance(choices, Mapping):
             data['choices'] = [{'name': n, 'value': v} for n, v in choices.items()]
         elif isinstance(choices, Iterable) and not isinstance(choices[0], OptionChoice):
             data['choices'] = [{'name': n, 'value': n} for n in choices]
         else:
             data['choices'] = [c.to_dict() for c in choices] # type: ignore
-            
+        
         parent = self._parent
         adapter = async_context.get()
         await adapter.create_interaction_response(

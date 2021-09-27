@@ -1838,10 +1838,7 @@ class BotBase(GroupMixin):
         
         inter.bot = self # type: ignore
         if slash_command.guild_ids is None or inter.guild_id in slash_command.guild_ids:
-            try:
-                await slash_command._call_relevant_autocompleter(inter)
-            except Exception:
-                pass
+            await slash_command._call_relevant_autocompleter(inter)
 
     async def process_application_commands(self, interaction: ApplicationCommandInteraction) -> None:
         """|coro|
