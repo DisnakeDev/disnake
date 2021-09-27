@@ -3438,13 +3438,6 @@ ClientUser
     :members:
     :inherited-members:
 
-Party
-~~~~~~
-
-.. attributetable:: Party
-
-.. autoclass:: Party()
-
 User
 ~~~~~
 

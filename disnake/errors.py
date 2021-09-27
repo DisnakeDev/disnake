@@ -51,7 +51,10 @@ __all__ = (
     'LoginFailure',
     'ConnectionClosed',
     'PrivilegedIntentsRequired',
+    'InteractionException',
+    'InteractionTimedOut',
     'InteractionResponded',
+    'InteractionNotResponded',
 )
 
 
