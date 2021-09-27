@@ -2326,7 +2326,7 @@ class Guild(Hashable):
         *,
         name: str,
         image: bytes,
-        roles: List[Role] = MISSING,
+        roles: Sequence[Role] = MISSING,
         reason: Optional[str] = None,
     ) -> Emoji:
         r"""|coro|

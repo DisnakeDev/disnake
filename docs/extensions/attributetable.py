@@ -72,7 +72,8 @@ class PyAttributeTable(SphinxDirective):
     option_spec = {}
 
     def parse_name(self, content):
-        path, name = _name_parser_regex.match(content).groups()
+        match = _name_parser_regex.match(content)
+        path, name = match.groups() if match else (None, None)
         if path:
             modulename = path.rstrip('.')
         else:

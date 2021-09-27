@@ -61,11 +61,17 @@ if TYPE_CHECKING:
 
     from typing_extensions import Concatenate, ParamSpec
     from disnake.message import Message
-    from disnake.interactions import ApplicationCommandInteraction
+    from disnake.interactions import (
+        ApplicationCommandInteraction,
+        MessageCommandInteraction,
+        UserCommandInteraction,
+    )
     from ._types import (
         Check,
         CoroFunc,
     )
+    AnyMessageCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
+    AnyUserCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
     
     P = ParamSpec('P')
 
@@ -485,8 +491,8 @@ class BotBase(GroupMixin):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, AnyUserCommandInter, P], Coroutine],
+                Callable[Concatenate[AnyUserCommandInter, P], Coroutine]
             ]
         ],
         InvokableUserCommand
@@ -531,8 +537,8 @@ class BotBase(GroupMixin):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, AnyMessageCommandInter, P], Coroutine],
+                Callable[Concatenate[AnyMessageCommandInter, P], Coroutine]
             ]
         ],
         InvokableMessageCommand
@@ -1404,10 +1410,12 @@ class BotBase(GroupMixin):
 
         # remove all the listeners from the module
         for event_list in self.extra_events.copy().values():
-            remove = []
-            for index, event in enumerate(event_list):
-                if event.__module__ is not None and _is_submodule(name, event.__module__):
-                    remove.append(index)
+            remove = [
+                index
+                for index, event in enumerate(event_list)
+                if event.__module__ is not None
+                and _is_submodule(name, event.__module__)
+            ]
 
             for index in reversed(remove):
                 del event_list[index]

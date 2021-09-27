@@ -52,6 +52,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     'Context',
+    'GuildContext'
 )
 
 MISSING: Any = disnake.utils.MISSING
@@ -399,3 +400,16 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
     @disnake.utils.copy_doc(Message.reply)
     async def reply(self, content: Optional[str] = None, **kwargs: Any) -> Message:
         return await self.message.reply(content, **kwargs)
+
+
+class GuildContext(Context):
+    """A Context subclass meant for annotation
+    
+    No runtime behavior is changed but annotations are modified
+    to seem like the context may never be invoked ina  dm.
+    """
+    
+    guild: Guild
+    channel: Union[TextChannel, Thread]
+    author: Member
+    me: Member

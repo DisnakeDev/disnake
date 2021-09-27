@@ -1467,7 +1467,7 @@ class ConnectionState:
                 return channel
 
     def create_message(
-        self, *, channel: Union[TextChannel, Thread, DMChannel, GroupChannel, PartialMessageable], data: MessagePayload
+        self, *, channel: Union[TextChannel, Thread, DMChannel, PartialMessageable], data: MessagePayload
     ) -> Message:
         return Message(state=self, channel=channel, data=data)
 

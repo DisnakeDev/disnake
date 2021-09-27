@@ -14,6 +14,8 @@ from ..message import Message
 
 __all__ = (
     'ApplicationCommandInteraction',
+    'UserCommandInteraction',
+    'MessageCommandInteraction',
     'ApplicationCommandInteractionData',
     'ApplicationCommandInteractionDataResolved',
     'AppCommandInter',
@@ -91,6 +93,25 @@ class ApplicationCommandInteraction(Interaction):
             for opt in self.data.options
         }
 
+class UserCommandInteraction(ApplicationCommandInteraction):
+    """An ApplicationCommandInteraction Context subclass meant for annotation
+    
+    No runtime behavior is changed but annotations are modified
+    to seem like the interaction is specifically a user command.
+    """
+    
+    target: Member
+    guild: Guild
+    me: Member
+
+class MessageCommandInteraction(ApplicationCommandInteraction):
+    """An ApplicationCommandInteraction Context subclass meant for annotation
+    
+    No runtime behavior is changed but annotations are modified
+    to seem like the interaction is specifically a message command.
+    """
+    
+    target: Message
 
 class ApplicationCommandInteractionData:
     """Represents the data of an interaction with an application command.

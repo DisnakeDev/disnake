@@ -54,6 +54,7 @@ class MessageInteraction(Interaction):
     data: :class:`MessageInteractionData`
         The wrapped interaction data.
     """
+    target: Message
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)

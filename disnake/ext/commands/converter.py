@@ -48,7 +48,7 @@ from .errors import *
 
 if TYPE_CHECKING:
     from .context import Context
-    from disnake.message import PartialMessageableChannel
+    from disnake.message import MessageableChannel
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES
 
@@ -356,7 +356,7 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
         return guild_id, message_id, channel_id
 
     @staticmethod
-    def _resolve_channel(ctx, guild_id, channel_id) -> Optional[PartialMessageableChannel]:
+    def _resolve_channel(ctx, guild_id, channel_id) -> Optional[MessageableChannel]:
         if guild_id is None:
             return ctx.bot.get_channel(channel_id) if channel_id else ctx.channel
 

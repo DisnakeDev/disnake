@@ -176,12 +176,12 @@ class Interaction:
         return self._state and self._state._get_guild(self.guild_id)
 
     @utils.cached_slot_property('_cs_me')
-    def me(self) -> Optional[Union[Member, ClientUser]]:
+    def me(self) -> Union[Member, ClientUser]:
         """Union[:class:`.Member`, :class:`.ClientUser`]:
         Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
         """
         if self.guild is None:
-            return None if self.bot is None else self.bot.user
+            return None if self.bot is None else self.bot.user # type: ignore
         return self.guild.me
 
     @utils.cached_slot_property('_cs_channel')

@@ -44,7 +44,7 @@ def create_overwrites(ctx, *objects):
 # it is best to lock it to be guild-only.
 @secret.command()
 @commands.guild_only()
-async def text(ctx: commands.Context, name: str, *objects: typing.Union[disnake.Role, disnake.Member]):
+async def text(ctx: commands.GuildContext, name: str, *objects: typing.Union[disnake.Role, disnake.Member]):
     """This makes a text channel with a specified name 
     that is only visible to roles or members that are specified.
     """
@@ -60,7 +60,7 @@ async def text(ctx: commands.Context, name: str, *objects: typing.Union[disnake.
 
 @secret.command()
 @commands.guild_only()
-async def voice(ctx: commands.Context, name: str, *objects: typing.Union[disnake.Role, disnake.Member]):
+async def voice(ctx: commands.GuildContext, name: str, *objects: typing.Union[disnake.Role, disnake.Member]):
     """This does the same thing as the `text` subcommand
     but instead creates a voice channel.
     """
@@ -75,7 +75,7 @@ async def voice(ctx: commands.Context, name: str, *objects: typing.Union[disnake
 
 @secret.command()
 @commands.guild_only()
-async def emoji(ctx: commands.Context, emoji: disnake.PartialEmoji, *roles: disnake.Role):
+async def emoji(ctx: commands.GuildContext, emoji: disnake.PartialEmoji, *roles: disnake.Role):
     """This clones a specified emoji that only specified roles
     are allowed to use.
     """
