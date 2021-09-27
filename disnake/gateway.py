@@ -455,6 +455,8 @@ class DiscordWebSocket:
         msg = utils._from_json(msg)
 
         _log.debug('For Shard ID %s: WebSocket Event: %s', self.shard_id, msg)
+        self._dispatch('socket_response', msg)
+        
         event = msg.get('t')
         if event:
             self._dispatch('socket_event_type', event)
