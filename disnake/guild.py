@@ -82,6 +82,7 @@ __all__ = (
     'Guild',
 )
 
+VocalGuildChannel = Union[VoiceChannel, StageChannel]
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
@@ -102,7 +103,6 @@ if TYPE_CHECKING:
 
     import datetime
 
-    VocalGuildChannel = Union[VoiceChannel, StageChannel]
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
 
