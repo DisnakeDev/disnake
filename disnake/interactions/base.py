@@ -378,11 +378,16 @@ class Interaction:
             Deleted a message that is not yours.
         """
         adapter = async_context.get()
-        await adapter.delete_original_interaction_response(
-            self.application_id,
-            self.token,
-            session=self._session,
-        )
+        try:
+            await adapter.delete_original_interaction_response(
+                self.application_id,
+                self.token,
+                session=self._session,
+            )
+        except NotFound as e:
+            if e.code == 10015:
+                raise InteractionNotResponded(self) from e
+            raise
 
 
 class InteractionResponse:
