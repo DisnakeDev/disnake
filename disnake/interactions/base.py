@@ -25,21 +25,28 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
-from typing import Any, Dict, Iterable, List, Mapping, Optional, TYPE_CHECKING, Tuple, Union, TypeVar, cast
+
 import asyncio
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
 from .. import utils
 from ..app_commands import OptionChoice
-from ..enums import try_enum, InteractionType, InteractionResponseType
-from ..errors import InteractionResponded, HTTPException, ClientException
-from ..channel import PartialMessageable, ChannelType
-
-from ..user import User, ClientUser
+from ..channel import ChannelType, PartialMessageable
+from ..enums import InteractionResponseType, InteractionType, try_enum
+from ..errors import (
+    ClientException,
+    HTTPException,
+    InteractionNotResponded,
+    InteractionResponded,
+    InteractionTimedOut,
+    NotFound,
+)
 from ..member import Member
-from ..message import Message, Attachment
+from ..message import Attachment, Message
 from ..object import Object
 from ..permissions import Permissions
-from ..webhook.async_ import async_context, Webhook, handle_message_parameters
+from ..user import ClientUser, User
+from ..webhook.async_ import Webhook, async_context, handle_message_parameters
 
 __all__ = (
     'Interaction',
@@ -178,20 +185,21 @@ class Interaction:
         return self.guild.me
 
     @utils.cached_slot_property('_cs_channel')
-    def channel(self) -> Optional[InteractionChannel]:
+    def channel(self) -> Union[TextChannel, Thread]:
         """Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]: The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels are not resolved since there is
         no data to complete them. These are :class:`PartialMessageable` instead.
         """
+        # the actual typing of these is a bit complicated, we just leave it at text channels
         guild = self.guild
         channel = guild and guild._resolve_channel(self.channel_id)
         if channel is None:
             if self.channel_id is not None:
                 type = ChannelType.text if self.guild_id is not None else ChannelType.private
-                return PartialMessageable(state=self._state, id=self.channel_id, type=type)
-            return None
-        return channel
+                return PartialMessageable(state=self._state, id=self.channel_id, type=type) # type: ignore
+            return None # type: ignore
+        return channel # type: ignore
 
     @property
     def permissions(self) -> Permissions:
@@ -334,14 +342,19 @@ class Interaction:
             previous_allowed_mentions=previous_mentions,
         )
         adapter = async_context.get()
-        data = await adapter.edit_original_interaction_response(
-            self.application_id,
-            self.token,
-            session=self._session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-        )
+        try:
+            data = await adapter.edit_original_interaction_response(
+                self.application_id,
+                self.token,
+                session=self._session,
+                payload=params.payload,
+                multipart=params.multipart,
+                files=params.files,
+            )
+        except NotFound as e:
+            if e.code == 10015:
+                raise InteractionNotResponded(self) from e
+            raise
 
         # The message channel types should always match
         message = InteractionMessage(state=self._state, channel=self.channel, data=data)  # type: ignore
@@ -550,16 +563,21 @@ class InteractionResponse:
 
         parent = self._parent
         adapter = async_context.get()
-        await adapter.create_interaction_response(
-            parent.id,
-            parent.token,
-            session=parent._session,
-            type=InteractionResponseType.channel_message.value,
-            data=payload,
-            files=files or None,
-        )
-
-        if files is not None:
+        try:
+            await adapter.create_interaction_response(
+                parent.id,
+                parent.token,
+                session=parent._session,
+                type=InteractionResponseType.channel_message.value,
+                data=payload,
+                files=files or None,
+            )
+        except NotFound as e:
+            if e.code == 10062:
+                raise InteractionTimedOut(self._parent) from e
+            raise
+        
+        if files is not MISSING:
             for f in files:
                 f.close()
 
