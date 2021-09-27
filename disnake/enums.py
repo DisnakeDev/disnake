@@ -78,7 +78,7 @@ class _EnumValueComparable(_EnumValueBase):
         return isinstance(other, self.__class__) and self.value == other.value
     
     def __lt__(self, other: object) -> bool:
-        return isinstance(other, self.__class__) and self.value == other.value
+        return isinstance(other, self.__class__) and self.value < other.value
 
 def _create_value_cls(name, comparable):
     parent = _EnumValueComparable if comparable else _EnumValueBase

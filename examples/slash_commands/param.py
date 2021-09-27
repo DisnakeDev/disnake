@@ -15,7 +15,7 @@ bot = commands.Bot("!")
 # Param takes care of parsing the annotation and adding a description for it.
 # If you want to provide a default value and make the option optional simply provide it as the first argument.
 # "description" may be shortened to "desc" if you so choose.
-@bot.slash_command(name="Simple Command", description="Some Simple command")
+@bot.slash_command(name="simple-command", description="Some Simple command")
 async def simple(
     inter: disnake.ApplicationCommandInteraction,
     req: str = Param(description="The required argument"),
