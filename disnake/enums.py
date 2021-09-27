@@ -23,8 +23,8 @@ DEALINGS IN THE SOFTWARE.
 """
 
 import types
-from collections import namedtuple
-from typing import Any, ClassVar, Dict, List, Optional, TYPE_CHECKING, Type, TypeVar
+from typing import Any, ClassVar, Dict, List, NamedTuple, Optional, TYPE_CHECKING, Type, TypeVar
+from functools import total_ordering
 
 __all__ = (
     'Enum',
@@ -59,17 +59,30 @@ __all__ = (
     'ApplicationCommandType'
 )
 
+class _EnumValueBase(NamedTuple):
+    if TYPE_CHECKING:
+        _cls_name: str
+    
+    name: str
+    value: Any
+    
+    def __repr__(self) -> str:
+        return f'<{self._cls_name}.{self.name}: {self.value!r}>'
+    
+    def __str__(self) -> str:
+        return f'{self._cls_name}.{self.name}'
+
+@total_ordering
+class _EnumValueComparable(_EnumValueBase):
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, self.__class__) and self.value == other.value
+    
+    def __lt__(self, other: object) -> bool:
+        return isinstance(other, self.__class__) and self.value == other.value
 
 def _create_value_cls(name, comparable):
-    cls = namedtuple('_EnumValue_' + name, 'name value')
-    cls.__repr__ = lambda self: f'<{name}.{self.name}: {self.value!r}>'
-    cls.__str__ = lambda self: f'{name}.{self.name}'
-    if comparable:
-        cls.__le__ = lambda self, other: isinstance(other, self.__class__) and self.value <= other.value
-        cls.__ge__ = lambda self, other: isinstance(other, self.__class__) and self.value >= other.value
-        cls.__lt__ = lambda self, other: isinstance(other, self.__class__) and self.value < other.value
-        cls.__gt__ = lambda self, other: isinstance(other, self.__class__) and self.value > other.value
-    return cls
+    parent = _EnumValueComparable if comparable else _EnumValueBase
+    return type(parent.__name__ + '_' + name, (parent,), {'_cls_name': name})
 
 def _is_descriptor(obj):
     return hasattr(obj, '__get__') or hasattr(obj, '__set__') or hasattr(obj, '__delete__')
@@ -453,6 +466,8 @@ class AuditLogAction(Enum):
             return 'sticker'
         elif v < 113:
             return 'thread'
+        else:
+            return None
 
 
 class UserFlags(Enum):
@@ -652,7 +667,7 @@ def enum_if_int(cls: Type[T], val: Any) -> T:
     return try_enum(cls, val)
 
 
-def try_enum_to_int(val: Any):
+def try_enum_to_int(val: Any) -> Any:
     if isinstance(val, int):
         return val
     try:

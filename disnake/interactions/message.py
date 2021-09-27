@@ -3,7 +3,7 @@ from typing import List, Optional, Union, TYPE_CHECKING
 
 from .base import Interaction
 
-from ..components import ActionRow
+from ..components import ActionRow, Button, SelectMenu
 from ..enums import ComponentType, try_enum
 from ..utils import cached_slot_property
 from ..message import Message
@@ -18,7 +18,6 @@ if TYPE_CHECKING:
         Interaction as InteractionPayload,
         ComponentInteractionData as ComponentInteractionDataPayload
     )
-    from ..components import Button, SelectMenu
     from ..state import ConnectionState
 
 
@@ -58,8 +57,8 @@ class MessageInteraction(Interaction):
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
-        self.data = MessageInteractionData(data=data.get('data'))
-        self.message = Message(state=self._state, channel=self.channel, data=data['message'])
+        self.data = MessageInteractionData(data=data.get('data', {}))
+        self.message = Message(state=self._state, channel=self.channel, data=data['message']) # type: ignore
     
     @property
     def values(self) -> Optional[List[str]]:
@@ -71,8 +70,14 @@ class MessageInteraction(Interaction):
             if not isinstance(action_row, ActionRow):
                 continue
             for component in action_row.children:
+                if not isinstance(component, (Button, SelectMenu)):
+                    continue
+                
                 if component.custom_id == self.data.custom_id:
                     return component
+        
+        raise Exception("MessageInteraction is malformed - no component found")
+        
 
 
 class MessageInteractionData:
@@ -97,7 +102,6 @@ class MessageInteractionData:
     )
 
     def __init__(self, *, data: ComponentInteractionDataPayload):
-        data = {} if data is None else data
         self.custom_id: str = data.get('custom_id')
         self.component_type: ComponentType = try_enum(ComponentType, data.get('component_type', 0))
         self.values: Optional[List[str]] = data.get('values')

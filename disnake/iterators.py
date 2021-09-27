@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from .audit_logs import AuditLogEntry
     from .guild import Guild
     from .threads import Thread
-    from .abc import Snowflake
+    from .abc import Snowflake, Messageable
 
 T = TypeVar('T')
 OT = TypeVar('OT')
@@ -209,7 +209,7 @@ class ReactionIterator(_AsyncIterator[Union['User', 'Member']]):
         from .user import User
 
         if self.limit > 0:
-            retrieve = self.limit if self.limit <= 100 else 100
+            retrieve = min(self.limit, 100)
 
             after = self.after.id if self.after else None
             data: List[PartialUserPayload] = await self.getter(
@@ -220,11 +220,10 @@ class ReactionIterator(_AsyncIterator[Union['User', 'Member']]):
                 self.limit -= retrieve
                 self.after = Object(id=int(data[-1]['id']))
 
-            if self.guild is None or isinstance(self.guild, Object):
-                for element in reversed(data):
+            for element in reversed(data):
+                if self.guild is None or isinstance(self.guild, Object):
                     await self.users.put(User(state=self.state, data=element))
-            else:
-                for element in reversed(data):
+                else:
                     member_id = int(element['id'])
                     member = self.guild.get_member(member_id)
                     if member is not None:
@@ -267,7 +266,15 @@ class HistoryIterator(_AsyncIterator['Message']):
         ``True`` if `after` is specified, otherwise ``False``.
     """
 
-    def __init__(self, messageable, limit, before=None, after=None, around=None, oldest_first=None):
+    def __init__(
+        self, 
+        messageable: Messageable, 
+        limit: Optional[int] = 100, 
+        before: Optional[Union[Snowflake, datetime.datetime]] = None, 
+        after: Optional[Union[Snowflake, datetime.datetime]] = None, 
+        around: Optional[Union[Snowflake, datetime.datetime]] = None, 
+        oldest_first: bool = None
+    ):
 
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
@@ -303,16 +310,16 @@ class HistoryIterator(_AsyncIterator['Message']):
 
             self._retrieve_messages = self._retrieve_messages_around_strategy  # type: ignore
             if self.before and self.after:
-                self._filter = lambda m: self.after.id < int(m['id']) < self.before.id
+                self._filter = lambda m: self.after.id < int(m['id']) < self.before.id # type: ignore
             elif self.before:
-                self._filter = lambda m: int(m['id']) < self.before.id
+                self._filter = lambda m: int(m['id']) < self.before.id # type: ignore
             elif self.after:
-                self._filter = lambda m: self.after.id < int(m['id'])
+                self._filter = lambda m: self.after.id < int(m['id']) # type: ignore
         else:
             if self.reverse:
                 self._retrieve_messages = self._retrieve_messages_after_strategy  # type: ignore
                 if self.before:
-                    self._filter = lambda m: int(m['id']) < self.before.id
+                    self._filter = lambda m: int(m['id']) < self.before.id # type: ignore
             else:
                 self._retrieve_messages = self._retrieve_messages_before_strategy  # type: ignore
                 if self.after and self.after != OLDEST_OBJECT:
@@ -356,7 +363,7 @@ class HistoryIterator(_AsyncIterator['Message']):
             for element in data:
                 await self.messages.put(self.state.create_message(channel=channel, data=element))
 
-    async def _retrieve_messages(self, retrieve) -> List[Message]:
+    async def _retrieve_messages(self, retrieve) -> List[MessagePayload]:
         """Retrieve messages and update next parameters."""
         raise NotImplementedError
 
@@ -420,7 +427,7 @@ class AuditLogIterator(_AsyncIterator['AuditLogEntry']):
         if self.reverse:
             self._strategy = self._after_strategy
             if self.before:
-                self._filter = lambda m: int(m['id']) < self.before.id
+                self._filter = lambda m: int(m['id']) < self.before.id # type: ignore
         else:
             self._strategy = self._before_strategy
             if self.after and self.after != OLDEST_OBJECT:
@@ -543,7 +550,7 @@ class GuildIterator(_AsyncIterator['Guild']):
 
         if self.before and self.after:
             self._retrieve_guilds = self._retrieve_guilds_before_strategy  # type: ignore
-            self._filter = lambda m: int(m['id']) > self.after.id
+            self._filter = lambda m: int(m['id']) > self.after.id # type: ignore
         elif self.after:
             self._retrieve_guilds = self._retrieve_guilds_after_strategy  # type: ignore
         else:

@@ -1,8 +1,9 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union, TypeVar
+from typing import Any, Dict, List, Mapping, Optional, TYPE_CHECKING, Union, TypeVar
 
 from .base import Interaction
 
+from ..utils import MISSING
 from ..channel import _threaded_channel_factory
 from ..enums import OptionType, ApplicationCommandType, try_enum
 from ..guild import Guild
@@ -14,7 +15,9 @@ from ..message import Message
 __all__ = (
     'ApplicationCommandInteraction',
     'ApplicationCommandInteractionData',
-    'ApplicationCommandInteractionDataResolved'
+    'ApplicationCommandInteractionDataResolved',
+    'AppCommandInter',
+    'AppCmdInter'
 )
 
 if TYPE_CHECKING:
@@ -26,7 +29,9 @@ if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, PartialMessageable
     from ..threads import Thread
-    from ..ext.commands import InvokableApplicationCommand
+    from ..ext.commands import InvokableApplicationCommand, Bot, AutoShardedBot
+    
+    BotBase = Union[Bot, AutoShardedBot]
 
     InteractionChannel = Union[
         VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, Thread, PartialMessageable
@@ -63,14 +68,16 @@ class ApplicationCommandInteraction(Interaction):
     data: :class:`ApplicationCommandInteractionData`
         The wrapped interaction data.
     """
+    bot: BotBase
+    
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
         self.data = ApplicationCommandInteractionData(
-            data=data.get('data'),
+            data=data['data'], # type: ignore
             state=state,
             guild=self.guild
         )
-        self.application_command: InvokableApplicationCommand = None
+        self.application_command: InvokableApplicationCommand = MISSING
         self.command_failed: bool = False
 
     @property
@@ -118,34 +125,40 @@ class ApplicationCommandInteractionData:
         'options',
     )
 
-    def __init__(self, *, data: ApplicationCommandInteractionDataPayload, state: ConnectionState, guild: Guild):
-        data = {} if data is None else data
+    def __init__(self, *, data: ApplicationCommandInteractionDataPayload, state: ConnectionState, guild: Optional[Guild]):
         self.id: int = int(data['id'])
         self.name: str = data['name']
-        self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data['type'])
+        self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data.get('type'))
         self.resolved = ApplicationCommandInteractionDataResolved(
-            data=data.get('resolved'),
+            data=data.get('resolved', {}),
             state=state,
             guild=guild
         )
         target_id = data.get('target_id')
         self.target_id: Optional[int] = None if target_id is None else int(target_id)
-        self.target: Optional[Union[User, Member, Message]] = self.resolved.get(self.target_id)
-        self.options: List[AppCmdDataOptionT] = [
+        self.target: Optional[Union[User, Member, Message]] = self.resolved.get(self.target_id) # type: ignore
+        self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
             for d in data.get('options', [])
         ]
     
-    def _get_focused_option(self) -> AppCmdDataOptionT:
+    def _get_focused_option(self) -> Optional[ApplicationCommandInteractionDataOption]:
         for option in self.options:
             if option.focused:
                 return option
             if option.value is None:
+                # This means that we're inside a group/subcmd now
+                # We can use 'return' here because user can only
+                # choose one subcommand per interaction
                 return option._get_focused_option()
+        
+        return None
     
     @property
-    def focused_option(self):
-        return self._get_focused_option()
+    def focused_option(self) -> ApplicationCommandInteractionDataOption:
+        """The focused option"""
+        # don't annotate as None for user experience
+        return self._get_focused_option() # type: ignore
 
 
 class ApplicationCommandInteractionDataOption:
@@ -169,7 +182,7 @@ class ApplicationCommandInteractionDataOption:
 
     __slots__ = ('name', 'type', 'value', 'options', 'focused')
 
-    def __init__(self, *, data: Dict[str, Any], resolved: ApplicationCommandInteractionDataResolved):
+    def __init__(self, *, data: Mapping[str, Any], resolved: ApplicationCommandInteractionDataResolved):
         self.name: str = data['name']
         self.type: OptionType = try_enum(OptionType, data['type'])
         value = data.get('value')
@@ -177,7 +190,7 @@ class ApplicationCommandInteractionDataOption:
             self.value: Any = resolved.get_with_type(value, self.type.value, value)
         else:
             self.value: Any = None
-        self.options: List[AppCmdDataOptionT] = [
+        self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=resolved)
             for d in data.get('options', [])
         ]
@@ -188,12 +201,14 @@ class ApplicationCommandInteractionDataOption:
             return self.value
         return {opt.name: opt._simplified_value() for opt in self.options}
     
-    def _get_focused_option(self) -> AppCmdDataOptionT:
+    def _get_focused_option(self) -> Optional[ApplicationCommandInteractionDataOption]:
         for option in self.options:
             if option.focused:
                 return option
             if option.value is None:
                 return option._get_focused_option()
+        
+        return None
 
 
 class ApplicationCommandInteractionDataResolved:
@@ -224,7 +239,7 @@ class ApplicationCommandInteractionDataResolved:
         'messages'
     )
 
-    def __init__(self, *, data: ApplicationCommandInteractionDataResolvedPayload, state: ConnectionState, guild: Guild):
+    def __init__(self, *, data: ApplicationCommandInteractionDataResolvedPayload, state: ConnectionState, guild: Optional[Guild]):
         data = data or {}
 
         self.members: Dict[int, Member] = {}
@@ -244,28 +259,28 @@ class ApplicationCommandInteractionDataResolved:
             member = members.get(str_id)
             if member is not None:
                 self.members[user_id] = Member(
-                    data={**member, 'user': user},
-                    guild=guild,
+                    data={**member, 'user': user}, # type: ignore
+                    guild=guild, # type: ignore
                     state=state
                 )
             else:
                 self.users[user_id] = User(state=state, data=user)
         
         for str_id, role in roles.items():
-            self.roles[int(str_id)] = Role(guild=guild, state=state, data=role)
+            self.roles[int(str_id)] = Role(guild=guild, state=state, data=role) # type: ignore
         
         for str_id, channel in channels.items():
             factory, ch_type = _threaded_channel_factory(channel['type'])
             if factory:
-                channel['position'] = 0
-                self.channels[int(str_id)] = factory(guild=guild, state=state, data=channel)
+                channel['position'] = 0 # type: ignore
+                self.channels[int(str_id)] = factory(guild=guild, state=state, data=channel) # type: ignore
         
         for str_id, message in messages.items():
             channel_id = int(message['channel_id'])
             channel = guild.get_channel(channel_id) if guild else None
             if channel is None:
                 channel = state.get_channel(channel_id)
-            self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)
+            self.messages[int(str_id)] = Message(state=state, channel=channel, data=message) # type: ignore
     
     def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
         if isinstance(option_type, int):
@@ -314,3 +329,4 @@ class ApplicationCommandInteractionDataResolved:
 
 # People asked about shorter aliases
 AppCommandInter = ApplicationCommandInteraction
+AppCmdInter = ApplicationCommandInteraction

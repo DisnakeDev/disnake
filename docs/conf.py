@@ -90,7 +90,7 @@ copyright = '2015-present, Rapptz'
 
 version = ''
 with open('../disnake/__init__.py') as f:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1) # type: ignore
 
 # The full version, including alpha/beta/rc tags.
 release = version

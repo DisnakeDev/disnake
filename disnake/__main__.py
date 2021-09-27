@@ -155,20 +155,11 @@ _cog_extras = '''
 # certain file names and directory names are forbidden
 # see: https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx
 # although some of this doesn't apply to Linux, we might as well be consistent
-_base_table = {
-    '<': '-',
-    '>': '-',
-    ':': '-',
-    '"': '-',
-    # '/': '-', these are fine
-    # '\\': '-',
-    '|': '-',
-    '?': '-',
-    '*': '-',
-}
+_ascii_table = dict.fromkeys('<>:"|?*', "-")
 
 # NUL (0) and 1-31 are disallowed
-_base_table.update((chr(i), None) for i in range(32))
+_byte_table = dict.fromkeys(map(chr, range(32)))
+_base_table = {**_ascii_table, **_byte_table}
 
 _translation_table = str.maketrans(_base_table)
 

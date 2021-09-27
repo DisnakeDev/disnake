@@ -100,8 +100,8 @@ async def enumeration(
     ...
 
 
-# Specific channel types may be specified
-# This is the only case where you're able to use Union
+# Specific channel types may be specified.
+# To specify multiple channel types use either abcs or unions.
 from typing import Union
 
 @bot.slash_command()
@@ -109,7 +109,8 @@ async def constraint(
     inter: disnake.ApplicationCommandInteraction,
     text: disnake.TextChannel = Param(desc="A text channel"),
     voice: disnake.VoiceChannel = Param(desc="A voice channel"),
-    fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Param("A fancy new channel")
+    fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Param("A fancy new channel"),
+    any: disnake.abc.GuildChannel = Param(desc="Any channel you can imagine")
 ):
     ...
 

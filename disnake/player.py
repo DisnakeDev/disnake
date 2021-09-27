@@ -200,7 +200,7 @@ class FFmpegAudio(AudioSource):
                 self._process.terminate()
                 return
             try:
-                self._stdin.write(data)
+                self._stdin.write(data) # type: ignore
             except Exception:
                 _log.debug('Write error for %s, this is probably not a problem', self, exc_info=True)
                 # at this point the source data is either exhausted or the process is fubar
@@ -526,7 +526,7 @@ class FFmpegOpusAudio(FFmpegAudio):
 
     @staticmethod
     def _probe_codec_native(source, executable: str = 'ffmpeg') -> Tuple[Optional[str], Optional[int]]:
-        exe = executable[:2] + 'probe' if executable in ('ffmpeg', 'avconv') else executable
+        exe = executable[:2] + 'probe' if executable in {'ffmpeg', 'avconv'} else executable
         args = [exe, '-v', 'quiet', '-print_format', 'json', '-show_streams', '-select_streams', 'a:0', source]
         output = subprocess.check_output(args, timeout=20)
         codec = bitrate = None

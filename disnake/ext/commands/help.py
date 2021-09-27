@@ -316,8 +316,8 @@ class HelpCommand:
         # The keys can be safely copied as-is since they're 99.99% certain of being
         # string keys
         deepcopy = copy.deepcopy
-        self.__original_kwargs__ = {k: deepcopy(v) for k, v in kwargs.items()}
-        self.__original_args__ = deepcopy(args)
+        self.__original_kwargs__ = {k: deepcopy(v) for k, v in kwargs.items()} # type: ignore
+        self.__original_args__ = deepcopy(args) # type: ignore
         return self
 
     def __init__(self, **options):
@@ -330,7 +330,7 @@ class HelpCommand:
         self._command_impl = _HelpCommandImpl(self, **self.command_attrs)
 
     def copy(self):
-        obj = self.__class__(*self.__original_args__, **self.__original_kwargs__)
+        obj = self.__class__(*self.__original_args__, **self.__original_kwargs__) # type: ignore
         obj._command_impl = self._command_impl
         return obj
 
@@ -914,10 +914,7 @@ class DefaultHelpCommand(HelpCommand):
         self.dm_help_threshold = options.pop('dm_help_threshold', 1000)
         self.commands_heading = options.pop('commands_heading', "Commands:")
         self.no_category = options.pop('no_category', 'No Category')
-        self.paginator = options.pop('paginator', None)
-
-        if self.paginator is None:
-            self.paginator = Paginator()
+        self.paginator = options.pop('paginator', Paginator())
 
         super().__init__(**options)
 
@@ -1116,10 +1113,7 @@ class MinimalHelpCommand(HelpCommand):
         self.dm_help_threshold = options.pop('dm_help_threshold', 1000)
         self.aliases_heading = options.pop('aliases_heading', "Aliases:")
         self.no_category = options.pop('no_category', 'No Category')
-        self.paginator = options.pop('paginator', None)
-
-        if self.paginator is None:
-            self.paginator = Paginator(suffix=None, prefix=None)
+        self.paginator = options.pop('paginator', Paginator(suffix=None, prefix=None))
 
         super().__init__(**options)
 

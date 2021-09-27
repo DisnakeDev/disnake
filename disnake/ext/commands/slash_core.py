@@ -194,12 +194,24 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             self.connectors.update(create_connectors(params))
             self.autocompleters.update(create_autocompleters(params))
         
-        self.body = SlashCommand(
+        self.body: SlashCommand = SlashCommand(
             name=self.name,
             description=description or '-',
             options=options or [],
             default_permission=default_permission,
         )
+    
+    @property
+    def description(self) -> str:
+        return self.body.description
+    
+    @property
+    def options(self) -> List[Option]:
+        return self.body.options
+    
+    @property
+    def default_permission(self) -> bool:
+        return self.body.default_permission
     
     def sub_command(
         self,
@@ -245,9 +257,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
             ]
         ) -> SubCommand:
-            if len(self.children) == 0:
-                if len(self.body.options) > 0:
-                    self.body.options = []
+            if len(self.children) == 0 and len(self.body.options) > 0:
+                self.body.options = []
             new_func = SubCommand(
                 func,
                 name=name,
@@ -294,9 +305,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
             ]
         ) -> SubCommandGroup:
-            if len(self.children) == 0:
-                if len(self.body.options) > 0:
-                    self.body.options = []
+            if len(self.children) == 0 and len(self.body.options) > 0:
+                self.body.options = []
             new_func = SubCommandGroup(func, name=name, **kwargs)
             new_func.qualified_name = f'{self.qualified_name} {new_func.name}'
             self.children[new_func.name] = new_func
@@ -339,7 +349,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         else:
             raise ValueError("Command chain is too long")
         
-        focused_option = inter.data._get_focused_option()
+        focused_option = inter.data.focused_option
 
         if subcmd is None or isinstance(subcmd, SubCommandGroup):
             call_autocompleter = self._call_autocompleter

@@ -65,6 +65,7 @@ if TYPE_CHECKING:
     from .message import Message
     from .role import Role
     from .types.voice import VoiceState as VoiceStatePayload
+    from .types.voice import GuildVoiceState as GuildVoiceStatePayload
 
     VocalGuildChannel = Union[VoiceChannel, StageChannel]
 
@@ -126,11 +127,11 @@ class VoiceState:
         'suppress',
     )
 
-    def __init__(self, *, data: VoiceStatePayload, channel: Optional[VocalGuildChannel] = None):
+    def __init__(self, *, data: Union[VoiceStatePayload, GuildVoiceStatePayload], channel: Optional[VocalGuildChannel] = None):
         self.session_id: str = data.get('session_id')
         self._update(data, channel)
 
-    def _update(self, data: VoiceStatePayload, channel: Optional[VocalGuildChannel]):
+    def _update(self, data: Union[VoiceStatePayload, GuildVoiceStatePayload], channel: Optional[VocalGuildChannel]):
         self.self_mute: bool = data.get('self_mute', False)
         self.self_deaf: bool = data.get('self_deaf', False)
         self.self_stream: bool = data.get('self_stream', False)
@@ -270,7 +271,6 @@ class Member(disnake.abc.Messageable, _UserTag):
     if TYPE_CHECKING:
         name: str
         id: int
-        discriminator: str
         bot: bool
         system: bool
         created_at: datetime.datetime
@@ -421,11 +421,11 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._client_status[None] = str(value)
     
     @property
-    def tag(self) -> int:
+    def tag(self) -> str:
         return self._user.discriminator
     
     @property
-    def discriminator(self) -> int:
+    def discriminator(self) -> str:
         return self._user.discriminator
 
     @property
@@ -734,6 +734,9 @@ class Member(disnake.abc.Messageable, _UserTag):
             payload['mute'] = mute
 
         if suppress is not MISSING:
+            if self.voice is None or self.voice.channel is None:
+                raise Exception("Cannot suppress a member which isn't in a vc")
+            
             voice_state_payload = {
                 'channel_id': self.voice.channel.id,
                 'suppress': suppress,
@@ -780,6 +783,9 @@ class Member(disnake.abc.Messageable, _UserTag):
         HTTPException
             The operation failed.
         """
+        if self.voice is None or self.voice.channel is None:
+            raise Exception("Cannot request to speak when not in a vc")
+            
         payload = {
             'channel_id': self.voice.channel.id,
             'request_to_speak_timestamp': datetime.datetime.utcnow().isoformat(),

@@ -271,7 +271,7 @@ class Select(Item[V]):
         self._underlying = component
 
     def refresh_state(self, interaction: MessageInteraction) -> None:
-        self._selected_values = interaction.values
+        self._selected_values = interaction.values # type: ignore
 
     @classmethod
     def from_component(cls: Type[S], component: SelectMenu) -> S:

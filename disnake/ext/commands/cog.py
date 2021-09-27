@@ -51,7 +51,7 @@ if TYPE_CHECKING:
     from .context import Context
     from .core import Command
     from disnake.interactions import ApplicationCommandInteraction
-    AnyBotT = TypeVar('AnyBotT', bound=Union[Bot, AutoShardedBot])
+    AnyBot = Union[Bot, AutoShardedBot]
 
 __all__ = (
     'CogMeta',
@@ -573,7 +573,7 @@ class Cog(metaclass=CogMeta):
     async def cog_after_message_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
         pass
 
-    def _inject(self: CogT, bot: AnyBotT) -> CogT:
+    def _inject(self: CogT, bot: AnyBot) -> CogT:
         cls = self.__class__
 
         # realistically, the only thing that can cause loading errors
@@ -633,7 +633,7 @@ class Cog(metaclass=CogMeta):
 
         return self
 
-    def _eject(self, bot: AnyBotT) -> None:
+    def _eject(self, bot: AnyBot) -> None:
         cls = self.__class__
 
         try:

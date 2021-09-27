@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, TYPE_CHECKING, Callable, Coroutine, Union
+from typing import List, TYPE_CHECKING, Callable, Coroutine, Optional, Union
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -26,7 +26,7 @@ __all__ = (
 class InvokableUserCommand(InvokableApplicationCommand):
     def __init__(self, func, *, name: str, guild_ids: List[int] = None, auto_sync: bool = True, **kwargs):
         super().__init__(func, name=name, **kwargs)
-        self.guild_ids: List[int] = guild_ids
+        self.guild_ids: Optional[List[int]] = guild_ids
         self.auto_sync: bool = auto_sync
         self.body = UserCommand(name=self.name)
     
@@ -44,7 +44,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
 class InvokableMessageCommand(InvokableApplicationCommand):
     def __init__(self, func, *, name: str, guild_ids: List[int] = None, auto_sync: bool = True, **kwargs):
         super().__init__(func, name=name, **kwargs)
-        self.guild_ids: List[int] = guild_ids
+        self.guild_ids: Optional[List[int]] = guild_ids
         self.auto_sync: bool = auto_sync
         self.body = MessageCommand(name=self.name)
 
@@ -103,14 +103,13 @@ def user_command(
             raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
         if hasattr(func, '__command_flag__'):
             raise TypeError('Callback is already a command.')
-        new_func = InvokableUserCommand(
+        return InvokableUserCommand(
             func,
             name=name,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             **kwargs
         )
-        return new_func
     return decorator
 
 
@@ -158,12 +157,11 @@ def message_command(
             raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
         if hasattr(func, '__command_flag__'):
             raise TypeError('Callback is already a command.')
-        new_func = InvokableMessageCommand(
+        return InvokableMessageCommand(
             func,
             name=name,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             **kwargs
         )
-        return new_func
     return decorator

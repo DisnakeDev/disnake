@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union, TypeVar
+from typing import Any, Dict, Iterable, List, Mapping, Optional, TYPE_CHECKING, Tuple, Union, TypeVar, cast
 import asyncio
 
 from .. import utils
@@ -117,7 +117,8 @@ class Interaction:
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
         self._state: ConnectionState = state
-        self._session: ClientSession = state.http._HTTPClient__session
+        # TODO: Maybe use a unique session
+        self._session: ClientSession = state.http._HTTPClient__session # type: ignore
         self._original_message: Optional[InteractionMessage] = None
         self._from_data(data)
         self.bot: Optional[Bot] = None
@@ -130,7 +131,8 @@ class Interaction:
         self.channel_id: Optional[int] = utils._get_as_snowflake(data, 'channel_id')
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, 'guild_id')
         self.application_id: int = int(data['application_id'])
-        self.author: Optional[Union[User, Member]] = None
+        # think about the user's experience
+        self.author: Union[User, Member] = None # type: ignore
         self._permissions: int = 0
 
         # TODO: there's a potential data loss here
@@ -527,18 +529,15 @@ class InteractionResponse:
             if len(embeds) > 10:
                 raise ValueError('embeds cannot exceed maximum of 10 elements')
             payload['embeds'] = [e.to_dict() for e in embeds]
-        
+
         if file is not MISSING and files is not MISSING:
             raise TypeError('cannot mix file and files keyword arguments')
-        
+
         if file is not MISSING:
             files = [file]
 
-        if files is not MISSING:
-            if len(files) > 10:
-                raise ValueError('files cannot exceed maximum of 10 elements')
-        else:
-            files = None
+        if files is not MISSING and len(files) > 10:
+            raise ValueError('files cannot exceed maximum of 10 elements')
 
         if content is not None:
             payload['content'] = str(content)
@@ -557,7 +556,7 @@ class InteractionResponse:
             session=parent._session,
             type=InteractionResponseType.channel_message.value,
             data=payload,
-            files=files,
+            files=files or None,
         )
 
         if files is not None:
@@ -615,7 +614,7 @@ class InteractionResponse:
             raise InteractionResponded(self._parent)
 
         parent = self._parent
-        msg = parent.message
+        msg: Optional[Message] = getattr(parent, 'message', None)
         state = parent._state
         message_id = msg.id if msg else None
         if parent.type is not InteractionType.component:
@@ -623,20 +622,12 @@ class InteractionResponse:
 
         payload = {}
         if content is not MISSING:
-            if content is None:
-                payload['content'] = None
-            else:
-                payload['content'] = str(content)
-
+            payload['content'] = None if content is None else str(content)
         if embed is not MISSING and embeds is not MISSING:
             raise TypeError('cannot mix both embed and embeds keyword arguments')
 
         if embed is not MISSING:
-            if embed is None:
-                embeds = []
-            else:
-                embeds = [embed]
-
+            embeds = [] if embed is None else [embed]
         if embeds is not MISSING:
             payload['embeds'] = [e.to_dict() for e in embeds]
 
@@ -644,12 +635,9 @@ class InteractionResponse:
             payload['attachments'] = [a.to_dict() for a in attachments]
 
         if view is not MISSING:
-            state.prevent_view_updates_for(message_id)
-            if view is None:
-                payload['components'] = []
-            else:
-                payload['components'] = view.to_components()
-
+            if message_id:
+                state.prevent_view_updates_for(message_id)
+            payload['components'] = [] if view is None else view.to_components()
         adapter = async_context.get()
         await adapter.create_interaction_response(
             parent.id,
@@ -670,7 +658,6 @@ class InteractionResponse:
         choices: Union[
             Dict[str, str],
             List[str],
-            List[Tuple[str, str]],
             List[OptionChoice],
         ]
     ) -> None:
@@ -694,18 +681,13 @@ class InteractionResponse:
             raise InteractionResponded(self._parent)
         
         data = {}
-        if isinstance(choices, dict):
+        if isinstance(choices, Mapping):
             data['choices'] = [{'name': n, 'value': v} for n, v in choices.items()]
-        elif isinstance(choices, list):
-            if not choices:
-                data['choices'] = []
-            elif isinstance(choices[0], OptionChoice):
-                data['choices'] = [ch.to_dict() for ch in choices]
-            elif len(choices[0]) == 2:
-                data['choices'] = [{'name': n, 'value': v} for n, v in choices]
-            else:
-                data['choices'] = [{'name': n, 'value': n} for n in choices]
-
+        elif isinstance(choices, Iterable) and not isinstance(choices[0], OptionChoice):
+            data['choices'] = [{'name': n, 'value': n} for n in choices]
+        else:
+            data['choices'] = [c.to_dict() for c in choices] # type: ignore
+            
         parent = self._parent
         adapter = async_context.get()
         await adapter.create_interaction_response(

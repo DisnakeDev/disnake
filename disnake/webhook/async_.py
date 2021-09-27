@@ -369,7 +369,7 @@ class AsyncWebhookAdapter:
             return self.request(route, session=session, payload=payload)
         
         else:
-            multipart = [{'name': 'payload_json', 'value': utils._to_json(payload)}]
+            multipart: Any = [{'name': 'payload_json', 'value': utils._to_json(payload)}]
             single = len(files) == 1
             for index, file in enumerate(files):
                 name = "file" if single else f"file{index}"

@@ -39,6 +39,7 @@ from typing import (
     TYPE_CHECKING,
     Tuple,
     Union,
+    cast,
     overload,
 )
 
@@ -77,7 +78,6 @@ from .threads import Thread, ThreadMember
 from .sticker import GuildSticker
 from .file import File
 
-
 __all__ = (
     'Guild',
 )
@@ -90,6 +90,7 @@ if TYPE_CHECKING:
     from .types.threads import (
         Thread as ThreadPayload,
     )
+    from .types.integration import IntegrationType
     from .types.voice import GuildVoiceState
     from .permissions import Permissions
     from .channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel
@@ -361,6 +362,7 @@ class Guild(Hashable):
     def _update_voice_state(self, data: GuildVoiceState, channel_id: int) -> Tuple[Optional[Member], VoiceState, VoiceState]:
         user_id = int(data['user_id'])
         channel = self.get_channel(channel_id)
+        channel = cast(Optional[VocalGuildChannel], channel)
         try:
             # check if we should remove the voice state from cache
             if channel is None:
@@ -408,7 +410,7 @@ class Guild(Hashable):
 
         return role
 
-    def get_command(self, application_command_id: int, /) -> ApplicationCommand:
+    def get_command(self, application_command_id: int, /) -> Optional[ApplicationCommand]:
         self._state._get_guild_application_command(self.id, application_command_id)
 
     def _add_application_command(self, application_command: ApplicationCommand, /) -> None:
@@ -474,7 +476,8 @@ class Guild(Hashable):
         cache_joined = self._state.member_cache_flags.joined
         self_id = self._state.self_id
         for mdata in guild.get('members', []):
-            member = Member(data=mdata, guild=self, state=state)
+            # NOTE: Are we sure it's fine to not have the user part here?
+            member = Member(data=mdata, guild=self, state=state) # type: ignore
             if cache_joined or member.id == self_id:
                 self._add_member(member)
 
@@ -996,7 +999,7 @@ class Guild(Hashable):
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         category: Optional[Snowflake] = None,
         **options: Any,
-    ):
+    ) -> Any:
         if overwrites is MISSING:
             overwrites = {}
         elif not isinstance(overwrites, dict):
@@ -1816,7 +1819,7 @@ class Guild(Hashable):
         if ch_type in (ChannelType.group, ChannelType.private):
             raise InvalidData('Channel ID resolved to a private channel')
 
-        guild_id = int(data['guild_id'])
+        guild_id = int(data['guild_id']) # type: ignore
         if self.id != guild_id:
             raise InvalidData('Guild ID resolved to a different guild')
 
@@ -2055,7 +2058,7 @@ class Guild(Hashable):
         """
         from .template import Template
 
-        payload = {'name': name}
+        payload: Any = {'name': name}
 
         if description:
             payload['description'] = description
@@ -2064,7 +2067,7 @@ class Guild(Hashable):
 
         return Template(state=self._state, data=data)
 
-    async def create_integration(self, *, type: str, id: int) -> None:
+    async def create_integration(self, *, type: IntegrationType, id: int) -> None:
         """|coro|
 
         Attaches an integration to the guild.
@@ -2221,7 +2224,7 @@ class Guild(Hashable):
         :class:`GuildSticker`
             The created sticker.
         """
-        payload = {
+        payload: Any = {
             'name': name,
         }
 
@@ -2419,7 +2422,13 @@ class Guild(Hashable):
         data = await self._state.http.get_roles(self.id)
         return [Role(guild=self, state=self._state, data=d) for d in data]
 
-    async def get_or_fetch_member(self, member_id: int) -> Member:
+    @overload
+    async def get_or_fetch_member(self, member_id: int, *, strict: Literal[False] = ...) -> Optional[Member]: ...
+    
+    @overload
+    async def get_or_fetch_member(self, member_id: int, *, strict: Literal[True]) -> Member: ...
+
+    async def get_or_fetch_member(self, member_id: int, *, strict: bool = False) -> Optional[Member]:
         """|coro|
         
         Tries to get a member from the cache by ID. If fails, it fetcehs
@@ -2442,8 +2451,12 @@ class Guild(Hashable):
             member = await self.fetch_member(member_id)
             self._add_member(member)
         except:
+            if strict:
+                raise
             return None
         return member
+
+    getch_member = get_or_fetch_member
 
     @overload
     async def create_role(
@@ -2600,7 +2613,7 @@ class Guild(Hashable):
         if not isinstance(positions, dict):
             raise InvalidArgument('positions parameter expects a dict.')
 
-        role_positions: List[Dict[str, Any]] = []
+        role_positions: List[Any] = []
         for role, position in positions.items():
 
             payload = {'id': role.id, 'position': position}
@@ -2728,7 +2741,7 @@ class Guild(Hashable):
         """
 
         # we start with { code: abc }
-        payload = await self._state.http.get_vanity_code(self.id)
+        payload: Any = await self._state.http.get_vanity_code(self.id)
         if not payload['code']:
             return None
 
@@ -2903,7 +2916,7 @@ class Guild(Hashable):
             raise ClientException('Intents.members must be enabled to use this.')
 
         if not self._state.is_guild_evicted(self):
-            return await self._state.chunk_guild(self, cache=cache)
+            await self._state.chunk_guild(self, cache=cache)
 
     async def query_members(
         self,
@@ -2982,7 +2995,7 @@ class Guild(Hashable):
         )
 
     async def change_voice_state(
-        self, *, channel: Optional[VocalGuildChannel], self_mute: bool = False, self_deaf: bool = False
+        self, *, channel: Optional[Snowflake], self_mute: bool = False, self_deaf: bool = False
     ):
         """|coro|
 

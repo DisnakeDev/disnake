@@ -7,7 +7,7 @@ with open('requirements.txt') as f:
 
 version = ''
 with open('disnake/__init__.py') as f:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1) # type: ignore
 
 if not version:
     raise RuntimeError('version is not set')
