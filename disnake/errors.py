@@ -312,8 +312,8 @@ class InteractionResponded(InteractionException):
     def __init__(self, interaction: Interaction):
         self.interaction: Interaction = interaction
         super().__init__('This interaction has already been responded to before')
-    
-    
+
+
 class InteractionNotResponded(InteractionException):
     """Exception that's raised when editing an interaction response without
     sending a response message first.

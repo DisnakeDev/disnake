@@ -37,7 +37,6 @@ __all__ = (
 )
 
 
-
 def options_as_route(options: Dict[str, Any]) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
     if not options:
         return (), {}
@@ -49,6 +48,30 @@ def options_as_route(options: Dict[str, Any]) -> Tuple[Tuple[str, ...], Dict[str
 
 
 class SubCommandGroup(InvokableApplicationCommand):
+    """A class that implements the protocol for a bot slash command group.
+
+    These are not created manually, instead they are created via the
+    decorator or functional interface.
+
+    Attributes
+    -----------
+    name: :class:`str`
+        The name of the group.
+    option: :class:`Option`
+        API representation of this subcommand.
+    callback: :ref:`coroutine <coroutine>`
+        The coroutine that is executed when the command group is invoked.
+    cog: Optional[:class:`Cog`]
+        The cog that this group belongs to. ``None`` if there isn't one.
+    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+        A list of predicates that verifies if the group could be executed
+        with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
+        is necessary to be thrown to signal failure, then one inherited from
+        :exc:`.CommandError` should be used. Note that if the checks fail then
+        :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
+        event.
+    """
+
     def __init__(self, func, *, name: str = None, **kwargs):
         super().__init__(func, name=name, **kwargs)
         self.children: Dict[str, SubCommand] = {}
@@ -110,6 +133,32 @@ class SubCommandGroup(InvokableApplicationCommand):
 
 
 class SubCommand(InvokableApplicationCommand):
+    """A class that implements the protocol for a bot slash subcommand.
+
+    These are not created manually, instead they are created via the
+    decorator or functional interface.
+
+    Attributes
+    -----------
+    name: :class:`str`
+        The name of the subcommand.
+    option: :class:`Option`
+        API representation of this subcommand.
+    callback: :ref:`coroutine <coroutine>`
+        The coroutine that is executed when the subcommand is called.
+    cog: Optional[:class:`Cog`]
+        The cog that this subcommand belongs to. ``None`` if there isn't one.
+    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+        A list of predicates that verifies if the subcommand could be executed
+        with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
+        is necessary to be thrown to signal failure, then one inherited from
+        :exc:`.CommandError` should be used. Note that if the checks fail then
+        :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
+        event.
+    connectors: Dict[:class:`str`, :class:`str`]
+        A mapping of option names to function parameter names, mainly for internal processes.
+    """
+
     def __init__(
         self,
         func,
@@ -161,6 +210,36 @@ class SubCommand(InvokableApplicationCommand):
 
 
 class InvokableSlashCommand(InvokableApplicationCommand):
+    """A class that implements the protocol for a bot slash command.
+
+    These are not created manually, instead they are created via the
+    decorator or functional interface.
+
+    Attributes
+    -----------
+    name: :class:`str`
+        The name of the command.
+    body: :class:`SlashCommand`
+        An object being registered in the API.
+    callback: :ref:`coroutine <coroutine>`
+        The coroutine that is executed when the command is called.
+    cog: Optional[:class:`Cog`]
+        The cog that this command belongs to. ``None`` if there isn't one.
+    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+        A list of predicates that verifies if the command could be executed
+        with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
+        is necessary to be thrown to signal failure, then one inherited from
+        :exc:`.CommandError` should be used. Note that if the checks fail then
+        :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
+        event.
+    guild_ids: Optional[List[:class:`int`]]
+        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
+    connectors: Dict[:class:`str`, :class:`str`]
+        A mapping of option names to function parameter names, mainly for internal processes.
+    auto_sync: :class:`bool`
+        Whether to sync the command in the API with ``body`` or not.
+    """
+
     def __init__(
         self,
         func,
@@ -449,16 +528,23 @@ def slash_command(
         the description of the slash command. It will be visible in Discord.
     options: List[:class:`Option`]
         the list of slash command options. The options will be visible in Discord.
+        This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
     default_permission: :class:`bool`
         whether the command is enabled by default when the app is added to a guild.
     guild_ids: List[:class:`int`]
         if specified, the client will register a command in these guilds.
-        Otherwise this command will be registered globally.
+        Otherwise this command will be registered globally in ~1 hour.
     connectors: Dict[:class:`str`, :class:`str`]
         binds function names to option names. If the name
         of an option already matches the corresponding function param,
         you don't have to specify the connectors. Connectors template:
-        ``{"option-name": "param_name", ...}``
+        ``{"option-name": "param_name", ...}``.
+        If you're using :ref:`param_syntax`, you don't need to specify this.
+    
+    Returns
+    --------
+    Callable[..., :class:`InvokableSlashCommand`]
+        A decorator that converts the provided method into a InvokableSlashCommand and returns it.
     """
 
     def decorator(

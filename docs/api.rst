@@ -4097,6 +4097,22 @@ PartialMessage
 .. autoclass:: PartialMessage
     :members:
 
+Option
+~~~~~~
+
+.. attributetable:: Option
+
+.. autoclass:: Option()
+    :members:
+
+OptionChoice
+~~~~~~~~~~~~
+
+.. attributetable:: OptionChoice
+
+.. autoclass:: OptionChoice()
+    :members:
+
 SelectOption
 ~~~~~~~~~~~~~
 
@@ -4311,7 +4327,13 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: PrivilegedIntentsRequired
 
+.. autoexception:: InteractionException
+
 .. autoexception:: InteractionResponded
+
+.. autoexception:: InteractionNotResponded
+
+.. autoexception:: InteractionTimedOut
 
 .. autoexception:: disnake.opus.OpusError
 
@@ -4330,7 +4352,10 @@ Exception Hierarchy
                 - :exc:`LoginFailure`
                 - :exc:`ConnectionClosed`
                 - :exc:`PrivilegedIntentsRequired`
-                - :exc:`InteractionResponded`
+                - :exc:`InteractionException`
+                    - :exc:`InteractionResponded`
+                    - :exc:`InteractionNotResponded`
+                    - :exc:`InteractionTimedOut`
             - :exc:`NoMoreItems`
             - :exc:`GatewayNotFound`
             - :exc:`HTTPException`

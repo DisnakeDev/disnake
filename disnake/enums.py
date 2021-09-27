@@ -554,6 +554,7 @@ class InteractionType(Enum):
     ping = 1
     application_command = 2
     component = 3
+    application_command_autocomplete = 4
 
 
 class InteractionResponseType(Enum):

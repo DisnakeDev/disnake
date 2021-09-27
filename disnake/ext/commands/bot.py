@@ -445,16 +445,18 @@ class BotBase(GroupMixin):
             the description of the slash command. It will be visible in Discord.
         options: List[:class:`Option`]
             the list of slash command options. The options will be visible in Discord.
+            This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
         default_permission: :class:`bool`
             whether the command is enabled by default when the app is added to a guild.
         guild_ids: List[:class:`int`]
             if specified, the client will register a command in these guilds.
-            Otherwise this command will be registered globally.
+            Otherwise this command will be registered globally in ~1 hour.
         connectors: Dict[:class:`str`, :class:`str`]
             binds function names to option names. If the name
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
-            ``{"option-name": "param_name", ...}``
+            ``{"option-name": "param_name", ...}``.
+            If you're using :ref:`param_syntax`, you don't need to specify this.
         
         Returns
         --------
@@ -509,7 +511,7 @@ class BotBase(GroupMixin):
             name of the user command you want to respond to (equals to function name by default).
         guild_ids: List[:class:`int`]
             if specified, the client will register the command in these guilds.
-            Otherwise this command will be registered globally.
+            Otherwise this command will be registered globally in ~1 hour.
         
         Returns
         --------
@@ -555,7 +557,7 @@ class BotBase(GroupMixin):
             name of the message command you want to respond to (equals to function name by default).
         guild_ids: List[:class:`int`]
             if specified, the client will register the command in these guilds.
-            Otherwise this command will be registered globally.
+            Otherwise this command will be registered globally in ~1 hour.
         
         Returns
         --------
