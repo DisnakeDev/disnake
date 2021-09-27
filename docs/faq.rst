@@ -81,7 +81,7 @@ General questions regarding library usage belong here.
 Where can I find usage examples?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Example code can be found in the `examples folder <https://github.com/Rapptz/disnake/tree/master/examples>`_
+Example code can be found in the `examples folder <https://github.com/EQUENOS/disnake/tree/master/examples>`_
 in the repository.
 
 How do I set the "Playing" status?
@@ -253,7 +253,7 @@ this together we can do the following: ::
 How do I run something in the background?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`Check the background_task.py example. <https://github.com/Rapptz/disnake/blob/master/examples/background_task.py>`_
+`Check the background_task.py example. <https://github.com/EQUENOS/disnake/blob/master/examples/background_task.py>`_
 
 How do I get a specific model?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
