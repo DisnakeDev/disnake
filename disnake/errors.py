@@ -258,7 +258,44 @@ class PrivilegedIntentsRequired(ClientException):
         super().__init__(msg % shard_id)
 
 
-class InteractionResponded(ClientException):
+class InteractionException(ClientException):
+    """Exception that's raised when an interaction operation fails
+    
+    .. versionadded:: 2.0
+    
+    Attributes
+    -----------
+    interaction: :class:`Interaction`
+        The interaction that was responded to
+    """
+    interaction: Interaction
+
+
+class InteractionTimedOut(InteractionException):
+    """Exception that's raised when an interaction takes more than 3 seconds
+    to respond but is not deffered.
+
+    .. versionadded:: 2.0
+
+    Attributes
+    -----------
+    interaction: :class:`Interaction`
+        The interaction that was responded to
+    """
+    
+    def __init__(self, interaction: Interaction):
+        self.interaction: Interaction = interaction
+        
+        msg = (
+            'Interaction took more than 3 seconds to be responded to. '
+            'Please defer it using "interaction.response.defer" on the start of your command. '
+            'Later you may send a response by editing the deferred message '
+            'using "interaction.edit_original_message"'
+        )
+        super().__init__(msg)
+
+
+class InteractionResponded(InteractionException):
     """Exception that's raised when sending another interaction response using
     :class:`InteractionResponse` when one has already been done before.
 
@@ -275,3 +312,22 @@ class InteractionResponded(ClientException):
     def __init__(self, interaction: Interaction):
         self.interaction: Interaction = interaction
         super().__init__('This interaction has already been responded to before')
+    
+    
+class InteractionNotResponded(InteractionException):
+    """Exception that's raised when editing an interaction response without
+    sending a response message first.
+
+    An interaction can only respond once.
+
+    .. versionadded:: 2.0
+
+    Attributes
+    -----------
+    interaction: :class:`Interaction`
+        The interaction that's already been responded to.
+    """
+    
+    def __init__(self, interaction: Interaction):
+        self.interaction: Interaction = interaction
+        super().__init__("This interaction hasn't been responded to yet")

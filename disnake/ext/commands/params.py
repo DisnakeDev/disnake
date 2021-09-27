@@ -223,7 +223,7 @@ class Param:
             raise TypeError(f"{annotation!r} is not a valid Param annotation")
 
     def parse_parameter(self, param: inspect.Parameter) -> None:
-        self.name = self.name or param.name.replace("_", "-")
+        self.name = self.name or param.name
         self.param_name = param.name
 
     def parse_doc(self, doc_type: Any, doc_description: str) -> None:

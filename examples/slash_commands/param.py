@@ -36,7 +36,7 @@ async def defaults(
     ...
 
 
-# Names are automatically discerned from the parameter name ("_" are changed to "-")
+# Names are automatically discerned from the parameter name
 # However you may want to provide your own name in some cases.
 @bot.slash_command()
 async def names(
