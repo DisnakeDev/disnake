@@ -46,6 +46,13 @@ async def names(
     ...
 
 
+# Commands may be limited only to guilds with a special interaction annotation
+@bot.slash_command()
+async def guild_command(
+    inter: disnake.GuildCommandInteraction
+):
+    ...
+
 # Not all types are currently supported by discord, you may use converters in these cases.
 # Both old command converters using annotations and converters using functions are supported.
 # However converters which are not consistent with the actual type are not allowed.
@@ -109,7 +116,7 @@ async def constraint(
     inter: disnake.ApplicationCommandInteraction,
     text: disnake.TextChannel = Param(desc="A text channel"),
     voice: disnake.VoiceChannel = Param(desc="A voice channel"),
-    fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Param("A fancy new channel"),
+    fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Param(desc="A fancy new channel"),
     any: disnake.abc.GuildChannel = Param(desc="Any channel you can imagine")
 ):
     ...
