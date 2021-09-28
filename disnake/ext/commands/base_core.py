@@ -57,6 +57,8 @@ class InvokableApplicationCommand(ABC):
         self._callback: Callable[..., Any] = func
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
+        # only an internal feature for now
+        self.guild_only: bool = kwargs.get('guild_only', False)
         if not isinstance(self.name, str):
             raise TypeError('Name of a command must be a string.')
 
@@ -232,6 +234,10 @@ class InvokableApplicationCommand(ABC):
         """
         This method isn't really usable in this class, but it's usable in subclasses.
         """
+        if self.guild_only and inter.guild_id is None:
+            await inter.response.send_message("This command cannot be used in dms", ephemeral=True)
+            return
+        
         await self.prepare(inter)
 
         try:

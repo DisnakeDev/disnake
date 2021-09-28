@@ -70,6 +70,7 @@ if TYPE_CHECKING:
         Check,
         CoroFunc,
     )
+    ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
     AnyMessageCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
     AnyUserCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
     
@@ -425,8 +426,8 @@ class BotBase(GroupMixin):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ],
         InvokableSlashCommand
@@ -465,8 +466,8 @@ class BotBase(GroupMixin):
         """
         def decorator(
             func: Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> InvokableSlashCommand:
             result = slash_command(
@@ -493,8 +494,8 @@ class BotBase(GroupMixin):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[Cog, AnyUserCommandInter, P], Coroutine],
-                Callable[Concatenate[AnyUserCommandInter, P], Coroutine]
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ],
         InvokableUserCommand
@@ -520,8 +521,8 @@ class BotBase(GroupMixin):
         """
         def decorator(
             func: Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> InvokableUserCommand:
             result = user_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
@@ -566,8 +567,8 @@ class BotBase(GroupMixin):
         """
         def decorator(
             func: Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> InvokableMessageCommand:
             result = message_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)

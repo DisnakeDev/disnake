@@ -8,12 +8,13 @@ from typing import (
     Coroutine,
     Optional,
     Tuple,
+    TypeVar,
     Union,
 )
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
-from .params import extract_params, create_autocompleters, create_connectors, resolve_param_kwargs
+from .params import resolve_param_kwargs, expand_params
 
 from disnake.app_commands import SlashCommand, Option
 from disnake.enums import OptionType
@@ -26,6 +27,8 @@ import inspect
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
     from .cog import CogT
+    
+    ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
 
     P = ParamSpec('P')
 
@@ -93,8 +96,8 @@ class SubCommandGroup(InvokableApplicationCommand):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ],
         SubCommand
@@ -112,8 +115,8 @@ class SubCommandGroup(InvokableApplicationCommand):
 
         def decorator(
             func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> SubCommand:
             new_func = SubCommand(
@@ -173,14 +176,11 @@ class SubCommand(InvokableApplicationCommand):
         self.connectors: Dict[str, str] = connectors or {}
         self.autocompleters: Dict[str, Any] = kwargs.get('autocompleters', {})
         
-        docstring = utils.parse_docstring(func)
-        description = description or docstring['description']
+        self.docstring = utils.parse_docstring(func)
+        description = description or self.docstring['description']
         
         if not options:
-            params = extract_params(func, self.cog, docstring['params'])
-            options = [param.to_option() for param in params]
-            self.connectors.update(create_connectors(params))
-            self.autocompleters.update(create_autocompleters(params))
+            options = expand_params(self)
         
         self.option = Option(
             name=self.name,
@@ -202,6 +202,10 @@ class SubCommand(InvokableApplicationCommand):
         return choices
 
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
+        if self.guild_only and inter.guild_id is None:
+            await inter.response.send_message("This command cannot be used in dms", ephemeral=True)
+            return
+        
         for k, v in self.connectors.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
@@ -260,14 +264,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.guild_ids: Optional[List[int]] = guild_ids
         self.autocompleters: Dict[str, Any] = kwargs.get('autocompleters', {})
         
-        docstring = utils.parse_docstring(func)
-        description = description or docstring['description']
+        self.docstring = utils.parse_docstring(func)
+        description = description or self.docstring['description']
         
         if not options:
-            params = extract_params(func, self.cog, docstring['params'])
-            options = [param.to_option() for param in params]
-            self.connectors.update(create_connectors(params))
-            self.autocompleters.update(create_autocompleters(params))
+            options = expand_params(self)
         
         self.body: SlashCommand = SlashCommand(
             name=self.name,
@@ -298,8 +299,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ],
         SubCommand
@@ -328,8 +329,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         """
         def decorator(
             func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> SubCommand:
             if len(self.children) == 0 and len(self.body.options) > 0:
@@ -355,8 +356,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ],
         SubCommandGroup
@@ -376,8 +377,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         """
         def decorator(
             func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> SubCommandGroup:
             if len(self.children) == 0 and len(self.body.options) > 0:
@@ -467,6 +468,10 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 raise
 
     async def invoke(self, inter: ApplicationCommandInteraction):
+        if self.guild_only and inter.guild_id is None:
+            await inter.response.send_message("This command cannot be used in dms", ephemeral=True)
+            return
+
         await self.prepare(inter)
 
         try:
@@ -509,8 +514,8 @@ def slash_command(
 ) -> Callable[
     [
         Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
         ]
     ],
     InvokableSlashCommand
@@ -549,8 +554,8 @@ def slash_command(
 
     def decorator(
         func: Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
         ]
     ) -> InvokableSlashCommand:
         if not asyncio.iscoroutinefunction(func):

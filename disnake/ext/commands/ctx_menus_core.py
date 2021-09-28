@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, TYPE_CHECKING, Callable, Coroutine, Optional, Union
+from typing import List, TYPE_CHECKING, Callable, Coroutine, Optional, TypeVar, Union
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -11,6 +11,8 @@ import asyncio
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
     from disnake.interactions import ApplicationCommandInteraction
+    
+    ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
     from .cog import CogT
 
     P = ParamSpec('P')
@@ -124,8 +126,8 @@ def user_command(
 ) -> Callable[
     [
         Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
         ]
     ],
     InvokableUserCommand
@@ -151,8 +153,8 @@ def user_command(
 
     def decorator(
         func: Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
         ]
     ) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
@@ -178,8 +180,8 @@ def message_command(
 ) -> Callable[
     [
         Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
         ]
     ],
     InvokableMessageCommand
@@ -205,8 +207,8 @@ def message_command(
 
     def decorator(
         func: Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
         ]
     ) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):

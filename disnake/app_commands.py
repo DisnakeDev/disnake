@@ -52,7 +52,7 @@ class OptionChoice:
         self.value: Union[str, int] = value
 
     def __repr__(self) -> str:
-        return f'<OptionChoice name={self.name} value={self.value}>'
+        return f'<OptionChoice name={self.name!r} value={self.value!r}>'
 
     def __eq__(self, other) -> bool:
         return (

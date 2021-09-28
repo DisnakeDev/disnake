@@ -29,6 +29,9 @@ from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction as Interaction
+    from .slash_core import InvokableSlashCommand, SubCommand
+
+    AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 
 TChoice = TypeVar("TChoice", str, int)
 
@@ -159,12 +162,20 @@ class Param:
         except Exception as e:
             raise errors.ConversionError(self.converter, e) from e
 
+    def _parse_enum(self, annotation: Any) -> None:
+        if isinstance(annotation, EnumMeta):
+            self.choices = [OptionChoice(name, value.value) for name, value in annotation.__members__.items()]  # type: ignore
+        else:
+            self.choices = [OptionChoice(str(i), i) for i in annotation.__args__]
+
+        self.type = type(self.choices[0].value)
+
     def parse_annotation(self, annotation: Any) -> None:
         if isinstance(annotation, Param):
             default = "..." if annotation.required else repr(annotation.default)
             r = f'Param({default}, description={annotation.description or "description"!r})'
-            raise TypeError(f"Param must be a parameter default, not an annotation: \"option: type = {r}\"")
-        
+            raise TypeError(f'Param must be a parameter default, not an annotation: "option: type = {r}"')
+
         # Get rid of Optionals
         if get_origin(annotation) is Union:
             args = [i for i in annotation.__args__ if i not in (None, type(None))]
@@ -172,7 +183,7 @@ class Param:
                 annotation = args[0]
             else:
                 annotation.__args__ = args
-        
+
         if self.converter is not None:
             # try to parse the converter's annotation, fall back on the annotation itself
             parameters = list(inspect.signature(self.converter).parameters.values())
@@ -182,8 +193,10 @@ class Param:
             if conv_annot in self.TYPES:
                 self.type = conv_annot
                 return
+            elif isinstance(conv_annot, EnumMeta) or get_origin(conv_annot) is Literal:
+                self._parse_enum(conv_annot)
+                return
             elif conv_annot is not Any:
-                # TODO: Implement at least enum for converters
                 raise TypeError("Converters cannot use converter annotations")
             elif annotation in CONVERTER_MAPPING:
                 raise TypeError(
@@ -193,20 +206,17 @@ class Param:
 
         if annotation is inspect.Parameter.empty or annotation is Any:
             pass
-        elif isinstance(annotation, EnumMeta):
-            self.choices = [OptionChoice(name, value) for name, value in annotation.__members__.items()]  # type: ignore
-            self.type = type(self.choices[0].value)
-        elif get_origin(annotation) is Literal:
-            self.choices = [OptionChoice(str(i), i) for i in annotation.__args__]
-            self.type = type(self.choices[0].value)
+        elif isinstance(annotation, EnumMeta) or get_origin(annotation) is Literal:
+            self._parse_enum(annotation)
 
         elif get_origin(annotation) is Union:
             args = annotation.__args__
             if all(issubclass(channel, disnake.abc.GuildChannel) for channel in args):
                 self.type = disnake.abc.GuildChannel
-                self.channel_types = []
+                channel_types = set()
                 for channel in args:
-                    self.channel_types += _channel_type_factory(channel)
+                    channel_types.union(_channel_type_factory(channel))
+                self.channel_types = list(channel_types)
             elif any(get_origin(arg) for arg in args):
                 raise TypeError("Unions do not support nesting")
             else:
@@ -246,16 +256,22 @@ class Param:
         )
 
 
-def extract_params(func: Callable, cog: Any = None, doc_params: Dict[str, Dict[str, Any]] = {}) -> List[Param]:
-    """Extract params from a function signature"""
-    sig = inspect.signature(func)
-    parameters = list(sig.parameters.values())
-    if cog is None:
-        # hacky I suppose
-        cog = parameters[0].name == "self"
-    parameters = parameters[2:] if cog else parameters[1:]
-    type_hints = get_type_hints(func)
+def expand_params(command: AnySlashCommand) -> List[Option]:
+    """Update an option with its params *in-place*
 
+    Returns the created options
+    """
+    # parse annotations:
+    sig = inspect.signature(command.callback)
+    parameters = list(sig.parameters.values())
+    
+    # hacky I suppose
+    cog = parameters[0].name == "self" if command.cog is None else True
+    inter_param = parameters[1] if cog else parameters[0]
+    parameters = parameters[2:] if cog else parameters[1:]
+    type_hints = get_type_hints(command.callback)
+
+    # extract params:
     params = []
     for parameter in parameters:
         if parameter.kind in [inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD]:
@@ -264,7 +280,7 @@ def extract_params(func: Callable, cog: Any = None, doc_params: Dict[str, Dict[s
         if not isinstance(param, Param):
             param = Param(param if param is not parameter.empty else ...)
 
-        doc_param = doc_params.get(parameter.name)
+        doc_param = command.docstring['params'].get(parameter.name)
 
         param.parse_parameter(parameter)
         if doc_param:
@@ -272,17 +288,20 @@ def extract_params(func: Callable, cog: Any = None, doc_params: Dict[str, Dict[s
         param.parse_annotation(type_hints.get(parameter.name, Any))
         params.append(param)
 
-    return params
+    # update connectors and autocompleters
+    for param in params:
+        if param.name != param.param_name:
+            command.connectors[param.name] = param.param_name
+        if param.autocomplete:
+            command.autocompleters[param.name] = param.autocomplete
+
+    # add custom decorators
+    inter_annot = type_hints.get(inter_param.name, Any)
+    if isinstance(inter_annot, type) and issubclass(inter_annot, disnake.GuildCommandInteraction):
+        command.guild_only = True
 
 
-def create_connectors(params: List[Param]) -> Dict[str, Any]:
-    """Create a connector for each param"""
-    return {param.name: param.param_name for param in params if param.name != param.param_name}
-
-
-def create_autocompleters(params: List[Param]) -> Dict[str, Callable[[Interaction, str], Any]]:
-    """Create an autocomplete for each param"""
-    return {param.name: param.autocomplete for param in params if param.autocomplete}
+    return [param.to_option() for param in params]
 
 
 async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[str, Any]) -> Dict[str, Any]:
