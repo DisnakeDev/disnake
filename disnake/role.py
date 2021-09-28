@@ -31,7 +31,7 @@ from .asset import Asset
 from .colour import Colour
 from .partial_emoji import PartialEmoji
 from .mixins import Hashable
-from .utils import snowflake_time, _get_as_snowflake, MISSING
+from .utils import snowflake_time, _get_as_snowflake, _bytes_to_base64_data, MISSING
 
 __all__ = (
     'RoleTags',
@@ -244,7 +244,7 @@ class Role(Hashable):
         self.position: int = data.get('position', 0)
         self._colour: int = data.get('color', 0)
         self.hoist: bool = data.get('hoist', False)
-        self._icon: Optional[str] = data.get('icon', None)
+        self._icon: Optional[str] = data.get('icon')
         self._emoji: Optional[str] = data.get('unicode_emoji')
         self.managed: bool = data.get('managed', False)
         self.mentionable: bool = data.get('mentionable', False)
@@ -374,6 +374,8 @@ class Role(Hashable):
         colour: Union[Colour, int] = MISSING,
         color: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
+        icon: bytes = MISSING,
+        emoji: str = MISSING,
         mentionable: bool = MISSING,
         position: int = MISSING,
         reason: Optional[str] = MISSING,
@@ -403,6 +405,10 @@ class Role(Hashable):
             The new colour to change to. (aliased to color as well)
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
+        icon: :class:`bytes`
+            The role's new icon image (if the guild has the ``ROLE_ICONS`` feature).
+        emoji: :class:`str`
+            The role's new unicode emoji.
         mentionable: :class:`bool`
             Indicates if the role should be mentionable by others.
         position: :class:`int`
@@ -450,6 +456,15 @@ class Role(Hashable):
 
         if mentionable is not MISSING:
             payload['mentionable'] = mentionable
+        
+        if icon is not MISSING:
+            if icon is None:
+                payload['icon'] = icon
+            else:
+                payload['icon'] = _bytes_to_base64_data(icon)
+        
+        if emoji is not MISSING:
+            payload['unicode_emoji'] = emoji
 
         data = await self._state.http.edit_role(self.guild.id, self.id, reason=reason, **payload)
         return Role(guild=self.guild, data=data, state=self._state)
