@@ -33,9 +33,11 @@ if TYPE_CHECKING:
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 
+T = TypeVar("T", bound=Any)
 TChoice = TypeVar("TChoice", str, int)
 
 __all__ = (
+    "Param",
     "param",
     "option_enum",
 )
@@ -172,7 +174,7 @@ class Param:
 
     def parse_annotation(self, annotation: Any) -> None:
         if isinstance(annotation, Param):
-            default = "..." if annotation.required else repr(annotation.default)
+            default = "..." if annotation.default is ... else repr(annotation.default)
             r = f'Param({default}, description={annotation.description or "description"!r})'
             raise TypeError(f'Param must be a parameter default, not an annotation: "option: type = {r}"')
 
@@ -206,6 +208,18 @@ class Param:
 
         if annotation is inspect.Parameter.empty or annotation is Any:
             pass
+        elif get_origin(annotation) is list:
+            if self.converter:
+                raise TypeError("Converter detected with custom annotation")
+            arg = annotation.__args__[0] if annotation.__args__ else str
+            if arg in [str, int, float]:
+                conv = arg
+            elif arg in CONVERTER_MAPPING:
+                # TODO: Define our own converters?
+                raise TypeError("Discord's api is not mature enough to handle member conversion with models")
+            else:
+                raise TypeError(f"{arg!r} is not a valid List subscript for Param")
+            self.converter = lambda inter, arg: list(map(conv, arg.split()))
         elif isinstance(annotation, EnumMeta) or get_origin(annotation) is Literal:
             self._parse_enum(annotation)
 
@@ -264,7 +278,7 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     # parse annotations:
     sig = inspect.signature(command.callback)
     parameters = list(sig.parameters.values())
-    
+
     # hacky I suppose
     cog = parameters[0].name == "self" if command.cog is None else True
     inter_param = parameters[1] if cog else parameters[0]
@@ -280,7 +294,7 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         if not isinstance(param, Param):
             param = Param(param if param is not parameter.empty else ...)
 
-        doc_param = command.docstring['params'].get(parameter.name)
+        doc_param = command.docstring["params"].get(parameter.name)
 
         param.parse_parameter(parameter)
         if doc_param:
@@ -299,7 +313,6 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     inter_annot = type_hints.get(inter_param.name, Any)
     if isinstance(inter_annot, type) and issubclass(inter_annot, disnake.GuildCommandInteraction):
         command.guild_only = True
-
 
     return [param.to_option() for param in params]
 

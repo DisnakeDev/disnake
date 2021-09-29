@@ -20,5 +20,5 @@ from .converter import *
 from .cooldowns import *
 from .cog import *
 from .flags import *
-
-from .params import param, param as Param, option_enum
+from .params import *
+from .params import param as Param

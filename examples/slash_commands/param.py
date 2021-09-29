@@ -78,6 +78,17 @@ async def advanced_converters(
 ):
     ...
 
+
+# Lists are kind of supported too, it simply splits all arguments by space
+from typing import List
+
+@bot.slash_command()
+async def list_converters(
+    inter: disnake.ApplicationCommandInteraction,
+    numbers: List[int] = Param(desc="A list of numbers")
+):
+    ...
+
 # Enumeration (choices) is allowed using enum.Enum, commands.option_enum or Literal
 # The user will see the enum member name or the dict key and the bot will receive the value.
 from enum import Enum
