@@ -145,7 +145,9 @@ All the other types may be converted implicitly, similarly to :ref:`discord_conv
 
 Parameter Descriptors
 +++++++++++++++++++++
-Python has no truly *clean* way to provide metadata for parameters, so disnake uses the same approach as fastapi using parameter defaults. At the current time there's only :class:`Param`.
+
+Python has no truly *clean* way to provide metadata for parameters, so disnake uses the same approach as fastapi using
+parameter defaults. At the current time there's only :class:`Param`.
 
 With this you may set the name, description, custom converters and :ref:`autocompleters`.
 
@@ -170,7 +172,9 @@ With this you may set the name, description, custom converters and :ref:`autocom
         ...
 
 .. note ::
-    There is a possibility that your editor is going to complain about the usage of ``commands.Param``. This is due to the limitation of most linters which forbid using incorrect types as function defaults. In that case use the lowercase alias ``commands.param``
+    There is a possibility that your editor is going to complain about the usage of ``commands.Param``.
+    This is due to the limitation of most linters which forbid using incorrect types as function defaults.
+    In that case use the lowercase alias ``commands.param``
 
     All keyword arguments of :class:`Param` have shorter aliases:
         - ``description`` -> ``desc``
@@ -179,21 +183,89 @@ With this you may set the name, description, custom converters and :ref:`autocom
 
 
 .. note ::
-    The converter parameter only ever takes in a **function**, not a Converter class. Converter classes are completely unusable in disnake due to their inconsistent typing.
+    The converter parameter only ever takes in a **function**, not a Converter class.
+    Converter classes are completely unusable in disnake due to their inconsistent typing.
 
 .. _autocompleters:
 
 
 Choices
 -------
-Just enums n stuff.
+Just enums n stuff. [Not finished]
 
 Autocompleters
 --------------
-Use the ``autocompleter`` kwarg
+Use the ``autocompleter`` kwarg. [Not finished]
 
 Docstrings
 ----------
-I love this feature ngl
 
-[Not finished]
+If you have a feeling that option descriptions make the parameters of your function look overloaded, use docstrings.
+This feature allows to describe your command and options in triple quotes inside the function, following the RST markdown.
+
+In order to describe the parameters, list them under the ``Parameters`` header, underlined with dashes:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def give_cookies(
+        inter: disnake.ApplicationCommandInteraction,
+        user: disnake.User,
+        amount: int = 1
+    ):
+        """
+        Give several cookies to a user
+
+        Parameters
+        ----------
+        user: :class:`disnake.User`
+            The user to give cookies to
+        amount: :class:`int`
+            The amount of cookies to give
+        """
+        ...
+
+Specifying the types isn't necessary, the docstring will still work:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def give_cookies(
+        inter: disnake.ApplicationCommandInteraction,
+        user: disnake.User,
+        amount: int = 1
+    ):
+        """
+        Give several cookies to a user
+
+        Parameters
+        ----------
+        user:
+            The user to give cookies to
+        amount:
+            The amount of cookies to give
+        """
+        ...
+
+.. note ::
+    You can remove ``:`` after the parameter names if you prefer the numpy format.
+
+If you don't want to spend too many lines, just paste the description after ``:``, like so:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def give_cookies(
+        inter: disnake.ApplicationCommandInteraction,
+        user: disnake.User,
+        amount: int = 1
+    ):
+        """
+        Give several cookies to a user
+
+        Parameters
+        ----------
+        user: The user to give cookies to
+        amount: The amount of cookies to give
+        """
+        ...

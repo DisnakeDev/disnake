@@ -323,7 +323,7 @@ class Client:
 
         self._handlers: Dict[str, Callable] = {
             'ready': self._handle_ready,
-            'connect_internal': self._schedule_app_command_preparation
+            'connect_internal': self._handle_first_connect
         }
 
         self._hooks: Dict[str, Callable] = {
@@ -338,9 +338,9 @@ class Client:
         self._connection.shard_count = self.shard_count
         self._closed: bool = False
         self._ready: asyncio.Event = asyncio.Event()
+        self._first_connect: asyncio.Event = asyncio.Event()
         self._connection._get_websocket = self._get_websocket
         self._connection._get_client = lambda: self
-        self._times_connected = 0
         self._sync_queued: bool = False
 
         if VoiceClient.warn_nacl:
@@ -358,6 +358,12 @@ class Client:
 
     def _handle_ready(self) -> None:
         self._ready.set()
+
+    def _handle_first_connect(self) -> None:
+        if self._first_connect.is_set():
+            return
+        self._first_connect.set()
+        self._schedule_app_command_preparation()
 
     @property
     def latency(self) -> float:
@@ -711,10 +717,7 @@ class Client:
         await self._sync_application_commands()
 
     def _schedule_app_command_preparation(self) -> None:
-        self._times_connected += 1
-        if self._times_connected > 1:
-            return
-        asyncio.create_task(
+        self.loop.create_task(
             self._prepare_application_commands(),
             name='disnake: app_command_preparation'
         )
@@ -1355,6 +1358,13 @@ class Client:
         Waits until the client's internal cache is all ready.
         """
         await self._ready.wait()
+    
+    async def wait_until_first_connect(self) -> None:
+        """|coro|
+
+        Waits until the first connect.
+        """
+        await self._first_connect.wait()
 
     def wait_for(
         self,

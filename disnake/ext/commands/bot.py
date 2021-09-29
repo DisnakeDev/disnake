@@ -177,7 +177,7 @@ class BotBase(GroupMixin):
         self.owner_id: Optional[int] = options.get('owner_id')
         self.owner_ids: Set[int] = options.get('owner_ids', set())
         self.owner: Optional[disnake.User] = None
-        self.owners: Set[disnake.User] = set()
+        self.owners: Set[disnake.TeamMember] = set()
 
         self.all_slash_commands: Dict[str, InvokableSlashCommand] = {}
         self.all_user_commands: Dict[str, InvokableUserCommand] = {}
@@ -194,11 +194,11 @@ class BotBase(GroupMixin):
         else:
             self.help_command = help_command
         
+        loop = asyncio.get_event_loop()
+        loop.create_task(self._fill_owners())
+
         if self.reload:
-            loop = asyncio.get_event_loop()
             loop.create_task(self._watchdog())
-        
-        self.add_listener(self._fill_owners, 'on_connect')
 
     @property
     def application_commands(self) -> Set[InvokableApplicationCommand]:
@@ -623,6 +623,9 @@ class BotBase(GroupMixin):
     async def _fill_owners(self) -> None:
         if self.owner_id or self.owner_ids:
             return
+        
+        await self.wait_until_first_connect() # type: ignore
+
         app = await self.application_info()  # type: ignore
         if app.team:
             self.owners = set(app.team.members)
