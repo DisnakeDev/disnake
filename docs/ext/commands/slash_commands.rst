@@ -98,4 +98,102 @@ The result should look like this:
 
 .. image:: /images/app_commands/int_option.png
 
+You can of course set a default for your option by giving a default value:
+
+.. code-block:: python3
+
+    @bot.slash_command(description="Multiplies the number by a multiplier")
+    async def multiply(inter, number: int, multiplier: int = 7):
+        await inter.response.send_message(number * multiplier)
+
+You may have as many options as you want but the order matters, an optional option cannot be followed by a required one.
+
+Option Types
+++++++++++++
+
+You might already be familiar with discord.py's converters, slash commands have a very similar equivalent in the form of option types.
+Discord itself supports only a few built-in types which are guaranteed to be enforced: 
+
+- :class:`str`
+- :class:`int`
+- :class:`float`
+- :class:`bool`
+- :class:`disnake.User` or :class:`disnake.Member`
+- :class:`disnake.abc.GuildChannel`\*
+- :class:`disnake.Role`\*\*
+
+All the other types may be converted implicitly, similarly to :ref:`discord_converters`
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def multiply(
+        interaction,
+        string: str,
+        integer: int,
+        number: float,
+        user: disnake.User,
+        emoji: disnake.Emoji,
+        message: disnake.Message
+    ):
+        ...
+
+.. note::
+  \* All channel subclasses and unions are also supported, see :ref:`channel_types`
+
+  \*\* Role and Member may be used together to create a "mentionable" (:class:`Union[Role, Member]`)
+
+Parameter Descriptors
++++++++++++++++++++++
+Python has no truly *clean* way to provide metadata for parameters, so disnake uses the same approach as fastapi using parameter defaults. At the current time there's only :class:`Param`.
+
+With this you may set the name, description, custom converters and :ref:`autocompleters`.
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def multiply(
+        interaction: commands.ApplicationCommandInteraction,
+        a: int = commands.Param(description="The first number"),
+        b: int = commands.Param(description="The second number"),
+        op: str = commands.Param(name="operator", description="The operator")
+    ):
+        ...
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def multiply(
+        interaction: commands.ApplicationCommandInteraction,
+        clean: str = commands.Param(converter=lambda inter, arg: arg.replace("@", "\\@")
+    ):
+        ...
+
+.. note ::
+    There is a possibility that your editor is going to complain about the usage of ``commands.Param``. This is due to the limitation of most linters which forbid using incorrect types as function defaults. In that case use the lowercase alias ``commands.param``
+
+    All keyword arguments of :class:`Param` have shorter aliases:
+        - ``description`` -> ``desc``
+        - ``converter`` -> ``conv``
+        - ``autocomplete`` -> ``autocomp``
+
+
+.. note ::
+    The converter parameter only ever takes in a **function**, not a Converter class. Converter classes are completely unusable in disnake due to their inconsistent typing.
+
+.. _autocompleters:
+
+
+Choices
+-------
+Just enums n stuff.
+
+Autocompleters
+--------------
+Use the ``autocompleter`` kwarg
+
+Docstrings
+----------
+I love this feature ngl
+
 [Not finished]
