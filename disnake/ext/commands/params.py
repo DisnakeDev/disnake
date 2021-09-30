@@ -165,7 +165,7 @@ class Param:
             raise errors.ConversionError(self.converter, e) from e
 
     def _parse_enum(self, annotation: Any) -> None:
-        if isinstance(annotation, EnumMeta):
+        if isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)):
             self.choices = [OptionChoice(name, value.value) for name, value in annotation.__members__.items()]  # type: ignore
         else:
             self.choices = [OptionChoice(str(i), i) for i in annotation.__args__]
@@ -220,7 +220,7 @@ class Param:
             else:
                 raise TypeError(f"{arg!r} is not a valid List subscript for Param")
             self.converter = lambda inter, arg: list(map(conv, arg.split()))
-        elif isinstance(annotation, EnumMeta) or get_origin(annotation) is Literal:
+        elif isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)) or get_origin(annotation) is Literal:
             self._parse_enum(annotation)
 
         elif get_origin(annotation) is Union:
