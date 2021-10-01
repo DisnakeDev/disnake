@@ -207,7 +207,7 @@ class FFmpegAudio(AudioSource):
                 self._process.terminate()
                 return
 
-    def read(self) -> None:
+    def check_streams(self) -> None:
         if (self._process is MISSING
             or self._stdout is MISSING
             or self._stdin is MISSING
@@ -281,7 +281,7 @@ class FFmpegPCMAudio(FFmpegAudio):
         super().__init__(source, executable=executable, args=args, **subprocess_kwargs)
 
     def read(self) -> bytes:
-        FFmpegAudio.read(self)
+        self.check_streams()
         ret = self._stdout.read(OpusEncoder.FRAME_SIZE)
         if len(ret) != OpusEncoder.FRAME_SIZE:
             return b''
@@ -568,7 +568,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         return codec, bitrate
 
     def read(self) -> bytes:
-        FFmpegAudio.read(self)
+        self.check_streams()
         return next(self._packet_iter, b'')
 
     def is_opus(self) -> bool:
