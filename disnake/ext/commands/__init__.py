@@ -21,4 +21,3 @@ from .cooldowns import *
 from .cog import *
 from .flags import *
 from .params import *
-from .params import param as Param

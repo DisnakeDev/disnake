@@ -39,13 +39,14 @@ Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
 TChoice = TypeVar("TChoice", bound=ChoiceValue)
 
 __all__ = (
+    "ParamInfo",
     "Param",
     "param",
     "option_enum",
 )
 
 
-class Param:
+class ParamInfo:
     """
     Parameters
     ----------
@@ -173,7 +174,7 @@ class Param:
         self.type = type(self.choices[0].value)
 
     def parse_annotation(self, annotation: Any) -> None:
-        if isinstance(annotation, Param):
+        if isinstance(annotation, ParamInfo):
             default = "..." if annotation.default is ... else repr(annotation.default)
             r = f'Param({default}, description={annotation.description or "description"!r})'
             raise TypeError(f'Param must be a parameter default, not an annotation: "option: type = {r}"')
@@ -291,8 +292,8 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         if parameter.kind in [inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD]:
             continue
         param = parameter.default
-        if not isinstance(param, Param):
-            param = Param(param if param is not parameter.empty else ...)
+        if not isinstance(param, ParamInfo):
+            param = ParamInfo(param if param is not parameter.empty else ...)
 
         doc_param = command.docstring["params"].get(parameter.name)
 
@@ -328,7 +329,7 @@ async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[
         if parameter.kind in [inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD]:
             continue
         param = parameter.default
-        if not isinstance(param, Param):
+        if not isinstance(param, ParamInfo):
             continue
 
         if param.param_name in kwargs:
@@ -340,7 +341,7 @@ async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[
 
 
 @overload
-def param(
+def Param(
     default: Any = ...,
     *,
     name: str = "",
@@ -353,7 +354,7 @@ def param(
 
 
 @overload
-def param(
+def Param(
     default: Any = ...,
     *,
     name: str = "",
@@ -365,7 +366,7 @@ def param(
     ...
 
 
-def param(
+def Param(
     default: Any = ...,
     *,
     name: str = "",
@@ -377,7 +378,7 @@ def param(
     autocomplete: Callable[[Interaction, str], Any] = None,
     choices: List[OptionChoice] = None,
 ) -> Any:
-    return Param(
+    return ParamInfo(
         default,
         name=name,
         description=desc or description,
@@ -385,6 +386,9 @@ def param(
         choices=choices,
         autcomplete=autocomp or autocomplete,
     )
+
+
+param = Param
 
 
 def option_enum(choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice) -> Type[TChoice]:

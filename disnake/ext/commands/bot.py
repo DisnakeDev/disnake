@@ -144,9 +144,15 @@ _default: Any = _DefaultRepr()
 
 
 class BotBase(GroupMixin):
-    def __init__(self, command_prefix: Optional[str] = None, help_command: HelpCommand = _default, description: str = None, **options: Any):
+    def __init__(
+        self,
+        command_prefix: Optional[Union[str, List[str], Callable]] = None,
+        help_command: HelpCommand = _default,
+        description: str = None,
+        **options: Any,
+    ):
         super().__init__(**options)
-        self.command_prefix: Optional[str] = command_prefix
+        self.command_prefix = command_prefix
         self.extra_events: Dict[str, List[CoroFunc]] = {}
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
@@ -1681,7 +1687,7 @@ class BotBase(GroupMixin):
 
         if not isinstance(ret, str):
             try:
-                ret = list(ret)
+                ret = list(ret) # type: ignore
             except TypeError:
                 # It's possible that a generator raised this exception.  Don't
                 # replace it with our own error if that's the case.

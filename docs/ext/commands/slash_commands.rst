@@ -172,10 +172,6 @@ With this you may set the name, description, custom converters and :ref:`autocom
         ...
 
 .. note ::
-    There is a possibility that your editor is going to complain about the usage of ``commands.Param``.
-    This is due to the limitation of most linters which forbid using incorrect types as function defaults.
-    In that case use the lowercase alias ``commands.param``
-
     All keyword arguments of :class:`Param` have shorter aliases:
         - ``description`` -> ``desc``
         - ``converter`` -> ``conv``
