@@ -10,6 +10,9 @@ disnake
 .. image:: https://img.shields.io/pypi/pyversions/disnake.svg
    :target: https://pypi.python.org/pypi/disnake
    :alt: PyPI supported Python versions
+.. image:: https://img.shields.io/github/commit-activity/w/EQUENOS/disnake.svg
+   :target: https://github.com/EQUENOS/disnake/commits
+   :alt: Commit activity
 
 A modern, easy to use, feature-rich, and async ready API wrapper for Discord written in Python.
 
