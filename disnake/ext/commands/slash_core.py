@@ -396,7 +396,15 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             return None
         if not callable(autocomp):
             return autocomp
-        choices = autocomp(inter, user_input)
+        
+        # possibly pass in filled options as a kwarg
+        filled = inter.filled_options
+        del filled[inter.data.focused_option.name]
+        try:
+            choices = autocomp(inter, user_input, **filled)
+        except TypeError:
+            choices = autocomp(inter, user_input)
+        
         if inspect.isawaitable(choices):
             return await choices
         return choices
