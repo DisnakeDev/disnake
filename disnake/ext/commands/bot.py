@@ -140,13 +140,13 @@ class _DefaultRepr:
     def __repr__(self):
         return '<default-help-command>'
 
-_default = _DefaultRepr()
+_default: Any = _DefaultRepr()
 
 
 class BotBase(GroupMixin):
-    def __init__(self, command_prefix, help_command=_default, description=None, **options):
+    def __init__(self, command_prefix: Optional[str] = None, help_command: HelpCommand = _default, description: str = None, **options: Any):
         super().__init__(**options)
-        self.command_prefix = command_prefix
+        self.command_prefix: Optional[str] = command_prefix
         self.extra_events: Dict[str, List[CoroFunc]] = {}
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
@@ -1655,7 +1655,7 @@ class BotBase(GroupMixin):
 
     # command processing
 
-    async def get_prefix(self, message: Message) -> Union[List[str], str]:
+    async def get_prefix(self, message: Message) -> Optional[Union[List[str], str]]:
         """|coro|
 
         Retrieves the prefix the bot is listening to
@@ -1668,13 +1668,16 @@ class BotBase(GroupMixin):
 
         Returns
         --------
-        Union[List[:class:`str`], :class:`str`]
+        Optional[Union[List[:class:`str`], :class:`str`]]
             A list of prefixes or a single prefix that the bot is
-            listening for.
+            listening for. None if the bot isn't listening for prefixes.
         """
         prefix = ret = self.command_prefix
         if callable(prefix):
             ret = await disnake.utils.maybe_coroutine(prefix, self, message)
+        
+        if ret is None:
+            return None
 
         if not isinstance(ret, str):
             try:
@@ -1732,7 +1735,9 @@ class BotBase(GroupMixin):
         prefix = await self.get_prefix(message)
         invoked_prefix = prefix
 
-        if isinstance(prefix, str):
+        if prefix is None:
+            return ctx
+        elif isinstance(prefix, str):
             if not view.skip_string(prefix):
                 return ctx
         else:

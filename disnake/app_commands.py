@@ -35,6 +35,8 @@ def application_command_factory(data: Mapping[str, Any]) -> Any:
     raise TypeError(f"Application command of type {cmd_type} is not valid")
 
 
+ChoiceValue = Union[str, int, float]
+
 class OptionChoice:
     """
     Represents an option choice.
@@ -47,9 +49,9 @@ class OptionChoice:
         the value of the option choice
     """
 
-    def __init__(self, name: str, value: Union[str, int]):
+    def __init__(self, name: str, value: ChoiceValue):
         self.name: str = name
-        self.value: Union[str, int] = value
+        self.value: ChoiceValue = value
 
     def __repr__(self) -> str:
         return f'<OptionChoice name={self.name!r} value={self.value!r}>'
@@ -60,14 +62,14 @@ class OptionChoice:
             self.value == other.value
         )
     
-    def to_dict(self) -> Dict[str, Union[str, int]]:
+    def to_dict(self) -> Dict[str, ChoiceValue]:
         return {
             'name': self.name,
             'value': self.value
         }
 
 
-Choices = Union[List[OptionChoice], Dict[str, Union[str, int]], List[Union[str, int]]]
+Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
 
 class Option:
     """

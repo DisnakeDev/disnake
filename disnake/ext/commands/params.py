@@ -34,7 +34,9 @@ if TYPE_CHECKING:
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 
 T = TypeVar("T", bound=Any)
-TChoice = TypeVar("TChoice", str, int)
+ChoiceValue = Union[str, int, float]
+Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
+TChoice = TypeVar("TChoice", bound=ChoiceValue)
 
 __all__ = (
     "Param",
@@ -55,8 +57,6 @@ class Param:
         option's description
     converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
         the option's converter, takes in an interaction and the argument
-    choices: List[:class:`OptionChoice`]
-    type: :class:`type`
     """
 
     TYPES: ClassVar[Dict[type, int]] = {
@@ -82,7 +82,7 @@ class Param:
         description: str = None,
         converter: Callable[[Interaction, Any], Any] = None,
         autcomplete: Callable[[Interaction, str], Any] = None,
-        choices: List[OptionChoice] = None,
+        choices: Choices = None,
         type: type = str,
         channel_types: List[ChannelType] = None,
     ) -> None:
