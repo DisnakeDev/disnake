@@ -56,7 +56,8 @@ __all__ = (
     'InteractionResponseType',
     'NSFWLevel',
     'OptionType',
-    'ApplicationCommandType'
+    'ApplicationCommandType',
+    'PartyType'
 )
 
 class _EnumValueBase(NamedTuple):
