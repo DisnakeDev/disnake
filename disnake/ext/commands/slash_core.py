@@ -398,12 +398,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             return autocomp
         
         # possibly pass in filled options as a kwarg
-        sig = inspect.signature(autocomp)
-        if any(param.kind is param.VAR_KEYWORD for param in sig.parameters.values()):
-            filled = inter.filled_options
-            del filled[inter.data.focused_option.name]
+        filled = inter.filled_options
+        del filled[inter.data.focused_option.name]
+        try:
             choices = autocomp(inter, user_input, **filled)
-        else:
+        except TypeError:
             choices = autocomp(inter, user_input)
         
         if inspect.isawaitable(choices):
