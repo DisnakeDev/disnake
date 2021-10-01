@@ -40,16 +40,6 @@ __all__ = (
 )
 
 
-def options_as_route(options: Dict[str, Any]) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
-    if not options:
-        return (), {}
-    name, value = next(iter(options.items()))
-    if isinstance(value, dict):
-        chain, kwargs = options_as_route(value)
-        return (name,) + chain, kwargs
-    return (), options
-
-
 class SubCommandGroup(InvokableApplicationCommand):
     """A class that implements the protocol for a bot slash command group.
 
@@ -412,7 +402,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return choices
 
     async def _call_relevant_autocompleter(self, inter: ApplicationCommandInteraction) -> None:
-        chain, _ = options_as_route(inter.options)
+        chain, _ = inter.data._get_chain_and_kwargs()
 
         if len(chain) == 0:
             subcmd = None
@@ -438,7 +428,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             await inter.response.autocomplete(choices=choices)
 
     async def invoke_children(self, inter: ApplicationCommandInteraction):
-        chain, kwargs = options_as_route(inter.options)
+        chain, kwargs = inter.data._get_chain_and_kwargs()
         
         if len(chain) == 0:
             group = None
@@ -479,7 +469,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 await self(inter)
                 await self.invoke_children(inter)
             else:
-                kwargs = inter.options or {}
+                kwargs = inter.filled_options
                 for k, v in self.connectors.items():
                     if k in kwargs:
                         kwargs[v] = kwargs.pop(k)

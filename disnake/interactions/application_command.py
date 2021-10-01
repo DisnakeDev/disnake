@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Mapping, Optional, TYPE_CHECKING, Union, TypeVar
+from typing import Any, Dict, List, Mapping, Optional, TYPE_CHECKING, Union, Tuple, TypeVar
 
 from .base import Interaction
 
@@ -89,10 +89,17 @@ class ApplicationCommandInteraction(Interaction):
     
     @property
     def options(self) -> Dict[str, Any]:
+        """The full option tree, including nestings"""
         return {
             opt.name: opt._simplified_value()
             for opt in self.data.options
         }
+    
+    @property
+    def filled_options(self) -> Dict[str, Any]:
+        """The options of the command (or sub-command) being invoked"""
+        _, kwargs = self.data._get_chain_and_kwargs()
+        return kwargs
 
 
 class GuildCommandInteraction(ApplicationCommandInteraction):
@@ -179,6 +186,18 @@ class ApplicationCommandInteractionData:
             for d in data.get('options', [])
         ]
     
+    def _get_chain_and_kwargs(self, chain: Tuple[str, ...] = None) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
+        """
+        Returns a chain of sub-command names and a dict of filled options.
+        """
+        chain = chain or ()
+        for option in self.options:
+            if option.value is None:
+                # Extend the chain and collect kwargs in the nesting
+                return option._get_chain_and_kwargs(chain + (option.name,))
+            return chain, {o.name: o.value for o in self.options}
+        return (), {}
+
     def _get_focused_option(self) -> Optional[ApplicationCommandInteractionDataOption]:
         for option in self.options:
             if option.focused:
@@ -244,8 +263,16 @@ class ApplicationCommandInteractionDataOption:
                 return option
             if option.value is None:
                 return option._get_focused_option()
-        
         return None
+    
+    def _get_chain_and_kwargs(self, chain: Tuple[str, ...] = None) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
+        chain = chain or ()
+        for option in self.options:
+            if option.value is None:
+                # Extend the chain and collect kwargs in the nesting
+                return option._get_chain_and_kwargs(chain + (option.name,))
+            return chain, {o.name: o.value for o in self.options}
+        return (), {}
 
 
 class ApplicationCommandInteractionDataResolved:
