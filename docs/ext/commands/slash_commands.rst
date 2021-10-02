@@ -188,7 +188,7 @@ Choices
 -------
 
 Some options can have a list of choices, so the user doesn't have to manually fill the value.
-The most elegant way of defining the choices is by using enums.
+The most elegant way of defining the choices is by using enums. These enums **must** inherit from the type of their value if you want them to work with linters.
 
 For example:
 
@@ -196,7 +196,7 @@ For example:
 
     from enum import Enum
 
-    class Animals(Enum):
+    class Animals(str, Enum):
         Dog = 'dog'
         Cat = 'cat'
         Penguin = 'peng'
