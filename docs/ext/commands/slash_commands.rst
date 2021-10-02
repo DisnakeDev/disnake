@@ -196,13 +196,13 @@ For example:
 
     from enum import Enum
 
-    class Animals(str, Enum):
+    class Animal(str, Enum):
         Dog = 'dog'
         Cat = 'cat'
         Penguin = 'peng'
     
     @bot.slash_command()
-    async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animals):
+    async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animal):
         await inter.response.send_message(animal)
 
 .. note ::
@@ -214,33 +214,33 @@ The values can be integers as well:
 
     from enum import Enum
 
-    class Animals(int, Enum):
+    class Animal(int, Enum):
         Dog = 1
         Cat = 2
         Penguin = 3
     
     @bot.slash_command()
-    async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animals):
+    async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animal):
         await inter.response.send_message(animal)
 
 You can define an enum in one line:
 
 .. code-block:: python3
 
-    Animals = commands.option_enum({"Dog": "dog", "Cat": "cat", "Penguin": "penguin"})
+    Animal = commands.option_enum({"Dog": "dog", "Cat": "cat", "Penguin": "penguin"})
     
     @bot.slash_command()
-    async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animals):
+    async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animal):
         await inter.response.send_message(animal)
 
 Or even forget about values and define the enum from list:
 
 .. code-block:: python3
 
-    Animals = commands.option_enum(["Dog", "Cat", "Penguin"])
+    Animal = commands.option_enum(["Dog", "Cat", "Penguin"])
     
     @bot.slash_command()
-    async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animals):
+    async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animal):
         await inter.response.send_message(animal)
 
 Finally, you can simply list the choices in ``commands.Param``:
