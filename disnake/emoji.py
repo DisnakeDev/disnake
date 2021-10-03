@@ -175,7 +175,8 @@ class Emoji(_EmojiTag, AssetMixin):
     @property
     def guild(self) -> Guild:
         """:class:`Guild`: The guild this emoji belongs to."""
-        return self._state._get_guild(self.guild_id)
+        # this will most likely never return None but there's a possibility
+        return self._state._get_guild(self.guild_id) # type: ignore
 
     def is_usable(self) -> bool:
         """:class:`bool`: Whether the bot can use this emoji.

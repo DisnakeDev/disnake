@@ -197,7 +197,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self.default_auto_archive_duration: ThreadArchiveDuration = data.get('default_auto_archive_duration', 1440)
         self._type: int = data.get('type', self._type)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, 'last_message_id')
-        self._fill_overwrites(data)
+        self._fill_overwrites(data) # type: ignore
 
     async def _get_channel(self):
         return self
@@ -1750,7 +1750,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload):
         self._state: ConnectionState = state
-        self.recipient: Optional[User] = state.store_user(data['recipients'][0])
+        self.recipient: Optional[User] = state.store_user(data['recipients'][0]) # type: ignore
         self.me: ClientUser = me
         self.id: int = int(data['id'])
 

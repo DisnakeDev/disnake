@@ -4,11 +4,8 @@ from typing import (
     Any,
     Dict,
     List,
-    Awaitable,
     Callable,
     Coroutine,
-    Iterable,
-    Mapping,
     Optional,
     Tuple,
     TypeVar,
@@ -17,7 +14,7 @@ from typing import (
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
-from .params import extract_params, create_autocompleters, create_connectors, resolve_param_kwargs
+from .params import resolve_param_kwargs, expand_params
 
 from disnake.app_commands import SlashCommand, Option
 from disnake.enums import OptionType
@@ -30,6 +27,8 @@ import inspect
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
     from .cog import CogT
+    
+    ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
 
     P = ParamSpec('P')
 
@@ -41,18 +40,31 @@ __all__ = (
 )
 
 
-
-def options_as_route(options: Dict[str, Any]) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
-    if not options:
-        return (), {}
-    name, value = next(iter(options.items()))
-    if isinstance(value, dict):
-        chain, kwargs = options_as_route(value)
-        return (name,) + chain, kwargs
-    return (), options
-
-
 class SubCommandGroup(InvokableApplicationCommand):
+    """A class that implements the protocol for a bot slash command group.
+
+    These are not created manually, instead they are created via the
+    decorator or functional interface.
+
+    Attributes
+    -----------
+    name: :class:`str`
+        The name of the group.
+    option: :class:`Option`
+        API representation of this subcommand.
+    callback: :ref:`coroutine <coroutine>`
+        The coroutine that is executed when the command group is invoked.
+    cog: Optional[:class:`Cog`]
+        The cog that this group belongs to. ``None`` if there isn't one.
+    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+        A list of predicates that verifies if the group could be executed
+        with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
+        is necessary to be thrown to signal failure, then one inherited from
+        :exc:`.CommandError` should be used. Note that if the checks fail then
+        :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
+        event.
+    """
+
     def __init__(self, func, *, name: str = None, **kwargs):
         super().__init__(func, name=name, **kwargs)
         self.children: Dict[str, SubCommand] = {}
@@ -74,8 +86,8 @@ class SubCommandGroup(InvokableApplicationCommand):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ],
         SubCommand
@@ -93,8 +105,8 @@ class SubCommandGroup(InvokableApplicationCommand):
 
         def decorator(
             func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> SubCommand:
             new_func = SubCommand(
@@ -114,6 +126,32 @@ class SubCommandGroup(InvokableApplicationCommand):
 
 
 class SubCommand(InvokableApplicationCommand):
+    """A class that implements the protocol for a bot slash subcommand.
+
+    These are not created manually, instead they are created via the
+    decorator or functional interface.
+
+    Attributes
+    -----------
+    name: :class:`str`
+        The name of the subcommand.
+    option: :class:`Option`
+        API representation of this subcommand.
+    callback: :ref:`coroutine <coroutine>`
+        The coroutine that is executed when the subcommand is called.
+    cog: Optional[:class:`Cog`]
+        The cog that this subcommand belongs to. ``None`` if there isn't one.
+    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+        A list of predicates that verifies if the subcommand could be executed
+        with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
+        is necessary to be thrown to signal failure, then one inherited from
+        :exc:`.CommandError` should be used. Note that if the checks fail then
+        :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
+        event.
+    connectors: Dict[:class:`str`, :class:`str`]
+        A mapping of option names to function parameter names, mainly for internal processes.
+    """
+
     def __init__(
         self,
         func,
@@ -128,14 +166,11 @@ class SubCommand(InvokableApplicationCommand):
         self.connectors: Dict[str, str] = connectors or {}
         self.autocompleters: Dict[str, Any] = kwargs.get('autocompleters', {})
         
-        docstring = utils.parse_docstring(func)
-        description = description or docstring['description']
+        self.docstring = utils.parse_docstring(func)
+        description = description or self.docstring['description']
         
         if not options:
-            params = extract_params(func, self.cog, docstring['params'])
-            options = [param.to_option() for param in params]
-            self.connectors.update(create_connectors(params))
-            self.autocompleters.update(create_autocompleters(params))
+            options = expand_params(self)
         
         self.option = Option(
             name=self.name,
@@ -157,6 +192,10 @@ class SubCommand(InvokableApplicationCommand):
         return choices
 
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
+        if self.guild_only and inter.guild_id is None:
+            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
+            return
+        
         for k, v in self.connectors.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
@@ -165,6 +204,36 @@ class SubCommand(InvokableApplicationCommand):
 
 
 class InvokableSlashCommand(InvokableApplicationCommand):
+    """A class that implements the protocol for a bot slash command.
+
+    These are not created manually, instead they are created via the
+    decorator or functional interface.
+
+    Attributes
+    -----------
+    name: :class:`str`
+        The name of the command.
+    body: :class:`SlashCommand`
+        An object being registered in the API.
+    callback: :ref:`coroutine <coroutine>`
+        The coroutine that is executed when the command is called.
+    cog: Optional[:class:`Cog`]
+        The cog that this command belongs to. ``None`` if there isn't one.
+    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+        A list of predicates that verifies if the command could be executed
+        with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
+        is necessary to be thrown to signal failure, then one inherited from
+        :exc:`.CommandError` should be used. Note that if the checks fail then
+        :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
+        event.
+    guild_ids: Optional[List[:class:`int`]]
+        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
+    connectors: Dict[:class:`str`, :class:`str`]
+        A mapping of option names to function parameter names, mainly for internal processes.
+    auto_sync: :class:`bool`
+        Whether to sync the command in the API with ``body`` or not.
+    """
+
     def __init__(
         self,
         func,
@@ -185,21 +254,30 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.guild_ids: Optional[List[int]] = guild_ids
         self.autocompleters: Dict[str, Any] = kwargs.get('autocompleters', {})
         
-        docstring = utils.parse_docstring(func)
-        description = description or docstring['description']
+        self.docstring = utils.parse_docstring(func)
+        description = description or self.docstring['description']
         
         if not options:
-            params = extract_params(func, self.cog, docstring['params'])
-            options = [param.to_option() for param in params]
-            self.connectors.update(create_connectors(params))
-            self.autocompleters.update(create_autocompleters(params))
+            options = expand_params(self)
         
-        self.body = SlashCommand(
+        self.body: SlashCommand = SlashCommand(
             name=self.name,
             description=description or '-',
             options=options or [],
             default_permission=default_permission,
         )
+    
+    @property
+    def description(self) -> str:
+        return self.body.description
+    
+    @property
+    def options(self) -> List[Option]:
+        return self.body.options
+    
+    @property
+    def default_permission(self) -> bool:
+        return self.body.default_permission
     
     def sub_command(
         self,
@@ -211,8 +289,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ],
         SubCommand
@@ -241,13 +319,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         """
         def decorator(
             func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> SubCommand:
-            if len(self.children) == 0:
-                if len(self.body.options) > 0:
-                    self.body.options = []
+            if len(self.children) == 0 and len(self.body.options) > 0:
+                self.body.options = []
             new_func = SubCommand(
                 func,
                 name=name,
@@ -269,8 +346,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ],
         SubCommandGroup
@@ -290,13 +367,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         """
         def decorator(
             func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> SubCommandGroup:
-            if len(self.children) == 0:
-                if len(self.body.options) > 0:
-                    self.body.options = []
+            if len(self.children) == 0 and len(self.body.options) > 0:
+                self.body.options = []
             new_func = SubCommandGroup(func, name=name, **kwargs)
             new_func.qualified_name = f'{self.qualified_name} {new_func.name}'
             self.children[new_func.name] = new_func
@@ -320,13 +396,21 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             return None
         if not callable(autocomp):
             return autocomp
-        choices = autocomp(inter, user_input)
+        
+        # possibly pass in filled options as a kwarg
+        filled = inter.filled_options
+        del filled[inter.data.focused_option.name]
+        try:
+            choices = autocomp(inter, user_input, **filled)
+        except TypeError:
+            choices = autocomp(inter, user_input)
+        
         if inspect.isawaitable(choices):
             return await choices
         return choices
 
     async def _call_relevant_autocompleter(self, inter: ApplicationCommandInteraction) -> None:
-        chain, _ = options_as_route(inter.options)
+        chain, _ = inter.data._get_chain_and_kwargs()
 
         if len(chain) == 0:
             subcmd = None
@@ -339,7 +423,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         else:
             raise ValueError("Command chain is too long")
         
-        focused_option = inter.data._get_focused_option()
+        focused_option = inter.data.focused_option
 
         if subcmd is None or isinstance(subcmd, SubCommandGroup):
             call_autocompleter = self._call_autocompleter
@@ -352,7 +436,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             await inter.response.autocomplete(choices=choices)
 
     async def invoke_children(self, inter: ApplicationCommandInteraction):
-        chain, kwargs = options_as_route(inter.options)
+        chain, kwargs = inter.data._get_chain_and_kwargs()
         
         if len(chain) == 0:
             group = None
@@ -382,6 +466,10 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 raise
 
     async def invoke(self, inter: ApplicationCommandInteraction):
+        if self.guild_only and inter.guild_id is None:
+            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
+            return
+
         await self.prepare(inter)
 
         try:
@@ -389,7 +477,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 await self(inter)
                 await self.invoke_children(inter)
             else:
-                kwargs = inter.options or {}
+                kwargs = inter.filled_options
                 for k, v in self.connectors.items():
                     if k in kwargs:
                         kwargs[v] = kwargs.pop(k)
@@ -424,8 +512,8 @@ def slash_command(
 ) -> Callable[
     [
         Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
         ]
     ],
     InvokableSlashCommand
@@ -443,22 +531,29 @@ def slash_command(
         the description of the slash command. It will be visible in Discord.
     options: List[:class:`Option`]
         the list of slash command options. The options will be visible in Discord.
+        This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
     default_permission: :class:`bool`
         whether the command is enabled by default when the app is added to a guild.
     guild_ids: List[:class:`int`]
         if specified, the client will register a command in these guilds.
-        Otherwise this command will be registered globally.
+        Otherwise this command will be registered globally in ~1 hour.
     connectors: Dict[:class:`str`, :class:`str`]
         binds function names to option names. If the name
         of an option already matches the corresponding function param,
         you don't have to specify the connectors. Connectors template:
-        ``{"option-name": "param_name", ...}``
+        ``{"option-name": "param_name", ...}``.
+        If you're using :ref:`param_syntax`, you don't need to specify this.
+    
+    Returns
+    --------
+    Callable[..., :class:`InvokableSlashCommand`]
+        A decorator that converts the provided method into a InvokableSlashCommand and returns it.
     """
 
     def decorator(
         func: Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteraction, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
         ]
     ) -> InvokableSlashCommand:
         if not asyncio.iscoroutinefunction(func):

@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, Generator, List, Optional, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, Generator, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 from . import enums, utils
 from .asset import Asset
@@ -77,7 +77,8 @@ def _transform_snowflake(entry: AuditLogEntry, data: Snowflake) -> int:
 def _transform_channel(entry: AuditLogEntry, data: Optional[Snowflake]) -> Optional[Union[abc.GuildChannel, Object]]:
     if data is None:
         return None
-    return entry.guild.get_channel(int(data)) or Object(id=data)
+    channel = cast(abc.GuildChannel, entry.guild.get_channel(int(data)))
+    return channel or Object(id=data)
 
 
 def _transform_member_id(entry: AuditLogEntry, data: Optional[Snowflake]) -> Union[Member, User, None]:
@@ -88,7 +89,7 @@ def _transform_member_id(entry: AuditLogEntry, data: Optional[Snowflake]) -> Uni
 def _transform_guild_id(entry: AuditLogEntry, data: Optional[Snowflake]) -> Optional[Guild]:
     if data is None:
         return None
-    return entry._state._get_guild(data)
+    return entry._state._get_guild(int(data))
 
 
 def _transform_overwrites(
@@ -371,7 +372,7 @@ class AuditLogEntry(Hashable):
         if isinstance(self.action, enums.AuditLogAction) and self.extra:
             if self.action is enums.AuditLogAction.member_prune:
                 # member prune has two keys with useful information
-                self.extra: _AuditLogProxyMemberPrune = type(
+                self.extra = type(
                     '_AuditLogProxy', (), {k: int(v) for k, v in self.extra.items()}
                 )()
             elif self.action is enums.AuditLogAction.member_move or self.action is enums.AuditLogAction.message_delete:
@@ -380,13 +381,13 @@ class AuditLogEntry(Hashable):
                     'count': int(self.extra['count']),
                     'channel': self.guild.get_channel(channel_id) or Object(id=channel_id),
                 }
-                self.extra: _AuditLogProxyMemberMoveOrMessageDelete = type('_AuditLogProxy', (), elems)()
+                self.extra = type('_AuditLogProxy', (), elems)()
             elif self.action is enums.AuditLogAction.member_disconnect:
                 # The member disconnect action has a dict with some information
                 elems = {
                     'count': int(self.extra['count']),
                 }
-                self.extra: _AuditLogProxyMemberDisconnect = type('_AuditLogProxy', (), elems)()
+                self.extra = type('_AuditLogProxy', (), elems)()
             elif self.action.name.endswith('pin'):
                 # the pin actions have a dict with some information
                 channel_id = int(self.extra['channel_id'])
@@ -394,7 +395,7 @@ class AuditLogEntry(Hashable):
                     'channel': self.guild.get_channel(channel_id) or Object(id=channel_id),
                     'message_id': int(self.extra['message_id']),
                 }
-                self.extra: _AuditLogProxyPinAction = type('_AuditLogProxy', (), elems)()
+                self.extra = type('_AuditLogProxy', (), elems)()
             elif self.action.name.startswith('overwrite_'):
                 # the overwrite_ actions have a dict with some information
                 instance_id = int(self.extra['id'])
@@ -406,23 +407,23 @@ class AuditLogEntry(Hashable):
                     if role is None:
                         role = Object(id=instance_id)
                         role.name = self.extra.get('role_name')  # type: ignore
-                    self.extra: Role = role
+                    self.extra = role
             elif self.action.name.startswith('stage_instance'):
                 channel_id = int(self.extra['channel_id'])
                 elems = {'channel': self.guild.get_channel(channel_id) or Object(id=channel_id)}
-                self.extra: _AuditLogProxyStageInstanceAction = type('_AuditLogProxy', (), elems)()
+                self.extra = type('_AuditLogProxy', (), elems)()
 
-        # fmt: off
-        self.extra: Union[
-            _AuditLogProxyMemberPrune,
-            _AuditLogProxyMemberMoveOrMessageDelete,
-            _AuditLogProxyMemberDisconnect,
-            _AuditLogProxyPinAction,
-            _AuditLogProxyStageInstanceAction,
-            Member, User, None,
-            Role,
-        ]
-        # fmt: on
+        self.extra: Any
+        # actually this but there's no reason to annoy users with this:
+        # Union[
+        #     _AuditLogProxyMemberPrune,
+        #     _AuditLogProxyMemberMoveOrMessageDelete,
+        #     _AuditLogProxyMemberDisconnect,
+        #     _AuditLogProxyPinAction,
+        #     _AuditLogProxyStageInstanceAction,
+        #     Member, User, None,
+        #     Role,
+        # ]
 
         # this key is not present when the above is present, typically.
         # It's a list of { new_value: a, old_value: b, key: c }
@@ -447,17 +448,20 @@ class AuditLogEntry(Hashable):
 
     @utils.cached_property
     def target(self) -> Union[Guild, abc.GuildChannel, Member, User, Role, Invite, Emoji, StageInstance, GuildSticker, Thread, Object, None]:
+        if self.action.target_type is None:
+            return Object(id=self._target_id) if self._target_id else None
+        
         try:
             converter = getattr(self, '_convert_target_' + self.action.target_type)
         except AttributeError:
-            return Object(id=self._target_id)
+            return Object(id=self._target_id) if self._target_id else None
         else:
             return converter(self._target_id)
 
     @utils.cached_property
     def category(self) -> enums.AuditLogActionCategory:
         """Optional[:class:`AuditLogActionCategory`]: The category of the action, if applicable."""
-        return self.action.category
+        return self.action.category # type: ignore
 
     @utils.cached_property
     def changes(self) -> AuditLogChanges:
@@ -480,7 +484,7 @@ class AuditLogEntry(Hashable):
         return self.guild
 
     def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
-        return self.guild.get_channel(target_id) or Object(id=target_id)
+        return self.guild.get_channel(target_id) or Object(id=target_id) # type: ignore
 
     def _convert_target_user(self, target_id: int) -> Union[Member, User, None]:
         return self._get_member(target_id)

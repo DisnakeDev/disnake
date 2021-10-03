@@ -38,6 +38,7 @@ from typing import (
     TypeVar,
     Type,
     TYPE_CHECKING,
+    cast,
     overload,
 )
 import asyncio
@@ -103,7 +104,7 @@ T = TypeVar('T')
 CogT = TypeVar('CogT', bound='Cog')
 CommandT = TypeVar('CommandT', bound='Command')
 ContextT = TypeVar('ContextT', bound='Context')
-AnyContextT = Union[Context, ApplicationCommandInteraction]
+AnyContext = Union[Context, ApplicationCommandInteraction]
 GroupT = TypeVar('GroupT', bound='Group')
 HookT = TypeVar('HookT', bound='Hook')
 ErrorT = TypeVar('ErrorT', bound='Error')
@@ -1716,9 +1717,9 @@ def check(predicate: Check) -> Callable[[T], T]:
             func.checks.append(predicate)
         else:
             if not hasattr(func, '__commands_checks__'):
-                func.__commands_checks__ = []
+                func.__commands_checks__ = [] # type: ignore
 
-            func.__commands_checks__.append(predicate)
+            func.__commands_checks__.append(predicate) # type: ignore
 
         return func
 
@@ -1785,7 +1786,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         else:
             unwrapped.append(pred)
 
-    async def predicate(ctx: AnyContextT) -> bool:
+    async def predicate(ctx: AnyContext) -> bool:
         errors = []
         for func in unwrapped:
             try:
@@ -1827,7 +1828,7 @@ def has_role(item: Union[int, str]) -> Callable[[T], T]:
         The name or ID of the role to check.
     """
 
-    def predicate(ctx: AnyContextT) -> bool:
+    def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
 
@@ -1873,7 +1874,7 @@ def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
         async def cool(ctx):
             await ctx.send('You are cool indeed')
     """
-    def predicate(ctx: AnyContextT) -> bool:
+    def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
 
@@ -1881,7 +1882,8 @@ def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
         getter = functools.partial(disnake.utils.get, ctx.author.roles)  # type: ignore
         if any(getter(id=item) is not None if isinstance(item, int) else getter(name=item) is not None for item in items):
             return True
-        raise MissingAnyRole(list(items))
+        # NOTE: variance problems
+        raise MissingAnyRole(list(items))  # type: ignore
 
     return check(predicate)
 
@@ -1899,11 +1901,11 @@ def bot_has_role(item: int) -> Callable[[T], T]:
         instead of generic :exc:`.CheckFailure`
     """
 
-    def predicate(ctx: AnyContextT) -> bool:
+    def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
-
-        me = ctx.me
+        
+        me = cast(disnake.Member, ctx.me)
         if isinstance(item, int):
             role = disnake.utils.get(me.roles, id=item)
         else:
@@ -1926,11 +1928,11 @@ def bot_has_any_role(*items: int) -> Callable[[T], T]:
         Raise :exc:`.BotMissingAnyRole` or :exc:`.NoPrivateMessage`
         instead of generic checkfailure
     """
-    def predicate(ctx: AnyContextT) -> bool:
+    def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
 
-        me = ctx.me
+        me = cast(disnake.Member, ctx.me)
         getter = functools.partial(disnake.utils.get, me.roles)
         if any(getter(id=item) is not None if isinstance(item, int) else getter(name=item) is not None for item in items):
             return True
@@ -1971,7 +1973,7 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
-    def predicate(ctx: AnyContextT) -> bool:
+    def predicate(ctx: AnyContext) -> bool:
         ch = ctx.channel
         permissions = ch.permissions_for(ctx.author)  # type: ignore
 
@@ -1996,7 +1998,7 @@ def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
-    def predicate(ctx: AnyContextT) -> bool:
+    def predicate(ctx: AnyContext) -> bool:
         permissions = ctx.channel.permissions_for(ctx.me)  # type: ignore
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
@@ -2022,7 +2024,7 @@ def has_guild_permissions(**perms: bool) -> Callable[[T], T]:
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
-    def predicate(ctx: AnyContextT) -> bool:
+    def predicate(ctx: AnyContext) -> bool:
         if not ctx.guild:
             raise NoPrivateMessage
 
@@ -2047,7 +2049,7 @@ def bot_has_guild_permissions(**perms: bool) -> Callable[[T], T]:
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
 
-    def predicate(ctx: AnyContextT) -> bool:
+    def predicate(ctx: AnyContext) -> bool:
         if not ctx.guild:
             raise NoPrivateMessage
 
@@ -2072,7 +2074,7 @@ def dm_only() -> Callable[[T], T]:
     .. versionadded:: 1.1
     """
 
-    def predicate(ctx: AnyContextT) -> bool:
+    def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is not None:
             raise PrivateMessageOnly()
         return True
@@ -2088,7 +2090,7 @@ def guild_only() -> Callable[[T], T]:
     that is inherited from :exc:`.CheckFailure`.
     """
 
-    def predicate(ctx: AnyContextT) -> bool:
+    def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
         return True
@@ -2105,7 +2107,7 @@ def is_owner() -> Callable[[T], T]:
     from :exc:`.CheckFailure`.
     """
 
-    async def predicate(ctx: AnyContextT) -> bool:
+    async def predicate(ctx: AnyContext) -> bool:
         if not await ctx.bot.is_owner(ctx.author):
             raise NotOwner('You do not own this bot.')
         return True
@@ -2123,7 +2125,7 @@ def is_nsfw() -> Callable[[T], T]:
         Raise :exc:`.NSFWChannelRequired` instead of generic :exc:`.CheckFailure`.
         DM channels will also now pass this check.
     """
-    def pred(ctx: AnyContextT) -> bool:
+    def pred(ctx: AnyContext) -> bool:
         ch = ctx.channel
         if ctx.guild is None or (isinstance(ch, (disnake.TextChannel, disnake.Thread)) and ch.is_nsfw()):
             return True
@@ -2161,7 +2163,7 @@ def cooldown(rate: int, per: float, type: Union[BucketType, Callable[[Message], 
         if hasattr(func, '__command_flag__'):
             func._buckets = CooldownMapping(Cooldown(rate, per), type)
         else:
-            func.__commands_cooldown__ = CooldownMapping(Cooldown(rate, per), type)
+            func.__commands_cooldown__ = CooldownMapping(Cooldown(rate, per), type) # type: ignore
         return func
     return decorator  # type: ignore
 
@@ -2201,7 +2203,7 @@ def dynamic_cooldown(cooldown: Union[BucketType, Callable[[Message], Any]], type
         if hasattr(func, '__command_flag__'):
             func._buckets = DynamicCooldownMapping(cooldown, type)
         else:
-            func.__commands_cooldown__ = DynamicCooldownMapping(cooldown, type)
+            func.__commands_cooldown__ = DynamicCooldownMapping(cooldown, type) # type: ignore
         return func
     return decorator  # type: ignore
 
@@ -2234,7 +2236,7 @@ def max_concurrency(number: int, per: BucketType = BucketType.default, *, wait: 
         if hasattr(func, '__command_flag__'):
             func._max_concurrency = value
         else:
-            func.__commands_max_concurrency__ = value
+            func.__commands_max_concurrency__ = value # type: ignore
         return func
     return decorator  # type: ignore
 
@@ -2280,7 +2282,7 @@ def before_invoke(coro) -> Callable[[T], T]:
         if hasattr(func, '__command_flag__'):
             func.before_invoke(coro)
         else:
-            func.__before_invoke__ = coro
+            func.__before_invoke__ = coro # type: ignore
         return func
     return decorator  # type: ignore
 
@@ -2296,6 +2298,6 @@ def after_invoke(coro) -> Callable[[T], T]:
         if hasattr(func, '__command_flag__'):
             func.after_invoke(coro)
         else:
-            func.__after_invoke__ = coro
+            func.__after_invoke__ = coro # type: ignore
         return func
     return decorator  # type: ignore

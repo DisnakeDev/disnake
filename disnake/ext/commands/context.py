@@ -37,6 +37,7 @@ if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
     from disnake.abc import MessageableChannel
+    from disnake.channel import TextChannel, Thread, DMChannel
     from disnake.guild import Guild
     from disnake.member import Member
     from disnake.state import ConnectionState
@@ -46,11 +47,11 @@ if TYPE_CHECKING:
     from .bot import Bot, AutoShardedBot
     from .cog import Cog
     from .core import Command
-    from .help import HelpCommand
     from .view import StringView
 
 __all__ = (
     'Context',
+    'GuildContext'
 )
 
 MISSING: Any = disnake.utils.MISSING
@@ -287,11 +288,11 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         return self.message.guild
 
     @disnake.utils.cached_property
-    def channel(self) -> disnake.abc.PartialMessageable:
+    def channel(self) -> Union[TextChannel, Thread, DMChannel]:
         """Union[:class:`.abc.Messageable`]: Returns the channel associated with this context's command.
         Shorthand for :attr:`.Message.channel`.
         """
-        return self.message.channel
+        return self.message.channel # type: ignore
 
     @disnake.utils.cached_property
     def author(self) -> Union[User, Member]:
@@ -398,3 +399,16 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
     @disnake.utils.copy_doc(Message.reply)
     async def reply(self, content: Optional[str] = None, **kwargs: Any) -> Message:
         return await self.message.reply(content, **kwargs)
+
+
+class GuildContext(Context):
+    """A Context subclass meant for annotation
+    
+    No runtime behavior is changed but annotations are modified
+    to seem like the context may never be invoked ina  dm.
+    """
+    
+    guild: Guild
+    channel: Union[TextChannel, Thread]
+    author: Member
+    me: Member

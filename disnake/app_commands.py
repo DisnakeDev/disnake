@@ -1,10 +1,13 @@
+from __future__ import annotations
+from abc import ABC, abstractmethod
+
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
+
 from .enums import ApplicationCommandType, ChannelType, OptionType, try_enum, enum_if_int, try_enum_to_int
 from .errors import InvalidArgument
 from .role import Role
 from .user import User
-
 
 __all__ = (
     "application_command_factory",
@@ -19,7 +22,8 @@ __all__ = (
 )
 
 
-def application_command_factory(data: Dict[str, Any]):
+def application_command_factory(data: Mapping[str, Any]) -> Any:
+    data = dict(data)
     cmd_type = try_enum(ApplicationCommandType, data.get("type", 1))
     if cmd_type is ApplicationCommandType.chat_input:
         return SlashCommand.from_dict(data)
@@ -27,7 +31,11 @@ def application_command_factory(data: Dict[str, Any]):
         return UserCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.message:
         return MessageCommand.from_dict(data)
+    
+    raise TypeError(f"Application command of type {cmd_type} is not valid")
 
+
+ChoiceValue = Union[str, int, float]
 
 class OptionChoice:
     """
@@ -41,12 +49,12 @@ class OptionChoice:
         the value of the option choice
     """
 
-    def __init__(self, name: str, value: Union[str, int]):
+    def __init__(self, name: str, value: ChoiceValue):
         self.name: str = name
-        self.value: Union[str, int] = value
+        self.value: ChoiceValue = value
 
     def __repr__(self) -> str:
-        return f'<OptionChoice name={self.name} value={self.value}>'
+        return f'<OptionChoice name={self.name!r} value={self.value!r}>'
 
     def __eq__(self, other) -> bool:
         return (
@@ -54,12 +62,14 @@ class OptionChoice:
             self.value == other.value
         )
     
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> Dict[str, ChoiceValue]:
         return {
             'name': self.name,
             'value': self.value
         }
 
+
+Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
 
 class Option:
     """
@@ -104,7 +114,7 @@ class Option:
         description: str = None,
         type: OptionType = None,
         required: bool = False,
-        choices: Union[List[OptionChoice], Dict[str, Union[str, int]]] = None,
+        choices: Choices = None,
         options: list = None,
         channel_types: List[ChannelType] = None,
         autocomplete: bool = False,
@@ -112,7 +122,7 @@ class Option:
         assert name.islower(), f"Option name {name!r} must be lowercase"
 
         self.name: str = name
-        self.description: str = description
+        self.description: Optional[str] = description
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
         self.options: List[Option] = options or []
@@ -130,13 +140,12 @@ class Option:
 
         if choices is None:
             choices = []
-        elif isinstance(choices, dict):
+        elif isinstance(choices, Mapping):
             choices = [OptionChoice(name, value) for name, value in choices.items()]
-        elif (
-            isinstance(choices, (tuple, list)) and choices
-            and isinstance(choices[0], (tuple, list))
-        ):
-            choices = [OptionChoice(name, value) for name, value in choices]
+        elif isinstance(choices, Iterable) and not isinstance(choices[0], OptionChoice):
+            choices = [OptionChoice(str(value), value) for value in choices] # type: ignore
+        else:
+            choices = cast(List[OptionChoice], choices)
         
         self.choices: List[OptionChoice] = choices
         self.autocomplete: bool = autocomplete
@@ -203,8 +212,9 @@ class Option:
         Adds an option to the current list of options
         Parameters are the same as for :class:`Option`
         """
+        type = type or OptionType.string
         if self.type == 1:
-            if type < 3:
+            if type in [1, 2]:
                 raise ValueError('sub_command can only be nested in a sub_command_group')
         elif self.type == 2:
             if type != 1:
@@ -241,10 +251,12 @@ class Option:
         return payload
 
 
-class ApplicationCommand:
+class ApplicationCommand(ABC):
     """
     The base class for application commands
     """
+    name: str
+    
     def __init__(self, type: ApplicationCommandType, **kwargs):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.id: Optional[int] = kwargs.pop('id', None)
@@ -260,6 +272,10 @@ class ApplicationCommand:
 
     def __eq__(self, other) -> bool:
         return isinstance(other, ApplicationCommand)
+    
+    @abstractmethod
+    def to_dict(self) -> Any:
+        raise NotImplementedError
 
 
 class UserCommand(ApplicationCommand):
@@ -378,7 +394,7 @@ class SlashCommand(ApplicationCommand):
         self,
         name: str,
         description: str = None,
-        type: int = None,
+        type: OptionType = None,
         required: bool = False,
         choices: List[OptionChoice] = None,
         options: list = None,
@@ -393,7 +409,7 @@ class SlashCommand(ApplicationCommand):
             Option(
                 name=name,
                 description=description,
-                type=type,
+                type=type or OptionType.string,
                 required=required,
                 choices=choices,
                 options=options,
@@ -458,7 +474,7 @@ class RawApplicationCommandPermission:
             permission=data["permission"]
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
             "type": self.type,
@@ -530,13 +546,13 @@ class ApplicationCommandPermissions:
         return ApplicationCommandPermissions(raw_perms)
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: Mapping[str, Any]):
         return ApplicationCommandPermissions([
             RawApplicationCommandPermission.from_dict(perm)
             for perm in data["permissions"]
         ])
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Any:
         return {
             "permissions": [perm.to_dict() for perm in self.permissions]
         }

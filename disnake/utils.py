@@ -919,9 +919,10 @@ def _get_option_desc(lines: List[str]) -> Dict[str, Any]:
     return options
 
 def parse_docstring(func: Callable) -> Dict[str, Any]:
-    if func.__doc__ is None:
+    doc = _getdoc(func)
+    if doc is None:
         return {'description': '', 'params': {}}
-    lines = _getdoc(func).splitlines()
+    lines = doc.splitlines()
     return {
         'description': _get_description(lines),
         'params': _get_option_desc(lines)

@@ -25,21 +25,28 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Union, TypeVar
+
 import asyncio
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
 from .. import utils
 from ..app_commands import OptionChoice
-from ..enums import try_enum, InteractionType, InteractionResponseType
-from ..errors import InteractionResponded, HTTPException, ClientException
-from ..channel import PartialMessageable, ChannelType
-
-from ..user import User, ClientUser
+from ..channel import ChannelType, PartialMessageable
+from ..enums import InteractionResponseType, InteractionType, try_enum
+from ..errors import (
+    ClientException,
+    HTTPException,
+    InteractionNotResponded,
+    InteractionResponded,
+    InteractionTimedOut,
+    NotFound,
+)
 from ..member import Member
-from ..message import Message, Attachment
+from ..message import Attachment, Message
 from ..object import Object
 from ..permissions import Permissions
-from ..webhook.async_ import async_context, Webhook, handle_message_parameters
+from ..user import ClientUser, User
+from ..webhook.async_ import Webhook, async_context, handle_message_parameters
 
 __all__ = (
     'Interaction',
@@ -117,7 +124,8 @@ class Interaction:
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
         self._state: ConnectionState = state
-        self._session: ClientSession = state.http._HTTPClient__session
+        # TODO: Maybe use a unique session
+        self._session: ClientSession = state.http._HTTPClient__session # type: ignore
         self._original_message: Optional[InteractionMessage] = None
         self._from_data(data)
         self.bot: Optional[Bot] = None
@@ -130,7 +138,8 @@ class Interaction:
         self.channel_id: Optional[int] = utils._get_as_snowflake(data, 'channel_id')
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, 'guild_id')
         self.application_id: int = int(data['application_id'])
-        self.author: Optional[Union[User, Member]] = None
+        # think about the user's experience
+        self.author: Union[User, Member] = None # type: ignore
         self._permissions: int = 0
 
         # TODO: there's a potential data loss here
@@ -167,29 +176,30 @@ class Interaction:
         return self._state and self._state._get_guild(self.guild_id)
 
     @utils.cached_slot_property('_cs_me')
-    def me(self) -> Optional[Union[Member, ClientUser]]:
+    def me(self) -> Union[Member, ClientUser]:
         """Union[:class:`.Member`, :class:`.ClientUser`]:
         Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
         """
         if self.guild is None:
-            return None if self.bot is None else self.bot.user
+            return None if self.bot is None else self.bot.user # type: ignore
         return self.guild.me
 
     @utils.cached_slot_property('_cs_channel')
-    def channel(self) -> Optional[InteractionChannel]:
+    def channel(self) -> Union[TextChannel, Thread]:
         """Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]: The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels are not resolved since there is
         no data to complete them. These are :class:`PartialMessageable` instead.
         """
+        # the actual typing of these is a bit complicated, we just leave it at text channels
         guild = self.guild
         channel = guild and guild._resolve_channel(self.channel_id)
         if channel is None:
             if self.channel_id is not None:
                 type = ChannelType.text if self.guild_id is not None else ChannelType.private
-                return PartialMessageable(state=self._state, id=self.channel_id, type=type)
-            return None
-        return channel
+                return PartialMessageable(state=self._state, id=self.channel_id, type=type) # type: ignore
+            return None # type: ignore
+        return channel # type: ignore
 
     @property
     def permissions(self) -> Permissions:
@@ -332,14 +342,19 @@ class Interaction:
             previous_allowed_mentions=previous_mentions,
         )
         adapter = async_context.get()
-        data = await adapter.edit_original_interaction_response(
-            self.application_id,
-            self.token,
-            session=self._session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-        )
+        try:
+            data = await adapter.edit_original_interaction_response(
+                self.application_id,
+                self.token,
+                session=self._session,
+                payload=params.payload,
+                multipart=params.multipart,
+                files=params.files,
+            )
+        except NotFound as e:
+            if e.code == 10015:
+                raise InteractionNotResponded(self) from e
+            raise
 
         # The message channel types should always match
         message = InteractionMessage(state=self._state, channel=self.channel, data=data)  # type: ignore
@@ -363,11 +378,16 @@ class Interaction:
             Deleted a message that is not yours.
         """
         adapter = async_context.get()
-        await adapter.delete_original_interaction_response(
-            self.application_id,
-            self.token,
-            session=self._session,
-        )
+        try:
+            await adapter.delete_original_interaction_response(
+                self.application_id,
+                self.token,
+                session=self._session,
+            )
+        except NotFound as e:
+            if e.code == 10015:
+                raise InteractionNotResponded(self) from e
+            raise
 
 
 class InteractionResponse:
@@ -527,18 +547,15 @@ class InteractionResponse:
             if len(embeds) > 10:
                 raise ValueError('embeds cannot exceed maximum of 10 elements')
             payload['embeds'] = [e.to_dict() for e in embeds]
-        
+
         if file is not MISSING and files is not MISSING:
             raise TypeError('cannot mix file and files keyword arguments')
-        
+
         if file is not MISSING:
             files = [file]
 
-        if files is not MISSING:
-            if len(files) > 10:
-                raise ValueError('files cannot exceed maximum of 10 elements')
-        else:
-            files = None
+        if files is not MISSING and len(files) > 10:
+            raise ValueError('files cannot exceed maximum of 10 elements')
 
         if content is not None:
             payload['content'] = str(content)
@@ -551,16 +568,21 @@ class InteractionResponse:
 
         parent = self._parent
         adapter = async_context.get()
-        await adapter.create_interaction_response(
-            parent.id,
-            parent.token,
-            session=parent._session,
-            type=InteractionResponseType.channel_message.value,
-            data=payload,
-            files=files,
-        )
-
-        if files is not None:
+        try:
+            await adapter.create_interaction_response(
+                parent.id,
+                parent.token,
+                session=parent._session,
+                type=InteractionResponseType.channel_message.value,
+                data=payload,
+                files=files or None,
+            )
+        except NotFound as e:
+            if e.code == 10062:
+                raise InteractionTimedOut(self._parent) from e
+            raise
+        
+        if files is not MISSING:
             for f in files:
                 f.close()
 
@@ -615,7 +637,7 @@ class InteractionResponse:
             raise InteractionResponded(self._parent)
 
         parent = self._parent
-        msg = parent.message
+        msg: Optional[Message] = getattr(parent, 'message', None)
         state = parent._state
         message_id = msg.id if msg else None
         if parent.type is not InteractionType.component:
@@ -623,20 +645,12 @@ class InteractionResponse:
 
         payload = {}
         if content is not MISSING:
-            if content is None:
-                payload['content'] = None
-            else:
-                payload['content'] = str(content)
-
+            payload['content'] = None if content is None else str(content)
         if embed is not MISSING and embeds is not MISSING:
             raise TypeError('cannot mix both embed and embeds keyword arguments')
 
         if embed is not MISSING:
-            if embed is None:
-                embeds = []
-            else:
-                embeds = [embed]
-
+            embeds = [] if embed is None else [embed]
         if embeds is not MISSING:
             payload['embeds'] = [e.to_dict() for e in embeds]
 
@@ -644,12 +658,9 @@ class InteractionResponse:
             payload['attachments'] = [a.to_dict() for a in attachments]
 
         if view is not MISSING:
-            state.prevent_view_updates_for(message_id)
-            if view is None:
-                payload['components'] = []
-            else:
-                payload['components'] = view.to_components()
-
+            if message_id:
+                state.prevent_view_updates_for(message_id)
+            payload['components'] = [] if view is None else view.to_components()
         adapter = async_context.get()
         await adapter.create_interaction_response(
             parent.id,
@@ -670,7 +681,6 @@ class InteractionResponse:
         choices: Union[
             Dict[str, str],
             List[str],
-            List[Tuple[str, str]],
             List[OptionChoice],
         ]
     ) -> None:
@@ -694,18 +704,15 @@ class InteractionResponse:
             raise InteractionResponded(self._parent)
         
         data = {}
-        if isinstance(choices, dict):
+        if not choices:
+            data['choices'] = []
+        elif isinstance(choices, Mapping):
             data['choices'] = [{'name': n, 'value': v} for n, v in choices.items()]
-        elif isinstance(choices, list):
-            if not choices:
-                data['choices'] = []
-            elif isinstance(choices[0], OptionChoice):
-                data['choices'] = [ch.to_dict() for ch in choices]
-            elif len(choices[0]) == 2:
-                data['choices'] = [{'name': n, 'value': v} for n, v in choices]
-            else:
-                data['choices'] = [{'name': n, 'value': n} for n in choices]
-
+        elif isinstance(choices, Iterable) and not isinstance(choices[0], OptionChoice):
+            data['choices'] = [{'name': n, 'value': n} for n in choices]
+        else:
+            data['choices'] = [c.to_dict() for c in choices] # type: ignore
+        
         parent = self._parent
         adapter = async_context.get()
         await adapter.create_interaction_response(

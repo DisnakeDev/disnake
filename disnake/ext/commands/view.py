@@ -143,7 +143,7 @@ class StringView:
             if not current:
                 if is_quoted:
                     # unexpected EOF
-                    raise ExpectedClosingQuoteError(close_quote)
+                    raise ExpectedClosingQuoteError(str(close_quote))
                 return ''.join(result)
 
             # currently we accept strings in the format of "hello world"
@@ -154,7 +154,7 @@ class StringView:
                     # string ends with \ and no character after it
                     if is_quoted:
                         # if we're quoted then we're expecting a closing quote
-                        raise ExpectedClosingQuoteError(close_quote)
+                        raise ExpectedClosingQuoteError(str(close_quote))
                     # if we aren't then we just let it through
                     return ''.join(result)
 
@@ -176,7 +176,7 @@ class StringView:
                 next_char = self.get()
                 valid_eof = not next_char or next_char.isspace()
                 if not valid_eof:
-                    raise InvalidEndOfQuotedStringError(next_char)
+                    raise InvalidEndOfQuotedStringError(str(next_char))
 
                 # we're quoted so it's okay
                 return ''.join(result)

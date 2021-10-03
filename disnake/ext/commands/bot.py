@@ -61,11 +61,18 @@ if TYPE_CHECKING:
 
     from typing_extensions import Concatenate, ParamSpec
     from disnake.message import Message
-    from disnake.interactions import ApplicationCommandInteraction
+    from disnake.interactions import (
+        ApplicationCommandInteraction,
+        MessageCommandInteraction,
+        UserCommandInteraction,
+    )
     from ._types import (
         Check,
         CoroFunc,
     )
+    ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
+    AnyMessageCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
+    AnyUserCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
     
     P = ParamSpec('P')
 
@@ -133,11 +140,17 @@ class _DefaultRepr:
     def __repr__(self):
         return '<default-help-command>'
 
-_default = _DefaultRepr()
+_default: Any = _DefaultRepr()
 
 
 class BotBase(GroupMixin):
-    def __init__(self, command_prefix, help_command=_default, description=None, **options):
+    def __init__(
+        self,
+        command_prefix: Optional[Union[str, List[str], Callable]] = None,
+        help_command: HelpCommand = _default,
+        description: str = None,
+        **options: Any,
+    ):
         super().__init__(**options)
         self.command_prefix = command_prefix
         self.extra_events: Dict[str, List[CoroFunc]] = {}
@@ -170,7 +183,7 @@ class BotBase(GroupMixin):
         self.owner_id: Optional[int] = options.get('owner_id')
         self.owner_ids: Set[int] = options.get('owner_ids', set())
         self.owner: Optional[disnake.User] = None
-        self.owners: Set[disnake.User] = set()
+        self.owners: Set[disnake.TeamMember] = set()
 
         self.all_slash_commands: Dict[str, InvokableSlashCommand] = {}
         self.all_user_commands: Dict[str, InvokableUserCommand] = {}
@@ -187,10 +200,11 @@ class BotBase(GroupMixin):
         else:
             self.help_command = help_command
         
+        loop = asyncio.get_event_loop()
+        loop.create_task(self._fill_owners())
+
         if self.reload:
-            asyncio.create_task(self._watchdog())
-        
-        self.add_listener(self._fill_owners, 'on_connect')
+            loop.create_task(self._watchdog())
 
     @property
     def application_commands(self) -> Set[InvokableApplicationCommand]:
@@ -418,8 +432,8 @@ class BotBase(GroupMixin):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ],
         InvokableSlashCommand
@@ -438,16 +452,18 @@ class BotBase(GroupMixin):
             the description of the slash command. It will be visible in Discord.
         options: List[:class:`Option`]
             the list of slash command options. The options will be visible in Discord.
+            This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
         default_permission: :class:`bool`
             whether the command is enabled by default when the app is added to a guild.
         guild_ids: List[:class:`int`]
             if specified, the client will register a command in these guilds.
-            Otherwise this command will be registered globally.
+            Otherwise this command will be registered globally in ~1 hour.
         connectors: Dict[:class:`str`, :class:`str`]
             binds function names to option names. If the name
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
-            ``{"option-name": "param_name", ...}``
+            ``{"option-name": "param_name", ...}``.
+            If you're using :ref:`param_syntax`, you don't need to specify this.
         
         Returns
         --------
@@ -456,8 +472,8 @@ class BotBase(GroupMixin):
         """
         def decorator(
             func: Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> InvokableSlashCommand:
             result = slash_command(
@@ -484,8 +500,8 @@ class BotBase(GroupMixin):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ],
         InvokableUserCommand
@@ -502,7 +518,7 @@ class BotBase(GroupMixin):
             name of the user command you want to respond to (equals to function name by default).
         guild_ids: List[:class:`int`]
             if specified, the client will register the command in these guilds.
-            Otherwise this command will be registered globally.
+            Otherwise this command will be registered globally in ~1 hour.
         
         Returns
         --------
@@ -511,8 +527,8 @@ class BotBase(GroupMixin):
         """
         def decorator(
             func: Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> InvokableUserCommand:
             result = user_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
@@ -530,8 +546,8 @@ class BotBase(GroupMixin):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, AnyMessageCommandInter, P], Coroutine],
+                Callable[Concatenate[AnyMessageCommandInter, P], Coroutine]
             ]
         ],
         InvokableMessageCommand
@@ -548,7 +564,7 @@ class BotBase(GroupMixin):
             name of the message command you want to respond to (equals to function name by default).
         guild_ids: List[:class:`int`]
             if specified, the client will register the command in these guilds.
-            Otherwise this command will be registered globally.
+            Otherwise this command will be registered globally in ~1 hour.
         
         Returns
         --------
@@ -557,8 +573,8 @@ class BotBase(GroupMixin):
         """
         def decorator(
             func: Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteraction, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteraction, P], Coroutine]
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> InvokableMessageCommand:
             result = message_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
@@ -613,6 +629,9 @@ class BotBase(GroupMixin):
     async def _fill_owners(self) -> None:
         if self.owner_id or self.owner_ids:
             return
+        
+        await self.wait_until_first_connect() # type: ignore
+
         app = await self.application_info()  # type: ignore
         if app.team:
             self.owners = set(app.team.members)
@@ -992,12 +1011,12 @@ class BotBase(GroupMixin):
         ) -> Callable[[ApplicationCommandInteraction], Any]:
             # T was used instead of Check to ensure the type matches on return
             self.add_check(
-                func,
+                func, # type: ignore
                 call_once=call_once,
                 slash_commands=slash_commands,
                 user_commands=user_commands,
                 message_commands=message_commands
-            )  # type: ignore
+            )
             return func
         return decorator
 
@@ -1035,7 +1054,7 @@ class BotBase(GroupMixin):
         # type-checker doesn't distinguish between functions and methods
         return await disnake.utils.async_all(f(inter) for f in checks)  # type: ignore
 
-    async def is_owner(self, user: disnake.User) -> bool:
+    async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
         """|coro|
 
         Checks if a :class:`~disnake.User` or :class:`~disnake.Member` is the owner of
@@ -1326,7 +1345,8 @@ class BotBase(GroupMixin):
                 raise disnake.ClientException(f'Cog named {cog_name!r} already loaded')
             self.remove_cog(cog_name)
 
-        cog = cog._inject(self)
+        # NOTE: Should be covariant
+        cog = cog._inject(self) # type: ignore
         self.__cogs[cog_name] = cog
 
     def get_cog(self, name: str) -> Optional[Cog]:
@@ -1374,7 +1394,8 @@ class BotBase(GroupMixin):
         help_command = self._help_command
         if help_command and help_command.cog is cog:
             help_command.cog = None
-        cog._eject(self)
+        # NOTE: Should be covariant
+        cog._eject(self) # type: ignore
 
         return cog
 
@@ -1401,10 +1422,12 @@ class BotBase(GroupMixin):
 
         # remove all the listeners from the module
         for event_list in self.extra_events.copy().values():
-            remove = []
-            for index, event in enumerate(event_list):
-                if event.__module__ is not None and _is_submodule(name, event.__module__):
-                    remove.append(index)
+            remove = [
+                index
+                for index, event in enumerate(event_list)
+                if event.__module__ is not None
+                and _is_submodule(name, event.__module__)
+            ]
 
             for index in reversed(remove):
                 del event_list[index]
@@ -1638,7 +1661,7 @@ class BotBase(GroupMixin):
 
     # command processing
 
-    async def get_prefix(self, message: Message) -> Union[List[str], str]:
+    async def get_prefix(self, message: Message) -> Optional[Union[List[str], str]]:
         """|coro|
 
         Retrieves the prefix the bot is listening to
@@ -1651,17 +1674,20 @@ class BotBase(GroupMixin):
 
         Returns
         --------
-        Union[List[:class:`str`], :class:`str`]
+        Optional[Union[List[:class:`str`], :class:`str`]]
             A list of prefixes or a single prefix that the bot is
-            listening for.
+            listening for. None if the bot isn't listening for prefixes.
         """
         prefix = ret = self.command_prefix
         if callable(prefix):
             ret = await disnake.utils.maybe_coroutine(prefix, self, message)
+        
+        if ret is None:
+            return None
 
         if not isinstance(ret, str):
             try:
-                ret = list(ret)
+                ret = list(ret) # type: ignore
             except TypeError:
                 # It's possible that a generator raised this exception.  Don't
                 # replace it with our own error if that's the case.
@@ -1715,7 +1741,9 @@ class BotBase(GroupMixin):
         prefix = await self.get_prefix(message)
         invoked_prefix = prefix
 
-        if isinstance(prefix, str):
+        if prefix is None:
+            return ctx
+        elif isinstance(prefix, str):
             if not view.skip_string(prefix):
                 return ctx
         else:
@@ -1825,12 +1853,9 @@ class BotBase(GroupMixin):
         if slash_command is None:
             return
         
-        inter.bot = self
+        inter.bot = self # type: ignore
         if slash_command.guild_ids is None or inter.guild_id in slash_command.guild_ids:
-            try:
-                await slash_command._call_relevant_autocompleter(inter)
-            except Exception:
-                pass
+            await slash_command._call_relevant_autocompleter(inter)
 
     async def process_application_commands(self, interaction: ApplicationCommandInteraction) -> None:
         """|coro|
@@ -1848,9 +1873,10 @@ class BotBase(GroupMixin):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
-        interaction.bot = self
+        interaction.bot = self # type: ignore
         command_type = interaction.data.type
         command_name = interaction.data.name
+        app_command = None
         event_name = None
 
         if command_type is ApplicationCommandType.chat_input:
@@ -1865,10 +1891,7 @@ class BotBase(GroupMixin):
             app_command = self.all_message_commands.get(command_name)
             event_name = 'message_command'
         
-        else:
-            app_command = None
-        
-        if app_command is None:
+        if event_name is None or app_command is None:
             # TODO: unregister this command from API
             return
         

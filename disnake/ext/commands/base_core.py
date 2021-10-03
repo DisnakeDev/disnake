@@ -1,5 +1,8 @@
 from __future__ import annotations
+from abc import ABC
 from typing import (
+    Any,
+    Callable,
     List,
     Optional,
     TypeVar,
@@ -41,19 +44,21 @@ def _get_overridden_method(method):
     return getattr(method.__func__, '__cog_special_method__', method)
 
 
-class InvokableApplicationCommand:
+class InvokableApplicationCommand(ABC):
     """A base class that implements the protocol for a bot application command.
 
     These are not created manually, instead they are created via the
     decorator or functional interface.
     """
+    body: ApplicationCommand
 
     def __init__(self, func, *, name: str = None, **kwargs):
         self.__command_flag__ = None
-        self._callback = func
+        self._callback: Callable[..., Any] = func
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
-        self.body = ApplicationCommand(0)
+        # only an internal feature for now
+        self.guild_only: bool = kwargs.get('guild_only', False)
         if not isinstance(self.name, str):
             raise TypeError('Name of a command must be a string.')
 
@@ -70,6 +75,7 @@ class InvokableApplicationCommand:
         except AttributeError:
             cooldown = kwargs.get('cooldown')
         
+        # TODO: Figure out how cooldowns even work with interactions
         if cooldown is None:
             buckets = CooldownMapping(cooldown, BucketType.default)
         elif isinstance(cooldown, CooldownMapping):
@@ -84,15 +90,15 @@ class InvokableApplicationCommand:
             max_concurrency = kwargs.get('max_concurrency')
         self._max_concurrency: Optional[MaxConcurrency] = max_concurrency
 
-        self.cog: Optional[CogT] = None
-        self.guild_ids: List[int] = None
+        self.cog: Optional[Cog] = None
+        self.guild_ids: Optional[List[int]] = None
         self.auto_sync: bool = True
 
-        self._before_invoke: Optional[HookT] = None
-        self._after_invoke: Optional[HookT] = None
+        self._before_invoke: Optional[Hook] = None
+        self._after_invoke: Optional[Hook] = None
     
     @property
-    def callback(self):
+    def callback(self) -> Callable[..., Any]:
         return self._callback
 
     def add_check(self, func: Check) -> None:
@@ -125,7 +131,7 @@ class InvokableApplicationCommand:
         except ValueError:
             pass
 
-    async def __call__(self, interaction: ApplicationCommandInteraction, *args, **kwargs) -> T:
+    async def __call__(self, interaction: ApplicationCommandInteraction, *args, **kwargs) -> Any:
         """|coro|
 
         Calls the internal callback that the application command holds.
@@ -138,15 +144,15 @@ class InvokableApplicationCommand:
 
         """
         if self.cog is not None:
-            return await self.callback(self.cog, interaction, *args, **kwargs)  # type: ignore
+            return await self.callback(self.cog, interaction, *args, **kwargs)
         else:
-            return await self.callback(interaction, *args, **kwargs)  # type: ignore
+            return await self.callback(interaction, *args, **kwargs)
 
     def _prepare_cooldowns(self, inter: ApplicationCommandInteraction) -> None:
         if self._buckets.valid:
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
-            bucket = self._buckets.get_bucket(inter, current)
+            bucket = self._buckets.get_bucket(inter, current) # type: ignore
             if bucket is not None:
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
@@ -185,7 +191,7 @@ class InvokableApplicationCommand:
         if not self._buckets.valid:
             return False
 
-        bucket = self._buckets.get_bucket(inter)
+        bucket = self._buckets.get_bucket(inter) # type: ignore
         dt = inter.created_at
         current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
         return bucket.get_tokens(current) == 0
@@ -199,7 +205,7 @@ class InvokableApplicationCommand:
             The interaction with this application command
         """
         if self._buckets.valid:
-            bucket = self._buckets.get_bucket(inter)
+            bucket = self._buckets.get_bucket(inter) # type: ignore
             bucket.reset()
 
     def get_cooldown_retry_after(self, inter: ApplicationCommandInteraction) -> float:
@@ -217,7 +223,7 @@ class InvokableApplicationCommand:
             If this is ``0.0`` then the command isn't on cooldown.
         """
         if self._buckets.valid:
-            bucket = self._buckets.get_bucket(inter)
+            bucket = self._buckets.get_bucket(inter) # type: ignore
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             return bucket.get_retry_after(current)
@@ -228,6 +234,10 @@ class InvokableApplicationCommand:
         """
         This method isn't really usable in this class, but it's usable in subclasses.
         """
+        if self.guild_only and inter.guild_id is None:
+            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
+            return
+        
         await self.prepare(inter)
 
         try:
@@ -243,7 +253,7 @@ class InvokableApplicationCommand:
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)
+                await self._max_concurrency.release(inter) # type: ignore
 
             await self.call_after_hooks(inter)
 
@@ -278,10 +288,11 @@ class InvokableApplicationCommand:
     async def _call_local_error_handler(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
         if not self.has_error_handler():
             return
+        # TODO: you shouldn't need to pass in cogs in the first place
         if self.cog is None:
-            await self.on_error(inter, error)
+            await self.on_error(inter, error) # type: ignore
         else:
-            await self.on_error(self.cog, inter, error)
+            await self.on_error(self.cog, inter, error) # type: ignore
 
     async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
         """Overwritten in subclasses"""

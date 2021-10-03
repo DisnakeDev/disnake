@@ -15,7 +15,7 @@ bot = commands.Bot("!")
 # Param takes care of parsing the annotation and adding a description for it.
 # If you want to provide a default value and make the option optional simply provide it as the first argument.
 # "description" may be shortened to "desc" if you so choose.
-@bot.slash_command(name="Simple Command", description="Some Simple command")
+@bot.slash_command(name="simple-command", description="Some Simple command")
 async def simple(
     inter: disnake.ApplicationCommandInteraction,
     req: str = Param(description="The required argument"),
@@ -36,7 +36,7 @@ async def defaults(
     ...
 
 
-# Names are automatically discerned from the parameter name ("_" are changed to "-")
+# Names are automatically discerned from the parameter name
 # However you may want to provide your own name in some cases.
 @bot.slash_command()
 async def names(
@@ -45,6 +45,13 @@ async def names(
 ):
     ...
 
+
+# Commands may be limited only to guilds with a special interaction annotation
+@bot.slash_command()
+async def guild_command(
+    inter: disnake.GuildCommandInteraction
+):
+    ...
 
 # Not all types are currently supported by discord, you may use converters in these cases.
 # Both old command converters using annotations and converters using functions are supported.
@@ -68,6 +75,17 @@ def get_username(inter, user: disnake.User) -> str:
 async def advanced_converters(
     inter: disnake.ApplicationCommandInteraction,
     username: str = Param(name="user", desc="A user", conv=get_username)
+):
+    ...
+
+
+# Lists are kind of supported too, it simply splits all arguments by space
+from typing import List
+
+@bot.slash_command()
+async def list_converters(
+    inter: disnake.ApplicationCommandInteraction,
+    numbers: List[int] = Param(desc="A list of numbers")
 ):
     ...
 
@@ -100,8 +118,8 @@ async def enumeration(
     ...
 
 
-# Specific channel types may be specified
-# This is the only case where you're able to use Union
+# Specific channel types may be specified.
+# To specify multiple channel types use either abcs or unions.
 from typing import Union
 
 @bot.slash_command()
@@ -109,7 +127,8 @@ async def constraint(
     inter: disnake.ApplicationCommandInteraction,
     text: disnake.TextChannel = Param(desc="A text channel"),
     voice: disnake.VoiceChannel = Param(desc="A voice channel"),
-    fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Param("A fancy new channel")
+    fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Param(desc="A fancy new channel"),
+    any: disnake.abc.GuildChannel = Param(desc="Any channel you can imagine")
 ):
     ...
 

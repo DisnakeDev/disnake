@@ -49,6 +49,7 @@ from .member import Member
 from .role import Role
 from .enums import ChannelType, ComponentType, Status, try_enum
 from . import utils
+from .utils import MISSING
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .object import Object
 from .invite import Invite
@@ -79,7 +80,9 @@ if TYPE_CHECKING:
 
     T = TypeVar('T')
     CS = TypeVar('CS', bound='ConnectionState')
-    Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel, PartialMessageable]
+    Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
+    PartialChannel = Union[Channel, PartialMessageable]
+    
 
 
 class ChunkRequest:
@@ -237,7 +240,7 @@ class ConnectionState:
         self.clear()
 
     def clear(self, *, views: bool = True) -> None:
-        self.user: Optional[ClientUser] = None
+        self.user: ClientUser = MISSING
         # Originally, this code used WeakValueDictionary to maintain references to the
         # global user mapping.
 
@@ -378,7 +381,9 @@ class ConnectionState:
 
     def _get_guild(self, guild_id: Optional[int]) -> Optional[Guild]:
         # the keys of self._guilds are ints
-        return self._guilds.get(guild_id)  # type: ignore
+        if guild_id is None:
+            return None
+        return self._guilds.get(guild_id)
 
     def _add_guild(self, guild: Guild) -> None:
         self._guilds[guild.id] = guild
@@ -394,10 +399,11 @@ class ConnectionState:
 
         del guild
 
-    def _get_global_application_command(self, application_command_id: int) -> ApplicationCommand:
+    def _get_global_application_command(self, application_command_id: int) -> Optional[ApplicationCommand]:
         return self._global_application_commands.get(application_command_id)
 
     def _add_global_application_command(self, application_command: ApplicationCommand, /) -> None:
+        assert application_command.id
         self._global_application_commands[application_command.id] = application_command
 
     def _remove_global_application_command(self, application_command_id: int, /) -> None:
@@ -406,12 +412,13 @@ class ConnectionState:
     def _clear_global_application_commands(self) -> None:
         self._global_application_commands.clear()
 
-    def _get_guild_application_command(self, guild_id: int, application_command_id: int) -> ApplicationCommand:
+    def _get_guild_application_command(self, guild_id: int, application_command_id: int) -> Optional[ApplicationCommand]:
         granula = self._guild_application_commands.get(guild_id)
         if granula is not None:
             return granula.get(application_command_id)
 
     def _add_guild_application_command(self, guild_id: int, application_command: ApplicationCommand) -> None:
+        assert application_command.id
         try:
             granula = self._guild_application_commands[guild_id]
             granula[application_command.id] = application_command
@@ -514,7 +521,7 @@ class ConnectionState:
         # If presences are enabled then we get back the old guild.large behaviour
         return self._chunk_guilds and not guild.chunked and not (self._intents.presences and not guild.large)
 
-    def _get_guild_channel(self, data: MessagePayload) -> Tuple[Union[Channel, Thread], Optional[Guild]]:
+    def _get_guild_channel(self, data: MessagePayload) -> Tuple[Union[PartialChannel, Thread], Optional[Guild]]:
         channel_id = int(data['channel_id'])
         try:
             guild = self._get_guild(int(data['guild_id']))
@@ -532,7 +539,9 @@ class ConnectionState:
         ws = self._get_websocket(guild_id)  # This is ignored upstream
         await ws.request_chunks(guild_id, query=query, limit=limit, presences=presences, nonce=nonce)
 
-    async def query_members(self, guild: Guild, query: str, limit: int, user_ids: List[int], cache: bool, presences: bool):
+    async def query_members(
+        self, guild: Guild, query: Optional[str], limit: int, user_ids: Optional[List[int]], cache: bool, presences: bool
+    ):
         guild_id = guild.id
         ws = self._get_websocket(guild_id)
         if ws is None:
@@ -769,7 +778,7 @@ class ConnectionState:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch('application_command_autocomplete', interaction)
         else:
-            pass
+            return
 
         self.dispatch('interaction', interaction)
 
@@ -1458,7 +1467,7 @@ class ConnectionState:
                 return channel
 
     def create_message(
-        self, *, channel: Union[TextChannel, Thread, DMChannel, GroupChannel, PartialMessageable], data: MessagePayload
+        self, *, channel: Union[TextChannel, Thread, DMChannel, PartialMessageable], data: MessagePayload
     ) -> Message:
         return Message(state=self, channel=channel, data=data)
 

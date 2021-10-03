@@ -48,8 +48,9 @@ from .errors import *
 
 if TYPE_CHECKING:
     from .context import Context
-    from disnake.message import PartialMessageableChannel
+    from disnake.message import MessageableChannel
 
+# TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES
 
 __all__ = (
     'Converter',
@@ -236,7 +237,8 @@ class MemberConverter(IDConverter[disnake.Member]):
         else:
             user_id = int(match.group(1))
             if guild:
-                result = guild.get_member(user_id) or _utils_get(ctx.message.mentions, id=user_id)
+                mentions = (user for user in ctx.message.mentions if isinstance(user, disnake.Member))
+                result = guild.get_member(user_id) or _utils_get(mentions, id=user_id)
             else:
                 result = _get_from_guilds(bot, 'get_member', user_id)
 
@@ -289,6 +291,8 @@ class UserConverter(IDConverter[disnake.User]):
                 except disnake.HTTPException:
                     raise UserNotFound(argument) from None
 
+            if isinstance(result, disnake.Member):
+                return result._user
             return result
 
         arg = argument
@@ -352,21 +356,21 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
         return guild_id, message_id, channel_id
 
     @staticmethod
-    def _resolve_channel(ctx, guild_id, channel_id) -> Optional[PartialMessageableChannel]:
-        if guild_id is not None:
-            guild = ctx.bot.get_guild(guild_id)
-            if guild is not None and channel_id is not None:
-                return guild._resolve_channel(channel_id)  # type: ignore
-            else:
-                return None
-        else:
+    def _resolve_channel(ctx, guild_id, channel_id) -> Optional[MessageableChannel]:
+        if guild_id is None:
             return ctx.bot.get_channel(channel_id) if channel_id else ctx.channel
+
+        guild = ctx.bot.get_guild(guild_id)
+        if guild is not None and channel_id is not None:
+            return guild._resolve_channel(channel_id)  # type: ignore
+        else:
+            return None
 
     async def convert(self, ctx: Context, argument: str) -> disnake.PartialMessage:
         guild_id, message_id, channel_id = self._get_id_matches(ctx, argument)
         channel = self._resolve_channel(ctx, guild_id, channel_id)
         if not channel:
-            raise ChannelNotFound(channel_id)
+            raise ChannelNotFound(str(channel_id))
         return disnake.PartialMessage(channel=channel, id=message_id)
 
 
@@ -392,13 +396,13 @@ class MessageConverter(IDConverter[disnake.Message]):
             return message
         channel = PartialMessageConverter._resolve_channel(ctx, guild_id, channel_id)
         if not channel:
-            raise ChannelNotFound(channel_id)
+            raise ChannelNotFound(str(channel_id))
         try:
             return await channel.fetch_message(message_id)
         except disnake.NotFound:
             raise MessageNotFound(argument)
         except disnake.Forbidden:
-            raise ChannelNotReadable(channel)
+            raise ChannelNotReadable(channel) # type: ignore
 
 
 class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
@@ -441,7 +445,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
         else:
             channel_id = int(match.group(1))
             if guild:
-                result = guild.get_channel(channel_id)
+                result = guild.get_channel(channel_id) # type: ignore
             else:
                 result = _get_from_guilds(bot, 'get_channel', channel_id)
 
@@ -466,7 +470,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
         else:
             thread_id = int(match.group(1))
             if guild:
-                result = guild.get_thread(thread_id)
+                result = guild.get_thread(thread_id) # type: ignore
 
         if not result or not isinstance(result, type):
             raise ThreadNotFound(argument)
@@ -899,39 +903,28 @@ class clean_content(Converter[str]):
     async def convert(self, ctx: Context, argument: str) -> str:
         msg = ctx.message
 
-        if ctx.guild:
-
-            def resolve_member(id: int) -> str:
-                m = _utils_get(msg.mentions, id=id) or ctx.guild.get_member(id)
-                return f'@{m.display_name if self.use_nicknames else m.name}' if m else '@deleted-user'
-
-            def resolve_role(id: int) -> str:
-                r = _utils_get(msg.role_mentions, id=id) or ctx.guild.get_role(id)
-                return f'@{r.name}' if r else '@deleted-role'
-
-        else:
-
-            def resolve_member(id: int) -> str:
-                m = _utils_get(msg.mentions, id=id) or ctx.bot.get_user(id)
-                return f'@{m.name}' if m else '@deleted-user'
-
-            def resolve_role(id: int) -> str:
+        def resolve_user(id: int) -> str:
+            m = _utils_get(msg.mentions, id=id) or ctx.bot.get_user(id)
+            if m is None and ctx.guild:
+                m = ctx.guild.get_member(id)
+            return f'@{m.display_name if self.use_nicknames else m.name}' if m else '@deleted-user'
+        
+        def resolve_role(id: int) -> str:
+            if ctx.guild is None:
                 return '@deleted-role'
-
-        if self.fix_channel_mentions and ctx.guild:
-
-            def resolve_channel(id: int) -> str:
+            r = _utils_get(msg.role_mentions, id=id) or ctx.guild.get_role(id)
+            return f'@{r.name}' if r else '@deleted-role'
+        
+        def resolve_channel(id: int) -> str:
+            if ctx.guild and self.fix_channel_mentions:
                 c = ctx.guild.get_channel(id)
                 return f'#{c.name}' if c else '#deleted-channel'
-
-        else:
-
-            def resolve_channel(id: int) -> str:
-                return f'<#{id}>'
+        
+            return f'<#{id}>'
 
         transforms = {
-            '@': resolve_member,
-            '@!': resolve_member,
+            '@': resolve_user,
+            '@!': resolve_user,
             '#': resolve_channel,
             '@&': resolve_role,
         }
@@ -939,8 +932,7 @@ class clean_content(Converter[str]):
         def repl(match: re.Match) -> str:
             type = match[1]
             id = int(match[2])
-            transformed = transforms[type](id)
-            return transformed
+            return transforms[type](id)
 
         result = re.sub(r'<(@[!&]?|#)([0-9]{15,20})>', repl, argument)
         if self.escape_markdown:
@@ -997,7 +989,7 @@ class Greedy(List[T]):
             raise TypeError('Greedy[...] expects a type or a Converter instance.')
 
         if converter in (str, type(None)) or origin is Greedy:
-            raise TypeError(f'Greedy[{converter.__name__}] is invalid.')
+            raise TypeError(f'Greedy[{converter.__name__}] is invalid.') # type: ignore
 
         if origin is Union and type(None) in args:
             raise TypeError(f'Greedy[{converter!r}] is invalid.')
@@ -1073,9 +1065,9 @@ async def _actual_conversion(ctx: Context, converter, argument: str, param: insp
             if inspect.ismethod(converter.convert):
                 return await converter.convert(ctx, argument)
             else:
-                return await converter().convert(ctx, argument)
+                return await converter().convert(ctx, argument) # type: ignore
         elif isinstance(converter, Converter):
-            return await converter.convert(ctx, argument)
+            return await converter.convert(ctx, argument) # type: ignore
     except CommandError:
         raise
     except Exception as exc:

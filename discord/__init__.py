@@ -54,14 +54,6 @@ from .components import *
 from .threads import *
 
 
-class VersionInfo(NamedTuple):
-    major: int
-    minor: int
-    micro: int
-    releaselevel: Literal["alpha", "beta", "candidate", "final"]
-    serial: int
-
-
-version_info: VersionInfo = disnake.version_info
+version_info: disnake.VersionInfo = disnake.version_info
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

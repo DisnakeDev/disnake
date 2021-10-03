@@ -10,6 +10,9 @@ disnake
 .. image:: https://img.shields.io/pypi/pyversions/disnake.svg
    :target: https://pypi.python.org/pypi/disnake
    :alt: PyPI supported Python versions
+.. image:: https://img.shields.io/github/commit-activity/w/EQUENOS/disnake.svg
+   :target: https://github.com/EQUENOS/disnake/commits
+   :alt: Commit activity
 
 A modern, easy to use, feature-rich, and async ready API wrapper for Discord written in Python.
 
@@ -144,61 +147,6 @@ Context Menus Example
     bot.run('token')
 
 You can find more examples in the examples directory.
-
-Making your application more efficient
---------------------------------------
-
-As your application scales, you may need to adjust some things to keep
-it performing nicely.
-
-Python optimisation flags
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-CPython provides two optimisation flags that remove internal safety
-checks that are useful for development, and change other internal
-settings in the interpreter.
-
--  ``python bot.py`` - no optimisation - this is the default.
--  ``python -O bot.py`` - first level optimisation - features such as
-   internal assertions will be disabled.
--  ``python -OO bot.py`` - second level optimisation - more features
-   (**including all docstrings**) will be removed from the loaded code
-   at runtime.
-
-**A minimum of first level of optimizations** is recommended when
-running bots in a production environment.
-
-``disnake[speed]``
-~~~~~~~~~~~~~~~~~~
-
-If you have a C compiler (Microsoft VC++ Redistributable 14.0 or newer,
-or a modern copy of GCC/G++, Clang, etc), you can install Disnake using
-``pip install -U disnake[speed]``. This will install ``aiodns``,
-``cchardet`` & ``Brotli`` which will provide you with a small
-performance boost.
-
-``uvloop``
-~~~~~~~~~~
-
-If you use a UNIX-like system, you will get additional performance
-benefits from using a library called ``uvloop``. This replaces the
-default ``asyncio`` event loop with one that uses ``libuv`` internally.
-You can run ``pip install uvloop`` and then amend your script to be
-something similar to the following example to utilise it in your
-application:
-
-.. code:: py
-
-    import os
-    from disnake.ext import commands
-
-    if os.name != "nt":
-        import uvloop
-        uvloop.install()
-
-    bot = commands.Bot(...)
-
-    ...
 
 Links
 ------

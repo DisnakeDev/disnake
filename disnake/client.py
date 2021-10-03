@@ -29,53 +29,69 @@ import logging
 import signal
 import sys
 import traceback
-from typing import Any, Callable, Coroutine, Dict, Generator, List, Optional, Sequence, TYPE_CHECKING, Tuple, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 
 import aiohttp
 
-from .user import User, ClientUser
-from .invite import Invite
-from .template import Template
-from .widget import Widget
-from .guild import Guild
-from .emoji import Emoji
-from .channel import _threaded_channel_factory, PartialMessageable
-from .enums import ChannelType
-from .mentions import AllowedMentions
-from .errors import *
-from .enums import Status, VoiceRegion
-from .flags import ApplicationFlags, Intents
-from .gateway import *
-from .activity import ActivityTypes, BaseActivity, create_activity
-from .voice_client import VoiceClient
-from .http import HTTPClient
-from .state import ConnectionState
 from . import utils
-from .utils import MISSING
-from .object import Object
-from .backoff import ExponentialBackoff
-from .webhook import Webhook
-from .iterators import GuildIterator
-from .appinfo import AppInfo
-from .ui.view import View
-from .stage_instance import StageInstance
-from .threads import Thread
-from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
+from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
-    application_command_factory,
-    ApplicationCommandPermissions,
     ApplicationCommand,
+    ApplicationCommandPermissions,
+    MessageCommand,
     SlashCommand,
     UserCommand,
-    MessageCommand,
+    application_command_factory,
 )
+from .appinfo import AppInfo
+from .backoff import ExponentialBackoff
+from .channel import PartialMessageable, _threaded_channel_factory
+from .emoji import Emoji
+from .enums import ChannelType, Status, VoiceRegion
+from .errors import *
+from .flags import ApplicationFlags, Intents
+from .gateway import *
+from .guild import Guild
+from .http import HTTPClient
+from .invite import Invite
+from .iterators import GuildIterator
+from .mentions import AllowedMentions
+from .object import Object
+from .stage_instance import StageInstance
+from .state import ConnectionState
+from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
+from .template import Template
+from .threads import Thread
+from .ui.view import View
+from .user import ClientUser, User
+from .utils import MISSING
+from .voice_client import VoiceClient
+from .webhook import Webhook
+from .widget import Widget
 
 if TYPE_CHECKING:
-    from .abc import SnowflakeTime, PrivateChannel, GuildChannel, Snowflake
+    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
     from .channel import DMChannel
-    from .message import Message
     from .member import Member
+    from .message import Message
     from .voice_client import VoiceProtocol
+
 
 __all__ = (
     'Client',
@@ -118,11 +134,11 @@ def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
         loop.close()
 
 def _app_commands_diff(
-    new_commands: List[ApplicationCommand],
-    old_commands: List[ApplicationCommand],
+    new_commands: Iterable[ApplicationCommand],
+    old_commands: Iterable[ApplicationCommand],
 ) -> Dict[str, List[ApplicationCommand]]:
-    new_commands = {cmd.name: cmd for cmd in new_commands}
-    old_commands = {cmd.name: cmd for cmd in old_commands}
+    new_cmds = {cmd.name: cmd for cmd in new_commands}
+    old_cmds = {cmd.name: cmd for cmd in old_commands}
 
     diff = {
         'no_changes': [],
@@ -132,8 +148,8 @@ def _app_commands_diff(
         'change_type': [],
     }
 
-    for name, new_cmd in new_commands.items():
-        old_cmd = old_commands.get(name)
+    for name, new_cmd in new_cmds.items():
+        old_cmd = old_cmds.get(name)
         if old_cmd is None:
             diff['upsert'].append(new_cmd)
         elif old_cmd.type != new_cmd.type:
@@ -146,8 +162,8 @@ def _app_commands_diff(
         else:
             diff['no_changes'].append(new_cmd)
     
-    for name, old_cmd in old_commands.items():
-        if name not in new_commands:
+    for name, old_cmd in old_cmds.items():
+        if name not in new_cmds:
             diff['delete'].append(old_cmd)
     
     return diff
@@ -307,7 +323,7 @@ class Client:
 
         self._handlers: Dict[str, Callable] = {
             'ready': self._handle_ready,
-            'connect_internal': self._schedule_app_command_preparation
+            'connect_internal': self._handle_first_connect
         }
 
         self._hooks: Dict[str, Callable] = {
@@ -322,9 +338,9 @@ class Client:
         self._connection.shard_count = self.shard_count
         self._closed: bool = False
         self._ready: asyncio.Event = asyncio.Event()
+        self._first_connect: asyncio.Event = asyncio.Event()
         self._connection._get_websocket = self._get_websocket
         self._connection._get_client = lambda: self
-        self._times_connected = 0
         self._sync_queued: bool = False
 
         if VoiceClient.warn_nacl:
@@ -342,6 +358,12 @@ class Client:
 
     def _handle_ready(self) -> None:
         self._ready.set()
+
+    def _handle_first_connect(self) -> None:
+        if self._first_connect.is_set():
+            return
+        self._first_connect.set()
+        self._schedule_app_command_preparation()
 
     @property
     def latency(self) -> float:
@@ -415,7 +437,7 @@ class Client:
         return self._connection.voice_clients
 
     @property
-    def application_id(self) -> Optional[int]:
+    def application_id(self) -> int:
         """Optional[:class:`int`]: The client's application ID.
 
         If this is not passed via ``__init__`` then this is retrieved
@@ -424,7 +446,7 @@ class Client:
         
         .. versionadded:: 2.0
         """
-        return self._connection.application_id
+        return self._connection.application_id # type: ignore
 
     @property
     def application_flags(self) -> ApplicationFlags:
@@ -474,7 +496,13 @@ class Client:
         """
         return utils.get(self.cached_messages, id=id)
     
-    async def get_or_fetch_user(self, user_id: int) -> User:
+    @overload
+    async def get_or_fetch_user(self, user_id: int, *, strict: Literal[False] = ...) -> Optional[User]: ...
+    
+    @overload
+    async def get_or_fetch_user(self, user_id: int, *, strict: Literal[True]) -> User: ...
+
+    async def get_or_fetch_user(self, user_id: int, *, strict: bool = False) -> Optional[User]:
         """|coro|
 
         Tries to get the user from the cache. If fails, it tries to
@@ -496,8 +524,12 @@ class Client:
         try:
             user = await self.fetch_user(user_id)
         except Exception:
+            if strict:
+                raise
             return None
         return user
+    
+    getch_user = get_or_fetch_user
 
     def is_ready(self) -> bool:
         """:class:`bool`: Specifies if the client's internal cache is ready for use."""
@@ -575,7 +607,7 @@ class Client:
         self, test_guilds: List[int] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
         """In :class:`.Bot` instance, this method is overridden"""
-        return None, None
+        raise NotImplementedError
 
     # command synchronisation
 
@@ -586,7 +618,8 @@ class Client:
         try:
             commands = await self.fetch_global_commands()
             self._connection._global_application_commands = {
-                command.id: command for command in commands
+                command.id: command for command in commands 
+                if command.id
             }
         except Exception:
             pass
@@ -594,7 +627,8 @@ class Client:
             try:
                 commands = await self.fetch_guild_commands(guild_id)
                 self._connection._guild_application_commands[guild_id] = {
-                    command.id: command for command in commands
+                    command.id: command for command in commands 
+                    if command and command.id
                 }
             except Exception:
                 pass
@@ -632,6 +666,7 @@ class Client:
                 new_commands = await self.bulk_overwrite_global_commands(to_send)
                 self._connection._global_application_commands = {
                     command.id: command for command in new_commands
+                    if command and command.id
                 }
             except Exception as e:
                 print(f"[WARNING] Failed to overwrite global commands due to {e}")
@@ -659,6 +694,7 @@ class Client:
                     new_commands = await self.bulk_overwrite_guild_commands(guild_id, to_send)
                     self._connection._guild_application_commands[guild_id] = {
                         command.id: command for command in new_commands
+                        if command and command.id
                     }
                 except Exception as e:
                     print(f"[WARNING] Failed to overwrite commands in <Guild id={guild_id}> due to {e}")
@@ -681,10 +717,7 @@ class Client:
         await self._sync_application_commands()
 
     def _schedule_app_command_preparation(self) -> None:
-        self._times_connected += 1
-        if self._times_connected > 1:
-            return
-        return asyncio.create_task(
+        self.loop.create_task(
             self._prepare_application_commands(),
             name='disnake: app_command_preparation'
         )
@@ -1325,6 +1358,13 @@ class Client:
         Waits until the client's internal cache is all ready.
         """
         await self._ready.wait()
+    
+    async def wait_until_first_connect(self) -> None:
+        """|coro|
+
+        Waits until the first connect.
+        """
+        await self._first_connect.wait()
 
     def wait_for(
         self,
@@ -1513,7 +1553,7 @@ class Client:
                 continue
 
             if activity is not None:
-                me.activities = (activity,)
+                me.activities = (activity,) # type: ignore
             else:
                 me.activities = ()
 
@@ -2073,7 +2113,7 @@ class Client:
         return application_command_factory(result)
 
     async def edit_global_command(self, command_id: int, new_command: ApplicationCommand) -> ApplicationCommand:
-        result = await self.http.edit_global_command(self.application_id, command_id, new_command)
+        result = await self.http.edit_global_command(self.application_id, command_id, new_command.to_dict())
         return application_command_factory(result)
 
     async def delete_global_command(self, command_id: int) -> None:
@@ -2099,7 +2139,7 @@ class Client:
         return application_command_factory(result)
 
     async def edit_guild_command(self, guild_id: int, command_id: int, new_command: ApplicationCommand) -> ApplicationCommand:
-        result = await self.http.edit_guild_command(self.application_id, guild_id, command_id, new_command)
+        result = await self.http.edit_guild_command(self.application_id, guild_id, command_id, new_command.to_dict())
         return application_command_factory(result)
 
     async def delete_guild_command(self, guild_id: int, command_id: int) -> None:

@@ -369,7 +369,7 @@ class AsyncWebhookAdapter:
             return self.request(route, session=session, payload=payload)
         
         else:
-            multipart = [{'name': 'payload_json', 'value': utils._to_json(payload)}]
+            multipart: Any = [{'name': 'payload_json', 'value': utils._to_json(payload)}]
             single = len(files) == 1
             for index, file in enumerate(files):
                 name = "file" if single else f"file{index}"
@@ -1021,7 +1021,7 @@ class Webhook(BaseWebhook):
             A partial :class:`Webhook`.
             A partial webhook is just a webhook object with an ID and a token.
         """
-        m = re.search(r'disnake(?:app)?.com/api/webhooks/(?P<id>[0-9]{17,20})/(?P<token>[A-Za-z0-9\.\-\_]{60,68})', url)
+        m = re.search(r'discord(?:app)?.com/api/webhooks/(?P<id>[0-9]{17,20})/(?P<token>[A-Za-z0-9\.\-\_]{60,68})', url)
         if m is None:
             raise InvalidArgument('Invalid webhook URL given.')
 

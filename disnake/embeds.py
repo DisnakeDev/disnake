@@ -344,7 +344,7 @@ class Embed:
         """
         return EmbedProxy(getattr(self, '_footer', {}))  # type: ignore
 
-    def set_footer(self: E, *, text: MaybeEmpty[Any] = EmptyEmbed, icon_url: MaybeEmpty[Any] = EmptyEmbed) -> E:
+    def set_footer(self: E, text: MaybeEmpty[Any] = EmptyEmbed, icon_url: MaybeEmpty[Any] = EmptyEmbed) -> E:
         """Sets the footer for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -397,7 +397,7 @@ class Embed:
         """
         return EmbedProxy(getattr(self, '_image', {}))  # type: ignore
 
-    def set_image(self: E, *, url: MaybeEmpty[Any]) -> E:
+    def set_image(self: E, url: MaybeEmpty[Any]) -> E:
         """Sets the image for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -439,7 +439,7 @@ class Embed:
         """
         return EmbedProxy(getattr(self, '_thumbnail', {}))  # type: ignore
 
-    def set_thumbnail(self: E, *, url: MaybeEmpty[Any]) -> E:
+    def set_thumbnail(self: E, url: MaybeEmpty[Any]) -> E:
         """Sets the thumbnail for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -500,7 +500,7 @@ class Embed:
         """
         return EmbedProxy(getattr(self, '_author', {}))  # type: ignore
 
-    def set_author(self: E, *, name: Any, url: MaybeEmpty[Any] = EmptyEmbed, icon_url: MaybeEmpty[Any] = EmptyEmbed) -> E:
+    def set_author(self: E, name: Any, url: MaybeEmpty[Any] = EmptyEmbed, icon_url: MaybeEmpty[Any] = EmptyEmbed) -> E:
         """Sets the author for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -553,7 +553,7 @@ class Embed:
         """
         return [EmbedProxy(d) for d in getattr(self, '_fields', [])]  # type: ignore
 
-    def add_field(self: E, *, name: Any, value: Any, inline: bool = True) -> E:
+    def add_field(self: E, name: Any, value: Any, *, inline: bool = True) -> E:
         """Adds a field to the embed object.
 
         This function returns the class instance to allow for fluent-style
@@ -582,7 +582,7 @@ class Embed:
 
         return self
 
-    def insert_field_at(self: E, index: int, *, name: Any, value: Any, inline: bool = True) -> E:
+    def insert_field_at(self: E, index: int, name: Any, value: Any, *, inline: bool = True) -> E:
         """Inserts a field before a specified index to the embed.
 
         This function returns the class instance to allow for fluent-style
@@ -643,7 +643,7 @@ class Embed:
         except (AttributeError, IndexError):
             pass
 
-    def set_field_at(self: E, index: int, *, name: Any, value: Any, inline: bool = True) -> E:
+    def set_field_at(self: E, index: int, name: Any, value: Any, *, inline: bool = True) -> E:
         """Modifies a field to the embed object.
 
         The index must point to a valid pre-existing field.

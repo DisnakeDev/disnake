@@ -11,6 +11,84 @@ Changelog
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
+.. _vp2p1p2:
+
+v2.1.2
+-------
+
+This is the first stable version of this discord.py 2.0 fork.
+
+New Features
+~~~~~~~~~~~~~~
+
+- Add interaction hierarchy. :class:`interaction` is now the base class for other interaction types, such as :class:`ApplicationCommandInteraction` and :class:`MessageInteraction`.
+- Add interaction data wrappers: :class:`ApplicationCommandInteractionData` and :class:`MessageInteractionData`.
+- Add interaction data option wrapper: :class:`ApplicationCommandInteractionDataOption`
+- Add :meth:`Client.bulk_edit_guild_command_permissions`
+- Add :meth:`Client.bulk_overwrite_global_commands`
+- Add :meth:`Client.bulk_overwrite_guild_commands`
+- Add :meth:`Client.create_global_command`
+- Add :meth:`Client.create_guild_command`
+- Add :meth:`Client.delete_global_command`
+- Add :meth:`Client.delete_guild_command`
+- Add :meth:`Client.edit_command_permissions`
+- Add :meth:`Client.edit_global_command`
+- Add :meth:`Client.edit_guild_command`
+- Add :meth:`Client.fetch_command_permissions`
+- Add :meth:`Client.fetch_global_commands`
+- Add :meth:`Client.fetch_global_command`
+- Add :meth:`Client.fetch_guild_commands`
+- Add :meth:`Client.fetch_guild_command`
+- Add :meth:`Client.fetch_guild_command_permissions`
+- Add :meth:`Client.get_global_command`
+- Add :meth:`Client.get_global_command_named`
+- Add :meth:`Client.get_guild_application_commands`
+- Add :meth:`Client.get_guild_slash_commands`
+- Add :meth:`Client.get_guild_user_commands`
+- Add :meth:`Client.get_guild_message_commands`
+- Add :meth:`Client.get_guild_command`
+- Add :meth:`Client.get_guild_command_named`
+- Add :attr:`Client.global_application_commands`
+- Add :attr:`Client.global_slash_commands`
+- Add :attr:`Client.global_user_commands`
+- Add :attr:`Client.global_message_commands`
+- |commands| Support for slash commands and context menus.
+- |commands| Add :class:`InvokableApplicationCommand <ext.commands.InvokableApplicationCommand>` - the base class for invokable slash commands and context menus.
+- |commands| Add :class:`InvokableSlashCommand <ext.commands.InvokableSlashCommand>` for slash command management.
+- |commands| Add :class:`SubCommand <ext.commands.SubCommand>` for slash sub-command management.
+- |commands| Add :class:`SubCommandGroup <ext.commands.SubCommandGroup>` for slash sub-command group management.
+- |commands| Add :class:`InvokableUserCommand <ext.commands.InvokableUserCommand>` for user command management (context menus).
+- |commands| Add :class:`InvokableMessageCommand <ext.commands.InvokableMessageCommand>` for message command management (context menus).
+- |commands| Add :class:`ParamInfo <ext.commands.ParamInfo>` for wrapping annotations.
+- |commands| Add :func:`slash_command <ext.commands.slash_command>` for slash command definitions.
+- |commands| Add :func:`user_command <ext.commands.user_command>` for user command definitions (context menus).
+- |commands| Add :func:`message_command <ext.commands.message_command>` for message command definitions (context menus).
+- |commands| Add :func:`param <ext.commands.param>` (with an alias :func:`Param <ext.commands.Param>`) in case :class:`ParamInfo <ext.commands.ParamInfo>` causes linter errors.
+- |commands| Add :meth:`Bot.slash_command <ext.commands.Bot.slash_command>` for slash command definitions.
+- |commands| Add :meth:`Bot.user_command <ext.commands.Bot.user_command>` for user command definitions (context menus).
+- |commands| Add :meth:`Bot.message_command <ext.commands.Bot.message_command>` for message command definitions (context menus).
+- |commands| Add :meth:`Bot.after_slash_command_invoke <ext.commands.Bot.after_slash_command_invoke>` - a decorator for post-invoke hooks for slash commands.
+- |commands| Add :meth:`Bot.after_user_command_invoke <ext.commands.Bot.after_user_command_invoke>` - a decorator for post-invoke hooks for user commands.
+- |commands| Add :meth:`Bot.after_message_command_invoke <ext.commands.Bot.after_message_command_invoke>` - a decorator for post-invoke hooks for message commands.
+- |commands| Add :meth:`Bot.before_slash_command_invoke <ext.commands.Bot.before_slash_command_invoke>` - a decorator for pre-invoke hooks for slash commands.
+- |commands| Add :meth:`Bot.before_user_command_invoke <ext.commands.Bot.before_user_command_invoke>` - a decorator for pre-invoke hooks for user commands.
+- |commands| Add :meth:`Bot.before_message_command_invoke <ext.commands.Bot.before_message_command_invoke>` - a decorator for pre-invoke hooks for message commands.
+- |commands| Add :meth:`Bot.add_slash_command <ext.commands.Bot.add_slash_command>`
+- |commands| Add :meth:`Bot.add_user_command <ext.commands.Bot.add_user_command>`
+- |commands| Add :meth:`Bot.add_message_command <ext.commands.Bot.add_message_command>`
+- |commands| Add :meth:`Bot.remove_slash_command <ext.commands.Bot.remove_slash_command>`
+- |commands| Add :meth:`Bot.remove_user_command <ext.commands.Bot.remove_user_command>`
+- |commands| Add :meth:`Bot.remove_message_command <ext.commands.Bot.remove_message_command>`
+- |commands| Add :meth:`Bot.get_slash_command <ext.commands.Bot.get_slash_command>`
+- |commands| Add :meth:`Bot.get_user_command <ext.commands.Bot.get_user_command>`
+- |commands| Add :meth:`Bot.get_message_command <ext.commands.Bot.get_message_command>`
+- |commands| Add :meth:`Bot.slash_command_check <ext.commands.Bot.slash_command_check>`
+- |commands| Add :meth:`Bot.slash_command_check_once <ext.commands.Bot.slash_command_check_once>`
+- |commands| Add :meth:`Bot.user_command_check <ext.commands.Bot.user_command_check>`
+- |commands| Add :meth:`Bot.user_command_check_once <ext.commands.Bot.user_command_check_once>`
+- |commands| Add :meth:`Bot.message_command_check <ext.commands.Bot.message_command_check>`
+- |commands| Add :meth:`Bot.message_command_check_once <ext.commands.Bot.message_command_check_once>`
+
 .. _vp1p7p3:
 
 v1.7.3
