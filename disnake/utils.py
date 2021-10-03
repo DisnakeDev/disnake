@@ -1135,8 +1135,6 @@ def format_dt(dt: Union[datetime.datetime, int, float], /, style: Optional[Times
     :class:`str`
         The formatted string.
     """
-    if isinstance(dt, (float, int)):
-        dt = int(dt)
-    elif isinstance(dt, datetime.datetime):
+    if isinstance(dt, datetime.datetime):
         dt = dt.timestamp()
     return f'<t:{int(dt)}:{style}>'
