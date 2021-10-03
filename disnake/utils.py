@@ -1095,7 +1095,7 @@ def resolve_annotation(
 TimestampStyle = Literal['f', 'F', 'd', 'D', 't', 'T', 'R']
 
 
-def format_dt(dt: datetime.datetime, /, style: Optional[TimestampStyle] = None) -> str:
+def format_dt(dt: Union[datetime.datetime, int. float], /, style: Optional[TimestampStyle] = "f") -> str:
     """A helper function to format a :class:`datetime.datetime` for presentation within Discord.
 
     This allows for a locale-independent way of presenting data using Discord specific Markdown.
@@ -1135,6 +1135,8 @@ def format_dt(dt: datetime.datetime, /, style: Optional[TimestampStyle] = None) 
     :class:`str`
         The formatted string.
     """
-    if style is None:
-        return f'<t:{int(dt.timestamp())}>'
+    if isinstance(dt, (float, int)):
+        dt = int(dt)
+    elif isinstance(dt, datetime.datetime):
+        dt = dt.timestamp
     return f'<t:{int(dt.timestamp())}:{style}>'
