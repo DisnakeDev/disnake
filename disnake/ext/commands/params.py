@@ -232,6 +232,8 @@ class ParamInfo:
                 for channel in args:
                     channel_types.union(_channel_type_factory(channel))
                 self.channel_types = list(channel_types)
+            elif annotation in self.TYPES:
+                self.type = annotation
             elif any(get_origin(arg) for arg in args):
                 raise TypeError("Unions do not support nesting")
             else:

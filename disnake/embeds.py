@@ -344,7 +344,7 @@ class Embed:
         """
         return EmbedProxy(getattr(self, '_footer', {}))  # type: ignore
 
-    def set_footer(self: E, text: MaybeEmpty[Any] = EmptyEmbed, icon_url: MaybeEmpty[Any] = EmptyEmbed) -> E:
+    def set_footer(self: E, *, text: MaybeEmpty[Any] = EmptyEmbed, icon_url: MaybeEmpty[Any] = EmptyEmbed) -> E:
         """Sets the footer for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -500,7 +500,7 @@ class Embed:
         """
         return EmbedProxy(getattr(self, '_author', {}))  # type: ignore
 
-    def set_author(self: E, name: Any, url: MaybeEmpty[Any] = EmptyEmbed, icon_url: MaybeEmpty[Any] = EmptyEmbed) -> E:
+    def set_author(self: E, *, name: Any, url: MaybeEmpty[Any] = EmptyEmbed, icon_url: MaybeEmpty[Any] = EmptyEmbed) -> E:
         """Sets the author for the embed content.
 
         This function returns the class instance to allow for fluent-style

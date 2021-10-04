@@ -7,7 +7,7 @@ from typing import (
     Callable,
     Coroutine,
     Optional,
-    Tuple,
+    Sequence,
     TypeVar,
     Union,
 )
@@ -242,7 +242,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         description: str = None,
         options: List[Option] = None,
         default_permission: bool = True,
-        guild_ids: List[int] = None,
+        guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
         **kwargs
@@ -251,7 +251,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = auto_sync
-        self.guild_ids: Optional[List[int]] = guild_ids
+        self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.autocompleters: Dict[str, Any] = kwargs.get('autocompleters', {})
         
         self.docstring = utils.parse_docstring(func)
@@ -505,7 +505,7 @@ def slash_command(
     description: str = None,
     options: List[Option] = None,
     default_permission: bool = True,
-    guild_ids: List[int] = None,
+    guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
     auto_sync: bool = True,
     **kwargs

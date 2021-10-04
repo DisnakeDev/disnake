@@ -36,7 +36,7 @@ import sys
 import traceback
 import time
 import types
-from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union, Set, Tuple, Coroutine
+from typing import Any, Callable, Mapping, List, Dict, TYPE_CHECKING, Optional, TypeVar, Type, Union, Set, Tuple, Coroutine, Sequence
 
 import disnake
 
@@ -425,7 +425,7 @@ class BotBase(GroupMixin):
         description: str = None,
         options: List[disnake.app_commands.Option] = None,
         default_permission: bool = True,
-        guild_ids: List[int] = None,
+        guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
         **kwargs
@@ -494,7 +494,7 @@ class BotBase(GroupMixin):
         self,
         *,
         name: str = None,
-        guild_ids: List[int] = None,
+        guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs
     ) -> Callable[
@@ -540,7 +540,7 @@ class BotBase(GroupMixin):
         self,
         *,
         name: str = None,
-        guild_ids: List[int] = None,
+        guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs
     ) -> Callable[
@@ -592,7 +592,7 @@ class BotBase(GroupMixin):
             self._schedule_event(event, ev, *args, **kwargs)  # type: ignore
 
     def _ordered_unsynced_commands(
-        self, test_guilds: List[int] = None
+        self, test_guilds: Sequence[int] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
         global_cmds = []
         guilds = {}

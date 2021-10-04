@@ -333,7 +333,7 @@ class Client:
         self._enable_debug_events: bool = options.pop('enable_debug_events', False)
         self._sync_commands: bool = options.pop('sync_commands', True)
         self._sync_commands_debug: bool = options.pop('sync_commands_debug', False)
-        self._test_guilds: Optional[List[int]] = options.pop('test_guilds', None)
+        self._test_guilds: Optional[Sequence[int]] = options.pop('test_guilds', None)
         self._connection: ConnectionState = self._get_state(**options)
         self._connection.shard_count = self.shard_count
         self._closed: bool = False
@@ -604,7 +604,7 @@ class Client:
         traceback.print_exc()
 
     def _ordered_unsynced_commands(
-        self, test_guilds: List[int] = None
+        self, test_guilds: Sequence[int] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
         """In :class:`.Bot` instance, this method is overridden"""
         raise NotImplementedError

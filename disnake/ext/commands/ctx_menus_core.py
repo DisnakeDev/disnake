@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, TYPE_CHECKING, Callable, Coroutine, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Callable, Coroutine, Optional, TypeVar, Union, Sequence
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -54,9 +54,9 @@ class InvokableUserCommand(InvokableApplicationCommand):
         Whether to sync the command in the API with ``body`` or not.
     """
 
-    def __init__(self, func, *, name: str = None, guild_ids: List[int] = None, auto_sync: bool = True, **kwargs):
+    def __init__(self, func, *, name: str = None, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs):
         super().__init__(func, name=name, **kwargs)
-        self.guild_ids: Optional[List[int]] = guild_ids
+        self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
         self.body = UserCommand(name=self.name)
     
@@ -100,9 +100,9 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         Whether to sync the command in the API with ``body`` or not.
     """
 
-    def __init__(self, func, *, name: str = None, guild_ids: List[int] = None, auto_sync: bool = True, **kwargs):
+    def __init__(self, func, *, name: str = None, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs):
         super().__init__(func, name=name, **kwargs)
-        self.guild_ids: Optional[List[int]] = guild_ids
+        self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
         self.body = MessageCommand(name=self.name)
 
@@ -120,7 +120,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: str = None,
-    guild_ids: List[int] = None,
+    guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     **kwargs
 ) -> Callable[
@@ -174,7 +174,7 @@ def user_command(
 def message_command(
     *,
     name: str = None,
-    guild_ids: List[int] = None,
+    guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     **kwargs
 ) -> Callable[
