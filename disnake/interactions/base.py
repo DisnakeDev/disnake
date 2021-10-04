@@ -47,6 +47,7 @@ from ..object import Object
 from ..permissions import Permissions
 from ..user import ClientUser, User
 from ..webhook.async_ import Webhook, async_context, handle_message_parameters
+from ..mentions import AllowedMentions
 
 __all__ = (
     'Interaction',
@@ -491,6 +492,7 @@ class InteractionResponse:
         view: View = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        allowed_mentions: AllowedMentions = ...
     ) -> None:
         """|coro|
 
@@ -530,6 +532,18 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
+        if allowed_mentions is not None:
+            if state.allowed_mentions is not None:
+                allowed_mentions = state.allowed_mentions.merge(allowed_mentions).to_dict()
+            else:
+                allowed_mentions = allowed_mentions.to_dict()
+        else:
+            allowed_mentions = state.allowed_mentions and state.allowed_mentions.to_dict()
+
+        if mention_author is not None:
+            allowed_mentions = allowed_mentions or AllowedMentions().to_dict()
+            allowed_mentions['replied_user'] = bool(mention_author)
+
         if self._responded:
             raise InteractionResponded(self._parent)
 
