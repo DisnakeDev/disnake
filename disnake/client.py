@@ -607,7 +607,7 @@ class Client:
         self, test_guilds: Sequence[int] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
         """In :class:`.Bot` instance, this method is overridden"""
-        raise NotImplementedError
+        return [], {}
 
     # command synchronisation
 

@@ -25,6 +25,8 @@ from __future__ import annotations
 
 import inspect
 import disnake.utils
+import inspect
+import disnake
 
 from typing import (
     Any,
@@ -38,7 +40,7 @@ from typing import (
     Tuple,
     TypeVar,
     Type,
-    Union
+    Union,
 )
 
 from ._types import _BaseCommand
@@ -47,11 +49,11 @@ from .slash_core import InvokableSlashCommand
 from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
 
 if TYPE_CHECKING:
-    from .bot import Bot, AutoShardedBot
+    from .bot import Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot
     from .context import Context
     from .core import Command
     from disnake.interactions import ApplicationCommandInteraction
-    AnyBot = Union[Bot, AutoShardedBot]
+    AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
 __all__ = (
     'CogMeta',
@@ -62,6 +64,12 @@ CogT = TypeVar('CogT', bound='Cog')
 FuncT = TypeVar('FuncT', bound=Callable[..., Any])
 
 MISSING: Any = disnake.utils.MISSING
+
+
+def _cog_special_method(func: FuncT) -> FuncT:
+    func.__cog_special_method__ = None
+    return func
+
 
 class CogMeta(type):
     """A metaclass for defining a cog.
@@ -198,9 +206,6 @@ class CogMeta(type):
     def qualified_name(cls) -> str:
         return cls.__cog_name__
 
-def _cog_special_method(func: FuncT) -> FuncT:
-    func.__cog_special_method__ = None
-    return func
 
 class Cog(metaclass=CogMeta):
     """The base class that all cogs must inherit from.
@@ -230,13 +235,13 @@ class Cog(metaclass=CogMeta):
         self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore
 
         lookup = {
-            cmd.qualified_name: cmd
+            cmd.qualified_name: cmd # type: ignore
             for cmd in self.__cog_commands__
         }
 
         # Update the Command instances dynamically as well
         for command in self.__cog_commands__:
-            setattr(self, command.callback.__name__, command)
+            setattr(self, command.callback.__name__, command) # type: ignore
             parent = command.parent
             if parent is not None:
                 # Get the latest parent reference
@@ -584,12 +589,12 @@ class Cog(metaclass=CogMeta):
             command.cog = self
             if command.parent is None:
                 try:
-                    bot.add_command(command)
+                    bot.add_command(command) # type: ignore
                 except Exception as e:
                     # undo our additions
                     for to_undo in self.__cog_commands__[:index]:
                         if to_undo.parent is None:
-                            bot.remove_command(to_undo.name)
+                            bot.remove_command(to_undo.name) # type: ignore
                     raise e
         
         for index, command in enumerate(self.__cog_app_commands__):
@@ -614,10 +619,10 @@ class Cog(metaclass=CogMeta):
 
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
-            bot.add_check(self.bot_check)
+            bot.add_check(self.bot_check) # type: ignore
 
         if cls.bot_check_once is not Cog.bot_check_once:
-            bot.add_check(self.bot_check_once, call_once=True)
+            bot.add_check(self.bot_check_once, call_once=True) # type: ignore
 
         # while Bot.add_listener can raise if it's not a coroutine,
         # this precondition is already met by the listener decorator
@@ -639,7 +644,7 @@ class Cog(metaclass=CogMeta):
         try:
             for command in self.__cog_commands__:
                 if command.parent is None:
-                    bot.remove_command(command.name)
+                    bot.remove_command(command.name) # type: ignore
 
             for app_command in self.__cog_app_commands__:
                 if isinstance(app_command, InvokableSlashCommand):
@@ -653,10 +658,10 @@ class Cog(metaclass=CogMeta):
                 bot.remove_listener(getattr(self, method_name))
 
             if cls.bot_check is not Cog.bot_check:
-                bot.remove_check(self.bot_check)
+                bot.remove_check(self.bot_check) # type: ignore
 
             if cls.bot_check_once is not Cog.bot_check_once:
-                bot.remove_check(self.bot_check_once, call_once=True)
+                bot.remove_check(self.bot_check_once, call_once=True) # type: ignore
         finally:
             try:
                 bot._schedule_delayed_command_sync()
