@@ -190,13 +190,14 @@ class ApplicationCommandInteractionData:
         """
         Returns a chain of sub-command names and a dict of filled options.
         """
-        chain = chain or ()
+        if chain is None:
+            chain = ()
         for option in self.options:
             if option.value is None:
                 # Extend the chain and collect kwargs in the nesting
                 return option._get_chain_and_kwargs(chain + (option.name,))
             return chain, {o.name: o.value for o in self.options}
-        return (), {}
+        return chain, {}
 
     def _get_focused_option(self) -> Optional[ApplicationCommandInteractionDataOption]:
         for option in self.options:
@@ -266,13 +267,14 @@ class ApplicationCommandInteractionDataOption:
         return None
     
     def _get_chain_and_kwargs(self, chain: Tuple[str, ...] = None) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
-        chain = chain or ()
+        if chain is None:
+            chain = ()
         for option in self.options:
             if option.value is None:
                 # Extend the chain and collect kwargs in the nesting
                 return option._get_chain_and_kwargs(chain + (option.name,))
             return chain, {o.name: o.value for o in self.options}
-        return (), {}
+        return chain, {}
 
 
 class ApplicationCommandInteractionDataResolved:
