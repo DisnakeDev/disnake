@@ -76,9 +76,13 @@ CXT = TypeVar('CXT', bound='Context')
 class InteractionBotBase(CommonBotBase):
     def __init__(
         self,
+        *,
+        sync_commands_on_cog_unload: bool = True,
         **options: Any,
     ):
         super().__init__(**options)
+
+        self._sync_commands_on_cog_unload = sync_commands_on_cog_unload
 
         self._slash_command_checks = []
         self._slash_command_check_once = []

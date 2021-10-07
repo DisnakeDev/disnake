@@ -129,12 +129,34 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         the ``command_prefix`` is set to ``!``. Defaults to ``False``.
 
         .. versionadded:: 1.7
+    test_guilds: List[:class:`int`]
+        The list of IDs of the guilds where you're going to test your app commands.
+        Defaults to ``None``, which means global registration of commands across
+        all guilds.
+
+        .. versionadded:: 2.1
+    sync_commands: :class:`bool`
+        Whether to enable automatic synchronization of application commands in your code.
+        Defaults to ``True``, which means that commands in API are automatically synced
+        with the commands in your code. Defaults to ``True``.
+
+        .. versionadded:: 2.1
+    sync_commands_on_cog_unload: :class:`bool`
+        Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
+
+        .. versionadded:: 2.1
+    sync_commands_debug: :class:`bool`
+        Whether to enable messages logging the synchronization process.
+        Useful for tracking the commands being registered in the API.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.1
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
-        reloaded for you so you do not have to reload the extension manually.
+        reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
         
-        .. versionadded:: 2.0
+        .. versionadded:: 2.1
     """
     pass
 
@@ -168,12 +190,34 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         fetched automatically using :meth:`~.Bot.application_info`.
         For performance reasons it is recommended to use a :class:`set`
         for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
+    test_guilds: List[:class:`int`]
+        The list of IDs of the guilds where you're going to test your app commands.
+        Defaults to ``None``, which means global registration of commands across
+        all guilds.
+
+        .. versionadded:: 2.1
+    sync_commands: :class:`bool`
+        Whether to enable automatic synchronization of application commands in your code.
+        Defaults to ``True``, which means that commands in API are automatically synced
+        with the commands in your code. Defaults to ``True``.
+
+        .. versionadded:: 2.1
+    sync_commands_on_cog_unload: :class:`bool`
+        Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
+
+        .. versionadded:: 2.1
+    sync_commands_debug: :class:`bool`
+        Whether to enable messages logging the synchronization process.
+        Useful for tracking the commands being registered in the API.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.1
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
-        reloaded for you so you do not have to reload the extension manually.
+        reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
         
-        .. versionadded:: 2.0
+        .. versionadded:: 2.1
     """
     pass
 

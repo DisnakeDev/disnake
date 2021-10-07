@@ -653,6 +653,38 @@ class Cog(metaclass=CogMeta):
 
         if cls.bot_check_once is not Cog.bot_check_once:
             bot.add_check(self.bot_check_once, call_once=True) # type: ignore
+        
+        # Add application command checks
+        if cls.bot_slash_command_check is not Cog.bot_slash_command_check:
+            bot.add_app_command_check(self.bot_slash_command_check, slash_commands=True) # type: ignore
+        
+        if cls.bot_user_command_check is not Cog.bot_user_command_check:
+            bot.add_app_command_check(self.bot_user_command_check, user_commands=True) # type: ignore
+        
+        if cls.bot_message_command_check is not Cog.bot_message_command_check:
+            bot.add_app_command_check(self.bot_message_command_check, message_commands=True) # type: ignore
+        
+        # Add app command one-off checks
+        if cls.bot_slash_command_check_once is not Cog.bot_slash_command_check_once:
+            bot.add_app_command_check(
+                self.bot_slash_command_check_once, # type: ignore
+                call_once=True,
+                slash_commands=True
+            )
+        
+        if cls.bot_user_command_check_once is not Cog.bot_user_command_check_once:
+            bot.add_app_command_check(
+                self.bot_user_command_check_once, # type: ignore
+                call_once=True,
+                user_commands=True
+            )
+        
+        if cls.bot_message_command_check_once is not Cog.bot_message_command_check_once:
+            bot.add_app_command_check(
+                self.bot_message_command_check_once, # type: ignore
+                call_once=True,
+                message_commands=True
+            )
 
         # while Bot.add_listener can raise if it's not a coroutine,
         # this precondition is already met by the listener decorator
@@ -662,7 +694,8 @@ class Cog(metaclass=CogMeta):
             bot.add_listener(getattr(self, method_name), name)
 
         try:
-            bot._schedule_delayed_command_sync()
+            if bot._sync_commands_on_cog_unload:
+                bot._schedule_delayed_command_sync()
         except Exception:
             pass
 
@@ -692,9 +725,43 @@ class Cog(metaclass=CogMeta):
 
             if cls.bot_check_once is not Cog.bot_check_once:
                 bot.remove_check(self.bot_check_once, call_once=True) # type: ignore
+            
+            # Remove application command checks
+            if cls.bot_slash_command_check is not Cog.bot_slash_command_check:
+                bot.remove_app_command_check(self.bot_slash_command_check, slash_commands=True) # type: ignore
+            
+            if cls.bot_user_command_check is not Cog.bot_user_command_check:
+                bot.remove_app_command_check(self.bot_user_command_check, user_commands=True) # type: ignore
+            
+            if cls.bot_message_command_check is not Cog.bot_message_command_check:
+                bot.remove_app_command_check(self.bot_message_command_check, message_commands=True) # type: ignore
+            
+            # Remove app command one-off checks
+            if cls.bot_slash_command_check_once is not Cog.bot_slash_command_check_once:
+                bot.remove_app_command_check(
+                    self.bot_slash_command_check_once, # type: ignore
+                    call_once=True,
+                    slash_commands=True
+                )
+            
+            if cls.bot_user_command_check_once is not Cog.bot_user_command_check_once:
+                bot.remove_app_command_check(
+                    self.bot_user_command_check_once, # type: ignore
+                    call_once=True,
+                    user_commands=True
+                )
+            
+            if cls.bot_message_command_check_once is not Cog.bot_message_command_check_once:
+                bot.remove_app_command_check(
+                    self.bot_message_command_check_once, # type: ignore
+                    call_once=True,
+                    message_commands=True
+                )
+        
         finally:
             try:
-                bot._schedule_delayed_command_sync()
+                if bot._sync_commands_on_cog_unload:
+                    bot._schedule_delayed_command_sync()
             except Exception:
                 pass
             try:
