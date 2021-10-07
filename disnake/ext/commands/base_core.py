@@ -295,7 +295,7 @@ class InvokableApplicationCommand(ABC):
             await self.on_error(self.cog, inter, error) # type: ignore
 
     async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
-        """Overwritten in subclasses"""
+        """Overridden in subclasses"""
         raise error
 
     async def dispatch_error(self, inter: ApplicationCommandInteraction, error: CommandError):

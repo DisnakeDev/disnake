@@ -891,7 +891,7 @@ class InteractionBotBase(CommonBotBase):
             event_name = 'message_command'
         
         if event_name is None or app_command is None:
-            # TODO: unregister this command from API
+            # TODO: unregister this command from API?
             return
         
         if app_command.guild_ids is None or interaction.guild_id in app_command.guild_ids:
@@ -899,13 +899,13 @@ class InteractionBotBase(CommonBotBase):
             try:
                 if await self.application_command_can_run(interaction, call_once=True):
                     await app_command.invoke(interaction)
-                    self.dispatch(f'{event_name}_complete', interaction)
+                    self.dispatch(f'{event_name}_completion', interaction)
                 else:
-                    raise errors.CheckFailure('The global check once functions failed.')
+                    raise errors.CheckFailure('The global check_once functions failed.')
             except errors.CommandError as exc:
                 await app_command.dispatch_error(interaction, exc)
         else:
-            # TODO: unregister this command from API
+            # TODO: unregister this command from API?
             pass
 
     async def on_application_command(self, interaction: ApplicationCommandInteraction):
