@@ -494,6 +494,36 @@ class Cog(metaclass=CogMeta):
         return True
 
     @_cog_special_method
+    def cog_slash_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+        """A special method that registers as a :func:`~disnake.ext.commands.check`
+        for every slash command and subcommand in this cog.
+
+        This function **can** be a coroutine and must take a sole parameter,
+        ``inter``, to represent the :class:`.ApplicationCommandInteraction`.
+        """
+        return True
+    
+    @_cog_special_method
+    def cog_user_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+        """A special method that registers as a :func:`~disnake.ext.commands.check`
+        for every user command in this cog.
+
+        This function **can** be a coroutine and must take a sole parameter,
+        ``inter``, to represent the :class:`.ApplicationCommandInteraction`.
+        """
+        return True
+    
+    @_cog_special_method
+    def cog_message_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+        """A special method that registers as a :func:`~disnake.ext.commands.check`
+        for every message command in this cog.
+
+        This function **can** be a coroutine and must take a sole parameter,
+        ``inter``, to represent the :class:`.ApplicationCommandInteraction`.
+        """
+        return True
+
+    @_cog_special_method
     async def cog_command_error(self, ctx: Context, error: Exception) -> None:
         """A special method that is called whenever an error
         is dispatched inside this cog.

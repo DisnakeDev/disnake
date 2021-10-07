@@ -13,7 +13,7 @@ import datetime
 
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
-from disnake.utils import async_all
+from disnake.utils import async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import *
@@ -444,8 +444,27 @@ class InvokableApplicationCommand(ABC):
         original = inter.application_command
         inter.application_command = self
 
+        if inter.data.type is ApplicationCommandType.chat_input:
+            partial_attr_name = 'slash_command'
+        elif inter.data.type is ApplicationCommandType.user:
+            partial_attr_name = 'user_command'
+        elif inter.data.type is ApplicationCommandType.message:
+            partial_attr_name = 'message_command'
+        else:
+            return True
+
         try:
-            # TODO: cog checks for application commands
+            if inter.bot and not await inter.bot.application_command_can_run(inter):
+                raise CheckFailure(f'The global check functions for command {self.qualified_name} failed.')
+            
+            cog = self.cog
+            if cog is not None:
+                meth = getattr(cog, f'cog_{partial_attr_name}_check', None)
+                local_check = _get_overridden_method(meth)
+                if local_check is not None:
+                    ret = await maybe_coroutine(local_check, inter)
+                    if not ret:
+                        return False
 
             predicates = self.checks
             if not predicates:
