@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Callable, Coroutine, Optional, TypeVar, Union, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Coroutine, Optional, TypeVar, Union, Sequence
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -11,18 +11,15 @@ import asyncio
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
     from disnake.interactions import ApplicationCommandInteraction
-    
-    ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
+
+    ApplicationCommandInteractionT = TypeVar(
+        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
+    )
     from .cog import CogT
 
-    P = ParamSpec('P')
+    P = ParamSpec("P")
 
-__all__ = (
-    'InvokableUserCommand',
-    'InvokableMessageCommand',
-    'user_command',
-    'message_command'
-)
+__all__ = ("InvokableUserCommand", "InvokableMessageCommand", "user_command", "message_command")
 
 
 class InvokableUserCommand(InvokableApplicationCommand):
@@ -59,7 +56,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
         self.body = UserCommand(name=self.name)
-    
+
     async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
         cog = self.cog
         try:
@@ -68,7 +65,18 @@ class InvokableUserCommand(InvokableApplicationCommand):
                 if local is not None:
                     await local(inter, error)
         finally:
-            inter.bot.dispatch('user_command_error', inter, error)
+            inter.bot.dispatch("user_command_error", inter, error)
+
+    async def __call__(self, inter: ApplicationCommandInteraction, target: Any = None, *args, **kwargs) -> None:
+        # the target may just not be passed in
+        target = target or inter.target
+        try:
+            await super().__call__(inter, *args, **kwargs)
+        except TypeError as e:
+            if e.args and e.args[0].startswith(f"{self.callback.__name__}() takes "):
+                await super().__call__(inter, target, *args, **kwargs)
+            else:
+                raise
 
 
 class InvokableMessageCommand(InvokableApplicationCommand):
@@ -114,23 +122,30 @@ class InvokableMessageCommand(InvokableApplicationCommand):
                 if local is not None:
                     await local(inter, error)
         finally:
-            inter.bot.dispatch('message_command_error', inter, error)
+            inter.bot.dispatch("message_command_error", inter, error)
+
+    async def __call__(self, inter: ApplicationCommandInteraction, target: Any = None, *args, **kwargs) -> None:
+        # the target may just not be passed in
+        target = target or inter.target
+        try:
+            await super().__call__(inter, *args, **kwargs)
+        except TypeError as e:
+            if e.args and e.args[0].startswith(f"{self.callback.__name__}() takes "):
+                await super().__call__(inter, target, *args, **kwargs)
+            else:
+                raise
 
 
 def user_command(
-    *,
-    name: str = None,
-    guild_ids: Sequence[int] = None,
-    auto_sync: bool = True,
-    **kwargs
+    *, name: str = None, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs
 ) -> Callable[
     [
         Union[
             Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
         ]
     ],
-    InvokableUserCommand
+    InvokableUserCommand,
 ]:
     """
     A shortcut decorator that builds a user command.
@@ -144,7 +159,7 @@ def user_command(
     guild_ids: List[:class:`int`]
         if specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
-    
+
     Returns
     --------
     Callable[..., :class:`InvokableUserCommand`]
@@ -154,37 +169,28 @@ def user_command(
     def decorator(
         func: Union[
             Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
         ]
     ) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
-            raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
-        if hasattr(func, '__command_flag__'):
-            raise TypeError('Callback is already a command.')
-        return InvokableUserCommand(
-            func,
-            name=name,
-            guild_ids=guild_ids,
-            auto_sync=auto_sync,
-            **kwargs
-        )
+            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+        if hasattr(func, "__command_flag__"):
+            raise TypeError("Callback is already a command.")
+        return InvokableUserCommand(func, name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
+
     return decorator
 
 
 def message_command(
-    *,
-    name: str = None,
-    guild_ids: Sequence[int] = None,
-    auto_sync: bool = True,
-    **kwargs
+    *, name: str = None, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs
 ) -> Callable[
     [
         Union[
             Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
         ]
     ],
-    InvokableMessageCommand
+    InvokableMessageCommand,
 ]:
     """
     A decorator that builds a message command.
@@ -198,7 +204,7 @@ def message_command(
     guild_ids: List[:class:`int`]
         if specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
-    
+
     Returns
     --------
     Callable[..., :class:`InvokableMessageCommand`]
@@ -208,18 +214,13 @@ def message_command(
     def decorator(
         func: Union[
             Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
         ]
     ) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):
-            raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
-        if hasattr(func, '__command_flag__'):
-            raise TypeError('Callback is already a command.')
-        return InvokableMessageCommand(
-            func,
-            name=name,
-            guild_ids=guild_ids,
-            auto_sync=auto_sync,
-            **kwargs
-        )
+            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+        if hasattr(func, "__command_flag__"):
+            raise TypeError("Callback is already a command.")
+        return InvokableMessageCommand(func, name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
+
     return decorator

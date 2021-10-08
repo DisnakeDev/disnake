@@ -14,6 +14,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
     get_origin,
     get_type_hints,
     overload,
@@ -395,7 +396,8 @@ param = Param
 
 def option_enum(choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice) -> Type[TChoice]:
     if isinstance(choices, list):
-        choices = {str(i): i for i in choices}
+        # invariance issue, please fix
+        choices = cast(Dict[str, TChoice], {str(i): i for i in choices})
 
     choices = choices or kwargs
     first, *_ = choices.values()

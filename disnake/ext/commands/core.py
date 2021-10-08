@@ -1338,7 +1338,8 @@ class GroupMixin(Generic[CogT]):
             kwargs.setdefault('parent', self)
             result = command(name=name, cls=cls, *args, **kwargs)(func)
             self.add_command(result)
-            return result
+            # TODO: Fix Command and CommandT not being compatible (wtf?)
+            return result # type: ignore
 
         return decorator
 
@@ -1386,7 +1387,8 @@ class GroupMixin(Generic[CogT]):
             kwargs.setdefault('parent', self)
             result = group(name=name, cls=cls, *args, **kwargs)(func)
             self.add_command(result)
-            return result
+            # TODO: Fix Group and GroupT not being compatible (wtf?)
+            return result # type: ignore
 
         return decorator
 
