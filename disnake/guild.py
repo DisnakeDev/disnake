@@ -234,15 +234,6 @@ class Guild(Hashable):
         The guild's NSFW level.
 
         .. versionadded:: 2.0
-    
-    bots: :class:`Member`
-        Returns the list of bots currently in the guild
-    
-    humans: :class:`Member`
-        Returns the list of humans currently in the guild
-    
-    get_or_fetch_member: :class:`Member`
-        Tries to get the member from the bot's cache, else makes an API call to get the member.
     """
 
     __slots__ = (
@@ -529,16 +520,6 @@ class Guild(Hashable):
         """
         return list(self._threads.values())
     
-    @property
-    def humans(self) -> List[Member]:
-        """List[:class:`Member`]: A list of humans that belong to this guild."""
-        return list(mem for mem in self.members if not mem.bot)
-    
-    @property
-    def bots(self) -> List[Member]:
-        """List[:class:`Member`]: A list of bots that belong to this guild."""
-        return list(mem for mem in self.members if mem.bot)
-
     @property
     def large(self) -> bool:
         """:class:`bool`: Indicates if the guild is a 'large' guild.

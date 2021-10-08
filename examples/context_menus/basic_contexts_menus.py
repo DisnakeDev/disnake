@@ -34,7 +34,7 @@ async def avatar(inter: disnake.UserCommandInteraction):
 async def reverse(inter: disnake.MessageCommandInteraction):
     # inter.target is the message you clicked on
     # Let's reverse it and send back
-    await inter.response.send_message(inter.target.content)
+    await inter.response.send_message(inter.target.content[::-1])
 
 
 bot.run("TOKEN")
