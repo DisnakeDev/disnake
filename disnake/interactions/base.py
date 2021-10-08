@@ -488,6 +488,7 @@ class InteractionResponse:
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
@@ -510,6 +511,8 @@ class InteractionResponse:
             The file to upload.
         files: List[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
         tts: :class:`bool`
             Indicates if the message should be sent using text-to-speech.
         view: :class:`disnake.ui.View`
@@ -557,6 +560,15 @@ class InteractionResponse:
         if files is not MISSING and len(files) > 10:
             raise ValueError('files cannot exceed maximum of 10 elements')
 
+        previous_mentions: Optional[AllowedMentions] = getattr(self._parent._state, 'allowed_mentions', None)
+        if allowed_mentions:
+            if previous_mentions is not None:
+                payload['allowed_mentions'] = previous_mentions.merge(allowed_mentions).to_dict()
+            else:
+                payload['allowed_mentions'] = allowed_mentions.to_dict()
+        elif previous_mentions is not None:
+            payload['allowed_mentions'] = previous_mentions.to_dict()
+
         if content is not None:
             payload['content'] = str(content)
 
@@ -600,6 +612,7 @@ class InteractionResponse:
         content: Optional[Any] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
         attachments: List[Attachment] = MISSING,
         view: Optional[View] = MISSING,
     ) -> None:
@@ -617,6 +630,8 @@ class InteractionResponse:
         embed: Optional[:class:`Embed`]
             The embed to edit the message with. ``None`` suppresses the embeds.
             This should not be mixed with the ``embeds`` parameter.
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all attachments are removed.
@@ -653,6 +668,15 @@ class InteractionResponse:
             embeds = [] if embed is None else [embed]
         if embeds is not MISSING:
             payload['embeds'] = [e.to_dict() for e in embeds]
+
+        previous_mentions: Optional[AllowedMentions] = getattr(self._parent._state, 'allowed_mentions', None)
+        if allowed_mentions:
+            if previous_mentions is not None:
+                payload['allowed_mentions'] = previous_mentions.merge(allowed_mentions).to_dict()
+            else:
+                payload['allowed_mentions'] = allowed_mentions.to_dict()
+        elif previous_mentions is not None:
+            payload['allowed_mentions'] = previous_mentions.to_dict()
 
         if attachments is not MISSING:
             payload['attachments'] = [a.to_dict() for a in attachments]

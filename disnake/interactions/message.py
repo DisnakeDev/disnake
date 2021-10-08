@@ -80,7 +80,6 @@ class MessageInteraction(Interaction):
         raise Exception("MessageInteraction is malformed - no component found")
         
 
-
 class MessageInteractionData:
     """Represents the data of an interaction with a message component.
 
