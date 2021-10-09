@@ -36,7 +36,6 @@ from typing import (
     Coroutine,
     Dict,
     Generator,
-    Iterable,
     List,
     Literal,
     Optional,
@@ -102,6 +101,7 @@ Coro = TypeVar('Coro', bound=Callable[..., Coroutine[Any, Any, Any]])
 
 _log = logging.getLogger(__name__)
 
+
 def _cancel_tasks(loop: asyncio.AbstractEventLoop) -> None:
     tasks = {t for t in asyncio.all_tasks(loop=loop) if not t.done()}
 
@@ -125,6 +125,7 @@ def _cancel_tasks(loop: asyncio.AbstractEventLoop) -> None:
                 'task': task
             })
 
+
 def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
     try:
         _cancel_tasks(loop)
@@ -133,61 +134,6 @@ def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
         _log.info('Closing the event loop.')
         loop.close()
 
-def _app_commands_diff(
-    new_commands: Iterable[ApplicationCommand],
-    old_commands: Iterable[ApplicationCommand],
-) -> Dict[str, List[ApplicationCommand]]:
-    new_cmds = {cmd.name: cmd for cmd in new_commands}
-    old_cmds = {cmd.name: cmd for cmd in old_commands}
-
-    diff = {
-        'no_changes': [],
-        'upsert': [],
-        'edit': [],
-        'delete': [],
-        'change_type': [],
-    }
-
-    for name, new_cmd in new_cmds.items():
-        old_cmd = old_cmds.get(name)
-        if old_cmd is None:
-            diff['upsert'].append(new_cmd)
-        elif old_cmd.type != new_cmd.type:
-            diff['change_type'].append(new_cmd)
-        elif new_cmd._always_synced:
-            diff['no_changes'].append(old_cmd)
-            continue
-        elif new_cmd != old_cmd:
-            diff['edit'].append(new_cmd)
-        else:
-            diff['no_changes'].append(new_cmd)
-    
-    for name, old_cmd in old_cmds.items():
-        if name not in new_cmds:
-            diff['delete'].append(old_cmd)
-    
-    return diff
-
-def _show_diff(diff: Dict[str, List[ApplicationCommand]], line_prefix: str = '') -> None:
-    _upsert = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['upsert']) or '-'
-    _edit = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['edit']) or '-'
-    _delete = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['delete']) or '-'
-    _change_type = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['change_type']) or '-'
-    _no_changes = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['no_changes']) or '-'
-    print(
-        f'{line_prefix}To upsert:',
-        f'    {_upsert}',
-        f'To edit:',
-        f'    {_edit}',
-        f'To delete:',
-        f'    {_delete}',
-        f'Type migration:',
-        f'    {_change_type}',
-        f'No changes:',
-        f'    {_no_changes}',
-        sep=f'\n{line_prefix}',
-        end='\n\n'
-    )
 
 class Client:
     r"""Represents a client connection that connects to Discord.
@@ -331,9 +277,6 @@ class Client:
         }
 
         self._enable_debug_events: bool = options.pop('enable_debug_events', False)
-        self._sync_commands: bool = options.pop('sync_commands', True)
-        self._sync_commands_debug: bool = options.pop('sync_commands_debug', False)
-        self._test_guilds: Optional[Sequence[int]] = options.pop('test_guilds', None)
         self._connection: ConnectionState = self._get_state(**options)
         self._connection.shard_count = self.shard_count
         self._closed: bool = False
@@ -341,7 +284,6 @@ class Client:
         self._first_connect: asyncio.Event = asyncio.Event()
         self._connection._get_websocket = self._get_websocket
         self._connection._get_client = lambda: self
-        self._sync_queued: bool = False
 
         if VoiceClient.warn_nacl:
             VoiceClient.warn_nacl = False
@@ -363,7 +305,6 @@ class Client:
         if self._first_connect.is_set():
             return
         self._first_connect.set()
-        self._schedule_app_command_preparation()
 
     @property
     def latency(self) -> float:
@@ -602,131 +543,6 @@ class Client:
         """
         print(f'Ignoring exception in {event_method}', file=sys.stderr)
         traceback.print_exc()
-
-    def _ordered_unsynced_commands(
-        self, test_guilds: Sequence[int] = None
-    ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
-        """In :class:`.Bot` instance, this method is overridden"""
-        return [], {}
-
-    # command synchronisation
-
-    async def _cache_application_commands(self) -> None:
-        _, guilds = self._ordered_unsynced_commands(self._test_guilds)
-        if guilds is None:
-            return
-        try:
-            commands = await self.fetch_global_commands()
-            self._connection._global_application_commands = {
-                command.id: command for command in commands 
-                if command.id
-            }
-        except Exception:
-            pass
-        for guild_id in guilds:
-            try:
-                commands = await self.fetch_guild_commands(guild_id)
-                self._connection._guild_application_commands[guild_id] = {
-                    command.id: command for command in commands 
-                    if command and command.id
-                }
-            except Exception:
-                pass
-    
-    async def _sync_application_commands(self) -> None:
-        if not self._sync_commands:
-            return
-        # We assume that all commands are already cached
-        # Sort all invokable commands between guild IDs
-        global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
-        if global_cmds is None:
-            return
-        
-        # Update global commands first
-        diff = _app_commands_diff(global_cmds, self._connection._global_application_commands.values())
-        update_required = bool(diff['upsert']) or bool(diff['edit']) or bool(diff['change_type']) or bool(diff['delete'])
-        # Show diff
-        if self._sync_commands_debug:
-            print(
-                'GLOBAL COMMANDS\n===============',
-                '| NOTE: global commands can take up to 1 hour to show up after registration.',
-                '|',
-                f'| Update is required: {update_required}',
-                sep='\n'
-            )
-            _show_diff(diff, '| ')
-        # Do API requests and cache
-        if update_required:
-            try:
-                to_send = diff['no_changes'] + diff['edit']
-                if bool(diff['change_type']):
-                    await self.bulk_overwrite_global_commands(to_send)
-                to_send.extend(diff['upsert'])
-                to_send.extend(diff['change_type'])
-                new_commands = await self.bulk_overwrite_global_commands(to_send)
-                self._connection._global_application_commands = {
-                    command.id: command for command in new_commands
-                    if command and command.id
-                }
-            except Exception as e:
-                print(f"[WARNING] Failed to overwrite global commands due to {e}")
-        # Update guild commands
-        for guild_id, cmds in guild_cmds.items():
-            current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
-            diff = _app_commands_diff(cmds, current_guild_cmds.values())
-            update_required = bool(diff['upsert']) or bool(diff['edit']) or bool(diff['change_type']) or bool(diff['delete'])
-            # Show diff
-            if self._sync_commands_debug:
-                print(
-                    f'COMMANDS IN {guild_id}\n============{"=" * 18}',
-                    f'| Update is required: {update_required}',
-                    sep='\n'
-                )
-                _show_diff(diff, '| ')
-            # Do API requests and cache
-            if update_required:
-                try:
-                    to_send = diff['no_changes'] + diff['edit']
-                    if bool(diff['change_type']):
-                        await self.bulk_overwrite_guild_commands(guild_id, to_send)
-                    to_send.extend(diff['upsert'])
-                    to_send.extend(diff['change_type'])
-                    new_commands = await self.bulk_overwrite_guild_commands(guild_id, to_send)
-                    self._connection._guild_application_commands[guild_id] = {
-                        command.id: command for command in new_commands
-                        if command and command.id
-                    }
-                except Exception as e:
-                    print(f"[WARNING] Failed to overwrite commands in <Guild id={guild_id}> due to {e}")
-        # Last debug message
-        if self._sync_commands_debug:
-            print('DEBUG: Command synchronization task has been finished', end='\n\n')
-
-    async def _prepare_application_commands(self) -> None:
-        await self._cache_application_commands()
-        await self._sync_application_commands()
-
-    async def _delayed_command_sync(self) -> None:
-        if not self._sync_commands or not self.is_ready() or self._sync_queued:
-            return
-        # We don't do this task on login or in parallel with a similar task
-        # Wait a little bit, maybe other cogs are loading
-        self._sync_queued = True
-        await asyncio.sleep(2)
-        self._sync_queued = False
-        await self._sync_application_commands()
-
-    def _schedule_app_command_preparation(self) -> None:
-        self.loop.create_task(
-            self._prepare_application_commands(),
-            name='disnake: app_command_preparation'
-        )
-    
-    def _schedule_delayed_command_sync(self) -> None:
-        self.loop.create_task(
-            self._delayed_command_sync(),
-            name='disnake: delayed_command_sync'
-        )
 
     # hooks
 
