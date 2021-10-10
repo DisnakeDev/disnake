@@ -44,6 +44,7 @@ from typing import (
 )
 
 from . import utils, abc
+from .app_commands import GuildApplicationCommandPermissions, PartialGuildApplicationCommandPermissions
 from .role import Role
 from .member import Member, VoiceState
 from .emoji import Emoji
@@ -402,7 +403,29 @@ class Guild(Hashable):
         return role
 
     def get_command(self, application_command_id: int, /) -> Optional[ApplicationCommand]:
+        """
+        Gets a cached application command matching the specified ID.
+
+        Paramters
+        ---------
+        name: :class:`int`
+            the ID to compare to.
+        """
         self._state._get_guild_application_command(self.id, application_command_id)
+    
+    def get_command_named(self, name: str, /) -> Optional[ApplicationCommand]:
+        """
+        Gets a cached application command matching the specified name.
+
+        Paramters
+        ---------
+        name: :class:`str`
+            the name to compare to.
+        """
+        granula = self._state._guild_application_commands.get(self.id, {})
+        for cmd in granula.values():
+            if cmd.name == name:
+                return cmd
 
     def _add_application_command(self, application_command: ApplicationCommand, /) -> None:
         self._state._add_guild_application_command(self.id, application_command)
@@ -3015,3 +3038,72 @@ class Guild(Hashable):
         ws = self._state._get_websocket(self.id)
         channel_id = channel.id if channel else None
         await ws.voice_state(self.id, channel_id, self_mute, self_deaf)
+
+    # Application command permissions
+
+    async def bulk_fetch_command_permissions(self) -> List[GuildApplicationCommandPermissions]:
+        """|coro|
+
+        Requests a list of :class:`GuildApplicationCommandPermissions` configured for this guild.
+
+        .. versionadded:: 2.1
+        """
+        array = await self._state.http.get_guild_application_command_permissions(
+            self._state.application_id, self.id # type: ignore
+        )
+        return [GuildApplicationCommandPermissions(state=self._state, data=obj) for obj in array]
+    
+    async def fetch_command_permissions(self, command_id: int) -> GuildApplicationCommandPermissions:
+        """|coro|
+
+        Requests :class:`GuildApplicationCommandPermissions` for a specific command.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        command_id: :class:`int`
+            the ID of the application command
+        
+        Returns
+        -------
+        :class:`GuildApplicationCommandPermissions`
+            The edited app command permissions.
+        """
+
+        data = await self._state.http.get_application_command_permissions(
+            self._state.application_id, self.id, command_id # type: ignore
+        )
+        return GuildApplicationCommandPermissions(state=self._state, data=data)
+
+    async def bulk_edit_command_permissions(
+        self, permissions: List[PartialGuildApplicationCommandPermissions]
+    ) -> List[GuildApplicationCommandPermissions]:
+        """|coro|
+
+        Edits guild permissions of multiple application commands at once.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        permissions: List[:class:`PartialGuildApplicationCommandPermissions`]
+            A list of partial permissions for each app command you want to edit.
+        
+        Returns
+        -------
+        List[:class:`GuildApplicationCommandPermissions`]
+            A list of edited permissions of application commands.
+        """
+
+        payload = [
+            perm.to_dict()
+            for perm in permissions
+        ]
+        
+        array = await self._state.http.bulk_edit_guild_application_command_permissions(
+            self._state.application_id, # type: ignore
+            guild_id=self.id,
+            payload=payload
+        )
+        return [GuildApplicationCommandPermissions(state=self._state, data=obj) for obj in array]

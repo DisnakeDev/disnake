@@ -2,12 +2,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 import re
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Union, cast
 
+from .abc import User
 from .enums import ApplicationCommandType, ChannelType, OptionType, try_enum, enum_if_int, try_enum_to_int
 from .errors import InvalidArgument
 from .role import Role
-from .user import User
+from .state import ConnectionState
 
 __all__ = (
     "application_command_factory",
@@ -18,7 +19,9 @@ __all__ = (
     "OptionChoice",
     "Option",
     "ApplicationCommandPermissions",
-    "RawApplicationCommandPermission",
+    "GuildApplicationCommandPermissions",
+    "PartialGuildApplicationCommandPermissions",
+    "PartialGuildAppCmdPerms",
 )
 
 
@@ -363,7 +366,6 @@ class SlashCommand(ApplicationCommand):
         self.description: str = description
         self.options: List[Option] = options or []
         self.default_permission: bool = default_permission
-        self.permissions = ApplicationCommandPermissions()
 
     def __repr__(self) -> str:
         return (
@@ -431,9 +433,10 @@ class SlashCommand(ApplicationCommand):
         return res
 
 
-class RawApplicationCommandPermission:
+class ApplicationCommandPermissions:
     """
-    Represents command permissions for a role or a user.
+    Represents application command permissions for a role or a user.
+
     Attributes
     ----------
     id : :class:`int`
@@ -441,38 +444,18 @@ class RawApplicationCommandPermission:
     type : :class:`int`
         1 if target is a role; 2 if target is a user
     permission : :class:`bool`
-        allow or deny the access to the command
+        Allow or deny the access to the command
     """
 
     __slots__ = ("id", "type", "permission")
 
-    def __init__(self, id: int, type: int, permission: bool):
-        self.id: int = id
-        self.type: int = type
-        self.permission: bool = permission
+    def __init__(self, *, data: Dict[str, Any]):
+        self.id: int = data["id"]
+        self.type: int = data["type"]
+        self.permission: bool = data["permission"]
 
     def __repr__(self):
-        return "<RawCommandPermission id={0.id} type={0.type} permission={0.permission}>".format(self)
-
-    @classmethod
-    def from_pair(cls, target: Union[Role, User], permission: bool):
-        if not isinstance(target, (Role, User)):
-            raise InvalidArgument("target should be Role or User")
-        if not isinstance(permission, bool):
-            raise InvalidArgument("permission should be bool")
-        return RawApplicationCommandPermission(
-            id=target.id,
-            type=1 if isinstance(target, Role) else 2,
-            permission=permission
-        )
-
-    @classmethod
-    def from_dict(cls, data: dict):
-        return RawApplicationCommandPermission(
-            id=data["id"],
-            type=data["type"],
-            permission=data["permission"]
-        )
+        return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -482,77 +465,155 @@ class RawApplicationCommandPermission:
         }
 
 
-class ApplicationCommandPermissions:
+class GuildApplicationCommandPermissions:
     """
-    Represents application command permissions.
-    Roughly equivalent to a list of :class:`RawApplicationCommandPermission`
-    Application command permissions are checked on the server side.
-    Only guild application commands can have this type of permissions.
+    Represents application command permissions in a guild.
 
-    Parameters
+    Attributes
     ----------
-    raw_permissions : List[:class:`RawApplicationCommandPermission`]
-        a list of :class:`RawApplicationCommandPermission`.
-        However, :meth:`from_pairs` or :meth:`from_ids`
-        might be more convenient.
+    id: :class:`int`
+        The ID of the corresponding command.
+    application_id: :class:`int`
+        The ID of your application.
+    guild_id: :class:`int`
+        The ID of the guild where these permissions are applied.
+    permissions: List[:class:`RawApplicationCommandPermission`]
+        A list of :class:`RawApplicationCommandPermission`.
     """
 
-    def __init__(self, raw_permissions: List[RawApplicationCommandPermission] = None):
-        self.permissions: List[RawApplicationCommandPermission] = raw_permissions or []
+    __slots__ = ("_state", "id", "application_id", "guild_id", "permissions")
+
+    def __init__(self, *, state: ConnectionState, data: Mapping[str, Any]):
+        self._state: ConnectionState = state
+        self.id: int = int(data["id"])
+        self.application_id: int = int(data["application_id"])
+        self.guild_id: int = int(data["guild_id"])
+
+        self.permissions: List[ApplicationCommandPermissions] = [
+            ApplicationCommandPermissions(data=elem)
+            for elem in data["permissions"]
+        ]
 
     def __repr__(self):
-        return "<ApplicationCommandPermissions permissions={0.permissions!r}>".format(self)
-
-    @classmethod
-    def from_pairs(cls, permissions: Dict[Union[Role, User], bool]):
-        """
-        Creates :class:`ApplicationCommandPermissions` using
-        instances of :class:`disnake.Role` and :class:`disnake.User`
-
-        Parameters
-        ----------
-        permissions: Dict[Union[:class:`Role`, :class:`User`], :class:`bool`]
-            a dictionary with permissions for users and roles.
-        """
-        raw_perms = [
-            RawApplicationCommandPermission.from_pair(target, perm)
-            for target, perm in permissions.items()
-        ]
-
-        return ApplicationCommandPermissions(raw_perms)
-
-    @classmethod
-    def from_ids(cls, role_perms: Dict[int, bool] = None, user_perms: Dict[int, bool] = None):
-        """
-        Creates :class:`ApplicationCommandPermissions` from
-        2 dictionaries of IDs and permissions.
-
-        Parameters
-        ----------
-        role_perms: Dict[:class:`int`, :class:`bool`]
-            a dictionary of {``role_id``: :class:`bool`}
-        user_perms: Dict[:class:`int`, :class:`bool`]
-            a dictionary of {``user_id``: :class:`bool`}
-        """
-        role_perms = role_perms or {}
-        user_perms = user_perms or {}
-        raw_perms = [
-            RawApplicationCommandPermission(role_id, 1, perm)
-            for role_id, perm in role_perms.items()
-        ]
-
-        for user_id, perm in user_perms.items():
-            raw_perms.append(RawApplicationCommandPermission(user_id, 2, perm))
-        return ApplicationCommandPermissions(raw_perms)
-
-    @classmethod
-    def from_dict(cls, data: Mapping[str, Any]):
-        return ApplicationCommandPermissions([
-            RawApplicationCommandPermission.from_dict(perm)
-            for perm in data["permissions"]
-        ])
+        return (
+            f"<GuildApplicationCommandPermissions id={self.id!r} application_id={self.application_id!r}"
+            f" guild_id={self.guild_id!r} permissions={self.permissions!r}>"
+        )
 
     def to_dict(self) -> Any:
         return {
-            "permissions": [perm.to_dict() for perm in self.permissions]
+            "id": self.id,
+            "application_id": self.application_id,
+            "guild_id": self.guild_id,
+            "permissions": [perm.to_dict() for perm in self.permissions],
         }
+
+    async def edit(
+        self,
+        *,
+        permissions: Dict[Union[Role, User], bool] = None,
+        role_ids: Dict[int, bool] = None,
+        user_ids: Dict[int, bool] = None,
+    ) -> GuildApplicationCommandPermissions:
+        """
+        Replaces current permissions with specified ones.
+
+        Parameters
+        ----------
+        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
+            Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
+        role_ids: Mapping[:class:`int`, :class:`bool`]
+            Role IDs to booleans.
+        user_ids: Mapping[:class:`int`, :class:`bool`]
+            User IDs to booleans.
+        """
+
+        data = []
+
+        if permissions is not None:
+            for obj, value in permissions.items():
+                if isinstance(obj, Role):
+                    target_type = 1
+                elif isinstance(obj, User):
+                    target_type = 2
+                else:
+                    raise ValueError(f"Permission target should be an instance of Role or abc.User")
+                data.append(
+                    {"id": obj.id, "type": target_type, "permission": value}
+                )
+        
+        if role_ids is not None:
+            for role_id, value in role_ids.items():
+                data.append(
+                    {"id": role_id, "type": 1, "permission": value}
+                )
+        
+        if user_ids is not None:
+            for user_id, value in user_ids.items():
+                data.append(
+                    {"id": user_id, "type": 2, "permission": value}
+                )
+        
+        res = await self._state.http.edit_application_command_permissions(
+            self.application_id, self.guild_id, self.id, {"permissions": data}
+        )
+
+        return GuildApplicationCommandPermissions(state=self._state, data=res)
+
+
+class PartialGuildApplicationCommandPermissions:
+    """
+    Creates an object representing permissions of the application command.
+
+    Parameters
+    ----------
+    command_id: :class:`int`
+        The ID of the app command you want to apply these permissions to.
+    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
+        Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
+    role_ids: Mapping[:class:`int`, :class:`bool`]
+        Role IDs to booleans.
+    user_ids: Mapping[:class:`int`, :class:`bool`]
+        User IDs to booleans.
+    """
+
+    def __init__(
+        self,
+        command_id: int,
+        *,
+        permissions: Mapping[Union[Role, User], bool] = None,
+        role_ids: Mapping[int, bool] = None,
+        user_ids: Mapping[int, bool] = None,
+    ):
+        self.id: int = command_id
+        self.permissions: List[ApplicationCommandPermissions] = []
+
+        if permissions is not None:
+            for obj, value in permissions.items():
+                if isinstance(obj, Role):
+                    target_type = 1
+                elif isinstance(obj, User):
+                    target_type = 2
+                else:
+                    raise ValueError(f"Permission target should be an instance of Role or abc.User")
+                data = {"id": obj.id, "type": target_type, "permission": value}
+                self.permissions.append(ApplicationCommandPermissions(data=data))
+        
+        if role_ids is not None:
+            for role_id, value in role_ids.items():
+                data = {"id": role_id, "type": 1, "permission": value}
+                self.permissions.append(ApplicationCommandPermissions(data=data))
+        
+        if user_ids is not None:
+            for user_id, value in user_ids.items():
+                data = {"id": user_id, "type": 2, "permission": value}
+                self.permissions.append(ApplicationCommandPermissions(data=data))
+    
+    def to_dict(self) -> Any:
+        return {
+            "id": self.id,
+            "permissions": [perm.to_dict() for perm in self.permissions],
+        }
+
+
+PartialGuildAppCmdPerms = PartialGuildApplicationCommandPermissions

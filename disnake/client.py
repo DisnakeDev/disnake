@@ -52,7 +52,7 @@ from . import utils
 from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
     ApplicationCommand,
-    ApplicationCommandPermissions,
+    GuildApplicationCommandPermissions,
     MessageCommand,
     SlashCommand,
     UserCommand,
@@ -1965,37 +1965,3 @@ class Client:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_guild_commands(self.application_id, guild_id, payload)
         return [application_command_factory(data) for data in results]
-
-    # Application command permissions
-
-    async def fetch_guild_command_permissions(
-        self, guild_id: int
-    ) -> Dict[int, ApplicationCommandPermissions]:
-        array = await self.http.get_guild_application_command_permissions(self.application_id, guild_id)
-        return {int(obj["id"]): ApplicationCommandPermissions.from_dict(obj) for obj in array}
-    
-    async def fetch_command_permissions(
-        self, guild_id: int, command_id: int
-    ) -> ApplicationCommandPermissions:
-        data = await self.http.get_application_command_permissions(self.application_id, guild_id, command_id)
-        return ApplicationCommandPermissions.from_dict(data)
-
-    async def edit_command_permissions(
-        self, guild_id: int, command_id: int, new_permissions: ApplicationCommandPermissions
-    ) -> None:
-        await self.http.edit_application_command_permissions(
-            self.application_id, guild_id, command_id, new_permissions.to_dict()
-        )
-
-    async def bulk_edit_guild_command_permissions(self, guild_id: int, permissions: Dict[int, ApplicationCommandPermissions]):
-        payload = []
-        for cmd_id, perms in permissions.items():
-            data = perms.to_dict()
-            data["id"] = cmd_id
-            payload.append(data)
-        array = await self.http.bulk_edit_guild_application_command_permissions(
-            self.application_id,
-            guild_id=guild_id,
-            payload=payload
-        )
-        return {int(obj["id"]): ApplicationCommandPermissions.from_dict(obj) for obj in array}
