@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
+from abc import ABC
 
 import re
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
@@ -8,6 +8,7 @@ from .abc import User
 from .enums import ApplicationCommandType, ChannelType, OptionType, try_enum, enum_if_int, try_enum_to_int
 from .errors import InvalidArgument
 from .role import Role
+from .utils import _get_as_snowflake
 
 if TYPE_CHECKING:
     from .state import ConnectionState
@@ -260,49 +261,58 @@ class ApplicationCommand(ABC):
     """
     The base class for application commands
     """
-    name: str
     
-    def __init__(self, type: ApplicationCommandType, **kwargs):
+    def __init__(
+        self,
+        type: ApplicationCommandType,
+        name: str,
+        default_permission: bool = True,
+        **kwargs
+    ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
-        self.id: Optional[int] = kwargs.pop('id', None)
-        if self.id:
-            self.id = int(self.id)
-        self.application_id: Optional[int] = kwargs.pop('application_id', None)
-        if self.application_id:
-            self.application_id = int(self.application_id)
+        self.name: str = name
+        self.default_permission: bool = default_permission
+
+        self.id: Optional[int] = _get_as_snowflake(kwargs, 'id')
+        self.application_id: Optional[int] = _get_as_snowflake(kwargs, 'application_id')
+        self.guild_id: Optional[int] = _get_as_snowflake(kwargs, 'guild_id')
+        self.version: Optional[int] = _get_as_snowflake(kwargs, 'version')
+
+        self._state: Optional[ConnectionState] = None
         self._always_synced: bool = False
-    
+
     def __repr__(self) -> str:
-        return f'<ApplicationCommand id={self.id!r} type={self.type!r}>'
+        return f'<ApplicationCommand type={self.type!r} name={self.name!r}>'
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, ApplicationCommand)
-    
-    @abstractmethod
-    def to_dict(self) -> Any:
-        raise NotImplementedError
+        return (
+            self.type == other.type
+            and self.name == other.name
+            and self.default_permission == other.default_permission
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        data = {
+            "type": try_enum_to_int(self.type),
+            "name": self.name,
+        }
+        if not self.default_permission:
+            data["default_permission"] = False
+        return data
 
 
 class UserCommand(ApplicationCommand):
-    def __init__(self, name: str, **kwargs):
-        super().__init__(ApplicationCommandType.user, **kwargs)
-        self.name: str = name
-    
-    def __repr__(self) -> str:
-        return f"<UserCommand name={self.name!r}>"
-    
-    def __eq__(self, other) -> bool:
-        return (
-            self.type == other.type and
-            self.name == other.name
+    def __init__(self, name: str, default_permission: bool = True, **kwargs):
+        super().__init__(
+            type=ApplicationCommandType.user,
+            name=name,
+            default_permission=default_permission,
+            **kwargs
         )
 
-    def to_dict(self, **kwargs) -> Dict[str, Any]:
-        return {
-            "type": try_enum_to_int(self.type),
-            "name": self.name
-        }
-    
+    def __repr__(self) -> str:
+        return f"<UserCommand name={self.name!r}>"
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         if data.pop("type", 0) == ApplicationCommandType.user.value:
@@ -310,25 +320,17 @@ class UserCommand(ApplicationCommand):
 
 
 class MessageCommand(ApplicationCommand):
-    def __init__(self, name: str, **kwargs):
-        super().__init__(ApplicationCommandType.message, **kwargs)
-        self.name: str = name
-    
-    def __repr__(self) -> str:
-        return f"<MessageCommand name={self.name!r}>"
-    
-    def __eq__(self, other) -> bool:
-        return (
-            self.type == other.type and
-            self.name == other.name
+    def __init__(self, name: str, default_permission: bool = True, **kwargs):
+        super().__init__(
+            type=ApplicationCommandType.message,
+            name=name,
+            default_permission=default_permission,
+            **kwargs
         )
 
-    def to_dict(self, **kwargs) -> Dict[str, Any]:
-        return {
-            "type": try_enum_to_int(self.type),
-            "name": self.name
-        }
-    
+    def __repr__(self) -> str:
+        return f"<MessageCommand name={self.name!r}>"
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         if data.pop("type", 0) == ApplicationCommandType.message.value:
@@ -359,15 +361,17 @@ class SlashCommand(ApplicationCommand):
         default_permission: bool = True,
         **kwargs
     ):
-        super().__init__(ApplicationCommandType.chat_input, **kwargs)
-
         assert re.match(r"^[\w-]{1,32}$", name) is not None and name.islower(),\
             f"Slash command name {name!r} should consist of these symbols: a-z, 0-9, -, _"
-
-        self.name: str = name
+        
+        super().__init__(
+            type=ApplicationCommandType.chat_input,
+            name=name,
+            default_permission=default_permission,
+            **kwargs
+        )
         self.description: str = description
         self.options: List[Option] = options or []
-        self.default_permission: bool = default_permission
 
     def __repr__(self) -> str:
         return (
@@ -380,10 +384,9 @@ class SlashCommand(ApplicationCommand):
 
     def __eq__(self, other) -> bool:
         return (
-            self.type == other.type and
-            self.name == other.name and
-            self.description == other.description and
-            self.options == other.options
+            super().__eq__(other)
+            and self.description == other.description
+            and self.options == other.options
         )
 
     @classmethod
@@ -422,16 +425,10 @@ class SlashCommand(ApplicationCommand):
             )
         )
 
-    def to_dict(self, *, hide_name: bool = False) -> Dict[str, Any]:
-        res = {
-            "type": try_enum_to_int(self.type),
-            "description": self.description,
-            "options": [o.to_dict() for o in self.options]
-        }
-        if not self.default_permission:
-            res["default_permission"] = False
-        if not hide_name:
-            res["name"] = self.name
+    def to_dict(self) -> Dict[str, Any]:
+        res = super().to_dict()
+        res["description"] = self.description
+        res["options"] = [o.to_dict() for o in self.options]
         return res
 
 

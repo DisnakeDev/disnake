@@ -37,6 +37,11 @@ import os
 
 from .guild import Guild
 from .activity import BaseActivity
+from .app_commands import (
+    GuildApplicationCommandPermissions,
+    PartialGuildApplicationCommandPermissions,
+    application_command_factory,
+)
 from .user import User, ClientUser
 from .emoji import Emoji
 from .mentions import AllowedMentions
@@ -223,6 +228,10 @@ class ConnectionState:
 
             cache_flags._verify_intents(intents)
 
+        # TODO: maybe we don't need to cache permissions at all
+        self._cache_application_command_permissions: bool = options.get(
+            'cache_application_command_permissions', True
+        )
         self.member_cache_flags: MemberCacheFlags = cache_flags
         self._activity: Optional[ActivityPayload] = activity
         self._status: Optional[str] = status
@@ -259,6 +268,8 @@ class ConnectionState:
         self._guilds: Dict[int, Guild] = {}
         self._global_application_commands: Dict[int, ApplicationCommand] = {}
         self._guild_application_commands: Dict[int, Dict[int, ApplicationCommand]] = {}
+        self._application_command_permissions: Dict[int, Dict[int, GuildApplicationCommandPermissions]] = {}
+
         if views:
             self._view_store: ViewStore = ViewStore(self)
 
@@ -408,6 +419,7 @@ class ConnectionState:
 
     def _remove_global_application_command(self, application_command_id: int, /) -> None:
         self._global_application_commands.pop(application_command_id, None)
+        self._unset_command_permissions(application_command_id)
 
     def _clear_global_application_commands(self) -> None:
         self._global_application_commands.clear()
@@ -433,6 +445,7 @@ class ConnectionState:
             granula.pop(application_command_id, None)
         except KeyError:
             pass
+        self._unset_command_permissions(application_command_id, guild_id)
 
     def _clear_guild_application_commands(self, guild_id: int) -> None:
         self._guild_application_commands.pop(guild_id, None)
@@ -443,12 +456,38 @@ class ConnectionState:
                 return cmd
     
     def _get_guild_command_named(self, guild_id: int, name: str) -> Optional[ApplicationCommand]:
-        granula = self._guild_application_commands.get(guild_id)
-        if granula is None:
-            return None
+        granula = self._guild_application_commands.get(guild_id, {})
         for cmd in granula.values():
             if cmd.name == name:
                 return cmd
+
+    def _set_command_permissions(self, permissions: GuildApplicationCommandPermissions) -> None:
+        if not self._cache_application_command_permissions:
+            return
+        try:
+            granula = self._application_command_permissions[permissions.guild_id]
+            granula[permissions.id] = permissions
+        except KeyError:
+            self._application_command_permissions[permissions.guild_id] = {
+                permissions.id: permissions
+            }
+    
+    def _unset_command_permissions(self, command_id: int, guild_id: int = None) -> None:
+        if guild_id is None:
+            for granula in self._application_command_permissions.values():
+                granula.pop(command_id, None)
+            return
+        try:
+            granula = self._application_command_permissions[guild_id]
+            granula.pop(command_id, None)
+        except KeyError:
+            pass
+
+    def _get_command_permissions(self, guild_id: int, command_id: int):
+        try:
+            return self._application_command_permissions[guild_id][command_id]
+        except KeyError:
+            pass
 
     @property
     def emojis(self) -> List[Emoji]:
@@ -1470,6 +1509,132 @@ class ConnectionState:
         self, *, channel: Union[TextChannel, Thread, DMChannel, PartialMessageable], data: MessagePayload
     ) -> Message:
         return Message(state=self, channel=channel, data=data)
+
+    # Application commands (global)
+    # All these methods (except fetchers) update the application command cache as well,
+    # since there're no events related to application command updates
+
+    async def fetch_global_commands(self) -> List[ApplicationCommand]:
+        results = await self.http.get_global_commands(self.application_id) # type: ignore
+        return [application_command_factory(data) for data in results]
+    
+    async def fetch_global_command(self, command_id: int) -> ApplicationCommand:
+        result = await self.http.get_global_command(self.application_id, command_id) # type: ignore
+        return application_command_factory(result)
+
+    async def create_global_command(self, application_command: ApplicationCommand) -> ApplicationCommand:
+        result = await self.http.upsert_global_command(
+            self.application_id, application_command.to_dict() # type: ignore
+        )
+        cmd = application_command_factory(result)
+        self._add_global_application_command(cmd)
+        return cmd
+
+    async def edit_global_command(self, command_id: int, new_command: ApplicationCommand) -> ApplicationCommand:
+        result = await self.http.edit_global_command(
+            self.application_id, command_id, new_command.to_dict() # type: ignore
+        )
+        cmd = application_command_factory(result)
+        self._add_global_application_command(cmd)
+        return cmd
+
+    async def delete_global_command(self, command_id: int) -> None:
+        await self.http.delete_global_command(self.application_id, command_id) # type: ignore
+        self._remove_global_application_command(command_id)
+
+    async def bulk_overwrite_global_commands(self, application_commands: List[ApplicationCommand]):
+        payload = [cmd.to_dict() for cmd in application_commands]
+        results = await self.http.bulk_upsert_global_commands(self.application_id, payload) # type: ignore
+        commands = [application_command_factory(data) for data in results]
+        self._global_application_commands = {cmd.id: cmd for cmd in commands}
+        return commands
+
+    # Application commands (guild)
+
+    async def fetch_guild_commands(self, guild_id: int):
+        results = await self.http.get_guild_commands(self.application_id, guild_id) # type: ignore
+        return [application_command_factory(data) for data in results]
+    
+    async def fetch_guild_command(self, guild_id: int, command_id: int) -> ApplicationCommand:
+        result = await self.http.get_guild_command(self.application_id, guild_id, command_id) # type: ignore
+        return application_command_factory(result)
+
+    async def create_guild_command(self, guild_id: int, application_command: ApplicationCommand) -> ApplicationCommand:
+        result = await self.http.upsert_guild_command(
+            self.application_id, guild_id, application_command.to_dict() # type: ignore
+        )
+        cmd = application_command_factory(result)
+        self._add_guild_application_command(guild_id, cmd)
+        return cmd
+
+    async def edit_guild_command(self, guild_id: int, command_id: int, new_command: ApplicationCommand) -> ApplicationCommand:
+        result = await self.http.edit_guild_command(
+            self.application_id, guild_id, command_id, new_command.to_dict() # type: ignore
+        )
+        cmd = application_command_factory(result)
+        self._add_guild_application_command(guild_id, cmd)
+        return cmd
+
+    async def delete_guild_command(self, guild_id: int, command_id: int) -> None:
+        await self.http.delete_guild_command(
+            self.application_id, guild_id, command_id # type: ignore
+        )
+        self._remove_guild_application_command(guild_id, command_id)
+
+    async def bulk_overwrite_guild_commands(self, guild_id: int, application_commands: List[ApplicationCommand]):
+        payload = [cmd.to_dict() for cmd in application_commands]
+        results = await self.http.bulk_upsert_guild_commands(
+            self.application_id, guild_id, payload # type: ignore
+        )
+        commands = [application_command_factory(data) for data in results]
+        self._guild_application_commands[guild_id] = {cmd.id for cmd in commands} # type: ignore
+        return commands
+
+    # Application command permissions
+
+    async def bulk_fetch_command_permissions(
+        self, guild_id: int
+    ) -> List[GuildApplicationCommandPermissions]:
+        array = await self.http.get_guild_application_command_permissions(
+            self.application_id, guild_id # type: ignore
+        )
+        return [GuildApplicationCommandPermissions(state=self, data=obj) for obj in array]
+    
+    async def fetch_command_permissions(
+        self, guild_id: int, command_id: int
+    ) -> GuildApplicationCommandPermissions:
+        data = await self.http.get_application_command_permissions(
+            self.application_id, guild_id, command_id # type: ignore
+        )
+        return GuildApplicationCommandPermissions(state=self, data=data)
+
+    async def edit_command_permissions(
+        self, guild_id: int, permissions: PartialGuildApplicationCommandPermissions
+    ) -> GuildApplicationCommandPermissions:
+        result = await self.http.edit_application_command_permissions(
+            self.application_id, guild_id, permissions.id, permissions.to_dict() # type: ignore
+        )
+        perms = GuildApplicationCommandPermissions(state=self, data=result)
+        self._set_command_permissions(perms)
+        return perms
+
+    async def bulk_edit_command_permissions(
+        self, guild_id: int, permissions: List[PartialGuildApplicationCommandPermissions]
+    ) -> List[GuildApplicationCommandPermissions]:
+        payload = [
+            perm.to_dict()
+            for perm in permissions
+        ]
+        
+        array = await self.http.bulk_edit_guild_application_command_permissions(
+            self.application_id, # type: ignore
+            guild_id=guild_id,
+            payload=payload
+        )
+
+        perms = [GuildApplicationCommandPermissions(state=self, data=obj) for obj in array]
+        self._application_command_permissions[guild_id] = {elem.id: elem for elem in perms}
+        return perms
 
 
 class AutoShardedConnectionState(ConnectionState):

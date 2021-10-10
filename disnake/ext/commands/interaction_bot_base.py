@@ -639,11 +639,7 @@ class InteractionBotBase(CommonBotBase):
                     await self.bulk_overwrite_global_commands(to_send)
                 to_send.extend(diff['upsert'])
                 to_send.extend(diff['change_type'])
-                new_commands = await self.bulk_overwrite_global_commands(to_send)
-                self._connection._global_application_commands = {
-                    command.id: command for command in new_commands
-                    if command and command.id
-                }
+                await self.bulk_overwrite_global_commands(to_send)
             except Exception as e:
                 print(f"[WARNING] Failed to overwrite global commands due to {e}")
         # Update guild commands
@@ -667,11 +663,7 @@ class InteractionBotBase(CommonBotBase):
                         await self.bulk_overwrite_guild_commands(guild_id, to_send)
                     to_send.extend(diff['upsert'])
                     to_send.extend(diff['change_type'])
-                    new_commands = await self.bulk_overwrite_guild_commands(guild_id, to_send)
-                    self._connection._guild_application_commands[guild_id] = {
-                        command.id: command for command in new_commands
-                        if command and command.id
-                    }
+                    await self.bulk_overwrite_guild_commands(guild_id, to_send)
                 except Exception as e:
                     print(f"[WARNING] Failed to overwrite commands in <Guild id={guild_id}> due to {e}")
         # Last debug message

@@ -38,6 +38,7 @@ from typing import (
     Generator,
     List,
     Literal,
+    Mapping,
     Optional,
     Sequence,
     Tuple,
@@ -51,12 +52,12 @@ import aiohttp
 from . import utils
 from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
-    ApplicationCommand,
+    PartialGuildApplicationCommandPermissions,
     GuildApplicationCommandPermissions,
+    ApplicationCommand,
     MessageCommand,
     SlashCommand,
     UserCommand,
-    application_command_factory,
 )
 from .appinfo import AppInfo
 from .backoff import ExponentialBackoff
@@ -85,10 +86,11 @@ from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
-    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
+    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime, User as ABCUser
     from .channel import DMChannel
     from .member import Member
     from .message import Message
+    from .role import Role
     from .voice_client import VoiceProtocol
 
 
@@ -1917,51 +1919,137 @@ class Client:
     # Application commands (global)
 
     async def fetch_global_commands(self) -> List[ApplicationCommand]:
-        results = await self.http.get_global_commands(self.application_id)
-        return [application_command_factory(data) for data in results]
+        return await self._connection.fetch_global_commands()
     
     async def fetch_global_command(self, command_id: int) -> ApplicationCommand:
-        result = await self.http.get_global_command(self.application_id, command_id)
-        return application_command_factory(result)
+        return await self._connection.fetch_global_command(command_id)
 
     async def create_global_command(self, application_command: ApplicationCommand) -> ApplicationCommand:
-        result = await self.http.upsert_global_command(self.application_id, application_command.to_dict())
-        return application_command_factory(result)
+        return await self._connection.create_global_command(application_command)
 
     async def edit_global_command(self, command_id: int, new_command: ApplicationCommand) -> ApplicationCommand:
-        result = await self.http.edit_global_command(self.application_id, command_id, new_command.to_dict())
-        return application_command_factory(result)
+        return await self._connection.edit_global_command(command_id, new_command)
 
     async def delete_global_command(self, command_id: int) -> None:
-        await self.http.delete_global_command(self.application_id, command_id)
+        return await self._connection.delete_global_command(command_id)
 
     async def bulk_overwrite_global_commands(self, application_commands: List[ApplicationCommand]):
-        payload = [cmd.to_dict() for cmd in application_commands]
-        results = await self.http.bulk_upsert_global_commands(self.application_id, payload)
-        return [application_command_factory(data) for data in results]
+        return await self._connection.bulk_overwrite_global_commands(application_commands)
     
     # Application commands (guild)
 
     async def fetch_guild_commands(self, guild_id: int):
-        results = await self.http.get_guild_commands(self.application_id, guild_id)
-        return [application_command_factory(data) for data in results]
+        return await self._connection.fetch_guild_commands(guild_id)
     
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> ApplicationCommand:
-        result = await self.http.get_guild_command(self.application_id, guild_id, command_id)
-        return application_command_factory(result)
+        return await self._connection.fetch_guild_command(guild_id, command_id)
 
     async def create_guild_command(self, guild_id: int, application_command: ApplicationCommand) -> ApplicationCommand:
-        result = await self.http.upsert_guild_command(self.application_id, guild_id, application_command.to_dict())
-        return application_command_factory(result)
+        return await self._connection.create_guild_command(guild_id, application_command)
 
     async def edit_guild_command(self, guild_id: int, command_id: int, new_command: ApplicationCommand) -> ApplicationCommand:
-        result = await self.http.edit_guild_command(self.application_id, guild_id, command_id, new_command.to_dict())
-        return application_command_factory(result)
+        return await self._connection.edit_guild_command(guild_id, command_id, new_command)
 
     async def delete_guild_command(self, guild_id: int, command_id: int) -> None:
         await self.http.delete_guild_command(self.application_id, guild_id, command_id)
 
     async def bulk_overwrite_guild_commands(self, guild_id: int, application_commands: List[ApplicationCommand]):
-        payload = [cmd.to_dict() for cmd in application_commands]
-        results = await self.http.bulk_upsert_guild_commands(self.application_id, guild_id, payload)
-        return [application_command_factory(data) for data in results]
+        return await self._connection.bulk_overwrite_guild_commands(guild_id, application_commands)
+
+    # Application command permissions
+
+    async def bulk_fetch_command_permissions(self, guild_id: int) -> List[GuildApplicationCommandPermissions]:
+        """|coro|
+
+        Requests a list of :class:`GuildApplicationCommandPermissions` configured for this guild.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The ID of the guild to inspect.
+        """
+        return await self._connection.bulk_fetch_command_permissions(guild_id)
+    
+    async def fetch_command_permissions(self, guild_id: int, command_id: int) -> GuildApplicationCommandPermissions:
+        """|coro|
+
+        Requests :class:`GuildApplicationCommandPermissions` for a specific command.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The ID of the guild to inspect.
+        command_id: :class:`int`
+            The ID of the application command
+        
+        Returns
+        -------
+        :class:`GuildApplicationCommandPermissions`
+            The edited app command permissions.
+        """
+        return await self._connection.fetch_command_permissions(guild_id, command_id)
+
+    async def edit_command_permissions(
+        self,
+        guild_id: int,
+        command_id: int,
+        *,
+        permissions: Mapping[Union[Role, ABCUser], bool] = None,
+        role_ids: Mapping[int, bool] = None,
+        user_ids: Mapping[int, bool] = None,
+    ) -> GuildApplicationCommandPermissions:
+        """
+        Edits guild permissions of a single command.
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The ID of the guild where the permissions should be applied.
+        command_id: :class:`int`
+            The ID of the app command you want to apply these permissions to.
+        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
+            Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
+        role_ids: Mapping[:class:`int`, :class:`bool`]
+            Role IDs to booleans.
+        user_ids: Mapping[:class:`int`, :class:`bool`]
+            User IDs to booleans.
+        
+        Returns
+        -------
+        :class:`GuildApplicationCommandPermissions`
+            The object representing the edited app command permissions.
+        """
+        perms = PartialGuildApplicationCommandPermissions(
+            command_id=command_id,
+            permissions=permissions,
+            role_ids=role_ids,
+            user_ids=user_ids,
+        )
+        return await self._connection.edit_command_permissions(guild_id, perms)
+
+    async def bulk_edit_command_permissions(
+        self, guild_id: int, permissions: List[PartialGuildApplicationCommandPermissions]
+    ) -> List[GuildApplicationCommandPermissions]:
+        """|coro|
+
+        Edits guild permissions of multiple application commands at once.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The ID of the guild where the permissions should be applied.
+        permissions: List[:class:`PartialGuildApplicationCommandPermissions`]
+            A list of partial permissions for each app command you want to edit.
+        
+        Returns
+        -------
+        List[:class:`GuildApplicationCommandPermissions`]
+            A list of edited permissions of application commands.
+        """
+        return await self._connection.bulk_edit_command_permissions(guild_id, permissions)

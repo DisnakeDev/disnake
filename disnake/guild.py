@@ -35,6 +35,7 @@ from typing import (
     Sequence,
     Set,
     Literal,
+    Mapping,
     Optional,
     TYPE_CHECKING,
     Tuple,
@@ -87,7 +88,7 @@ VocalGuildChannel = Union[VoiceChannel, StageChannel]
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
-    from .abc import Snowflake, SnowflakeTime
+    from .abc import Snowflake, SnowflakeTime, User as ABCUser
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, MFALevel, GuildFeature
     from .types.threads import (
         Thread as ThreadPayload,
@@ -422,19 +423,10 @@ class Guild(Hashable):
         name: :class:`str`
             the name to compare to.
         """
-        granula = self._state._guild_application_commands.get(self.id, {})
-        for cmd in granula.values():
-            if cmd.name == name:
-                return cmd
+        return self._state._get_guild_command_named(self.id, name)
 
-    def _add_application_command(self, application_command: ApplicationCommand, /) -> None:
-        self._state._add_guild_application_command(self.id, application_command)
-
-    def _remove_application_command(self, application_command_id: int, /) -> None:
-        self._state._remove_guild_application_command(self.id, application_command_id)
-
-    def _clear_application_commands(self) -> None:
-        self._state._clear_guild_application_commands(self.id)
+    def get_command_permissions(self, command_id: int, /) -> Optional[GuildApplicationCommandPermissions]:
+        return self._state._get_command_permissions(self.id, command_id)
 
     def _from_data(self, guild: GuildPayload) -> None:
         # according to Stan, this is always available even if the guild is unavailable
@@ -3048,10 +3040,7 @@ class Guild(Hashable):
 
         .. versionadded:: 2.1
         """
-        array = await self._state.http.get_guild_application_command_permissions(
-            self._state.application_id, self.id # type: ignore
-        )
-        return [GuildApplicationCommandPermissions(state=self._state, data=obj) for obj in array]
+        return await self._state.bulk_fetch_command_permissions(self.id)
     
     async def fetch_command_permissions(self, command_id: int) -> GuildApplicationCommandPermissions:
         """|coro|
@@ -3070,11 +3059,42 @@ class Guild(Hashable):
         :class:`GuildApplicationCommandPermissions`
             The edited app command permissions.
         """
+        return await self._state.fetch_command_permissions(self.id, command_id)
 
-        data = await self._state.http.get_application_command_permissions(
-            self._state.application_id, self.id, command_id # type: ignore
+    async def edit_command_permissions(
+        self,
+        command_id: int,
+        *,
+        permissions: Mapping[Union[Role, ABCUser], bool] = None,
+        role_ids: Mapping[int, bool] = None,
+        user_ids: Mapping[int, bool] = None,
+    ) -> GuildApplicationCommandPermissions:
+        """
+        Edits guild permissions of a single command.
+
+        Parameters
+        ----------
+        command_id: :class:`int`
+            The ID of the app command you want to apply these permissions to.
+        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
+            Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
+        role_ids: Mapping[:class:`int`, :class:`bool`]
+            Role IDs to booleans.
+        user_ids: Mapping[:class:`int`, :class:`bool`]
+            User IDs to booleans.
+        
+        Returns
+        -------
+        :class:`GuildApplicationCommandPermissions`
+            The object representing the edited app command permissions.
+        """
+        perms = PartialGuildApplicationCommandPermissions(
+            command_id=command_id,
+            permissions=permissions,
+            role_ids=role_ids,
+            user_ids=user_ids,
         )
-        return GuildApplicationCommandPermissions(state=self._state, data=data)
+        return await self._state.edit_command_permissions(self.id, perms)
 
     async def bulk_edit_command_permissions(
         self, permissions: List[PartialGuildApplicationCommandPermissions]
@@ -3095,15 +3115,4 @@ class Guild(Hashable):
         List[:class:`GuildApplicationCommandPermissions`]
             A list of edited permissions of application commands.
         """
-
-        payload = [
-            perm.to_dict()
-            for perm in permissions
-        ]
-        
-        array = await self._state.http.bulk_edit_guild_application_command_permissions(
-            self._state.application_id, # type: ignore
-            guild_id=self.id,
-            payload=payload
-        )
-        return [GuildApplicationCommandPermissions(state=self._state, data=obj) for obj in array]
+        return await self._state.bulk_edit_command_permissions(self.id, permissions)
