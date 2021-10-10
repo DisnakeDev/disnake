@@ -1,27 +1,29 @@
 import disnake
 from disnake.ext import commands
-from disnake.ext.commands import Param
+from disnake.ext.commands import Param as Parameter
+
 
 bot = commands.Bot("!")
 
-# disnake can use a fastapi-like option syntax.
+
+# Disnake can use a fastapi-like option syntax.
 # That means instead of using the options keyword you will be
 # setting the default of your parameters.
 # It should allow you to create more readable commands and make the more complicated
 # features easier to use.
-# Not only that but using Param even adds support for a ton of other features.
+# Not only that but using Parameter even adds support for a ton of other features.
 
-# We create a new command with two options: "req" (a required string) and "opt" (an integer).
-# Param takes care of parsing the annotation and adding a description for it.
+# We create a new command with two options: "required" (a required string) and "optional" (an integer).
+# Parameter takes care of parsing the annotation and adding a description for it.
 # If you want to provide a default value and make the option optional simply provide it as the first argument.
 # "description" may be shortened to "desc" if you so choose.
 @bot.slash_command(name="simple-command", description="Some Simple command")
 async def simple(
     inter: disnake.ApplicationCommandInteraction,
-    req: str = Param(description="The required argument"),
-    opt: int = Param(0, desc="The optional argument"),
-):
-    ...
+    required: str = Parameter(desc="The required argument"),
+    optional: int = Parameter(description="The optional argument", default=0),
+) -> None:
+    ...  # There should be a code here:3
 
 
 # To make an option required don't provide a default or set it to "..."
@@ -29,10 +31,10 @@ async def simple(
 @bot.slash_command()
 async def defaults(
     inter: disnake.ApplicationCommandInteraction,
-    required: str = Param(desc="a"),
-    also_required: str = Param(..., desc="b"),
-    member: str = Param(lambda inter: inter.author),
-):
+    required: str = Parameter(description="a"),
+    also_required: str = Parameter(..., description="b"),
+    member: str = Parameter(default=lambda inter: inter.author),
+) -> None:
     ...
 
 
@@ -40,9 +42,9 @@ async def defaults(
 # However you may want to provide your own name in some cases.
 @bot.slash_command()
 async def names(
-    inter: disnake.ApplicationCommandInteraction, 
-    class_: str = Param(name="class", desc="Your class")
-):
+    inter: disnake.ApplicationCommandInteraction,
+    class_: str = Parameter(name="class", description="Your class")
+) -> None:
     ...
 
 
@@ -50,8 +52,9 @@ async def names(
 @bot.slash_command()
 async def guild_command(
     inter: disnake.GuildCommandInteraction
-):
+) -> None:
     ...
+
 
 # Not all types are currently supported by discord, you may use converters in these cases.
 # Both old command converters using annotations and converters using functions are supported.
@@ -60,33 +63,35 @@ async def guild_command(
 @bot.slash_command()
 async def converters(
     inter: disnake.ApplicationCommandInteraction,
-    emoji: disnake.Emoji = Param(desc="An emoji"),
-    content: str = Param(description="Clean content", converter=lambda inter, arg: arg.replace("@", "\\@")),
-):
+    emoji: disnake.Emoji = Parameter(description="An emoji"),
+    content: str = Parameter(description="Clean content", converter=lambda inter, arg: arg.replace("@", r"\@")),
+) -> None:
     ...
 
 
-# converters may also dictate the type of the option
+# Converters may also dictate the type of the option
 # (In case no annotation is present the code falls back to the normal annotation)
 def get_username(inter, user: disnake.User) -> str:
-    return user.name + '#' + user.discriminator # str(user) is better here but shhhh
+    return user.name + '#' + user.discriminator  # str(user) is better here but shhhh
+
 
 @bot.slash_command()
 async def advanced_converters(
     inter: disnake.ApplicationCommandInteraction,
-    username: str = Param(name="user", desc="A user", conv=get_username)
-):
+    username: str = Parameter(name="user", description="A user", converter=get_username)
+) -> None:
     ...
 
 
 # Lists are kind of supported too, it simply splits all arguments by space
-from typing import List
+from typing import List  # Do not import at the module level not at the top of the file, this is done on purpose!!!
+
 
 @bot.slash_command()
 async def list_converters(
     inter: disnake.ApplicationCommandInteraction,
-    numbers: List[int] = Param(desc="A list of numbers")
-):
+    numbers: List[int] = Parameter(description="A list of numbers")
+) -> None:
     ...
 
 # Enumeration (choices) is allowed using enum.Enum, commands.option_enum or Literal
@@ -102,7 +107,6 @@ class Color(int, Enum):
     yellow = 0xfee75c
 
 
-
 Gender = commands.option_enum(["Male", "Female", "Other", "Prefer Not To Say"])
 Language = commands.option_enum({"English": "en", "French": "fr", "Spanish": "es"})
 
@@ -110,11 +114,11 @@ Language = commands.option_enum({"English": "en", "French": "fr", "Spanish": "es
 @bot.slash_command()
 async def enumeration(
     inter: disnake.ApplicationCommandInteraction,
-    color: Color = Param(desc="Your favorite color"),
-    gender: Gender = Param(desc="Your gender"),
-    language: Language = Param(desc="Your language"),
-    mode: Literal[1, 2, 3] = Param(desc="Mode of your choosing"),
-):
+    color: Color = Parameter(description="Your favorite color"),
+    gender: Gender = Parameter(description="Your gender"),
+    language: Language = Parameter(description="Your language"),
+    mode: Literal[1, 2, 3] = Parameter(description="Mode of your choosing"),
+) -> None:
     ...
 
 
@@ -122,14 +126,15 @@ async def enumeration(
 # To specify multiple channel types use either abcs or unions.
 from typing import Union
 
+
 @bot.slash_command()
 async def constraint(
     inter: disnake.ApplicationCommandInteraction,
-    text: disnake.TextChannel = Param(desc="A text channel"),
-    voice: disnake.VoiceChannel = Param(desc="A voice channel"),
-    fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Param(desc="A fancy new channel"),
-    any: disnake.abc.GuildChannel = Param(desc="Any channel you can imagine")
-):
+    text: disnake.TextChannel = Parameter(description="A text channel"),
+    voice: disnake.VoiceChannel = Parameter(description="A voice channel"),
+    fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Parameter(description="A fancy new channel"),
+    any: disnake.abc.GuildChannel = Parameter(description="Any channel you can imagine")
+) -> None:
     ...
 
 
@@ -139,15 +144,19 @@ async def constraint(
 # but the amount of options cannot be more than 20.
 
 LANGUAGES = ["Python", "JavaScript", "TypeScript", "Java", "Rust", "Lisp", "Elixir"]
-async def autocomplete_langs(inter: disnake.ApplicationCommandInteraction, string: str):
-    return [lang for lang in LANGUAGES if string.lower() in lang]
+
+
+async def autocomplete_langs(inter: disnake.ApplicationCommandInteraction, string: str) -> List[str]:
+    return list(filter(lambda lang: string in lang.lower(), LANGUAGES))
+
 
 @bot.slash_command()
 async def autocomplete(
     inter: disnake.ApplicationCommandInteraction,
-    language: str = Param(desc="Your favorite language", autocomp=autocomplete_langs)
-):
+    language: str = Parameter(description="Your favorite language", autocomplete=autocomplete_langs)
+) -> None:
     ...
+
 
 # You can use docstrings to set the description of the command or even
 # the description of options. You should follow the ReStructuredText or numpy format.
@@ -156,7 +165,7 @@ async def docstrings(
     inter: disnake.ApplicationCommandInteraction,
     user: disnake.User,
     reason: str,
-):
+) -> None:
     """
     This command shows how docstrings are being parsed.
 
@@ -169,6 +178,7 @@ async def docstrings(
     """
     ...
 
+
 # Types of parameters in docstrings are optional.
 # You can specify the descriptions without them.
 @bot.slash_command()
@@ -176,7 +186,7 @@ async def partial_docstrings(
     inter: disnake.ApplicationCommandInteraction,
     user: disnake.User,
     reason: str,
-):
+) -> None:
     """
     This command shows how docstrings are being parsed.
 
@@ -197,7 +207,7 @@ async def simple_docstrings(
     inter: disnake.ApplicationCommandInteraction,
     user: disnake.User,
     reason: str,
-):
+) -> None:
     """
     This command shows how docstrings are being parsed.
 
