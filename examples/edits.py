@@ -4,7 +4,7 @@ import disnake
 
 
 class MyClient(disnake.Client):
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         print(f"Logged in as {self.user} (ID: {self.user.id})")
         print("------")
 
@@ -22,4 +22,4 @@ class MyClient(disnake.Client):
 
 
 client = MyClient()
-client.run('token')
+client.run("token")
