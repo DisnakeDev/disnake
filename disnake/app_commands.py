@@ -2,13 +2,15 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 import re
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
 
 from .abc import User
 from .enums import ApplicationCommandType, ChannelType, OptionType, try_enum, enum_if_int, try_enum_to_int
 from .errors import InvalidArgument
 from .role import Role
-from .state import ConnectionState
+
+if TYPE_CHECKING:
+    from .state import ConnectionState
 
 __all__ = (
     "application_command_factory",
