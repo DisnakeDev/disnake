@@ -609,7 +609,7 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
         
-        if not self._sync_commands:
+        if not self._sync_commands or self.loop.is_closed():
             return
         
         # We assume that all commands are already cached
@@ -682,7 +682,7 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
         
-        if not self._sync_commands or not self.is_ready() or self._sync_queued:
+        if not self._sync_commands or self._sync_queued or not self.is_ready() or self.loop.is_closed():
             return
         # We don't do this task on login or in parallel with a similar task
         # Wait a little bit, maybe other cogs are loading
