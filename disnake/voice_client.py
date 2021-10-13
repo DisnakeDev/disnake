@@ -71,7 +71,6 @@ if TYPE_CHECKING:
 has_nacl: bool
 
 try:
-    import nacl.utils  # type: ignore
     import nacl.secret  # type: ignore
     has_nacl = True
 except ImportError:
@@ -222,8 +221,6 @@ class VoiceClient(VoiceProtocol):
     loop: :class:`asyncio.AbstractEventLoop`
         The event loop that the voice client is running on.
     """
-    ip: str
-    port: int
     endpoint_ip: str
     voice_port: int
     secret_key: List[int]
@@ -267,18 +264,14 @@ class VoiceClient(VoiceProtocol):
     )
 
     @property
-    def guild(self) -> Guild:
+    def guild(self) -> Optional[Guild]:
         """Optional[:class:`Guild`]: The guild we're connected to, if applicable."""
-        guild = getattr(self.channel, 'guild', None)
-        if guild is None:
-            # TODO: bots in dms have been deprecated for a long time, remove the need for this
-            raise AttributeError
-        return guild
+        return getattr(self.channel, 'guild', None)
 
     @property
     def user(self) -> ClientUser:
         """:class:`ClientUser`: The user connected to voice (i.e. ourselves)."""
-        return self._state.user # type: ignore
+        return self._state.user
 
     def checked_add(self, attr, value, limit):
         val = getattr(self, attr)
@@ -339,7 +332,7 @@ class VoiceClient(VoiceProtocol):
         self._voice_server_complete.set()
 
     async def voice_connect(self) -> None:
-        await self.channel.guild.change_voice_state(channel=self.channel) # type: ignore
+        await self.channel.guild.change_voice_state(channel=self.channel)
 
     async def voice_disconnect(self) -> None:
         _log.info('The voice handshake is being terminated for Channel ID %s (Guild ID %s)', self.channel.id, self.guild.id)
@@ -466,14 +459,17 @@ class VoiceClient(VoiceProtocol):
                     if exc.code == 4014:
                         _log.info('Disconnected from voice by force... potentially reconnecting.')
                         successful = await self.potential_reconnect()
-                        if successful:
+                        if not successful:
+                            _log.info('Reconnect was unsuccessful, disconnecting from voice normally...')
+                            await self.disconnect()
+                            break
+                        else:
                             continue
-                        _log.info('Reconnect was unsuccessful, disconnecting from voice normally...')
-                        await self.disconnect()
-                        break
+
                 if not reconnect:
                     await self.disconnect()
                     raise
+
                 retry = backoff.delay()
                 _log.exception('Disconnected from voice... Reconnecting in %.2fs.', retry)
                 self._connected.clear()
@@ -482,6 +478,7 @@ class VoiceClient(VoiceProtocol):
                 try:
                     await self.connect(reconnect=True, timeout=self.timeout)
                 except asyncio.TimeoutError:
+                    # at this point we've retried 5 times... let's continue the loop.
                     _log.warning('Could not connect to voice... Retrying...')
                     continue
 

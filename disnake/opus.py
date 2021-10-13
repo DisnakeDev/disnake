@@ -36,7 +36,6 @@ import struct
 import sys
 
 from .errors import DiscordException, InvalidArgument
-from .utils import MISSING
 
 if TYPE_CHECKING:
     T = TypeVar('T')
@@ -67,7 +66,7 @@ c_int_ptr   = ctypes.POINTER(ctypes.c_int)
 c_int16_ptr = ctypes.POINTER(ctypes.c_int16)
 c_float_ptr = ctypes.POINTER(ctypes.c_float)
 
-_lib = MISSING
+_lib = None
 
 class EncoderStruct(ctypes.Structure):
     pass
@@ -216,9 +215,9 @@ def _load_default() -> bool:
         else:
             _lib = libopus_loader(ctypes.util.find_library('opus'))
     except Exception:
-        _lib = MISSING
+        _lib = None
 
-    return _lib is not MISSING
+    return _lib is not None
 
 def load_opus(name: str) -> None:
     """Loads the libopus shared library for use with voice.
@@ -270,7 +269,7 @@ def is_loaded() -> bool:
         Indicates if the opus library has been loaded.
     """
     global _lib
-    return _lib is not MISSING
+    return _lib is not None
 
 class OpusError(DiscordException):
     """An exception that is thrown for libopus related errors.

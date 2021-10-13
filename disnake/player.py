@@ -151,7 +151,7 @@ class FFmpegAudio(AudioSource):
 
         self._process: subprocess.Popen = self._spawn_process(args, **kwargs)
         self._stdout: IO[bytes] = self._process.stdout  # type: ignore
-        self._stdin: Optional[IO[bytes]] = None
+        self._stdin: Optional[IO[Bytes]] = None
         self._pipe_thread: Optional[threading.Thread] = None
 
         if piping:
@@ -200,7 +200,7 @@ class FFmpegAudio(AudioSource):
                 self._process.terminate()
                 return
             try:
-                self._stdin.write(data) # type: ignore
+                self._stdin.write(data)
             except Exception:
                 _log.debug('Write error for %s, this is probably not a problem', self, exc_info=True)
                 # at this point the source data is either exhausted or the process is fubar
@@ -281,7 +281,7 @@ class FFmpegPCMAudio(FFmpegAudio):
         super().__init__(source, executable=executable, args=args, **subprocess_kwargs)
 
     def read(self) -> bytes:
-        self.check_streams()
+        # self.check_streams()
         ret = self._stdout.read(OpusEncoder.FRAME_SIZE)
         if len(ret) != OpusEncoder.FRAME_SIZE:
             return b''
@@ -409,13 +409,13 @@ class FFmpegOpusAudio(FFmpegAudio):
 
         Use this function to create an :class:`FFmpegOpusAudio` instance instead of the constructor: ::
 
-            source = await disnake.FFmpegOpusAudio.from_probe("song.webm")
+            source = await discord.FFmpegOpusAudio.from_probe("song.webm")
             voice_client.play(source)
 
         If you are on Windows and don't have ffprobe installed, use the ``fallback`` method
         to probe using ffmpeg instead: ::
 
-            source = await disnake.FFmpegOpusAudio.from_probe("song.webm", method='fallback')
+            source = await discord.FFmpegOpusAudio.from_probe("song.webm", method='fallback')
             voice_client.play(source)
 
         Using a custom method of determining codec and bitrate: ::
@@ -424,7 +424,7 @@ class FFmpegOpusAudio(FFmpegAudio):
                 # some analysis code here
                 return codec, bitrate
 
-            source = await disnake.FFmpegOpusAudio.from_probe("song.webm", method=custom_probe)
+            source = await discord.FFmpegOpusAudio.from_probe("song.webm", method=custom_probe)
             voice_client.play(source)
 
         Parameters
@@ -534,7 +534,7 @@ class FFmpegOpusAudio(FFmpegAudio):
 
     @staticmethod
     def _probe_codec_native(source, executable: str = 'ffmpeg') -> Tuple[Optional[str], Optional[int]]:
-        exe = executable[:2] + 'probe' if executable in {'ffmpeg', 'avconv'} else executable
+        exe = executable[:2] + 'probe' if executable in ('ffmpeg', 'avconv') else executable
         args = [exe, '-v', 'quiet', '-print_format', 'json', '-show_streams', '-select_streams', 'a:0', source]
         output = subprocess.check_output(args, timeout=20)
         codec = bitrate = None
@@ -568,7 +568,6 @@ class FFmpegOpusAudio(FFmpegAudio):
         return codec, bitrate
 
     def read(self) -> bytes:
-        self.check_streams()
         return next(self._packet_iter, b'')
 
     def is_opus(self) -> bool:
