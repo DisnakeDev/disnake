@@ -674,7 +674,7 @@ class Message(Hashable):
         self.nonce: Optional[Union[int, str]] = data.get('nonce')
         self.stickers: List[StickerItem] = [StickerItem(data=d, state=state) for d in data.get('sticker_items', [])]
         self.components: List[Component] = [_component_factory(d) for d in data.get('components', [])]
-        self.interaction = data['interaction']  # TODO: class, that represents message interaction
+        self.interaction = data.get('interaction')  # TODO: class, that represents message interaction
         try:
             # if the channel doesn't have a guild attribute, we handle that
             self.guild = channel.guild  # type: ignore
