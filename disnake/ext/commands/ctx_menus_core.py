@@ -51,11 +51,11 @@ class InvokableUserCommand(InvokableApplicationCommand):
         Whether to sync the command in the API with ``body`` or not.
     """
 
-    def __init__(self, func, *, name: str = None, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs):
+    def __init__(self, func, *, name: str = None, default_permission: bool = True, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = UserCommand(name=self.name)
+        self.body = UserCommand(name=self.name, default_permission=default_permission)
 
     async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
         cog = self.cog
@@ -108,11 +108,11 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         Whether to sync the command in the API with ``body`` or not.
     """
 
-    def __init__(self, func, *, name: str = None, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs):
+    def __init__(self, func, *, name: str = None, default_permission: bool = True, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = MessageCommand(name=self.name)
+        self.body = MessageCommand(name=self.name, default_permission=default_permission)
 
     async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
         cog = self.cog
@@ -137,7 +137,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
 
 def user_command(
-    *, name: str = None, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs
+    *, name: str = None, default_permission: bool = True, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs
 ) -> Callable[
     [
         Union[
@@ -176,13 +176,13 @@ def user_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        return InvokableUserCommand(func, name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
+        return InvokableUserCommand(func, name=name, default_permission=default_permission, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
 
     return decorator
 
 
 def message_command(
-    *, name: str = None, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs
+    *, name: str = None, default_permission: bool = True, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs
 ) -> Callable[
     [
         Union[
@@ -221,6 +221,6 @@ def message_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        return InvokableMessageCommand(func, name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
+        return InvokableMessageCommand(func, name=name, default_permission=default_permission, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
 
     return decorator
