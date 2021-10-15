@@ -471,6 +471,7 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: str = None,
+        default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs
@@ -508,7 +509,7 @@ class InteractionBotBase(CommonBotBase):
                 Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> InvokableUserCommand:
-            result = user_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
+            result = user_command(name=name, default_permission=default_permission, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
             self.add_user_command(result)
             return result
         return decorator
@@ -517,6 +518,7 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: str = None,
+        default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs
@@ -554,7 +556,7 @@ class InteractionBotBase(CommonBotBase):
                 Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
             ]
         ) -> InvokableMessageCommand:
-            result = message_command(name=name, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
+            result = message_command(name=name, default_permission=default_permission, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
             self.add_message_command(result)
             return result
         return decorator
