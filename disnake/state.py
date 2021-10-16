@@ -1587,7 +1587,7 @@ class ConnectionState:
             self.application_id, guild_id, payload # type: ignore
         )
         commands = [application_command_factory(data) for data in results]
-        self._guild_application_commands[guild_id] = {cmd.id for cmd in commands} # type: ignore
+        self._guild_application_commands[guild_id] = {cmd.id: cmd for cmd in commands}
         return commands
 
     # Application command permissions
