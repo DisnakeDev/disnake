@@ -351,7 +351,7 @@ def Param(
     desc: str = None,
     conv: Callable[[Interaction, Any], Any] = None,
     autocomp: Callable[[Interaction, str], Any] = None,
-    choices: List[OptionChoice] = None,
+    choices: Choices = None,
 ) -> Any:
     ...
 
@@ -364,7 +364,7 @@ def Param(
     description: str = None,
     converter: Callable[[Interaction, Any], Any] = None,
     autocomplete: Callable[[Interaction, str], Any] = None,
-    choices: List[OptionChoice] = None,
+    choices: Choices = None,
 ) -> Any:
     ...
 
@@ -379,7 +379,7 @@ def Param(
     converter: Callable[[Interaction, Any], Any] = None,
     autocomp: Callable[[Interaction, str], Any] = None,
     autocomplete: Callable[[Interaction, str], Any] = None,
-    choices: List[OptionChoice] = None,
+    choices: Choices = None,
 ) -> Any:
     return ParamInfo(
         default,
