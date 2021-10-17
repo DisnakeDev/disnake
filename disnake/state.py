@@ -1542,7 +1542,7 @@ class ConnectionState:
         await self.http.delete_global_command(self.application_id, command_id) # type: ignore
         self._remove_global_application_command(command_id)
 
-    async def bulk_overwrite_global_commands(self, application_commands: List[ApplicationCommand]):
+    async def bulk_overwrite_global_commands(self, application_commands: List[ApplicationCommand]) -> List[ApplicationCommand]:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_global_commands(self.application_id, payload) # type: ignore
         commands = [application_command_factory(data) for data in results]
@@ -1551,7 +1551,7 @@ class ConnectionState:
 
     # Application commands (guild)
 
-    async def fetch_guild_commands(self, guild_id: int):
+    async def fetch_guild_commands(self, guild_id: int) -> List[ApplicationCommand]:
         results = await self.http.get_guild_commands(self.application_id, guild_id) # type: ignore
         return [application_command_factory(data) for data in results]
     
@@ -1581,7 +1581,9 @@ class ConnectionState:
         )
         self._remove_guild_application_command(guild_id, command_id)
 
-    async def bulk_overwrite_guild_commands(self, guild_id: int, application_commands: List[ApplicationCommand]):
+    async def bulk_overwrite_guild_commands(
+        self, guild_id: int, application_commands: List[ApplicationCommand]
+    ) -> List[ApplicationCommand]:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_guild_commands(
             self.application_id, guild_id, payload # type: ignore

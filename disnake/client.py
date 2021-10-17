@@ -1923,41 +1923,234 @@ class Client:
     # Application commands (global)
 
     async def fetch_global_commands(self) -> List[ApplicationCommand]:
+        """|coro|
+
+        Requests a list of global application commands.
+
+        .. versionadded:: 2.1
+
+        Returns
+        -------
+        List[:class:`ApplicationCommand`]
+            A list of application commands.
+        """
         return await self._connection.fetch_global_commands()
     
     async def fetch_global_command(self, command_id: int) -> ApplicationCommand:
+        """|coro|
+
+        Requests a global application command.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        command_id: :class:`int`
+            the ID of the command to request.
+        
+        Returns
+        -------
+        :class:`ApplicationCommand`
+            The requested application command.
+        """
         return await self._connection.fetch_global_command(command_id)
 
     async def create_global_command(self, application_command: ApplicationCommand) -> ApplicationCommand:
+        """|coro|
+
+        Creates a global application command.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        application_command: :class:`ApplicationCommand`
+            an object representing the application command.
+        
+        Returns
+        -------
+        :class:`ApplicationCommand`
+            The application command that was created.
+        """
         return await self._connection.create_global_command(application_command)
 
     async def edit_global_command(self, command_id: int, new_command: ApplicationCommand) -> ApplicationCommand:
+        """|coro|
+
+        Edits a global application command.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        command_id: :class:`int`
+            the ID of the command to edit.
+        new_command: :class:`ApplicationCommand`
+            an object representing the edited command.
+        
+        Returns
+        -------
+        :class:`ApplicationCommand`
+            The edited application command.
+        """
         return await self._connection.edit_global_command(command_id, new_command)
 
     async def delete_global_command(self, command_id: int) -> None:
+        """|coro|
+
+        Deletes a global application command.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        command_id: :class:`int`
+            the ID of the command to delete.
+        """
         return await self._connection.delete_global_command(command_id)
 
-    async def bulk_overwrite_global_commands(self, application_commands: List[ApplicationCommand]):
+    async def bulk_overwrite_global_commands(self, application_commands: List[ApplicationCommand]) -> List[ApplicationCommand]:
+        """|coro|
+
+        Overwrites several global application commands in one API request.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        application_commands: List[:class:`ApplicationCommand`]
+            a list of application commands to insert instead of the existing commands.
+        
+        Returns
+        -------
+        List[:class:`ApplicationCommand`]
+            A list of registered application commands.
+        """
         return await self._connection.bulk_overwrite_global_commands(application_commands)
     
     # Application commands (guild)
 
     async def fetch_guild_commands(self, guild_id: int):
+        """|coro|
+
+        Requests a list of guild application commands.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            the ID of the guild to fetch commands from.
+
+        Returns
+        -------
+        List[:class:`ApplicationCommand`]
+            A list of application commands.
+        """
         return await self._connection.fetch_guild_commands(guild_id)
     
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> ApplicationCommand:
+        """|coro|
+
+        Requests a guild application command.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            the ID of the guild to fetch command from.
+        command_id: :class:`int`
+            the ID of the command to request.
+        
+        Returns
+        -------
+        :class:`ApplicationCommand`
+            The requested application command.
+        """
         return await self._connection.fetch_guild_command(guild_id, command_id)
 
     async def create_guild_command(self, guild_id: int, application_command: ApplicationCommand) -> ApplicationCommand:
+        """|coro|
+
+        Creates a guild application command.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            the ID of the guild where the command should be inserted.
+        application_command: :class:`ApplicationCommand`
+            an object representing the application command.
+        
+        Returns
+        -------
+        :class:`ApplicationCommand`
+            The application command that was created.
+        """
         return await self._connection.create_guild_command(guild_id, application_command)
 
     async def edit_guild_command(self, guild_id: int, command_id: int, new_command: ApplicationCommand) -> ApplicationCommand:
+        """|coro|
+
+        Edits a guild application command.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            the ID of the guild where the command should be edited.
+        command_id: :class:`int`
+            the ID of the command to edit.
+        new_command: :class:`ApplicationCommand`
+            an object representing the edited command.
+        
+        Returns
+        -------
+        :class:`ApplicationCommand`
+            The edited application command.
+        """
         return await self._connection.edit_guild_command(guild_id, command_id, new_command)
 
     async def delete_guild_command(self, guild_id: int, command_id: int) -> None:
+        """|coro|
+
+        Deletes a guild application command.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            the ID of the guild where the command should be deleted.
+        command_id: :class:`int`
+            the ID of the command to delete.
+        """
         await self.http.delete_guild_command(self.application_id, guild_id, command_id)
 
-    async def bulk_overwrite_guild_commands(self, guild_id: int, application_commands: List[ApplicationCommand]):
+    async def bulk_overwrite_guild_commands(
+        self, guild_id: int, application_commands: List[ApplicationCommand]
+    ) -> List[ApplicationCommand]:
+        """|coro|
+
+        Overwrites several guild application commands in one API request.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            the ID of the guild where the commands should be overwritten.
+        application_commands: List[:class:`ApplicationCommand`]
+            a list of application commands to insert instead of the existing commands.
+        
+        Returns
+        -------
+        List[:class:`ApplicationCommand`]
+            A list of registered application commands.
+        """
         return await self._connection.bulk_overwrite_guild_commands(guild_id, application_commands)
 
     # Application command permissions

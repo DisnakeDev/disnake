@@ -598,6 +598,7 @@ class InteractionBotBase(CommonBotBase):
         # If we cache guild commands from everywhere, the limit of invalid requests gets exhausted.
         # This is because we don't know the scopes of the app in all guilds in advance, so we'll have to
         # catch a lot of "Forbidden" errors, exceeding the limit of 10k invalid requests in 10 minutes (for large bots).
+        # However, our approach has blind spots. We deal with them in :meth:`process_application_commands`.
 
         try:
             commands = await self.fetch_global_commands()
@@ -610,8 +611,8 @@ class InteractionBotBase(CommonBotBase):
             try:
                 commands = await self.fetch_guild_commands(guild_id)
                 if commands:
-                    self._connection._guild_application_commands[guild_id] = {
-                        command.id: command for command in commands # type: ignore
+                    self._connection._guild_application_commands[guild_id] = { # type: ignore
+                        command.id: command for command in commands
                     }
             except Exception:
                 pass
@@ -623,8 +624,8 @@ class InteractionBotBase(CommonBotBase):
         if not self._sync_commands or self.loop.is_closed():
             return
         
-        # We assume that all commands are already cached
-        # Sort all invokable commands between guild IDs
+        # We assume that all commands are already cached.
+        # Sort all invokable commands between guild IDs:
         global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
         if global_cmds is None:
             return
@@ -632,8 +633,9 @@ class InteractionBotBase(CommonBotBase):
         # Update global commands first
         diff = _app_commands_diff(global_cmds, self._connection._global_application_commands.values())
         update_required = bool(diff['upsert']) or bool(diff['edit']) or bool(diff['change_type']) or bool(diff['delete'])
-        # Show diff
+
         if self._sync_commands_debug:
+            # Show the difference
             print(
                 'GLOBAL COMMANDS\n===============',
                 '| NOTE: global commands can take up to 1 hour to show up after registration.',
@@ -642,18 +644,23 @@ class InteractionBotBase(CommonBotBase):
                 sep='\n'
             )
             _show_diff(diff, '| ')
-        # Do API requests and cache
+        
         if update_required:
+            # Notice that we don't do any API requests if there're no changes.
             try:
                 to_send = diff['no_changes'] + diff['edit']
                 if bool(diff['change_type']):
+                    # We can't just "edit" the command type, so we bulk delete the commands with old type first.
                     await self.bulk_overwrite_global_commands(to_send)
+                # Finally, we make an API call that applies all changes from the code.
                 to_send.extend(diff['upsert'])
                 to_send.extend(diff['change_type'])
                 await self.bulk_overwrite_global_commands(to_send)
             except Exception as e:
                 print(f"[WARNING] Failed to overwrite global commands due to {e}")
-        # Update guild commands
+        # Same process but for each specified guild individually.
+        # Notice that we're not doing this for every single guild for optimisation purposes.
+        # See the note in :meth:`_cache_application_commands` about guild app commands.
         for guild_id, cmds in guild_cmds.items():
             current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
             diff = _app_commands_diff(cmds, current_guild_cmds.values())
