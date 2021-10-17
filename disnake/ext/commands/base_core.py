@@ -25,7 +25,9 @@ from abc import ABC
 from typing import (
     Any,
     Callable,
+    Dict,
     List,
+    Mapping,
     Optional,
     TypeVar,
     TYPE_CHECKING
@@ -33,7 +35,7 @@ from typing import (
 import asyncio
 import datetime
 
-from disnake.app_commands import ApplicationCommand
+from disnake.app_commands import ApplicationCommand, PartialGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
 from disnake.utils import async_all, maybe_coroutine
 
@@ -47,7 +49,7 @@ if TYPE_CHECKING:
     from .cog import Cog
 
 
-__all__ = ('InvokableApplicationCommand',)
+__all__ = ('InvokableApplicationCommand', 'guild_permissions')
 
 
 T = TypeVar('T')
@@ -81,8 +83,15 @@ class InvokableApplicationCommand(ABC):
         self.qualified_name: str = self.name
         # only an internal feature for now
         self.guild_only: bool = kwargs.get('guild_only', False)
+
         if not isinstance(self.name, str):
             raise TypeError('Name of a command must be a string.')
+
+        try:
+            perms = func.__app_command_permissions__
+        except AttributeError:
+            perms = {}
+        self.permissions: Dict[int, PartialGuildApplicationCommandPermissions] = perms
 
         try:
             checks = func.__commands_checks__
@@ -496,3 +505,34 @@ class InvokableApplicationCommand(ABC):
             return await async_all(predicate(inter) for predicate in predicates)  # type: ignore
         finally:
             inter.application_command = original
+
+
+def guild_permissions(
+    guild_id: int,
+    role_ids: Mapping[int, bool] = None,
+    user_ids: Mapping[int, bool] = None,
+) -> Callable[[T], T]:
+    """
+    A decorator that sets application command permissions in the specified guild.
+    This type of permissions "greys out" the command in the command picker.
+    If you want to change this type of permissions dynamically, this decorator is not useful.
+
+    Parameters
+    ----------
+    guild_id: :class:`int`
+        the ID of the guild to apply the permissions to.
+    role_ids: Mapping[:class:`int`, :class:`bool`]
+        a mapping of role IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
+    user_ids: Mapping[:class:`int`, :class:`bool`]
+        a mapping of user IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
+    """
+    perms = PartialGuildApplicationCommandPermissions(0, role_ids=role_ids, user_ids=user_ids)
+    def decorator(func: T) -> T:
+        if isinstance(func, InvokableApplicationCommand):
+            func.permissions[guild_id] = perms
+        else:
+            if not hasattr(func, "__app_command_permissions__"):
+                func.__app_command_permissions__ = {} # type: ignore
+            func.__app_command_permissions__[guild_id] = perms # type: ignore
+        return func
+    return decorator

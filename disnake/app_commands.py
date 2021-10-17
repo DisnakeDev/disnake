@@ -471,12 +471,19 @@ class ApplicationCommandPermissions:
     __slots__ = ("id", "type", "permission")
 
     def __init__(self, *, data: Dict[str, Any]):
-        self.id: int = data["id"]
+        self.id: int = int(data["id"])
         self.type: int = data["type"]
         self.permission: bool = data["permission"]
 
     def __repr__(self):
         return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
+
+    def __eq__(self, other):
+        return (
+            self.id == other.id
+            and self.type == other.type
+            and self.permission == other.permission
+        )
 
     def to_dict(self) -> Dict[str, Any]:
         return {

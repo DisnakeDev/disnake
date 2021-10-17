@@ -39,6 +39,7 @@ from typing import (
     TYPE_CHECKING,
     TypeVar,
     Union,
+    cast,
 )
 
 import disnake
@@ -121,22 +122,22 @@ def _app_commands_diff(
 
 
 def _show_diff(diff: Dict[str, List[ApplicationCommand]], line_prefix: str = '') -> None:
-    _upsert = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['upsert']) or '-'
-    _edit = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['edit']) or '-'
-    _delete = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['delete']) or '-'
-    _change_type = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['change_type']) or '-'
-    _no_changes = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['no_changes']) or '-'
+    to_upsert = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['upsert']) or '-'
+    to_edit = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['edit']) or '-'
+    to_delete = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['delete']) or '-'
+    change_type = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['change_type']) or '-'
+    no_changes = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['no_changes']) or '-'
     print(
         f'{line_prefix}To upsert:',
-        f'    {_upsert}',
+        f'    {to_upsert}',
         f'To edit:',
-        f'    {_edit}',
+        f'    {to_edit}',
         f'To delete:',
-        f'    {_delete}',
+        f'    {to_delete}',
         f'Type migration:',
-        f'    {_change_type}',
+        f'    {change_type}',
         f'No changes:',
-        f'    {_no_changes}',
+        f'    {no_changes}',
         sep=f'\n{line_prefix}',
         end='\n\n'
     )
@@ -149,15 +150,17 @@ class InteractionBotBase(CommonBotBase):
         sync_commands: bool = True,
         sync_commands_debug: bool = False,
         sync_commands_on_cog_unload: bool = True,
+        sync_permissions: bool = False,
         test_guilds: Sequence[int] = None,
         **options: Any,
     ):
         super().__init__(**options)
 
+        self._test_guilds: Optional[Sequence[int]] = test_guilds
         self._sync_commands: bool = sync_commands
         self._sync_commands_debug: bool = sync_commands_debug
-        self._test_guilds: Optional[Sequence[int]] = test_guilds
         self._sync_commands_on_cog_unload = sync_commands_on_cog_unload
+        self._sync_permissions: bool = sync_permissions
         self._sync_queued: bool = False
 
         self._slash_command_checks = []
@@ -488,9 +491,11 @@ class InteractionBotBase(CommonBotBase):
         Parameters
         ----------
         auto_sync: :class:`bool`
-            whether to automatically register the command or not. Defaults to ``True``
+            whether to automatically register the command or not. Defaults to ``True``.
         name: :class:`str`
             name of the user command you want to respond to (equals to function name by default).
+        default_permission: :class:`bool`
+            whether the command is enabled by default when the app is added to a guild.
         guild_ids: List[:class:`int`]
             if specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally in ~1 hour.
@@ -538,6 +543,8 @@ class InteractionBotBase(CommonBotBase):
             whether to automatically register the command or not. Defaults to ``True``
         name: :class:`str`
             name of the message command you want to respond to (equals to function name by default).
+        default_permission: :class:`bool`
+            whether the command is enabled by default when the app is added to a guild.
         guild_ids: List[:class:`int`]
             if specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally in ~1 hour.
@@ -584,23 +591,21 @@ class InteractionBotBase(CommonBotBase):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
         
         _, guilds = self._ordered_unsynced_commands(self._test_guilds)
-        if guilds is None:
-            return
+
         try:
             commands = await self.fetch_global_commands()
-            self._connection._global_application_commands = {
-                command.id: command for command in commands 
-                if command.id
+            self._connection._global_application_commands = { # type: ignore
+                command.id: command for command in commands
             }
         except Exception:
             pass
         for guild_id in guilds:
             try:
                 commands = await self.fetch_guild_commands(guild_id)
-                self._connection._guild_application_commands[guild_id] = {
-                    command.id: command for command in commands 
-                    if command and command.id
-                }
+                if commands:
+                    self._connection._guild_application_commands[guild_id] = {
+                        command.id: command for command in commands # type: ignore
+                    }
             except Exception:
                 pass
     
@@ -669,6 +674,80 @@ class InteractionBotBase(CommonBotBase):
         if self._sync_commands_debug:
             print('DEBUG: Command synchronization task has been finished', end='\n\n')
 
+    async def _cache_application_command_permissions(self) -> None:
+        # This method is usually called once per bot start
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+        
+        if not self._sync_permissions:
+            return
+
+        guilds_to_cache = set()
+        for cmd in self.application_commands:
+            if not cmd.auto_sync:
+                continue
+            for guild_id in cmd.permissions:
+                guilds_to_cache.add(guild_id)
+        
+        for guild_id in guilds_to_cache:
+            perms = await self.bulk_fetch_command_permissions(guild_id)
+            self._connection._application_command_permissions[guild_id] = {
+                perm.id: perm for perm in perms
+            }
+
+    async def _sync_application_command_permissions(self) -> None:
+        # Assuming that all relevant permissions are cached
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+        
+        if not self._sync_commands or not self._sync_permissions or self.loop.is_closed():
+            return
+
+        guilds_to_compare: Dict[int, List[Any]] = {} # {guild_id: [partial_perms, ...], ...}
+
+        for cmd_wrapper in self.application_commands:
+            if not cmd_wrapper.auto_sync:
+                continue
+            # Sync the permissions
+            for guild_id, partial_perms in cmd_wrapper.permissions.items():
+                # Here we need to get the ID of the relevant API object
+                # representing the application command from the user's code
+                guild_ids_for_sync = cmd_wrapper.guild_ids or self._test_guilds
+                if guild_ids_for_sync is None:
+                    cmd = self.get_global_command_named(cmd_wrapper.name, cmd_wrapper.body.type)
+                else:
+                    cmd = self.get_guild_command_named(guild_id, cmd_wrapper.name, cmd_wrapper.body.type)
+                if cmd is None:
+                    continue
+                # If we got here, we know the ID of the application command
+                partial_perms.id = cmd.id # type: ignore
+                if guild_id not in guilds_to_compare:
+                    guilds_to_compare[guild_id] = [partial_perms]
+                else:
+                    guilds_to_compare[guild_id].append(partial_perms)
+        # Once per-guild permissions are collected from the code,
+        # we can compare them to the cached permissions
+        for guild_id, new_array in guilds_to_compare.items():
+            old_array = list(self._connection._application_command_permissions.get(guild_id, {}).values())
+            if (
+                len(new_array) == len(old_array)
+                and all(
+                    new_perms.permissions == old_perms.permissions
+                    for new_perms, old_perms in zip(new_array, old_array)
+                )
+            ):
+                if self._sync_commands_debug:
+                    print(f"DEBUG: Command permissions in <Guild id={guild_id}>: no changes")
+                continue
+            # If we got here, the permissions require an update
+            try:
+                await self.bulk_edit_command_permissions(guild_id, new_array)
+            except Exception as err:
+                print(f"[WARNING] Failed to overwrite permissions in <Guild id={guild_id}> due to {err}")
+            finally:
+                if self._sync_commands_debug:
+                    print(f"DEBUG: Command permissions in <Guild id={guild_id}>: edited")
+
     async def _prepare_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):
             raise NotImplementedError(f"Command sync is only possible in disnake.Client subclasses")
@@ -676,6 +755,8 @@ class InteractionBotBase(CommonBotBase):
         await self.wait_until_first_connect()
         await self._cache_application_commands()
         await self._sync_application_commands()
+        await self._cache_application_command_permissions()
+        await self._sync_application_command_permissions()
 
     async def _delayed_command_sync(self) -> None:
         if not isinstance(self, disnake.Client):
@@ -689,6 +770,7 @@ class InteractionBotBase(CommonBotBase):
         await asyncio.sleep(2)
         self._sync_queued = False
         await self._sync_application_commands()
+        await self._sync_application_command_permissions()
 
     def _schedule_app_command_preparation(self) -> None:
         if not isinstance(self, disnake.Client):
@@ -1106,22 +1188,40 @@ class InteractionBotBase(CommonBotBase):
             event_name = 'message_command'
         
         if event_name is None or app_command is None:
-            # TODO: unregister this command from API?
+            # If we got here, the command being invoked is either unknown or has an unknonw type.
+            # This usually happens if the auto sync is disabled, so let's just ignore this.
             return
         
-        if app_command.guild_ids is None or interaction.guild_id in app_command.guild_ids:
-            self.dispatch(event_name, interaction)
-            try:
-                if await self.application_command_can_run(interaction, call_once=True):
-                    await app_command.invoke(interaction)
-                    self.dispatch(f'{event_name}_completion', interaction)
-                else:
-                    raise errors.CheckFailure('The global check_once functions failed.')
-            except errors.CommandError as exc:
-                await app_command.dispatch_error(interaction, exc)
-        else:
-            # TODO: unregister this command from API?
-            pass
+        expected_command = self.get_global_command(interaction.data.id) # type: ignore
+        if expected_command is None:
+            expected_command = self.get_guild_command(interaction.guild_id, interaction.data.id) # type: ignore
+
+        if expected_command is None:
+            # This usually comes from the blind spots of the sync algorithm.
+            # Since not all guild commands are cached, it is possible to experience such issues.
+            # In this case, the blind spot is the interaction guild, let's fix it:
+            if self._sync_commands:
+                try:
+                    await interaction.response.send_message(
+                        'This is a deprecated local command, which is now deleted.', ephemeral=True
+                    )
+                except Exception:
+                    pass
+                try:
+                    await self.bulk_overwrite_guild_commands(interaction.guild_id, []) # type: ignore
+                except Exception:
+                    pass
+                return
+
+        self.dispatch(event_name, interaction)
+        try:
+            if await self.application_command_can_run(interaction, call_once=True):
+                await app_command.invoke(interaction)
+                self.dispatch(f'{event_name}_completion', interaction)
+            else:
+                raise errors.CheckFailure('The global check_once functions failed.')
+        except errors.CommandError as exc:
+            await app_command.dispatch_error(interaction, exc)
 
     async def on_application_command(self, interaction: ApplicationCommandInteraction):
         await self.process_application_commands(interaction)

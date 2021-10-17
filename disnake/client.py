@@ -63,7 +63,7 @@ from .appinfo import AppInfo
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
-from .enums import ChannelType, Status, VoiceRegion
+from .enums import ApplicationCommandType, ChannelType, Status, VoiceRegion
 from .errors import *
 from .flags import ApplicationFlags, Intents
 from .gateway import *
@@ -1134,23 +1134,25 @@ class Client:
         """
         return self._connection._get_guild_application_command(guild_id, id)
 
-    def get_global_command_named(self, name: str) -> Optional[ApplicationCommand]:
+    def get_global_command_named(self, name: str, cmd_type: ApplicationCommandType = None) -> Optional[ApplicationCommand]:
         """
         Returns a global application command matching the specified name.
 
         Parameters
         ----------
         name: :class:`str`
-            The name to search for.
+            The name to look for.
+        cmd_type: :class:`ApplicationCommandType`
+            The type to look for. By default, no types are checked.
         
         Returns
         -------
         :class:`ApplicationCommand`
             The application command.
         """
-        return self._connection._get_global_command_named(name)
+        return self._connection._get_global_command_named(name, cmd_type)
     
-    def get_guild_command_named(self, guild_id: int, name: str) -> Optional[ApplicationCommand]:
+    def get_guild_command_named(self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None) -> Optional[ApplicationCommand]:
         """
         Returns a guild application command matching the name.
 
@@ -1160,13 +1162,15 @@ class Client:
             The guild ID to search for.
         name: :class:`str`
             The command name to search for.
+        cmd_type: :class:`ApplicationCommandType`
+            The type to look for. By default, no types are checked.
         
         Returns
         -------
         :class:`ApplicationCommand`
             The application command.
         """
-        return self._connection._get_guild_command_named(guild_id, name)
+        return self._connection._get_guild_command_named(guild_id, name, cmd_type)
 
     # listeners/waiters
 

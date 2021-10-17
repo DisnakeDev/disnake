@@ -138,7 +138,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
-        with the commands in your code. Defaults to ``True``.
+        with the commands in your code.
 
         .. versionadded:: 2.1
     sync_commands_on_cog_unload: :class:`bool`
@@ -151,6 +151,9 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         Defaults to ``False``.
 
         .. versionadded:: 2.1
+    sync_permissions: :class:`bool`
+        Whether to enable automatic synchronization of app command permissions in your code.
+        Defaults to ``False``.
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
@@ -199,7 +202,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
-        with the commands in your code. Defaults to ``True``.
+        with the commands in your code.
 
         .. versionadded:: 2.1
     sync_commands_on_cog_unload: :class:`bool`
@@ -209,6 +212,11 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     sync_commands_debug: :class:`bool`
         Whether to enable messages logging the synchronization process.
         Useful for tracking the commands being registered in the API.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.1
+    sync_permissions: :class:`bool`
+        Whether to enable automatic synchronization of app command permissions in your code.
         Defaults to ``False``.
 
         .. versionadded:: 2.1

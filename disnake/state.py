@@ -52,7 +52,7 @@ from .channel import _channel_factory
 from .raw_models import *
 from .member import Member
 from .role import Role
-from .enums import ChannelType, ComponentType, Status, try_enum
+from .enums import ApplicationCommandType, ChannelType, ComponentType, Status, try_enum
 from . import utils
 from .utils import MISSING
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
@@ -450,15 +450,15 @@ class ConnectionState:
     def _clear_guild_application_commands(self, guild_id: int) -> None:
         self._guild_application_commands.pop(guild_id, None)
 
-    def _get_global_command_named(self, name: str) -> Optional[ApplicationCommand]:
+    def _get_global_command_named(self, name: str, cmd_type: ApplicationCommandType = None) -> Optional[ApplicationCommand]:
         for cmd in self._global_application_commands.values():
-            if cmd.name == name:
+            if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
     
-    def _get_guild_command_named(self, guild_id: int, name: str) -> Optional[ApplicationCommand]:
+    def _get_guild_command_named(self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None) -> Optional[ApplicationCommand]:
         granula = self._guild_application_commands.get(guild_id, {})
         for cmd in granula.values():
-            if cmd.name == name:
+            if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
 
     def _set_command_permissions(self, permissions: GuildApplicationCommandPermissions) -> None:
@@ -1633,7 +1633,8 @@ class ConnectionState:
         )
 
         perms = [GuildApplicationCommandPermissions(state=self, data=obj) for obj in array]
-        self._application_command_permissions[guild_id] = {elem.id: elem for elem in perms}
+        if self._cache_application_command_permissions:
+            self._application_command_permissions[guild_id] = {elem.id: elem for elem in perms}
         return perms
 
 

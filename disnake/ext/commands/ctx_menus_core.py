@@ -73,7 +73,16 @@ class InvokableUserCommand(InvokableApplicationCommand):
         Whether to sync the command in the API with ``body`` or not.
     """
 
-    def __init__(self, func, *, name: str = None, default_permission: bool = True, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs):
+    def __init__(
+        self,
+        func,
+        *,
+        name: str = None,
+        default_permission: bool = True,
+        guild_ids: Sequence[int] = None,
+        auto_sync: bool = True,
+        **kwargs
+    ):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
@@ -130,7 +139,16 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         Whether to sync the command in the API with ``body`` or not.
     """
 
-    def __init__(self, func, *, name: str = None, default_permission: bool = True, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs):
+    def __init__(
+        self,
+        func,
+        *,
+        name: str = None,
+        default_permission: bool = True,
+        guild_ids: Sequence[int] = None,
+        auto_sync: bool = True,
+        **kwargs
+    ):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
@@ -174,11 +192,13 @@ def user_command(
 
     Parameters
     ----------
-    auto_sync: :class:`bool`
-        whether to automatically register / edit the command or not. Defaults to ``True``
     name: :class:`str`
         name of the user command you want to respond to (equals to function name by default).
-    guild_ids: List[:class:`int`]
+    default_permission: :class:`bool`
+        whether the command is enabled by default when the app is added to a guild.
+    auto_sync: :class:`bool`
+        whether to automatically register / edit the command or not. Defaults to ``True``.
+    guild_ids: Sequence[:class:`int`]
         if specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
 
@@ -198,7 +218,14 @@ def user_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        return InvokableUserCommand(func, name=name, default_permission=default_permission, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
+        return InvokableUserCommand(
+            func,
+            name=name,
+            default_permission=default_permission,
+            guild_ids=guild_ids,
+            auto_sync=auto_sync,
+            **kwargs
+        )
 
     return decorator
 
@@ -219,11 +246,13 @@ def message_command(
 
     Parameters
     ----------
-    auto_sync: :class:`bool`
-        whether to automatically register / edit the command or not. Defaults to ``True``
     name: :class:`str`
         name of the message command you want to respond to (equals to function name by default).
-    guild_ids: List[:class:`int`]
+    default_permission: :class:`bool`
+        whether the command is enabled by default when the app is added to a guild.
+    auto_sync: :class:`bool`
+        whether to automatically register / edit the command or not. Defaults to ``True``.
+    guild_ids: Sequence[:class:`int`]
         if specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
 
@@ -243,6 +272,13 @@ def message_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        return InvokableMessageCommand(func, name=name, default_permission=default_permission, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)
+        return InvokableMessageCommand(
+            func,
+            name=name,
+            default_permission=default_permission,
+            guild_ids=guild_ids,
+            auto_sync=auto_sync,
+            **kwargs
+        )
 
     return decorator
