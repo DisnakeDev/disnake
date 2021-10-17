@@ -13,34 +13,34 @@ class Menu(disnake.ui.View):
         self.embeds = embeds
 
         # Current embed number.
-        self.embedCount = 0
+        self.embed_count = 0
 
     @disnake.ui.button(label="Previous page", emoji="◀️", style=disnake.ButtonStyle.red)
     async def next_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        if self.embedCount == 0: # If current embed is the first embed then, do not do anything.
+        if self.embed_count == 0: # If current embed is the first embed then, do not do anything.
             pass
         else: # If current embed is not the first embed then, sends the preview embed.
-            self.embedCount -= 1
+            self.embed_count -= 1
 
             # Gets the embed object.
-            embed = self.embeds[self.embedCount]
+            embed = self.embeds[self.embed_count]
 
             # Sets the footer of the embed with current page and then sends it.
-            embed.set_footer(text=f"Page {self.embedCount + 1} of {len(self.embeds)}")
+            embed.set_footer(text=f"Page {self.embed_count + 1} of {len(self.embeds)}")
             await interaction.response.edit_message(embed=embed)
 
     @disnake.ui.button(label="Next page", emoji="▶️", style=disnake.ButtonStyle.green)
     async def last_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        if self.embedCount == (len(self.embeds) - 1): # If current embed is the last embed then, do not do anything.
+        if self.embed_count == (len(self.embeds) - 1): # If current embed is the last embed then, do not do anything.
             pass
         else: # If current embed is not the last embed then, sends the next embed.
-            self.embedCount += 1
+            self.embed_count += 1
 
             # Gets the embed object.
-            embed = self.embeds[self.embedCount]
+            embed = self.embeds[self.embed_count]
 
             # Sets the footer of the embed with current page and then sends it.
-            embed.set_footer(text=f"Page {self.embedCount + 1} of {len(self.embeds)}")
+            embed.set_footer(text=f"Page {self.embed_count + 1} of {len(self.embeds)}")
             await interaction.response.edit_message(embed=embed)
 
 @bot.command()
