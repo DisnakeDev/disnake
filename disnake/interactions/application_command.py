@@ -40,6 +40,7 @@ __all__ = (
     'UserCommandInteraction',
     'MessageCommandInteraction',
     'ApplicationCommandInteractionData',
+    'ApplicationCommandInteractionDataOption',
     'ApplicationCommandInteractionDataResolved',
     'AppCommandInter',
     'AppCmdInter'
@@ -87,6 +88,20 @@ class ApplicationCommandInteraction(Interaction):
         The application ID that the interaction was for.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
+    guild: Optional[:class:`Guild`]
+        The guild the interaction was sent from.
+    channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
+        The channel the interaction was sent from.
+    me: Union[:class:`.Member`, :class:`.ClientUser`]
+        Similar to :attr:`.Guild.me`
+    permissions: :class:`Permissions`
+        The resolved permissions of the member in the channel, including overwrites.
+    response: :class:`InteractionResponse`
+        Returns an object responsible for handling responding to the interaction.
+    followup: :class:`Webhook`
+        Returns the follow up webhook for follow up interactions.
+    type: :class:`InteractionType`
+        The interaction type.
     token: :class:`str`
         The token to continue the interaction. These are valid
         for 15 minutes.
@@ -107,11 +122,12 @@ class ApplicationCommandInteraction(Interaction):
 
     @property
     def target(self) -> Optional[Union[User, Member, Message]]:
+        """Optional[Union[:class:`abc.User`, :class:`Message`]]: The user or message targetted by a user or message command"""
         return self.data.target
     
     @property
     def options(self) -> Dict[str, Any]:
-        """The full option tree, including nestings"""
+        """Dict[:class:`str`, :class:`Any`]: The full option tree, including nestings"""
         return {
             opt.name: opt._simplified_value()
             for opt in self.data.options
@@ -119,7 +135,7 @@ class ApplicationCommandInteraction(Interaction):
     
     @property
     def filled_options(self) -> Dict[str, Any]:
-        """The options of the command (or sub-command) being invoked"""
+        """Dict[:class:`str`, :class:`Any`]: The options of the command (or sub-command) being invoked"""
         _, kwargs = self.data._get_chain_and_kwargs()
         return kwargs
 

@@ -32,7 +32,7 @@ from ..message import Message
 
 __all__ = (
     'MessageInteraction',
-    'MessageInteractionData'
+    'MessageInteractionData',
 )
 
 if TYPE_CHECKING:
@@ -54,8 +54,6 @@ class MessageInteraction(Interaction):
     -----------
     id: :class:`int`
         The interaction's ID.
-    type: :class:`InteractionType`
-        The interaction type.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
     channel_id: Optional[:class:`int`]
@@ -64,12 +62,22 @@ class MessageInteraction(Interaction):
         The application ID that the interaction was for.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
+    guild: Optional[:class:`Guild`]
+        The guild the interaction was sent from.
+    channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
+        The channel the interaction was sent from.
     message: Optional[:class:`Message`]
         The message that sent this interaction.
-    component: :class:`Component`
-        The component the user interacted with
-    values: Optional[List[:class:`str`]]
-        The values the user selected
+    me: Union[:class:`.Member`, :class:`.ClientUser`]
+        Similar to :attr:`.Guild.me`
+    permissions: :class:`Permissions`
+        The resolved permissions of the member in the channel, including overwrites.
+    response: :class:`InteractionResponse`
+        Returns an object responsible for handling responding to the interaction.
+    followup: :class:`Webhook`
+        Returns the follow up webhook for follow up interactions.
+    type: :class:`InteractionType`
+        The interaction type.
     token: :class:`str`
         The token to continue the interaction. These are valid
         for 15 minutes.
@@ -85,10 +93,12 @@ class MessageInteraction(Interaction):
     
     @property
     def values(self) -> Optional[List[str]]:
+        """Optional[List[:class:`str`]]: The values the user selected"""
         return self.data.values
 
     @cached_slot_property('_cs_component')
     def component(self) -> Union[Button, SelectMenu]:
+        """Union[:class:`Button`, :class:`SelectMenu`]: The component the user interacted with"""
         for action_row in self.message.components:
             if not isinstance(action_row, ActionRow):
                 continue
@@ -100,7 +110,7 @@ class MessageInteraction(Interaction):
                     return component
         
         raise Exception("MessageInteraction is malformed - no component found")
-        
+
 
 class MessageInteractionData:
     """Represents the data of an interaction with a message component.

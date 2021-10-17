@@ -620,13 +620,68 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. warning::
 
         This is a low level function that is not generally meant to be used.
+
+    .. versionadded:: 2.0
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`Interaction`
+
+.. function:: on_message_interaction(interaction)
+
+    Called when a message interaction happened.
+
+    This currently happens due to components being used.
+
+    .. warning::
+
+        This is a low level function that is not generally meant to be used.
         If you are working with components, consider using the callbacks associated
         with the :class:`~disnake.ui.View` instead as it provides a nicer user experience.
 
     .. versionadded:: 2.0
 
-    :param interaction: The interaction data.
-    :type interaction: :class:`Interaction`
+    :param interaction: The interaction object.
+    :type interaction: :class:`MessageInteraction`
+
+.. function:: on_button_click(interaction)
+
+    Called when a button is clicked.
+
+    .. warning::
+
+        Consider using the callbacks associated with the :class:`~disnake.ui.View` instead.
+
+    .. versionadded:: 2.0
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`MessageInteraction`
+
+.. function:: on_dropdown(interaction)
+
+    Called when a select menu is clicked.
+
+    .. warning::
+
+        Consider using the callbacks associated with the :class:`~disnake.ui.View` instead.
+
+    .. versionadded:: 2.0
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`MessageInteraction`
+
+.. function:: on_application_command(interaction)
+
+    Called when an application_command is invoked.
+
+    .. warning::
+
+        This is a low level function that is not generally meant to be used.
+        Consider using :class:`~ext.commands.Bot` or :class:`~ext.commands.InteractionBot` instead.
+
+    .. versionadded:: 2.0
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`ApplicationCommandInteraction`
 
 .. function:: on_private_channel_update(before, after)
 
@@ -3527,6 +3582,30 @@ OptionChoice
 .. autoclass:: OptionChoice()
     :members:
 
+ApplicationCommandPermissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationCommandPermissions
+
+.. autoclass:: ApplicationCommandPermissions()
+    :members:
+
+GuildApplicationCommandPermissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: GuildApplicationCommandPermissions
+
+.. autoclass:: GuildApplicationCommandPermissions()
+    :members:
+
+PartialGuildApplicationCommandPermissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: PartialGuildApplicationCommandPermissions
+
+.. autoclass:: PartialGuildApplicationCommandPermissions()
+    :members:
+
 Component
 ~~~~~~~~~~
 
@@ -3670,6 +3749,38 @@ InteractionMessage
 .. attributetable:: InteractionMessage
 
 .. autoclass:: InteractionMessage()
+    :members:
+
+ApplicationCommandInteractionData
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationCommandInteractionData
+
+.. autoclass:: ApplicationCommandInteractionData()
+    :members:
+
+ApplicationCommandInteractionDataOption
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationCommandInteractionDataOption
+
+.. autoclass:: ApplicationCommandInteractionDataOption()
+    :members:
+
+ApplicationCommandInteractionDataResolved
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationCommandInteractionDataResolved
+
+.. autoclass:: ApplicationCommandInteractionDataResolved()
+    :members:
+
+MessageInteractionData
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: MessageInteractionData
+
+.. autoclass:: MessageInteractionData()
     :members:
 
 Member

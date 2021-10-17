@@ -11,6 +11,9 @@ The gist:
 
 - Each cog is a Python class that subclasses :class:`.commands.Cog`.
 - Every command is marked with the :func:`.commands.command` decorator.
+- Every slash command is marked with the :func:`.commands.slash_command` decorator.
+- Every user command is marked with the :func:`.commands.user_command` decorator.
+- Every message command is marked with the :func:`.commands.message_command` decorator.
 - Every listener is marked with the :meth:`.commands.Cog.listener` decorator.
 - Cogs are then registered with the :meth:`.Bot.add_cog` call.
 - Cogs are subsequently removed with the :meth:`.Bot.remove_cog` call.
@@ -119,6 +122,27 @@ They are as follows:
 - :meth:`.Cog.cog_after_invoke`
 - :meth:`.Cog.bot_check`
 - :meth:`.Cog.bot_check_once`
+
+- :meth:`.Cog.cog_slash_command_check`
+- :meth:`.Cog.cog_slash_command_error`
+- :meth:`.Cog.cog_before_slash_command_invoke`
+- :meth:`.Cog.cog_after_slash_command_invoke`
+- :meth:`.Cog.bot_slash_command_check`
+- :meth:`.Cog.bot_slash_command_check_once`
+
+- :meth:`.Cog.cog_user_command_check`
+- :meth:`.Cog.cog_user_command_error`
+- :meth:`.Cog.cog_before_user_command_invoke`
+- :meth:`.Cog.cog_after_user_command_invoke`
+- :meth:`.Cog.bot_user_command_check`
+- :meth:`.Cog.bot_user_command_check_once`
+
+- :meth:`.Cog.cog_message_command_check`
+- :meth:`.Cog.cog_message_command_error`
+- :meth:`.Cog.cog_before_message_command_invoke`
+- :meth:`.Cog.cog_after_message_command_invoke`
+- :meth:`.Cog.bot_message_command_check`
+- :meth:`.Cog.bot_message_command_check_once`
 
 You can visit the reference to get more detail.
 
