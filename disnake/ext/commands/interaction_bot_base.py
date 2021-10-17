@@ -592,6 +592,13 @@ class InteractionBotBase(CommonBotBase):
         
         _, guilds = self._ordered_unsynced_commands(self._test_guilds)
 
+        # Here we only cache global commands and commands from guilds that are spcified in the code.
+        # They're collected from the "test_guilds" kwarg of commands.InteractionBotBase
+        # and the "guild_ids" kwarg of the decorators. This is the only way to avoid rate limits.
+        # If we cache guild commands from everywhere, the limit of invalid requests gets exhausted.
+        # This is because we don't know the scopes of the app in all guilds in advance, so we'll have to
+        # catch a lot of "Forbidden" errors, exceeding the limit of 10k invalid requests in 10 minutes (for large bots).
+
         try:
             commands = await self.fetch_global_commands()
             self._connection._global_application_commands = { # type: ignore
@@ -678,9 +685,6 @@ class InteractionBotBase(CommonBotBase):
         # This method is usually called once per bot start
         if not isinstance(self, disnake.Client):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
-        
-        if not self._sync_permissions:
-            return
 
         guilds_to_cache = set()
         for cmd in self.application_commands:
@@ -689,18 +693,29 @@ class InteractionBotBase(CommonBotBase):
             for guild_id in cmd.permissions:
                 guilds_to_cache.add(guild_id)
         
+        if not self._sync_permissions:
+            if guilds_to_cache:
+                print(
+                    "[WARNING] You're using the @commands.guild_permissions decorator, however,"
+                    f" the 'sync_permissions' kwarg of '{self.__class__.__name__}' is set to 'False'."
+                )
+            return
+        
         for guild_id in guilds_to_cache:
-            perms = await self.bulk_fetch_command_permissions(guild_id)
-            self._connection._application_command_permissions[guild_id] = {
-                perm.id: perm for perm in perms
-            }
+            try:
+                perms = await self.bulk_fetch_command_permissions(guild_id)
+                self._connection._application_command_permissions[guild_id] = {
+                    perm.id: perm for perm in perms
+                }
+            except Exception:
+                pass
 
     async def _sync_application_command_permissions(self) -> None:
-        # Assuming that all relevant permissions are cached
+        # Assuming that permissions and commands are cached
         if not isinstance(self, disnake.Client):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
         
-        if not self._sync_commands or not self._sync_permissions or self.loop.is_closed():
+        if not self._sync_permissions or self.loop.is_closed():
             return
 
         guilds_to_compare: Dict[int, List[Any]] = {} # {guild_id: [partial_perms, ...], ...}
@@ -1196,22 +1211,21 @@ class InteractionBotBase(CommonBotBase):
         if expected_command is None:
             expected_command = self.get_guild_command(interaction.guild_id, interaction.data.id) # type: ignore
 
-        if expected_command is None:
+        if expected_command is None and self._sync_commands:
             # This usually comes from the blind spots of the sync algorithm.
             # Since not all guild commands are cached, it is possible to experience such issues.
             # In this case, the blind spot is the interaction guild, let's fix it:
-            if self._sync_commands:
-                try:
-                    await interaction.response.send_message(
-                        'This is a deprecated local command, which is now deleted.', ephemeral=True
-                    )
-                except Exception:
-                    pass
-                try:
-                    await self.bulk_overwrite_guild_commands(interaction.guild_id, []) # type: ignore
-                except Exception:
-                    pass
-                return
+            try:
+                await interaction.response.send_message(
+                    'This is a deprecated local command, which is now deleted.', ephemeral=True
+                )
+            except Exception:
+                pass
+            try:
+                await self.bulk_overwrite_guild_commands(interaction.guild_id, []) # type: ignore
+            except Exception:
+                pass
+            return
 
         self.dispatch(event_name, interaction)
         try:
