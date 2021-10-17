@@ -25,7 +25,7 @@ class Menu(disnake.ui.View):
     async def nextPage(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         if self.embedCount == 1: # If current embed is the first embed then, do not do anything.
             pass
-        else: # If current embed is not the first embed then, sends the preview embed.
+        else: # If current embed is not the first embed then, edits the message with the preview embed.
             self.embedCount -= 1
 
             # Gets embed object
@@ -37,7 +37,7 @@ class Menu(disnake.ui.View):
     async def lastPage(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         if self.embedCount == 3: # If current embed is the last embed then, do not do anything.
             pass
-        else: # If current embed is not the last embed then, sends the next embed.
+        else: # If current embed is not the last embed then, edits the message with the next embed.
             self.embedCount += 1
 
             # Gets embed object
