@@ -730,7 +730,7 @@ class InteractionBotBase(CommonBotBase):
         for cmd_wrapper in self.application_commands:
             if not cmd_wrapper.auto_sync:
                 continue
-            # Sync the permissions
+            
             for guild_id, partial_perms in cmd_wrapper.permissions.items():
                 # Here we need to get the ID of the relevant API object
                 # representing the application command from the user's code
@@ -754,7 +754,8 @@ class InteractionBotBase(CommonBotBase):
             if (
                 len(new_array) == len(old_perms)
                 and all(
-                    new_cmd_perms.id in old_perms and old_perms[new_cmd_perms.id].permissions == new_cmd_perms.permissions
+                    new_cmd_perms.id in old_perms
+                    and old_perms[new_cmd_perms.id].permissions == new_cmd_perms.permissions
                     for new_cmd_perms in new_array
                 )
             ):
