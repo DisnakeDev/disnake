@@ -750,12 +750,12 @@ class InteractionBotBase(CommonBotBase):
         # Once per-guild permissions are collected from the code,
         # we can compare them to the cached permissions
         for guild_id, new_array in guilds_to_compare.items():
-            old_array = list(self._connection._application_command_permissions.get(guild_id, {}).values())
+            old_perms = self._connection._application_command_permissions.get(guild_id, {})
             if (
-                len(new_array) == len(old_array)
+                len(new_array) == len(old_perms)
                 and all(
-                    new_perms.permissions == old_perms.permissions
-                    for new_perms, old_perms in zip(new_array, old_array)
+                    new_cmd_perms.id in old_perms and old_perms[new_cmd_perms.id].permissions == new_cmd_perms.permissions
+                    for new_cmd_perms in new_array
                 )
             ):
                 if self._sync_commands_debug:
