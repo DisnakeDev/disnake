@@ -1558,11 +1558,13 @@ of :class:`enum.Enum`.
         Represents a channel option.
     .. attribute:: role
 
-        Represents a role + user option
+        Represents a role option.
     .. attribute:: mentionable
 
-        Represents a float option.
+        Represents a role + user option.
     .. attribute:: number
+    
+        Represents a float option.
 
 
 .. class:: ButtonStyle
