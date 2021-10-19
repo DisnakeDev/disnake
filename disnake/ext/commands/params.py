@@ -24,6 +24,7 @@
 from __future__ import annotations
 
 import inspect
+import math
 from enum import Enum, EnumMeta
 from typing import (
     TYPE_CHECKING,
@@ -45,13 +46,14 @@ from typing import (
 import disnake
 from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
-from disnake.enums import ChannelType, OptionType, try_enum_to_int
+from disnake.enums import OptionType, try_enum_to_int
 
 from . import errors
 from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction as Interaction
+
     from .slash_core import InvokableSlashCommand, SubCommand
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
@@ -107,8 +109,10 @@ class ParamInfo:
         converter: Callable[[Interaction, Any], Any] = None,
         autcomplete: Callable[[Interaction, str], Any] = None,
         choices: Choices = None,
-        type: type = str,
-        channel_types: List[ChannelType] = None,
+        lt: float = None,
+        le: float = None,
+        gt: float = None,
+        ge: float = None,
     ) -> None:
         self.default = default
         self.name = name
@@ -116,10 +120,13 @@ class ParamInfo:
         self.description = description
         self.converter = converter
         self.autocomplete = autcomplete
-
         self.choices = choices or []
-        self.type = type
-        self.channel_types = channel_types or []
+
+        if not bool(lt) ^ bool(le) or not bool(gt) ^ bool(ge):
+            raise TypeError("Cannot match lt and le or gt and ge")
+
+        self.le = le or (math.nextafter(lt, -math.inf) if lt else None)
+        self.ge = ge or (math.nextafter(gt, math.inf) if gt else None)
 
     @property
     def required(self) -> bool:
@@ -196,7 +203,8 @@ class ParamInfo:
 
         self.type = type(self.choices[0].value)
 
-    def parse_annotation(self, annotation: Any) -> None:
+    def parse_annotation(self, annotation: Any) -> None:  # sourcery no-metrics
+        # TODO: Clean up whatever the fuck this is
         if isinstance(annotation, ParamInfo):
             default = "..." if annotation.default is ... else repr(annotation.default)
             r = f'Param({default}, description={annotation.description or "description"!r})'
@@ -293,6 +301,8 @@ class ParamInfo:
             choices=self.choices or None,
             channel_types=self.channel_types,
             autocomplete=self.autocomplete is not None,
+            min_value=self.ge,
+            max_value=self.le,
         )
 
 
@@ -371,9 +381,13 @@ def Param(
     *,
     name: str = "",
     desc: str = None,
+    choices: Choices = None,
     conv: Callable[[Interaction, Any], Any] = None,
     autocomp: Callable[[Interaction, str], Any] = None,
-    choices: Choices = None,
+    lt: float = None,
+    le: float = None,
+    gt: float = None,
+    ge: float = None,
 ) -> Any:
     ...
 
@@ -384,9 +398,15 @@ def Param(
     *,
     name: str = "",
     description: str = None,
+    choices: Choices = None,
     converter: Callable[[Interaction, Any], Any] = None,
     autocomplete: Callable[[Interaction, str], Any] = None,
-    choices: Choices = None,
+    lt: float = None,
+    le: float = None,
+    gt: float = None,
+    ge: float = None,
+    min_value: float = None,
+    max_value: float = None,
 ) -> Any:
     ...
 
@@ -397,19 +417,29 @@ def Param(
     name: str = "",
     desc: str = None,
     description: str = None,
+    choices: Choices = None,
     conv: Callable[[Interaction, Any], Any] = None,
     converter: Callable[[Interaction, Any], Any] = None,
     autocomp: Callable[[Interaction, str], Any] = None,
     autocomplete: Callable[[Interaction, str], Any] = None,
-    choices: Choices = None,
+    lt: float = None,
+    le: float = None,
+    gt: float = None,
+    ge: float = None,
+    min_value: float = None,
+    max_value: float = None,
 ) -> Any:
     return ParamInfo(
         default,
         name=name,
         description=desc or description,
-        converter=conv or converter,
         choices=choices,
+        converter=conv or converter,
         autcomplete=autocomp or autocomplete,
+        lt=lt,
+        le=le or max_value,
+        gt=gt,
+        ge=ge or min_value,
     )
 
 

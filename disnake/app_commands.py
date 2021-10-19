@@ -24,6 +24,7 @@ from __future__ import annotations
 from abc import ABC
 
 import re
+import math
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
 
 from .abc import User
@@ -152,8 +153,8 @@ class Option:
         options: list = None,
         channel_types: List[ChannelType] = None,
         autocomplete: bool = False,
-        min_value: Union[int, float] = None,
-        max_value: Union[int, float] = None,
+        min_value: float = None,
+        max_value: float = None,
     ):
         assert name.islower(), f"Option name {name!r} must be lowercase"
 
@@ -163,22 +164,13 @@ class Option:
         self.required: bool = required
         self.options: List[Option] = options or []
 
-        if self.type is OptionType.integer:
-            if not (
-                (min_value is None or isinstance(min_value, int))
-                and (max_value is None or isinstance(max_value, int))
-            ):
-                raise InvalidArgument(f"min_values / max_values should be integers, since option type is {self.type}")
+        if min_value and self.type is OptionType.integer:
+            min_value = math.ceil(min_value)
+        elif max_value and self.type is OptionType.integer:
+            max_value = math.floor(max_value)
         
-        elif self.type is OptionType.number:
-            if not (
-                (min_value is None or isinstance(min_value, (int, float)))
-                and (max_value is None or isinstance(max_value, (int, float)))
-            ):
-                raise InvalidArgument(f"min_values / max_values should be floats, since option type is {self.type}")
-
-        self.min_value: Optional[Union[int, float]] = min_value
-        self.max_value: Optional[Union[int, float]] = max_value
+        self.min_value: Optional[float] = min_value
+        self.max_value: Optional[float] = max_value
 
         if (
             channel_types is not None and
@@ -251,8 +243,8 @@ class Option:
         options: list = None,
         channel_types: List[ChannelType] = None,
         autocomplete: bool = False,
-        min_value: Union[int, float] = None,
-        max_value: Union[int, float] = None,
+        min_value: float = None,
+        max_value: float = None,
     ) -> None:
         """
         Adds an option to the current list of options
@@ -447,8 +439,8 @@ class SlashCommand(ApplicationCommand):
         options: list = None,
         channel_types: List[ChannelType] = None,
         autocomplete: bool = False,
-        min_value: Union[int, float] = None,
-        max_value: Union[int, float] = None,
+        min_value: float = None,
+        max_value: float = None,
     ) -> None:
         """
         Adds an option to the current list of options
