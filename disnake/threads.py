@@ -32,7 +32,7 @@ from .mixins import Hashable
 from .abc import Messageable
 from .enums import ChannelType, try_enum
 from .errors import ClientException
-from .utils import MISSING, parse_time, _get_as_snowflake
+from .utils import MISSING, parse_time, snowflake_time, _get_as_snowflake
 
 __all__ = (
     'Thread',
@@ -55,6 +55,8 @@ if TYPE_CHECKING:
     from .role import Role
     from .permissions import Permissions
     from .state import ConnectionState
+
+    import datetime
 
 
 class Thread(Messageable, Hashable):
@@ -293,6 +295,11 @@ class Thread(Messageable, Hashable):
         if parent is None:
             raise ClientException('Parent channel not found')
         return parent.category_id
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the thread's creation time in UTC."""
+        return snowflake_time(self.id)
 
     def is_private(self) -> bool:
         """:class:`bool`: Whether the thread is a private thread.
