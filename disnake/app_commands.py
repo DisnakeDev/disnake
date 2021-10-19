@@ -166,7 +166,7 @@ class Option:
 
         if min_value and self.type is OptionType.integer:
             min_value = math.ceil(min_value)
-        elif max_value and self.type is OptionType.integer:
+        if max_value and self.type is OptionType.integer:
             max_value = math.floor(max_value)
         
         self.min_value: Optional[float] = min_value

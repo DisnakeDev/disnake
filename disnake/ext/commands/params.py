@@ -34,6 +34,7 @@ from typing import (
     Dict,
     List,
     Literal,
+    Optional,
     Type,
     TypeVar,
     Union,
@@ -69,6 +70,23 @@ __all__ = (
     "param",
     "option_enum",
 )
+
+
+def _xt_to_xe(xe: Optional[float], xt: Optional[float], towards: float) -> Optional[float]:
+    """Function for combining xt and xe
+
+
+    * x > xt && x >= xe ; x >= f(xt, xe, inf)
+    * x < xt && x <= xe ; x <= f(xt, xe, inf)
+    """
+    if xe is not None:
+        if xt is not None:
+            raise TypeError("Cannot combine lt and le or gt and le")
+        return xe
+    elif xt is not None:
+        return math.nextafter(xt, towards)
+    else:
+        return None
 
 
 class ParamInfo:
@@ -122,11 +140,8 @@ class ParamInfo:
         self.autocomplete = autcomplete
         self.choices = choices or []
 
-        if not bool(lt) ^ bool(le) or not bool(gt) ^ bool(ge):
-            raise TypeError("Cannot match lt and le or gt and ge")
-
-        self.le = le or (math.nextafter(lt, -math.inf) if lt else None)
-        self.ge = ge or (math.nextafter(gt, math.inf) if gt else None)
+        self.le = _xt_to_xe(le, lt, -math.inf)
+        self.ge = _xt_to_xe(ge, gt, +math.inf)
 
     @property
     def required(self) -> bool:
@@ -405,8 +420,6 @@ def Param(
     le: float = None,
     gt: float = None,
     ge: float = None,
-    min_value: float = None,
-    max_value: float = None,
 ) -> Any:
     ...
 
@@ -426,8 +439,6 @@ def Param(
     le: float = None,
     gt: float = None,
     ge: float = None,
-    min_value: float = None,
-    max_value: float = None,
 ) -> Any:
     return ParamInfo(
         default,
@@ -437,9 +448,9 @@ def Param(
         converter=conv or converter,
         autcomplete=autocomp or autocomplete,
         lt=lt,
-        le=le or max_value,
+        le=le,
         gt=gt,
-        ge=ge or min_value,
+        ge=ge,
     )
 
 
