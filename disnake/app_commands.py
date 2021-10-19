@@ -123,6 +123,10 @@ class Option:
         By default, it supports all channel types.
     autocomplete: :class:`bool`
         whether this option can be autocompleted.
+    min_value: Union[:class:`int`, :class:`float`]
+        the minimum value permitted
+    max_value: Union[:class:`int`, :class:`float`]
+        the maximum value permitted
     """
 
     __slots__ = (
@@ -134,6 +138,8 @@ class Option:
         'options',
         'channel_types',
         'autocomplete',
+        'min_value',
+        'max_value',
     )
 
     def __init__(
@@ -146,6 +152,8 @@ class Option:
         options: list = None,
         channel_types: List[ChannelType] = None,
         autocomplete: bool = False,
+        min_value: Union[int, float] = None,
+        max_value: Union[int, float] = None,
     ):
         assert name.islower(), f"Option name {name!r} must be lowercase"
 
@@ -154,6 +162,23 @@ class Option:
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
         self.options: List[Option] = options or []
+
+        if self.type is OptionType.integer:
+            if not (
+                (min_value is None or isinstance(min_value, int))
+                and (max_value is None or isinstance(max_value, int))
+            ):
+                raise InvalidArgument(f"min_values / max_values should be integers, since option type is {self.type}")
+        
+        elif self.type is OptionType.number:
+            if not (
+                (min_value is None or isinstance(min_value, (int, float)))
+                and (max_value is None or isinstance(max_value, (int, float)))
+            ):
+                raise InvalidArgument(f"min_values / max_values should be floats, since option type is {self.type}")
+
+        self.min_value: Optional[Union[int, float]] = min_value
+        self.max_value: Optional[Union[int, float]] = max_value
 
         if (
             channel_types is not None and
@@ -180,21 +205,23 @@ class Option:
 
     def __repr__(self) -> str:
         return (
-            f'<Option name={self.name!r} description={self.description!r} '
-            f'type={self.type!r} required={self.required!r} choices={self.choices!r} '
-            f'options={self.options!r}>'
+            f'<Option name={self.name!r} description={self.description!r}'
+            f' type={self.type!r} required={self.required!r} choices={self.choices!r}'
+            f' options={self.options!r} min_value={self.min_value!r} max_value={self.max_value!r}>'
         )
 
     def __eq__(self, other) -> bool:
         return (
-            self.name == other.name and
-            self.description == other.description and
-            self.type == other.type and
-            self.required == other.required and
-            self.choices == other.choices and
-            self.options == other.options and
-            self.channel_types == other.channel_types and
-            self.autocomplete == other.autocomplete
+            self.name == other.name
+            and self.description == other.description
+            and self.type == other.type
+            and self.required == other.required
+            and self.choices == other.choices
+            and self.options == other.options
+            and self.channel_types == other.channel_types
+            and self.autocomplete == other.autocomplete
+            and self.min_value == other.min_value
+            and self.max_value == other.max_value
         )
 
     @classmethod
@@ -212,17 +239,6 @@ class Option:
         Adds an OptionChoice to the list of current choices
         Parameters are the same as for :class:`OptionChoice`
         """
-        # Wrap the value
-        # true_value = value
-        # if self.type == OptionType.string:
-        #     if not isinstance(value, str):
-        #         true_value = f"option_choice_{len(self._choice_connectors)}"
-        #         self._choice_connectors[true_value] = value
-        # elif self.type == OptionType.integer:
-        #     if not isinstance(value, int):
-        #         true_value = len(self._choice_connectors)
-        #         self._choice_connectors[true_value] = value
-        # Add an option choice
         self.choices.append(OptionChoice(name=name, value=value))
 
     def add_option(
@@ -235,18 +251,14 @@ class Option:
         options: list = None,
         channel_types: List[ChannelType] = None,
         autocomplete: bool = False,
+        min_value: Union[int, float] = None,
+        max_value: Union[int, float] = None,
     ) -> None:
         """
         Adds an option to the current list of options
         Parameters are the same as for :class:`Option`
         """
         type = type or OptionType.string
-        if self.type == 1:
-            if type in [1, 2]:
-                raise ValueError('sub_command can only be nested in a sub_command_group')
-        elif self.type == 2:
-            if type != 1:
-                raise ValueError('Expected sub_command in this sub_command_group')
         self.options.append(
             Option(
                 name=name,
@@ -257,6 +269,8 @@ class Option:
                 options=options,
                 channel_types=channel_types,
                 autocomplete=autocomplete,
+                min_value=min_value,
+                max_value=max_value,
             )
         )
 
@@ -270,12 +284,16 @@ class Option:
             payload['required'] = True
         if self.autocomplete:
             payload['autocomplete'] = True
-        if len(self.choices) > 0:
+        if self.choices:
             payload['choices'] = [c.to_dict() for c in self.choices]
-        if len(self.options) > 0:
+        if self.options:
             payload['options'] = [o.to_dict() for o in self.options]
-        if len(self.channel_types) > 0:
+        if self.channel_types:
             payload['channel_types'] = [v.value for v in self.channel_types]
+        if self.min_value is not None:
+            payload['min_value'] = self.min_value
+        if self.max_value is not None:
+            payload['max_value'] = self.max_value
         return payload
 
 
@@ -429,6 +447,8 @@ class SlashCommand(ApplicationCommand):
         options: list = None,
         channel_types: List[ChannelType] = None,
         autocomplete: bool = False,
+        min_value: Union[int, float] = None,
+        max_value: Union[int, float] = None,
     ) -> None:
         """
         Adds an option to the current list of options
@@ -444,6 +464,8 @@ class SlashCommand(ApplicationCommand):
                 options=options,
                 channel_types=channel_types,
                 autocomplete=autocomplete,
+                min_value=min_value,
+                max_value=max_value,
             )
         )
 
