@@ -400,12 +400,23 @@ def Param(
     choices: Choices = None,
     conv: Callable[[Interaction, Any], Any] = None,
     autocomp: Callable[[Interaction, str], Any] = None,
-    lt: float = None,
-    le: float = None,
-    gt: float = None,
     ge: float = None,
-    min_value: float = None,
-    max_value: float = None,
+    le: float = None,
+) -> Any:
+    ...
+
+
+@overload
+def Param(
+    default: Any = ...,
+    *,
+    name: str = "",
+    desc: str = None,
+    choices: Choices = None,
+    conv: Callable[[Interaction, Any], Any] = None,
+    autocomp: Callable[[Interaction, str], Any] = None,
+    gt: float = None,
+    lt: float = None,
 ) -> Any:
     ...
 
@@ -419,10 +430,6 @@ def Param(
     choices: Choices = None,
     converter: Callable[[Interaction, Any], Any] = None,
     autocomplete: Callable[[Interaction, str], Any] = None,
-    lt: float = None,
-    le: float = None,
-    gt: float = None,
-    ge: float = None,
     min_value: float = None,
     max_value: float = None,
 ) -> Any:
