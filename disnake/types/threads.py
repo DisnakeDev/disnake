@@ -52,6 +52,7 @@ class ThreadMetadata(_ThreadMetadataOptional):
 
 class _ThreadOptional(TypedDict, total=False):
     member: ThreadMember
+    owner_id: Snowflake
     last_message_id: Optional[Snowflake]
     last_pin_timestamp: Optional[Snowflake]
 
@@ -60,7 +61,6 @@ class Thread(_ThreadOptional):
     id: Snowflake
     guild_id: Snowflake
     parent_id: Snowflake
-    owner_id: Snowflake
     name: str
     type: ThreadType
     member_count: int

@@ -41,13 +41,12 @@ from typing import (
     cast,
     get_origin,
     get_type_hints,
-    overload,
 )
 
 import disnake
 from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
-from disnake.enums import OptionType, try_enum_to_int
+from disnake.enums import ChannelType, OptionType, try_enum_to_int
 
 from . import errors
 from .converter import CONVERTER_MAPPING
@@ -128,6 +127,8 @@ class ParamInfo:
         converter: Callable[[Interaction, Any], Any] = None,
         autcomplete: Callable[[Interaction, str], Any] = None,
         choices: Choices = None,
+        type: type = None,
+        channel_types: List[ChannelType] = None,
         lt: float = None,
         le: float = None,
         gt: float = None,
@@ -140,6 +141,8 @@ class ParamInfo:
         self.converter = converter
         self.autocomplete = autcomplete
         self.choices = choices or []
+        self.type = type or str
+        self.channel_types = channel_types or []
 
         self.le = _xt_to_xe(le, lt, -1)
         self.ge = _xt_to_xe(ge, gt, 1)
@@ -391,51 +394,8 @@ async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[
     return kwargs
 
 
-@overload
-def Param(
-    default: Any = ...,
-    *,
-    name: str = "",
-    desc: str = None,
-    choices: Choices = None,
-    conv: Callable[[Interaction, Any], Any] = None,
-    autocomp: Callable[[Interaction, str], Any] = None,
-    ge: float = None,
-    le: float = None,
-) -> Any:
-    ...
-
-
-@overload
-def Param(
-    default: Any = ...,
-    *,
-    name: str = "",
-    desc: str = None,
-    choices: Choices = None,
-    conv: Callable[[Interaction, Any], Any] = None,
-    autocomp: Callable[[Interaction, str], Any] = None,
-    gt: float = None,
-    lt: float = None,
-) -> Any:
-    ...
-
-
-@overload
-def Param(
-    default: Any = ...,
-    *,
-    name: str = "",
-    description: str = None,
-    choices: Choices = None,
-    converter: Callable[[Interaction, Any], Any] = None,
-    autocomplete: Callable[[Interaction, str], Any] = None,
-    min_value: float = None,
-    max_value: float = None,
-) -> Any:
-    ...
-
-
+# NOTE: This is not worth overloading anymore unless we take
+# an sqlmodel approach and create overloads dynamically using templating
 def Param(
     default: Any = ...,
     *,

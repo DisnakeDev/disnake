@@ -216,6 +216,8 @@ class Thread(Messageable, Hashable):
     @property
     def owner(self) -> Optional[Member]:
         """Optional[:class:`Member`]: The member this thread belongs to."""
+        if self.owner_id is None:
+            return None
         return self.guild.get_member(self.owner_id)
 
     @property
