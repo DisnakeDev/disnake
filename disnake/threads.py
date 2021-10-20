@@ -90,7 +90,7 @@ class Thread(Messageable, Hashable):
         The thread ID.
     parent_id: :class:`int`
         The parent :class:`TextChannel` ID this thread belongs to.
-    owner_id: :class:`int`
+    owner_id: Optional[:class:`int`]
         The user's ID that created this thread.
     last_message_id: Optional[:class:`int`]
         The last message ID of the message sent to this thread. It may
@@ -100,9 +100,9 @@ class Thread(Messageable, Hashable):
         in this thread. A value of `0` denotes that it is disabled.
         Bots and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages` bypass slowmode.
-    message_count: :class:`int`
+    message_count: Optional[:class:`int`]
         An approximate number of messages in this thread. This caps at 50.
-    member_count: :class:`int`
+    member_count: Optional[:class:`int`]
         An approximate number of members in this thread. This caps at 50.
     me: Optional[:class:`ThreadMember`]
         A thread member representing yourself, if you've joined the thread.
@@ -166,13 +166,13 @@ class Thread(Messageable, Hashable):
     def _from_data(self, data: ThreadPayload):
         self.id = int(data['id'])
         self.parent_id = int(data['parent_id'])
-        self.owner_id = int(data['owner_id'])
+        self.owner_id = _get_as_snowflake(data, 'owner_id')
         self.name = data['name']
         self._type = try_enum(ChannelType, data['type'])
         self.last_message_id = _get_as_snowflake(data, 'last_message_id')
         self.slowmode_delay = data.get('rate_limit_per_user', 0)
-        self.message_count = data['message_count']
-        self.member_count = data['member_count']
+        self.message_count = data.get('message_count')
+        self.member_count = data.get('member_count')
         self._unroll_metadata(data['thread_metadata'])
 
         try:
