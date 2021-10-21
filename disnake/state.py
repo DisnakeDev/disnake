@@ -248,7 +248,7 @@ class ConnectionState:
 
         self.clear()
 
-    def clear(self, *, views: bool = True) -> None:
+    def clear(self, *, views: bool = True, application_commands: bool = True) -> None:
         self.user: ClientUser = MISSING
         # Originally, this code used WeakValueDictionary to maintain references to the
         # global user mapping.
@@ -266,9 +266,11 @@ class ConnectionState:
         self._emojis: Dict[int, Emoji] = {}
         self._stickers: Dict[int, GuildSticker] = {}
         self._guilds: Dict[int, Guild] = {}
-        self._global_application_commands: Dict[int, ApplicationCommand] = {}
-        self._guild_application_commands: Dict[int, Dict[int, ApplicationCommand]] = {}
-        self._application_command_permissions: Dict[int, Dict[int, GuildApplicationCommandPermissions]] = {}
+
+        if application_commands:
+            self._global_application_commands: Dict[int, ApplicationCommand] = {}
+            self._guild_application_commands: Dict[int, Dict[int, ApplicationCommand]] = {}
+            self._application_command_permissions: Dict[int, Dict[int, GuildApplicationCommandPermissions]] = {}
 
         if views:
             self._view_store: ViewStore = ViewStore(self)
@@ -650,7 +652,7 @@ class ConnectionState:
             self._ready_task.cancel()
 
         self._ready_state = asyncio.Queue()
-        self.clear(views=False)
+        self.clear(views=False, application_commands=False)
         self.user = ClientUser(state=self, data=data['user'])
         self.store_user(data['user'])
 
