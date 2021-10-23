@@ -55,7 +55,11 @@ from .cog import Cog
 from .slash_core import slash_command
 from .ctx_menus_core import user_command, message_command
 
-from disnake.app_commands import ApplicationCommand
+from disnake.app_commands import (
+    ApplicationCommand,
+    PartialGuildApplicationCommandPermissions,
+    UnresolvedGuildApplicationCommandPermissions,
+)
 from disnake.enums import ApplicationCommandType
 
 if TYPE_CHECKING:
@@ -725,13 +729,13 @@ class InteractionBotBase(CommonBotBase):
         if not self._sync_permissions or self.loop.is_closed():
             return
 
-        guilds_to_compare: Dict[int, List[Any]] = {} # {guild_id: [partial_perms, ...], ...}
+        guilds_to_compare: Dict[int, List[PartialGuildApplicationCommandPermissions]] = {} # {guild_id: [partial_perms, ...], ...}
 
         for cmd_wrapper in self.application_commands:
             if not cmd_wrapper.auto_sync:
                 continue
             
-            for guild_id, partial_perms in cmd_wrapper.permissions.items():
+            for guild_id, perms in cmd_wrapper.permissions.items():
                 # Here we need to get the ID of the relevant API object
                 # representing the application command from the user's code
                 guild_ids_for_sync = cmd_wrapper.guild_ids or self._test_guilds
@@ -742,11 +746,18 @@ class InteractionBotBase(CommonBotBase):
                 if cmd is None:
                     continue
                 # If we got here, we know the ID of the application command
-                partial_perms.id = cmd.id # type: ignore
+
+                if not self.owner_id and not self.owner_ids:
+                    await self._fill_owners()
+                resolved_perms = perms.resolve(
+                    command_id=cmd.id,
+                    owners=[self.owner_id] if self.owner_id else self.owner_ids
+                )
+
                 if guild_id not in guilds_to_compare:
-                    guilds_to_compare[guild_id] = [partial_perms]
-                else:
-                    guilds_to_compare[guild_id].append(partial_perms)
+                    guilds_to_compare[guild_id] = []
+                guilds_to_compare[guild_id].append(resolved_perms)
+
         # Once per-guild permissions are collected from the code,
         # we can compare them to the cached permissions
         for guild_id, new_array in guilds_to_compare.items():
