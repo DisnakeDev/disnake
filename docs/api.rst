@@ -3606,6 +3606,14 @@ PartialGuildApplicationCommandPermissions
 .. autoclass:: PartialGuildApplicationCommandPermissions()
     :members:
 
+UnresolvedGuildApplicationCommandPermissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: UnresolvedGuildApplicationCommandPermissions
+
+.. autoclass:: UnresolvedGuildApplicationCommandPermissions()
+    :members:
+
 Component
 ~~~~~~~~~~
 

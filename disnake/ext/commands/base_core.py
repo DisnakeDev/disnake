@@ -35,7 +35,7 @@ from typing import (
 import asyncio
 import datetime
 
-from disnake.app_commands import ApplicationCommand, PartialGuildApplicationCommandPermissions
+from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
 from disnake.utils import async_all, maybe_coroutine
 
@@ -91,7 +91,7 @@ class InvokableApplicationCommand(ABC):
             perms = func.__app_command_permissions__
         except AttributeError:
             perms = {}
-        self.permissions: Dict[int, PartialGuildApplicationCommandPermissions] = perms
+        self.permissions: Dict[int, UnresolvedGuildApplicationCommandPermissions] = perms
 
         try:
             checks = func.__commands_checks__
@@ -511,6 +511,7 @@ def guild_permissions(
     guild_id: int,
     role_ids: Mapping[int, bool] = None,
     user_ids: Mapping[int, bool] = None,
+    owner: bool = None
 ) -> Callable[[T], T]:
     """
     A decorator that sets application command permissions in the specified guild.
@@ -525,8 +526,10 @@ def guild_permissions(
         a mapping of role IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
     user_ids: Mapping[:class:`int`, :class:`bool`]
         a mapping of user IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
+    owner: :class:`bool`
+        whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
     """
-    perms = PartialGuildApplicationCommandPermissions(0, role_ids=role_ids, user_ids=user_ids)
+    perms = UnresolvedGuildApplicationCommandPermissions(role_ids=role_ids, user_ids=user_ids, owner=owner)
     def decorator(func: T) -> T:
         if isinstance(func, InvokableApplicationCommand):
             func.permissions[guild_id] = perms

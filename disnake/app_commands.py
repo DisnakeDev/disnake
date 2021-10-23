@@ -48,6 +48,7 @@ __all__ = (
     "GuildApplicationCommandPermissions",
     "PartialGuildApplicationCommandPermissions",
     "PartialGuildAppCmdPerms",
+    "UnresolvedGuildApplicationCommandPermissions",
 )
 
 
@@ -659,3 +660,77 @@ class PartialGuildApplicationCommandPermissions:
 
 
 PartialGuildAppCmdPerms = PartialGuildApplicationCommandPermissions
+
+
+class UnresolvedGuildApplicationCommandPermissions:
+    """
+    Creates an object representing permissions of an application command,
+    without a specific command ID.
+
+    Parameters
+    ----------
+    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
+        Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
+    role_ids: Mapping[:class:`int`, :class:`bool`]
+        Role IDs to booleans.
+    user_ids: Mapping[:class:`int`, :class:`bool`]
+        User IDs to booleans.
+    owner: :class:`bool`
+        Allow/deny the bot owner(s).
+    """
+
+    def __init__(
+        self,
+        *,
+        permissions: Mapping[Union[Role, User], bool] = None,
+        role_ids: Mapping[int, bool] = None,
+        user_ids: Mapping[int, bool] = None,
+        owner: bool = None,
+    ):
+        self._permissions: Optional[Mapping[Union[Role, User], bool]] = permissions
+        self._role_ids: Optional[Mapping[int, bool]] = role_ids
+        self._user_ids: Optional[Mapping[int, bool]] = user_ids
+        self._owner: Optional[bool] = owner
+
+    def resolve(self, *, command_id: int, owners: Iterable[int]) -> PartialGuildApplicationCommandPermissions:
+        """
+        Creates a new :class:`PartialGuildApplicationCommandPermissions` object,
+        combining the previously supplied permission values with the provided
+        command ID and owner IDs.
+
+        Parameters
+        ----------
+        command_id: :class:`int`
+            the command ID to be used
+        owners: Iterable[:class:`int`]
+            the owner IDs, used for extending the user ID mapping
+            based on the previously set ``owner`` permission if applicable
+
+        Returns
+        --------
+        :class:`PartialGuildApplicationCommandPermissions`
+            A new permissions object based on this instance
+            and the provided command ID and owner IDs.
+        """
+
+        resolved_user_ids: Optional[Mapping[int, bool]]
+        if self._owner is not None:
+            owner_ids = dict.fromkeys(owners, self._owner)
+            if not owner_ids:
+                raise ValueError('Cannot properly resolve permissions without owner IDs')
+
+            user_ids = self._user_ids or {}
+            common_ids = owner_ids.keys() & user_ids.keys()
+            if any(user_ids[id] != owner_ids[id] for id in common_ids):
+                print('[WARNING] Conflicting permissions for owner(s) provided in user_ids')
+
+            resolved_user_ids = {**user_ids, **owner_ids}
+        else:
+            resolved_user_ids = self._user_ids
+
+        return PartialGuildApplicationCommandPermissions(
+            command_id=command_id,
+            permissions=self._permissions,
+            role_ids=self._role_ids,
+            user_ids=resolved_user_ids,
+        )
