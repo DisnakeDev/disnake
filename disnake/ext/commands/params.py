@@ -378,13 +378,16 @@ async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[
     Depends on the fact that optionparams already contain all info.
     """
     sig = inspect.signature(func)
+    type_hints = get_type_hints(func)
 
     for parameter in sig.parameters.values():
         if parameter.kind in [inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD]:
             continue
         param = parameter.default
         if not isinstance(param, ParamInfo):
-            continue
+            param = ParamInfo(param if param is not parameter.empty else ...)
+            param.parse_parameter(parameter)
+            param.parse_annotation(type_hints.get(param.param_name, Any))
 
         if param.param_name in kwargs:
             kwargs[param.param_name] = await param.convert_argument(inter, kwargs[param.param_name])
