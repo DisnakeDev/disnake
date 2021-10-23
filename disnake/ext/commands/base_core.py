@@ -511,7 +511,7 @@ def guild_permissions(
     guild_id: int,
     role_ids: Mapping[int, bool] = None,
     user_ids: Mapping[int, bool] = None,
-    owner: bool = None
+    owner: bool = None,
 ) -> Callable[[T], T]:
     """
     A decorator that sets application command permissions in the specified guild.

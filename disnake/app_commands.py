@@ -687,10 +687,10 @@ class UnresolvedGuildApplicationCommandPermissions:
         user_ids: Mapping[int, bool] = None,
         owner: bool = None,
     ):
-        self._permissions: Optional[Mapping[Union[Role, User], bool]] = permissions
-        self._role_ids: Optional[Mapping[int, bool]] = role_ids
-        self._user_ids: Optional[Mapping[int, bool]] = user_ids
-        self._owner: Optional[bool] = owner
+        self.permissions: Optional[Mapping[Union[Role, User], bool]] = permissions
+        self.role_ids: Optional[Mapping[int, bool]] = role_ids
+        self.user_ids: Optional[Mapping[int, bool]] = user_ids
+        self.owner: Optional[bool] = owner
 
     def resolve(self, *, command_id: int, owners: Iterable[int]) -> PartialGuildApplicationCommandPermissions:
         """
@@ -714,23 +714,23 @@ class UnresolvedGuildApplicationCommandPermissions:
         """
 
         resolved_user_ids: Optional[Mapping[int, bool]]
-        if self._owner is not None:
-            owner_ids = dict.fromkeys(owners, self._owner)
+        if self.owner is not None:
+            owner_ids = dict.fromkeys(owners, self.owner)
             if not owner_ids:
                 raise ValueError('Cannot properly resolve permissions without owner IDs')
 
-            user_ids = self._user_ids or {}
+            user_ids = self.user_ids or {}
             common_ids = owner_ids.keys() & user_ids.keys()
             if any(user_ids[id] != owner_ids[id] for id in common_ids):
                 print('[WARNING] Conflicting permissions for owner(s) provided in user_ids')
 
             resolved_user_ids = {**user_ids, **owner_ids}
         else:
-            resolved_user_ids = self._user_ids
+            resolved_user_ids = self.user_ids
 
         return PartialGuildApplicationCommandPermissions(
             command_id=command_id,
-            permissions=self._permissions,
-            role_ids=self._role_ids,
+            permissions=self.permissions,
+            role_ids=self.role_ids,
             user_ids=resolved_user_ids,
         )
