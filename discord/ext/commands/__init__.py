@@ -10,3 +10,4 @@ from .converter import *
 from .cooldowns import *
 from .cog import *
 from .flags import *
+from .params import *

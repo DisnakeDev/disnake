@@ -737,7 +737,7 @@ class HelpCommand:
             You can access the invocation context with :attr:`HelpCommand.context`.
 
             To get the commands that belong to this group without aliases see
-            :attr:`Group.commands`. The commands returned not filtered. To do the
+            :attr:`Group.commands`. The commands returned are not filtered. To do the
             filtering you will have to call :meth:`filter_commands` yourself.
 
         Parameters
