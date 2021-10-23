@@ -294,6 +294,9 @@ class InteractionTimedOut(InteractionException):
             'Please defer it using "interaction.response.defer" on the start of your command. '
             'Later you may send a response by editing the deferred message '
             'using "interaction.edit_original_message"'
+            '\n'
+            'Note: This might also be caused by a misconfiguration in the components '
+            'make sure you do not respond twice in case this is a component.'
         )
         super().__init__(msg)
 
