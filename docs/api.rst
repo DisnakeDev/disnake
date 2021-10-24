@@ -4203,6 +4203,14 @@ MessageReference
 .. autoclass:: MessageReference
     :members:
 
+InteractionReference
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionReference
+
+.. autoclass:: InteractionReference
+    :members:
+
 PartialMessage
 ~~~~~~~~~~~~~~~~~
 
