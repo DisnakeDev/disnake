@@ -35,13 +35,14 @@ from . import utils
 from .reaction import Reaction
 from .emoji import Emoji
 from .partial_emoji import PartialEmoji
-from .enums import MessageType, ChannelType, try_enum
+from .enums import MessageType, ChannelType, InteractionType, try_enum
 from .errors import InvalidArgument, HTTPException
 from .components import _component_factory
 from .embeds import Embed
 from .member import Member
 from .flags import MessageFlags
 from .file import File
+from .user import User
 from .utils import escape_mentions, MISSING
 from .guild import Guild
 from .mixins import Hashable
@@ -66,13 +67,13 @@ if TYPE_CHECKING:
     )
     from .types.user import User as UserPayload
     from .types.embed import Embed as EmbedPayload
+    from .types.interactions import MessageInteraction as InteractionReferencePayload
     from .abc import Snowflake
     from .abc import GuildChannel, MessageableChannel, MessageableChannel
     from .components import Component
     from .state import ConnectionState
     from .channel import TextChannel, GroupChannel, DMChannel, PartialMessageable
     from .mentions import AllowedMentions
-    from .user import User
     from .role import Role
     from .ui.view import View
 
@@ -471,6 +472,44 @@ class MessageReference:
     to_message_reference_dict = to_dict
 
 
+class InteractionReference:
+    """
+    Represents an interaction being referenced in a message.
+
+    This means responses to message components do not include this property,
+    instead including a message reference object as components always exist on preexisting messages.
+
+    .. versionadded:: 2.1
+
+    Attributes
+    ----------
+    id: :class:`int`
+        ID of the interaction
+    type: :class:`InteractionType`
+        The type of interaction
+    name: :class:`str`
+        The name of the application command
+    user: :class:`User`
+        The user who invoked the interaction
+    """
+
+    __slots__ = ('id', 'type', 'name', 'user', '_state')
+
+    def __init__(self, *, state: ConnectionState, data: InteractionReferencePayload):
+        self._state: ConnectionState = state
+        self.id: int = int(data['id'])
+        self.type: InteractionType = try_enum(InteractionType, int(data['type']))
+        self.name: str = data['name']
+        self.user: User = User(state=state, data=data['user'])
+    
+    def __repr__(self) -> str:
+        return f"<InteractionReference id={self.id!r} type={self.type!r} name={self.name!r} user={self.user!r}>"
+    
+    @property
+    def author(self) -> User:
+        return self.user
+
+
 def flatten_handlers(cls):
     prefix = len('_handle_')
     handlers = [
@@ -532,6 +571,11 @@ class Message(Hashable):
         followed channel integration, or message replies.
 
         .. versionadded:: 1.5
+    interaction: Optional[:class:`~disnake.InteractionReference`]
+        The interaction that this message references.
+        This exists only when the message is a response to an interaction without an existing message.
+
+        .. versionadded:: 2.1
 
     mention_everyone: :class:`bool`
         Specifies if the message mentions everyone.
@@ -629,6 +673,7 @@ class Message(Hashable):
         'flags',
         'reactions',
         'reference',
+        'interaction',
         'application',
         'activity',
         'stickers',
@@ -673,6 +718,10 @@ class Message(Hashable):
         self.nonce: Optional[Union[int, str]] = data.get('nonce')
         self.stickers: List[StickerItem] = [StickerItem(data=d, state=state) for d in data.get('sticker_items', [])]
         self.components: List[Component] = [_component_factory(d) for d in data.get('components', [])]
+
+        inter_payload = data.get('interaction')
+        inter = None if inter_payload is None else InteractionReference(state=state, data=inter_payload)
+        self.interaction: Optional[InteractionReference] = inter
 
         try:
             # if the channel doesn't have a guild attribute, we handle that
