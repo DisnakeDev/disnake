@@ -395,7 +395,7 @@ async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[
 
         if param.param_name in kwargs:
             kwargs[param.param_name] = await param.convert_argument(inter, kwargs[param.param_name])
-        else:
+        elif param.default is not ...:
             kwargs[param.param_name] = await param.get_default(inter)
 
     return kwargs
