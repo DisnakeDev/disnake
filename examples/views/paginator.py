@@ -48,9 +48,9 @@ async def menu(ctx):
 
     # Creates the embeds as a list.
     embeds = [
-        disnake.Embed(title="Menu example", description="This is the first embed.", colour=disnake.Colour.random()),
-        disnake.Embed(title="Menu example", description="This is the second embed.", colour=disnake.Color.random()),
-        disnake.Embed(title="Menu example", description="This is the third embed.", colour=disnake.Color.random())
+        disnake.Embed(title="Paginator example", description="This is the first embed.", colour=disnake.Colour.random()),
+        disnake.Embed(title="Paginator example", description="This is the second embed.", colour=disnake.Color.random()),
+        disnake.Embed(title="Paginator example", description="This is the third embed.", colour=disnake.Color.random())
     ]
 
     # Sets the footer of the first embed.
