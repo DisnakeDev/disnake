@@ -181,6 +181,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             ('nsfw', self.nsfw),
             ('news', self.is_news()),
             ('category_id', self.category_id),
+            ('default_auto_archive_duration', self.default_auto_archive_duration),
         ]
         joined = ' '.join('%s=%r' % t for t in attrs)
         return f'<{self.__class__.__name__} {joined}>'
