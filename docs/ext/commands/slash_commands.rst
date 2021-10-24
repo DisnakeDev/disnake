@@ -122,7 +122,7 @@ Discord itself supports only a few built-in types which are guaranteed to be enf
 - :class:`disnake.abc.GuildChannel`\*
 - :class:`disnake.Role`\*\*
 
-All the other types may be converted implicitly, similarly to :ref:`discord_converters`
+All the other types may be converted implicitly, similarly to :ref:`ext_commands_basic_converters`
 
 .. code-block:: python3
 
@@ -139,7 +139,7 @@ All the other types may be converted implicitly, similarly to :ref:`discord_conv
         ...
 
 .. note::
-  \* All channel subclasses and unions are also supported, see :ref:`channel_types`
+  \* All channel subclasses and unions are also supported, see :attr:`Option.channel_types <Option>`
 
   \*\* Role and Member may be used together to create a "mentionable" (:class:`Union[Role, Member]`)
 

@@ -381,7 +381,7 @@ class SlashCommand(ApplicationCommand):
     description : :class:`str`
         The command description (it'll be displayed by disnake)
     options : List[:class:`Option`]
-        The options of the command. See :ref:`option`
+        The options of the command
     default_permission : :class:`bool`
         Whether the command is enabled by default when the app is added to a guild
     """

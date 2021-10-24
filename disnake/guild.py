@@ -407,8 +407,8 @@ class Guild(Hashable):
         """
         Gets a cached application command matching the specified ID.
 
-        Paramters
-        ---------
+        Parameters
+        ----------
         name: :class:`int`
             the ID to compare to.
         """
@@ -418,8 +418,8 @@ class Guild(Hashable):
         """
         Gets a cached application command matching the specified name.
 
-        Paramters
-        ---------
+        Parameters
+        ----------
         name: :class:`str`
             the name to compare to.
         """

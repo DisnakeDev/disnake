@@ -91,7 +91,7 @@ Congratulations. You now have a virtual environment all set up.
 Basic Concepts
 ---------------
 
-disnake revolves around the concept of :ref:`events <disnake-api-events>`.
+disnake revolves around the concept of :ref:`events <discord-api-events>`.
 An event is something you listen to and then respond to. For example, when a message
 happens, you will receive an event about it that you can respond to.
 
