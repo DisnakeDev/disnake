@@ -20,7 +20,7 @@ class row_buttons(disnake.ui.View):
     async def second_button(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         await interaction.response.send_message("This is the second button.")
 
-    @disnake.ui.button(label="A row of", style=ButtonStyle.blurple, row=1)
+    @disnake.ui.button(label="a row of", style=ButtonStyle.blurple, row=1)
     async def third_button(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         await interaction.response.send_message("This is the third button.")
     
