@@ -386,8 +386,12 @@ async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[
         param = parameter.default
         if not isinstance(param, ParamInfo):
             param = ParamInfo(param if param is not parameter.empty else ...)
-            param.parse_parameter(parameter)
-            param.parse_annotation(type_hints.get(param.param_name, Any))
+            try:
+                param.parse_parameter(parameter)
+                param.parse_annotation(type_hints.get(param.param_name, Any))
+            except TypeError:
+                # invalid annotations with old-style options
+                continue
 
         if param.param_name in kwargs:
             kwargs[param.param_name] = await param.convert_argument(inter, kwargs[param.param_name])
