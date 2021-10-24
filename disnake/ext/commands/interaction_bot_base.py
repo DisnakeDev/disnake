@@ -56,9 +56,9 @@ from .slash_core import slash_command
 from .ctx_menus_core import user_command, message_command
 
 from disnake.app_commands import (
+    Option,
     ApplicationCommand,
     PartialGuildApplicationCommandPermissions,
-    UnresolvedGuildApplicationCommandPermissions,
 )
 from disnake.enums import ApplicationCommandType
 
@@ -213,7 +213,7 @@ class InteractionBotBase(CommonBotBase):
     def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
         """Adds an :class:`.InvokableSlashCommand` into the internal list of slash commands.
 
-        This is usually not called, instead the :meth:`~.BotBase.slash_command` or
+        This is usually not called, instead the :meth:`.slash_command` or
         shortcut decorators are used.
 
         Parameters
@@ -240,7 +240,7 @@ class InteractionBotBase(CommonBotBase):
     def add_user_command(self, user_command: InvokableUserCommand) -> None:
         """Adds an :class:`.InvokableUserCommand` into the internal list of user commands.
 
-        This is usually not called, instead the :meth:`~.BotBase.user_command` or
+        This is usually not called, instead the :meth:`.user_command` or
         shortcut decorators are used.
 
         Parameters
@@ -267,7 +267,7 @@ class InteractionBotBase(CommonBotBase):
     def add_message_command(self, message_command: InvokableMessageCommand) -> None:
         """Adds an :class:`.InvokableMessageCommand` into the internal list of message commands.
 
-        This is usually not called, instead the :meth:`~.BotBase.message_command` or
+        This is usually not called, instead the :meth:`.message_command` or
         shortcut decorators are used.
 
         Parameters
@@ -404,7 +404,7 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: str = None,
         description: str = None,
-        options: List[disnake.app_commands.Option] = None,
+        options: List[Option] = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
@@ -431,7 +431,7 @@ class InteractionBotBase(CommonBotBase):
             name of the slash command you want to respond to (equals to function name by default).
         description: :class:`str`
             the description of the slash command. It will be visible in Discord.
-        options: List[:class:`Option`]
+        options: List[:class:`.Option`]
             the list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
         default_permission: :class:`bool`

@@ -520,8 +520,8 @@ class GuildApplicationCommandPermissions:
         The ID of your application.
     guild_id: :class:`int`
         The ID of the guild where these permissions are applied.
-    permissions: List[:class:`RawApplicationCommandPermission`]
-        A list of :class:`RawApplicationCommandPermission`.
+    permissions: List[:class:`ApplicationCommandPermissions`]
+        A list of :class:`ApplicationCommandPermissions`.
     """
 
     __slots__ = ("_state", "id", "application_id", "guild_id", "permissions")
