@@ -229,6 +229,7 @@ class MessageType(Enum):
     thread_starter_message = 21
     guild_invite_reminder = 22
 
+
 class PartyType(Enum):
     youtube = 755600276941176913
     poker = 755827207812677713
@@ -238,6 +239,7 @@ class PartyType(Enum):
     letter_tile = 879863686565621790
     word_snack = 879863976006127627
     doodle_crew = 878067389634314250
+
 
 class VoiceRegion(Enum):
     us_west = 'us-west'
@@ -611,7 +613,6 @@ class ApplicationCommandType(Enum):
     message = 3
 
 
-
 class OptionType(Enum):
     sub_command = 1
     sub_command_group = 2
@@ -623,6 +624,7 @@ class OptionType(Enum):
     role = 8
     mentionable = 9
     number = 10
+    attachment = 11
 
 
 class StagePrivacyLevel(Enum):
