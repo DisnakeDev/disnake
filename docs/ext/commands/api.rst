@@ -73,7 +73,7 @@ Prefix Helpers
 Event Reference
 -----------------
 
-These events function similar to :ref:`the regular events <disnake-api-events>`, except they
+These events function similar to :ref:`the regular events <discord-api-events>`, except they
 are custom to the command extension module.
 
 .. function:: disnake.ext.commands.on_command_error(ctx, error)
@@ -224,6 +224,45 @@ Slash Command
         :decorator:
 
     .. automethod:: InvokableSlashCommand.error()
+        :decorator:
+
+Slash Subcommand
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.SubCommand
+
+.. autoclass:: disnake.ext.commands.SubCommand
+    :members:
+    :exclude-members: after_invoke, before_invoke, error
+
+    .. automethod:: SubCommand.after_invoke()
+        :decorator:
+
+    .. automethod:: SubCommand.before_invoke()
+        :decorator:
+
+    .. automethod:: SubCommand.error()
+        :decorator:
+
+Slash Subcommand Group
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.SubCommandGroup
+
+.. autoclass:: disnake.ext.commands.SubCommandGroup
+    :members:
+    :exclude-members: sub_command, after_invoke, before_invoke, error
+
+    .. automethod:: SubCommandGroup.sub_command(*args, **kwargs)
+        :decorator:
+
+    .. automethod:: SubCommandGroup.after_invoke()
+        :decorator:
+
+    .. automethod:: SubCommandGroup.before_invoke()
+        :decorator:
+
+    .. automethod:: SubCommandGroup.error()
         :decorator:
 
 User Command

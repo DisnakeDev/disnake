@@ -85,6 +85,7 @@ __all__ = (
     'Message',
     'PartialMessage',
     'MessageReference',
+    'InteractionReference',
     'DeletedReferencedMessage',
 )
 

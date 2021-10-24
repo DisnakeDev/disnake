@@ -458,7 +458,7 @@ class Client:
 
         Returns
         --------
-        :class:`User`
+        :class:`~disnake.User`
             The user with the given ID
         """
         user = self.get_user(user_id)
@@ -1043,7 +1043,7 @@ class Client:
         
         Returns
         -------
-        List[:class:`ApplicationCommand`]
+        List[:class:`.ApplicationCommand`]
             The list of application commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
@@ -1060,7 +1060,7 @@ class Client:
         
         Returns
         -------
-        List[:class:`SlashCommand`]
+        List[:class:`.SlashCommand`]
             The list of slash commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
@@ -1077,7 +1077,7 @@ class Client:
         
         Returns
         -------
-        List[:class:`UserCommand`]
+        List[:class:`.UserCommand`]
             The list of user commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
@@ -1094,7 +1094,7 @@ class Client:
         
         Returns
         -------
-        List[:class:`MessageCommand`]
+        List[:class:`.MessageCommand`]
             The list of message commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
@@ -1111,7 +1111,7 @@ class Client:
         
         Returns
         -------
-        :class:`ApplicationCommand`
+        :class:`.ApplicationCommand`
             The application command.
         """
         return self._connection._get_global_application_command(id)
@@ -1129,7 +1129,7 @@ class Client:
         
         Returns
         -------
-        :class:`ApplicationCommand`
+        :class:`.ApplicationCommand`
             The application command.
         """
         return self._connection._get_guild_application_command(guild_id, id)
@@ -1142,12 +1142,12 @@ class Client:
         ----------
         name: :class:`str`
             The name to look for.
-        cmd_type: :class:`ApplicationCommandType`
+        cmd_type: :class:`.ApplicationCommandType`
             The type to look for. By default, no types are checked.
         
         Returns
         -------
-        :class:`ApplicationCommand`
+        :class:`.ApplicationCommand`
             The application command.
         """
         return self._connection._get_global_command_named(name, cmd_type)
@@ -1162,12 +1162,12 @@ class Client:
             The guild ID to search for.
         name: :class:`str`
             The command name to search for.
-        cmd_type: :class:`ApplicationCommandType`
+        cmd_type: :class:`.ApplicationCommandType`
             The type to look for. By default, no types are checked.
         
         Returns
         -------
-        :class:`ApplicationCommand`
+        :class:`.ApplicationCommand`
             The application command.
         """
         return self._connection._get_guild_command_named(guild_id, name, cmd_type)
@@ -1210,7 +1210,7 @@ class Client:
 
         In case the event returns multiple arguments, a :class:`tuple` containing those
         arguments is returned instead. Please check the
-        :ref:`documentation <disnake-api-events>` for a list of events and their
+        :ref:`documentation <discord-api-events>` for a list of events and their
         parameters.
 
         This function returns the **first event that meets the requirements**.
@@ -1254,7 +1254,7 @@ class Client:
         Parameters
         ------------
         event: :class:`str`
-            The event name, similar to the :ref:`event reference <disnake-api-events>`,
+            The event name, similar to the :ref:`event reference <discord-api-events>`,
             but without the ``on_`` prefix, to wait for.
         check: Optional[Callable[..., :class:`bool`]]
             A predicate to check what to wait for. The arguments must meet the
@@ -1273,7 +1273,7 @@ class Client:
         Any
             Returns no arguments, a single argument, or a :class:`tuple` of multiple
             arguments that mirrors the parameters passed in the
-            :ref:`event reference <disnake-api-events>`.
+            :ref:`event reference <discord-api-events>`.
         """
 
         future = self.loop.create_future()
@@ -1297,7 +1297,7 @@ class Client:
     def event(self, coro: Coro) -> Coro:
         """A decorator that registers an event to listen to.
 
-        You can find more info about the events on the :ref:`documentation below <disnake-api-events>`.
+        You can find more info about the events on the :ref:`documentation below <discord-api-events>`.
 
         The events must be a :ref:`coroutine <coroutine>`, if not, :exc:`TypeError` is raised.
 
@@ -1931,7 +1931,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`ApplicationCommand`]
+        List[:class:`.ApplicationCommand`]
             A list of application commands.
         """
         return await self._connection.fetch_global_commands()
@@ -1950,7 +1950,7 @@ class Client:
         
         Returns
         -------
-        :class:`ApplicationCommand`
+        :class:`.ApplicationCommand`
             The requested application command.
         """
         return await self._connection.fetch_global_command(command_id)
@@ -1964,12 +1964,12 @@ class Client:
 
         Parameters
         ----------
-        application_command: :class:`ApplicationCommand`
+        application_command: :class:`.ApplicationCommand`
             an object representing the application command.
         
         Returns
         -------
-        :class:`ApplicationCommand`
+        :class:`.ApplicationCommand`
             The application command that was created.
         """
         return await self._connection.create_global_command(application_command)
@@ -1985,12 +1985,12 @@ class Client:
         ----------
         command_id: :class:`int`
             the ID of the command to edit.
-        new_command: :class:`ApplicationCommand`
+        new_command: :class:`.ApplicationCommand`
             an object representing the edited command.
         
         Returns
         -------
-        :class:`ApplicationCommand`
+        :class:`.ApplicationCommand`
             The edited application command.
         """
         return await self._connection.edit_global_command(command_id, new_command)
@@ -2018,12 +2018,12 @@ class Client:
 
         Parameters
         ----------
-        application_commands: List[:class:`ApplicationCommand`]
+        application_commands: List[:class:`.ApplicationCommand`]
             a list of application commands to insert instead of the existing commands.
         
         Returns
         -------
-        List[:class:`ApplicationCommand`]
+        List[:class:`.ApplicationCommand`]
             A list of registered application commands.
         """
         return await self._connection.bulk_overwrite_global_commands(application_commands)
@@ -2044,7 +2044,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`ApplicationCommand`]
+        List[:class:`.ApplicationCommand`]
             A list of application commands.
         """
         return await self._connection.fetch_guild_commands(guild_id)
@@ -2065,7 +2065,7 @@ class Client:
         
         Returns
         -------
-        :class:`ApplicationCommand`
+        :class:`.ApplicationCommand`
             The requested application command.
         """
         return await self._connection.fetch_guild_command(guild_id, command_id)
@@ -2081,12 +2081,12 @@ class Client:
         ----------
         guild_id: :class:`int`
             the ID of the guild where the command should be inserted.
-        application_command: :class:`ApplicationCommand`
+        application_command: :class:`.ApplicationCommand`
             an object representing the application command.
         
         Returns
         -------
-        :class:`ApplicationCommand`
+        :class:`.ApplicationCommand`
             The application command that was created.
         """
         return await self._connection.create_guild_command(guild_id, application_command)
@@ -2104,12 +2104,12 @@ class Client:
             the ID of the guild where the command should be edited.
         command_id: :class:`int`
             the ID of the command to edit.
-        new_command: :class:`ApplicationCommand`
+        new_command: :class:`.ApplicationCommand`
             an object representing the edited command.
         
         Returns
         -------
-        :class:`ApplicationCommand`
+        :class:`.ApplicationCommand`
             The edited application command.
         """
         return await self._connection.edit_guild_command(guild_id, command_id, new_command)
@@ -2143,12 +2143,12 @@ class Client:
         ----------
         guild_id: :class:`int`
             the ID of the guild where the commands should be overwritten.
-        application_commands: List[:class:`ApplicationCommand`]
+        application_commands: List[:class:`.ApplicationCommand`]
             a list of application commands to insert instead of the existing commands.
         
         Returns
         -------
-        List[:class:`ApplicationCommand`]
+        List[:class:`.ApplicationCommand`]
             A list of registered application commands.
         """
         return await self._connection.bulk_overwrite_guild_commands(guild_id, application_commands)
@@ -2158,7 +2158,7 @@ class Client:
     async def bulk_fetch_command_permissions(self, guild_id: int) -> List[GuildApplicationCommandPermissions]:
         """|coro|
 
-        Requests a list of :class:`GuildApplicationCommandPermissions` configured for this guild.
+        Requests a list of :class:`.GuildApplicationCommandPermissions` configured for this guild.
 
         .. versionadded:: 2.1
 
@@ -2172,7 +2172,7 @@ class Client:
     async def fetch_command_permissions(self, guild_id: int, command_id: int) -> GuildApplicationCommandPermissions:
         """|coro|
 
-        Requests :class:`GuildApplicationCommandPermissions` for a specific command.
+        Requests :class:`.GuildApplicationCommandPermissions` for a specific command.
 
         .. versionadded:: 2.1
 
@@ -2185,7 +2185,7 @@ class Client:
         
         Returns
         -------
-        :class:`GuildApplicationCommandPermissions`
+        :class:`.GuildApplicationCommandPermissions`
             The edited app command permissions.
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
@@ -2208,7 +2208,7 @@ class Client:
             The ID of the guild where the permissions should be applied.
         command_id: :class:`int`
             The ID of the app command you want to apply these permissions to.
-        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
+        permissions: Mapping[Union[:class:`~disnake.Role`, :class:`disnake.abc.User`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
         role_ids: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.
@@ -2217,7 +2217,7 @@ class Client:
         
         Returns
         -------
-        :class:`GuildApplicationCommandPermissions`
+        :class:`.GuildApplicationCommandPermissions`
             The object representing the edited app command permissions.
         """
         perms = PartialGuildApplicationCommandPermissions(
@@ -2241,12 +2241,12 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID of the guild where the permissions should be applied.
-        permissions: List[:class:`PartialGuildApplicationCommandPermissions`]
+        permissions: List[:class:`.PartialGuildApplicationCommandPermissions`]
             A list of partial permissions for each app command you want to edit.
         
         Returns
         -------
-        List[:class:`GuildApplicationCommandPermissions`]
+        List[:class:`.GuildApplicationCommandPermissions`]
             A list of edited permissions of application commands.
         """
         return await self._connection.bulk_edit_command_permissions(guild_id, permissions)

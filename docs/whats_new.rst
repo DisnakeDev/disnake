@@ -600,7 +600,7 @@ New Features
 - Add :attr:`VoiceRegion.europe` and :attr:`VoiceRegion.dubai`. (:issue:`2358`, :issue:`2490`)
 - Add :meth:`TextChannel.follow` to follow a news channel. (:issue:`2367`)
 - Add :attr:`Permissions.view_guild_insights` permission. (:issue:`2415`)
-- Add support for new audit log types. See :ref:`disnake-api-audit-logs` for more information. (:issue:`2427`)
+- Add support for new audit log types. See :ref:`discord-api-audit-logs` for more information. (:issue:`2427`)
     - Note that integration support is not finalized.
 
 - Add :attr:`Webhook.type` to query the type of webhook (:class:`WebhookType`). (:issue:`2441`)

@@ -54,7 +54,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
     -----------
     name: :class:`str`
         The name of the user command.
-    body: :class:`UserCommand`
+    body: :class:`.UserCommand`
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the user command is called.
@@ -120,7 +120,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     -----------
     name: :class:`str`
         The name of the message command.
-    body: :class:`MessageCommand`
+    body: :class:`.MessageCommand`
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the message command is called.

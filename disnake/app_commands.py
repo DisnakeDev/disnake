@@ -381,7 +381,7 @@ class SlashCommand(ApplicationCommand):
     description : :class:`str`
         The command description (it'll be displayed by disnake)
     options : List[:class:`Option`]
-        The options of the command. See :ref:`option`
+        The options of the command
     default_permission : :class:`bool`
         Whether the command is enabled by default when the app is added to a guild
     """
@@ -520,8 +520,8 @@ class GuildApplicationCommandPermissions:
         The ID of your application.
     guild_id: :class:`int`
         The ID of the guild where these permissions are applied.
-    permissions: List[:class:`RawApplicationCommandPermission`]
-        A list of :class:`RawApplicationCommandPermission`.
+    permissions: List[:class:`ApplicationCommandPermissions`]
+        A list of :class:`ApplicationCommandPermissions`.
     """
 
     __slots__ = ("_state", "id", "application_id", "guild_id", "permissions")

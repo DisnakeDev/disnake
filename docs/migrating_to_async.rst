@@ -91,14 +91,14 @@ After:
     def on_socket_raw_send(payload): pass
 
 Note that ``on_status`` was removed. If you want its functionality, use :func:`on_member_update`.
-See :ref:`disnake-api-events` for more information. Other removed events include ``on_socket_closed``, ``on_socket_receive``, and ``on_socket_opened``.
+See :ref:`discord-api-events` for more information. Other removed events include ``on_socket_closed``, ``on_socket_receive``, and ``on_socket_opened``.
 
 
 Coroutines
 -----------
 
 The biggest change that the library went through is that almost every function in :class:`Client`
-was changed to be a `coroutine <py:library/asyncio-task.html>`_. Functions
+was changed to be a :doc:`coroutine <py:library/asyncio-task>`. Functions
 that are marked as a coroutine in the documentation must be awaited from or yielded from in order
 for the computation to be done. For example...
 
@@ -180,7 +180,7 @@ After:
     channel.type == disnake.ChannelType.text
 
 The main reason for this change was to reduce the use of finicky strings in the API as this
-could give users a false sense of power. More information can be found in the :ref:`disnake-api-enums` page.
+could give users a false sense of power. More information can be found in the :ref:`discord-api-enums` page.
 
 Properties
 -----------

@@ -72,7 +72,7 @@ class SubCommandGroup(InvokableApplicationCommand):
     -----------
     name: :class:`str`
         The name of the group.
-    option: :class:`Option`
+    option: :class:`.Option`
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the command group is invoked.
@@ -157,7 +157,7 @@ class SubCommand(InvokableApplicationCommand):
     -----------
     name: :class:`str`
         The name of the subcommand.
-    option: :class:`Option`
+    option: :class:`.Option`
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the subcommand is called.
@@ -235,7 +235,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     -----------
     name: :class:`str`
         The name of the command.
-    body: :class:`SlashCommand`
+    body: :class:`.SlashCommand`
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the command is called.
@@ -326,7 +326,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             the name of the subcommand. Defaults to the function name
         description: :class:`str`
             the description of the subcommand
-        options: List[:class:`Option`]
+        options: List[:class:`.Option`]
             the options of the subcommand for registration in API
         connectors: Dict[:class:`str`, :class:`str`]
             which function param states for each option. If the name
@@ -337,7 +337,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         Returns
         --------
         Callable[..., :class:`SubCommand`]
-            A decorator that converts the provided method into a SubCommand, adds it to the bot, then returns it.
+            A decorator that converts the provided method into a :class:`SubCommand`, adds it to the bot, then returns it.
         """
         def decorator(
             func: Union[
@@ -385,7 +385,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         Returns
         --------
         Callable[..., :class:`SubCommandGroup`]
-            A decorator that converts the provided method into a SubCommandGroup, adds it to the bot, then returns it.
+            A decorator that converts the provided method into a :class:`SubCommandGroup`, adds it to the bot, then returns it.
         """
         def decorator(
             func: Union[
@@ -551,7 +551,7 @@ def slash_command(
         name of the slash command you want to respond to (equals to function name by default).
     description: :class:`str`
         the description of the slash command. It will be visible in Discord.
-    options: List[:class:`Option`]
+    options: List[:class:`.Option`]
         the list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
     default_permission: :class:`bool`

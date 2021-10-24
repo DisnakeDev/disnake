@@ -16,7 +16,7 @@ If intents are not passed, then the library defaults to every intent being enabl
 What intents are needed?
 --------------------------
 
-The intents that are necessary for your bot can only be dictated by yourself. Each attribute in the :class:`Intents` class documents what :ref:`events <disnake-api-events>` it corresponds to and what kind of cache it enables.
+The intents that are necessary for your bot can only be dictated by yourself. Each attribute in the :class:`Intents` class documents what :ref:`events <discord-api-events>` it corresponds to and what kind of cache it enables.
 
 For example, if you want a bot that functions without spammy events like presences or typing then we could do the following:
 
