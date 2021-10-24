@@ -323,15 +323,15 @@ class ApplicationCommandInteractionDataResolved:
 
     Attributes
     ----------
-    members: :class:`Dict[int, Member]`
-        IDs and prtial members (missing 'deaf' and 'mute')
-    users: :class:`Dict[int, User]`
+    members: Dict[:class:`int`, :class:`Member`]
+        IDs and partial members (missing 'deaf' and 'mute')
+    users: Dict[:class:`int`, :class:`User`]
         IDs and users
-    roles: :class:`Dict[int, Role]`
+    roles: Dict[:class:`int`, :class:`Role`]
         IDs and roles
-    channels: :class:`Dict[int, Channel]`
+    channels: Dict[:class:`int`, :class:`Channel`]
         IDs and partial channels (only 'id', 'name' and 'permissions' are included)
-    messages: :class:`Dict[int, Message]`
+    messages: Dict[:class:`int`, :class:`Message`]
         IDs and messages
     """
 
