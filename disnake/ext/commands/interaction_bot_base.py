@@ -571,6 +571,10 @@ class InteractionBotBase(CommonBotBase):
 
     # command synchronisation
     
+    async def close(self) -> None:
+        self._sync_commands = False
+        await super().close()
+
     def _ordered_unsynced_commands(
         self, test_guilds: Sequence[int] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
@@ -750,7 +754,7 @@ class InteractionBotBase(CommonBotBase):
                 if not self.owner_id and not self.owner_ids:
                     await self._fill_owners()
                 resolved_perms = perms.resolve(
-                    command_id=cmd.id,
+                    command_id=cmd.id, # type: ignore
                     owners=[self.owner_id] if self.owner_id else self.owner_ids
                 )
 
@@ -786,11 +790,13 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError(f"Command sync is only possible in disnake.Client subclasses")
         
+        self._sync_queued = True
         await self.wait_until_first_connect()
         await self._cache_application_commands()
         await self._sync_application_commands()
         await self._cache_application_command_permissions()
         await self._sync_application_command_permissions()
+        self._sync_queued = False
 
     async def _delayed_command_sync(self) -> None:
         if not isinstance(self, disnake.Client):
