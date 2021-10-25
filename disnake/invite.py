@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from .types.channel import (
         PartialChannel as InviteChannelPayload,
     )
+    from .types.guild import GuildFeature
     from .state import ConnectionState
     from .guild import Guild
     from .abc import GuildChannel
@@ -160,7 +161,7 @@ class PartialInviteGuild:
         self._state: ConnectionState = state
         self.id: int = id
         self.name: str = data['name']
-        self.features: List[str] = data.get('features', [])
+        self.features: List[GuildFeature] = data.get('features', [])
         self._icon: Optional[str] = data.get('icon')
         self._banner: Optional[str] = data.get('banner')
         self._splash: Optional[str] = data.get('splash')
