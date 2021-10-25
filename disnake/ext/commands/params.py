@@ -242,9 +242,8 @@ class ParamInfo:
             parameters = list(inspect.signature(self.converter).parameters.values())
             parameter = parameters[2] if inspect.ismethod(self.converter) else parameters[1]
             if self.converter.__class__ != type:
-                conv_annot = get_type_hints(self.converter.__call__).get(parameter.name, Any)
-            else:
-                conv_annot = get_type_hints(self.converter).get(parameter.name, Any)
+                self.converter = self.converter.__call__
+            conv_annot = get_type_hints(self.converter).get(parameter.name, Any)
 
             if conv_annot in self.TYPES:
                 self.type = conv_annot
