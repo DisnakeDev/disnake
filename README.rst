@@ -1,3 +1,6 @@
+.. image:: ./assets/banner.png
+    :alt: Disnake Banner
+
 disnake
 =======
 
