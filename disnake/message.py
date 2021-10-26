@@ -248,6 +248,14 @@ class Attachment(Hashable):
         The attachment's `media type <https://en.wikipedia.org/wiki/Media_type>`_
 
         .. versionadded:: 1.7
+    ephemeral: :class:`bool`
+        Whether the attachment is ephemeral.
+
+        .. versionadded:: 2.1
+    description: :class:`str`
+        The attachment's description
+
+        .. versionadded:: 2.1
     """
 
     __slots__ = (
@@ -261,6 +269,7 @@ class Attachment(Hashable):
         "_http",
         "content_type",
         "ephemeral",
+        "description",
     )
 
     def __init__(self, *, data: AttachmentPayload, state: ConnectionState):
@@ -274,6 +283,7 @@ class Attachment(Hashable):
         self._http = state.http
         self.content_type: Optional[str] = data.get("content_type")
         self.ephemeral: bool = data.get("ephemeral", False)
+        self.description: Optional[str] = data.get("description")
 
     def is_spoiler(self) -> bool:
         """:class:`bool`: Whether this attachment contains a spoiler."""
@@ -370,7 +380,13 @@ class Attachment(Hashable):
         data = await self._http.get_from_cdn(url)
         return data
 
-    async def to_file(self, *, use_cached: bool = False, spoiler: bool = False) -> File:
+    async def to_file(
+        self,
+        *,
+        use_cached: bool = False,
+        spoiler: bool = False,
+        description: Optional[str] = MISSING,
+    ) -> File:
         """|coro|
 
         Converts the attachment into a :class:`File` suitable for sending via
@@ -393,6 +409,9 @@ class Attachment(Hashable):
             Whether the file is a spoiler.
 
             .. versionadded:: 1.4
+        description: Optional[:class:`str`]
+            The file's description. Copies this attachment's description by default,
+            set to ``None`` to remove.
 
         Raises
         ------
@@ -409,8 +428,12 @@ class Attachment(Hashable):
             The attachment as a file suitable for sending.
         """
 
+        if description is MISSING:
+            description = self.description
         data = await self.read(use_cached=use_cached)
-        return File(io.BytesIO(data), filename=self.filename, spoiler=spoiler)
+        return File(
+            io.BytesIO(data), filename=self.filename, spoiler=spoiler, description=description
+        )
 
     def to_dict(self) -> AttachmentPayload:
         result: AttachmentPayload = {
@@ -419,7 +442,7 @@ class Attachment(Hashable):
             "proxy_url": self.proxy_url,
             "size": self.size,
             "url": self.url,
-            "spoiler": self.is_spoiler(),
+            "ephemeral": self.ephemeral,
         }
         if self.height:
             result["height"] = self.height
@@ -427,6 +450,8 @@ class Attachment(Hashable):
             result["width"] = self.width
         if self.content_type:
             result["content_type"] = self.content_type
+        if self.description:
+            result["description"] = self.description
         return result
 
 
