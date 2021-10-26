@@ -433,16 +433,12 @@ class Cog(metaclass=CogMeta):
         if not hasattr(self.cog_load.__func__, '__cog_special_method__'):
             return
         
-        await bot.wait_until_ready()
-        asyncio.create_task(disnake.utils.maybe_coroutine(self.cog_load))
+        bot.loop.create_task(disnake.utils.maybe_coroutine(self.cog_load))
         
     
     @_cog_special_method
     async def cog_load(self) -> None:
-        """A special method that is called as a task when the cog is added.
-        
-        By default it waits until the bot is ready before running the function.
-        """
+        """A special method that is called as a task when the cog is added."""
         pass
     
 
@@ -665,7 +661,7 @@ class Cog(metaclass=CogMeta):
                         bot.remove_message_command(to_undo.name)
                 raise e
         
-        asyncio.create_task(self.__cog_load_impl(bot))
+        bot.loop.create_task(self.__cog_load_impl(bot))
 
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
