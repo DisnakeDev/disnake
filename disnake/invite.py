@@ -194,7 +194,7 @@ class PartialInviteGuild:
         """Optional[:class:`Asset`]: Returns the guild's banner asset, if available."""
         if self._banner is None:
             return None
-        return Asset._from_guild_image(self._state, self.id, self._banner, path='banners')
+        return Asset._from_banner(self._state, self.id, self._banner)
 
     @property
     def splash(self) -> Optional[Asset]:

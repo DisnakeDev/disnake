@@ -184,7 +184,7 @@ class BaseUser(_UserTag):
         """
         if self._banner is None:
             return None
-        return Asset._from_user_banner(self._state, self.id, self._banner)
+        return Asset._from_banner(self._state, self.id, self._banner)
 
     @property
     def accent_colour(self) -> Optional[Colour]:
