@@ -571,10 +571,6 @@ class InteractionBotBase(CommonBotBase):
 
     # command synchronisation
     
-    async def close(self) -> None:
-        self._sync_commands = False
-        await super().close()
-
     def _ordered_unsynced_commands(
         self, test_guilds: Sequence[int] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
@@ -629,7 +625,7 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
         
-        if not self._sync_commands or self.loop.is_closed():
+        if not self._sync_commands or self._is_closed or self.loop.is_closed():
             return
         
         # We assume that all commands are already cached.
@@ -730,7 +726,7 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
         
-        if not self._sync_permissions or self.loop.is_closed():
+        if not self._sync_permissions or self._is_closed or self.loop.is_closed():
             return
 
         guilds_to_compare: Dict[int, List[PartialGuildApplicationCommandPermissions]] = {} # {guild_id: [partial_perms, ...], ...}
@@ -802,7 +798,7 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
         
-        if not self._sync_commands or self._sync_queued or not self.is_ready() or self.loop.is_closed():
+        if not self._sync_commands or self._sync_queued or not self.is_ready() or self._is_closed or self.loop.is_closed():
             return
         # We don't do this task on login or in parallel with a similar task
         # Wait a little bit, maybe other cogs are loading

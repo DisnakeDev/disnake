@@ -79,6 +79,7 @@ class CommonBotBase(Generic[CogT]):
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}
         self.extra_events: Dict[str, List[CoroFunc]] = {}
+        self._is_closed: bool = False
 
         self.owner_id: Optional[int] = kwargs.get('owner_id')
         self.owner_ids: Set[int] = kwargs.get('owner_ids', set())
@@ -123,6 +124,8 @@ class CommonBotBase(Generic[CogT]):
             self.owner_id = app.owner.id
 
     async def close(self) -> None:
+        self._is_closed = True
+
         for extension in tuple(self.__extensions):
             try:
                 self.unload_extension(extension)
