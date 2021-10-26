@@ -153,9 +153,12 @@ class AsyncWebhookAdapter:
                     file.reset(seek=attempt)
 
                 if multipart:
-                    form_data = aiohttp.FormData()
+                    # NOTE: for `quote_fields`, see https://github.com/aio-libs/aiohttp/issues/4012
+                    form_data = aiohttp.FormData(quote_fields=False)
                     for p in multipart:
-                        form_data.add_field(**p)
+                        # manually escape double quotes and backslashes, like urllib3
+                        name = p.pop("name").replace('"', "%22").replace("\\", "\\\\")
+                        form_data.add_field(name=name, **p)
                     to_send = form_data
 
                 try:

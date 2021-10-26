@@ -305,9 +305,12 @@ class HTTPClient:
                         f.reset(seek=tries)
 
                 if form:
-                    form_data = aiohttp.FormData()
+                    # NOTE: for `quote_fields`, see https://github.com/aio-libs/aiohttp/issues/4012
+                    form_data = aiohttp.FormData(quote_fields=False)
                     for params in form:
-                        form_data.add_field(**params)
+                        # manually escape double quotes and backslashes, like urllib3
+                        name = params.pop("name").replace('"', "%22").replace("\\", "\\\\")
+                        form_data.add_field(name=name, **params)
                     kwargs["data"] = form_data
 
                 try:
