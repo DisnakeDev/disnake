@@ -241,7 +241,10 @@ class ParamInfo:
             # try to parse the converter's annotation, fall back on the annotation itself
             parameters = list(inspect.signature(self.converter).parameters.values())
             parameter = parameters[2] if inspect.ismethod(self.converter) else parameters[1]
-            conv_annot = Any if parameter.annotation is inspect._empty else parameter.annotation
+            if self.converter.__class__ != type:
+                conv_annot = get_type_hints(self.converter.__call__).get(parameter.name, Any)
+            else:
+                conv_annot = get_type_hints(self.converter).get(parameter.name, Any)
 
             if conv_annot in self.TYPES:
                 self.type = conv_annot
