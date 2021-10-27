@@ -91,16 +91,32 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
 
 class ParamInfo:
     """
-    Parameters
+    A class that basically connects function params with slash command options.
+    The instances of this class are not created manually, but via the functional interface instead.
+    See :func:`Param`.
+
+    Attributes
     ----------
-    default: Union[:class:`str`, Callable[[:class:`ApplicationCommandInteraction`, Any], Any]]
-        default value or a default value factory
+    default: Any
+        The actual default value for the corresponding function param.
     name: :class:`str`
-        option's name, the parameter name by default
+        The name of this slash command option.
     description: :class:`str`
-        option's description
+        The description of this slash command option.
+    choices: Iterable[Any]
+        The list of choices of this slash command option.
+    ge: :class:`float`
+        The lowest allowed value for this option.
+    le: :class:`float`
+        The greatest allowed value for this option.
+    type: Any
+        The type of the parameter.
+    channel_types: List[:class:`ChannelType`]
+        The list of channel types supported by this slash command option.
+    autocomplete: Callable[[:class:`ApplicationCommandInteraction`, :class:`str`], Any]
+        The function that will suggest possible autocomplete options while typing.
     converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
-        the option's converter, takes in an interaction and the argument
+        The function that will convert the original input to a desired format.
     """
 
     TYPES: ClassVar[Dict[type, int]] = {
@@ -424,6 +440,39 @@ def Param(
     min_value: float = None,
     max_value: float = None,
 ) -> Any:
+    """
+    A special function that creates an instance of :class:`ParamInfo` that contains some information about a
+    slash command option. This instance should be assigned to a parameter of a function representing your slash command.
+
+    See :ref:`param_syntax` for more info.
+
+    Parameters
+    ----------
+    default: Any
+        The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
+    name: :class:`str`
+        The name of the option. By default, the option name is the parameter name.
+    description: :class:`str`
+        The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
+        Kwarg aliases: ``desc``.
+    choices: Iterable[Any]
+        A list of choices for this option.
+    min_value: :class:`float`
+        The lowest allowed value for this option. Kwarg aliases: ``ge``, ``gt``.
+    max_value: :class:`float`
+        The greatest allowed value for this option. Kwarg aliases: ``le``, ``lt``.
+    autocomplete: Callable[[:class:`ApplicationCommandInteraction`, :class:`str`], Any]
+        A function that will suggest possible autocomplete options while typing.
+        See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
+    converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
+        A function that will convert the original input to a desired format.
+        Kwarg aliases: ``conv``.
+    
+    Returns
+    -------
+    :class:`ParamInfo`
+        An instance with the option info.
+    """
     return ParamInfo(
         default,
         name=name,

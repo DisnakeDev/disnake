@@ -201,6 +201,11 @@ Decorators
 .. autofunction:: disnake.ext.commands.group
     :decorator:
 
+Helper Functions
+~~~~~~~~~~~~~~~~
+
+.. autofunction:: disnake.ext.commands.Param
+
 Slash Command
 ~~~~~~~~~~~~~
 
@@ -264,6 +269,13 @@ Slash Subcommand Group
 
     .. automethod:: SubCommandGroup.error()
         :decorator:
+
+ParamInfo
+~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.ParamInfo
+
+.. autoclass:: disnake.ext.commands.ParamInfo
 
 User Command
 ~~~~~~~~~~~~
