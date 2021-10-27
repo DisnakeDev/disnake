@@ -131,11 +131,8 @@ async def _edit_handler(
         raise InvalidArgument('cannot pass both embed and embeds parameter to edit()')
 
     if embed is not MISSING:
-        if embed is None:
-            payload['embeds'] = []
-        else:
-            payload['embeds'] = [embed.to_dict()]
-    elif embeds is not MISSING:
+        embeds = [embed] if embed else []
+    if embeds is not MISSING:
         payload['embeds'] = [e.to_dict() for e in embeds]
 
     if suppress is not MISSING:
