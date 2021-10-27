@@ -1226,21 +1226,27 @@ of :class:`enum.Enum`.
 
     .. attribute:: news_thread
 
-        A news thread
+        A news thread.
 
         .. versionadded:: 2.0
 
     .. attribute:: public_thread
 
-        A public thread
+        A public thread.
 
         .. versionadded:: 2.0
 
     .. attribute:: private_thread
 
-        A private thread
+        A private thread.
 
         .. versionadded:: 2.0
+
+    .. attribute:: guild_directory
+
+        A student hub channel.
+
+        .. versionadded:: 2.1
 
 .. class:: MessageType
 

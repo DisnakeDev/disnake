@@ -201,12 +201,15 @@ class Guild(Hashable):
 
         They are currently as follows:
 
+        - ``ANIMATED_BANNER``: Guild can upload an animated banner.
         - ``ANIMATED_ICON``: Guild can upload an animated icon.
         - ``BANNER``: Guild can upload and use a banner. (i.e. :attr:`.banner`)
         - ``COMMERCE``: Guild can sell things using store channels.
         - ``COMMUNITY``: Guild is a community server.
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
         - ``FEATURABLE``: Guild is able to be featured in Server Discovery.
+        - ``HAS_DIRECTORY_ENTRY``: Guild is listed in a student hub.
+        - ``HUB``: Guild is a student hub.
         - ``INVITE_SPLASH``: Guild's invite page can have a special splash.
         - ``MEMBER_VERIFICATION_GATE_ENABLED``: Guild has Membership Screening enabled.
         - ``MONETIZATION_ENABLED``: Guild has enabled monetization.
@@ -886,7 +889,7 @@ class Guild(Hashable):
         """Optional[:class:`Asset`]: Returns the guild's banner asset, if available."""
         if self._banner is None:
             return None
-        return Asset._from_guild_image(self._state, self.id, self._banner, path='banners')
+        return Asset._from_banner(self._state, self.id, self._banner)
 
     @property
     def splash(self) -> Optional[Asset]:
@@ -1419,6 +1422,7 @@ class Guild(Hashable):
             Could be ``None`` to denote removal of the icon.
         banner: :class:`bytes`
             A :term:`py:bytes-like object` representing the banner.
+            GIF is only available to guilds that contain ``ANIMATED_BANNER`` in :attr:`Guild.features`.
             Could be ``None`` to denote removal of the banner. This is only available to guilds that contain
             ``BANNER`` in :attr:`Guild.features`.
         splash: :class:`bytes`

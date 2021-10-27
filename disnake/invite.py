@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from .types.channel import (
         PartialChannel as InviteChannelPayload,
     )
+    from .types.guild import GuildFeature
     from .state import ConnectionState
     from .guild import Guild
     from .abc import GuildChannel
@@ -160,7 +161,7 @@ class PartialInviteGuild:
         self._state: ConnectionState = state
         self.id: int = id
         self.name: str = data['name']
-        self.features: List[str] = data.get('features', [])
+        self.features: List[GuildFeature] = data.get('features', [])
         self._icon: Optional[str] = data.get('icon')
         self._banner: Optional[str] = data.get('banner')
         self._splash: Optional[str] = data.get('splash')
@@ -193,7 +194,7 @@ class PartialInviteGuild:
         """Optional[:class:`Asset`]: Returns the guild's banner asset, if available."""
         if self._banner is None:
             return None
-        return Asset._from_guild_image(self._state, self.id, self._banner, path='banners')
+        return Asset._from_banner(self._state, self.id, self._banner)
 
     @property
     def splash(self) -> Optional[Asset]:

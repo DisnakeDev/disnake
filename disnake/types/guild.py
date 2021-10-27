@@ -75,12 +75,15 @@ VerificationLevel = Literal[0, 1, 2, 3, 4]
 NSFWLevel = Literal[0, 1, 2, 3]
 PremiumTier = Literal[0, 1, 2, 3]
 GuildFeature = Literal[
+    'ANIMATED_BANNER',
     'ANIMATED_ICON',
     'BANNER',
     'COMMERCE',
     'COMMUNITY',
     'DISCOVERABLE',
     'FEATURABLE',
+    'HAS_DIRECTORY_ENTRY',
+    'HUB',
     'INVITE_SPLASH',
     'MEMBER_VERIFICATION_GATE_ENABLED',
     'MONETIZATION_ENABLED',

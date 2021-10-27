@@ -23,6 +23,7 @@ DEALINGS IN THE SOFTWARE.
 """
 from __future__ import annotations
 
+import asyncio
 import inspect
 import disnake.utils
 import inspect
@@ -427,6 +428,19 @@ class Cog(metaclass=CogMeta):
     def has_message_error_handler(self) -> bool:
         """:class:`bool`: Checks whether the cog has a slash error handler."""
         return not hasattr(self.cog_message_command_error.__func__, '__cog_special_method__')
+    
+    async def __cog_load_impl(self, bot: AnyBot) -> None:
+        if not hasattr(self.cog_load.__func__, '__cog_special_method__'):
+            return
+        
+        bot.loop.create_task(disnake.utils.maybe_coroutine(self.cog_load))
+        
+    
+    @_cog_special_method
+    async def cog_load(self) -> None:
+        """A special method that is called as a task when the cog is added."""
+        pass
+    
 
     @_cog_special_method
     def cog_unload(self) -> None:
@@ -646,6 +660,8 @@ class Cog(metaclass=CogMeta):
                     elif isinstance(to_undo, InvokableMessageCommand):
                         bot.remove_message_command(to_undo.name)
                 raise e
+        
+        bot.loop.create_task(self.__cog_load_impl(bot))
 
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
