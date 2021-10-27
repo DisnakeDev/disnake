@@ -1823,8 +1823,11 @@ class PartialMessage(Hashable):
             passed, then the object is merged with :attr:`~disnake.Client.allowed_mentions`.
             The merging behaviour only overrides attributes that have been explicitly passed
             to the object, otherwise it uses the attributes set in :attr:`~disnake.Client.allowed_mentions`.
-            If no object is passed at all then the defaults given by :attr:`~disnake.Client.allowed_mentions`
-            are used instead.
+
+            .. note::
+                Unlike :meth:`Message.edit`, this does not default to
+                :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`
+                if no object is passed.
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
