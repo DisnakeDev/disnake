@@ -114,21 +114,25 @@ async def _edit_handler(
     content: Optional[str] = MISSING,
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
+    file: File = MISSING,
+    files: List[File] = MISSING,
     attachments: List[Attachment] = MISSING,
     suppress: bool = MISSING,
     delete_after: Optional[float] = None,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     view: Optional[View] = MISSING,
 ) -> Message:
+    if embed is not MISSING and embeds is not MISSING:
+        raise InvalidArgument('Cannot mix embed and embeds keyword arguments.')
+    if file is not MISSING and files is not MISSING:
+        raise InvalidArgument('Cannot mix file and files keyword arguments.')
+
     payload: Dict[str, Any] = {}
     if content is not MISSING:
         if content is not None:
             payload['content'] = str(content)
         else:
             payload['content'] = None
-
-    if embed is not MISSING and embeds is not MISSING:
-        raise InvalidArgument('cannot pass both embed and embeds parameter to edit()')
 
     if embed is not MISSING:
         embeds = [embed] if embed else []
@@ -160,7 +164,10 @@ async def _edit_handler(
         else:
             payload['components'] = []
 
-    data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload)
+    if file is not MISSING:
+        files = [file]
+
+    data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)
     message = Message(state=msg._state, channel=msg.channel, data=data)
 
     if view and not view.is_finished():
@@ -1271,6 +1278,22 @@ class Message(Hashable):
         *,
         content: Optional[str] = ...,
         embed: Optional[Embed] = ...,
+        file: File = ...,
+        attachments: List[Attachment] = ...,
+        suppress: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        *,
+        content: Optional[str] = ...,
+        embed: Optional[Embed] = ...,
+        files: List[File] = ...,
         attachments: List[Attachment] = ...,
         suppress: bool = ...,
         delete_after: Optional[float] = ...,
@@ -1285,6 +1308,22 @@ class Message(Hashable):
         *,
         content: Optional[str] = ...,
         embeds: List[Embed] = ...,
+        file: File = ...,
+        attachments: List[Attachment] = ...,
+        suppress: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        *,
+        content: Optional[str] = ...,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
         attachments: List[Attachment] = ...,
         suppress: bool = ...,
         delete_after: Optional[float] = ...,
@@ -1316,6 +1355,19 @@ class Message(Hashable):
             To remove all embeds ``[]`` should be passed.
 
             .. versionadded:: 2.0
+        file: :class:`File`
+            The file to upload. This cannot be mixed with ``files`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
+
+            .. versionadded:: 2.1
+        files: List[:class:`File`]
+            A list of files to send with the content. This cannot be mixed with the
+            ``file`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
+
+            .. versionadded:: 2.1
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all attachments are removed.
@@ -1349,7 +1401,7 @@ class Message(Hashable):
             Tried to suppress a message without permissions or
             edited a message's content or embed that isn't yours.
         ~disnake.InvalidArgument
-            You specified both ``embed`` and ``embeds``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
 
         Returns
         ---------
@@ -1804,6 +1856,19 @@ class PartialMessage(Hashable):
             To remove all embeds ``[]`` should be passed.
 
             .. versionadded:: 2.1
+        file: :class:`File`
+            The file to upload. This cannot be mixed with ``files`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
+
+            .. versionadded:: 2.1
+        files: List[:class:`File`]
+            A list of files to send with the content. This cannot be mixed with the
+            ``file`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
+
+            .. versionadded:: 2.1
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all attachments are removed.
@@ -1844,7 +1909,7 @@ class PartialMessage(Hashable):
             Tried to suppress a message without permissions or
             edited a message's content or embed that isn't yours.
         ~disnake.InvalidArgument
-            You specified both ``embed`` and ``embeds``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
 
         Returns
         ---------

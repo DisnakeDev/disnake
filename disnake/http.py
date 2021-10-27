@@ -581,8 +581,27 @@ class HTTPClient:
 
         return self.request(r, json=payload, reason=reason)
 
-    def edit_message(self, channel_id: Snowflake, message_id: Snowflake, **fields: Any) -> Response[message.Message]:
+    def edit_message(
+        self,
+        channel_id: Snowflake,
+        message_id: Snowflake,
+        *,
+        files: Optional[List[File]],
+        **fields: Any,
+    ) -> Response[message.Message]:
         r = Route('PATCH', '/channels/{channel_id}/messages/{message_id}', channel_id=channel_id, message_id=message_id)
+        if files:
+            multipart: List[Dict[str, Any]] = [{'name': 'payload_json', 'value': utils._to_json(fields)}]
+            for index, file in enumerate(files):
+                multipart.append(
+                    {
+                        'name': f'file{index}',
+                        'value': file.fp,
+                        'filename': file.filename,
+                        'content_type': 'application/octet-stream',
+                    }
+                )
+            return self.request(r, form=multipart, files=files)
         return self.request(r, json=fields)
 
     def add_reaction(self, channel_id: Snowflake, message_id: Snowflake, emoji: str) -> Response[None]:
