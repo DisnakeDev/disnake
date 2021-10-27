@@ -1370,7 +1370,7 @@ class Message(Hashable):
             .. versionadded:: 2.1
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
-            then all attachments are removed.
+            then all existing attachments are removed.
         suppress: :class:`bool`
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
@@ -1382,10 +1382,10 @@ class Message(Hashable):
             then it is silently ignored.
         allowed_mentions: Optional[:class:`~disnake.AllowedMentions`]
             Controls the mentions being processed in this message. If this is
-            passed, then the object is merged with :attr:`~disnake.Client.allowed_mentions`.
+            passed, then the object is merged with :attr:`Client.allowed_mentions`.
             The merging behaviour only overrides attributes that have been explicitly passed
-            to the object, otherwise it uses the attributes set in :attr:`~disnake.Client.allowed_mentions`.
-            If no object is passed at all then the defaults given by :attr:`~disnake.Client.allowed_mentions`
+            to the object, otherwise it uses the attributes set in :attr:`Client.allowed_mentions`.
+            If no object is passed at all then the defaults given by :attr:`Client.allowed_mentions`
             are used instead.
 
             .. versionadded:: 1.4
@@ -1871,7 +1871,7 @@ class PartialMessage(Hashable):
             .. versionadded:: 2.1
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
-            then all attachments are removed.
+            then all existing attachments are removed.
 
             .. versionadded:: 2.1
         suppress: :class:`bool`
@@ -1885,14 +1885,13 @@ class PartialMessage(Hashable):
             then it is silently ignored.
         allowed_mentions: Optional[:class:`~disnake.AllowedMentions`]
             Controls the mentions being processed in this message. If this is
-            passed, then the object is merged with :attr:`~disnake.Client.allowed_mentions`.
+            passed, then the object is merged with :attr:`Client.allowed_mentions`.
             The merging behaviour only overrides attributes that have been explicitly passed
-            to the object, otherwise it uses the attributes set in :attr:`~disnake.Client.allowed_mentions`.
+            to the object, otherwise it uses the attributes set in :attr:`Client.allowed_mentions`.
 
             .. note::
                 Unlike :meth:`Message.edit`, this does not default to
-                :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`
-                if no object is passed.
+                :attr:`Client.allowed_mentions` if no object is passed.
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
