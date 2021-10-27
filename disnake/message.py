@@ -1817,56 +1817,39 @@ class PartialMessage(Hashable):
             The message that was edited.
         """
 
-        try:
-            content = fields['content']
-        except KeyError:
-            pass
-        else:
-            if content is not None:
-                fields['content'] = str(content)
+        content = fields.get('content', MISSING)
+        if content is not MISSING and content is not None:
+            fields['content'] = str(content)
 
-        try:
-            embed = fields['embed']
-        except KeyError:
-            pass
-        else:
-            if embed is not None:
-                fields['embed'] = embed.to_dict()
+        embed: Optional[Embed] = fields.get('embed', MISSING)
+        if embed is not MISSING and embed is not None:
+            fields['embed'] = embed.to_dict()
 
-        try:
-            suppress: bool = fields.pop('suppress')
-        except KeyError:
-            pass
-        else:
+        suppress = fields.pop('suppress', MISSING)
+        if suppress is not MISSING:
             flags = MessageFlags._from_value(0)
             flags.suppress_embeds = suppress
             fields['flags'] = flags.value
 
         delete_after = fields.pop('delete_after', None)
 
-        try:
-            allowed_mentions = fields.pop('allowed_mentions')
-        except KeyError:
-            pass
-        else:
-            if allowed_mentions is not None:
-                if self._state.allowed_mentions is not None:
-                    allowed_mentions = self._state.allowed_mentions.merge(allowed_mentions).to_dict()
-                else:
-                    allowed_mentions = allowed_mentions.to_dict()
-                fields['allowed_mentions'] = allowed_mentions
+        allowed_mentions = fields.pop('allowed_mentions', MISSING)
+        if allowed_mentions is not MISSING and allowed_mentions is not None:
+            if self._state.allowed_mentions is not None:
+                allowed_mentions = self._state.allowed_mentions.merge(allowed_mentions).to_dict()
+            else:
+                allowed_mentions = allowed_mentions.to_dict()
+            fields['allowed_mentions'] = allowed_mentions
 
-        try:
-            view = fields.pop('view')
-        except KeyError:
-            # To check for the view afterwards
-            view = None
-        else:
+        view = fields.pop('view', MISSING)
+        if view is not MISSING:
             self._state.prevent_view_updates_for(self.id)
             if view:
                 fields['components'] = view.to_components()
             else:
                 fields['components'] = []
+        else:
+            view = None
 
         if fields:
             data = await self._state.http.edit_message(self.channel.id, self.id, **fields)
