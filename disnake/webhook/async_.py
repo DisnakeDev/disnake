@@ -41,7 +41,7 @@ from ..message import Message
 from ..enums import try_enum, WebhookType
 from ..user import BaseUser, User
 from ..asset import Asset
-from ..http import Route
+from ..http import Route, to_multipart
 from ..mixins import Hashable
 from ..channel import PartialMessageable
 
@@ -365,23 +365,10 @@ class AsyncWebhookAdapter:
         if data is not None:
             payload['data'] = data
 
-        if files is None:
-            return self.request(route, session=session, payload=payload)
-        
-        else:
-            multipart: Any = [{'name': 'payload_json', 'value': utils._to_json(payload)}]
-            single = len(files) == 1
-            for index, file in enumerate(files):
-                name = "file" if single else f"file{index}"
-                multipart.append(
-                    {
-                        "name": name,
-                        "value": file.fp,
-                        "filename": file.filename,
-                        "content_type": "application/octet-stream",
-                    }
-                )
+        if files:
+            multipart = to_multipart(payload, files)
             return self.request(route, session=session, multipart=multipart, files=files)
+        return self.request(route, session=session, payload=payload)
 
     def get_original_interaction_response(
         self,
@@ -503,28 +490,8 @@ def handle_message_parameters(
         files = [file]
 
     if files:
-        multipart.append({'name': 'payload_json', 'value': utils._to_json(payload)})
+        multipart = to_multipart(payload, files)
         payload = None
-        if len(files) == 1:
-            file = files[0]
-            multipart.append(
-                {
-                    'name': 'file',
-                    'value': file.fp,
-                    'filename': file.filename,
-                    'content_type': 'application/octet-stream',
-                }
-            )
-        else:
-            for index, file in enumerate(files):
-                multipart.append(
-                    {
-                        'name': f'file{index}',
-                        'value': file.fp,
-                        'filename': file.filename,
-                        'content_type': 'application/octet-stream',
-                    }
-                )
 
     return ExecuteWebhookParameters(payload=payload, multipart=multipart, files=files)
 

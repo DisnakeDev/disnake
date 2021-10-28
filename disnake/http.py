@@ -107,6 +107,20 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
     return text
 
 
+def to_multipart(payload: Dict[str, Any], files: Iterable[File]) -> List[Dict[str, Any]]:
+    multipart: List[Dict[str, Any]] = [{'name': 'payload_json', 'value': utils._to_json(payload)}]
+    for index, file in enumerate(files):
+        multipart.append(
+            {
+                'name': f'file{index}',
+                'value': file.fp,
+                'filename': file.filename,
+                'content_type': 'application/octet-stream',
+            }
+        )
+    return multipart
+
+
 class Route:
     BASE: ClassVar[str] = 'https://discord.com/api/v8'
 
@@ -491,8 +505,6 @@ class HTTPClient:
         stickers: Optional[List[sticker.StickerItem]] = None,
         components: Optional[List[components.Component]] = None,
     ) -> Response[message.Message]:
-        form = []
-
         payload: Dict[str, Any] = {'tts': tts}
         if content:
             payload['content'] = content
@@ -511,29 +523,9 @@ class HTTPClient:
         if stickers:
             payload['sticker_ids'] = stickers
 
-        form.append({'name': 'payload_json', 'value': utils._to_json(payload)})
-        if len(files) == 1:
-            file = files[0]
-            form.append(
-                {
-                    'name': 'file',
-                    'value': file.fp,
-                    'filename': file.filename,
-                    'content_type': 'application/octet-stream',
-                }
-            )
-        else:
-            for index, file in enumerate(files):
-                form.append(
-                    {
-                        'name': f'file{index}',
-                        'value': file.fp,
-                        'filename': file.filename,
-                        'content_type': 'application/octet-stream',
-                    }
-                )
+        multipart = to_multipart(payload, files)
 
-        return self.request(route, form=form, files=files)
+        return self.request(route, form=multipart, files=files)
 
     def send_files(
         self,
@@ -581,8 +573,18 @@ class HTTPClient:
 
         return self.request(r, json=payload, reason=reason)
 
-    def edit_message(self, channel_id: Snowflake, message_id: Snowflake, **fields: Any) -> Response[message.Message]:
+    def edit_message(
+        self,
+        channel_id: Snowflake,
+        message_id: Snowflake,
+        *,
+        files: Optional[List[File]],
+        **fields: Any,
+    ) -> Response[message.Message]:
         r = Route('PATCH', '/channels/{channel_id}/messages/{message_id}', channel_id=channel_id, message_id=message_id)
+        if files:
+            multipart = to_multipart(fields, files)
+            return self.request(r, form=multipart, files=files)
         return self.request(r, json=fields)
 
     def add_reaction(self, channel_id: Snowflake, message_id: Snowflake, emoji: str) -> Response[None]:
@@ -1707,7 +1709,6 @@ class HTTPClient:
         embeds: Optional[List[embed.Embed]] = None,
         allowed_mentions: Optional[message.AllowedMentions] = None,
     ):
-
         payload: Dict[str, Any] = {}
         if content:
             payload['content'] = content
@@ -1716,24 +1717,10 @@ class HTTPClient:
         if allowed_mentions:
             payload['allowed_mentions'] = allowed_mentions
 
-        form: List[Dict[str, Any]] = [
-            {
-                'name': 'payload_json',
-                'value': utils._to_json(payload),
-            }
-        ]
-
         if file:
-            form.append(
-                {
-                    'name': 'file',
-                    'value': file.fp,
-                    'filename': file.filename,
-                    'content_type': 'application/octet-stream',
-                }
-            )
-
-        return self.request(route, form=form, files=[file] if file else None)
+            multipart = to_multipart(payload, [file])
+            return self.request(route, form=multipart, files=[file])
+        return self.request(route, json=payload)
 
     def create_interaction_response(
         self,

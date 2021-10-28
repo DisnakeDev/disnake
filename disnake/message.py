@@ -106,6 +106,79 @@ def convert_emoji_reaction(emoji):
     raise InvalidArgument(f'emoji argument must be str, Emoji, or Reaction not {emoji.__class__.__name__}.')
 
 
+async def _edit_handler(
+    msg: Union[Message, PartialMessage],
+    *,
+    default_allowed_mentions: Optional[AllowedMentions],
+    default_flags: int,
+    content: Optional[str] = MISSING,
+    embed: Optional[Embed] = MISSING,
+    embeds: List[Embed] = MISSING,
+    file: File = MISSING,
+    files: List[File] = MISSING,
+    attachments: List[Attachment] = MISSING,
+    suppress: bool = MISSING,
+    delete_after: Optional[float] = None,
+    allowed_mentions: Optional[AllowedMentions] = MISSING,
+    view: Optional[View] = MISSING,
+) -> Message:
+    if embed is not MISSING and embeds is not MISSING:
+        raise InvalidArgument('Cannot mix embed and embeds keyword arguments.')
+    if file is not MISSING and files is not MISSING:
+        raise InvalidArgument('Cannot mix file and files keyword arguments.')
+
+    payload: Dict[str, Any] = {}
+    if content is not MISSING:
+        if content is not None:
+            payload['content'] = str(content)
+        else:
+            payload['content'] = None
+
+    if embed is not MISSING:
+        embeds = [embed] if embed else []
+    if embeds is not MISSING:
+        payload['embeds'] = [e.to_dict() for e in embeds]
+
+    if suppress is not MISSING:
+        flags = MessageFlags._from_value(default_flags)
+        flags.suppress_embeds = suppress
+        payload['flags'] = flags.value
+
+    if allowed_mentions is MISSING:
+        if default_allowed_mentions:
+            payload['allowed_mentions'] = default_allowed_mentions.to_dict()
+    else:
+        if allowed_mentions:
+            if msg._state.allowed_mentions is not None:
+                payload['allowed_mentions'] = msg._state.allowed_mentions.merge(allowed_mentions).to_dict()
+            else:
+                payload['allowed_mentions'] = allowed_mentions.to_dict()
+
+    if attachments is not MISSING:
+        payload['attachments'] = [a.to_dict() for a in attachments]
+
+    if view is not MISSING:
+        msg._state.prevent_view_updates_for(msg.id)
+        if view:
+            payload['components'] = view.to_components()
+        else:
+            payload['components'] = []
+
+    if file is not MISSING:
+        files = [file]
+
+    data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)
+    message = Message(state=msg._state, channel=msg.channel, data=data)
+
+    if view and not view.is_finished():
+        msg._state.store_view(view, msg.id)
+
+    if delete_after is not None:
+        await msg.delete(delay=delete_after)
+
+    return message
+
+
 class Attachment(Hashable):
     """Represents an attachment from Discord.
 
@@ -1205,6 +1278,22 @@ class Message(Hashable):
         *,
         content: Optional[str] = ...,
         embed: Optional[Embed] = ...,
+        file: File = ...,
+        attachments: List[Attachment] = ...,
+        suppress: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        *,
+        content: Optional[str] = ...,
+        embed: Optional[Embed] = ...,
+        files: List[File] = ...,
         attachments: List[Attachment] = ...,
         suppress: bool = ...,
         delete_after: Optional[float] = ...,
@@ -1219,6 +1308,7 @@ class Message(Hashable):
         *,
         content: Optional[str] = ...,
         embeds: List[Embed] = ...,
+        file: File = ...,
         attachments: List[Attachment] = ...,
         suppress: bool = ...,
         delete_after: Optional[float] = ...,
@@ -1227,17 +1317,22 @@ class Message(Hashable):
     ) -> Message:
         ...
 
+    @overload
     async def edit(
         self,
-        content: Optional[str] = MISSING,
-        embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
-        attachments: List[Attachment] = MISSING,
-        suppress: bool = MISSING,
-        delete_after: Optional[float] = None,
-        allowed_mentions: Optional[AllowedMentions] = MISSING,
-        view: Optional[View] = MISSING,
+        *,
+        content: Optional[str] = ...,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
+        attachments: List[Attachment] = ...,
+        suppress: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
     ) -> Message:
+        ...
+
+    async def edit(self, **fields: Any) -> Message:
         """|coro|
 
         Edits the message.
@@ -1260,9 +1355,22 @@ class Message(Hashable):
             To remove all embeds ``[]`` should be passed.
 
             .. versionadded:: 2.0
+        file: :class:`File`
+            The file to upload. This cannot be mixed with ``files`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
+
+            .. versionadded:: 2.1
+        files: List[:class:`File`]
+            A list of files to send with the content. This cannot be mixed with the
+            ``file`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
+
+            .. versionadded:: 2.1
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
-            then all attachments are removed.
+            then all existing attachments are removed.
         suppress: :class:`bool`
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
@@ -1274,10 +1382,10 @@ class Message(Hashable):
             then it is silently ignored.
         allowed_mentions: Optional[:class:`~disnake.AllowedMentions`]
             Controls the mentions being processed in this message. If this is
-            passed, then the object is merged with :attr:`~disnake.Client.allowed_mentions`.
+            passed, then the object is merged with :attr:`Client.allowed_mentions`.
             The merging behaviour only overrides attributes that have been explicitly passed
-            to the object, otherwise it uses the attributes set in :attr:`~disnake.Client.allowed_mentions`.
-            If no object is passed at all then the defaults given by :attr:`~disnake.Client.allowed_mentions`
+            to the object, otherwise it uses the attributes set in :attr:`Client.allowed_mentions`.
+            If no object is passed at all then the defaults given by :attr:`Client.allowed_mentions`
             are used instead.
 
             .. versionadded:: 1.4
@@ -1293,62 +1401,26 @@ class Message(Hashable):
             Tried to suppress a message without permissions or
             edited a message's content or embed that isn't yours.
         ~disnake.InvalidArgument
-            You specified both ``embed`` and ``embeds``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
+
+        Returns
+        ---------
+        :class:`Message`
+            The message that was edited.
         """
 
-        payload: Dict[str, Any] = {}
-        if content is not MISSING:
-            if content is not None:
-                payload['content'] = str(content)
-            else:
-                payload['content'] = None
-
-        if embed is not MISSING and embeds is not MISSING:
-            raise InvalidArgument('cannot pass both embed and embeds parameter to edit()')
-
-        if embed is not MISSING:
-            if embed is None:
-                payload['embeds'] = []
-            else:
-                payload['embeds'] = [embed.to_dict()]
-        elif embeds is not MISSING:
-            payload['embeds'] = [e.to_dict() for e in embeds]
-
-        if suppress is not MISSING:
-            flags = MessageFlags._from_value(self.flags.value)
-            flags.suppress_embeds = suppress
-            payload['flags'] = flags.value
-
-        if allowed_mentions is MISSING:
-            if self._state.allowed_mentions is not None and self.author.id == self._state.self_id:
-                payload['allowed_mentions'] = self._state.allowed_mentions.to_dict()
+        # allowed_mentions can only be changed on the bot's own messages
+        if self._state.allowed_mentions is not None and self.author.id == self._state.self_id:
+            default_allowed_mentions = self._state.allowed_mentions
         else:
-            if allowed_mentions is not None:
-                if self._state.allowed_mentions is not None:
-                    payload['allowed_mentions'] = self._state.allowed_mentions.merge(allowed_mentions).to_dict()
-                else:
-                    payload['allowed_mentions'] = allowed_mentions.to_dict()
+            default_allowed_mentions = None
 
-        if attachments is not MISSING:
-            payload['attachments'] = [a.to_dict() for a in attachments]
-
-        if view is not MISSING:
-            self._state.prevent_view_updates_for(self.id)
-            if view:
-                payload['components'] = view.to_components()
-            else:
-                payload['components'] = []
-
-        data = await self._state.http.edit_message(self.channel.id, self.id, **payload)
-        message = Message(state=self._state, channel=self.channel, data=data)
-
-        if view and not view.is_finished():
-            self._state.store_view(view, self.id)
-
-        if delete_after is not None:
-            await self.delete(delay=delete_after)
-
-        return message
+        return await _edit_handler(
+            self,
+            default_allowed_mentions=default_allowed_mentions,
+            default_flags=self.flags.value,
+            **fields,
+        )
 
     async def publish(self) -> None:
         """|coro|
@@ -1761,15 +1833,15 @@ class PartialMessage(Hashable):
         data = await self._state.http.get_message(self.channel.id, self.id)
         return self._state.create_message(channel=self.channel, data=data)
 
-    async def edit(self, **fields: Any) -> Optional[Message]:
+    async def edit(self, **fields: Any) -> Message:
         """|coro|
 
         Edits the message.
 
         The content must be able to be transformed into a string via ``str(content)``.
 
-        .. versionchanged:: 1.7
-            :class:`disnake.Message` is returned instead of ``None`` if an edit took place.
+        .. versionchanged:: 2.1
+            :class:`disnake.Message` is always returned.
 
         Parameters
         -----------
@@ -1779,6 +1851,29 @@ class PartialMessage(Hashable):
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with.
             Could be ``None`` to remove the embed.
+        embeds: List[:class:`Embed`]
+            The new embeds to replace the original with. Must be a maximum of 10.
+            To remove all embeds ``[]`` should be passed.
+
+            .. versionadded:: 2.1
+        file: :class:`File`
+            The file to upload. This cannot be mixed with ``files`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
+
+            .. versionadded:: 2.1
+        files: List[:class:`File`]
+            A list of files to send with the content. This cannot be mixed with the
+            ``file`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
+
+            .. versionadded:: 2.1
+        attachments: List[:class:`Attachment`]
+            A list of attachments to keep in the message. If ``[]`` is passed
+            then all existing attachments are removed.
+
+            .. versionadded:: 2.1
         suppress: :class:`bool`
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
@@ -1790,11 +1885,13 @@ class PartialMessage(Hashable):
             then it is silently ignored.
         allowed_mentions: Optional[:class:`~disnake.AllowedMentions`]
             Controls the mentions being processed in this message. If this is
-            passed, then the object is merged with :attr:`~disnake.Client.allowed_mentions`.
+            passed, then the object is merged with :attr:`Client.allowed_mentions`.
             The merging behaviour only overrides attributes that have been explicitly passed
-            to the object, otherwise it uses the attributes set in :attr:`~disnake.Client.allowed_mentions`.
-            If no object is passed at all then the defaults given by :attr:`~disnake.Client.allowed_mentions`
-            are used instead.
+            to the object, otherwise it uses the attributes set in :attr:`Client.allowed_mentions`.
+
+            .. note::
+                Unlike :meth:`Message.edit`, this does not default to
+                :attr:`Client.allowed_mentions` if no object is passed.
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
@@ -1810,73 +1907,18 @@ class PartialMessage(Hashable):
         Forbidden
             Tried to suppress a message without permissions or
             edited a message's content or embed that isn't yours.
+        ~disnake.InvalidArgument
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
 
         Returns
         ---------
-        Optional[:class:`Message`]
+        :class:`Message`
             The message that was edited.
         """
 
-        try:
-            content = fields['content']
-        except KeyError:
-            pass
-        else:
-            if content is not None:
-                fields['content'] = str(content)
-
-        try:
-            embed = fields['embed']
-        except KeyError:
-            pass
-        else:
-            if embed is not None:
-                fields['embed'] = embed.to_dict()
-
-        try:
-            suppress: bool = fields.pop('suppress')
-        except KeyError:
-            pass
-        else:
-            flags = MessageFlags._from_value(0)
-            flags.suppress_embeds = suppress
-            fields['flags'] = flags.value
-
-        delete_after = fields.pop('delete_after', None)
-
-        try:
-            allowed_mentions = fields.pop('allowed_mentions')
-        except KeyError:
-            pass
-        else:
-            if allowed_mentions is not None:
-                if self._state.allowed_mentions is not None:
-                    allowed_mentions = self._state.allowed_mentions.merge(allowed_mentions).to_dict()
-                else:
-                    allowed_mentions = allowed_mentions.to_dict()
-                fields['allowed_mentions'] = allowed_mentions
-
-        try:
-            view = fields.pop('view')
-        except KeyError:
-            # To check for the view afterwards
-            view = None
-        else:
-            self._state.prevent_view_updates_for(self.id)
-            if view:
-                fields['components'] = view.to_components()
-            else:
-                fields['components'] = []
-
-        if fields:
-            data = await self._state.http.edit_message(self.channel.id, self.id, **fields)
-
-        if delete_after is not None:
-            await self.delete(delay=delete_after)
-
-        if fields:
-            # data isn't unbound
-            msg = self._state.create_message(channel=self.channel, data=data)  # type: ignore
-            if view and not view.is_finished():
-                self._state.store_view(view, self.id)
-            return msg
+        return await _edit_handler(
+            self,
+            default_allowed_mentions=None,
+            default_flags=0,
+            **fields,
+        )
