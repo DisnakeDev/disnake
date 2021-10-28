@@ -89,13 +89,17 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self.body = UserCommand(name=self.name, default_permission=default_permission)
 
     async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+        stop_propagation = False
         cog = self.cog
         try:
             if cog is not None:
                 local = _get_overridden_method(cog.cog_user_command_error)
                 if local is not None:
-                    await local(inter, error)
+                    stop_propagation = await local(inter, error)
+                    # User has an option to cancel the global error handler by returning True
         finally:
+            if stop_propagation:
+                return
             inter.bot.dispatch("user_command_error", inter, error)
 
     async def __call__(self, inter: ApplicationCommandInteraction, target: Any = None, *args, **kwargs) -> None:
@@ -155,13 +159,17 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         self.body = MessageCommand(name=self.name, default_permission=default_permission)
 
     async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+        stop_propagation = False
         cog = self.cog
         try:
             if cog is not None:
                 local = _get_overridden_method(cog.cog_message_command_error)
                 if local is not None:
-                    await local(inter, error)
+                    stop_propagation = await local(inter, error)
+                    # User has an option to cancel the global error handler by returning True
         finally:
+            if stop_propagation:
+                return
             inter.bot.dispatch("message_command_error", inter, error)
 
     async def __call__(self, inter: ApplicationCommandInteraction, target: Any = None, *args, **kwargs) -> None:

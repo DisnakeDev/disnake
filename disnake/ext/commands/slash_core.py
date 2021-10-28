@@ -403,13 +403,17 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return decorator
 
     async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+        stop_propagation = False
         cog = self.cog
         try:
             if cog is not None:
                 local = _get_overridden_method(cog.cog_slash_command_error)
                 if local is not None:
-                    await local(inter, error)
+                    stop_propagation = await local(inter, error)
+                    # User has an option to cancel the global error handler by returning True
         finally:
+            if stop_propagation:
+                return
             inter.bot.dispatch('slash_command_error', inter, error) # type: ignore
 
     async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Any:
@@ -477,15 +481,15 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             try:
                 await group.invoke(inter)
             except CommandError as exc:
-                await group._call_local_error_handler(inter, exc)
-                raise
+                if not await group._call_local_error_handler(inter, exc):
+                    raise
         
         if subcmd is not None:
             try:
                 await subcmd.invoke(inter, **kwargs)
             except CommandError as exc:
-                await subcmd._call_local_error_handler(inter, exc)
-                raise
+                if not await subcmd._call_local_error_handler(inter, exc):
+                    raise
 
     async def invoke(self, inter: ApplicationCommandInteraction):
         if self.guild_only and inter.guild_id is None:

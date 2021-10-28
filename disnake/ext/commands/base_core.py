@@ -34,6 +34,7 @@ from typing import (
 )
 import asyncio
 import datetime
+import functools
 
 from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
@@ -66,6 +67,21 @@ else:
 
 def _get_overridden_method(method):
     return getattr(method.__func__, '__cog_special_method__', method)
+
+
+def wrap_callback(coro):
+    @functools.wraps(coro)
+    async def wrapped(*args, **kwargs):
+        try:
+            ret = await coro(*args, **kwargs)
+        except CommandError:
+            raise
+        except asyncio.CancelledError:
+            return
+        except Exception as exc:
+            raise CommandInvokeError(exc) from exc
+        return ret
+    return wrapped
 
 
 class InvokableApplicationCommand(ABC):
@@ -316,22 +332,23 @@ class InvokableApplicationCommand(ABC):
         """
         return hasattr(self, 'on_error')
 
-    async def _call_local_error_handler(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+    async def _call_local_error_handler(self, inter: ApplicationCommandInteraction, error: CommandError) -> Any:
         if not self.has_error_handler():
             return
-        # TODO: you shouldn't need to pass in cogs in the first place
-        if self.cog is None:
-            await self.on_error(inter, error) # type: ignore
+        
+        injected = wrap_callback(self.on_error)
+        if self.cog is not None:
+            return await injected(self.cog, inter, error)
         else:
-            await self.on_error(self.cog, inter, error) # type: ignore
+            return await injected(inter, error)
 
     async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
         """Overridden in subclasses"""
         raise error
 
-    async def dispatch_error(self, inter: ApplicationCommandInteraction, error: CommandError):
-        await self._call_local_error_handler(inter, error)
-        await self._call_external_error_handlers(inter, error)
+    async def dispatch_error(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+        if not await self._call_local_error_handler(inter, error):
+            await self._call_external_error_handlers(inter, error)
 
     async def call_before_hooks(self, inter: ApplicationCommandInteraction) -> None:
         # now that we're done preparing we can call the pre-command hooks

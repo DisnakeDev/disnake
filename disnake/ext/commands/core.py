@@ -514,6 +514,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             return self.copy()
 
     async def dispatch_error(self, ctx: Context, error: Exception) -> None:
+        stop_propagation = False
         ctx.command_failed = True
         cog = self.cog
         try:
@@ -523,17 +524,22 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         else:
             injected = wrap_callback(coro)
             if cog is not None:
-                await injected(cog, ctx, error)
+                stop_propagation = await injected(cog, ctx, error)
             else:
-                await injected(ctx, error)
+                stop_propagation = await injected(ctx, error)
+            if stop_propagation:
+                return
 
         try:
             if cog is not None:
                 local = Cog._get_overridden_method(cog.cog_command_error)
                 if local is not None:
                     wrapped = wrap_callback(local)
-                    await wrapped(ctx, error)
+                    stop_propagation = await wrapped(ctx, error)
+                    # User has an option to cancel the global error handler by returning True
         finally:
+            if stop_propagation:
+                return
             ctx.bot.dispatch('command_error', ctx, error)
 
     async def transform(self, ctx: Context, param: inspect.Parameter) -> Any:
