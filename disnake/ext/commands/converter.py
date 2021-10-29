@@ -930,9 +930,9 @@ class clean_content(Converter[str]):
         }
 
         def repl(match: re.Match) -> str:
-            type = match[1]
-            id = int(match[2])
-            return transforms[type](id)
+            typea = match[1]
+            ida = int(match[2])
+            return transforms[typea](ida)
 
         result = re.sub(r'<(@[!&]?|#)([0-9]{15,20})>', repl, argument)
         if self.escape_markdown:
