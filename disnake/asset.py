@@ -324,9 +324,8 @@ class Asset(AssetMixin):
             if self._animated:
                 if format not in VALID_ASSET_FORMATS:
                     raise InvalidArgument(f'format must be one of {VALID_ASSET_FORMATS}')
-            else:
-                if format not in VALID_STATIC_FORMATS:
-                    raise InvalidArgument(f'format must be one of {VALID_STATIC_FORMATS}')
+            elif format not in VALID_STATIC_FORMATS:
+                raise InvalidArgument(f'format must be one of {VALID_STATIC_FORMATS}')
             url = url.with_path(f'{path}.{format}')
 
         if static_format is not MISSING and not self._animated:
@@ -390,9 +389,8 @@ class Asset(AssetMixin):
         if self._animated:
             if format not in VALID_ASSET_FORMATS:
                 raise InvalidArgument(f'format must be one of {VALID_ASSET_FORMATS}')
-        else:
-            if format not in VALID_STATIC_FORMATS:
-                raise InvalidArgument(f'format must be one of {VALID_STATIC_FORMATS}')
+        elif format not in VALID_STATIC_FORMATS:
+            raise InvalidArgument(f'format must be one of {VALID_STATIC_FORMATS}')
 
         url = yarl.URL(self._url)
         path, _ = os.path.splitext(url.path)
