@@ -267,12 +267,12 @@ class HistoryIterator(_AsyncIterator['Message']):
     """
 
     def __init__(
-        self, 
-        messageable: Messageable, 
-        limit: Optional[int] = 100, 
-        before: Optional[Union[Snowflake, datetime.datetime]] = None, 
-        after: Optional[Union[Snowflake, datetime.datetime]] = None, 
-        around: Optional[Union[Snowflake, datetime.datetime]] = None, 
+        self,
+        messageable: Messageable,
+        limit: Optional[int] = 100,
+        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+        after: Optional[Union[Snowflake, datetime.datetime]] = None,
+        around: Optional[Union[Snowflake, datetime.datetime]] = None,
         oldest_first: bool = None
     ):
 

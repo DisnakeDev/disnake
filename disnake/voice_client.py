@@ -66,7 +66,7 @@ if TYPE_CHECKING:
         VoiceServerUpdate as VoiceServerUpdatePayload,
         SupportedModes,
     )
-    
+
 
 has_nacl: bool
 

@@ -1307,7 +1307,7 @@ class Webhook(BaseWebhook):
             The thread to send this webhook to.
 
             .. versionadded:: 2.0
-        
+
         delete_after: :class:`float`
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
@@ -1348,7 +1348,7 @@ class Webhook(BaseWebhook):
         application_webhook = self.type is WebhookType.application
         if ephemeral and not application_webhook:
             raise InvalidArgument('ephemeral messages can only be sent from application webhooks')
-        
+
         if delete_after is not MISSING and ephemeral:
             raise InvalidArgument('ephemeral messages can not be deleted via endpoints')
 

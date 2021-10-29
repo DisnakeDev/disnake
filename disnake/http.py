@@ -399,7 +399,7 @@ class HTTPClient:
             raise
 
         return data
-    
+
     def create_party(
         self,
         channel_id: Snowflake,

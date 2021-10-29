@@ -101,7 +101,7 @@ class CommonBotBase(Generic[CogT]):
             loop.create_task(self._watchdog())
 
         super().__init__(*args, **kwargs)
-    
+
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         # super() will resolve to Client
         super().dispatch(event_name, *args, **kwargs)  # type: ignore
@@ -112,7 +112,7 @@ class CommonBotBase(Generic[CogT]):
     async def _fill_owners(self) -> None:
         if self.owner_id or self.owner_ids:
             return
-        
+
         await self.wait_until_first_connect() # type: ignore
 
         app = await self.application_info()  # type: ignore
@@ -180,7 +180,7 @@ class CommonBotBase(Generic[CogT]):
                 return user.id == owner_id
 
     # listener registration
-    
+
     def add_listener(self, func: CoroFunc, name: str = MISSING) -> None:
         """The non decorator alternative to :meth:`.listen`.
 
@@ -212,7 +212,7 @@ class CommonBotBase(Generic[CogT]):
             self.extra_events[name].append(func)
         else:
             self.extra_events[name] = [func]
-    
+
     def remove_listener(self, func: CoroFunc, name: str = MISSING) -> None:
         """Removes a listener from the pool of listeners.
 
@@ -232,7 +232,7 @@ class CommonBotBase(Generic[CogT]):
                 self.extra_events[name].remove(func)
             except ValueError:
                 pass
-    
+
     def listen(self, name: str = MISSING) -> Callable[[CFT], CFT]:
         """A decorator that registers another function as an external
         event listener. Basically this allows you to listen to multiple
@@ -599,36 +599,36 @@ class CommonBotBase(Generic[CogT]):
 
     async def _watchdog(self):
         """|coro|
-        
-        Starts the bot watchdog which will watch currently loaded extensions 
+
+        Starts the bot watchdog which will watch currently loaded extensions
         and reload them when they're modified.
         """
         if isinstance(self, disnake.Client):
             await self.wait_until_ready()
-        
+
         reload_log = logging.getLogger(__name__)
         # ensure the message actually shows up
         if logging.root.level > logging.INFO:
             logging.basicConfig()
             reload_log.setLevel(logging.INFO)
-        
+
         if isinstance(self, disnake.Client):
             is_closed = self.is_closed
         else:
             is_closed = lambda: False
-        
+
         reload_log.info(f"WATCHDOG: Watching extensions")
-        
+
         last = time.time()
         while not is_closed():
             t = time.time()
-            
+
             extensions = set()
             for name, module in self.extensions.items():
                 file = module.__file__
                 if os.stat(file).st_mtime > last:
                     extensions.add(name)
-            
+
             for name in extensions:
                 try:
                     self.reload_extension(name)
@@ -636,6 +636,6 @@ class CommonBotBase(Generic[CogT]):
                     reload_log.exception(e)
                 else:
                     reload_log.info(f"WATCHDOG: Reloaded '{name}'")
-            
+
             await asyncio.sleep(1)
             last = t

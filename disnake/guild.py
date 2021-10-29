@@ -416,7 +416,7 @@ class Guild(Hashable):
             the ID to compare to.
         """
         self._state._get_guild_application_command(self.id, application_command_id)
-    
+
     def get_command_named(self, name: str, /) -> Optional[ApplicationCommand]:
         """
         Gets a cached application command matching the specified name.
@@ -537,7 +537,7 @@ class Guild(Hashable):
         .. versionadded:: 2.0
         """
         return list(self._threads.values())
-    
+
     @property
     def large(self) -> bool:
         """:class:`bool`: Indicates if the guild is a 'large' guild.
@@ -648,7 +648,7 @@ class Guild(Hashable):
             return
 
         return self._channels.get(id) or self._threads.get(id)
-    
+
     def get_channel_or_thread(self, channel_id: int, /) -> Optional[Union[Thread, GuildChannel]]:
         """Returns a channel or thread with the given ID.
 
@@ -2424,16 +2424,16 @@ class Guild(Hashable):
 
     @overload
     async def get_or_fetch_member(self, member_id: int, *, strict: Literal[False] = ...) -> Optional[Member]: ...
-    
+
     @overload
     async def get_or_fetch_member(self, member_id: int, *, strict: Literal[True]) -> Member: ...
 
     async def get_or_fetch_member(self, member_id: int, *, strict: bool = False) -> Optional[Member]:
         """|coro|
-        
+
         Tries to get a member from the cache by ID. If fails, it fetcehs
         the user from the API and caches it.
-        
+
         Parameters
         -----------
         member_id: :class:`int`
@@ -2569,13 +2569,13 @@ class Guild(Hashable):
 
         if name is not MISSING:
             fields['name'] = name
-        
+
         if icon is not MISSING:
             if icon is None:
                 fields['icon'] = icon
             else:
                 fields['icon'] = utils._bytes_to_base64_data(icon)
-        
+
         if emoji is not MISSING:
             fields['unicode_emoji'] = emoji
 
@@ -3045,7 +3045,7 @@ class Guild(Hashable):
         .. versionadded:: 2.1
         """
         return await self._state.bulk_fetch_command_permissions(self.id)
-    
+
     async def fetch_command_permissions(self, command_id: int) -> GuildApplicationCommandPermissions:
         """|coro|
 
@@ -3057,7 +3057,7 @@ class Guild(Hashable):
         ----------
         command_id: :class:`int`
             the ID of the application command
-        
+
         Returns
         -------
         :class:`GuildApplicationCommandPermissions`
@@ -3086,7 +3086,7 @@ class Guild(Hashable):
             Role IDs to booleans.
         user_ids: Mapping[:class:`int`, :class:`bool`]
             User IDs to booleans.
-        
+
         Returns
         -------
         :class:`GuildApplicationCommandPermissions`
@@ -3113,7 +3113,7 @@ class Guild(Hashable):
         ----------
         permissions: List[:class:`PartialGuildApplicationCommandPermissions`]
             A list of partial permissions for each app command you want to edit.
-        
+
         Returns
         -------
         List[:class:`GuildApplicationCommandPermissions`]

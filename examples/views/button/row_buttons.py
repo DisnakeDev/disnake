@@ -11,7 +11,7 @@ class row_buttons(disnake.ui.View):
         super().__init__(timeout=None)
 
     # Creates a row of buttons and when one of them is pressed, it will send a message with the number of the button.
-        
+
     @disnake.ui.button(label="Hi", style=ButtonStyle.red)
     async def first_button(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         await interaction.response.send_message("This is the first button.")
@@ -23,7 +23,7 @@ class row_buttons(disnake.ui.View):
     @disnake.ui.button(label="a row of", style=ButtonStyle.blurple, row=1)
     async def third_button(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         await interaction.response.send_message("This is the third button.")
-    
+
     @disnake.ui.button(label="buttons.", style=ButtonStyle.blurple, row=1)
     async def fourth_button(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         await interaction.response.send_message("This is the fourth button.")

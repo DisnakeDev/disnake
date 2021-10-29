@@ -263,9 +263,9 @@ class PrivilegedIntentsRequired(ClientException):
 
 class InteractionException(ClientException):
     """Exception that's raised when an interaction operation fails
-    
+
     .. versionadded:: 2.0
-    
+
     Attributes
     -----------
     interaction: :class:`Interaction`
@@ -285,10 +285,10 @@ class InteractionTimedOut(InteractionException):
     interaction: :class:`Interaction`
         The interaction that was responded to
     """
-    
+
     def __init__(self, interaction: Interaction):
         self.interaction: Interaction = interaction
-        
+
         msg = (
             'Interaction took more than 3 seconds to be responded to. '
             'Please defer it using "interaction.response.defer" on the start of your command. '
@@ -333,7 +333,7 @@ class InteractionNotResponded(InteractionException):
     interaction: :class:`Interaction`
         The interaction that's already been responded to.
     """
-    
+
     def __init__(self, interaction: Interaction):
         self.interaction: Interaction = interaction
         super().__init__("This interaction hasn't been responded to yet")

@@ -121,7 +121,7 @@ class InvokableApplicationCommand(ABC):
             cooldown = func.__commands_cooldown__
         except AttributeError:
             cooldown = kwargs.get('cooldown')
-        
+
         # TODO: Figure out how cooldowns even work with interactions
         if cooldown is None:
             buckets = CooldownMapping(cooldown, BucketType.default)
@@ -143,7 +143,7 @@ class InvokableApplicationCommand(ABC):
 
         self._before_invoke: Optional[Hook] = None
         self._after_invoke: Optional[Hook] = None
-    
+
     @property
     def callback(self) -> Callable[..., Any]:
         return self._callback
@@ -207,7 +207,7 @@ class InvokableApplicationCommand(ABC):
 
     async def prepare(self, inter: ApplicationCommandInteraction) -> None:
         inter.application_command = self
-        
+
         if not await self.can_run(inter):
             raise CheckFailure(f'The check functions for command {self.qualified_name!r} failed.')
 
@@ -221,7 +221,7 @@ class InvokableApplicationCommand(ABC):
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)  # type: ignore
             raise
-    
+
     def is_on_cooldown(self, inter: ApplicationCommandInteraction) -> bool:
         """Checks whether the application command is currently on cooldown.
 
@@ -284,7 +284,7 @@ class InvokableApplicationCommand(ABC):
         if self.guild_only and inter.guild_id is None:
             await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
             return
-        
+
         await self.prepare(inter)
 
         try:
@@ -335,7 +335,7 @@ class InvokableApplicationCommand(ABC):
     async def _call_local_error_handler(self, inter: ApplicationCommandInteraction, error: CommandError) -> Any:
         if not self.has_error_handler():
             return
-        
+
         injected = wrap_callback(self.on_error)
         if self.cog is not None:
             return await injected(self.cog, inter, error)
@@ -504,7 +504,7 @@ class InvokableApplicationCommand(ABC):
         try:
             if inter.bot and not await inter.bot.application_command_can_run(inter):
                 raise CheckFailure(f'The global check functions for command {self.qualified_name} failed.')
-            
+
             cog = self.cog
             if cog is not None:
                 meth = getattr(cog, f'cog_{partial_attr_name}_check', None)
@@ -518,7 +518,7 @@ class InvokableApplicationCommand(ABC):
             if not predicates:
                 # since we have no checks, then we just return True.
                 return True
-            
+
             return await async_all(predicate(inter) for predicate in predicates)  # type: ignore
         finally:
             inter.application_command = original

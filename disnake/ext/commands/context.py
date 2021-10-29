@@ -403,11 +403,11 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
 class GuildContext(Context):
     """A Context subclass meant for annotation
-    
+
     No runtime behavior is changed but annotations are modified
     to seem like the context may never be invoked ina  dm.
     """
-    
+
     guild: Guild
     channel: Union[TextChannel, Thread]
     author: Member

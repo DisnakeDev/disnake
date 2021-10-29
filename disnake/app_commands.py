@@ -61,7 +61,7 @@ def application_command_factory(data: Mapping[str, Any]) -> Any:
         return UserCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.message:
         return MessageCommand.from_dict(data)
-    
+
     raise TypeError(f"Application command of type {cmd_type} is not valid")
 
 
@@ -91,7 +91,7 @@ class OptionChoice:
             self.name == other.name and
             self.value == other.value
         )
-    
+
     def to_dict(self) -> Dict[str, ChoiceValue]:
         return {
             'name': self.name,
@@ -169,7 +169,7 @@ class Option:
             min_value = math.ceil(min_value)
         if max_value and self.type is OptionType.integer:
             max_value = math.floor(max_value)
-        
+
         self.min_value: Optional[float] = min_value
         self.max_value: Optional[float] = max_value
 
@@ -192,7 +192,7 @@ class Option:
             choices = [OptionChoice(str(value), value) for value in choices] # type: ignore
         else:
             choices = cast(List[OptionChoice], choices)
-        
+
         self.choices: List[OptionChoice] = choices
         self.autocomplete: bool = autocomplete
 
@@ -294,7 +294,7 @@ class ApplicationCommand(ABC):
     """
     The base class for application commands
     """
-    
+
     def __init__(
         self,
         type: ApplicationCommandType,
@@ -396,7 +396,7 @@ class SlashCommand(ApplicationCommand):
     ):
         assert re.match(r"^[\w-]{1,32}$", name) is not None and name.islower(),\
             f"Slash command name {name!r} should consist of these symbols: a-z, 0-9, -, _"
-        
+
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
@@ -584,19 +584,19 @@ class GuildApplicationCommandPermissions:
                 data.append(
                     {"id": obj.id, "type": target_type, "permission": value}
                 )
-        
+
         if role_ids is not None:
             for role_id, value in role_ids.items():
                 data.append(
                     {"id": role_id, "type": 1, "permission": value}
                 )
-        
+
         if user_ids is not None:
             for user_id, value in user_ids.items():
                 data.append(
                     {"id": user_id, "type": 2, "permission": value}
                 )
-        
+
         res = await self._state.http.edit_application_command_permissions(
             self.application_id, self.guild_id, self.id, {"permissions": data}
         )
@@ -641,17 +641,17 @@ class PartialGuildApplicationCommandPermissions:
                     raise ValueError(f"Permission target should be an instance of Role or abc.User")
                 data = {"id": obj.id, "type": target_type, "permission": value}
                 self.permissions.append(ApplicationCommandPermissions(data=data))
-        
+
         if role_ids is not None:
             for role_id, value in role_ids.items():
                 data = {"id": role_id, "type": 1, "permission": value}
                 self.permissions.append(ApplicationCommandPermissions(data=data))
-        
+
         if user_ids is not None:
             for user_id, value in user_ids.items():
                 data = {"id": user_id, "type": 2, "permission": value}
                 self.permissions.append(ApplicationCommandPermissions(data=data))
-    
+
     def to_dict(self) -> Any:
         return {
             "id": self.id,

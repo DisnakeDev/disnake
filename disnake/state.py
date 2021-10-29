@@ -87,7 +87,6 @@ if TYPE_CHECKING:
     CS = TypeVar('CS', bound='ConnectionState')
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
     PartialChannel = Union[Channel, PartialMessageable]
-    
 
 
 class ChunkRequest:
@@ -456,7 +455,7 @@ class ConnectionState:
         for cmd in self._global_application_commands.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
-    
+
     def _get_guild_command_named(self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None) -> Optional[ApplicationCommand]:
         granula = self._guild_application_commands.get(guild_id, {})
         for cmd in granula.values():
@@ -473,7 +472,7 @@ class ConnectionState:
             self._application_command_permissions[permissions.guild_id] = {
                 permissions.id: permissions
             }
-    
+
     def _unset_command_permissions(self, command_id: int, guild_id: int = None) -> None:
         if guild_id is None:
             for granula in self._application_command_permissions.values():
@@ -1519,7 +1518,7 @@ class ConnectionState:
     async def fetch_global_commands(self) -> List[ApplicationCommand]:
         results = await self.http.get_global_commands(self.application_id) # type: ignore
         return [application_command_factory(data) for data in results]
-    
+
     async def fetch_global_command(self, command_id: int) -> ApplicationCommand:
         result = await self.http.get_global_command(self.application_id, command_id) # type: ignore
         return application_command_factory(result)
@@ -1556,7 +1555,7 @@ class ConnectionState:
     async def fetch_guild_commands(self, guild_id: int) -> List[ApplicationCommand]:
         results = await self.http.get_guild_commands(self.application_id, guild_id) # type: ignore
         return [application_command_factory(data) for data in results]
-    
+
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> ApplicationCommand:
         result = await self.http.get_guild_command(self.application_id, guild_id, command_id) # type: ignore
         return application_command_factory(result)
@@ -1603,7 +1602,7 @@ class ConnectionState:
             self.application_id, guild_id # type: ignore
         )
         return [GuildApplicationCommandPermissions(state=self, data=obj) for obj in array]
-    
+
     async def fetch_command_permissions(
         self, guild_id: int, command_id: int
     ) -> GuildApplicationCommandPermissions:
@@ -1629,7 +1628,7 @@ class ConnectionState:
             perm.to_dict()
             for perm in permissions
         ]
-        
+
         array = await self.http.bulk_edit_guild_application_command_permissions(
             self.application_id, # type: ignore
             guild_id=guild_id,

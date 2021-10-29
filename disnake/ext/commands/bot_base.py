@@ -54,7 +54,7 @@ if TYPE_CHECKING:
     ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
     AnyMessageCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
     AnyUserCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
-    
+
     P = ParamSpec('P')
 
 __all__ = (
@@ -154,7 +154,7 @@ class BotBase(CommonBotBase, GroupMixin):
             self.help_command = help_command
 
     # internal helpers
-    
+
     async def on_command_error(self, context: Context, exception: errors.CommandError) -> None:
         """|coro|
 
@@ -311,7 +311,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         # type-checker doesn't distinguish between functions and methods
         return await disnake.utils.async_all(f(ctx) for f in data)  # type: ignore
-    
+
     def before_invoke(self, coro: CFT) -> CFT:
         """A decorator that registers a coroutine as a pre-invoke hook.
 
@@ -431,7 +431,7 @@ class BotBase(CommonBotBase, GroupMixin):
         prefix = ret = self.command_prefix
         if callable(prefix):
             ret = await disnake.utils.maybe_coroutine(prefix, self, message)
-        
+
         if ret is None:
             return None
 
@@ -582,6 +582,6 @@ class BotBase(CommonBotBase, GroupMixin):
 
         ctx = await self.get_context(message)
         await self.invoke(ctx)
-    
+
     async def on_message(self, message):
         await self.process_commands(message)

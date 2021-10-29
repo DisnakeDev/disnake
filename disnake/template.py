@@ -310,7 +310,7 @@ class Template:
     @property
     def url(self) -> str:
         """:class:`str`: The template url.
-        
+
         .. versionadded:: 2.0
         """
         return f'https://disnake.new/{self.code}'

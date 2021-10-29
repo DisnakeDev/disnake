@@ -49,7 +49,7 @@ import inspect
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
     from .cog import CogT
-    
+
     ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
 
     P = ParamSpec('P')
@@ -187,13 +187,13 @@ class SubCommand(InvokableApplicationCommand):
         super().__init__(func, name=name, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
         self.autocompleters: Dict[str, Any] = kwargs.get('autocompleters', {})
-        
+
         self.docstring = utils.parse_docstring(func)
         description = description or self.docstring['description']
-        
+
         if not options:
             options = expand_params(self)
-        
+
         self.option = Option(
             name=self.name,
             description=description or '-',
@@ -201,7 +201,7 @@ class SubCommand(InvokableApplicationCommand):
             options=options
         )
         self.qualified_name = ''
-    
+
     async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Any:
         autocomp = self.autocompleters.get(param)
         if autocomp is None:
@@ -217,7 +217,7 @@ class SubCommand(InvokableApplicationCommand):
         if self.guild_only and inter.guild_id is None:
             await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
             return
-        
+
         for k, v in self.connectors.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
@@ -275,32 +275,32 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.auto_sync: bool = auto_sync
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.autocompleters: Dict[str, Any] = kwargs.get('autocompleters', {})
-        
+
         self.docstring = utils.parse_docstring(func)
         description = description or self.docstring['description']
-        
+
         if not options:
             options = expand_params(self)
-        
+
         self.body: SlashCommand = SlashCommand(
             name=self.name,
             description=description or '-',
             options=options or [],
             default_permission=default_permission,
         )
-    
+
     @property
     def description(self) -> str:
         return self.body.description
-    
+
     @property
     def options(self) -> List[Option]:
         return self.body.options
-    
+
     @property
     def default_permission(self) -> bool:
         return self.body.default_permission
-    
+
     def sub_command(
         self,
         name: str = None,
@@ -333,7 +333,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``
-        
+
         Returns
         --------
         Callable[..., :class:`SubCommand`]
@@ -381,7 +381,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         ----------
         name : :class:`str`
             the name of the subcommand group. Defaults to the function name
-        
+
         Returns
         --------
         Callable[..., :class:`SubCommandGroup`]
@@ -422,7 +422,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             return None
         if not callable(autocomp):
             return autocomp
-        
+
         # possibly pass in filled options as a kwarg
         filled = inter.filled_options
         del filled[inter.data.focused_option.name]
@@ -430,7 +430,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             choices = autocomp(inter, user_input, **filled)
         except TypeError:
             choices = autocomp(inter, user_input)
-        
+
         if inspect.isawaitable(choices):
             return await choices
         return choices
@@ -448,22 +448,22 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             subcmd = group.children.get(chain[1]) if group is not None else None
         else:
             raise ValueError("Command chain is too long")
-        
+
         focused_option = inter.data.focused_option
 
         if subcmd is None or isinstance(subcmd, SubCommandGroup):
             call_autocompleter = self._call_autocompleter
         else:
             call_autocompleter = subcmd._call_autocompleter
-        
+
         choices = await call_autocompleter(focused_option.name, inter, focused_option.value)
-        
+
         if choices is not None:
             await inter.response.autocomplete(choices=choices)
 
     async def invoke_children(self, inter: ApplicationCommandInteraction):
         chain, kwargs = inter.data._get_chain_and_kwargs()
-        
+
         if len(chain) == 0:
             group = None
             subcmd = None
@@ -483,7 +483,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             except CommandError as exc:
                 if not await group._call_local_error_handler(inter, exc):
                     raise
-        
+
         if subcmd is not None:
             try:
                 await subcmd.invoke(inter, **kwargs)
@@ -569,7 +569,7 @@ def slash_command(
         you don't have to specify the connectors. Connectors template:
         ``{"option-name": "param_name", ...}``.
         If you're using :ref:`param_syntax`, you don't need to specify this.
-    
+
     Returns
     --------
     Callable[..., :class:`InvokableSlashCommand`]

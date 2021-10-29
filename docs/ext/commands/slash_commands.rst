@@ -112,7 +112,7 @@ Option Types
 ++++++++++++
 
 You might already be familiar with discord.py's converters, slash commands have a very similar equivalent in the form of option types.
-Discord itself supports only a few built-in types which are guaranteed to be enforced: 
+Discord itself supports only a few built-in types which are guaranteed to be enforced:
 
 - :class:`str`
 - :class:`int`
@@ -200,7 +200,7 @@ For example:
         Dog = 'dog'
         Cat = 'cat'
         Penguin = 'peng'
-    
+
     @bot.slash_command()
     async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animal):
         await inter.response.send_message(animal)
@@ -218,7 +218,7 @@ The values can be integers as well:
         Dog = 1
         Cat = 2
         Penguin = 3
-    
+
     @bot.slash_command()
     async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animal):
         await inter.response.send_message(animal)
@@ -228,7 +228,7 @@ You can define an enum in one line:
 .. code-block:: python3
 
     Animal = commands.option_enum({"Dog": "dog", "Cat": "cat", "Penguin": "penguin"})
-    
+
     @bot.slash_command()
     async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animal):
         await inter.response.send_message(animal)
@@ -238,7 +238,7 @@ Or even forget about values and define the enum from list:
 .. code-block:: python3
 
     Animal = commands.option_enum(["Dog", "Cat", "Penguin"])
-    
+
     @bot.slash_command()
     async def blep(inter: disnake.ApplicationCommandInteraction, animal: Animal):
         await inter.response.send_message(animal)
@@ -253,7 +253,7 @@ Finally, you can simply list the choices in ``commands.Param``:
         animal: str = commands.Param(choices={"Dog": "dog", "Cat": "cat", "Penguin": "penguin"})
     ):
         await inter.response.send_message(animal)
-    
+
     # Or define the choices in a list
 
     @bot.slash_command()
@@ -308,7 +308,7 @@ For example, here's how you make a ``/show user`` command:
     async def show(inter):
         # Here you can paste some code, it will run for every invoked sub-command.
         pass
-    
+
     @show.sub_command()
     async def user(inter, user: disnake.User):
         """
@@ -330,11 +330,11 @@ You can implement double nesting and build commands like ``/parent group subcmd`
     @bot.slash_command()
     async def parent(inter):
         pass
-    
+
     @parent.sub_command_group()
     async def group(inter):
         pass
-    
+
     @group.sub_command()
     async def subcmd(inter):
         # Some stuff

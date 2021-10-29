@@ -4,7 +4,7 @@ from disnake.ext import commands
 bot = commands.Bot("!")
 
 # Slash command subcommands differ from classic text subcommands & groups
-# 
+#
 # The gist of it is:
 #   You may define any slash command which takes no arguments as the subcommand parent.
 #   A parent has children which are subcommands or subcommand groups
@@ -43,7 +43,7 @@ class MyCog(commands.Cog):
     @command.sub_command_group()
     async def bar(self, inter):
         print("This code is ran every time any subcommand of bar is invoked")
-    
+
     @bar.sub_command()
     async def b(self, inter, option: float):
         await inter.response.send_message(f"You ran /command bar b {option}")

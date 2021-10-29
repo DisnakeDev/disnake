@@ -225,7 +225,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
         return [m for m in self.guild.members if self.permissions_for(m).read_messages]
-    
+
     @property
     def threads(self) -> List[Thread]:
         """List[:class:`Thread`]: Returns all the threads that you can see.
@@ -1537,7 +1537,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
 class NewsChannel(TextChannel):
     """Represents a Discord news channel
-    
+
     An exact 1:1 copy of :class:`TextChannel` meant for command annotations
     """
     type: ChannelType = ChannelType.news
@@ -2092,7 +2092,7 @@ def _channel_type_factory(cls: Type[disnake.abc.GuildChannel]) -> List[ChannelTy
         disnake.abc.GuildChannel: list(ChannelType.__members__.values()),
         VocalGuildChannel: [ChannelType.voice, ChannelType.stage_voice],
         disnake.abc.PrivateChannel: [ChannelType.private, ChannelType.group],
-        
+
         TextChannel: [ChannelType.text, ChannelType.news],
         DMChannel: [ChannelType.private],
         VoiceChannel: [ChannelType.voice],

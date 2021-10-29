@@ -63,13 +63,13 @@ __all__ = (
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
         _cls_name: str
-    
+
     name: str
     value: Any
-    
+
     def __repr__(self) -> str:
         return f'<{self._cls_name}.{self.name}: {self.value!r}>'
-    
+
     def __str__(self) -> str:
         return f'{self._cls_name}.{self.name}'
 
@@ -77,7 +77,7 @@ class _EnumValueBase(NamedTuple):
 class _EnumValueComparable(_EnumValueBase):
     def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and self.value == other.value
-    
+
     def __lt__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and self.value < other.value
 

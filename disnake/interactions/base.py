@@ -399,10 +399,10 @@ class Interaction:
                     await deleter
                 except HTTPException:
                     pass
-            
+
             asyncio.create_task(delete(delay))
             return
-        
+
         try:
             await deleter
         except NotFound as e:
@@ -698,7 +698,7 @@ class InteractionResponse:
             if e.code == 10062:
                 raise InteractionTimedOut(self._parent) from e
             raise
-        
+
         self._responded = True
 
         if files is not MISSING:
@@ -834,7 +834,7 @@ class InteractionResponse:
         """
         if self._responded:
             raise InteractionResponded(self._parent)
-        
+
         data = {}
         if not choices:
             data['choices'] = []
@@ -844,7 +844,7 @@ class InteractionResponse:
             data['choices'] = [{'name': n, 'value': n} for n in choices]
         else:
             data['choices'] = [c.to_dict() for c in choices] # type: ignore
-        
+
         parent = self._parent
         adapter = async_context.get()
         await adapter.create_interaction_response(

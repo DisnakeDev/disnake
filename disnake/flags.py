@@ -1073,7 +1073,7 @@ class ApplicationFlags(BaseFlags):
         receive message content over the gateway.
         """
         return 1 << 18
-    
+
     @flag_value
     def gateway_message_content_limited(self):
         """:class:`bool`: Returns ``True`` if the application is verified and is allowed to

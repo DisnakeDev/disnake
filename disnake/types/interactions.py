@@ -223,7 +223,6 @@ class MessageInteraction(TypedDict):
     user: User
 
 
-
 class _EditApplicationCommandOptional(TypedDict, total=False):
     description: str
     options: Optional[List[ApplicationCommandOption]]

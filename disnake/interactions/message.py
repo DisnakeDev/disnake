@@ -90,7 +90,7 @@ class MessageInteraction(Interaction):
         super().__init__(data=data, state=state)
         self.data = MessageInteractionData(data=data.get('data', {}))
         self.message = Message(state=self._state, channel=self.channel, data=data['message']) # type: ignore
-    
+
     @property
     def values(self) -> Optional[List[str]]:
         """Optional[List[:class:`str`]]: The values the user selected"""
@@ -105,10 +105,10 @@ class MessageInteraction(Interaction):
             for component in action_row.children:
                 if not isinstance(component, (Button, SelectMenu)):
                     continue
-                
+
                 if component.custom_id == self.data.custom_id:
                     return component
-        
+
         raise Exception("MessageInteraction is malformed - no component found")
 
 

@@ -428,7 +428,7 @@ class Decoder(_OpusStruct):
     @overload
     def decode(self, data: bytes, *, fec: bool) -> bytes:
         ...
-    
+
     @overload
     def decode(self, data: Literal[None], *, fec: Literal[False]) -> bytes:
         ...

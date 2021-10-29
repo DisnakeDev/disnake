@@ -245,7 +245,7 @@ class Asset(AssetMixin):
             key=banner_hash,
             animated=animated
         )
-    
+
     @classmethod
     def _from_role_icon(cls, state, role_id: int, icon_hash: str) -> Asset:
         animated = icon_hash.startswith('a_')
