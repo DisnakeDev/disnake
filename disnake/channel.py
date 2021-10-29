@@ -679,7 +679,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         name: str,
         message: Optional[Snowflake] = None,
         auto_archive_duration: ThreadArchiveDuration = MISSING,
-        type: Optional[ChannelType] = None,
+        threadtype: Optional[ChannelType] = None,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
@@ -702,7 +702,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         auto_archive_duration: :class:`int`
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
-        type: Optional[:class:`ChannelType`]
+        threadtype: Optional[:class:`ChannelType`]
             The type of thread to create. If a ``message`` is passed then this parameter
             is ignored, as a thread created with a message is always a public thread.
             By default this creates a private thread if this is ``None``.
@@ -722,15 +722,15 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The created thread
         """
 
-        if type is None:
-            type = ChannelType.private_thread
+        if threadtype is None:
+            threadtype = ChannelType.private_thread
 
         if message is None:
             data = await self._state.http.start_thread_without_message(
                 self.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                type=type.value,
+                type=threadtype.value,
                 reason=reason,
             )
         else:
