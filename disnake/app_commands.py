@@ -737,5 +737,4 @@ class UnresolvedGuildApplicationCommandPermissions:
         if any(user_ids[id] != owner_ids[id] for id in common_ids):
             print('[WARNING] Conflicting permissions for owner(s) provided in user_ids')
 
-        result = {**user_ids, **owner_ids}
-        return result
+        return {**user_ids, **owner_ids}
