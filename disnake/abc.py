@@ -1280,11 +1280,22 @@ class Messageable:
         tts: :class:`bool`
             Indicates if the message should be sent using text-to-speech.
         embed: :class:`~disnake.Embed`
-            The rich embed for the content.
+            The rich embed for the content to send. This cannot be mixed with
+            ``embeds`` parameter.
+        embeds: List[:class:`~disnake.Embed`]
+            A list of embeds to send with the content. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
+
+            .. versionadded:: 2.0
         file: :class:`~disnake.File`
-            The file to upload.
+            The file to upload. This cannot be mixed with ``files`` parameter.
         files: List[:class:`~disnake.File`]
-            A list of files to upload. Must be a maximum of 10.
+            A list of files to send with the content. Must be a maximum of 10.
+            This cannot be mixed with the ``file`` parameter.
+        stickers: Sequence[Union[:class:`~disnake.GuildSticker`, :class:`~disnake.StickerItem`]]
+            A list of stickers to upload. Must be a maximum of 3.
+
+            .. versionadded:: 2.0
         nonce: :class:`int`
             The nonce to use for sending this message. If the message was successfully sent,
             then the message will have a nonce with this value.
@@ -1294,10 +1305,10 @@ class Messageable:
             then it is silently ignored.
         allowed_mentions: :class:`~disnake.AllowedMentions`
             Controls the mentions being processed in this message. If this is
-            passed, then the object is merged with :attr:`~disnake.Client.allowed_mentions`.
+            passed, then the object is merged with :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`.
             The merging behaviour only overrides attributes that have been explicitly passed
-            to the object, otherwise it uses the attributes set in :attr:`~disnake.Client.allowed_mentions`.
-            If no object is passed at all then the defaults given by :attr:`~disnake.Client.allowed_mentions`
+            to the object, otherwise it uses the attributes set in :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`.
+            If no object is passed at all then the defaults given by :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`
             are used instead.
 
             .. versionadded:: 1.4
@@ -1316,14 +1327,6 @@ class Messageable:
             .. versionadded:: 1.6
         view: :class:`disnake.ui.View`
             A Discord UI View to add to the message.
-        embeds: List[:class:`~disnake.Embed`]
-            A list of embeds to upload. Must be a maximum of 10.
-
-            .. versionadded:: 2.0
-        stickers: Sequence[Union[:class:`~disnake.GuildSticker`, :class:`~disnake.StickerItem`]]
-            A list of stickers to upload. Must be a maximum of 3.
-
-            .. versionadded:: 2.0
 
         Raises
         --------

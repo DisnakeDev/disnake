@@ -288,8 +288,8 @@ class Interaction:
         self,
         *,
         content: Optional[str] = MISSING,
-        embeds: List[Embed] = MISSING,
         embed: Optional[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
         view: Optional[View] = MISSING,
@@ -297,7 +297,7 @@ class Interaction:
     ) -> InteractionMessage:
         """|coro|
 
-        Edits the original interaction response message.
+        Edits the original, previously sent interaction response message.
 
         This is a lower level interface to :meth:`InteractionMessage.edit` in case
         you do not want to fetch the message and save an HTTP request.
@@ -309,22 +309,27 @@ class Interaction:
         ------------
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
-        embeds: List[:class:`Embed`]
-            A list of embeds to edit the message with.
         embed: Optional[:class:`Embed`]
-            The embed to edit the message with. ``None`` suppresses the embeds.
-            This should not be mixed with the ``embeds`` parameter.
+            The new embed to replace the original with. This cannot be mixed with the
+            ``embeds`` parameter.
+            Could be ``None`` to remove the embed.
+        embeds: List[:class:`Embed`]
+            The new embeds to replace the original with. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
+            To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
+            Files will be appended to the message.
         files: List[:class:`File`]
             A list of files to send with the content. This cannot be mixed with the
             ``file`` parameter.
-        allowed_mentions: :class:`AllowedMentions`
-            Controls the mentions being processed in this message.
-            See :meth:`.abc.Messageable.send` for more information.
+            Files will be appended to the message.
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
+            See :meth:`.abc.Messageable.send` for more information.
 
         Raises
         -------
@@ -449,16 +454,17 @@ class Interaction:
         -----------
         content: Optional[:class:`str`]
             The content of the message to send.
-        embeds: List[:class:`Embed`]
-            A list of embeds to send with the content. Maximum of 10. This cannot
-            be mixed with the ``embed`` parameter.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with
             ``embeds`` parameter.
-        file: :class:`~disnake.File`
-            The file to upload.
-        files: List[:class:`~disnake.File`]
+        embeds: List[:class:`Embed`]
+            A list of embeds to send with the content. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
+        file: :class:`File`
+            The file to upload. This cannot be mixed with ``files`` parameter.
+        files: List[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
+            This cannot be mixed with the ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         tts: :class:`bool`
@@ -616,22 +622,23 @@ class InteractionResponse:
         -----------
         content: Optional[:class:`str`]
             The content of the message to send.
-        embeds: List[:class:`Embed`]
-            A list of embeds to send with the content. Maximum of 10. This cannot
-            be mixed with the ``embed`` parameter.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with
             ``embeds`` parameter.
-        file: :class:`~disnake.File`
-            The file to upload.
-        files: List[:class:`~disnake.File`]
-            A list of files to upload. Must be a maximum of 10.
+        embeds: List[:class:`Embed`]
+            A list of embeds to send with the content. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
+        file: :class:`File`
+            The file to upload. This cannot be mixed with ``files`` parameter.
+        files: List[:class:`File`]
+            A list of files to send with the content. Must be a maximum of 10.
+            This cannot be mixed with the ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
-        tts: :class:`bool`
-            Indicates if the message should be sent using text-to-speech.
         view: :class:`disnake.ui.View`
             The view to send with the message.
+        tts: :class:`bool`
+            Indicates if the message should be sent using text-to-speech.
         ephemeral: :class:`bool`
             Indicates if the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
@@ -743,8 +750,8 @@ class InteractionResponse:
         content: Optional[Any] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
-        allowed_mentions: AllowedMentions = MISSING,
         attachments: List[Attachment] = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
     ) -> None:
         """|coro|
@@ -756,16 +763,19 @@ class InteractionResponse:
         -----------
         content: Optional[:class:`str`]
             The new content to replace the message with. ``None`` removes the content.
-        embeds: List[:class:`Embed`]
-            A list of embeds to edit the message with.
         embed: Optional[:class:`Embed`]
-            The embed to edit the message with. ``None`` suppresses the embeds.
-            This should not be mixed with the ``embeds`` parameter.
-        allowed_mentions: :class:`AllowedMentions`
-            Controls the mentions being processed in this message.
+            The new embed to replace the original with. This cannot be mixed with the
+            ``embeds`` parameter.
+            Could be ``None`` to remove the embed.
+        embeds: List[:class:`Embed`]
+            The new embeds to replace the original with. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
+            To remove all embeds ``[]`` should be passed.
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all attachments are removed.
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
@@ -930,8 +940,8 @@ class InteractionMessage(Message):
     async def edit(
         self,
         content: Optional[str] = MISSING,
-        embeds: List[Embed] = MISSING,
         embed: Optional[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
         view: Optional[View] = MISSING,
@@ -945,22 +955,27 @@ class InteractionMessage(Message):
         ------------
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
-        embeds: List[:class:`Embed`]
-            A list of embeds to edit the message with.
         embed: Optional[:class:`Embed`]
-            The embed to edit the message with. ``None`` suppresses the embeds.
-            This should not be mixed with the ``embeds`` parameter.
+            The new embed to replace the original with. This cannot be mixed with the
+            ``embeds`` parameter.
+            Could be ``None`` to remove the embed.
+        embeds: List[:class:`Embed`]
+            The new embeds to replace the original with. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
+            To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
+            Files will be appended to the message.
         files: List[:class:`File`]
             A list of files to send with the content. This cannot be mixed with the
             ``file`` parameter.
-        allowed_mentions: :class:`AllowedMentions`
-            Controls the mentions being processed in this message.
-            See :meth:`.abc.Messageable.send` for more information.
+            Files will be appended to the message.
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
+            See :meth:`.abc.Messageable.send` for more information.
 
         Raises
         -------

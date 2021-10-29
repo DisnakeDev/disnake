@@ -663,8 +663,8 @@ class WebhookMessage(Message):
     async def edit(
         self,
         content: Optional[str] = MISSING,
-        embeds: List[Embed] = MISSING,
         embed: Optional[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
         view: Optional[View] = MISSING,
@@ -683,28 +683,33 @@ class WebhookMessage(Message):
         ------------
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
-        embeds: List[:class:`Embed`]
-            A list of embeds to edit the message with.
         embed: Optional[:class:`Embed`]
-            The embed to edit the message with. ``None`` suppresses the embeds.
-            This should not be mixed with the ``embeds`` parameter.
+            The new embed to replace the original with. This cannot be mixed with the
+            ``embeds`` parameter.
+            Could be ``None`` to remove the embed.
+        embeds: List[:class:`Embed`]
+            The new embeds to replace the original with. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
+            To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
+            Files will be appended to the message.
 
             .. versionadded:: 2.0
         files: List[:class:`File`]
             A list of files to send with the content. This cannot be mixed with the
             ``file`` parameter.
+            Files will be appended to the message.
 
             .. versionadded:: 2.0
-        allowed_mentions: :class:`AllowedMentions`
-            Controls the mentions being processed in this message.
-            See :meth:`.abc.Messageable.send` for more information.
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
 
             .. versionadded:: 2.0
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
+            See :meth:`.abc.Messageable.send` for more information.
 
         Raises
         -------
@@ -1331,11 +1336,6 @@ class Webhook(BaseWebhook):
         ------------
         content: :class:`str`
             The content of the message to send.
-        wait: :class:`bool`
-            Whether the server should wait before sending a response. This essentially
-            means that the return type of this function changes from ``None`` to
-            a :class:`WebhookMessage` if set to ``True``. If the type of webhook
-            is :attr:`WebhookType.application` then this is always set to ``True``.
         username: :class:`str`
             The username to send with this message. If no username is provided
             then the default username for the webhook is used.
@@ -1355,14 +1355,14 @@ class Webhook(BaseWebhook):
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
         files: List[:class:`File`]
-            A list of files to send with the content. This cannot be mixed with the
-            ``file`` parameter.
+            A list of files to send with the content. Must be a maximum of 10.
+            This cannot be mixed with the ``file`` parameter.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with
             ``embeds`` parameter.
         embeds: List[:class:`Embed`]
-            A list of embeds to send with the content. Maximum of 10. This cannot
-            be mixed with the ``embed`` parameter.
+            A list of embeds to send with the content. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
 
@@ -1378,7 +1378,11 @@ class Webhook(BaseWebhook):
             The thread to send this webhook to.
 
             .. versionadded:: 2.0
-
+        wait: :class:`bool`
+            Whether the server should wait before sending a response. This essentially
+            means that the return type of this function changes from ``None`` to
+            a :class:`WebhookMessage` if set to ``True``. If the type of webhook
+            is :attr:`WebhookType.application` then this is always set to ``True``.
         delete_after: :class:`float`
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
@@ -1522,8 +1526,8 @@ class Webhook(BaseWebhook):
         message_id: int,
         *,
         content: Optional[str] = MISSING,
-        embeds: List[Embed] = MISSING,
         embed: Optional[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
         view: Optional[View] = MISSING,
@@ -1547,29 +1551,34 @@ class Webhook(BaseWebhook):
             The message ID to edit.
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
-        embeds: List[:class:`Embed`]
-            A list of embeds to edit the message with.
         embed: Optional[:class:`Embed`]
-            The embed to edit the message with. ``None`` suppresses the embeds.
-            This should not be mixed with the ``embeds`` parameter.
+            The new embed to replace the original with. This cannot be mixed with the
+            ``embeds`` parameter.
+            Could be ``None`` to remove the embed.
+        embeds: List[:class:`Embed`]
+            The new embeds to replace the original with. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
+            To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
+            Files will be appended to the message.
 
             .. versionadded:: 2.0
         files: List[:class:`File`]
             A list of files to send with the content. This cannot be mixed with the
             ``file`` parameter.
+            Files will be appended to the message.
 
             .. versionadded:: 2.0
-        allowed_mentions: :class:`AllowedMentions`
-            Controls the mentions being processed in this message.
-            See :meth:`.abc.Messageable.send` for more information.
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed. The webhook must have state attached, similar to
             :meth:`send`.
 
             .. versionadded:: 2.0
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
+            See :meth:`.abc.Messageable.send` for more information.
 
         Raises
         -------
