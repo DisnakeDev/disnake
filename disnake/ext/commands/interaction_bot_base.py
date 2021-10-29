@@ -188,9 +188,7 @@ class InteractionBotBase(CommonBotBase):
 
     @property
     def application_commands(self) -> Set[InvokableApplicationCommand]:
-        result = set()
-        for cmd in self.all_slash_commands.values():
-            result.add(cmd)
+        result = {cmd for cmd in self.all_slash_commands.values()}
         for cmd in self.all_user_commands.values():
             result.add(cmd)
         for cmd in self.all_message_commands.values():
