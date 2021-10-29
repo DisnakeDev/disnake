@@ -1374,11 +1374,7 @@ class Client:
             if me is None:
                 continue
 
-            if activity is not None:
-                me.activities = (activity,) # type: ignore
-            else:
-                me.activities = ()
-
+            me.activities = (activity, ) if activity is not None else ()
             me.status = status
 
     # Guild stuff
