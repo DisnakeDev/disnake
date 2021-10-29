@@ -697,8 +697,7 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.0
         files: List[:class:`File`]
-            A list of files to send with the content. This cannot be mixed with the
-            ``file`` parameter.
+            A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message.
 
             .. versionadded:: 2.0
@@ -1355,7 +1354,7 @@ class Webhook(BaseWebhook):
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
         files: List[:class:`File`]
-            A list of files to send with the content. Must be a maximum of 10.
+            A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with

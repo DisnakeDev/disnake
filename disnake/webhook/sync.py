@@ -442,8 +442,7 @@ class SyncWebhookMessage(Message):
             The file to upload. This cannot be mixed with ``files`` parameter.
             Files will be appended to the message.
         files: List[:class:`File`]
-            A list of files to send with the content. This cannot be mixed with the
-            ``file`` parameter.
+            A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
@@ -906,7 +905,7 @@ class SyncWebhook(BaseWebhook):
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
         files: List[:class:`File`]
-            A list of files to send with the content. Must be a maximum of 10.
+            A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with
@@ -1062,8 +1061,7 @@ class SyncWebhook(BaseWebhook):
             The file to upload. This cannot be mixed with ``files`` parameter.
             Files will be appended to the message.
         files: List[:class:`File`]
-            A list of files to send with the content. This cannot be mixed with the
-            ``file`` parameter.
+            A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
