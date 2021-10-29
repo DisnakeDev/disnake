@@ -19,3 +19,5 @@ build
 tests
 dist
 ADVANCED.rst
+.vscode
+.idea
