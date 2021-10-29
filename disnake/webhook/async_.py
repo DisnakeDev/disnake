@@ -1079,7 +1079,6 @@ class Webhook(BaseWebhook):
             if available. Defaults to ``True``.
 
             .. versionadded:: 2.0
-
         Raises
         -------
         HTTPException
@@ -1201,6 +1200,7 @@ class Webhook(BaseWebhook):
         view: View = MISSING,
         thread: Snowflake = MISSING,
         wait: Literal[True],
+        delete_after: float = MISSING,
     ) -> WebhookMessage:
         ...
 
@@ -1221,6 +1221,7 @@ class Webhook(BaseWebhook):
         view: View = MISSING,
         thread: Snowflake = MISSING,
         wait: Literal[False] = ...,
+        delete_after: float = MISSING,
     ) -> None:
         ...
 
@@ -1240,6 +1241,7 @@ class Webhook(BaseWebhook):
         view: View = MISSING,
         thread: Snowflake = MISSING,
         wait: bool = False,
+        delete_after: float = MISSING,
     ) -> Optional[WebhookMessage]:
         """|coro|
 
@@ -1305,6 +1307,13 @@ class Webhook(BaseWebhook):
             The thread to send this webhook to.
 
             .. versionadded:: 2.0
+        
+        delete_after: :class:`float`
+            If provided, the number of seconds to wait in the background
+            before deleting the message we just sent. If the deletion fails,
+            then it is silently ignored.
+
+            .. versionadded:: 2.1
 
         Raises
         --------
@@ -1339,8 +1348,11 @@ class Webhook(BaseWebhook):
         application_webhook = self.type is WebhookType.application
         if ephemeral and not application_webhook:
             raise InvalidArgument('ephemeral messages can only be sent from application webhooks')
+        
+        if delete_after is not MISSING and ephemeral:
+            raise InvalidArgument('ephemeral messages can not be deleted via endpoints')
 
-        if application_webhook:
+        if application_webhook or delete_after is not MISSING:
             wait = True
 
         if view is not MISSING:
@@ -1382,6 +1394,8 @@ class Webhook(BaseWebhook):
         msg = None
         if wait:
             msg = self._create_message(data)
+            if delete_after is not MISSING:
+                await msg.delete(delay=delete_after)
 
         if view is not MISSING and not view.is_finished():
             message_id = None if msg is None else msg.id

@@ -363,13 +363,20 @@ class Interaction:
             self._state.store_view(view, message.id)
         return message
 
-    async def delete_original_message(self) -> None:
+    async def delete_original_message(self, *, delay: float = None) -> None:
         """|coro|
 
         Deletes the original interaction response message.
 
         This is a lower level interface to :meth:`InteractionMessage.delete` in case
         you do not want to fetch the message and save an HTTP request.
+
+        Parameters
+        ----------
+        delay: :class:`float`
+            If provided, the number of seconds to wait in the background
+            before deleting the original message. If the deletion fails,
+            then it is silently ignored.
 
         Raises
         -------
@@ -379,16 +386,105 @@ class Interaction:
             Deleted a message that is not yours.
         """
         adapter = async_context.get()
+        deleter = adapter.delete_original_interaction_response(
+            self.application_id,
+            self.token,
+            session=self._session,
+        )
+
+        if delay is not None:
+            async def delete(delay: float):
+                await asyncio.sleep(delay)
+                try:
+                    await deleter
+                except HTTPException:
+                    pass
+            
+            asyncio.create_task(delete(delay))
+            return
+        
         try:
-            await adapter.delete_original_interaction_response(
-                self.application_id,
-                self.token,
-                session=self._session,
-            )
+            await deleter
         except NotFound as e:
             if e.code == 10015:
                 raise InteractionNotResponded(self) from e
             raise
+
+    async def send(
+        self,
+        content: Optional[Any] = None,
+        *,
+        embed: Embed = MISSING,
+        embeds: List[Embed] = MISSING,
+        file: File = MISSING,
+        files: List[File] = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
+        view: View = MISSING,
+        tts: bool = False,
+        ephemeral: bool = False,
+        delete_after: float = MISSING,
+    ) -> None:
+        """|coro|
+
+        Sends a message using either :meth:`response.send_message` or :meth:`followup.send`.
+
+        If the interaction is not responded, this method will call :meth:`response.send_message`.
+        :meth:`followup.send` otherwise.
+
+        Parameters
+        -----------
+        content: Optional[:class:`str`]
+            The content of the message to send.
+        embeds: List[:class:`Embed`]
+            A list of embeds to send with the content. Maximum of 10. This cannot
+            be mixed with the ``embed`` parameter.
+        embed: :class:`Embed`
+            The rich embed for the content to send. This cannot be mixed with
+            ``embeds`` parameter.
+        file: :class:`~disnake.File`
+            The file to upload.
+        files: List[:class:`~disnake.File`]
+            A list of files to upload. Must be a maximum of 10.
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
+        tts: :class:`bool`
+            Indicates if the message should be sent using text-to-speech.
+        view: :class:`disnake.ui.View`
+            The view to send with the message.
+        ephemeral: :class:`bool`
+            Indicates if the message should only be visible to the user who started the interaction.
+            If a view is sent with an ephemeral message and it has no timeout set then the timeout
+            is set to 15 minutes.
+        delete_after: :class:`float`
+            If provided, the number of seconds to wait in the background
+            before deleting the message we just sent. If the deletion fails,
+            then it is silently ignored.
+
+        Raises
+        -------
+        HTTPException
+            Sending the message failed.
+        TypeError
+            You specified both ``embed`` and ``embeds``.
+        ValueError
+            The length of ``embeds`` was invalid.
+        """
+        if self.response._responded:
+            sender = self.followup.send
+        else:
+            sender = self.response.send_message
+        await sender( # type: ignore
+            content=content,
+            embed=embed,
+            embeds=embeds,
+            file=file,
+            files=files,
+            allowed_mentions=allowed_mentions,
+            view=view,
+            tts=tts,
+            ephemeral=ephemeral,
+            delete_after=delete_after,
+        )
 
 
 class InteractionResponse:
@@ -493,6 +589,7 @@ class InteractionResponse:
         view: View = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        delete_after: float = MISSING,
     ) -> None:
         """|coro|
 
@@ -522,6 +619,10 @@ class InteractionResponse:
             Indicates if the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
             is set to 15 minutes.
+        delete_after: :class:`float`
+            If provided, the number of seconds to wait in the background
+            before deleting the message we just sent. If the deletion fails,
+            then it is silently ignored.
 
         Raises
         -------
@@ -540,6 +641,9 @@ class InteractionResponse:
         payload: Dict[str, Any] = {
             'tts': tts,
         }
+
+        if delete_after is not MISSING and ephemeral:
+            raise ValueError('ephemeral messages can not be deleted via endpoints')
 
         if embed is not MISSING and embeds is not MISSING:
             raise TypeError('cannot mix embed and embeds keyword arguments')
@@ -595,6 +699,8 @@ class InteractionResponse:
                 raise InteractionTimedOut(self._parent) from e
             raise
         
+        self._responded = True
+
         if files is not MISSING:
             for f in files:
                 f.close()
@@ -605,7 +711,8 @@ class InteractionResponse:
 
             self._parent._state.store_view(view)
 
-        self._responded = True
+        if delete_after is not MISSING:
+            await self._parent.delete_original_message(delay=delete_after)
 
     async def edit_message(
         self,
