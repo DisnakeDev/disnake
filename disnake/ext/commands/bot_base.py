@@ -338,11 +338,9 @@ class BotBase(CommonBotBase, GroupMixin):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The pre-invoke hook must be a coroutine.')
-
-        self._before_invoke = coro
-        return coro
+        return self._extracted_from_after_invoke_3(
+            coro, 'The pre-invoke hook must be a coroutine.'
+        )
 
     def after_invoke(self, coro: CFT) -> CFT:
         r"""A decorator that registers a coroutine as a post-invoke hook.
@@ -371,10 +369,14 @@ class BotBase(CommonBotBase, GroupMixin):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The post-invoke hook must be a coroutine.')
+        return self._extracted_from_after_invoke_3(
+            coro, 'The post-invoke hook must be a coroutine.'
+        )
 
-        self._after_invoke = coro
+    # TODO Rename this here and in `before_invoke` and `after_invoke`
+    def _extracted_from_after_invoke_3(self, coro, arg1):
+        if not asyncio.iscoroutinefunction(coro):
+            raise TypeError(arg1)
         return coro
 
     # extensions
