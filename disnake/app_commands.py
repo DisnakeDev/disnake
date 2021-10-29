@@ -715,16 +715,7 @@ class UnresolvedGuildApplicationCommandPermissions:
 
         resolved_user_ids: Optional[Mapping[int, bool]]
         if self.owner is not None:
-            owner_ids = dict.fromkeys(owners, self.owner)
-            if not owner_ids:
-                raise ValueError('Cannot properly resolve permissions without owner IDs')
-
-            user_ids = self.user_ids or {}
-            common_ids = owner_ids.keys() & user_ids.keys()
-            if any(user_ids[id] != owner_ids[id] for id in common_ids):
-                print('[WARNING] Conflicting permissions for owner(s) provided in user_ids')
-
-            resolved_user_ids = {**user_ids, **owner_ids}
+            resolved_user_ids = self._extracted_from_resolve_6(owners)
         else:
             resolved_user_ids = self.user_ids
 
@@ -734,3 +725,17 @@ class UnresolvedGuildApplicationCommandPermissions:
             role_ids=self.role_ids,
             user_ids=resolved_user_ids,
         )
+
+    # TODO Rename this here and in `resolve`
+    def _extracted_from_resolve_6(self, owners):
+        owner_ids = dict.fromkeys(owners, self.owner)
+        if not owner_ids:
+            raise ValueError('Cannot properly resolve permissions without owner IDs')
+
+        user_ids = self.user_ids or {}
+        common_ids = owner_ids.keys() & user_ids.keys()
+        if any(user_ids[id] != owner_ids[id] for id in common_ids):
+            print('[WARNING] Conflicting permissions for owner(s) provided in user_ids')
+
+        result = {**user_ids, **owner_ids}
+        return result
