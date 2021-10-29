@@ -1065,8 +1065,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                 should_print = param.default if isinstance(param.default, str) else param.default is not None
                 if should_print:
                     result.append(f'[{name}={param.default}]' if not greedy else
-                                  f'[{name}={param.default}]...')
-                    continue
+                                  f'[{name}={param.default}]...')                    
                 else:
                     result.append(f'[{name}]')
 
