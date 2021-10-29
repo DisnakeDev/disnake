@@ -763,7 +763,7 @@ class InteractionResponse:
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        # attachments: List[Attachment] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
     ) -> None:
@@ -771,6 +771,13 @@ class InteractionResponse:
 
         Responds to this interaction by editing the original message of
         a component interaction.
+
+        .. note::
+            The ``attachments`` parameter is currently non-functional, removing/replacing existing
+            attachments using this method is presently not supported (API limitation, see
+            `this <https://github.com/discord/discord-api-docs/discussions/3335>`_).
+            As a workaround, respond to the interaction first (e.g. using :meth:`.defer`),
+            then edit the message using :meth:`.edit_original_message`.
 
         Parameters
         -----------
@@ -786,19 +793,14 @@ class InteractionResponse:
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
-            Files will be appended to the message, see the ``attachments`` parameter
-            to remove/replace existing files.
+            Files will be appended to the message.
 
             .. versionadded:: 2.1
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
-            Files will be appended to the message, see the ``attachments`` parameter
-            to remove/replace existing files.
+            Files will be appended to the message.
 
             .. versionadded:: 2.1
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all attachments are removed.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
@@ -860,8 +862,8 @@ class InteractionResponse:
         elif previous_mentions is not None:
             payload["allowed_mentions"] = previous_mentions.to_dict()
 
-        if attachments is not MISSING:
-            payload["attachments"] = [a.to_dict() for a in attachments]
+        # if attachments is not MISSING:
+        #     payload["attachments"] = [a.to_dict() for a in attachments]
 
         if view is not MISSING:
             if message_id:
