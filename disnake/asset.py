@@ -169,10 +169,10 @@ class Asset(AssetMixin):
     @classmethod
     def _from_avatar(cls, state, user_id: int, avatar: str) -> Asset:
         animated = avatar.startswith('a_')
-        format = 'gif' if animated else 'png'
+        formata = 'gif' if animated else 'png'
         return cls(
             state,
-            url=f'{cls.BASE}/avatars/{user_id}/{avatar}.{format}?size=1024',
+            url=f'{cls.BASE}/avatars/{user_id}/{avatar}.{formata}?size=1024',
             key=avatar,
             animated=animated,
         )
@@ -180,10 +180,10 @@ class Asset(AssetMixin):
     @classmethod
     def _from_guild_avatar(cls, state, guild_id: int, member_id: int, avatar: str) -> Asset:
         animated = avatar.startswith('a_')
-        format = 'gif' if animated else 'png'
+        formata = 'gif' if animated else 'png'
         return cls(
             state,
-            url=f"{cls.BASE}/guilds/{guild_id}/users/{member_id}/avatars/{avatar}.{format}?size=1024",
+            url=f"{cls.BASE}/guilds/{guild_id}/users/{member_id}/avatars/{avatar}.{formata}?size=1024",
             key=avatar,
             animated=animated,
         )
@@ -218,10 +218,10 @@ class Asset(AssetMixin):
     @classmethod
     def _from_guild_icon(cls, state, guild_id: int, icon_hash: str) -> Asset:
         animated = icon_hash.startswith('a_')
-        format = 'gif' if animated else 'png'
+        formata = 'gif' if animated else 'png'
         return cls(
             state,
-            url=f'{cls.BASE}/icons/{guild_id}/{icon_hash}.{format}?size=1024',
+            url=f'{cls.BASE}/icons/{guild_id}/{icon_hash}.{formata}?size=1024',
             key=icon_hash,
             animated=animated,
         )
@@ -238,10 +238,10 @@ class Asset(AssetMixin):
     @classmethod
     def _from_banner(cls, state, id: int, banner_hash: str) -> Asset:
         animated = banner_hash.startswith('a_')
-        format = 'gif' if animated else 'png'
+        formata = 'gif' if animated else 'png'
         return cls(
             state,
-            url=f'{cls.BASE}/banners/{id}/{banner_hash}.{format}?size=1024',
+            url=f'{cls.BASE}/banners/{id}/{banner_hash}.{formata}?size=1024',
             key=banner_hash,
             animated=animated
         )
@@ -249,10 +249,10 @@ class Asset(AssetMixin):
     @classmethod
     def _from_role_icon(cls, state, role_id: int, icon_hash: str) -> Asset:
         animated = icon_hash.startswith('a_')
-        format = 'gif' if animated else 'png'
+        formata = 'gif' if animated else 'png'
         return cls(
             state,
-            url=f'{cls.BASE}/role-icons/{role_id}/{icon_hash}.{format}?size=1024',
+            url=f'{cls.BASE}/role-icons/{role_id}/{icon_hash}.{formata}?size=1024',
             key=icon_hash,
             animated=animated,
         )
