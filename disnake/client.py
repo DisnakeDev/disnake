@@ -1771,15 +1771,12 @@ class Client:
 
         if ch_type in (ChannelType.group, ChannelType.private):
             # the factory will be a DMChannel or GroupChannel here
-            channel = factory(me=self.user, data=data, state=self._connection) # type: ignore
-        else:
-            # the factory can't be a DMChannel or GroupChannel here
-            guild_id = int(data['guild_id']) # type: ignore
-            guild = self.get_guild(guild_id) or Object(id=guild_id)
+            return factory(me=self.user, data=data, state=self._connection)
+        # the factory can't be a DMChannel or GroupChannel here
+        guild_id = int(data['guild_id']) # type: ignore
+        guild = self.get_guild(guild_id) or Object(id=guild_id)
             # GuildChannels expect a Guild, we may be passing an Object
-            channel = factory(guild=guild, state=self._connection, data=data) # type: ignore
-
-        return channel
+        return factory(guild=guild, state=self._connection, data=data)
 
     async def fetch_webhook(self, webhook_id: int, /) -> Webhook:
         """|coro|
