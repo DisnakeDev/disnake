@@ -754,6 +754,8 @@ class InteractionResponse:
         content: Optional[Any] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
+        file: File = MISSING,
+        files: List[File] = MISSING,
         attachments: List[Attachment] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
@@ -775,6 +777,18 @@ class InteractionResponse:
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
+        file: :class:`File`
+            The file to upload. This cannot be mixed with ``files`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
+
+            .. versionadded:: 2.1
+        files: List[:class:`File`]
+            A list of files to upload. This cannot be mixed with the ``file`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
+
+            .. versionadded:: 2.1
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all attachments are removed.
@@ -819,6 +833,15 @@ class InteractionResponse:
                         "Embed images in edit interaction responses are not supported"
                     )
 
+        if file is not MISSING and files is not MISSING:
+            raise TypeError("cannot mix file and files keyword arguments")
+
+        if file is not MISSING:
+            files = [file]
+
+        if files is not MISSING and len(files) > 10:
+            raise ValueError("files cannot exceed maximum of 10 elements")
+
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._parent._state, "allowed_mentions", None
         )
@@ -844,6 +867,7 @@ class InteractionResponse:
             session=parent._session,
             type=InteractionResponseType.message_update.value,
             data=payload,
+            files=files,
         )
 
         if view and not view.is_finished():
