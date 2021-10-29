@@ -758,8 +758,8 @@ class GuildConverter(IDConverter[disnake.Guild]):
         if result is None:
             result = disnake.utils.get(ctx.bot.guilds, name=argument)
 
-            if result is None:
-                raise GuildNotFound(argument)
+        if result is None:
+            raise GuildNotFound(argument)
         return result
 
 
@@ -907,7 +907,11 @@ class clean_content(Converter[str]):
             m = _utils_get(msg.mentions, id=id) or ctx.bot.get_user(id)
             if m is None and ctx.guild:
                 m = ctx.guild.get_member(id)
-            return f'@{m.display_name if self.use_nicknames else m.name}' if m else '@deleted-user'
+            a = f'@{m.display_name if self.use_nicknames else m.name}'
+            if m:
+                return a
+            else:
+                return "@deleted-user"
         
         def resolve_role(id: int) -> str:
             if ctx.guild is None:
