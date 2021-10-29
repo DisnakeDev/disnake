@@ -465,7 +465,12 @@ class Interaction:
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
-            Controls the mentions being processed in this message.
+            Controls the mentions being processed in this message. If this is
+            passed, then the object is merged with :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`.
+            The merging behaviour only overrides attributes that have been explicitly passed
+            to the object, otherwise it uses the attributes set in :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`.
+            If no object is passed at all then the defaults given by :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`
+            are used instead.
         tts: :class:`bool`
             Indicates if the message should be sent using text-to-speech.
         view: :class:`disnake.ui.View`
