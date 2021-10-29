@@ -391,15 +391,7 @@ class ApplicationCommandInteractionDataResolved:
         if isinstance(option_type, int):
             option_type = try_enum(OptionType, option_type)
         if option_type is OptionType.mentionable:
-            key = int(key)
-            result = self.members.get(key)
-            if result is not None:
-                return result
-            result = self.users.get(key)
-            if result is not None:
-                return result
-            return self.roles.get(key, default)
-        
+            return self._extracted_from_get_with_type_5(key, default)
         if option_type is OptionType.user:
             key = int(key)
             member = self.members.get(key)
@@ -409,11 +401,22 @@ class ApplicationCommandInteractionDataResolved:
 
         if option_type is OptionType.channel:
             return self.channels.get(int(key), default)
-        
+
         if option_type is OptionType.role:
             return self.roles.get(int(key), default)
-        
+
         return default
+
+    # TODO Rename this here and in `get_with_type`
+    def _extracted_from_get_with_type_5(self, key, default):
+        key = int(key)
+        result = self.members.get(key)
+        if result is not None:
+            return result
+        result = self.users.get(key)
+        if result is not None:
+            return result
+        return self.roles.get(key, default)
 
     def get(self, key: int):
         if key is None:
