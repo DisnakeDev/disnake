@@ -605,30 +605,30 @@ class CommonBotBase(Generic[CogT]):
         """
         if isinstance(self, disnake.Client):
             await self.wait_until_ready()
-        
+
         reload_log = logging.getLogger(__name__)
         # ensure the message actually shows up
         if logging.root.level > logging.INFO:
             logging.basicConfig()
             reload_log.setLevel(logging.INFO)
-        
+
         if isinstance(self, disnake.Client):
             is_closed = self.is_closed
         else:
             is_closed = lambda: False
-        
-        reload_log.info(f"WATCHDOG: Watching extensions")
-        
+
+        reload_log.info('WATCHDOG: Watching extensions')
+
         last = time.time()
         while not is_closed():
             t = time.time()
-            
+
             extensions = set()
             for name, module in self.extensions.items():
                 file = module.__file__
                 if os.stat(file).st_mtime > last:
                     extensions.add(name)
-            
+
             for name in extensions:
                 try:
                     self.reload_extension(name)
@@ -636,6 +636,6 @@ class CommonBotBase(Generic[CogT]):
                     reload_log.exception(e)
                 else:
                     reload_log.info(f"WATCHDOG: Reloaded '{name}'")
-            
+
             await asyncio.sleep(1)
             last = t
