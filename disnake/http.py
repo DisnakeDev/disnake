@@ -116,16 +116,31 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
 
 
 def to_multipart(payload: Dict[str, Any], files: Iterable[File]) -> List[Dict[str, Any]]:
-    multipart: List[Dict[str, Any]] = [{"name": "payload_json", "value": utils._to_json(payload)}]
+    # NOTE: this method modifies the provided `payload` and `payload["attachments"]` collections
+
+    attachments = payload.get("attachments", [])
+    multipart: List[Dict[str, Any]] = []
     for index, file in enumerate(files):
         multipart.append(
             {
-                "name": f"file{index}",
+                "name": f"files[{index}]",
                 "value": file.fp,
                 "filename": file.filename,
                 "content_type": "application/octet-stream",
             }
         )
+        attachments.append(
+            {
+                "id": index,
+                "description": file.description,
+            }
+        )
+
+    # if existing attachments weren't in the payload before and we
+    # didn't add any new ones, don't add the list to the payload.
+    if attachments:
+        payload["attachments"] = attachments
+    multipart.append({"name": "payload_json", "value": utils._to_json(payload)})
     return multipart
 
 
