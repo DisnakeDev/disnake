@@ -112,7 +112,6 @@ def _app_commands_diff(
             diff['change_type'].append(new_cmd)
         elif new_cmd._always_synced:
             diff['no_changes'].append(old_cmd)
-            continue
         elif new_cmd != old_cmd:
             diff['edit'].append(new_cmd)
         else:
