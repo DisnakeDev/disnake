@@ -580,23 +580,23 @@ class GuildApplicationCommandPermissions:
                 elif isinstance(obj, User):
                     target_type = 2
                 else:
-                    raise ValueError(f"Permission target should be an instance of Role or abc.User")
+                    raise ValueError('Permission target should be an instance of Role or abc.User')
                 data.append(
                     {"id": obj.id, "type": target_type, "permission": value}
                 )
-        
+
         if role_ids is not None:
             for role_id, value in role_ids.items():
                 data.append(
                     {"id": role_id, "type": 1, "permission": value}
                 )
-        
+
         if user_ids is not None:
             for user_id, value in user_ids.items():
                 data.append(
                     {"id": user_id, "type": 2, "permission": value}
                 )
-        
+
         res = await self._state.http.edit_application_command_permissions(
             self.application_id, self.guild_id, self.id, {"permissions": data}
         )
@@ -638,15 +638,15 @@ class PartialGuildApplicationCommandPermissions:
                 elif isinstance(obj, User):
                     target_type = 2
                 else:
-                    raise ValueError(f"Permission target should be an instance of Role or abc.User")
+                    raise ValueError('Permission target should be an instance of Role or abc.User')
                 data = {"id": obj.id, "type": target_type, "permission": value}
                 self.permissions.append(ApplicationCommandPermissions(data=data))
-        
+
         if role_ids is not None:
             for role_id, value in role_ids.items():
                 data = {"id": role_id, "type": 1, "permission": value}
                 self.permissions.append(ApplicationCommandPermissions(data=data))
-        
+
         if user_ids is not None:
             for user_id, value in user_ids.items():
                 data = {"id": user_id, "type": 2, "permission": value}
