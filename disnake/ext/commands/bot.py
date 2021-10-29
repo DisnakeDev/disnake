@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
     AnyMessageCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
     AnyUserCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
-    
+
     P = ParamSpec('P')
 
 __all__ = (
@@ -158,7 +158,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
         reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
-        
+
         .. versionadded:: 2.1
     """
     pass
@@ -224,7 +224,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
         reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
-        
+
         .. versionadded:: 2.1
     """
     pass

@@ -34,16 +34,16 @@ Bot
 
     .. automethod:: Bot.command(*args, **kwargs)
         :decorator:
-    
+
     .. automethod:: Bot.slash_command(*args, **kwargs)
         :decorator:
-    
+
     .. automethod:: Bot.user_command(*args, **kwargs)
         :decorator:
-    
+
     .. automethod:: Bot.message_command(*args, **kwargs)
         :decorator:
-    
+
     .. automethod:: Bot.event()
         :decorator:
 
@@ -221,7 +221,7 @@ Slash Command
 
     .. automethod:: InvokableSlashCommand.sub_command_group(*args, **kwargs)
         :decorator:
-    
+
     .. automethod:: InvokableSlashCommand.after_invoke()
         :decorator:
 

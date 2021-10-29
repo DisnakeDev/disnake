@@ -24,7 +24,7 @@ class Dropdown(disnake.ui.Select):
     async def callback(self, interaction: disnake.MessageInteraction):
         # Use the interaction object to send a response message containing
         # the user's favourite colour or choice. The self object refers to the
-        # Select object, and the values attribute gets a list of the user's 
+        # Select object, and the values attribute gets a list of the user's
         # selected options. We only want the first one.
         await interaction.response.send_message(f'Your favourite colour is {self.values[0]}')
 
@@ -44,8 +44,8 @@ class Bot(commands.Bot):
     async def on_ready(self):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
         print('------')
-    
-    
+
+
 bot = Bot()
 
 

@@ -467,7 +467,7 @@ def Param(
     converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.
         Kwarg aliases: ``conv``.
-    
+
     Returns
     -------
     :class:`ParamInfo`

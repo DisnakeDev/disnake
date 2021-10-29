@@ -5,7 +5,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"))
 
 
 class MyView(disnake.ui.View):
-    
+
     def __init__(self):
         super().__init__(timeout=30.0)
 
@@ -42,4 +42,4 @@ async def view(ctx):
     # Sends a message with the view
     view.message = await ctx.send("These buttons will be disabled or removed", view=view)
 
-bot.run("token") 
+bot.run("token")

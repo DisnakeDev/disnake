@@ -908,18 +908,18 @@ class clean_content(Converter[str]):
             if m is None and ctx.guild:
                 m = ctx.guild.get_member(id)
             return f'@{m.display_name if self.use_nicknames else m.name}' if m else '@deleted-user'
-        
+
         def resolve_role(id: int) -> str:
             if ctx.guild is None:
                 return '@deleted-role'
             r = _utils_get(msg.role_mentions, id=id) or ctx.guild.get_role(id)
             return f'@{r.name}' if r else '@deleted-role'
-        
+
         def resolve_channel(id: int) -> str:
             if ctx.guild and self.fix_channel_mentions:
                 c = ctx.guild.get_channel(id)
                 return f'#{c.name}' if c else '#deleted-channel'
-        
+
             return f'<#{id}>'
 
         transforms = {

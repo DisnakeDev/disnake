@@ -575,10 +575,10 @@ class InteractionReference:
         self.type: InteractionType = try_enum(InteractionType, int(data['type']))
         self.name: str = data['name']
         self.user: User = User(state=state, data=data['user'])
-    
+
     def __repr__(self) -> str:
         return f"<InteractionReference id={self.id!r} type={self.type!r} name={self.name!r} user={self.user!r}>"
-    
+
     @property
     def author(self) -> User:
         return self.user

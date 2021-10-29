@@ -274,8 +274,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         which calls converters. If ``False`` then cooldown processing is done
         first and then the converters are called second. Defaults to ``False``.
     extras: :class:`dict`
-        A dict of user provided extras to attach to the Command. 
-        
+        A dict of user provided extras to attach to the Command.
+
         .. note::
             This object may be copied by the library.
 
@@ -349,7 +349,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             cooldown = func.__commands_cooldown__
         except AttributeError:
             cooldown = kwargs.get('cooldown')
-        
+
         if cooldown is None:
             buckets = CooldownMapping(cooldown, BucketType.default)
         elif isinstance(cooldown, CooldownMapping):
@@ -1161,7 +1161,7 @@ class GroupMixin(Generic[CogT]):
     def commands(self) -> Set[Command[CogT, Any, Any]]:
         """Set[:class:`.Command`]: A unique set of commands without aliases that are registered."""
         return set(self.all_commands.values())
-    
+
     def recursively_remove_all_commands(self) -> None:
         for command in self.all_commands.copy().values():
             if isinstance(command, GroupMixin):
@@ -1912,7 +1912,7 @@ def bot_has_role(item: int) -> Callable[[T], T]:
     def predicate(ctx: AnyContext) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
-        
+
         me = cast(disnake.Member, ctx.me)
         if isinstance(item, int):
             role = disnake.utils.get(me.roles, id=item)
@@ -2119,7 +2119,7 @@ def is_owner() -> Callable[[T], T]:
         if not await ctx.bot.is_owner(ctx.author):
             raise NotOwner('You do not own this bot.')
         return True
-    
+
     return check(predicate)
 
 def is_nsfw() -> Callable[[T], T]:

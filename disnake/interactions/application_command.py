@@ -56,7 +56,7 @@ if TYPE_CHECKING:
     from ..channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel, PartialMessageable
     from ..threads import Thread
     from ..ext.commands import InvokableApplicationCommand, Bot, AutoShardedBot
-    
+
     BotBase = Union[Bot, AutoShardedBot]
 
     InteractionChannel = Union[
@@ -109,7 +109,7 @@ class ApplicationCommandInteraction(Interaction):
         The wrapped interaction data.
     """
     bot: BotBase
-    
+
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
         self.data = ApplicationCommandInteractionData(
@@ -124,7 +124,7 @@ class ApplicationCommandInteraction(Interaction):
     def target(self) -> Optional[Union[User, Member, Message]]:
         """Optional[Union[:class:`abc.User`, :class:`Message`]]: The user or message targetted by a user or message command"""
         return self.data.target
-    
+
     @property
     def options(self) -> Dict[str, Any]:
         """Dict[:class:`str`, :class:`Any`]: The full option tree, including nestings"""
@@ -132,7 +132,7 @@ class ApplicationCommandInteraction(Interaction):
             opt.name: opt._simplified_value()
             for opt in self.data.options
         }
-    
+
     @property
     def filled_options(self) -> Dict[str, Any]:
         """Dict[:class:`str`, :class:`Any`]: The options of the command (or sub-command) being invoked"""
@@ -142,23 +142,23 @@ class ApplicationCommandInteraction(Interaction):
 
 class GuildCommandInteraction(ApplicationCommandInteraction):
     """An ApplicationCommandInteraction Context subclass meant for annotation
-    
-    
+
+
     No runtime behavior is changed but annotations are modified
     to seem like the interaction can only ever be invoked in guilds.
     """
-    
+
     guild: Guild
     me: Member
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
     """An ApplicationCommandInteraction Context subclass meant for annotation
-    
+
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a user command.
     """
-    
+
     target: Member
     guild: Guild
     me: Member
@@ -166,11 +166,11 @@ class UserCommandInteraction(ApplicationCommandInteraction):
 
 class MessageCommandInteraction(ApplicationCommandInteraction):
     """An ApplicationCommandInteraction Context subclass meant for annotation
-    
+
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a message command.
     """
-    
+
     target: Message
 
 
@@ -223,7 +223,7 @@ class ApplicationCommandInteractionData:
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
             for d in data.get('options', [])
         ]
-    
+
     def _get_chain_and_kwargs(self, chain: Tuple[str, ...] = None) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
         """
         Returns a chain of sub-command names and a dict of filled options.
@@ -246,9 +246,9 @@ class ApplicationCommandInteractionData:
                 # We can use 'return' here because user can only
                 # choose one subcommand per interaction
                 return option._get_focused_option()
-        
+
         return None
-    
+
     @property
     def focused_option(self) -> ApplicationCommandInteractionDataOption:
         """The focused option"""
@@ -290,12 +290,12 @@ class ApplicationCommandInteractionDataOption:
             for d in data.get('options', [])
         ]
         self.focused: bool = data.get('focused', False)
-    
+
     def _simplified_value(self) -> Any:
         if self.value is not None:
             return self.value
         return {opt.name: opt._simplified_value() for opt in self.options}
-    
+
     def _get_focused_option(self) -> Optional[ApplicationCommandInteractionDataOption]:
         for option in self.options:
             if option.focused:
@@ -303,7 +303,7 @@ class ApplicationCommandInteractionDataOption:
             if option.value is None:
                 return option._get_focused_option()
         return None
-    
+
     def _get_chain_and_kwargs(self, chain: Tuple[str, ...] = None) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
         if chain is None:
             chain = ()
@@ -370,23 +370,23 @@ class ApplicationCommandInteractionDataResolved:
                 )
             else:
                 self.users[user_id] = User(state=state, data=user)
-        
+
         for str_id, role in roles.items():
             self.roles[int(str_id)] = Role(guild=guild, state=state, data=role) # type: ignore
-        
+
         for str_id, channel in channels.items():
             factory, ch_type = _threaded_channel_factory(channel['type'])
             if factory:
                 channel['position'] = 0 # type: ignore
                 self.channels[int(str_id)] = factory(guild=guild, state=state, data=channel) # type: ignore
-        
+
         for str_id, message in messages.items():
             channel_id = int(message['channel_id'])
             channel = guild.get_channel(channel_id) if guild else None
             if channel is None:
                 channel = state.get_channel(channel_id)
             self.messages[int(str_id)] = Message(state=state, channel=channel, data=message) # type: ignore
-    
+
     def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
         if isinstance(option_type, int):
             option_type = try_enum(OptionType, option_type)
@@ -399,7 +399,7 @@ class ApplicationCommandInteractionDataResolved:
             if result is not None:
                 return result
             return self.roles.get(key, default)
-        
+
         if option_type is OptionType.user:
             key = int(key)
             member = self.members.get(key)
@@ -409,10 +409,10 @@ class ApplicationCommandInteractionDataResolved:
 
         if option_type is OptionType.channel:
             return self.channels.get(int(key), default)
-        
+
         if option_type is OptionType.role:
             return self.roles.get(int(key), default)
-        
+
         return default
 
     def get(self, key: int):

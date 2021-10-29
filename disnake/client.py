@@ -386,7 +386,7 @@ class Client:
         If this is not passed via ``__init__`` then this is retrieved
         through the gateway when an event contains the data. Usually
         after :func:`~disnake.on_connect` is called.
-        
+
         .. versionadded:: 2.0
         """
         return self._connection.application_id # type: ignore
@@ -398,7 +398,7 @@ class Client:
         .. versionadded:: 2.0
         """
         return self._connection.application_flags  # type: ignore
-    
+
     @property
     def global_application_commands(self) -> List[ApplicationCommand]:
         return list(self._connection._global_application_commands.values())
@@ -416,7 +416,7 @@ class Client:
             cmd for cmd in self._connection._global_application_commands.values()
             if isinstance(cmd, UserCommand)
         ]
-    
+
     @property
     def global_message_commands(self) -> List[MessageCommand]:
         return [
@@ -431,17 +431,17 @@ class Client:
         -----------
         id: :class:`int`
             The ID of the message to look for.
-        
+
         Returns
         --------
         Optional[:class:`.Message`]
             The corresponding message.
         """
         return utils.get(self.cached_messages, id=id)
-    
+
     @overload
     async def get_or_fetch_user(self, user_id: int, *, strict: Literal[False] = ...) -> Optional[User]: ...
-    
+
     @overload
     async def get_or_fetch_user(self, user_id: int, *, strict: Literal[True]) -> User: ...
 
@@ -471,7 +471,7 @@ class Client:
                 raise
             return None
         return user
-    
+
     getch_user = get_or_fetch_user
 
     def is_ready(self) -> bool:
@@ -819,7 +819,7 @@ class Client:
             self._connection._activity = value.to_dict() # type: ignore
         else:
             raise TypeError('activity must derive from BaseActivity.')
-    
+
     @property
     def status(self):
         """:class:`.Status`:
@@ -890,7 +890,7 @@ class Client:
 
         This is useful if you have a channel_id but don't want to do an API call
         to send messages to it.
-        
+
         .. versionadded:: 2.0
 
         Parameters
@@ -1040,7 +1040,7 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID to search for.
-        
+
         Returns
         -------
         List[:class:`.ApplicationCommand`]
@@ -1048,7 +1048,7 @@ class Client:
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
         return list(data.values())
-    
+
     def get_guild_slash_commands(self, guild_id: int) -> List[SlashCommand]:
         """
         Returns a list of all slash commands in the guild.
@@ -1057,7 +1057,7 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID to search for.
-        
+
         Returns
         -------
         List[:class:`.SlashCommand`]
@@ -1065,7 +1065,7 @@ class Client:
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
         return [cmd for cmd in data.values() if isinstance(cmd, SlashCommand)]
-    
+
     def get_guild_user_commands(self, guild_id: int) -> List[UserCommand]:
         """
         Returns a list of all user commands in the guild.
@@ -1074,7 +1074,7 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID to search for.
-        
+
         Returns
         -------
         List[:class:`.UserCommand`]
@@ -1082,7 +1082,7 @@ class Client:
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
         return [cmd for cmd in data.values() if isinstance(cmd, UserCommand)]
-    
+
     def get_guild_message_commands(self, guild_id: int) -> List[MessageCommand]:
         """
         Returns a list of all message commands in the guild.
@@ -1091,7 +1091,7 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID to search for.
-        
+
         Returns
         -------
         List[:class:`.MessageCommand`]
@@ -1099,7 +1099,7 @@ class Client:
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
         return [cmd for cmd in data.values() if isinstance(cmd, MessageCommand)]
-    
+
     def get_global_command(self, id: int) -> Optional[ApplicationCommand]:
         """
         Returns a global application command.
@@ -1108,14 +1108,14 @@ class Client:
         ----------
         id: :class:`int`
             The ID to search for.
-        
+
         Returns
         -------
         :class:`.ApplicationCommand`
             The application command.
         """
         return self._connection._get_global_application_command(id)
-    
+
     def get_guild_command(self, guild_id: int, id: int) -> Optional[ApplicationCommand]:
         """
         Returns a guild application command.
@@ -1126,7 +1126,7 @@ class Client:
             The guild ID to search for.
         id: :class:`int`
             The command ID to search for.
-        
+
         Returns
         -------
         :class:`.ApplicationCommand`
@@ -1144,14 +1144,14 @@ class Client:
             The name to look for.
         cmd_type: :class:`.ApplicationCommandType`
             The type to look for. By default, no types are checked.
-        
+
         Returns
         -------
         :class:`.ApplicationCommand`
             The application command.
         """
         return self._connection._get_global_command_named(name, cmd_type)
-    
+
     def get_guild_command_named(self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None) -> Optional[ApplicationCommand]:
         """
         Returns a guild application command matching the name.
@@ -1164,7 +1164,7 @@ class Client:
             The command name to search for.
         cmd_type: :class:`.ApplicationCommandType`
             The type to look for. By default, no types are checked.
-        
+
         Returns
         -------
         :class:`.ApplicationCommand`
@@ -1180,7 +1180,7 @@ class Client:
         Waits until the client's internal cache is all ready.
         """
         await self._ready.wait()
-    
+
     async def wait_until_first_connect(self) -> None:
         """|coro|
 
@@ -1883,7 +1883,7 @@ class Client:
 
         This method should be used for when a view is comprised of components
         that last longer than the lifecycle of the program.
-        
+
         .. versionadded:: 2.0
 
         Parameters
@@ -1915,7 +1915,7 @@ class Client:
     @property
     def persistent_views(self) -> Sequence[View]:
         """Sequence[:class:`.View`]: A sequence of persistent views added to the client.
-        
+
         .. versionadded:: 2.0
         """
         return self._connection.persistent_views
@@ -1935,7 +1935,7 @@ class Client:
             A list of application commands.
         """
         return await self._connection.fetch_global_commands()
-    
+
     async def fetch_global_command(self, command_id: int) -> ApplicationCommand:
         """|coro|
 
@@ -1947,7 +1947,7 @@ class Client:
         ----------
         command_id: :class:`int`
             the ID of the command to request.
-        
+
         Returns
         -------
         :class:`.ApplicationCommand`
@@ -1966,7 +1966,7 @@ class Client:
         ----------
         application_command: :class:`.ApplicationCommand`
             an object representing the application command.
-        
+
         Returns
         -------
         :class:`.ApplicationCommand`
@@ -1987,7 +1987,7 @@ class Client:
             the ID of the command to edit.
         new_command: :class:`.ApplicationCommand`
             an object representing the edited command.
-        
+
         Returns
         -------
         :class:`.ApplicationCommand`
@@ -2020,14 +2020,14 @@ class Client:
         ----------
         application_commands: List[:class:`.ApplicationCommand`]
             a list of application commands to insert instead of the existing commands.
-        
+
         Returns
         -------
         List[:class:`.ApplicationCommand`]
             A list of registered application commands.
         """
         return await self._connection.bulk_overwrite_global_commands(application_commands)
-    
+
     # Application commands (guild)
 
     async def fetch_guild_commands(self, guild_id: int):
@@ -2048,7 +2048,7 @@ class Client:
             A list of application commands.
         """
         return await self._connection.fetch_guild_commands(guild_id)
-    
+
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> ApplicationCommand:
         """|coro|
 
@@ -2062,7 +2062,7 @@ class Client:
             the ID of the guild to fetch command from.
         command_id: :class:`int`
             the ID of the command to request.
-        
+
         Returns
         -------
         :class:`.ApplicationCommand`
@@ -2083,7 +2083,7 @@ class Client:
             the ID of the guild where the command should be inserted.
         application_command: :class:`.ApplicationCommand`
             an object representing the application command.
-        
+
         Returns
         -------
         :class:`.ApplicationCommand`
@@ -2106,7 +2106,7 @@ class Client:
             the ID of the command to edit.
         new_command: :class:`.ApplicationCommand`
             an object representing the edited command.
-        
+
         Returns
         -------
         :class:`.ApplicationCommand`
@@ -2145,7 +2145,7 @@ class Client:
             the ID of the guild where the commands should be overwritten.
         application_commands: List[:class:`.ApplicationCommand`]
             a list of application commands to insert instead of the existing commands.
-        
+
         Returns
         -------
         List[:class:`.ApplicationCommand`]
@@ -2168,7 +2168,7 @@ class Client:
             The ID of the guild to inspect.
         """
         return await self._connection.bulk_fetch_command_permissions(guild_id)
-    
+
     async def fetch_command_permissions(self, guild_id: int, command_id: int) -> GuildApplicationCommandPermissions:
         """|coro|
 
@@ -2182,7 +2182,7 @@ class Client:
             The ID of the guild to inspect.
         command_id: :class:`int`
             The ID of the application command
-        
+
         Returns
         -------
         :class:`.GuildApplicationCommandPermissions`
@@ -2214,7 +2214,7 @@ class Client:
             Role IDs to booleans.
         user_ids: Mapping[:class:`int`, :class:`bool`]
             User IDs to booleans.
-        
+
         Returns
         -------
         :class:`.GuildApplicationCommandPermissions`
@@ -2243,7 +2243,7 @@ class Client:
             The ID of the guild where the permissions should be applied.
         permissions: List[:class:`.PartialGuildApplicationCommandPermissions`]
             A list of partial permissions for each app command you want to edit.
-        
+
         Returns
         -------
         List[:class:`.GuildApplicationCommandPermissions`]

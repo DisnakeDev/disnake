@@ -8,7 +8,7 @@ class Menu(disnake.ui.View):
 
     def __init__(self, embeds: list[disnake.Embed]):
         super().__init__(timeout=None)
-        
+
         # Sets the embed list variable.
         self.embeds = embeds
 

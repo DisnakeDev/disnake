@@ -312,7 +312,7 @@ class Role(Hashable):
         if self._icon is None:
             return None
         return Asset._from_role_icon(self._state, self.id, self._icon)
-    
+
     @property
     def emoji(self) -> Optional[PartialEmoji]:
         """Optional[:class:`PartialEmoji`]: Returns the role's emoji, if available.
@@ -322,7 +322,7 @@ class Role(Hashable):
         if self._emoji is None:
             return None
         return PartialEmoji(name=self._emoji)
-    
+
     @property
     def created_at(self) -> datetime.datetime:
         """:class:`datetime.datetime`: Returns the role's creation time in UTC."""
@@ -456,13 +456,13 @@ class Role(Hashable):
 
         if mentionable is not MISSING:
             payload['mentionable'] = mentionable
-        
+
         if icon is not MISSING:
             if icon is None:
                 payload['icon'] = icon
             else:
                 payload['icon'] = _bytes_to_base64_data(icon)
-        
+
         if emoji is not MISSING:
             payload['unicode_emoji'] = emoji
 

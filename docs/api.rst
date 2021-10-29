@@ -1569,7 +1569,7 @@ of :class:`enum.Enum`.
 
         Represents a role + user option.
     .. attribute:: number
-    
+
         Represents a float option.
 
 
