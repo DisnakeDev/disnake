@@ -67,6 +67,7 @@ _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from ..file import File
+    from ..message import Attachment
     from ..embeds import Embed
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
@@ -475,6 +476,7 @@ def handle_message_parameters(
     ephemeral: bool = False,
     file: File = MISSING,
     files: List[File] = MISSING,
+    attachments: List[Attachment] = MISSING,
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
@@ -505,6 +507,10 @@ def handle_message_parameters(
         payload["content"] = str(content) if content is not None else None
     if view is not MISSING:
         payload["components"] = view.to_components() if view is not None else []
+
+    if attachments is not MISSING:
+        payload["attachments"] = [a.to_dict() for a in attachments]
+
     payload["tts"] = tts
     if avatar_url:
         payload["avatar_url"] = str(avatar_url)
@@ -667,6 +673,7 @@ class WebhookMessage(Message):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
+        attachments: List[Attachment] = MISSING,
         view: Optional[View] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> WebhookMessage:
@@ -701,6 +708,11 @@ class WebhookMessage(Message):
             Files will be appended to the message.
 
             .. versionadded:: 2.0
+        attachments: List[:class:`Attachment`]
+            A list of attachments to keep in the message. If ``[]`` is passed
+            then all existing attachments are removed.
+
+            .. versionadded:: 2.1
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
@@ -735,6 +747,7 @@ class WebhookMessage(Message):
             embed=embed,
             file=file,
             files=files,
+            attachments=attachments,
             view=view,
             allowed_mentions=allowed_mentions,
         )
@@ -1535,6 +1548,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
+        attachments: List[Attachment] = MISSING,
         view: Optional[View] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> WebhookMessage:
@@ -1575,6 +1589,11 @@ class Webhook(BaseWebhook):
             Files will be appended to the message.
 
             .. versionadded:: 2.0
+        attachments: List[:class:`Attachment`]
+            A list of attachments to keep in the message. If ``[]`` is passed
+            then all existing attachments are removed.
+
+            .. versionadded:: 2.1
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed. The webhook must have state attached, similar to
@@ -1621,6 +1640,7 @@ class Webhook(BaseWebhook):
             content=content,
             file=file,
             files=files,
+            attachments=attachments,
             embed=embed,
             embeds=embeds,
             view=view,
