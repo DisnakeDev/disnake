@@ -238,7 +238,7 @@ class Option:
         self,
         name: str,
         description: str = None,
-        type: OptionType = None,
+        optiontype: OptionType = None,
         required: bool = False,
         choices: List[OptionChoice] = None,
         options: list = None,
@@ -251,12 +251,12 @@ class Option:
         Adds an option to the current list of options
         Parameters are the same as for :class:`Option`
         """
-        type = type or OptionType.string
+        optiontype = optiontype or OptionType.string
         self.options.append(
             Option(
                 name=name,
                 description=description,
-                type=type,
+                type=optiontype,
                 required=required,
                 choices=choices,
                 options=options,
