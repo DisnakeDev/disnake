@@ -36,28 +36,31 @@ if TYPE_CHECKING:
 
     from typing_extensions import ParamSpec
     from disnake.interactions import ApplicationCommandInteraction
-    from ._types import (CoroFunc)
-    ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
-    AnyMessageCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
-    AnyUserCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
+    from ._types import CoroFunc
 
-    P = ParamSpec('P')
+    ApplicationCommandInteractionT = TypeVar(
+        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
+    )
+    AnyMessageCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
+    AnyUserCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
+
+    P = ParamSpec("P")
 
 __all__ = (
-    'when_mentioned',
-    'when_mentioned_or',
-    'BotBase',
-    'Bot',
-    'InteractionBot',
-    'AutoShardedBot',
-    'AutoShardedInteractionBot',
+    "when_mentioned",
+    "when_mentioned_or",
+    "BotBase",
+    "Bot",
+    "InteractionBot",
+    "AutoShardedBot",
+    "AutoShardedInteractionBot",
 )
 
 MISSING: Any = disnake.utils.MISSING
 
-T = TypeVar('T')
-CFT = TypeVar('CFT', bound='CoroFunc')
-CXT = TypeVar('CXT', bound='Context')
+T = TypeVar("T")
+CFT = TypeVar("CFT", bound="CoroFunc")
+CXT = TypeVar("CXT", bound="Context")
 
 
 class Bot(BotBase, InteractionBotBase, disnake.Client):
@@ -161,6 +164,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
     """
+
     pass
 
 
@@ -168,6 +172,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
     """This is similar to :class:`.Bot` except that it is inherited from
     :class:`disnake.AutoShardedClient` instead.
     """
+
     pass
 
 
@@ -227,6 +232,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
     """
+
     pass
 
 
@@ -234,4 +240,5 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
     """This is similar to :class:`.InteractionBot` except that it is inherited from
     :class:`disnake.AutoShardedClient` instead.
     """
+
     pass

@@ -10,7 +10,7 @@ class MyContext(commands.Context):
         # depending on whether value is True or False
         # if its True, it'll add a green check mark
         # otherwise, it'll add a red cross mark
-        emoji = '\N{WHITE HEAVY CHECK MARK}' if value else '\N{CROSS MARK}'
+        emoji = "\N{WHITE HEAVY CHECK MARK}" if value else "\N{CROSS MARK}"
         try:
             # this will react to the command author's message
             await self.message.add_reaction(emoji)
@@ -29,11 +29,12 @@ class MyBot(commands.Bot):
         return await super().get_context(message, cls=cls)
 
 
-bot = MyBot(command_prefix='!')
+bot = MyBot(command_prefix="!")
+
 
 @bot.command()
 async def guess(ctx, number: int):
-    """ Guess a random number from 1 to 6. """
+    """Guess a random number from 1 to 6."""
     # explained in a previous example, this gives you
     # a random number from 1-6
     value = random.randint(1, 6)
@@ -41,6 +42,7 @@ async def guess(ctx, number: int):
     # green check mark if the guess was correct,
     # or a red cross mark if it wasn't
     await ctx.tick(number == value)
+
 
 # IMPORTANT: You shouldn't hard code your token
 # these are very important, and leaking them can

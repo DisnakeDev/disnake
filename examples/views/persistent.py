@@ -14,22 +14,26 @@ class PersistentView(disnake.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @disnake.ui.button(label='Green', style=disnake.ButtonStyle.green, custom_id='persistent_view:green')
+    @disnake.ui.button(
+        label="Green", style=disnake.ButtonStyle.green, custom_id="persistent_view:green"
+    )
     async def green(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        await interaction.response.send_message('This is green.', ephemeral=True)
+        await interaction.response.send_message("This is green.", ephemeral=True)
 
-    @disnake.ui.button(label='Red', style=disnake.ButtonStyle.red, custom_id='persistent_view:red')
+    @disnake.ui.button(label="Red", style=disnake.ButtonStyle.red, custom_id="persistent_view:red")
     async def red(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        await interaction.response.send_message('This is red.', ephemeral=True)
+        await interaction.response.send_message("This is red.", ephemeral=True)
 
-    @disnake.ui.button(label='Grey', style=disnake.ButtonStyle.grey, custom_id='persistent_view:grey')
+    @disnake.ui.button(
+        label="Grey", style=disnake.ButtonStyle.grey, custom_id="persistent_view:grey"
+    )
     async def grey(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        await interaction.response.send_message('This is grey.', ephemeral=True)
+        await interaction.response.send_message("This is grey.", ephemeral=True)
 
 
 class PersistentViewBot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or('$'))
+        super().__init__(command_prefix=commands.when_mentioned_or("$"))
         self.persistent_views_added = False
 
     async def on_ready(self):
@@ -42,8 +46,8 @@ class PersistentViewBot(commands.Bot):
             self.add_view(PersistentView())
             self.persistent_views_added = True
 
-        print(f'Logged in as {self.user} (ID: {self.user.id})')
-        print('------')
+        print(f"Logged in as {self.user} (ID: {self.user.id})")
+        print("------")
 
 
 bot = PersistentViewBot()
@@ -60,4 +64,4 @@ async def prepare(ctx: commands.Context):
     await ctx.send("What's your favourite colour?", view=PersistentView())
 
 
-bot.run('token')
+bot.run("token")

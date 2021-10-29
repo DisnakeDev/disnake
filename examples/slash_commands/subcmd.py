@@ -17,9 +17,11 @@ bot = commands.Bot("!")
 async def command(inter):
     print("This code is ran every time any subcommand is invoked")
 
+
 @command.sub_command()
 async def foo(inter, option: str):
     await inter.response.send_message(f"Received {option}")
+
 
 @command.sub_command()
 async def bar(inter, option: int):

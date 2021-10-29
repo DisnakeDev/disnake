@@ -182,7 +182,9 @@ class ParamInfo:
         raise TypeError(f"Type {discord_type} is not a valid Param type")
 
     def __repr__(self):
-        return f"<Param default={self.default!r} name={self.name!r} description={self.description!r}>"
+        return (
+            f"<Param default={self.default!r} name={self.name!r} description={self.description!r}>"
+        )
 
     async def get_default(self, inter: Interaction) -> Any:
         """Gets the default for an interaction"""
@@ -243,7 +245,9 @@ class ParamInfo:
         if isinstance(annotation, ParamInfo):
             default = "..." if annotation.default is ... else repr(annotation.default)
             r = f'Param({default}, description={annotation.description or "description"!r})'
-            raise TypeError(f'Param must be a parameter default, not an annotation: "option: type = {r}"')
+            raise TypeError(
+                f'Param must be a parameter default, not an annotation: "option: type = {r}"'
+            )
 
         # Get rid of Optionals
         if get_origin(annotation) is Union:
@@ -286,11 +290,16 @@ class ParamInfo:
                 conv = arg
             elif arg in CONVERTER_MAPPING:
                 # TODO: Define our own converters?
-                raise TypeError("Discord's api is not mature enough to handle member conversion with models")
+                raise TypeError(
+                    "Discord's api is not mature enough to handle member conversion with models"
+                )
             else:
                 raise TypeError(f"{arg!r} is not a valid List subscript for Param")
             self.converter = lambda inter, arg: list(map(conv, arg.split()))
-        elif isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)) or get_origin(annotation) is Literal:
+        elif (
+            isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta))
+            or get_origin(annotation) is Literal
+        ):
             self._parse_enum(annotation)
 
         elif get_origin(annotation) is Union:
@@ -391,7 +400,9 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     return [param.to_option() for param in params]
 
 
-async def resolve_param_kwargs(func: Callable, inter: Interaction, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+async def resolve_param_kwargs(
+    func: Callable, inter: Interaction, kwargs: Dict[str, Any]
+) -> Dict[str, Any]:
     """Resolves a call with kwargs and transforms into normal kwargs
 
     Depends on the fact that optionparams already contain all info.
@@ -490,7 +501,9 @@ def Param(
 param = Param
 
 
-def option_enum(choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice) -> Type[TChoice]:
+def option_enum(
+    choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
+) -> Type[TChoice]:
     if isinstance(choices, list):
         # invariance issue, please fix
         choices = cast(Dict[str, TChoice], {str(i): i for i in choices})

@@ -2,15 +2,18 @@
 
 import disnake
 
+
 class MyClient(disnake.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.role_message_id = 0 # ID of the message that can be reacted to to add/remove a role.
+        self.role_message_id = 0  # ID of the message that can be reacted to to add/remove a role.
         self.emoji_to_role = {
-            disnake.PartialEmoji(name='🔴'): 0, # ID of the role associated with unicode emoji '🔴'.
-            disnake.PartialEmoji(name='🟡'): 0, # ID of the role associated with unicode emoji '🟡'.
-            disnake.PartialEmoji(name='green', id=0): 0, # ID of the role associated with a partial emoji's ID.
+            disnake.PartialEmoji(name="🔴"): 0,  # ID of the role associated with unicode emoji '🔴'.
+            disnake.PartialEmoji(name="🟡"): 0,  # ID of the role associated with unicode emoji '🟡'.
+            disnake.PartialEmoji(
+                name="green", id=0
+            ): 0,  # ID of the role associated with a partial emoji's ID.
         }
 
     async def on_raw_reaction_add(self, payload: disnake.RawReactionActionEvent):
@@ -78,8 +81,9 @@ class MyClient(disnake.Client):
             # If we want to do something in case of errors we'd do it here.
             pass
 
+
 intents = disnake.Intents.default()
 intents.members = True
 
 client = MyClient(intents=intents)
-client.run('token')
+client.run("token")

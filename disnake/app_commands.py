@@ -28,7 +28,14 @@ import math
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
 
 from .abc import User
-from .enums import ApplicationCommandType, ChannelType, OptionType, try_enum, enum_if_int, try_enum_to_int
+from .enums import (
+    ApplicationCommandType,
+    ChannelType,
+    OptionType,
+    try_enum,
+    enum_if_int,
+    try_enum_to_int,
+)
 from .errors import InvalidArgument
 from .role import Role
 from .utils import _get_as_snowflake
@@ -67,6 +74,7 @@ def application_command_factory(data: Mapping[str, Any]) -> Any:
 
 ChoiceValue = Union[str, int, float]
 
+
 class OptionChoice:
     """
     Represents an option choice.
@@ -84,22 +92,17 @@ class OptionChoice:
         self.value: ChoiceValue = value
 
     def __repr__(self) -> str:
-        return f'<OptionChoice name={self.name!r} value={self.value!r}>'
+        return f"<OptionChoice name={self.name!r} value={self.value!r}>"
 
     def __eq__(self, other) -> bool:
-        return (
-            self.name == other.name and
-            self.value == other.value
-        )
+        return self.name == other.name and self.value == other.value
 
     def to_dict(self) -> Dict[str, ChoiceValue]:
-        return {
-            'name': self.name,
-            'value': self.value
-        }
+        return {"name": self.name, "value": self.value}
 
 
 Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
+
 
 class Option:
     """
@@ -132,16 +135,16 @@ class Option:
     """
 
     __slots__ = (
-        'name',
-        'description',
-        'type',
-        'required',
-        'choices',
-        'options',
-        'channel_types',
-        'autocomplete',
-        'min_value',
-        'max_value',
+        "name",
+        "description",
+        "type",
+        "required",
+        "choices",
+        "options",
+        "channel_types",
+        "autocomplete",
+        "min_value",
+        "max_value",
     )
 
     def __init__(
@@ -173,11 +176,8 @@ class Option:
         self.min_value: Optional[float] = min_value
         self.max_value: Optional[float] = max_value
 
-        if (
-            channel_types is not None and
-            not all(isinstance(t, ChannelType) for t in channel_types)
-        ):
-            raise InvalidArgument('channel_types must be instances of ChannelType')
+        if channel_types is not None and not all(isinstance(t, ChannelType) for t in channel_types):
+            raise InvalidArgument("channel_types must be instances of ChannelType")
 
         self.channel_types: List[ChannelType] = channel_types or []
 
@@ -189,7 +189,7 @@ class Option:
         elif isinstance(choices, Mapping):
             choices = [OptionChoice(name, value) for name, value in choices.items()]
         elif isinstance(choices, Iterable) and not isinstance(choices[0], OptionChoice):
-            choices = [OptionChoice(str(value), value) for value in choices] # type: ignore
+            choices = [OptionChoice(str(value), value) for value in choices]  # type: ignore
         else:
             choices = cast(List[OptionChoice], choices)
 
@@ -198,9 +198,9 @@ class Option:
 
     def __repr__(self) -> str:
         return (
-            f'<Option name={self.name!r} description={self.description!r}'
-            f' type={self.type!r} required={self.required!r} choices={self.choices!r}'
-            f' options={self.options!r} min_value={self.min_value!r} max_value={self.max_value!r}>'
+            f"<Option name={self.name!r} description={self.description!r}"
+            f" type={self.type!r} required={self.required!r} choices={self.choices!r}"
+            f" options={self.options!r} min_value={self.min_value!r} max_value={self.max_value!r}>"
         )
 
     def __eq__(self, other) -> bool:
@@ -219,12 +219,12 @@ class Option:
 
     @classmethod
     def from_dict(cls, payload: dict):
-        if 'options' in payload:
-            payload['options'] = [Option.from_dict(p) for p in payload['options']]
-        if 'choices' in payload:
-            payload['choices'] = [OptionChoice(**p) for p in payload['choices']]
-        if 'channel_types' in payload:
-            payload['channel_types'] = [try_enum(ChannelType, v) for v in payload['channel_types']]
+        if "options" in payload:
+            payload["options"] = [Option.from_dict(p) for p in payload["options"]]
+        if "choices" in payload:
+            payload["choices"] = [OptionChoice(**p) for p in payload["choices"]]
+        if "channel_types" in payload:
+            payload["channel_types"] = [try_enum(ChannelType, v) for v in payload["channel_types"]]
         return Option(**payload)
 
     def add_choice(self, name: str, value: Union[str, int]) -> None:
@@ -269,24 +269,24 @@ class Option:
 
     def to_dict(self) -> Dict[str, Any]:
         payload = {
-            'name': self.name,
-            'description': self.description,
-            'type': try_enum_to_int(self.type)
+            "name": self.name,
+            "description": self.description,
+            "type": try_enum_to_int(self.type),
         }
         if self.required:
-            payload['required'] = True
+            payload["required"] = True
         if self.autocomplete:
-            payload['autocomplete'] = True
+            payload["autocomplete"] = True
         if self.choices:
-            payload['choices'] = [c.to_dict() for c in self.choices]
+            payload["choices"] = [c.to_dict() for c in self.choices]
         if self.options:
-            payload['options'] = [o.to_dict() for o in self.options]
+            payload["options"] = [o.to_dict() for o in self.options]
         if self.channel_types:
-            payload['channel_types'] = [v.value for v in self.channel_types]
+            payload["channel_types"] = [v.value for v in self.channel_types]
         if self.min_value is not None:
-            payload['min_value'] = self.min_value
+            payload["min_value"] = self.min_value
         if self.max_value is not None:
-            payload['max_value'] = self.max_value
+            payload["max_value"] = self.max_value
         return payload
 
 
@@ -296,26 +296,22 @@ class ApplicationCommand(ABC):
     """
 
     def __init__(
-        self,
-        type: ApplicationCommandType,
-        name: str,
-        default_permission: bool = True,
-        **kwargs
+        self, type: ApplicationCommandType, name: str, default_permission: bool = True, **kwargs
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
         self.default_permission: bool = default_permission
 
-        self.id: Optional[int] = _get_as_snowflake(kwargs, 'id')
-        self.application_id: Optional[int] = _get_as_snowflake(kwargs, 'application_id')
-        self.guild_id: Optional[int] = _get_as_snowflake(kwargs, 'guild_id')
-        self.version: Optional[int] = _get_as_snowflake(kwargs, 'version')
+        self.id: Optional[int] = _get_as_snowflake(kwargs, "id")
+        self.application_id: Optional[int] = _get_as_snowflake(kwargs, "application_id")
+        self.guild_id: Optional[int] = _get_as_snowflake(kwargs, "guild_id")
+        self.version: Optional[int] = _get_as_snowflake(kwargs, "version")
 
         self._state: Optional[ConnectionState] = None
         self._always_synced: bool = False
 
     def __repr__(self) -> str:
-        return f'<ApplicationCommand type={self.type!r} name={self.name!r}>'
+        return f"<ApplicationCommand type={self.type!r} name={self.name!r}>"
 
     def __eq__(self, other) -> bool:
         return (
@@ -340,7 +336,7 @@ class UserCommand(ApplicationCommand):
             type=ApplicationCommandType.user,
             name=name,
             default_permission=default_permission,
-            **kwargs
+            **kwargs,
         )
 
     def __repr__(self) -> str:
@@ -358,7 +354,7 @@ class MessageCommand(ApplicationCommand):
             type=ApplicationCommandType.message,
             name=name,
             default_permission=default_permission,
-            **kwargs
+            **kwargs,
         )
 
     def __repr__(self) -> str:
@@ -392,28 +388,29 @@ class SlashCommand(ApplicationCommand):
         description: str,
         options: list = None,
         default_permission: bool = True,
-        **kwargs
+        **kwargs,
     ):
-        assert re.match(r"^[\w-]{1,32}$", name) is not None and name.islower(),\
-            f"Slash command name {name!r} should consist of these symbols: a-z, 0-9, -, _"
+        assert (
+            re.match(r"^[\w-]{1,32}$", name) is not None and name.islower()
+        ), f"Slash command name {name!r} should consist of these symbols: a-z, 0-9, -, _"
 
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
             default_permission=default_permission,
-            **kwargs
+            **kwargs,
         )
         self.description: str = description
         self.options: List[Option] = options or []
 
     def __repr__(self) -> str:
         return (
-            f'<SlashCommand name={self.name!r} description={self.description!r} '
-            f'default_permission={self.default_permission!r} options={self.options!r}>'
+            f"<SlashCommand name={self.name!r} description={self.description!r} "
+            f"default_permission={self.default_permission!r} options={self.options!r}>"
         )
 
     def __str__(self) -> str:
-        return f'<SlashCommand name={self.name!r}>'
+        return f"<SlashCommand name={self.name!r}>"
 
     def __eq__(self, other) -> bool:
         return (
@@ -426,8 +423,8 @@ class SlashCommand(ApplicationCommand):
     def from_dict(cls, payload: Dict[str, Any]):
         if payload.pop("type", 1) != ApplicationCommandType.chat_input.value:
             return None
-        if 'options' in payload:
-            payload['options'] = [Option.from_dict(p) for p in payload['options']]
+        if "options" in payload:
+            payload["options"] = [Option.from_dict(p) for p in payload["options"]]
         return SlashCommand(**payload)
 
     def add_option(
@@ -495,17 +492,11 @@ class ApplicationCommandPermissions:
 
     def __eq__(self, other):
         return (
-            self.id == other.id
-            and self.type == other.type
-            and self.permission == other.permission
+            self.id == other.id and self.type == other.type and self.permission == other.permission
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
-            "id": self.id,
-            "type": self.type,
-            "permission": self.permission
-        }
+        return {"id": self.id, "type": self.type, "permission": self.permission}
 
 
 class GuildApplicationCommandPermissions:
@@ -533,8 +524,7 @@ class GuildApplicationCommandPermissions:
         self.guild_id: int = int(data["guild_id"])
 
         self.permissions: List[ApplicationCommandPermissions] = [
-            ApplicationCommandPermissions(data=elem)
-            for elem in data["permissions"]
+            ApplicationCommandPermissions(data=elem) for elem in data["permissions"]
         ]
 
     def __repr__(self):
@@ -581,21 +571,15 @@ class GuildApplicationCommandPermissions:
                     target_type = 2
                 else:
                     raise ValueError(f"Permission target should be an instance of Role or abc.User")
-                data.append(
-                    {"id": obj.id, "type": target_type, "permission": value}
-                )
+                data.append({"id": obj.id, "type": target_type, "permission": value})
 
         if role_ids is not None:
             for role_id, value in role_ids.items():
-                data.append(
-                    {"id": role_id, "type": 1, "permission": value}
-                )
+                data.append({"id": role_id, "type": 1, "permission": value})
 
         if user_ids is not None:
             for user_id, value in user_ids.items():
-                data.append(
-                    {"id": user_id, "type": 2, "permission": value}
-                )
+                data.append({"id": user_id, "type": 2, "permission": value})
 
         res = await self._state.http.edit_application_command_permissions(
             self.application_id, self.guild_id, self.id, {"permissions": data}
@@ -692,7 +676,9 @@ class UnresolvedGuildApplicationCommandPermissions:
         self.user_ids: Optional[Mapping[int, bool]] = user_ids
         self.owner: Optional[bool] = owner
 
-    def resolve(self, *, command_id: int, owners: Iterable[int]) -> PartialGuildApplicationCommandPermissions:
+    def resolve(
+        self, *, command_id: int, owners: Iterable[int]
+    ) -> PartialGuildApplicationCommandPermissions:
         """
         Creates a new :class:`PartialGuildApplicationCommandPermissions` object,
         combining the previously supplied permission values with the provided
@@ -717,12 +703,12 @@ class UnresolvedGuildApplicationCommandPermissions:
         if self.owner is not None:
             owner_ids = dict.fromkeys(owners, self.owner)
             if not owner_ids:
-                raise ValueError('Cannot properly resolve permissions without owner IDs')
+                raise ValueError("Cannot properly resolve permissions without owner IDs")
 
             user_ids = self.user_ids or {}
             common_ids = owner_ids.keys() & user_ids.keys()
             if any(user_ids[id] != owner_ids[id] for id in common_ids):
-                print('[WARNING] Conflicting permissions for owner(s) provided in user_ids')
+                print("[WARNING] Conflicting permissions for owner(s) provided in user_ids")
 
             resolved_user_ids = {**user_ids, **owner_ids}
         else:
