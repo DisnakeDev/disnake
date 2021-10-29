@@ -59,10 +59,7 @@ CogT = TypeVar('CogT', bound='Cog')
 HookT = TypeVar('HookT', bound='Hook')
 ErrorT = TypeVar('ErrorT', bound='Error')
 
-if TYPE_CHECKING:
-    P = ParamSpec('P')
-else:
-    P = TypeVar('P')
+P = ParamSpec('P') if TYPE_CHECKING else TypeVar('P')
 
 
 def _get_overridden_method(method):
