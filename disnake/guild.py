@@ -228,6 +228,8 @@ class Guild(Hashable):
         - ``VIP_REGIONS``: Guild has VIP voice regions.
         - ``WELCOME_SCREEN_ENABLED``: Guild has enabled the welcome screen.
 
+    premium_progress_bar_enabled: :class:`bool`
+        Whether the server boost progress bar is enabled.
     premium_tier: :class:`int`
         The premium tier for this guild. Corresponds to "Nitro Server" in the official UI.
         The number goes from 0 to 3 inclusive.
@@ -261,6 +263,7 @@ class Guild(Hashable):
         "max_presences",
         "max_members",
         "max_video_channel_users",
+        "premium_progress_bar_enabled",
         "premium_tier",
         "premium_subscription_count",
         "preferred_locale",
@@ -491,6 +494,7 @@ class Guild(Hashable):
             guild, "public_updates_channel_id"
         )
         self.nsfw_level: NSFWLevel = try_enum(NSFWLevel, guild.get("nsfw_level", 0))
+        self.premium_progress_bar_enabled: bool = guild.get("premium_progress_bar_enabled", False)
 
         self._stage_instances: Dict[int, StageInstance] = {}
         for s in guild.get("stage_instances", []):
@@ -1433,6 +1437,7 @@ class Guild(Hashable):
         preferred_locale: str = MISSING,
         rules_channel: Optional[TextChannel] = MISSING,
         public_updates_channel: Optional[TextChannel] = MISSING,
+        premium_progress_bar_enabled: bool = MISSING,
     ) -> Guild:
         r"""|coro|
 
@@ -1513,6 +1518,8 @@ class Guild(Hashable):
             public updates channel.
         reason: Optional[:class:`str`]
             The reason for editing this guild. Shows up on the audit log.
+        premium_progress_bar_enabled: :class:`bool`
+            Whether the server boost progress bar is enabled.
 
         Raises
         -------
@@ -1645,6 +1652,9 @@ class Guild(Hashable):
                     )
 
             fields["features"] = features
+
+        if premium_progress_bar_enabled is not MISSING:
+            fields["premium_progress_bar_enabled"] = premium_progress_bar_enabled
 
         data = await http.edit_guild(self.id, reason=reason, **fields)
         return Guild(data=data, state=self._state)

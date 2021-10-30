@@ -146,6 +146,7 @@ class _AuditLogChange_Bool(TypedDict):
         "available",
         "archived",
         "locked",
+        "premium_progress_bar_enabled",
     ]
     new_value: bool
     old_value: bool
