@@ -139,6 +139,7 @@ class Guild(_BaseGuildPreview, _GuildOptional):
     rules_channel_id: Optional[Snowflake]
     vanity_url_code: Optional[str]
     banner: Optional[str]
+    premium_progress_bar_enabled: bool
     premium_tier: PremiumTier
     preferred_locale: str
     public_updates_channel_id: Optional[Snowflake]
