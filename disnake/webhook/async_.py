@@ -486,30 +486,25 @@ def handle_message_parameters(
     if embeds is not MISSING and embed is not MISSING:
         raise TypeError("Cannot mix embed and embeds keyword arguments.")
 
+    if file is not MISSING:
+        files = [file]
+
     payload = {}
+    if embed is not MISSING:
+        payload["embeds"] = [] if embed is None else [embed.to_dict()]
     if embeds is not MISSING:
         if len(embeds) > 10:
             raise InvalidArgument("embeds has a maximum of 10 elements.")
         payload["embeds"] = [e.to_dict() for e in embeds]
-
-    if embed is not MISSING:
-        if embed is None:
-            payload["embeds"] = []
-        else:
-            payload["embeds"] = [embed.to_dict()]
+        for embed in embeds:
+            if embed._files:
+                files = files or []
+                files += embed._files
 
     if content is not MISSING:
-        if content is not None:
-            payload["content"] = str(content)
-        else:
-            payload["content"] = None
-
+        payload["content"] = str(content) if content is not None else None
     if view is not MISSING:
-        if view is not None:
-            payload["components"] = view.to_components()
-        else:
-            payload["components"] = []
-
+        payload["components"] = view.to_components() if view is not None else []
     payload["tts"] = tts
     if avatar_url:
         payload["avatar_url"] = str(avatar_url)
@@ -529,8 +524,6 @@ def handle_message_parameters(
         payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
 
     multipart = []
-    if file is not MISSING:
-        files = [file]
 
     if files:
         multipart = to_multipart(payload, files)
