@@ -1437,6 +1437,7 @@ class Guild(Hashable):
         preferred_locale: str = MISSING,
         rules_channel: Optional[TextChannel] = MISSING,
         public_updates_channel: Optional[TextChannel] = MISSING,
+        premium_progress_bar_enabled: bool = MISSING,
     ) -> Guild:
         r"""|coro|
 
@@ -1517,6 +1518,8 @@ class Guild(Hashable):
             public updates channel.
         reason: Optional[:class:`str`]
             The reason for editing this guild. Shows up on the audit log.
+        premium_progress_bar_enabled: :class:`bool`
+            Whether the server boost progress bar is enabled.
 
         Raises
         -------
@@ -1649,6 +1652,9 @@ class Guild(Hashable):
                     )
 
             fields["features"] = features
+
+        if premium_progress_bar_enabled is not MISSING:
+            fields["premium_progress_bar_enabled"] = premium_progress_bar_enabled
 
         data = await http.edit_guild(self.id, reason=reason, **fields)
         return Guild(data=data, state=self._state)
