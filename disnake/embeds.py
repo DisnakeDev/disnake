@@ -437,11 +437,11 @@ class Embed:
             The file to use as the image.
         """
         if file:
-            self._files.append(file)
-            url = url or f"attachment://{file.filename}"
-            if not url:
+            if url:
+                raise TypeError("Cannot use both a url and a file at the same time")
+            if file.filename is None:
                 raise TypeError("File doesn't have a filename")
-            self._image = {"url": str(url)}
+            self._image = {"url": f"attachment://{file.filename}"}
         elif url is EmptyEmbed:
             try:
                 del self._image
@@ -486,11 +486,11 @@ class Embed:
             The file to use as the image.
         """
         if file:
-            self._files.append(file)
-            url = url or f"attachment://{file.filename}"
-            if not url:
+            if url:
+                raise TypeError("Cannot use both a url and a file at the same time")
+            if file.filename is None:
                 raise TypeError("File doesn't have a filename")
-            self._thumbnail = {"url": str(url)}
+            self._image = {"url": f"attachment://{file.filename}"}
         elif url is EmptyEmbed:
             try:
                 del self._thumbnail
