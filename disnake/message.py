@@ -149,7 +149,7 @@ async def _edit_handler(
             payload["content"] = str(content)
         else:
             payload["content"] = None
-    
+
     if file is not MISSING:
         files = [file]
 

@@ -442,6 +442,7 @@ class Embed:
             if file.filename is None:
                 raise TypeError("File doesn't have a filename")
             self._image = {"url": f"attachment://{file.filename}"}
+            self._files.append(file)
         elif url is EmptyEmbed:
             try:
                 del self._image
@@ -490,7 +491,8 @@ class Embed:
                 raise TypeError("Cannot use both a url and a file at the same time")
             if file.filename is None:
                 raise TypeError("File doesn't have a filename")
-            self._image = {"url": f"attachment://{file.filename}"}
+            self._thumbnail = {"url": f"attachment://{file.filename}"}
+            self._files.append(file)
         elif url is EmptyEmbed:
             try:
                 del self._thumbnail
