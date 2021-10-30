@@ -43,16 +43,14 @@ async def defaults(
 @bot.slash_command()
 async def names(
     inter: disnake.ApplicationCommandInteraction,
-    class_: str = Param(name="class", description="Your class")
+    class_: str = Param(name="class", description="Your class"),
 ):
     ...
 
 
 # Commands may be limited only to guilds with a special interaction annotation
 @bot.slash_command()
-async def guild_command(
-    inter: disnake.GuildCommandInteraction
-):
+async def guild_command(inter: disnake.GuildCommandInteraction):
     ...
 
 
@@ -64,7 +62,9 @@ async def guild_command(
 async def converters(
     inter: disnake.ApplicationCommandInteraction,
     emoji: disnake.Emoji = Param(description="An emoji"),
-    content: str = Param(description="Clean content", converter=lambda inter, arg: arg.replace("@", r"\@")),
+    content: str = Param(
+        description="Clean content", converter=lambda inter, arg: arg.replace("@", r"\@")
+    ),
 ):
     ...
 
@@ -72,27 +72,30 @@ async def converters(
 # Converters may also dictate the type of the option
 # (In case no annotation is present the code falls back to the normal annotation)
 def get_username(inter, user: disnake.User) -> str:
-    return user.name + '#' + user.discriminator  # str(user) is better here but shhhh
+    return user.name + "#" + user.discriminator  # str(user) is better here but shhhh
 
 
 @bot.slash_command()
 async def advanced_converters(
     inter: disnake.ApplicationCommandInteraction,
-    username: str = Param(name="user", description="A user", converter=get_username)
+    username: str = Param(name="user", description="A user", converter=get_username),
 ):
     ...
 
 
 # Lists are kind of supported too, it simply splits all arguments by space
-from typing import List  # Do not import at the module level not at the top of the file, this is done on purpose!!!
+from typing import (
+    List,
+)  # Do not import at the module level not at the top of the file, this is done on purpose!!!
 
 
 @bot.slash_command()
 async def list_converters(
     inter: disnake.ApplicationCommandInteraction,
-    numbers: List[int] = Param(description="A list of numbers")
+    numbers: List[int] = Param(description="A list of numbers"),
 ):
     ...
+
 
 # Enumeration (choices) is allowed using enum.Enum, commands.option_enum or Literal
 # The user will see the enum member name or the dict key and the bot will receive the value.
@@ -101,10 +104,10 @@ from typing import Literal
 
 
 class Color(int, Enum):
-    red = 0xe74c3c
-    green = 0x2ecc71
-    blue = 0x3498db
-    yellow = 0xfee75c
+    red = 0xE74C3C
+    green = 0x2ECC71
+    blue = 0x3498DB
+    yellow = 0xFEE75C
 
 
 Gender = commands.option_enum(["Male", "Female", "Other", "Prefer Not To Say"])
@@ -132,8 +135,10 @@ async def constraint(
     inter: disnake.ApplicationCommandInteraction,
     text: disnake.TextChannel = Param(description="A text channel"),
     voice: disnake.VoiceChannel = Param(description="A voice channel"),
-    fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Param(description="A fancy new channel"),
-    any: disnake.abc.GuildChannel = Param(description="Any channel you can imagine")
+    fancy: Union[disnake.NewsChannel, disnake.StoreChannel] = Param(
+        description="A fancy new channel"
+    ),
+    any: disnake.abc.GuildChannel = Param(description="Any channel you can imagine"),
 ):
     ...
 
@@ -146,14 +151,16 @@ async def constraint(
 LANGUAGES = ["Python", "JavaScript", "TypeScript", "Java", "Rust", "Lisp", "Elixir"]
 
 
-async def autocomplete_langs(inter: disnake.ApplicationCommandInteraction, string: str) -> List[str]:
+async def autocomplete_langs(
+    inter: disnake.ApplicationCommandInteraction, string: str
+) -> List[str]:
     return list(filter(lambda lang: string in lang.lower(), LANGUAGES))
 
 
 @bot.slash_command()
 async def autocomplete(
     inter: disnake.ApplicationCommandInteraction,
-    language: str = Param(description="Your favorite language", autocomplete=autocomplete_langs)
+    language: str = Param(description="Your favorite language", autocomplete=autocomplete_langs),
 ):
     ...
 

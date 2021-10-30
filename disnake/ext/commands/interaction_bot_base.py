@@ -72,21 +72,22 @@ if TYPE_CHECKING:
         Check,
         CoroFunc,
     )
-    ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
-    AnyMessageCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
-    AnyUserCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
 
-    P = ParamSpec('P')
+    ApplicationCommandInteractionT = TypeVar(
+        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
+    )
+    AnyMessageCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
+    AnyUserCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
 
-__all__ = (
-    'InteractionBotBase',
-)
+    P = ParamSpec("P")
+
+__all__ = ("InteractionBotBase",)
 
 MISSING: Any = disnake.utils.MISSING
 
-T = TypeVar('T')
-CFT = TypeVar('CFT', bound='CoroFunc')
-CXT = TypeVar('CXT', bound='Context')
+T = TypeVar("T")
+CFT = TypeVar("CFT", bound="CoroFunc")
+CXT = TypeVar("CXT", bound="Context")
 
 
 def _app_commands_diff(
@@ -97,53 +98,53 @@ def _app_commands_diff(
     old_cmds = {cmd.name: cmd for cmd in old_commands}
 
     diff = {
-        'no_changes': [],
-        'upsert': [],
-        'edit': [],
-        'delete': [],
-        'change_type': [],
+        "no_changes": [],
+        "upsert": [],
+        "edit": [],
+        "delete": [],
+        "change_type": [],
     }
 
     for name, new_cmd in new_cmds.items():
         old_cmd = old_cmds.get(name)
         if old_cmd is None:
-            diff['upsert'].append(new_cmd)
+            diff["upsert"].append(new_cmd)
         elif old_cmd.type != new_cmd.type:
-            diff['change_type'].append(new_cmd)
+            diff["change_type"].append(new_cmd)
         elif new_cmd._always_synced:
-            diff['no_changes'].append(old_cmd)
+            diff["no_changes"].append(old_cmd)
             continue
         elif new_cmd != old_cmd:
-            diff['edit'].append(new_cmd)
+            diff["edit"].append(new_cmd)
         else:
-            diff['no_changes'].append(new_cmd)
+            diff["no_changes"].append(new_cmd)
 
     for name, old_cmd in old_cmds.items():
         if name not in new_cmds:
-            diff['delete'].append(old_cmd)
+            diff["delete"].append(old_cmd)
 
     return diff
 
 
-def _show_diff(diff: Dict[str, List[ApplicationCommand]], line_prefix: str = '') -> None:
-    to_upsert = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['upsert']) or '-'
-    to_edit = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['edit']) or '-'
-    to_delete = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['delete']) or '-'
-    change_type = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['change_type']) or '-'
-    no_changes = f',\n{line_prefix}    '.join(str(cmd) for cmd in diff['no_changes']) or '-'
+def _show_diff(diff: Dict[str, List[ApplicationCommand]], line_prefix: str = "") -> None:
+    to_upsert = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["upsert"]) or "-"
+    to_edit = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["edit"]) or "-"
+    to_delete = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["delete"]) or "-"
+    change_type = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["change_type"]) or "-"
+    no_changes = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["no_changes"]) or "-"
     print(
-        f'{line_prefix}To upsert:',
-        f'    {to_upsert}',
-        f'To edit:',
-        f'    {to_edit}',
-        f'To delete:',
-        f'    {to_delete}',
-        f'Type migration:',
-        f'    {change_type}',
-        f'No changes:',
-        f'    {no_changes}',
-        sep=f'\n{line_prefix}',
-        end='\n\n'
+        f"{line_prefix}To upsert:",
+        f"    {to_upsert}",
+        f"To edit:",
+        f"    {to_edit}",
+        f"To delete:",
+        f"    {to_delete}",
+        f"Type migration:",
+        f"    {change_type}",
+        f"No changes:",
+        f"    {no_changes}",
+        sep=f"\n{line_prefix}",
+        end="\n\n",
     )
 
 
@@ -230,7 +231,7 @@ class InteractionBotBase(CommonBotBase):
         """
 
         if not isinstance(slash_command, InvokableSlashCommand):
-            raise TypeError('The slash_command passed must be an instance of InvokableSlashCommand')
+            raise TypeError("The slash_command passed must be an instance of InvokableSlashCommand")
 
         if slash_command.name in self.all_slash_commands:
             raise CommandRegistrationError(slash_command.name)
@@ -257,7 +258,7 @@ class InteractionBotBase(CommonBotBase):
         """
 
         if not isinstance(user_command, InvokableUserCommand):
-            raise TypeError('The user_command passed must be an instance of InvokableUserCommand')
+            raise TypeError("The user_command passed must be an instance of InvokableUserCommand")
 
         if user_command.name in self.all_user_commands:
             raise CommandRegistrationError(user_command.name)
@@ -284,7 +285,9 @@ class InteractionBotBase(CommonBotBase):
         """
 
         if not isinstance(message_command, InvokableMessageCommand):
-            raise TypeError('The message_command passed must be an instance of InvokableMessageCommand')
+            raise TypeError(
+                "The message_command passed must be an instance of InvokableMessageCommand"
+            )
 
         if message_command.name in self.all_message_commands:
             raise CommandRegistrationError(message_command.name)
@@ -409,15 +412,15 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
-        **kwargs
+        **kwargs,
     ) -> Callable[
         [
             Union[
                 Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ],
-        InvokableSlashCommand
+        InvokableSlashCommand,
     ]:
         """
         A shortcut decorator that invokes :func:`.slash_command` and adds it to
@@ -451,10 +454,11 @@ class InteractionBotBase(CommonBotBase):
         Callable[..., :class:`InvokableSlashCommand`]
             A decorator that converts the provided method into a InvokableSlashCommand, adds it to the bot, then returns it.
         """
+
         def decorator(
             func: Union[
                 Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ) -> InvokableSlashCommand:
             result = slash_command(
@@ -465,10 +469,11 @@ class InteractionBotBase(CommonBotBase):
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
-                **kwargs
+                **kwargs,
             )(func)
             self.add_slash_command(result)
             return result
+
         return decorator
 
     def user_command(
@@ -478,15 +483,15 @@ class InteractionBotBase(CommonBotBase):
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
-        **kwargs
+        **kwargs,
     ) -> Callable[
         [
             Union[
                 Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ],
-        InvokableUserCommand
+        InvokableUserCommand,
     ]:
         """
         A shortcut decorator that invokes :func:`.user_command` and adds it to
@@ -509,15 +514,23 @@ class InteractionBotBase(CommonBotBase):
         Callable[..., :class:`InvokableUserCommand`]
             A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
+
         def decorator(
             func: Union[
                 Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ) -> InvokableUserCommand:
-            result = user_command(name=name, default_permission=default_permission, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
+            result = user_command(
+                name=name,
+                default_permission=default_permission,
+                guild_ids=guild_ids,
+                auto_sync=auto_sync,
+                **kwargs,
+            )(func)
             self.add_user_command(result)
             return result
+
         return decorator
 
     def message_command(
@@ -527,15 +540,15 @@ class InteractionBotBase(CommonBotBase):
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
-        **kwargs
+        **kwargs,
     ) -> Callable[
         [
             Union[
                 Callable[Concatenate[Cog, AnyMessageCommandInter, P], Coroutine],
-                Callable[Concatenate[AnyMessageCommandInter, P], Coroutine]
+                Callable[Concatenate[AnyMessageCommandInter, P], Coroutine],
             ]
         ],
-        InvokableMessageCommand
+        InvokableMessageCommand,
     ]:
         """
         A shortcut decorator that invokes :func:`.message_command` and adds it to
@@ -558,15 +571,23 @@ class InteractionBotBase(CommonBotBase):
         Callable[..., :class:`InvokableUserCommand`]
             A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
+
         def decorator(
             func: Union[
                 Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ) -> InvokableMessageCommand:
-            result = message_command(name=name, default_permission=default_permission, guild_ids=guild_ids, auto_sync=auto_sync, **kwargs)(func)
+            result = message_command(
+                name=name,
+                default_permission=default_permission,
+                guild_ids=guild_ids,
+                auto_sync=auto_sync,
+                **kwargs,
+            )(func)
             self.add_message_command(result)
             return result
+
         return decorator
 
     # command synchronisation
@@ -606,7 +627,7 @@ class InteractionBotBase(CommonBotBase):
 
         try:
             commands = await self.fetch_global_commands()
-            self._connection._global_application_commands = { # type: ignore
+            self._connection._global_application_commands = {  # type: ignore
                 command.id: command for command in commands
             }
         except Exception:
@@ -615,7 +636,7 @@ class InteractionBotBase(CommonBotBase):
             try:
                 commands = await self.fetch_guild_commands(guild_id)
                 if commands:
-                    self._connection._guild_application_commands[guild_id] = { # type: ignore
+                    self._connection._guild_application_commands[guild_id] = {  # type: ignore
                         command.id: command for command in commands
                     }
             except Exception:
@@ -635,30 +656,37 @@ class InteractionBotBase(CommonBotBase):
             return
 
         # Update global commands first
-        diff = _app_commands_diff(global_cmds, self._connection._global_application_commands.values())
-        update_required = bool(diff['upsert']) or bool(diff['edit']) or bool(diff['change_type']) or bool(diff['delete'])
+        diff = _app_commands_diff(
+            global_cmds, self._connection._global_application_commands.values()
+        )
+        update_required = (
+            bool(diff["upsert"])
+            or bool(diff["edit"])
+            or bool(diff["change_type"])
+            or bool(diff["delete"])
+        )
 
         if self._sync_commands_debug:
             # Show the difference
             print(
-                'GLOBAL COMMANDS\n===============',
-                '| NOTE: global commands can take up to 1 hour to show up after registration.',
-                '|',
-                f'| Update is required: {update_required}',
-                sep='\n'
+                "GLOBAL COMMANDS\n===============",
+                "| NOTE: global commands can take up to 1 hour to show up after registration.",
+                "|",
+                f"| Update is required: {update_required}",
+                sep="\n",
             )
-            _show_diff(diff, '| ')
+            _show_diff(diff, "| ")
 
         if update_required:
             # Notice that we don't do any API requests if there're no changes.
             try:
-                to_send = diff['no_changes'] + diff['edit']
-                if bool(diff['change_type']):
+                to_send = diff["no_changes"] + diff["edit"]
+                if bool(diff["change_type"]):
                     # We can't just "edit" the command type, so we bulk delete the commands with old type first.
                     await self.bulk_overwrite_global_commands(to_send)
                 # Finally, we make an API call that applies all changes from the code.
-                to_send.extend(diff['upsert'])
-                to_send.extend(diff['change_type'])
+                to_send.extend(diff["upsert"])
+                to_send.extend(diff["change_type"])
                 await self.bulk_overwrite_global_commands(to_send)
             except Exception as e:
                 print(f"[WARNING] Failed to overwrite global commands due to {e}")
@@ -668,29 +696,36 @@ class InteractionBotBase(CommonBotBase):
         for guild_id, cmds in guild_cmds.items():
             current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
             diff = _app_commands_diff(cmds, current_guild_cmds.values())
-            update_required = bool(diff['upsert']) or bool(diff['edit']) or bool(diff['change_type']) or bool(diff['delete'])
+            update_required = (
+                bool(diff["upsert"])
+                or bool(diff["edit"])
+                or bool(diff["change_type"])
+                or bool(diff["delete"])
+            )
             # Show diff
             if self._sync_commands_debug:
                 print(
                     f'COMMANDS IN {guild_id}\n============{"=" * 18}',
-                    f'| Update is required: {update_required}',
-                    sep='\n'
+                    f"| Update is required: {update_required}",
+                    sep="\n",
                 )
-                _show_diff(diff, '| ')
+                _show_diff(diff, "| ")
             # Do API requests and cache
             if update_required:
                 try:
-                    to_send = diff['no_changes'] + diff['edit']
-                    if bool(diff['change_type']):
+                    to_send = diff["no_changes"] + diff["edit"]
+                    if bool(diff["change_type"]):
                         await self.bulk_overwrite_guild_commands(guild_id, to_send)
-                    to_send.extend(diff['upsert'])
-                    to_send.extend(diff['change_type'])
+                    to_send.extend(diff["upsert"])
+                    to_send.extend(diff["change_type"])
                     await self.bulk_overwrite_guild_commands(guild_id, to_send)
                 except Exception as e:
-                    print(f"[WARNING] Failed to overwrite commands in <Guild id={guild_id}> due to {e}")
+                    print(
+                        f"[WARNING] Failed to overwrite commands in <Guild id={guild_id}> due to {e}"
+                    )
         # Last debug message
         if self._sync_commands_debug:
-            print('DEBUG: Command synchronization task has been finished', end='\n\n')
+            print("DEBUG: Command synchronization task has been finished", end="\n\n")
 
     async def _cache_application_command_permissions(self) -> None:
         # This method is usually called once per bot start
@@ -729,7 +764,9 @@ class InteractionBotBase(CommonBotBase):
         if not self._sync_permissions or self._is_closed or self.loop.is_closed():
             return
 
-        guilds_to_compare: Dict[int, List[PartialGuildApplicationCommandPermissions]] = {} # {guild_id: [partial_perms, ...], ...}
+        guilds_to_compare: Dict[
+            int, List[PartialGuildApplicationCommandPermissions]
+        ] = {}  # {guild_id: [partial_perms, ...], ...}
 
         for cmd_wrapper in self.application_commands:
             if not cmd_wrapper.auto_sync:
@@ -742,7 +779,9 @@ class InteractionBotBase(CommonBotBase):
                 if guild_ids_for_sync is None:
                     cmd = self.get_global_command_named(cmd_wrapper.name, cmd_wrapper.body.type)
                 else:
-                    cmd = self.get_guild_command_named(guild_id, cmd_wrapper.name, cmd_wrapper.body.type)
+                    cmd = self.get_guild_command_named(
+                        guild_id, cmd_wrapper.name, cmd_wrapper.body.type
+                    )
                 if cmd is None:
                     continue
                 # If we got here, we know the ID of the application command
@@ -750,8 +789,8 @@ class InteractionBotBase(CommonBotBase):
                 if not self.owner_id and not self.owner_ids:
                     await self._fill_owners()
                 resolved_perms = perms.resolve(
-                    command_id=cmd.id, # type: ignore
-                    owners=[self.owner_id] if self.owner_id else self.owner_ids
+                    command_id=cmd.id,  # type: ignore
+                    owners=[self.owner_id] if self.owner_id else self.owner_ids,
                 )
 
                 if guild_id not in guilds_to_compare:
@@ -762,13 +801,10 @@ class InteractionBotBase(CommonBotBase):
         # we can compare them to the cached permissions
         for guild_id, new_array in guilds_to_compare.items():
             old_perms = self._connection._application_command_permissions.get(guild_id, {})
-            if (
-                len(new_array) == len(old_perms)
-                and all(
-                    new_cmd_perms.id in old_perms
-                    and old_perms[new_cmd_perms.id].permissions == new_cmd_perms.permissions
-                    for new_cmd_perms in new_array
-                )
+            if len(new_array) == len(old_perms) and all(
+                new_cmd_perms.id in old_perms
+                and old_perms[new_cmd_perms.id].permissions == new_cmd_perms.permissions
+                for new_cmd_perms in new_array
             ):
                 if self._sync_commands_debug:
                     print(f"DEBUG: Command permissions in <Guild id={guild_id}>: no changes")
@@ -777,7 +813,9 @@ class InteractionBotBase(CommonBotBase):
             try:
                 await self.bulk_edit_command_permissions(guild_id, new_array)
             except Exception as err:
-                print(f"[WARNING] Failed to overwrite permissions in <Guild id={guild_id}> due to {err}")
+                print(
+                    f"[WARNING] Failed to overwrite permissions in <Guild id={guild_id}> due to {err}"
+                )
             finally:
                 if self._sync_commands_debug:
                     print(f"DEBUG: Command permissions in <Guild id={guild_id}>: edited")
@@ -798,7 +836,13 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(self, disnake.Client):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
 
-        if not self._sync_commands or self._sync_queued or not self.is_ready() or self._is_closed or self.loop.is_closed():
+        if (
+            not self._sync_commands
+            or self._sync_queued
+            or not self.is_ready()
+            or self._is_closed
+            or self.loop.is_closed()
+        ):
             return
         # We don't do this task on login or in parallel with a similar task
         # Wait a little bit, maybe other cogs are loading
@@ -813,27 +857,21 @@ class InteractionBotBase(CommonBotBase):
             raise NotImplementedError(f"Command sync is only possible in disnake.Client subclasses")
 
         self.loop.create_task(
-            self._prepare_application_commands(),
-            name='disnake: app_command_preparation'
+            self._prepare_application_commands(), name="disnake: app_command_preparation"
         )
 
     def _schedule_delayed_command_sync(self) -> None:
         if not isinstance(self, disnake.Client):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
 
-        self.loop.create_task(
-            self._delayed_command_sync(),
-            name='disnake: delayed_command_sync'
-        )
+        self.loop.create_task(self._delayed_command_sync(), name="disnake: delayed_command_sync")
 
     # Error handlers
 
     async def on_slash_command_error(
-        self,
-        interaction: ApplicationCommandInteraction,
-        exception: errors.CommandError
+        self, interaction: ApplicationCommandInteraction, exception: errors.CommandError
     ) -> None:
-        if self.extra_events.get('on_slash_command_error', None):
+        if self.extra_events.get("on_slash_command_error", None):
             return
 
         command = interaction.application_command
@@ -844,15 +882,15 @@ class InteractionBotBase(CommonBotBase):
         if cog and cog.has_slash_error_handler():
             return
 
-        print(f'Ignoring exception in slash command {command.name!r}:', file=sys.stderr)
-        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+        print(f"Ignoring exception in slash command {command.name!r}:", file=sys.stderr)
+        traceback.print_exception(
+            type(exception), exception, exception.__traceback__, file=sys.stderr
+        )
 
     async def on_user_command_error(
-        self,
-        interaction: ApplicationCommandInteraction,
-        exception: errors.CommandError
+        self, interaction: ApplicationCommandInteraction, exception: errors.CommandError
     ) -> None:
-        if self.extra_events.get('on_user_command_error', None):
+        if self.extra_events.get("on_user_command_error", None):
             return
         command = interaction.application_command
         if command and command.has_error_handler():
@@ -860,15 +898,15 @@ class InteractionBotBase(CommonBotBase):
         cog = command.cog
         if cog and cog.has_user_error_handler():
             return
-        print(f'Ignoring exception in user command {command.name!r}:', file=sys.stderr)
-        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+        print(f"Ignoring exception in user command {command.name!r}:", file=sys.stderr)
+        traceback.print_exception(
+            type(exception), exception, exception.__traceback__, file=sys.stderr
+        )
 
     async def on_message_command_error(
-        self,
-        interaction: ApplicationCommandInteraction,
-        exception: errors.CommandError
+        self, interaction: ApplicationCommandInteraction, exception: errors.CommandError
     ) -> None:
-        if self.extra_events.get('on_message_command_error', None):
+        if self.extra_events.get("on_message_command_error", None):
             return
         command = interaction.application_command
         if command and command.has_error_handler():
@@ -876,8 +914,10 @@ class InteractionBotBase(CommonBotBase):
         cog = command.cog
         if cog and cog.has_message_error_handler():
             return
-        print(f'Ignoring exception in message command {command.name!r}:', file=sys.stderr)
-        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+        print(f"Ignoring exception in message command {command.name!r}:", file=sys.stderr)
+        traceback.print_exception(
+            type(exception), exception, exception.__traceback__, file=sys.stderr
+        )
 
     # global check registration
 
@@ -1026,7 +1066,7 @@ class InteractionBotBase(CommonBotBase):
         message_commands: bool = False,
     ) -> Callable[
         [Callable[[ApplicationCommandInteraction], Any]],
-        Callable[[ApplicationCommandInteraction], Any]
+        Callable[[ApplicationCommandInteraction], Any],
     ]:
         r"""A decorator that adds a global check to the bot.
 
@@ -1075,20 +1115,18 @@ class InteractionBotBase(CommonBotBase):
         ) -> Callable[[ApplicationCommandInteraction], Any]:
             # T was used instead of Check to ensure the type matches on return
             self.add_app_command_check(
-                func, # type: ignore
+                func,  # type: ignore
                 call_once=call_once,
                 slash_commands=slash_commands,
                 user_commands=user_commands,
-                message_commands=message_commands
+                message_commands=message_commands,
             )
             return func
+
         return decorator
 
     async def application_command_can_run(
-        self,
-        inter: ApplicationCommandInteraction,
-        *,
-        call_once: bool = False
+        self, inter: ApplicationCommandInteraction, *, call_once: bool = False
     ) -> bool:
 
         if inter.data.type is ApplicationCommandType.chat_input:
@@ -1113,7 +1151,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`.before_invoke` but for slash commands."""
 
         if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The pre-invoke hook must be a coroutine.')
+            raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_slash_command_invoke = coro
         return coro
@@ -1122,7 +1160,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`.after_invoke` but for slash commands."""
 
         if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The post-invoke hook must be a coroutine.')
+            raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_slash_command_invoke = coro
         return coro
@@ -1131,7 +1169,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`.before_invoke` but for user commands."""
 
         if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The pre-invoke hook must be a coroutine.')
+            raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_user_command_invoke = coro
         return coro
@@ -1140,7 +1178,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`.after_invoke` but for user commands."""
 
         if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The post-invoke hook must be a coroutine.')
+            raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_user_command_invoke = coro
         return coro
@@ -1149,7 +1187,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`.before_invoke` but for message commands."""
 
         if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The pre-invoke hook must be a coroutine.')
+            raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_message_command_invoke = coro
         return coro
@@ -1158,14 +1196,16 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`.after_invoke` but for message commands."""
 
         if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The post-invoke hook must be a coroutine.')
+            raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_message_command_invoke = coro
         return coro
 
     # command processing
 
-    async def process_app_command_autocompletion(self, inter: ApplicationCommandInteraction) -> None:
+    async def process_app_command_autocompletion(
+        self, inter: ApplicationCommandInteraction
+    ) -> None:
         """|coro|
 
         This function processes the application command autocompletions.
@@ -1185,11 +1225,13 @@ class InteractionBotBase(CommonBotBase):
         if slash_command is None:
             return
 
-        inter.bot = self # type: ignore
+        inter.bot = self  # type: ignore
         if slash_command.guild_ids is None or inter.guild_id in slash_command.guild_ids:
             await slash_command._call_relevant_autocompleter(inter)
 
-    async def process_application_commands(self, interaction: ApplicationCommandInteraction) -> None:
+    async def process_application_commands(
+        self, interaction: ApplicationCommandInteraction
+    ) -> None:
         """|coro|
 
         This function processes the application commands that have been registered
@@ -1205,7 +1247,7 @@ class InteractionBotBase(CommonBotBase):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
-        interaction.bot = self # type: ignore
+        interaction.bot = self  # type: ignore
         command_type = interaction.data.type
         command_name = interaction.data.name
         app_command = None
@@ -1213,24 +1255,24 @@ class InteractionBotBase(CommonBotBase):
 
         if command_type is ApplicationCommandType.chat_input:
             app_command = self.all_slash_commands.get(command_name)
-            event_name = 'slash_command'
+            event_name = "slash_command"
 
         elif command_type is ApplicationCommandType.user:
             app_command = self.all_user_commands.get(command_name)
-            event_name = 'user_command'
+            event_name = "user_command"
 
         elif command_type is ApplicationCommandType.message:
             app_command = self.all_message_commands.get(command_name)
-            event_name = 'message_command'
+            event_name = "message_command"
 
         if event_name is None or app_command is None:
             # If we got here, the command being invoked is either unknown or has an unknonw type.
             # This usually happens if the auto sync is disabled, so let's just ignore this.
             return
 
-        expected_command = self.get_global_command(interaction.data.id) # type: ignore
+        expected_command = self.get_global_command(interaction.data.id)  # type: ignore
         if expected_command is None:
-            expected_command = self.get_guild_command(interaction.guild_id, interaction.data.id) # type: ignore
+            expected_command = self.get_guild_command(interaction.guild_id, interaction.data.id)  # type: ignore
 
         if expected_command is None and self._sync_commands:
             # This usually comes from the blind spots of the sync algorithm.
@@ -1238,12 +1280,12 @@ class InteractionBotBase(CommonBotBase):
             # In this case, the blind spot is the interaction guild, let's fix it:
             try:
                 await interaction.response.send_message(
-                    'This is a deprecated local command, which is now deleted.', ephemeral=True
+                    "This is a deprecated local command, which is now deleted.", ephemeral=True
                 )
             except Exception:
                 pass
             try:
-                await self.bulk_overwrite_guild_commands(interaction.guild_id, []) # type: ignore
+                await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # type: ignore
             except Exception:
                 pass
             return
@@ -1252,9 +1294,9 @@ class InteractionBotBase(CommonBotBase):
         try:
             if await self.application_command_can_run(interaction, call_once=True):
                 await app_command.invoke(interaction)
-                self.dispatch(f'{event_name}_completion', interaction)
+                self.dispatch(f"{event_name}_completion", interaction)
             else:
-                raise errors.CheckFailure('The global check_once functions failed.')
+                raise errors.CheckFailure("The global check_once functions failed.")
         except errors.CommandError as exc:
             await app_command.dispatch_error(interaction, exc)
 

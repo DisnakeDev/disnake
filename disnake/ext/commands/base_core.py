@@ -22,16 +22,7 @@
 
 from __future__ import annotations
 from abc import ABC
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Mapping,
-    Optional,
-    TypeVar,
-    TYPE_CHECKING
-)
+from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, TYPE_CHECKING
 import asyncio
 import datetime
 import functools
@@ -50,23 +41,23 @@ if TYPE_CHECKING:
     from .cog import Cog
 
 
-__all__ = ('InvokableApplicationCommand', 'guild_permissions')
+__all__ = ("InvokableApplicationCommand", "guild_permissions")
 
 
-T = TypeVar('T')
-AppCommandT = TypeVar('AppCommandT', bound='InvokableApplicationCommand')
-CogT = TypeVar('CogT', bound='Cog')
-HookT = TypeVar('HookT', bound='Hook')
-ErrorT = TypeVar('ErrorT', bound='Error')
+T = TypeVar("T")
+AppCommandT = TypeVar("AppCommandT", bound="InvokableApplicationCommand")
+CogT = TypeVar("CogT", bound="Cog")
+HookT = TypeVar("HookT", bound="Hook")
+ErrorT = TypeVar("ErrorT", bound="Error")
 
 if TYPE_CHECKING:
-    P = ParamSpec('P')
+    P = ParamSpec("P")
 else:
-    P = TypeVar('P')
+    P = TypeVar("P")
 
 
 def _get_overridden_method(method):
-    return getattr(method.__func__, '__cog_special_method__', method)
+    return getattr(method.__func__, "__cog_special_method__", method)
 
 
 def wrap_callback(coro):
@@ -81,6 +72,7 @@ def wrap_callback(coro):
         except Exception as exc:
             raise CommandInvokeError(exc) from exc
         return ret
+
     return wrapped
 
 
@@ -90,6 +82,7 @@ class InvokableApplicationCommand(ABC):
     These are not created manually, instead they are created via the
     decorator or functional interface.
     """
+
     body: ApplicationCommand
 
     def __init__(self, func, *, name: str = None, **kwargs):
@@ -98,10 +91,10 @@ class InvokableApplicationCommand(ABC):
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
         # only an internal feature for now
-        self.guild_only: bool = kwargs.get('guild_only', False)
+        self.guild_only: bool = kwargs.get("guild_only", False)
 
         if not isinstance(self.name, str):
-            raise TypeError('Name of a command must be a string.')
+            raise TypeError("Name of a command must be a string.")
 
         try:
             perms = func.__app_command_permissions__
@@ -113,14 +106,14 @@ class InvokableApplicationCommand(ABC):
             checks = func.__commands_checks__
             checks.reverse()
         except AttributeError:
-            checks = kwargs.get('checks', [])
+            checks = kwargs.get("checks", [])
 
         self.checks: List[Check] = checks
 
         try:
             cooldown = func.__commands_cooldown__
         except AttributeError:
-            cooldown = kwargs.get('cooldown')
+            cooldown = kwargs.get("cooldown")
 
         # TODO: Figure out how cooldowns even work with interactions
         if cooldown is None:
@@ -134,7 +127,7 @@ class InvokableApplicationCommand(ABC):
         try:
             max_concurrency = func.__commands_max_concurrency__
         except AttributeError:
-            max_concurrency = kwargs.get('max_concurrency')
+            max_concurrency = kwargs.get("max_concurrency")
         self._max_concurrency: Optional[MaxConcurrency] = max_concurrency
 
         self.cog: Optional[Cog] = None
@@ -199,7 +192,7 @@ class InvokableApplicationCommand(ABC):
         if self._buckets.valid:
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
-            bucket = self._buckets.get_bucket(inter, current) # type: ignore
+            bucket = self._buckets.get_bucket(inter, current)  # type: ignore
             if bucket is not None:
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
@@ -209,14 +202,14 @@ class InvokableApplicationCommand(ABC):
         inter.application_command = self
 
         if not await self.can_run(inter):
-            raise CheckFailure(f'The check functions for command {self.qualified_name!r} failed.')
+            raise CheckFailure(f"The check functions for command {self.qualified_name!r} failed.")
 
         if self._max_concurrency is not None:
             await self._max_concurrency.acquire(inter)  # type: ignore
 
         try:
             self._prepare_cooldowns(inter)
-            await self.call_before_hooks(inter) # type: ignore
+            await self.call_before_hooks(inter)  # type: ignore
         except:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)  # type: ignore
@@ -238,7 +231,7 @@ class InvokableApplicationCommand(ABC):
         if not self._buckets.valid:
             return False
 
-        bucket = self._buckets.get_bucket(inter) # type: ignore
+        bucket = self._buckets.get_bucket(inter)  # type: ignore
         dt = inter.created_at
         current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
         return bucket.get_tokens(current) == 0
@@ -252,7 +245,7 @@ class InvokableApplicationCommand(ABC):
             The interaction with this application command
         """
         if self._buckets.valid:
-            bucket = self._buckets.get_bucket(inter) # type: ignore
+            bucket = self._buckets.get_bucket(inter)  # type: ignore
             bucket.reset()
 
     def get_cooldown_retry_after(self, inter: ApplicationCommandInteraction) -> float:
@@ -270,7 +263,7 @@ class InvokableApplicationCommand(ABC):
             If this is ``0.0`` then the command isn't on cooldown.
         """
         if self._buckets.valid:
-            bucket = self._buckets.get_bucket(inter) # type: ignore
+            bucket = self._buckets.get_bucket(inter)  # type: ignore
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             return bucket.get_retry_after(current)
@@ -300,7 +293,7 @@ class InvokableApplicationCommand(ABC):
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter) # type: ignore
+                await self._max_concurrency.release(inter)  # type: ignore
 
             await self.call_after_hooks(inter)
 
@@ -321,7 +314,7 @@ class InvokableApplicationCommand(ABC):
         """
 
         if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The error handler must be a coroutine.')
+            raise TypeError("The error handler must be a coroutine.")
 
         self.on_error: Error = coro
         return coro
@@ -330,9 +323,11 @@ class InvokableApplicationCommand(ABC):
         """
         Checks whether the application command has an error handler registered.
         """
-        return hasattr(self, 'on_error')
+        return hasattr(self, "on_error")
 
-    async def _call_local_error_handler(self, inter: ApplicationCommandInteraction, error: CommandError) -> Any:
+    async def _call_local_error_handler(
+        self, inter: ApplicationCommandInteraction, error: CommandError
+    ) -> Any:
         if not self.has_error_handler():
             return
 
@@ -342,11 +337,15 @@ class InvokableApplicationCommand(ABC):
         else:
             return await injected(inter, error)
 
-    async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+    async def _call_external_error_handlers(
+        self, inter: ApplicationCommandInteraction, error: CommandError
+    ) -> None:
         """Overridden in subclasses"""
         raise error
 
-    async def dispatch_error(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+    async def dispatch_error(
+        self, inter: ApplicationCommandInteraction, error: CommandError
+    ) -> None:
         if not await self._call_local_error_handler(inter, error):
             await self._call_external_error_handlers(inter, error)
 
@@ -356,7 +355,7 @@ class InvokableApplicationCommand(ABC):
         cog = self.cog
         if self._before_invoke is not None:
             # should be cog if @commands.before_invoke is used
-            instance = getattr(self._before_invoke, '__self__', cog)
+            instance = getattr(self._before_invoke, "__self__", cog)
             # __self__ only exists for methods, not functions
             # however, if @command.before_invoke is used, it will be a function
             if instance:
@@ -365,53 +364,53 @@ class InvokableApplicationCommand(ABC):
                 await self._before_invoke(inter)  # type: ignore
 
         if inter.data.type is ApplicationCommandType.chat_input:
-            partial_attr_name = 'slash_command'
+            partial_attr_name = "slash_command"
         elif inter.data.type is ApplicationCommandType.user:
-            partial_attr_name = 'user_command'
+            partial_attr_name = "user_command"
         elif inter.data.type is ApplicationCommandType.message:
-            partial_attr_name = 'message_command'
+            partial_attr_name = "message_command"
         else:
             return
 
         # call the cog local hook if applicable:
         if cog is not None:
-            meth = getattr(cog, f'cog_before_{partial_attr_name}_invoke', None)
+            meth = getattr(cog, f"cog_before_{partial_attr_name}_invoke", None)
             hook = _get_overridden_method(meth)
             if hook is not None:
                 await hook(inter)
 
         # call the bot global hook if necessary
-        hook = getattr(inter.bot, f'_before_{partial_attr_name}_invoke', None)
+        hook = getattr(inter.bot, f"_before_{partial_attr_name}_invoke", None)
         if hook is not None:
             await hook(inter)
 
     async def call_after_hooks(self, inter: ApplicationCommandInteraction) -> None:
         cog = self.cog
         if self._after_invoke is not None:
-            instance = getattr(self._after_invoke, '__self__', cog)
+            instance = getattr(self._after_invoke, "__self__", cog)
             if instance:
                 await self._after_invoke(instance, inter)  # type: ignore
             else:
                 await self._after_invoke(inter)  # type: ignore
 
         if inter.data.type is ApplicationCommandType.chat_input:
-            partial_attr_name = 'slash_command'
+            partial_attr_name = "slash_command"
         elif inter.data.type is ApplicationCommandType.user:
-            partial_attr_name = 'user_command'
+            partial_attr_name = "user_command"
         elif inter.data.type is ApplicationCommandType.message:
-            partial_attr_name = 'message_command'
+            partial_attr_name = "message_command"
         else:
             return
 
         # call the cog local hook if applicable:
         if cog is not None:
-            meth = getattr(cog, f'cog_after_{partial_attr_name}_invoke', None)
+            meth = getattr(cog, f"cog_after_{partial_attr_name}_invoke", None)
             hook = _get_overridden_method(meth)
             if hook is not None:
                 await hook(inter)
 
         # call the bot global hook if necessary
-        hook = getattr(inter.bot, f'_after_{partial_attr_name}_invoke', None)
+        hook = getattr(inter.bot, f"_after_{partial_attr_name}_invoke", None)
         if hook is not None:
             await hook(inter)
 
@@ -433,7 +432,7 @@ class InvokableApplicationCommand(ABC):
             The coroutine passed is not actually a coroutine.
         """
         if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The pre-invoke hook must be a coroutine.')
+            raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_invoke = coro
         return coro
@@ -456,7 +455,7 @@ class InvokableApplicationCommand(ABC):
             The coroutine passed is not actually a coroutine.
         """
         if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The post-invoke hook must be a coroutine.')
+            raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_invoke = coro
         return coro
@@ -493,21 +492,23 @@ class InvokableApplicationCommand(ABC):
         inter.application_command = self
 
         if inter.data.type is ApplicationCommandType.chat_input:
-            partial_attr_name = 'slash_command'
+            partial_attr_name = "slash_command"
         elif inter.data.type is ApplicationCommandType.user:
-            partial_attr_name = 'user_command'
+            partial_attr_name = "user_command"
         elif inter.data.type is ApplicationCommandType.message:
-            partial_attr_name = 'message_command'
+            partial_attr_name = "message_command"
         else:
             return True
 
         try:
             if inter.bot and not await inter.bot.application_command_can_run(inter):
-                raise CheckFailure(f'The global check functions for command {self.qualified_name} failed.')
+                raise CheckFailure(
+                    f"The global check functions for command {self.qualified_name} failed."
+                )
 
             cog = self.cog
             if cog is not None:
-                meth = getattr(cog, f'cog_{partial_attr_name}_check', None)
+                meth = getattr(cog, f"cog_{partial_attr_name}_check", None)
                 local_check = _get_overridden_method(meth)
                 if local_check is not None:
                     ret = await maybe_coroutine(local_check, inter)
@@ -546,13 +547,17 @@ def guild_permissions(
     owner: :class:`bool`
         whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
     """
-    perms = UnresolvedGuildApplicationCommandPermissions(role_ids=role_ids, user_ids=user_ids, owner=owner)
+    perms = UnresolvedGuildApplicationCommandPermissions(
+        role_ids=role_ids, user_ids=user_ids, owner=owner
+    )
+
     def decorator(func: T) -> T:
         if isinstance(func, InvokableApplicationCommand):
             func.permissions[guild_id] = perms
         else:
             if not hasattr(func, "__app_command_permissions__"):
-                func.__app_command_permissions__ = {} # type: ignore
-            func.__app_command_permissions__[guild_id] = perms # type: ignore
+                func.__app_command_permissions__ = {}  # type: ignore
+            func.__app_command_permissions__[guild_id] = perms  # type: ignore
         return func
+
     return decorator

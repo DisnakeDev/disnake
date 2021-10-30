@@ -31,14 +31,14 @@ from ..utils import cached_slot_property
 from ..message import Message
 
 __all__ = (
-    'MessageInteraction',
-    'MessageInteractionData',
+    "MessageInteraction",
+    "MessageInteractionData",
 )
 
 if TYPE_CHECKING:
     from ..types.interactions import (
         Interaction as InteractionPayload,
-        ComponentInteractionData as ComponentInteractionDataPayload
+        ComponentInteractionData as ComponentInteractionDataPayload,
     )
     from ..state import ConnectionState
 
@@ -84,19 +84,20 @@ class MessageInteraction(Interaction):
     data: :class:`MessageInteractionData`
         The wrapped interaction data.
     """
+
     target: Message
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
-        self.data = MessageInteractionData(data=data.get('data', {}))
-        self.message = Message(state=self._state, channel=self.channel, data=data['message']) # type: ignore
+        self.data = MessageInteractionData(data=data.get("data", {}))
+        self.message = Message(state=self._state, channel=self.channel, data=data["message"])  # type: ignore
 
     @property
     def values(self) -> Optional[List[str]]:
         """Optional[List[:class:`str`]]: The values the user selected"""
         return self.data.values
 
-    @cached_slot_property('_cs_component')
+    @cached_slot_property("_cs_component")
     def component(self) -> Union[Button, SelectMenu]:
         """Union[:class:`Button`, :class:`SelectMenu`]: The component the user interacted with"""
         for action_row in self.message.components:
@@ -127,13 +128,9 @@ class MessageInteractionData:
         The values the user has selected.
     """
 
-    __slots__ = (
-        'custom_id',
-        'component_type',
-        'values'
-    )
+    __slots__ = ("custom_id", "component_type", "values")
 
     def __init__(self, *, data: ComponentInteractionDataPayload):
-        self.custom_id: str = data.get('custom_id')
-        self.component_type: ComponentType = try_enum(ComponentType, data.get('component_type', 0))
-        self.values: Optional[List[str]] = data.get('values')
+        self.custom_id: str = data.get("custom_id")
+        self.component_type: ComponentType = try_enum(ComponentType, data.get("component_type", 0))
+        self.values: Optional[List[str]] = data.get("values")

@@ -81,14 +81,16 @@ class InvokableUserCommand(InvokableApplicationCommand):
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
         self.body = UserCommand(name=self.name, default_permission=default_permission)
 
-    async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+    async def _call_external_error_handlers(
+        self, inter: ApplicationCommandInteraction, error: CommandError
+    ) -> None:
         stop_propagation = False
         cog = self.cog
         try:
@@ -102,7 +104,9 @@ class InvokableUserCommand(InvokableApplicationCommand):
                 return
             inter.bot.dispatch("user_command_error", inter, error)
 
-    async def __call__(self, inter: ApplicationCommandInteraction, target: Any = None, *args, **kwargs) -> None:
+    async def __call__(
+        self, inter: ApplicationCommandInteraction, target: Any = None, *args, **kwargs
+    ) -> None:
         # the target may just not be passed in
         target = target or inter.target
         try:
@@ -151,14 +155,16 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
         self.body = MessageCommand(name=self.name, default_permission=default_permission)
 
-    async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+    async def _call_external_error_handlers(
+        self, inter: ApplicationCommandInteraction, error: CommandError
+    ) -> None:
         stop_propagation = False
         cog = self.cog
         try:
@@ -172,7 +178,9 @@ class InvokableMessageCommand(InvokableApplicationCommand):
                 return
             inter.bot.dispatch("message_command_error", inter, error)
 
-    async def __call__(self, inter: ApplicationCommandInteraction, target: Any = None, *args, **kwargs) -> None:
+    async def __call__(
+        self, inter: ApplicationCommandInteraction, target: Any = None, *args, **kwargs
+    ) -> None:
         # the target may just not be passed in
         target = target or inter.target
         try:
@@ -185,7 +193,12 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
 
 def user_command(
-    *, name: str = None, default_permission: bool = True, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs
+    *,
+    name: str = None,
+    default_permission: bool = True,
+    guild_ids: Sequence[int] = None,
+    auto_sync: bool = True,
+    **kwargs,
 ) -> Callable[
     [
         Union[
@@ -232,14 +245,19 @@ def user_command(
             default_permission=default_permission,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
-            **kwargs
+            **kwargs,
         )
 
     return decorator
 
 
 def message_command(
-    *, name: str = None, default_permission: bool = True, guild_ids: Sequence[int] = None, auto_sync: bool = True, **kwargs
+    *,
+    name: str = None,
+    default_permission: bool = True,
+    guild_ids: Sequence[int] = None,
+    auto_sync: bool = True,
+    **kwargs,
 ) -> Callable[
     [
         Union[
@@ -286,7 +304,7 @@ def message_command(
             default_permission=default_permission,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
-            **kwargs
+            **kwargs,
         )
 
     return decorator

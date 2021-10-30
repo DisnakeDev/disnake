@@ -57,15 +57,14 @@ if TYPE_CHECKING:
     from ._types import (
         CoroFunc,
     )
+
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
-__all__ = (
-    'CommonBotBase',
-)
+__all__ = ("CommonBotBase",)
 
-CogT = TypeVar('CogT', bound='Cog')
-FuncT = TypeVar('FuncT', bound=Callable[..., Any])
-CFT = TypeVar('CFT', bound='CoroFunc')
+CogT = TypeVar("CogT", bound="Cog")
+FuncT = TypeVar("FuncT", bound=Callable[..., Any])
+CFT = TypeVar("CFT", bound="CoroFunc")
 
 MISSING: Any = disnake.utils.MISSING
 
@@ -81,18 +80,18 @@ class CommonBotBase(Generic[CogT]):
         self.extra_events: Dict[str, List[CoroFunc]] = {}
         self._is_closed: bool = False
 
-        self.owner_id: Optional[int] = kwargs.get('owner_id')
-        self.owner_ids: Set[int] = kwargs.get('owner_ids', set())
+        self.owner_id: Optional[int] = kwargs.get("owner_id")
+        self.owner_ids: Set[int] = kwargs.get("owner_ids", set())
         self.owner: Optional[disnake.User] = None
         self.owners: Set[disnake.TeamMember] = set()
 
         if self.owner_id and self.owner_ids:
-            raise TypeError('Both owner_id and owner_ids are set.')
+            raise TypeError("Both owner_id and owner_ids are set.")
 
         if self.owner_ids and not isinstance(self.owner_ids, collections.abc.Collection):
-            raise TypeError(f'owner_ids must be a collection not {self.owner_ids.__class__!r}')
+            raise TypeError(f"owner_ids must be a collection not {self.owner_ids.__class__!r}")
 
-        self.reload: bool = kwargs.get('reload', False)
+        self.reload: bool = kwargs.get("reload", False)
 
         loop = asyncio.get_event_loop()
         loop.create_task(self._fill_owners())
@@ -105,7 +104,7 @@ class CommonBotBase(Generic[CogT]):
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         # super() will resolve to Client
         super().dispatch(event_name, *args, **kwargs)  # type: ignore
-        ev = 'on_' + event_name
+        ev = "on_" + event_name
         for event in self.extra_events.get(ev, []):
             self._schedule_event(event, ev, *args, **kwargs)  # type: ignore
 
@@ -113,7 +112,7 @@ class CommonBotBase(Generic[CogT]):
         if self.owner_id or self.owner_ids:
             return
 
-        await self.wait_until_first_connect() # type: ignore
+        await self.wait_until_first_connect()  # type: ignore
 
         app = await self.application_info()  # type: ignore
         if app.team:
@@ -206,7 +205,7 @@ class CommonBotBase(Generic[CogT]):
         name = func.__name__ if name is MISSING else name
 
         if not asyncio.iscoroutinefunction(func):
-            raise TypeError('Listeners must be coroutines')
+            raise TypeError("Listeners must be coroutines")
 
         if name in self.extra_events:
             self.extra_events[name].append(func)
@@ -302,18 +301,18 @@ class CommonBotBase(Generic[CogT]):
         """
 
         if not isinstance(cog, Cog):
-            raise TypeError('cogs must derive from Cog')
+            raise TypeError("cogs must derive from Cog")
 
         cog_name = cog.__cog_name__
         existing = self.__cogs.get(cog_name)
 
         if existing is not None:
             if not override:
-                raise disnake.ClientException(f'Cog named {cog_name!r} already loaded')
+                raise disnake.ClientException(f"Cog named {cog_name!r} already loaded")
             self.remove_cog(cog_name)
 
         # NOTE: Should be covariant
-        cog = cog._inject(self) # type: ignore
+        cog = cog._inject(self)  # type: ignore
         self.__cogs[cog_name] = cog
 
     def get_cog(self, name: str) -> Optional[Cog]:
@@ -358,11 +357,11 @@ class CommonBotBase(Generic[CogT]):
         if cog is None:
             return
 
-        help_command = getattr(self, '_help_command', None)
+        help_command = getattr(self, "_help_command", None)
         if help_command and help_command.cog is cog:
             help_command.cog = None
         # NOTE: Should be covariant
-        cog._eject(self) # type: ignore
+        cog._eject(self)  # type: ignore
 
         return cog
 
@@ -384,8 +383,7 @@ class CommonBotBase(Generic[CogT]):
             remove = [
                 index
                 for index, event in enumerate(event_list)
-                if event.__module__ is not None
-                and _is_submodule(name, event.__module__)
+                if event.__module__ is not None and _is_submodule(name, event.__module__)
             ]
 
             for index in reversed(remove):
@@ -393,7 +391,7 @@ class CommonBotBase(Generic[CogT]):
 
     def _call_module_finalizers(self, lib: types.ModuleType, key: str) -> None:
         try:
-            func = getattr(lib, 'teardown')
+            func = getattr(lib, "teardown")
         except AttributeError:
             pass
         else:
@@ -420,7 +418,7 @@ class CommonBotBase(Generic[CogT]):
             raise errors.ExtensionFailed(key, e) from e
 
         try:
-            setup = getattr(lib, 'setup')
+            setup = getattr(lib, "setup")
         except AttributeError:
             del sys.modules[key]
             raise errors.NoEntryPointError(key)

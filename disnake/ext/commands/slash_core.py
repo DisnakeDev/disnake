@@ -50,16 +50,13 @@ if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
     from .cog import CogT
 
-    ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
+    ApplicationCommandInteractionT = TypeVar(
+        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
+    )
 
-    P = ParamSpec('P')
+    P = ParamSpec("P")
 
-__all__ = (
-    'InvokableSlashCommand',
-    'SubCommandGroup',
-    'SubCommand',
-    'slash_command'
-)
+__all__ = ("InvokableSlashCommand", "SubCommandGroup", "SubCommand", "slash_command")
 
 
 class SubCommandGroup(InvokableApplicationCommand):
@@ -91,12 +88,9 @@ class SubCommandGroup(InvokableApplicationCommand):
         super().__init__(func, name=name, **kwargs)
         self.children: Dict[str, SubCommand] = {}
         self.option = Option(
-            name=self.name,
-            description='-',
-            type=OptionType.sub_command_group,
-            options=[]
+            name=self.name, description="-", type=OptionType.sub_command_group, options=[]
         )
-        self.qualified_name: str = ''
+        self.qualified_name: str = ""
 
     def sub_command(
         self,
@@ -104,15 +98,15 @@ class SubCommandGroup(InvokableApplicationCommand):
         description: str = None,
         options: list = None,
         connectors: dict = None,
-        **kwargs
+        **kwargs,
     ) -> Callable[
         [
             Union[
                 Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ],
-        SubCommand
+        SubCommand,
     ]:
         """
         A decorator that creates a subcommand in the
@@ -128,7 +122,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         def decorator(
             func: Union[
                 Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ) -> SubCommand:
             new_func = SubCommand(
@@ -137,13 +131,14 @@ class SubCommandGroup(InvokableApplicationCommand):
                 description=description,
                 options=options,
                 connectors=connectors,
-                **kwargs
+                **kwargs,
             )
             qualified_name = self.qualified_name or self.name
-            new_func.qualified_name = f'{qualified_name} {new_func.name}'
+            new_func.qualified_name = f"{qualified_name} {new_func.name}"
             self.children[new_func.name] = new_func
             self.option.options.append(new_func.option)
             return new_func
+
         return decorator
 
 
@@ -182,27 +177,29 @@ class SubCommand(InvokableApplicationCommand):
         description: str = None,
         options: list = None,
         connectors: Dict[str, str] = None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(func, name=name, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
-        self.autocompleters: Dict[str, Any] = kwargs.get('autocompleters', {})
+        self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
 
         self.docstring = utils.parse_docstring(func)
-        description = description or self.docstring['description']
+        description = description or self.docstring["description"]
 
         if not options:
             options = expand_params(self)
 
         self.option = Option(
             name=self.name,
-            description=description or '-',
+            description=description or "-",
             type=OptionType.sub_command,
-            options=options
+            options=options,
         )
-        self.qualified_name = ''
+        self.qualified_name = ""
 
-    async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Any:
+    async def _call_autocompleter(
+        self, param: str, inter: ApplicationCommandInteraction, user_input: str
+    ) -> Any:
         autocomp = self.autocompleters.get(param)
         if autocomp is None:
             return None
@@ -267,24 +264,24 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(func, name=name, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = auto_sync
         self.guild_ids: Optional[Sequence[int]] = guild_ids
-        self.autocompleters: Dict[str, Any] = kwargs.get('autocompleters', {})
+        self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
 
         self.docstring = utils.parse_docstring(func)
-        description = description or self.docstring['description']
+        description = description or self.docstring["description"]
 
         if not options:
             options = expand_params(self)
 
         self.body: SlashCommand = SlashCommand(
             name=self.name,
-            description=description or '-',
+            description=description or "-",
             options=options or [],
             default_permission=default_permission,
         )
@@ -307,15 +304,15 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         description: str = None,
         options: list = None,
         connectors: dict = None,
-        **kwargs
+        **kwargs,
     ) -> Callable[
         [
             Union[
                 Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ],
-        SubCommand
+        SubCommand,
     ]:
         """
         A decorator that creates a subcommand under the base command.
@@ -339,10 +336,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         Callable[..., :class:`SubCommand`]
             A decorator that converts the provided method into a :class:`SubCommand`, adds it to the bot, then returns it.
         """
+
         def decorator(
             func: Union[
                 Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ) -> SubCommand:
             if len(self.children) == 0 and len(self.body.options) > 0:
@@ -353,26 +351,25 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 description=description,
                 options=options,
                 connectors=connectors,
-                **kwargs
+                **kwargs,
             )
-            new_func.qualified_name = f'{self.qualified_name} {new_func.name}'
+            new_func.qualified_name = f"{self.qualified_name} {new_func.name}"
             self.children[new_func.name] = new_func
             self.body.options.append(new_func.option)
             return new_func
+
         return decorator
 
     def sub_command_group(
-        self,
-        name: str = None,
-        **kwargs
+        self, name: str = None, **kwargs
     ) -> Callable[
         [
             Union[
                 Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ],
-        SubCommandGroup
+        SubCommandGroup,
     ]:
         """
         A decorator that creates a subcommand group under the base command.
@@ -387,22 +384,26 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         Callable[..., :class:`SubCommandGroup`]
             A decorator that converts the provided method into a :class:`SubCommandGroup`, adds it to the bot, then returns it.
         """
+
         def decorator(
             func: Union[
                 Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ) -> SubCommandGroup:
             if len(self.children) == 0 and len(self.body.options) > 0:
                 self.body.options = []
             new_func = SubCommandGroup(func, name=name, **kwargs)
-            new_func.qualified_name = f'{self.qualified_name} {new_func.name}'
+            new_func.qualified_name = f"{self.qualified_name} {new_func.name}"
             self.children[new_func.name] = new_func
             self.body.options.append(new_func.option)
             return new_func
+
         return decorator
 
-    async def _call_external_error_handlers(self, inter: ApplicationCommandInteraction, error: CommandError) -> None:
+    async def _call_external_error_handlers(
+        self, inter: ApplicationCommandInteraction, error: CommandError
+    ) -> None:
         stop_propagation = False
         cog = self.cog
         try:
@@ -414,9 +415,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         finally:
             if stop_propagation:
                 return
-            inter.bot.dispatch('slash_command_error', inter, error) # type: ignore
+            inter.bot.dispatch("slash_command_error", inter, error)  # type: ignore
 
-    async def _call_autocompleter(self, param: str, inter: ApplicationCommandInteraction, user_input: str) -> Any:
+    async def _call_autocompleter(
+        self, param: str, inter: ApplicationCommandInteraction, user_input: str
+    ) -> Any:
         autocomp = self.autocompleters.get(param)
         if autocomp is None:
             return None
@@ -520,7 +523,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter) # type: ignore
+                await self._max_concurrency.release(inter)  # type: ignore
 
             await self.call_after_hooks(inter)
 
@@ -534,15 +537,15 @@ def slash_command(
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
     auto_sync: bool = True,
-    **kwargs
+    **kwargs,
 ) -> Callable[
     [
         Union[
             Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
         ]
     ],
-    InvokableSlashCommand
+    InvokableSlashCommand,
 ]:
     """
     A decorator that builds a slash command.
@@ -579,13 +582,13 @@ def slash_command(
     def decorator(
         func: Union[
             Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine]
+            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
         ]
     ) -> InvokableSlashCommand:
         if not asyncio.iscoroutinefunction(func):
-            raise TypeError(f'<{func.__qualname__}> must be a coroutine function')
-        if hasattr(func, '__command_flag__'):
-            raise TypeError('Callback is already a command.')
+            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+        if hasattr(func, "__command_flag__"):
+            raise TypeError("Callback is already a command.")
         return InvokableSlashCommand(
             func,
             name=name,
@@ -595,6 +598,7 @@ def slash_command(
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,
-            **kwargs
+            **kwargs,
         )
+
     return decorator

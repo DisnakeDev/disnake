@@ -51,23 +51,27 @@ if TYPE_CHECKING:
         Check,
         CoroFunc,
     )
-    ApplicationCommandInteractionT = TypeVar('ApplicationCommandInteractionT', bound=ApplicationCommandInteraction, covariant=True)
-    AnyMessageCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
-    AnyUserCommandInter = Any # Union[ApplicationCommandInteraction, UserCommandInteraction]
 
-    P = ParamSpec('P')
+    ApplicationCommandInteractionT = TypeVar(
+        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
+    )
+    AnyMessageCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
+    AnyUserCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
+
+    P = ParamSpec("P")
 
 __all__ = (
-    'when_mentioned',
-    'when_mentioned_or',
-    'BotBase',
+    "when_mentioned",
+    "when_mentioned_or",
+    "BotBase",
 )
 
 MISSING: Any = disnake.utils.MISSING
 
-T = TypeVar('T')
-CFT = TypeVar('CFT', bound='CoroFunc')
-CXT = TypeVar('CXT', bound='Context')
+T = TypeVar("T")
+CFT = TypeVar("CFT", bound="CoroFunc")
+CXT = TypeVar("CXT", bound="Context")
+
 
 def when_mentioned(bot: BotBase, msg: Message) -> List[str]:
     """A callable that implements a command prefix equivalent to being mentioned.
@@ -75,7 +79,7 @@ def when_mentioned(bot: BotBase, msg: Message) -> List[str]:
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
     """
     # bot.user will never be None when this is called
-    return [f'<@{bot.user.id}> ', f'<@!{bot.user.id}> ']  # type: ignore
+    return [f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]  # type: ignore
 
 
 def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]:
@@ -107,6 +111,7 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]
     ----------
     :func:`.when_mentioned`
     """
+
     def inner(bot, msg):
         r = list(prefixes)
         r = when_mentioned(bot, msg) + r
@@ -121,7 +126,7 @@ def _is_submodule(parent: str, child: str) -> bool:
 
 class _DefaultRepr:
     def __repr__(self):
-        return '<default-help-command>'
+        return "<default-help-command>"
 
 
 _default: Any = _DefaultRepr()
@@ -145,8 +150,8 @@ class BotBase(CommonBotBase, GroupMixin):
         self._after_invoke = None
 
         self._help_command = None
-        self.description: str = inspect.cleandoc(description) if description else ''
-        self.strip_after_prefix: bool = options.get('strip_after_prefix', False)
+        self.description: str = inspect.cleandoc(description) if description else ""
+        self.strip_after_prefix: bool = options.get("strip_after_prefix", False)
 
         if help_command is _default:
             self.help_command = DefaultHelpCommand()
@@ -165,7 +170,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         This only fires if you do not specify any listeners for command error.
         """
-        if self.extra_events.get('on_command_error', None):
+        if self.extra_events.get("on_command_error", None):
             return
 
         command = context.command
@@ -176,8 +181,10 @@ class BotBase(CommonBotBase, GroupMixin):
         if cog and cog.has_error_handler():
             return
 
-        print(f'Ignoring exception in command {context.command}:', file=sys.stderr)
-        traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
+        print(f"Ignoring exception in command {context.command}:", file=sys.stderr)
+        traceback.print_exception(
+            type(exception), exception, exception.__traceback__, file=sys.stderr
+        )
 
     # global check registration
 
@@ -339,7 +346,7 @@ class BotBase(CommonBotBase, GroupMixin):
             The coroutine passed is not actually a coroutine.
         """
         if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The pre-invoke hook must be a coroutine.')
+            raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_invoke = coro
         return coro
@@ -372,7 +379,7 @@ class BotBase(CommonBotBase, GroupMixin):
             The coroutine passed is not actually a coroutine.
         """
         if not asyncio.iscoroutinefunction(coro):
-            raise TypeError('The post-invoke hook must be a coroutine.')
+            raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_invoke = coro
         return coro
@@ -398,7 +405,7 @@ class BotBase(CommonBotBase, GroupMixin):
     def help_command(self, value: Optional[HelpCommand]) -> None:
         if value is not None:
             if not isinstance(value, HelpCommand):
-                raise TypeError('help_command must be a subclass of HelpCommand')
+                raise TypeError("help_command must be a subclass of HelpCommand")
             if self._help_command is not None:
                 self._help_command._remove_from_bot(self)
             self._help_command = value
@@ -437,15 +444,17 @@ class BotBase(CommonBotBase, GroupMixin):
 
         if not isinstance(ret, str):
             try:
-                ret = list(ret) # type: ignore
+                ret = list(ret)  # type: ignore
             except TypeError:
                 # It's possible that a generator raised this exception.  Don't
                 # replace it with our own error if that's the case.
                 if isinstance(ret, collections.abc.Iterable):
                     raise
 
-                raise TypeError("command_prefix must be plain string, iterable of strings, or callable "
-                                f"returning either of these, not {ret.__class__.__name__}")
+                raise TypeError(
+                    "command_prefix must be plain string, iterable of strings, or callable "
+                    f"returning either of these, not {ret.__class__.__name__}"
+                )
 
             if not ret:
                 raise ValueError("Iterable command_prefix must contain at least one prefix")
@@ -507,14 +516,18 @@ class BotBase(CommonBotBase, GroupMixin):
 
             except TypeError:
                 if not isinstance(prefix, list):
-                    raise TypeError("get_prefix must return either a string or a list of string, "
-                                    f"not {prefix.__class__.__name__}")
+                    raise TypeError(
+                        "get_prefix must return either a string or a list of string, "
+                        f"not {prefix.__class__.__name__}"
+                    )
 
                 # It's possible a bad command_prefix got us here.
                 for value in prefix:
                     if not isinstance(value, str):
-                        raise TypeError("Iterable command_prefix or list returned from get_prefix must "
-                                        f"contain only strings, not {value.__class__.__name__}")
+                        raise TypeError(
+                            "Iterable command_prefix or list returned from get_prefix must "
+                            f"contain only strings, not {value.__class__.__name__}"
+                        )
 
                 # Getting here shouldn't happen
                 raise
@@ -541,19 +554,19 @@ class BotBase(CommonBotBase, GroupMixin):
             The invocation context to invoke.
         """
         if ctx.command is not None:
-            self.dispatch('command', ctx)
+            self.dispatch("command", ctx)
             try:
                 if await self.can_run(ctx, call_once=True):
                     await ctx.command.invoke(ctx)
                 else:
-                    raise errors.CheckFailure('The global check once functions failed.')
+                    raise errors.CheckFailure("The global check once functions failed.")
             except errors.CommandError as exc:
                 await ctx.command.dispatch_error(ctx, exc)
             else:
-                self.dispatch('command_completion', ctx)
+                self.dispatch("command_completion", ctx)
         elif ctx.invoked_with:
             exc = errors.CommandNotFound(f'Command "{ctx.invoked_with}" is not found')
-            self.dispatch('command_error', ctx, exc)
+            self.dispatch("command_error", ctx, exc)
 
     async def process_commands(self, message: Message) -> None:
         """|coro|

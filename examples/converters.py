@@ -8,7 +8,7 @@ from disnake.ext import commands
 intents = disnake.Intents.default()
 intents.members = True
 
-bot = commands.Bot('!', intents=intents)
+bot = commands.Bot("!", intents=intents)
 
 
 @bot.command()
@@ -29,14 +29,16 @@ async def userinfo(ctx: commands.Context, user: disnake.User):
     user_id = user.id
     username = user.name
     avatar = user.display_avatar.url
-    await ctx.send(f'User found: {user_id} -- {username}\n{avatar}')
+    await ctx.send(f"User found: {user_id} -- {username}\n{avatar}")
+
 
 @userinfo.error
 async def userinfo_error(ctx: commands.Context, error: commands.CommandError):
     # if the conversion above fails for any reason, it will raise `commands.BadArgument`
     # so we handle this in this error handler:
     if isinstance(error, commands.BadArgument):
-        return await ctx.send('Couldn\'t find that user.')
+        return await ctx.send("Couldn't find that user.")
+
 
 # Custom Converter here
 class ChannelOrMemberConverter(commands.Converter):
@@ -80,7 +82,8 @@ async def notify(ctx: commands.Context, target: ChannelOrMemberConverter):
     # the `argument` parameter of the `ChannelOrMemberConverter.convert` method and
     # the conversion will go through the process defined there.
 
-    await target.send(f'Hello, {target.name}!')
+    await target.send(f"Hello, {target.name}!")
+
 
 @bot.command()
 async def ignore(ctx: commands.Context, target: typing.Union[disnake.Member, disnake.TextChannel]):
@@ -94,9 +97,12 @@ async def ignore(ctx: commands.Context, target: typing.Union[disnake.Member, dis
 
     # To check the resulting type, `isinstance` is used
     if isinstance(target, disnake.Member):
-        await ctx.send(f'Member found: {target.mention}, adding them to the ignore list.')
-    elif isinstance(target, disnake.TextChannel): # this could be an `else` but for completeness' sake.
-        await ctx.send(f'Channel found: {target.mention}, adding it to the ignore list.')
+        await ctx.send(f"Member found: {target.mention}, adding them to the ignore list.")
+    elif isinstance(
+        target, disnake.TextChannel
+    ):  # this could be an `else` but for completeness' sake.
+        await ctx.send(f"Channel found: {target.mention}, adding it to the ignore list.")
+
 
 # Built-in type converters.
 @bot.command()
@@ -109,4 +115,5 @@ async def multiply(ctx: commands.Context, number: int, maybe: bool):
         return await ctx.send(number * 2)
     await ctx.send(number * 5)
 
-bot.run('token')
+
+bot.run("token")
