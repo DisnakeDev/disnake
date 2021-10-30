@@ -41,8 +41,10 @@ class Dropdown(disnake.ui.Select):
 
 
 class DropdownView(disnake.ui.View):
-    def __init__(self, timeout=None):
-        super().__init__()
+
+    # Initialize the view and set no timeout.
+    def __init__(self):
+        super().__init__(timeout=None)
 
         # Adds the dropdown to our view object.
         self.add_item(Dropdown())
@@ -50,8 +52,10 @@ class DropdownView(disnake.ui.View):
 
 # Define a simple View that gives us a confirmation menu
 class Button(disnake.ui.View):
-    def __init__(self, timeout=None):
-        super().__init__()
+
+    # Initialize the view and set no timeout.
+    def __init__(self):
+        super().__init__(timeout=None)
 
     # Create some simple buttons.
     @disnake.ui.button(label="Hi", style=disnake.ButtonStyle.green)
