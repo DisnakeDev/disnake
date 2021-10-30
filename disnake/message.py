@@ -1404,10 +1404,12 @@ class Message(Hashable):
             The new content to replace the message with.
             Could be ``None`` to remove the content.
         embed: Optional[:class:`Embed`]
-            The new embed to replace the original with.
+            The new embed to replace the original with. This cannot be mixed with the
+            ``embeds`` parameter.
             Could be ``None`` to remove the embed.
         embeds: List[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
 
             .. versionadded:: 2.0
@@ -1418,8 +1420,7 @@ class Message(Hashable):
 
             .. versionadded:: 2.1
         files: List[:class:`File`]
-            A list of files to send with the content. This cannot be mixed with the
-            ``file`` parameter.
+            A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
@@ -1911,10 +1912,12 @@ class PartialMessage(Hashable):
             The new content to replace the message with.
             Could be ``None`` to remove the content.
         embed: Optional[:class:`Embed`]
-            The new embed to replace the original with.
+            The new embed to replace the original with. This cannot be mixed with the
+            ``embeds`` parameter.
             Could be ``None`` to remove the embed.
         embeds: List[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
 
             .. versionadded:: 2.1
@@ -1925,8 +1928,7 @@ class PartialMessage(Hashable):
 
             .. versionadded:: 2.1
         files: List[:class:`File`]
-            A list of files to send with the content. This cannot be mixed with the
-            ``file`` parameter.
+            A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
