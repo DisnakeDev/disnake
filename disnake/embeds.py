@@ -25,8 +25,22 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import Any, Dict, Final, List, Mapping, Protocol, TYPE_CHECKING, Type, TypeVar, Union
+import warnings
+from typing import (
+    Any,
+    Dict,
+    Final,
+    List,
+    Mapping,
+    Protocol,
+    TYPE_CHECKING,
+    Type,
+    TypeVar,
+    Union,
+)
 
+from .file import File
+from .utils import MISSING
 from . import utils
 from .colour import Colour
 
@@ -168,6 +182,7 @@ class Embed:
         "_author",
         "_fields",
         "description",
+        "_files",
     )
 
     Empty: Final = EmptyEmbed
@@ -201,6 +216,8 @@ class Embed:
 
         if timestamp:
             self.timestamp = timestamp
+
+        self._files: List[File] = []
 
     @classmethod
     def from_dict(cls: Type[E], data: Mapping[str, Any]) -> E:
@@ -261,7 +278,9 @@ class Embed:
 
     def copy(self: E) -> E:
         """Returns a shallow copy of the embed."""
-        return self.__class__.from_dict(self.to_dict())
+        embed = self.__class__.from_dict(self.to_dict())
+        embed._files = self._files  # TODO: Maybe copy these too?
+        return embed
 
     def __len__(self) -> int:
         total = len(self.title) + len(self.description)
@@ -401,7 +420,7 @@ class Embed:
         """
         return EmbedProxy(getattr(self, "_image", {}))  # type: ignore
 
-    def set_image(self: E, url: MaybeEmpty[Any]) -> E:
+    def set_image(self: E, url: MaybeEmpty[Any] = MISSING, *, file: File = MISSING) -> E:
         """Sets the image for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -414,17 +433,24 @@ class Embed:
         -----------
         url: :class:`str`
             The source URL for the image. Only HTTP(S) is supported.
+        file: :class:`File`
+            The file to use as the image.
         """
-
-        if url is EmptyEmbed:
+        if file:
+            if url:
+                raise TypeError("Cannot use both a url and a file at the same time")
+            if file.filename is None:
+                raise TypeError("File doesn't have a filename")
+            self._image = {"url": f"attachment://{file.filename}"}
+        elif url is EmptyEmbed:
             try:
                 del self._image
             except AttributeError:
                 pass
+        elif url is MISSING:
+            raise TypeError("Neither a url nor a file have been provided")
         else:
-            self._image = {
-                "url": str(url),
-            }
+            self._image = {"url": str(url)}
 
         return self
 
@@ -443,7 +469,7 @@ class Embed:
         """
         return EmbedProxy(getattr(self, "_thumbnail", {}))  # type: ignore
 
-    def set_thumbnail(self: E, url: MaybeEmpty[Any]) -> E:
+    def set_thumbnail(self: E, url: MaybeEmpty[Any] = MISSING, *, file: File = MISSING) -> E:
         """Sets the thumbnail for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -456,17 +482,24 @@ class Embed:
         -----------
         url: :class:`str`
             The source URL for the thumbnail. Only HTTP(S) is supported.
+        file: :class:`File`
+            The file to use as the image.
         """
-
-        if url is EmptyEmbed:
+        if file:
+            if url:
+                raise TypeError("Cannot use both a url and a file at the same time")
+            if file.filename is None:
+                raise TypeError("File doesn't have a filename")
+            self._image = {"url": f"attachment://{file.filename}"}
+        elif url is EmptyEmbed:
             try:
                 del self._thumbnail
             except AttributeError:
                 pass
+        elif url is MISSING:
+            raise TypeError("Neither a url nor a file have been provided")
         else:
-            self._thumbnail = {
-                "url": str(url),
-            }
+            self._thumbnail = {"url": str(url)}
 
         return self
 
@@ -696,7 +729,7 @@ class Embed:
         result = {
             key[1:]: getattr(self, key)
             for key in self.__slots__
-            if key[0] == '_' and hasattr(self, key)
+            if key[0] == '_' and hasattr(self, key) and key != "_files"
         }
         # fmt: on
 

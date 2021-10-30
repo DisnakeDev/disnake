@@ -1348,27 +1348,38 @@ class Messageable:
         state = self._state
         content = str(content) if content is not None else None
 
+        if file is not None and files is not None:
+            raise InvalidArgument("cannot pass both file and files parameter to send()")
+
+        if file is not None:
+            if not isinstance(file, File):
+                raise InvalidArgument("file parameter must be File")
+            files = [file]
+
         if embed is not None and embeds is not None:
             raise InvalidArgument("cannot pass both embed and embeds parameter to send()")
 
         if embed is not None:
-            embed = embed.to_dict()
+            embeds = [embed]
 
-        elif embeds is not None:
+        if embeds is not None:
             if len(embeds) > 10:
                 raise InvalidArgument("embeds parameter must be a list of up to 10 elements")
+            for embed in embeds:
+                if embed._files:
+                    files = files or []
+                    files += embed._files
             embeds = [embed.to_dict() for embed in embeds]
 
         if stickers is not None:
             stickers = [sticker.id for sticker in stickers]
 
-        if allowed_mentions is not None:
-            if state.allowed_mentions is not None:
-                allowed_mentions = state.allowed_mentions.merge(allowed_mentions).to_dict()
-            else:
-                allowed_mentions = allowed_mentions.to_dict()
-        else:
+        if allowed_mentions is None:
             allowed_mentions = state.allowed_mentions and state.allowed_mentions.to_dict()
+        elif state.allowed_mentions is not None:
+            allowed_mentions = state.allowed_mentions.merge(allowed_mentions).to_dict()
+        else:
+            allowed_mentions = allowed_mentions.to_dict()
 
         if mention_author is not None:
             allowed_mentions = allowed_mentions or AllowedMentions().to_dict()
@@ -1390,13 +1401,6 @@ class Messageable:
         else:
             components = None
 
-        if file is not None and files is not None:
-            raise InvalidArgument("cannot pass both file and files parameter to send()")
-
-        if file is not None:
-            if not isinstance(file, File):
-                raise InvalidArgument("file parameter must be File")
-            files = [file]
         if files is not None:
             if len(files) > 10:
                 raise InvalidArgument("files parameter must be a list of up to 10 elements")

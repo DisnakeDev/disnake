@@ -149,11 +149,18 @@ async def _edit_handler(
             payload["content"] = str(content)
         else:
             payload["content"] = None
+    
+    if file is not MISSING:
+        files = [file]
 
     if embed is not MISSING:
         embeds = [embed] if embed else []
     if embeds is not MISSING:
         payload["embeds"] = [e.to_dict() for e in embeds]
+        for embed in embeds:
+            if embed._files:
+                files = files or []
+                files += embed._files
 
     if suppress is not MISSING:
         flags = MessageFlags._from_value(default_flags)
@@ -181,9 +188,6 @@ async def _edit_handler(
             payload["components"] = view.to_components()
         else:
             payload["components"] = []
-
-    if file is not MISSING:
-        files = [file]
 
     data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)
     message = Message(state=msg._state, channel=msg.channel, data=data)
