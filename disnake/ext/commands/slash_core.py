@@ -59,6 +59,60 @@ if TYPE_CHECKING:
 __all__ = ("InvokableSlashCommand", "SubCommandGroup", "SubCommand", "slash_command")
 
 
+def _autocomplete(
+    self: Union[SubCommand, InvokableSlashCommand], option_name: str
+) -> Callable[[Callable], Callable]:
+    exists = False
+    for option in self.body.options:
+        if option.name == option_name:
+            option.autocomplete = True
+            exists = True
+            break
+
+    if not exists:
+        raise ValueError(
+            f"Option '{option_name}' doesn't exist in '{self.qualified_name}'"
+        )
+
+    def decorator(func: Callable) -> Callable:
+        func.__slash_command__ = self
+        self.autocompleters[option_name] = func
+        return func
+    return decorator
+
+
+async def _call_autocompleter(
+    self, param: str, inter: ApplicationCommandInteraction, user_input: str
+) -> Any:
+    autocomp = self.autocompleters.get(param)
+    if autocomp is None:
+        return None
+    if not callable(autocomp):
+        return autocomp
+
+    try:
+        cog = autocomp.__slash_command__.cog
+    except AttributeError:
+        cog = None
+
+    filled = inter.filled_options
+    del filled[inter.data.focused_option.name]
+    try:
+        if cog is None:
+            choices = autocomp(inter, user_input, **filled)
+        else:
+            choices = autocomp(cog, inter, user_input, **filled)
+    except TypeError:
+        if cog is None:
+            choices = autocomp(inter, user_input)
+        else:
+            choices = autocomp(cog, inter, user_input)
+
+    if inspect.isawaitable(choices):
+        return await choices
+    return choices
+
+
 class SubCommandGroup(InvokableApplicationCommand):
     """A class that implements the protocol for a bot slash command group.
 
@@ -197,18 +251,14 @@ class SubCommand(InvokableApplicationCommand):
         )
         self.qualified_name = ""
 
+    @property
+    def body(self) -> Option:
+        return self.option
+
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str
     ) -> Any:
-        autocomp = self.autocompleters.get(param)
-        if autocomp is None:
-            return None
-        if not callable(autocomp):
-            return autocomp
-        choices = autocomp(inter, user_input)
-        if inspect.isawaitable(choices):
-            return await choices
-        return choices
+        return await _call_autocompleter(self, param, inter, user_input)
 
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
         if self.guild_only and inter.guild_id is None:
@@ -220,6 +270,19 @@ class SubCommand(InvokableApplicationCommand):
                 kwargs[v] = kwargs.pop(k)
         kwargs = await resolve_param_kwargs(self.callback, inter, kwargs)
         return await super().invoke(inter, *args, **kwargs)
+
+    def autocomplete(
+        self, option_name: str
+    ) -> Callable[[Callable], Callable]:
+        """
+        A decorator that registers an autocomplete function for the specified option.
+
+        Parameters
+        ----------
+        option_name: :class:`str`
+            The name of the slash command option.
+        """
+        return _autocomplete(self, option_name)
 
 
 class InvokableSlashCommand(InvokableApplicationCommand):
@@ -401,6 +464,19 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         return decorator
 
+    def autocomplete(
+        self, option_name: str
+    ) -> Callable[[Callable], Callable]:
+        """
+        A decorator that registers an autocomplete function for the specified option.
+
+        Parameters
+        ----------
+        option_name: :class:`str`
+            The name of the slash command option.
+        """
+        return _autocomplete(self, option_name)
+
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
     ) -> None:
@@ -420,23 +496,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str
     ) -> Any:
-        autocomp = self.autocompleters.get(param)
-        if autocomp is None:
-            return None
-        if not callable(autocomp):
-            return autocomp
-
-        # possibly pass in filled options as a kwarg
-        filled = inter.filled_options
-        del filled[inter.data.focused_option.name]
-        try:
-            choices = autocomp(inter, user_input, **filled)
-        except TypeError:
-            choices = autocomp(inter, user_input)
-
-        if inspect.isawaitable(choices):
-            return await choices
-        return choices
+        return await _call_autocompleter(self, param, inter, user_input)
 
     async def _call_relevant_autocompleter(self, inter: ApplicationCommandInteraction) -> None:
         chain, _ = inter.data._get_chain_and_kwargs()
