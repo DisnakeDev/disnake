@@ -1583,18 +1583,20 @@ class Webhook(BaseWebhook):
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
 
             .. versionadded:: 2.0
         files: List[:class:`File`]
-            A list of files to send with the content. This cannot be mixed with the
-            ``file`` parameter.
-            Files will be appended to the message.
+            A list of files to upload. This cannot be mixed with the ``file`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
 
             .. versionadded:: 2.0
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
         view: Optional[:class:`~disnake.ui.View`]
@@ -1635,6 +1637,11 @@ class Webhook(BaseWebhook):
                 raise InvalidArgument("This webhook does not have state associated with it")
 
             self._state.prevent_view_updates_for(message_id)
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if attachments is MISSING and (file or files):
+            attachments = (await self.fetch_message(message_id)).attachments
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._state, "allowed_mentions", None

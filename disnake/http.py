@@ -65,6 +65,7 @@ _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from .file import File
+    from .message import Attachment
     from .enums import (
         AuditLogAction,
         InteractionResponseType,
@@ -1999,7 +2000,11 @@ class HTTPClient:
         content: Optional[str] = None,
         embeds: Optional[List[embed.Embed]] = None,
         allowed_mentions: Optional[message.AllowedMentions] = None,
+        attachments: Optional[List[Attachment]] = None,
     ):
+        # TODO: this does not work how it should (e.g. `embeds=[]` is ignored).
+        #       This method (or rather its calling methods) is completely unused, and hence likely untested
+
         payload: Dict[str, Any] = {}
         if content:
             payload["content"] = content
@@ -2007,6 +2012,8 @@ class HTTPClient:
             payload["embeds"] = embeds
         if allowed_mentions:
             payload["allowed_mentions"] = allowed_mentions
+        if attachments:
+            payload["attachments"] = attachments
 
         if file:
             multipart = to_multipart(payload, [file])
@@ -2057,6 +2064,7 @@ class HTTPClient:
         content: Optional[str] = None,
         embeds: Optional[List[embed.Embed]] = None,
         allowed_mentions: Optional[message.AllowedMentions] = None,
+        attachments: Optional[List[Attachment]] = None,
     ) -> Response[message.Message]:
         r = Route(
             "PATCH",
@@ -2065,7 +2073,12 @@ class HTTPClient:
             interaction_token=token,
         )
         return self._edit_webhook_helper(
-            r, file=file, content=content, embeds=embeds, allowed_mentions=allowed_mentions
+            r,
+            file=file,
+            content=content,
+            embeds=embeds,
+            allowed_mentions=allowed_mentions,
+            attachments=attachments,
         )
 
     def delete_original_interaction_response(
@@ -2113,6 +2126,7 @@ class HTTPClient:
         content: Optional[str] = None,
         embeds: Optional[List[embed.Embed]] = None,
         allowed_mentions: Optional[message.AllowedMentions] = None,
+        attachments: Optional[List[Attachment]] = None,
     ) -> Response[message.Message]:
         r = Route(
             "PATCH",
@@ -2122,7 +2136,12 @@ class HTTPClient:
             message_id=message_id,
         )
         return self._edit_webhook_helper(
-            r, file=file, content=content, embeds=embeds, allowed_mentions=allowed_mentions
+            r,
+            file=file,
+            content=content,
+            embeds=embeds,
+            allowed_mentions=allowed_mentions,
+            attachments=attachments,
         )
 
     def delete_followup_message(

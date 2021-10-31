@@ -1453,6 +1453,7 @@ class Message(Hashable):
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
         suppress: :class:`bool`
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
@@ -1496,6 +1497,11 @@ class Message(Hashable):
             previous_allowed_mentions = self._state.allowed_mentions
         else:
             previous_allowed_mentions = None
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if "attachments" not in fields and (fields.get("file") or fields.get("files")):
+            fields["attachments"] = self.attachments
 
         return await _edit_handler(
             self,
@@ -1961,6 +1967,7 @@ class PartialMessage(Hashable):
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
         suppress: :class:`bool`
@@ -2004,6 +2011,11 @@ class PartialMessage(Hashable):
         :class:`Message`
             The message that was edited.
         """
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if "attachments" not in fields and (fields.get("file") or fields.get("files")):
+            fields["attachments"] = (await self.fetch()).attachments
 
         return await _edit_handler(
             self,
