@@ -70,9 +70,7 @@ def _autocomplete(
             break
 
     if not exists:
-        raise ValueError(
-            f"Option '{option_name}' doesn't exist in '{self.qualified_name}'"
-        )
+        raise ValueError(f"Option '{option_name}' doesn't exist in '{self.qualified_name}'")
 
     def decorator(func: Callable) -> Callable:
         func.__slash_command__ = self
