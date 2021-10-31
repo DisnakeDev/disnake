@@ -125,8 +125,8 @@ def convert_emoji_reaction(emoji):
 async def _edit_handler(
     msg: Union[Message, PartialMessage],
     *,
-    default_allowed_mentions: Optional[AllowedMentions],
     default_flags: int,
+    previous_allowed_mentions: Optional[AllowedMentions],
     content: Optional[str] = MISSING,
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
@@ -168,8 +168,8 @@ async def _edit_handler(
         payload["flags"] = flags.value
 
     if allowed_mentions is MISSING:
-        if default_allowed_mentions:
-            payload["allowed_mentions"] = default_allowed_mentions.to_dict()
+        if previous_allowed_mentions:
+            payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
     else:
         if allowed_mentions:
             if msg._state.allowed_mentions is not None:
@@ -1493,14 +1493,14 @@ class Message(Hashable):
 
         # allowed_mentions can only be changed on the bot's own messages
         if self._state.allowed_mentions is not None and self.author.id == self._state.self_id:
-            default_allowed_mentions = self._state.allowed_mentions
+            previous_allowed_mentions = self._state.allowed_mentions
         else:
-            default_allowed_mentions = None
+            previous_allowed_mentions = None
 
         return await _edit_handler(
             self,
-            default_allowed_mentions=default_allowed_mentions,
             default_flags=self.flags.value,
+            previous_allowed_mentions=previous_allowed_mentions,
             **fields,
         )
 
@@ -2007,7 +2007,7 @@ class PartialMessage(Hashable):
 
         return await _edit_handler(
             self,
-            default_allowed_mentions=None,
             default_flags=0,
+            previous_allowed_mentions=None,
             **fields,
         )
