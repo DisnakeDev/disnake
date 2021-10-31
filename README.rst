@@ -143,8 +143,8 @@ Context Menus Example
 
     @bot.user_command()
     async def avatar(inter):
-        embed = disnake.Embed(title=str(inter.author))
-        embed.set_image(url=inter.author.avatar.url)
+        embed = disnake.Embed(title=str(inter.target))
+        embed.set_image(url=inter.target.avatar.url)
         await inter.response.send_message(embed=embed)
 
     bot.run('token')
