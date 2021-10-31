@@ -76,6 +76,7 @@ def _autocomplete(
         func.__slash_command__ = self
         self.autocompleters[option_name] = func
         return func
+
     return decorator
 
 
@@ -269,9 +270,7 @@ class SubCommand(InvokableApplicationCommand):
         kwargs = await resolve_param_kwargs(self.callback, inter, kwargs)
         return await super().invoke(inter, *args, **kwargs)
 
-    def autocomplete(
-        self, option_name: str
-    ) -> Callable[[Callable], Callable]:
+    def autocomplete(self, option_name: str) -> Callable[[Callable], Callable]:
         """
         A decorator that registers an autocomplete function for the specified option.
 
@@ -462,9 +461,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         return decorator
 
-    def autocomplete(
-        self, option_name: str
-    ) -> Callable[[Callable], Callable]:
+    def autocomplete(self, option_name: str) -> Callable[[Callable], Callable]:
         """
         A decorator that registers an autocomplete function for the specified option.
 
