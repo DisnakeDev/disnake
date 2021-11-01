@@ -444,7 +444,9 @@ class Guild(Hashable):
     def _from_data(self, guild: GuildPayload) -> None:
         # according to Stan, this is always available even if the guild is unavailable
         # I don't have this guarantee when someone updates the guild.
-        self._member_count: Optional[int] = guild.get("member_count", None)
+        member_count = guild.get("member_count", None)
+        if member_count is not None:
+            self._member_count: int = member_count
 
         self.name: str = guild.get("name")
         self.region: VoiceRegion = try_enum(VoiceRegion, guild.get("region"))
@@ -508,9 +510,7 @@ class Guild(Hashable):
                 self._add_member(member)
 
         self._sync(guild)
-        self._large: Optional[bool] = (
-            None if self._member_count is None else self._member_count >= 250
-        )
+        self._large: Optional[bool] = None if member_count is None else self._member_count >= 250
 
         self.owner_id: Optional[int] = utils._get_as_snowflake(guild, "owner_id")
         self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(utils._get_as_snowflake(guild, "afk_channel_id"))  # type: ignore
@@ -565,9 +565,9 @@ class Guild(Hashable):
         members, which for this library is set to the maximum of 250.
         """
         if self._large is None:
-            if self._member_count is not None:
+            try:
                 return self._member_count >= 250
-            else:
+            except AttributeError:
                 return len(self._members) >= 250
         return self._large
 
@@ -938,9 +938,10 @@ class Guild(Hashable):
             accurate, it requires :attr:`Intents.members` to be specified.
 
         """
-        if self._member_count is None:
+        try:
+            return self._member_count
+        except AttributeError:
             return len(self._members)
-        return self._member_count
 
     @property
     def chunked(self) -> bool:
