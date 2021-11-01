@@ -11,6 +11,83 @@ Changelog
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
+.. _vp2p2p0
+
+v2.2.0
+-------
+
+New Features
+~~~~~~~~~~~~~~
+
+- Add :meth:`Interaction.send`
+- Add kwarg ``attachments`` to edit methods
+- Add kwargs ``file` and ``files`` to :meth:`InteractionResponse.edit_message`, :meth:`PartialMessage.edit` and :meth:`Message.edit`
+- Add kwarg ``file`` to :meth:`Embed.set_image` and :meth:`Embed.set_thumbnail`
+- Add kwarg ``delay`` to :meth:`Interaction.delete_original_message` and :meth:`WebhookMessage.delete`
+- Add kwarg ``delete_after`` to :meth:`InteractionResponse.send_message` and :meth:`WebhookMessage.send`
+- |commands| Add :meth:`InvokableSlashCommand.autocomplete <ext.commands.InvokableSlashCommand.autocomplete>` (alternative method of adding autocomplete functions)
+- |commands| Add :meth:`SubCommand.autocomplete <ext.commands.SubCommand.autocomplete>` (alternative method of adding autocomplete functions)
+- |commands| Add :meth:`Cog.cog_load <ext.commands.Cog.cog_load>`
+- |commands| Error handlers now can cancel each other by returning ``True``
+
+.. _vp2p1p5
+
+v2.1.5
+-------
+
+New Features
+~~~~~~~~~~~~~~
+
+- Add :class:`InteractionReference`
+- Add :class:`UnresolvedGuildApplicationCommandPermissions`
+- Add :attr:`Message.interaction`
+- Add kwargs ``min_value`` and ``max_value`` in :class:`Option`
+- |commands| Add kwarg ``min_value`` (with aliases ``ge``, ``gt``) to :func:`Param <ext.commands.Param>`
+- |commands| Add kwarg ``max_value`` (with aliases ``le``, ``lt``) to :func:`Param <ext.commands.Param>`
+- |commands| Add kwarg ``owner`` to :func:`guild_permissions <ext.commands.guild_permissions>`
+
+Bug Fixes
+~~~~~~~~~~
+
+- Command deletions on reconnections
+- Pending sync tasks on loop termination
+
+.. _vp2p1p4
+
+v2.1.4
+-------
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fixed some issues with application command permissions synchronisation
+
+.. _vp2p1p3:
+
+v2.1.3
+-------
+
+New Features
+~~~~~~~~~~~~~~
+
+- Add :class:`GuildApplicationCommandPermissions`
+- Add :class:`PartialGuildApplicationCommandPermissions`
+- Add :attr:`ApplicationCommandInteraction.filled_options` property
+- Add :func:`on_slash_command_completion`
+- Add :func:`on_user_command_completion`
+- Add :func:`on_message_command_completion`
+- |commands| Add :class:`AutoShardedInteractionBot <ext.commands.AutoShardedInteractionBot>`
+- |commands| Add :class:`InteractionBot <ext.commands.InteractionBot>`
+- |commands| Add :func:`guild_permissions <ext.commands.guild_permissions>`
+- |commands| Add kwargs ``sync_commands_on_cog_unload`` and ``sync_permissions`` to :class:`InteractionBotBase <ext.commands.InteractionBotBase>`
+
+Bug Fixes
+~~~~~~~~~~
+
+- Music
+- ``default_permission`` kwarg in user / message commands
+- Commands no longer sync during the loop termination
+
 .. _vp2p1p2:
 
 v2.1.2
