@@ -154,7 +154,7 @@ LANGUAGES = ["Python", "JavaScript", "TypeScript", "Java", "Rust", "Lisp", "Elix
 async def autocomplete_langs(
     inter: disnake.ApplicationCommandInteraction, string: str
 ) -> List[str]:
-    return list(filter(lambda lang: string in lang.lower(), LANGUAGES))
+    return [lang for lang in LANGUAGES if string in lang.lower()]
 
 
 @bot.slash_command()
@@ -163,6 +163,21 @@ async def autocomplete(
     language: str = Param(description="Your favorite language", autocomplete=autocomplete_langs),
 ):
     ...
+
+
+# From version 2.2.0
+# it's possible to create autocomplete options with the decorator @slash_command.autocomplete()
+
+
+@bot.slash_command()
+async def languages(inter: disnake.ApplicationCommandInteraction, language: str):
+    ...
+
+
+@languages.autocomplete("language")
+async def language_autocomp(inter: disnake.ApplicationCommandInteraction, string: str):
+    string = string.lower()
+    return [lang for lang in LANGUAGES if string in lang.lower()]
 
 
 # You can use docstrings to set the description of the command or even
