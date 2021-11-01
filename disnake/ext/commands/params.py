@@ -160,8 +160,8 @@ class ParamInfo:
         self.type = type or str
         self.channel_types = channel_types or []
 
-        self.le = _xt_to_xe(le, lt, -1)
-        self.ge = _xt_to_xe(ge, gt, 1)
+        self.max_value = _xt_to_xe(le, lt, -1)
+        self.min_value = _xt_to_xe(ge, gt, 1)
 
     @property
     def required(self) -> bool:
@@ -180,6 +180,30 @@ class ParamInfo:
                 return
 
         raise TypeError(f"Type {discord_type} is not a valid Param type")
+
+    @classmethod
+    def from_param(
+        cls,
+        param: inspect.Parameter,
+        type_hints: Dict[str, Any],
+        parsed_docstring: Dict[str, Any] = None,
+    ) -> ParamInfo:
+        # hopefully repeated parsing won't cause any problems
+        parsed_docstring = parsed_docstring or {}
+
+        if isinstance(param.default, cls):
+            self = param.default
+        else:
+            default = param.default if param.default is not inspect.Parameter.empty else ...
+            self = cls(default)
+
+        self.parse_parameter(param)
+        doc = parsed_docstring.get(param.name)
+        if doc:
+            self.parse_doc(doc["type"], doc["description"])
+        self.parse_annotation(type_hints.get(param.name, Any))
+
+        return self
 
     def __repr__(self):
         return (
@@ -348,8 +372,8 @@ class ParamInfo:
             choices=self.choices or None,
             channel_types=self.channel_types,
             autocomplete=self.autocomplete is not None,
-            min_value=self.ge,
-            max_value=self.le,
+            min_value=self.min_value,
+            max_value=self.max_value,
         )
 
 
@@ -367,22 +391,14 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     inter_param = parameters[1] if cog else parameters[0]
     parameters = parameters[2:] if cog else parameters[1:]
     type_hints = get_type_hints(command.callback)
+    docstring = command.docstring["params"]
 
     # extract params:
     params = []
     for parameter in parameters:
         if parameter.kind in [inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD]:
             continue
-        param = parameter.default
-        if not isinstance(param, ParamInfo):
-            param = ParamInfo(param if param is not parameter.empty else ...)
-
-        doc_param = command.docstring["params"].get(parameter.name)
-
-        param.parse_parameter(parameter)
-        if doc_param:
-            param.parse_doc(doc_param["type"], doc_param["description"])
-        param.parse_annotation(type_hints.get(parameter.name, Any))
+        param = ParamInfo.from_param(parameter, type_hints, docstring)
         params.append(param)
 
     # update connectors and autocompleters
@@ -413,15 +429,11 @@ async def resolve_param_kwargs(
     for parameter in sig.parameters.values():
         if parameter.kind in [inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD]:
             continue
-        param = parameter.default
-        if not isinstance(param, ParamInfo):
-            param = ParamInfo(param if param is not parameter.empty else ...)
-            try:
-                param.parse_parameter(parameter)
-                param.parse_annotation(type_hints.get(param.param_name, Any))
-            except TypeError:
-                # invalid annotations with old-style options
-                continue
+        try:
+            param = ParamInfo.from_param(parameter, type_hints)
+        except TypeError:
+            # invalid annotations with old-style options
+            continue
 
         if param.param_name in kwargs:
             kwargs[param.param_name] = await param.convert_argument(inter, kwargs[param.param_name])
