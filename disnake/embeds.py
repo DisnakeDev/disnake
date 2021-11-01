@@ -254,6 +254,8 @@ class Embed:
         if self.url is not EmptyEmbed:
             self.url = str(self.url)
 
+        self._files = []
+
         # try to fill in the more rich fields
 
         try:
