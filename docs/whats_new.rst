@@ -21,7 +21,7 @@ New Features
 
 - Add :meth:`Interaction.send`
 - Add kwarg ``attachments`` to edit methods
-- Add kwargs ``file` and ``files`` to :meth:`InteractionResponse.edit_message`, :meth:`PartialMessage.edit` and :meth:`Message.edit`
+- Add kwargs ``file`` and ``files`` to :meth:`InteractionResponse.edit_message`, :meth:`PartialMessage.edit` and :meth:`Message.edit`
 - Add kwarg ``file`` to :meth:`Embed.set_image` and :meth:`Embed.set_thumbnail`
 - Add kwarg ``delay`` to :meth:`Interaction.delete_original_message` and :meth:`WebhookMessage.delete`
 - Add kwarg ``delete_after`` to :meth:`InteractionResponse.send_message` and :meth:`WebhookMessage.send`
