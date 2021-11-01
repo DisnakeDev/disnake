@@ -180,7 +180,7 @@ async def language_autocomp(
 ) -> List[str]:
     langs = ["Python", "JavaScript", "TypeScript", "Java", "Rust", "Lisp", "Elixir"]
     string = string.lower()
-    return [lang for lang in langs if string in lang.lower()] 
+    return list(filter(lambda lang: string in lang.lower(), langs))
 
 
 # You can use docstrings to set the description of the command or even
