@@ -18,6 +18,7 @@ class TestBot(commands.Bot):
             intents=disnake.Intents.all(),
             help_command=None, # type: ignore
             sync_commands_debug=True,
+            sync_permissions=True,
             test_guilds=[768247229840359465],
         )
 
