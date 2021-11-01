@@ -63,7 +63,7 @@ class File:
     description: Optional[:class:`str`]
         The file's description.
 
-        .. versionadded:: 2.1
+        .. versionadded:: 2.3
     """
 
     __slots__ = ("fp", "filename", "spoiler", "description", "_original_pos", "_owner", "_closer")

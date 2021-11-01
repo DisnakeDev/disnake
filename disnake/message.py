@@ -255,7 +255,7 @@ class Attachment(Hashable):
     description: :class:`str`
         The attachment's description
 
-        .. versionadded:: 2.1
+        .. versionadded:: 2.3
     """
 
     __slots__ = (
@@ -412,6 +412,8 @@ class Attachment(Hashable):
         description: Optional[:class:`str`]
             The file's description. Copies this attachment's description by default,
             set to ``None`` to remove.
+
+            .. versionadded:: 2.3
 
         Raises
         ------
