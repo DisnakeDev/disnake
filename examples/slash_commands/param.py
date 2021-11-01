@@ -177,7 +177,7 @@ async def languages(inter: disnake.ApplicationCommandInteraction, language: str)
 @languages.autocomplete("language")
 async def language_autocomp(
     inter: disnake.ApplicationCommandInteraction, string: str
-) -> List[str]
+) -> List[str]:
     langs = ["Python", "JavaScript", "TypeScript", "Java", "Rust", "Lisp", "Elixir"]
     string = string.lower()
     return [lang for lang in langs if string in lang.lower()] 
