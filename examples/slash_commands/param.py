@@ -154,7 +154,7 @@ LANGUAGES = ["Python", "JavaScript", "TypeScript", "Java", "Rust", "Lisp", "Elix
 async def autocomplete_langs(
     inter: disnake.ApplicationCommandInteraction, string: str
 ) -> List[str]:
-    return list(filter(lambda lang: string in lang.lower(), LANGUAGES))
+    return [lang for lang in LANGUAGES if string in lang.lower()]
 
 
 @bot.slash_command()
@@ -175,12 +175,9 @@ async def languages(inter: disnake.ApplicationCommandInteraction, language: str)
 
 
 @languages.autocomplete("language")
-async def language_autocomp(
-    inter: disnake.ApplicationCommandInteraction, string: str
-) -> List[str]:
-    langs = ["Python", "JavaScript", "TypeScript", "Java", "Rust", "Lisp", "Elixir"]
+async def language_autocomp(inter: disnake.ApplicationCommandInteraction, string: str):
     string = string.lower()
-    return list(filter(lambda lang: string in lang.lower(), langs))
+    return [lang for lang in LANGUAGES if string in lang.lower()]
 
 
 # You can use docstrings to set the description of the command or even
