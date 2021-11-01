@@ -165,6 +165,20 @@ async def autocomplete(
     ...
 
 
+# From version 2.2.0
+# it's possible to create autocomplete options with the decorator @slash_command.autocomplete()
+
+
+@bot.slash_command()
+async def languages(inter: disnake.ApplicationCommandInteraction, language: str):
+    ...
+
+
+@languages.autocomplete("language")
+async def language_autocomp(inter: disnake.ApplicationCommandInteraction, string: str):
+    return ["Python", "JavaScript", "TypeScript", "Java", "Rust", "Lisp", "Elixir"] 
+
+
 # You can use docstrings to set the description of the command or even
 # the description of options. You should follow the ReStructuredText or numpy format.
 @bot.slash_command()
