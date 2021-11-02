@@ -442,13 +442,16 @@ class SyncWebhookMessage(Message):
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
         allowed_mentions: :class:`AllowedMentions`
