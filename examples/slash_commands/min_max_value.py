@@ -46,11 +46,13 @@ async def rocket_launch(
         await interaction.edit_original_message(content=sequencee)
         await asyncio.sleep(1)
 
-    # Here we will choice between "success" and "explosion", in order to know if the rocket launch was success or not.
+    # Here we will choice between "success" and "explosion",
+    # in order to know if the rocket launch was success or not.
     rocket = secrets.choice(["success", "explosion"])
 
     if rocket == "success":
-        # If the rocket launch was a success, we will edit the message and send that it was success.
+        # If the rocket launch was a success,
+        # we will edit the message and send that it was success.
         success = [
             """‏‏‎‏‏‎‏‏‎ ‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎🚀
     \n\nRocket launched successfully!"""
@@ -58,7 +60,8 @@ async def rocket_launch(
 
         await interaction.edit_original_message(content=success[0])
     else:
-        # If the rocket launch wasn't a succes and it exploded, we will edit the message and send that the rocket exploded.
+        # If the rocket launch wasn't a success and it exploded,
+        #  we will edit the message and send that it exploded.
         explosion = [
             """‏‏‎‏‏‎‏‏‎‏‏‎‏‏‎ ‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎💥
     \n\nOh no, the rocket exploded."""
