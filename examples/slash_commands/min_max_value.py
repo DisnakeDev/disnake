@@ -9,12 +9,12 @@ bot = commands.Bot(command_prefix="-")
 
 SEQUENCE = [
     """‎‎‎‎‎‎‎‏‏‎  ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎‏🚀
-    Rocket launch starting in 0.""",
+Rocket launch starting in 0.""",
     """‏‏‎   ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‏🚀
-    \nRocket launch starting in 0.""",
+\nRocket launch starting in 0.""",
     """‏‏‎ ‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎🚀
     \n
-    Rocket launch starting in 0.
+Rocket launch starting in 0.
     """,
 ]
 
