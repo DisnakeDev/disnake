@@ -1,12 +1,12 @@
 name: Bug Report
 description: Report broken or incorrect behaviour
-labels: unconfirmed bug
+labels: ["unconfirmed bug"]
 body:
   - type: markdown
     attributes:
       value: >
         Thanks for taking the time to fill out a bug.
-        If you want real-time support, consider joining our Discord at https://discord.gg/gJDbCw8aQy instead.
+        If you want real-time support, consider joining our [Discord server](https://discord.gg/gJDbCw8aQy) instead.
 
         Please note that this form is for bugs only!
   - type: input
@@ -54,17 +54,17 @@ body:
     attributes:
       label: System Information
       description: >
-        Run `python -m disnake -v` and paste this information below.
+        Run `python -m disnake -v` and paste the output below.
 
-        This command required v1.1.0 or higher of the library. If this errors out then show some basic
-        information involving your system such as operating system and Python version.
+        If you are unable to run this command, show some basic information involving
+        your system such as operating system and Python version.
     validations:
       required: true
   - type: checkboxes
     attributes:
       label: Checklist
       description: >
-        Let's make sure you've properly done due dilligence when reporting this issue!
+        Let's make sure you've properly done due diligence when reporting this issue!
       options:
         - label: I have searched the open issues for duplicates.
           required: true

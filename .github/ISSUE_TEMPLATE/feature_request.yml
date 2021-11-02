@@ -1,6 +1,6 @@
 name: Feature Request
 description: Suggest a feature for this library
-labels: feature request
+labels: ["feature request"]
 body:
   - type: input
     attributes:
@@ -41,8 +41,6 @@ body:
       label: The Current Solution
       description: >
         What is the current solution to the problem, if any?
-    validations:
-      required: false
   - type: textarea
     attributes:
       label: Additional Context
