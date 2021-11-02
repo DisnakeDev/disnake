@@ -67,4 +67,4 @@ async def rocket_launch(
         await interaction.edit_original_message(content=explosion[0])
 
 
-bot.run("OTAzNDIwMjI5NDMzMDQ0OTky.YXstpw.F5AFU1wM8guiOoZV1h-6n4ZdZ40")
+bot.run("token")
