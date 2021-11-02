@@ -482,6 +482,12 @@ class SyncWebhookMessage(Message):
         :class:`SyncWebhookMessage`
             The newly edited message.
         """
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if attachments is MISSING and (file or files):
+            attachments = self.attachments
+
         return self._state._webhook.edit_message(
             self.id,
             content=content,
