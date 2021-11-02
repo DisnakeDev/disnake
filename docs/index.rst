@@ -38,7 +38,6 @@ If you're having trouble with something, these resources might help.
 - Ask us and hang out with us in our :resource:`Discord <disnake>` server.
 - If you're looking for something specific, try the :ref:`index <genindex>` or :ref:`searching <search>`.
 - Report bugs in the :resource:`issue tracker <issues>`.
-- Ask in our :resource:`GitHub discussions page <discussions>`.
 
 Extensions
 ------------
