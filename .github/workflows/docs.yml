@@ -1,0 +1,11 @@
+- name: Sphinx Build
+  # You may pin to the exact commit or the version.
+  # uses: ammaraskar/sphinx-action@8b4f60114d7fd1faeba1a712269168508d4750d2
+  uses: ammaraskar/sphinx-action@0.4
+  with:
+    # The folder containing your sphinx docs.
+    docs-folder: # default is docs/
+    # The command used to build your documentation.
+    build-command: # optional, default is make html
+    # Run before the build command, you can use this to install system level dependencies, for example with "apt-get update -y && apt-get install -y perl"
+    pre-build-command: # optional
