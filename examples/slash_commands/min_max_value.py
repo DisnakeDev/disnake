@@ -8,14 +8,9 @@ bot = commands.Bot(command_prefix="-")
 # Here we create a simple sequence of messages for the following command.
 
 SEQUENCE = [
-    """‎‎‎‎‎‎‎‏‏‎  ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎‏🚀
-Rocket launch starting in 0.""",
-    """‏‏‎   ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‏🚀
-\nRocket launch starting in 0.""",
-    """‏‏‎ ‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎🚀
-    \n
-Rocket launch starting in 0.
-    """,
+    "‎‎‎‎‎‎‎‏‏‎  ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎‏🚀\nRocket launch starting in 0.",
+    "‏‏‎   ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‏🚀\n\nRocket launch starting in 0.",
+    "‏‏‎ ‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎🚀\n\n\nRocket launch starting in 0.",
 ]
 
 
@@ -54,9 +49,7 @@ async def rocket_launch(
         # If the rocket launch was a success,
         # we will edit the message and send that it was success.
         success = [
-            """‏‏‎‏‏‎‏‏‎ ‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎🚀
-            \n\nRocket launched successfully!
-            """
+            "‏‏‎‏‏‎‏‏‎ ‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎🚀\n\n\nRocket launched successfully!"
         ]
 
         await interaction.edit_original_message(content=success[0])
@@ -64,9 +57,7 @@ async def rocket_launch(
         # If the rocket launch wasn't a success and it exploded,
         #  we will edit the message and send that it exploded.
         explosion = [
-            """‏‏‎‏‏‎‏‏‎‏‏‎‏‏‎ ‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎💥
-            \n\nOh no, the rocket exploded.
-            """
+            "‏‏‎‏‏‎‏‏‎‏‏‎‏‏‎ ‏‏‎ ‎‏‏‎ ‎‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‎ ‎‏‏‏‏‎💥\n\n\nOh no, the rocket exploded."
         ]
 
         await interaction.edit_original_message(content=explosion[0])
