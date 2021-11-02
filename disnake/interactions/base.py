@@ -306,6 +306,12 @@ class Interaction:
         This method is also the only way to edit the original message if
         the message sent was ephemeral.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
         Parameters
         ------------
         content: Optional[:class:`str`]
@@ -787,6 +793,12 @@ class InteractionResponse:
             As a workaround, respond to the interaction first (e.g. using :meth:`.defer`),
             then edit the message using :meth:`.edit_original_message`.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``, or adding an embed with local files).
+
         Parameters
         -----------
         content: Optional[:class:`str`]
@@ -997,6 +1009,12 @@ class InteractionMessage(Message):
         """|coro|
 
         Edits the message.
+
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
         ------------

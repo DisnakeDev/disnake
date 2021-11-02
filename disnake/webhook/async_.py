@@ -689,6 +689,12 @@ class WebhookMessage(Message):
         .. versionchanged:: 2.0
             The edit is no longer in-place, instead the newly edited message is returned.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
         Parameters
         ------------
         content: Optional[:class:`str`]
@@ -1569,6 +1575,12 @@ class Webhook(BaseWebhook):
 
         .. versionchanged:: 2.0
             The edit is no longer in-place, instead the newly edited message is returned.
+
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
         ------------

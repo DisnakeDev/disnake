@@ -1425,6 +1425,12 @@ class Message(Hashable):
         .. versionchanged:: 1.3
             The ``suppress`` keyword-only parameter was added.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
         Parameters
         -----------
         content: Optional[:class:`str`]
@@ -1938,6 +1944,12 @@ class PartialMessage(Hashable):
 
         .. versionchanged:: 2.1
             :class:`disnake.Message` is always returned.
+
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
         -----------
