@@ -65,10 +65,10 @@ packages = [
 setup(
     name="disnake",
     author="Rapptz, EQUENOS",
-    url="https://github.com/EQUENOS/disnake",
+    url="https://github.com/DisnakeDev/disnake",
     project_urls={
         "Documentation": "https://disnake.readthedocs.io/en/latest/",
-        "Issue tracker": "https://github.com/EQUENOS/disnake/issues",
+        "Issue tracker": "https://github.com/DisnakeDev/disnake/issues",
     },
     version=version,
     packages=packages,

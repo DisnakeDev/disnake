@@ -205,7 +205,7 @@ class HTTPClient:
         self.use_clock: bool = not unsync_clock
 
         user_agent = (
-            "DiscordBot (https://github.com/EQUENOS/disnake {0}) Python/{1[0]}.{1[1]} aiohttp/{2}"
+            "DiscordBot (https://github.com/DisnakeDev/disnake {0}) Python/{1[0]}.{1[1]} aiohttp/{2}"
         )
         self.user_agent: str = user_agent.format(__version__, sys.version_info, aiohttp.__version__)
 
