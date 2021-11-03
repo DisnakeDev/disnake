@@ -13,7 +13,7 @@ disnake
 .. image:: https://img.shields.io/pypi/pyversions/disnake.svg
    :target: https://pypi.python.org/pypi/disnake
    :alt: PyPI supported Python versions
-.. image:: https://img.shields.io/github/commit-activity/w/EQUENOS/disnake.svg
+.. image:: https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg
    :target: https://github.com/DisnakeDev/disnake/commits
    :alt: Commit activity
 
