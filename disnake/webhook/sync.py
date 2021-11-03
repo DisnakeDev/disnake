@@ -428,6 +428,12 @@ class SyncWebhookMessage(Message):
     ) -> SyncWebhookMessage:
         """Edits the message.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
         Parameters
         ------------
         content: Optional[:class:`str`]
@@ -442,13 +448,16 @@ class SyncWebhookMessage(Message):
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
         allowed_mentions: :class:`AllowedMentions`
@@ -473,6 +482,12 @@ class SyncWebhookMessage(Message):
         :class:`SyncWebhookMessage`
             The newly edited message.
         """
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if attachments is MISSING and (file or files):
+            attachments = self.attachments
+
         return self._state._webhook.edit_message(
             self.id,
             content=content,
@@ -1052,6 +1067,12 @@ class SyncWebhook(BaseWebhook):
 
         .. versionadded:: 1.6
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
         Parameters
         ------------
         message_id: :class:`int`
@@ -1068,13 +1089,16 @@ class SyncWebhook(BaseWebhook):
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
         allowed_mentions: :class:`AllowedMentions`
@@ -1097,6 +1121,11 @@ class SyncWebhook(BaseWebhook):
 
         if self.token is None:
             raise InvalidArgument("This webhook does not have a token associated with it")
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if attachments is MISSING and (file or files):
+            attachments = self.fetch_message(message_id).attachments
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._state, "allowed_mentions", None

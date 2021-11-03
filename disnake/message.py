@@ -125,8 +125,8 @@ def convert_emoji_reaction(emoji):
 async def _edit_handler(
     msg: Union[Message, PartialMessage],
     *,
-    default_allowed_mentions: Optional[AllowedMentions],
     default_flags: int,
+    previous_allowed_mentions: Optional[AllowedMentions],
     content: Optional[str] = MISSING,
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
@@ -168,8 +168,8 @@ async def _edit_handler(
         payload["flags"] = flags.value
 
     if allowed_mentions is MISSING:
-        if default_allowed_mentions:
-            payload["allowed_mentions"] = default_allowed_mentions.to_dict()
+        if previous_allowed_mentions:
+            payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
     else:
         if allowed_mentions:
             if msg._state.allowed_mentions is not None:
@@ -248,6 +248,14 @@ class Attachment(Hashable):
         The attachment's `media type <https://en.wikipedia.org/wiki/Media_type>`_
 
         .. versionadded:: 1.7
+    ephemeral: :class:`bool`
+        Whether the attachment is ephemeral.
+
+        .. versionadded:: 2.1
+    description: :class:`str`
+        The attachment's description
+
+        .. versionadded:: 2.3
     """
 
     __slots__ = (
@@ -261,6 +269,7 @@ class Attachment(Hashable):
         "_http",
         "content_type",
         "ephemeral",
+        "description",
     )
 
     def __init__(self, *, data: AttachmentPayload, state: ConnectionState):
@@ -274,6 +283,7 @@ class Attachment(Hashable):
         self._http = state.http
         self.content_type: Optional[str] = data.get("content_type")
         self.ephemeral: bool = data.get("ephemeral", False)
+        self.description: Optional[str] = data.get("description")
 
     def is_spoiler(self) -> bool:
         """:class:`bool`: Whether this attachment contains a spoiler."""
@@ -370,7 +380,13 @@ class Attachment(Hashable):
         data = await self._http.get_from_cdn(url)
         return data
 
-    async def to_file(self, *, use_cached: bool = False, spoiler: bool = False) -> File:
+    async def to_file(
+        self,
+        *,
+        use_cached: bool = False,
+        spoiler: bool = False,
+        description: Optional[str] = MISSING,
+    ) -> File:
         """|coro|
 
         Converts the attachment into a :class:`File` suitable for sending via
@@ -393,6 +409,11 @@ class Attachment(Hashable):
             Whether the file is a spoiler.
 
             .. versionadded:: 1.4
+        description: Optional[:class:`str`]
+            The file's description. Copies this attachment's description by default,
+            set to ``None`` to remove.
+
+            .. versionadded:: 2.3
 
         Raises
         ------
@@ -409,8 +430,12 @@ class Attachment(Hashable):
             The attachment as a file suitable for sending.
         """
 
+        if description is MISSING:
+            description = self.description
         data = await self.read(use_cached=use_cached)
-        return File(io.BytesIO(data), filename=self.filename, spoiler=spoiler)
+        return File(
+            io.BytesIO(data), filename=self.filename, spoiler=spoiler, description=description
+        )
 
     def to_dict(self) -> AttachmentPayload:
         result: AttachmentPayload = {
@@ -419,7 +444,7 @@ class Attachment(Hashable):
             "proxy_url": self.proxy_url,
             "size": self.size,
             "url": self.url,
-            "spoiler": self.is_spoiler(),
+            "ephemeral": self.ephemeral,
         }
         if self.height:
             result["height"] = self.height
@@ -427,6 +452,8 @@ class Attachment(Hashable):
             result["width"] = self.width
         if self.content_type:
             result["content_type"] = self.content_type
+        if self.description:
+            result["description"] = self.description
         return result
 
 
@@ -1398,6 +1425,12 @@ class Message(Hashable):
         .. versionchanged:: 1.3
             The ``suppress`` keyword-only parameter was added.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
         Parameters
         -----------
         content: Optional[:class:`str`]
@@ -1428,6 +1461,7 @@ class Message(Hashable):
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
         suppress: :class:`bool`
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
@@ -1468,14 +1502,19 @@ class Message(Hashable):
 
         # allowed_mentions can only be changed on the bot's own messages
         if self._state.allowed_mentions is not None and self.author.id == self._state.self_id:
-            default_allowed_mentions = self._state.allowed_mentions
+            previous_allowed_mentions = self._state.allowed_mentions
         else:
-            default_allowed_mentions = None
+            previous_allowed_mentions = None
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if "attachments" not in fields and (fields.get("file") or fields.get("files")):
+            fields["attachments"] = self.attachments
 
         return await _edit_handler(
             self,
-            default_allowed_mentions=default_allowed_mentions,
             default_flags=self.flags.value,
+            previous_allowed_mentions=previous_allowed_mentions,
             **fields,
         )
 
@@ -1906,6 +1945,12 @@ class PartialMessage(Hashable):
         .. versionchanged:: 2.1
             :class:`disnake.Message` is always returned.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
         Parameters
         -----------
         content: Optional[:class:`str`]
@@ -1936,6 +1981,7 @@ class PartialMessage(Hashable):
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
         suppress: :class:`bool`
@@ -1980,9 +2026,14 @@ class PartialMessage(Hashable):
             The message that was edited.
         """
 
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if "attachments" not in fields and (fields.get("file") or fields.get("files")):
+            fields["attachments"] = (await self.fetch()).attachments
+
         return await _edit_handler(
             self,
-            default_allowed_mentions=None,
             default_flags=0,
+            previous_allowed_mentions=None,
             **fields,
         )

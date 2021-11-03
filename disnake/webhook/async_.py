@@ -153,9 +153,12 @@ class AsyncWebhookAdapter:
                     file.reset(seek=attempt)
 
                 if multipart:
-                    form_data = aiohttp.FormData()
+                    # NOTE: for `quote_fields`, see https://github.com/aio-libs/aiohttp/issues/4012
+                    form_data = aiohttp.FormData(quote_fields=False)
                     for p in multipart:
-                        form_data.add_field(**p)
+                        # manually escape double quotes and backslashes, like urllib3
+                        name = p.pop("name").replace('"', "%22").replace("\\", "\\\\")
+                        form_data.add_field(name=name, **p)
                     to_send = form_data
 
                 try:
@@ -686,6 +689,12 @@ class WebhookMessage(Message):
         .. versionchanged:: 2.0
             The edit is no longer in-place, instead the newly edited message is returned.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
         Parameters
         ------------
         content: Optional[:class:`str`]
@@ -700,17 +709,20 @@ class WebhookMessage(Message):
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
 
             .. versionadded:: 2.0
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
 
             .. versionadded:: 2.0
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
         view: Optional[:class:`~disnake.ui.View`]
@@ -740,6 +752,12 @@ class WebhookMessage(Message):
         :class:`WebhookMessage`
             The newly edited message.
         """
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if attachments is MISSING and (file or files):
+            attachments = self.attachments
+
         return await self._state._webhook.edit_message(
             self.id,
             content=content,
@@ -1564,6 +1582,12 @@ class Webhook(BaseWebhook):
         .. versionchanged:: 2.0
             The edit is no longer in-place, instead the newly edited message is returned.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
         Parameters
         ------------
         message_id: :class:`int`
@@ -1580,18 +1604,20 @@ class Webhook(BaseWebhook):
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
 
             .. versionadded:: 2.0
         files: List[:class:`File`]
-            A list of files to send with the content. This cannot be mixed with the
-            ``file`` parameter.
-            Files will be appended to the message.
+            A list of files to upload. This cannot be mixed with the ``file`` parameter.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
 
             .. versionadded:: 2.0
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
         view: Optional[:class:`~disnake.ui.View`]
@@ -1632,6 +1658,11 @@ class Webhook(BaseWebhook):
                 raise InvalidArgument("This webhook does not have state associated with it")
 
             self._state.prevent_view_updates_for(message_id)
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if attachments is MISSING and (file or files):
+            attachments = (await self.fetch_message(message_id)).attachments
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._state, "allowed_mentions", None

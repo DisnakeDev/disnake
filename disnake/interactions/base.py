@@ -306,6 +306,12 @@ class Interaction:
         This method is also the only way to edit the original message if
         the message sent was ephemeral.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
         Parameters
         ------------
         content: Optional[:class:`str`]
@@ -320,13 +326,16 @@ class Interaction:
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
         view: Optional[:class:`~disnake.ui.View`]
@@ -352,6 +361,11 @@ class Interaction:
         :class:`InteractionMessage`
             The newly edited message.
         """
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if attachments is MISSING and (file or files):
+            attachments = (await self.original_message()).attachments
 
         previous_mentions: Optional[AllowedMentions] = self._state.allowed_mentions
         params = handle_message_parameters(
@@ -779,6 +793,12 @@ class InteractionResponse:
             As a workaround, respond to the interaction first (e.g. using :meth:`.defer`),
             then edit the message using :meth:`.edit_original_message`.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``, or adding an embed with local files).
+
         Parameters
         -----------
         content: Optional[:class:`str`]
@@ -869,6 +889,7 @@ class InteractionResponse:
             if message_id:
                 state.prevent_view_updates_for(message_id)
             payload["components"] = [] if view is None else view.to_components()
+
         adapter = async_context.get()
         await adapter.create_interaction_response(
             parent.id,
@@ -989,6 +1010,12 @@ class InteractionMessage(Message):
 
         Edits the message.
 
+        .. note::
+            If the original message has embeds with images that were created from local files
+            (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
+            those images will be removed if the message's attachments are edited in any way
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
         Parameters
         ------------
         content: Optional[:class:`str`]
@@ -1003,13 +1030,16 @@ class InteractionMessage(Message):
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
-            Files will be appended to the message.
+            Files will be appended to the message, see the ``attachments`` parameter
+            to remove/replace existing files.
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
+            Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
         view: Optional[:class:`~disnake.ui.View`]
@@ -1035,6 +1065,12 @@ class InteractionMessage(Message):
         :class:`InteractionMessage`
             The newly edited message.
         """
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if attachments is MISSING and (file or files):
+            attachments = self.attachments
+
         return await self._state._interaction.edit_original_message(
             content=content,
             embeds=embeds,

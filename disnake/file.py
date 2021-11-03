@@ -60,14 +60,19 @@ class File:
         a string then the ``filename`` will default to the string given.
     spoiler: :class:`bool`
         Whether the attachment is a spoiler.
+    description: Optional[:class:`str`]
+        The file's description.
+
+        .. versionadded:: 2.3
     """
 
-    __slots__ = ("fp", "filename", "spoiler", "_original_pos", "_owner", "_closer")
+    __slots__ = ("fp", "filename", "spoiler", "description", "_original_pos", "_owner", "_closer")
 
     if TYPE_CHECKING:
         fp: io.BufferedIOBase
         filename: Optional[str]
         spoiler: bool
+        description: Optional[str]
 
     def __init__(
         self,
@@ -75,6 +80,7 @@ class File:
         filename: Optional[str] = None,
         *,
         spoiler: bool = False,
+        description: Optional[str] = None,
     ):
         if isinstance(fp, io.IOBase):
             if not (fp.seekable() and fp.readable()):
@@ -108,6 +114,7 @@ class File:
         self.spoiler = spoiler or (
             self.filename is not None and self.filename.startswith("SPOILER_")
         )
+        self.description = description
 
     def reset(self, *, seek: Union[int, bool] = True) -> None:
         # The `seek` parameter is needed because

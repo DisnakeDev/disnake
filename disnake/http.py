@@ -65,6 +65,7 @@ _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from .file import File
+    from .message import Attachment
     from .enums import (
         AuditLogAction,
         InteractionResponseType,
@@ -116,16 +117,31 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
 
 
 def to_multipart(payload: Dict[str, Any], files: Iterable[File]) -> List[Dict[str, Any]]:
-    multipart: List[Dict[str, Any]] = [{"name": "payload_json", "value": utils._to_json(payload)}]
+    # NOTE: this method modifies the provided `payload` and `payload["attachments"]` collections
+
+    attachments = payload.get("attachments", [])
+    multipart: List[Dict[str, Any]] = []
     for index, file in enumerate(files):
         multipart.append(
             {
-                "name": f"file{index}",
+                "name": f"files[{index}]",
                 "value": file.fp,
                 "filename": file.filename,
                 "content_type": "application/octet-stream",
             }
         )
+        attachments.append(
+            {
+                "id": index,
+                "description": file.description,
+            }
+        )
+
+    # if existing attachments weren't in the payload before and we
+    # didn't add any new ones, don't add the list to the payload.
+    if attachments:
+        payload["attachments"] = attachments
+    multipart.append({"name": "payload_json", "value": utils._to_json(payload)})
     return multipart
 
 
@@ -290,9 +306,12 @@ class HTTPClient:
                         f.reset(seek=tries)
 
                 if form:
-                    form_data = aiohttp.FormData()
+                    # NOTE: for `quote_fields`, see https://github.com/aio-libs/aiohttp/issues/4012
+                    form_data = aiohttp.FormData(quote_fields=False)
                     for params in form:
-                        form_data.add_field(**params)
+                        # manually escape double quotes and backslashes, like urllib3
+                        name = params.pop("name").replace('"', "%22").replace("\\", "\\\\")
+                        form_data.add_field(name=name, **params)
                     kwargs["data"] = form_data
 
                 try:
@@ -1981,7 +2000,11 @@ class HTTPClient:
         content: Optional[str] = None,
         embeds: Optional[List[embed.Embed]] = None,
         allowed_mentions: Optional[message.AllowedMentions] = None,
+        attachments: Optional[List[Attachment]] = None,
     ):
+        # TODO: this does not work how it should (e.g. `embeds=[]` is ignored).
+        #       This method (or rather its calling methods) is completely unused, and hence likely untested
+
         payload: Dict[str, Any] = {}
         if content:
             payload["content"] = content
@@ -1989,6 +2012,8 @@ class HTTPClient:
             payload["embeds"] = embeds
         if allowed_mentions:
             payload["allowed_mentions"] = allowed_mentions
+        if attachments:
+            payload["attachments"] = attachments
 
         if file:
             multipart = to_multipart(payload, [file])
@@ -2039,6 +2064,7 @@ class HTTPClient:
         content: Optional[str] = None,
         embeds: Optional[List[embed.Embed]] = None,
         allowed_mentions: Optional[message.AllowedMentions] = None,
+        attachments: Optional[List[Attachment]] = None,
     ) -> Response[message.Message]:
         r = Route(
             "PATCH",
@@ -2047,7 +2073,12 @@ class HTTPClient:
             interaction_token=token,
         )
         return self._edit_webhook_helper(
-            r, file=file, content=content, embeds=embeds, allowed_mentions=allowed_mentions
+            r,
+            file=file,
+            content=content,
+            embeds=embeds,
+            allowed_mentions=allowed_mentions,
+            attachments=attachments,
         )
 
     def delete_original_interaction_response(
@@ -2095,6 +2126,7 @@ class HTTPClient:
         content: Optional[str] = None,
         embeds: Optional[List[embed.Embed]] = None,
         allowed_mentions: Optional[message.AllowedMentions] = None,
+        attachments: Optional[List[Attachment]] = None,
     ) -> Response[message.Message]:
         r = Route(
             "PATCH",
@@ -2104,7 +2136,12 @@ class HTTPClient:
             message_id=message_id,
         )
         return self._edit_webhook_helper(
-            r, file=file, content=content, embeds=embeds, allowed_mentions=allowed_mentions
+            r,
+            file=file,
+            content=content,
+            embeds=embeds,
+            allowed_mentions=allowed_mentions,
+            attachments=attachments,
         )
 
     def delete_followup_message(
