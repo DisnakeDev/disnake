@@ -49,7 +49,7 @@ autodoc_typehints = "none"
 # napoleon_attr_annotations = False
 
 extlinks = {
-    "issue": ("https://github.com/EQUENOS/disnake/issues/%s", "GH-"),
+    "issue": ("https://github.com/DisnakeDev/disnake/issues/%s", "GH-"),
 }
 
 # Links used for cross-referencing stuff in other documentation
@@ -168,9 +168,9 @@ html_context = {
 
 resource_links = {
     "disnake": "https://discord.gg/gJDbCw8aQy",
-    "issues": "https://github.com/EQUENOS/disnake/issues",
-    "discussions": "https://github.com/EQUENOS/disnake/discussions",
-    "examples": f"https://github.com/EQUENOS/disnake/tree/{branch}/examples",
+    "issues": "https://github.com/DisnakeDev/disnake/issues",
+    "discussions": "https://github.com/DisnakeDev/disnake/discussions",
+    "examples": f"https://github.com/DisnakeDev/disnake/tree/{branch}/examples",
 }
 
 # Theme options are theme-specific and customize the look and feel of a theme

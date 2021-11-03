@@ -14,7 +14,7 @@ disnake
    :target: https://pypi.python.org/pypi/disnake
    :alt: PyPI supported Python versions
 .. image:: https://img.shields.io/github/commit-activity/w/EQUENOS/disnake.svg
-   :target: https://github.com/EQUENOS/disnake/commits
+   :target: https://github.com/DisnakeDev/disnake/commits
    :alt: Commit activity
 
 A modern, easy to use, feature-rich, and async ready API wrapper for Discord written in Python.
@@ -62,7 +62,7 @@ To install the development version, do the following:
 
 .. code:: sh
 
-    $ git clone https://github.com/EQUENOS/disnake
+    $ git clone https://github.com/DisnakeDev/disnake
     $ cd disnake
     $ python3 -m pip install -U .[voice]
 
