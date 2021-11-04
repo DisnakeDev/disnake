@@ -26,6 +26,7 @@ from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, TYPE_C
 import asyncio
 import datetime
 import functools
+import warnings
 
 from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
@@ -525,11 +526,14 @@ class InvokableApplicationCommand(ABC):
             inter.application_command = original
 
 
+# kwargs are annotated as None to ensure the user gets a linter error when using them
 def guild_permissions(
     guild_id: int,
-    role_ids: Mapping[int, bool] = None,
-    user_ids: Mapping[int, bool] = None,
+    *,
+    roles: Optional[Mapping[int, bool]] = None,
+    users: Optional[Mapping[int, bool]] = None,
     owner: bool = None,
+    **kwargs: None,
 ) -> Callable[[T], T]:
     """
     A decorator that sets application command permissions in the specified guild.
@@ -540,16 +544,22 @@ def guild_permissions(
     ----------
     guild_id: :class:`int`
         the ID of the guild to apply the permissions to.
-    role_ids: Mapping[:class:`int`, :class:`bool`]
+    roles: Mapping[:class:`int`, :class:`bool`]
         a mapping of role IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
-    user_ids: Mapping[:class:`int`, :class:`bool`]
+    users: Mapping[:class:`int`, :class:`bool`]
         a mapping of user IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
     owner: :class:`bool`
         whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
     """
-    perms = UnresolvedGuildApplicationCommandPermissions(
-        role_ids=role_ids, user_ids=user_ids, owner=owner
-    )
+    if kwargs:
+        warnings.warn(
+            f"guild_permissions got unexpected deprecated keyword arguments: {', '.join(map(repr, kwargs))}",
+            DeprecationWarning,
+        )
+        roles = roles or kwargs.get("role_ids")
+        users = users or kwargs.get("user_ids")
+
+    perms = UnresolvedGuildApplicationCommandPermissions(roles=roles, users=users, owner=owner)
 
     def decorator(func: T) -> T:
         if isinstance(func, InvokableApplicationCommand):
