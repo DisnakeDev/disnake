@@ -891,6 +891,17 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param after: The updated member's updated info.
     :type after: :class:`Member`
 
+.. function:: on_member_screening_decline(member)
+
+    Called when a :class:`Member` leaves a :class:`Guild` without completing
+    membership screening. This does not replace :func:`on_member_remove`;
+    both will be called.
+
+    This requires :attr:`Intents.members` to be enabled.
+
+    :param member: The member that left.
+    :type member: :class:`Member`
+
 .. function:: on_presence_update(before, after)
 
     Called when a :class:`Member` updates their presence.
