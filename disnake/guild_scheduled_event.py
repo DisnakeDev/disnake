@@ -60,7 +60,6 @@ class GuildEventEntityMetadata:
     __slots__ = ("speaker_ids", "location")
 
     def __init__(self, *, data: Dict[str, Any]):
-        data = data or {}
         self.speaker_ids: List[int] = list(map(int, data.get("speaker_ids", [])))
         self.location: Optional[str] = data.get("location")
 
@@ -118,7 +117,7 @@ class GuildScheduledEvent(Hashable):
     sku_ids: List[:class:`int`]
         Sku ids.
     creator: Optional[:class:`User`]
-        the creator of the event.
+        The creator of the event.
     skus: Optional[List[:class:`dict`]]
         A list of skus.
     user_count: Optional[:class:`int`]
@@ -171,8 +170,10 @@ class GuildScheduledEvent(Hashable):
             GuildScheduledEventEntityType, data["entity_type"]
         )
         self.entity_id: Optional[int] = _get_as_snowflake(data, "entity_id")
-        self.entity_metadata: GuildEventEntityMetadata = GuildEventEntityMetadata(
-            data=data["entity_metadata"]
+
+        entity_metadata = data["entity_metadata"]
+        self.entity_metadata: Optional[GuildEventEntityMetadata] = (
+            None if entity_metadata is None else GuildEventEntityMetadata(data=entity_metadata)
         )
         self.sku_ids: List[int] = list(map(int, data["sku_ids"]))
 

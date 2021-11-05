@@ -962,7 +962,7 @@ class Client:
         Returns
         --------
         Optional[:class:`.StageInstance`]
-            The returns stage instance of ``None`` if not found.
+            The returned stage instance or ``None`` if not found.
         """
         from .channel import StageChannel
 
@@ -970,6 +970,38 @@ class Client:
 
         if isinstance(channel, StageChannel):
             return channel.instance
+
+    def get_scheduled_event(self, id: int) -> Optional[GuildScheduledEvent]:
+        """Returns a scheduled event with the given ID.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        -----------
+        id: :class:`int`
+            The ID to search for.
+
+        Returns
+        --------
+        Optional[:class:`.GuildScheduledEvent`]
+            The returned scheduled event or ``None`` if not found.
+        """
+        return self._connection.get_scheduled_event(id)
+
+    def get_all_scheduled_events(self) -> List[GuildScheduledEvent]:
+        """Returns all scheduled events across all guilds.
+
+        .. versionadded:: 2.3
+
+        Returns
+        --------
+        List[:class:`.GuildScheduledEvent`]
+            The returned scheduled events.
+        """
+        result = []
+        for guild in self.guilds:
+            result.extend(guild._scheduled_events.values())
+        return result
 
     def get_guild(self, id: int, /) -> Optional[Guild]:
         """Returns a guild with the given ID.
@@ -1715,6 +1747,8 @@ class Client:
         """|coro|
 
         Retrieves a :class:`GuildScheduledEvent` from an ID.
+
+        .. versionadded:: 2.3
 
         Parameters
         ----------
