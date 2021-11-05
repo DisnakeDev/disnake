@@ -27,7 +27,7 @@ import re
 import math
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
 
-from .abc import User
+from .member import Member
 from .enums import (
     ApplicationCommandType,
     ChannelType,
@@ -544,7 +544,7 @@ class GuildApplicationCommandPermissions:
     async def edit(
         self,
         *,
-        permissions: Dict[Union[Role, User], bool] = None,
+        permissions: Dict[Union[Role, Member], bool] = None,
         roles: Dict[int, bool] = None,
         users: Dict[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
@@ -553,7 +553,7 @@ class GuildApplicationCommandPermissions:
 
         Parameters
         ----------
-        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
+        permissions: Mapping[Union[:class:`Role`, :class:`Member`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
         roles: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.
@@ -567,7 +567,7 @@ class GuildApplicationCommandPermissions:
             for obj, value in permissions.items():
                 if isinstance(obj, Role):
                     target_type = 1
-                elif isinstance(obj, User):
+                elif isinstance(obj, Member):
                     target_type = 2
                 else:
                     raise ValueError("Permission target should be an instance of Role or abc.User")
@@ -596,7 +596,7 @@ class PartialGuildApplicationCommandPermissions:
     ----------
     command_id: :class:`int`
         The ID of the app command you want to apply these permissions to.
-    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
+    permissions: Mapping[Union[:class:`Role`, :class:`Member`], :class:`bool`]
         Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
     roles: Mapping[:class:`int`, :class:`bool`]
         Role IDs to booleans.
@@ -608,7 +608,7 @@ class PartialGuildApplicationCommandPermissions:
         self,
         command_id: int,
         *,
-        permissions: Mapping[Union[Role, User], bool] = None,
+        permissions: Mapping[Union[Role, Member], bool] = None,
         roles: Mapping[int, bool] = None,
         users: Mapping[int, bool] = None,
     ):
@@ -619,7 +619,7 @@ class PartialGuildApplicationCommandPermissions:
             for obj, value in permissions.items():
                 if isinstance(obj, Role):
                     target_type = 1
-                elif isinstance(obj, User):
+                elif isinstance(obj, Member):
                     target_type = 2
                 else:
                     raise ValueError("Permission target should be an instance of Role or abc.User")
@@ -653,7 +653,7 @@ class UnresolvedGuildApplicationCommandPermissions:
 
     Parameters
     ----------
-    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
+    permissions: Mapping[Union[:class:`Role`, :class:`Member`], :class:`bool`]
         Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
     roles: Mapping[:class:`int`, :class:`bool`]
         Role IDs to booleans.
@@ -666,12 +666,12 @@ class UnresolvedGuildApplicationCommandPermissions:
     def __init__(
         self,
         *,
-        permissions: Mapping[Union[Role, User], bool] = None,
+        permissions: Mapping[Union[Role, Member], bool] = None,
         roles: Mapping[int, bool] = None,
         users: Mapping[int, bool] = None,
         owner: bool = None,
     ):
-        self.permissions: Optional[Mapping[Union[Role, User], bool]] = permissions
+        self.permissions: Optional[Mapping[Union[Role, Member], bool]] = permissions
         self.roles: Optional[Mapping[int, bool]] = roles
         self.users: Optional[Mapping[int, bool]] = users
         self.owner: Optional[bool] = owner

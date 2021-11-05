@@ -87,7 +87,7 @@ from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
-    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime, User as ABCUser
+    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
     from .channel import DMChannel
     from .member import Member
     from .message import Message
@@ -2290,7 +2290,7 @@ class Client:
         guild_id: int,
         command_id: int,
         *,
-        permissions: Mapping[Union[Role, ABCUser], bool] = None,
+        permissions: Mapping[Union[Role, Member], bool] = None,
         roles: Mapping[int, bool] = None,
         users: Mapping[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
@@ -2303,7 +2303,7 @@ class Client:
             The ID of the guild where the permissions should be applied.
         command_id: :class:`int`
             The ID of the app command you want to apply these permissions to.
-        permissions: Mapping[Union[:class:`~disnake.Role`, :class:`disnake.abc.User`], :class:`bool`]
+        permissions: Mapping[Union[:class:`~disnake.Role`, :class:`Member`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
         roles: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.

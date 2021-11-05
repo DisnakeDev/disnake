@@ -30,7 +30,7 @@ class SlashCommands(commands.Cog):
         return ["XD", ":D", ":)", ":|", ":("]
 
     @commands.slash_command()
-    @commands.guild_permissions(768247229840359465, {815866581233041428: False})
+    @commands.guild_permissions(768247229840359465, roles={815866581233041428: False})
     async def alt_auto(
         self,
         inter: disnake.AppCmdInter,
@@ -39,16 +39,16 @@ class SlashCommands(commands.Cog):
         await inter.send(mood)
 
     @commands.slash_command()
-    async def parent(self, inter):
+    async def check(self, inter):
         pass
 
-    @parent.sub_command_group()
-    async def group(self, inter):
+    @check.sub_command_group()
+    async def out(self, inter):
         pass
 
-    @group.sub_command(description="Nested command")
-    async def subcmd(self, inter: disnake.AppCmdInter):
-        await inter.send(f"{inter.application_command.qualified_name}")
+    @out.sub_command(description="Nested command")
+    async def events(self, inter: disnake.GuildCommandInteraction):
+        await inter.send(f"{inter.guild.scheduled_events}")
 
 
 def setup(bot):

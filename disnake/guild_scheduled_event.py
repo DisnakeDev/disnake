@@ -31,7 +31,8 @@ from .enums import (
     try_enum,
 )
 from .user import User
-from .utils import cached_slot_property, parse_time
+from .mixins import Hashable
+from .utils import cached_slot_property, parse_time, _get_as_snowflake
 
 if TYPE_CHECKING:
     from .abc import GuildChannel
@@ -59,13 +60,30 @@ class GuildEventEntityMetadata:
     __slots__ = ("speaker_ids", "location")
 
     def __init__(self, *, data: Dict[str, Any]):
+        data = data or {}
         self.speaker_ids: List[int] = list(map(int, data.get("speaker_ids", [])))
         self.location: Optional[str] = data.get("location")
 
 
-class GuildScheduledEvent:
+class GuildScheduledEvent(Hashable):
     """
     Represents guild scheduled events.
+
+    .. versionadded:: 2.3
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two scheduled events are equal.
+
+        .. describe:: x != y
+
+            Checks if two scheduled events are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the scheduled event's hash.
 
     Attributes
     ----------
@@ -73,7 +91,7 @@ class GuildScheduledEvent:
         The id of the event.
     guild_id: :class:`int`
         The guild id of the event.
-    channel_id: :class:`int`
+    channel_id: Optional[:class:`int`]
         The channel id of the event.
     creator_id: :class:`int`
         The id of the user that created the event.
@@ -81,11 +99,11 @@ class GuildScheduledEvent:
         The name of the event.
     description: :class:`str`
         The description of the event.
-    image: :class:`str`
+    image: Optional[:class:`str`]
         The image of the event.
     scheduled_start_time: :class:`datetime`
         The time the event will start.
-    scheduled_end_time: :class:`datetime`
+    scheduled_end_time: Optional[:class:`datetime`]
         The time the event will end, or ``None`` if the event does not have a scheduled time to end.
     privacy_level: :class:`StagePrivacyLevel`
         Event privacy level.
@@ -93,7 +111,7 @@ class GuildScheduledEvent:
         The scheduled status of the event.
     entity_type: :class:`GuildScheduledEventEntityType`
         The scheduled entity type of the event.
-    entity_id: :class:`int`
+    entity_id: Optional[:class:`int`]
         Entity id.
     entity_metadata: :class:`GuildEventEntityMetadata`
         Metadata for the event.
@@ -101,12 +119,10 @@ class GuildScheduledEvent:
         Sku ids.
     creator: Optional[:class:`User`]
         the creator of the event.
-    skus: List[:class:`dict`]
+    skus: Optional[List[:class:`dict`]]
         A list of skus.
     user_count: Optional[:class:`int`]
         Users subscribed to the event.
-
-    .. versionadded:: 2.3
     """
 
     __slots__ = (
@@ -135,17 +151,20 @@ class GuildScheduledEvent:
 
     def __init__(self, *, state: ConnectionState, data: Dict[str, Any]):
         self._state: ConnectionState = state
+        self._update(data)
+
+    def _update(self, data: Dict[str, Any]):
         self.id: int = int(data["id"])
         self.guild_id: int = int(data["guild_id"])
-        self.channel_id: int = int(data["channel_id"])
+        self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
         self.creator_id: int = int(data["creator_id"])
         self.name: str = data["name"]
         self.description: Optional[str] = data.get("description")
-        self.image: str = data["image"]
+        self.image: Optional[str] = data["image"]
         self.scheduled_start_time: datetime = parse_time( # type: ignore
             data["scheduled_start_time"]
         )
-        self.scheduled_end_time: datetime = parse_time(  # type: ignore
+        self.scheduled_end_time: Optional[datetime] = parse_time(
             data["scheduled_end_time"]
         )
         self.privacy_level: StagePrivacyLevel = try_enum(StagePrivacyLevel, data["privacy_level"])
@@ -155,7 +174,7 @@ class GuildScheduledEvent:
         self.entity_type: GuildScheduledEventEntityType = try_enum(
             GuildScheduledEventEntityType, data["entity_type"]
         )
-        self.entity_id: int = int(data["entity_id"])
+        self.entity_id: Optional[int] = _get_as_snowflake(data, "entity_id")
         self.entity_metadata: GuildEventEntityMetadata = GuildEventEntityMetadata(
             data=data["entity_metadata"]
         )
@@ -163,9 +182,9 @@ class GuildScheduledEvent:
 
         creator_data = data.get("creator")
         self.creator: Optional[User] = (
-            None if creator_data is None else User(state=state, data=creator_data)
+            None if creator_data is None else User(state=self._state, data=creator_data)
         )
-        self.skus: list = data["skus"]  # TODO: what is this
+        self.skus: Optional[list] = data.get("skus")  # TODO: what is this
         self.user_count: Optional[int] = data.get("user_count")
 
     @cached_slot_property("_cs_guild")
@@ -176,6 +195,8 @@ class GuildScheduledEvent:
     @cached_slot_property("_cs_channel")
     def channel(self) -> Optional[GuildChannel]:  # TODO: better type hints?
         """:class:`GuildChannel` The channel of the event."""
+        if self.channel_id is None:
+            return None
         guild = self.guild
         return None if guild is None else guild.get_channel(self.channel_id)
 

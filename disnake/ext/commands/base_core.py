@@ -529,7 +529,6 @@ class InvokableApplicationCommand(ABC):
 # kwargs are annotated as None to ensure the user gets a linter error when using them
 def guild_permissions(
     guild_id: int,
-    *,
     roles: Optional[Mapping[int, bool]] = None,
     users: Optional[Mapping[int, bool]] = None,
     owner: bool = None,

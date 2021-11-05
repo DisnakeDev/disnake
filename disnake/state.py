@@ -1271,23 +1271,55 @@ class ConnectionState:
 
     def parse_guild_scheduled_event_create(self, data) -> None:
         scheduled_event = GuildScheduledEvent(state=self, data=data)
+        guild = scheduled_event.guild
+        if guild is not None:
+            guild._scheduled_events[scheduled_event.id] = scheduled_event
         self.dispatch("guild_scheduled_event_create", scheduled_event)
 
     def parse_guild_scheduled_event_update(self, data) -> None:
-        scheduled_event = GuildScheduledEvent(state=self, data=data)
-        self.dispatch("guild_scheduled_event_update", scheduled_event)
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is not None:
+            scheduled_event = guild._scheduled_events.get(int(data["id"]))
+            if scheduled_event is not None:
+                old_scheduled_event = copy.copy(scheduled_event)
+                scheduled_event._update(data)
+                self.dispatch("guild_scheduled_event_update", old_scheduled_event, scheduled_event)
+            else:
+                _log.debug(
+                    "GUILD_SCHEDULED_EVENT_UPDATE referencing "
+                    "unknown scheduled event ID: %s. Discarding.",
+                    data["id"],
+                )
+        else:
+            _log.debug(
+                "GUILD_SCHEDULED_EVENT_UPDATE referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
 
     def parse_guild_scheduled_event_delete(self, data) -> None:
         scheduled_event = GuildScheduledEvent(state=self, data=data)
+        guild = scheduled_event.guild
+        if guild is not None:
+            guild._scheduled_events.pop(scheduled_event.id, None)
         self.dispatch("guild_scheduled_event_delete", scheduled_event)
 
     def parse_guild_scheduled_event_user_create(self, data) -> None:
         event_id = int(data["guild_scheduled_event_id"])
         user_id = int(data["user_id"])
+        event = self.get_scheduled_event(event_id)
+        user = self.get_user(user_id)
+        self.dispatch("raw_guild_scheduled_event_subscribe", event_id, user_id)
+        if event is not None and user is not None:
+            self.dispatch("guild_scheduled_event_subscribe", event, user)
 
     def parse_guild_scheduled_event_user_delete(self, data) -> None:
         event_id = int(data["guild_scheduled_event_id"])
         user_id = int(data["user_id"])
+        event = self.get_scheduled_event(event_id)
+        user = self.get_user(user_id)
+        self.dispatch("raw_guild_scheduled_event_unsubscribe", event_id, user_id)
+        if event is not None and user is not None:
+            self.dispatch("guild_scheduled_event_unsubscribe", event, user)
 
     def _get_create_guild(self, data):
         if data.get("unavailable") is False:
@@ -1697,6 +1729,12 @@ class ConnectionState:
             channel = guild._resolve_channel(id)
             if channel is not None:
                 return channel
+
+    def get_scheduled_event(self, event_id: int) -> Optional[GuildScheduledEvent]:
+        for guild in self.guilds:
+            event = guild.get_scheduled_event(event_id)
+            if event is not None:
+                return event
 
     def create_message(
         self,

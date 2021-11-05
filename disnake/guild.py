@@ -288,7 +288,7 @@ class Guild(Hashable):
         "_public_updates_channel_id",
         "_stage_instances",
         "_threads",
-        "_application_commands",
+        "_scheduled_events",
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
@@ -304,7 +304,6 @@ class Guild(Hashable):
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
         self._threads: Dict[int, Thread] = {}
-        self._application_commands: Dict[int, ApplicationCommand] = {}
         self._state: ConnectionState = state
         self._from_data(data)
 
@@ -504,6 +503,11 @@ class Guild(Hashable):
             stage_instance = StageInstance(guild=self, data=s, state=state)
             self._stage_instances[stage_instance.id] = stage_instance
 
+        self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
+        for s in guild.get("guild_scheduled_events", []):
+            scheduled_event = GuildScheduledEvent(data=s, state=state)
+            self._scheduled_events[scheduled_event.id] = scheduled_event
+
         cache_joined = self._state.member_cache_flags.joined
         self_id = self._state.self_id
         for mdata in guild.get("members", []):
@@ -595,6 +599,14 @@ class Guild(Hashable):
         r = [ch for ch in self._channels.values() if isinstance(ch, StageChannel)]
         r.sort(key=lambda c: (c.position, c.id))
         return r
+
+    @property
+    def scheduled_events(self) -> List[GuildScheduledEvent]:
+        """List[:class:`GuildScheduledEvent`]: A list of scheduled events that belongs to this guild.
+
+        .. versionadded:: 2.3
+        """
+        return list(self._scheduled_events.values())
 
     @property
     def me(self) -> Member:
@@ -723,6 +735,23 @@ class Guild(Hashable):
             The returned thread or ``None`` if not found.
         """
         return self._threads.get(thread_id)
+
+    def get_scheduled_event(self, event_id: int) -> Optional[GuildScheduledEvent]:
+        """Returns a scheduled event with the given ID.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        -----------
+        event_id: :class:`int`
+            The ID to search for.
+
+        Returns
+        --------
+        Optional[:class:`GuildScheduledEvent`]
+            The returned scheduled event or ``None`` if not found.
+        """
+        return self._scheduled_events.get(event_id)
 
     @property
     def system_channel(self) -> Optional[TextChannel]:
@@ -3237,7 +3266,7 @@ class Guild(Hashable):
         self,
         command_id: int,
         *,
-        permissions: Mapping[Union[Role, ABCUser], bool] = None,
+        permissions: Mapping[Union[Role, Member], bool] = None,
         role_ids: Mapping[int, bool] = None,
         user_ids: Mapping[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
@@ -3248,7 +3277,7 @@ class Guild(Hashable):
         ----------
         command_id: :class:`int`
             The ID of the app command you want to apply these permissions to.
-        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
+        permissions: Mapping[Union[:class:`Role`, :class:`Member`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
         roles: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.
