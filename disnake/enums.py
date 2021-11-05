@@ -480,7 +480,7 @@ class AuditLogAction(Enum):
             return "stage_instance"
         elif v < 93:
             return "sticker"
-        elif v < 101:
+        elif v < 103:
             return "guild_scheduled_event"
         elif v < 113:
             return "thread"
