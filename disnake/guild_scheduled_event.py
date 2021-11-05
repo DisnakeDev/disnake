@@ -161,16 +161,12 @@ class GuildScheduledEvent(Hashable):
         self.name: str = data["name"]
         self.description: Optional[str] = data.get("description")
         self.image: Optional[str] = data["image"]
-        self.scheduled_start_time: datetime = parse_time( # type: ignore
+        self.scheduled_start_time: datetime = parse_time(  # type: ignore
             data["scheduled_start_time"]
         )
-        self.scheduled_end_time: Optional[datetime] = parse_time(
-            data["scheduled_end_time"]
-        )
+        self.scheduled_end_time: Optional[datetime] = parse_time(data["scheduled_end_time"])
         self.privacy_level: StagePrivacyLevel = try_enum(StagePrivacyLevel, data["privacy_level"])
-        self.status: GuildScheduledEventStatus = try_enum(
-            GuildScheduledEventStatus, data["status"]
-        )
+        self.status: GuildScheduledEventStatus = try_enum(GuildScheduledEventStatus, data["status"])
         self.entity_type: GuildScheduledEventEntityType = try_enum(
             GuildScheduledEventEntityType, data["entity_type"]
         )
