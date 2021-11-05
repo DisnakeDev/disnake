@@ -40,7 +40,7 @@ from typing import (
     cast,
 )
 
-from . import enums, utils
+from . import abc, enums, utils
 from .asset import Asset
 from .colour import Colour
 from .invite import Invite
@@ -58,7 +58,6 @@ __all__ = (
 if TYPE_CHECKING:
     import datetime
 
-    from . import abc
     from .emoji import Emoji
     from .guild import Guild
     from .member import Member
