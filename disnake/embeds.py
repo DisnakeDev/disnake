@@ -437,6 +437,8 @@ class Embed:
             The source URL for the image. Only HTTP(S) is supported.
         file: :class:`File`
             The file to use as the image.
+
+            .. versionadded:: 2.2
         """
         if file:
             if url:
@@ -487,6 +489,8 @@ class Embed:
             The source URL for the thumbnail. Only HTTP(S) is supported.
         file: :class:`File`
             The file to use as the image.
+
+            .. versionadded:: 2.2
         """
         if file:
             if url:
