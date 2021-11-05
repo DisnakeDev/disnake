@@ -3280,9 +3280,9 @@ class Guild(Hashable):
             The ID of the app command you want to apply these permissions to.
         permissions: Mapping[Union[:class:`Role`, :class:`Member`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-        roles: Mapping[:class:`int`, :class:`bool`]
+        role_ids: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.
-        users: Mapping[:class:`int`, :class:`bool`]
+        user_ids: Mapping[:class:`int`, :class:`bool`]
             User IDs to booleans.
 
         Returns
@@ -3293,8 +3293,8 @@ class Guild(Hashable):
         perms = PartialGuildApplicationCommandPermissions(
             command_id=command_id,
             permissions=permissions,
-            roles=role_ids,
-            users=user_ids,
+            role_ids=role_ids,
+            user_ids=user_ids,
         )
         return await self._state.edit_command_permissions(self.id, perms)
 

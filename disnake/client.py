@@ -2291,8 +2291,8 @@ class Client:
         command_id: int,
         *,
         permissions: Mapping[Union[Role, Member], bool] = None,
-        roles: Mapping[int, bool] = None,
-        users: Mapping[int, bool] = None,
+        role_ids: Mapping[int, bool] = None,
+        user_ids: Mapping[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
         """
         Edits guild permissions of a single command.
@@ -2305,9 +2305,9 @@ class Client:
             The ID of the app command you want to apply these permissions to.
         permissions: Mapping[Union[:class:`~disnake.Role`, :class:`Member`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-        roles: Mapping[:class:`int`, :class:`bool`]
+        role_ids: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.
-        users: Mapping[:class:`int`, :class:`bool`]
+        user_ids: Mapping[:class:`int`, :class:`bool`]
             User IDs to booleans.
 
         Returns
@@ -2318,8 +2318,8 @@ class Client:
         perms = PartialGuildApplicationCommandPermissions(
             command_id=command_id,
             permissions=permissions,
-            roles=roles,
-            users=users,
+            role_ids=role_ids,
+            user_ids=user_ids,
         )
         return await self._connection.edit_command_permissions(guild_id, perms)
 
