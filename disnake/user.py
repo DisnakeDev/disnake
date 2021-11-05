@@ -189,6 +189,16 @@ class BaseUser(_UserTag):
         return Asset._from_banner(self._state, self.id, self._banner)
 
     @property
+    def display_banner(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the users's display banner, if available.
+
+        For regular users this is just their uploaded banner.
+
+        .. versionadded:: 2.3
+        """
+        return self.banner
+
+    @property
     def accent_colour(self) -> Optional[Colour]:
         """Optional[:class:`Colour`]: Returns the user's accent colour, if applicable.
 
