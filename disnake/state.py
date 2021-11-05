@@ -49,6 +49,7 @@ import inspect
 import os
 
 from .guild import Guild
+from .guild_scheduled_event import GuildScheduledEvent
 from .activity import BaseActivity
 from .app_commands import (
     GuildApplicationCommandPermissions,
@@ -1267,6 +1268,26 @@ class ConnectionState:
         # guild won't be None here
         guild.stickers = tuple(map(lambda d: self.store_sticker(guild, d), data["stickers"]))  # type: ignore
         self.dispatch("guild_stickers_update", guild, before_stickers, guild.stickers)
+
+    def parse_guild_scheduled_event_create(self, data) -> None:
+        scheduled_event = GuildScheduledEvent(state=self, data=data)
+        self.dispatch("guild_scheduled_event_create", scheduled_event)
+
+    def parse_guild_scheduled_event_update(self, data) -> None:
+        scheduled_event = GuildScheduledEvent(state=self, data=data)
+        self.dispatch("guild_scheduled_event_update", scheduled_event)
+
+    def parse_guild_scheduled_event_delete(self, data) -> None:
+        scheduled_event = GuildScheduledEvent(state=self, data=data)
+        self.dispatch("guild_scheduled_event_delete", scheduled_event)
+
+    def parse_guild_scheduled_event_user_create(self, data) -> None:
+        event_id = int(data["guild_scheduled_event_id"])
+        user_id = int(data["user_id"])
+
+    def parse_guild_scheduled_event_user_delete(self, data) -> None:
+        event_id = int(data["guild_scheduled_event_id"])
+        user_id = int(data["user_id"])
 
     def _get_create_guild(self, data):
         if data.get("unavailable") is False:

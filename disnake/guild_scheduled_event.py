@@ -46,6 +46,8 @@ class GuildEventEntityMetadata:
     """
     Represents guild event entity metadata.
 
+    .. versionadded:: 2.3
+
     Attributes
     ----------
     speaker_ids: List[:class:`int`]
@@ -104,7 +106,7 @@ class GuildScheduledEvent:
     user_count: Optional[:class:`int`]
         Users subscribed to the event.
 
-    .. versionadded:: 2.2
+    .. versionadded:: 2.3
     """
 
     __slots__ = (

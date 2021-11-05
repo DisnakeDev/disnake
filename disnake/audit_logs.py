@@ -168,7 +168,7 @@ def _enum_transformer(enum: Type[T]) -> Callable[[AuditLogEntry, int], T]:
 
 
 def _transform_type(
-    entry: AuditLogEntry, data: Union[int]
+    entry: AuditLogEntry, data: int
 ) -> Union[enums.ChannelType, enums.StickerType]:
     if entry.action.name.startswith("sticker_"):
         return enums.try_enum(enums.StickerType, data)
@@ -232,7 +232,10 @@ class AuditLogChanges:
         'video_quality_mode':            (None, _enum_transformer(enums.VideoQualityMode)),
         'privacy_level':                 (None, _enum_transformer(enums.StagePrivacyLevel)),
         'format_type':                   (None, _enum_transformer(enums.StickerFormatType)),
+        'entity_type':                   (None, _enum_transformer(enums.GuildScheduledEventEntityType)),
+        'status':                        (None, _enum_transformer(enums.GuildScheduledEventStatus)),
         'type':                          (None, _transform_type),
+        'sku_ids':                       (None, lambda _, data: list(map(int, data))),
     }
     # fmt: on
 

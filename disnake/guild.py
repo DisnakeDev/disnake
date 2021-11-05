@@ -69,7 +69,10 @@ from .enums import (
     ContentFilter,
     NotificationLevel,
     NSFWLevel,
+    StagePrivacyLevel,
+    GuildScheduledEventEntityType,
 )
+from .guild_scheduled_event import GuildScheduledEvent
 from .mixins import Hashable
 from .user import User
 from .invite import Invite
@@ -3121,6 +3124,83 @@ class Guild(Hashable):
         channel_id = channel.id if channel else None
         await ws.voice_state(self.id, channel_id, self_mute, self_deaf)
 
+    # Scheduled events
+
+    async def fetch_scheduled_events(
+        self, *, with_user_count: bool = None
+    ) -> List[GuildScheduledEvent]:
+        """|coro|
+
+        Request all scheduled events in this guild.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ----------
+        with_user_count: :class:`bool`
+            Whether to include the field with subscriber count.
+
+        Returns
+        -------
+        List[:class:`GuildScheduledEvent`]
+        """
+        array = await self._state.http.get_guild_scheduled_events(self.id, with_user_count)
+        return [GuildScheduledEvent(state=self._state, data=data) for data in array]
+
+    async def create_scheduled_event(
+        self,
+        *,
+        name: str,
+        privacy_level: StagePrivacyLevel,
+        scheduled_start_time: datetime.datetime,
+        entity_type: GuildScheduledEventEntityType,
+        channel_id: int = None,
+        description: str = None,
+    ) -> List[GuildScheduledEvent]:
+        """|coro|
+
+        Creates a scheduled event in this guild.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name of the event.
+        privacy_level: :class:`StagePrivacyLevel`
+            The privacy level of the event.
+        scheduled_start_time: :class:`datetime`
+            The time to schedule the event.
+        entity_type: :class:`GuildScheduledEventEntityType`
+            The scheduled entity type of the event.
+        channel_id: :class:`int`
+            The channel id of the event.
+        description: :class:`str`
+            The description of the event.
+
+        Returns
+        -------
+        :class:`GuildScheduledEvent`
+            The guild scheduled event instance.
+
+        Raises
+        ------
+        Forbidden
+            You do not have proper permissions to create the event.
+        HTTPException
+            Creating the event failed.
+        """
+
+        return await self._state.http.create_guild_scheduled_event(
+            guild_id=self.id,
+            name=name,
+            privacy_level=privacy_level.value,
+            scheduled_start_time=scheduled_start_time.isoformat(),
+            entity_type=entity_type.value,
+            channel_id=channel_id,
+            description=description,
+        )
+
     # Application command permissions
 
     async def bulk_fetch_command_permissions(self) -> List[GuildApplicationCommandPermissions]:
@@ -3170,9 +3250,9 @@ class Guild(Hashable):
             The ID of the app command you want to apply these permissions to.
         permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-        role_ids: Mapping[:class:`int`, :class:`bool`]
+        roles: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.
-        user_ids: Mapping[:class:`int`, :class:`bool`]
+        users: Mapping[:class:`int`, :class:`bool`]
             User IDs to booleans.
 
         Returns
@@ -3183,8 +3263,8 @@ class Guild(Hashable):
         perms = PartialGuildApplicationCommandPermissions(
             command_id=command_id,
             permissions=permissions,
-            role_ids=role_ids,
-            user_ids=user_ids,
+            roles=role_ids,
+            users=user_ids,
         )
         return await self._state.edit_command_permissions(self.id, perms)
 

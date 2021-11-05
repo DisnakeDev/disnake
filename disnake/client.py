@@ -68,6 +68,7 @@ from .errors import *
 from .flags import ApplicationFlags, Intents
 from .gateway import *
 from .guild import Guild
+from .guild_scheduled_event import GuildScheduledEvent
 from .http import HTTPClient
 from .invite import Invite
 from .iterators import GuildIterator
@@ -1708,6 +1709,31 @@ class Client:
         invite_id = utils.resolve_invite(invite)
         await self.http.delete_invite(invite_id)
 
+    # Guild scheduled events
+
+    async def fetch_guild_scheduled_event(self, event_id: int) -> GuildScheduledEvent:
+        """|coro|
+
+        Retrieves a :class:`GuildScheduledEvent` from an ID.
+
+        Parameters
+        ----------
+        event_id: :class:`int`
+            The event's ID to fetch from.
+
+        Raises
+        ------
+        :exc:`.HTTPException`
+            Getting the scheduled event failed.
+
+        Returns
+        --------
+        :class:`GuildScheduledEvent`
+            The guild scheduled event from the ID.
+        """
+        data = await self.http.get_guild_scheduled_event(event_id)
+        return GuildScheduledEvent(state=self._connection, data=data)
+
     # Miscellaneous stuff
 
     async def fetch_widget(self, guild_id: int, /) -> Widget:
@@ -2265,8 +2291,8 @@ class Client:
         command_id: int,
         *,
         permissions: Mapping[Union[Role, ABCUser], bool] = None,
-        role_ids: Mapping[int, bool] = None,
-        user_ids: Mapping[int, bool] = None,
+        roles: Mapping[int, bool] = None,
+        users: Mapping[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
         """
         Edits guild permissions of a single command.
@@ -2279,9 +2305,9 @@ class Client:
             The ID of the app command you want to apply these permissions to.
         permissions: Mapping[Union[:class:`~disnake.Role`, :class:`disnake.abc.User`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-        role_ids: Mapping[:class:`int`, :class:`bool`]
+        roles: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.
-        user_ids: Mapping[:class:`int`, :class:`bool`]
+        users: Mapping[:class:`int`, :class:`bool`]
             User IDs to booleans.
 
         Returns
@@ -2292,8 +2318,8 @@ class Client:
         perms = PartialGuildApplicationCommandPermissions(
             command_id=command_id,
             permissions=permissions,
-            role_ids=role_ids,
-            user_ids=user_ids,
+            roles=roles,
+            users=users,
         )
         return await self._connection.edit_command_permissions(guild_id, perms)
 
