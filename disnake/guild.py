@@ -507,6 +507,7 @@ class Guild(Hashable):
         for s in guild.get("guild_scheduled_events", []):
             scheduled_event = GuildScheduledEvent(data=s, state=state)
             self._scheduled_events[scheduled_event.id] = scheduled_event
+            state._scheduled_event_guilds[scheduled_event.id] = self.id
 
         cache_joined = self._state.member_cache_flags.joined
         self_id = self._state.self_id
