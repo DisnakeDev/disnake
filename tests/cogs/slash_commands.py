@@ -38,6 +38,18 @@ class SlashCommands(commands.Cog):
     ):
         await inter.send(mood)
 
+    @commands.slash_command()
+    async def parent(self, inter):
+        pass
+
+    @parent.sub_command_group()
+    async def group(self, inter):
+        pass
+
+    @group.sub_command(description="Nested command")
+    async def subcmd(self, inter: disnake.AppCmdInter):
+        await inter.send(f"{inter.application_command.qualified_name}")
+
 
 def setup(bot):
     bot.add_cog(SlashCommands(bot))
