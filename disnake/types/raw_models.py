@@ -78,6 +78,11 @@ class ReactionClearEmojiEvent(_ReactionClearEmojiEventOptional):
     emoji: PartialEmoji
 
 
+class MemberScreeningRejectEvent(TypedDict):
+    guild_id: Snowflake
+    user_id: Snowflake
+
+
 class _IntegrationDeleteEventOptional(TypedDict, total=False):
     application_id: Snowflake
 

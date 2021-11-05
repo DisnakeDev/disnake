@@ -34,6 +34,7 @@ if TYPE_CHECKING:
         MessageUpdateEvent,
         ReactionClearEvent,
         ReactionClearEmojiEvent,
+        MemberScreeningRejectEvent,
         IntegrationDeleteEvent,
     )
     from .message import Message
@@ -48,6 +49,7 @@ __all__ = (
     "RawReactionActionEvent",
     "RawReactionClearEvent",
     "RawReactionClearEmojiEvent",
+    "RawMemberScreeningRejectEvent",
     "RawIntegrationDeleteEvent",
 )
 
@@ -248,6 +250,26 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
             self.guild_id: Optional[int] = None
+
+
+class RawMemberScreeningRejectEvent(_RawReprMixin):
+    """Represents the payload for a :func:`on_raw_member_screening_reject` event.
+
+    .. versionadded:: 2.3
+
+    Attributes
+    -----------
+    guild_id: :class:`int`
+        The guild ID of the guild which the user left.
+    user_id: :class:`int`
+        The user ID of the user who left the guild.
+    """
+
+    __slots__ = ("guild_id", "user_id")
+
+    def __init__(self, data: MemberScreeningRejectEvent) -> None:
+        self.guild_id: int = int(data["guild_id"])
+        self.user_id: int = int(data["user_id"])
 
 
 class RawIntegrationDeleteEvent(_RawReprMixin):

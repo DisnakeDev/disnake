@@ -891,16 +891,34 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param after: The updated member's updated info.
     :type after: :class:`Member`
 
-.. function:: on_member_screening_decline(member)
+.. function:: on_member_screening_reject(member)
 
     Called when a :class:`Member` leaves a :class:`Guild` without completing
     membership screening. This does not replace :func:`on_member_remove`;
-    both will be called.
+    both will be called, given the approriate intents are enabled.
+
+    If the member is not found in the internal member cache, this event will
+    not be called (hence the requirement for :attr:`Intents.members`).
+    Consider using :func:`on_raw_member_screening_reject` instead.
 
     This requires :attr:`Intents.members` to be enabled.
 
+    .. versionadded:: 2.3
+
     :param member: The member that left.
     :type member: :class:`Member`
+
+.. function:: on_raw_member_screening_reject(payload)
+
+    Called when a :class:`Member` leaves a :class:`Guild` without completing
+    membership screening. Unlike :func:`on_member_screening_reject`, this is
+    called regardless of the state of the internal member cache, and therefore
+    does not require :attr:`Intents.members` to be enabled.
+
+    .. versionadded:: 2.3
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawMemberScreeningRejectEvent`
 
 .. function:: on_presence_update(before, after)
 
@@ -4145,6 +4163,14 @@ RawReactionClearEmojiEvent
 .. attributetable:: RawReactionClearEmojiEvent
 
 .. autoclass:: RawReactionClearEmojiEvent()
+    :members:
+
+RawMemberScreeningRejectEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawMemberScreeningRejectEvent
+
+.. autoclass:: RawMemberScreeningRejectEvent()
     :members:
 
 RawIntegrationDeleteEvent
