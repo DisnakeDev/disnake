@@ -92,7 +92,7 @@ class GuildScheduledEvent(Hashable):
         The guild id of the event.
     channel_id: Optional[:class:`int`]
         The channel id of the event.
-    creator_id: :class:`int`
+    creator_id: Optional[:class:`int`]
         The id of the user that created the event.
     name: :class:`str`
         The name of the event.
@@ -156,7 +156,7 @@ class GuildScheduledEvent(Hashable):
         self.id: int = int(data["id"])
         self.guild_id: int = int(data["guild_id"])
         self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
-        self.creator_id: int = int(data["creator_id"])
+        self.creator_id: Optional[int] = _get_as_snowflake(data, "creator_id")
         self.name: str = data["name"]
         self.description: Optional[str] = data.get("description")
         self.image: Optional[str] = data["image"]
