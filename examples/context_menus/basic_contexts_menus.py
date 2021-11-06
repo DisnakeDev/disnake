@@ -21,10 +21,9 @@ async def on_ready():
 # should only have one requierd argument, which is
 # an instance of ApplicationCommandInteraction.
 @bot.user_command(name="Avatar")  # optional
-async def avatar(inter: disnake.UserCommandInteraction):
-    # inter.target is the user you clicked on
-    emb = disnake.Embed(title=f"{inter.target}'s avatar")
-    emb.set_image(url=inter.target.display_avatar.url)
+async def avatar(inter: disnake.ApplicationCommandInteraction, user: disnake.User):
+    emb = disnake.Embed(title=f"{user}'s avatar")
+    emb.set_image(url=user.display_avatar.url)
     await inter.response.send_message(embed=emb)
 
 
@@ -32,10 +31,9 @@ async def avatar(inter: disnake.UserCommandInteraction):
 # should only have one requierd argument, which is
 # an instance of ApplicationCommandInteraction.
 @bot.message_command(name="Reverse")  # optional
-async def reverse(inter: disnake.MessageCommandInteraction):
-    # inter.target is the message you clicked on
+async def reverse(inter: disnake.ApplicationCommandInteraction, message: disnake.Message):
     # Let's reverse it and send back
-    await inter.response.send_message(inter.target.content[::-1])
+    await inter.response.send_message(message.content[::-1])
 
 
 bot.run("TOKEN")
