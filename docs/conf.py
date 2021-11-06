@@ -187,6 +187,9 @@ def linkcode_resolve(domain, info):
             obj = getattr(obj, part)
         obj = inspect.unwrap(obj)  # type: ignore
 
+        if isinstance(obj, property):
+            obj = inspect.unwrap(obj.fget)  # type: ignore
+
         path = os.path.relpath(inspect.getsourcefile(obj), start=_disnake_module_path)
         src, lineno = inspect.getsourcelines(obj)
     except Exception:
