@@ -4225,22 +4225,6 @@ PartialMessage
 .. autoclass:: PartialMessage
     :members:
 
-Option
-~~~~~~
-
-.. attributetable:: Option
-
-.. autoclass:: Option()
-    :members:
-
-OptionChoice
-~~~~~~~~~~~~
-
-.. attributetable:: OptionChoice
-
-.. autoclass:: OptionChoice()
-    :members:
-
 SelectOption
 ~~~~~~~~~~~~~
 
