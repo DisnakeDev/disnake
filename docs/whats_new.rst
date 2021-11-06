@@ -11,7 +11,7 @@ Changelog
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
-.. _vp2p2p0
+.. _vp2p2p0:
 
 v2.2.0
 -------
@@ -30,7 +30,7 @@ New Features
 - |commands| Add :meth:`Cog.cog_load <ext.commands.Cog.cog_load>`
 - |commands| Error handlers now can cancel each other by returning ``True``
 
-.. _vp2p1p5
+.. _vp2p1p5:
 
 v2.1.5
 -------
@@ -52,7 +52,7 @@ Bug Fixes
 - Command deletions on reconnections
 - Pending sync tasks on loop termination
 
-.. _vp2p1p4
+.. _vp2p1p4:
 
 v2.1.4
 -------
