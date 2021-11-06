@@ -3174,8 +3174,8 @@ class Guild(Hashable):
         -------
         List[:class:`GuildScheduledEvent`]
         """
-        array = await self._state.http.get_guild_scheduled_events(self.id, with_user_count)
-        return [GuildScheduledEvent(state=self._state, data=data) for data in array]
+        events_data = await self._state.http.get_guild_scheduled_events(self.id, with_user_count)
+        return [GuildScheduledEvent(state=self._state, data=data) for data in events_data]
 
     async def create_scheduled_event(
         self,
