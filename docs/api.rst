@@ -4511,3 +4511,22 @@ Exception Hierarchy
                 - :exc:`Forbidden`
                 - :exc:`NotFound`
                 - :exc:`DiscordServerError`
+
+
+Warnings
+----------
+
+.. autoclass:: DiscordWarning
+
+.. autoclass:: ConfigWarning
+
+.. autoclass:: SyncWarning
+
+Warning Hierarchy
+~~~~~~~~~~~~~~~~~~~
+
+.. exception_hierarchy::
+
+    - :class:`DiscordWarning`
+        - :class:`ConfigWarning`
+        - :class:`SyncWarning`

@@ -26,8 +26,10 @@ from abc import ABC
 import re
 import math
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
+import warnings
 
 from .abc import User
+from .custom_warnings import ConfigWarning
 from .enums import (
     ApplicationCommandType,
     ChannelType,
@@ -708,7 +710,9 @@ class UnresolvedGuildApplicationCommandPermissions:
             users = self.users or {}
             common_ids = owner_ids.keys() & users.keys()
             if any(users[id] != owner_ids[id] for id in common_ids):
-                print("[WARNING] Conflicting permissions for owner(s) provided in users")
+                warnings.warn(
+                    "Conflicting permissions for owner(s) provided in users", ConfigWarning
+                )
 
             resolved_users = {**users, **owner_ids}
         else:
