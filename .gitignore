@@ -16,6 +16,6 @@ docs/crowdin.py
 test.py
 TODO.md
 build
-tests
 dist
 ADVANCED.rst
+secrets/

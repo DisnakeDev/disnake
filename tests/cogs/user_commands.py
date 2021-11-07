@@ -7,11 +7,8 @@ class UserCommands(commands.Cog):
         self.bot: commands.Bot = bot
 
     @commands.user_command(name="Avatar")
-    async def avatar(self, inter: disnake.UserCommandInteraction):
-        await inter.response.send_message(
-            inter.target.display_avatar.url,
-            ephemeral=True
-        )
+    async def avatar(self, inter: disnake.UserCommandInteraction, user: disnake.User):
+        await inter.response.send_message(user.display_avatar.url, ephemeral=True)
 
 
 def setup(bot):

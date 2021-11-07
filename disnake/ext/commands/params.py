@@ -63,12 +63,7 @@ ChoiceValue = Union[str, int, float]
 Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
 TChoice = TypeVar("TChoice", bound=ChoiceValue)
 
-__all__ = (
-    "ParamInfo",
-    "Param",
-    "param",
-    "option_enum",
-)
+__all__ = ("ParamInfo", "Param", "param", "option_enum", "Current")
 
 
 def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) -> Optional[float]:
@@ -87,6 +82,35 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
         return xt + (epsilon * direction)
     else:
         return None
+
+
+class _Current:
+    inst: Optional[_Current] = None
+
+    def __new__(cls) -> _Current:
+        if cls.inst is None:
+            cls.inst = super().__new__(cls)
+        return cls.inst
+
+    def __repr__(self) -> str:
+        return "<Current>"
+
+    def __call__(self, **kwargs: Any) -> Any:
+        return Param(self, **kwargs)
+
+
+Current: Any = _Current()
+
+
+def current_default(annotation: Any) -> Callable[[Interaction], Any]:
+    if issubclass(annotation, disnake.abc.GuildChannel):
+        return lambda i: i.channel
+    elif issubclass(annotation, (disnake.User, disnake.Member)):
+        return lambda i: i.author
+    elif issubclass(annotation, disnake.Guild):
+        return lambda i: i.guild
+
+    raise TypeError(f"There cannot be a current value for {annotation}")
 
 
 class ParamInfo:
@@ -277,6 +301,8 @@ class ParamInfo:
                 annotation = args[0]
             else:
                 annotation.__args__ = args
+
+        self.default = current_default(annotation) if self.default is Current else self.default
 
         if self.converter is not None:
             # try to parse the converter's annotation, fall back on the annotation itself

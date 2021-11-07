@@ -30,13 +30,23 @@ class SlashCommands(commands.Cog):
         return ["XD", ":D", ":)", ":|", ":("]
 
     @commands.slash_command()
-    @commands.guild_permissions(768247229840359465, {815866581233041428: False})
+    @commands.guild_permissions(768247229840359465, roles={815866581233041428: False})
     async def alt_auto(
         self,
         inter: disnake.AppCmdInter,
-        mood: str = commands.Param(autocomp=test_autocomp)
+        mood: str = commands.Param(autocomp=test_autocomp),
     ):
         await inter.send(mood)
+
+    @commands.slash_command()
+    async def current(
+        self,
+        inter: disnake.GuildCommandInteraction,
+        user: disnake.Member = commands.Param(commands.Current),
+        channel: disnake.abc.GuildChannel = commands.Param(commands.Current, desc="channel"),
+        guild: disnake.Guild = commands.Current,
+    ):
+        await inter.send(f"user: {user.mention} channel: {channel.mention} guild: {guild.name}")
 
 
 def setup(bot):
