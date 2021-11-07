@@ -249,19 +249,26 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
     def actual_decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
         def decorated(*args: P.args, **kwargs: P.kwargs) -> T:
-            warnings.simplefilter("always", DeprecationWarning)  # turn off filter
             if instead:
-                fmt = "{0.__name__} is deprecated, use {1} instead."
+                msg = f"{func.__name__} is deprecated, use {instead} instead."
             else:
-                fmt = "{0.__name__} is deprecated."
+                msg = f"{func.__name__} is deprecated."
 
-            warnings.warn(fmt.format(func, instead), stacklevel=3, category=DeprecationWarning)
-            warnings.simplefilter("default", DeprecationWarning)  # reset filter
+            warn_deprecated(msg, stacklevel=3)
             return func(*args, **kwargs)
 
         return decorated
 
     return actual_decorator
+
+
+def warn_deprecated(*args: Any, stacklevel: int = 1, **kwargs: Any) -> None:
+    old_filters = warnings.filters[:]
+    try:
+        warnings.simplefilter("always", DeprecationWarning)
+        warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
+    finally:
+        warnings.filters[:] = old_filters  # type: ignore
 
 
 def oauth_url(
