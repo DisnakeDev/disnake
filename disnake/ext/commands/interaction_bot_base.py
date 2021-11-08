@@ -1226,6 +1226,7 @@ class InteractionBotBase(CommonBotBase):
             return
 
         inter.bot = self  # type: ignore
+        inter.application_command = slash_command
         if slash_command.guild_ids is None or inter.guild_id in slash_command.guild_ids:
             await slash_command._call_relevant_autocompleter(inter)
 
