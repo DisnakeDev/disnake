@@ -353,19 +353,23 @@ class ParamInfo:
             args = annotation.__args__
             if all(issubclass(channel, disnake.abc.GuildChannel) for channel in args):
                 self.type = disnake.abc.GuildChannel
-                channel_types = set()
-                for channel in args:
-                    channel_types.union(_channel_type_factory(channel))
-                self.channel_types = list(channel_types)
+                if not self.channel_types:
+                    channel_types = set()
+                    for channel in args:
+                        channel_types.union(_channel_type_factory(channel))
+                    self.channel_types = list(channel_types)
             elif annotation in self.TYPES:
                 self.type = annotation
             elif any(get_origin(arg) for arg in args):
                 raise TypeError("Unions do not support nesting")
             else:
-                raise TypeError("Unions for anything else other than channels are not supported")
+                raise TypeError(
+                    "Unions for anything else other than channels or a mentionable are not supported"
+                )
         elif isinstance(annotation, type) and issubclass(annotation, disnake.abc.GuildChannel):
             self.type = disnake.abc.GuildChannel
-            self.channel_types = _channel_type_factory(annotation)
+            if not self.channel_types:
+                self.channel_types = _channel_type_factory(annotation)
 
         elif annotation in self.TYPES:
             self.type = annotation
@@ -479,6 +483,7 @@ def Param(
     converter: Callable[[Interaction, Any], Any] = None,
     autocomp: Callable[[Interaction, str], Any] = None,
     autocomplete: Callable[[Interaction, str], Any] = None,
+    channel_types: List[ChannelType] = None,
     lt: float = None,
     le: float = None,
     gt: float = None,
@@ -503,6 +508,9 @@ def Param(
         Kwarg aliases: ``desc``.
     choices: Iterable[Any]
         A list of choices for this option.
+    channel_types: Iterable[:class:`ChannelType`]
+        A list of channel types that should be allowed.
+        By default these are discerned from the annotation.
     min_value: :class:`float`
         The lowest allowed value for this option. Kwarg aliases: ``ge``, ``gt``.
     max_value: :class:`float`
@@ -526,6 +534,7 @@ def Param(
         choices=choices,
         converter=conv or converter,
         autcomplete=autocomp or autocomplete,
+        channel_types=channel_types,
         lt=lt,
         le=le if max_value is None else max_value,
         gt=gt,
