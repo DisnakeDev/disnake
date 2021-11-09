@@ -47,13 +47,12 @@ import disnake
 from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
+from disnake.interactions import ApplicationCommandInteraction as Interaction
 
 from . import errors
 from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
-    from disnake.interactions import ApplicationCommandInteraction as Interaction
-
     from .slash_core import InvokableSlashCommand, SubCommand
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
@@ -414,9 +413,14 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     parameters = list(sig.parameters.values())
 
     # hacky I suppose
-    cog = parameters[0].name == "self" if command.cog is None else True
-    inter_param = parameters[1] if cog else parameters[0]
-    parameters = parameters[2:] if cog else parameters[1:]
+    predicate = (
+        lambda x: x.annotation is inspect._empty
+        and x.name != "self"
+        or isinstance(x.annotation, type)
+        and issubclass(x.annotation, Interaction)
+    )
+    inter_param = disnake.utils.find(predicate, parameters)
+    parameters = parameters[parameters.index(inter_param) + 1 :]
     type_hints = get_type_hints(command.callback)
     docstring = command.docstring["params"]
 
