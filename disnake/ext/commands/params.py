@@ -413,9 +413,11 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     parameters = list(sig.parameters.values())
 
     # hacky I suppose
-    predicate = lambda x: x.annotation is inspect._empty and x.name != "self" or x.annotation is Interaction
+    predicate = (
+        lambda x: x.annotation is inspect._empty and x.name != "self" or x.annotation is Interaction
+    )
     inter_param = disnake.utils.find(predicate, parameters)
-    parameters = parameters[parameters.index(inter_param) + 1:]
+    parameters = parameters[parameters.index(inter_param) + 1 :]
     type_hints = get_type_hints(command.callback)
     docstring = command.docstring["params"]
 
