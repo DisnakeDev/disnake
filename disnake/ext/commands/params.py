@@ -414,7 +414,10 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
 
     # hacky I suppose
     predicate = (
-        lambda x: x.annotation is inspect._empty and x.name != "self" or x.annotation is Interaction
+        lambda x: x.annotation is inspect._empty
+        and x.name != "self"
+        or isinstance(x.annotation, type)
+        and issubclass(x.annotation, Interaction)
     )
     inter_param = disnake.utils.find(predicate, parameters)
     parameters = parameters[parameters.index(inter_param) + 1 :]
