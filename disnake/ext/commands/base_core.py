@@ -30,7 +30,7 @@ import warnings
 
 from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
-from disnake.utils import async_all, maybe_coroutine
+from disnake.utils import async_all, maybe_coroutine, warn_deprecated
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import *
@@ -552,9 +552,9 @@ def guild_permissions(
         whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
     """
     if kwargs:
-        warnings.warn(
+        warn_deprecated(
             f"guild_permissions got unexpected deprecated keyword arguments: {', '.join(map(repr, kwargs))}",
-            DeprecationWarning,
+            stacklevel=2,
         )
         roles = roles or kwargs.get("role_ids")
         users = users or kwargs.get("user_ids")

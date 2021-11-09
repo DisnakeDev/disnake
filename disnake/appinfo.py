@@ -28,6 +28,7 @@ from typing import List, TYPE_CHECKING, Optional
 
 from . import utils
 from .asset import Asset
+from .flags import ApplicationFlags
 
 if TYPE_CHECKING:
     from .guild import Guild
@@ -112,6 +113,11 @@ class AppInfo:
         The application's privacy policy URL, if set.
 
         .. versionadded:: 2.0
+
+    flags: Optional[:class:`ApplicationFlags`]
+        The application's public flags.
+
+        .. versionadded:: 2.3
     """
 
     __slots__ = (
@@ -133,6 +139,7 @@ class AppInfo:
         "_cover_image",
         "terms_of_service_url",
         "privacy_policy_url",
+        "flags",
     )
 
     def __init__(self, state: ConnectionState, data: AppInfoPayload):
@@ -161,6 +168,11 @@ class AppInfo:
         self._cover_image: Optional[str] = data.get("cover_image")
         self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")
         self.privacy_policy_url: Optional[str] = data.get("privacy_policy_url")
+
+        flags: Optional[int] = data.get("flags")
+        self.flags: Optional[ApplicationFlags] = (
+            ApplicationFlags._from_value(flags) if flags is not None else None
+        )
 
     def __repr__(self) -> str:
         return (

@@ -42,6 +42,7 @@ from typing import (
     Union,
     runtime_checkable,
 )
+import functools
 
 import disnake
 from .errors import *
@@ -76,6 +77,7 @@ __all__ = (
     "ThreadConverter",
     "GuildChannelConverter",
     "GuildStickerConverter",
+    "PermissionsConverter",
     "clean_content",
     "Greedy",
     "run_converters",
@@ -885,6 +887,46 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
         return result
 
 
+class PermissionsConverter(Converter[disnake.Permissions]):
+    """Converts to a  :class:`~disnake.Permissions`."""
+
+    async def convert(self, ctx: Context, argument: str) -> disnake.Permissions:
+        # try the permission bit value
+        try:
+            value = int(argument)
+        except ValueError:
+            pass
+        else:
+            return disnake.Permissions(value)
+
+        argument = argument.replace("server", "guild")
+
+        # try multiple attributes, then a single one
+        perms: List[disnake.Permissions] = []
+        for name in argument.split():
+            attr = getattr(disnake.Permissions, name, None)
+            if attr is None:
+                break
+
+            if callable(attr):
+                perms.append(attr())
+            else:
+                perms.append(disnake.Permissions(**{name: True}))
+        else:
+            return functools.reduce(lambda a, b: disnake.Permissions(a.value | b.value), perms)
+
+        name = argument.replace(" ", "_")
+
+        attr = getattr(disnake.Permissions, name, None)
+        if attr is None:
+            raise BadArgument(f"Invalid Permissions: {name!r}")
+
+        if callable(attr):
+            return attr()
+        else:
+            return disnake.Permissions(**{name: True})
+
+
 class clean_content(Converter[str]):
     """Converts the argument to mention scrubbed version of
     said content.
@@ -1063,6 +1105,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Any] = {
     disnake.Thread: ThreadConverter,
     disnake.abc.GuildChannel: GuildChannelConverter,
     disnake.GuildSticker: GuildStickerConverter,
+    disnake.Permissions: PermissionsConverter,
 }
 
 
