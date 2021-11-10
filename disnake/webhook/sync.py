@@ -459,7 +459,7 @@ class SyncWebhookMessage(Message):
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -1100,7 +1100,7 @@ class SyncWebhook(BaseWebhook):
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.

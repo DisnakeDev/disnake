@@ -337,7 +337,7 @@ class Interaction:
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
@@ -815,12 +815,12 @@ class InteractionResponse:
             The file to upload. This cannot be mixed with ``files`` parameter.
             Files will be appended to the message.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
@@ -1041,7 +1041,7 @@ class InteractionMessage(Message):
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.

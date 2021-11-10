@@ -724,7 +724,7 @@ class WebhookMessage(Message):
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
@@ -1619,7 +1619,7 @@ class Webhook(BaseWebhook):
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed. The webhook must have state attached, similar to
