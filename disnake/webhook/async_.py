@@ -712,7 +712,7 @@ class WebhookMessage(Message):
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed.
@@ -1593,7 +1593,7 @@ class Webhook(BaseWebhook):
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed. The webhook must have state attached, similar to
