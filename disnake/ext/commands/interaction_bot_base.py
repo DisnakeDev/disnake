@@ -949,7 +949,7 @@ class InteractionBotBase(CommonBotBase):
             The function that was used as a global check.
         call_once: :class:`bool`
             If the function should only be called once per
-            :meth:`.invoke` call.
+            :meth:`invoke` call.
         slash_commands: :class:`bool`
             If this check is for slash commands.
         user_commands: :class:`bool`
@@ -1100,7 +1100,7 @@ class InteractionBotBase(CommonBotBase):
         ----------
         call_once: :class:`bool`
             If the function should only be called once per
-            :meth:`.invoke` call.
+            :meth:`invoke` call.
         text_commands: :class:`bool`
             If this check is for text commands.
         slash_commands: :class:`bool`
@@ -1153,7 +1153,7 @@ class InteractionBotBase(CommonBotBase):
         return await disnake.utils.async_all(f(inter) for f in checks)  # type: ignore
 
     def before_slash_command_invoke(self, coro: CFT) -> CFT:
-        """Similar to :meth:`.before_invoke` but for slash commands."""
+        """Similar to :meth:`Bot.before_invoke` but for slash commands."""
 
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
@@ -1162,7 +1162,7 @@ class InteractionBotBase(CommonBotBase):
         return coro
 
     def after_slash_command_invoke(self, coro: CFT) -> CFT:
-        """Similar to :meth:`.after_invoke` but for slash commands."""
+        """Similar to :meth:`Bot.after_invoke` but for slash commands."""
 
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
@@ -1171,7 +1171,7 @@ class InteractionBotBase(CommonBotBase):
         return coro
 
     def before_user_command_invoke(self, coro: CFT) -> CFT:
-        """Similar to :meth:`.before_invoke` but for user commands."""
+        """Similar to :meth:`Bot.before_invoke` but for user commands."""
 
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
@@ -1180,7 +1180,7 @@ class InteractionBotBase(CommonBotBase):
         return coro
 
     def after_user_command_invoke(self, coro: CFT) -> CFT:
-        """Similar to :meth:`.after_invoke` but for user commands."""
+        """Similar to :meth:`Bot.after_invoke` but for user commands."""
 
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
@@ -1189,7 +1189,7 @@ class InteractionBotBase(CommonBotBase):
         return coro
 
     def before_message_command_invoke(self, coro: CFT) -> CFT:
-        """Similar to :meth:`.before_invoke` but for message commands."""
+        """Similar to :meth:`Bot.before_invoke` but for message commands."""
 
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
@@ -1198,7 +1198,7 @@ class InteractionBotBase(CommonBotBase):
         return coro
 
     def after_message_command_invoke(self, coro: CFT) -> CFT:
-        """Similar to :meth:`.after_invoke` but for message commands."""
+        """Similar to :meth:`Bot.after_invoke` but for message commands."""
 
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
