@@ -529,6 +529,7 @@ class InvokableApplicationCommand(ABC):
 # kwargs are annotated as None to ensure the user gets a linter error when using them
 def guild_permissions(
     guild_id: int,
+    *,
     roles: Optional[Mapping[int, bool]] = None,
     users: Optional[Mapping[int, bool]] = None,
     owner: bool = None,
@@ -550,7 +551,6 @@ def guild_permissions(
     owner: :class:`bool`
         whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
     """
-
     if kwargs:
         warn_deprecated(
             f"guild_permissions got unexpected deprecated keyword arguments: {', '.join(map(repr, kwargs))}",

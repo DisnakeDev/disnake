@@ -1061,33 +1061,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     :param guild: The :class:`Guild` that has changed availability.
 
-.. function:: on_scheduled_event_create(event)
-
-    Called when a guild scheduled event is created.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param event: The :class:`GuildScheduledEvent`.
-
-.. function:: on_scheduled_event_update(before, after)
-
-    Called when a guild scheduled event is updated.
-    The guild must have existed in the :attr:`Client.guilds` cache.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param before: The :class:`GuildScheduledEvent` before update.
-
-    :param after: The :class:`GuildScheduledEvent` after update.
-
-.. function:: on_scheduled_event_delete(event)
-
-    Called when a guild scheduled event is deleted.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param event: The :class:`GuildScheduledEvent`.
-
 .. function:: on_voice_state_update(member, before, after)
 
     Called when a :class:`Member` changes their :class:`VoiceState`.
@@ -2491,60 +2464,6 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.0
 
-    .. attribute:: guild_scheduled_event_create
-
-        A scheduled event was created.
-
-        When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`GuildScheduledEvent` or :class:`Object` with the ID of the event
-        which was created.
-
-        Possible attributes for :class:`AuditLogDiff`:
-
-        - :attr:`~AuditLogDiff.name`
-        - :attr:`~AuditLogDiff.description`
-        - :attr:`~AuditLogDiff.privacy_level`
-        - :attr:`~AuditLogDiff.status`
-        - :attr:`~AuditLogDiff.sku_ids`
-
-        .. versionadded:: 2.3
-
-    .. attribute:: guild_scheduled_event_update
-
-        A scheduled event was updated.
-
-        When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`GuildScheduledEvent` or :class:`Object` with the ID of the event
-        which was updated.
-
-        Possible attributes for :class:`AuditLogDiff`:
-
-        - :attr:`~AuditLogDiff.name`
-        - :attr:`~AuditLogDiff.description`
-        - :attr:`~AuditLogDiff.privacy_level`
-        - :attr:`~AuditLogDiff.status`
-        - :attr:`~AuditLogDiff.sku_ids`
-
-        .. versionadded:: 2.3
-
-    .. attribute:: guild_scheduled_event_delete
-
-        A scheduled event was deleted.
-
-        When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`GuildScheduledEvent` or :class:`Object` with the ID of the event
-        which was deleted.
-
-        Possible attributes for :class:`AuditLogDiff`:
-
-        - :attr:`~AuditLogDiff.name`
-        - :attr:`~AuditLogDiff.description`
-        - :attr:`~AuditLogDiff.privacy_level`
-        - :attr:`~AuditLogDiff.status`
-        - :attr:`~AuditLogDiff.sku_ids`
-
-        .. versionadded:: 2.3
-
     .. attribute:: thread_create
 
         A thread was created.
@@ -2818,51 +2737,6 @@ of :class:`enum.Enum`.
     .. attribute:: age_restricted
 
         The guild may contain NSFW content.
-
-.. class:: GuildScheduledEventEntityType
-
-    Represents the type of scheduled event entity type.
-
-    .. versionadded:: 2.3
-
-    .. attribute:: none
-
-        Represents an entity without a type.
-
-    .. attribute:: stage_instance
-
-        Represents a stage instance.
-
-    .. attribute:: voice
-
-        Represents a voice channel.
-
-    .. attribute:: location
-
-        Represents a custom location.
-
-.. class:: GuildScheduledEventStatus
-
-    Represents the scheduled event status.
-
-    .. versionadded:: 2.3
-
-    .. attribute:: scheduled
-
-        Represents a scheduled event.
-
-    .. attribute:: active
-
-        Represents an active event.
-
-    .. attribute:: completed
-
-        Represents a completed event.
-
-    .. attribute:: canceled
-
-        Represents a canceled event.
-
 
 Async Iterator
 ----------------
@@ -3862,22 +3736,6 @@ Guild
         The :class:`User` that was banned.
 
         :type: :class:`User`
-
-GuildScheduledEvent
-~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: GuildScheduledEvent
-
-.. autoclass:: GuildScheduledEvent()
-    :members:
-
-GuildEventEntityMetadata
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: GuildEventEntityMetadata
-
-.. autoclass:: GuildEventEntityMetadata()
-    :members:
 
 
 Integration
