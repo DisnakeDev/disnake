@@ -517,9 +517,6 @@ class Intents(BaseFlags):
         - :func:`on_guild_channel_create`
         - :func:`on_guild_channel_delete`
         - :func:`on_guild_channel_pins_update`
-        - :func:`on_guild_scheduled_event_create`
-        - :func:`on_guild_scheduled_event_updated`
-        - :func:`on_guild_scheduled_event_delete`
 
         This also corresponds to the following attributes and classes in terms of cache:
 
@@ -527,8 +524,6 @@ class Intents(BaseFlags):
         - :class:`Guild` and all its attributes.
         - :meth:`Client.get_channel`
         - :meth:`Client.get_all_channels`
-        - :meth:`Client.get_scheduled_event`
-        - :meth:`Client.get_all_scheduled_events`
 
         It is highly advisable to leave this intent enabled for your bot to function.
         """
