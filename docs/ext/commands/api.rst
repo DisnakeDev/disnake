@@ -61,6 +61,78 @@ AutoShardedBot
 .. autoclass:: disnake.ext.commands.AutoShardedBot
     :members:
 
+InteractionBot
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.InteractionBot
+
+.. autoclass:: disnake.ext.commands.InteractionBot
+    :members:
+    :inherited-members:
+    :exclude-members: after_slash_command_invoke, after_user_command_invoke, after_message_command_invoke, before_slash_command_invoke, before_user_command_invoke, before_message_command_invoke, application_command_check, slash_command_check, user_command_check, message_command_check, slash_command_check_once, user_command_check_once, message_command_check_once, event, listen, slash_command, user_command, message_command
+
+    .. automethod:: InteractionBot.after_slash_command_invoke()
+        :decorator:
+
+    .. automethod:: InteractionBot.after_user_command_invoke()
+        :decorator:
+
+    .. automethod:: InteractionBot.after_message_command_invoke()
+        :decorator:
+
+    .. automethod:: InteractionBot.before_slash_command_invoke()
+        :decorator:
+
+    .. automethod:: InteractionBot.before_user_command_invoke()
+        :decorator:
+
+    .. automethod:: InteractionBot.before_message_command_invoke()
+        :decorator:
+    
+    .. automethod:: InteractionBot.application_command_check()
+        :decorator:
+
+    .. automethod:: InteractionBot.slash_command_check()
+        :decorator:
+
+    .. automethod:: InteractionBot.user_command_check()
+        :decorator:
+
+    .. automethod:: InteractionBot.message_command_check()
+        :decorator:
+
+    .. automethod:: InteractionBot.slash_command_check_once()
+        :decorator:
+
+    .. automethod:: InteractionBot.user_command_check_once()
+        :decorator:
+
+    .. automethod:: InteractionBot.message_command_check_once()
+        :decorator:
+
+    .. automethod:: InteractionBot.slash_command(*args, **kwargs)
+        :decorator:
+
+    .. automethod:: InteractionBot.user_command(*args, **kwargs)
+        :decorator:
+
+    .. automethod:: InteractionBot.message_command(*args, **kwargs)
+        :decorator:
+
+    .. automethod:: InteractionBot.event()
+        :decorator:
+
+    .. automethod:: InteractionBot.listen(name=None)
+        :decorator:
+
+AutoShardedInteractionBot
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.AutoShardedInteractionBot
+
+.. autoclass:: disnake.ext.commands.AutoShardedInteractionBot
+    :members:
+
 Prefix Helpers
 ----------------
 
