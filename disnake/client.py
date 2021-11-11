@@ -68,6 +68,7 @@ from .errors import *
 from .flags import ApplicationFlags, Intents
 from .gateway import *
 from .guild import Guild
+from .guild_scheduled_event import GuildScheduledEvent
 from .http import HTTPClient
 from .invite import Invite
 from .iterators import GuildIterator
@@ -86,7 +87,7 @@ from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
-    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime, User as ABCUser
+    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
     from .channel import DMChannel
     from .member import Member
     from .message import Message
@@ -961,7 +962,7 @@ class Client:
         Returns
         --------
         Optional[:class:`.StageInstance`]
-            The returns stage instance of ``None`` if not found.
+            The returned stage instance or ``None`` if not found.
         """
         from .channel import StageChannel
 
@@ -969,6 +970,38 @@ class Client:
 
         if isinstance(channel, StageChannel):
             return channel.instance
+
+    def get_scheduled_event(self, id: int) -> Optional[GuildScheduledEvent]:
+        """Returns a scheduled event with the given ID.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        -----------
+        id: :class:`int`
+            The ID to search for.
+
+        Returns
+        --------
+        Optional[:class:`.GuildScheduledEvent`]
+            The returned scheduled event or ``None`` if not found.
+        """
+        return self._connection.get_scheduled_event(id)
+
+    def get_all_scheduled_events(self) -> List[GuildScheduledEvent]:
+        """Returns all scheduled events across all guilds.
+
+        .. versionadded:: 2.3
+
+        Returns
+        --------
+        List[:class:`.GuildScheduledEvent`]
+            The returned scheduled events.
+        """
+        result = []
+        for guild in self.guilds:
+            result.extend(guild._scheduled_events.values())
+        return result
 
     def get_guild(self, id: int, /) -> Optional[Guild]:
         """Returns a guild with the given ID.
@@ -1708,6 +1741,33 @@ class Client:
         invite_id = utils.resolve_invite(invite)
         await self.http.delete_invite(invite_id)
 
+    # Guild scheduled events
+
+    async def fetch_guild_scheduled_event(self, event_id: int) -> GuildScheduledEvent:
+        """|coro|
+
+        Retrieves a :class:`GuildScheduledEvent` from an ID.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ----------
+        event_id: :class:`int`
+            The event's ID to fetch from.
+
+        Raises
+        ------
+        :exc:`.HTTPException`
+            Getting the scheduled event failed.
+
+        Returns
+        --------
+        :class:`GuildScheduledEvent`
+            The guild scheduled event from the ID.
+        """
+        data = await self.http.get_guild_scheduled_event(event_id)
+        return GuildScheduledEvent(state=self._connection, data=data)
+
     # Miscellaneous stuff
 
     async def fetch_widget(self, guild_id: int, /) -> Widget:
@@ -2264,7 +2324,7 @@ class Client:
         guild_id: int,
         command_id: int,
         *,
-        permissions: Mapping[Union[Role, ABCUser], bool] = None,
+        permissions: Mapping[Union[Role, Member], bool] = None,
         role_ids: Mapping[int, bool] = None,
         user_ids: Mapping[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
@@ -2277,7 +2337,7 @@ class Client:
             The ID of the guild where the permissions should be applied.
         command_id: :class:`int`
             The ID of the app command you want to apply these permissions to.
-        permissions: Mapping[Union[:class:`~disnake.Role`, :class:`disnake.abc.User`], :class:`bool`]
+        permissions: Mapping[Union[:class:`~disnake.Role`, :class:`Member`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
         role_ids: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.

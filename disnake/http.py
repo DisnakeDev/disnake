@@ -1833,6 +1833,86 @@ class HTTPClient:
             Route("DELETE", "/stage-instances/{channel_id}", channel_id=channel_id), reason=reason
         )
 
+    # Scheduled event management
+    # TODO: type hints for dicts
+
+    def get_guild_scheduled_events(self, guild_id: int, with_user_count: bool = None):
+        params = {}
+
+        if with_user_count is not None:
+            params["with_user_count"] = with_user_count
+
+        return self.request(
+            Route("GET", "/guilds/{guild_id}/events", guild_id=guild_id), params=params
+        )
+
+    def create_guild_scheduled_event(
+        self,
+        guild_id: int,
+        *,
+        name: str,
+        privacy_level: int,
+        scheduled_start_time: str,
+        entity_type: int,
+        channel_id: int = None,
+        description: str = None,
+    ):
+        r = Route("POST", "/guilds/{guild_id}/events", guild_id=guild_id)
+        payload = {
+            "name": name,
+            "privacy_level": privacy_level,
+            "scheduled_start_time": scheduled_start_time,
+            "entity_type": entity_type,
+        }
+
+        if channel_id is not None:
+            payload["channel_id"] = channel_id
+
+        if description is not None:
+            payload["description"] = description
+
+        return self.request(r, json=payload)
+
+    def get_guild_scheduled_event(self, event_id: int):
+        return self.request(Route("GET", "/guild-events/{event_id}", event_id=event_id))
+
+    def delete_guild_scheduled_event(self, event_id: int):
+        return self.request(Route("DELETE", "/guild-events/{event_id}", event_id=event_id))
+
+    def edit_guild_scheduled_event(
+        self,
+        event_id: int,
+        *,
+        channel_id: int = None,
+        name: str = None,
+        privacy_level: int = None,
+        scheduled_start_time: str = None,
+        description: str = None,
+        entity_type: int = None,
+    ):
+        r = Route("PATCH", "/guild-events/{event_id}", event_id=event_id)
+        payload = {}
+
+        if channel_id is not None:
+            payload["channel_id"] = channel_id
+
+        if name is not None:
+            payload["name"] = name
+
+        if privacy_level is not None:
+            payload["privacy_level"] = privacy_level
+
+        if scheduled_start_time is not None:
+            payload["scheduled_start_time"] = scheduled_start_time
+
+        if description is not None:
+            payload["description"] = description
+
+        if entity_type is not None:
+            payload["entity_type"] = entity_type
+
+        return self.request(r, json=payload)
+
     # Application commands (global)
 
     def get_global_commands(

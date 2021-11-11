@@ -69,7 +69,10 @@ from .enums import (
     ContentFilter,
     NotificationLevel,
     NSFWLevel,
+    StagePrivacyLevel,
+    GuildScheduledEventEntityType,
 )
+from .guild_scheduled_event import GuildScheduledEvent
 from .mixins import Hashable
 from .user import User
 from .invite import Invite
@@ -285,7 +288,7 @@ class Guild(Hashable):
         "_public_updates_channel_id",
         "_stage_instances",
         "_threads",
-        "_application_commands",
+        "_scheduled_events",
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
@@ -301,7 +304,6 @@ class Guild(Hashable):
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
         self._threads: Dict[int, Thread] = {}
-        self._application_commands: Dict[int, ApplicationCommand] = {}
         self._state: ConnectionState = state
         self._from_data(data)
 
@@ -501,6 +503,12 @@ class Guild(Hashable):
             stage_instance = StageInstance(guild=self, data=s, state=state)
             self._stage_instances[stage_instance.id] = stage_instance
 
+        self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
+        for s in guild.get("guild_scheduled_events", []):
+            scheduled_event = GuildScheduledEvent(data=s, state=state)
+            self._scheduled_events[scheduled_event.id] = scheduled_event
+            state._scheduled_event_guilds[scheduled_event.id] = self.id
+
         cache_joined = self._state.member_cache_flags.joined
         self_id = self._state.self_id
         for mdata in guild.get("members", []):
@@ -592,6 +600,14 @@ class Guild(Hashable):
         r = [ch for ch in self._channels.values() if isinstance(ch, StageChannel)]
         r.sort(key=lambda c: (c.position, c.id))
         return r
+
+    @property
+    def scheduled_events(self) -> List[GuildScheduledEvent]:
+        """List[:class:`GuildScheduledEvent`]: A list of scheduled events that belongs to this guild.
+
+        .. versionadded:: 2.3
+        """
+        return list(self._scheduled_events.values())
 
     @property
     def me(self) -> Member:
@@ -720,6 +736,23 @@ class Guild(Hashable):
             The returned thread or ``None`` if not found.
         """
         return self._threads.get(thread_id)
+
+    def get_scheduled_event(self, event_id: int) -> Optional[GuildScheduledEvent]:
+        """Returns a scheduled event with the given ID.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        -----------
+        event_id: :class:`int`
+            The ID to search for.
+
+        Returns
+        --------
+        Optional[:class:`GuildScheduledEvent`]
+            The returned scheduled event or ``None`` if not found.
+        """
+        return self._scheduled_events.get(event_id)
 
     @property
     def system_channel(self) -> Optional[TextChannel]:
@@ -3121,6 +3154,83 @@ class Guild(Hashable):
         channel_id = channel.id if channel else None
         await ws.voice_state(self.id, channel_id, self_mute, self_deaf)
 
+    # Scheduled events
+
+    async def fetch_scheduled_events(
+        self, *, with_user_count: bool = None
+    ) -> List[GuildScheduledEvent]:
+        """|coro|
+
+        Request all scheduled events in this guild.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ----------
+        with_user_count: :class:`bool`
+            Whether to include the field with subscriber count.
+
+        Returns
+        -------
+        List[:class:`GuildScheduledEvent`]
+        """
+        events_data = await self._state.http.get_guild_scheduled_events(self.id, with_user_count)
+        return [GuildScheduledEvent(state=self._state, data=data) for data in events_data]
+
+    async def create_scheduled_event(
+        self,
+        *,
+        name: str,
+        privacy_level: StagePrivacyLevel,
+        scheduled_start_time: datetime.datetime,
+        entity_type: GuildScheduledEventEntityType,
+        channel_id: int = None,
+        description: str = None,
+    ) -> List[GuildScheduledEvent]:
+        """|coro|
+
+        Creates a scheduled event in this guild.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name of the event.
+        privacy_level: :class:`StagePrivacyLevel`
+            The privacy level of the event.
+        scheduled_start_time: :class:`datetime`
+            The time to schedule the event.
+        entity_type: :class:`GuildScheduledEventEntityType`
+            The scheduled entity type of the event.
+        channel_id: :class:`int`
+            The channel id of the event.
+        description: :class:`str`
+            The description of the event.
+
+        Returns
+        -------
+        :class:`GuildScheduledEvent`
+            The guild scheduled event instance.
+
+        Raises
+        ------
+        Forbidden
+            You do not have proper permissions to create the event.
+        HTTPException
+            Creating the event failed.
+        """
+
+        return await self._state.http.create_guild_scheduled_event(
+            guild_id=self.id,
+            name=name,
+            privacy_level=privacy_level.value,
+            scheduled_start_time=scheduled_start_time.isoformat(),
+            entity_type=entity_type.value,
+            channel_id=channel_id,
+            description=description,
+        )
+
     # Application command permissions
 
     async def bulk_fetch_command_permissions(self) -> List[GuildApplicationCommandPermissions]:
@@ -3157,7 +3267,7 @@ class Guild(Hashable):
         self,
         command_id: int,
         *,
-        permissions: Mapping[Union[Role, ABCUser], bool] = None,
+        permissions: Mapping[Union[Role, Member], bool] = None,
         role_ids: Mapping[int, bool] = None,
         user_ids: Mapping[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
@@ -3168,7 +3278,7 @@ class Guild(Hashable):
         ----------
         command_id: :class:`int`
             The ID of the app command you want to apply these permissions to.
-        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
+        permissions: Mapping[Union[:class:`Role`, :class:`Member`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
         role_ids: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.
