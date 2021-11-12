@@ -240,7 +240,7 @@ class Select(Item[V]):
             The number of options exceeds 25.
         """
 
-        if len(self._underlying.options) > 25:
+        if len(self._underlying.options) >= 25:
             raise ValueError("maximum number of options already provided")
 
         self._underlying.options.append(option)
