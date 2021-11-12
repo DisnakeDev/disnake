@@ -189,7 +189,12 @@ async def _edit_handler(
         else:
             payload["components"] = []
 
-    data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)
+    try:
+        data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)
+    finally:
+        if files:
+            for f in files:
+                f.close()
     message = Message(state=msg._state, channel=msg.channel, data=data)
 
     if view and not view.is_finished():

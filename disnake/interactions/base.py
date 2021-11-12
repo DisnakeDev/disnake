@@ -393,6 +393,10 @@ class Interaction:
             if e.code == 10015:
                 raise InteractionNotResponded(self) from e
             raise
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
 
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
@@ -753,12 +757,12 @@ class InteractionResponse:
             if e.code == 10062:
                 raise InteractionTimedOut(self._parent) from e
             raise
+        finally:
+            if files:
+                for f in files:
+                    f.close()
 
         self._responded = True
-
-        if files is not MISSING:
-            for f in files:
-                f.close()
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
@@ -891,14 +895,19 @@ class InteractionResponse:
             payload["components"] = [] if view is None else view.to_components()
 
         adapter = async_context.get()
-        await adapter.create_interaction_response(
-            parent.id,
-            parent.token,
-            session=parent._session,
-            type=InteractionResponseType.message_update.value,
-            data=payload,
-            files=files,
-        )
+        try:
+            await adapter.create_interaction_response(
+                parent.id,
+                parent.token,
+                session=parent._session,
+                type=InteractionResponseType.message_update.value,
+                data=payload,
+                files=files,
+            )
+        finally:
+            if files:
+                for f in files:
+                    f.close()
 
         if view and not view.is_finished():
             state.store_view(view, message_id)

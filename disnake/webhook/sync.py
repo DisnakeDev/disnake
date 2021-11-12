@@ -996,16 +996,21 @@ class SyncWebhook(BaseWebhook):
         if thread is not MISSING:
             thread_id = thread.id
 
-        data = adapter.execute_webhook(
-            self.id,
-            self.token,
-            session=self.session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-            thread_id=thread_id,
-            wait=wait,
-        )
+        try:
+            data = adapter.execute_webhook(
+                self.id,
+                self.token,
+                session=self.session,
+                payload=params.payload,
+                multipart=params.multipart,
+                files=params.files,
+                thread_id=thread_id,
+                wait=wait,
+            )
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
         if wait:
             return self._create_message(data)
 
@@ -1141,15 +1146,20 @@ class SyncWebhook(BaseWebhook):
             previous_allowed_mentions=previous_mentions,
         )
         adapter: WebhookAdapter = _get_webhook_adapter()
-        data = adapter.edit_webhook_message(
-            self.id,
-            self.token,
-            message_id,
-            session=self.session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-        )
+        try:
+            data = adapter.edit_webhook_message(
+                self.id,
+                self.token,
+                message_id,
+                session=self.session,
+                payload=params.payload,
+                multipart=params.multipart,
+                files=params.files,
+            )
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
         return self._create_message(data)
 
     def delete_message(self, message_id: int, /) -> None:
