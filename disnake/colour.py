@@ -318,7 +318,7 @@ class Colour:
         """A factory method that returns a :class:`Colour` with a value of ``0x2f3136``.
         This will blend in with the embed's colour.
 
-        .. versionadded:: 2.1
+        .. versionadded:: 2.3
         """
         return cls(0x2f3136)
 
