@@ -156,9 +156,13 @@ class AsyncWebhookAdapter:
                     # NOTE: for `quote_fields`, see https://github.com/aio-libs/aiohttp/issues/4012
                     form_data = aiohttp.FormData(quote_fields=False)
                     for p in multipart:
-                        # manually escape double quotes and backslashes, like urllib3
-                        name = p.pop("name").replace('"', "%22").replace("\\", "\\\\")
-                        form_data.add_field(name=name, **p)
+                        # manually escape chars, just in case
+                        name = re.sub(
+                            r"[^\x21\x23-\x5b\x5d-\x7e]", lambda m: f"\\{m.group(0)}", p["name"]
+                        )
+                        form_data.add_field(
+                            name=name, **{k: v for k, v in p.items() if k != "name"}
+                        )
                     to_send = form_data
 
                 try:
