@@ -314,7 +314,7 @@ class Colour:
         return cls(0x36393F)
 
     @classmethod
-    def invisible(cls: Type[CT]) -> CT:
+    def dark_invisible(cls: Type[CT]) -> CT:
         """A factory method that returns a :class:`Colour` with a value of ``0x2f3136``.
         This will blend in with the embed's colour on Discord's dark theme.
 
