@@ -160,7 +160,7 @@ class Embed:
         The timestamp of the embed content. This is an aware datetime.
         If a naive datetime is passed, it is converted to an aware
         datetime with the local timezone.
-    colour: Union[:class:`Colour`, :class:`int`]
+    colour: Union[:class:`Colour`, :class:`Color`, :class:`int`]
         The colour code of the embed. Aliased to ``color`` as well.
         This can be set during initialisation.
     Empty
@@ -190,8 +190,8 @@ class Embed:
     def __init__(
         self,
         *,
-        colour: Union[int, Colour, _EmptyEmbed] = EmptyEmbed,
-        color: Union[int, Colour, _EmptyEmbed] = EmptyEmbed,
+        colour: Union[int, Colour, Color, _EmptyEmbed] = EmptyEmbed,
+        color: Union[int, Colour, Color, _EmptyEmbed] = EmptyEmbed,
         title: MaybeEmpty[Any] = EmptyEmbed,
         type: EmbedType = "rich",
         url: MaybeEmpty[Any] = EmptyEmbed,
