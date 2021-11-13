@@ -315,7 +315,7 @@ class Colour:
 
     @classmethod
     def invisible(cls: Type[CT]) -> CT:
-        """A factory method that returns a :class:`Colour` with a value of ``0x36393F``.
+        """A factory method that returns a :class:`Colour` with a value of ``0x2f3136``.
         This will blend in with the whole embed's colour.
 
         .. versionadded:: 2.1
