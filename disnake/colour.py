@@ -314,6 +314,15 @@ class Colour:
         return cls(0x36393F)
 
     @classmethod
+    def invisible(cls: Type[CT]) -> CT:
+        """A factory method that returns a :class:`Colour` with a value of ``0x36393F``.
+        This will blend in with the whole embed's colour.
+
+        .. versionadded:: 2.1
+        """
+        return cls(0x2f3136)
+
+    @classmethod
     def fuchsia(cls: Type[CT]) -> CT:
         """A factory method that returns a :class:`Colour` with a value of ``0xEB459E``.
 
