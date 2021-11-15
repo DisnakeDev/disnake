@@ -1715,7 +1715,11 @@ class Message(Hashable):
         await self._state.http.clear_reactions(self.channel.id, self.id)
 
     async def create_thread(
-        self, *, name: str, auto_archive_duration: ThreadArchiveDuration = MISSING
+        self,
+        *,
+        name: str,
+        auto_archive_duration: ThreadArchiveDuration = None,
+        slowmode_delay: int = None,
     ) -> Thread:
         """|coro|
 
@@ -1735,6 +1739,12 @@ class Message(Hashable):
         auto_archive_duration: :class:`int`
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this thread, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+
+            .. versionadded:: 2.3
 
         Raises
         -------
@@ -1761,6 +1771,7 @@ class Message(Hashable):
             self.id,
             name=name,
             auto_archive_duration=auto_archive_duration or default_auto_archive_duration,
+            rate_limit_per_user=slowmode_delay or 0,
         )
         return Thread(guild=self.guild, state=self._state, data=data)
 
