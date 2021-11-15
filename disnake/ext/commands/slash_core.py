@@ -239,7 +239,7 @@ class SubCommand(InvokableApplicationCommand):
         self.docstring = utils.parse_docstring(func)
         description = description or self.docstring["description"]
 
-        if not options:
+        if options is None:
             options = expand_params(self)
 
         self.option = Option(
@@ -336,7 +336,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.docstring = utils.parse_docstring(func)
         description = description or self.docstring["description"]
 
-        if not options:
+        if options is None:
             options = expand_params(self)
 
         self.body: SlashCommand = SlashCommand(
