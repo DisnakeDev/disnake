@@ -701,6 +701,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         message: Optional[Snowflake] = None,
         auto_archive_duration: ThreadArchiveDuration = None,
         type: Optional[ChannelType] = None,
+        invitable: bool = None,
         slowmode_delay: int = None,
         reason: Optional[str] = None,
     ) -> Thread:
@@ -728,6 +729,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The type of thread to create. If a ``message`` is passed then this parameter
             is ignored, as a thread created with a message is always a public thread.
             By default this creates a private thread if this is ``None``.
+        invitable: :class:`bool`
+            Whether non-moderators can add other non-moderators to this thread.
+            Only available for private threads.
+            If a ``message`` is passed then this parameter is ignored, as a thread
+            created with a message is always a public thread.
+            Defaults to ``True``.
+
+            .. versionadded:: 2.3
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
@@ -759,6 +768,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
                 type=type.value,
+                invitable=invitable if invitable is not None else True,
                 rate_limit_per_user=slowmode_delay or 0,
                 reason=reason,
             )
