@@ -26,7 +26,6 @@ from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, TYPE_C
 import asyncio
 import datetime
 import functools
-import warnings
 
 from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
@@ -559,7 +558,7 @@ def guild_permissions(
         roles = roles or kwargs.get("role_ids")
         users = users or kwargs.get("user_ids")
 
-    perms = UnresolvedGuildApplicationCommandPermissions(roles=roles, users=users, owner=owner)
+    perms = UnresolvedGuildApplicationCommandPermissions(role_ids=roles, user_ids=users, owner=owner)
 
     def decorator(func: T) -> T:
         if isinstance(func, InvokableApplicationCommand):
