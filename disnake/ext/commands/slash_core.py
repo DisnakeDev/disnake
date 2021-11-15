@@ -36,7 +36,7 @@ from typing import (
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
-from .params import resolve_param_kwargs, expand_params
+from .params import call_param_func, expand_params
 
 from disnake.app_commands import SlashCommand, Option
 from disnake.enums import OptionType
@@ -267,8 +267,25 @@ class SubCommand(InvokableApplicationCommand):
         for k, v in self.connectors.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
-        kwargs = await resolve_param_kwargs(self.callback, inter, kwargs)
-        return await super().invoke(inter, *args, **kwargs)
+
+        await self.prepare(inter)
+
+        try:
+            await call_param_func(self.callback, inter, self.cog, **kwargs)
+        except CommandError:
+            inter.command_failed = True
+            raise
+        except asyncio.CancelledError:
+            inter.command_failed = True
+            return
+        except Exception as exc:
+            inter.command_failed = True
+            raise CommandInvokeError(exc) from exc
+        finally:
+            if self._max_concurrency is not None:
+                await self._max_concurrency.release(inter)  # type: ignore
+
+            await self.call_after_hooks(inter)
 
     def autocomplete(self, option_name: str) -> Callable[[Callable], Callable]:
         """
@@ -565,8 +582,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 for k, v in self.connectors.items():
                     if k in kwargs:
                         kwargs[v] = kwargs.pop(k)
-                kwargs = await resolve_param_kwargs(self.callback, inter, kwargs)
-                await self(inter, **kwargs)
+                await call_param_func(self.callback, inter, self.cog, **kwargs)
         except CommandError:
             inter.command_failed = True
             raise

@@ -38,16 +38,6 @@ class SlashCommands(commands.Cog):
     ):
         await inter.send(mood)
 
-    @commands.slash_command()
-    async def current(
-        self,
-        inter: disnake.GuildCommandInteraction,
-        user: disnake.Member = commands.Param(commands.Current),
-        channel: disnake.abc.GuildChannel = commands.Param(commands.Current, desc="channel"),
-        guild: disnake.Guild = commands.Current,
-    ):
-        await inter.send(f"user: {user.mention} channel: {channel.mention} guild: {guild.name}")
-
 
 def setup(bot):
     bot.add_cog(SlashCommands(bot))

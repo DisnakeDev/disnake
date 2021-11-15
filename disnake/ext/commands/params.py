@@ -23,31 +23,23 @@
 """Repsonsible for handling Params for slash commands"""
 from __future__ import annotations
 
+import asyncio
 import inspect
+import itertools
 import math
+import warnings
 from enum import Enum, EnumMeta
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-    get_origin,
-    get_type_hints,
-)
+from typing import (TYPE_CHECKING, Any, Callable, ClassVar, Dict, ForwardRef,
+                    List, Literal, Optional, Tuple, Type, TypeVar, Union, cast,
+                    get_origin, get_type_hints)
 
 import disnake
 from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
+from disnake.ext import commands
 from disnake.interactions import ApplicationCommandInteraction as Interaction
+from disnake.utils import maybe_coroutine
 
 from . import errors
 from .converter import CONVERTER_MAPPING
@@ -56,13 +48,41 @@ if TYPE_CHECKING:
     from .slash_core import InvokableSlashCommand, SubCommand
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
+    
+    from typing_extensions import TypeGuard
 
 T = TypeVar("T", bound=Any)
+TypeT = TypeVar("TypeT", bound=Type[Any])
 ChoiceValue = Union[str, int, float]
 Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
 TChoice = TypeVar("TChoice", bound=ChoiceValue)
 
-__all__ = ("ParamInfo", "Param", "param", "option_enum", "Current")
+__all__ = ("ParamInfo", "Param", "param", "inject", "option_enum")
+
+
+def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
+    if not isinstance(obj, type) or not isinstance(tp, (type, tuple)):
+        return False
+    return issubclass(obj, tp)
+    
+
+def signature(function: Callable) -> inspect.Signature:
+    """Get the signature with evaluated annotations wherever possible"""
+    globalns = function.__globals__
+    sig = inspect.signature(function)
+    parameters = []
+    for parameter in sig.parameters.values():
+        if isinstance(parameter.annotation, str):
+            try:
+                annot = ForwardRef(parameter.annotation)._evaluate(globalns, globalns, recursive_guard=frozenset()) # type: ignore
+            except Exception as e:
+                warnings.warn(f"Cannot parse annotation in {function!r}: {parameter.annotation!r}")
+            else:
+                parameter = parameter.replace(annotation=annot)
+
+        parameters.append(parameter)
+    
+    return inspect.Signature(parameters, return_annotation=sig.return_annotation)
 
 
 def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) -> Optional[float]:
@@ -83,33 +103,11 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
         return None
 
 
-class _Current:
-    inst: Optional[_Current] = None
+class Injection:
+    function: Callable
 
-    def __new__(cls) -> _Current:
-        if cls.inst is None:
-            cls.inst = super().__new__(cls)
-        return cls.inst
-
-    def __repr__(self) -> str:
-        return "<Current>"
-
-    def __call__(self, **kwargs: Any) -> Any:
-        return Param(self, **kwargs)
-
-
-Current: Any = _Current()
-
-
-def current_default(annotation: Any) -> Callable[[Interaction], Any]:
-    if issubclass(annotation, disnake.abc.GuildChannel):
-        return lambda i: i.channel
-    elif issubclass(annotation, (disnake.User, disnake.Member)):
-        return lambda i: i.author
-    elif issubclass(annotation, disnake.Guild):
-        return lambda i: i.guild
-
-    raise TypeError(f"There cannot be a current value for {annotation}")
+    def __init__(self, function: Callable) -> None:
+        self.function = function
 
 
 class ParamInfo:
@@ -223,7 +221,7 @@ class ParamInfo:
         doc = parsed_docstring.get(param.name)
         if doc:
             self.parse_doc(doc["type"], doc["description"])
-        self.parse_annotation(type_hints.get(param.name, Any))
+        self.parse_annotation(type_hints.get(param.name, param.annotation))
 
         return self
 
@@ -300,8 +298,6 @@ class ParamInfo:
                 annotation = args[0]
             else:
                 annotation.__args__ = args
-
-        self.default = current_default(annotation) if self.default is Current else self.default
 
         if self.converter is not None:
             # try to parse the converter's annotation, fall back on the annotation itself
@@ -402,36 +398,145 @@ class ParamInfo:
             max_value=self.max_value,
         )
 
+def safe_call(function: Callable[..., T], *args: Any, **possible_kwargs: Any) -> T:
+    """Calls a function without providing any extra unexpected arguments"""
+    parsed_pos = False
+    sig = signature(function)
+
+    kwargs = {}
+
+    for index, parameter, posarg in itertools.zip_longest(itertools.count(), sig.parameters.values(), args):
+        if parameter is None:
+            if posarg is not None:
+                args = args[:index]
+                kwargs = {}
+            break
+        if posarg is None:
+            parsed_pos = True
+        if parsed_pos and parameter.name in possible_kwargs:
+            kwargs[parameter.name]  = possible_kwargs[parameter.name]
+    
+    print(f"{sig} being called with {args} and {kwargs}")
+    return function(*args, **kwargs)
+        
+
+def collect_params(
+    function: Callable,
+) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
+    """Collect all parameters in a function
+
+    Returns: (`self parameter`, `interaction parameter`, `param infos`, `injections`)
+    """
+    is_interaction = lambda annot: issubclass_(annot, Interaction) or annot is inspect.Parameter.empty
+    
+    sig = signature(function)
+    doc = disnake.utils.parse_docstring(function)
+
+    parameters = dict(sig.parameters)
+    parametersl = list(sig.parameters.values())
+    
+    if not parameters:
+        return None, None, [], {}
+
+    self_param: Optional[inspect.Parameter] = None
+    inter_param: Optional[inspect.Parameter] = None
+    paraminfos: List[ParamInfo] = []
+    injections: Dict[str, Injection] = {}
+    
+    if parametersl[0].name == "self":
+        self_param = parameters.pop(parametersl[0].name)
+        parametersl.pop(0)
+        if len(parameters) > 1 and is_interaction(parametersl[0].annotation):
+            inter_param = parameters.pop(parametersl[0].name)
+    if inter_param is None and is_interaction(parametersl[0].annotation):
+        inter_param = parameters.pop(parametersl[0].name)
+    
+    for parameter in parameters.values():
+        if parameter.kind in [parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD]:
+            continue
+        if parameter.kind is parameter.POSITIONAL_ONLY:
+            raise TypeError("Positional-only parameters cannot be used in commands")
+        
+        default = parameter.default
+        if isinstance(default, Injection):
+            injections[parameter.name] = default
+        elif issubclass_(parameter.annotation, Interaction):
+            if inter_param is None:
+                inter_param = parameter
+            else:
+                raise TypeError(f"Found two candidates for the interaction in {function!r}: {inter_param.name} and {parameter.name}")
+        else:
+            paraminfo = ParamInfo.from_param(parameter, {}, doc)
+            paraminfos.append(paraminfo)
+    
+    
+        
+
+    return (
+        self_param.name if self_param else None,
+        inter_param.name if inter_param else None,
+        paraminfos,
+        injections
+    )
+
+def collect_nested_params(function: Callable) -> List[ParamInfo]:
+    """Collect all options from a function"""
+    _, _, paraminfos, injections = collect_params(function)
+    
+    for injection in injections.values():
+        paraminfos += collect_nested_params(injection.function)
+    
+    return paraminfos
+
+def format_kwargs(interaction: Interaction, self_param: str = None, inter_param: str = None, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+    cog: Optional[commands.Cog] = None
+    
+    for arg in args:
+        if isinstance(arg, commands.Cog):
+            cog = arg
+        else:
+            raise TypeError(f"Unexpected positional argument in a command callback: {arg}")
+    
+    if self_param:
+        kwargs[self_param] = cog
+    if inter_param:
+        kwargs[inter_param] = interaction
+    
+    return kwargs
+
+async def run_injections(injections: Dict[str, Injection], interaction: Interaction, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+    """Run and resolve a list of injections"""
+    async def _helper(name: str, injection: Injection) -> Tuple[str, Any]:
+        return name, await call_param_func(injection.function, interaction, *args, **kwargs)
+    
+    resolved = await asyncio.gather(*(_helper(name, i) for name, i in injections.items()))
+    return dict(resolved)
+    
+
+async def call_param_func(function: Callable, interaction: Interaction, *args: Any, **kwargs: Any) -> Any:
+    """Call a function utilizing ParamInfo"""
+    print(function, "START", args, kwargs)
+    self_param, inter_param, paraminfos, injections = collect_params(function)
+    formatted_kwargs = format_kwargs(interaction, self_param, inter_param, *args, **kwargs)
+    formatted_kwargs.update(await run_injections(injections, interaction, *args, **kwargs))
+    
+    for param in paraminfos:
+        if param.param_name in kwargs:
+            kwargs[param.param_name] = await param.convert_argument(interaction, kwargs[param.param_name])
+        elif param.default is not ...:
+            kwargs[param.param_name] = await param.get_default(interaction)
+    
+    print(function, "END", kwargs)
+    return await maybe_coroutine(safe_call, function, **formatted_kwargs)
+
 
 def expand_params(command: AnySlashCommand) -> List[Option]:
     """Update an option with its params *in-place*
 
     Returns the created options
     """
-    # parse annotations:
-    sig = inspect.signature(command.callback)
-    parameters = list(sig.parameters.values())
-
-    # hacky I suppose
-    predicate = (
-        lambda x: x.annotation is inspect._empty
-        and x.name != "self"
-        or isinstance(x.annotation, type)
-        and issubclass(x.annotation, Interaction)
-    )
-    inter_param = disnake.utils.find(predicate, parameters)
-    parameters = parameters[parameters.index(inter_param) + 1 :]
-    type_hints = get_type_hints(command.callback)
-    docstring = command.docstring["params"]
-
-    # extract params:
-    params = []
-    for parameter in parameters:
-        if parameter.kind in [inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD]:
-            continue
-        param = ParamInfo.from_param(parameter, type_hints, docstring)
-        params.append(param)
-
+    params = collect_nested_params(command.callback)
+    
     # update connectors and autocompleters
     for param in params:
         if param.name != param.param_name:
@@ -439,40 +544,9 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         if param.autocomplete:
             command.autocompleters[param.name] = param.autocomplete
 
-    # add custom decorators
-    inter_annot = type_hints.get(inter_param.name, Any)
-    if isinstance(inter_annot, type) and issubclass(inter_annot, disnake.GuildCommandInteraction):
-        command.guild_only = True
+    # TODO: Apply stuff like GuildCommandInteraction
 
     return [param.to_option() for param in params]
-
-
-async def resolve_param_kwargs(
-    func: Callable, inter: Interaction, kwargs: Dict[str, Any]
-) -> Dict[str, Any]:
-    """Resolves a call with kwargs and transforms into normal kwargs
-
-    Depends on the fact that optionparams already contain all info.
-    """
-    sig = inspect.signature(func)
-    type_hints = get_type_hints(func)
-
-    for parameter in sig.parameters.values():
-        if parameter.kind in [inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD]:
-            continue
-        try:
-            param = ParamInfo.from_param(parameter, type_hints)
-        except TypeError:
-            # invalid annotations with old-style options
-            continue
-
-        if param.param_name in kwargs:
-            kwargs[param.param_name] = await param.convert_argument(inter, kwargs[param.param_name])
-        elif param.default is not ...:
-            kwargs[param.param_name] = await param.get_default(inter)
-
-    return kwargs
-
 
 # NOTE: This is not worth overloading anymore unless we take
 # an sqlmodel approach and create overloads dynamically using templating
@@ -548,6 +622,9 @@ def Param(
 
 param = Param
 
+def inject(function: Callable[..., Any]) -> Any:
+    return Injection(function)
+
 
 def option_enum(
     choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
@@ -559,3 +636,24 @@ def option_enum(
     choices = choices or kwargs
     first, *_ = choices.values()
     return Enum("", choices, type=type(first))
+
+if __name__ == '__main__':
+    import tracemalloc
+    tracemalloc.start()
+    
+    async def injectable(foo: float, bar: float):
+        return foo + bar
+
+    async def command(inter, a: int, b: int, x: float = inject(injectable)):
+        print(a, b)
+        return f"---> {locals()} <---"
+
+
+    async def main():
+        paraminfos = collect_nested_params(command)
+        print(paraminfos)
+        interaction: Interaction = ... # type: ignore
+        x = await call_param_func(command, interaction, a=1, b=2, foo=1.2, bar=3.4)
+        print(x)
+
+    asyncio.run(main())
