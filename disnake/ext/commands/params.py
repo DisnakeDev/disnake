@@ -29,9 +29,23 @@ import itertools
 import math
 import warnings
 from enum import Enum, EnumMeta
-from typing import (TYPE_CHECKING, Any, Callable, ClassVar, Dict, ForwardRef,
-                    List, Literal, Optional, Tuple, Type, TypeVar, Union, cast,
-                    get_origin, get_type_hints)
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    ForwardRef,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+    get_origin,
+)
 
 import disnake
 from disnake.app_commands import Option, OptionChoice
@@ -48,7 +62,7 @@ if TYPE_CHECKING:
     from .slash_core import InvokableSlashCommand, SubCommand
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
-    
+
     from typing_extensions import TypeGuard
 
 T = TypeVar("T", bound=Any)
@@ -64,7 +78,7 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
     if not isinstance(obj, type) or not isinstance(tp, (type, tuple)):
         return False
     return issubclass(obj, tp)
-    
+
 
 def signature(function: Callable) -> inspect.Signature:
     """Get the signature with evaluated annotations wherever possible"""
@@ -74,14 +88,24 @@ def signature(function: Callable) -> inspect.Signature:
     for parameter in sig.parameters.values():
         if isinstance(parameter.annotation, str):
             try:
-                annot = ForwardRef(parameter.annotation)._evaluate(globalns, globalns, recursive_guard=frozenset()) # type: ignore
+                annot = ForwardRef(parameter.annotation)._evaluate(globalns, globalns, recursive_guard=frozenset())  # type: ignore
             except Exception as e:
                 warnings.warn(f"Cannot parse annotation in {function!r}: {parameter.annotation!r}")
             else:
                 parameter = parameter.replace(annotation=annot)
 
+        # remove unwanted optionals
+        if get_origin(parameter.annotation) is Union:
+            parameter.annotation = cast(Any, parameter.annotation)
+
+            args = [i for i in parameter.annotation.__args__ if i not in (None, type(None))]
+            if len(args) == 1:
+                parameter.annotation = args[0]
+            else:
+                parameter.annotation.__args__ = args
+
         parameters.append(parameter)
-    
+
     return inspect.Signature(parameters, return_annotation=sig.return_annotation)
 
 
@@ -283,95 +307,67 @@ class ParamInfo:
 
         self.type = type(self.choices[0].value)
 
-    def parse_annotation(self, annotation: Any) -> None:  # sourcery no-metrics
-        # TODO: Clean up whatever the fuck this is
-        if isinstance(annotation, ParamInfo):
-            default = "..." if annotation.default is ... else repr(annotation.default)
-            raise TypeError(
-                f'Param must be a parameter default, not an annotation: "option: type = Param({default})"'
-            )
+    def _parse_guild_channel(self, *channels: Type[disnake.abc.GuildChannel]) -> None:
+        self.type = disnake.abc.GuildChannel
 
-        # Get rid of Optionals
-        if get_origin(annotation) is Union:
-            args = [i for i in annotation.__args__ if i not in (None, type(None))]
-            if len(args) == 1:
-                annotation = args[0]
-            else:
-                annotation.__args__ = args
+        if not self.channel_types:
+            channel_types = set()
+            for channel in channels:
+                channel_types.union(_channel_type_factory(channel))
+            self.channel_types = list(channel_types)
 
-        if self.converter is not None:
-            # try to parse the converter's annotation, fall back on the annotation itself
-            parameters = list(inspect.signature(self.converter).parameters.values())
-            parameter = parameters[2] if parameters[0].name == "self" else parameters[1]
-            if self.converter.__class__ != type:
-                conv_annot = get_type_hints(self.converter.__call__).get(parameter.name, Any)
-            else:
-                conv_annot = get_type_hints(self.converter).get(parameter.name, Any)
-
-            if conv_annot in self.TYPES:
-                self.type = conv_annot
-                return
-            elif isinstance(conv_annot, EnumMeta) or get_origin(conv_annot) is Literal:
-                self._parse_enum(conv_annot)
-                return
-            elif conv_annot is not Any:
-                raise TypeError("Converters cannot use converter annotations")
-            elif annotation in CONVERTER_MAPPING:
-                raise TypeError(
-                    "Cannot use an implicit converter annotation and an unnanotated converter at the same time"
-                )
-            # otherwise just parse the annotation normally and hope for the best
-
+    def parse_annotation(self, annotation: Any, converter_mode: bool = False) -> bool:
+        """Parse an annotation"""
         if annotation is inspect.Parameter.empty or annotation is Any:
             pass
-        elif get_origin(annotation) is list:
-            if self.converter:
-                raise TypeError("Converter detected with custom annotation")
-            arg = annotation.__args__[0] if annotation.__args__ else str
-            if arg in [str, int, float]:
-                conv = arg
-            elif arg in CONVERTER_MAPPING:
-                # TODO: Define our own converters?
-                raise TypeError(
-                    "Discord's api is not mature enough to handle member conversion with models"
-                )
-            else:
-                raise TypeError(f"{arg!r} is not a valid List subscript for Param")
-            self.converter = lambda inter, arg: list(map(conv, arg.split()))
+        elif annotation in self.TYPES:
+            self.type = annotation
         elif (
             isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta))
             or get_origin(annotation) is Literal
         ):
             self._parse_enum(annotation)
-
         elif get_origin(annotation) is Union:
             args = annotation.__args__
-            if all(issubclass(channel, disnake.abc.GuildChannel) for channel in args):
-                self.type = disnake.abc.GuildChannel
-                if not self.channel_types:
-                    channel_types = set()
-                    for channel in args:
-                        channel_types.union(_channel_type_factory(channel))
-                    self.channel_types = list(channel_types)
-            elif annotation in self.TYPES:
-                self.type = annotation
-            elif any(get_origin(arg) for arg in args):
-                raise TypeError("Unions do not support nesting")
+            if all(issubclass_(channel, disnake.abc.GuildChannel) for channel in args):
+                self._parse_guild_channel(*args)
             else:
                 raise TypeError(
                     "Unions for anything else other than channels or a mentionable are not supported"
                 )
-        elif isinstance(annotation, type) and issubclass(annotation, disnake.abc.GuildChannel):
-            self.type = disnake.abc.GuildChannel
-            if not self.channel_types:
-                self.channel_types = _channel_type_factory(annotation)
+        elif issubclass_(annotation, disnake.abc.GuildChannel):
+            self._parse_guild_channel(annotation)
 
-        elif annotation in self.TYPES:
-            self.type = annotation
-        elif annotation in CONVERTER_MAPPING:
+        elif not converter_mode and annotation in CONVERTER_MAPPING:
             self.converter = CONVERTER_MAPPING[annotation]().convert
+        elif converter_mode:
+            return False
         else:
             raise TypeError(f"{annotation!r} is not a valid Param annotation")
+
+        return True
+
+    def parse_converter_annotation(self, converter: Callable, fallback_annotation: Any) -> None:
+        _, parameters = isolate_self(converter)
+
+        if len(parameters) != 1:
+            raise TypeError(
+                "Converters must take precisely one argument (excluding self and an optional interaction)"
+            )
+
+        _, parameter = parameters.popitem()
+        annotation = parameter.annotation
+
+        success = self.parse_annotation(annotation, converter_mode=True)
+        if success:
+            return
+        success = self.parse_annotation(fallback_annotation, converter_mode=True)
+        if success:
+            return
+
+        raise TypeError(
+            f"Both the converter annotation {annotation!r} and the option annotation {fallback_annotation!r} are invalid"
+        )
 
     def parse_parameter(self, param: inspect.Parameter) -> None:
         self.name = self.name or param.name
@@ -398,6 +394,7 @@ class ParamInfo:
             max_value=self.max_value,
         )
 
+
 def safe_call(function: Callable[..., T], *args: Any, **possible_kwargs: Any) -> T:
     """Calls a function without providing any extra unexpected arguments"""
     parsed_pos = False
@@ -405,7 +402,9 @@ def safe_call(function: Callable[..., T], *args: Any, **possible_kwargs: Any) ->
 
     kwargs = {}
 
-    for index, parameter, posarg in itertools.zip_longest(itertools.count(), sig.parameters.values(), args):
+    for index, parameter, posarg in itertools.zip_longest(
+        itertools.count(), sig.parameters.values(), args
+    ):
         if parameter is None:
             if posarg is not None:
                 args = args[:index]
@@ -414,11 +413,40 @@ def safe_call(function: Callable[..., T], *args: Any, **possible_kwargs: Any) ->
         if posarg is None:
             parsed_pos = True
         if parsed_pos and parameter.name in possible_kwargs:
-            kwargs[parameter.name]  = possible_kwargs[parameter.name]
-    
-    print(f"{sig} being called with {args} and {kwargs}")
+            kwargs[parameter.name] = possible_kwargs[parameter.name]
+
     return function(*args, **kwargs)
-        
+
+
+def isolate_self(
+    function: Callable,
+) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
+    """Create parameters without self and the first interaction"""
+    is_interaction = (
+        lambda annot: issubclass_(annot, Interaction) or annot is inspect.Parameter.empty
+    )
+
+    sig = signature(function)
+
+    parameters = dict(sig.parameters)
+    parametersl = list(sig.parameters.values())
+
+    if not parameters:
+        return (None, None), {}
+
+    self_param: Optional[inspect.Parameter] = None
+    inter_param: Optional[inspect.Parameter] = None
+
+    if parametersl[0].name == "self":
+        self_param = parameters.pop(parametersl[0].name)
+        parametersl.pop(0)
+        if len(parameters) > 1 and is_interaction(parametersl[0].annotation):
+            inter_param = parameters.pop(parametersl[0].name)
+    if inter_param is None and is_interaction(parametersl[0].annotation):
+        inter_param = parameters.pop(parametersl[0].name)
+
+    return (self_param, inter_param), parameters
+
 
 def collect_params(
     function: Callable,
@@ -427,36 +455,21 @@ def collect_params(
 
     Returns: (`self parameter`, `interaction parameter`, `param infos`, `injections`)
     """
-    is_interaction = lambda annot: issubclass_(annot, Interaction) or annot is inspect.Parameter.empty
-    
-    sig = signature(function)
+    (self_param, inter_param), parameters = isolate_self(function)
     doc = disnake.utils.parse_docstring(function)
 
-    parameters = dict(sig.parameters)
-    parametersl = list(sig.parameters.values())
-    
     if not parameters:
         return None, None, [], {}
 
-    self_param: Optional[inspect.Parameter] = None
-    inter_param: Optional[inspect.Parameter] = None
     paraminfos: List[ParamInfo] = []
     injections: Dict[str, Injection] = {}
-    
-    if parametersl[0].name == "self":
-        self_param = parameters.pop(parametersl[0].name)
-        parametersl.pop(0)
-        if len(parameters) > 1 and is_interaction(parametersl[0].annotation):
-            inter_param = parameters.pop(parametersl[0].name)
-    if inter_param is None and is_interaction(parametersl[0].annotation):
-        inter_param = parameters.pop(parametersl[0].name)
-    
+
     for parameter in parameters.values():
         if parameter.kind in [parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD]:
             continue
         if parameter.kind is parameter.POSITIONAL_ONLY:
             raise TypeError("Positional-only parameters cannot be used in commands")
-        
+
         default = parameter.default
         if isinstance(default, Injection):
             injections[parameter.name] = default
@@ -464,69 +477,82 @@ def collect_params(
             if inter_param is None:
                 inter_param = parameter
             else:
-                raise TypeError(f"Found two candidates for the interaction in {function!r}: {inter_param.name} and {parameter.name}")
+                raise TypeError(
+                    f"Found two candidates for the interaction in {function!r}: {inter_param.name} and {parameter.name}"
+                )
         else:
             paraminfo = ParamInfo.from_param(parameter, {}, doc)
             paraminfos.append(paraminfo)
-    
-    
-        
 
     return (
         self_param.name if self_param else None,
         inter_param.name if inter_param else None,
         paraminfos,
-        injections
+        injections,
     )
+
 
 def collect_nested_params(function: Callable) -> List[ParamInfo]:
     """Collect all options from a function"""
     _, _, paraminfos, injections = collect_params(function)
-    
+
     for injection in injections.values():
         paraminfos += collect_nested_params(injection.function)
-    
+
     return paraminfos
 
-def format_kwargs(interaction: Interaction, self_param: str = None, inter_param: str = None, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+
+def format_kwargs(
+    interaction: Interaction,
+    self_param: str = None,
+    inter_param: str = None,
+    *args: Any,
+    **kwargs: Any,
+) -> Dict[str, Any]:
     cog: Optional[commands.Cog] = None
-    
+
     for arg in args:
         if isinstance(arg, commands.Cog):
             cog = arg
         else:
             raise TypeError(f"Unexpected positional argument in a command callback: {arg}")
-    
+
     if self_param:
         kwargs[self_param] = cog
     if inter_param:
         kwargs[inter_param] = interaction
-    
+
     return kwargs
 
-async def run_injections(injections: Dict[str, Injection], interaction: Interaction, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+
+async def run_injections(
+    injections: Dict[str, Injection], interaction: Interaction, *args: Any, **kwargs: Any
+) -> Dict[str, Any]:
     """Run and resolve a list of injections"""
+
     async def _helper(name: str, injection: Injection) -> Tuple[str, Any]:
         return name, await call_param_func(injection.function, interaction, *args, **kwargs)
-    
+
     resolved = await asyncio.gather(*(_helper(name, i) for name, i in injections.items()))
     return dict(resolved)
-    
 
-async def call_param_func(function: Callable, interaction: Interaction, *args: Any, **kwargs: Any) -> Any:
+
+async def call_param_func(
+    function: Callable, interaction: Interaction, *args: Any, **kwargs: Any
+) -> Any:
     """Call a function utilizing ParamInfo"""
-    print(function, "START", args, kwargs)
     self_param, inter_param, paraminfos, injections = collect_params(function)
     formatted_kwargs = format_kwargs(interaction, self_param, inter_param, *args, **kwargs)
     formatted_kwargs.update(await run_injections(injections, interaction, *args, **kwargs))
-    
+
     for param in paraminfos:
         if param.param_name in kwargs:
-            kwargs[param.param_name] = await param.convert_argument(interaction, kwargs[param.param_name])
+            kwargs[param.param_name] = await param.convert_argument(
+                interaction, kwargs[param.param_name]
+            )
         elif param.default is not ...:
             kwargs[param.param_name] = await param.get_default(interaction)
-    
-    print(function, "END", kwargs)
+
     return await maybe_coroutine(safe_call, function, **formatted_kwargs)
 
 
@@ -536,7 +562,7 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     Returns the created options
     """
     params = collect_nested_params(command.callback)
-    
+
     # update connectors and autocompleters
     for param in params:
         if param.name != param.param_name:
@@ -547,6 +573,7 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     # TODO: Apply stuff like GuildCommandInteraction
 
     return [param.to_option() for param in params]
+
 
 # NOTE: This is not worth overloading anymore unless we take
 # an sqlmodel approach and create overloads dynamically using templating
@@ -622,6 +649,7 @@ def Param(
 
 param = Param
 
+
 def inject(function: Callable[..., Any]) -> Any:
     return Injection(function)
 
@@ -636,24 +664,3 @@ def option_enum(
     choices = choices or kwargs
     first, *_ = choices.values()
     return Enum("", choices, type=type(first))
-
-if __name__ == '__main__':
-    import tracemalloc
-    tracemalloc.start()
-    
-    async def injectable(foo: float, bar: float):
-        return foo + bar
-
-    async def command(inter, a: int, b: int, x: float = inject(injectable)):
-        print(a, b)
-        return f"---> {locals()} <---"
-
-
-    async def main():
-        paraminfos = collect_nested_params(command)
-        print(paraminfos)
-        interaction: Interaction = ... # type: ignore
-        x = await call_param_func(command, interaction, a=1, b=2, foo=1.2, bar=3.4)
-        print(x)
-
-    asyncio.run(main())

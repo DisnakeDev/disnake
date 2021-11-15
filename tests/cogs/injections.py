@@ -12,14 +12,14 @@ class InjectionSlashCommands(commands.Cog):
     def __init__(self, bot):
         self.bot: commands.Bot = bot
         self.exponent = 2
-    
+
     async def injected_method(self, number: int = 0):
         return number ** self.exponent
 
     @commands.slash_command()
     async def injection_command(
-        self, 
-        inter: disnake.ApplicationCommandInteraction, 
+        self,
+        inter: disnake.ApplicationCommandInteraction,
         some: Tuple[int, str] = commands.inject(injected),
         other: int = commands.inject(injected_method),
     ):
