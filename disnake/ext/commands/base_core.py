@@ -558,7 +558,9 @@ def guild_permissions(
         roles = roles or kwargs.get("role_ids")
         users = users or kwargs.get("user_ids")
 
-    perms = UnresolvedGuildApplicationCommandPermissions(role_ids=roles, user_ids=users, owner=owner)
+    perms = UnresolvedGuildApplicationCommandPermissions(
+        role_ids=roles, user_ids=users, owner=owner
+    )
 
     def decorator(func: T) -> T:
         if isinstance(func, InvokableApplicationCommand):
