@@ -547,8 +547,8 @@ class GuildApplicationCommandPermissions:
         self,
         *,
         permissions: Dict[Union[Role, User], bool] = None,
-        roles: Dict[int, bool] = None,
-        users: Dict[int, bool] = None,
+        role_ids: Dict[int, bool] = None,
+        user_ids: Dict[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
         """
         Replaces current permissions with specified ones.
@@ -557,9 +557,9 @@ class GuildApplicationCommandPermissions:
         ----------
         permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-        roles: Mapping[:class:`int`, :class:`bool`]
+        role_ids: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.
-        users: Mapping[:class:`int`, :class:`bool`]
+        user_ids: Mapping[:class:`int`, :class:`bool`]
             User IDs to booleans.
         """
 
@@ -575,12 +575,12 @@ class GuildApplicationCommandPermissions:
                     raise ValueError("Permission target should be an instance of Role or abc.User")
                 data.append({"id": obj.id, "type": target_type, "permission": value})
 
-        if roles is not None:
-            for role_id, value in roles.items():
+        if role_ids is not None:
+            for role_id, value in role_ids.items():
                 data.append({"id": role_id, "type": 1, "permission": value})
 
-        if users is not None:
-            for user_id, value in users.items():
+        if user_ids is not None:
+            for user_id, value in user_ids.items():
                 data.append({"id": user_id, "type": 2, "permission": value})
 
         res = await self._state.http.edit_application_command_permissions(
@@ -600,9 +600,9 @@ class PartialGuildApplicationCommandPermissions:
         The ID of the app command you want to apply these permissions to.
     permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
         Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-    roles: Mapping[:class:`int`, :class:`bool`]
+    role_ids: Mapping[:class:`int`, :class:`bool`]
         Role IDs to booleans.
-    users: Mapping[:class:`int`, :class:`bool`]
+    user_ids: Mapping[:class:`int`, :class:`bool`]
         User IDs to booleans.
     """
 
@@ -611,8 +611,8 @@ class PartialGuildApplicationCommandPermissions:
         command_id: int,
         *,
         permissions: Mapping[Union[Role, User], bool] = None,
-        roles: Mapping[int, bool] = None,
-        users: Mapping[int, bool] = None,
+        role_ids: Mapping[int, bool] = None,
+        user_ids: Mapping[int, bool] = None,
     ):
         self.id: int = command_id
         self.permissions: List[ApplicationCommandPermissions] = []
@@ -628,13 +628,13 @@ class PartialGuildApplicationCommandPermissions:
                 data = {"id": obj.id, "type": target_type, "permission": value}
                 self.permissions.append(ApplicationCommandPermissions(data=data))
 
-        if roles is not None:
-            for role_id, value in roles.items():
+        if role_ids is not None:
+            for role_id, value in role_ids.items():
                 data = {"id": role_id, "type": 1, "permission": value}
                 self.permissions.append(ApplicationCommandPermissions(data=data))
 
-        if users is not None:
-            for user_id, value in users.items():
+        if user_ids is not None:
+            for user_id, value in user_ids.items():
                 data = {"id": user_id, "type": 2, "permission": value}
                 self.permissions.append(ApplicationCommandPermissions(data=data))
 
@@ -657,9 +657,9 @@ class UnresolvedGuildApplicationCommandPermissions:
     ----------
     permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
         Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-    roles: Mapping[:class:`int`, :class:`bool`]
+    role_ids: Mapping[:class:`int`, :class:`bool`]
         Role IDs to booleans.
-    users: Mapping[:class:`int`, :class:`bool`]
+    user_ids: Mapping[:class:`int`, :class:`bool`]
         User IDs to booleans.
     owner: :class:`bool`
         Allow/deny the bot owner(s).
@@ -669,13 +669,13 @@ class UnresolvedGuildApplicationCommandPermissions:
         self,
         *,
         permissions: Mapping[Union[Role, User], bool] = None,
-        roles: Mapping[int, bool] = None,
-        users: Mapping[int, bool] = None,
+        role_ids: Mapping[int, bool] = None,
+        user_ids: Mapping[int, bool] = None,
         owner: bool = None,
     ):
         self.permissions: Optional[Mapping[Union[Role, User], bool]] = permissions
-        self.roles: Optional[Mapping[int, bool]] = roles
-        self.users: Optional[Mapping[int, bool]] = users
+        self.role_ids: Optional[Mapping[int, bool]] = role_ids
+        self.user_ids: Optional[Mapping[int, bool]] = user_ids
         self.owner: Optional[bool] = owner
 
     def resolve(
@@ -707,7 +707,7 @@ class UnresolvedGuildApplicationCommandPermissions:
             if not owner_ids:
                 raise ValueError("Cannot properly resolve permissions without owner IDs")
 
-            users = self.users or {}
+            users = self.user_ids or {}
             common_ids = owner_ids.keys() & users.keys()
             if any(users[id] != owner_ids[id] for id in common_ids):
                 warnings.warn(
@@ -716,11 +716,11 @@ class UnresolvedGuildApplicationCommandPermissions:
 
             resolved_users = {**users, **owner_ids}
         else:
-            resolved_users = self.users
+            resolved_users = self.user_ids
 
         return PartialGuildApplicationCommandPermissions(
             command_id=command_id,
             permissions=self.permissions,
-            roles=self.roles,
-            users=resolved_users,
+            role_ids=self.role_ids,
+            user_ids=resolved_users,
         )
