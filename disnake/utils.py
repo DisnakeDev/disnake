@@ -496,9 +496,7 @@ def _get_as_snowflake(data: Any, key: str) -> Optional[int]:
         return value and int(value)
 
 
-def _get_and_cast(
-    data: dict, key: Any, converter: Callable[[Any], T], default: Any = None
-) -> Optional[T]:
+def _get_and_cast(data: dict, key: Any, converter: Callable, default: Any = None) -> Any:
     try:
         return converter(data[key])
     except KeyError:
