@@ -247,8 +247,12 @@ class Interaction:
         Fetches the original interaction response message associated with the interaction.
 
         If the interaction response was :meth:`InteractionResponse.send_message` then this would
-        return the message that was sent using that response. Otherwise, this would return
-        the message that triggered the interaction.
+        return the message that was sent using that response.
+        Otherwise, if the interaction response was :meth:`InteractionResponse.defer` then this would
+        return the original interaction message.
+
+        If the interaction response was :meth:`InteractionResponse.edit_message` then this would
+        return the edited message.
 
         Repeated calls to this will return a cached value.
 
