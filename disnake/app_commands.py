@@ -161,6 +161,7 @@ class Option:
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
+        **kwargs,
     ):
         assert name.islower(), f"Option name {name!r} must be lowercase"
 
