@@ -104,7 +104,7 @@ class OptionChoice:
 
     @classmethod
     def from_dict(cls, data):
-        return OptionChoice(name=data.get("name"), value=data.get("value"))
+        return OptionChoice(name=data["name"], value=data["value"])
 
 
 Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
@@ -357,16 +357,17 @@ class UserCommand(ApplicationCommand):
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
-        if data.pop("type", 0) != ApplicationCommandType.user.value:
-            raise ValueError("Invalid payload")
+        cmd_type = data.get("type", 0)
+        if cmd_type != ApplicationCommandType.user.value:
+            raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
         return UserCommand(
             name=data["name"],
             default_permission=data.get("default_permission", True),
-            id=_get_as_snowflake(data, "id"),
-            application_id=_get_as_snowflake(data, "application_id"),
-            guild_id=_get_as_snowflake(data, "guild_id"),
-            version=_get_as_snowflake(data, "version"),
+            id=data.get("id"),
+            application_id=data.get("application_id"),
+            guild_id=data.get("guild_id"),
+            version=data.get("version"),
         )
 
 
@@ -384,16 +385,17 @@ class MessageCommand(ApplicationCommand):
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
-        if data.pop("type", 0) != ApplicationCommandType.message.value:
-            raise ValueError("Invalid payload")
+        cmd_type = data.get("type", 0)
+        if cmd_type != ApplicationCommandType.message.value:
+            raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
         return MessageCommand(
             name=data["name"],
             default_permission=data.get("default_permission", True),
-            id=_get_as_snowflake(data, "id"),
-            application_id=_get_as_snowflake(data, "application_id"),
-            guild_id=_get_as_snowflake(data, "guild_id"),
-            version=_get_as_snowflake(data, "version"),
+            id=data.get("id"),
+            application_id=data.get("application_id"),
+            guild_id=data.get("guild_id"),
+            version=data.get("version"),
         )
 
 
@@ -452,18 +454,19 @@ class SlashCommand(ApplicationCommand):
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
-        if data.pop("type", 1) != ApplicationCommandType.chat_input.value:
-            raise ValueError("Invalid payload")
+        cmd_type = data.get("type", 0)
+        if cmd_type != ApplicationCommandType.chat_input.value:
+            raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
 
         return SlashCommand(
             name=data["name"],
             description=data["description"],
             default_permission=data.get("default_permission", True),
             options=_get_and_cast(data, "options", lambda x: list(map(Option.from_dict, x))),
-            id=_get_as_snowflake(data, "id"),
-            application_id=_get_as_snowflake(data, "application_id"),
-            guild_id=_get_as_snowflake(data, "guild_id"),
-            version=_get_as_snowflake(data, "version"),
+            id=data.get("id"),
+            application_id=data.get("application_id"),
+            guild_id=data.get("guild_id"),
+            version=data.get("version"),
         )
 
     def add_option(
