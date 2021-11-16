@@ -1181,6 +1181,11 @@ div.code-block-caption {
   font-weight: bold;
 }
 
+.viewcode-link {
+  font-size: small;
+  margin-top: 2px;
+}
+
 
 /* desktop stuff */
 

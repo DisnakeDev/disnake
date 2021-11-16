@@ -159,7 +159,6 @@ class ParamInfo:
         self.choices = choices or []
         self.type = type or str
         self.channel_types = channel_types or []
-
         self.max_value = _xt_to_xe(le, lt, -1)
         self.min_value = _xt_to_xe(ge, gt, 1)
 
@@ -205,10 +204,9 @@ class ParamInfo:
 
         return self
 
-    def __repr__(self):
-        return (
-            f"<Param default={self.default!r} name={self.name!r} description={self.description!r}>"
-        )
+    def __repr__(self) -> str:
+        args = ", ".join(f"{k}={'...' if v is ... else repr(v)}" for k, v in vars(self).items())
+        return f"{type(self).__name__}({args})"
 
     async def get_default(self, inter: Interaction) -> Any:
         """Gets the default for an interaction"""
@@ -268,9 +266,8 @@ class ParamInfo:
         # TODO: Clean up whatever the fuck this is
         if isinstance(annotation, ParamInfo):
             default = "..." if annotation.default is ... else repr(annotation.default)
-            r = f'Param({default}, description={annotation.description or "description"!r})'
             raise TypeError(
-                f'Param must be a parameter default, not an annotation: "option: type = {r}"'
+                f'Param must be a parameter default, not an annotation: "option: type = Param({default})"'
             )
 
         # Get rid of Optionals
@@ -284,7 +281,7 @@ class ParamInfo:
         if self.converter is not None:
             # try to parse the converter's annotation, fall back on the annotation itself
             parameters = list(inspect.signature(self.converter).parameters.values())
-            parameter = parameters[2] if inspect.ismethod(self.converter) else parameters[1]
+            parameter = parameters[2] if parameters[0].name == "self" else parameters[1]
             if self.converter.__class__ != type:
                 conv_annot = get_type_hints(self.converter.__call__).get(parameter.name, Any)
             else:

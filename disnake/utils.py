@@ -489,6 +489,13 @@ def _get_as_snowflake(data: Any, key: str) -> Optional[int]:
         return value and int(value)
 
 
+def _get_and_cast(data: dict, key: Any, converter: Callable, default: Any = None) -> Any:
+    try:
+        return converter(data[key])
+    except KeyError:
+        return default
+
+
 def _get_mime_type_for_image(data: bytes):
     if data.startswith(b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"):
         return "image/png"

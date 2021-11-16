@@ -112,7 +112,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         try:
             await super().__call__(inter, *args, **kwargs)
         except TypeError as e:
-            if e.args and e.args[0].startswith(f"{self.callback.__name__}() takes "):
+            if e.args and e.args[0].startswith(f"{self.callback.__name__}() missing "):
                 await super().__call__(inter, target, *args, **kwargs)
             else:
                 raise
@@ -186,7 +186,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         try:
             await super().__call__(inter, *args, **kwargs)
         except TypeError as e:
-            if e.args and e.args[0].startswith(f"{self.callback.__name__}() takes "):
+            if e.args and e.args[0].startswith(f"{self.callback.__name__}() missing "):
                 await super().__call__(inter, target, *args, **kwargs)
             else:
                 raise

@@ -450,7 +450,7 @@ class SyncWebhookMessage(Message):
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -1076,7 +1076,7 @@ class SyncWebhook(BaseWebhook):
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
 
-            .. versionadded:: 2.1
+            .. versionadded:: 2.2
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.

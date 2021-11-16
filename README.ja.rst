@@ -50,7 +50,7 @@ disnake は機能豊富かつモダンで使いやすい、非同期処理にも
 
 .. code:: sh
 
-    $ git clone https://github.com/EQUENOS/disnake
+    $ git clone https://github.com/DisnakeDev/disnake
     $ cd disnake
     $ python3 -m pip install -U .[voice]
 
