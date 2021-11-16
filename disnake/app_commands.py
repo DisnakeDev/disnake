@@ -40,7 +40,7 @@ from .enums import (
 )
 from .errors import InvalidArgument
 from .role import Role
-from .utils import _get_as_snowflake
+from .utils import _get_as_snowflake, _get_and_cast
 
 if TYPE_CHECKING:
     from .state import ConnectionState
@@ -101,6 +101,10 @@ class OptionChoice:
 
     def to_dict(self) -> Dict[str, ChoiceValue]:
         return {"name": self.name, "value": self.value}
+
+    @classmethod
+    def from_dict(cls, data):
+        return OptionChoice(name=data.get("name"), value=data.get("value"))
 
 
 Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
@@ -220,14 +224,21 @@ class Option:
         )
 
     @classmethod
-    def from_dict(cls, payload: dict):
-        if "options" in payload:
-            payload["options"] = [Option.from_dict(p) for p in payload["options"]]
-        if "choices" in payload:
-            payload["choices"] = [OptionChoice(**p) for p in payload["choices"]]
-        if "channel_types" in payload:
-            payload["channel_types"] = [try_enum(ChannelType, v) for v in payload["channel_types"]]
-        return Option(**payload)
+    def from_dict(cls, data: dict):
+        return Option(
+            name=data["name"],
+            description=data.get("description"),
+            type=data.get("type"),
+            required=data.get("required", False),
+            choices=_get_and_cast(data, "choices", lambda x: list(map(OptionChoice.from_dict, x))),
+            options=_get_and_cast(data, "options", lambda x: list(map(Option.from_dict, x))),
+            channel_types=_get_and_cast(
+                data, "channel_types", lambda x: [try_enum(ChannelType, t) for t in x]
+            ),
+            autocomplete=data.get("autocomplete", False),
+            min_value=data.get("min_value"),
+            max_value=data.get("max_value"),
+        )
 
     def add_choice(self, name: str, value: Union[str, int]) -> None:
         """
@@ -346,8 +357,17 @@ class UserCommand(ApplicationCommand):
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
-        if data.pop("type", 0) == ApplicationCommandType.user.value:
-            return UserCommand(**data)
+        if data.pop("type", 0) != ApplicationCommandType.user.value:
+            raise ValueError("Invalid payload")
+
+        return UserCommand(
+            name=data["name"],
+            default_permission=data.get("default_permission", True),
+            id=_get_as_snowflake(data, "id"),
+            application_id=_get_as_snowflake(data, "application_id"),
+            guild_id=_get_as_snowflake(data, "guild_id"),
+            version=_get_as_snowflake(data, "version"),
+        )
 
 
 class MessageCommand(ApplicationCommand):
@@ -364,8 +384,17 @@ class MessageCommand(ApplicationCommand):
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
-        if data.pop("type", 0) == ApplicationCommandType.message.value:
-            return MessageCommand(**data)
+        if data.pop("type", 0) != ApplicationCommandType.message.value:
+            raise ValueError("Invalid payload")
+
+        return MessageCommand(
+            name=data["name"],
+            default_permission=data.get("default_permission", True),
+            id=_get_as_snowflake(data, "id"),
+            application_id=_get_as_snowflake(data, "application_id"),
+            guild_id=_get_as_snowflake(data, "guild_id"),
+            version=_get_as_snowflake(data, "version"),
+        )
 
 
 class SlashCommand(ApplicationCommand):
@@ -422,12 +451,20 @@ class SlashCommand(ApplicationCommand):
         )
 
     @classmethod
-    def from_dict(cls, payload: Dict[str, Any]):
-        if payload.pop("type", 1) != ApplicationCommandType.chat_input.value:
-            return None
-        if "options" in payload:
-            payload["options"] = [Option.from_dict(p) for p in payload["options"]]
-        return SlashCommand(**payload)
+    def from_dict(cls, data: Dict[str, Any]):
+        if data.pop("type", 1) != ApplicationCommandType.chat_input.value:
+            raise ValueError("Invalid payload")
+
+        return SlashCommand(
+            name=data["name"],
+            description=data["description"],
+            default_permission=data.get("default_permission", True),
+            options=_get_and_cast(data, "options", lambda x: list(map(Option.from_dict, x))),
+            id=_get_as_snowflake(data, "id"),
+            application_id=_get_as_snowflake(data, "application_id"),
+            guild_id=_get_as_snowflake(data, "guild_id"),
+            version=_get_as_snowflake(data, "version"),
+        )
 
     def add_option(
         self,
