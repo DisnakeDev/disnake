@@ -620,26 +620,20 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     return [param.to_option() for param in params]
 
 
-# NOTE: This is not worth overloading anymore unless we take
-# an sqlmodel approach and create overloads dynamically using templating
 def Param(
     default: Any = ...,
     *,
     name: str = "",
-    desc: str = None,
     description: str = None,
     choices: Choices = None,
-    conv: Callable[[Interaction, Any], Any] = None,
     converter: Callable[[Interaction, Any], Any] = None,
-    autocomp: Callable[[Interaction, str], Any] = None,
     autocomplete: Callable[[Interaction, str], Any] = None,
     channel_types: List[ChannelType] = None,
     lt: float = None,
     le: float = None,
     gt: float = None,
     ge: float = None,
-    min_value: float = None,
-    max_value: float = None,
+    **kwargs: Any,
 ) -> Any:
     """
     A special function that creates an instance of :class:`ParamInfo` that contains some information about a
@@ -677,18 +671,28 @@ def Param(
     :class:`ParamInfo`
         An instance with the option info.
     """
+    description = kwargs.pop("desc", description)
+    converter = kwargs.pop("conv", converter)
+    autocomplete = kwargs.pop("autocomp", autocomplete)
+    le = kwargs.pop("max_value", le)
+    ge = kwargs.pop("min_value", ge)
+
+    if kwargs:
+        a = ", ".join(map(repr, kwargs))
+        raise TypeError(f"Param() got unexpected keyword arguments: {a}")
+
     return ParamInfo(
         default,
         name=name,
-        description=desc or description,
+        description=description,
         choices=choices,
-        converter=conv or converter,
-        autcomplete=autocomp or autocomplete,
+        converter=converter,
+        autcomplete=autocomplete,
         channel_types=channel_types,
         lt=lt,
-        le=le if max_value is None else max_value,
+        le=le,
         gt=gt,
-        ge=ge if min_value is None else min_value,
+        ge=ge,
     )
 
 
