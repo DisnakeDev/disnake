@@ -1517,7 +1517,7 @@ class Client:
         data = await self.http.get_template(code)
         return Template(data=data, state=self._connection)  # type: ignore
 
-    async def fetch_guild(self, guild_id: int, /, *, with_counts: Optional[bool] = True) -> Guild:
+     async def fetch_guild(self, guild_id: int, /) -> Guild:
         """|coro|
 
         Retrieves a :class:`.Guild` from an ID.
@@ -1535,11 +1535,6 @@ class Client:
         -----------
         guild_id: :class:`int`
             The guild's ID to fetch from.
-
-        with_counts: Optional[:class:`bool`]
-            Whether to include count information in the guild. This fills the
-            :attr:`.Guild.approximate_member_count` and :attr:`.Guild.approximate_presence_count`
-            attributes without needing any privileged intents. Defaults to ``True``.
 
         Raises
         ------
