@@ -67,11 +67,20 @@ if TYPE_CHECKING:
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
+CallableT = TypeVar("CallableT", bound=Callable[..., Any])
 ChoiceValue = Union[str, int, float]
 Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
 TChoice = TypeVar("TChoice", bound=ChoiceValue)
 
-__all__ = ("ParamInfo", "Param", "param", "inject", "option_enum")
+__all__ = (
+    "ParamInfo",
+    "Param",
+    "param",
+    "inject",
+    "option_enum",
+    "register_injection",
+    "converter_method",
+)
 
 
 def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
@@ -80,22 +89,30 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
     return issubclass(obj, tp)
 
 
+def evaluate_forwardref(annotation: Any, globalns: Dict[str, Any]) -> Any:
+    if isinstance(annotation, (str, ForwardRef)):
+        if isinstance(annotation, str):
+            annotation = ForwardRef(annotation)
+
+        try:
+            annotation._evaluate(globalns, globalns, recursive_guard=frozenset())  # type: ignore
+        except Exception as e:
+            warnings.warn(f"Cannot parse annotation: {annotation!r}")
+
+    return annotation
+
+
 def signature(function: Callable) -> inspect.Signature:
     """Get the signature with evaluated annotations wherever possible"""
     globalns = function.__globals__
     sig = inspect.signature(function)
     parameters = []
     for parameter in sig.parameters.values():
-        if isinstance(parameter.annotation, str):
-            try:
-                annot = ForwardRef(parameter.annotation)._evaluate(globalns, globalns, recursive_guard=frozenset())  # type: ignore
-            except Exception as e:
-                warnings.warn(f"Cannot parse annotation in {function!r}: {parameter.annotation!r}")
-            else:
-                parameter = parameter.replace(annotation=annot)
+        annotation = evaluate_forwardref(parameter.annotation, globalns)
+        parameter = parameter.replace(annotation=annotation)
 
         # remove unwanted optionals
-        if get_origin(parameter.annotation) is Union:
+        if get_origin(parameter.annotation) is Union and parameter.default is not parameter.empty:
             parameter.annotation = cast(Any, parameter.annotation)
 
             args = [i for i in parameter.annotation.__args__ if i not in (None, type(None))]
@@ -106,7 +123,9 @@ def signature(function: Callable) -> inspect.Signature:
 
         parameters.append(parameter)
 
-    return inspect.Signature(parameters, return_annotation=sig.return_annotation)
+    return_annotation = evaluate_forwardref(sig.return_annotation, globalns)
+
+    return inspect.Signature(parameters, return_annotation=return_annotation)
 
 
 def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) -> Optional[float]:
@@ -128,10 +147,18 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
 
 
 class Injection:
+    REGISTERED: ClassVar[Dict[Any, Injection]] = {}
+
     function: Callable
 
     def __init__(self, function: Callable) -> None:
         self.function = function
+
+    @classmethod
+    def register(cls, function: CallableT, annotation: Any) -> CallableT:
+        self = cls(function)
+        cls.REGISTERED[annotation] = self
+        return function
 
 
 class ParamInfo:
@@ -178,6 +205,7 @@ class ParamInfo:
         disnake.abc.Snowflake: 9,
         float: 10,
     }
+    CONVERTERS: ClassVar[Dict[type, Callable]] = {}
 
     def __init__(
         self,
@@ -249,6 +277,11 @@ class ParamInfo:
 
         return self
 
+    @classmethod
+    def register_converter(cls, annotation: Any, converter: CallableT) -> CallableT:
+        cls.CONVERTERS[annotation] = converter
+        return converter
+
     def __repr__(self) -> str:
         args = ", ".join(f"{k}={'...' if v is ... else repr(v)}" for k, v in vars(self).items())
         return f"{type(self).__name__}({args})"
@@ -318,6 +351,13 @@ class ParamInfo:
 
     def parse_annotation(self, annotation: Any, converter_mode: bool = False) -> bool:
         """Parse an annotation"""
+        if not converter_mode:
+            self.converter = getattr(annotation, "__discord_converter__", None)
+            self.converter = self.converter or self.CONVERTERS.get(annotation)
+            if self.converter:
+                self.parse_converter_annotation(self.converter, annotation)
+                return True
+
         if annotation is inspect.Parameter.empty or annotation is Any:
             pass
         elif annotation in self.TYPES:
@@ -473,6 +513,8 @@ def collect_params(
         default = parameter.default
         if isinstance(default, Injection):
             injections[parameter.name] = default
+        elif parameter.annotation in Injection.REGISTERED:
+            injections[parameter.name] = Injection.REGISTERED[parameter.annotation]
         elif issubclass_(parameter.annotation, Interaction):
             if inter_param is None:
                 inter_param = parameter
@@ -494,12 +536,14 @@ def collect_params(
 
 def collect_nested_params(function: Callable) -> List[ParamInfo]:
     """Collect all options from a function"""
+    # TODO: Have these be actually sorted properly and not have injections always at the end
+
     _, _, paraminfos, injections = collect_params(function)
 
     for injection in injections.values():
         paraminfos += collect_nested_params(injection.function)
 
-    return paraminfos
+    return sorted(paraminfos, key=lambda param: not param.required)
 
 
 def format_kwargs(
@@ -544,6 +588,7 @@ async def call_param_func(
     self_param, inter_param, paraminfos, injections = collect_params(function)
     formatted_kwargs = format_kwargs(interaction, self_param, inter_param, *args, **kwargs)
     formatted_kwargs.update(await run_injections(injections, interaction, *args, **kwargs))
+    kwargs = formatted_kwargs
 
     for param in paraminfos:
         if param.param_name in kwargs:
@@ -553,7 +598,7 @@ async def call_param_func(
         elif param.default is not ...:
             kwargs[param.param_name] = await param.get_default(interaction)
 
-    return await maybe_coroutine(safe_call, function, **formatted_kwargs)
+    return await maybe_coroutine(safe_call, function, **kwargs)
 
 
 def expand_params(command: AnySlashCommand) -> List[Option]:
@@ -664,3 +709,42 @@ def option_enum(
     choices = choices or kwargs
     first, *_ = choices.values()
     return Enum("", choices, type=type(first))
+
+
+class ConverterMethod:
+    function: classmethod
+
+    def __init__(self, function) -> None:
+        if not isinstance(function, classmethod):
+            function = classmethod(function)
+
+        self.function = function
+
+    def __set_name__(self, owner: Type[Any], name: str):
+        ParamInfo.CONVERTERS[owner] = self.function
+        owner.__discord_converter__ = self.function
+
+    def __get__(self, instance: Any, cls: Any):
+        return self.function
+
+
+if TYPE_CHECKING:
+    converter_method = classmethod
+else:
+
+    def converter_method(function: Any) -> ConverterMethod:
+        return ConverterMethod(function)
+
+
+def register_injection(function: CallableT) -> CallableT:
+    """Use this as a decorator to register a global injection"""
+    sig = signature(function)
+    tp = sig.return_annotation
+
+    if tp is inspect.Parameter.empty:
+        raise TypeError("Injection must have a return annotation")
+    if tp in ParamInfo.TYPES:
+        raise TypeError("Injection cannot overwrite builtin types")
+
+    Injection.register(function, sig.return_annotation)
+    return function
