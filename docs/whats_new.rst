@@ -11,6 +11,40 @@ Changelog
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
+.. _vp2p2p2:
+
+v2.2.2
+-------
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fix channel conversion in audit log entries
+- Fix improper error handling in context menu commands
+- Supply :attr:`ApplicationCommandInteraction.application_command` in autocomplete callbacks
+- Fix :class:`Select.append_option <disnake.ui.Select.append_option>` not raising an error if 25 options have already been added
+- Improve check for ``options`` parameter on slash commands and subcommands
+- Improve parameter parsing for converters
+- Fix warning related to new option properties
+
+Documentation
+~~~~~~~~~~~~~~
+
+- Update repository links to new organization
+- Fix duplicate entries in documentation
+- Fix incorrect ``versionadded`` tags
+- Add docs for :class:`InteractionBot` and :class:`AutoShardedInteractionBot`
+
+.. _vp2p2p1:
+
+v2.2.1
+-------
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fixed error related to guild member count
+
 .. _vp2p2p0:
 
 v2.2.0
