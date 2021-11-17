@@ -242,12 +242,10 @@ class Guild(Hashable):
         The guild's NSFW level.
 
         .. versionadded:: 2.0
-
     approximate_member_count: Optional[:class:`int`]
         The approximate number of members in the guild.
 
         .. versionadded:: 2.3
-
     approximate_presence_count: Optional[:class:`int`]
         The approximate number of members currently active in the guild.
         This includes idle, dnd, online, and invisible members. Offline members are excluded.
