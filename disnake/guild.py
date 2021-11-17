@@ -246,13 +246,13 @@ class Guild(Hashable):
     approximate_member_count: Optional[:class:`int`]
         The approximate number of members in the guild.
 
-        .. versionadded:: 2.0
+        .. versionadded:: 2.3.0
 
     approximate_presence_count: Optional[:class:`int`]
         The approximate number of members currently active in the guild.
         This includes idle, dnd, online, and invisible members. Offline members are excluded.
 
-        .. versionadded:: 2.0
+        .. versionadded:: 2.3.0
     """
 
     __slots__ = (
