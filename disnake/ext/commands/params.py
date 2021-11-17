@@ -147,7 +147,7 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
 
 
 class Injection:
-    REGISTERED: ClassVar[Dict[Any, Injection]] = {}
+    _registered: ClassVar[Dict[Any, Injection]] = {}
 
     function: Callable
 
@@ -157,7 +157,7 @@ class Injection:
     @classmethod
     def register(cls, function: CallableT, annotation: Any) -> CallableT:
         self = cls(function)
-        cls.REGISTERED[annotation] = self
+        cls._registered[annotation] = self
         return function
 
 
@@ -206,7 +206,7 @@ class ParamInfo:
         disnake.abc.Snowflake: 9,
         float: 10,
     }
-    CONVERTERS: ClassVar[Dict[type, Callable]] = {}
+    _registered_converters: ClassVar[Dict[type, Callable]] = {}
 
     def __init__(
         self,
@@ -280,7 +280,7 @@ class ParamInfo:
 
     @classmethod
     def register_converter(cls, annotation: Any, converter: CallableT) -> CallableT:
-        cls.CONVERTERS[annotation] = converter
+        cls._registered_converters[annotation] = converter
         return converter
 
     def __repr__(self) -> str:
@@ -354,7 +354,7 @@ class ParamInfo:
         """Parse an annotation"""
         if not converter_mode:
             self.converter = getattr(annotation, "__discord_converter__", None)
-            self.converter = self.converter or self.CONVERTERS.get(annotation)
+            self.converter = self.converter or self._registered_converters.get(annotation)
             if self.converter:
                 self.parse_converter_annotation(self.converter, annotation)
                 return True
@@ -514,8 +514,8 @@ def collect_params(
         default = parameter.default
         if isinstance(default, Injection):
             injections[parameter.name] = default
-        elif parameter.annotation in Injection.REGISTERED:
-            injections[parameter.name] = Injection.REGISTERED[parameter.annotation]
+        elif parameter.annotation in Injection._registered:
+            injections[parameter.name] = Injection._registered[parameter.annotation]
         elif issubclass_(parameter.annotation, Interaction):
             if inter_param is None:
                 inter_param = parameter
@@ -726,7 +726,7 @@ class ConverterMethod:
         self.function = function
 
     def __set_name__(self, owner: Type[Any], name: str):
-        ParamInfo.CONVERTERS[owner] = self.function
+        ParamInfo._registered_converters[owner] = self.function
         owner.__discord_converter__ = self.function
 
     def __get__(self, instance: Any, cls: Any):
