@@ -244,7 +244,7 @@ class PartyType(Enum):
     letter_tile = 879863686565621790
     word_snack = 879863976006127627
     doodle_crew = 878067389634314250
-    checkers = 827123687055949824
+    checkers = 832013003968348200
 
 
 class VoiceRegion(Enum):
