@@ -24,10 +24,10 @@ class MyClient(disnake.Client):
     @my_background_task.before_loop
     async def before_my_task(self):
         await self.wait_until_ready()  # wait until the bot logs in
-        channel = self.get_channel(1234567) # channel ID goes here
+        channel = self.get_channel(1234567)  # channel ID goes here
         if not isinstance(channel, disnake.TextChannel):
             raise ValueError("Invalid channel")
-        
+
         self.channel = channel
 
 

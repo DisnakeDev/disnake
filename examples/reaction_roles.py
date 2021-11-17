@@ -20,7 +20,7 @@ class MyClient(disnake.Client):
         """Gives a role based on a reaction emoji."""
         if payload.guild_id is None or payload.member is None:
             return
-        
+
         # Make sure that the message the user is reacting to is the one we care about.
         if payload.message_id != self.role_message_id:
             return

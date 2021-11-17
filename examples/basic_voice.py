@@ -49,7 +49,7 @@ class YTDLSource(disnake.PCMVolumeTransformer):
 
         filename = data["url"] if stream else ytdl.prepare_filename(data)
         assert filename
-        
+
         return cls(disnake.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 

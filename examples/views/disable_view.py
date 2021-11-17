@@ -6,13 +6,13 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"))
 
 class MyView(disnake.ui.View):
     message: disnake.Message
-    
+
     def __init__(self):
         super().__init__(timeout=30.0)
 
     async def on_timeout(self):
         # Once the view times out we disable the first button and remove the second button
-        self.children[0].disabled = True # type: ignore
+        self.children[0].disabled = True  # type: ignore
         self.remove_item(self.children[1])
         # make sure to update the message with the new buttons
         await self.message.edit(view=self)
