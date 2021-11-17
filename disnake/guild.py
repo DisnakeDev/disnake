@@ -90,13 +90,7 @@ MISSING = utils.MISSING
 
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime, User as ABCUser
-    from .types.guild import (
-        Ban as BanPayload,
-        Guild as GuildPayload,
-        GuildWithCounts as GuildWithCountsPayload,
-        MFALevel,
-        GuildFeature,
-    )
+    from .types.guild import Ban as BanPayload, Guild as GuildPayload, MFALevel, GuildFeature
     from .types.threads import (
         Thread as ThreadPayload,
     )
@@ -114,7 +108,6 @@ if TYPE_CHECKING:
 
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
-    AnyGuildPayload = Union[GuildPayload, GuildWithCountsPayload]
 
 
 class BanEntry(NamedTuple):
@@ -316,7 +309,7 @@ class Guild(Hashable):
         3: _GuildLimit(emoji=250, stickers=60, bitrate=384e3, filesize=104857600),
     }
 
-    def __init__(self, *, data: AnyGuildPayload, state: ConnectionState):
+    def __init__(self, *, data: GuildPayload, state: ConnectionState):
         self._channels: Dict[int, GuildChannel] = {}
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
@@ -461,7 +454,7 @@ class Guild(Hashable):
     ) -> Optional[GuildApplicationCommandPermissions]:
         return self._state._get_command_permissions(self.id, command_id)
 
-    def _from_data(self, guild: AnyGuildPayload) -> None:
+    def _from_data(self, guild: GuildPayload) -> None:
         # according to Stan, this is always available even if the guild is unavailable
         # I don't have this guarantee when someone updates the guild.
         member_count = guild.get("member_count", None)
