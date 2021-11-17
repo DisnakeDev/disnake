@@ -246,9 +246,15 @@ class Interaction:
 
         Fetches the original interaction response message associated with the interaction.
 
-        If the interaction response was :meth:`InteractionResponse.send_message` then this would
-        return the message that was sent using that response. Otherwise, this would return
-        the message that triggered the interaction.
+        Here is a table with response types and their associated original message:
+
+        .. csv-table::
+            :header: "Response type", "Original message"
+
+            :meth:`InteractionResponse.send_message`, "The message you sent"
+            :meth:`InteractionResponse.edit_message`, "The message you edited"
+            :meth:`InteractionResponse.defer`, "The message with thinking state (bot is thinking...)"
+            "Other response types", "None"
 
         Repeated calls to this will return a cached value.
 
