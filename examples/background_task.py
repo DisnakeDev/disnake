@@ -1,6 +1,5 @@
-from disnake.ext import tasks
-
 import disnake
+from disnake.ext import tasks
 
 
 class MyClient(disnake.Client):
@@ -19,13 +18,17 @@ class MyClient(disnake.Client):
 
     @tasks.loop(seconds=60)  # task runs every 60 seconds
     async def my_background_task(self):
-        channel = self.get_channel(1234567)  # channel ID goes here
         self.counter += 1
-        await channel.send(self.counter)
+        await self.channel.send(self.counter)
 
     @my_background_task.before_loop
     async def before_my_task(self):
         await self.wait_until_ready()  # wait until the bot logs in
+        channel = self.get_channel(1234567) # channel ID goes here
+        if not isinstance(channel, disnake.TextChannel):
+            raise ValueError("Invalid channel")
+        
+        self.channel = channel
 
 
 client = MyClient()

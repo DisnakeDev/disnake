@@ -41,12 +41,15 @@ class YTDLSource(disnake.PCMVolumeTransformer):
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        assert data
 
         if "entries" in data:
             # take first item from a playlist
             data = data["entries"][0]
 
         filename = data["url"] if stream else ytdl.prepare_filename(data)
+        assert filename
+        
         return cls(disnake.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
@@ -66,7 +69,7 @@ class Music(commands.Cog):
     @commands.command()
     async def play(self, ctx, *, query):
         """Plays a file from the local filesystem"""
-
+        await self.ensure_voice(ctx)
         source = disnake.PCMVolumeTransformer(disnake.FFmpegPCMAudio(query))
         ctx.voice_client.play(source, after=lambda e: print(f"Player error: {e}") if e else None)
 
@@ -75,7 +78,7 @@ class Music(commands.Cog):
     @commands.command()
     async def yt(self, ctx, *, url):
         """Plays from a url (almost anything youtube_dl supports)"""
-
+        await self.ensure_voice(ctx)
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop)
             ctx.voice_client.play(
@@ -87,7 +90,7 @@ class Music(commands.Cog):
     @commands.command()
     async def stream(self, ctx, *, url):
         """Streams from a url (same as yt, but doesn't predownload)"""
-
+        await self.ensure_voice(ctx)
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
             ctx.voice_client.play(
@@ -112,9 +115,6 @@ class Music(commands.Cog):
 
         await ctx.voice_client.disconnect()
 
-    @play.before_invoke
-    @yt.before_invoke
-    @stream.before_invoke
     async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:

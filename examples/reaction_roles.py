@@ -18,6 +18,9 @@ class MyClient(disnake.Client):
 
     async def on_raw_reaction_add(self, payload: disnake.RawReactionActionEvent):
         """Gives a role based on a reaction emoji."""
+        if payload.guild_id is None or payload.member is None:
+            return
+        
         # Make sure that the message the user is reacting to is the one we care about.
         if payload.message_id != self.role_message_id:
             return
@@ -47,6 +50,8 @@ class MyClient(disnake.Client):
 
     async def on_raw_reaction_remove(self, payload: disnake.RawReactionActionEvent):
         """Removes a role based on a reaction emoji."""
+        if payload.guild_id is None:
+            return
         # Make sure that the message the user is reacting to is the one we care about.
         if payload.message_id != self.role_message_id:
             return
