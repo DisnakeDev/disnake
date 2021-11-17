@@ -36,6 +36,7 @@ from typing import (
     Dict,
     Iterable,
     List,
+    Literal,
     Optional,
     Sequence,
     TYPE_CHECKING,
@@ -43,6 +44,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    overload,
 )
 from urllib.parse import quote as _uriquote
 import weakref
@@ -1206,7 +1208,19 @@ class HTTPClient:
     def leave_guild(self, guild_id: Snowflake) -> Response[None]:
         return self.request(Route("DELETE", "/users/@me/guilds/{guild_id}", guild_id=guild_id))
 
-    def get_guild(self, guild_id: Snowflake, *, with_counts: bool = True) -> Response[guild.Guild]:
+    @overload
+    def get_guild(
+        self, guild_id: Snowflake, *, with_counts: Literal[False]
+    ) -> Response[guild.Guild]:
+        ...
+
+    @overload
+    def get_guild(
+        self, guild_id: Snowflake, *, with_counts: Literal[True] = True
+    ) -> Response[guild.GuildWithCounts]:
+        ...
+
+    def get_guild(self, guild_id: Snowflake, *, with_counts: bool = True):
         params = {"with_counts": int(with_counts)}
         return self.request(Route("GET", "/guilds/{guild_id}", guild_id=guild_id), params=params)
 
