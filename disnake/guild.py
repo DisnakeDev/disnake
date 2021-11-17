@@ -286,6 +286,8 @@ class Guild(Hashable):
         "premium_subscription_count",
         "preferred_locale",
         "nsfw_level",
+        "approximate_member_count",
+        "approximate_presence_count",
         "_members",
         "_channels",
         "_icon",
@@ -304,8 +306,6 @@ class Guild(Hashable):
         "_stage_instances",
         "_threads",
         "_application_commands",
-        "approximate_member_count",
-        "approximate_presence_count",
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
