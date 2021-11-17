@@ -2155,8 +2155,9 @@ def admin_only() -> Callable[[T], T]:
     an administrator of the guild.
 
     This check raises a special exception, :exc:`.NotAdmin`
-    that is inherited from :exc:`.CheckFailure`. It will raise :exc:`.NoPrivateMessage`
-    if it is used in a private message. 
+    that is inherited from :exc:`.CheckFailure`.
+
+    It will raise :exc:`.NoPrivateMessage` if it is used in a private message. 
     """
 
     def predicate(ctx: AnyContext) -> bool:
