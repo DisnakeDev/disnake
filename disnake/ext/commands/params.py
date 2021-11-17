@@ -198,6 +198,7 @@ class ParamInfo:
         disnake.abc.User: 6,
         disnake.User: 6,
         disnake.Member: 6,
+        Union[disnake.User, disnake.Member]: 6,
         # channels handled separately
         disnake.abc.GuildChannel: 7,
         disnake.Role: 8,
