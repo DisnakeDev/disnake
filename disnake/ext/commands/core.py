@@ -90,6 +90,7 @@ __all__ = (
     "cooldown",
     "dynamic_cooldown",
     "max_concurrency",
+    "admin_only",
     "dm_only",
     "guild_only",
     "is_owner",
@@ -2145,6 +2146,24 @@ def bot_has_guild_permissions(**perms: bool) -> Callable[[T], T]:
             return True
 
         raise BotMissingPermissions(missing)
+
+    return check(predicate)
+
+
+def admin_only() -> Callable[[T], T]:
+    """A :func:`.check` that indicates this command must only be used by
+    an administrator of the guild.
+
+    This check raises a special exception, :exc:`.NotAdmin`
+    that is inherited from :exc:`.CheckFailure`. It will raise :exc:`.NoPrivateMessage`
+    if it is used in a private message. 
+    """
+
+    def predicate(ctx: AnyContext) -> bool:
+        if ctx.guild is None:
+            raise NoPrivateMessage
+        if not ctx.author.guild_permissions.administrator:
+            raise NotAdmin("This command can only be used by an administrator of the guild.")
 
     return check(predicate)
 

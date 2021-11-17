@@ -56,6 +56,7 @@ __all__ = (
     "CommandOnCooldown",
     "MaxConcurrencyReached",
     "NotOwner",
+    "NotAdmin",
     "MessageNotFound",
     "ObjectNotFound",
     "MemberNotFound",
@@ -253,6 +254,15 @@ class NoPrivateMessage(CheckFailure):
 
 class NotOwner(CheckFailure):
     """Exception raised when the message author is not the owner of the bot.
+
+    This inherits from :exc:`CheckFailure`
+    """
+
+    pass
+
+
+class NotAdmin(CheckFailure):
+    """Exception raised when the message author is not an administrator of the guild.
 
     This inherits from :exc:`CheckFailure`
     """
