@@ -242,6 +242,17 @@ class Guild(Hashable):
         The guild's NSFW level.
 
         .. versionadded:: 2.0
+    approximate_member_count: Optional[:class:`int`]
+        The approximate number of members in the guild.
+        Only available for manually fetched guilds.
+
+        .. versionadded:: 2.3
+    approximate_presence_count: Optional[:class:`int`]
+        The approximate number of members currently active in the guild.
+        This includes idle, dnd, online, and invisible members. Offline members are excluded.
+        Only available for manually fetched guilds.
+
+        .. versionadded:: 2.3
     """
 
     __slots__ = (
@@ -268,6 +279,8 @@ class Guild(Hashable):
         "premium_subscription_count",
         "preferred_locale",
         "nsfw_level",
+        "approximate_member_count",
+        "approximate_presence_count",
         "_members",
         "_channels",
         "_icon",
@@ -495,6 +508,8 @@ class Guild(Hashable):
         )
         self.nsfw_level: NSFWLevel = try_enum(NSFWLevel, guild.get("nsfw_level", 0))
         self.premium_progress_bar_enabled: bool = guild.get("premium_progress_bar_enabled", False)
+        self.approximate_presence_count: Optional[int] = guild.get("approximate_presence_count")
+        self.approximate_member_count: Optional[int] = guild.get("approximate_member_count")
 
         self._stage_instances: Dict[int, StageInstance] = {}
         for s in guild.get("stage_instances", []):
