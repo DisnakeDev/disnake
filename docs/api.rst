@@ -1397,6 +1397,11 @@ of :class:`enum.Enum`.
         thread's conversation topic.
 
         .. versionadded:: 2.0
+    .. attribute:: context_menu_command
+
+        The system message denoting that a context menu command was executed.
+
+        .. versionadded:: 2.3
 
 .. class:: UserFlags
 
@@ -1453,6 +1458,11 @@ of :class:`enum.Enum`.
     .. attribute:: discord_certified_moderator
 
         The user is a Discord Certified Moderator.
+    .. attribute:: http_interactions_bot
+
+        The user is a bot that only uses HTTP interactions.
+
+        .. versionadded:: 2.3
 
 .. class:: ActivityType
 
@@ -1870,6 +1880,11 @@ of :class:`enum.Enum`.
         The member is "invisible". In reality, this is only used in sending
         a presence a la :meth:`Client.change_presence`. When you receive a
         user's presence this will be :attr:`offline` instead.
+    .. attribute:: streaming
+
+        The member is live streaming to Twitch.
+
+        .. versionadded:: 2.3
 
 
 .. class:: AuditLogAction

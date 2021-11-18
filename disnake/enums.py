@@ -233,6 +233,7 @@ class MessageType(Enum):
     application_command = 20
     thread_starter_message = 21
     guild_invite_reminder = 22
+    context_menu_command = 23
 
 
 class PartyType(Enum):
@@ -316,6 +317,7 @@ class Status(Enum):
     dnd = "dnd"
     do_not_disturb = "dnd"
     invisible = "invisible"
+    streaming = "streaming"
 
     def __str__(self):
         return self.value
@@ -497,6 +499,7 @@ class UserFlags(Enum):
     verified_bot = 65536
     verified_bot_developer = 131072
     discord_certified_moderator = 262144
+    http_interactions_bot = 524288
 
 
 class ActivityType(Enum):
@@ -543,13 +546,11 @@ class StickerFormatType(Enum):
 
     @property
     def file_extension(self) -> str:
-        # fmt: off
         lookup: Dict[StickerFormatType, str] = {
-            StickerFormatType.png: 'png',
-            StickerFormatType.apng: 'png',
-            StickerFormatType.lottie: 'json',
+            StickerFormatType.png: "png",
+            StickerFormatType.apng: "png",
+            StickerFormatType.lottie: "json",
         }
-        # fmt: on
         return lookup[self]
 
 
