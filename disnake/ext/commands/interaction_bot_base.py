@@ -359,11 +359,13 @@ class InteractionBotBase(CommonBotBase):
     def get_slash_command(
         self, name: str
     ) -> Optional[Union[InvokableSlashCommand, SubCommandGroup, SubCommand]]:
-        """Works like ``Bot.get_command``, but for slashes.
+        """Works like ``Bot.get_command``, but for slash commands.
+
         Parameters
         -----------
         name: :class:`str`
             The name of the slash command to get.
+
         Returns
         --------
         Optional[Union[:class:`InvokableSlashCommand`, :class:`SubCommandGroup`, :class:`SubCommand`]]
