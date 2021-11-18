@@ -237,9 +237,7 @@ class MessageType(Enum):
 
 
 class PartyType(Enum):
-    watch_together = 880218394199220334
-    youtube_old = 755600276941176913
-    youtube = watch_together  # backwards compatibility
+    youtube = 755600276941176913
     poker = 755827207812677713
     betrayal = 773336526917861400
     fishing = 814288819477020702
@@ -252,6 +250,7 @@ class PartyType(Enum):
     awkword = 879863881349087252
     sketchy_artist = 879864070101172255
     putt_party = 832012854282158180
+    watch_together = 880218394199220334
 
 
 class VoiceRegion(Enum):

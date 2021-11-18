@@ -1497,19 +1497,9 @@ of :class:`enum.Enum`.
 
     Represents the type of a voice channel activity/application.
 
-    .. attribute:: watch_together
-
-        The "Watch Together" activity, a Youtube application.
-
-        .. versionadded:: 2.3
-    .. attribute:: youtube_old
-
-        The (old) "Youtube Together" activity.
-
-        .. versionadded:: 2.3
     .. attribute:: youtube
 
-        An alias for :attr:`watch_together`.
+        The (old) "Youtube Together" activity.
     .. attribute:: poker
 
         The "Poker Night" activity.
@@ -1554,6 +1544,11 @@ of :class:`enum.Enum`.
     .. attribute:: putt_party
 
         The "Putt Party" activity.
+
+        .. versionadded:: 2.3
+    .. attribute:: watch_together
+
+        The "Watch Together" activity, a Youtube application.
 
         .. versionadded:: 2.3
 
