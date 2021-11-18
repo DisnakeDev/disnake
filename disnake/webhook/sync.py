@@ -32,7 +32,6 @@ from __future__ import annotations
 
 import threading
 import logging
-import json
 import time
 import re
 
@@ -80,6 +79,10 @@ if TYPE_CHECKING:
         from requests import Session, Response
     except ModuleNotFoundError:
         pass
+try:
+    import orjson
+except ModuleNotFoundError:
+    import json  
 
 MISSING = utils.MISSING
 
