@@ -82,7 +82,7 @@ if TYPE_CHECKING:
 try:
     import orjson
 except ModuleNotFoundError:
-    import json  
+    import json
 
 MISSING = utils.MISSING
 

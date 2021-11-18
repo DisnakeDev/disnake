@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 try:
     import orjson
 except ModuleNotFoundError:
-    import json    
+    import json
 
 
 AT = TypeVar("AT", bound="AudioSource")
