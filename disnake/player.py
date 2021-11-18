@@ -43,7 +43,7 @@ from .oggparse import OggStream
 from .utils import MISSING
 
 if TYPE_CHECKING:
-    from .voice_client import VoiceClient\
+    from .voice_client import VoiceClient
 
 try:
     import orjson
