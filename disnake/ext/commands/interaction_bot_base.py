@@ -360,7 +360,7 @@ class InteractionBotBase(CommonBotBase):
         self,
         name: str
     ) -> Optional[Union[InvokableSlashCommand, SubCommandGroup, SubCommand]]:
-        """Works like ``Bot.get_command``, but for slashes.
+        """Works like ``Bot.get_command``, but for slash commands.
 
         Parameters
         -----------
