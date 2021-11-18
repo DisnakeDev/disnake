@@ -233,10 +233,13 @@ class MessageType(Enum):
     application_command = 20
     thread_starter_message = 21
     guild_invite_reminder = 22
+    context_menu_command = 23
 
 
 class PartyType(Enum):
-    youtube = 755600276941176913
+    watch_together = 880218394199220334
+    youtube_old = 755600276941176913
+    youtube = watch_together  # backwards compatibility
     poker = 755827207812677713
     betrayal = 773336526917861400
     fishing = 814288819477020702
@@ -245,6 +248,10 @@ class PartyType(Enum):
     word_snack = 879863976006127627
     doodle_crew = 878067389634314250
     checkers = 832013003968348200
+    spellcast = 852509694341283871
+    awkword = 879863881349087252
+    sketchy_artist = 879864070101172255
+    putt_party = 832012854282158180
 
 
 class VoiceRegion(Enum):
@@ -316,6 +323,7 @@ class Status(Enum):
     dnd = "dnd"
     do_not_disturb = "dnd"
     invisible = "invisible"
+    streaming = "streaming"
 
     def __str__(self):
         return self.value
@@ -497,6 +505,7 @@ class UserFlags(Enum):
     verified_bot = 65536
     verified_bot_developer = 131072
     discord_certified_moderator = 262144
+    http_interactions_bot = 524288
 
 
 class ActivityType(Enum):
@@ -543,13 +552,11 @@ class StickerFormatType(Enum):
 
     @property
     def file_extension(self) -> str:
-        # fmt: off
         lookup: Dict[StickerFormatType, str] = {
-            StickerFormatType.png: 'png',
-            StickerFormatType.apng: 'png',
-            StickerFormatType.lottie: 'json',
+            StickerFormatType.png: "png",
+            StickerFormatType.apng: "png",
+            StickerFormatType.lottie: "json",
         }
-        # fmt: on
         return lookup[self]
 
 
