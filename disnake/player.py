@@ -31,7 +31,6 @@ import asyncio
 import logging
 import shlex
 import time
-import json
 import sys
 import re
 import io
@@ -44,7 +43,12 @@ from .oggparse import OggStream
 from .utils import MISSING
 
 if TYPE_CHECKING:
-    from .voice_client import VoiceClient
+    from .voice_client import VoiceClient\
+
+try:
+    import orjson
+except ModuleNotFoundError:
+    import json    
 
 
 AT = TypeVar("AT", bound="AudioSource")
