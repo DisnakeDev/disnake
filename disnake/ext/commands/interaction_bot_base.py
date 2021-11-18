@@ -372,6 +372,9 @@ class InteractionBotBase(CommonBotBase):
             The slash command that was requested. If not found, returns ``None``.
         """
 
+        if not isinstance(name, str):
+            raise TypeError(f"Expected name to be str, not {name.__class__}")
+
         command = name.split()
         slash = self.all_slash_commands.get(command[0])
         if slash:
