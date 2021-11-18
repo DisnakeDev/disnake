@@ -357,8 +357,7 @@ class InteractionBotBase(CommonBotBase):
         return command
 
     def get_slash_command(
-        self,
-        name: str
+        self, name: str
     ) -> Optional[Union[InvokableSlashCommand, SubCommandGroup, SubCommand]]:
         """Works like ``Bot.get_command``, but for slashes.
         Parameters
