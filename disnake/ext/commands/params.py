@@ -102,10 +102,18 @@ def evaluate_forwardref(annotation: Any, globalns: Dict[str, Any]) -> Any:
     return annotation
 
 
-def signature(function: Callable) -> inspect.Signature:
-    """Get the signature with evaluated annotations wherever possible"""
-    globalns = function.__globals__
-    sig = inspect.signature(function)
+def signature(func: Callable, globalns: Dict[str, Any] = None) -> inspect.Signature:
+    """Get the signature with evaluated annotations wherever possible
+
+    This is equivalent to `signature(..., eval_str=True)` in python 3.10
+    """
+    if globalns is None:
+        if not (inspect.isfunction(func) or inspect.ismethod(func)):
+            func = func.__call__
+
+        globalns = dict(inspect.getclosurevars(func).globals)
+
+    sig = inspect.signature(func)
     parameters = []
     for parameter in sig.parameters.values():
         annotation = evaluate_forwardref(parameter.annotation, globalns)
@@ -353,8 +361,11 @@ class ParamInfo:
     def parse_annotation(self, annotation: Any, converter_mode: bool = False) -> bool:
         """Parse an annotation"""
         if not converter_mode:
-            self.converter = getattr(annotation, "__discord_converter__", None)
-            self.converter = self.converter or self._registered_converters.get(annotation)
+            self.converter = (
+                self.converter
+                or getattr(annotation, "__discord_converter__", None)
+                or self._registered_converters.get(annotation)
+            )
             if self.converter:
                 self.parse_converter_annotation(self.converter, annotation)
                 return True

@@ -12,6 +12,15 @@ async def converter(interaction, number: float) -> float:
     return number ** 0.5
 
 
+class PrefixConverter:
+    def __init__(self, prefix: str, suffix: str = "") -> None:
+        self.prefix = prefix
+        self.suffix = suffix
+
+    def __call__(self, inter: disnake.ApplicationCommandInteraction, a: str):
+        return self.prefix + a + self.suffix
+
+
 class HopeToGod:
     def __init__(self, username: str, discriminator: str) -> None:
         self.username = username
@@ -54,6 +63,7 @@ class InjectionSlashCommands(commands.Cog):
         self,
         inter: disnake.ApplicationCommandInteraction,
         converted: float = commands.Param(None, converter=lambda i, x: x ** 0.5),
+        class_converter: str = commands.Param(converter=PrefixConverter("__", "__")),
         other: Tuple[int, str] = commands.inject(injected),
         some: int = commands.inject(injected_method),
     ):
