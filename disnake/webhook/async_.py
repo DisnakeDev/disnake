@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import logging
 import asyncio
-import json
 import re
 
 from urllib.parse import quote as urlquote
@@ -83,6 +82,11 @@ if TYPE_CHECKING:
     from ..abc import Snowflake
     from ..ui.view import View
     import datetime
+ 
+try:
+    import orjson
+except ModuleNotFoundError:
+    import json
 
 MISSING = utils.MISSING
 
