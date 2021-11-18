@@ -25,7 +25,6 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import sys
 import re
@@ -61,6 +60,11 @@ from .errors import (
 from .gateway import DiscordClientWebSocketResponse
 from . import __version__, utils
 from .utils import MISSING
+
+try:
+    import orjson
+except ModuleNotFoundError:
+    import json
 
 _log = logging.getLogger(__name__)
 
