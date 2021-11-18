@@ -1493,6 +1493,70 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 1.5
 
+.. class:: PartyType
+
+    Represents the type of a voice channel activity/application.
+
+    .. attribute:: watch_together
+
+        The "Watch Together" activity, a Youtube application.
+
+        .. versionadded:: 2.3
+    .. attribute:: youtube_old
+
+        The (old) "Youtube Together" activity.
+
+        .. versionadded:: 2.3
+    .. attribute:: youtube
+
+        An alias for :attr:`watch_together`.
+    .. attribute:: poker
+
+        The "Poker Night" activity.
+    .. attribute:: betrayal
+
+        The "Betrayal.io" activity.
+    .. attribute:: fishing
+
+        The "Fishington.io" activity.
+    .. attribute:: chess
+
+        The "Chess In The Park" activity.
+    .. attribute:: letter_tile
+
+        The "Letter Tile" activity.
+    .. attribute:: word_snack
+
+        The "Word Snacks" activity.
+    .. attribute:: doodle_crew
+
+        The "Doodle Crew" activity.
+    .. attribute:: checkers
+
+        The "Checkers In The Park" activity.
+
+        .. versionadded:: 2.3
+    .. attribute:: spellcast
+
+        The "SpellCast" activity.
+
+        .. versionadded:: 2.3
+    .. attribute:: awkword
+
+        The "Awkword" activity.
+
+        .. versionadded:: 2.3
+    .. attribute:: sketchy_artist
+
+        The "Sketchy Artist" activity.
+
+        .. versionadded:: 2.3
+    .. attribute:: putt_party
+
+        The "Putt Party" activity.
+
+        .. versionadded:: 2.3
+
 .. class:: ApplicationCommandType
 
     Represents the type of an application command.
