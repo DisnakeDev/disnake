@@ -69,6 +69,9 @@ from .enums import (
     ContentFilter,
     NotificationLevel,
     NSFWLevel,
+    StagePrivacyLevel,
+    GuildScheduledEventEntityType,
+    GuildScheduledEventStatus,
 )
 from .mixins import Hashable
 from .user import User
@@ -79,6 +82,7 @@ from .asset import Asset
 from .flags import SystemChannelFlags
 from .integrations import Integration, _integration_factory
 from .stage_instance import StageInstance
+from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
 from .threads import Thread, ThreadMember
 from .sticker import GuildSticker
 from .file import File
@@ -302,8 +306,8 @@ class Guild(Hashable):
         "_rules_channel_id",
         "_public_updates_channel_id",
         "_stage_instances",
+        "_scheduled_events",
         "_threads",
-        "_application_commands",
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
@@ -319,7 +323,6 @@ class Guild(Hashable):
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
         self._threads: Dict[int, Thread] = {}
-        self._application_commands: Dict[int, ApplicationCommand] = {}
         self._state: ConnectionState = state
         self._from_data(data)
 
@@ -520,6 +523,12 @@ class Guild(Hashable):
         for s in guild.get("stage_instances", []):
             stage_instance = StageInstance(guild=self, data=s, state=state)
             self._stage_instances[stage_instance.id] = stage_instance
+
+        self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
+        print([k for k in guild.keys() if "event" in k])
+        for s in guild.get("scheduled_events", []):
+            scheduled_event = GuildScheduledEvent(state=state, data=s)
+            self._scheduled_events[scheduled_event.id] = scheduled_event
 
         cache_joined = self._state.member_cache_flags.joined
         self_id = self._state.self_id
@@ -912,6 +921,31 @@ class Guild(Hashable):
             The stage instance or ``None`` if not found.
         """
         return self._stage_instances.get(stage_instance_id)
+
+    @property
+    def scheduled_events(self) -> List[GuildScheduledEvent]:
+        """List[:class:``]: Returns a :class:`list` of the existing guild scheduled events.
+
+        .. versionadded:: 2.3
+        """
+        return list(self._scheduled_events.values())
+
+    def get_scheduled_event(self, event_id: int, /) -> Optional[GuildScheduledEvent]:
+        """Returns a scheduled event with the given ID.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        -----------
+        event_id: :class:`int`
+            The ID to search for.
+
+        Returns
+        --------
+        Optional[:class:`GuildScheduledEvent`]
+            The scheduled event or ``None`` if not found.
+        """
+        return self._scheduled_events.get(event_id)
 
     @property
     def owner(self) -> Optional[Member]:
@@ -1745,6 +1779,151 @@ class Guild(Hashable):
                 thread._add_member(ThreadMember(parent=thread, data=member))
 
         return threads
+
+    async def fetch_scheduled_events(
+        self, *, with_user_count: bool = None
+    ) -> List[GuildScheduledEvent]:
+        """|coro|
+
+        Returns a list of :class:`GuildScheduledEvent` of this guild.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ----------
+        with_user_count: :class:`bool`
+            Whether to include number of users subscribed to each event.
+
+        Raises
+        ------
+        HTTPException
+            The request failed.
+
+        Returns
+        --------
+        List[:class:`GuildScheduledEvent`]
+            The scheduled events.
+        """
+        raw_events = await self._state.http.get_guild_scheduled_events(
+            self.id, with_user_count=with_user_count
+        )
+        return [GuildScheduledEvent(state=self._state, data=data) for data in raw_events]
+
+    async def fetch_scheduled_event(
+        self, event_id: int, *, with_user_count: bool = None
+    ) -> GuildScheduledEvent:
+        """|coro|
+
+        Returns a :class:`GuildScheduledEvent` with the given ID.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ----------
+        event_id: :class:`int`
+            The ID to look for.
+        with_user_count: :class:`bool`
+            Whether to include number of users subscribed to each event.
+
+        Raises
+        ------
+        HTTPException
+            The request failed.
+
+        Returns
+        --------
+        :class:`GuildScheduledEvent`
+            The scheduled event.
+        """
+        data = await self._state.http.get_guild_scheduled_event(
+            self.id, event_id, with_user_count=with_user_count
+        )
+        return GuildScheduledEvent(state=self._state, data=data)
+
+    async def create_scheduled_event(
+        self,
+        *,
+        name: str,
+        privacy_level: StagePrivacyLevel,
+        scheduled_start_time: datetime.datetime,
+        entity_type: GuildScheduledEventEntityType,
+        channel_id: Snowflake = MISSING,
+        entity_metadata: GuildScheduledEventMetadata = MISSING,
+        scheduled_end_time: datetime.datetime = MISSING,
+        description: str = MISSING,
+    ) -> GuildScheduledEvent:
+        """|coro|
+
+        Creates a :class:`GuildScheduledEvent`.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name of the scheduled event.
+        description: :class:`str`
+            The description of the scheduled event.
+        channel_id: :class:`int`
+            The channel id of the scheduled event. Set to ``None`` if changing
+            ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
+        privacy_level: :class:`StagePrivacyLevel`
+            The privacy level of the scheduled event.
+        scheduled_start_time: :class:`datetime`
+            The time to schedule the event.
+        scheduled_end_time: :class:`datetime`
+            The time when the scheduled event is scheduled to end.
+        entity_type: :class:`GuildScheduledEventEntityType`
+            The entity type of the scheduled event.
+        entity_metadata: :class:`GuildScheduledEventMetadata`
+            The entity metadata of the scheduled event.
+
+        Raises
+        ------
+        HTTPException
+            The request failed.
+
+        Returns
+        --------
+        :class:`GuildScheduledEvent`
+            The scheduled event.
+        """
+        if not isinstance(privacy_level, StagePrivacyLevel):
+            raise ValueError("privacy_level must be an instance of StagePrivacyLevel")
+
+        if not isinstance(entity_type, GuildScheduledEventEntityType):
+            raise ValueError(
+                "entity_type must be an instance of GuildScheduledEventEntityType"
+            )
+
+        fields: Dict[str, Any] = {
+            "name": name,
+            "privacy_level": privacy_level.value,
+            "scheduled_start_time": scheduled_start_time.isoformat(),
+            "entity_type": entity_type.value,
+        }
+
+        if entity_metadata is not MISSING:
+            if not isinstance(entity_metadata, GuildScheduledEventMetadata):
+                raise ValueError(
+                    "entity_metadata must be an instance of GuildScheduledEventMetadata"
+                )
+
+            fields["entity_metadata"] = (
+                None if entity_metadata is None else entity_metadata.to_dict()
+            )
+
+        if description is not MISSING:
+            fields["description"] = description
+
+        if channel_id is not MISSING:
+            fields["channel_id"] = channel_id
+
+        if scheduled_end_time is not MISSING:
+            fields["scheduled_end_time"] = scheduled_end_time.isoformat()
+
+        data = await self._state.http.create_guild_scheduled_event(self.id, **fields)
+        return GuildScheduledEvent(state=self._state, data=data)
 
     # TODO: Remove Optional typing here when async iterators are refactored
     def fetch_members(

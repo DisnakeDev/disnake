@@ -1839,6 +1839,118 @@ class HTTPClient:
             Route("DELETE", "/stage-instances/{channel_id}", channel_id=channel_id), reason=reason
         )
 
+    # Scheduled event management
+    # TODO: typed dicts
+
+    def get_guild_scheduled_events(self, guild_id: Snowflake, with_user_count: bool = None):
+        params: Dict[str, Any] = {}
+        if with_user_count is not None:
+            params["with_user_count"] = with_user_count
+
+        r = Route("GET", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
+        return self.request(r, params=params)
+
+    def create_guild_scheduled_event(
+        self,
+        guild_id: Snowflake,
+        *,
+        name: str,
+        privacy_level: int,
+        scheduled_start_time: str,
+        entity_type: int,
+        channel_id: Snowflake = None,
+        entity_metadata: Dict[str, Any] = None,
+        scheduled_end_time: str = None,
+        description: str = None,
+    ):
+        r = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
+        payload = {
+            "name": name,
+            "privacy_level": privacy_level,
+            "scheduled_start_time": scheduled_start_time,
+            "entity_type": entity_type,
+        }
+
+        if channel_id is not None:
+            payload["channel_id"] = channel_id
+
+        if entity_metadata is not None:
+            payload["entity_metadata"] = entity_metadata
+
+        if scheduled_end_time is not None:
+            payload["scheduled_end_time"] = scheduled_end_time
+
+        if description is not None:
+            payload["description"] = description
+
+        return self.request(r, json=payload)
+
+    def get_guild_scheduled_event(
+        self, guild_id: Snowflake, event_id: Snowflake, with_user_count: bool = None
+    ):
+        params: Dict[str, Any] = {}
+
+        if with_user_count is not None:
+            params["with_user_count"] = with_user_count
+
+        route = Route(
+            method="GET",
+            path="/guilds/{guild_id}/scheduled-events/{event_id}",
+            guild_id=guild_id,
+            event_id=event_id,
+        )
+        return self.request(route, params=params)
+
+    def edit_guild_scheduled_event(self, guild_id: Snowflake, event_id: Snowflake, **fields):
+        route = Route(
+            method="PATCH",
+            path="/guilds/{guild_id}/scheduled-events/{event_id}",
+            guild_id=guild_id,
+            event_id=event_id,
+        )
+
+        return self.request(route, json=fields)
+
+    def delete_guild_scheduled_event(self, guild_id: Snowflake, event_id: Snowflake):
+        route = Route(
+            method="DELETE",
+            path="/guilds/{guild_id}/scheduled-events/{event_id}",
+            guild_id=guild_id,
+            event_id=event_id,
+        )
+        return self.request(route)
+
+    def get_guild_scheduled_event_users(
+        self,
+        guild_id: Snowflake,
+        event_id: Snowflake,
+        limit: int = None,
+        with_member: bool = None,
+        before: Snowflake = None,
+        after: Snowflake = None,
+    ):
+        params: Dict[str, Any] = {}
+
+        if limit is not None:
+            params["limit"] = limit
+
+        if with_member is not None:
+            params["with_member"] = with_member
+
+        if before is not None:
+            params["before"] = before
+
+        if after is not None:
+            params["after"] = after
+
+        route = Route(
+            method="GET",
+            path="/guilds/{guild_id}/scheduled-events/{event_id}/users",
+            guild_id=guild_id,
+            event_id=event_id,
+        )
+        return self.request(route, params=params)
+
     # Application commands (global)
 
     def get_global_commands(

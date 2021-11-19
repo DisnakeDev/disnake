@@ -58,6 +58,8 @@ __all__ = (
     "OptionType",
     "ApplicationCommandType",
     "PartyType",
+    "GuildScheduledEventEntityType",
+    "GuildScheduledEventStatus",
 )
 
 
@@ -650,6 +652,19 @@ class NSFWLevel(Enum, comparable=True):
     explicit = 1
     safe = 2
     age_restricted = 3
+
+
+class GuildScheduledEventEntityType(Enum):
+    stage_instance = 1
+    voice = 2
+    external = 3
+
+
+class GuildScheduledEventStatus(Enum):
+    scheduled = 1
+    active = 2
+    completed = 3
+    canceled = 4
 
 
 T = TypeVar("T")
