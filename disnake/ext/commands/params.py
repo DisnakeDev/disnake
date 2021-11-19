@@ -24,6 +24,7 @@
 from __future__ import annotations
 
 import asyncio
+import collections.abc
 import inspect
 import itertools
 import math
@@ -31,6 +32,7 @@ import warnings
 from enum import Enum, EnumMeta
 from typing import (
     TYPE_CHECKING,
+    Annotated,
     Any,
     Callable,
     ClassVar,
@@ -95,9 +97,28 @@ def evaluate_forwardref(annotation: Any, globalns: Dict[str, Any]) -> Any:
             annotation = ForwardRef(annotation)
 
         try:
-            annotation._evaluate(globalns, globalns, recursive_guard=frozenset())  # type: ignore
+            annotation = annotation._evaluate(globalns, globalns, recursive_guard=frozenset())  # type: ignore
         except Exception as e:
+            annotation = annotation.__forward_arg__
             warnings.warn(f"Cannot parse annotation: {annotation!r}")
+
+    if get_origin(annotation) is Annotated:
+        # fairly common bug in lower python versions
+        annotation = getattr(annotation, "__origin__", annotation)
+
+    return annotation
+
+
+def remove_optionals(annotation: Any) -> Any:
+    """remove unwanted optionals from an annotation"""
+    if get_origin(annotation) is Union:
+        annotation = cast(Any, annotation)
+
+        args = [i for i in annotation.__args__ if i not in (None, type(None))]
+        if len(args) == 1:
+            annotation = args[0]
+        else:
+            annotation.__args__ = args
 
     return annotation
 
@@ -111,23 +132,13 @@ def signature(func: Callable, globalns: Dict[str, Any] = None) -> inspect.Signat
         if not (inspect.isfunction(func) or inspect.ismethod(func)):
             func = func.__call__
 
-        globalns = dict(inspect.getclosurevars(func).globals)
+        globalns = getattr(func, "__globals__", {})
 
     sig = inspect.signature(func)
     parameters = []
     for parameter in sig.parameters.values():
         annotation = evaluate_forwardref(parameter.annotation, globalns)
         parameter = parameter.replace(annotation=annotation)
-
-        # remove unwanted optionals
-        if get_origin(parameter.annotation) is Union and parameter.default is not parameter.empty:
-            parameter.annotation = cast(Any, parameter.annotation)
-
-            args = [i for i in parameter.annotation.__args__ if i not in (None, type(None))]
-            if len(args) == 1:
-                parameter.annotation = args[0]
-            else:
-                parameter.annotation.__args__ = args
 
         parameters.append(parameter)
 
@@ -360,6 +371,8 @@ class ParamInfo:
 
     def parse_annotation(self, annotation: Any, converter_mode: bool = False) -> bool:
         """Parse an annotation"""
+        annotation = remove_optionals(annotation)
+
         if not converter_mode:
             self.converter = (
                 self.converter
@@ -371,7 +384,7 @@ class ParamInfo:
                 return True
 
         if annotation is inspect.Parameter.empty or annotation is Any:
-            pass
+            return False
         elif annotation in self.TYPES:
             self.type = annotation
         elif (
@@ -389,13 +402,21 @@ class ParamInfo:
                 )
         elif issubclass_(annotation, disnake.abc.GuildChannel):
             self._parse_guild_channel(annotation)
+        elif issubclass_(get_origin(annotation), collections.abc.Sequence):
+            raise TypeError(
+                f"List arguments have not been implemented yet and therefore {annotation!r} is invalid"
+            )
 
-        elif not converter_mode and annotation in CONVERTER_MAPPING:
+        elif annotation in CONVERTER_MAPPING:
+            if converter_mode:
+                raise TypeError(
+                    f"{annotation!r} implies the usage of a converter but those cannot be nested"
+                )
             self.converter = CONVERTER_MAPPING[annotation]().convert
         elif converter_mode:
-            return False
+            raise TypeError(f"{annotation!r} is not a valid converter annotation")
         else:
-            raise TypeError(f"{annotation!r} is not a valid Param annotation")
+            raise TypeError(f"{annotation!r} is not a valid parameter annotation")
 
         return True
 

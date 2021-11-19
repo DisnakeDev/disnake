@@ -1,4 +1,6 @@
-from typing import Any, Tuple
+from __future__ import annotations
+
+from typing import Optional, Tuple
 import disnake
 from disnake.ext import commands
 from pprint import pformat
@@ -62,7 +64,7 @@ class InjectionSlashCommands(commands.Cog):
     async def injection_command(
         self,
         inter: disnake.ApplicationCommandInteraction,
-        converted: float = commands.Param(None, converter=lambda i, x: x ** 0.5),
+        converted: Optional[float] = commands.Param(None, converter=lambda i, x: x ** 0.5),
         class_converter: str = commands.Param(converter=PrefixConverter("__", "__")),
         other: Tuple[int, str] = commands.inject(injected),
         some: int = commands.inject(injected_method),
