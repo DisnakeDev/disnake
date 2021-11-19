@@ -70,7 +70,7 @@ if TYPE_CHECKING:
 if sys.version_info >= (3, 9):
     from typing import Annotated
 else:
-    Annotated = None
+    Annotated = object()
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
