@@ -525,8 +525,7 @@ class Guild(Hashable):
             self._stage_instances[stage_instance.id] = stage_instance
 
         self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
-        print([k for k in guild.keys() if "event" in k])
-        for s in guild.get("scheduled_events", []):
+        for s in guild.get("guild_scheduled_events", []):
             scheduled_event = GuildScheduledEvent(state=state, data=s)
             self._scheduled_events[scheduled_event.id] = scheduled_event
 
