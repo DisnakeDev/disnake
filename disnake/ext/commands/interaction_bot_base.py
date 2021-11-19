@@ -383,13 +383,11 @@ class InteractionBotBase(CommonBotBase):
         if len(chain) == 1:
             return slash
         elif len(chain) == 2:
-            cmd = slash.children.get(chain[1])
-            return cmd
+            return slash.children.get(chain[1])
         elif len(chain) == 3:
             group = slash.children.get(chain[1])
             if isinstance(group, SubCommandGroup):
-                cmd = group.children.get(chain[2])
-                return cmd
+                return group.children.get(chain[2])
 
         return None
 
