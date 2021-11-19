@@ -375,19 +375,21 @@ class InteractionBotBase(CommonBotBase):
         if not isinstance(name, str):
             raise TypeError(f"Expected name to be str, not {name.__class__}")
 
-        command = name.split()
-        slash = self.all_slash_commands.get(command[0])
-        if slash:
-            if len(command) == 1:
-                return slash
-            elif len(command) == 2:
-                cmd = slash.children.get(command[1])
+        chain = name.split()
+        slash = self.all_slash_commands.get(chain[0])
+        if not slash:
+            return None
+
+        if len(chain) == 1:
+            return slash
+        elif len(chain) == 2:
+            cmd = slash.children.get(chain[1])
+            return cmd
+        elif len(chain) == 3:
+            group = slash.children.get(chain[1])
+            if isinstance(group, SubCommandGroup):
+                cmd = group.children.get(chain[2])
                 return cmd
-            elif len(command) == 3:
-                group = slash.children.get(command[1])
-                if isinstance(group, SubCommandGroup):
-                    cmd = group.children.get(command[2])
-                    return cmd
 
         return None
 
