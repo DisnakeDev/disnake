@@ -34,7 +34,7 @@ class SlashCommands(commands.Cog):
     async def alt_auto(
         self,
         inter: disnake.AppCmdInter,
-        mood: str = commands.Param(autocomp=test_autocomp),
+        mood: str = commands.Param(autocomplete=test_autocomp),
     ):
         await inter.send(mood)
 

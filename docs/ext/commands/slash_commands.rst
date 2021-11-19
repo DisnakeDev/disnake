@@ -322,7 +322,7 @@ For example:
     @bot.slash_command()
     async def example(
         inter: disnake.ApplicationCommandInteraction,
-        language: str = commands.Param(autocomp=autocomp_langs)
+        language: str = commands.Param(autocomplete=autocomp_langs)
     ):
         ...
 

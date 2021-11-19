@@ -65,3 +65,16 @@ async def defaults(
     user: disnake.User = commands.Param(lambda inter: inter.author),
 ):
     ...
+
+
+# You may limit numbers into a certain range using gt, ge, lt, le (greater than, greater or equal, less than, less or equal)
+# Alternatively you may use min_value instead of ge and max_value instead of le
+@bot.slash_command()
+async def ranges(
+    self,
+    inter: disnake.ApplicationCommandInteraction,
+    ranking: int = commands.Param(gt=0, le=10),
+    negative: float = commands.Param(lt=0),
+    fraction: float = commands.Param(ge=0, lt=1),
+):
+    ...
