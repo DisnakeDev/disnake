@@ -327,7 +327,7 @@ For example:
         ...
 
 Subcommands And Groups
-++++++++++++++++++++++
+----------------------
 
 Groups of commands work differently in terms of slash commands. Instead of defining a group, you should still define a slash command
 and then nest some sub-commands or sub-command-groups there via special decorators.
@@ -377,6 +377,6 @@ You can implement double nesting and build commands like ``/parent group subcmd`
     This is the deepest nesting available.
 
 Injections
-++++++++++
+----------
 
 We have them, look at [this example](https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py) for more information ✨
