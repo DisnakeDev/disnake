@@ -54,7 +54,7 @@ async def full_description(
     """
 
 
-# To make an option optionsal you can simply give it a default value.
+# To make an option optional you can simply give it a default value.
 # In case the default value is supposed to be callable you should use commands.Param
 # This is so the annotation actually stays correct.
 @bot.slash_command()
