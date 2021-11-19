@@ -1892,9 +1892,7 @@ class Guild(Hashable):
             raise ValueError("privacy_level must be an instance of StagePrivacyLevel")
 
         if not isinstance(entity_type, GuildScheduledEventEntityType):
-            raise ValueError(
-                "entity_type must be an instance of GuildScheduledEventEntityType"
-            )
+            raise ValueError("entity_type must be an instance of GuildScheduledEventEntityType")
 
         fields: Dict[str, Any] = {
             "name": name,

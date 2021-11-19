@@ -278,9 +278,7 @@ class GuildScheduledEvent(Hashable):
 
         if entity_type is not MISSING:
             if not isinstance(entity_type, GuildScheduledEventEntityType):
-                raise ValueError(
-                    "entity_type must be an instance of GuildScheduledEventEntityType"
-                )
+                raise ValueError("entity_type must be an instance of GuildScheduledEventEntityType")
 
             fields["entity_type"] = entity_type.value
 
