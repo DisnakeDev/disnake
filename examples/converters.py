@@ -40,51 +40,6 @@ async def userinfo_error(ctx: commands.Context, error: commands.CommandError):
         return await ctx.send("Couldn't find that user.")
 
 
-# Custom Converter here
-class ChannelOrMemberConverter(commands.Converter):
-    async def convert(self, ctx: commands.Context, argument: str):
-        # In this example we have made a custom converter.
-        # This checks if an input is convertible to a
-        # `disnake.Member` or `disnake.TextChannel` instance from the
-        # input the user has given us using the pre-existing converters
-        # that the library provides.
-
-        member_converter = commands.MemberConverter()
-        try:
-            # Try and convert to a Member instance.
-            # If this fails, then an exception is raised.
-            # Otherwise, we just return the converted member value.
-            member = await member_converter.convert(ctx, argument)
-        except commands.MemberNotFound:
-            pass
-        else:
-            return member
-
-        # Do the same for TextChannel...
-        textchannel_converter = commands.TextChannelConverter()
-        try:
-            channel = await textchannel_converter.convert(ctx, argument)
-        except commands.ChannelNotFound:
-            pass
-        else:
-            return channel
-
-        # If the value could not be converted we can raise an error
-        # so our error handlers can deal with it in one place.
-        # The error has to be CommandError derived, so BadArgument works fine here.
-        raise commands.BadArgument(f'No Member or TextChannel could be converted from "{argument}"')
-
-
-@bot.command()
-async def notify(ctx: commands.Context, target: ChannelOrMemberConverter):
-    # This command signature utilises the custom converter written above
-    # What will happen during command invocation is that the `target` above will be passed to
-    # the `argument` parameter of the `ChannelOrMemberConverter.convert` method and
-    # the conversion will go through the process defined there.
-
-    await target.send(f"Hello, {target.name}!")
-
-
 @bot.command()
 async def ignore(ctx: commands.Context, target: typing.Union[disnake.Member, disnake.TextChannel]):
     # This command signature utilises the `typing.Union` typehint.
