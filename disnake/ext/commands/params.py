@@ -473,6 +473,14 @@ def safe_call(function: Callable[..., T], *args: Any, **possible_kwargs: Any) ->
     parsed_pos = False
     sig = signature(function)
 
+    kinds = {p.kind for p in sig.parameters.values()}
+    arb = {inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD}
+    if arb.issubset(kinds):
+        raise TypeError(
+            "Cannot safely call a function with both *args and **kwargs. "
+            "If this is a wrapper please use functools.wraps to keep the signature correct"
+        )
+
     kwargs = {}
 
     for index, parameter, posarg in itertools.zip_longest(
