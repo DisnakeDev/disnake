@@ -377,7 +377,7 @@ class InteractionBotBase(CommonBotBase):
 
         chain = name.split()
         slash = self.all_slash_commands.get(chain[0])
-        if not slash:
+        if slash is None:
             return None
 
         if len(chain) == 1:
