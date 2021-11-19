@@ -37,7 +37,7 @@ Creating a Bot account is a pretty straightforward process.
 
 7. Copy the token using the "Copy" button.
 
-    - **This is not the Client Secret at the General Information page.**
+    - **This is not the Client Secret at the OAuth2 page.**
 
     .. warning::
 
@@ -66,15 +66,18 @@ If you want to invite your bot you must create an invite URL for it.
 1. Make sure you're logged on to the `Discord website <https://discord.com>`_.
 2. Navigate to the `application page <https://discord.com/developers/applications>`_
 3. Click on your bot's page.
-4. Go to the "OAuth2" tab.
+4. Go to the "OAuth2" tab and then click in "URL Generator".
 
-    .. image:: /images/discord_oauth2.png
+    .. image:: /images/discord_url_generator.png
         :alt: How the OAuth2 page should look like.
 
-5. Tick the "bot" checkbox under "scopes".
+5. Tick the “bot” checkbox under “scopes”.
 
-    .. image:: /images/discord_oauth2_scope.png
+    .. image:: /images/discord_url_generator_scopes.png
         :alt: The scopes checkbox with "bot" ticked.
+
+    .. note::
+        If your bot uses slash commands you need to tick the "applications.commands" checkbox.
 
 6. Tick the permissions required for your bot to function under "Bot Permissions".
 
@@ -86,6 +89,47 @@ If you want to invite your bot you must create an invite URL for it.
         :alt: The permission checkboxes with some permissions checked.
 
 7. Now the resulting URL can be used to add your bot to a server. Copy and paste the URL into your browser, choose a server to invite the bot to, and click "Authorize".
+
+
+Invite your bot through its profile
++++++++++++++++++++++++++++++++++++
+
+Maybe after you finish coding your bot, you want other users to invite your bot to their servers.
+The easiest way to do this is to allow users to invite your bot through its profile.
+
+Here is a guide of how to do this:
+
+1. Make sure you're logged on to the `Discord website <https://discord.com>`_.
+2. Navigate to the `application page <https://discord.com/developers/applications>`_
+3. Click on your bot's page.
+4. Go to the "OAuth2" tab.
+
+5. In authorization method, select **In-app Authorization**
+
+    .. image:: /images/discord_general_authorization_link.png
+        :alt: The Default Authorization Link section.
+
+6. Tick the “bot” checkbox under “scopes”.
+
+    .. image:: /images/discord_general_scope.png
+        :alt: The scopes checkbox with "bot" ticked.
+
+    .. note::
+        If your bot uses slash commands you need to tick the "applications.commands" checkbox.
+
+7. Tick the permissions required for your bot to function under "Bot Permissions".
+
+    - Please be aware of the consequences of requiring your bot to have the "Administrator" permission.
+
+    - Bot owners must have 2FA enabled for certain actions and permissions when added in servers that have Server-Wide 2FA enabled. Check the `2FA support page <https://support.discord.com/hc/en-us/articles/219576828-Setting-up-Two-Factor-Authentication>`_ for more information.
+
+    .. image:: /images/discord_oauth2_perms.png
+        :alt: The permission checkboxes with some permissions checked.
+
+8. Now you can invite your bot through its profile.
+
+    .. image:: /images/discord_add_to_server.png
+        :alt: The Add to Server button.
 
 
 .. note::
