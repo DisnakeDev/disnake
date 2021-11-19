@@ -28,11 +28,11 @@ import collections.abc
 import inspect
 import itertools
 import math
+import sys
 import warnings
 from enum import Enum, EnumMeta
 from typing import (
     TYPE_CHECKING,
-    Annotated,
     Any,
     Callable,
     ClassVar,
@@ -66,6 +66,11 @@ if TYPE_CHECKING:
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 
     from typing_extensions import TypeGuard
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    Annotated = None
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
