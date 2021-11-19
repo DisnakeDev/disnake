@@ -361,6 +361,11 @@ class InteractionBotBase(CommonBotBase):
     ) -> Optional[Union[InvokableSlashCommand, SubCommandGroup, SubCommand]]:
         """Works like ``Bot.get_command``, but for slash commands.
 
+        If the name contains spaces, then it will assume that you are looking for a :class:`.SubCommand` or
+        a :class:`.SubCommandGroup`.
+        e.g: ``'foo bar'`` will get the sub command group, or the sub command ``bar`` of the top-level slash command
+        ``foo`` if found, otherwise ``None``.
+
         Parameters
         -----------
         name: :class:`str`
@@ -388,8 +393,6 @@ class InteractionBotBase(CommonBotBase):
             group = slash.children.get(chain[1])
             if isinstance(group, SubCommandGroup):
                 return group.children.get(chain[2])
-
-        return None
 
     def get_user_command(self, name: str) -> Optional[InvokableUserCommand]:
         """Get a :class:`.InvokableUserCommand` from the internal list
