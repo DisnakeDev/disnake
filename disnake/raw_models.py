@@ -51,6 +51,7 @@ __all__ = (
     "RawReactionClearEmojiEvent",
     "RawMemberScreeningRejectEvent",
     "RawIntegrationDeleteEvent",
+    "RawGuildScheduledEventUserActionEvent",
 )
 
 
@@ -297,3 +298,28 @@ class RawIntegrationDeleteEvent(_RawReprMixin):
             self.application_id: Optional[int] = int(data["application_id"])
         except KeyError:
             self.application_id: Optional[int] = None
+
+
+class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
+    """Represents the payload for a :func:`guild_scheduled_event_subscribe`
+    and :func:`guild_scheduled_event_unsubscribe` event.
+
+    .. versionadded:: 2.3
+
+    Attributes
+    -----------
+    event_id: :class:`int`
+        The ID of the guild scheduled event that the user subscribed to.
+    user_id: :class:`int`
+        The ID of the subscriber.
+    guild_id: :class:`int`
+        The guild ID where the scheduled event is located.
+    """
+
+    __slots__ = ("guild_scheduled_event_id", "user_id", "guild_id")
+
+    def __init__(self, data: dict):
+        # TODO: typed dicts
+        self.event_id: int = int(data["guild_scheduled_event_id"])
+        self.user_id: int = int(data["user_id"])
+        self.guild_id: int = int(data["guild_id"])
