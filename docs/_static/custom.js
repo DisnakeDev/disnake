@@ -95,3 +95,7 @@ document.addEventListener('keydown', (event) => {
     activeModal.close();
   }
 });
+
+$(document).ready(function () {
+  $('a.external').attr('target', '_blank');
+});
