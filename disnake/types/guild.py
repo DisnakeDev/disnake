@@ -66,6 +66,8 @@ class _GuildOptional(TypedDict, total=False):
     max_members: int
     premium_subscription_count: int
     max_video_channel_users: int
+    approximate_member_count: int
+    approximate_presence_count: int
 
 
 DefaultMessageNotificationLevel = Literal[0, 1]
@@ -81,19 +83,24 @@ GuildFeature = Literal[
     "COMMERCE",
     "COMMUNITY",
     "DISCOVERABLE",
+    "ENABLED_DISCOVERABLE_BEFORE",
     "FEATURABLE",
     "HAS_DIRECTORY_ENTRY",
     "HUB",
     "INVITE_SPLASH",
+    "LINKED_TO_HUB",
     "MEMBER_VERIFICATION_GATE_ENABLED",
     "MONETIZATION_ENABLED",
     "MORE_EMOJI",
     "MORE_STICKERS",
     "NEWS",
+    "NEW_THREAD_PERMISSIONS",
     "PARTNERED",
     "PREVIEW_ENABLED",
     "PRIVATE_THREADS",
+    "ROLE_ICONS",
     "SEVEN_DAY_THREAD_ARCHIVE",
+    "THREADS_ENABLED",
     "THREE_DAY_THREAD_ARCHIVE",
     "TICKETED_EVENTS_ENABLED",
     "VANITY_URL",
@@ -113,13 +120,9 @@ class _BaseGuildPreview(UnavailableGuild):
     description: Optional[str]
 
 
-class _GuildPreviewUnique(TypedDict):
+class GuildPreview(_BaseGuildPreview):
     approximate_member_count: int
     approximate_presence_count: int
-
-
-class GuildPreview(_BaseGuildPreview, _GuildPreviewUnique):
-    ...
 
 
 class Guild(_BaseGuildPreview, _GuildOptional):
@@ -147,10 +150,6 @@ class Guild(_BaseGuildPreview, _GuildOptional):
 
 class InviteGuild(Guild, total=False):
     welcome_screen: WelcomeScreen
-
-
-class GuildWithCounts(Guild, _GuildPreviewUnique):
-    ...
 
 
 class GuildPrune(TypedDict):

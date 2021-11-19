@@ -28,6 +28,7 @@ import asyncio
 import json
 import logging
 import sys
+import re
 from typing import (
     Any,
     ClassVar,
@@ -306,10 +307,14 @@ class HTTPClient:
                 if form:
                     # NOTE: for `quote_fields`, see https://github.com/aio-libs/aiohttp/issues/4012
                     form_data = aiohttp.FormData(quote_fields=False)
-                    for params in form:
-                        # manually escape double quotes and backslashes, like urllib3
-                        name = params.pop("name").replace('"', "%22").replace("\\", "\\\\")
-                        form_data.add_field(name=name, **params)
+                    for p in form:
+                        # manually escape chars, just in case
+                        name = re.sub(
+                            r"[^\x21\x23-\x5b\x5d-\x7e]", lambda m: f"\\{m.group(0)}", p["name"]
+                        )
+                        form_data.add_field(
+                            name=name, **{k: v for k, v in p.items() if k != "name"}
+                        )
                     kwargs["data"] = form_data
 
                 try:
@@ -1201,8 +1206,9 @@ class HTTPClient:
     def leave_guild(self, guild_id: Snowflake) -> Response[None]:
         return self.request(Route("DELETE", "/users/@me/guilds/{guild_id}", guild_id=guild_id))
 
-    def get_guild(self, guild_id: Snowflake) -> Response[guild.Guild]:
-        return self.request(Route("GET", "/guilds/{guild_id}", guild_id=guild_id))
+    def get_guild(self, guild_id: Snowflake, *, with_counts: bool = True) -> Response[guild.Guild]:
+        params = {"with_counts": int(with_counts)}
+        return self.request(Route("GET", "/guilds/{guild_id}", guild_id=guild_id), params=params)
 
     def delete_guild(self, guild_id: Snowflake) -> Response[None]:
         return self.request(Route("DELETE", "/guilds/{guild_id}", guild_id=guild_id))

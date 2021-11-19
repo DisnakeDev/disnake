@@ -1397,6 +1397,11 @@ of :class:`enum.Enum`.
         thread's conversation topic.
 
         .. versionadded:: 2.0
+    .. attribute:: context_menu_command
+
+        The system message denoting that a context menu command was executed.
+
+        .. versionadded:: 2.3
 
 .. class:: UserFlags
 
@@ -1453,6 +1458,11 @@ of :class:`enum.Enum`.
     .. attribute:: discord_certified_moderator
 
         The user is a Discord Certified Moderator.
+    .. attribute:: http_interactions_bot
+
+        The user is a bot that only uses HTTP interactions.
+
+        .. versionadded:: 2.3
 
 .. class:: ActivityType
 
@@ -1482,6 +1492,65 @@ of :class:`enum.Enum`.
         A competing activity type.
 
         .. versionadded:: 1.5
+
+.. class:: PartyType
+
+    Represents the type of a voice channel activity/application.
+
+    .. attribute:: youtube
+
+        The (old) "Youtube Together" activity.
+    .. attribute:: poker
+
+        The "Poker Night" activity.
+    .. attribute:: betrayal
+
+        The "Betrayal.io" activity.
+    .. attribute:: fishing
+
+        The "Fishington.io" activity.
+    .. attribute:: chess
+
+        The "Chess In The Park" activity.
+    .. attribute:: letter_tile
+
+        The "Letter Tile" activity.
+    .. attribute:: word_snack
+
+        The "Word Snacks" activity.
+    .. attribute:: doodle_crew
+
+        The "Doodle Crew" activity.
+    .. attribute:: checkers
+
+        The "Checkers In The Park" activity.
+
+        .. versionadded:: 2.3
+    .. attribute:: spellcast
+
+        The "SpellCast" activity.
+
+        .. versionadded:: 2.3
+    .. attribute:: awkword
+
+        The "Awkword" activity.
+
+        .. versionadded:: 2.3
+    .. attribute:: sketchy_artist
+
+        The "Sketchy Artist" activity.
+
+        .. versionadded:: 2.3
+    .. attribute:: putt_party
+
+        The "Putt Party" activity.
+
+        .. versionadded:: 2.3
+    .. attribute:: watch_together
+
+        The "Watch Together" activity, a Youtube application.
+
+        .. versionadded:: 2.3
 
 .. class:: ApplicationCommandType
 
@@ -1870,6 +1939,11 @@ of :class:`enum.Enum`.
         The member is "invisible". In reality, this is only used in sending
         a presence a la :meth:`Client.change_presence`. When you receive a
         user's presence this will be :attr:`offline` instead.
+    .. attribute:: streaming
+
+        The member is live streaming to Twitch.
+
+        .. versionadded:: 2.3
 
 
 .. class:: AuditLogAction

@@ -229,6 +229,15 @@ class SystemChannelFlags(BaseFlags):
         """
         return 4
 
+    @flag_value
+    def join_notification_replies(self):
+        """:class:`bool`: Returns ``True`` if the system channel shows sticker reply
+        buttons for member join notifications.
+
+        .. versionadded:: 2.3
+        """
+        return 8
+
 
 @fill_with_flags()
 class MessageFlags(BaseFlags):
@@ -307,6 +316,15 @@ class MessageFlags(BaseFlags):
         .. versionadded:: 2.0
         """
         return 64
+
+    @flag_value
+    def loading(self):
+        """:class:`bool`: Returns ``True`` if the source message is a deferred
+        interaction response and shows a "thinking" state.
+
+        .. versionadded:: 2.3
+        """
+        return 128
 
 
 @fill_with_flags()
@@ -422,6 +440,14 @@ class PublicUserFlags(BaseFlags):
         .. versionadded:: 2.0
         """
         return UserFlags.discord_certified_moderator.value
+
+    @flag_value
+    def http_interactions_bot(self):
+        """:class:`bool`: Returns ``True`` if the user is a bot that only uses HTTP interactions.
+
+        .. versionadded:: 2.3
+        """
+        return UserFlags.http_interactions_bot.value
 
     def all(self) -> List[UserFlags]:
         """List[:class:`UserFlags`]: Returns all public flags the user has."""
