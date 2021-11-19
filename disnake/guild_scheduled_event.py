@@ -214,7 +214,7 @@ class GuildScheduledEvent(Hashable):
         *,
         name: str = MISSING,
         description: str = MISSING,
-        channel_id: int = MISSING,
+        channel_id: Optional[int] = MISSING,
         privacy_level: StagePrivacyLevel = MISSING,
         scheduled_start_time: datetime = MISSING,
         scheduled_end_time: datetime = MISSING,
