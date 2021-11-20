@@ -62,6 +62,9 @@ class GuildScheduledEventMetadata:
     def __init__(self, *, location: str = None):
         self.location: Optional[str] = location
 
+    def __repr__(self) -> str:
+        return f"<GuildScheduledEventMetadata location={self.location!r}>"
+
     def to_dict(self) -> Dict[str, Any]:
         return {"location": self.location}
 
@@ -179,10 +182,23 @@ class GuildScheduledEvent(Hashable):
         )
 
         creator_data = data.get("creator")
-        self.creator: Optional[User] = (
-            None if creator_data is None else User(state=self._state, data=creator_data)
-        )
+        self.creator: Optional[User]
+        if creator_data is not None:
+            self.creator = User(state=self._state, data=creator_data)
+        elif self.creator_id is not None:
+            self.creator = self._state.get_user(self.creator_id)
+        else:
+            self.creator = None
+
         self.user_count: Optional[int] = data.get("user_count")
+
+    def __repr__(self) -> str:
+        return "<GuildScheduledEvent " + " ".join(
+            f"{attr}={getattr(self, attr)!r}" for attr in self.__slots__ if not attr.startswith("_")
+        ) + ">"
+
+    def __str__(self) -> str:
+        return self.name
 
     @cached_slot_property("_cs_guild")
     def guild(self) -> Optional[Guild]:
@@ -280,7 +296,9 @@ class GuildScheduledEvent(Hashable):
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
-                raise ValueError("privacy_level must be an instance of GuildScheduledEventPrivacyLevel")
+                raise ValueError(
+                    "privacy_level must be an instance of GuildScheduledEventPrivacyLevel"
+                )
 
             fields["privacy_level"] = privacy_level.value
 
