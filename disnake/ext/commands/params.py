@@ -526,9 +526,7 @@ def isolate_self(
     if parametersl[0].name == "self":
         cog_param = parameters.pop(parametersl[0].name)
         parametersl.pop(0)
-        if len(parameters) > 1 and is_interaction(parametersl[0].annotation):
-            inter_param = parameters.pop(parametersl[0].name)
-    if inter_param is None and is_interaction(parametersl[0].annotation):
+    if parametersl and is_interaction(parametersl[0].annotation):
         inter_param = parameters.pop(parametersl[0].name)
 
     return (cog_param, inter_param), parameters
