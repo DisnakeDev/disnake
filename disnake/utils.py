@@ -341,7 +341,7 @@ def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
     parts = token.split(".")
 
     # validate the token while accounting for any eventual overflows in the future
-    if 53 >= len(token) >= 50:
+    if 62 >= len(token) >= 58:
         msg = "Token must be exactly 59 characters."  # 59 at the time of writing
         if len(token) == 32:
             msg += " Maybe it is a client secret instead?"
