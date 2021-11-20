@@ -15,7 +15,7 @@ async def clean_content_converter(
 
 
 # Converters may also set the type of the option using annotations
-# here avatar is actually a user option despite the actual command being annotated as str
+# here the converter is actually using a user option despite the actual command being annotated as str
 def avatar_converter(inter: disnake.ApplicationCommandInteraction, user: disnake.User) -> str:
     return user.display_avatar.url
 
