@@ -237,7 +237,7 @@ class GuildScheduledEvent(Hashable):
             The name of the scheduled event.
         description: :class:`str`
             The description of the scheduled event.
-        channel_id: :class:`int`
+        channel_id: Optional[:class:`int`]
             The channel id of the scheduled event. Set to ``None`` if changing
             ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
         privacy_level: :class:`StagePrivacyLevel`

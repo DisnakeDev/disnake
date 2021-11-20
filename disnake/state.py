@@ -1453,7 +1453,7 @@ class ConnectionState:
                 "GUILD_SCHEDULED_EVENT_UPDATE referencing unknown guild ID: %s. Discarding.",
                 data["guild_id"],
             )
-            return None
+            return
 
         scheduled_event = guild._scheduled_events.get(int(data["id"]))
         if scheduled_event is not None:
@@ -1480,7 +1480,7 @@ class ConnectionState:
         self.dispatch("raw_guild_scheduled_event_subscribe", payload)
         guild = self._get_guild(payload.guild_id)
         if guild is None:
-            return None
+            return
 
         event = guild.get_scheduled_event(payload.event_id)
         user = guild.get_member(payload.user_id)
@@ -1495,7 +1495,7 @@ class ConnectionState:
         self.dispatch("raw_guild_scheduled_event_unsubscribe", payload)
         guild = self._get_guild(payload.guild_id)
         if guild is None:
-            return None
+            return
 
         event = guild.get_scheduled_event(payload.event_id)
         user = guild.get_member(payload.user_id)

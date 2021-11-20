@@ -1842,11 +1842,8 @@ class HTTPClient:
     # Scheduled event management
     # TODO: typed dicts
 
-    def get_guild_scheduled_events(self, guild_id: Snowflake, with_user_count: bool = None):
-        params: Dict[str, Any] = {}
-        if with_user_count is not None:
-            params["with_user_count"] = with_user_count
-
+    def get_guild_scheduled_events(self, guild_id: Snowflake, with_user_count: bool = False):
+        params = {"with_user_count": int(with_user_count)}
         r = Route("GET", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
         return self.request(r, params=params)
 
@@ -1886,13 +1883,9 @@ class HTTPClient:
         return self.request(r, json=payload)
 
     def get_guild_scheduled_event(
-        self, guild_id: Snowflake, event_id: Snowflake, with_user_count: bool = None
+        self, guild_id: Snowflake, event_id: Snowflake, with_user_count: bool = False
     ):
-        params: Dict[str, Any] = {}
-
-        if with_user_count is not None:
-            params["with_user_count"] = with_user_count
-
+        params = {"with_user_count": int(with_user_count)}
         route = Route(
             method="GET",
             path="/guilds/{guild_id}/scheduled-events/{event_id}",

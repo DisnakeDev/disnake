@@ -923,7 +923,7 @@ class Guild(Hashable):
 
     @property
     def scheduled_events(self) -> List[GuildScheduledEvent]:
-        """List[:class:``]: Returns a :class:`list` of the existing guild scheduled events.
+        """List[:class:`GuildScheduledEvent`]: Returns a :class:`list` of the existing guild scheduled events.
 
         .. versionadded:: 2.3
         """
@@ -1780,7 +1780,7 @@ class Guild(Hashable):
         return threads
 
     async def fetch_scheduled_events(
-        self, *, with_user_count: bool = None
+        self, *, with_user_count: bool = False
     ) -> List[GuildScheduledEvent]:
         """|coro|
 
@@ -1809,7 +1809,7 @@ class Guild(Hashable):
         return [GuildScheduledEvent(state=self._state, data=data) for data in raw_events]
 
     async def fetch_scheduled_event(
-        self, event_id: int, *, with_user_count: bool = None
+        self, event_id: int, *, with_user_count: bool = False
     ) -> GuildScheduledEvent:
         """|coro|
 
@@ -1822,7 +1822,7 @@ class Guild(Hashable):
         event_id: :class:`int`
             The ID to look for.
         with_user_count: :class:`bool`
-            Whether to include number of users subscribed to each event.
+            Whether to include number of users subscribed to the event.
 
         Raises
         ------
