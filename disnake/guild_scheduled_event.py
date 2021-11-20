@@ -193,9 +193,15 @@ class GuildScheduledEvent(Hashable):
         self.user_count: Optional[int] = data.get("user_count")
 
     def __repr__(self) -> str:
-        return "<GuildScheduledEvent " + " ".join(
-            f"{attr}={getattr(self, attr)!r}" for attr in self.__slots__ if not attr.startswith("_")
-        ) + ">"
+        return (
+            "<GuildScheduledEvent "
+            + " ".join(
+                f"{attr}={getattr(self, attr)!r}"
+                for attr in self.__slots__
+                if not attr.startswith("_")
+            )
+            + ">"
+        )
 
     def __str__(self) -> str:
         return self.name
