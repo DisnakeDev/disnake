@@ -84,6 +84,7 @@ if TYPE_CHECKING:
     from .channel import TextChannel, DMChannel, GroupChannel, PartialMessageable
     from .threads import Thread
     from .enums import InviteTarget
+    from .guild_scheduled_event import GuildScheduledEvent
     from .ui.view import View
     from .types.channel import (
         PermissionOverwrite as PermissionOverwritePayload,
@@ -1053,6 +1054,7 @@ class GuildChannel(ABC):
         target_type: Optional[InviteTarget] = None,
         target_user: Optional[User] = None,
         target_application: Optional[PartyType] = None,
+        guild_scheduled_event: Optional[GuildScheduledEvent] = None,
     ) -> Invite:
         """|coro|
 
@@ -1082,16 +1084,18 @@ class GuildChannel(ABC):
             The type of target for the voice channel invite, if any.
 
             .. versionadded:: 2.0
-
         target_user: Optional[:class:`User`]
             The user whose stream to display for this invite, required if `target_type` is `TargetType.stream`. The user must be streaming in the channel.
 
             .. versionadded:: 2.0
-
         target_application: Optional[:class:`.PartyType`]
             The id of the embedded application for the invite, required if `target_type` is `TargetType.embedded_application`.
 
             .. versionadded:: 2.0
+        guild_scheduled_event: Optional[:class:`GuildScheduledEvent`]
+            The scheduled event to include with the invite.
+
+            .. versionadded:: 2.3
 
         Raises
         -------
@@ -1118,7 +1122,9 @@ class GuildChannel(ABC):
             target_user_id=target_user.id if target_user else None,
             target_application_id=try_enum_to_int(target_application),
         )
-        return Invite.from_incomplete(data=data, state=self._state)
+        invite = Invite.from_incomplete(data=data, state=self._state)
+        invite.guild_scheduled_event = guild_scheduled_event
+        return invite
 
     async def invites(self) -> List[Invite]:
         """|coro|
