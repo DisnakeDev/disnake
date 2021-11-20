@@ -60,6 +60,7 @@ __all__ = (
     "PartyType",
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
+    "GuildScheduledEventPrivacyLevel",
 )
 
 
