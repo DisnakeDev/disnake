@@ -544,9 +544,6 @@ def collect_params(
     (cog_param, inter_param), parameters = isolate_self(function)
     doc = disnake.utils.parse_docstring(function)
 
-    if not parameters:
-        return None, None, [], {}
-
     paraminfos: List[ParamInfo] = []
     injections: Dict[str, Injection] = {}
 
