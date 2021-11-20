@@ -539,7 +539,7 @@ def collect_params(
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
     """Collect all parameters in a function
 
-    Returns: (`cpg parameter`, `interaction parameter`, `param infos`, `injections`)
+    Returns: (`cog parameter`, `interaction parameter`, `param infos`, `injections`)
     """
     (cog_param, inter_param), parameters = isolate_self(function)
     doc = disnake.utils.parse_docstring(function)
