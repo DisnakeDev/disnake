@@ -60,7 +60,7 @@ from .errors import (
 )
 from .gateway import DiscordClientWebSocketResponse
 from . import __version__, utils
-from .utils import MISSING
+from .utils import MISSING, parse_token
 
 _log = logging.getLogger(__name__)
 
@@ -434,6 +434,11 @@ class HTTPClient:
     # login management
 
     async def static_login(self, token: str) -> user.User:
+        try:
+            parse_token(token)
+        except Exception as e:
+            raise LoginFailure(f"An improperly formatted token has been passed: {e}") from e
+
         # Necessary to get aiohttp to stop complaining about session creation
         self.__session = aiohttp.ClientSession(
             connector=self.connector, ws_response_class=DiscordClientWebSocketResponse

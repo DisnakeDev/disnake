@@ -340,6 +340,15 @@ def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
     """
     parts = token.split(".")
 
+    # validate the token
+    if len(token) != 59:
+        msg = "Token must be exactly 59 characters."
+        if len(token) == 32:
+            msg += " Maybe it is a client secret instead?"
+        raise ValueError(msg)
+    elif len(parts) != 3 or not all(re.fullmatch(r"[A-Za-z0-9_\-]*={0,2}", s) for s in parts):
+        raise ValueError("Token must be a base64 encoded string separated by dots")
+
     user_id = int(b64decode(parts[0]))
 
     timestamp = int.from_bytes(b64decode(parts[1] + "=="), "big")
