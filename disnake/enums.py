@@ -675,6 +675,10 @@ class GuildScheduledEventStatus(Enum):
     canceled = 4
 
 
+class GuildScheduledEventPrivacyLevel(Enum):
+    guild_only = 2
+
+
 T = TypeVar("T")
 
 

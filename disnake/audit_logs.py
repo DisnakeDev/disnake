@@ -173,6 +173,16 @@ def _transform_type(entry: AuditLogEntry, data: int) -> Union[enums.ChannelType,
         return enums.try_enum(enums.ChannelType, data)
 
 
+def _transform_privacy_level(
+    entry: AuditLogEntry, data: int
+) -> Optional[Union[enums.StagePrivacyLevel, enums.GuildScheduledEventPrivacyLevel]]:
+    if data is None:
+        return None
+    if entry.action.target_type == "guild_scheduled_event":
+        return enums.try_enum(enums.GuildScheduledEventPrivacyLevel, data)
+    return enums.try_enum(enums.StagePrivacyLevel, data)
+
+
 class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
@@ -227,7 +237,7 @@ class AuditLogChanges:
         'region':                        (None, _enum_transformer(enums.VoiceRegion)),
         'rtc_region':                    (None, _enum_transformer(enums.VoiceRegion)),
         'video_quality_mode':            (None, _enum_transformer(enums.VideoQualityMode)),
-        'privacy_level':                 (None, _enum_transformer(enums.StagePrivacyLevel)),
+        'privacy_level':                 (None, _transform_privacy_level),
         'format_type':                   (None, _enum_transformer(enums.StickerFormatType)),
         'entity_type':                   (None, _enum_transformer(enums.GuildScheduledEventEntityType)),
         'status':                        (None, _enum_transformer(enums.GuildScheduledEventStatus)),

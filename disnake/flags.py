@@ -565,6 +565,8 @@ class Intents(BaseFlags):
         - :func:`on_member_remove`
         - :func:`on_member_update`
         - :func:`on_user_update`
+        - :func:`on_guild_scheduled_event_subscribe`
+        - :func:`on_guild_scheduled_event_unsubscribe`
 
         This also corresponds to the following attributes and classes in terms of cache:
 

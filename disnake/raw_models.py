@@ -301,7 +301,7 @@ class RawIntegrationDeleteEvent(_RawReprMixin):
 
 
 class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
-    """Represents the payload for a :func:`guild_scheduled_event_subscribe`
+    """Represents the payload for :func:`guild_scheduled_event_subscribe`
     and :func:`guild_scheduled_event_unsubscribe` event.
 
     .. versionadded:: 2.3
@@ -309,9 +309,9 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
     Attributes
     -----------
     event_id: :class:`int`
-        The ID of the guild scheduled event that the user subscribed to.
+        The ID of the guild scheduled event that the user subscribed to or unsubscribed from.
     user_id: :class:`int`
-        The ID of the subscriber.
+        The ID of the user doing the action.
     guild_id: :class:`int`
         The guild ID where the scheduled event is located.
     """

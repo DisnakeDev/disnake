@@ -71,7 +71,7 @@ from .enums import (
     NSFWLevel,
     StagePrivacyLevel,
     GuildScheduledEventEntityType,
-    GuildScheduledEventStatus,
+    GuildScheduledEventPrivacyLevel,
 )
 from .mixins import Hashable
 from .user import User
@@ -1784,7 +1784,7 @@ class Guild(Hashable):
     ) -> List[GuildScheduledEvent]:
         """|coro|
 
-        Returns a list of :class:`GuildScheduledEvent` of this guild.
+        Returns a list of :class:`GuildScheduledEvent`s of this guild.
 
         .. versionadded:: 2.3
 
@@ -1843,9 +1843,9 @@ class Guild(Hashable):
         self,
         *,
         name: str,
-        privacy_level: StagePrivacyLevel,
         scheduled_start_time: datetime.datetime,
         entity_type: GuildScheduledEventEntityType,
+        privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         channel_id: Snowflake = MISSING,
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         scheduled_end_time: datetime.datetime = MISSING,
@@ -1864,9 +1864,8 @@ class Guild(Hashable):
         description: :class:`str`
             The description of the scheduled event.
         channel_id: :class:`int`
-            The channel id of the scheduled event. Set to ``None`` if changing
-            ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
-        privacy_level: :class:`StagePrivacyLevel`
+            The channel ID of the scheduled event.
+        privacy_level: :class:`GuildScheduledEventPrivacyLevel`
             The privacy level of the scheduled event.
         scheduled_start_time: :class:`datetime`
             The time to schedule the event.
@@ -1887,11 +1886,13 @@ class Guild(Hashable):
         :class:`GuildScheduledEvent`
             The scheduled event.
         """
-        if not isinstance(privacy_level, StagePrivacyLevel):
-            raise ValueError("privacy_level must be an instance of StagePrivacyLevel")
-
         if not isinstance(entity_type, GuildScheduledEventEntityType):
             raise ValueError("entity_type must be an instance of GuildScheduledEventEntityType")
+
+        if privacy_level is MISSING:
+            privacy_level = GuildScheduledEventPrivacyLevel.guild_only
+        elif not isinstance(privacy_level, StagePrivacyLevel):
+            raise ValueError("privacy_level must be an instance of GuildScheduledEventPrivacyLevel")
 
         fields: Dict[str, Any] = {
             "name": name,
@@ -1906,9 +1907,7 @@ class Guild(Hashable):
                     "entity_metadata must be an instance of GuildScheduledEventMetadata"
                 )
 
-            fields["entity_metadata"] = (
-                None if entity_metadata is None else entity_metadata.to_dict()
-            )
+            fields["entity_metadata"] = entity_metadata.to_dict()
 
         if description is not MISSING:
             fields["description"] = description
