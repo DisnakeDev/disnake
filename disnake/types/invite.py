@@ -27,7 +27,7 @@ from __future__ import annotations
 from typing import Literal, Optional, TypedDict, Union
 
 from .snowflake import Snowflake
-from .guild import InviteGuild, _GuildPreviewUnique
+from .guild import InviteGuild
 from .channel import PartialChannel
 from .user import PartialUser
 from .appinfo import PartialAppInfo
@@ -41,6 +41,8 @@ class _InviteOptional(TypedDict, total=False):
     target_user: PartialUser
     target_type: InviteTargetType
     target_application: PartialAppInfo
+    approximate_member_count: int
+    approximate_presence_count: int
 
 
 class _InviteMetadata(TypedDict, total=False):
@@ -62,10 +64,6 @@ class IncompleteInvite(_InviteMetadata):
 
 
 class Invite(IncompleteInvite, _InviteOptional):
-    ...
-
-
-class InviteWithCounts(Invite, _GuildPreviewUnique):
     ...
 
 
