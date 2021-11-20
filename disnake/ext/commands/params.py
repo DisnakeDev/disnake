@@ -520,18 +520,18 @@ def isolate_self(
     if not parameters:
         return (None, None), {}
 
-    self_param: Optional[inspect.Parameter] = None
+    cog_param: Optional[inspect.Parameter] = None
     inter_param: Optional[inspect.Parameter] = None
 
     if parametersl[0].name == "self":
-        self_param = parameters.pop(parametersl[0].name)
+        cog_param = parameters.pop(parametersl[0].name)
         parametersl.pop(0)
         if len(parameters) > 1 and is_interaction(parametersl[0].annotation):
             inter_param = parameters.pop(parametersl[0].name)
     if inter_param is None and is_interaction(parametersl[0].annotation):
         inter_param = parameters.pop(parametersl[0].name)
 
-    return (self_param, inter_param), parameters
+    return (cog_param, inter_param), parameters
 
 
 def collect_params(
@@ -539,9 +539,9 @@ def collect_params(
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
     """Collect all parameters in a function
 
-    Returns: (`self parameter`, `interaction parameter`, `param infos`, `injections`)
+    Returns: (`cpg parameter`, `interaction parameter`, `param infos`, `injections`)
     """
-    (self_param, inter_param), parameters = isolate_self(function)
+    (cog_param, inter_param), parameters = isolate_self(function)
     doc = disnake.utils.parse_docstring(function)
 
     if not parameters:
@@ -566,14 +566,21 @@ def collect_params(
                 inter_param = parameter
             else:
                 raise TypeError(
-                    f"Found two candidates for the interaction in {function!r}: {inter_param.name} and {parameter.name}"
+                    f"Found two candidates for the interaction parameter in {function!r}: {inter_param.name} and {parameter.name}"
+                )
+        elif issubclass_(parameter.annotation, commands.Cog):
+            if cog_param is None:
+                cog_param = parameter
+            else:
+                raise TypeError(
+                    f"Found two candidates for the cog parameter in {function!r}: {inter_param.name} and {parameter.name}"
                 )
         else:
             paraminfo = ParamInfo.from_param(parameter, {}, doc)
             paraminfos.append(paraminfo)
 
     return (
-        self_param.name if self_param else None,
+        cog_param.name if cog_param else None,
         inter_param.name if inter_param else None,
         paraminfos,
         injections,
@@ -594,7 +601,7 @@ def collect_nested_params(function: Callable) -> List[ParamInfo]:
 
 def format_kwargs(
     interaction: Interaction,
-    self_param: str = None,
+    cog_param: str = None,
     inter_param: str = None,
     *args: Any,
     **kwargs: Any,
@@ -607,8 +614,8 @@ def format_kwargs(
         else:
             raise TypeError(f"Unexpected positional argument in a command callback: {arg}")
 
-    if self_param:
-        kwargs[self_param] = cog
+    if cog_param:
+        kwargs[cog_param] = cog
     if inter_param:
         kwargs[inter_param] = interaction
 
@@ -631,8 +638,8 @@ async def call_param_func(
     function: Callable, interaction: Interaction, *args: Any, **kwargs: Any
 ) -> Any:
     """Call a function utilizing ParamInfo"""
-    self_param, inter_param, paraminfos, injections = collect_params(function)
-    formatted_kwargs = format_kwargs(interaction, self_param, inter_param, *args, **kwargs)
+    cog_param, inter_param, paraminfos, injections = collect_params(function)
+    formatted_kwargs = format_kwargs(interaction, cog_param, inter_param, *args, **kwargs)
     formatted_kwargs.update(await run_injections(injections, interaction, *args, **kwargs))
     kwargs = formatted_kwargs
 
