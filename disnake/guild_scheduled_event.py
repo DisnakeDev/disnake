@@ -264,8 +264,8 @@ class GuildScheduledEvent(Hashable):
         description: :class:`str`
             The description of the scheduled event.
         channel_id: Optional[:class:`int`]
-            The channel ID of the scheduled event. Set to ``None`` if changing
-            ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
+            The channel ID in which the scheduled event will be hosted.
+            Set to ``None`` if changing ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
         privacy_level: :class:`GuildScheduledEventPrivacyLevel`
             The privacy level of the scheduled event.
         scheduled_start_time: :class:`datetime`
@@ -380,9 +380,9 @@ class GuildScheduledEvent(Hashable):
         with_members: :class:`bool`
             Whether to include some users as members. Defaults to ``True``.
         before_id: :class:`int`
-            Consider only users before given user id.
+            Consider only users before given user ID.
         after_id: :class:`int`
-            Consider only users after given user id.
+            Consider only users after given user ID.
 
         Raises
         ------

@@ -1864,7 +1864,7 @@ class Guild(Hashable):
         description: :class:`str`
             The description of the scheduled event.
         channel_id: :class:`int`
-            The channel ID of the scheduled event.
+            The channel ID in which the scheduled event will be hosted.
         privacy_level: :class:`GuildScheduledEventPrivacyLevel`
             The privacy level of the scheduled event.
         scheduled_start_time: :class:`datetime`
