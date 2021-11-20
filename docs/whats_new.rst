@@ -33,7 +33,7 @@ Documentation
 - Update repository links to new organization
 - Fix duplicate entries in documentation
 - Fix incorrect ``versionadded`` tags
-- Add docs for :class:`InteractionBot` and :class:`AutoShardedInteractionBot`
+- Add documentation for :class:`InteractionBot <ext.commands.InteractionBot>` and :class:`AutoShardedInteractionBot <ext.commands.AutoShardedInteractionBot>`
 
 .. _vp2p2p1:
 

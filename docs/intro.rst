@@ -61,7 +61,7 @@ A more in-depth tutorial is found on :doc:`py:tutorial/venv`.
 
 However, for the quick and dirty:
 
-1. Go to your project's working directory:
+1. Go to your project's working directory and create a Virtual Environment:
 
     .. code-block:: shell
 
@@ -74,11 +74,11 @@ However, for the quick and dirty:
 
         $ source bot-env/bin/activate
 
-    On Windows you activate it with:
+    On Windows you activate it with the following command:
 
     .. code-block:: shell
 
-        $ bot-env\Scripts\activate.bat
+        $ bot-env/Scripts/activate.bat
 
 3. Use pip like usual:
 
