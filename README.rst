@@ -154,6 +154,6 @@ You can find more examples in the examples directory.
 Links
 ------
 
-- `Documentation <http://disnake.rtfd.io/>`_
+- `Documentation <https://docs.disnake.dev/>`_
 - `Official Discord Server <https://discord.gg/gJDbCw8aQy>`_
 - `Discord API <https://discord.gg/discord-api>`_
