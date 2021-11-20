@@ -105,7 +105,7 @@ def evaluate_forwardref(annotation: Any, globalns: Dict[str, Any]) -> Any:
             annotation = annotation._evaluate(globalns, globalns, recursive_guard=frozenset())  # type: ignore
         except Exception as e:
             annotation = annotation.__forward_arg__
-            warnings.warn(f"Cannot parse annotation: {annotation!r}")
+            raise TypeError(f"Cannot parse annotation: {annotation!r}")
 
     if get_origin(annotation) is Annotated:
         # fairly common bug in lower python versions
