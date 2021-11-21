@@ -601,13 +601,15 @@ def format_kwargs(
     *args: Any,
     **kwargs: Any,
 ) -> Dict[str, Any]:
-    cog: Optional[commands.Cog] = None
-
-    for arg in args:
-        if isinstance(arg, commands.Cog):
-            cog = arg
-        else:
-            raise TypeError(f"Unexpected positional argument in a command callback: {arg}")
+    """Create kwargs from appropriate information"""
+    first = args[0] if args else None
+    
+    if len(args) > 1:
+        raise TypeError("When calling a slash command only self and the interaction should be positional")
+    elif first and not isinstance(first, commands.Cog):
+        raise TypeError("Method slash commands may be created only in cog subclasses")
+    
+    cog: Optional[commands.Cog] = first
 
     if cog_param:
         kwargs[cog_param] = cog
