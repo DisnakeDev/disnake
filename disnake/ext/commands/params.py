@@ -239,6 +239,7 @@ class ParamInfo:
         name: str = "",
         description: str = None,
         converter: Callable[[Interaction, Any], Any] = None,
+        convert_default: bool = False,
         autcomplete: Callable[[Interaction, str], Any] = None,
         choices: Choices = None,
         type: type = None,
@@ -254,6 +255,7 @@ class ParamInfo:
         self.param_name = name
         self.description = description
         self.converter = converter
+        self.convert_default = convert_default
         self.autocomplete = autcomplete
         self.choices = choices or []
         self.type = type or str
@@ -315,12 +317,15 @@ class ParamInfo:
 
     async def get_default(self, inter: Interaction) -> Any:
         """Gets the default for an interaction"""
-        if not callable(self.default):
-            return self.default
+        default = self.default
+        if callable(self.default):
+            default = self.default(inter)
 
-        default = self.default(inter)
-        if inspect.isawaitable(default):
-            return await default
+            if inspect.isawaitable(default):
+                default = await default
+
+        if self.convert_default:
+            default = await self.convert_argument(inter, default)
 
         return default
 
@@ -442,11 +447,15 @@ class ParamInfo:
 
         if len(parameters) != 1:
             raise TypeError(
-                "Converters must take precisely one argument (excluding self and an optional interaction)"
+                "Converters must take precisely two arguments: the interaction and the argument"
             )
 
         _, parameter = parameters.popitem()
         annotation = parameter.annotation
+
+        if parameter.default is not inspect.Parameter.empty and self.default is ...:
+            self.default = parameter.default
+            self.convert_default = True
 
         success = self.parse_annotation(annotation, converter_mode=True)
         if success:
@@ -691,6 +700,7 @@ def Param(
     description: str = None,
     choices: Choices = None,
     converter: Callable[[Interaction, Any], Any] = None,
+    convert_defaults: bool = False,
     autocomplete: Callable[[Interaction, str], Any] = None,
     channel_types: List[ChannelType] = None,
     lt: float = None,
@@ -752,6 +762,7 @@ def Param(
         description=description,
         choices=choices,
         converter=converter,
+        convert_default=convert_defaults,
         autcomplete=autocomplete,
         channel_types=channel_types,
         lt=lt,

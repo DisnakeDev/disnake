@@ -19,7 +19,7 @@ class PrefixConverter:
         self.prefix = prefix
         self.suffix = suffix
 
-    def __call__(self, inter: disnake.ApplicationCommandInteraction, a: str):
+    def __call__(self, inter: disnake.ApplicationCommandInteraction, a: str = "init"):
         return self.prefix + a + self.suffix
 
 
