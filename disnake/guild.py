@@ -2527,7 +2527,7 @@ class Guild(Hashable):
     ) -> Optional[Member]:
         """|coro|
 
-        Tries to get a member from the cache by ID. If fails, it fetcehs
+        Tries to get a member from the cache by ID. If fails, it fetches
         the user from the API and caches it.
 
         Parameters
