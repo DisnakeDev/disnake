@@ -47,7 +47,8 @@ class PerhapsThis:
 
 @commands.register_injection
 async def perhaps_this_is_it(
-    a: disnake.TextChannel = commands.Param(lambda i: i.channel), b: float = 0
+    a: disnake.TextChannel = commands.Param(lambda i: i.channel),
+    b: int = commands.Param(0, large=True),
 ) -> PerhapsThis:
     return PerhapsThis(a.id, b / 2)
 

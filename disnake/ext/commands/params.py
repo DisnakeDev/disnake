@@ -247,6 +247,7 @@ class ParamInfo:
         le: float = None,
         gt: float = None,
         ge: float = None,
+        large: bool = False,
     ) -> None:
         self.default = default
         self.name = name
@@ -259,6 +260,7 @@ class ParamInfo:
         self.channel_types = channel_types or []
         self.max_value = _xt_to_xe(le, lt, -1)
         self.min_value = _xt_to_xe(ge, gt, 1)
+        self.large = large
 
     @property
     def required(self) -> bool:
@@ -345,6 +347,12 @@ class ParamInfo:
 
     async def convert_argument(self, inter: Interaction, argument: Any) -> Any:
         """Convert a value if a converter is given"""
+        if self.large:
+            try:
+                argument = int(argument)
+            except Exception as e:
+                raise errors.ConversionError(int, e) from e
+
         if self.converter is None:
             return await self.verify_type(inter, argument)
 
@@ -390,6 +398,10 @@ class ParamInfo:
 
         if annotation is inspect.Parameter.empty or annotation is Any:
             return False
+        elif self.large:
+            self.type = str
+            if annotation is not int:
+                raise TypeError("Large integers must be annotated with int")
         elif annotation in self.TYPES:
             self.type = annotation
         elif (
@@ -603,12 +615,14 @@ def format_kwargs(
 ) -> Dict[str, Any]:
     """Create kwargs from appropriate information"""
     first = args[0] if args else None
-    
+
     if len(args) > 1:
-        raise TypeError("When calling a slash command only self and the interaction should be positional")
+        raise TypeError(
+            "When calling a slash command only self and the interaction should be positional"
+        )
     elif first and not isinstance(first, commands.Cog):
         raise TypeError("Method slash commands may be created only in cog subclasses")
-    
+
     cog: Optional[commands.Cog] = first
 
     if cog_param:
@@ -683,6 +697,7 @@ def Param(
     le: float = None,
     gt: float = None,
     ge: float = None,
+    large: bool = False,
     **kwargs: Any,
 ) -> Any:
     """
@@ -743,6 +758,7 @@ def Param(
         le=le,
         gt=gt,
         ge=ge,
+        large=large,
     )
 
 
