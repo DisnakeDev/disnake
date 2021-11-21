@@ -371,7 +371,7 @@ class ParamInfo:
         if not self.channel_types:
             channel_types = set()
             for channel in channels:
-                channel_types.union(_channel_type_factory(channel))
+                channel_types.update(_channel_type_factory(channel))
             self.channel_types = list(channel_types)
 
     def parse_annotation(self, annotation: Any, converter_mode: bool = False) -> bool:
