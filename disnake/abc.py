@@ -1092,7 +1092,7 @@ class GuildChannel(ABC):
             The id of the embedded application for the invite, required if `target_type` is `TargetType.embedded_application`.
 
             .. versionadded:: 2.0
-        guild_scheduled_event: Optional[:class:`GuildScheduledEvent`]
+        guild_scheduled_event: Optional[:class:`.GuildScheduledEvent`]
             The scheduled event to include with the invite.
 
             .. versionadded:: 2.3
