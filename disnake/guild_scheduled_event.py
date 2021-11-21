@@ -109,9 +109,9 @@ class GuildScheduledEvent(Hashable):
         The name of the scheduled event (1-100 characters).
     description: :class:`str`
         The description of the scheduled event (1-1000 characters).
-    scheduled_start_time: :class:`datetime.datetime`
+    scheduled_start_time: :class:`datetime`
         The time the event will start.
-    scheduled_end_time: Optional[:class:`datetime.datetime`]
+    scheduled_end_time: Optional[:class:`datetime`]
         The time the event will end, or ``None`` if the event does not have a scheduled time to end.
     privacy_level: :class:`GuildScheduledEventPrivacyLevel`
         The privacy level of the scheduled event.
@@ -213,7 +213,7 @@ class GuildScheduledEvent(Hashable):
 
     @cached_slot_property("_cs_channel")
     def channel(self) -> Optional[GuildChannel]:
-        """:class:`abc.GuildChannel` The channel in which the scheduled event will be hosted."""
+        """:class:`GuildChannel` The channel in which the scheduled event will be hosted."""
         if self.channel_id is None:
             return None
         guild = self.guild
@@ -268,9 +268,9 @@ class GuildScheduledEvent(Hashable):
             Set to ``None`` if changing ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
         privacy_level: :class:`GuildScheduledEventPrivacyLevel`
             The privacy level of the scheduled event.
-        scheduled_start_time: :class:`datetime.datetime`
+        scheduled_start_time: :class:`datetime`
             The time to schedule the event.
-        scheduled_end_time: :class:`datetime.datetime`
+        scheduled_end_time: :class:`datetime`
             The time when the scheduled event is scheduled to end.
         entity_type: :class:`GuildScheduledEventEntityType`
             The entity type of the scheduled event.
