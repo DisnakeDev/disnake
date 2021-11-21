@@ -733,6 +733,8 @@ def Param(
     convert_defaults: :class:`bool`
         Whether to also apply the converter to the provided default value.
         Defaults to ``False``.
+
+        .. versionadded: 2.3
     autocomplete: Callable[[:class:`ApplicationCommandInteraction`, :class:`str`], Any]
         A function that will suggest possible autocomplete options while typing.
         See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
@@ -747,6 +749,11 @@ def Param(
         The (exclusive) lower bound of values for this option (greater-than).
     ge: :class:`float`
         The (inclusive) lower bound of values for this option (greater-than-or-equal). Kwarg aliases: ``min_value``.
+    large: :class:`bool`
+        Whether to accept large :class:`int` values (if this is ``False``, only
+        values in the range ``(-2^53, 2^53)`` would be accepted due to an API limitation).
+
+        .. versionadded: 2.3
 
     Returns
     -------
@@ -784,6 +791,10 @@ param = Param
 
 
 def inject(function: Callable[..., Any]) -> Any:
+    """
+    A special function to use the provided function for injections.
+    This should be assigned to a parameter of a function representing your application command.
+    """
     return Injection(function)
 
 
@@ -825,7 +836,9 @@ else:
 
 
 def register_injection(function: CallableT) -> CallableT:
-    """Use this as a decorator to register a global injection"""
+    """
+    A decorator to register a global injection.
+    """
     sig = signature(function)
     tp = sig.return_annotation
 
