@@ -215,7 +215,7 @@ class Permissions(BaseFlags):
 
         .. versionadded:: 1.7
 
-        .. versionadded:: 2.3
+        .. versionchanged:: 2.3
             Added :attr:`moderate_members` permission.
         """
         return cls(0b10000000000001100000000000000000000000111)
@@ -576,7 +576,7 @@ class Permissions(BaseFlags):
 
     @flag_value
     def moderate_members(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can moderate members.
+        """:class:`bool`: Returns ``True`` if a user can perform limited moderation actions (time out).
 
         .. versionadded:: 2.3
         """

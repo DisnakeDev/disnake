@@ -753,8 +753,8 @@ class Member(disnake.abc.Messageable, _UserTag):
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
         communication_disabled_until: Optional[:class:`datetime.datetime`]
-            Datetime when the time out will be removed; until then, the member will not be able to interact with the guild.
-            Set to ``None`` to remove the time out. Only 28 days in the future is supported.
+            The datetime when the time out will be removed; until then, the member will not be able to interact with the guild.
+            Set to ``None`` to remove the time out. Only up to 28 days in the future is supported.
 
             .. versionadded:: 2.3
         reason: Optional[:class:`str`]
