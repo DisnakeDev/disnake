@@ -1081,18 +1081,19 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param after: The voice state after the changes.
     :type after: :class:`VoiceState`
 
+.. function:: on_guild_scheduled_event_create(event)
+              on_guild_scheduled_event_delete(event)
 
-.. function:: on_scheduled_event_create(event)
-
-    Called when a guild scheduled event is created.
+    Called when a guild scheduled event is created or deleted.
 
     This requires :attr:`Intents.guild_scheduled_events` to be enabled.
 
     .. versionadded:: 2.3
 
-    :param event: The :class:`GuildScheduledEvent`.
+    :param event: The guild scheduled event that was created or deleted.
+    :type event: :class:`GuildScheduledEvent`
 
-.. function:: on_scheduled_event_update(before, after)
+.. function:: on_guild_scheduled_event_update(before, after)
 
     Called when a guild scheduled event is updated.
     The guild must have existed in the :attr:`Client.guilds` cache.
@@ -1101,43 +1102,34 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     .. versionadded:: 2.3
 
-    :param before: The :class:`GuildScheduledEvent` before update.
+    :param before: The guild scheduled event before the update.
+    :type before: :class:`GuildScheduledEvent`
+    :param after: The guild scheduled event after the update.
+    :type after: :class:`GuildScheduledEvent`
 
-    :param after: The :class:`GuildScheduledEvent` after update.
+.. function:: on_guild_scheduled_event_subscribe(event, user)
+              on_guild_scheduled_event_unsubscribe(event, user)
 
-.. function:: on_scheduled_event_delete(event)
-
-    Called when a guild scheduled event is deleted.
-
-    This requires :attr:`Intents.guild_scheduled_events` to be enabled.
-
-    .. versionadded:: 2.3
-
-    :param event: The :class:`GuildScheduledEvent`.
-
-.. function:: on_scheduled_event_subscribe(event)
-
-    Called when a user subscribes to a guild scheduled event.
+    Called when a user subscribes to or unsubscribes from a guild scheduled event.
 
     This requires :attr:`Intents.guild_scheduled_events` and :attr:`Intents.members` to be enabled.
 
     .. versionadded:: 2.3
 
-    :param event: The :class:`GuildScheduledEvent`.
+    :param event: The guild scheduled event that the user subscribed to or unsubscribed from.
+    :type event: :class:`GuildScheduledEvent`
+    :param user: The user who subscribed to or unsubscribed from the event.
+    :type user: Union[:class:`Member`, :class:`User`]
 
-    :param user: The :class:`User` that subscribed to the event.
+.. function:: on_raw_guild_scheduled_event_subscribe(payload)
+              on_raw_guild_scheduled_event_unsubscribe(payload)
 
-.. function:: on_scheduled_event_unsubscribe(event)
+    Called when a user subscribes to or unsubscribes from a guild scheduled event.
+    Unlike :func:`on_guild_scheduled_event_subscribe` and :func:`on_guild_scheduled_event_unsubscribe`,
+    this is called regardless of the guild scheduled event cache.
 
-    Called when a user unsubscribes from a guild scheduled event.
-
-    This requires :attr:`Intents.guild_scheduled_events` and :attr:`Intents.members` to be enabled.
-
-    .. versionadded:: 2.3
-
-    :param event: The :class:`GuildScheduledEvent`.
-
-    :param user: The :class:`User` that unsubscribed from the event.
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawGuildScheduledEventUserActionEvent`
 
 .. function:: on_stage_instance_create(stage_instance)
               on_stage_instance_delete(stage_instance)
@@ -2505,7 +2497,7 @@ of :class:`enum.Enum`.
 
     .. attribute:: guild_scheduled_event_create
 
-        A scheduled event was created.
+        A guild scheduled event was created.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`GuildScheduledEvent` or :class:`Object` with the ID of the event
@@ -2522,7 +2514,7 @@ of :class:`enum.Enum`.
 
     .. attribute:: guild_scheduled_event_update
 
-        A scheduled event was updated.
+        A guild scheduled event was updated.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`GuildScheduledEvent` or :class:`Object` with the ID of the event
@@ -2539,7 +2531,7 @@ of :class:`enum.Enum`.
 
     .. attribute:: guild_scheduled_event_delete
 
-        A scheduled event was deleted.
+        A guild scheduled event was deleted.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`GuildScheduledEvent` or :class:`Object` with the ID of the event
@@ -2923,25 +2915,25 @@ of :class:`enum.Enum`.
 
 .. class:: GuildScheduledEventEntityType
 
-    Represents the type of a scheduled event entity.
+    Represents the type of a guild scheduled event entity.
 
     .. versionadded:: 2.3
 
     .. attribute:: stage_instance
 
-        The scheduled event will take place in a stage channel.
+        The guild scheduled event will take place in a stage channel.
 
     .. attribute:: voice
 
-        The scheduled event will take place in a voice channel.
+        The guild scheduled event will take place in a voice channel.
 
     .. attribute:: external
 
-        The scheduled event will take place in a custom location.
+        The guild scheduled event will take place in a custom location.
 
 .. class:: GuildScheduledEventStatus
 
-    Represents the scheduled event status.
+    Represents the status of a guild scheduled event.
 
     .. versionadded:: 2.3
 
@@ -2963,13 +2955,13 @@ of :class:`enum.Enum`.
 
 .. class:: GuildScheduledEventPrivacyLevel
 
-    Represents the scheduled event privacy level.
+    Represents the privacy level of a guild scheduled event.
 
     .. versionadded:: 2.3
 
     .. attribute:: guild_only
 
-        The scheduled event is only for a specific guild.
+        The guild scheduled event is only for a specific guild.
 
 
 Async Iterator
@@ -3388,7 +3380,7 @@ AuditLogDiff
 
     .. attribute:: privacy_level
 
-        The privacy level of the stage instance or scheduled event.
+        The privacy level of the stage instance or guild scheduled event.
 
         :type: Union[:class:`StagePrivacyLevel`, :class:`GuildScheduledEventPrivacyLevel`]
 
@@ -4447,6 +4439,14 @@ RawIntegrationDeleteEvent
 .. attributetable:: RawIntegrationDeleteEvent
 
 .. autoclass:: RawIntegrationDeleteEvent()
+    :members:
+
+RawGuildScheduledEventUserActionEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawGuildScheduledEventUserActionEvent
+
+.. autoclass:: RawGuildScheduledEventUserActionEvent()
     :members:
 
 PartialWebhookGuild

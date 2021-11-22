@@ -923,14 +923,14 @@ class Guild(Hashable):
 
     @property
     def scheduled_events(self) -> List[GuildScheduledEvent]:
-        """List[:class:`GuildScheduledEvent`]: Returns a :class:`list` of the existing guild scheduled events.
+        """List[:class:`GuildScheduledEvent`]: Returns a :class:`list` of existing guild scheduled events.
 
         .. versionadded:: 2.3
         """
         return list(self._scheduled_events.values())
 
     def get_scheduled_event(self, event_id: int, /) -> Optional[GuildScheduledEvent]:
-        """Returns a scheduled event with the given ID.
+        """Returns a guild scheduled event with the given ID.
 
         .. versionadded:: 2.3
 
@@ -942,7 +942,7 @@ class Guild(Hashable):
         Returns
         --------
         Optional[:class:`GuildScheduledEvent`]
-            The scheduled event or ``None`` if not found.
+            The guild scheduled event or ``None`` if not found.
         """
         return self._scheduled_events.get(event_id)
 
@@ -1784,7 +1784,7 @@ class Guild(Hashable):
     ) -> List[GuildScheduledEvent]:
         """|coro|
 
-        Returns a list of :class:`GuildScheduledEvent`s of this guild.
+        Retrieves a list of all :class:`GuildScheduledEvent` instances of the guild.
 
         .. versionadded:: 2.3
 
@@ -1801,7 +1801,7 @@ class Guild(Hashable):
         Returns
         --------
         List[:class:`GuildScheduledEvent`]
-            The scheduled events.
+            The existing guild scheduled events.
         """
         raw_events = await self._state.http.get_guild_scheduled_events(
             self.id, with_user_count=with_user_count
@@ -1813,7 +1813,7 @@ class Guild(Hashable):
     ) -> GuildScheduledEvent:
         """|coro|
 
-        Returns a :class:`GuildScheduledEvent` with the given ID.
+        Retrieves a :class:`GuildScheduledEvent` with the given ID.
 
         .. versionadded:: 2.3
 
@@ -1832,7 +1832,7 @@ class Guild(Hashable):
         Returns
         --------
         :class:`GuildScheduledEvent`
-            The scheduled event.
+            The guild scheduled event.
         """
         data = await self._state.http.get_guild_scheduled_event(
             self.id, event_id, with_user_count=with_user_count
@@ -1860,21 +1860,21 @@ class Guild(Hashable):
         Parameters
         ----------
         name: :class:`str`
-            The name of the scheduled event.
+            The name of the guild scheduled event.
         description: :class:`str`
-            The description of the scheduled event.
+            The description of the guild scheduled event.
         channel_id: :class:`int`
-            The channel ID in which the scheduled event will be hosted.
+            The channel ID in which the guild scheduled event will be hosted.
         privacy_level: :class:`GuildScheduledEventPrivacyLevel`
-            The privacy level of the scheduled event.
-        scheduled_start_time: :class:`datetime`
-            The time to schedule the event.
-        scheduled_end_time: :class:`datetime`
-            The time when the scheduled event is scheduled to end.
+            The privacy level of the guild scheduled event.
+        scheduled_start_time: :class:`datetime.datetime`
+            The time to schedule the guild scheduled event.
+        scheduled_end_time: :class:`datetime.datetime`
+            The time when the guild scheduled event is scheduled to end.
         entity_type: :class:`GuildScheduledEventEntityType`
-            The entity type of the scheduled event.
+            The entity type of the guild scheduled event.
         entity_metadata: :class:`GuildScheduledEventMetadata`
-            The entity metadata of the scheduled event.
+            The entity metadata of the guild scheduled event.
 
         Raises
         ------
@@ -1884,7 +1884,7 @@ class Guild(Hashable):
         Returns
         --------
         :class:`GuildScheduledEvent`
-            The scheduled event.
+            The guild scheduled event.
         """
         if not isinstance(entity_type, GuildScheduledEventEntityType):
             raise ValueError("entity_type must be an instance of GuildScheduledEventEntityType")

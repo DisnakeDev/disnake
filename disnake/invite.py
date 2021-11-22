@@ -321,7 +321,7 @@ class Invite(Hashable):
         .. versionadded:: 2.0
 
     guild_scheduled_event: Optional[:class:`GuildScheduledEvent`]
-        The scheduled event included in the invite, if any.
+        The guild scheduled event included in the invite, if any.
 
         .. versionadded:: 2.3
     """
