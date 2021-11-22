@@ -6,8 +6,15 @@ from disnake.ext import commands
 from pprint import pformat
 
 
-def injected(option: disnake.User, other: disnake.TextChannel):
-    return (option.id, other.name)
+def injected(user: disnake.User, channel: disnake.TextChannel):
+    """This description should not be shown
+    
+    Parameters
+    ----------
+    user: A User from `injected` - saves its id
+    channel: A TextChannel from `injected` - saves its name
+    """
+    return (user.id, channel.name)
 
 
 async def converter(interaction, number: float) -> float:
@@ -47,10 +54,17 @@ class PerhapsThis:
 
 @commands.register_injection
 async def perhaps_this_is_it(
-    a: disnake.TextChannel = commands.Param(lambda i: i.channel),
-    b: int = commands.Param(0, large=True),
+    disc_channel: disnake.TextChannel = commands.Param(lambda i: i.channel),
+    large: int = commands.Param(0, large=True),
 ) -> PerhapsThis:
-    return PerhapsThis(a.id, b / 2)
+    """This description should not be shown
+    
+    Parameters
+    ----------
+    disc_channel: A channel which should default to the current one - uses the id
+    large: A large number which defaults to 0 - divided by 2
+    """
+    return PerhapsThis(disc_channel.id, large / 2)
 
 
 class InjectionSlashCommands(commands.Cog):
@@ -58,18 +72,33 @@ class InjectionSlashCommands(commands.Cog):
         self.bot: commands.Bot = bot
         self.exponent = 2
 
-    async def injected_method(self, number: int = 0):
+    async def injected_method(self, number: int = 3):
+        """This should not be shown
+        
+        Parameters
+        ----------
+        number: A number which will be squared, 3^2 == 9 by default
+        """
         return number ** self.exponent
 
     @commands.slash_command()
     async def injection_command(
         self,
         inter: disnake.ApplicationCommandInteraction,
-        converted: Optional[float] = commands.Param(None, converter=lambda i, x: x ** 0.5),
-        class_converter: str = commands.Param(converter=PrefixConverter("__", "__")),
+        sqrt: Optional[float] = commands.Param(None, converter=lambda i, x: x ** 0.5),
+        prefixed: str = commands.Param(converter=PrefixConverter("__", "__")),
         other: Tuple[int, str] = commands.inject(injected),
         some: int = commands.inject(injected_method),
     ):
+        """A command gotten from explicit converts and injections
+        
+        Parameters
+        ----------
+        sqrt: Does the square root of this number, None if not provided
+        prefixed: Adds dunders to a string, created `__init__` by default
+        other: This should not be shown
+        some: This should not be shown
+        """
         await inter.response.send_message(f"```py\n{pformat(locals())}\n```")
 
     @commands.slash_command()
@@ -79,6 +108,13 @@ class InjectionSlashCommands(commands.Cog):
         perhaps: PerhapsThis,
         god: HopeToGod = None,
     ):
+        """A command gotten just with annotations
+        
+        Parameters
+        ----------
+        perhaps: This should not be shown
+        god: Gets the name and discriminator of a user - None by default
+        """
         await inter.response.send_message(f"```py\n{pformat(locals())}\n```")
 
 

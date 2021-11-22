@@ -561,7 +561,7 @@ def collect_params(
     Returns: (`cog parameter`, `interaction parameter`, `param infos`, `injections`)
     """
     (cog_param, inter_param), parameters = isolate_self(function)
-    doc = disnake.utils.parse_docstring(function)
+    doc = disnake.utils.parse_docstring(function)["params"]
 
     paraminfos: List[ParamInfo] = []
     injections: Dict[str, Injection] = {}
