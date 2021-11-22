@@ -209,7 +209,9 @@ class Interaction:
         channel = guild and guild._resolve_channel(self.channel_id)
         if channel is None:
             if self.channel_id is not None:
-                type = None if self.guild_id is not None else ChannelType.private  # could be a text, voice, or thread channel in a guild
+                type = (
+                    None if self.guild_id is not None else ChannelType.private
+                )  # could be a text, voice, or thread channel in a guild
                 return PartialMessageable(state=self._state, id=self.channel_id, type=type)  # type: ignore
             return None  # type: ignore
         return channel  # type: ignore
