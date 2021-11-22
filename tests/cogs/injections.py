@@ -8,7 +8,7 @@ from pprint import pformat
 
 def injected(user: disnake.User, channel: disnake.TextChannel):
     """This description should not be shown
-    
+
     Parameters
     ----------
     user: A User from `injected` - saves its id
@@ -58,7 +58,7 @@ async def perhaps_this_is_it(
     large: int = commands.Param(0, large=True),
 ) -> PerhapsThis:
     """This description should not be shown
-    
+
     Parameters
     ----------
     disc_channel: A channel which should default to the current one - uses the id
@@ -74,7 +74,7 @@ class InjectionSlashCommands(commands.Cog):
 
     async def injected_method(self, number: int = 3):
         """This should not be shown
-        
+
         Parameters
         ----------
         number: A number which will be squared, 3^2 == 9 by default
@@ -91,7 +91,7 @@ class InjectionSlashCommands(commands.Cog):
         some: int = commands.inject(injected_method),
     ):
         """A command gotten from explicit converts and injections
-        
+
         Parameters
         ----------
         sqrt: Does the square root of this number, None if not provided
@@ -109,7 +109,7 @@ class InjectionSlashCommands(commands.Cog):
         god: HopeToGod = None,
     ):
         """A command gotten just with annotations
-        
+
         Parameters
         ----------
         perhaps: This should not be shown

@@ -810,29 +810,16 @@ def option_enum(
     return Enum("", choices, type=type(first))
 
 
-class ConverterMethod:
-    function: classmethod
-
-    def __init__(self, function) -> None:
-        if not isinstance(function, classmethod):
-            function = classmethod(function)
-
-        self.function = function
+class converter_method(classmethod):
+    """
+    A decorator to register a method as the converter method
+    """
 
     def __set_name__(self, owner: Type[Any], name: str):
-        ParamInfo._registered_converters[owner] = self.function
-        owner.__discord_converter__ = self.function
-
-    def __get__(self, instance: Any, cls: Any):
-        return self.function
-
-
-if TYPE_CHECKING:
-    converter_method = classmethod
-else:
-
-    def converter_method(function: Any) -> ConverterMethod:
-        return ConverterMethod(function)
+        # this feels wrong
+        function = self.__get__(None, owner)
+        ParamInfo._registered_converters[owner] = function
+        owner.__discord_converter__ = function
 
 
 def register_injection(function: CallableT) -> CallableT:
