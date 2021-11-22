@@ -656,7 +656,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def communication_disabled_until(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the datetime when the time-out will be removed, if any
+        """Optional[:class:`datetime.datetime`]: Returns the datetime when the time out will be removed, if any
 
         .. versionadded:: 2.3
         """
@@ -753,9 +753,8 @@ class Member(disnake.abc.Messageable, _UserTag):
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
         communication_disabled_until: Optional[:class:`datetime.datetime`]
-            Datetime when the time-out will be removed; until then, the member will not be able to interact with the guild.
-            Set to ``None`` to remove the time out.
-            (Support up to 28 days in the future)
+            Datetime when the time out will be removed; until then, the member will not be able to interact with the guild.
+            Set to ``None`` to remove the time out. Only 28 days in the future is supported.
 
             .. versionadded:: 2.3
         reason: Optional[:class:`str`]
