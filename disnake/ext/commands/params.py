@@ -826,7 +826,7 @@ def option_enum(
     return Enum("", choices, type=type(first))
 
 
-class converter_method(classmethod):
+class ConverterMethod(classmethod):
     """
     A decorator to register a method as the converter method
     """
@@ -836,6 +836,16 @@ class converter_method(classmethod):
         function = self.__get__(None, owner)
         ParamInfo._registered_converters[owner] = function
         owner.__discord_converter__ = function
+
+
+# due to a bug in pylance classmethod subclasses do not actually work properly
+if TYPE_CHECKING:
+    converter_method = classmethod
+else:
+
+    def converter_method(function: Any) -> ConverterMethod:
+        """A decorator to register a method as the converter method"""
+        return ConverterMethod(function)
 
 
 def register_injection(function: CallableT) -> CallableT:
