@@ -167,7 +167,7 @@ class Permissions(BaseFlags):
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
-        return cls(0b111111111111111111111111111111111111111)
+        return cls(0b11111111111111111111111111111111111111111)
 
     @classmethod
     def all_channel(cls: Type[P]) -> P:
@@ -214,8 +214,11 @@ class Permissions(BaseFlags):
         "Membership" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
+
+        .. versionadded:: 2.3
+            Added :attr:`moderate_members` permission.
         """
-        return cls(0b00001100000000000000000000000111)
+        return cls(0b10000000000001100000000000000000000000111)
 
     @classmethod
     def text(cls: Type[P]) -> P:
@@ -571,6 +574,14 @@ class Permissions(BaseFlags):
         """
         return 1 << 38
 
+    @flag_value
+    def moderate_members(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can moderate members.
+
+        .. versionadded:: 2.3
+        """
+        return 1 << 40
+
 
 PO = TypeVar("PO", bound="PermissionOverwrite")
 
@@ -686,6 +697,7 @@ class PermissionOverwrite:
         send_messages_in_threads: Optional[bool]
         external_stickers: Optional[bool]
         use_external_stickers: Optional[bool]
+        moderate_members: Optional[bool]
 
     def __init__(self, **kwargs: Optional[bool]):
         self._values: Dict[str, Optional[bool]] = {}
