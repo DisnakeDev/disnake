@@ -494,9 +494,9 @@ class ParamInfo:
         )
 
 
-def safe_call(function: Callable[..., T], *args: Any, **possible_kwargs: Any) -> T:
+def safe_call(function: Callable[..., T], *possible_args: Any, **possible_kwargs: Any) -> T:
     """Calls a function without providing any extra unexpected arguments"""
-    parsed_pos = False
+    MISSING = object()
     sig = signature(function)
 
     kinds = {p.kind for p in sig.parameters.values()}
@@ -507,19 +507,35 @@ def safe_call(function: Callable[..., T], *args: Any, **possible_kwargs: Any) ->
             "If this is a wrapper please use functools.wraps to keep the signature correct"
         )
 
-    kwargs = {}
+    parsed_pos = False
+    args: List[Any] = []
+    kwargs: Dict[str, Any] = {}
 
     for index, parameter, posarg in itertools.zip_longest(
-        itertools.count(), sig.parameters.values(), args
+        itertools.count(),
+        sig.parameters.values(),
+        possible_args,
+        fillvalue=MISSING,
     ):
-        if parameter is None:
-            if posarg is not None:
-                args = args[:index]
-                kwargs = {}
+        if parameter is MISSING:
             break
-        if posarg is None:
+        if posarg is MISSING:
             parsed_pos = True
-        if parsed_pos and parameter.name in possible_kwargs:
+
+        if parameter.kind is inspect.Parameter.VAR_POSITIONAL:
+            args = list(possible_args)
+            parsed_pos = True
+        elif parameter.kind is inspect.Parameter.VAR_KEYWORD:
+            kwargs = possible_kwargs
+            break
+        elif parameter.kind is inspect.Parameter.KEYWORD_ONLY:
+            parsed_pos = True
+
+        if not parsed_pos:
+            args.append(possible_args[index])
+        elif parameter.kind is inspect.Parameter.POSITIONAL_ONLY:
+            break  # guaranteed error since not enough positional arguments
+        elif parameter.name in possible_kwargs:
             kwargs[parameter.name] = possible_kwargs[parameter.name]
 
     return function(*args, **kwargs)
