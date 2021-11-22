@@ -54,7 +54,7 @@ from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
-from disnake.interactions import ApplicationCommandInteraction as Interaction
+from disnake.interactions import CommandInteraction
 from disnake.utils import maybe_coroutine
 
 from . import errors
@@ -238,9 +238,9 @@ class ParamInfo:
         *,
         name: str = "",
         description: str = None,
-        converter: Callable[[Interaction, Any], Any] = None,
+        converter: Callable[[CommandInteraction, Any], Any] = None,
         convert_default: bool = False,
-        autcomplete: Callable[[Interaction, str], Any] = None,
+        autcomplete: Callable[[CommandInteraction, str], Any] = None,
         choices: Choices = None,
         type: type = None,
         channel_types: List[ChannelType] = None,
@@ -315,7 +315,7 @@ class ParamInfo:
         args = ", ".join(f"{k}={'...' if v is ... else repr(v)}" for k, v in vars(self).items())
         return f"{type(self).__name__}({args})"
 
-    async def get_default(self, inter: Interaction) -> Any:
+    async def get_default(self, inter: CommandInteraction) -> Any:
         """Gets the default for an interaction"""
         default = self.default
         if callable(self.default):
@@ -329,7 +329,7 @@ class ParamInfo:
 
         return default
 
-    async def verify_type(self, inter: Interaction, argument: Any) -> Any:
+    async def verify_type(self, inter: CommandInteraction, argument: Any) -> Any:
         """Check if a type of an argument is correct and possibly fix it"""
         # these types never need to be verified
         if self.discord_type.value in [3, 4, 5, 8, 9, 10]:
@@ -350,7 +350,7 @@ class ParamInfo:
         # unexpected types may just be ignored
         return argument
 
-    async def convert_argument(self, inter: Interaction, argument: Any) -> Any:
+    async def convert_argument(self, inter: CommandInteraction, argument: Any) -> Any:
         """Convert a value if a converter is given"""
         if self.large:
             try:
@@ -530,7 +530,7 @@ def isolate_self(
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
     """Create parameters without self and the first interaction"""
     is_interaction = (
-        lambda annot: issubclass_(annot, Interaction) or annot is inspect.Parameter.empty
+        lambda annot: issubclass_(annot, CommandInteraction) or annot is inspect.Parameter.empty
     )
 
     sig = signature(function)
@@ -577,7 +577,7 @@ def collect_params(
             injections[parameter.name] = default
         elif parameter.annotation in Injection._registered:
             injections[parameter.name] = Injection._registered[parameter.annotation]
-        elif issubclass_(parameter.annotation, Interaction):
+        elif issubclass_(parameter.annotation, CommandInteraction):
             if inter_param is None:
                 inter_param = parameter
             else:
@@ -616,7 +616,7 @@ def collect_nested_params(function: Callable) -> List[ParamInfo]:
 
 
 def format_kwargs(
-    interaction: Interaction,
+    interaction: CommandInteraction,
     cog_param: str = None,
     inter_param: str = None,
     *args: Any,
@@ -643,7 +643,7 @@ def format_kwargs(
 
 
 async def run_injections(
-    injections: Dict[str, Injection], interaction: Interaction, *args: Any, **kwargs: Any
+    injections: Dict[str, Injection], interaction: CommandInteraction, *args: Any, **kwargs: Any
 ) -> Dict[str, Any]:
     """Run and resolve a list of injections"""
 
@@ -655,7 +655,7 @@ async def run_injections(
 
 
 async def call_param_func(
-    function: Callable, interaction: Interaction, *args: Any, **kwargs: Any
+    function: Callable, interaction: CommandInteraction, *args: Any, **kwargs: Any
 ) -> Any:
     """Call a function utilizing ParamInfo"""
     cog_param, inter_param, paraminfos, injections = collect_params(function)
@@ -699,9 +699,9 @@ def Param(
     name: str = "",
     description: str = None,
     choices: Choices = None,
-    converter: Callable[[Interaction, Any], Any] = None,
+    converter: Callable[[CommandInteraction, Any], Any] = None,
     convert_defaults: bool = False,
-    autocomplete: Callable[[Interaction, str], Any] = None,
+    autocomplete: Callable[[CommandInteraction, str], Any] = None,
     channel_types: List[ChannelType] = None,
     lt: float = None,
     le: float = None,
