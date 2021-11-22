@@ -86,7 +86,7 @@ if TYPE_CHECKING:
     from .abc import GuildChannel, MessageableChannel, MessageableChannel
     from .components import Component
     from .state import ConnectionState
-    from .channel import TextChannel, GroupChannel, DMChannel, PartialMessageable
+    from .channel import TextChannel, GroupChannel, DMChannel, PartialMessageable, VoiceChannel
     from .mentions import AllowedMentions
     from .role import Role
     from .ui.view import View
@@ -854,7 +854,7 @@ class Message(Hashable):
         self.activity: Optional[MessageActivityPayload] = data.get("activity")
         # for user experince, on_message has no bussiness getting partials
         # TODO: Subscripted message to include the channel
-        self.channel: Union[TextChannel, DMChannel, Thread] = channel  # type: ignore
+        self.channel: Union[TextChannel, DMChannel, Thread, VoiceChannel] = channel  # type: ignore
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data["edited_timestamp"]
         )
@@ -1082,7 +1082,7 @@ class Message(Hashable):
         self.components = [_component_factory(d) for d in components]
 
     def _rebind_cached_references(
-        self, new_guild: Guild, new_channel: Union[TextChannel, Thread]
+        self, new_guild: Guild, new_channel: Union[TextChannel, Thread, VoiceChannel]
     ) -> None:
         self.guild = new_guild
         self.channel = new_channel

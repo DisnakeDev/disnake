@@ -79,7 +79,7 @@ if TYPE_CHECKING:
         Message as MessagePayload,
     )
     from ..guild import Guild
-    from ..channel import TextChannel
+    from ..channel import TextChannel, VoiceChannel
     from ..abc import Snowflake
     from ..ui.view import View
     import datetime
@@ -886,8 +886,8 @@ class BaseWebhook(Hashable):
         return self._state and self._state._get_guild(self.guild_id)
 
     @property
-    def channel(self) -> Optional[TextChannel]:
-        """Optional[:class:`TextChannel`]: The text channel this webhook belongs to.
+    def channel(self) -> Optional[Union[TextChannel, VoiceChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`]]: The messageable channel this webhook belongs to.
 
         If this is a partial webhook, then this will always return ``None``.
         """

@@ -74,6 +74,7 @@ if TYPE_CHECKING:
         StoreChannel,
         Thread,
         PartialMessageable,
+        VoiceChannel,
     ]
 
 

@@ -198,7 +198,7 @@ class Interaction:
         return self.guild.me
 
     @utils.cached_slot_property("_cs_channel")
-    def channel(self) -> Union[TextChannel, Thread]:
+    def channel(self) -> Union[TextChannel, Thread, VoiceChannel]:
         """Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]: The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels are not resolved since there is
@@ -209,7 +209,7 @@ class Interaction:
         channel = guild and guild._resolve_channel(self.channel_id)
         if channel is None:
             if self.channel_id is not None:
-                type = ChannelType.text if self.guild_id is not None else ChannelType.private
+                type = None if self.guild_id is not None else ChannelType.private  # could be a text, voice, or thread channel in a guild
                 return PartialMessageable(state=self._state, id=self.channel_id, type=type)  # type: ignore
             return None  # type: ignore
         return channel  # type: ignore
