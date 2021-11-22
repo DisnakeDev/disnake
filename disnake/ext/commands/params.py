@@ -29,7 +29,6 @@ import inspect
 import itertools
 import math
 import sys
-import warnings
 from enum import Enum, EnumMeta
 from typing import (
     TYPE_CHECKING,
@@ -37,7 +36,6 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
-    ForwardRef,
     List,
     Literal,
     Optional,
@@ -47,6 +45,7 @@ from typing import (
     Union,
     cast,
     get_origin,
+    get_type_hints,
 )
 
 import disnake
@@ -96,24 +95,6 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
     return issubclass(obj, tp)
 
 
-def evaluate_forwardref(annotation: Any, globalns: Dict[str, Any]) -> Any:
-    if isinstance(annotation, (str, ForwardRef)):
-        if isinstance(annotation, str):
-            annotation = ForwardRef(annotation)
-
-        try:
-            annotation = annotation._evaluate(globalns, globalns, recursive_guard=frozenset())  # type: ignore
-        except Exception as e:
-            annotation = annotation.__forward_arg__
-            raise TypeError(f"Cannot parse annotation: {annotation!r}")
-
-    if get_origin(annotation) is Annotated:
-        # fairly common bug in lower python versions
-        annotation = getattr(annotation, "__origin__", annotation)
-
-    return annotation
-
-
 def remove_optionals(annotation: Any) -> Any:
     """remove unwanted optionals from an annotation"""
     if get_origin(annotation) is Union:
@@ -128,28 +109,35 @@ def remove_optionals(annotation: Any) -> Any:
     return annotation
 
 
-def signature(func: Callable, globalns: Dict[str, Any] = None) -> inspect.Signature:
+def signature(func: Callable) -> inspect.Signature:
     """Get the signature with evaluated annotations wherever possible
 
     This is equivalent to `signature(..., eval_str=True)` in python 3.10
     """
-    if globalns is None:
-        if not (inspect.isfunction(func) or inspect.ismethod(func)):
-            func = func.__call__
+    if sys.version_info >= (3, 10):
+        return inspect.signature(func, eval_str=True)
 
-        globalns = getattr(func, "__globals__", {})
+    if inspect.isfunction(func) or inspect.ismethod(func):
+        typehints = get_type_hints(func)
+    else:
+        typehints = get_type_hints(func.__call__)
 
-    sig = inspect.signature(func)
+    signature = inspect.signature(func)
     parameters = []
-    for parameter in sig.parameters.values():
-        annotation = evaluate_forwardref(parameter.annotation, globalns)
-        parameter = parameter.replace(annotation=annotation)
 
-        parameters.append(parameter)
+    for name, param in signature.parameters.items():
+        if isinstance(param.annotation, str):
+            param = param.replace(annotation=typehints.get(name, inspect.Parameter.empty))
+        if param.annotation is type(None):
+            param = param.replace(annotation=None)
 
-    return_annotation = evaluate_forwardref(sig.return_annotation, globalns)
+        parameters.append(param)
 
-    return inspect.Signature(parameters, return_annotation=return_annotation)
+    return_annotation = typehints.get("return", inspect.Parameter.empty)
+    if return_annotation is type(None):
+        return_annotation = None
+
+    return signature.replace(parameters=parameters, return_annotation=return_annotation)
 
 
 def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) -> Optional[float]:
