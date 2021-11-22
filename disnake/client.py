@@ -1637,7 +1637,12 @@ class Client:
     # Invite management
 
     async def fetch_invite(
-        self, url: Union[Invite, str], *, with_counts: bool = True, with_expiration: bool = True
+        self,
+        url: Union[Invite, str],
+        *,
+        with_counts: bool = True,
+        with_expiration: bool = True,
+        guild_scheduled_event_id: Optional[int] = None,
     ) -> Invite:
         """|coro|
 
@@ -1662,6 +1667,12 @@ class Client:
             :attr:`.Invite.expires_at` field.
 
             .. versionadded:: 2.0
+        guild_scheduled_event_id: :class:`int`
+            The ID of the scheduled event to include in the invite.
+            If not provided, defaults to the ``event`` parameter in the URL if it exists,
+            or the ID of the scheduled event contained in the provided invite object.
+
+            .. versionadded:: 2.3
 
         Raises
         -------
@@ -1676,9 +1687,20 @@ class Client:
             The invite from the URL/ID.
         """
 
-        invite_id = utils.resolve_invite(url)
+        invite_id, params = utils.resolve_invite(url, with_params=True)
+
+        if not guild_scheduled_event_id:
+            # keep scheduled event ID from invite url/object
+            if "event" in params:
+                guild_scheduled_event_id = int(params["event"])
+            elif isinstance(url, Invite) and url.guild_scheduled_event:
+                guild_scheduled_event_id = url.guild_scheduled_event.id
+
         data = await self.http.get_invite(
-            invite_id, with_counts=with_counts, with_expiration=with_expiration
+            invite_id,
+            with_counts=with_counts,
+            with_expiration=with_expiration,
+            guild_scheduled_event_id=guild_scheduled_event_id,
         )
         return Invite.from_incomplete(state=self._connection, data=data)
 

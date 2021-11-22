@@ -59,6 +59,7 @@ import json
 import re
 import sys
 import types
+from urllib.parse import urlencode, parse_qs
 import warnings
 
 from .errors import InvalidArgument
@@ -315,8 +316,6 @@ def oauth_url(
     if guild is not MISSING:
         url += f"&guild_id={guild.id}"
     if redirect_uri is not MISSING:
-        from urllib.parse import urlencode
-
         url += "&response_type=code&" + urlencode({"redirect_uri": redirect_uri})
     if disable_guild_select:
         url += "&disable_guild_select=true"
@@ -682,7 +681,21 @@ def _string_width(string: str, *, _IS_ASCII=_IS_ASCII) -> int:
     return sum(2 if func(char) in UNICODE_WIDE_CHAR_TYPE else 1 for char in string)
 
 
-def resolve_invite(invite: Union[Invite, str]) -> str:
+@overload
+def resolve_invite(invite: Union[Invite, str], *, with_params: Literal[False] = False) -> str:
+    ...
+
+
+@overload
+def resolve_invite(
+    invite: Union[Invite, str], *, with_params: Literal[True]
+) -> Tuple[str, Dict[str, str]]:
+    ...
+
+
+def resolve_invite(
+    invite: Union[Invite, str], *, with_params: bool = False
+) -> Union[str, Tuple[str, Dict[str, str]]]:
     """
     Resolves an invite from a :class:`~disnake.Invite`, URL or code.
 
@@ -691,21 +704,33 @@ def resolve_invite(invite: Union[Invite, str]) -> str:
     invite: Union[:class:`~disnake.Invite`, :class:`str`]
         The invite.
 
+    with_params: :class:`bool`
+        Whether to also return the query parameters of the invite, if it's a url.
+
+        .. versionadded:: 2.3
+
     Returns
     --------
-    :class:`str`
-        The invite code.
+    Union[:class:`str`, Tuple[:class:`str`, Dict[:class:`str`, :class:`str`]]]
+        The invite code if ``with_params`` is ``False``, otherwise a tuple containing the
+        invite code and the url's query parameters, if applicable.
     """
     from .invite import Invite  # circular import
 
+    code = None
+    params = {}
     if isinstance(invite, Invite):
-        return invite.code
+        code = invite.code
     else:
-        rx = r"(?:https?\:\/\/)?discord(?:\.gg|(?:app)?\.com\/invite)\/(.+)"
+        rx = r"(?:https?\:\/\/)?discord(?:\.gg|(?:app)?\.com\/invite)\/([^?]+)(?:\?(.+))?"
         m = re.match(rx, invite)
         if m:
-            return m.group(1)
-    return invite
+            code, p = m.groups()
+            if with_params:
+                params = {k: v[0] for k, v in parse_qs(p or "").items()}
+        else:
+            code = invite
+    return (code, params) if with_params else code
 
 
 def resolve_template(code: Union[Template, str]) -> str:
