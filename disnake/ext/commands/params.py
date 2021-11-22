@@ -727,19 +727,33 @@ def Param(
         Kwarg aliases: ``desc``.
     choices: Iterable[Any]
         A list of choices for this option.
-    channel_types: Iterable[:class:`ChannelType`]
-        A list of channel types that should be allowed.
-        By default these are discerned from the annotation.
-    min_value: :class:`float`
-        The lowest allowed value for this option. Kwarg aliases: ``ge``, ``gt``.
-    max_value: :class:`float`
-        The greatest allowed value for this option. Kwarg aliases: ``le``, ``lt``.
-    autocomplete: Callable[[:class:`ApplicationCommandInteraction`, :class:`str`], Any]
-        A function that will suggest possible autocomplete options while typing.
-        See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
     converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.
         Kwarg aliases: ``conv``.
+    convert_defaults: :class:`bool`
+        Whether to also apply the converter to the provided default value.
+        Defaults to ``False``.
+
+        .. versionadded: 2.3
+    autocomplete: Callable[[:class:`ApplicationCommandInteraction`, :class:`str`], Any]
+        A function that will suggest possible autocomplete options while typing.
+        See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
+    channel_types: Iterable[:class:`ChannelType`]
+        A list of channel types that should be allowed.
+        By default these are discerned from the annotation.
+    lt: :class:`float`
+        The (exclusive) upper bound of values for this option (less-than).
+    le: :class:`float`
+        The (inclusive) upper bound of values for this option (less-than-or-equal). Kwarg aliases: ``max_value``.
+    gt: :class:`float`
+        The (exclusive) lower bound of values for this option (greater-than).
+    ge: :class:`float`
+        The (inclusive) lower bound of values for this option (greater-than-or-equal). Kwarg aliases: ``min_value``.
+    large: :class:`bool`
+        Whether to accept large :class:`int` values (if this is ``False``, only
+        values in the range ``(-2^53, 2^53)`` would be accepted due to an API limitation).
+
+        .. versionadded: 2.3
 
     Returns
     -------
@@ -777,6 +791,10 @@ param = Param
 
 
 def inject(function: Callable[..., Any]) -> Any:
+    """
+    A special function to use the provided function for injections.
+    This should be assigned to a parameter of a function representing your application command.
+    """
     return Injection(function)
 
 
@@ -818,7 +836,9 @@ else:
 
 
 def register_injection(function: CallableT) -> CallableT:
-    """Use this as a decorator to register a global injection"""
+    """
+    A decorator to register a global injection.
+    """
     sig = signature(function)
     tp = sig.return_annotation
 
