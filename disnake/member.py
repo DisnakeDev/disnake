@@ -659,14 +659,16 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def communication_disabled_until(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the datetime when the time out will be removed, if any
+        """Optional[:class:`datetime.datetime`]: Returns the datetime when the time out will be removed, if any.
 
         .. versionadded:: 2.3
         """
 
-        if self._communication_disabled_until is not None:
-            if self._communication_disabled_until < utils.utcnow():
-                return None
+        if (
+            self._communication_disabled_until
+            and self._communication_disabled_until < utils.utcnow()
+        ):
+            return None
 
         return self._communication_disabled_until
 
