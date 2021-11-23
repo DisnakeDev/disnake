@@ -29,6 +29,7 @@ import inspect
 import itertools
 import sys
 from operator import attrgetter
+from types import NoneType
 from typing import (
     Any,
     Dict,
@@ -1000,7 +1001,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         return self.guild.get_role(role_id) if self._roles.has(role_id) else None
 
     async def timeout(
-        self, seconds: int = MISSING, reason: Optional[str] = None
+        self, seconds: Optional[int] = MISSING, reason: Optional[str] = None
     ) -> Optional[Member]:
         """Time outs the user from the guild; until then, the user will not be able to interact with it.
 
@@ -1010,8 +1011,9 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Parameters
         ----------
-        seconds: :class:`int`
-            The seconds to time out.
+        seconds: Optional[:class:`int`]
+            The seconds to time out. Set to `None` or `0` to remove the timeout.
+            Support up to `2419200` seconds (28 days) in the future.
         reason: Optional[:class:`str`]
             The reason for this time out. Appears on the audit log.
 
@@ -1032,8 +1034,11 @@ class Member(disnake.abc.Messageable, _UserTag):
         payload: Dict[str, Any] = {}
 
         if seconds is not MISSING:
-            datetime = utils.add_seconds(seconds)
-            payload["communication_disabled_until"] = datetime.isoformat()
+            if seconds and seconds > 0:
+                datetime = utils.add_seconds(seconds)
+                payload["communication_disabled_until"] = datetime.isoformat()
+            else:
+                payload["communication_disabled_until"] = None
 
         if payload:
             data = await http.edit_member(guild_id, self.id, reason=reason, **payload)
