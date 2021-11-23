@@ -410,6 +410,9 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.premium_since = utils.parse_time(data.get("premium_since"))
         self._roles = utils.SnowflakeList(map(int, data["roles"]))
         self._avatar = data.get("avatar")
+        self._communication_disabled_until = utils.parse_time(
+            data.get("communication_disabled_until")
+        )
 
     def _presence_update(
         self, data: PartialPresenceUpdate, user: UserPayload
