@@ -106,7 +106,13 @@ class _AuditLogChange_Str(TypedDict):
 
 class _AuditLogChange_AssetHash(TypedDict):
     key: Literal[
-        "icon_hash", "splash_hash", "discovery_splash_hash", "banner_hash", "avatar_hash", "asset"
+        "icon_hash",
+        "splash_hash",
+        "discovery_splash_hash",
+        "banner_hash",
+        "avatar_hash",
+        "asset",
+        "communication_disabled_until",
     ]
     new_value: str
     old_value: str
