@@ -238,12 +238,16 @@ def button(
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], ItemCallbackType]:
+) -> Callable[[ItemCallbackType], Button]:
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.Button` being pressed and
     the :class:`disnake.MessageInteraction` you receive.
+
+    .. versionchanged:: 2.3
+        Returns a :class:`Button` object instead of the decorated function when
+        applied to a function.
 
     .. note::
 
@@ -275,20 +279,22 @@ def button(
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    def decorator(func: ItemCallbackType) -> ItemCallbackType:
+    def decorator(func: ItemCallbackType) -> Button:
         if not inspect.iscoroutinefunction(func):
-            raise TypeError("button function must be a coroutine function")
+            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+        if hasattr(func, "__item_callback__"):
+            raise TypeError("Callback is already an item")
 
-        func.__discord_ui_model_type__ = Button
-        func.__discord_ui_model_kwargs__ = {
-            "style": style,
-            "custom_id": custom_id,
-            "url": None,
-            "disabled": disabled,
-            "label": label,
-            "emoji": emoji,
-            "row": row,
-        }
-        return func
+        button = Button(
+            style=style,
+            label=label,
+            disabled=disabled,
+            custom_id=custom_id,
+            url=None,
+            emoji=emoji,
+            row=row,
+        )
+        button.__item_callback__ = func
+        return button
 
     return decorator

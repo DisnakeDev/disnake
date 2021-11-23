@@ -301,7 +301,7 @@ def select(
     options: List[SelectOption] = MISSING,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], ItemCallbackType]:
+) -> Callable[[ItemCallbackType], Select]:
     """A decorator that attaches a select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -310,6 +310,10 @@ def select(
 
     In order to get the selected items that the user has chosen within the callback
     use :attr:`Select.values`.
+
+    .. versionchanged:: 2.3
+        Returns a :class:`Select` object instead of the decorated function when
+        applied to a function.
 
     Parameters
     ------------
@@ -336,20 +340,22 @@ def select(
         Whether the select is disabled or not. Defaults to ``False``.
     """
 
-    def decorator(func: ItemCallbackType) -> ItemCallbackType:
+    def decorator(func: ItemCallbackType) -> Select:
         if not inspect.iscoroutinefunction(func):
-            raise TypeError("select function must be a coroutine function")
+            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+        if hasattr(func, "__item_callback__"):
+            raise TypeError("Callback is already an item")
 
-        func.__discord_ui_model_type__ = Select
-        func.__discord_ui_model_kwargs__ = {
-            "placeholder": placeholder,
-            "custom_id": custom_id,
-            "row": row,
-            "min_values": min_values,
-            "max_values": max_values,
-            "options": options,
-            "disabled": disabled,
-        }
-        return func
+        select = Select(
+            custom_id=custom_id,
+            placeholder=placeholder,
+            min_values=min_values,
+            max_values=max_values,
+            options=options,
+            disabled=disabled,
+            row=row,
+        )
+        select.__item_callback__ = func
+        return select
 
     return decorator

@@ -43,7 +43,7 @@ import asyncio
 import sys
 import time
 import os
-from .item import Item, ItemCallbackType
+from .item import Item
 from ..enums import try_enum_to_int
 from ..components import (
     Component,
@@ -146,13 +146,13 @@ class View:
     """
 
     __discord_ui_view__: ClassVar[bool] = True
-    __view_children_items__: ClassVar[List[ItemCallbackType]] = []
+    __view_children_items__: ClassVar[List[Item]] = []
 
     def __init_subclass__(cls) -> None:
-        children: List[ItemCallbackType] = []
+        children: List[Item] = []
         for base in reversed(cls.__mro__):
             for member in base.__dict__.values():
-                if hasattr(member, "__discord_ui_model_type__"):
+                if hasattr(member, "__item_callback__"):
                     children.append(member)
 
         if len(children) > 25:
@@ -163,11 +163,11 @@ class View:
     def __init__(self, *, timeout: Optional[float] = 180.0):
         self.timeout = timeout
         self.children: List[Item] = []
-        for func in self.__view_children_items__:
-            item: Item = func.__discord_ui_model_type__(**func.__discord_ui_model_kwargs__)
-            item.callback = partial(func, self, item)
+        for item in self.__view_children_items__:
+            item = item._copy()
+            item.callback = partial(item.__item_callback__, self, item)
             item._view = self
-            setattr(self, func.__name__, item)
+            setattr(self, item.__item_callback__.__name__, item)
             self.children.append(item)
 
         self.__weights = _ViewWeights(self.children)

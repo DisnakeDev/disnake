@@ -62,7 +62,17 @@ class Item(Generic[V]):
     .. versionadded:: 2.0
     """
 
+    __original_kwargs__: Dict[str, Any]
+
+    __item_callback__: ItemCallbackType
+
     __item_repr_attributes__: Tuple[str, ...] = ("row",)
+
+    # similar to ext.commands.Command.__new__
+    def __new__(cls: Type[I], *args: Any, **kwargs: Any) -> I:
+        self = super().__new__(cls)
+        self.__original_kwargs__ = kwargs.copy()
+        return self
 
     def __init__(self):
         self._view: Optional[V] = None
@@ -78,6 +88,13 @@ class Item(Generic[V]):
 
     def to_component_dict(self) -> Dict[str, Any]:
         raise NotImplementedError
+
+    def _copy(self: I) -> I:
+        # this copy method is only meant for decorator-created items
+        item = self.__class__(**self.__original_kwargs__)
+        item.__original_kwargs__ = self.__original_kwargs__  # discard copy created by __new__
+        item.__item_callback__ = self.__item_callback__
+        return item
 
     def refresh_component(self, component: Component) -> None:
         return None
