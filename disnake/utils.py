@@ -235,6 +235,11 @@ def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
         return datetime.datetime.fromisoformat(timestamp)
     return None
 
+def add_seconds(seconds: Optional[int]) -> Optional[datetime.datetime]:
+    if seconds:
+        return utcnow() + datetime.timedelta(seconds=seconds)
+    return None
+
 
 def copy_doc(original: Callable) -> Callable[[T], T]:
     def decorator(overriden: T) -> T:

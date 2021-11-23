@@ -998,3 +998,43 @@ class Member(disnake.abc.Messageable, _UserTag):
             The role or ``None`` if not found in the member's roles.
         """
         return self.guild.get_role(role_id) if self._roles.has(role_id) else None
+
+    async def timeout(
+        self, seconds: int = MISSING, reason: Optional[str] = None
+    ) -> Optional[Member]:
+        """Time outs the user from the guild; until then, the user will not be able to interact with it.
+
+        This requires :attr:`Permissions.moderate_members` permission.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ----------
+        seconds: :class:`int`
+            The seconds to time out.
+        reason: Optional[:class:`str`]
+            The reason for this time out. Appears on the audit log.
+
+        Raises
+        -------
+        Forbidden
+            You do not have permissions to time out this user.
+        HTTPException
+            Time outing the user failed.
+
+        Returns
+        -------
+        Optional[:class:`Member`]
+            The newly updated member.
+        """
+        http = self._state.http
+        guild_id = self.guild.id
+        payload: Dict[str, Any] = {}
+
+        if seconds is not MISSING:
+            datetime = utils.add_seconds(seconds)
+            payload["communication_disabled_until"] = datetime.isoformat()
+
+        if payload:
+            data = await http.edit_member(guild_id, self.id, reason=reason, **payload)
+            return Member(data=data, guild=self.guild, state=self._state)
