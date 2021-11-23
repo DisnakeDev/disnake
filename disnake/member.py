@@ -658,7 +658,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         return self.guild._voice_state_for(self._user.id)
 
     @property
-    def communication_disabled_until(self) -> Optional[datetime.datetime]:
+    def current_timeout(self) -> Optional[datetime.datetime]:
         """Optional[:class:`datetime.datetime`]: Returns the datetime when the time out will be removed, if any.
 
         .. versionadded:: 2.3
