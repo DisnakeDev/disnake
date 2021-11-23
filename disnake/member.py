@@ -29,7 +29,6 @@ import inspect
 import itertools
 import sys
 from operator import attrgetter
-from types import NoneType
 from typing import (
     Any,
     Dict,
