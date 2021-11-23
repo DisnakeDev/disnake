@@ -829,7 +829,7 @@ class Member(disnake.abc.Messageable, _UserTag):
                 payload["communication_disabled_until"] = guild_timeout.astimezone(
                     tz=datetime.timezone.utc
                 ).isoformat()
-            if guild_timeout is None:
+            else:
                 payload["communication_disabled_until"] = None
 
         if payload:
