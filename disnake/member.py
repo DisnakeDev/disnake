@@ -759,7 +759,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             Pass ``None`` to kick them from voice.
         guild_timeout: Optional[:class:`datetime.datetime`]
             The datetime when the time out will be removed; until then, the member will not be able to interact with the guild.
-            Set to ``None`` to remove the time out. Only up to 28 days in the future is supported.
+            Set to ``None`` to remove the time out. Support up to 28 days in the future.
 
             .. versionadded:: 2.3
         reason: Optional[:class:`str`]
@@ -1002,7 +1002,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def timeout(
         self, seconds: Optional[int] = MISSING, reason: Optional[str] = None
     ) -> Optional[Member]:
-        """Time outs the user from the guild; until then, the user will not be able to interact with it.
+        """Time outs the member from the guild; until then, the member will not be able to interact with the guild.
 
         This requires :attr:`Permissions.moderate_members` permission.
 
@@ -1011,8 +1011,8 @@ class Member(disnake.abc.Messageable, _UserTag):
         Parameters
         ----------
         seconds: Optional[:class:`int`]
-            The seconds to time out. Set to `None` or `0` to remove the timeout.
-            Support up to `2419200` seconds (28 days) in the future.
+            The seconds to time out. Set to ``None`` or ``0`` to remove the timeout.
+            Support up to ``2419200`` seconds (28 days) in the future.
         reason: Optional[:class:`str`]
             The reason for this time out. Appears on the audit log.
 
