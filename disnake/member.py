@@ -707,7 +707,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         suppress: bool = MISSING,
         roles: List[disnake.abc.Snowflake] = MISSING,
         voice_channel: Optional[VocalGuildChannel] = MISSING,
-        communication_disabled_until: Optional[datetime.datetime] = MISSING,
+        guild_timeout: Optional[datetime.datetime] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[Member]:
         """|coro|
@@ -729,7 +729,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         +------------------------------+-------------------------------------+
         | voice_channel                | :attr:`Permissions.move_members`    |
         +------------------------------+-------------------------------------+
-        | communication_disabled_until | :attr:`Permissions.moderate_members`|
+        | guild_timeout                | :attr:`Permissions.moderate_members`|
         +------------------------------+-------------------------------------+
 
         All parameters are optional.
@@ -757,7 +757,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         voice_channel: Optional[:class:`VoiceChannel`]
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
-        communication_disabled_until: Optional[:class:`datetime.datetime`]
+        guild_timeout: Optional[:class:`datetime.datetime`]
             The datetime when the time out will be removed; until then, the member will not be able to interact with the guild.
             Set to ``None`` to remove the time out. Only up to 28 days in the future is supported.
 
@@ -823,13 +823,13 @@ class Member(disnake.abc.Messageable, _UserTag):
         if roles is not MISSING:
             payload["roles"] = tuple(r.id for r in roles)
 
-        if communication_disabled_until is not MISSING:
+        if guild_timeout is not MISSING:
             # TODO: Add audit logs.
-            if communication_disabled_until is not None:
-                payload["communication_disabled_until"] = communication_disabled_until.astimezone(
+            if guild_timeout is not None:
+                payload["communication_disabled_until"] = guild_timeout.astimezone(
                     tz=datetime.timezone.utc
                 ).isoformat()
-            if communication_disabled_until is None:
+            if guild_timeout is None:
                 payload["communication_disabled_until"] = None
 
         if payload:
