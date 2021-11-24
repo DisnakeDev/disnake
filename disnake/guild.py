@@ -3441,7 +3441,7 @@ class Guild(Hashable):
 
         Returns
         --------
-        Optiona[:class:`Member`]
+        Optional[:class:`Member`]
             The newly updated member.
         """
         payload: Dict[str, Any] = {}

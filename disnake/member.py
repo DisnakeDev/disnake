@@ -825,7 +825,6 @@ class Member(disnake.abc.Messageable, _UserTag):
             payload["roles"] = tuple(r.id for r in roles)
 
         if guild_timeout is not MISSING:
-            # TODO: Add audit logs.
             if guild_timeout is not None:
                 payload["communication_disabled_until"] = guild_timeout.astimezone(
                     tz=datetime.timezone.utc
@@ -1001,11 +1000,11 @@ class Member(disnake.abc.Messageable, _UserTag):
         return self.guild.get_role(role_id) if self._roles.has(role_id) else None
 
     async def timeout(
-        self, seconds: Optional[int] = MISSING, reason: Optional[str] = None
+        self, *, seconds: Optional[int], reason: Optional[str] = None
     ) -> Optional[Member]:
         """|coro|
 
-        Time outs the member from the guild; until then, the member will not be able to interact with the guild.
+        Times out the member from the guild; until then, the member will not be able to interact with the guild.
 
         You must have the :attr:`Permissions.moderate_members` permission to do this.
 
