@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import copy
 import unicodedata
+import datetime
 from typing import (
     Any,
     ClassVar,
@@ -107,8 +108,6 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .voice_client import VoiceProtocol
     from .app_commands import ApplicationCommand
-
-    import datetime
 
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
@@ -3404,3 +3403,54 @@ class Guild(Hashable):
             A list of edited permissions of application commands.
         """
         return await self._state.bulk_edit_command_permissions(self.id, permissions)
+
+    async def timeout(
+        self,
+        user: Snowflake = MISSING,
+        *,
+        seconds: Optional[int] = MISSING,
+        reason: Optional[str] = None,
+    ) -> Optional[Member]:
+        """|coro|
+
+        Time outs the member from the guild; until then, the member will not be able to interact with the guild.
+
+        The user must meet the :class:`abc.Snowflake` abc.
+
+        You must have the :attr:`Permisisions.moderate_members` permission to do this.
+
+        Parameters
+        -----------
+        user: :class:`abc.Snowflake`
+            The user to time out.
+        seconds: Optional[:class:`int`]
+            The seconds to time out the member.
+            Set to ``None`` or ``0`` to remove the time out.
+            Support up to ``2419200`` seconds (28 days) in the future.
+        reason: optional[:class:`str`]
+            The reason for doing this action. Shows up on the audit log.
+
+        Raises
+        -------
+        Forbidden
+            You do not have permissions to time out this member.
+        HTTPException
+            Time outing the member failed.
+
+        Returns
+        --------
+        Optiona[:class:`Member`]
+            The newly updated member.
+        """
+        payload: Dict[str, Any] = {}
+
+        if seconds is not MISSING:
+            if seconds and seconds > 0:
+                date_time = utils.utcnow() + datetime.timedelta(seconds=seconds)
+                payload["communication_disabled_until"] = date_time.isoformat()
+            else:
+                payload["communication_disabled_until"] = None
+
+        if payload:
+            data = await self._state.http.edit_member(self.id, user, reason=reason, **payload)
+            return Member(data=data, guild=self.id, state=self._state)
