@@ -24,6 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+import datetime
 from typing import List, Literal, Optional, TypedDict, Union
 from .webhook import Webhook
 from .guild import (
@@ -112,7 +113,6 @@ class _AuditLogChange_AssetHash(TypedDict):
         "banner_hash",
         "avatar_hash",
         "asset",
-        "communication_disabled_until",
     ]
     new_value: str
     old_value: str
@@ -230,6 +230,12 @@ class _AuditLogChange_Overwrites(TypedDict):
     old_value: List[PermissionOverwrite]
 
 
+class _AuditLogChange_Datetime(TypedDict):
+    key: Literal["communication_disabled_until"]
+    new_value: datetime.datetime
+    old_value: datetime.datetime
+
+
 AuditLogChange = Union[
     _AuditLogChange_Str,
     _AuditLogChange_AssetHash,
@@ -245,6 +251,7 @@ AuditLogChange = Union[
     _AuditLogChange_IntegrationExpireBehaviour,
     _AuditLogChange_VideoQualityMode,
     _AuditLogChange_Overwrites,
+    _AuditLogChange_Datetime,
 ]
 
 

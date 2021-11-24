@@ -660,7 +660,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def current_timeout(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the datetime when the time out will be removed, if any.
+        """Optional[:class:`datetime.datetime`]: Returns the datetime when the time out expires, if any.
 
         .. versionadded:: 2.3
         """
@@ -759,7 +759,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
         guild_timeout: Optional[:class:`datetime.datetime`]
-            The datetime when the time out will be removed; until then, the member will not be able to interact with the guild.
+            The datetime when the time out expires; until then, the member will not be able to interact with the guild.
             Set to ``None`` to remove the time out. Support up to 28 days in the future.
 
             .. versionadded:: 2.3

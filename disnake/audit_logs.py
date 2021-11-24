@@ -175,6 +175,10 @@ def _transform_type(
         return enums.try_enum(enums.ChannelType, data)
 
 
+def _transform_datetime(entry: AuditLogEntry, data: Optional[str]) -> Optional[datetime.datetime]:
+    return utils.parse_time(data)
+
+
 class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
@@ -226,6 +230,7 @@ class AuditLogChanges:
         'guild_id':                      ('guild', _transform_guild_id),
         'tags':                          ('emoji', None),
         'default_message_notifications': ('default_notifications', _enum_transformer(enums.NotificationLevel)),
+        'communication_disabled_until':  ('guild_timeout', _transform_datetime),
         'region':                        (None, _enum_transformer(enums.VoiceRegion)),
         'rtc_region':                    (None, _enum_transformer(enums.VoiceRegion)),
         'video_quality_mode':            (None, _enum_transformer(enums.VideoQualityMode)),
