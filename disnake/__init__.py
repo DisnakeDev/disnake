@@ -61,6 +61,7 @@ from .interactions import *
 from .components import *
 from .threads import *
 from .custom_warnings import *
+from .guild_scheduled_event import *
 
 
 class VersionInfo(NamedTuple):

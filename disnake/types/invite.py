@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict, Union
+from typing import Any, Dict, Literal, Optional, TypedDict, Union
 
 from .snowflake import Snowflake
 from .guild import InviteGuild
@@ -43,6 +43,7 @@ class _InviteOptional(TypedDict, total=False):
     target_application: PartialAppInfo
     approximate_member_count: int
     approximate_presence_count: int
+    guild_scheduled_event: Dict[str, Any]  # TODO: add GuildScheduledEvent payload
 
 
 class _InviteMetadata(TypedDict, total=False):
