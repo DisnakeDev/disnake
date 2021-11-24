@@ -1003,7 +1003,9 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def timeout(
         self, seconds: Optional[int] = MISSING, reason: Optional[str] = None
     ) -> Optional[Member]:
-        """Time outs the member from the guild; until then, the member will not be able to interact with the guild.
+        """|coro|
+
+        Time outs the member from the guild; until then, the member will not be able to interact with the guild.
 
         This requires :attr:`Permissions.moderate_members` permission.
 
@@ -1020,9 +1022,9 @@ class Member(disnake.abc.Messageable, _UserTag):
         Raises
         -------
         Forbidden
-            You do not have permissions to time out this user.
+            You do not have permissions to time out this member.
         HTTPException
-            Time outing the user failed.
+            Time outing the member failed.
 
         Returns
         -------
@@ -1035,8 +1037,8 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         if seconds is not MISSING:
             if seconds and seconds > 0:
-                datetime = utils.add_seconds(seconds)
-                payload["communication_disabled_until"] = datetime.isoformat()
+                date_time = utils.utcnow() + datetime.timedelta(seconds=seconds)
+                payload["communication_disabled_until"] = date_time.isoformat()
             else:
                 payload["communication_disabled_until"] = None
 
