@@ -322,9 +322,8 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.nick: Optional[str] = data.get("nick", None)
         self.pending: bool = data.get("pending", False)
         self._avatar: Optional[str] = data.get("avatar")
-        self._communication_disabled_until: Optional[datetime.datetime] = utils.parse_time(
-            data.get("communication_disabled_until", None)
-        )
+        timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
+        self._communication_disabled_until: Optional[datetime.datetime] = timeout_datetime
 
     def __str__(self) -> str:
         return str(self._user)
@@ -411,9 +410,8 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.premium_since = utils.parse_time(data.get("premium_since"))
         self._roles = utils.SnowflakeList(map(int, data["roles"]))
         self._avatar = data.get("avatar")
-        self._communication_disabled_until = utils.parse_time(
-            data.get("communication_disabled_until")
-        )
+        timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
+        self._communication_disabled_until = timeout_datetime
 
     def _presence_update(
         self, data: PartialPresenceUpdate, user: UserPayload
