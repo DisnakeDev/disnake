@@ -1007,7 +1007,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Time outs the member from the guild; until then, the member will not be able to interact with the guild.
 
-        This requires :attr:`Permissions.moderate_members` permission.
+        You must have the :attr:`Permissions.moderate_members` permission to do this.
 
         .. versionadded:: 2.3
 

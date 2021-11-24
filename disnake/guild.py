@@ -3417,17 +3417,19 @@ class Guild(Hashable):
 
         The user must meet the :class:`abc.Snowflake` abc.
 
-        You must have the :attr:`Permisisions.moderate_members` permission to do this.
+        You must have the :attr:`~Permissions.moderate_members` permission to do this.
+
+        .. versionadded:: 2.3
 
         Parameters
         -----------
         user: :class:`abc.Snowflake`
-            The user to time out.
+            The member to time out.
         seconds: Optional[:class:`int`]
             The seconds to time out the member.
             Set to ``None`` or ``0`` to remove the time out.
             Support up to ``2419200`` seconds (28 days) in the future.
-        reason: optional[:class:`str`]
+        reason: Optional[:class:`str`]
             The reason for doing this action. Shows up on the audit log.
 
         Raises
