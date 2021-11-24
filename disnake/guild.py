@@ -3406,9 +3406,9 @@ class Guild(Hashable):
 
     async def timeout(
         self,
-        user: Snowflake = MISSING,
+        user: Snowflake,
         *,
-        seconds: Optional[int] = MISSING,
+        seconds: Optional[int],
         reason: Optional[str] = None,
     ) -> Optional[Member]:
         """|coro|
@@ -3446,13 +3446,11 @@ class Guild(Hashable):
         """
         payload: Dict[str, Any] = {}
 
-        if seconds is not MISSING:
-            if seconds and seconds > 0:
-                date_time = utils.utcnow() + datetime.timedelta(seconds=seconds)
-                payload["communication_disabled_until"] = date_time.isoformat()
-            else:
-                payload["communication_disabled_until"] = None
+        if seconds and seconds > 0:
+            date_time = utils.utcnow() + datetime.timedelta(seconds=seconds)
+            payload["communication_disabled_until"] = date_time.isoformat()
+        else:
+            payload["communication_disabled_until"] = None
 
-        if payload:
-            data = await self._state.http.edit_member(self.id, user, reason=reason, **payload)
-            return Member(data=data, guild=self.id, state=self._state)
+        data = await self._state.http.edit_member(self.id, user, reason=reason, **payload)
+        return Member(data=data, guild=self.id, state=self._state)

@@ -665,10 +665,11 @@ class Member(disnake.abc.Messageable, _UserTag):
         .. versionadded:: 2.3
         """
 
-        if (
-            self._communication_disabled_until
-            and self._communication_disabled_until < utils.utcnow()
-        ):
+        if self._communication_disabled_until is None:
+            return None
+
+        if self._communication_disabled_until < utils.utcnow():
+            self._communication_disabled_until = None
             return None
 
         return self._communication_disabled_until
@@ -826,9 +827,8 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         if guild_timeout is not MISSING:
             if guild_timeout is not None:
-                payload["communication_disabled_until"] = guild_timeout.astimezone(
-                    tz=datetime.timezone.utc
-                ).isoformat()
+                date_time = guild_timeout.astimezone(tz=datetime.timezone.utc).isoformat()
+                payload["communication_disabled_until"] = date_time
             else:
                 payload["communication_disabled_until"] = None
 
@@ -1030,17 +1030,4 @@ class Member(disnake.abc.Messageable, _UserTag):
         Optional[:class:`Member`]
             The newly updated member.
         """
-        http = self._state.http
-        guild_id = self.guild.id
-        payload: Dict[str, Any] = {}
-
-        if seconds is not MISSING:
-            if seconds and seconds > 0:
-                date_time = utils.utcnow() + datetime.timedelta(seconds=seconds)
-                payload["communication_disabled_until"] = date_time.isoformat()
-            else:
-                payload["communication_disabled_until"] = None
-
-        if payload:
-            data = await http.edit_member(guild_id, self.id, reason=reason, **payload)
-            return Member(data=data, guild=self.guild, state=self._state)
+        return await self.guild.timeout(self.id, seconds=seconds, reason=reason)
