@@ -384,6 +384,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.activities = member.activities
         self._state = member._state
         self._avatar = member._avatar
+        self._communication_disabled_until = member.current_timeout
 
         # Reference will not be copied unless necessary by PRESENCE_UPDATE
         # See below
