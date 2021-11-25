@@ -30,32 +30,34 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import json
-import logging
-import re
 import threading
+import logging
+import json
 import time
+import re
+
+from urllib.parse import quote as urlquote
 from typing import (
-    TYPE_CHECKING,
     Any,
     Dict,
     List,
     Literal,
     Optional,
+    TYPE_CHECKING,
     Tuple,
     Type,
     TypeVar,
     Union,
     overload,
 )
-from urllib.parse import quote as urlquote
 
 from .. import utils
-from ..channel import PartialMessageable
-from ..errors import DiscordServerError, Forbidden, HTTPException, InvalidArgument, NotFound
-from ..http import Route
+from ..errors import InvalidArgument, HTTPException, Forbidden, NotFound, DiscordServerError
 from ..message import Message
-from .async_ import BaseWebhook, _WebhookState, handle_message_parameters
+from ..http import Route
+from ..channel import PartialMessageable
+
+from .async_ import BaseWebhook, handle_message_parameters, _WebhookState
 
 __all__ = (
     "SyncWebhook",
@@ -65,15 +67,17 @@ __all__ = (
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from ..abc import Snowflake
-    from ..embeds import Embed
     from ..file import File
-    from ..mentions import AllowedMentions
     from ..message import Attachment
-    from ..types.webhook import Webhook as WebhookPayload
+    from ..embeds import Embed
+    from ..mentions import AllowedMentions
+    from ..types.webhook import (
+        Webhook as WebhookPayload,
+    )
+    from ..abc import Snowflake
 
     try:
-        from requests import Response, Session
+        from requests import Session, Response
     except ModuleNotFoundError:
         pass
 

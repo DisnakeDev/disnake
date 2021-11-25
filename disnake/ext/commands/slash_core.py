@@ -21,34 +21,33 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-
-import asyncio
-import inspect
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Coroutine,
     Dict,
     List,
+    Callable,
+    Coroutine,
     Optional,
     Sequence,
     TypeVar,
     Union,
 )
 
-from disnake import utils
-from disnake.app_commands import Option, SlashCommand
-from disnake.enums import OptionType
-from disnake.interactions import ApplicationCommandInteraction
-
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
-from .params import expand_params, resolve_param_kwargs
+from .params import resolve_param_kwargs, expand_params
+
+from disnake.app_commands import SlashCommand, Option
+from disnake.enums import OptionType
+from disnake.interactions import ApplicationCommandInteraction
+from disnake import utils
+
+import asyncio
+import inspect
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
-
     from .cog import CogT
 
     ApplicationCommandInteractionT = TypeVar(

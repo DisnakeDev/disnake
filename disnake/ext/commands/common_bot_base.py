@@ -22,39 +22,41 @@
 
 from __future__ import annotations
 
-import asyncio
 import collections.abc
-import importlib.util
-import logging
-import os
-import sys
-import time
+import disnake.utils
 import types
+import importlib.util
+import sys
+import logging
+import asyncio
+import time
+import os
+
+import disnake
+
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
     Generic,
-    List,
-    Mapping,
     Optional,
-    Set,
+    TYPE_CHECKING,
     TypeVar,
     Union,
+    Mapping,
+    List,
+    Set,
 )
-
-import disnake
-import disnake.utils
 
 from . import errors
 from .cog import Cog
 
 if TYPE_CHECKING:
     import importlib.machinery
-
-    from ._types import CoroFunc
-    from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
+    from .bot import Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot
+    from ._types import (
+        CoroFunc,
+    )
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 

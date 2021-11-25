@@ -24,34 +24,32 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import functools
-import inspect
 import re
+import inspect
 from typing import (
-    TYPE_CHECKING,
     Any,
     Dict,
     Generic,
     Iterable,
-    List,
     Literal,
     Optional,
+    TYPE_CHECKING,
+    List,
     Protocol,
-    Tuple,
     Type,
     TypeVar,
+    Tuple,
     Union,
     runtime_checkable,
 )
+import functools
 
 import disnake
-
 from .errors import *
 
 if TYPE_CHECKING:
-    from disnake.message import MessageableChannel
-
     from .context import Context
+    from disnake.message import MessageableChannel
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES
 
