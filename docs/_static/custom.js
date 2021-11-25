@@ -99,3 +99,9 @@ document.addEventListener('keydown', (event) => {
 $(document).ready(function () {
   $('a.external').attr('target', '_blank');
 });
+
+var url = window.location.href.toLowerCase();
+
+if (url.search("color") != -1) {
+  window.open(url.replace("color", "colour"), "_self");
+}
