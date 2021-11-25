@@ -88,7 +88,7 @@ InteractionBot
 
     .. automethod:: InteractionBot.before_message_command_invoke()
         :decorator:
-    
+
     .. automethod:: InteractionBot.application_command_check()
         :decorator:
 
@@ -277,6 +277,10 @@ Helper Functions
 ~~~~~~~~~~~~~~~~
 
 .. autofunction:: disnake.ext.commands.Param
+
+.. autofunction:: disnake.ext.commands.inject
+
+.. autofunction:: disnake.ext.commands.register_injection
 
 Slash Command
 ~~~~~~~~~~~~~
