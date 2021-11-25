@@ -24,8 +24,11 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import inspect
+import disnake.utils
+import inspect
+import disnake
+
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
@@ -33,26 +36,23 @@ from typing import (
     Generator,
     List,
     Optional,
+    TYPE_CHECKING,
     Tuple,
-    Type,
     TypeVar,
+    Type,
     Union,
 )
 
-import disnake
-import disnake.utils
-
 from ._types import _BaseCommand
 from .base_core import InvokableApplicationCommand
-from .ctx_menus_core import InvokableMessageCommand, InvokableUserCommand
 from .slash_core import InvokableSlashCommand
+from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
 
 if TYPE_CHECKING:
-    from disnake.interactions import ApplicationCommandInteraction
-
-    from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
+    from .bot import Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot
     from .context import Context
     from .core import Command
+    from disnake.interactions import ApplicationCommandInteraction
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 

@@ -25,12 +25,23 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, Final, List, Mapping, Protocol, Type, TypeVar, Union
+from typing import (
+    Any,
+    Dict,
+    Final,
+    List,
+    Mapping,
+    Protocol,
+    TYPE_CHECKING,
+    Type,
+    TypeVar,
+    Union,
+)
 
-from . import utils
-from .colour import Colour
 from .file import File
 from .utils import MISSING
+from . import utils
+from .colour import Colour
 
 __all__ = ("Embed",)
 
@@ -67,8 +78,7 @@ class EmbedProxy:
 E = TypeVar("E", bound="Embed")
 
 if TYPE_CHECKING:
-    from disnake.types.embed import Embed as EmbedData
-    from disnake.types.embed import EmbedType
+    from disnake.types.embed import Embed as EmbedData, EmbedType
 
     T = TypeVar("T")
     MaybeEmpty = Union[T, _EmptyEmbed]

@@ -9,7 +9,7 @@ Bot UI Kit helper for the Discord API
 
 """
 
-from .button import *
-from .item import *
-from .select import *
 from .view import *
+from .item import *
+from .button import *
+from .select import *

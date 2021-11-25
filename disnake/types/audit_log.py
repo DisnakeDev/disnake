@@ -25,20 +25,19 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from typing import List, Literal, Optional, TypedDict, Union
-
-from .channel import ChannelType, PermissionOverwrite, VideoQualityMode
+from .webhook import Webhook
 from .guild import (
-    DefaultMessageNotificationLevel,
-    ExplicitContentFilterLevel,
     MFALevel,
     VerificationLevel,
+    ExplicitContentFilterLevel,
+    DefaultMessageNotificationLevel,
 )
 from .integration import IntegrationExpireBehavior, PartialIntegration
-from .role import Role
-from .snowflake import Snowflake
-from .threads import Thread
 from .user import User
-from .webhook import Webhook
+from .snowflake import Snowflake
+from .role import Role
+from .channel import ChannelType, VideoQualityMode, PermissionOverwrite
+from .threads import Thread
 
 AuditLogEvent = Literal[
     1,

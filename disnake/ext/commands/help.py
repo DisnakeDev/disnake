@@ -22,15 +22,16 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
+import itertools
 import copy
 import functools
-import itertools
 import re
+
 from typing import TYPE_CHECKING
 
 import disnake.utils
 
-from .core import Command, Group
+from .core import Group, Command
 from .errors import CommandError
 
 if TYPE_CHECKING:
