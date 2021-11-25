@@ -26,25 +26,15 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-from typing import (
-    Any,
-    Awaitable,
-    Callable,
-    Generic,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-)
-
-import aiohttp
-import disnake
 import inspect
 import sys
 import traceback
-
 from collections.abc import Sequence
+from typing import Any, Awaitable, Callable, Generic, List, Optional, Type, TypeVar, Union
+
+import aiohttp
+
+import disnake
 from disnake.backoff import ExponentialBackoff
 from disnake.utils import MISSING
 

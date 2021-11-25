@@ -26,7 +26,23 @@ from __future__ import annotations
 import array
 import asyncio
 import collections.abc
+import datetime
+import functools
+import json
+import re
+import sys
+import types
+import unicodedata
+import warnings
+from base64 import b64encode
+from base64 import urlsafe_b64decode as b64decode
+from bisect import bisect_left
+from inspect import getdoc as _getdoc
+from inspect import isawaitable as _isawaitable
+from inspect import signature as _signature
+from operator import attrgetter
 from typing import (
+    TYPE_CHECKING,
     Any,
     AsyncIterator,
     Callable,
@@ -46,21 +62,8 @@ from typing import (
     TypeVar,
     Union,
     overload,
-    TYPE_CHECKING,
 )
-import unicodedata
-from base64 import b64encode, urlsafe_b64decode as b64decode
-from bisect import bisect_left
-import datetime
-import functools
-from inspect import isawaitable as _isawaitable, signature as _signature, getdoc as _getdoc
-from operator import attrgetter
-import json
-import re
-import sys
-import types
-from urllib.parse import urlencode, parse_qs
-import warnings
+from urllib.parse import parse_qs, urlencode
 
 from .errors import InvalidArgument
 
@@ -125,9 +128,9 @@ if TYPE_CHECKING:
 
     from typing_extensions import ParamSpec
 
-    from .permissions import Permissions
     from .abc import Snowflake
     from .invite import Invite
+    from .permissions import Permissions
     from .template import Template
 
     class _RequestLike(Protocol):

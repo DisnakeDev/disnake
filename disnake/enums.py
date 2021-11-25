@@ -23,8 +23,8 @@ DEALINGS IN THE SOFTWARE.
 """
 
 import types
-from typing import Any, ClassVar, Dict, List, NamedTuple, Optional, TYPE_CHECKING, Type, TypeVar
 from functools import total_ordering
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, NamedTuple, Optional, Type, TypeVar
 
 __all__ = (
     "Enum",

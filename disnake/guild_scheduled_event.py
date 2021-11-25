@@ -23,17 +23,18 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+
 from .enums import (
     GuildScheduledEventEntityType,
-    GuildScheduledEventStatus,
     GuildScheduledEventPrivacyLevel,
+    GuildScheduledEventStatus,
     try_enum,
 )
-from .user import User
 from .member import Member
 from .mixins import Hashable
-from .utils import cached_slot_property, parse_time, _get_as_snowflake, MISSING
+from .user import User
+from .utils import MISSING, _get_as_snowflake, cached_slot_property, parse_time
 
 if TYPE_CHECKING:
     from .abc import GuildChannel
