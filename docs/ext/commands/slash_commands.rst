@@ -379,4 +379,4 @@ You can implement double nesting and build commands like ``/parent group subcmd`
 Injections
 ----------
 
-We have them, look at [this example](https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py) for more information ✨
+We have them, look at `this example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_ for more information ✨
