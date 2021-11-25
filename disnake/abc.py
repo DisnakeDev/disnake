@@ -81,7 +81,7 @@ if TYPE_CHECKING:
     from .channel import CategoryChannel
     from .embeds import Embed
     from .message import Message, MessageReference, PartialMessage
-    from .channel import TextChannel, DMChannel, GroupChannel, PartialMessageable
+    from .channel import TextChannel, DMChannel, PartialMessageable
     from .threads import Thread
     from .enums import InviteTarget
     from .guild_scheduled_event import GuildScheduledEvent

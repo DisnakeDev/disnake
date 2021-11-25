@@ -36,7 +36,6 @@ from disnake.message import Message
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
-    from disnake.abc import MessageableChannel
     from disnake.channel import TextChannel, Thread, DMChannel
     from disnake.guild import Guild
     from disnake.member import Member

@@ -86,7 +86,7 @@ if TYPE_CHECKING:
     from .abc import GuildChannel, MessageableChannel, MessageableChannel
     from .components import Component
     from .state import ConnectionState
-    from .channel import TextChannel, GroupChannel, DMChannel, PartialMessageable
+    from .channel import TextChannel, DMChannel
     from .mentions import AllowedMentions
     from .role import Role
     from .ui.view import View

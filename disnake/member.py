@@ -40,7 +40,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    overload,
 )
 
 import disnake.abc

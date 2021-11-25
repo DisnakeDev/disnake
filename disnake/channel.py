@@ -51,7 +51,6 @@ from .enums import (
     try_enum,
     VoiceRegion,
     VideoQualityMode,
-    PartyType,
 )
 from .mixins import Hashable
 from .object import Object

@@ -25,7 +25,6 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-import warnings
 from typing import (
     Any,
     Dict,
