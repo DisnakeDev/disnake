@@ -33,7 +33,7 @@ If the bug report is missing this information then it'll take us longer to fix t
 
 Submitting a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go. It would be incredibly lovely if the style is consistent to that found in the project. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
-Before submitting a pull request, ensure that the code is formatted properly by installing the required [tooling](https://github.com/psf/black) (`pip install -r requirements_dev.txt`) and running `black .` in the project root.
+Before submitting a pull request, ensure that the code is formatted properly by installing the required tooling (`pip install -r requirements_dev.txt`) and running `pre-commit run` once your files are staged.
 
 ### Git Commit Guidelines
 
