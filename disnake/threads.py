@@ -567,7 +567,7 @@ class Thread(Messageable, Hashable):
             The new duration in minutes before a thread is automatically archived for inactivity.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         slowmode_delay: :class:`int`
-            Specifies the slowmode rate limit for user in this thread, in seconds.
+            Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
 
         Raises

@@ -352,7 +352,7 @@ They will be enumerated here.
 - ``Guild.default_channel`` / ``Server.default_channel`` and ``Channel.is_default``
 
     - The concept of a default channel was removed from Discord.
-      See `#329 <https://github.com/hammerandchisel/disnake-api-docs/pull/329>`_.
+      See `#329 <https://github.com/discord/discord-api-docs/pull/329>`_.
 
 - ``Message.edited_timestamp``
 

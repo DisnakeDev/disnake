@@ -42,6 +42,12 @@ __all__ = (
     "ApplicationCommandInteractionData",
     "ApplicationCommandInteractionDataOption",
     "ApplicationCommandInteractionDataResolved",
+    # aliases (we're trying to find out which one catches on)
+    "CommandInteraction",
+    "CmdInteraction",
+    "CommandInter",
+    "CmdInter",
+    "AppCommandInteraction",
     "AppCommandInter",
     "AppCmdInter",
 )
@@ -450,6 +456,11 @@ class ApplicationCommandInteractionDataResolved:
         return self.messages.get(key)
 
 
-# People asked about shorter aliases
+# People asked about shorter aliases, let's see which one catches on the most
+CommandInteraction = ApplicationCommandInteraction
+CmdInteraction = ApplicationCommandInteraction
+CommandInter = ApplicationCommandInteraction
+CmdInter = ApplicationCommandInteraction
+AppCommandInteraction = ApplicationCommandInteraction
 AppCommandInter = ApplicationCommandInteraction
 AppCmdInter = ApplicationCommandInteraction

@@ -565,6 +565,8 @@ class Intents(BaseFlags):
         - :func:`on_member_remove`
         - :func:`on_member_update`
         - :func:`on_user_update`
+        - :func:`on_guild_scheduled_event_subscribe`
+        - :func:`on_guild_scheduled_event_unsubscribe`
 
         This also corresponds to the following attributes and classes in terms of cache:
 
@@ -908,6 +910,27 @@ class Intents(BaseFlags):
         This does not correspond to any attributes or classes in the library in terms of cache.
         """
         return 1 << 14
+
+    @flag_value
+    def guild_scheduled_events(self):
+        """:class:`bool`: Whether guild scheduled event related events are enabled.
+
+        This corresponds to the following events:
+
+        - :func:`on_guild_scheduled_event_create`
+        - :func:`on_guild_scheduled_event_delete`
+        - :func:`on_guild_scheduled_event_update`
+        - :func:`on_guild_scheduled_event_subscribe`
+        - :func:`on_guild_scheduled_event_unsubscribe`
+        - :func:`on_raw_guild_scheduled_event_subscribe`
+        - :func:`on_raw_guild_scheduled_event_unsubscribe`
+
+        This also corresponds to the following attributes and classes in terms of cache:
+
+        - :attr:`Guild.scheduled_events`
+        - :meth:`Guild.get_scheduled_event`
+        """
+        return 1 << 16
 
 
 @fill_with_flags()
