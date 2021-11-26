@@ -1,13 +1,13 @@
 repos:
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.10.0
+    rev: 5.10.1
     hooks:
       - id: isort
         name: Running isort in all files.
       
   - repo: https://github.com/psf/black
-    rev: 21.11b0
+    rev: 21.11b1
     hooks:
       - id: black
         name: Running black in all files.
