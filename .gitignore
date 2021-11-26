@@ -19,7 +19,3 @@ build
 dist
 ADVANCED.rst
 secrets/
-
-progress/
-dev/
-pc/
