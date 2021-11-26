@@ -4031,6 +4031,7 @@ ApplicationCommandInteraction
 
 .. autoclass:: ApplicationCommandInteraction()
     :members:
+    :inherited-members:
 
 MessageInteraction
 ~~~~~~~~~~~~~~~~~~
@@ -4039,6 +4040,7 @@ MessageInteraction
 
 .. autoclass:: MessageInteraction()
     :members:
+    :inherited-members:
 
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
