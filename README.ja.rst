@@ -147,4 +147,4 @@ examplesディレクトリに更に多くのサンプルがあります。
 
 - `ドキュメント <https://docs.disnake.dev>`_
 - `公式Discordサーバー <https://discord.gg/gJDbCw8aQy>`_
-- `Discord API <https://discord.gg/disnake-api>`_
+- `Discord API <https://discord.gg/discord-api>`_
