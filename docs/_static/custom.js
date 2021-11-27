@@ -100,8 +100,12 @@ $(document).ready(function () {
   $('a.external').attr('target', '_blank');
 });
 
-var url = window.location.href.toLowerCase();
+var url = new URL(window.location.href);
 
-if (url.search("color") != -1) {
-  window.open(url.replace("color", "colour"), "_self");
+if (url.searchParams.has('q')) {
+  query = url.searchParams.get('q')
+  if (query.toLowerCase().includes('color')) {
+    url.searchParams.set('q', query.replace('color', 'colour').replace('Color', 'Colour'));
+    window.history.replaceState({}, document.title, url.toString());
+  }
 }
