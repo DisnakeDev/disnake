@@ -1687,7 +1687,7 @@ class ConnectionState:
             if isinstance(channel, DMChannel):
                 member = channel.recipient
 
-            elif isinstance(channel, (Thread, TextChannel)) and guild is not None:
+            elif isinstance(channel, (Thread, TextChannel, VoiceChannel)) and guild is not None:
                 # user_id won't be None
                 member = guild.get_member(user_id)  # type: ignore
 
@@ -1708,7 +1708,7 @@ class ConnectionState:
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
     ) -> Optional[Union[User, Member]]:
-        if isinstance(channel, TextChannel):
+        if isinstance(channel, (TextChannel, VoiceChannel)):
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 
