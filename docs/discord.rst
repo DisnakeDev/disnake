@@ -66,7 +66,7 @@ If you want to invite your bot you must create an invite URL for it.
 1. Make sure you're logged on to the `Discord website <https://discord.com>`_.
 2. Navigate to the `application page <https://discord.com/developers/applications>`_
 3. Click on your bot's page.
-4. Go to the "OAuth2" tab and then click in "URL Generator".
+4. Go to the "OAuth2" tab and click on "URL Generator".
 
     .. image:: /images/discord_url_generator.png
         :alt: How the OAuth2 page should look like.
@@ -77,7 +77,7 @@ If you want to invite your bot you must create an invite URL for it.
         :alt: The scopes checkbox with "bot" ticked.
 
     .. note::
-        If your bot uses slash commands you need to tick the "applications.commands" checkbox.
+        If your bot uses slash commands you also need to tick the "applications.commands" checkbox.
 
 6. Tick the permissions required for your bot to function under "Bot Permissions".
 
@@ -91,7 +91,7 @@ If you want to invite your bot you must create an invite URL for it.
 7. Now the resulting URL can be used to add your bot to a server. Copy and paste the URL into your browser, choose a server to invite the bot to, and click "Authorize".
 
 
-Invite your bot through its profile
+Invite your Bot through its profile
 +++++++++++++++++++++++++++++++++++
 
 Maybe after you finish coding your bot, you want other users to invite your bot to their servers.
@@ -115,7 +115,7 @@ Here is a guide of how to do this:
         :alt: The scopes checkbox with "bot" ticked.
 
     .. note::
-        If your bot uses slash commands you need to tick the "applications.commands" checkbox.
+        If your bot uses slash commands you also need to tick the "applications.commands" checkbox.
 
 7. Tick the permissions required for your bot to function under "Bot Permissions".
 
