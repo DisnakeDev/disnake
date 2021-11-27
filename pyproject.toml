@@ -6,5 +6,6 @@ target-version = ['py38', 'py39']
 profile = "black"
 py_version = 38
 line_length = 100
+combine_as_imports = true
 src_paths = ["disnake"]
 skip = ["examples", "tests"]
