@@ -23,13 +23,14 @@ DEALINGS IN THE SOFTWARE.
 """
 
 import argparse
+import platform
 import sys
 from pathlib import Path
 
-import disnake
-import pkg_resources
 import aiohttp
-import platform
+import pkg_resources
+
+import disnake
 
 
 def show_version():

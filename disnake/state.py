@@ -25,77 +25,75 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-from collections import deque, OrderedDict
 import copy
 import datetime
+import inspect
 import itertools
 import logging
+import os
+from collections import OrderedDict, deque
 from typing import (
-    Dict,
-    Optional,
     TYPE_CHECKING,
-    Union,
-    Callable,
     Any,
-    List,
-    TypeVar,
+    Callable,
     Coroutine,
+    Deque,
+    Dict,
+    List,
+    Optional,
     Sequence,
     Tuple,
-    Deque,
+    TypeVar,
+    Union,
 )
-import inspect
 
-import os
-
-from .guild import Guild
+from . import utils
 from .activity import BaseActivity
 from .app_commands import (
     GuildApplicationCommandPermissions,
     PartialGuildApplicationCommandPermissions,
     application_command_factory,
 )
-from .user import User, ClientUser
-from .emoji import Emoji
-from .mentions import AllowedMentions
-from .partial_emoji import PartialEmoji
-from .message import Message
 from .channel import *
 from .channel import _channel_factory
-from .raw_models import *
-from .member import Member
-from .role import Role
+from .emoji import Emoji
 from .enums import ApplicationCommandType, ChannelType, ComponentType, Status, try_enum
-from . import utils
-from .utils import MISSING
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
-from .object import Object
-from .invite import Invite
-from .interactions import Interaction, MessageInteraction, ApplicationCommandInteraction
-from .integrations import _integration_factory
-from .ui.view import ViewStore, View
-from .stage_instance import StageInstance
+from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
-from .threads import Thread, ThreadMember
+from .integrations import _integration_factory
+from .interactions import ApplicationCommandInteraction, Interaction, MessageInteraction
+from .invite import Invite
+from .member import Member
+from .mentions import AllowedMentions
+from .message import Message
+from .object import Object
+from .partial_emoji import PartialEmoji
+from .raw_models import *
+from .role import Role
+from .stage_instance import StageInstance
 from .sticker import GuildSticker
+from .threads import Thread, ThreadMember
+from .ui.view import View, ViewStore
+from .user import ClientUser, User
+from .utils import MISSING
 
 if TYPE_CHECKING:
-    from .app_commands import ApplicationCommand
     from .abc import PrivateChannel
-    from .message import MessageableChannel
-    from .guild import GuildChannel, VocalGuildChannel
-    from .http import HTTPClient
-    from .voice_client import VoiceProtocol
+    from .app_commands import ApplicationCommand
     from .client import Client
     from .gateway import DiscordWebSocket
-
+    from .guild import GuildChannel, VocalGuildChannel
+    from .http import HTTPClient
+    from .message import MessageableChannel
     from .types.activity import Activity as ActivityPayload
     from .types.channel import DMChannel as DMChannelPayload
-    from .types.user import User as UserPayload
     from .types.emoji import Emoji as EmojiPayload
-    from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
+    from .types.sticker import GuildSticker as GuildStickerPayload
+    from .types.user import User as UserPayload
+    from .voice_client import VoiceProtocol
 
     T = TypeVar("T")
     CS = TypeVar("CS", bound="ConnectionState")

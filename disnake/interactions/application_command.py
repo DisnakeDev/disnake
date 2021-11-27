@@ -21,18 +21,18 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from typing import Any, Dict, List, Mapping, Optional, TYPE_CHECKING, Union, Tuple, TypeVar
 
-from .base import Interaction
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, TypeVar, Union
 
-from ..utils import MISSING
 from ..channel import _threaded_channel_factory
-from ..enums import OptionType, ApplicationCommandType, try_enum
+from ..enums import ApplicationCommandType, OptionType, try_enum
 from ..guild import Guild
-from ..role import Role
-from ..user import User
 from ..member import Member
 from ..message import Message
+from ..role import Role
+from ..user import User
+from ..utils import MISSING
+from .base import Interaction
 
 __all__ = (
     "ApplicationCommandInteraction",
@@ -53,22 +53,24 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from ..channel import (
+        CategoryChannel,
+        PartialMessageable,
+        StageChannel,
+        StoreChannel,
+        TextChannel,
+        VoiceChannel,
+    )
+    from ..ext.commands import AutoShardedBot, Bot, InvokableApplicationCommand
+    from ..state import ConnectionState
+    from ..threads import Thread
     from ..types.interactions import (
-        Interaction as InteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
+    )
+    from ..types.interactions import (
         ApplicationCommandInteractionDataResolved as ApplicationCommandInteractionDataResolvedPayload,
     )
-    from ..state import ConnectionState
-    from ..channel import (
-        VoiceChannel,
-        StageChannel,
-        TextChannel,
-        CategoryChannel,
-        StoreChannel,
-        PartialMessageable,
-    )
-    from ..threads import Thread
-    from ..ext.commands import InvokableApplicationCommand, Bot, AutoShardedBot
+    from ..types.interactions import Interaction as InteractionPayload
 
     BotBase = Union[Bot, AutoShardedBot]
 

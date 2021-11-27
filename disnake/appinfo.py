@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import List, TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from . import utils
 from .asset import Asset
@@ -32,13 +32,11 @@ from .flags import ApplicationFlags
 
 if TYPE_CHECKING:
     from .guild import Guild
-    from .types.appinfo import (
-        AppInfo as AppInfoPayload,
-        PartialAppInfo as PartialAppInfoPayload,
-        Team as TeamPayload,
-    )
-    from .user import User
     from .state import ConnectionState
+    from .types.appinfo import AppInfo as AppInfoPayload
+    from .types.appinfo import PartialAppInfo as PartialAppInfoPayload
+    from .types.appinfo import Team as TeamPayload
+    from .user import User
 
 __all__ = (
     "AppInfo",

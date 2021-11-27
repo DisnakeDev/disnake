@@ -21,14 +21,14 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from typing import List, Optional, Union, TYPE_CHECKING
 
-from .base import Interaction
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from ..components import ActionRow, Button, SelectMenu
 from ..enums import ComponentType, try_enum
-from ..utils import cached_slot_property
 from ..message import Message
+from ..utils import cached_slot_property
+from .base import Interaction
 
 __all__ = (
     "MessageInteraction",
@@ -36,11 +36,9 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from ..types.interactions import (
-        Interaction as InteractionPayload,
-        ComponentInteractionData as ComponentInteractionDataPayload,
-    )
     from ..state import ConnectionState
+    from ..types.interactions import ComponentInteractionData as ComponentInteractionDataPayload
+    from ..types.interactions import Interaction as InteractionPayload
 
 
 class MessageInteraction(Interaction):

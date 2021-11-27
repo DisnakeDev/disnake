@@ -1,7 +1,6 @@
-from docutils.parsers.rst import Directive
-from docutils.parsers.rst import states, directives  # type: ignore
-from docutils.parsers.rst.roles import set_classes
 from docutils import nodes
+from docutils.parsers.rst import Directive, directives, states  # type: ignore
+from docutils.parsers.rst.roles import set_classes
 
 
 class details(nodes.General, nodes.Element):

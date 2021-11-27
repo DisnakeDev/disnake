@@ -52,10 +52,10 @@ import aiohttp
 from . import utils
 from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
-    PartialGuildApplicationCommandPermissions,
-    GuildApplicationCommandPermissions,
     ApplicationCommand,
+    GuildApplicationCommandPermissions,
     MessageCommand,
+    PartialGuildApplicationCommandPermissions,
     SlashCommand,
     UserCommand,
 )
@@ -86,7 +86,8 @@ from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
-    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime, User as ABCUser
+    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
+    from .abc import User as ABCUser
     from .channel import DMChannel
     from .member import Member
     from .message import Message
