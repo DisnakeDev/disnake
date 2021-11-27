@@ -357,8 +357,8 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     Which could either be :class:`TextChannel`, :class:`GroupChannel`, or
     :class:`DMChannel`.
 
-    If the ``channel`` is a :class:`TextChannel` then the ``user`` parameter
-    is a :class:`Member`, otherwise it is a :class:`User`.
+    If the ``channel`` is a :class:`TextChannel` or :class:`VoiceChannel` then the
+    ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
 
     This requires :attr:`Intents.typing` to be enabled.
 
