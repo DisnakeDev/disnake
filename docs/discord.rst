@@ -90,6 +90,8 @@ If you want to invite your bot you must create an invite URL for it.
 
 7. Now the resulting URL can be used to add your bot to a server. Copy and paste the URL into your browser, choose a server to invite the bot to, and click "Authorize".
 
+If you want to generate this URL dynamically at run-time inside your bot and using the
+:class:`disnake.Permissions` interface, you can use :func:`disnake.utils.oauth_url`.
 
 Invite your Bot through its profile
 +++++++++++++++++++++++++++++++++++
@@ -97,7 +99,9 @@ Invite your Bot through its profile
 Maybe after you finish coding your bot, you want other users to invite your bot to their servers.
 The easiest way to do this is to allow users to invite your bot through its profile.
 
-Here is a guide of how to do this:
+This will only work if your bot is on a common server with the user.
+
+Here is a guide on how to do this:
 
 1. Make sure you're logged on to the `Discord website <https://discord.com>`_.
 2. Navigate to the `application page <https://discord.com/developers/applications>`_
@@ -135,6 +139,3 @@ Here is a guide of how to do this:
 .. note::
 
     The person adding the bot needs "Manage Server" permissions to do so.
-
-If you want to generate this URL dynamically at run-time inside your bot and using the
-:class:`disnake.Permissions` interface, you can use :func:`disnake.utils.oauth_url`.
