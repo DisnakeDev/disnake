@@ -797,7 +797,7 @@ class InteractionResponse:
             attachments using this method is presently not supported (API limitation, see
             `this <https://github.com/discord/discord-api-docs/discussions/3335>`_).
             As a workaround, respond to the interaction first (e.g. using :meth:`.defer`),
-            then edit the message using :meth:`.edit_original_message`.
+            then edit the message using :meth:`Interaction.edit_original_message`.
 
         .. note::
             If the original message has embeds with images that were created from local files
