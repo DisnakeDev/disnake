@@ -19,3 +19,6 @@ build
 dist
 ADVANCED.rst
 secrets/
+*_test.py
+*.env
+venvs/
