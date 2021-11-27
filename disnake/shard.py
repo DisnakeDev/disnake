@@ -26,27 +26,29 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar
 
 import aiohttp
 
-from .backoff import ExponentialBackoff
+from .state import AutoShardedConnectionState
 from .client import Client
-from .enums import Status
+from .backoff import ExponentialBackoff
+from .gateway import *
 from .errors import (
     ClientException,
-    ConnectionClosed,
-    GatewayNotFound,
     HTTPException,
+    GatewayNotFound,
+    ConnectionClosed,
     PrivilegedIntentsRequired,
 )
-from .gateway import *
-from .state import AutoShardedConnectionState
+
+from .enums import Status
+
+from typing import TYPE_CHECKING, Any, Callable, Tuple, Type, Optional, List, Dict, TypeVar
 
 if TYPE_CHECKING:
+    from .gateway import DiscordWebSocket
     from .activity import BaseActivity
     from .enums import Status
-    from .gateway import DiscordWebSocket
 
     EI = TypeVar("EI", bound="EventItem")
 

@@ -1,5 +1,6 @@
-import disnake
 from disnake.ext import commands
+
+import disnake
 
 
 class CounterBot(commands.Bot):

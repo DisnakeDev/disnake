@@ -25,9 +25,7 @@ from __future__ import annotations
 import asyncio
 import sys
 import traceback
-import warnings
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Coroutine,
@@ -38,41 +36,44 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    TYPE_CHECKING,
     TypeVar,
     Union,
     cast,
 )
+import warnings
 
 import disnake
+
+from .base_core import InvokableApplicationCommand
+from .slash_core import InvokableSlashCommand, SubCommandGroup, SubCommand
+from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
+from .common_bot_base import CommonBotBase
+from .context import Context
+from .errors import CommandRegistrationError
+from . import errors
+from .cog import Cog
+from .slash_core import slash_command
+from .ctx_menus_core import user_command, message_command
+
 from disnake.app_commands import (
-    ApplicationCommand,
     Option,
+    ApplicationCommand,
     PartialGuildApplicationCommandPermissions,
 )
 from disnake.custom_warnings import ConfigWarning, SyncWarning
 from disnake.enums import ApplicationCommandType
 
-from . import errors
-from .base_core import InvokableApplicationCommand
-from .cog import Cog
-from .common_bot_base import CommonBotBase
-from .context import Context
-from .ctx_menus_core import (
-    InvokableMessageCommand,
-    InvokableUserCommand,
-    message_command,
-    user_command,
-)
-from .errors import CommandRegistrationError
-from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
-
 if TYPE_CHECKING:
 
     from typing_extensions import Concatenate, ParamSpec
-
-    from disnake.interactions import ApplicationCommandInteraction
-
-    from ._types import Check, CoroFunc
+    from disnake.interactions import (
+        ApplicationCommandInteraction,
+    )
+    from ._types import (
+        Check,
+        CoroFunc,
+    )
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True

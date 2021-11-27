@@ -55,27 +55,25 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from datetime import datetime
-
-    from aiohttp import ClientSession
-
-    from ..channel import (
-        CategoryChannel,
-        PartialMessageable,
-        StageChannel,
-        StoreChannel,
-        TextChannel,
-        VoiceChannel,
-    )
-    from ..embeds import Embed
     from ..ext.commands.bot import Bot
-    from ..file import File
-    from ..guild import Guild
-    from ..mentions import AllowedMentions
-    from ..state import ConnectionState
-    from ..threads import Thread
     from ..types.interactions import Interaction as InteractionPayload
+    from ..guild import Guild
+    from ..state import ConnectionState
+    from ..file import File
+    from ..mentions import AllowedMentions
+    from aiohttp import ClientSession
+    from ..embeds import Embed
     from ..ui.view import View
+    from ..channel import (
+        VoiceChannel,
+        StageChannel,
+        TextChannel,
+        CategoryChannel,
+        StoreChannel,
+        PartialMessageable,
+    )
+    from ..threads import Thread
+    from datetime import datetime
 
     InteractionChannel = Union[
         VoiceChannel,

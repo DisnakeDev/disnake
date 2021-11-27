@@ -1,8 +1,8 @@
-import os
-import traceback
-
 import disnake
 from disnake.ext import commands
+
+import os
+import traceback
 
 
 def fancy_traceback(exc: Exception) -> str:

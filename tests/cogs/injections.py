@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from pprint import pformat
 from typing import Optional, Tuple
-
 import disnake
 from disnake.ext import commands
+from pprint import pformat
 
 
 def injected(user: disnake.User, channel: disnake.TextChannel):

@@ -1,9 +1,8 @@
 # This example requires the 'members' privileged intents
 
-import random
-
 import disnake
 from disnake.ext import commands
+import random
 
 description = """An example bot to showcase the disnake.ext.commands extension
 module.

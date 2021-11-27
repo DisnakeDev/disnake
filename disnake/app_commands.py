@@ -21,12 +21,12 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-
-import math
-import re
-import warnings
 from abc import ABC
+
+import re
+import math
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
+import warnings
 
 from .abc import User
 from .custom_warnings import ConfigWarning
@@ -34,13 +34,13 @@ from .enums import (
     ApplicationCommandType,
     ChannelType,
     OptionType,
-    enum_if_int,
     try_enum,
+    enum_if_int,
     try_enum_to_int,
 )
 from .errors import InvalidArgument
 from .role import Role
-from .utils import _get_and_cast, _get_as_snowflake
+from .utils import _get_as_snowflake, _get_and_cast
 
 if TYPE_CHECKING:
     from .state import ConnectionState

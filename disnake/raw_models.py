@@ -24,22 +24,22 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Set
+from typing import TYPE_CHECKING, Optional, Set, List
 
 if TYPE_CHECKING:
-    from .member import Member
+    from .types.raw_models import (
+        MessageDeleteEvent,
+        BulkMessageDeleteEvent,
+        ReactionActionEvent,
+        MessageUpdateEvent,
+        ReactionClearEvent,
+        ReactionClearEmojiEvent,
+        MemberScreeningRejectEvent,
+        IntegrationDeleteEvent,
+    )
     from .message import Message
     from .partial_emoji import PartialEmoji
-    from .types.raw_models import (
-        BulkMessageDeleteEvent,
-        IntegrationDeleteEvent,
-        MemberScreeningRejectEvent,
-        MessageDeleteEvent,
-        MessageUpdateEvent,
-        ReactionActionEvent,
-        ReactionClearEmojiEvent,
-        ReactionClearEvent,
-    )
+    from .member import Member
 
 
 __all__ = (

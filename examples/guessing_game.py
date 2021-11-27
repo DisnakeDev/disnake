@@ -1,7 +1,6 @@
-import asyncio
-import random
-
 import disnake
+import random
+import asyncio
 
 
 class MyClient(disnake.Client):

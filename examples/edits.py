@@ -1,6 +1,5 @@
-import asyncio
-
 import disnake
+import asyncio
 
 
 class MyClient(disnake.Client):
