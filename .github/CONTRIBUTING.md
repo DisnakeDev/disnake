@@ -9,7 +9,7 @@ The following is a set of guidelines for contributing to the repository. These a
 Generally speaking questions are better suited in our resources below.
 
 - The official support server: https://discord.gg/gJDbCw8aQy
-- The [FAQ in the documentation](https://disnake.readthedocs.io/en/latest/faq.html)
+- The [FAQ in the documentation](https://docs.disnake.dev/en/latest/faq.html)
 - Stack Overflow's [`discord.py` tag](https://stackoverflow.com/questions/tagged/discord.py)
 
 Please try your best not to ask questions in our issue tracker. Most of them don't belong there unless they provide value to a larger audience.
