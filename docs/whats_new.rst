@@ -132,10 +132,10 @@ This is the first stable version of this discord.py 2.0 fork.
 New Features
 ~~~~~~~~~~~~~~
 
-- Add interaction hierarchy. :class:`interaction` is now the base class for other interaction types, such as :class:`ApplicationCommandInteraction` and :class:`MessageInteraction`.
+- Add interaction hierarchy. :class:`Interaction` is now the base class for other interaction types, such as :class:`ApplicationCommandInteraction` and :class:`MessageInteraction`.
 - Add interaction data wrappers: :class:`ApplicationCommandInteractionData` and :class:`MessageInteractionData`.
 - Add interaction data option wrapper: :class:`ApplicationCommandInteractionDataOption`
-- Add :meth:`Client.bulk_edit_guild_command_permissions`
+- Add :meth:`Client.bulk_edit_command_permissions`
 - Add :meth:`Client.bulk_overwrite_global_commands`
 - Add :meth:`Client.bulk_overwrite_guild_commands`
 - Add :meth:`Client.create_global_command`
@@ -150,7 +150,7 @@ New Features
 - Add :meth:`Client.fetch_global_command`
 - Add :meth:`Client.fetch_guild_commands`
 - Add :meth:`Client.fetch_guild_command`
-- Add :meth:`Client.fetch_guild_command_permissions`
+- Add :meth:`Client.fetch_command_permissions`
 - Add :meth:`Client.get_global_command`
 - Add :meth:`Client.get_global_command_named`
 - Add :meth:`Client.get_guild_application_commands`
