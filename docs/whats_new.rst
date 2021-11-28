@@ -174,7 +174,7 @@ New Features
 - |commands| Add :func:`slash_command <ext.commands.slash_command>` for slash command definitions.
 - |commands| Add :func:`user_command <ext.commands.user_command>` for user command definitions (context menus).
 - |commands| Add :func:`message_command <ext.commands.message_command>` for message command definitions (context menus).
-- |commands| Add :func:`param <ext.commands.param>` (with an alias :func:`Param <ext.commands.Param>`) in case :class:`ParamInfo <ext.commands.ParamInfo>` causes linter errors.
+- |commands| Add :func:`Param <ext.commands.Param>` (with an alias :func:`param <ext.commands.param>`) in case :class:`ParamInfo <ext.commands.ParamInfo>` causes linter errors.
 - |commands| Add :meth:`Bot.slash_command <ext.commands.Bot.slash_command>` for slash command definitions.
 - |commands| Add :meth:`Bot.user_command <ext.commands.Bot.user_command>` for user command definitions (context menus).
 - |commands| Add :meth:`Bot.message_command <ext.commands.Bot.message_command>` for message command definitions (context menus).
