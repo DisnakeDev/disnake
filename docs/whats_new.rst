@@ -107,9 +107,9 @@ New Features
 - Add :class:`GuildApplicationCommandPermissions`
 - Add :class:`PartialGuildApplicationCommandPermissions`
 - Add :attr:`ApplicationCommandInteraction.filled_options` property
-- Add :func:`on_slash_command_completion`
-- Add :func:`on_user_command_completion`
-- Add :func:`on_message_command_completion`
+- Add :func:`on_slash_command_completion <.ext.commands.on_slash_command_completion>`
+- Add :func:`on_user_command_completion <.ext.commands.on_user_command_completion>`
+- Add :func:`on_message_command_completion <.ext.commands.on_message_command_completion>`
 - |commands| Add :class:`AutoShardedInteractionBot <ext.commands.AutoShardedInteractionBot>`
 - |commands| Add :class:`InteractionBot <ext.commands.InteractionBot>`
 - |commands| Add :func:`guild_permissions <ext.commands.guild_permissions>`
