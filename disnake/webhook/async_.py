@@ -868,7 +868,7 @@ class BaseWebhook(Hashable):
         """Whether the webhook is a "partial" webhook.
 
         .. versionadded:: 2.0
-        
+
         :return type: :class:`bool`
         """
         return self.channel_id is None
