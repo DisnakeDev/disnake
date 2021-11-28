@@ -312,6 +312,24 @@ Helper Functions
 
 .. autofunction:: disnake.ext.commands.register_injection
 
+Application Command
+~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.InvokableApplicationCommand
+
+.. autoclass:: disnake.ext.commands.InvokableApplicationCommand
+    :members:
+    :exclude-members: before_invoke, after_invoke, error
+
+    .. automethod:: InvokableApplicationCommand.before_invoke()
+        :decorator:
+
+    .. automethod:: InvokableApplicationCommand.after_invoke()
+        :decorator:
+
+    .. automethod:: InvokableApplicationCommand.error()
+        :decorator:
+
 Slash Command
 ~~~~~~~~~~~~~
 
