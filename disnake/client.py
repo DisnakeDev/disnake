@@ -410,10 +410,12 @@ class Client:
 
     @property
     def global_application_commands(self) -> List[ApplicationCommand]:
+        """List[:class:`.ApplicationCommand`]: The client's global application commands."""
         return list(self._connection._global_application_commands.values())
 
     @property
     def global_slash_commands(self) -> List[SlashCommand]:
+        """List[:class:`.SlashCommand`]: The client's global slash commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
@@ -422,6 +424,7 @@ class Client:
 
     @property
     def global_user_commands(self) -> List[UserCommand]:
+        """List[:class:`.UserCommand`]: The client's global user commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
@@ -430,6 +433,7 @@ class Client:
 
     @property
     def global_message_commands(self) -> List[MessageCommand]:
+        """List[:class:`.MessageCommand`]: The client's global message commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
