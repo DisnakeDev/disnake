@@ -105,6 +105,8 @@ class ApplicationCommandInteraction(Interaction):
         The channel ID the interaction was sent from.
     application_id: :class:`int`
         The application ID that the interaction was for.
+    bot: :class:`.Bot`
+        The interaction's bot. There is an alias for this named ``client``.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
     guild: Optional[:class:`Guild`]
