@@ -250,6 +250,36 @@ are custom to the command extension module.
     :param ctx: The invocation context.
     :type ctx: :class:`.Context`
 
+.. function:: disnake.ext.commands.on_slash_command_completion(inter)
+
+    An event that is called when a slash command has completed its invocation.
+
+    This event is called only if the slash command succeeded, i.e. all checks have
+    passed and the user input it correctly.
+
+    :param inter: The invocation interaction.
+    :type inter: :class:`.ApplicationCommandInteraction`
+
+.. function:: disnake.ext.commands.on_user_command_completion(inter)
+
+    An event that is called when a user command has completed its invocation.
+
+    This event is called only if the user command succeeded, i.e. all checks have
+    passed and the user input it correctly.
+
+    :param inter: The invocation interaction.
+    :type inter: :class:`.ApplicationCommandInteraction`
+
+.. function:: disnake.ext.commands.on_message_command_completion(inter)
+
+    An event that is called when a message command has completed its invocation.
+
+    This event is called only if the message command succeeded, i.e. all checks have
+    passed and the user input it correctly.
+
+    :param inter: The invocation interaction.
+    :type inter: :class:`.ApplicationCommandInteraction`
+
 .. _ext_commands_api_command:
 
 Commands
