@@ -287,7 +287,7 @@ class Attachment(Hashable):
 
     def is_spoiler(self) -> bool:
         """Whether this attachment contains a spoiler.
-        
+
         :return type: :class:`bool`
         """
         return self.filename.startswith("SPOILER_")

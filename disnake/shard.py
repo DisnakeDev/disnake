@@ -247,7 +247,7 @@ class ShardInfo:
 
     def is_closed(self) -> bool:
         """Whether the shard connection is currently closed.
-        
+
         :return type: :class:`bool`
         """
         return not self._parent.ws.open

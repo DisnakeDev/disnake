@@ -245,14 +245,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
     def is_nsfw(self) -> bool:
         """Checks if the channel is NSFW.
-        
+
         :return type: :class:`bool`
         """
         return self.nsfw
 
     def is_news(self) -> bool:
         """Checks if the channel is a news channel.
-        
+
         :return type: :class:`bool`
         """
         return self._type == ChannelType.news.value
@@ -1460,7 +1460,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     def is_nsfw(self) -> bool:
         """Checks if the category is NSFW.
-        
+
         :return type: :class:`bool`
         """
         return self.nsfw
@@ -1728,7 +1728,7 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
 
     def is_nsfw(self) -> bool:
         """Checks if the channel is NSFW.
-        
+
         :return type: :class:`bool`
         """
         return self.nsfw

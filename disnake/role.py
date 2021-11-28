@@ -86,21 +86,21 @@ class RoleTags:
 
     def is_bot_managed(self) -> bool:
         """Whether the role is associated with a bot.
-        
+
         :return type: :class:`bool`
         """
         return self.bot_id is not None
 
     def is_premium_subscriber(self) -> bool:
         """Whether the role is the premium subscriber, AKA "boost", role for the guild.
-        
+
         :return type: :class:`bool`
         """
         return self._premium_subscriber is None
 
     def is_integration(self) -> bool:
         """Whether the role is managed by an integration.
-        
+
         :return type: :class:`bool`
         """
         return self.integration_id is not None
@@ -266,7 +266,7 @@ class Role(Hashable):
 
     def is_default(self) -> bool:
         """Checks if the role is the default role.
-        
+
         :return type: :class:`bool`
         """
         return self.guild.id == self.id

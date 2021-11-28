@@ -94,7 +94,7 @@ class Reaction:
     # TODO: typeguard
     def is_custom_emoji(self) -> bool:
         """If this is a custom emoji.
-        
+
         :return type: :class:`bool`
         """
         return not isinstance(self.emoji, str)

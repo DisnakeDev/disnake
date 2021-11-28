@@ -206,7 +206,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
     def is_unicode_emoji(self) -> bool:
         """Checks if this is a Unicode emoji.
-        
+
         :return type: :class:`bool`
         """
         return self.id is None

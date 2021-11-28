@@ -479,7 +479,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     def is_on_mobile(self) -> bool:
         """A helper function that determines if a member is active on a mobile device.
-        
+
         :return type: :class:`bool`
         """
         return "mobile" in self._client_status
