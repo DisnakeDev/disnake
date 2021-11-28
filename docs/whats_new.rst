@@ -150,7 +150,6 @@ New Features
 - Add :meth:`Client.fetch_global_command`
 - Add :meth:`Client.fetch_guild_commands`
 - Add :meth:`Client.fetch_guild_command`
-- Add :meth:`Client.fetch_command_permissions`
 - Add :meth:`Client.get_global_command`
 - Add :meth:`Client.get_global_command_named`
 - Add :meth:`Client.get_guild_application_commands`

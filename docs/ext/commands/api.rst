@@ -255,9 +255,9 @@ are custom to the command extension module.
     An event that is called when a slash command has completed its invocation.
 
     This event is called only if the slash command succeeded, i.e. all checks have
-    passed and the user input it correctly.
+    passed and command handler ran successfully.
 
-    :param inter: The invocation interaction.
+    :param inter: The interaction that invoked this slash command.
     :type inter: :class:`.ApplicationCommandInteraction`
 
 .. function:: disnake.ext.commands.on_user_command_completion(inter)
@@ -265,9 +265,9 @@ are custom to the command extension module.
     An event that is called when a user command has completed its invocation.
 
     This event is called only if the user command succeeded, i.e. all checks have
-    passed and the user input it correctly.
+    passed and command handler ran successfully.
 
-    :param inter: The invocation interaction.
+    :param inter: The interaction that invoked this user command.
     :type inter: :class:`.ApplicationCommandInteraction`
 
 .. function:: disnake.ext.commands.on_message_command_completion(inter)
@@ -275,9 +275,9 @@ are custom to the command extension module.
     An event that is called when a message command has completed its invocation.
 
     This event is called only if the message command succeeded, i.e. all checks have
-    passed and the user input it correctly.
+    passed and command handler ran successfully.
 
-    :param inter: The invocation interaction.
+    :param inter: The interaction that invoked this message command.
     :type inter: :class:`.ApplicationCommandInteraction`
 
 .. _ext_commands_api_command:
