@@ -907,7 +907,6 @@ class InteractionBotBase(CommonBotBase):
 
         This only fires if you do not specify any listeners for slash command error.
         """
-
         if self.extra_events.get("on_slash_command_error", None):
             return
 
