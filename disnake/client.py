@@ -622,7 +622,6 @@ class Client:
 
         Logs in the client with the specified credentials.
 
-
         Parameters
         -----------
         token: :class:`str`
@@ -972,7 +971,7 @@ class Client:
         Returns
         --------
         Optional[:class:`.StageInstance`]
-            The returns stage instance of ``None`` if not found.
+            The returns stage instance or ``None`` if not found.
         """
         from .channel import StageChannel
 
@@ -1163,7 +1162,7 @@ class Client:
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Optional[:class:`.ApplicationCommand`]
             The application command.
         """
         return self._connection._get_global_application_command(id)
@@ -1181,7 +1180,7 @@ class Client:
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Optional[:class:`.ApplicationCommand`]
             The application command.
         """
         return self._connection._get_guild_application_command(guild_id, id)
@@ -1201,7 +1200,7 @@ class Client:
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Optional[:class:`.ApplicationCommand`]
             The application command.
         """
         return self._connection._get_global_command_named(name, cmd_type)
@@ -1223,7 +1222,7 @@ class Client:
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Optional[:class:`.ApplicationCommand`]
             The application command.
         """
         return self._connection._get_guild_command_named(guild_id, name, cmd_type)
@@ -2034,7 +2033,7 @@ class Client:
         Parameters
         ----------
         command_id: :class:`int`
-            the ID of the command to request.
+            The ID of the command to request.
 
         Returns
         -------
@@ -2055,7 +2054,7 @@ class Client:
         Parameters
         ----------
         application_command: :class:`.ApplicationCommand`
-            an object representing the application command.
+            An object representing the application command.
 
         Returns
         -------
@@ -2076,9 +2075,9 @@ class Client:
         Parameters
         ----------
         command_id: :class:`int`
-            the ID of the command to edit.
+            The ID of the command to edit.
         new_command: :class:`.ApplicationCommand`
-            an object representing the edited command.
+            An object representing the edited command.
 
         Returns
         -------
@@ -2097,7 +2096,7 @@ class Client:
         Parameters
         ----------
         command_id: :class:`int`
-            the ID of the command to delete.
+            The ID of the command to delete.
         """
         return await self._connection.delete_global_command(command_id)
 
@@ -2113,7 +2112,7 @@ class Client:
         Parameters
         ----------
         application_commands: List[:class:`.ApplicationCommand`]
-            a list of application commands to insert instead of the existing commands.
+            A list of application commands to insert instead of the existing commands.
 
         Returns
         -------
@@ -2124,7 +2123,7 @@ class Client:
 
     # Application commands (guild)
 
-    async def fetch_guild_commands(self, guild_id: int):
+    async def fetch_guild_commands(self, guild_id: int) -> List[ApplicationCommand]:
         """|coro|
 
         Requests a list of guild application commands.
@@ -2134,7 +2133,7 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild to fetch commands from.
+            The ID of the guild to fetch commands from.
 
         Returns
         -------
@@ -2153,9 +2152,9 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild to fetch command from.
+            The ID of the guild to fetch command from.
         command_id: :class:`int`
-            the ID of the command to request.
+            The ID of the command to request.
 
         Returns
         -------
@@ -2176,9 +2175,9 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild where the command should be inserted.
+            The ID of the guild where the command should be inserted.
         application_command: :class:`.ApplicationCommand`
-            an object representing the application command.
+            An object representing the application command.
 
         Returns
         -------
@@ -2199,11 +2198,11 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild where the command should be edited.
+            The ID of the guild where the command should be edited.
         command_id: :class:`int`
-            the ID of the command to edit.
+            The ID of the command to edit.
         new_command: :class:`.ApplicationCommand`
-            an object representing the edited command.
+            An object representing the edited command.
 
         Returns
         -------
@@ -2222,9 +2221,9 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild where the command should be deleted.
+            The ID of the guild where the command should be deleted.
         command_id: :class:`int`
-            the ID of the command to delete.
+            The ID of the command to delete.
         """
         await self.http.delete_guild_command(self.application_id, guild_id, command_id)
 
@@ -2240,9 +2239,9 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild where the commands should be overwritten.
+            The ID of the guild where the commands should be overwritten.
         application_commands: List[:class:`.ApplicationCommand`]
-            a list of application commands to insert instead of the existing commands.
+            A list of application commands to insert instead of the existing commands.
 
         Returns
         -------
