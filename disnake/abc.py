@@ -81,7 +81,7 @@ if TYPE_CHECKING:
     from .channel import CategoryChannel
     from .embeds import Embed
     from .message import Message, MessageReference, PartialMessage
-    from .channel import TextChannel, DMChannel, PartialMessageable
+    from .channel import TextChannel, DMChannel, PartialMessageable, VoiceChannel
     from .threads import Thread
     from .enums import InviteTarget
     from .guild_scheduled_event import GuildScheduledEvent
@@ -93,7 +93,7 @@ if TYPE_CHECKING:
         OverwriteType,
     )
 
-    MessageableChannel = Union[TextChannel, Thread, DMChannel, PartialMessageable]
+    MessageableChannel = Union[TextChannel, Thread, DMChannel, PartialMessageable, VoiceChannel]
     SnowflakeTime = Union["Snowflake", datetime]
 
 MISSING = utils.MISSING
@@ -1164,6 +1164,7 @@ class Messageable:
     - :class:`~disnake.Member`
     - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.Thread`
+    - :class:`~disnake.VoiceChannel`
     """
 
     __slots__ = ()

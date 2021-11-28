@@ -67,7 +67,7 @@ setup(
     author="Rapptz, EQUENOS",
     url="https://github.com/DisnakeDev/disnake",
     project_urls={
-        "Documentation": "https://disnake.readthedocs.io/en/latest/",
+        "Documentation": "https://docs.disnake.dev/en/latest/",
         "Issue tracker": "https://github.com/DisnakeDev/disnake/issues",
     },
     version=version,

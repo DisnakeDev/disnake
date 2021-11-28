@@ -929,7 +929,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         return base
 
 
-class VoiceChannel(VocalGuildChannel):
+class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild voice channel.
 
     .. container:: operations
@@ -991,6 +991,9 @@ class VoiceChannel(VocalGuildChannel):
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
+
+    async def _get_channel(self):
+        return self
 
     @property
     def type(self) -> ChannelType:

@@ -142,9 +142,9 @@ Context Menus Example
     bot = commands.Bot(command_prefix='>', test_guilds=[12345])
 
     @bot.user_command()
-    async def avatar(inter):
-        embed = disnake.Embed(title=str(inter.target))
-        embed.set_image(url=inter.target.avatar.url)
+    async def avatar(inter, user):
+        embed = disnake.Embed(title=str(user))
+        embed.set_image(url=user.display_avatar.url)
         await inter.response.send_message(embed=embed)
 
     bot.run('token')
@@ -154,6 +154,6 @@ You can find more examples in the examples directory.
 Links
 ------
 
-- `Documentation <http://disnake.rtfd.io/>`_
+- `Documentation <https://docs.disnake.dev/>`_
 - `Official Discord Server <https://discord.gg/gJDbCw8aQy>`_
 - `Discord API <https://discord.gg/discord-api>`_

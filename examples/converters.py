@@ -46,7 +46,7 @@ async def ignore(ctx: commands.Context, target: typing.Union[disnake.Member, dis
     # The `commands` framework attempts a conversion of each type in this Union *in order*.
     # So, it will attempt to convert whatever is passed to `target` to a `disnake.Member` instance.
     # If that fails, it will attempt to convert it to a `disnake.TextChannel` instance.
-    # See: https://disnake.readthedocs.io/en/latest/ext/commands/commands.html#typing-union
+    # See: https://docs.disnake.dev/en/latest/ext/commands/commands.html#typing-union
     # NOTE: If a Union typehint converter fails it will raise `commands.BadUnionArgument`
     # instead of `commands.BadArgument`.
 
@@ -64,7 +64,7 @@ async def ignore(ctx: commands.Context, target: typing.Union[disnake.Member, dis
 async def multiply(ctx: commands.Context, number: int, maybe: bool):
     # We want an `int` and a `bool` parameter here.
     # `bool` is a slightly special case, as shown here:
-    # See: https://disnake.readthedocs.io/en/latest/ext/commands/commands.html#bool
+    # See: https://docs.disnake.dev/en/latest/ext/commands/commands.html#bool
 
     if maybe is True:
         return await ctx.send(number * 2)

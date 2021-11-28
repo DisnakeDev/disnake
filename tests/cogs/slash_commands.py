@@ -34,19 +34,9 @@ class SlashCommands(commands.Cog):
     async def alt_auto(
         self,
         inter: disnake.AppCmdInter,
-        mood: str = commands.Param(autocomp=test_autocomp),
+        mood: str = commands.Param(autocomplete=test_autocomp),
     ):
         await inter.send(mood)
-
-    @commands.slash_command()
-    async def current(
-        self,
-        inter: disnake.GuildCommandInteraction,
-        user: disnake.Member = commands.Param(commands.Current),
-        channel: disnake.abc.GuildChannel = commands.Param(commands.Current, desc="channel"),
-        guild: disnake.Guild = commands.Current,
-    ):
-        await inter.send(f"user: {user.mention} channel: {channel.mention} guild: {guild.name}")
 
 
 def setup(bot):
