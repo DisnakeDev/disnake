@@ -556,9 +556,11 @@ class InteractionResponse:
         self._responded: bool = False
 
     def is_done(self) -> bool:
-        """:class:`bool`: Indicates whether an interaction response has been done before.
+        """Indicates whether an interaction response has been done before.
 
         An interaction can only be responded to once.
+
+        :return type: :class:`bool`
         """
         return self._responded
 

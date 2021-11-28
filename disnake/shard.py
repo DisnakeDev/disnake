@@ -246,7 +246,10 @@ class ShardInfo:
         self.shard_count: Optional[int] = shard_count
 
     def is_closed(self) -> bool:
-        """:class:`bool`: Whether the shard connection is currently closed."""
+        """Whether the shard connection is currently closed.
+        
+        :return type: :class:`bool`
+        """
         return not self._parent.ws.open
 
     async def disconnect(self) -> None:
@@ -287,12 +290,14 @@ class ShardInfo:
         return self._parent.ws.latency
 
     def is_ws_ratelimited(self) -> bool:
-        """:class:`bool`: Whether the websocket is currently rate limited.
+        """Whether the websocket is currently rate limited.
 
         This can be useful to know when deciding whether you should query members
         using HTTP or via the gateway.
 
         .. versionadded:: 1.6
+
+        :return type: :class:`bool`
         """
         return self._parent.ws.is_ratelimited()
 
@@ -553,7 +558,7 @@ class AutoShardedClient(Client):
             me.status = status_enum
 
     def is_ws_ratelimited(self) -> bool:
-        """:class:`bool`: Whether the websocket is currently rate limited.
+        """Whether the websocket is currently rate limited.
 
         This can be useful to know when deciding whether you should query members
         using HTTP or via the gateway.
@@ -562,5 +567,7 @@ class AutoShardedClient(Client):
         For more granular control, consider :meth:`ShardInfo.is_ws_ratelimited`.
 
         .. versionadded:: 1.6
+
+        :return type: :class:`bool`
         """
         return any(shard.ws.is_ratelimited() for shard in self.__shards.values())

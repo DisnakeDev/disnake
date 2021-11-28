@@ -432,18 +432,26 @@ class View:
             self.__cancel_callback = None
 
     def is_finished(self) -> bool:
-        """:class:`bool`: Whether the view has finished interacting."""
+        """Whether the view has finished interacting.
+        
+        :return type: :class:`bool`
+        """
         return self.__stopped.done()
 
     def is_dispatching(self) -> bool:
-        """:class:`bool`: Whether the view has been added for dispatching purposes."""
+        """Whether the view has been added for dispatching purposes.
+        
+        :return type: :class:`bool`
+        """
         return self.__cancel_callback is not None
 
     def is_persistent(self) -> bool:
-        """:class:`bool`: Whether the view is set up as persistent.
+        """Whether the view is set up as persistent.
 
         A persistent view has all their components with a set ``custom_id`` and
         a :attr:`timeout` set to ``None``.
+
+        :return type: :class:`bool`
         """
         return self.timeout is None and all(item.is_persistent() for item in self.children)
 

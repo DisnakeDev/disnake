@@ -244,11 +244,17 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
-        """:class:`bool`: Checks if the channel is NSFW."""
+        """Checks if the channel is NSFW.
+        
+        :return type: :class:`bool`
+        """
         return self.nsfw
 
     def is_news(self) -> bool:
-        """:class:`bool`: Checks if the channel is a news channel."""
+        """Checks if the channel is a news channel.
+        
+        :return type: :class:`bool`
+        """
         return self._type == ChannelType.news.value
 
     @property
@@ -1453,7 +1459,10 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ChannelType.category
 
     def is_nsfw(self) -> bool:
-        """:class:`bool`: Checks if the category is NSFW."""
+        """Checks if the category is NSFW.
+        
+        :return type: :class:`bool`
+        """
         return self.nsfw
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
@@ -1718,7 +1727,10 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
         return base
 
     def is_nsfw(self) -> bool:
-        """:class:`bool`: Checks if the channel is NSFW."""
+        """Checks if the channel is NSFW.
+        
+        :return type: :class:`bool`
+        """
         return self.nsfw
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
