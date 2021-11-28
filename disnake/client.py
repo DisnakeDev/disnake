@@ -327,12 +327,14 @@ class Client:
         return float("nan") if not ws else ws.latency
 
     def is_ws_ratelimited(self) -> bool:
-        """:class:`bool`: Whether the websocket is currently rate limited.
+        """Whether the websocket is currently rate limited.
 
         This can be useful to know when deciding whether you should query members
         using HTTP or via the gateway.
 
         .. versionadded:: 1.6
+
+        :return type: :class:`bool`
         """
         if self.ws:
             return self.ws.is_ratelimited()
@@ -495,7 +497,10 @@ class Client:
     getch_user = get_or_fetch_user
 
     def is_ready(self) -> bool:
-        """:class:`bool`: Specifies if the client's internal cache is ready for use."""
+        """Specifies if the client's internal cache is ready for use.
+
+        :return type: :class:`bool`
+        """
         return self._ready.is_set()
 
     async def _run_event(
@@ -843,7 +848,10 @@ class Client:
     # properties
 
     def is_closed(self) -> bool:
-        """:class:`bool`: Indicates if the websocket connection is closed."""
+        """Indicates if the websocket connection is closed.
+
+        :return type: :class:`bool`
+        """
         return self._closed
 
     @property
@@ -865,10 +873,9 @@ class Client:
 
     @property
     def status(self):
-        """:class:`.Status`:
-        The status being used upon logging on to Discord.
+        """:class:`.Status`: The status being used upon logging on to Discord.
 
-        .. versionadded: 2.0
+        .. versionadded:: 2.0
         """
         if self._connection._status in set(state.value for state in Status):
             return Status(self._connection._status)
