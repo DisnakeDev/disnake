@@ -360,7 +360,20 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     If the ``channel`` is a :class:`TextChannel` then the ``user`` parameter
     is a :class:`Member`, otherwise it is a :class:`User`.
 
+    If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,
+    then this event will not be called. Consider using :func:`on_raw_typing` instead.
+
     This requires :attr:`Intents.typing` to be enabled.
+
+    .. note::
+
+        This doesn't require :attr:`Intents.members` within a guild context,
+        but due to Discord not providing updated user information in a direct message
+        it's required for direct messages to receive this event, if the bot didn't explicitly
+        open the DM channel in the same session (through :func:`User.create_dm`, :func:`Client.create_dm`,
+        or indirectly by sending a message to the user).
+        Consider using :func:`on_raw_typing` if you need this and do not otherwise want
+        to enable the members intent.
 
     :param channel: The location where the typing originated from.
     :type channel: :class:`abc.Messageable`
