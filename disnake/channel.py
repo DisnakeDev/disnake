@@ -975,9 +975,24 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         .. versionadded:: 1.7
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
+    slowmode_delay: :class:`int`
+        The number of seconds a member must wait between sending messages
+        in this channel. A value of `0` denotes that it is disabled.
+        Bots and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages` bypass slowmode.
+
+        .. versionadded:: 2.3
+    last_message_id: Optional[:class:`int`]
+        The last message ID of the message sent to this channel. It may
+        *not* point to an existing or valid message.
+
+        .. versionadded:: 2.3
     """
 
-    __slots__ = ()
+    __slots__ = (
+        "slowmode_delay",
+        "last_message_id",
+    )
 
     def __repr__(self) -> str:
         attrs = [
@@ -992,6 +1007,11 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
+
+    def _update(self, guild: Guild, data: VoiceChannelPayload) -> None:
+        super()._update(guild, data)
+        self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
 
     async def _get_channel(self):
         return self
@@ -1009,6 +1029,27 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             {"bitrate": self.bitrate, "user_limit": self.user_limit}, name=name, reason=reason
         )
 
+    @property
+    def last_message(self) -> Optional[Message]:
+        """Fetches the last message from this channel in cache.
+
+        The message might not be valid or point to an existing message.
+
+        .. admonition:: Reliable Fetching
+            :class: helpful
+
+            For a slightly more reliable method of fetching the
+            last message, consider using either :meth:`history`
+            or :meth:`fetch_message` with the :attr:`last_message_id`
+            attribute.
+
+        Returns
+        ---------
+        Optional[:class:`Message`]
+            The last message in this channel or ``None`` if not found.
+        """
+        return self._state._get_message(self.last_message_id) if self.last_message_id else None
+
     @overload
     async def edit(
         self,
@@ -1022,6 +1063,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         rtc_region: Optional[VoiceRegion] = ...,
         video_quality_mode: VideoQualityMode = ...,
+        slowmode_delay: int = ...,
         reason: Optional[str] = ...,
     ) -> Optional[VoiceChannel]:
         ...
@@ -1074,6 +1116,11 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             The camera video quality for the voice channel's participants.
 
             .. versionadded:: 2.0
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+
+            .. versionadded:: 2.3
 
         Raises
         ------
