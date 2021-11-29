@@ -1698,10 +1698,7 @@ class ConnectionState:
             guild = self._get_guild(raw.guild_id)
             if guild is not None:
                 raw.member = Member(data=member_data, guild=guild, state=self)
-            else:
-                raw.member = None
-        else:
-            raw.member = None
+
         self.dispatch("raw_typing", raw)
 
         if channel is not None:
