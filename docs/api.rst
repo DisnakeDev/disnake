@@ -363,7 +363,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,
     then this event will not be called. Consider using :func:`on_raw_typing` instead.
 
-    This requires :attr:`Intents.typing` to be enabled.
+    This requires :attr:`Intents.typing` and :attr:`Intents.guilds` to be enabled.
 
     .. note::
 
@@ -381,6 +381,16 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :type user: Union[:class:`User`, :class:`Member`]
     :param when: When the typing started as an aware datetime in UTC.
     :type when: :class:`datetime.datetime`
+
+.. function:: on_raw_typing(data)
+
+    Called when someone begins typing a message.
+
+    This is similar to :func:`on_typing` except that it is called regardless of
+    whether :attr:`Intents.typing`, :attr:`Intents.members` and :attr:`Intents.guilds` are enabled.
+
+    :param data: The raw event payload data.
+    :type data: :class:`RawTypingEvent`
 
 .. function:: on_message(message)
 
@@ -4462,6 +4472,14 @@ RawGuildScheduledEventUserActionEvent
 .. attributetable:: RawGuildScheduledEventUserActionEvent
 
 .. autoclass:: RawGuildScheduledEventUserActionEvent()
+    :members:
+
+RawTypingEvent
+~~~~~~~~~~~~~~
+
+.. attributetable:: RawTypingEvent
+
+.. autoclass:: RawTypingEvent()
     :members:
 
 PartialWebhookGuild
