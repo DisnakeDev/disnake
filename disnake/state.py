@@ -620,7 +620,6 @@ class ConnectionState:
             guild = None
         else:
             channel = guild and guild._resolve_channel(channel_id)
-
         return channel or PartialMessageable(state=self, id=channel_id), guild
 
     async def chunker(
@@ -1691,6 +1690,19 @@ class ConnectionState:
 
     def parse_typing_start(self, data: TypingEvent) -> None:
         channel, guild = self._get_guild_channel(data)
+        raw = RawTypingEvent(data)
+
+        member_data = data.get("member")
+        if member_data:
+            guild = self._get_guild(raw.guild_id)
+            if guild is not None:
+                raw.member = Member(data=member_data, guild=guild, state=self)
+            else:
+                raw.member = None
+        else:
+            raw.member = None
+        self.dispatch("raw_typing", raw)
+
         if channel is not None:
             member = None
             user_id = utils._get_as_snowflake(data, "user_id")
