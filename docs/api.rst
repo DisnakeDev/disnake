@@ -387,7 +387,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     Called when someone begins typing a message.
 
     This is similar to :func:`on_typing` except that it is called regardless of
-    whether :attr:`Intents.typing`, :attr:`Intents.members` and :attr:`Intents.guilds` are enabled.
+    whether :attr:`Intents.members` and :attr:`Intents.guilds` are enabled.
 
     :param data: The raw event payload data.
     :type data: :class:`RawTypingEvent`
