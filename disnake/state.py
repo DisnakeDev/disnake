@@ -1712,9 +1712,6 @@ class ConnectionState:
                 # user_id won't be None
                 member = guild.get_member(user_id)  # type: ignore
 
-                if member is None and member_data:
-                    member = Member(data=member_data, state=self, guild=guild)
-
             elif isinstance(channel, GroupChannel):
                 member = utils.find(lambda x: x.id == user_id, channel.recipients)
 
