@@ -1042,7 +1042,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     def is_nsfw(self) -> bool:
         """Checks if the channel is NSFW.
-        
+
         :return type: :class:`bool`
         """
         return self.nsfw
