@@ -612,10 +612,10 @@ class ConnectionState:
             if channel is None:
                 if "author" in data:
                     # MessagePayload
-                    user_id = utils._get_as_snowflake(data["author"], "id")
+                    user_id = int(data["author"]["id"])
                 else:
                     # TypingEvent
-                    user_id = utils._get_as_snowflake(data, "user_id")
+                    user_id = int(data["user_id"])
                 channel = DMChannel._from_message(self, channel_id, user_id)
             guild = None
         else:

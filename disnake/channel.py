@@ -1860,9 +1860,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         return f"<DMChannel id={self.id} recipient={self.recipient!r}>"
 
     @classmethod
-    def _from_message(
-        cls: Type[DMC], state: ConnectionState, channel_id: int, user_id: Optional[int]
-    ) -> DMC:
+    def _from_message(cls: Type[DMC], state: ConnectionState, channel_id: int, user_id: int) -> DMC:
         self: DMC = cls.__new__(cls)
         self._state = state
         self.id = channel_id
