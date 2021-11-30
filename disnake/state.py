@@ -1693,24 +1693,23 @@ class ConnectionState:
         channel, guild = self._get_guild_channel(data)
         raw = RawTypingEvent(data)
 
+        user_id = int(data["user_id"])
         member_data = data.get("member")
         if member_data and guild is not None:
-            raw.member = Member(data=member_data, guild=guild, state=self)
+            # try member cache first
+            raw.member = guild.get_member(user_id) or Member(
+                data=member_data, guild=guild, state=self
+            )
 
         self.dispatch("raw_typing", raw)
 
         if channel is not None:
             member = None
-            user_id = utils._get_as_snowflake(data, "user_id")
             if raw.member is not None:
                 member = raw.member
 
             elif isinstance(channel, DMChannel):
                 member = channel.recipient
-
-            elif isinstance(channel, (Thread, TextChannel)) and guild is not None:
-                # user_id won't be None
-                member = guild.get_member(user_id)  # type: ignore
 
             elif isinstance(channel, GroupChannel):
                 member = utils.find(lambda x: x.id == user_id, channel.recipients)
