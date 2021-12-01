@@ -282,7 +282,7 @@ def button(
     def decorator(func: ItemCallbackType) -> Button:
         if not inspect.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
-        if hasattr(func, "__item_callback__"):
+        if hasattr(func, "__item_decorated_callback__"):
             raise TypeError("Callback is already an item")
 
         button = Button(
@@ -294,7 +294,7 @@ def button(
             emoji=emoji,
             row=row,
         )
-        button.__item_callback__ = func
+        button.__item_decorated_callback__ = func
         return button
 
     return decorator

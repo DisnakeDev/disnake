@@ -343,7 +343,7 @@ def select(
     def decorator(func: ItemCallbackType) -> Select:
         if not inspect.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
-        if hasattr(func, "__item_callback__"):
+        if hasattr(func, "__item_decorated_callback__"):
             raise TypeError("Callback is already an item")
 
         select = Select(
@@ -355,7 +355,7 @@ def select(
             disabled=disabled,
             row=row,
         )
-        select.__item_callback__ = func
+        select.__item_decorated_callback__ = func
         return select
 
     return decorator

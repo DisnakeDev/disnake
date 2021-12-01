@@ -152,7 +152,7 @@ class View:
         children: List[Item] = []
         for base in reversed(cls.__mro__):
             for member in base.__dict__.values():
-                if hasattr(member, "__item_callback__"):
+                if hasattr(member, "__item_decorated_callback__"):
                     children.append(member)
 
         if len(children) > 25:
@@ -165,9 +165,9 @@ class View:
         self.children: List[Item] = []
         for item in self.__view_children_items__:
             item = item._copy()
-            item.callback = partial(item.__item_callback__, self, item)
+            item.callback = partial(item.__item_decorated_callback__, self, item)
             item._view = self
-            setattr(self, item.__item_callback__.__name__, item)
+            setattr(self, item.__item_decorated_callback__.__name__, item)
             self.children.append(item)
 
         self.__weights = _ViewWeights(self.children)
