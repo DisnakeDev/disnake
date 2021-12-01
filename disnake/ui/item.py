@@ -145,6 +145,9 @@ class Item(Generic[V]):
 I_co = TypeVar("I_co", bound=Item, covariant=True)
 
 
+# while the decorators don't actually return a descriptor that matches this protocol,
+# this protocol ensures that type checkers don't complain about statements like `self.button.disabled = True`,
+# which work as `View.__init__` replaces the handler with the item
 class DecoratedItem(Protocol[I_co]):
     @overload
     def __get__(self, obj: None, objtype: Any) -> ItemCallbackType:
