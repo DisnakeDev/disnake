@@ -164,10 +164,11 @@ class View:
         self.timeout = timeout
         self.children: List[Item] = []
         for item in self.__view_children_items__:
+            dec_callback = item.__item_decorated_callback__
             item = item._copy()
-            item.callback = partial(item.__item_decorated_callback__, self, item)
+            item.callback = partial(dec_callback, self, item)
             item._view = self
-            setattr(self, item.__item_decorated_callback__.__name__, item)
+            setattr(self, dec_callback.__name__, item)
             self.children.append(item)
 
         self.__weights = _ViewWeights(self.children)

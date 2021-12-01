@@ -62,17 +62,11 @@ class Item(Generic[V]):
     .. versionadded:: 2.0
     """
 
-    __original_kwargs__: Dict[str, Any]
-
+    # these two only exist on decorator-created items
+    __item_original_kwargs__: Dict[str, Any]
     __item_decorated_callback__: ItemCallbackType
 
     __item_repr_attributes__: Tuple[str, ...] = ("row",)
-
-    # similar to ext.commands.Command.__new__
-    def __new__(cls: Type[I], *args: Any, **kwargs: Any) -> I:
-        self = super().__new__(cls)
-        self.__original_kwargs__ = kwargs.copy()
-        return self
 
     def __init__(self):
         self._view: Optional[V] = None
@@ -91,11 +85,15 @@ class Item(Generic[V]):
 
     def _copy(self: I) -> I:
         # this copy method is only meant for decorator-created items
-        item = self.__class__(**self.__original_kwargs__)
-        item.__original_kwargs__ = self.__original_kwargs__  # discard copy created by __new__
-        if hasattr(self, "__item_decorated_callback__"):
-            item.__item_decorated_callback__ = self.__item_decorated_callback__
-        return item
+        if not hasattr(self, "__item_original_kwargs__"):
+            raise RuntimeError(
+                "Cannot copy item without '__item_original_kwargs__' property. "
+                "Copying items is only supported for decorator-created instances"
+            )
+
+        # we don't copy `__item_original_kwargs__` and `__item_decorated_callback__` here,
+        # as item copies are not expected to be copied again
+        return self.__class__(**self.__item_original_kwargs__)
 
     def refresh_component(self, component: Component) -> None:
         return None

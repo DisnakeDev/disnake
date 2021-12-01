@@ -346,15 +346,17 @@ def select(
         if hasattr(func, "__item_decorated_callback__"):
             raise TypeError("Callback is already an item")
 
-        select = Select(
-            custom_id=custom_id,
-            placeholder=placeholder,
-            min_values=min_values,
-            max_values=max_values,
-            options=options,
-            disabled=disabled,
-            row=row,
-        )
+        kwargs = {
+            "placeholder": placeholder,
+            "custom_id": custom_id,
+            "row": row,
+            "min_values": min_values,
+            "max_values": max_values,
+            "options": options,
+            "disabled": disabled,
+        }
+        select = Select(**kwargs)
+        select.__item_original_kwargs__ = kwargs
         select.__item_decorated_callback__ = func
         return select
 

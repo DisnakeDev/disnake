@@ -285,15 +285,17 @@ def button(
         if hasattr(func, "__item_decorated_callback__"):
             raise TypeError("Callback is already an item")
 
-        button = Button(
-            style=style,
-            label=label,
-            disabled=disabled,
-            custom_id=custom_id,
-            url=None,
-            emoji=emoji,
-            row=row,
-        )
+        kwargs = {
+            "style": style,
+            "custom_id": custom_id,
+            "url": None,
+            "disabled": disabled,
+            "label": label,
+            "emoji": emoji,
+            "row": row,
+        }
+        button = Button(**kwargs)
+        button.__item_original_kwargs__ = kwargs
         button.__item_decorated_callback__ = func
         return button
 
