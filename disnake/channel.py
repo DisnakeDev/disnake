@@ -1090,6 +1090,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
+
     @overload
     async def edit(
         self,
