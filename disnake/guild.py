@@ -3413,7 +3413,7 @@ class Guild(Hashable):
     ) -> Optional[Member]:
         """|coro|
 
-        Time outs the member from the guild; until then, the member will not be able to interact with the guild.
+        Times out the member from the guild; until then, the member will not be able to interact with the guild.
 
         The user must meet the :class:`abc.Snowflake` abc.
 
@@ -3424,10 +3424,10 @@ class Guild(Hashable):
         Parameters
         -----------
         user: :class:`abc.Snowflake`
-            The member to time out.
+            The member to timeout.
         seconds: Optional[:class:`int`]
-            The seconds to time out the member.
-            Set to ``None`` or ``0`` to remove the time out.
+            The seconds to timeout the member.
+            Set to ``None`` or ``0`` to remove the timeout.
             Support up to ``2419200`` seconds (28 days) in the future.
         reason: Optional[:class:`str`]
             The reason for doing this action. Shows up on the audit log.
@@ -3435,9 +3435,9 @@ class Guild(Hashable):
         Raises
         -------
         Forbidden
-            You do not have permissions to time out this member.
+            You do not have permissions to timeout this member.
         HTTPException
-            Time outing the member failed.
+            Timing out the member failed.
 
         Returns
         --------

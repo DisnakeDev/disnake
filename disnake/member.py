@@ -658,7 +658,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def current_timeout(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the datetime when the time out expires, if any.
+        """Optional[:class:`datetime.datetime`]: Returns the datetime when the timeout expires, if any.
 
         .. versionadded:: 2.3
         """
@@ -758,8 +758,8 @@ class Member(disnake.abc.Messageable, _UserTag):
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
         guild_timeout: Optional[:class:`datetime.datetime`]
-            The datetime when the time out expires; until then, the member will not be able to interact with the guild.
-            Set to ``None`` to remove the time out. Support up to 28 days in the future.
+            The datetime when the timeout expires; until then, the member will not be able to interact with the guild.
+            Set to ``None`` to remove the timeout. Support up to 28 days in the future.
 
             .. versionadded:: 2.3
         reason: Optional[:class:`str`]
@@ -1011,17 +1011,17 @@ class Member(disnake.abc.Messageable, _UserTag):
         Parameters
         ----------
         seconds: Optional[:class:`int`]
-            The seconds to time out. Set to ``None`` or ``0`` to remove the timeout.
+            The seconds to timeout. Set to ``None`` or ``0`` to remove the timeout.
             Support up to ``2419200`` seconds (28 days) in the future.
         reason: Optional[:class:`str`]
-            The reason for this time out. Appears on the audit log.
+            The reason for this timeout. Appears on the audit log.
 
         Raises
         -------
         Forbidden
-            You do not have permissions to time out this member.
+            You do not have permissions to timeout this member.
         HTTPException
-            Time outing the member failed.
+            Timing out the member failed.
 
         Returns
         -------

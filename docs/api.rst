@@ -3616,7 +3616,7 @@ AuditLogDiff
 
     .. attribute:: guild_timeout
 
-        The datetime when the time out expires, if any.
+        The datetime when the timeout expires, if any.
 
         :type: :class:`datetime.datetime`
 
