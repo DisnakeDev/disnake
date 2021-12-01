@@ -3430,7 +3430,7 @@ class Guild(Hashable):
             Set to ``None`` or ``0`` to remove the timeout.
             Support up to ``2419200`` seconds (28 days) in the future.
         reason: Optional[:class:`str`]
-            The reason for doing this action. Shows up on the audit log.
+            The reason for this timeout. Shows up on the audit log.
 
         Raises
         -------

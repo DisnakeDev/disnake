@@ -576,7 +576,7 @@ class Permissions(BaseFlags):
 
     @flag_value
     def moderate_members(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can perform limited moderation actions (time out).
+        """:class:`bool`: Returns ``True`` if a user can perform limited moderation actions (timeout).
 
         .. versionadded:: 2.3
         """
