@@ -32,9 +32,11 @@ from typing import (
     Generic,
     Optional,
     TYPE_CHECKING,
+    Protocol,
     Tuple,
     Type,
     TypeVar,
+    overload,
 )
 
 from ..interactions import MessageInteraction
@@ -62,10 +64,6 @@ class Item(Generic[V]):
     .. versionadded:: 2.0
     """
 
-    # these two only exist on decorator-created items
-    __item_original_kwargs__: Dict[str, Any]
-    __item_decorated_callback__: ItemCallbackType
-
     __item_repr_attributes__: Tuple[str, ...] = ("row",)
 
     def __init__(self):
@@ -82,18 +80,6 @@ class Item(Generic[V]):
 
     def to_component_dict(self) -> Dict[str, Any]:
         raise NotImplementedError
-
-    def _copy(self: I) -> I:
-        # this copy method is only meant for decorator-created items
-        if not hasattr(self, "__item_original_kwargs__"):
-            raise RuntimeError(
-                "Cannot copy item without '__item_original_kwargs__' property. "
-                "Copying items is only supported for decorator-created instances"
-            )
-
-        # we don't copy `__item_original_kwargs__` and `__item_decorated_callback__` here,
-        # as item copies are not expected to be copied again
-        return self.__class__(**self.__item_original_kwargs__)
 
     def refresh_component(self, component: Component) -> None:
         return None
@@ -154,3 +140,16 @@ class Item(Generic[V]):
             The interaction that triggered this UI item.
         """
         pass
+
+
+I_co = TypeVar("I_co", bound=Item, covariant=True)
+
+
+class DecoratedItem(Protocol[I_co]):
+    @overload
+    def __get__(self, obj: None, objtype: Any) -> ItemCallbackType:
+        ...
+
+    @overload
+    def __get__(self, obj: Any, objtype: Any) -> I_co:
+        ...

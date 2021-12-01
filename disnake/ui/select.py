@@ -27,7 +27,7 @@ from typing import List, Optional, TYPE_CHECKING, Tuple, TypeVar, Type, Callable
 import inspect
 import os
 
-from .item import Item, ItemCallbackType
+from .item import Item, ItemCallbackType, DecoratedItem
 from ..enums import ComponentType
 from ..partial_emoji import PartialEmoji
 from ..emoji import Emoji
@@ -301,7 +301,7 @@ def select(
     options: List[SelectOption] = MISSING,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], Select]:
+) -> Callable[[ItemCallbackType], DecoratedItem[Select]]:
     """A decorator that attaches a select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -310,10 +310,6 @@ def select(
 
     In order to get the selected items that the user has chosen within the callback
     use :attr:`Select.values`.
-
-    .. versionchanged:: 2.3
-        Returns a :class:`Select` object instead of the decorated function when
-        applied to a function.
 
     Parameters
     ------------
@@ -340,13 +336,12 @@ def select(
         Whether the select is disabled or not. Defaults to ``False``.
     """
 
-    def decorator(func: ItemCallbackType) -> Select:
+    def decorator(func: ItemCallbackType) -> DecoratedItem[Select]:
         if not inspect.iscoroutinefunction(func):
-            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
-        if hasattr(func, "__item_decorated_callback__"):
-            raise TypeError("Callback is already an item")
+            raise TypeError("select function must be a coroutine function")
 
-        kwargs = {
+        func.__discord_ui_model_type__ = Select
+        func.__discord_ui_model_kwargs__ = {
             "placeholder": placeholder,
             "custom_id": custom_id,
             "row": row,
@@ -355,9 +350,6 @@ def select(
             "options": options,
             "disabled": disabled,
         }
-        select = Select(**kwargs)
-        select.__item_original_kwargs__ = kwargs
-        select.__item_decorated_callback__ = func
-        return select
+        return func  # type: ignore
 
     return decorator
