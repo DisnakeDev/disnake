@@ -387,10 +387,14 @@ class ApplicationCommandInteractionDataResolved:
             user_id = int(str_id)
             member = members.get(str_id)
             if member is not None:
-                self.members[user_id] = guild.get_member(user_id) or Member(
-                    data={**member, "user": user},  # type: ignore
-                    guild=guild,  # type: ignore
-                    state=state,
+                self.members[user_id] = (
+                    guild
+                    and guild.get_member(user_id)
+                    or Member(
+                        data={**member, "user": user},  # type: ignore
+                        guild=guild,  # type: ignore
+                        state=state,
+                    )
                 )
             else:
                 self.users[user_id] = User(state=state, data=user)

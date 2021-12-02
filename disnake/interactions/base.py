@@ -163,10 +163,12 @@ class Interaction:
             except KeyError:
                 pass
             else:
-                author_id = data["member"]["user"]["id"]
-                self.author = guild.get_member(int(author_id)) or Member(
-                    state=self._state, guild=guild, data=member
-                )  # type: ignore
+                author_id = int(member["user"]["id"])  # type: ignore
+                self.author = (
+                    guild
+                    and guild.get_member(author_id)  # type: ignore
+                    or Member(state=self._state, guild=guild, data=member)  # type: ignore
+                )
                 self._permissions = int(member.get("permissions", 0))
         else:
             try:
@@ -529,8 +531,8 @@ class Interaction:
             sender = self.followup.send
         else:
             sender = self.response.send_message
-        await sender(  # type: ignore
-            content=content,
+        await sender(
+            content=content,  # type: ignore
             embed=embed,
             embeds=embeds,
             file=file,
