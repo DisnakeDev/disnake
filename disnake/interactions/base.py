@@ -163,7 +163,10 @@ class Interaction:
             except KeyError:
                 pass
             else:
-                self.author = Member(state=self._state, guild=guild, data=member)  # type: ignore
+                author_id = data["member"]["user"]["id"]
+                self.author = guild.get_member(int(author_id)) or Member(
+                    state=self._state, guild=guild, data=member
+                )  # type: ignore
                 self._permissions = int(member.get("permissions", 0))
         else:
             try:
