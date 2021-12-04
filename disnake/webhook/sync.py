@@ -45,8 +45,6 @@ from typing import (
     Optional,
     TYPE_CHECKING,
     Tuple,
-    Type,
-    TypeVar,
     Union,
     overload,
 )
