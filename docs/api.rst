@@ -1614,11 +1614,6 @@ of :class:`enum.Enum`.
         The "Sketchy Artist" activity.
 
         .. versionadded:: 2.3
-    .. attribute:: putt_party
-
-        The "Putt Party" activity.
-
-        .. versionadded:: 2.3
     .. attribute:: watch_together
 
         The "Watch Together" activity, a Youtube application.
