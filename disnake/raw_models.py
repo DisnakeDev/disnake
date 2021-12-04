@@ -26,6 +26,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Set, List
 
+import datetime
+
 if TYPE_CHECKING:
     from .types.raw_models import (
         MessageDeleteEvent,
@@ -36,6 +38,7 @@ if TYPE_CHECKING:
         ReactionClearEmojiEvent,
         MemberScreeningRejectEvent,
         IntegrationDeleteEvent,
+        TypingEvent,
     )
     from .message import Message
     from .partial_emoji import PartialEmoji
@@ -52,6 +55,7 @@ __all__ = (
     "RawMemberScreeningRejectEvent",
     "RawIntegrationDeleteEvent",
     "RawGuildScheduledEventUserActionEvent",
+    "RawTypingEvent",
 )
 
 
@@ -323,3 +327,33 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
         self.event_id: int = int(data["guild_scheduled_event_id"])
         self.user_id: int = int(data["user_id"])
         self.guild_id: int = int(data["guild_id"])
+
+
+class RawTypingEvent(_RawReprMixin):
+    """Represents the payload for :func:`on_raw_typing` event.
+
+    Attributes
+    -----------
+    user_id: :class:`int`
+        The ID of the user who started typing.
+    channel_id: :class:`int`
+        The ID of the channel where the user started typing.
+    guild_id: Optional[:class:`int`]
+        The ID of the guild where the user started typing or ``None`` if it was in a DM.
+    member: Optional[:class:`Member`]
+        The member object of the user who started typing or ``None`` if it was in a DM.
+    timestamp: :class:`datetime.datetime`
+        The timestamp when the user started typing.
+    """
+
+    __slots__ = ("user_id", "channel_id", "guild_id", "member", "timestamp")
+
+    def __init__(self, data: TypingEvent) -> None:
+        self.user_id: int = int(data["user_id"])
+        self.channel_id: int = int(data["channel_id"])
+        try:
+            self.guild_id: Optional[int] = int(data["guild_id"])
+        except KeyError:
+            self.guild_id: Optional[int] = None
+        self.member: Optional[Member] = None
+        self.timestamp: datetime.datetime = datetime.datetime.utcfromtimestamp(data["timestamp"])
