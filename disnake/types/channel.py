@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 from typing import List, Literal, Optional, TypedDict, Union
 from .user import PartialUser
 from .snowflake import Snowflake
-from .threads import ThreadMetadata, ThreadMember, ThreadArchiveDuration
+from .threads import ThreadArchiveDurationT, ThreadMetadata, ThreadMember
 
 
 OverwriteType = Literal[0, 1]
@@ -63,7 +63,7 @@ class _TextChannelOptional(TypedDict, total=False):
     last_message_id: Optional[Snowflake]
     last_pin_timestamp: str
     rate_limit_per_user: int
-    default_auto_archive_duration: ThreadArchiveDuration
+    default_auto_archive_duration: ThreadArchiveDurationT
 
 
 class TextChannel(_BaseGuildChannel, _TextChannelOptional):

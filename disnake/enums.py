@@ -61,6 +61,7 @@ __all__ = (
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
+    "ThreadArchiveDuration",
 )
 
 
@@ -677,6 +678,13 @@ class GuildScheduledEventStatus(Enum):
 
 class GuildScheduledEventPrivacyLevel(Enum):
     guild_only = 2
+
+
+class ThreadArchiveDuration(Enum):
+    hour = 60
+    day = 1440
+    three_days = 4320
+    week = 10080
 
 
 T = TypeVar("T")
