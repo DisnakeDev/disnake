@@ -26,10 +26,10 @@ from __future__ import annotations
 from typing import List, Literal, Optional, TypedDict, Union
 
 from .snowflake import Snowflake
-from ..enums import ThreadArchiveDuration as ArchiveDuration
+from ..enums import ThreadArchiveDuration as ThreadArchiveDurationT
 
 ThreadType = Literal[10, 11, 12]
-ThreadArchiveDuration = Union[Literal[60, 1440, 4320, 10080], ArchiveDuration]
+ThreadArchiveDuration = Union[Literal[60, 1440, 4320, 10080], ThreadArchiveDurationT]
 
 
 class ThreadMember(TypedDict):
