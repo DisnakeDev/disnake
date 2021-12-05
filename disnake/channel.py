@@ -51,7 +51,6 @@ from .enums import (
     try_enum,
     VoiceRegion,
     VideoQualityMode,
-    PartyType,
 )
 from .mixins import Hashable
 from .object import Object
@@ -244,11 +243,17 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
-        """:class:`bool`: Checks if the channel is NSFW."""
+        """Checks if the channel is NSFW.
+
+        :return type: :class:`bool`
+        """
         return self.nsfw
 
     def is_news(self) -> bool:
-        """:class:`bool`: Checks if the channel is a news channel."""
+        """Checks if the channel is a news channel.
+
+        :return type: :class:`bool`
+        """
         return self._type == ChannelType.news.value
 
     @property
@@ -1549,7 +1554,10 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ChannelType.category
 
     def is_nsfw(self) -> bool:
-        """:class:`bool`: Checks if the category is NSFW."""
+        """Checks if the category is NSFW.
+
+        :return type: :class:`bool`
+        """
         return self.nsfw
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
@@ -1814,7 +1822,10 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
         return base
 
     def is_nsfw(self) -> bool:
-        """:class:`bool`: Checks if the channel is NSFW."""
+        """Checks if the channel is NSFW.
+
+        :return type: :class:`bool`
+        """
         return self.nsfw
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
@@ -1953,13 +1964,13 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         return f"<DMChannel id={self.id} recipient={self.recipient!r}>"
 
     @classmethod
-    def _from_message(cls: Type[DMC], state: ConnectionState, channel_id: int) -> DMC:
+    def _from_message(cls: Type[DMC], state: ConnectionState, channel_id: int, user_id: int) -> DMC:
         self: DMC = cls.__new__(cls)
         self._state = state
         self.id = channel_id
-        self.recipient = None
         # state.user won't be None here
         self.me = state.user  # type: ignore
+        self.recipient = state.get_user(user_id) if user_id != self.me.id else None
         return self
 
     @property

@@ -865,15 +865,20 @@ class BaseWebhook(Hashable):
         self.source_guild: Optional[PartialWebhookGuild] = source_guild
 
     def is_partial(self) -> bool:
-        """:class:`bool`: Whether the webhook is a "partial" webhook.
+        """Whether the webhook is a "partial" webhook.
 
-        .. versionadded:: 2.0"""
+        .. versionadded:: 2.0
+
+        :return type: :class:`bool`
+        """
         return self.channel_id is None
 
     def is_authenticated(self) -> bool:
-        """:class:`bool`: Whether the webhook is authenticated with a bot token.
+        """Whether the webhook is authenticated with a bot token.
 
         .. versionadded:: 2.0
+
+        :return type: :class:`bool`
         """
         return self.auth_token is not None
 

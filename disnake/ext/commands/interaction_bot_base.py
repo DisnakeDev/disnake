@@ -39,7 +39,6 @@ from typing import (
     TYPE_CHECKING,
     TypeVar,
     Union,
-    cast,
 )
 import warnings
 
@@ -898,6 +897,15 @@ class InteractionBotBase(CommonBotBase):
     async def on_slash_command_error(
         self, interaction: ApplicationCommandInteraction, exception: errors.CommandError
     ) -> None:
+        """|coro|
+
+        The default slash command error handler provided by the bot.
+
+        By default this prints to :data:`sys.stderr` however it could be
+        overridden to have a different implementation.
+
+        This only fires if you do not specify any listeners for slash command error.
+        """
         if self.extra_events.get("on_slash_command_error", None):
             return
 
@@ -917,6 +925,10 @@ class InteractionBotBase(CommonBotBase):
     async def on_user_command_error(
         self, interaction: ApplicationCommandInteraction, exception: errors.CommandError
     ) -> None:
+        """|coro|
+
+        Similar to :meth:`on_slash_command_error` but for user commands.
+        """
         if self.extra_events.get("on_user_command_error", None):
             return
         command = interaction.application_command
@@ -933,6 +945,10 @@ class InteractionBotBase(CommonBotBase):
     async def on_message_command_error(
         self, interaction: ApplicationCommandInteraction, exception: errors.CommandError
     ) -> None:
+        """|coro|
+
+        Similar to :meth:`on_slash_command_error` but for message commands.
+        """
         if self.extra_events.get("on_message_command_error", None):
             return
         command = interaction.application_command

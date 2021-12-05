@@ -25,7 +25,6 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import sys
 import re
@@ -92,7 +91,6 @@ if TYPE_CHECKING:
         channel,
         widget,
         threads,
-        voice,
         sticker,
     )
     from .types.snowflake import Snowflake, SnowflakeList
