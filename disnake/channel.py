@@ -52,6 +52,7 @@ from .enums import (
     VoiceRegion,
     VideoQualityMode,
     PartyType,
+    ThreadArchiveDuration as ArchiveDuration,
 )
 from .mixins import Hashable
 from .object import Object
@@ -722,9 +723,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             A snowflake representing the message to create the thread with.
             If ``None`` is passed then a private thread is created.
             Defaults to ``None``.
-        auto_archive_duration: :class:`int`
+        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         type: Optional[:class:`ChannelType`]
             The type of thread to create. If a ``message`` is passed then this parameter
             is ignored, as a thread created with a message is always a public thread.
@@ -761,6 +763,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         if type is None:
             type = ChannelType.private_thread
+
+        if isinstance(auto_archive_duration, ArchiveDuration):
+            auto_archive_duration = auto_archive_duration.value
 
         if message is None:
             data = await self._state.http.start_thread_without_message(

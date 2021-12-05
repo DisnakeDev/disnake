@@ -49,7 +49,7 @@ from . import utils
 from .reaction import Reaction
 from .emoji import Emoji
 from .partial_emoji import PartialEmoji
-from .enums import MessageType, ChannelType, InteractionType, try_enum
+from .enums import MessageType, ChannelType, InteractionType, try_enum, ThreadArchiveDuration as ArchiveDuration
 from .errors import InvalidArgument, HTTPException
 from .components import _component_factory
 from .embeds import Embed
@@ -1737,9 +1737,10 @@ class Message(Hashable):
         -----------
         name: :class:`str`
             The name of the thread.
-        auto_archive_duration: :class:`int`
+        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
@@ -1763,6 +1764,9 @@ class Message(Hashable):
         """
         if self.guild is None:
             raise InvalidArgument("This message does not have guild info attached.")
+
+        if isinstance(auto_archive_duration, ArchiveDuration):
+            auto_archive_duration = auto_archive_duration.value
 
         default_auto_archive_duration: ThreadArchiveDuration = getattr(
             self.channel, "default_auto_archive_duration", 1440
