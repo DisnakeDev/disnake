@@ -1708,15 +1708,6 @@ class ConnectionState:
             if raw.member is not None:
                 member = raw.member
 
-            elif isinstance(channel, (Thread, TextChannel, VoiceChannel)) and guild is not None:
-                # user_id won't be None
-                member = guild.get_member(user_id)  # type: ignore
-
-                if member is None:
-                    member_data = data.get("member")
-                    if member_data:
-                        member = Member(data=member_data, state=self, guild=guild)
-
             elif isinstance(channel, DMChannel):
                 member = channel.recipient
 
