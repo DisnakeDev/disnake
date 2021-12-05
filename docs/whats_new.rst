@@ -33,7 +33,7 @@ Documentation
 - Update repository links to new organization
 - Fix duplicate entries in documentation
 - Fix incorrect ``versionadded`` tags
-- Add docs for :class:`InteractionBot` and :class:`AutoShardedInteractionBot`
+- Add documentation for :class:`InteractionBot <ext.commands.InteractionBot>` and :class:`AutoShardedInteractionBot <ext.commands.AutoShardedInteractionBot>`
 
 .. _vp2p2p1:
 
@@ -107,9 +107,9 @@ New Features
 - Add :class:`GuildApplicationCommandPermissions`
 - Add :class:`PartialGuildApplicationCommandPermissions`
 - Add :attr:`ApplicationCommandInteraction.filled_options` property
-- Add :func:`on_slash_command_completion`
-- Add :func:`on_user_command_completion`
-- Add :func:`on_message_command_completion`
+- Add :func:`on_slash_command_completion <.ext.commands.on_slash_command_completion>`
+- Add :func:`on_user_command_completion <.ext.commands.on_user_command_completion>`
+- Add :func:`on_message_command_completion <.ext.commands.on_message_command_completion>`
 - |commands| Add :class:`AutoShardedInteractionBot <ext.commands.AutoShardedInteractionBot>`
 - |commands| Add :class:`InteractionBot <ext.commands.InteractionBot>`
 - |commands| Add :func:`guild_permissions <ext.commands.guild_permissions>`
@@ -132,10 +132,10 @@ This is the first stable version of this discord.py 2.0 fork.
 New Features
 ~~~~~~~~~~~~~~
 
-- Add interaction hierarchy. :class:`interaction` is now the base class for other interaction types, such as :class:`ApplicationCommandInteraction` and :class:`MessageInteraction`.
+- Add interaction hierarchy. :class:`Interaction` is now the base class for other interaction types, such as :class:`ApplicationCommandInteraction` and :class:`MessageInteraction`.
 - Add interaction data wrappers: :class:`ApplicationCommandInteractionData` and :class:`MessageInteractionData`.
 - Add interaction data option wrapper: :class:`ApplicationCommandInteractionDataOption`
-- Add :meth:`Client.bulk_edit_guild_command_permissions`
+- Add :meth:`Client.bulk_edit_command_permissions`
 - Add :meth:`Client.bulk_overwrite_global_commands`
 - Add :meth:`Client.bulk_overwrite_guild_commands`
 - Add :meth:`Client.create_global_command`
@@ -150,7 +150,6 @@ New Features
 - Add :meth:`Client.fetch_global_command`
 - Add :meth:`Client.fetch_guild_commands`
 - Add :meth:`Client.fetch_guild_command`
-- Add :meth:`Client.fetch_guild_command_permissions`
 - Add :meth:`Client.get_global_command`
 - Add :meth:`Client.get_global_command_named`
 - Add :meth:`Client.get_guild_application_commands`
@@ -174,7 +173,7 @@ New Features
 - |commands| Add :func:`slash_command <ext.commands.slash_command>` for slash command definitions.
 - |commands| Add :func:`user_command <ext.commands.user_command>` for user command definitions (context menus).
 - |commands| Add :func:`message_command <ext.commands.message_command>` for message command definitions (context menus).
-- |commands| Add :func:`param <ext.commands.param>` (with an alias :func:`Param <ext.commands.Param>`) in case :class:`ParamInfo <ext.commands.ParamInfo>` causes linter errors.
+- |commands| Add :func:`Param <ext.commands.Param>` (with an alias :func:`param <ext.commands.param>`) in case :class:`ParamInfo <ext.commands.ParamInfo>` causes linter errors.
 - |commands| Add :meth:`Bot.slash_command <ext.commands.Bot.slash_command>` for slash command definitions.
 - |commands| Add :meth:`Bot.user_command <ext.commands.Bot.user_command>` for user command definitions (context menus).
 - |commands| Add :meth:`Bot.message_command <ext.commands.Bot.message_command>` for message command definitions (context menus).

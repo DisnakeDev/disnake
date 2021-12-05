@@ -253,7 +253,6 @@ class PartyType(Enum):
     spellcast = 852509694341283871
     awkword = 879863881349087252
     sketchy_artist = 879864070101172255
-    putt_party = 832012854282158180
     watch_together = 880218394199220334
 
 

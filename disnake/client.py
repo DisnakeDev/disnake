@@ -327,12 +327,14 @@ class Client:
         return float("nan") if not ws else ws.latency
 
     def is_ws_ratelimited(self) -> bool:
-        """:class:`bool`: Whether the websocket is currently rate limited.
+        """Whether the websocket is currently rate limited.
 
         This can be useful to know when deciding whether you should query members
         using HTTP or via the gateway.
 
         .. versionadded:: 1.6
+
+        :return type: :class:`bool`
         """
         if self.ws:
             return self.ws.is_ratelimited()
@@ -410,10 +412,12 @@ class Client:
 
     @property
     def global_application_commands(self) -> List[ApplicationCommand]:
+        """List[:class:`.ApplicationCommand`]: The client's global application commands."""
         return list(self._connection._global_application_commands.values())
 
     @property
     def global_slash_commands(self) -> List[SlashCommand]:
+        """List[:class:`.SlashCommand`]: The client's global slash commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
@@ -422,6 +426,7 @@ class Client:
 
     @property
     def global_user_commands(self) -> List[UserCommand]:
+        """List[:class:`.UserCommand`]: The client's global user commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
@@ -430,6 +435,7 @@ class Client:
 
     @property
     def global_message_commands(self) -> List[MessageCommand]:
+        """List[:class:`.MessageCommand`]: The client's global message commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
@@ -491,7 +497,10 @@ class Client:
     getch_user = get_or_fetch_user
 
     def is_ready(self) -> bool:
-        """:class:`bool`: Specifies if the client's internal cache is ready for use."""
+        """Specifies if the client's internal cache is ready for use.
+
+        :return type: :class:`bool`
+        """
         return self._ready.is_set()
 
     async def _run_event(
@@ -612,7 +621,6 @@ class Client:
         """|coro|
 
         Logs in the client with the specified credentials.
-
 
         Parameters
         -----------
@@ -839,7 +847,10 @@ class Client:
     # properties
 
     def is_closed(self) -> bool:
-        """:class:`bool`: Indicates if the websocket connection is closed."""
+        """Indicates if the websocket connection is closed.
+
+        :return type: :class:`bool`
+        """
         return self._closed
 
     @property
@@ -861,10 +872,9 @@ class Client:
 
     @property
     def status(self):
-        """:class:`.Status`:
-        The status being used upon logging on to Discord.
+        """:class:`.Status`: The status being used upon logging on to Discord.
 
-        .. versionadded: 2.0
+        .. versionadded:: 2.0
         """
         if self._connection._status in set(state.value for state in Status):
             return Status(self._connection._status)
@@ -961,7 +971,7 @@ class Client:
         Returns
         --------
         Optional[:class:`.StageInstance`]
-            The returns stage instance of ``None`` if not found.
+            The returns stage instance or ``None`` if not found.
         """
         from .channel import StageChannel
 
@@ -1152,7 +1162,7 @@ class Client:
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Optional[:class:`.ApplicationCommand`]
             The application command.
         """
         return self._connection._get_global_application_command(id)
@@ -1170,7 +1180,7 @@ class Client:
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Optional[:class:`.ApplicationCommand`]
             The application command.
         """
         return self._connection._get_guild_application_command(guild_id, id)
@@ -1190,7 +1200,7 @@ class Client:
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Optional[:class:`.ApplicationCommand`]
             The application command.
         """
         return self._connection._get_global_command_named(name, cmd_type)
@@ -1212,7 +1222,7 @@ class Client:
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Optional[:class:`.ApplicationCommand`]
             The application command.
         """
         return self._connection._get_guild_command_named(guild_id, name, cmd_type)
@@ -2023,7 +2033,7 @@ class Client:
         Parameters
         ----------
         command_id: :class:`int`
-            the ID of the command to request.
+            The ID of the command to request.
 
         Returns
         -------
@@ -2044,7 +2054,7 @@ class Client:
         Parameters
         ----------
         application_command: :class:`.ApplicationCommand`
-            an object representing the application command.
+            An object representing the application command.
 
         Returns
         -------
@@ -2065,9 +2075,9 @@ class Client:
         Parameters
         ----------
         command_id: :class:`int`
-            the ID of the command to edit.
+            The ID of the command to edit.
         new_command: :class:`.ApplicationCommand`
-            an object representing the edited command.
+            An object representing the edited command.
 
         Returns
         -------
@@ -2086,7 +2096,7 @@ class Client:
         Parameters
         ----------
         command_id: :class:`int`
-            the ID of the command to delete.
+            The ID of the command to delete.
         """
         return await self._connection.delete_global_command(command_id)
 
@@ -2102,7 +2112,7 @@ class Client:
         Parameters
         ----------
         application_commands: List[:class:`.ApplicationCommand`]
-            a list of application commands to insert instead of the existing commands.
+            A list of application commands to insert instead of the existing commands.
 
         Returns
         -------
@@ -2113,7 +2123,7 @@ class Client:
 
     # Application commands (guild)
 
-    async def fetch_guild_commands(self, guild_id: int):
+    async def fetch_guild_commands(self, guild_id: int) -> List[ApplicationCommand]:
         """|coro|
 
         Requests a list of guild application commands.
@@ -2123,7 +2133,7 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild to fetch commands from.
+            The ID of the guild to fetch commands from.
 
         Returns
         -------
@@ -2142,9 +2152,9 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild to fetch command from.
+            The ID of the guild to fetch command from.
         command_id: :class:`int`
-            the ID of the command to request.
+            The ID of the command to request.
 
         Returns
         -------
@@ -2165,9 +2175,9 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild where the command should be inserted.
+            The ID of the guild where the command should be inserted.
         application_command: :class:`.ApplicationCommand`
-            an object representing the application command.
+            An object representing the application command.
 
         Returns
         -------
@@ -2188,11 +2198,11 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild where the command should be edited.
+            The ID of the guild where the command should be edited.
         command_id: :class:`int`
-            the ID of the command to edit.
+            The ID of the command to edit.
         new_command: :class:`.ApplicationCommand`
-            an object representing the edited command.
+            An object representing the edited command.
 
         Returns
         -------
@@ -2211,9 +2221,9 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild where the command should be deleted.
+            The ID of the guild where the command should be deleted.
         command_id: :class:`int`
-            the ID of the command to delete.
+            The ID of the command to delete.
         """
         await self.http.delete_guild_command(self.application_id, guild_id, command_id)
 
@@ -2229,9 +2239,9 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            the ID of the guild where the commands should be overwritten.
+            The ID of the guild where the commands should be overwritten.
         application_commands: List[:class:`.ApplicationCommand`]
-            a list of application commands to insert instead of the existing commands.
+            A list of application commands to insert instead of the existing commands.
 
         Returns
         -------

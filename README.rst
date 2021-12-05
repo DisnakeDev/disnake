@@ -4,7 +4,7 @@
 disnake
 =======
 
-.. image:: https://discord.com/api/guilds/808030843078836254/embed.png
+.. image:: https://img.shields.io/discord/808030843078836254?color=5865f2&logo=discord&logoColor=ffffff
    :target: https://discord.gg/gJDbCw8aQy
    :alt: Discord server invite
 .. image:: https://img.shields.io/pypi/v/disnake.svg

@@ -177,9 +177,11 @@ class Emoji(_EmojiTag, AssetMixin):
         return self._state._get_guild(self.guild_id)  # type: ignore
 
     def is_usable(self) -> bool:
-        """:class:`bool`: Whether the bot can use this emoji.
+        """Whether the bot can use this emoji.
 
         .. versionadded:: 1.3
+
+        :return type: :class:`bool`
         """
         if not self.available:
             return False

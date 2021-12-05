@@ -96,6 +96,7 @@ if TYPE_CHECKING:
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
+    from .types.raw_models import TypingEvent
 
     T = TypeVar("T")
     CS = TypeVar("CS", bound="ConnectionState")
@@ -600,13 +601,22 @@ class ConnectionState:
         )
 
     def _get_guild_channel(
-        self, data: MessagePayload
+        self, data: Union[MessagePayload, TypingEvent]
     ) -> Tuple[Union[PartialChannel, Thread], Optional[Guild]]:
         channel_id = int(data["channel_id"])
         try:
             guild = self._get_guild(int(data["guild_id"]))
         except KeyError:
-            channel = DMChannel._from_message(self, channel_id)
+            # if we're here, this is a DM channel
+            channel = self._get_private_channel(channel_id)
+            if channel is None:
+                if "author" in data:
+                    # MessagePayload
+                    user_id = int(data["author"]["id"])
+                else:
+                    # TypingEvent
+                    user_id = int(data["user_id"])
+                channel = DMChannel._from_message(self, channel_id, user_id)
             guild = None
         else:
             channel = guild and guild._resolve_channel(channel_id)
@@ -1679,22 +1689,27 @@ class ConnectionState:
                 logging_coroutine(coro, info="Voice Protocol voice server update handler")
             )
 
-    def parse_typing_start(self, data) -> None:
+    def parse_typing_start(self, data: TypingEvent) -> None:
         channel, guild = self._get_guild_channel(data)
+        raw = RawTypingEvent(data)
+
+        user_id = int(data["user_id"])
+        member_data = data.get("member")
+        if member_data and guild is not None:
+            # try member cache first
+            raw.member = guild.get_member(user_id) or Member(
+                data=member_data, guild=guild, state=self
+            )
+
+        self.dispatch("raw_typing", raw)
+
         if channel is not None:
             member = None
-            user_id = utils._get_as_snowflake(data, "user_id")
-            if isinstance(channel, DMChannel):
+            if raw.member is not None:
+                member = raw.member
+
+            elif isinstance(channel, DMChannel):
                 member = channel.recipient
-
-            elif isinstance(channel, (Thread, TextChannel)) and guild is not None:
-                # user_id won't be None
-                member = guild.get_member(user_id)  # type: ignore
-
-                if member is None:
-                    member_data = data.get("member")
-                    if member_data:
-                        member = Member(data=member_data, state=self, guild=guild)
 
             elif isinstance(channel, GroupChannel):
                 member = utils.find(lambda x: x.id == user_id, channel.recipients)

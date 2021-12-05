@@ -285,7 +285,10 @@ class Asset(AssetMixin):
         return self._key
 
     def is_animated(self) -> bool:
-        """:class:`bool`: Returns whether the asset is animated."""
+        """Returns whether the asset is animated.
+
+        :return type: :class:`bool`
+        """
         return self._animated
 
     def replace(

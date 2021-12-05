@@ -304,26 +304,32 @@ class Thread(Messageable, Hashable):
         return snowflake_time(self.id)
 
     def is_private(self) -> bool:
-        """:class:`bool`: Whether the thread is a private thread.
+        """Whether the thread is a private thread.
 
         A private thread is only viewable by those that have been explicitly
         invited or have :attr:`~.Permissions.manage_threads`.
+
+        :return type: :class:`bool`
         """
         return self._type is ChannelType.private_thread
 
     def is_news(self) -> bool:
-        """:class:`bool`: Whether the thread is a news thread.
+        """Whether the thread is a news thread.
 
         A news thread is a thread that has a parent that is a news channel,
         i.e. :meth:`.TextChannel.is_news` is ``True``.
+
+        :return type: :class:`bool`
         """
         return self._type is ChannelType.news_thread
 
     def is_nsfw(self) -> bool:
-        """:class:`bool`: Whether the thread is NSFW or not.
+        """Whether the thread is NSFW or not.
 
         An NSFW thread is a thread that has a parent that is an NSFW channel,
         i.e. :meth:`.TextChannel.is_nsfw` is ``True``.
+
+        :return type: :class:`bool`
         """
         parent = self.parent
         return parent is not None and parent.is_nsfw()

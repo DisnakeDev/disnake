@@ -92,7 +92,7 @@ if TYPE_CHECKING:
     from .abc import GuildChannel, MessageableChannel, MessageableChannel
     from .components import Component
     from .state import ConnectionState
-    from .channel import TextChannel, GroupChannel, DMChannel, PartialMessageable, VoiceChannel
+    from .channel import TextChannel, DMChannel, VoiceChannel
     from .mentions import AllowedMentions
     from .role import Role
     from .ui.view import View
@@ -292,7 +292,10 @@ class Attachment(Hashable):
         self.description: Optional[str] = data.get("description")
 
     def is_spoiler(self) -> bool:
-        """:class:`bool`: Whether this attachment contains a spoiler."""
+        """Whether this attachment contains a spoiler.
+
+        :return type: :class:`bool`
+        """
         return self.filename.startswith("SPOILER_")
 
     def __repr__(self) -> str:
@@ -1194,12 +1197,14 @@ class Message(Hashable):
         return f"https://discord.com/channels/{guild_id}/{self.channel.id}/{self.id}"
 
     def is_system(self) -> bool:
-        """:class:`bool`: Whether the message is a system message.
+        """Whether the message is a system message.
 
         A system message is a message that is constructed entirely by the Discord API
         in response to something.
 
         .. versionadded:: 1.3
+
+        :return type: :class:`bool`
         """
         return self.type not in (
             MessageType.default,
