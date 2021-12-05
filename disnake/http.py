@@ -1015,7 +1015,7 @@ class HTTPClient:
         message_id: Snowflake,
         *,
         name: str,
-        auto_archive_duration: threads.ThreadArchiveDuration,
+        auto_archive_duration: threads.ThreadArchiveDurationT,
         rate_limit_per_user: int = 0,
         reason: Optional[str] = None,
     ) -> Response[threads.Thread]:
@@ -1038,7 +1038,7 @@ class HTTPClient:
         channel_id: Snowflake,
         *,
         name: str,
-        auto_archive_duration: threads.ThreadArchiveDuration,
+        auto_archive_duration: threads.ThreadArchiveDurationT,
         type: threads.ThreadType,
         invitable: bool = True,
         rate_limit_per_user: int = 0,

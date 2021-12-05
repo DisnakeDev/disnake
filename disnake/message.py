@@ -54,7 +54,7 @@ from .enums import (
     ChannelType,
     InteractionType,
     try_enum,
-    ThreadArchiveDuration as ThreadArchiveDurationT,
+    ThreadArchiveDuration,
 )
 from .errors import InvalidArgument, HTTPException
 from .components import _component_factory
@@ -80,7 +80,7 @@ if TYPE_CHECKING:
     )
 
     from .types.components import Component as ComponentPayload
-    from .types.threads import ThreadArchiveDuration
+    from .types.threads import ThreadArchiveDurationT
     from .types.member import (
         Member as MemberPayload,
         UserWithMember as UserWithMemberPayload,
@@ -1730,7 +1730,7 @@ class Message(Hashable):
         self,
         *,
         name: str,
-        auto_archive_duration: ThreadArchiveDuration = None,
+        auto_archive_duration: ThreadArchiveDurationT = None,
         slowmode_delay: int = None,
     ) -> Thread:
         """|coro|
@@ -1776,10 +1776,10 @@ class Message(Hashable):
         if self.guild is None:
             raise InvalidArgument("This message does not have guild info attached.")
 
-        if isinstance(auto_archive_duration, ThreadArchiveDurationT):
+        if isinstance(auto_archive_duration, ThreadArchiveDuration):
             auto_archive_duration = auto_archive_duration.value
 
-        default_auto_archive_duration: ThreadArchiveDuration = getattr(
+        default_auto_archive_duration: ThreadArchiveDurationT = getattr(
             self.channel, "default_auto_archive_duration", 1440
         )
         data = await self._state.http.start_thread_with_message(

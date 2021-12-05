@@ -30,7 +30,7 @@ import asyncio
 
 from .mixins import Hashable
 from .abc import Messageable
-from .enums import ChannelType, try_enum, ThreadArchiveDuration as ThreadArchiveDurationT
+from .enums import ChannelType, try_enum, ThreadArchiveDuration
 from .errors import ClientException
 from .utils import MISSING, parse_time, snowflake_time, _get_as_snowflake
 
@@ -44,7 +44,7 @@ if TYPE_CHECKING:
         Thread as ThreadPayload,
         ThreadMember as ThreadMemberPayload,
         ThreadMetadata,
-        ThreadArchiveDuration,
+        ThreadArchiveDurationT,
     )
     from .types.snowflake import SnowflakeList
     from .guild import Guild
@@ -545,7 +545,7 @@ class Thread(Messageable, Hashable):
         locked: bool = MISSING,
         invitable: bool = MISSING,
         slowmode_delay: int = MISSING,
-        auto_archive_duration: ThreadArchiveDuration = MISSING,
+        auto_archive_duration: ThreadArchiveDurationT = MISSING,
     ) -> Thread:
         """|coro|
 
@@ -594,7 +594,7 @@ class Thread(Messageable, Hashable):
         if archived is not MISSING:
             payload["archived"] = archived
         if auto_archive_duration is not MISSING:
-            if isinstance(auto_archive_duration, ThreadArchiveDurationT):
+            if isinstance(auto_archive_duration, ThreadArchiveDuration):
                 payload["auto_archive_duration"] = auto_archive_duration.value
             else:
                 payload["auto_archive_duration"] = auto_archive_duration
