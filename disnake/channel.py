@@ -51,7 +51,7 @@ from .enums import (
     try_enum,
     VoiceRegion,
     VideoQualityMode,
-    ThreadArchiveDuration as ArchiveDuration,
+    ThreadArchiveDuration as ThreadArchiveDurationT,
 )
 from .mixins import Hashable
 from .object import Object
@@ -763,7 +763,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         if type is None:
             type = ChannelType.private_thread
 
-        if isinstance(auto_archive_duration, ArchiveDuration):
+        if isinstance(auto_archive_duration, ThreadArchiveDurationT):
             auto_archive_duration = auto_archive_duration.value
 
         if message is None:

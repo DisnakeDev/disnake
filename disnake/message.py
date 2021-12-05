@@ -49,7 +49,13 @@ from . import utils
 from .reaction import Reaction
 from .emoji import Emoji
 from .partial_emoji import PartialEmoji
-from .enums import MessageType, ChannelType, InteractionType, try_enum, ThreadArchiveDuration as ArchiveDuration
+from .enums import (
+    MessageType,
+    ChannelType,
+    InteractionType,
+    try_enum,
+    ThreadArchiveDuration as ThreadArchiveDurationT,
+)
 from .errors import InvalidArgument, HTTPException
 from .components import _component_factory
 from .embeds import Embed
@@ -1765,7 +1771,7 @@ class Message(Hashable):
         if self.guild is None:
             raise InvalidArgument("This message does not have guild info attached.")
 
-        if isinstance(auto_archive_duration, ArchiveDuration):
+        if isinstance(auto_archive_duration, ThreadArchiveDurationT):
             auto_archive_duration = auto_archive_duration.value
 
         default_auto_archive_duration: ThreadArchiveDuration = getattr(
