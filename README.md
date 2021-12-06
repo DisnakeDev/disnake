@@ -3,13 +3,12 @@
 disnake
 =======
 
-[![Discord server invite](https://img.shields.io/discord/808030843078836254?color=5865f2&logo=discord&logoColor=ffffff)](https://discord.gg/gJDbCw8aQy)
-
-[![PyPI version info](https://img.shields.io/pypi/v/disnake.svg)](https://pypi.python.org/pypi/disnake)
-
-[![PyPI supported Python versions](https://img.shields.io/pypi/pyversions/disnake.svg)](https://pypi.python.org/pypi/disnake)
-
-[![Commit activity](https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg)](https://github.com/DisnakeDev/disnake/commits)
+<p>
+  <a href="https://discord.gg/gJDbCw8aQy"><img src="https://img.shields.io/discord/808030843078836254?style=flat-square&color=5865f2&logo=discord&logoColor=ffffff" alt="Discord server invite" /></a>
+  <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/v/disnake.svg?style=flat-square" alt="PyPI version info" /></a>
+  <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/pyversions/disnake.svg?style=flat-square" alt="PyPI supported Python versions" /></a>
+  <a href="https://github.com/DisnakeDev/disnake/commits"><img src="https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg?style=flat-square" alt="Commit activity" /></a>
+</p>
 
 A modern, easy to use, feature-rich, and async ready API wrapper for
 Discord written in Python.
