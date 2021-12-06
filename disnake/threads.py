@@ -30,7 +30,7 @@ import asyncio
 
 from .mixins import Hashable
 from .abc import Messageable
-from .enums import ChannelType, try_enum, ThreadArchiveDuration
+from .enums import ChannelType, try_enum, ThreadArchiveDuration, try_enum_to_int
 from .errors import ClientException
 from .utils import MISSING, parse_time, snowflake_time, _get_as_snowflake
 
@@ -594,10 +594,7 @@ class Thread(Messageable, Hashable):
         if archived is not MISSING:
             payload["archived"] = archived
         if auto_archive_duration is not MISSING:
-            if isinstance(auto_archive_duration, ThreadArchiveDuration):
-                payload["auto_archive_duration"] = auto_archive_duration.value
-            else:
-                payload["auto_archive_duration"] = auto_archive_duration
+            payload["auto_archive_duration"] = try_enum_to_int(auto_archive_duration)
         if locked is not MISSING:
             payload["locked"] = locked
         if invitable is not MISSING:

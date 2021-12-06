@@ -55,6 +55,7 @@ from .enums import (
     InteractionType,
     try_enum,
     ThreadArchiveDuration,
+    try_enum_to_int,
 )
 from .errors import InvalidArgument, HTTPException
 from .components import _component_factory
@@ -1776,8 +1777,7 @@ class Message(Hashable):
         if self.guild is None:
             raise InvalidArgument("This message does not have guild info attached.")
 
-        if isinstance(auto_archive_duration, ThreadArchiveDuration):
-            auto_archive_duration = auto_archive_duration.value
+        auto_archive_duration = try_enum_to_int(auto_archive_duration)
 
         default_auto_archive_duration: ThreadArchiveDurationT = getattr(
             self.channel, "default_auto_archive_duration", 1440
