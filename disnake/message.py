@@ -54,7 +54,6 @@ from .enums import (
     ChannelType,
     InteractionType,
     try_enum,
-    ThreadArchiveDuration,
     try_enum_to_int,
 )
 from .errors import InvalidArgument, HTTPException
@@ -81,7 +80,6 @@ if TYPE_CHECKING:
     )
 
     from .types.components import Component as ComponentPayload
-    from .types.threads import ThreadArchiveDurationT
     from .types.member import (
         Member as MemberPayload,
         UserWithMember as UserWithMemberPayload,
@@ -89,6 +87,7 @@ if TYPE_CHECKING:
     from .types.user import User as UserPayload
     from .types.embed import Embed as EmbedPayload
     from .types.interactions import MessageInteraction as InteractionReferencePayload
+    from .types.threads import ThreadArchiveDurationLiteral
     from .abc import Snowflake
     from .abc import GuildChannel, MessageableChannel, MessageableChannel
     from .components import Component
@@ -96,6 +95,7 @@ if TYPE_CHECKING:
     from .channel import TextChannel, DMChannel, VoiceChannel
     from .mentions import AllowedMentions
     from .role import Role
+    from .threads import AnyThreadArchiveDuration
     from .ui.view import View
 
     MR = TypeVar("MR", bound="MessageReference")
@@ -1731,7 +1731,7 @@ class Message(Hashable):
         self,
         *,
         name: str,
-        auto_archive_duration: ThreadArchiveDurationT = None,
+        auto_archive_duration: AnyThreadArchiveDuration = None,
         slowmode_delay: int = None,
     ) -> Thread:
         """|coro|
@@ -1777,9 +1777,12 @@ class Message(Hashable):
         if self.guild is None:
             raise InvalidArgument("This message does not have guild info attached.")
 
-        auto_archive_duration = try_enum_to_int(auto_archive_duration)
+        if auto_archive_duration is not None:
+            auto_archive_duration: ThreadArchiveDurationLiteral = try_enum_to_int(
+                auto_archive_duration
+            )
 
-        default_auto_archive_duration: ThreadArchiveDurationT = getattr(
+        default_auto_archive_duration: ThreadArchiveDurationLiteral = getattr(
             self.channel, "default_auto_archive_duration", 1440
         )
         data = await self._state.http.start_thread_with_message(

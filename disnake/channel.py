@@ -77,7 +77,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from .types.threads import ThreadArchiveDurationT
+    from .types.threads import ThreadArchiveDurationLiteral
     from .role import Role
     from .member import Member, VoiceState
     from .abc import Snowflake, SnowflakeTime
@@ -86,6 +86,7 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .user import ClientUser, User, BaseUser
     from .guild import Guild, GuildChannel as GuildChannelType
+    from .threads import AnyThreadArchiveDuration
     from .types.channel import (
         TextChannel as TextChannelPayload,
         VoiceChannel as VoiceChannelPayload,
@@ -203,7 +204,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self.nsfw: bool = data.get("nsfw", False)
         # Does this need coercion into `int`? No idea yet.
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
-        self.default_auto_archive_duration: ThreadArchiveDurationT = data.get(
+        self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
             "default_auto_archive_duration", 1440
         )
         self._type: int = data.get("type", self._type)
@@ -291,7 +292,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = ...,
         category: Optional[CategoryChannel] = ...,
         slowmode_delay: int = ...,
-        default_auto_archive_duration: ThreadArchiveDurationT = ...,
+        default_auto_archive_duration: AnyThreadArchiveDuration = ...,
         type: ChannelType = ...,
         overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = ...,
     ) -> Optional[TextChannel]:
@@ -706,7 +707,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         message: Optional[Snowflake] = None,
-        auto_archive_duration: ThreadArchiveDurationT = None,
+        auto_archive_duration: AnyThreadArchiveDuration = None,
         type: Optional[ChannelType] = None,
         invitable: bool = None,
         slowmode_delay: int = None,

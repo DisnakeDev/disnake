@@ -23,13 +23,12 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
-from typing import List, Literal, Optional, TypedDict, Union
+from typing import List, Literal, Optional, TypedDict
 
 from .snowflake import Snowflake
-from ..enums import ThreadArchiveDuration
 
 ThreadType = Literal[10, 11, 12]
-ThreadArchiveDurationT = Union[Literal[60, 1440, 4320, 10080], ThreadArchiveDuration]
+ThreadArchiveDurationLiteral = Literal[60, 1440, 4320, 10080]
 
 
 class ThreadMember(TypedDict):
@@ -47,7 +46,7 @@ class _ThreadMetadataOptional(TypedDict, total=False):
 
 class ThreadMetadata(_ThreadMetadataOptional):
     archived: bool
-    auto_archive_duration: ThreadArchiveDurationT
+    auto_archive_duration: ThreadArchiveDurationLiteral
     archive_timestamp: str
 
 

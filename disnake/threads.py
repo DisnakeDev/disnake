@@ -44,7 +44,7 @@ if TYPE_CHECKING:
         Thread as ThreadPayload,
         ThreadMember as ThreadMemberPayload,
         ThreadMetadata,
-        ThreadArchiveDurationT,
+        ThreadArchiveDurationLiteral,
     )
     from .types.snowflake import SnowflakeList
     from .guild import Guild
@@ -57,6 +57,8 @@ if TYPE_CHECKING:
     from .state import ConnectionState
 
     import datetime
+
+    AnyThreadArchiveDuration = Union[ThreadArchiveDuration, ThreadArchiveDurationLiteral]
 
 
 class Thread(Messageable, Hashable):
@@ -545,7 +547,7 @@ class Thread(Messageable, Hashable):
         locked: bool = MISSING,
         invitable: bool = MISSING,
         slowmode_delay: int = MISSING,
-        auto_archive_duration: ThreadArchiveDurationT = MISSING,
+        auto_archive_duration: AnyThreadArchiveDuration = MISSING,
     ) -> Thread:
         """|coro|
 
