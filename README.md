@@ -42,54 +42,19 @@ python3 -m pip install -U disnake
 py -3 -m pip install -U disnake
 ```
 
-Otherwise to get voice support you should run the following command:
-
-``` {.sh}
-# Linux/macOS
-python3 -m pip install -U "disnake[voice]"
-
-# Windows
-py -3 -m pip install -U disnake[voice]
-```
-
-To install the development version, do the following:
-
-``` {.sh}
-$ git clone https://github.com/DisnakeDev/disnake
-$ cd disnake
-$ python3 -m pip install -U .[voice]
-```
+Installing `disnake` with voice support requires you to replace `disnake` here, with `disnake[voice]` To learn more about voice support (or installing the development version), please visit [this section of our guide](https://guide.disnake.dev/000-prerequisites/001-installing-python/#installing-disnake).
 
 ### Optional Packages
 
 -   [PyNaCl](https://pypi.org/project/PyNaCl/) (for voice support)
 
-Please note that on Linux installing voice you must install the
-following packages via your favourite package manager (e.g. `apt`,
-`dnf`, etc) before running the above commands:
+Please note that on Linux installing voice you must install the following packages via your favourite package manager (e.g. `apt`, `dnf`, etc) before running the above commands:
 
 -   libffi-dev (or `libffi-devel` on some systems)
 -   python-dev (e.g. `python3.6-dev` for Python 3.6)
 
 Quick Example
 -------------
-
-```
-
-### Bot Example
-
-``` {.py}
-import disnake
-from disnake.ext import commands
-
-bot = commands.Bot(command_prefix='>')
-
-@bot.command()
-async def ping(ctx):
-    await ctx.send('pong')
-
-bot.run('token')
-```
 
 ### Slash Commands Example
 
@@ -119,6 +84,21 @@ async def avatar(inter, user):
     embed = disnake.Embed(title=str(user))
     embed.set_image(url=user.display_avatar.url)
     await inter.response.send_message(embed=embed)
+
+bot.run('token')
+```
+
+### Prefix Commands Example
+
+``` {.py}
+import disnake
+from disnake.ext import commands
+
+bot = commands.Bot(command_prefix='>')
+
+@bot.command()
+async def ping(ctx):
+    await ctx.send('pong')
 
 bot.run('token')
 ```
