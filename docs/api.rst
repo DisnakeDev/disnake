@@ -2989,19 +2989,19 @@ of :class:`enum.Enum`.
 
     .. attribute:: hour
 
-        The thread will archive after an hour.
+        The thread will archive after an hour of inactivity.
 
     .. attribute:: day
 
-        The thread will archive after a day.
+        The thread will archive after a day of inactivity.
 
     .. attribute:: three_days
 
-        The thread will archive after three days.
+        The thread will archive after three days of inactivity.
 
     .. attribute:: week
-    
-        The thread will archive after a week.
+
+        The thread will archive after a week of inactivity.
 
 
 Async Iterator
