@@ -770,7 +770,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         if type is None:
             type = ChannelType.private_thread
 
-        auto_archive_duration = try_enum_to_int(auto_archive_duration)
+        if auto_archive_duration is not None:
+            auto_archive_duration: ThreadArchiveDurationLiteral = try_enum_to_int(
+                auto_archive_duration
+            )
 
         if message is None:
             data = await self._state.http.start_thread_without_message(
