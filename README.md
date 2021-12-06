@@ -10,21 +10,14 @@ disnake
     <a href="https://github.com/DisnakeDev/disnake/commits"><img src="https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg?style=flat-square" alt="Commit activity" /></a>
 </p>
 
-A modern, easy to use, feature-rich, and async ready API wrapper for
-Discord written in Python.
-
-All the contributors and developers, associated with disnake, are trying
-their best to add new features to the library as soon as possible. We
-strive to revive the greatest Python wrapper for Discord API and keep it
-up to date.
+A modern, easy to use, feature-rich, and async ready API wrapper for Discord written in Python. All contributors and developers associated with disnake, are trying their best to add new features to the library as soon as possible. 
 
 Key Features
 ------------
 
--   Modern Pythonic API using `async` and `await`.
--   Added features for ease of coding
--   Proper rate limit handling.
--   Optimised in both speed and memory.
+- Proper rate limit handling.
+- Type-safety measures.
+- [FastAPI](https://fastapi.tiangolo.com/)-like syntax.
 
 Installing
 ----------
