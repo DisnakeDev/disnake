@@ -32,7 +32,6 @@ from __future__ import annotations
 
 import threading
 import logging
-import json
 import time
 import re
 
@@ -174,7 +173,7 @@ class WebhookAdapter:
 
                         data = response.text or None
                         if data and response.headers["Content-Type"] == "application/json":
-                            data = json.loads(data)
+                            data = utils._from_json(data)
 
                         remaining = response.headers.get("X-Ratelimit-Remaining")
                         if remaining == "0" and response.status_code != 429:
