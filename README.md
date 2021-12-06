@@ -4,17 +4,14 @@ disnake
 =======
 
 <p align="center">
-  <a href="https://discord.gg/gJDbCw8aQy"><img src="https://img.shields.io/discord/808030843078836254?style=flat-square&color=5865f2&logo=discord&logoColor=ffffff" alt="Discord server invite" /></a>
-  <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/v/disnake.svg?style=flat-square" alt="PyPI version info" /></a>
-  <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/pyversions/disnake.svg?style=flat-square" alt="PyPI supported Python versions" /></a>
-  <a href="https://github.com/DisnakeDev/disnake/commits"><img src="https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg?style=flat-square" alt="Commit activity" /></a>
+    <a href="https://discord.gg/gJDbCw8aQy"><img src="https://img.shields.io/discord/808030843078836254?style=flat-square&color=5865f2&logo=discord&logoColor=ffffff" alt="Discord server invite" /></a>
+    <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/v/disnake.svg?style=flat-square" alt="PyPI version info" /></a>
+    <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/pyversions/disnake.svg?style=flat-square" alt="PyPI supported Python versions" /></a>
+    <a href="https://github.com/DisnakeDev/disnake/commits"><img src="https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg?style=flat-square" alt="Commit activity" /></a>
 </p>
 
 A modern, easy to use, feature-rich, and async ready API wrapper for
 Discord written in Python.
-
-About disnake
--------------
 
 All the contributors and developers, associated with disnake, are trying
 their best to add new features to the library as soon as possible. We
@@ -77,23 +74,6 @@ following packages via your favourite package manager (e.g. `apt`,
 Quick Example
 -------------
 
-``` {.py}
-import disnake
-
-class MyClient(disnake.Client):
-    async def on_ready(self):
-        print('Logged on as', self.user)
-
-    async def on_message(self, message):
-        # don't respond to ourselves
-        if message.author == self.user:
-            return
-
-        if message.content == 'ping':
-            await message.channel.send('pong')
-
-client = MyClient()
-client.run('token')
 ```
 
 ### Bot Example
@@ -145,9 +125,14 @@ bot.run('token')
 
 You can find more examples in the examples directory.
 
-Links
------
-
--   [Documentation](https://docs.disnake.dev/)
--   [Official Discord Server](https://discord.gg/gJDbCw8aQy)
--   [Discord API](https://discord.gg/discord-api)
+<br>
+<p align="center">
+    <a href="https://docs.disnake.dev/">Documentation</a>
+    ⁕
+    <a href="https://guide.disnake.dev/">Guide</a>
+    ⁕
+    <a href="https://discord.gg/gJDbCw8aQy">Discord Server</a>
+    ⁕
+    <a href="https://discord.gg/discord-api">Discord API</a>
+</p>
+<br>
