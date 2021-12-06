@@ -51,7 +51,6 @@ from .enums import (
     try_enum,
     VoiceRegion,
     VideoQualityMode,
-    ThreadArchiveDuration,
     try_enum_to_int,
 )
 from .mixins import Hashable
@@ -347,7 +346,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        default_auto_archive_duration: :class:`int`
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
 
