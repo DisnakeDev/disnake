@@ -22,7 +22,7 @@ Key Features
 Installing
 ----------
 
-**Python 3.8 or higher is required**
+**Python 3.8 or higher is required.**
 
 To install the library without full voice support, you can just run the
 following command:
@@ -35,11 +35,7 @@ python3 -m pip install -U disnake
 py -3 -m pip install -U disnake
 ```
 
-Installing `disnake` with voice support requires you to replace `disnake` here, with `disnake[voice]` To learn more about voice support (or installing the development version), please visit [this section of our guide](https://guide.disnake.dev/000-prerequisites/001-installing-python/#installing-disnake).
-
-### Optional Packages
-
--   [PyNaCl](https://pypi.org/project/PyNaCl/) (for voice support)
+Installing `disnake` with full voice support requires you to replace `disnake` here, with `disnake[voice]`. To learn more about voice support (or installing the development version), please visit [this section of our guide](https://guide.disnake.dev/000-prerequisites/001-installing-python/#installing-disnake). You can also optionally install [PyNaCl](https://pypi.org/project/PyNaCl/) for voice support.
 
 Please note that on Linux installing voice you must install the following packages via your favourite package manager (e.g. `apt`, `dnf`, etc) before running the above commands:
 
@@ -59,9 +55,9 @@ bot = commands.Bot(command_prefix='>', test_guilds=[12345])
 
 @bot.slash_command()
 async def ping(inter):
-    await inter.response.send_message('pong')
+    await inter.response.send_message('Pong!')
 
-bot.run('token')
+bot.run('BOT_TOKEN')
 ```
 
 ### Context Menus Example
@@ -78,7 +74,7 @@ async def avatar(inter, user):
     embed.set_image(url=user.display_avatar.url)
     await inter.response.send_message(embed=embed)
 
-bot.run('token')
+bot.run('BOT_TOKEN')
 ```
 
 ### Prefix Commands Example
@@ -91,12 +87,12 @@ bot = commands.Bot(command_prefix='>')
 
 @bot.command()
 async def ping(ctx):
-    await ctx.send('pong')
+    await ctx.send('Pong!')
 
-bot.run('token')
+bot.run('BOT_TOKEN')
 ```
 
-You can find more examples in the examples directory.
+You can find more examples in the [examples directory](./examples).
 
 <br>
 <p align="center">
