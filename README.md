@@ -27,7 +27,7 @@ Installing
 To install the library without full voice support, you can just run the
 following command:
 
-``` {.sh}
+``` sh
 # Linux/macOS
 python3 -m pip install -U disnake
 
@@ -51,7 +51,7 @@ Quick Example
 
 ### Slash Commands Example
 
-``` {.py}
+``` py
 import disnake
 from disnake.ext import commands
 
@@ -66,7 +66,7 @@ bot.run('token')
 
 ### Context Menus Example
 
-``` {.py}
+``` py
 import disnake
 from disnake.ext import commands
 
@@ -83,7 +83,7 @@ bot.run('token')
 
 ### Prefix Commands Example
 
-``` {.py}
+``` py
 import disnake
 from disnake.ext import commands
 
