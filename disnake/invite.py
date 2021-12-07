@@ -303,7 +303,7 @@ class Invite(Hashable):
 
         .. versionadded:: 2.0
 
-    channel: Union[:class:`abc.GuildChannel`, :class:`Object`, :class:`PartialInviteChannel`]
+    channel: Optional[Union[:class:`abc.GuildChannel`, :class:`Object`, :class:`PartialInviteChannel`]]
         The channel the invite is for.
     target_type: :class:`InviteTarget`
         The type of target for the voice channel invite.
