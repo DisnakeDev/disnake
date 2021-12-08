@@ -4,7 +4,7 @@ disnake
 =======
 
 <p align="center">
-    <a href="https://discord.gg/gJDbCw8aQy"><img src="https://img.shields.io/discord/808030843078836254?style=flat-square&color=5865f2&logo=discord&logoColor=ffffff" alt="Discord server invite" /></a>
+    <a href="https://discord.gg/gJDbCw8aQy"><img src="https://img.shields.io/discord/808030843078836254?style=flat-square&color=5865f2&logo=discord&logoColor=ffffff&label=discord" alt="Discord server invite" /></a>
     <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/v/disnake.svg?style=flat-square" alt="PyPI version info" /></a>
     <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/pyversions/disnake.svg?style=flat-square" alt="PyPI supported Python versions" /></a>
     <a href="https://github.com/DisnakeDev/disnake/commits"><img src="https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg?style=flat-square" alt="Commit activity" /></a>
@@ -17,7 +17,9 @@ Key Features
 
 - Proper rate limit handling.
 - Type-safety measures.
-- [FastAPI](https://fastapi.tiangolo.com/)-like syntax.
+- [FastAPI](https://fastapi.tiangolo.com/)-like slash command syntax.
+
+<sup>The syntax and structure of `discord.py 2.0` is preserved.</sup>
 
 Installing
 ----------
