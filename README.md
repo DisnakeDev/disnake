@@ -35,12 +35,11 @@ python3 -m pip install -U disnake
 py -3 -m pip install -U disnake
 ```
 
-Installing `disnake` with full voice support requires you to replace `disnake` here, with `disnake[voice]`. To learn more about voice support (or installing the development version), please visit [this section of our guide](https://guide.disnake.dev/000-prerequisites/001-installing-python/#installing-disnake). You can also optionally install [PyNaCl](https://pypi.org/project/PyNaCl/) for voice support.
+Installing `disnake` with full voice support requires you to replace `disnake` here, with `disnake[voice]`. To learn more about voice support (or installing the development version), please visit [this section of our guide](https://guide.disnake.dev/000-prerequisites/001-installing-python/#installing-disnake). 
 
-Please note that on Linux installing voice you must install the following packages via your favourite package manager (e.g. `apt`, `dnf`, etc) before running the above commands:
+(You can also optionally install [PyNaCl](https://pypi.org/project/PyNaCl/) for voice support.)
 
--   libffi-dev (or `libffi-devel` on some systems)
--   python-dev (e.g. `python3.6-dev` for Python 3.6)
+Note that on voice support on Linux requires installation of `libffi-dev` and `python-dev` packages, via your favourite package manager (e.g. `apt`, `dnf`, etc.) before running the following commands.
 
 Quick Example
 -------------
