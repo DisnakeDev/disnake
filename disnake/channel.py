@@ -980,9 +980,33 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         .. versionadded:: 1.7
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
+    nsfw: :class:`bool`
+        If the channel is marked as "not safe for work".
+
+        .. note::
+
+            To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
+
+        .. versionadded:: 2.3
+    slowmode_delay: :class:`int`
+        The number of seconds a member must wait between sending messages
+        in this channel. A value of `0` denotes that it is disabled.
+        Bots and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages` bypass slowmode.
+
+        .. versionadded:: 2.3
+    last_message_id: Optional[:class:`int`]
+        The last message ID of the message sent to this channel. It may
+        *not* point to an existing or valid message.
+
+        .. versionadded:: 2.3
     """
 
-    __slots__ = ()
+    __slots__ = (
+        "nsfw",
+        "slowmode_delay",
+        "last_message_id",
+    )
 
     def __repr__(self) -> str:
         attrs = [
@@ -994,9 +1018,16 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             ("video_quality_mode", self.video_quality_mode),
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
+            ("nsfw", self.nsfw),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
+
+    def _update(self, guild: Guild, data: VoiceChannelPayload) -> None:
+        super()._update(guild, data)
+        self.nsfw: bool = data.get("nsfw", False)
+        self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
 
     async def _get_channel(self):
         return self
@@ -1014,6 +1045,57 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             {"bitrate": self.bitrate, "user_limit": self.user_limit}, name=name, reason=reason
         )
 
+    def is_nsfw(self) -> bool:
+        """Checks if the channel is NSFW.
+
+        :return type: :class:`bool`
+        """
+        return self.nsfw
+
+    @property
+    def last_message(self) -> Optional[Message]:
+        """Fetches the last message from this channel in cache.
+
+        The message might not be valid or point to an existing message.
+
+        .. admonition:: Reliable Fetching
+            :class: helpful
+
+            For a slightly more reliable method of fetching the
+            last message, consider using either :meth:`history`
+            or :meth:`fetch_message` with the :attr:`last_message_id`
+            attribute.
+
+        Returns
+        ---------
+        Optional[:class:`Message`]
+            The last message in this channel or ``None`` if not found.
+        """
+        return self._state._get_message(self.last_message_id) if self.last_message_id else None
+
+    def get_partial_message(self, message_id: int, /) -> PartialMessage:
+        """Creates a :class:`PartialMessage` from the message ID.
+
+        This is useful if you want to work with a message and only have its ID without
+        doing an unnecessary API call.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ------------
+        message_id: :class:`int`
+            The message ID to create a partial message for.
+
+        Returns
+        ---------
+        :class:`PartialMessage`
+            The partial message.
+        """
+
+        from .message import PartialMessage
+
+        return PartialMessage(channel=self, id=message_id)
+
     @overload
     async def edit(
         self,
@@ -1027,6 +1109,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         rtc_region: Optional[VoiceRegion] = ...,
         video_quality_mode: VideoQualityMode = ...,
+        nsfw: bool = ...,
+        slowmode_delay: int = ...,
         reason: Optional[str] = ...,
     ) -> Optional[VoiceChannel]:
         ...
@@ -1079,6 +1163,15 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             The camera video quality for the voice channel's participants.
 
             .. versionadded:: 2.0
+        nsfw: :class:`bool`
+            To mark the channel as NSFW or not.
+
+            .. versionadded:: 2.3
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+
+            .. versionadded:: 2.3
 
         Raises
         ------

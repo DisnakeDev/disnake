@@ -80,6 +80,8 @@ VideoQualityMode = Literal[1, 2]
 class _VoiceChannelOptional(TypedDict, total=False):
     rtc_region: Optional[str]
     video_quality_mode: VideoQualityMode
+    last_message_id: Optional[Snowflake]
+    rate_limit_per_user: int
 
 
 class VoiceChannel(_BaseGuildChannel, _VoiceChannelOptional):

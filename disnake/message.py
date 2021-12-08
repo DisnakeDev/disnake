@@ -1871,7 +1871,7 @@ class PartialMessage(Hashable):
 
     Attributes
     -----------
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`]
+    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`VoiceChannel`]
         The channel associated with this partial message.
     id: :class:`int`
         The message ID.
