@@ -33,7 +33,7 @@ if version.endswith(("a", "b", "rc")):
         pass
 
 readme = ""
-with open("README.rst") as f:
+with open("README.md") as f:
     readme = f.read()
 
 extras_require = {
