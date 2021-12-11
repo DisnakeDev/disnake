@@ -389,10 +389,14 @@ class ApplicationCommandInteractionDataResolved:
             user_id = int(str_id)
             member = members.get(str_id)
             if member is not None:
-                self.members[user_id] = Member(
-                    data={**member, "user": user},  # type: ignore
-                    guild=guild,  # type: ignore
-                    state=state,
+                self.members[user_id] = (
+                    guild
+                    and guild.get_member(user_id)
+                    or Member(
+                        data={**member, "user": user},  # type: ignore
+                        guild=guild,  # type: ignore
+                        state=state,
+                    )
                 )
             else:
                 self.users[user_id] = User(state=state, data=user)
@@ -404,7 +408,11 @@ class ApplicationCommandInteractionDataResolved:
             factory, ch_type = _threaded_channel_factory(channel["type"])
             if factory:
                 channel["position"] = 0  # type: ignore
-                self.channels[int(str_id)] = factory(guild=guild, state=state, data=channel)  # type: ignore
+                self.channels[int(str_id)] = (  # type: ignore
+                    guild
+                    and guild.get_channel(int(str_id))
+                    or factory(guild=guild, state=state, data=channel)  # type: ignore
+                )
 
         for str_id, message in messages.items():
             channel_id = int(message["channel_id"])
