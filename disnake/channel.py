@@ -52,6 +52,7 @@ from .enums import (
     try_enum,
     VoiceRegion,
     VideoQualityMode,
+    try_enum_to_int,
 )
 from .mixins import Hashable
 from .object import Object
@@ -76,7 +77,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from .types.threads import ThreadArchiveDuration
+    from .types.threads import ThreadArchiveDurationLiteral
     from .role import Role
     from .member import Member, VoiceState
     from .abc import Snowflake, SnowflakeTime
@@ -85,6 +86,7 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .user import ClientUser, User, BaseUser
     from .guild import Guild, GuildChannel as GuildChannelType
+    from .threads import AnyThreadArchiveDuration
     from .types.channel import (
         TextChannel as TextChannelPayload,
         VoiceChannel as VoiceChannelPayload,
@@ -202,7 +204,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self.nsfw: bool = data.get("nsfw", False)
         # Does this need coercion into `int`? No idea yet.
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
-        self.default_auto_archive_duration: ThreadArchiveDuration = data.get(
+        self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
             "default_auto_archive_duration", 1440
         )
         self._type: int = data.get("type", self._type)
@@ -290,7 +292,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = ...,
         category: Optional[CategoryChannel] = ...,
         slowmode_delay: int = ...,
-        default_auto_archive_duration: ThreadArchiveDuration = ...,
+        default_auto_archive_duration: AnyThreadArchiveDuration = ...,
         type: ChannelType = ...,
         overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = ...,
     ) -> Optional[TextChannel]:
@@ -345,7 +347,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        default_auto_archive_duration: :class:`int`
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
 
@@ -705,7 +707,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         message: Optional[Snowflake] = None,
-        auto_archive_duration: ThreadArchiveDuration = None,
+        auto_archive_duration: AnyThreadArchiveDuration = None,
         type: Optional[ChannelType] = None,
         invitable: bool = None,
         slowmode_delay: int = None,
@@ -728,9 +730,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             A snowflake representing the message to create the thread with.
             If ``None`` is passed then a private thread is created.
             Defaults to ``None``.
-        auto_archive_duration: :class:`int`
+        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         type: Optional[:class:`ChannelType`]
             The type of thread to create. If a ``message`` is passed then this parameter
             is ignored, as a thread created with a message is always a public thread.
@@ -767,6 +770,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         if type is None:
             type = ChannelType.private_thread
+
+        if auto_archive_duration is not None:
+            auto_archive_duration: ThreadArchiveDurationLiteral = try_enum_to_int(
+                auto_archive_duration
+            )
 
         if message is None:
             data = await self._state.http.start_thread_without_message(

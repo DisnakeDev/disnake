@@ -2981,6 +2981,28 @@ of :class:`enum.Enum`.
 
         The guild scheduled event is only for a specific guild.
 
+.. class:: ThreadArchiveDuration
+
+    Represents the automatic archive duration of a thread in minutes.
+
+    .. versionadded:: 2.3
+
+    .. attribute:: hour
+
+        The thread will archive after an hour of inactivity.
+
+    .. attribute:: day
+
+        The thread will archive after a day of inactivity.
+
+    .. attribute:: three_days
+
+        The thread will archive after three days of inactivity.
+
+    .. attribute:: week
+
+        The thread will archive after a week of inactivity.
+
 
 Async Iterator
 ----------------

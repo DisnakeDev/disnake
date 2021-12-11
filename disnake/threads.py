@@ -31,7 +31,7 @@ import asyncio
 
 from .mixins import Hashable
 from .abc import Messageable
-from .enums import ChannelType, try_enum
+from .enums import ChannelType, try_enum, ThreadArchiveDuration, try_enum_to_int
 from .errors import ClientException
 from .utils import MISSING, parse_time, snowflake_time, _get_as_snowflake
 
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
         Thread as ThreadPayload,
         ThreadMember as ThreadMemberPayload,
         ThreadMetadata,
-        ThreadArchiveDuration,
+        ThreadArchiveDurationLiteral,
     )
     from .types.snowflake import SnowflakeList
     from .guild import Guild
@@ -58,6 +58,8 @@ if TYPE_CHECKING:
     from .state import ConnectionState
 
     import datetime
+
+    AnyThreadArchiveDuration = Union[ThreadArchiveDuration, ThreadArchiveDurationLiteral]
 
 
 class Thread(Messageable, Hashable):
@@ -546,7 +548,7 @@ class Thread(Messageable, Hashable):
         locked: bool = MISSING,
         invitable: bool = MISSING,
         slowmode_delay: int = MISSING,
-        auto_archive_duration: ThreadArchiveDuration = MISSING,
+        auto_archive_duration: AnyThreadArchiveDuration = MISSING,
     ) -> Thread:
         """|coro|
 
@@ -570,7 +572,7 @@ class Thread(Messageable, Hashable):
         invitable: :class:`bool`
             Whether non-moderators can add other non-moderators to this thread.
             Only available for private threads.
-        auto_archive_duration: :class:`int`
+        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The new duration in minutes before a thread is automatically archived for inactivity.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         slowmode_delay: :class:`int`
@@ -595,7 +597,7 @@ class Thread(Messageable, Hashable):
         if archived is not MISSING:
             payload["archived"] = archived
         if auto_archive_duration is not MISSING:
-            payload["auto_archive_duration"] = auto_archive_duration
+            payload["auto_archive_duration"] = try_enum_to_int(auto_archive_duration)
         if locked is not MISSING:
             payload["locked"] = locked
         if invitable is not MISSING:
