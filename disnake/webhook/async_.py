@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -26,7 +27,6 @@ from __future__ import annotations
 
 import logging
 import asyncio
-import json
 import re
 
 from urllib.parse import quote as urlquote
@@ -178,7 +178,7 @@ class AsyncWebhookAdapter:
                         )
                         data = (await response.text(encoding="utf-8")) or None
                         if data and response.headers["Content-Type"] == "application/json":
-                            data = json.loads(data)
+                            data = utils._from_json(data)
 
                         remaining = response.headers.get("X-Ratelimit-Remaining")
                         if remaining == "0" and response.status != 429:
@@ -500,7 +500,7 @@ def handle_message_parameters(
 
     payload = {}
     if embed is not MISSING:
-        payload["embeds"] = [] if embed is None else [embed.to_dict()]
+        embeds = [embed] if embed else []
     if embeds is not MISSING:
         if len(embeds) > 10:
             raise InvalidArgument("embeds has a maximum of 10 elements.")

@@ -3,7 +3,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -163,7 +164,11 @@ class Interaction:
             except KeyError:
                 pass
             else:
-                self.author = Member(state=self._state, guild=guild, data=member)  # type: ignore
+                self.author = (
+                    guild
+                    and guild.get_member(int(member["user"]["id"]))  # type: ignore
+                    or Member(state=self._state, guild=guild, data=member)  # type: ignore
+                )
                 self._permissions = int(member.get("permissions", 0))
         else:
             try:
@@ -473,10 +478,16 @@ class Interaction:
     ) -> None:
         """|coro|
 
-        Sends a message using either :meth:`response.send_message` or :meth:`followup.send`.
+        Sends a message using either :meth:`response.send_message <InteractionResponse.send_message>`
+        or :meth:`followup.send <Webhook.send>`.
 
-        If the interaction is not responded, this method will call :meth:`response.send_message`.
-        :meth:`followup.send` otherwise.
+        If the interaction hasn't been responded to yet, this method will call :meth:`response.send_message <InteractionResponse.send_message>`.
+        Otherwise, it will call :meth:`followup.send <Webhook.send>`.
+
+        .. note::
+            This method does not return a :class:`Message` object. If you need a message object,
+            use :meth:`original_message` to fetch it, or use :meth:`followup.send <Webhook.send>`
+            directly instead of this method if you're sending a followup message.
 
         Parameters
         -----------
@@ -526,8 +537,8 @@ class Interaction:
             sender = self.followup.send
         else:
             sender = self.response.send_message
-        await sender(  # type: ignore
-            content=content,
+        await sender(
+            content=content,  # type: ignore
             embed=embed,
             embeds=embeds,
             file=file,

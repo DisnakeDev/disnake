@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -61,6 +62,7 @@ __all__ = (
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
+    "ThreadArchiveDuration",
 )
 
 
@@ -677,6 +679,13 @@ class GuildScheduledEventStatus(Enum):
 
 class GuildScheduledEventPrivacyLevel(Enum):
     guild_only = 2
+
+
+class ThreadArchiveDuration(Enum):
+    hour = 60
+    day = 1440
+    three_days = 4320
+    week = 10080
 
 
 T = TypeVar("T")

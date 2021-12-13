@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -38,13 +39,15 @@ import io
 
 from typing import Any, Callable, Generic, IO, Optional, TYPE_CHECKING, Tuple, Type, TypeVar, Union
 
+from . import utils
 from .errors import ClientException
 from .opus import Encoder as OpusEncoder
 from .oggparse import OggStream
-from .utils import MISSING
 
 if TYPE_CHECKING:
     from .voice_client import VoiceClient
+
+MISSING = utils.MISSING
 
 
 AT = TypeVar("AT", bound="AudioSource")
@@ -598,7 +601,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         codec = bitrate = None
 
         if output:
-            data = json.loads(output)
+            data = utils._from_json(output)
             streamdata = data["streams"][0]
 
             codec = streamdata.get("codec_name")

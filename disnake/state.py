@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -96,6 +97,7 @@ if TYPE_CHECKING:
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
+    from .types.raw_models import TypingEvent
 
     T = TypeVar("T")
     CS = TypeVar("CS", bound="ConnectionState")
@@ -600,13 +602,22 @@ class ConnectionState:
         )
 
     def _get_guild_channel(
-        self, data: MessagePayload
+        self, data: Union[MessagePayload, TypingEvent]
     ) -> Tuple[Union[PartialChannel, Thread], Optional[Guild]]:
         channel_id = int(data["channel_id"])
         try:
             guild = self._get_guild(int(data["guild_id"]))
         except KeyError:
+            # if we're here, this is a DM channel
             channel = self.get_channel(channel_id)
+            if channel is None:
+                if "author" in data:
+                    # MessagePayload
+                    user_id = int(data["author"]["id"])
+                else:
+                    # TypingEvent
+                    user_id = int(data["user_id"])
+                channel = DMChannel._from_message(self, channel_id, user_id)
             guild = None
         else:
             channel = guild and guild._resolve_channel(channel_id)
@@ -752,8 +763,8 @@ class ConnectionState:
         self.dispatch("message", message)
         if self._messages is not None:
             self._messages.append(message)
-        # we ensure that the channel is either a TextChannel or Thread
-        if channel and channel.__class__ in (TextChannel, Thread):
+        # we ensure that the channel is a type that implements last_message_id
+        if channel and channel.__class__ in (TextChannel, Thread, VoiceChannel):
             channel.last_message_id = message.id  # type: ignore
 
     def parse_message_delete(self, data) -> None:
@@ -1679,22 +1690,28 @@ class ConnectionState:
                 logging_coroutine(coro, info="Voice Protocol voice server update handler")
             )
 
-    def parse_typing_start(self, data) -> None:
+    def parse_typing_start(self, data: TypingEvent) -> None:
         channel, guild = self._get_guild_channel(data)
+        print(f"event channel: {channel}")
+        raw = RawTypingEvent(data)
+
+        user_id = int(data["user_id"])
+        member_data = data.get("member")
+        if member_data and guild is not None:
+            # try member cache first
+            raw.member = guild.get_member(user_id) or Member(
+                data=member_data, guild=guild, state=self
+            )
+
+        self.dispatch("raw_typing", raw)
+
         if channel is not None:
             member = None
-            user_id = utils._get_as_snowflake(data, "user_id")
-            if isinstance(channel, DMChannel):
+            if raw.member is not None:
+                member = raw.member
+
+            elif isinstance(channel, DMChannel):
                 member = channel.recipient
-
-            elif isinstance(channel, (Thread, TextChannel)) and guild is not None:
-                # user_id won't be None
-                member = guild.get_member(user_id)  # type: ignore
-
-                if member is None:
-                    member_data = data.get("member")
-                    if member_data:
-                        member = Member(data=member_data, state=self, guild=guild)
 
             elif isinstance(channel, GroupChannel):
                 member = utils.find(lambda x: x.id == user_id, channel.recipients)
@@ -1708,7 +1725,7 @@ class ConnectionState:
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
     ) -> Optional[Union[User, Member]]:
-        if isinstance(channel, TextChannel):
+        if isinstance(channel, (TextChannel, VoiceChannel)):
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 

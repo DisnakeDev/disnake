@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -25,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from typing import List, Literal, Optional, TypedDict, Union
 from .user import PartialUser
 from .snowflake import Snowflake
-from .threads import ThreadMetadata, ThreadMember, ThreadArchiveDuration
+from .threads import ThreadArchiveDurationLiteral, ThreadMetadata, ThreadMember
 
 
 OverwriteType = Literal[0, 1]
@@ -63,7 +64,7 @@ class _TextChannelOptional(TypedDict, total=False):
     last_message_id: Optional[Snowflake]
     last_pin_timestamp: str
     rate_limit_per_user: int
-    default_auto_archive_duration: ThreadArchiveDuration
+    default_auto_archive_duration: ThreadArchiveDurationLiteral
 
 
 class TextChannel(_BaseGuildChannel, _TextChannelOptional):
@@ -80,6 +81,8 @@ VideoQualityMode = Literal[1, 2]
 class _VoiceChannelOptional(TypedDict, total=False):
     rtc_region: Optional[str]
     video_quality_mode: VideoQualityMode
+    last_message_id: Optional[Snowflake]
+    rate_limit_per_user: int
 
 
 class VoiceChannel(_BaseGuildChannel, _VoiceChannelOptional):
