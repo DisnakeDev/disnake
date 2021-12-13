@@ -1692,7 +1692,6 @@ class ConnectionState:
 
     def parse_typing_start(self, data: TypingEvent) -> None:
         channel, guild = self._get_guild_channel(data)
-        print(f"event channel: {channel}")
         raw = RawTypingEvent(data)
 
         user_id = int(data["user_id"])
