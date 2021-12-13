@@ -450,7 +450,10 @@ class PublicUserFlags(BaseFlags):
 
     @flag_value
     def spammer(self):
-        """:class:`bool`: Returns ``True`` if the user is a spammer."""
+        """:class:`bool`: Returns ``True`` if the user is marked as a spammer.
+
+        .. versionadded:: 2.3
+        """
         return UserFlags.spammer.value
 
     def all(self) -> List[UserFlags]:
