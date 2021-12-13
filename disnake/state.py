@@ -748,7 +748,6 @@ class ConnectionState:
     def parse_message_create(self, data) -> None:
         channel, _ = self._get_guild_channel(data)
         # channel would be the correct type here
-        # print(data)
         message = Message(channel=channel, data=data, state=self)  # type: ignore
         self.dispatch("message", message)
         if self._messages is not None:
