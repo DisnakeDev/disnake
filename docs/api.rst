@@ -1536,6 +1536,11 @@ of :class:`enum.Enum`.
         The user is a bot that only uses HTTP interactions.
 
         .. versionadded:: 2.3
+    .. attribute:: spammer
+    
+        The user is marked as a spammer.
+
+        .. versionadded:: 2.3
 
 .. class:: ActivityType
 
