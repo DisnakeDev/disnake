@@ -174,6 +174,7 @@ class Embed:
         "_files",
     )
 
+    _default_colour: Union[int, Colour] = Colour(0)
     Empty: Final = EmptyEmbed
 
     def __init__(
@@ -189,6 +190,8 @@ class Embed:
     ):
 
         self.colour = colour if colour is not EmptyEmbed else color
+        if self.colour is EmptyEmbed:
+            self.colour = Embed._default_colour
         self.title = title
         self.type = type
         self.url = url
@@ -269,7 +272,7 @@ class Embed:
 
     def copy(self: E) -> E:
         """Returns a shallow copy of the embed."""
-        embed = self.__class__.from_dict(self.to_dict())
+        embed = type(self).from_dict(self.to_dict())
         embed._files = self._files  # TODO: Maybe copy these too?
         return embed
 
@@ -324,8 +327,12 @@ class Embed:
             self._colour = Colour(value=value)
         else:
             raise TypeError(
-                f"Expected disnake.Colour, int, or Embed.Empty but received {value.__class__.__name__} instead."
+                f"Expected disnake.Colour, int, or Embed.Empty but received {type(value).__name__} instead."
             )
+
+    @colour.deleter
+    def colour(self):
+        self.colour = Embed._default_colour
 
     color = colour
 
@@ -343,7 +350,7 @@ class Embed:
             self._timestamp = value
         else:
             raise TypeError(
-                f"Expected datetime.datetime or Embed.Empty received {value.__class__.__name__} instead"
+                f"Expected datetime.datetime or Embed.Empty received {type(value).__name__} instead"
             )
 
     @property
@@ -762,3 +769,17 @@ class Embed:
             result["title"] = self.title
 
         return result  # type: ignore
+
+    @classmethod
+    def set_default_colour(cls, value: Union[int, Colour]):
+        """Set the default colour of all new embeds."""
+        if isinstance(value, (Colour, _EmptyEmbed)):
+            cls._default_colour = value
+        elif isinstance(value, int):
+            cls._default_colour = Colour(value=value)
+        else:
+            raise TypeError(
+                f"Expected disnake.Colour, or int, but received {type(value).__name__} instead."
+            )
+
+    set_default_color = set_default_colour
