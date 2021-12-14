@@ -3,9 +3,19 @@
 Version Guarantees
 =====================
 
-The library follows a `semantic versioning principle <https://semver.org/>`_ which means that the major version is updated every time there is an incompatible API change. However due to the lack of guarantees on the Discord side when it comes to breaking changes along with the fairly dynamic nature of Python it can be hard to discern what can be considered a breaking change and what isn't.
+This library does **not** quite follow the semantic versioning principle, the notable difference being that breaking changes may not only occur on major version increases, but also on minor version bumps (think Python's own versioning scheme).
+The primary reason for this is the lack of guarantees on the Discord API side when it comes to breaking changes, which along with the dynamic nature of the API results in breaking changes sometimes being required more frequently than desired.
+However, any breaking changes will always be explicitly marked as such in the release notes.
 
-The first thing to keep in mind is that breaking changes only apply to **publicly documented functions and classes**. If it's not listed in the documentation here then it is not part of the public API and is thus bound to change. This includes attributes that start with an underscore or functions without an underscore that are not documented.
+In general, the versioning scheme (``major.minor.micro``) used in this library aims to follow these rules:
+
+- ``major`` bumps indicate a significant refactoring or other large changes that would constitute such an increase (will most likely include breaking changes)
+- ``minor`` bumps contain new features, fixes, and **may also have breaking changes**
+- ``micro`` bumps only contain fixes, no new features and no breaking changes
+
+One thing to keep in mind is that breaking changes only apply to **publicly documented functions and classes**.
+If it's not listed in the documentation here then it is not part of the public API and is thus bound to change.
+This includes attributes that start with an underscore or functions without an underscore that are not documented.
 
 .. note::
 
