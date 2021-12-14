@@ -43,6 +43,13 @@ Installing `disnake` with full voice support requires you to replace `disnake` h
 
 Note that voice support on Linux requires installation of `libffi-dev` and `python-dev` packages, via your preferred package manager (e.g. `apt`, `dnf`, etc.) before running the following commands.
 
+Versioning
+----------
+
+This project does **not** quite follow semantic versioning; for more details, see [version guarantees](https://docs.disnake.dev/en/latest/version_guarantees.html).
+
+To be on the safe side and avoid unexpected breaking changes, pin the dependency to a minor version (e.g. `disnake==a.b.*` or `disnake~=a.b.c`) or an exact version (e.g. `disnake==a.b.c`).
+
 Quick Example
 -------------
 
