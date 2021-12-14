@@ -608,7 +608,7 @@ class ConnectionState:
         try:
             guild = self._get_guild(int(data["guild_id"]))
         except KeyError:
-            # if we're here, this is a DM channel
+            # if we're here, this is a DM channel or an ephemeral message in a guild
             channel = self.get_channel(channel_id)
             if channel is None:
                 if "author" in data:
