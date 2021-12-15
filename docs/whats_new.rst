@@ -39,30 +39,6 @@ Deprecations
 New Features
 ~~~~~~~~~~~~~
 
-- Add attachment descriptions (see :class:`File`, :class:`Attachment`)
-- Add :func:`on_member_screening_reject` and :func:`on_raw_member_screening_reject` events
-    - *note:* these are currently not officially documented or supported, but have been consistently emitted for several months
-- Support ``channel_types`` in :func:`Param <ext.commands.Param>`/:class:`ParamInfo <ext.commands.ParamInfo>`
-- Add :class:`PermissionsConverter`, which allows the conversion of a value or a (list of) permission names to a :class:`Permissions` instance
-  (using a :class:`Permissions` annotation)
-- Add a base class for warnings emitted by this library, :class:`DiscordWarning`
-- Add new warnings (emitted instead of just using ``print`` for warnings):
-  :class:`ConfigWarning`, :class:`SyncWarning`
-- Add :attr:`AppInfo.flags`
-- Add new voice channel activities:
-    - :attr:`PartyType.watch_together`
-    - :attr:`PartyType.checkers`
-    - :attr:`PartyType.spellcast`
-    - :attr:`PartyType.awkword`
-    - :attr:`PartyType.sketchy_artist`
-- Add :attr:`Guild.approximate_member_count` and :attr:`Guild.approximate_presence_count` (available on manually fetched guilds)
-- Add new flags/enum values:
-    - :attr:`MessageType.context_menu_command`
-    - :attr:`Status.streaming`
-    - :attr:`SystemChannelFlags.join_notification_replies`
-    - :attr:`MessageFlags.loading`
-    - :attr:`UserFlags.http_interactions_bot`, :attr:`PublicUserFlags.http_interactions_bot`
-    - :attr:`UserFlags.spammer`, :attr:`PublicUserFlags.spammer`
 - Add scheduled events
     - New intent: :attr:`Intents.guild_scheduled_events` (enabled by default)
     - New types
@@ -93,14 +69,6 @@ New Features
         - :attr:`AuditLogAction.guild_scheduled_event_create`
         - :attr:`AuditLogAction.guild_scheduled_event_update`
         - :attr:`AuditLogAction.guild_scheduled_event_delete`
-- Add support for setting ``slowmode_delay`` on thread creation (:func:`TextChannel.create_thread`, :func:`Message.create_thread`)
-- Add ``invitable`` parameter to :func:`TextChannel.create_thread`
-- Add parameter injections (`example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_)
-    - :func:`inject <ext.commands.inject>`
-    - :func:`converter_method <ext.commands.converter_method>`
-    - :func:`register_injection <ext.commands.register_injection>`
-- Add new aliases for :class:`ApplicationCommandInteraction`:
-  ``CommandInteraction``, ``CmdInteraction``, ``CommandInter``, ``CmdInter``, ``AppCommandInteraction``
 - Add preliminary support for text-in-voice
     - Many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods
     - :class:`VoiceChannel` now inherits from :class:`abc.Messageable`
@@ -109,29 +77,66 @@ New Features
     - New :class:`VoiceChannel` methods:
       :func:`.is_nsfw <VoiceChannel.is_nsfw>`, :func:`.get_partial_message <VoiceChannel.get_partial_message>`
     - ``nsfw`` and ``slowmode_delay`` parameters for :func:`VoiceChannel.edit`
-- Add :attr:`Permissions.start_embedded_activities`
+- Add parameter injections (`example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_)
+    - :func:`inject <ext.commands.inject>`
+    - :func:`converter_method <ext.commands.converter_method>`
+    - :func:`register_injection <ext.commands.register_injection>`
+
+- Add attachment descriptions (see :class:`File`, :class:`Attachment`)
+- Add :func:`on_member_screening_reject` and :func:`on_raw_member_screening_reject` events
+    - *note:* these are currently not officially documented or supported, but have been consistently emitted for several months
 - Add :func:`on_raw_typing` event
+- Add :attr:`Guild.approximate_member_count` and :attr:`Guild.approximate_presence_count` (available on manually fetched guilds)
+- Add :attr:`Permissions.start_embedded_activities`
 - Add :class:`ThreadArchiveDuration` enum, containing the currently valid values for the thread auto-archive feature
+- Add :class:`PermissionsConverter`, which allows the conversion of a value or a (list of) permission names to a :class:`Permissions` instance
+  (using a :class:`Permissions` annotation)
+- Add :attr:`AppInfo.flags`
+- Add ``channel_types`` parameter to :func:`Param <ext.commands.Param>`/:class:`ParamInfo <ext.commands.ParamInfo>`
+- Add support for setting ``slowmode_delay`` on thread creation (:func:`TextChannel.create_thread`, :func:`Message.create_thread`)
+- Add ``invitable`` parameter to :func:`TextChannel.create_thread`
+- Add new aliases for :class:`ApplicationCommandInteraction`:
+  ``CommandInteraction``, ``CmdInteraction``, ``CommandInter``, ``CmdInter``, ``AppCommandInteraction``
+
+- Add a base class for warnings emitted by this library, :class:`DiscordWarning`
+- Add new warnings (emitted instead of just using ``print`` for warnings):
+  :class:`ConfigWarning`, :class:`SyncWarning`
+
+- Add new voice channel activities:
+    - :attr:`PartyType.watch_together`
+    - :attr:`PartyType.checkers`
+    - :attr:`PartyType.spellcast`
+    - :attr:`PartyType.awkword`
+    - :attr:`PartyType.sketchy_artist`
+- Add new flags/enum values:
+    - :attr:`MessageType.context_menu_command`
+    - :attr:`Status.streaming`
+    - :attr:`SystemChannelFlags.join_notification_replies`
+    - :attr:`MessageFlags.loading`
+    - :attr:`UserFlags.http_interactions_bot`, :attr:`PublicUserFlags.http_interactions_bot`
+    - :attr:`UserFlags.spammer`, :attr:`PublicUserFlags.spammer`
 
 
 Bug Fixes
 ~~~~~~~~~~
 
+- Fix dispatch of typing events in DMs
+- Try to retrieve objects in received interactions from cache first (fixing properties like :attr:`Member.status` on member parameters)
+- Fix return type annotation of :func:`ui.button` and :func:`ui.select` decorators
 - Fix incorrect URL returned by :attr:`Template.url`
 - Fix unnecessary application command sync without changes
-- Fix return type annotation of :func:`ui.button` and :func:`ui.select` decorators
-- Fix dispatch of typing events in DMs
-- Fix leftover uses of ``json``, which didn't use ``orjson`` if available
-- Try to retrieve objects in received interactions from cache first (fixing properties like :attr:`Member.status` on member parameters)
 - Fix sending local files in embeds with interactions/webhooks if only one embed was specified
+- Fix leftover uses of ``json``, which didn't use ``orjson`` if available
 
 
 Documentation
 ~~~~~~~~~~~~~~
 
-- Clarify :func:`Interaction.original_message` documentation regarding different response types
-- Add documentation for new guild feature values
 - Move documentation to https://docs.disnake.dev/
+- Clarify :func:`Interaction.original_message` documentation regarding different response types
+- Clarify :func:`Interaction.send` documentation
+- Redirect searches for ``color`` to ``colour``
+- Add documentation for new guild feature values
 - Add documentation for several methods/properties:
     - :attr:`Client.global_application_commands`
     - :attr:`Client.global_slash_commands`
@@ -145,8 +150,6 @@ Documentation
     - :func:`on_message_command_completion <.ext.commands.on_message_command_completion>`
     - :attr:`ApplicationCommandInteraction.bot`
     - :class:`InvokableApplicationCommand <ext.commands.InvokableApplicationCommand>`
-- Redirect searches for ``color`` to ``colour``
-- Clarify :func:`Interaction.send` documentation
 - Fix incorrect type in docs for :attr:`Invite.channel`
 
 
