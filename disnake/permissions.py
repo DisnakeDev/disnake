@@ -583,14 +583,6 @@ class Permissions(BaseFlags):
         return 1 << 38
 
     @flag_value
-<<<<<<< HEAD
-    def moderate_members(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can perform limited moderation actions (timeout).
-
-        .. versionadded:: 2.3
-        """
-        return 1 << 40
-=======
     def start_embedded_activities(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can launch activities (applications
         with the :attr:`embedded <ApplicationFlags.embedded>` flag) in a voice channel.
@@ -598,7 +590,14 @@ class Permissions(BaseFlags):
         .. versionadded:: 2.3
         """
         return 1 << 39
->>>>>>> up/master
+
+    @flag_value
+    def moderate_members(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can perform limited moderation actions (timeout).
+
+        .. versionadded:: 2.3
+        """
+        return 1 << 40
 
 
 PO = TypeVar("PO", bound="PermissionOverwrite")
@@ -714,12 +713,9 @@ class PermissionOverwrite:
         create_private_threads: Optional[bool]
         external_stickers: Optional[bool]
         use_external_stickers: Optional[bool]
-<<<<<<< HEAD
-        moderate_members: Optional[bool]
-=======
         send_messages_in_threads: Optional[bool]
         start_embedded_activities: Optional[bool]
->>>>>>> up/master
+        moderate_members: Optional[bool]
 
     def __init__(self, **kwargs: Optional[bool]):
         self._values: Dict[str, Optional[bool]] = {}
