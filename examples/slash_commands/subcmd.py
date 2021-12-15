@@ -30,7 +30,7 @@ async def bar(inter, option: int):
 
 # Define a new command with sub command groups (this time in a cog)
 class MyCog(commands.Cog):
-    @bot.slash_command()
+    @commands.slash_command()
     async def command(self, inter):
         print("This code is ran every time any subcommand is invoked")
 

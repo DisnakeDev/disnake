@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -29,7 +30,6 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
-    Generic,
     Iterator,
     List,
     Optional,
@@ -448,6 +448,14 @@ class PublicUserFlags(BaseFlags):
         .. versionadded:: 2.3
         """
         return UserFlags.http_interactions_bot.value
+
+    @flag_value
+    def spammer(self):
+        """:class:`bool`: Returns ``True`` if the user is marked as a spammer.
+
+        .. versionadded:: 2.3
+        """
+        return UserFlags.spammer.value
 
     def all(self) -> List[UserFlags]:
         """List[:class:`UserFlags`]: Returns all public flags the user has."""

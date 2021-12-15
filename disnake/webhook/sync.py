@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -32,7 +33,6 @@ from __future__ import annotations
 
 import threading
 import logging
-import json
 import time
 import re
 
@@ -45,8 +45,6 @@ from typing import (
     Optional,
     TYPE_CHECKING,
     Tuple,
-    Type,
-    TypeVar,
     Union,
     overload,
 )
@@ -176,7 +174,7 @@ class WebhookAdapter:
 
                         data = response.text or None
                         if data and response.headers["Content-Type"] == "application/json":
-                            data = json.loads(data)
+                            data = utils._from_json(data)
 
                         remaining = response.headers.get("X-Ratelimit-Remaining")
                         if remaining == "0" and response.status_code != 429:

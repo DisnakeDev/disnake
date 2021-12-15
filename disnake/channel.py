@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -51,7 +52,7 @@ from .enums import (
     try_enum,
     VoiceRegion,
     VideoQualityMode,
-    PartyType,
+    try_enum_to_int,
 )
 from .mixins import Hashable
 from .object import Object
@@ -76,7 +77,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from .types.threads import ThreadArchiveDuration
+    from .types.threads import ThreadArchiveDurationLiteral
     from .role import Role
     from .member import Member, VoiceState
     from .abc import Snowflake, SnowflakeTime
@@ -85,6 +86,7 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .user import ClientUser, User, BaseUser
     from .guild import Guild, GuildChannel as GuildChannelType
+    from .threads import AnyThreadArchiveDuration
     from .types.channel import (
         TextChannel as TextChannelPayload,
         VoiceChannel as VoiceChannelPayload,
@@ -202,7 +204,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self.nsfw: bool = data.get("nsfw", False)
         # Does this need coercion into `int`? No idea yet.
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
-        self.default_auto_archive_duration: ThreadArchiveDuration = data.get(
+        self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
             "default_auto_archive_duration", 1440
         )
         self._type: int = data.get("type", self._type)
@@ -244,11 +246,17 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
-        """:class:`bool`: Checks if the channel is NSFW."""
+        """Checks if the channel is NSFW.
+
+        :return type: :class:`bool`
+        """
         return self.nsfw
 
     def is_news(self) -> bool:
-        """:class:`bool`: Checks if the channel is a news channel."""
+        """Checks if the channel is a news channel.
+
+        :return type: :class:`bool`
+        """
         return self._type == ChannelType.news.value
 
     @property
@@ -284,7 +292,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = ...,
         category: Optional[CategoryChannel] = ...,
         slowmode_delay: int = ...,
-        default_auto_archive_duration: ThreadArchiveDuration = ...,
+        default_auto_archive_duration: AnyThreadArchiveDuration = ...,
         type: ChannelType = ...,
         overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = ...,
     ) -> Optional[TextChannel]:
@@ -339,7 +347,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        default_auto_archive_duration: :class:`int`
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
 
@@ -699,7 +707,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         message: Optional[Snowflake] = None,
-        auto_archive_duration: ThreadArchiveDuration = None,
+        auto_archive_duration: AnyThreadArchiveDuration = None,
         type: Optional[ChannelType] = None,
         invitable: bool = None,
         slowmode_delay: int = None,
@@ -722,9 +730,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             A snowflake representing the message to create the thread with.
             If ``None`` is passed then a private thread is created.
             Defaults to ``None``.
-        auto_archive_duration: :class:`int`
+        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         type: Optional[:class:`ChannelType`]
             The type of thread to create. If a ``message`` is passed then this parameter
             is ignored, as a thread created with a message is always a public thread.
@@ -761,6 +770,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         if type is None:
             type = ChannelType.private_thread
+
+        if auto_archive_duration is not None:
+            auto_archive_duration: ThreadArchiveDurationLiteral = try_enum_to_int(
+                auto_archive_duration
+            )
 
         if message is None:
             data = await self._state.http.start_thread_without_message(
@@ -930,7 +944,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         return base
 
 
-class VoiceChannel(VocalGuildChannel):
+class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild voice channel.
 
     .. container:: operations
@@ -975,9 +989,33 @@ class VoiceChannel(VocalGuildChannel):
         .. versionadded:: 1.7
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
+    nsfw: :class:`bool`
+        If the channel is marked as "not safe for work".
+
+        .. note::
+
+            To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
+
+        .. versionadded:: 2.3
+    slowmode_delay: :class:`int`
+        The number of seconds a member must wait between sending messages
+        in this channel. A value of `0` denotes that it is disabled.
+        Bots and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages` bypass slowmode.
+
+        .. versionadded:: 2.3
+    last_message_id: Optional[:class:`int`]
+        The last message ID of the message sent to this channel. It may
+        *not* point to an existing or valid message.
+
+        .. versionadded:: 2.3
     """
 
-    __slots__ = ()
+    __slots__ = (
+        "nsfw",
+        "slowmode_delay",
+        "last_message_id",
+    )
 
     def __repr__(self) -> str:
         attrs = [
@@ -989,9 +1027,19 @@ class VoiceChannel(VocalGuildChannel):
             ("video_quality_mode", self.video_quality_mode),
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
+            ("nsfw", self.nsfw),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
+
+    def _update(self, guild: Guild, data: VoiceChannelPayload) -> None:
+        super()._update(guild, data)
+        self.nsfw: bool = data.get("nsfw", False)
+        self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
+
+    async def _get_channel(self):
+        return self
 
     @property
     def type(self) -> ChannelType:
@@ -1006,6 +1054,57 @@ class VoiceChannel(VocalGuildChannel):
             {"bitrate": self.bitrate, "user_limit": self.user_limit}, name=name, reason=reason
         )
 
+    def is_nsfw(self) -> bool:
+        """Checks if the channel is NSFW.
+
+        :return type: :class:`bool`
+        """
+        return self.nsfw
+
+    @property
+    def last_message(self) -> Optional[Message]:
+        """Fetches the last message from this channel in cache.
+
+        The message might not be valid or point to an existing message.
+
+        .. admonition:: Reliable Fetching
+            :class: helpful
+
+            For a slightly more reliable method of fetching the
+            last message, consider using either :meth:`history`
+            or :meth:`fetch_message` with the :attr:`last_message_id`
+            attribute.
+
+        Returns
+        ---------
+        Optional[:class:`Message`]
+            The last message in this channel or ``None`` if not found.
+        """
+        return self._state._get_message(self.last_message_id) if self.last_message_id else None
+
+    def get_partial_message(self, message_id: int, /) -> PartialMessage:
+        """Creates a :class:`PartialMessage` from the message ID.
+
+        This is useful if you want to work with a message and only have its ID without
+        doing an unnecessary API call.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ------------
+        message_id: :class:`int`
+            The message ID to create a partial message for.
+
+        Returns
+        ---------
+        :class:`PartialMessage`
+            The partial message.
+        """
+
+        from .message import PartialMessage
+
+        return PartialMessage(channel=self, id=message_id)
+
     @overload
     async def edit(
         self,
@@ -1019,6 +1118,8 @@ class VoiceChannel(VocalGuildChannel):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         rtc_region: Optional[VoiceRegion] = ...,
         video_quality_mode: VideoQualityMode = ...,
+        nsfw: bool = ...,
+        slowmode_delay: int = ...,
         reason: Optional[str] = ...,
     ) -> Optional[VoiceChannel]:
         ...
@@ -1071,6 +1172,15 @@ class VoiceChannel(VocalGuildChannel):
             The camera video quality for the voice channel's participants.
 
             .. versionadded:: 2.0
+        nsfw: :class:`bool`
+            To mark the channel as NSFW or not.
+
+            .. versionadded:: 2.3
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+
+            .. versionadded:: 2.3
 
         Raises
         ------
@@ -1453,7 +1563,10 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ChannelType.category
 
     def is_nsfw(self) -> bool:
-        """:class:`bool`: Checks if the category is NSFW."""
+        """Checks if the category is NSFW.
+
+        :return type: :class:`bool`
+        """
         return self.nsfw
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
@@ -1718,7 +1831,10 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
         return base
 
     def is_nsfw(self) -> bool:
-        """:class:`bool`: Checks if the channel is NSFW."""
+        """Checks if the channel is NSFW.
+
+        :return type: :class:`bool`
+        """
         return self.nsfw
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
@@ -1857,13 +1973,13 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         return f"<DMChannel id={self.id} recipient={self.recipient!r}>"
 
     @classmethod
-    def _from_message(cls: Type[DMC], state: ConnectionState, channel_id: int) -> DMC:
+    def _from_message(cls: Type[DMC], state: ConnectionState, channel_id: int, user_id: int) -> DMC:
         self: DMC = cls.__new__(cls)
         self._state = state
         self.id = channel_id
-        self.recipient = None
         # state.user won't be None here
         self.me = state.user  # type: ignore
+        self.recipient = state.get_user(user_id) if user_id != self.me.id else None
         return self
 
     @property

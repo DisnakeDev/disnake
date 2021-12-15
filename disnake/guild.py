@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -231,7 +232,7 @@ class Guild(Hashable):
         - ``THREE_DAY_THREAD_ARCHIVE``: Guild has access to the three day archive time for threads.
         - ``THREADS_ENABLED``: Guild had early access to threads.
         - ``TICKETED_EVENTS_ENABLED``: Guild has enabled ticketed events.
-        - ``VANITY_URL``: Guild can have a vanity invite URL (e.g. discord.gg/disnake-api).
+        - ``VANITY_URL``: Guild can have a vanity invite URL (e.g. discord.gg/discord-api).
         - ``VERIFIED``: Guild is a verified server.
         - ``VIP_REGIONS``: Guild has VIP voice regions.
         - ``WELCOME_SCREEN_ENABLED``: Guild has enabled the welcome screen.
@@ -2702,7 +2703,7 @@ class Guild(Hashable):
     ) -> Optional[Member]:
         """|coro|
 
-        Tries to get a member from the cache by ID. If fails, it fetcehs
+        Tries to get a member from the cache by ID. If fails, it fetches
         the user from the API and caches it.
 
         Parameters

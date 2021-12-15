@@ -42,6 +42,12 @@ __all__ = (
     "ApplicationCommandInteractionData",
     "ApplicationCommandInteractionDataOption",
     "ApplicationCommandInteractionDataResolved",
+    # aliases (we're trying to find out which one catches on)
+    "CommandInteraction",
+    "CmdInteraction",
+    "CommandInter",
+    "CmdInter",
+    "AppCommandInteraction",
     "AppCommandInter",
     "AppCmdInter",
 )
@@ -74,6 +80,7 @@ if TYPE_CHECKING:
         StoreChannel,
         Thread,
         PartialMessageable,
+        VoiceChannel,
     ]
 
 
@@ -99,6 +106,8 @@ class ApplicationCommandInteraction(Interaction):
         The channel ID the interaction was sent from.
     application_id: :class:`int`
         The application ID that the interaction was for.
+    bot: :class:`.Bot`
+        The interaction's bot. There is an alias for this named ``client``.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
     guild: Optional[:class:`Guild`]
@@ -380,10 +389,14 @@ class ApplicationCommandInteractionDataResolved:
             user_id = int(str_id)
             member = members.get(str_id)
             if member is not None:
-                self.members[user_id] = Member(
-                    data={**member, "user": user},  # type: ignore
-                    guild=guild,  # type: ignore
-                    state=state,
+                self.members[user_id] = (
+                    guild
+                    and guild.get_member(user_id)
+                    or Member(
+                        data={**member, "user": user},  # type: ignore
+                        guild=guild,  # type: ignore
+                        state=state,
+                    )
                 )
             else:
                 self.users[user_id] = User(state=state, data=user)
@@ -395,7 +408,11 @@ class ApplicationCommandInteractionDataResolved:
             factory, ch_type = _threaded_channel_factory(channel["type"])
             if factory:
                 channel["position"] = 0  # type: ignore
-                self.channels[int(str_id)] = factory(guild=guild, state=state, data=channel)  # type: ignore
+                self.channels[int(str_id)] = (  # type: ignore
+                    guild
+                    and guild.get_channel(int(str_id))
+                    or factory(guild=guild, state=state, data=channel)  # type: ignore
+                )
 
         for str_id, message in messages.items():
             channel_id = int(message["channel_id"])
@@ -450,6 +467,11 @@ class ApplicationCommandInteractionDataResolved:
         return self.messages.get(key)
 
 
-# People asked about shorter aliases
+# People asked about shorter aliases, let's see which one catches on the most
+CommandInteraction = ApplicationCommandInteraction
+CmdInteraction = ApplicationCommandInteraction
+CommandInter = ApplicationCommandInteraction
+CmdInter = ApplicationCommandInteraction
+AppCommandInteraction = ApplicationCommandInteraction
 AppCommandInter = ApplicationCommandInteraction
 AppCmdInter = ApplicationCommandInteraction

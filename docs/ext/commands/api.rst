@@ -88,7 +88,7 @@ InteractionBot
 
     .. automethod:: InteractionBot.before_message_command_invoke()
         :decorator:
-    
+
     .. automethod:: InteractionBot.application_command_check()
         :decorator:
 
@@ -250,6 +250,36 @@ are custom to the command extension module.
     :param ctx: The invocation context.
     :type ctx: :class:`.Context`
 
+.. function:: disnake.ext.commands.on_slash_command_completion(inter)
+
+    An event that is called when a slash command has completed its invocation.
+
+    This event is called only if the slash command succeeded, i.e. all checks have
+    passed and command handler ran successfully.
+
+    :param inter: The interaction that invoked this slash command.
+    :type inter: :class:`.ApplicationCommandInteraction`
+
+.. function:: disnake.ext.commands.on_user_command_completion(inter)
+
+    An event that is called when a user command has completed its invocation.
+
+    This event is called only if the user command succeeded, i.e. all checks have
+    passed and command handler ran successfully.
+
+    :param inter: The interaction that invoked this user command.
+    :type inter: :class:`.ApplicationCommandInteraction`
+
+.. function:: disnake.ext.commands.on_message_command_completion(inter)
+
+    An event that is called when a message command has completed its invocation.
+
+    This event is called only if the message command succeeded, i.e. all checks have
+    passed and command handler ran successfully.
+
+    :param inter: The interaction that invoked this message command.
+    :type inter: :class:`.ApplicationCommandInteraction`
+
 .. _ext_commands_api_command:
 
 Commands
@@ -277,6 +307,28 @@ Helper Functions
 ~~~~~~~~~~~~~~~~
 
 .. autofunction:: disnake.ext.commands.Param
+
+.. autofunction:: disnake.ext.commands.inject
+
+.. autofunction:: disnake.ext.commands.register_injection
+
+Application Command
+~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.InvokableApplicationCommand
+
+.. autoclass:: disnake.ext.commands.InvokableApplicationCommand
+    :members:
+    :exclude-members: before_invoke, after_invoke, error
+
+    .. automethod:: InvokableApplicationCommand.before_invoke()
+        :decorator:
+
+    .. automethod:: InvokableApplicationCommand.after_invoke()
+        :decorator:
+
+    .. automethod:: InvokableApplicationCommand.error()
+        :decorator:
 
 Slash Command
 ~~~~~~~~~~~~~

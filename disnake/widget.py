@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -28,7 +29,7 @@ from typing import Any, List, Optional, TYPE_CHECKING, Union
 
 from .utils import snowflake_time, _get_as_snowflake, resolve_invite
 from .user import BaseUser
-from .activity import Activity, BaseActivity, Spotify, create_activity
+from .activity import BaseActivity, Spotify, create_activity
 from .invite import Invite
 from .enums import Status, try_enum
 

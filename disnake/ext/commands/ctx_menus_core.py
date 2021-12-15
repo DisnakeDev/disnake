@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING, Any, Callable, Coroutine, Optional, TypeVar, U
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
+from .params import safe_call
 
 from disnake.app_commands import UserCommand, MessageCommand
 
@@ -105,17 +106,14 @@ class InvokableUserCommand(InvokableApplicationCommand):
             inter.bot.dispatch("user_command_error", inter, error)
 
     async def __call__(
-        self, inter: ApplicationCommandInteraction, target: Any = None, *args, **kwargs
+        self, interaction: ApplicationCommandInteraction, target: Any = None, *args, **kwargs
     ) -> None:
         # the target may just not be passed in
-        target = target or inter.target
-        try:
-            await super().__call__(inter, *args, **kwargs)
-        except TypeError as e:
-            if e.args and e.args[0].startswith(f"{self.callback.__name__}() missing "):
-                await super().__call__(inter, target, *args, **kwargs)
-            else:
-                raise
+        args = (target or interaction.target,) + args
+        if self.cog is not None:
+            await safe_call(self.callback, self.cog, interaction, *args, **kwargs)
+        else:
+            await safe_call(self.callback, interaction, *args, **kwargs)
 
 
 class InvokableMessageCommand(InvokableApplicationCommand):
@@ -179,17 +177,14 @@ class InvokableMessageCommand(InvokableApplicationCommand):
             inter.bot.dispatch("message_command_error", inter, error)
 
     async def __call__(
-        self, inter: ApplicationCommandInteraction, target: Any = None, *args, **kwargs
+        self, interaction: ApplicationCommandInteraction, target: Any = None, *args, **kwargs
     ) -> None:
         # the target may just not be passed in
-        target = target or inter.target
-        try:
-            await super().__call__(inter, *args, **kwargs)
-        except TypeError as e:
-            if e.args and e.args[0].startswith(f"{self.callback.__name__}() missing "):
-                await super().__call__(inter, target, *args, **kwargs)
-            else:
-                raise
+        args = (target or interaction.target,) + args
+        if self.cog is not None:
+            await safe_call(self.callback, self.cog, interaction, *args, **kwargs)
+        else:
+            await safe_call(self.callback, interaction, *args, **kwargs)
 
 
 def user_command(

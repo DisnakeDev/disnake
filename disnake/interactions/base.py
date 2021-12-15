@@ -3,7 +3,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -163,7 +164,11 @@ class Interaction:
             except KeyError:
                 pass
             else:
-                self.author = Member(state=self._state, guild=guild, data=member)  # type: ignore
+                self.author = (
+                    guild
+                    and guild.get_member(int(member["user"]["id"]))  # type: ignore
+                    or Member(state=self._state, guild=guild, data=member)  # type: ignore
+                )
                 self._permissions = int(member.get("permissions", 0))
         else:
             try:
@@ -198,7 +203,7 @@ class Interaction:
         return self.guild.me
 
     @utils.cached_slot_property("_cs_channel")
-    def channel(self) -> Union[TextChannel, Thread]:
+    def channel(self) -> Union[TextChannel, Thread, VoiceChannel]:
         """Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]: The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels are not resolved since there is
@@ -209,7 +214,9 @@ class Interaction:
         channel = guild and guild._resolve_channel(self.channel_id)
         if channel is None:
             if self.channel_id is not None:
-                type = ChannelType.text if self.guild_id is not None else ChannelType.private
+                type = (
+                    None if self.guild_id is not None else ChannelType.private
+                )  # could be a text, voice, or thread channel in a guild
                 return PartialMessageable(state=self._state, id=self.channel_id, type=type)  # type: ignore
             return None  # type: ignore
         return channel  # type: ignore
@@ -471,10 +478,16 @@ class Interaction:
     ) -> None:
         """|coro|
 
-        Sends a message using either :meth:`response.send_message` or :meth:`followup.send`.
+        Sends a message using either :meth:`response.send_message <InteractionResponse.send_message>`
+        or :meth:`followup.send <Webhook.send>`.
 
-        If the interaction is not responded, this method will call :meth:`response.send_message`.
-        :meth:`followup.send` otherwise.
+        If the interaction hasn't been responded to yet, this method will call :meth:`response.send_message <InteractionResponse.send_message>`.
+        Otherwise, it will call :meth:`followup.send <Webhook.send>`.
+
+        .. note::
+            This method does not return a :class:`Message` object. If you need a message object,
+            use :meth:`original_message` to fetch it, or use :meth:`followup.send <Webhook.send>`
+            directly instead of this method if you're sending a followup message.
 
         Parameters
         -----------
@@ -524,8 +537,8 @@ class Interaction:
             sender = self.followup.send
         else:
             sender = self.response.send_message
-        await sender(  # type: ignore
-            content=content,
+        await sender(
+            content=content,  # type: ignore
             embed=embed,
             embeds=embeds,
             file=file,
@@ -556,9 +569,11 @@ class InteractionResponse:
         self._responded: bool = False
 
     def is_done(self) -> bool:
-        """:class:`bool`: Indicates whether an interaction response has been done before.
+        """Indicates whether an interaction response has been done before.
 
         An interaction can only be responded to once.
+
+        :return type: :class:`bool`
         """
         return self._responded
 
@@ -797,7 +812,7 @@ class InteractionResponse:
             attachments using this method is presently not supported (API limitation, see
             `this <https://github.com/discord/discord-api-docs/discussions/3335>`_).
             As a workaround, respond to the interaction first (e.g. using :meth:`.defer`),
-            then edit the message using :meth:`.edit_original_message`.
+            then edit the message using :meth:`Interaction.edit_original_message`.
 
         .. note::
             If the original message has embeds with images that were created from local files

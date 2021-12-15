@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -40,7 +41,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    overload,
 )
 
 import disnake.abc
@@ -484,7 +484,10 @@ class Member(disnake.abc.Messageable, _UserTag):
         return try_enum(Status, self._client_status.get("web", "offline"))
 
     def is_on_mobile(self) -> bool:
-        """:class:`bool`: A helper function that determines if a member is active on a mobile device."""
+        """A helper function that determines if a member is active on a mobile device.
+
+        :return type: :class:`bool`
+        """
         return "mobile" in self._client_status
 
     @property

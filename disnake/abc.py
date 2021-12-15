@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -81,7 +82,7 @@ if TYPE_CHECKING:
     from .channel import CategoryChannel
     from .embeds import Embed
     from .message import Message, MessageReference, PartialMessage
-    from .channel import TextChannel, DMChannel, GroupChannel, PartialMessageable
+    from .channel import TextChannel, DMChannel, PartialMessageable, VoiceChannel
     from .threads import Thread
     from .enums import InviteTarget
     from .guild_scheduled_event import GuildScheduledEvent
@@ -93,7 +94,7 @@ if TYPE_CHECKING:
         OverwriteType,
     )
 
-    MessageableChannel = Union[TextChannel, Thread, DMChannel, PartialMessageable]
+    MessageableChannel = Union[TextChannel, Thread, DMChannel, PartialMessageable, VoiceChannel]
     SnowflakeTime = Union["Snowflake", datetime]
 
 MISSING = utils.MISSING
@@ -1164,6 +1165,7 @@ class Messageable:
     - :class:`~disnake.Member`
     - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.Thread`
+    - :class:`~disnake.VoiceChannel`
     """
 
     __slots__ = ()

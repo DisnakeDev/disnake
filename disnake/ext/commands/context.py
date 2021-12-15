@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -35,9 +36,7 @@ from disnake.message import Message
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
-
-    from disnake.abc import MessageableChannel
-    from disnake.channel import TextChannel, Thread, DMChannel
+    from disnake.channel import TextChannel, Thread, DMChannel, VoiceChannel
     from disnake.guild import Guild
     from disnake.member import Member
     from disnake.state import ConnectionState
@@ -286,7 +285,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         return self.message.guild
 
     @disnake.utils.cached_property
-    def channel(self) -> Union[TextChannel, Thread, DMChannel]:
+    def channel(self) -> Union[TextChannel, Thread, DMChannel, VoiceChannel]:
         """Union[:class:`.abc.Messageable`]: Returns the channel associated with this context's command.
         Shorthand for :attr:`.Message.channel`.
         """
@@ -407,6 +406,6 @@ class GuildContext(Context):
     """
 
     guild: Guild
-    channel: Union[TextChannel, Thread]
+    channel: Union[TextChannel, Thread, VoiceChannel]
     author: Member
     me: Member

@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -26,7 +27,6 @@ from __future__ import annotations
 
 import logging
 import asyncio
-import json
 import re
 
 from urllib.parse import quote as urlquote
@@ -79,7 +79,7 @@ if TYPE_CHECKING:
         Message as MessagePayload,
     )
     from ..guild import Guild
-    from ..channel import TextChannel
+    from ..channel import TextChannel, VoiceChannel
     from ..abc import Snowflake
     from ..ui.view import View
     import datetime
@@ -178,7 +178,7 @@ class AsyncWebhookAdapter:
                         )
                         data = (await response.text(encoding="utf-8")) or None
                         if data and response.headers["Content-Type"] == "application/json":
-                            data = json.loads(data)
+                            data = utils._from_json(data)
 
                         remaining = response.headers.get("X-Ratelimit-Remaining")
                         if remaining == "0" and response.status != 429:
@@ -500,7 +500,7 @@ def handle_message_parameters(
 
     payload = {}
     if embed is not MISSING:
-        payload["embeds"] = [] if embed is None else [embed.to_dict()]
+        embeds = [embed] if embed else []
     if embeds is not MISSING:
         if len(embeds) > 10:
             raise InvalidArgument("embeds has a maximum of 10 elements.")
@@ -865,15 +865,20 @@ class BaseWebhook(Hashable):
         self.source_guild: Optional[PartialWebhookGuild] = source_guild
 
     def is_partial(self) -> bool:
-        """:class:`bool`: Whether the webhook is a "partial" webhook.
+        """Whether the webhook is a "partial" webhook.
 
-        .. versionadded:: 2.0"""
+        .. versionadded:: 2.0
+
+        :return type: :class:`bool`
+        """
         return self.channel_id is None
 
     def is_authenticated(self) -> bool:
-        """:class:`bool`: Whether the webhook is authenticated with a bot token.
+        """Whether the webhook is authenticated with a bot token.
 
         .. versionadded:: 2.0
+
+        :return type: :class:`bool`
         """
         return self.auth_token is not None
 
@@ -886,8 +891,8 @@ class BaseWebhook(Hashable):
         return self._state and self._state._get_guild(self.guild_id)
 
     @property
-    def channel(self) -> Optional[TextChannel]:
-        """Optional[:class:`TextChannel`]: The text channel this webhook belongs to.
+    def channel(self) -> Optional[Union[TextChannel, VoiceChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`]]: The messageable channel this webhook belongs to.
 
         If this is a partial webhook, then this will always return ``None``.
         """

@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -198,11 +199,17 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         return hash((self.id, self.name))
 
     def is_custom_emoji(self) -> bool:
-        """:class:`bool`: Checks if this is a custom non-Unicode emoji."""
+        """Checks if this is a custom non-Unicode emoji.
+
+        :return type: :class:`bool`
+        """
         return self.id is not None
 
     def is_unicode_emoji(self) -> bool:
-        """:class:`bool`: Checks if this is a Unicode emoji."""
+        """Checks if this is a Unicode emoji.
+
+        :return type: :class:`bool`
+        """
         return self.id is None
 
     def _as_reaction(self) -> str:

@@ -354,13 +354,26 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     Called when someone begins typing a message.
 
     The ``channel`` parameter can be a :class:`abc.Messageable` instance.
-    Which could either be :class:`TextChannel`, :class:`GroupChannel`, or
-    :class:`DMChannel`.
+    Which could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`GroupChannel`,
+    or :class:`DMChannel`.
 
-    If the ``channel`` is a :class:`TextChannel` then the ``user`` parameter
-    is a :class:`Member`, otherwise it is a :class:`User`.
+    If the ``channel`` is a :class:`TextChannel` or :class:`VoiceChannel` then the
+    ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
 
-    This requires :attr:`Intents.typing` to be enabled.
+    If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,
+    then this event will not be called. Consider using :func:`on_raw_typing` instead.
+
+    This requires :attr:`Intents.typing` and :attr:`Intents.guilds` to be enabled.
+
+    .. note::
+
+        This doesn't require :attr:`Intents.members` within a guild context,
+        but due to Discord not providing updated user information in a direct message
+        it's required for direct messages to receive this event, if the bot didn't explicitly
+        open the DM channel in the same session (through :func:`User.create_dm`, :func:`Client.create_dm`,
+        or indirectly by sending a message to the user).
+        Consider using :func:`on_raw_typing` if you need this and do not otherwise want
+        to enable the members intent.
 
     :param channel: The location where the typing originated from.
     :type channel: :class:`abc.Messageable`
@@ -368,6 +381,16 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :type user: Union[:class:`User`, :class:`Member`]
     :param when: When the typing started as an aware datetime in UTC.
     :type when: :class:`datetime.datetime`
+
+.. function:: on_raw_typing(data)
+
+    Called when someone begins typing a message.
+
+    This is similar to :func:`on_typing` except that it is called regardless of
+    whether :attr:`Intents.members` and :attr:`Intents.guilds` are enabled.
+
+    :param data: The raw event payload data.
+    :type data: :class:`RawTypingEvent`
 
 .. function:: on_message(message)
 
@@ -1513,6 +1536,11 @@ of :class:`enum.Enum`.
         The user is a bot that only uses HTTP interactions.
 
         .. versionadded:: 2.3
+    .. attribute:: spammer
+    
+        The user is marked as a spammer.
+
+        .. versionadded:: 2.3
 
 .. class:: ActivityType
 
@@ -1589,11 +1617,6 @@ of :class:`enum.Enum`.
     .. attribute:: sketchy_artist
 
         The "Sketchy Artist" activity.
-
-        .. versionadded:: 2.3
-    .. attribute:: putt_party
-
-        The "Putt Party" activity.
 
         .. versionadded:: 2.3
     .. attribute:: watch_together
@@ -2965,6 +2988,28 @@ of :class:`enum.Enum`.
 
         The guild scheduled event is only for a specific guild.
 
+.. class:: ThreadArchiveDuration
+
+    Represents the automatic archive duration of a thread in minutes.
+
+    .. versionadded:: 2.3
+
+    .. attribute:: hour
+
+        The thread will archive after an hour of inactivity.
+
+    .. attribute:: day
+
+        The thread will archive after a day of inactivity.
+
+    .. attribute:: three_days
+
+        The thread will archive after three days of inactivity.
+
+    .. attribute:: week
+
+        The thread will archive after a week of inactivity.
+
 
 Async Iterator
 ----------------
@@ -4039,6 +4084,8 @@ ApplicationCommandInteraction
 
 .. autoclass:: ApplicationCommandInteraction()
     :members:
+    :inherited-members:
+    :exclude-members: channel, followup, guild, me, permissions, response
 
 MessageInteraction
 ~~~~~~~~~~~~~~~~~~
@@ -4047,6 +4094,8 @@ MessageInteraction
 
 .. autoclass:: MessageInteraction()
     :members:
+    :inherited-members:
+    :exclude-members: channel, followup, guild, me, permissions, response
 
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
@@ -4455,6 +4504,14 @@ RawGuildScheduledEventUserActionEvent
 .. attributetable:: RawGuildScheduledEventUserActionEvent
 
 .. autoclass:: RawGuildScheduledEventUserActionEvent()
+    :members:
+
+RawTypingEvent
+~~~~~~~~~~~~~~
+
+.. attributetable:: RawTypingEvent
+
+.. autoclass:: RawTypingEvent()
     :members:
 
 PartialWebhookGuild

@@ -217,7 +217,7 @@ class Option:
             and self.required == other.required
             and self.choices == other.choices
             and self.options == other.options
-            and self.channel_types == other.channel_types
+            and set(self.channel_types) == set(other.channel_types)
             and self.autocomplete == other.autocomplete
             and self.min_value == other.min_value
             and self.max_value == other.max_value

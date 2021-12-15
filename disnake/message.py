@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -49,7 +50,13 @@ from . import utils
 from .reaction import Reaction
 from .emoji import Emoji
 from .partial_emoji import PartialEmoji
-from .enums import MessageType, ChannelType, InteractionType, try_enum
+from .enums import (
+    MessageType,
+    ChannelType,
+    InteractionType,
+    try_enum,
+    try_enum_to_int,
+)
 from .errors import InvalidArgument, HTTPException
 from .components import _component_factory
 from .embeds import Embed
@@ -74,7 +81,6 @@ if TYPE_CHECKING:
     )
 
     from .types.components import Component as ComponentPayload
-    from .types.threads import ThreadArchiveDuration
     from .types.member import (
         Member as MemberPayload,
         UserWithMember as UserWithMemberPayload,
@@ -82,13 +88,15 @@ if TYPE_CHECKING:
     from .types.user import User as UserPayload
     from .types.embed import Embed as EmbedPayload
     from .types.interactions import MessageInteraction as InteractionReferencePayload
+    from .types.threads import ThreadArchiveDurationLiteral
     from .abc import Snowflake
     from .abc import GuildChannel, MessageableChannel, MessageableChannel
     from .components import Component
     from .state import ConnectionState
-    from .channel import TextChannel, GroupChannel, DMChannel, PartialMessageable
+    from .channel import TextChannel, DMChannel, VoiceChannel
     from .mentions import AllowedMentions
     from .role import Role
+    from .threads import AnyThreadArchiveDuration
     from .ui.view import View
 
     MR = TypeVar("MR", bound="MessageReference")
@@ -286,7 +294,10 @@ class Attachment(Hashable):
         self.description: Optional[str] = data.get("description")
 
     def is_spoiler(self) -> bool:
-        """:class:`bool`: Whether this attachment contains a spoiler."""
+        """Whether this attachment contains a spoiler.
+
+        :return type: :class:`bool`
+        """
         return self.filename.startswith("SPOILER_")
 
     def __repr__(self) -> str:
@@ -854,7 +865,7 @@ class Message(Hashable):
         self.activity: Optional[MessageActivityPayload] = data.get("activity")
         # for user experince, on_message has no bussiness getting partials
         # TODO: Subscripted message to include the channel
-        self.channel: Union[TextChannel, DMChannel, Thread] = channel  # type: ignore
+        self.channel: Union[TextChannel, DMChannel, Thread, VoiceChannel] = channel  # type: ignore
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data["edited_timestamp"]
         )
@@ -1082,7 +1093,7 @@ class Message(Hashable):
         self.components = [_component_factory(d) for d in components]
 
     def _rebind_cached_references(
-        self, new_guild: Guild, new_channel: Union[TextChannel, Thread]
+        self, new_guild: Guild, new_channel: Union[TextChannel, Thread, VoiceChannel]
     ) -> None:
         self.guild = new_guild
         self.channel = new_channel
@@ -1188,12 +1199,14 @@ class Message(Hashable):
         return f"https://discord.com/channels/{guild_id}/{self.channel.id}/{self.id}"
 
     def is_system(self) -> bool:
-        """:class:`bool`: Whether the message is a system message.
+        """Whether the message is a system message.
 
         A system message is a message that is constructed entirely by the Discord API
         in response to something.
 
         .. versionadded:: 1.3
+
+        :return type: :class:`bool`
         """
         return self.type not in (
             MessageType.default,
@@ -1719,7 +1732,7 @@ class Message(Hashable):
         self,
         *,
         name: str,
-        auto_archive_duration: ThreadArchiveDuration = None,
+        auto_archive_duration: AnyThreadArchiveDuration = None,
         slowmode_delay: int = None,
     ) -> Thread:
         """|coro|
@@ -1737,9 +1750,10 @@ class Message(Hashable):
         -----------
         name: :class:`str`
             The name of the thread.
-        auto_archive_duration: :class:`int`
+        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
@@ -1764,7 +1778,12 @@ class Message(Hashable):
         if self.guild is None:
             raise InvalidArgument("This message does not have guild info attached.")
 
-        default_auto_archive_duration: ThreadArchiveDuration = getattr(
+        if auto_archive_duration is not None:
+            auto_archive_duration: ThreadArchiveDurationLiteral = try_enum_to_int(
+                auto_archive_duration
+            )
+
+        default_auto_archive_duration: ThreadArchiveDurationLiteral = getattr(
             self.channel, "default_auto_archive_duration", 1440
         )
         data = await self._state.http.start_thread_with_message(
@@ -1843,6 +1862,7 @@ class PartialMessage(Hashable):
     the constructor itself, and the second is via the following:
 
     - :meth:`TextChannel.get_partial_message`
+    - :meth:`VoiceChannel.get_partial_message`
     - :meth:`Thread.get_partial_message`
     - :meth:`DMChannel.get_partial_message`
 
@@ -1866,7 +1886,7 @@ class PartialMessage(Hashable):
 
     Attributes
     -----------
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`]
+    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`VoiceChannel`]
         The channel associated with this partial message.
     id: :class:`int`
         The message ID.
@@ -1895,8 +1915,11 @@ class PartialMessage(Hashable):
             ChannelType.news_thread,
             ChannelType.public_thread,
             ChannelType.private_thread,
+            ChannelType.voice,
         ):
-            raise TypeError(f"Expected TextChannel, DMChannel or Thread not {type(channel)!r}")
+            raise TypeError(
+                f"Expected TextChannel, DMChannel, VoiceChannel, or Thread not {type(channel)!r}"
+            )
 
         self.channel: MessageableChannel = channel
         self._state: ConnectionState = channel._state

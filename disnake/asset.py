@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -285,7 +286,10 @@ class Asset(AssetMixin):
         return self._key
 
     def is_animated(self) -> bool:
-        """:class:`bool`: Returns whether the asset is animated."""
+        """Returns whether the asset is animated.
+
+        :return type: :class:`bool`
+        """
         return self._animated
 
     def replace(

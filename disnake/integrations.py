@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -25,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import Any, Dict, Optional, TYPE_CHECKING, overload, Type, Tuple
+from typing import Any, Dict, Optional, TYPE_CHECKING, Type, Tuple
 from .utils import _get_as_snowflake, parse_time, MISSING
 from .user import User
 from .errors import InvalidArgument
