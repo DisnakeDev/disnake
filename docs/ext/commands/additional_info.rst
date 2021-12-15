@@ -28,4 +28,4 @@ Changing test guilds
 
 If you remove some IDs from the ``test_guilds`` kwarg of ``commands.Bot`` (or a similar class) the commands in those guilds
 won't be deleted instantly. Instead, they'll be deleted as soon as one of the deprecated commands is invoked. Your bot will send a message
-like "This command was incorrectly synced ...".
+like "This command has just been synced ...".

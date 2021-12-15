@@ -1308,7 +1308,9 @@ class InteractionBotBase(CommonBotBase):
                 try:
                     # This part is in a separate try-except because we still should respond to the interaction
                     await interaction.response.send_message(
-                        "This command was incorrectly synced. Please try again.", ephemeral=True
+                        "This command has just been synced. See also: https://docs.disnake.dev/"
+                        "en/latest/ext/commands/additional_info.html#app-command-sync.",
+                        ephemeral=True,
                     )
                 except disnake.HTTPException:
                     pass
