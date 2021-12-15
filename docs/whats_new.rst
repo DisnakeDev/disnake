@@ -11,6 +11,153 @@ Changelog
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
+.. _vp2p3p0:
+
+v2.3.0
+-------
+
+This version contains several new features and fixes, notably support for scheduled events,
+initial text-in-voice support (not yet released at the time of writing),
+and a slash command rework with parameter injections, as well as several documentation fixes.
+
+Note: the :ref:`version_guarantees` have been updated to more accurately reflect the versioning scheme this library is following.
+
+Breaking Changes
+~~~~~~~~~~~~~~~~~
+
+- Drop aiohttp ``3.6.x`` dependency, require ``3.7.x``
+- Due to the upcoming text-in-voice feature, many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods
+- Slash commands have undergone an extensive rework, and while existing code should still work as before, it is recommended that you do some testing using the new implementation first
+- :func:`Bot.get_slash_command <ext.commands.Bot.get_slash_command>` may now also return :class:`SubCommandGroup <ext.commands.SubCommandGroup>` or :class:`SubCommand <ext.commands.SubCommand>` instances, see documentation
+
+Deprecations
+~~~~~~~~~~~~~
+
+- The ``role_ids`` and ``user_ids`` parameters for :func:`guild_permissions <ext.commands.guild_permissions>` are now
+  ``roles`` and ``users`` respectively; the old parameter names will be removed in a future version
+
+New Features
+~~~~~~~~~~~~~
+
+- Add attachment descriptions (see :class:`File`, :class:`Attachment`)
+- Add :func:`on_member_screening_reject` and :func:`on_raw_member_screening_reject` events
+    - *note:* these are currently not officially documented or supported, but have been consistently emitted for several months
+- Support ``channel_types`` in :func:`Param <ext.commands.Param>`/:class:`ParamInfo <ext.commands.ParamInfo>`
+- Add :class:`PermissionsConverter`, which allows the conversion of a value or a (list of) permission names to a :class:`Permissions` instance
+  (using a :class:`Permissions` annotation)
+- Add a base class for warnings emitted by this library, :class:`DiscordWarning`
+- Add new warnings (emitted instead of just using ``print`` for warnings):
+  :class:`ConfigWarning`, :class:`SyncWarning`
+- Add :attr:`AppInfo.flags`
+- Add new voice channel activities:
+    - :attr:`PartyType.watch_together`
+    - :attr:`PartyType.checkers`
+    - :attr:`PartyType.spellcast`
+    - :attr:`PartyType.awkword`
+    - :attr:`PartyType.sketchy_artist`
+- Add :attr:`Guild.approximate_member_count` and :attr:`Guild.approximate_presence_count` (available on manually fetched guilds)
+- Add new flags/enum values:
+    - :attr:`MessageType.context_menu_command`
+    - :attr:`Status.streaming`
+    - :attr:`SystemChannelFlags.join_notification_replies`
+    - :attr:`MessageFlags.loading`
+    - :attr:`UserFlags.http_interactions_bot`, :attr:`PublicUserFlags.http_interactions_bot`
+    - :attr:`UserFlags.spammer`, :attr:`PublicUserFlags.spammer`
+- Add scheduled events
+    - New intent: :attr:`Intents.guild_scheduled_events` (enabled by default)
+    - New types
+        - :class:`GuildScheduledEvent`
+        - :class:`GuildScheduledEventMetadata`
+        - :class:`GuildScheduledEventEntityType`
+        - :class:`GuildScheduledEventStatus`
+        - :class:`GuildScheduledEventPrivacyLevel`
+    - Guild additions/changes
+        - :attr:`Guild.scheduled_events`
+        - :func:`Guild.get_scheduled_event`
+        - :func:`Guild.fetch_scheduled_event`
+        - :func:`Guild.fetch_scheduled_events`
+        - :func:`Guild.create_scheduled_event`
+    - Invite changes
+        - :attr:`Invite.guild_scheduled_event`
+        - ``guild_scheduled_event`` parameter on :func:`abc.GuildChannel.create_invite`
+        - ``guild_scheduled_event_id`` parameter on :func:`Client.fetch_invite`
+        - Include ``event`` parameter in :attr:`Invite.url` if applicable
+        - Support parsing scheduled event ID from invite URLs
+    - New events
+        - :func:`on_guild_scheduled_event_create`
+        - :func:`on_guild_scheduled_event_update`
+        - :func:`on_guild_scheduled_event_delete`
+        - :func:`on_guild_scheduled_event_subscribe` and :func:`on_raw_guild_scheduled_event_subscribe`
+        - :func:`on_guild_scheduled_event_unsubscribe` and :func:`on_raw_guild_scheduled_event_unsubscribe`
+    - New audit log actions
+        - :attr:`AuditLogAction.guild_scheduled_event_create`
+        - :attr:`AuditLogAction.guild_scheduled_event_update`
+        - :attr:`AuditLogAction.guild_scheduled_event_delete`
+- Add support for setting ``slowmode_delay`` on thread creation (:func:`TextChannel.create_thread`, :func:`Message.create_thread`)
+- Add ``invitable`` parameter to :func:`TextChannel.create_thread`
+- Add parameter injections (`example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_)
+    - :func:`inject <ext.commands.inject>`
+    - :func:`converter_method <ext.commands.converter_method>`
+    - :func:`register_injection <ext.commands.register_injection>`
+- Add new aliases for :class:`ApplicationCommandInteraction`:
+  ``CommandInteraction``, ``CmdInteraction``, ``CommandInter``, ``CmdInter``, ``AppCommandInteraction``
+- Add preliminary support for text-in-voice
+    - Many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods
+    - :class:`VoiceChannel` now inherits from :class:`abc.Messageable`
+    - New :class:`VoiceChannel` properties:
+      :attr:`.nsfw <VoiceChannel.nsfw>`, :attr:`.slowmode_delay <VoiceChannel.slowmode_delay>`, :attr:`.last_message_id <VoiceChannel.last_message_id>`, :attr:`.last_message <VoiceChannel.last_message>`
+    - New :class:`VoiceChannel` methods:
+      :func:`.is_nsfw <VoiceChannel.is_nsfw>`, :func:`.get_partial_message <VoiceChannel.get_partial_message>`
+    - ``nsfw`` and ``slowmode_delay`` parameters for :func:`VoiceChannel.edit`
+- Add :attr:`Permissions.start_embedded_activities`
+- Add :func:`on_raw_typing` event
+- Add :class:`ThreadArchiveDuration` enum, containing the currently valid values for the thread auto-archive feature
+
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fix incorrect URL returned by :attr:`Template.url`
+- Fix unnecessary application command sync without changes
+- Fix return type annotation of :func:`ui.button` and :func:`ui.select` decorators
+- Fix dispatch of typing events in DMs
+- Fix leftover uses of ``json``, which didn't use ``orjson`` if available
+- Try to retrieve objects in received interactions from cache first (fixing properties like :attr:`Member.status` on member parameters)
+- Fix sending local files in embeds with interactions/webhooks if only one embed was specified
+
+
+Documentation
+~~~~~~~~~~~~~~
+
+- Clarify :func:`Interaction.original_message` documentation regarding different response types
+- Add documentation for new guild feature values
+- Move documentation to https://docs.disnake.dev/
+- Add documentation for several methods/properties:
+    - :attr:`Client.global_application_commands`
+    - :attr:`Client.global_slash_commands`
+    - :attr:`Client.global_user_commands`
+    - :attr:`Client.global_message_commands`
+    - :func:`Bot.on_slash_command_error <ext.commands.Bot.on_slash_command_error>`
+    - :func:`Bot.on_user_command_error <ext.commands.Bot.on_user_command_error>`
+    - :func:`Bot.on_message_command_error <ext.commands.Bot.on_message_command_error>`
+    - :func:`on_slash_command_completion <.ext.commands.on_slash_command_completion>`
+    - :func:`on_user_command_completion <.ext.commands.on_user_command_completion>`
+    - :func:`on_message_command_completion <.ext.commands.on_message_command_completion>`
+    - :attr:`ApplicationCommandInteraction.bot`
+    - :class:`InvokableApplicationCommand <ext.commands.InvokableApplicationCommand>`
+- Redirect searches for ``color`` to ``colour``
+- Clarify :func:`Interaction.send` documentation
+- Fix incorrect type in docs for :attr:`Invite.channel`
+
+
+Miscellaneous
+~~~~~~~~~~~~~~
+
+- Add Python 3.10 to package classifiers
+- Add guide for configuring inviting a bot through its profile
+- Rewrite project README
+
+
 .. _vp2p2p2:
 
 v2.2.2
