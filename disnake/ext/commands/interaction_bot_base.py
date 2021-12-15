@@ -874,9 +874,9 @@ class InteractionBotBase(CommonBotBase):
         # Wait a little bit, maybe other cogs are loading
         self._sync_queued = True
         await asyncio.sleep(2)
-        self._sync_queued = False
         await self._sync_application_commands()
         await self._sync_application_command_permissions()
+        self._sync_queued = False
 
     def _schedule_app_command_preparation(self) -> None:
         if not isinstance(self, disnake.Client):
