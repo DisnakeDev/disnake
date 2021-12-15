@@ -15,7 +15,7 @@ class MyView(disnake.ui.View):
         self.children[0].disabled = True  # type: ignore
         self.remove_item(self.children[1])
         # make sure to update the message with the new buttons
-        await inter.response.edit_message(view=self)
+        await self.message.edit(view=self)
 
     @disnake.ui.button(label="Click to disable the view", style=disnake.ButtonStyle.red)
     async def disable(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
