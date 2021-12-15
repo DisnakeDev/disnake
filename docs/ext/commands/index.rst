@@ -17,3 +17,4 @@ extension library that handles this for you.
     cogs
     extensions
     api
+    additional_info
