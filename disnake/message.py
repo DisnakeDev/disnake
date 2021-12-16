@@ -1823,9 +1823,11 @@ class Message(Hashable):
         :class:`.Message`
             The message that was sent.
         """
-
-        reference = MessageReference.from_message(self, fail_if_not_exists=fail_if_not_exists)
-        return await self.channel.send(content, reference=reference, **kwargs)  # type: ignore
+        if fail_if_not_exists:
+            reference = MessageReference.from_message(self, fail_if_not_exists=True)
+        else:
+            reference = self
+        return await self.channel.send(content, reference=reference, **kwargs)
 
     def to_reference(self, *, fail_if_not_exists: bool = True) -> MessageReference:
         """Creates a :class:`~disnake.MessageReference` from the current message.
