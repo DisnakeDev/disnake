@@ -12,7 +12,7 @@ This section contains explanations of some library mechanics which may be useful
 App command sync
 -----------------
 
-If you're using :ref:`discord_ext_commands` framework for application commands (slash commands, context menus) you should
+If you're using :ref:`discord_ext_commands` for application commands (slash commands, context menus) you should
 understand how your commands show up in Discord. If ``sync_commands`` kwarg of :class:`Bot <ext.commands.Bot>` (or a similar class) is set to ``True`` (which is the default value)
 the library registers / updates all commands automatically. Based on the application commands defined in your code it decides
 which commands should be registered, edited or deleted but there're some edge cases you should keep in mind.
