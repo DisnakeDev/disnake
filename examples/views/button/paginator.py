@@ -17,10 +17,14 @@ class Menu(disnake.ui.View):
         self.embed_count = 0
 
         # Disables previous page button by default.
-        self.last_page.disabled = True
+        self.prev_page.disabled = True
+
+        # Sets the footer of the embeds with their respective page numbers.
+        for i in range(len(embeds)):
+            self.embeds[i].set_footer(text=f"Page {i + 1} of {len(embeds)}")
 
     @disnake.ui.button(label="Previous page", emoji="◀️", style=disnake.ButtonStyle.red)
-    async def last_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+    async def prev_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         # Decrements the embed count.
         self.embed_count -= 1
 
@@ -32,8 +36,6 @@ class Menu(disnake.ui.View):
         if self.embed_count == 0:
             button.disabled = True
 
-        # Sets the footer of the embed with current page and then sends it.
-        embed.set_footer(text=f"Page {self.embed_count + 1} of {len(self.embeds)}")
         await interaction.response.edit_message(embed=embed, view=self)
 
     @disnake.ui.button(label="Next page", emoji="▶️", style=disnake.ButtonStyle.green)
@@ -45,12 +47,10 @@ class Menu(disnake.ui.View):
         embed = self.embeds[self.embed_count]
 
         # Enables the previous page button and disables the next page button if we're on the last embed.
-        self.last_page.disabled = False
+        self.prev_page.disabled = False
         if self.embed_count == len(self.embeds) - 1:
             button.disabled = True
 
-        # Sets the footer of the embed with current page and then sends it.
-        embed.set_footer(text=f"Page {self.embed_count + 1} of {len(self.embeds)}")
         await interaction.response.edit_message(embed=embed, view=self)
 
 
