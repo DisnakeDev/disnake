@@ -16,7 +16,7 @@ in specific versions.
 v2.3.0
 -------
 
-This version contains several new features and fixes, notably support for scheduled events,
+This version contains several new features and fixes, notably support for guild scheduled events,
 initial text-in-voice support (not yet released at the time of writing),
 and a slash command rework with parameter injections, as well as several documentation fixes.
 
@@ -25,10 +25,11 @@ Note: the :ref:`version_guarantees` have been updated to more accurately reflect
 Breaking Changes
 ~~~~~~~~~~~~~~~~~
 
-- Drop aiohttp ``3.6.x`` dependency, require ``3.7.x``
+- Drop aiohttp ``3.6.x`` dependency, restrict allowed version range to ``3.7.x`` only
 - Due to the upcoming text-in-voice feature, many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods
 - Slash commands have undergone an extensive rework, and while existing code should still work as before, it is recommended that you do some testing using the new implementation first
 - :func:`Bot.get_slash_command <ext.commands.Bot.get_slash_command>` may now also return :class:`SubCommandGroup <ext.commands.SubCommandGroup>` or :class:`SubCommand <ext.commands.SubCommand>` instances, see documentation
+- ``disnake.types.ThreadArchiveDuration`` is now ``ThreadArchiveDurationLiteral``, to avoid confusion with the new :class:`ThreadArchiveDuration` enum
 
 Deprecations
 ~~~~~~~~~~~~~
@@ -39,7 +40,7 @@ Deprecations
 New Features
 ~~~~~~~~~~~~~
 
-- Add scheduled events
+- Add guild scheduled events
     - New intent: :attr:`Intents.guild_scheduled_events` (enabled by default)
     - New types
         - :class:`GuildScheduledEvent`
@@ -53,11 +54,11 @@ New Features
         - :func:`Guild.fetch_scheduled_event`
         - :func:`Guild.fetch_scheduled_events`
         - :func:`Guild.create_scheduled_event`
-    - Invite changes
+    - Invite additions/changes
         - :attr:`Invite.guild_scheduled_event`
         - ``guild_scheduled_event`` parameter on :func:`abc.GuildChannel.create_invite`
         - ``guild_scheduled_event_id`` parameter on :func:`Client.fetch_invite`
-        - Include ``event`` parameter in :attr:`Invite.url` if applicable
+        - Include ``event`` URL parameter in :attr:`Invite.url` if applicable
         - Support parsing scheduled event ID from invite URLs
     - New events
         - :func:`on_guild_scheduled_event_create`
@@ -79,12 +80,12 @@ New Features
     - ``nsfw`` and ``slowmode_delay`` parameters for :func:`VoiceChannel.edit`
 - Add parameter injections (`example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_)
     - :func:`inject <ext.commands.inject>`
-    - :func:`converter_method <ext.commands.converter_method>`
     - :func:`register_injection <ext.commands.register_injection>`
+    - :func:`converter_method <ext.commands.converter_method>`
 
 - Add attachment descriptions (see :class:`File`, :class:`Attachment`)
 - Add :func:`on_member_screening_reject` and :func:`on_raw_member_screening_reject` events
-    - *note:* these are currently not officially documented or supported, but have been consistently emitted for several months
+    - *note:* these are currently not officially documented or supported by the API, but have been consistently emitted for several months
 - Add :func:`on_raw_typing` event
 - Add :attr:`Guild.approximate_member_count` and :attr:`Guild.approximate_presence_count` (available on manually fetched guilds)
 - Add :attr:`Permissions.start_embedded_activities`
@@ -121,7 +122,7 @@ Bug Fixes
 ~~~~~~~~~~
 
 - Fix dispatch of typing events in DMs
-- Try to retrieve objects in received interactions from cache first (fixing properties like :attr:`Member.status` on member parameters)
+- Try to retrieve objects in received interactions from cache first (fixing properties like :attr:`Member.status` on member parameters for commands)
 - Fix return type annotation of :func:`ui.button` and :func:`ui.select` decorators
 - Fix incorrect URL returned by :attr:`Template.url`
 - Fix unnecessary application command sync without changes
@@ -150,7 +151,7 @@ Documentation
     - :func:`on_message_command_completion <.ext.commands.on_message_command_completion>`
     - :attr:`ApplicationCommandInteraction.bot`
     - :class:`InvokableApplicationCommand <ext.commands.InvokableApplicationCommand>`
-- Fix incorrect type in docs for :attr:`Invite.channel`
+- Fix incorrect type for :attr:`Invite.channel` in documentation
 
 
 Miscellaneous
