@@ -84,7 +84,7 @@ New Features
     - New :class:`VoiceChannel` methods:
       :func:`.is_nsfw <VoiceChannel.is_nsfw>`, :func:`.get_partial_message <VoiceChannel.get_partial_message>`
     - ``nsfw`` and ``slowmode_delay`` parameters for :func:`VoiceChannel.edit`
-- Add parameter injections (`example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_)
+- |commands| Add parameter injections (`example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_)
     - :func:`inject <ext.commands.inject>`
     - :func:`register_injection <ext.commands.register_injection>`
     - :func:`converter_method <ext.commands.converter_method>`
@@ -96,10 +96,10 @@ New Features
 - Add :attr:`Guild.approximate_member_count` and :attr:`Guild.approximate_presence_count` (available on manually fetched guilds)
 - Add :attr:`Permissions.start_embedded_activities`
 - Add :class:`ThreadArchiveDuration` enum, containing the currently valid values for the thread auto-archive feature
-- Add :class:`PermissionsConverter`, which allows the conversion of a value or a (list of) permission names to a :class:`Permissions` instance
+- |commands| Add :class:`PermissionsConverter`, which allows the conversion of a value or a (list of) permission names to a :class:`Permissions` instance
   (using a :class:`Permissions` annotation)
 - Add :attr:`AppInfo.flags`
-- Add ``channel_types`` parameter to :func:`Param <ext.commands.Param>`/:class:`ParamInfo <ext.commands.ParamInfo>`
+- |commands| Add ``channel_types`` parameter to :func:`Param <ext.commands.Param>`/:class:`ParamInfo <ext.commands.ParamInfo>`
 - Add support for setting ``slowmode_delay`` on thread creation (:func:`TextChannel.create_thread`, :func:`Message.create_thread`)
 - Add ``invitable`` parameter to :func:`TextChannel.create_thread`
 - Add new aliases for :class:`ApplicationCommandInteraction`:
@@ -131,7 +131,7 @@ Bug Fixes
 - Try to retrieve objects in received interactions from cache first (fixing properties like :attr:`Member.status` on member parameters for commands)
 - Fix return type annotation of :func:`ui.button` and :func:`ui.select` decorators
 - Fix incorrect URL returned by :attr:`Template.url`
-- Fix unnecessary application command sync without changes
+- |commands| Fix unnecessary application command sync without changes
 - Fix sending local files in embeds with interactions/webhooks if only one embed was specified
 - Fix leftover uses of ``json``, which didn't use ``orjson`` if available
 
