@@ -1,11 +1,13 @@
 import disnake
 from disnake.ext import commands
 
+from typing import List
+
 bot = commands.Bot(command_prefix="-")
 
 # Defines a simple view of buttons for the embed.
 class Menu(disnake.ui.View):
-    def __init__(self, embeds: list[disnake.Embed]):
+    def __init__(self, embeds: List[disnake.Embed]):
         super().__init__(timeout=None)
 
         # Sets the embed list variable.
@@ -46,7 +48,7 @@ class Menu(disnake.ui.View):
 
 
 @bot.command()
-async def menu(ctx):
+async def menu(ctx: commands.Context):
 
     # Creates the embeds as a list.
     embeds = [
