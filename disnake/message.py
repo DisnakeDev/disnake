@@ -1805,6 +1805,9 @@ class Message(Hashable):
 
         .. versionadded:: 1.6
 
+        .. versionchanged:: 2.3
+            Added ``fail_if_not_exists`` keyword argument. Defaults to ``False``.
+
         Raises
         --------
         ~disnake.HTTPException
@@ -1822,7 +1825,7 @@ class Message(Hashable):
         """
 
         reference = MessageReference.from_message(self, fail_if_not_exists=fail_if_not_exists)
-        return await self.channel.send(content, reference=reference, **kwargs)
+        return await self.channel.send(content, reference=reference, **kwargs)  # type: ignore
 
     def to_reference(self, *, fail_if_not_exists: bool = True) -> MessageReference:
         """Creates a :class:`~disnake.MessageReference` from the current message.
