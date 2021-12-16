@@ -26,7 +26,8 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~~
 
 - Drop aiohttp ``3.6.x`` dependency, restrict allowed version range to ``3.7.x`` only
-- Due to the upcoming text-in-voice feature, many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods
+- Due to the upcoming text-in-voice feature, many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods.
+  Also see the details for text-in-voice under "New Features" below, which include a few important things to note.
 - Slash commands have undergone an extensive rework, and while existing code should still work as before, it is recommended that you do some testing using the new implementation first
 - :func:`Bot.get_slash_command <ext.commands.Bot.get_slash_command>` may now also return :class:`SubCommandGroup <ext.commands.SubCommandGroup>` or :class:`SubCommand <ext.commands.SubCommand>` instances, see documentation
 - ``disnake.types.ThreadArchiveDuration`` is now ``ThreadArchiveDurationLiteral``, to avoid confusion with the new :class:`ThreadArchiveDuration` enum
@@ -72,6 +73,11 @@ New Features
         - :attr:`AuditLogAction.guild_scheduled_event_delete`
 - Add preliminary support for text-in-voice
     - Many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods
+    - Important notes:
+        - This feature is only available in a very limited number of servers at the time of writing this, and the API is still being developed; therefore, expect changes in the future
+        - Text-in-voice currently does **not** support these text channel features (note: this is not guaranteed to be an exhaustive list): threads, webhooks, nsfw flags, slowmode
+        - The ``nsfw`` and ``slowmode_delay`` values/parameters are currently not supported by the API, however according to Discord developers these are TBD
+        - Pinned messages are currently not exposed in the client UI, and while the API for them works, their future is uncertain
     - :class:`VoiceChannel` now inherits from :class:`abc.Messageable`
     - New :class:`VoiceChannel` properties:
       :attr:`.nsfw <VoiceChannel.nsfw>`, :attr:`.slowmode_delay <VoiceChannel.slowmode_delay>`, :attr:`.last_message_id <VoiceChannel.last_message_id>`, :attr:`.last_message <VoiceChannel.last_message>`
