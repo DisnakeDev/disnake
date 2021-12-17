@@ -1823,8 +1823,8 @@ class Message(Hashable):
         :class:`.Message`
             The message that was sent.
         """
-        if fail_if_not_exists:
-            reference = MessageReference.from_message(self, fail_if_not_exists=True)
+        if not fail_if_not_exists:
+            reference = MessageReference.from_message(self, fail_if_not_exists=False)
         else:
             reference = self
         return await self.channel.send(content, reference=reference, **kwargs)
