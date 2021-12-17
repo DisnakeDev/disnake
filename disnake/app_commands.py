@@ -424,8 +424,8 @@ class SlashCommand(ApplicationCommand):
         **kwargs,
     ):
         assert (
-            re.match(r"^[\w-]{1,32}$", name) is not None and name.islower()
-        ), f"Slash command name {name!r} should consist of these symbols: a-z, 0-9, -, _"
+            re.match(r"^[a-zㄱ-힣-_\d]{1,32}$", name) is not None
+        ), f"Slash command name {name!r} should consist of these symbols: a-z, ㄱ-힣, 0-9, -, _"
 
         super().__init__(
             type=ApplicationCommandType.chat_input,
