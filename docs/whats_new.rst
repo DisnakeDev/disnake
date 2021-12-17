@@ -103,6 +103,8 @@ New Features
 - Add support for setting ``slowmode_delay`` on thread creation (:func:`TextChannel.create_thread`, :func:`Message.create_thread`)
 - Add ``invitable`` parameter to :func:`TextChannel.create_thread`
 - Add ``fail_if_not_exists`` parameter to :func:`Message.reply`
+- |commands| :func:`Bot.get_slash_command <ext.commands.Bot.get_slash_command>` now works similar to :func:`Bot.get_command <ext.commands.Bot.get_command>`,
+  in that it can also return subcommands/groups for inputs like ``"foo bar"``
 - Add new aliases for :class:`ApplicationCommandInteraction`:
   ``CommandInteraction``, ``CmdInteraction``, ``CommandInter``, ``CmdInter``, ``AppCommandInteraction``
 
@@ -169,6 +171,7 @@ Miscellaneous
 ~~~~~~~~~~~~~~
 
 - Add Python 3.10 to package classifiers
+- Drop aiohttp ``3.6.x`` dependency, restrict allowed version range to ``3.7.x`` only
 - Add guide for configuring inviting a bot through its profile
 - Rewrite project README
 - Improve examples
