@@ -1796,7 +1796,7 @@ class Message(Hashable):
         return Thread(guild=self.guild, state=self._state, data=data)
 
     async def reply(
-        self, content: Optional[str] = None, *, fail_if_not_exists: bool = False, **kwargs
+        self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs
     ) -> Message:
         """|coro|
 
@@ -1806,7 +1806,7 @@ class Message(Hashable):
         .. versionadded:: 1.6
 
         .. versionchanged:: 2.3
-            Added ``fail_if_not_exists`` keyword argument. Defaults to ``False``.
+            Added ``fail_if_not_exists`` keyword argument. Defaults to ``True``.
 
         Raises
         --------
