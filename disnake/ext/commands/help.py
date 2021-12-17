@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -25,10 +26,9 @@ DEALINGS IN THE SOFTWARE.
 import itertools
 import copy
 import functools
-import inspect
 import re
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 import disnake.utils
 

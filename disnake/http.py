@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -25,7 +26,6 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import sys
 import re
@@ -92,7 +92,6 @@ if TYPE_CHECKING:
         channel,
         widget,
         threads,
-        voice,
         sticker,
     )
     from .types.snowflake import Snowflake, SnowflakeList
@@ -1017,7 +1016,7 @@ class HTTPClient:
         message_id: Snowflake,
         *,
         name: str,
-        auto_archive_duration: threads.ThreadArchiveDuration,
+        auto_archive_duration: threads.ThreadArchiveDurationLiteral,
         rate_limit_per_user: int = 0,
         reason: Optional[str] = None,
     ) -> Response[threads.Thread]:
@@ -1040,7 +1039,7 @@ class HTTPClient:
         channel_id: Snowflake,
         *,
         name: str,
-        auto_archive_duration: threads.ThreadArchiveDuration,
+        auto_archive_duration: threads.ThreadArchiveDurationLiteral,
         type: threads.ThreadType,
         invitable: bool = True,
         rate_limit_per_user: int = 0,

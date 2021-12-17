@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -167,7 +168,7 @@ class Permissions(BaseFlags):
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
-        return cls(0b111111111111111111111111111111111111111)
+        return cls(0b1111111111111111111111111111111111111111)
 
     @classmethod
     def all_channel(cls: Type[P]) -> P:
@@ -192,8 +193,11 @@ class Permissions(BaseFlags):
            Added :attr:`create_public_threads`, :attr:`create_private_threads`, :attr:`manage_threads`,
            :attr:`use_external_stickers`, :attr:`send_messages_in_threads` and
            :attr:`request_to_speak` permissions.
+
+        .. versionchanged:: 2.3
+            Added :attr:`start_embedded_activities` permission.
         """
-        return cls(0b111110110110011111101111111111101010001)
+        return cls(0b1111110110110011111101111111111101010001)
 
     @classmethod
     def general(cls: Type[P]) -> P:
@@ -235,8 +239,12 @@ class Permissions(BaseFlags):
     @classmethod
     def voice(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
-        "Voice" permissions from the official Discord UI set to ``True``."""
-        return cls(0b00000011111100000000001100000000)
+        "Voice" permissions from the official Discord UI set to ``True``.
+
+        .. versionchanged:: 2.3
+            Added :attr:`start_embedded_activities` permission.
+        """
+        return cls(0b1000000000000011111100000000001100000000)
 
     @classmethod
     def stage(cls: Type[P]) -> P:
@@ -571,6 +579,15 @@ class Permissions(BaseFlags):
         """
         return 1 << 38
 
+    @flag_value
+    def start_embedded_activities(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can launch activities (applications
+        with the :attr:`embedded <ApplicationFlags.embedded>` flag) in a voice channel.
+
+        .. versionadded:: 2.3
+        """
+        return 1 << 39
+
 
 PO = TypeVar("PO", bound="PermissionOverwrite")
 
@@ -683,9 +700,10 @@ class PermissionOverwrite:
         manage_threads: Optional[bool]
         create_public_threads: Optional[bool]
         create_private_threads: Optional[bool]
-        send_messages_in_threads: Optional[bool]
         external_stickers: Optional[bool]
         use_external_stickers: Optional[bool]
+        send_messages_in_threads: Optional[bool]
+        start_embedded_activities: Optional[bool]
 
     def __init__(self, **kwargs: Optional[bool]):
         self._values: Dict[str, Optional[bool]] = {}

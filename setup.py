@@ -2,11 +2,11 @@ from setuptools import setup
 import re
 
 requirements = []
-with open("requirements.txt") as f:
+with open("requirements.txt", encoding="utf-8") as f:
     requirements = f.read().splitlines()
 
 version = ""
-with open("disnake/__init__.py") as f:
+with open("disnake/__init__.py", encoding="utf-8") as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)  # type: ignore
 
 if not version:
@@ -33,7 +33,7 @@ if version.endswith(("a", "b", "rc")):
         pass
 
 readme = ""
-with open("README.rst") as f:
+with open("README.md", encoding="utf-8") as f:
     readme = f.read()
 
 extras_require = {
@@ -67,7 +67,7 @@ setup(
     author="Rapptz, EQUENOS",
     url="https://github.com/DisnakeDev/disnake",
     project_urls={
-        "Documentation": "https://docs.disnake.dev/en/latest/",
+        "Documentation": "https://docs.disnake.dev/en/latest",
         "Issue tracker": "https://github.com/DisnakeDev/disnake/issues",
     },
     version=version,

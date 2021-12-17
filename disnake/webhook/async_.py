@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -26,7 +27,6 @@ from __future__ import annotations
 
 import logging
 import asyncio
-import json
 import re
 
 from urllib.parse import quote as urlquote
@@ -178,7 +178,7 @@ class AsyncWebhookAdapter:
                         )
                         data = (await response.text(encoding="utf-8")) or None
                         if data and response.headers["Content-Type"] == "application/json":
-                            data = json.loads(data)
+                            data = utils._from_json(data)
 
                         remaining = response.headers.get("X-Ratelimit-Remaining")
                         if remaining == "0" and response.status != 429:
@@ -500,7 +500,7 @@ def handle_message_parameters(
 
     payload = {}
     if embed is not MISSING:
-        payload["embeds"] = [] if embed is None else [embed.to_dict()]
+        embeds = [embed] if embed else []
     if embeds is not MISSING:
         if len(embeds) > 10:
             raise InvalidArgument("embeds has a maximum of 10 elements.")
@@ -865,15 +865,20 @@ class BaseWebhook(Hashable):
         self.source_guild: Optional[PartialWebhookGuild] = source_guild
 
     def is_partial(self) -> bool:
-        """:class:`bool`: Whether the webhook is a "partial" webhook.
+        """Whether the webhook is a "partial" webhook.
 
-        .. versionadded:: 2.0"""
+        .. versionadded:: 2.0
+
+        :return type: :class:`bool`
+        """
         return self.channel_id is None
 
     def is_authenticated(self) -> bool:
-        """:class:`bool`: Whether the webhook is authenticated with a bot token.
+        """Whether the webhook is authenticated with a bot token.
 
         .. versionadded:: 2.0
+
+        :return type: :class:`bool`
         """
         return self.auth_token is not None
 
@@ -1497,16 +1502,21 @@ class Webhook(BaseWebhook):
         if thread is not MISSING:
             thread_id = thread.id
 
-        data = await adapter.execute_webhook(
-            self.id,
-            self.token,
-            session=self.session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-            thread_id=thread_id,
-            wait=wait,
-        )
+        try:
+            data = await adapter.execute_webhook(
+                self.id,
+                self.token,
+                session=self.session,
+                payload=params.payload,
+                multipart=params.multipart,
+                files=params.files,
+                thread_id=thread_id,
+                wait=wait,
+            )
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
 
         msg = None
         if wait:
@@ -1683,15 +1693,20 @@ class Webhook(BaseWebhook):
             previous_allowed_mentions=previous_mentions,
         )
         adapter = async_context.get()
-        data = await adapter.edit_webhook_message(
-            self.id,
-            self.token,
-            message_id,
-            session=self.session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-        )
+        try:
+            data = await adapter.edit_webhook_message(
+                self.id,
+                self.token,
+                message_id,
+                session=self.session,
+                payload=params.payload,
+                multipart=params.multipart,
+                files=params.files,
+            )
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
 
         message = self._create_message(data)
         if view and not view.is_finished():

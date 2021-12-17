@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -32,7 +33,6 @@ from __future__ import annotations
 
 import threading
 import logging
-import json
 import time
 import re
 
@@ -45,8 +45,6 @@ from typing import (
     Optional,
     TYPE_CHECKING,
     Tuple,
-    Type,
-    TypeVar,
     Union,
     overload,
 )
@@ -176,7 +174,7 @@ class WebhookAdapter:
 
                         data = response.text or None
                         if data and response.headers["Content-Type"] == "application/json":
-                            data = json.loads(data)
+                            data = utils._from_json(data)
 
                         remaining = response.headers.get("X-Ratelimit-Remaining")
                         if remaining == "0" and response.status_code != 429:
@@ -996,16 +994,21 @@ class SyncWebhook(BaseWebhook):
         if thread is not MISSING:
             thread_id = thread.id
 
-        data = adapter.execute_webhook(
-            self.id,
-            self.token,
-            session=self.session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-            thread_id=thread_id,
-            wait=wait,
-        )
+        try:
+            data = adapter.execute_webhook(
+                self.id,
+                self.token,
+                session=self.session,
+                payload=params.payload,
+                multipart=params.multipart,
+                files=params.files,
+                thread_id=thread_id,
+                wait=wait,
+            )
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
         if wait:
             return self._create_message(data)
 
@@ -1141,15 +1144,20 @@ class SyncWebhook(BaseWebhook):
             previous_allowed_mentions=previous_mentions,
         )
         adapter: WebhookAdapter = _get_webhook_adapter()
-        data = adapter.edit_webhook_message(
-            self.id,
-            self.token,
-            message_id,
-            session=self.session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-        )
+        try:
+            data = adapter.edit_webhook_message(
+                self.id,
+                self.token,
+                message_id,
+                session=self.session,
+                payload=params.payload,
+                multipart=params.multipart,
+                files=params.files,
+            )
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
         return self._create_message(data)
 
     def delete_message(self, message_id: int, /) -> None:

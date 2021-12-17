@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -32,9 +33,11 @@ from typing import (
     Generic,
     Optional,
     TYPE_CHECKING,
+    Protocol,
     Tuple,
     Type,
     TypeVar,
+    overload,
 )
 
 from ..interactions import MessageInteraction
@@ -138,3 +141,19 @@ class Item(Generic[V]):
             The interaction that triggered this UI item.
         """
         pass
+
+
+I_co = TypeVar("I_co", bound=Item, covariant=True)
+
+
+# while the decorators don't actually return a descriptor that matches this protocol,
+# this protocol ensures that type checkers don't complain about statements like `self.button.disabled = True`,
+# which work as `View.__init__` replaces the handler with the item
+class DecoratedItem(Protocol[I_co]):
+    @overload
+    def __get__(self, obj: None, objtype: Any) -> ItemCallbackType:
+        ...
+
+    @overload
+    def __get__(self, obj: Any, objtype: Any) -> I_co:
+        ...

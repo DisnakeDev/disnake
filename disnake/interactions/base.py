@@ -3,7 +3,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -405,6 +406,10 @@ class Interaction:
             if e.code == 10015:
                 raise InteractionNotResponded(self) from e
             raise
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
 
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
@@ -477,10 +482,16 @@ class Interaction:
     ) -> None:
         """|coro|
 
-        Sends a message using either :meth:`response.send_message` or :meth:`followup.send`.
+        Sends a message using either :meth:`response.send_message <InteractionResponse.send_message>`
+        or :meth:`followup.send <Webhook.send>`.
 
-        If the interaction is not responded, this method will call :meth:`response.send_message`.
-        :meth:`followup.send` otherwise.
+        If the interaction hasn't been responded to yet, this method will call :meth:`response.send_message <InteractionResponse.send_message>`.
+        Otherwise, it will call :meth:`followup.send <Webhook.send>`.
+
+        .. note::
+            This method does not return a :class:`Message` object. If you need a message object,
+            use :meth:`original_message` to fetch it, or use :meth:`followup.send <Webhook.send>`
+            directly instead of this method if you're sending a followup message.
 
         Parameters
         -----------
@@ -562,9 +573,11 @@ class InteractionResponse:
         self._responded: bool = False
 
     def is_done(self) -> bool:
-        """:class:`bool`: Indicates whether an interaction response has been done before.
+        """Indicates whether an interaction response has been done before.
 
         An interaction can only be responded to once.
+
+        :return type: :class:`bool`
         """
         return self._responded
 
@@ -765,12 +778,12 @@ class InteractionResponse:
             if e.code == 10062:
                 raise InteractionTimedOut(self._parent) from e
             raise
+        finally:
+            if files:
+                for f in files:
+                    f.close()
 
         self._responded = True
-
-        if files is not MISSING:
-            for f in files:
-                f.close()
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
@@ -803,7 +816,7 @@ class InteractionResponse:
             attachments using this method is presently not supported (API limitation, see
             `this <https://github.com/discord/discord-api-docs/discussions/3335>`_).
             As a workaround, respond to the interaction first (e.g. using :meth:`.defer`),
-            then edit the message using :meth:`.edit_original_message`.
+            then edit the message using :meth:`Interaction.edit_original_message`.
 
         .. note::
             If the original message has embeds with images that were created from local files
@@ -903,14 +916,19 @@ class InteractionResponse:
             payload["components"] = [] if view is None else view.to_components()
 
         adapter = async_context.get()
-        await adapter.create_interaction_response(
-            parent.id,
-            parent.token,
-            session=parent._session,
-            type=InteractionResponseType.message_update.value,
-            data=payload,
-            files=files,
-        )
+        try:
+            await adapter.create_interaction_response(
+                parent.id,
+                parent.token,
+                session=parent._session,
+                type=InteractionResponseType.message_update.value,
+                data=payload,
+                files=files,
+            )
+        finally:
+            if files:
+                for f in files:
+                    f.close()
 
         if view and not view.is_finished():
             state.store_view(view, message_id)

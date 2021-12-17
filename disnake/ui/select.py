@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -27,11 +28,11 @@ from typing import List, Optional, TYPE_CHECKING, Tuple, TypeVar, Type, Callable
 import inspect
 import os
 
-from .item import Item, ItemCallbackType
+from .item import Item, ItemCallbackType, DecoratedItem
 from ..enums import ComponentType
 from ..partial_emoji import PartialEmoji
 from ..emoji import Emoji
-from ..interactions import MessageInteraction, MessageInteractionData
+from ..interactions import MessageInteraction
 from ..utils import MISSING
 from ..components import (
     SelectOption,
@@ -46,9 +47,6 @@ __all__ = (
 if TYPE_CHECKING:
     from .view import View
     from ..types.components import SelectMenu as SelectMenuPayload
-    from ..types.interactions import (
-        ComponentInteractionData,
-    )
 
 S = TypeVar("S", bound="Select")
 V = TypeVar("V", bound="View", covariant=True)
@@ -301,7 +299,7 @@ def select(
     options: List[SelectOption] = MISSING,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], ItemCallbackType]:
+) -> Callable[[ItemCallbackType], DecoratedItem[Select]]:
     """A decorator that attaches a select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -336,7 +334,7 @@ def select(
         Whether the select is disabled or not. Defaults to ``False``.
     """
 
-    def decorator(func: ItemCallbackType) -> ItemCallbackType:
+    def decorator(func: ItemCallbackType) -> DecoratedItem[Select]:
         if not inspect.iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 
@@ -350,6 +348,6 @@ def select(
             "options": options,
             "disabled": disabled,
         }
-        return func
+        return func  # type: ignore
 
     return decorator

@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -23,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, TypeVar, Union, overload, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TypeVar, Union, TYPE_CHECKING
 
 from .permissions import Permissions
 from .errors import InvalidArgument
@@ -85,15 +86,24 @@ class RoleTags:
         self._premium_subscriber: Optional[Any] = data.get("premium_subscriber", MISSING)
 
     def is_bot_managed(self) -> bool:
-        """:class:`bool`: Whether the role is associated with a bot."""
+        """Whether the role is associated with a bot.
+
+        :return type: :class:`bool`
+        """
         return self.bot_id is not None
 
     def is_premium_subscriber(self) -> bool:
-        """:class:`bool`: Whether the role is the premium subscriber, AKA "boost", role for the guild."""
+        """Whether the role is the premium subscriber, AKA "boost", role for the guild.
+
+        :return type: :class:`bool`
+        """
         return self._premium_subscriber is None
 
     def is_integration(self) -> bool:
-        """:class:`bool`: Whether the role is managed by an integration."""
+        """Whether the role is managed by an integration.
+
+        :return type: :class:`bool`
+        """
         return self.integration_id is not None
 
     def __repr__(self) -> str:
@@ -256,34 +266,45 @@ class Role(Hashable):
             self.tags = None
 
     def is_default(self) -> bool:
-        """:class:`bool`: Checks if the role is the default role."""
+        """Checks if the role is the default role.
+
+        :return type: :class:`bool`
+        """
         return self.guild.id == self.id
 
     def is_bot_managed(self) -> bool:
-        """:class:`bool`: Whether the role is associated with a bot.
+        """Whether the role is associated with a bot.
 
         .. versionadded:: 1.6
+
+        :return type: :class:`bool`
         """
         return self.tags is not None and self.tags.is_bot_managed()
 
     def is_premium_subscriber(self) -> bool:
-        """:class:`bool`: Whether the role is the premium subscriber, AKA "boost", role for the guild.
+        """Whether the role is the premium subscriber, AKA "boost", role for the guild.
 
         .. versionadded:: 1.6
+
+        :return type: :class:`bool`
         """
         return self.tags is not None and self.tags.is_premium_subscriber()
 
     def is_integration(self) -> bool:
-        """:class:`bool`: Whether the role is managed by an integration.
+        """Whether the role is managed by an integration.
 
         .. versionadded:: 1.6
+
+        :return type: :class:`bool`
         """
         return self.tags is not None and self.tags.is_integration()
 
     def is_assignable(self) -> bool:
-        """:class:`bool`: Whether the role is able to be assigned or removed by the bot.
+        """Whether the role is able to be assigned or removed by the bot.
 
         .. versionadded:: 2.0
+
+        :return type: :class:`bool`
         """
         me = self.guild.me
         return (

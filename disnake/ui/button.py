@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -29,7 +30,7 @@ import inspect
 import os
 
 
-from .item import Item, ItemCallbackType
+from .item import Item, ItemCallbackType, DecoratedItem
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
 from ..components import Button as ButtonComponent
@@ -238,7 +239,7 @@ def button(
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], ItemCallbackType]:
+) -> Callable[[ItemCallbackType], DecoratedItem[Button]]:
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -275,7 +276,7 @@ def button(
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    def decorator(func: ItemCallbackType) -> ItemCallbackType:
+    def decorator(func: ItemCallbackType) -> DecoratedItem[Button]:
         if not inspect.iscoroutinefunction(func):
             raise TypeError("button function must be a coroutine function")
 
@@ -289,6 +290,6 @@ def button(
             "emoji": emoji,
             "row": row,
         }
-        return func
+        return func  # type: ignore
 
     return decorator

@@ -139,6 +139,7 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def callback(self) -> Callable[..., Any]:
+        """Callable[..., Any]: The callback associated with the interaction."""
         return self._callback
 
     def add_check(self, func: Check) -> None:

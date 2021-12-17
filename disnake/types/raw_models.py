@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -90,3 +91,14 @@ class _IntegrationDeleteEventOptional(TypedDict, total=False):
 class IntegrationDeleteEvent(_IntegrationDeleteEventOptional):
     id: Snowflake
     guild_id: Snowflake
+
+
+class _TypingEventOptional(TypedDict, total=False):
+    guild_id: Snowflake
+    member: Member
+
+
+class TypingEvent(_TypingEventOptional):
+    user_id: Snowflake
+    channel_id: Snowflake
+    timestamp: int

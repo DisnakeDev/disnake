@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -61,6 +62,7 @@ __all__ = (
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
+    "ThreadArchiveDuration",
 )
 
 
@@ -252,7 +254,6 @@ class PartyType(Enum):
     spellcast = 852509694341283871
     awkword = 879863881349087252
     sketchy_artist = 879864070101172255
-    putt_party = 832012854282158180
     watch_together = 880218394199220334
 
 
@@ -516,6 +517,7 @@ class UserFlags(Enum):
     verified_bot_developer = 131072
     discord_certified_moderator = 262144
     http_interactions_bot = 524288
+    spammer = 1048576
 
 
 class ActivityType(Enum):
@@ -678,6 +680,13 @@ class GuildScheduledEventStatus(Enum):
 
 class GuildScheduledEventPrivacyLevel(Enum):
     guild_only = 2
+
+
+class ThreadArchiveDuration(Enum):
+    hour = 60
+    day = 1440
+    three_days = 4320
+    week = 10080
 
 
 T = TypeVar("T")
