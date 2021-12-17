@@ -28,7 +28,7 @@ Breaking Changes
 - Drop aiohttp ``3.6.x`` dependency, restrict allowed version range to ``3.7.x`` only
 - Due to the upcoming text-in-voice feature, many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods.
   Also see the details for text-in-voice under "New Features" below, which include a few important things to note.
-- Slash commands have undergone an extensive rework, and while existing code should still work as before, it is recommended that you do some testing using the new implementation first
+- Slash command internals have undergone an extensive rework, and while existing code should still work as before, it is recommended that you do some testing using the new implementation first
 - :func:`Bot.get_slash_command <ext.commands.Bot.get_slash_command>` may now also return :class:`SubCommandGroup <ext.commands.SubCommandGroup>` or :class:`SubCommand <ext.commands.SubCommand>` instances, see documentation
 - ``disnake.types.ThreadArchiveDuration`` is now ``ThreadArchiveDurationLiteral``, to avoid confusion with the new :class:`ThreadArchiveDuration` enum
 
@@ -102,6 +102,7 @@ New Features
 - |commands| Add ``channel_types`` parameter to :func:`Param <ext.commands.Param>`/:class:`ParamInfo <ext.commands.ParamInfo>`
 - Add support for setting ``slowmode_delay`` on thread creation (:func:`TextChannel.create_thread`, :func:`Message.create_thread`)
 - Add ``invitable`` parameter to :func:`TextChannel.create_thread`
+- Add ``fail_if_not_exists`` parameter to :func:`Message.reply`
 - Add new aliases for :class:`ApplicationCommandInteraction`:
   ``CommandInteraction``, ``CmdInteraction``, ``CommandInter``, ``CmdInter``, ``AppCommandInteraction``
 
@@ -134,6 +135,9 @@ Bug Fixes
 - |commands| Fix unnecessary application command sync without changes
 - Fix sending local files in embeds with interactions/webhooks if only one embed was specified
 - Fix leftover uses of ``json``, which didn't use ``orjson`` if available
+- Fix :attr:`Message.channel` type being :class:`DMChannel` for ephemeral messages in :func:`on_message`
+- Always close files after completing HTTP requests
+- |commands| Fix incorrect detection of deprecated guild commands in sync algorithm while sync is in progress
 
 
 Documentation
@@ -158,6 +162,7 @@ Documentation
     - :attr:`ApplicationCommandInteraction.bot`
     - :class:`InvokableApplicationCommand <ext.commands.InvokableApplicationCommand>`
 - Fix incorrect type for :attr:`Invite.channel` in documentation
+- Add additional information about application command sync algorithm and syncing commands in sharded bots
 
 
 Miscellaneous
@@ -166,6 +171,7 @@ Miscellaneous
 - Add Python 3.10 to package classifiers
 - Add guide for configuring inviting a bot through its profile
 - Rewrite project README
+- Improve examples
 
 
 .. _vp2p2p2:
