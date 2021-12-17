@@ -146,6 +146,7 @@ Documentation
 ~~~~~~~~~~~~~~
 
 - Move documentation to https://docs.disnake.dev/
+- Update :ref:`version_guarantees` (:issue:`200`)
 - Clarify :func:`Interaction.original_message` documentation regarding different response types (:issue:`140`)
 - Clarify :func:`Interaction.send` documentation (:issue:`188`)
 - Redirect searches for ``color`` to ``colour`` (:issue:`153`)
