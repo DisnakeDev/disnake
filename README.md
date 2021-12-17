@@ -1,4 +1,4 @@
-[![Disnake Banner](./assets/banner.png)](https://disnake.dev/)
+[![Disnake Banner](https://raw.githubusercontent.com/DisnakeDev/disnake/master/assets/banner.png)](https://disnake.dev/)
 
 disnake
 =======
@@ -37,11 +37,18 @@ python3 -m pip install -U disnake
 py -3 -m pip install -U disnake
 ```
 
-Installing `disnake` with full voice support requires you to replace `disnake` here, with `disnake[voice]`. To learn more about voice support (or installing the development version), please visit [this section of our guide](https://guide.disnake.dev/000-prerequisites/001-installing-python/#installing-disnake). 
+Installing `disnake` with full voice support requires you to replace `disnake` here, with `disnake[voice]`. To learn more about voice support (or installing the development version), please visit [this section of our guide](https://guide.disnake.dev/000-prerequisites/001-installing-disnake/). 
 
 (You can optionally install [PyNaCl](https://pypi.org/project/PyNaCl/) for voice support.)
 
 Note that voice support on Linux requires installation of `libffi-dev` and `python-dev` packages, via your preferred package manager (e.g. `apt`, `dnf`, etc.) before running the following commands.
+
+Versioning
+----------
+
+This project does **not** quite follow semantic versioning; for more details, see [version guarantees](https://docs.disnake.dev/en/latest/version_guarantees.html).
+
+To be on the safe side and avoid unexpected breaking changes, pin the dependency to a minor version (e.g. `disnake==a.b.*` or `disnake~=a.b.c`) or an exact version (e.g. `disnake==a.b.c`).
 
 Quick Example
 -------------
