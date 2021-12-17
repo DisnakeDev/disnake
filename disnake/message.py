@@ -1800,13 +1800,18 @@ class Message(Hashable):
         )
         return Thread(guild=self.guild, state=self._state, data=data)
 
-    async def reply(self, content: Optional[str] = None, **kwargs) -> Message:
+    async def reply(
+        self, content: Optional[str] = None, *, fail_if_not_exists: bool = False, **kwargs
+    ) -> Message:
         """|coro|
 
         A shortcut method to :meth:`.abc.Messageable.send` to reply to the
         :class:`.Message`.
 
         .. versionadded:: 1.6
+
+        .. versionchanged:: 2.3
+            Added ``fail_if_not_exists`` keyword argument. Defaults to ``False``.
 
         Raises
         --------
@@ -1823,8 +1828,11 @@ class Message(Hashable):
         :class:`.Message`
             The message that was sent.
         """
-
-        return await self.channel.send(content, reference=self, **kwargs)
+        if not fail_if_not_exists:
+            reference = MessageReference.from_message(self, fail_if_not_exists=False)
+        else:
+            reference = self
+        return await self.channel.send(content, reference=reference, **kwargs)
 
     def to_reference(self, *, fail_if_not_exists: bool = True) -> MessageReference:
         """Creates a :class:`~disnake.MessageReference` from the current message.
