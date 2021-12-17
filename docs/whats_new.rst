@@ -96,7 +96,7 @@ New Features
 - Add :attr:`Guild.approximate_member_count` and :attr:`Guild.approximate_presence_count` (available on manually fetched guilds) (:issue:`139`)
 - Add :attr:`Permissions.start_embedded_activities` (:issue:`160`)
 - Add :class:`ThreadArchiveDuration` enum, containing the currently valid values for the thread auto-archive feature (:issue:`187`)
-- |commands| Add :class:`PermissionsConverter`, which allows the conversion of a value or a (list of) permission names to a :class:`Permissions` instance
+- |commands| Add :class:`PermissionsConverter <ext.commands.PermissionsConverter>`, which allows the conversion of a value or a (list of) permission names to a :class:`Permissions` instance
   (using a :class:`Permissions` annotation)
 - Add :attr:`AppInfo.flags`
 - |commands| Add ``channel_types`` parameter to :func:`Param <ext.commands.Param>`/:class:`ParamInfo <ext.commands.ParamInfo>` (:issue:`130`)

@@ -312,6 +312,8 @@ Helper Functions
 
 .. autofunction:: disnake.ext.commands.register_injection
 
+.. autofunction:: disnake.ext.commands.converter_method
+
 Application Command
 ~~~~~~~~~~~~~~~~~~~
 
@@ -748,6 +750,9 @@ Converters
     :members:
 
 .. autoclass:: disnake.ext.commands.GuildStickerConverter
+    :members:
+
+.. autoclass:: disnake.ext.commands.PermissionsConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.clean_content
