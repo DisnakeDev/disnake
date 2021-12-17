@@ -47,6 +47,7 @@ from ..object import Object
 from ..permissions import Permissions
 from ..user import ClientUser, User
 from ..webhook.async_ import Webhook, async_context, handle_message_parameters
+from ..guild import Guild
 
 __all__ = (
     "Interaction",
@@ -57,7 +58,6 @@ __all__ = (
 if TYPE_CHECKING:
     from ..ext.commands.bot import Bot
     from ..types.interactions import Interaction as InteractionPayload
-    from ..guild import Guild
     from ..state import ConnectionState
     from ..file import File
     from ..mentions import AllowedMentions
@@ -164,7 +164,7 @@ class Interaction:
                 pass
             else:
                 self.author = (
-                    guild
+                    isinstance(guild, Guild)
                     and guild.get_member(int(member["user"]["id"]))  # type: ignore
                     or Member(state=self._state, guild=guild, data=member)  # type: ignore
                 )
