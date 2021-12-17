@@ -41,7 +41,7 @@ Deprecations
 New Features
 ~~~~~~~~~~~~~
 
-- Add guild scheduled events
+- Add guild scheduled events (:issue:`151`)
     - New intent: :attr:`Intents.guild_scheduled_events` (enabled by default)
     - New types
         - :class:`GuildScheduledEvent`
@@ -71,7 +71,7 @@ New Features
         - :attr:`AuditLogAction.guild_scheduled_event_create`
         - :attr:`AuditLogAction.guild_scheduled_event_update`
         - :attr:`AuditLogAction.guild_scheduled_event_delete`
-- Add preliminary support for text-in-voice
+- Add preliminary support for text-in-voice (:issue:`162`, :issue:`177`)
     - Many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods
     - Important notes:
         - This feature is only available in a very limited number of servers at the time of writing this, and the API is still being developed; therefore, expect changes in the future
@@ -84,41 +84,41 @@ New Features
     - New :class:`VoiceChannel` methods:
       :func:`.is_nsfw <VoiceChannel.is_nsfw>`, :func:`.get_partial_message <VoiceChannel.get_partial_message>`
     - ``nsfw`` and ``slowmode_delay`` parameters for :func:`VoiceChannel.edit`
-- |commands| Add parameter injections (`example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_)
+- |commands| Add parameter injections (`example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_) (:issue:`130`)
     - :func:`inject <ext.commands.inject>`
     - :func:`register_injection <ext.commands.register_injection>`
     - :func:`converter_method <ext.commands.converter_method>`
 
-- Add attachment descriptions (see :class:`File`, :class:`Attachment`)
-- Add :func:`on_member_screening_reject` and :func:`on_raw_member_screening_reject` events
+- Add attachment descriptions (see :class:`File`, :class:`Attachment`) (:issue:`100`)
+- Add :func:`on_member_screening_reject` and :func:`on_raw_member_screening_reject` events (:issue:`109`)
     - *note:* these are currently not officially documented or supported by the API, but have been consistently emitted for several months
-- Add :func:`on_raw_typing` event
-- Add :attr:`Guild.approximate_member_count` and :attr:`Guild.approximate_presence_count` (available on manually fetched guilds)
-- Add :attr:`Permissions.start_embedded_activities`
-- Add :class:`ThreadArchiveDuration` enum, containing the currently valid values for the thread auto-archive feature
+- Add :func:`on_raw_typing` event (:issue:`176`)
+- Add :attr:`Guild.approximate_member_count` and :attr:`Guild.approximate_presence_count` (available on manually fetched guilds) (:issue:`139`)
+- Add :attr:`Permissions.start_embedded_activities` (:issue:`160`)
+- Add :class:`ThreadArchiveDuration` enum, containing the currently valid values for the thread auto-archive feature (:issue:`187`)
 - |commands| Add :class:`PermissionsConverter`, which allows the conversion of a value or a (list of) permission names to a :class:`Permissions` instance
   (using a :class:`Permissions` annotation)
 - Add :attr:`AppInfo.flags`
-- |commands| Add ``channel_types`` parameter to :func:`Param <ext.commands.Param>`/:class:`ParamInfo <ext.commands.ParamInfo>`
-- Add support for setting ``slowmode_delay`` on thread creation (:func:`TextChannel.create_thread`, :func:`Message.create_thread`)
-- Add ``invitable`` parameter to :func:`TextChannel.create_thread`
-- Add ``fail_if_not_exists`` parameter to :func:`Message.reply`
+- |commands| Add ``channel_types`` parameter to :func:`Param <ext.commands.Param>`/:class:`ParamInfo <ext.commands.ParamInfo>` (:issue:`130`)
+- Add support for setting ``slowmode_delay`` on thread creation (:func:`TextChannel.create_thread`, :func:`Message.create_thread`) (:issue:`132`)
+- Add ``invitable`` parameter to :func:`TextChannel.create_thread` (:issue:`132`)
+- Add ``fail_if_not_exists`` parameter to :func:`Message.reply` (:issue:`199`, :issue:`211`)
 - |commands| :func:`Bot.get_slash_command <ext.commands.Bot.get_slash_command>` now works similar to :func:`Bot.get_command <ext.commands.Bot.get_command>`,
-  in that it can also return subcommands/groups for inputs like ``"foo bar"``
+  in that it can also return subcommands/groups for inputs like ``"foo bar"`` (:issue:`149`)
 - Add new aliases for :class:`ApplicationCommandInteraction`:
   ``CommandInteraction``, ``CmdInteraction``, ``CommandInter``, ``CmdInter``, ``AppCommandInteraction``
 
-- Add a base class for warnings emitted by this library, :class:`DiscordWarning`
+- Add a base class for warnings emitted by this library, :class:`DiscordWarning` (:issue:`118`)
 - Add new warnings (emitted instead of just using ``print`` for warnings):
-  :class:`ConfigWarning`, :class:`SyncWarning`
+  :class:`ConfigWarning`, :class:`SyncWarning` (:issue:`118`)
 
-- Add new voice channel activities:
+- Add new voice channel activities: (:issue:`145`, :issue:`148`, :issue:`183`)
     - :attr:`PartyType.watch_together`
     - :attr:`PartyType.checkers`
     - :attr:`PartyType.spellcast`
     - :attr:`PartyType.awkword`
     - :attr:`PartyType.sketchy_artist`
-- Add new flags/enum values:
+- Add new flags/enum values: (:issue:`148`, :issue:`194`)
     - :attr:`MessageType.context_menu_command`
     - :attr:`Status.streaming`
     - :attr:`SystemChannelFlags.join_notification_replies`
@@ -130,27 +130,27 @@ New Features
 Bug Fixes
 ~~~~~~~~~~
 
-- Fix dispatch of typing events in DMs
-- Try to retrieve objects in received interactions from cache first (fixing properties like :attr:`Member.status` on member parameters for commands)
-- Fix return type annotation of :func:`ui.button` and :func:`ui.select` decorators
+- Fix dispatch of typing events in DMs (:issue:`176`)
+- Try to retrieve objects in received interactions from cache first (fixing properties like :attr:`Member.status` on member parameters for commands) (:issue:`182`, :issue:`213`)
+- Fix return type annotation of :func:`ui.button` and :func:`ui.select` decorators (:issue:`163`)
 - Fix incorrect URL returned by :attr:`Template.url`
 - |commands| Fix unnecessary application command sync without changes
-- Fix sending local files in embeds with interactions/webhooks if only one embed was specified
-- Fix leftover uses of ``json``, which didn't use ``orjson`` if available
-- Fix :attr:`Message.channel` type being :class:`DMChannel` for ephemeral messages in :func:`on_message`
-- Always close files after completing HTTP requests
-- |commands| Fix incorrect detection of deprecated guild commands in sync algorithm while sync is in progress
+- Fix sending local files in embeds with interactions/webhooks if only one embed was specified (:issue:`193`)
+- Fix leftover uses of ``json``, which didn't use ``orjson`` if available (:issue:`184`)
+- Fix :attr:`Message.channel` type being :class:`DMChannel` for ephemeral messages in :func:`on_message` (:issue:`197`)
+- Always close files after completing HTTP requests (:issue:`124`)
+- |commands| Fix incorrect detection of deprecated guild commands in sync algorithm while sync is in progress (:issue:`205`)
 
 
 Documentation
 ~~~~~~~~~~~~~~
 
 - Move documentation to https://docs.disnake.dev/
-- Clarify :func:`Interaction.original_message` documentation regarding different response types
-- Clarify :func:`Interaction.send` documentation
-- Redirect searches for ``color`` to ``colour``
-- Add documentation for new guild feature values
-- Add documentation for several methods/properties:
+- Clarify :func:`Interaction.original_message` documentation regarding different response types (:issue:`140`)
+- Clarify :func:`Interaction.send` documentation (:issue:`188`)
+- Redirect searches for ``color`` to ``colour`` (:issue:`153`)
+- Add documentation for new guild feature values (:issue:`148`)
+- Add documentation for several methods/properties: (:issue:`153`)
     - :attr:`Client.global_application_commands`
     - :attr:`Client.global_slash_commands`
     - :attr:`Client.global_user_commands`
@@ -164,17 +164,17 @@ Documentation
     - :attr:`ApplicationCommandInteraction.bot`
     - :class:`InvokableApplicationCommand <ext.commands.InvokableApplicationCommand>`
 - Fix incorrect type for :attr:`Invite.channel` in documentation
-- Add additional information about application command sync algorithm and syncing commands in sharded bots
+- Add additional information about application command sync algorithm and syncing commands in sharded bots (:issue:`205`)
 
 
 Miscellaneous
 ~~~~~~~~~~~~~~
 
-- Add Python 3.10 to package classifiers
-- Drop aiohttp ``3.6.x`` dependency, restrict allowed version range to ``3.7.x`` only
-- Add guide for configuring inviting a bot through its profile
-- Rewrite project README
-- Improve examples
+- Add Python 3.10 to package classifiers (:issue:`127`)
+- Drop aiohttp ``3.6.x`` dependency, restrict allowed version range to ``3.7.x`` only (:issue:`119`)
+- Add guide for configuring inviting a bot through its profile (:issue:`153`)
+- Rewrite project README (:issue:`191`)
+- Improve examples (:issue:`143`)
 
 
 .. _vp2p2p2:
