@@ -266,6 +266,7 @@ class Invite(Hashable):
     | :attr:`expires_at`                 | :meth:`Client.fetch_invite` with `with_expiration` enabled        |
     +------------------------------------+-------------------------------------------------------------------+
     | :attr:`guild_scheduled_event`      | :meth:`Client.fetch_invite` with valid `guild_scheduled_event_id` |
+    |                                    | or valid event ID in URL or invite object                         |
     +------------------------------------+-------------------------------------------------------------------+
 
     If it's not in the table above then it is available by all methods.
