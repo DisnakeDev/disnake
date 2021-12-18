@@ -916,6 +916,9 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_member_screening_reject(member)
 
+    .. note::
+        This is currently not officially documented or supported by the API, but has been consistently emitted for a while
+
     Called when a :class:`Member` leaves a :class:`Guild` without completing
     membership screening. This does not replace :func:`on_member_remove`;
     both will be called, given the approriate intents are enabled.
@@ -1537,7 +1540,7 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.3
     .. attribute:: spammer
-    
+
         The user is marked as a spammer.
 
         .. versionadded:: 2.3
