@@ -1878,6 +1878,8 @@ class Guild(Hashable):
             The entity type of the guild scheduled event.
         entity_metadata: :class:`GuildScheduledEventMetadata`
             The entity metadata of the guild scheduled event.
+        reason: Optional[:class:`str`]
+            The reason for creating the guild scheduled event. Shows up on the audit log.
 
         Raises
         ------

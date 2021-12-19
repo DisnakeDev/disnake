@@ -288,6 +288,8 @@ class GuildScheduledEvent(Hashable):
             The entity metadata of the guild scheduled event.
         status: :class:`GuildScheduledEventStatus`
             The status of the guild scheduled event.
+        reason: Optional[:class:`str`]
+            The reason for editing the guild scheduled event. Shows up on the audit log.
 
         Returns
         -------
