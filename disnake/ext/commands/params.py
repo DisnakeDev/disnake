@@ -687,7 +687,7 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     _, inter_param, params, injections = collect_params(command.callback)
 
     if inter_param is None:
-        raise TypeError(f"Couldn't find an interaction paramter in {command.callback}")
+        raise TypeError(f"Couldn't find an interaction parameter in {command.callback}")
 
     for injection in injections.values():
         params += collect_nested_params(injection.function)
