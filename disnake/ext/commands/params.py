@@ -808,6 +808,8 @@ def inject(function: Callable[..., Any]) -> Any:
     """
     A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your application command.
+
+    .. versionadded:: 2.3
     """
     return Injection(function)
 
@@ -842,13 +844,17 @@ if TYPE_CHECKING:
 else:
 
     def converter_method(function: Any) -> ConverterMethod:
-        """A decorator to register a method as the converter method"""
+        """A decorator to register a method as the converter method
+
+        .. versionadded:: 2.3
+        """
         return ConverterMethod(function)
 
 
 def register_injection(function: CallableT) -> CallableT:
-    """
-    A decorator to register a global injection.
+    """A decorator to register a global injection.
+
+    .. versionadded:: 2.3
     """
     sig = signature(function)
     tp = sig.return_annotation

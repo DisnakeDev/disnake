@@ -1813,6 +1813,14 @@ class Message(Hashable):
         .. versionchanged:: 2.3
             Added ``fail_if_not_exists`` keyword argument. Defaults to ``True``.
 
+        Parameters
+        ----------
+        fail_if_not_exists: :class:`bool`
+            Whether replying using the message reference should raise :class:`HTTPException`
+            if the message no longer exists or Discord could not fetch the message.
+
+            .. versionadded:: 2.3
+
         Raises
         --------
         ~disnake.HTTPException
