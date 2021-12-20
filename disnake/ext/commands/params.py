@@ -842,8 +842,7 @@ else:
 
 
 def register_injection(function: CallableT) -> CallableT:
-    """
-    A decorator to register a global injection.
+    """A decorator to register a global injection.
 
     .. versionadded:: 2.3
     """
