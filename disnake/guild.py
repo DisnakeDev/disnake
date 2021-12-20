@@ -1851,6 +1851,7 @@ class Guild(Hashable):
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         scheduled_end_time: datetime.datetime = MISSING,
         description: str = MISSING,
+        reason: Optional[str] = None,
     ) -> GuildScheduledEvent:
         """|coro|
 
@@ -1876,6 +1877,8 @@ class Guild(Hashable):
             The entity type of the guild scheduled event.
         entity_metadata: :class:`GuildScheduledEventMetadata`
             The entity metadata of the guild scheduled event.
+        reason: Optional[:class:`str`]
+            The reason for creating the guild scheduled event. Shows up on the audit log.
 
         Raises
         ------
@@ -1919,7 +1922,7 @@ class Guild(Hashable):
         if scheduled_end_time is not MISSING:
             fields["scheduled_end_time"] = scheduled_end_time.isoformat()
 
-        data = await self._state.http.create_guild_scheduled_event(self.id, **fields)
+        data = await self._state.http.create_guild_scheduled_event(self.id, reason=reason, **fields)
         return GuildScheduledEvent(state=self._state, data=data)
 
     # TODO: Remove Optional typing here when async iterators are refactored

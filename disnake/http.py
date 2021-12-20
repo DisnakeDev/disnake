@@ -1870,6 +1870,7 @@ class HTTPClient:
         entity_metadata: Dict[str, Any] = None,
         scheduled_end_time: str = None,
         description: str = None,
+        reason: Optional[str] = None,
     ):
         r = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
         payload = {
@@ -1891,7 +1892,7 @@ class HTTPClient:
         if description is not None:
             payload["description"] = description
 
-        return self.request(r, json=payload)
+        return self.request(r, json=payload, reason=reason)
 
     def get_guild_scheduled_event(
         self, guild_id: Snowflake, event_id: Snowflake, with_user_count: bool = False
@@ -1905,7 +1906,9 @@ class HTTPClient:
         )
         return self.request(route, params=params)
 
-    def edit_guild_scheduled_event(self, guild_id: Snowflake, event_id: Snowflake, **fields):
+    def edit_guild_scheduled_event(
+        self, guild_id: Snowflake, event_id: Snowflake, *, reason: Optional[str] = None, **fields
+    ):
         route = Route(
             method="PATCH",
             path="/guilds/{guild_id}/scheduled-events/{event_id}",
@@ -1913,7 +1916,7 @@ class HTTPClient:
             event_id=event_id,
         )
 
-        return self.request(route, json=fields)
+        return self.request(route, json=fields, reason=reason)
 
     def delete_guild_scheduled_event(self, guild_id: Snowflake, event_id: Snowflake):
         route = Route(
