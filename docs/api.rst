@@ -2210,7 +2210,8 @@ of :class:`enum.Enum`.
         A member has updated. This triggers in the following situations:
 
         - A nickname was changed
-        - They were server muted or deafened (or it was undo'd)
+        - They were server muted or deafened (or it was undone)
+        - They were timed out
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Member` or :class:`User` who got updated.
@@ -2220,6 +2221,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.nick`
         - :attr:`~AuditLogDiff.mute`
         - :attr:`~AuditLogDiff.deaf`
+        - :attr:`~AuditLogDiff.guild_timeout`
 
     .. attribute:: member_role_update
 
@@ -3656,6 +3658,12 @@ AuditLogDiff
         The default auto archive duration for newly created threads being changed.
 
         :type: :class:`int`
+
+    .. attribute:: guild_timeout
+
+        The datetime when the timeout expires, if any.
+
+        :type: :class:`datetime.datetime`
 
     .. attribute:: entity_type
 
