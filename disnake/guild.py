@@ -3440,7 +3440,7 @@ class Guild(Hashable):
 
         Times out the member from the guild; until then, the member will not be able to interact with the guild.
 
-        Exactly one of ``duration`` and ``until`` must be provided.
+        Exactly one of ``duration`` or ``until`` must be provided. To remove a timeout, set one of the parameters to ``None``.
 
         The user must meet the :class:`abc.Snowflake` abc.
 
@@ -3453,7 +3453,7 @@ class Guild(Hashable):
         user: :class:`abc.Snowflake`
             The member to timeout.
         duration: Optional[Union[:class:`float`, :class:`datetime.timedelta`]]
-            The duration of the member's timeout. Set to ``None`` to remove the timeout.
+            The duration (seconds or timedelta) of the member's timeout. Set to ``None`` to remove the timeout.
             Supports up to 28 days in the future.
             May not be used in combination with the ``until`` parameter.
         until: Optional[:class:`datetime.datetime`]

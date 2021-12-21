@@ -762,8 +762,9 @@ class Member(disnake.abc.Messageable, _UserTag):
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
         timeout: Optional[Union[:class:`float`, :class:`datetime.timedelta`, :class:`datetime.datetime`]]
-            The seconds or datetime when the timeout expires; until then, the member will not be able to interact with the guild.
-            Set to ``None`` to remove the timeout. Support up to 28 days in the future.
+            The duration (seconds or timedelta) or the expiry (datetime) of the timeout;
+            until then, the member will not be able to interact with the guild.
+            Set to ``None`` to remove the timeout. Supports up to 28 days in the future.
 
             .. versionadded:: 2.3
         reason: Optional[:class:`str`]
@@ -1035,7 +1036,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Times out the member from the guild; until then, the member will not be able to interact with the guild.
 
-        Exactly one of ``duration`` and ``until`` must be provided.
+        Exactly one of ``duration`` or ``until`` must be provided. To remove a timeout, set one of the parameters to ``None``.
 
         You must have the :attr:`Permissions.moderate_members` permission to do this.
 
@@ -1044,7 +1045,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         Parameters
         ----------
         duration: Optional[Union[:class:`float`, :class:`datetime.timedelta`]]
-            The duration of the member's timeout. Set to ``None`` to remove the timeout.
+            The duration (seconds or timedelta) of the member's timeout. Set to ``None`` to remove the timeout.
             Supports up to 28 days in the future.
             May not be used in combination with the ``until`` parameter.
         until: Optional[:class:`datetime.datetime`]
