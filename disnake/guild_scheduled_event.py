@@ -255,6 +255,7 @@ class GuildScheduledEvent(Hashable):
         entity_type: GuildScheduledEventEntityType = MISSING,
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         status: GuildScheduledEventStatus = MISSING,
+        reason: Optional[str] = None,
     ):
         """|coro|
 
@@ -287,6 +288,8 @@ class GuildScheduledEvent(Hashable):
             The entity metadata of the guild scheduled event.
         status: :class:`GuildScheduledEventStatus`
             The status of the guild scheduled event.
+        reason: Optional[:class:`str`]
+            The reason for editing the guild scheduled event. Shows up on the audit log.
 
         Returns
         -------
@@ -366,7 +369,7 @@ class GuildScheduledEvent(Hashable):
             raise ValueError(error_for_external_entity.format("scheduled_end_time", "provided"))
 
         data = await self._state.http.edit_guild_scheduled_event(
-            guild_id=self.guild_id, event_id=self.id, **fields
+            guild_id=self.guild_id, event_id=self.id, reason=reason, **fields
         )
         return GuildScheduledEvent(state=self._state, data=data)
 

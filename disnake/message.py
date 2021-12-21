@@ -197,7 +197,12 @@ async def _edit_handler(
         else:
             payload["components"] = []
 
-    data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)
+    try:
+        data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)
+    finally:
+        if files:
+            for f in files:
+                f.close()
     message = Message(state=msg._state, channel=msg.channel, data=data)
 
     if view and not view.is_finished():
@@ -1795,13 +1800,26 @@ class Message(Hashable):
         )
         return Thread(guild=self.guild, state=self._state, data=data)
 
-    async def reply(self, content: Optional[str] = None, **kwargs) -> Message:
+    async def reply(
+        self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs
+    ) -> Message:
         """|coro|
 
         A shortcut method to :meth:`.abc.Messageable.send` to reply to the
         :class:`.Message`.
 
         .. versionadded:: 1.6
+
+        .. versionchanged:: 2.3
+            Added ``fail_if_not_exists`` keyword argument. Defaults to ``True``.
+
+        Parameters
+        ----------
+        fail_if_not_exists: :class:`bool`
+            Whether replying using the message reference should raise :class:`HTTPException`
+            if the message no longer exists or Discord could not fetch the message.
+
+            .. versionadded:: 2.3
 
         Raises
         --------
@@ -1818,8 +1836,11 @@ class Message(Hashable):
         :class:`.Message`
             The message that was sent.
         """
-
-        return await self.channel.send(content, reference=self, **kwargs)
+        if not fail_if_not_exists:
+            reference = MessageReference.from_message(self, fail_if_not_exists=False)
+        else:
+            reference = self
+        return await self.channel.send(content, reference=reference, **kwargs)
 
     def to_reference(self, *, fail_if_not_exists: bool = True) -> MessageReference:
         """Creates a :class:`~disnake.MessageReference` from the current message.

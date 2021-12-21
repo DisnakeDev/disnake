@@ -874,9 +874,9 @@ class InteractionBotBase(CommonBotBase):
         # Wait a little bit, maybe other cogs are loading
         self._sync_queued = True
         await asyncio.sleep(2)
-        self._sync_queued = False
         await self._sync_application_commands()
         await self._sync_application_command_permissions()
+        self._sync_queued = False
 
     def _schedule_app_command_preparation(self) -> None:
         if not isinstance(self, disnake.Client):
@@ -1291,6 +1291,32 @@ class InteractionBotBase(CommonBotBase):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
+        if self._sync_commands and not self._sync_queued:
+            known_command = self.get_global_command(interaction.data.id)  # type: ignore
+
+            if known_command is None:
+                known_command = self.get_guild_command(interaction.guild_id, interaction.data.id)  # type: ignore
+
+            if known_command is None:
+                # This usually comes from the blind spots of the sync algorithm.
+                # Since not all guild commands are cached, it is possible to experience such issues.
+                # In this case, the blind spot is the interaction guild, let's fix it:
+                try:
+                    await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # type: ignore
+                except disnake.HTTPException:
+                    pass
+                try:
+                    # This part is in a separate try-except because we still should respond to the interaction
+                    await interaction.response.send_message(
+                        "This command has just been synced. More information about this: "
+                        "https://docs.disnake.dev/en/latest/ext/commands/additional_info.html"
+                        "#app-command-sync.",
+                        ephemeral=True,
+                    )
+                except disnake.HTTPException:
+                    pass
+                return
+
         interaction.bot = self  # type: ignore
         command_type = interaction.data.type
         command_name = interaction.data.name
@@ -1310,28 +1336,8 @@ class InteractionBotBase(CommonBotBase):
             event_name = "message_command"
 
         if event_name is None or app_command is None:
-            # If we got here, the command being invoked is either unknown or has an unknonw type.
+            # If we are here, the command being invoked is either unknown or has an unknonw type.
             # This usually happens if the auto sync is disabled, so let's just ignore this.
-            return
-
-        expected_command = self.get_global_command(interaction.data.id)  # type: ignore
-        if expected_command is None:
-            expected_command = self.get_guild_command(interaction.guild_id, interaction.data.id)  # type: ignore
-
-        if expected_command is None and self._sync_commands:
-            # This usually comes from the blind spots of the sync algorithm.
-            # Since not all guild commands are cached, it is possible to experience such issues.
-            # In this case, the blind spot is the interaction guild, let's fix it:
-            try:
-                await interaction.response.send_message(
-                    "This is a deprecated local command, which is now deleted.", ephemeral=True
-                )
-            except Exception:
-                pass
-            try:
-                await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # type: ignore
-            except Exception:
-                pass
             return
 
         self.dispatch(event_name, interaction)
