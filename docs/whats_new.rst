@@ -139,11 +139,12 @@ Bug Fixes
 - Try to retrieve objects in received interactions from cache first (fixing properties like :attr:`Member.status` on member parameters for commands) (:issue:`182`, :issue:`213`)
 - Fix return type annotation of :func:`ui.button` and :func:`ui.select` decorators (:issue:`163`)
 - Fix incorrect URL returned by :attr:`Template.url`
-- |commands| Fix unnecessary application command sync without changes
 - Fix sending local files in embeds with interactions/webhooks if only one embed was specified (:issue:`193`)
 - Fix leftover uses of ``json``, which didn't use ``orjson`` if available (:issue:`184`)
 - Fix :attr:`Message.channel` type being :class:`DMChannel` for ephemeral messages in :func:`on_message` (:issue:`197`)
+- Fix command/option name validation (:issue:`210`)
 - Always close files after completing HTTP requests (:issue:`124`)
+- |commands| Fix unnecessary application command sync without changes
 - |commands| Fix incorrect detection of deprecated guild commands in sync algorithm while sync is in progress (:issue:`205`)
 
 
