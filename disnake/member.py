@@ -710,7 +710,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         suppress: bool = MISSING,
         roles: List[disnake.abc.Snowflake] = MISSING,
         voice_channel: Optional[VocalGuildChannel] = MISSING,
-        guild_timeout: Optional[datetime.datetime] = MISSING,
+        timeout: Optional[Union[float, datetime.datetime]] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[Member]:
         """|coro|
@@ -732,7 +732,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         +------------------------------+-------------------------------------+
         | voice_channel                | :attr:`Permissions.move_members`    |
         +------------------------------+-------------------------------------+
-        | guild_timeout                | :attr:`Permissions.moderate_members`|
+        | timeout                      | :attr:`Permissions.moderate_members`|
         +------------------------------+-------------------------------------+
 
         All parameters are optional.
@@ -760,8 +760,8 @@ class Member(disnake.abc.Messageable, _UserTag):
         voice_channel: Optional[:class:`VoiceChannel`]
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
-        guild_timeout: Optional[:class:`datetime.datetime`]
-            The datetime when the timeout expires; until then, the member will not be able to interact with the guild.
+        timeout: Optional[Union[:class:`float`, :class:`datetime.datetime`]]
+            The seconds or datetime when the timeout expires; until then, the member will not be able to interact with the guild.
             Set to ``None`` to remove the timeout. Support up to 28 days in the future.
 
             .. versionadded:: 2.3
@@ -826,10 +826,13 @@ class Member(disnake.abc.Messageable, _UserTag):
         if roles is not MISSING:
             payload["roles"] = tuple(r.id for r in roles)
 
-        if guild_timeout is not MISSING:
-            if guild_timeout is not None:
-                date_time = guild_timeout.astimezone(tz=datetime.timezone.utc).isoformat()
-                payload["communication_disabled_until"] = date_time
+        if timeout is not MISSING:
+            if timeout is not None:
+                if isinstance(timeout, datetime.datetime):
+                    dt = timeout.astimezone(tz=datetime.timezone.utc)
+                else:
+                    dt = utils.utcnow() + datetime.timedelta(seconds=timeout)
+                payload["communication_disabled_until"] = dt.isoformat()
             else:
                 payload["communication_disabled_until"] = None
 
@@ -1001,8 +1004,8 @@ class Member(disnake.abc.Messageable, _UserTag):
         return self.guild.get_role(role_id) if self._roles.has(role_id) else None
 
     async def timeout(
-        self, *, seconds: Optional[int], reason: Optional[str] = None
-    ) -> Optional[Member]:
+        self, *, until: Optional[Union[float, datetime.datetime]], reason: Optional[str] = None
+    ) -> Member:
         """|coro|
 
         Times out the member from the guild; until then, the member will not be able to interact with the guild.
@@ -1013,9 +1016,9 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Parameters
         ----------
-        seconds: Optional[:class:`int`]
-            The seconds to timeout. Set to ``None`` or ``0`` to remove the timeout.
-            Support up to ``2419200`` seconds (28 days) in the future.
+        until: Optional[Union[:class:`float`, :class:`datetime.datetime`]]
+            The seconds or datetime to timeout. Set to ``None`` to remove the timeout.
+            Support up to 28 days in the future.
         reason: Optional[:class:`str`]
             The reason for this timeout. Appears on the audit log.
 
@@ -1028,7 +1031,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Returns
         -------
-        Optional[:class:`Member`]
+        :class:`Member`
             The newly updated member.
         """
-        return await self.guild.timeout(self, seconds=seconds, reason=reason)
+        return await self.guild.timeout(self, until=until, reason=reason)

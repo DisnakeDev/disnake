@@ -3412,9 +3412,9 @@ class Guild(Hashable):
         self,
         user: Snowflake,
         *,
-        seconds: Optional[int],
+        until: Optional[Union[float, datetime.datetime]],
         reason: Optional[str] = None,
-    ) -> Optional[Member]:
+    ) -> Member:
         """|coro|
 
         Times out the member from the guild; until then, the member will not be able to interact with the guild.
@@ -3429,10 +3429,9 @@ class Guild(Hashable):
         -----------
         user: :class:`abc.Snowflake`
             The member to timeout.
-        seconds: Optional[:class:`int`]
-            The seconds to timeout the member.
-            Set to ``None`` or ``0`` to remove the timeout.
-            Support up to ``2419200`` seconds (28 days) in the future.
+        until: Optional[Union[:class:`float`, :class:`datetime.datetime`]]
+            The seconds or datetime to timeout the member. Set to ``None`` to remove the timeout.
+            Support up to 28 days in the future.
         reason: Optional[:class:`str`]
             The reason for this timeout. Shows up on the audit log.
 
@@ -3445,14 +3444,17 @@ class Guild(Hashable):
 
         Returns
         --------
-        Optional[:class:`Member`]
+        :class:`Member`
             The newly updated member.
         """
         payload: Dict[str, Any] = {}
 
-        if seconds and seconds > 0:
-            date_time = utils.utcnow() + datetime.timedelta(seconds=seconds)
-            payload["communication_disabled_until"] = date_time.isoformat()
+        if until is not None:
+            if isinstance(until, datetime.datetime):
+                dt = until.astimezone(datetime.timezone.utc)
+            else:
+                dt = utils.utcnow() + datetime.timedelta(seconds=until)
+            payload["communication_disabled_until"] = dt.isoformat()
         else:
             payload["communication_disabled_until"] = None
 

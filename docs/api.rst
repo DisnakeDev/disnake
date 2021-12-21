@@ -2224,7 +2224,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.nick`
         - :attr:`~AuditLogDiff.mute`
         - :attr:`~AuditLogDiff.deaf`
-        - :attr:`~AuditLogDiff.guild_timeout`
+        - :attr:`~AuditLogDiff.timeout`
 
     .. attribute:: member_role_update
 
@@ -3662,7 +3662,7 @@ AuditLogDiff
 
         :type: :class:`int`
 
-    .. attribute:: guild_timeout
+    .. attribute:: timeout
 
         The datetime when the timeout expires, if any.
 
