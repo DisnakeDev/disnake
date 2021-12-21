@@ -591,10 +591,6 @@ class Intents(BaseFlags):
         - :attr:`User.avatar`
         - :attr:`User.discriminator`
 
-        Note that due to an implicit relationship this also corresponds to the following events:
-
-        - :func:`on_member_screening_reject`
-
         For more information go to the :ref:`member intent documentation <need_members_intent>`.
 
         .. note::
