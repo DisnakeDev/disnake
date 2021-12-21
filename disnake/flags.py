@@ -572,7 +572,6 @@ class Intents(BaseFlags):
         - :func:`on_member_join`
         - :func:`on_member_remove`
         - :func:`on_member_update`
-        - :func:`on_member_screening_decline`
         - :func:`on_user_update`
         - :func:`on_guild_scheduled_event_subscribe`
         - :func:`on_guild_scheduled_event_unsubscribe`
