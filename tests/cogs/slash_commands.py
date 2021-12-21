@@ -38,6 +38,10 @@ class SlashCommands(commands.Cog):
     ):
         await inter.send(mood)
 
+    @commands.slash_command()
+    async def guild_only(self, inter: disnake.GuildCommandInteraction, option: str = None):
+        await inter.send(f"guild: {inter.guild} | option: {option!r}")
+
 
 def setup(bot):
     bot.add_cog(SlashCommands(bot))
