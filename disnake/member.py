@@ -41,6 +41,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    overload,
 )
 
 import disnake.abc
@@ -710,7 +711,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         suppress: bool = MISSING,
         roles: List[disnake.abc.Snowflake] = MISSING,
         voice_channel: Optional[VocalGuildChannel] = MISSING,
-        timeout: Optional[Union[float, datetime.datetime]] = MISSING,
+        timeout: Optional[Union[float, datetime.timedelta, datetime.datetime]] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[Member]:
         """|coro|
@@ -760,9 +761,10 @@ class Member(disnake.abc.Messageable, _UserTag):
         voice_channel: Optional[:class:`VoiceChannel`]
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
-        timeout: Optional[Union[:class:`float`, :class:`datetime.datetime`]]
-            The seconds or datetime when the timeout expires; until then, the member will not be able to interact with the guild.
-            Set to ``None`` to remove the timeout. Support up to 28 days in the future.
+        timeout: Optional[Union[:class:`float`, :class:`datetime.timedelta`, :class:`datetime.datetime`]]
+            The duration (seconds or timedelta) or the expiry (datetime) of the timeout;
+            until then, the member will not be able to interact with the guild.
+            Set to ``None`` to remove the timeout. Supports up to 28 days in the future.
 
             .. versionadded:: 2.3
         reason: Optional[:class:`str`]
@@ -830,6 +832,8 @@ class Member(disnake.abc.Messageable, _UserTag):
             if timeout is not None:
                 if isinstance(timeout, datetime.datetime):
                     dt = timeout.astimezone(tz=datetime.timezone.utc)
+                elif isinstance(timeout, datetime.timedelta):
+                    dt = utils.utcnow() + timeout
                 else:
                     dt = utils.utcnow() + datetime.timedelta(seconds=timeout)
                 payload["communication_disabled_until"] = dt.isoformat()
@@ -1003,12 +1007,36 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         return self.guild.get_role(role_id) if self._roles.has(role_id) else None
 
+    @overload
     async def timeout(
-        self, *, until: Optional[Union[float, datetime.datetime]], reason: Optional[str] = None
+        self,
+        *,
+        duration: Optional[Union[float, datetime.timedelta]],
+        reason: Optional[str] = None,
+    ) -> Member:
+        ...
+
+    @overload
+    async def timeout(
+        self,
+        *,
+        until: Optional[datetime.datetime],
+        reason: Optional[str] = None,
+    ) -> Member:
+        ...
+
+    async def timeout(
+        self,
+        *,
+        duration: Optional[Union[float, datetime.timedelta]] = MISSING,
+        until: Optional[datetime.datetime] = MISSING,
+        reason: Optional[str] = None,
     ) -> Member:
         """|coro|
 
         Times out the member from the guild; until then, the member will not be able to interact with the guild.
+
+        Exactly one of ``duration`` or ``until`` must be provided. To remove a timeout, set one of the parameters to ``None``.
 
         You must have the :attr:`Permissions.moderate_members` permission to do this.
 
@@ -1016,9 +1044,14 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Parameters
         ----------
-        until: Optional[Union[:class:`float`, :class:`datetime.datetime`]]
-            The seconds or datetime to timeout. Set to ``None`` to remove the timeout.
-            Support up to 28 days in the future.
+        duration: Optional[Union[:class:`float`, :class:`datetime.timedelta`]]
+            The duration (seconds or timedelta) of the member's timeout. Set to ``None`` to remove the timeout.
+            Supports up to 28 days in the future.
+            May not be used in combination with the ``until`` parameter.
+        until: Optional[:class:`datetime.datetime`]
+            The expiry date/time of the member's timeout. Set to ``None`` to remove the timeout.
+            Supports up to 28 days in the future.
+            May not be used in combination with the ``duration`` parameter.
         reason: Optional[:class:`str`]
             The reason for this timeout. Appears on the audit log.
 
@@ -1034,4 +1067,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         :class:`Member`
             The newly updated member.
         """
-        return await self.guild.timeout(self, until=until, reason=reason)
+        if duration is not MISSING:
+            return await self.guild.timeout(self, duration=duration, reason=reason)
+        else:
+            return await self.guild.timeout(self, until=until, reason=reason)
