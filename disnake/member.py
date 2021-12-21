@@ -710,7 +710,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         suppress: bool = MISSING,
         roles: List[disnake.abc.Snowflake] = MISSING,
         voice_channel: Optional[VocalGuildChannel] = MISSING,
-        timeout: Optional[Union[float, datetime.datetime]] = MISSING,
+        timeout: Optional[Union[float, datetime.timedelta, datetime.datetime]] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[Member]:
         """|coro|
@@ -760,7 +760,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         voice_channel: Optional[:class:`VoiceChannel`]
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
-        timeout: Optional[Union[:class:`float`, :class:`datetime.datetime`]]
+        timeout: Optional[Union[:class:`float`, :class:`datetime.timedelta`, :class:`datetime.datetime`]]
             The seconds or datetime when the timeout expires; until then, the member will not be able to interact with the guild.
             Set to ``None`` to remove the timeout. Support up to 28 days in the future.
 
@@ -830,6 +830,8 @@ class Member(disnake.abc.Messageable, _UserTag):
             if timeout is not None:
                 if isinstance(timeout, datetime.datetime):
                     dt = timeout.astimezone(tz=datetime.timezone.utc)
+                elif isinstance(timeout, datetime.timedelta):
+                    dt = utils.utcnow() + timeout
                 else:
                     dt = utils.utcnow() + datetime.timedelta(seconds=timeout)
                 payload["communication_disabled_until"] = dt.isoformat()
@@ -1004,7 +1006,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         return self.guild.get_role(role_id) if self._roles.has(role_id) else None
 
     async def timeout(
-        self, *, until: Optional[Union[float, datetime.datetime]], reason: Optional[str] = None
+        self, *, duration: Optional[Union[float, datetime.timedelta, datetime.datetime]], reason: Optional[str] = None
     ) -> Member:
         """|coro|
 
@@ -1016,7 +1018,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Parameters
         ----------
-        until: Optional[Union[:class:`float`, :class:`datetime.datetime`]]
+        duration: Optional[Union[:class:`float`, :class:`datetime.timedelta`, :class:`datetime.datetime`]]
             The seconds or datetime to timeout. Set to ``None`` to remove the timeout.
             Support up to 28 days in the future.
         reason: Optional[:class:`str`]
@@ -1034,4 +1036,4 @@ class Member(disnake.abc.Messageable, _UserTag):
         :class:`Member`
             The newly updated member.
         """
-        return await self.guild.timeout(self, until=until, reason=reason)
+        return await self.guild.timeout(self, duration=duration, reason=reason)
