@@ -16,8 +16,8 @@ in specific versions.
 v2.3.0
 -------
 
-This version contains several new features and fixes, notably support for guild scheduled events,
-initial text-in-voice support (not yet released at the time of writing),
+This version contains several new features and fixes,
+notably support for guild scheduled events, guild timeouts,
 and a slash command rework with parameter injections, as well as several documentation fixes.
 
 Note: the :ref:`version_guarantees` have been updated to more accurately reflect the versioning scheme this library is following.
@@ -25,8 +25,9 @@ Note: the :ref:`version_guarantees` have been updated to more accurately reflect
 Breaking Changes
 ~~~~~~~~~~~~~~~~~
 
-- Drop aiohttp ``3.6.x`` dependency, restrict allowed version range to ``3.7.x`` only
-- Due to the upcoming text-in-voice feature, many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods.
+- The supported aiohttp version range changed from ``>=3.6.0,<3.8.0`` to ``>=3.7.0,<3.9.0``
+- Due to the upcoming text-in-voice feature (not yet released at the time of writing),
+  many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods.
   Also see the details for text-in-voice under "New Features" below, which include a few important things to note.
 - Slash command internals have undergone an extensive rework, and while existing code should still work as before, it is recommended that you do some testing using the new implementation first
 - :func:`Bot.get_slash_command <ext.commands.Bot.get_slash_command>` may now also return :class:`SubCommandGroup <ext.commands.SubCommandGroup>` or :class:`SubCommand <ext.commands.SubCommand>` instances, see documentation
@@ -41,7 +42,7 @@ Deprecations
 New Features
 ~~~~~~~~~~~~~
 
-- Add guild scheduled events (:issue:`151`)
+- Add guild scheduled events (:issue:`151`, :issue:`217`)
     - New intent: :attr:`Intents.guild_scheduled_events` (enabled by default)
     - New types
         - :class:`GuildScheduledEvent`
@@ -71,6 +72,12 @@ New Features
         - :attr:`AuditLogAction.guild_scheduled_event_create`
         - :attr:`AuditLogAction.guild_scheduled_event_update`
         - :attr:`AuditLogAction.guild_scheduled_event_delete`
+- Add guild timeouts (:issue:`161`, :issue:`219`, :issue:`221`)
+    - :func:`Guild.timeout`
+    - :func:`Member.timeout`
+    - :attr:`Member.current_timeout`
+    - ``timeout`` parameter on :func:`Member.edit`
+    - New permission: :attr:`Permissions.moderate_members`
 - Add preliminary support for text-in-voice (:issue:`162`, :issue:`177`)
     - Many methods/properties that previously returned a :class:`TextChannel` can now also return a :class:`VoiceChannel`, which shares many but not all of its methods
     - Important notes:
@@ -172,7 +179,7 @@ Miscellaneous
 ~~~~~~~~~~~~~~
 
 - Add Python 3.10 to package classifiers (:issue:`127`)
-- Drop aiohttp ``3.6.x`` dependency, restrict allowed version range to ``3.7.x`` only (:issue:`119`)
+- Change supported aiohttp version range from ``>=3.6.0,<3.8.0`` to ``>=3.7.0,<3.9.0`` (:issue:`119`, :issue:`164`)
 - Add guide for configuring inviting a bot through its profile (:issue:`153`)
 - Rewrite project README (:issue:`191`)
 - Improve examples (:issue:`143`)
