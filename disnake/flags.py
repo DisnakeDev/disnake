@@ -572,6 +572,7 @@ class Intents(BaseFlags):
         - :func:`on_member_join`
         - :func:`on_member_remove`
         - :func:`on_member_update`
+        - :func:`on_member_screening_decline`
         - :func:`on_user_update`
         - :func:`on_guild_scheduled_event_subscribe`
         - :func:`on_guild_scheduled_event_unsubscribe`
@@ -590,10 +591,6 @@ class Intents(BaseFlags):
         - :attr:`User.name`
         - :attr:`User.avatar`
         - :attr:`User.discriminator`
-
-        Note that due to an implicit relationship this also corresponds to the following events:
-
-        - :func:`on_member_screening_reject`
 
         For more information go to the :ref:`member intent documentation <need_members_intent>`.
 

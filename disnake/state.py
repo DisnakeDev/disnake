@@ -1236,8 +1236,7 @@ class ConnectionState:
             )
 
     def parse_guild_join_request_delete(self, data) -> None:
-        raw = RawMemberScreeningRejectEvent(data)
-        guild = self._get_guild(raw.guild_id)
+        guild = self._get_guild(int(data["guild_id"]))
         if guild is None:
             _log.debug(
                 "GUILD_JOIN_REQUEST_DELETE referencing an unknown guild ID: %s. Discarding.",
@@ -1245,10 +1244,9 @@ class ConnectionState:
             )
             return
 
-        self.dispatch("raw_member_screening_reject", raw)
-        member = guild.get_member(raw.user_id)
+        member = guild.get_member(int(data["user_id"]))
         if member is not None:
-            self.dispatch("member_screening_reject", member)
+            self.dispatch("member_screening_decline", member)
 
     def parse_guild_emojis_update(self, data) -> None:
         guild = self._get_guild(int(data["guild_id"]))
