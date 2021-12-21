@@ -3456,5 +3456,5 @@ class Guild(Hashable):
         else:
             payload["communication_disabled_until"] = None
 
-        data = await self._state.http.edit_member(self.id, user, reason=reason, **payload)
-        return Member(data=data, guild=self.id, state=self._state)
+        data = await self._state.http.edit_member(self.id, user.id, reason=reason, **payload)
+        return Member(data=data, guild=self, state=self._state)
