@@ -72,7 +72,7 @@ New Features
         - :attr:`AuditLogAction.guild_scheduled_event_create`
         - :attr:`AuditLogAction.guild_scheduled_event_update`
         - :attr:`AuditLogAction.guild_scheduled_event_delete`
-- Add guild timeouts (:issue:`161`, :issue:`219`, :issue:`221`)
+- Add guild timeouts (:issue:`161`, :issue:`221`, :issue:`223`)
     - :func:`Guild.timeout`
     - :func:`Member.timeout`
     - :attr:`Member.current_timeout`
@@ -83,7 +83,7 @@ New Features
     - Important notes:
         - This feature is only available in a very limited number of servers at the time of writing this, and the API is still being developed; therefore, expect changes in the future
         - Text-in-voice currently does **not** support these text channel features (note: this is not guaranteed to be an exhaustive list): threads, webhooks, nsfw flags, slowmode
-        - The ``nsfw`` and ``slowmode_delay`` values/parameters are currently not supported by the API, however according to Discord developers these are TBD
+        - The ``nsfw`` and ``slowmode_delay`` values/parameters are currently not supported by the API and are still TBD
         - Pinned messages are currently not exposed in the client UI, and while the API for them works, their future is uncertain
     - :class:`VoiceChannel` now inherits from :class:`abc.Messageable`
     - New :class:`VoiceChannel` properties:
