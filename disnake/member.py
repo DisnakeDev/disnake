@@ -1031,4 +1031,4 @@ class Member(disnake.abc.Messageable, _UserTag):
         Optional[:class:`Member`]
             The newly updated member.
         """
-        return await self.guild.timeout(self.id, seconds=seconds, reason=reason)
+        return await self.guild.timeout(self, seconds=seconds, reason=reason)
