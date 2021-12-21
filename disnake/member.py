@@ -41,6 +41,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    overload,
 )
 
 import disnake.abc
@@ -1005,6 +1006,24 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         return self.guild.get_role(role_id) if self._roles.has(role_id) else None
 
+    @overload
+    async def timeout(
+        self,
+        *,
+        duration: Optional[Union[float, datetime.timedelta]],
+        reason: Optional[str] = None,
+    ) -> Member:
+        ...
+
+    @overload
+    async def timeout(
+        self,
+        *,
+        until: Optional[datetime.datetime],
+        reason: Optional[str] = None,
+    ) -> Member:
+        ...
+
     async def timeout(
         self,
         *,
@@ -1047,4 +1066,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         :class:`Member`
             The newly updated member.
         """
-        return await self.guild.timeout(self, duration=duration, until=until, reason=reason)
+        if duration is not MISSING:
+            return await self.guild.timeout(self, duration=duration, reason=reason)
+        else:
+            return await self.guild.timeout(self, until=until, reason=reason)

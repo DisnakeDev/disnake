@@ -3408,6 +3408,26 @@ class Guild(Hashable):
         """
         return await self._state.bulk_edit_command_permissions(self.id, permissions)
 
+    @overload
+    async def timeout(
+        self,
+        user: Snowflake,
+        *,
+        duration: Optional[Union[float, datetime.timedelta]],
+        reason: Optional[str] = None,
+    ) -> Member:
+        ...
+
+    @overload
+    async def timeout(
+        self,
+        user: Snowflake,
+        *,
+        until: Optional[datetime.datetime],
+        reason: Optional[str] = None,
+    ) -> Member:
+        ...
+
     async def timeout(
         self,
         user: Snowflake,
