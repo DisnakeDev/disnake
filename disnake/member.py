@@ -829,10 +829,10 @@ class Member(disnake.abc.Messageable, _UserTag):
         if timeout is not MISSING:
             if timeout is not None:
                 if isinstance(timeout, datetime.datetime):
-                    date_time = timeout.astimezone(tz=datetime.timezone.utc)
+                    dt = timeout.astimezone(tz=datetime.timezone.utc)
                 else:
-                    date_time = utils.utcnow() + datetime.timedelta(seconds=timeout)
-                payload["communication_disabled_until"] = date_time.isoformat()
+                    dt = utils.utcnow() + datetime.timedelta(seconds=timeout)
+                payload["communication_disabled_until"] = dt.isoformat()
             else:
                 payload["communication_disabled_until"] = None
 

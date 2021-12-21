@@ -3451,10 +3451,10 @@ class Guild(Hashable):
 
         if until is not None:
             if isinstance(until, datetime.datetime):
-                date_time = until.astimezone(datetime.timezone.utc)
+                dt = until.astimezone(datetime.timezone.utc)
             else:
-                date_time = utils.utcnow() + datetime.timedelta(seconds=until)
-            payload["communication_disabled_until"] = date_time.isoformat()
+                dt = utils.utcnow() + datetime.timedelta(seconds=until)
+            payload["communication_disabled_until"] = dt.isoformat()
         else:
             payload["communication_disabled_until"] = None
 
