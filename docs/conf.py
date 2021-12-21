@@ -55,7 +55,7 @@ autodoc_typehints = "none"
 github_repo = "https://github.com/DisnakeDev/disnake"
 
 extlinks = {
-    "issue": (f"{github_repo}/issues/%s", "GH-"),
+    "issue": (f"{github_repo}/issues/%s", "#"),
 }
 
 # Links used for cross-referencing stuff in other documentation

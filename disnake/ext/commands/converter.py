@@ -889,7 +889,12 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
 
 
 class PermissionsConverter(Converter[disnake.Permissions]):
-    """Converts to a  :class:`~disnake.Permissions`."""
+    """Converts to a :class:`~disnake.Permissions`.
+
+    Accepts an integer or a string of space-separated permission names (or just a single one) as input.
+
+    .. versionadded:: 2.3
+    """
 
     async def convert(self, ctx: Context, argument: str) -> disnake.Permissions:
         # try the permission bit value
