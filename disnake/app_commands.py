@@ -166,9 +166,7 @@ class Option:
         min_value: float = None,
         max_value: float = None,
     ):
-        assert name.islower(), f"Option name {name!r} must be lowercase"
-
-        self.name: str = name
+        self.name: str = name.lower()
         self.description: Optional[str] = description
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
@@ -423,8 +421,9 @@ class SlashCommand(ApplicationCommand):
         default_permission: bool = True,
         **kwargs,
     ):
-        assert (
-            re.match(r"^[\w-]{1,32}$", name) is not None and name.islower()
+        name = name.lower()
+        assert re.fullmatch(
+            r"[\w-]{1,32}", name
         ), f"Slash command name {name!r} should consist of these symbols: a-z, 0-9, -, _"
 
         super().__init__(
