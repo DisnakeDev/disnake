@@ -761,7 +761,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
         timeout: Optional[Union[:class:`float`, :class:`datetime.datetime`]]
-            The seconds or date time when the timeout expires; until then, the member will not be able to interact with the guild.
+            The seconds or datetime when the timeout expires; until then, the member will not be able to interact with the guild.
             Set to ``None`` to remove the timeout. Support up to 28 days in the future.
 
             .. versionadded:: 2.3
@@ -1005,7 +1005,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     async def timeout(
         self, *, until: Optional[Union[float, datetime.datetime]], reason: Optional[str] = None
-    ) -> Optional[Member]:
+    ) -> Member:
         """|coro|
 
         Times out the member from the guild; until then, the member will not be able to interact with the guild.
@@ -1017,7 +1017,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         Parameters
         ----------
         until: Optional[Union[:class:`float`, :class:`datetime.datetime`]]
-            The seconds or date time to timeout. Set to ``None`` or ``0`` to remove the timeout.
+            The seconds or datetime to timeout. Set to ``None`` or ``0`` to remove the timeout.
             Support up to 28 days in the future.
         reason: Optional[:class:`str`]
             The reason for this timeout. Appears on the audit log.
@@ -1031,7 +1031,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Returns
         -------
-        Optional[:class:`Member`]
+        :class:`Member`
             The newly updated member.
         """
         return await self.guild.timeout(self, until=until, reason=reason)
