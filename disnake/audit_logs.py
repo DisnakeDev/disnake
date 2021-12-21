@@ -74,6 +74,7 @@ if TYPE_CHECKING:
     from .stage_instance import StageInstance
     from .sticker import GuildSticker
     from .threads import Thread
+    from .guild_scheduled_event import GuildScheduledEvent
 
 
 def _transform_permissions(entry: AuditLogEntry, data: str) -> Permissions:
@@ -507,6 +508,7 @@ class AuditLogEntry(Hashable):
         StageInstance,
         GuildSticker,
         Thread,
+        GuildScheduledEvent,
         Object,
         None,
     ]:
@@ -588,3 +590,8 @@ class AuditLogEntry(Hashable):
 
     def _convert_target_thread(self, target_id: int) -> Union[Thread, Object]:
         return self.guild.get_thread(target_id) or Object(id=target_id)
+
+    def _convert_target_guild_scheduled_event(
+        self, target_id: int
+    ) -> Union[GuildScheduledEvent, Object]:
+        return self.guild.get_scheduled_event(target_id) or Object(id=target_id)
