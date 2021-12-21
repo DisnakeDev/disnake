@@ -3430,7 +3430,7 @@ class Guild(Hashable):
         user: :class:`abc.Snowflake`
             The member to timeout.
         until: Optional[Union[:class:`float`, :class:`datetime.datetime`]]
-            The seconds or datetime to timeout the member. Set to ``None`` or ``0`` to remove the timeout.
+            The seconds or datetime to timeout the member. Set to ``None`` to remove the timeout.
             Support up to 28 days in the future.
         reason: Optional[:class:`str`]
             The reason for this timeout. Shows up on the audit log.

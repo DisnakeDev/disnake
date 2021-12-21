@@ -1017,7 +1017,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         Parameters
         ----------
         until: Optional[Union[:class:`float`, :class:`datetime.datetime`]]
-            The seconds or datetime to timeout. Set to ``None`` or ``0`` to remove the timeout.
+            The seconds or datetime to timeout. Set to ``None`` to remove the timeout.
             Support up to 28 days in the future.
         reason: Optional[:class:`str`]
             The reason for this timeout. Appears on the audit log.
