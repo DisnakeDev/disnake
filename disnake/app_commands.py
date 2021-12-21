@@ -422,9 +422,9 @@ class SlashCommand(ApplicationCommand):
         **kwargs,
     ):
         name = name.lower()
-        assert (
-            re.fullmatch(r"[\w-]{1,32}", name)
-        ), f"Slash command name {name!r} should consist of these symbols: a-z, 0-9, -, _"
+        assert re.fullmatch(r"[\w-]{1,32}", name), (
+            f"Slash command name {name!r} should consist of these symbols: a-z, 0-9, -, _"
+        )
 
         super().__init__(
             type=ApplicationCommandType.chat_input,
