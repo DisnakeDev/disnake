@@ -655,7 +655,7 @@ Checks
 .. autofunction:: disnake.ext.commands.is_nsfw(,)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.guild_permissions(guild_id, role_ids, user_ids, owner)
+.. autofunction:: disnake.ext.commands.guild_permissions(guild_id, roles, users, owner)
     :decorator:
 
 .. _ext_commands_api_context:
