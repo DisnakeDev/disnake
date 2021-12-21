@@ -3412,12 +3412,15 @@ class Guild(Hashable):
         self,
         user: Snowflake,
         *,
-        duration: Optional[Union[float, datetime.timedelta, datetime.datetime]],
+        duration: Optional[Union[float, datetime.timedelta]] = MISSING,
+        until: Optional[datetime.datetime] = MISSING,
         reason: Optional[str] = None,
     ) -> Member:
         """|coro|
 
         Times out the member from the guild; until then, the member will not be able to interact with the guild.
+
+        Exactly one of ``duration`` and ``until`` must be provided.
 
         The user must meet the :class:`abc.Snowflake` abc.
 
@@ -3429,9 +3432,14 @@ class Guild(Hashable):
         -----------
         user: :class:`abc.Snowflake`
             The member to timeout.
-        duration: Optional[Union[:class:`float`, :class:`datetime.timedelta`, :class:`datetime.datetime`]]
-            The seconds or datetime to timeout the member. Set to ``None`` to remove the timeout.
-            Support up to 28 days in the future.
+        duration: Optional[Union[:class:`float`, :class:`datetime.timedelta`]]
+            The duration of the member's timeout. Set to ``None`` to remove the timeout.
+            Supports up to 28 days in the future.
+            May not be used in combination with the ``until`` parameter.
+        until: Optional[:class:`datetime.datetime`]
+            The expiry date/time of the member's timeout. Set to ``None`` to remove the timeout.
+            Supports up to 28 days in the future.
+            May not be used in combination with the ``duration`` parameter.
         reason: Optional[:class:`str`]
             The reason for this timeout. Shows up on the audit log.
 
@@ -3447,16 +3455,24 @@ class Guild(Hashable):
         :class:`Member`
             The newly updated member.
         """
+
+        if not (duration is MISSING) ^ (until is MISSING):
+            raise ValueError("Exactly one of `duration` and `until` must be provided")
+
         payload: Dict[str, Any] = {}
 
-        if duration is not None:
-            if isinstance(duration, datetime.datetime):
-                dt = duration.astimezone(datetime.timezone.utc)
+        if duration is not MISSING:
+            if duration is None:
+                until = None
             elif isinstance(duration, datetime.timedelta):
-                dt = utils.utcnow() + duration
+                until = utils.utcnow() + duration
             else:
-                dt = utils.utcnow() + datetime.timedelta(seconds=duration)
-            payload["communication_disabled_until"] = dt.isoformat()
+                until = utils.utcnow() + datetime.timedelta(seconds=duration)
+
+        # at this point `until` cannot be `MISSING`
+        if until is not None:
+            until = until.astimezone(datetime.timezone.utc)
+            payload["communication_disabled_until"] = until.isoformat()
         else:
             payload["communication_disabled_until"] = None
 

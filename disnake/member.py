@@ -1006,11 +1006,17 @@ class Member(disnake.abc.Messageable, _UserTag):
         return self.guild.get_role(role_id) if self._roles.has(role_id) else None
 
     async def timeout(
-        self, *, duration: Optional[Union[float, datetime.timedelta, datetime.datetime]], reason: Optional[str] = None
+        self,
+        *,
+        duration: Optional[Union[float, datetime.timedelta]] = MISSING,
+        until: Optional[datetime.datetime] = MISSING,
+        reason: Optional[str] = None,
     ) -> Member:
         """|coro|
 
         Times out the member from the guild; until then, the member will not be able to interact with the guild.
+
+        Exactly one of ``duration`` and ``until`` must be provided.
 
         You must have the :attr:`Permissions.moderate_members` permission to do this.
 
@@ -1018,9 +1024,14 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Parameters
         ----------
-        duration: Optional[Union[:class:`float`, :class:`datetime.timedelta`, :class:`datetime.datetime`]]
-            The seconds or datetime to timeout. Set to ``None`` to remove the timeout.
-            Support up to 28 days in the future.
+        duration: Optional[Union[:class:`float`, :class:`datetime.timedelta`]]
+            The duration of the member's timeout. Set to ``None`` to remove the timeout.
+            Supports up to 28 days in the future.
+            May not be used in combination with the ``until`` parameter.
+        until: Optional[:class:`datetime.datetime`]
+            The expiry date/time of the member's timeout. Set to ``None`` to remove the timeout.
+            Supports up to 28 days in the future.
+            May not be used in combination with the ``duration`` parameter.
         reason: Optional[:class:`str`]
             The reason for this timeout. Appears on the audit log.
 
@@ -1036,4 +1047,4 @@ class Member(disnake.abc.Messageable, _UserTag):
         :class:`Member`
             The newly updated member.
         """
-        return await self.guild.timeout(self, duration=duration, reason=reason)
+        return await self.guild.timeout(self, duration=duration, until=until, reason=reason)
