@@ -97,8 +97,6 @@ New Features
     - :func:`converter_method <ext.commands.converter_method>`
 
 - Add attachment descriptions (see :class:`File`, :class:`Attachment`) (:issue:`100`)
-- Add :func:`on_member_screening_reject` and :func:`on_raw_member_screening_reject` events (:issue:`109`)
-    - *note:* these are currently not officially documented or supported by the API, but have been consistently emitted for several months
 - Add :func:`on_raw_typing` event (:issue:`176`)
 - Add :attr:`Guild.approximate_member_count` and :attr:`Guild.approximate_presence_count` (available on manually fetched guilds) (:issue:`139`)
 - Add :attr:`Permissions.start_embedded_activities` (:issue:`160`)
