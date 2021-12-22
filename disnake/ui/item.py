@@ -40,18 +40,17 @@ from typing import (
     overload,
 )
 
-from ..interactions import MessageInteraction
-
 __all__ = ("Item",)
+
+I = TypeVar("I", bound="Item")
+V = TypeVar("V", bound="View", covariant=True)
 
 if TYPE_CHECKING:
     from ..enums import ComponentType
     from .view import View
     from ..components import Component
-
-I = TypeVar("I", bound="Item")
-V = TypeVar("V", bound="View", covariant=True)
-ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
+    from ..interactions import MessageInteraction
+    ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 
 class Item(Generic[V]):

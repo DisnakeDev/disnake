@@ -44,7 +44,7 @@ import asyncio
 import sys
 import time
 import os
-from .item import Item, ItemCallbackType
+from .item import Item
 from ..enums import try_enum_to_int
 from ..components import (
     Component,
@@ -58,6 +58,7 @@ __all__ = ("View",)
 
 
 if TYPE_CHECKING:
+    from .item import ItemCallbackType
     from ..interactions import MessageInteraction
     from ..message import Message
     from ..types.components import Component as ComponentPayload

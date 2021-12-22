@@ -30,7 +30,7 @@ import inspect
 import os
 
 
-from .item import Item, ItemCallbackType, DecoratedItem
+from .item import Item, DecoratedItem
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
 from ..components import Button as ButtonComponent
@@ -41,6 +41,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from .item import ItemCallbackType
     from .view import View
     from ..emoji import Emoji
 

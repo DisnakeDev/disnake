@@ -28,11 +28,9 @@ from typing import List, Optional, TYPE_CHECKING, Tuple, TypeVar, Type, Callable
 import inspect
 import os
 
-from .item import Item, ItemCallbackType, DecoratedItem
+from .item import Item, DecoratedItem
 from ..enums import ComponentType
 from ..partial_emoji import PartialEmoji
-from ..emoji import Emoji
-from ..interactions import MessageInteraction
 from ..utils import MISSING
 from ..components import (
     SelectOption,
@@ -45,7 +43,10 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from .item import ItemCallbackType
     from .view import View
+    from ..emoji import Emoji
+    from ..interactions import MessageInteraction
     from ..types.components import SelectMenu as SelectMenuPayload
 
 S = TypeVar("S", bound="Select")
