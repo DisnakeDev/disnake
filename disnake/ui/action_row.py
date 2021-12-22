@@ -221,14 +221,14 @@ class ActionRow:
         return self._underlying.to_dict()
 
 
-def components_to_action_rows(
+def components_to_dict(
     components: Union[ActionRow, Item, List[Union[ActionRow, Item, List[Item]]]]
-) -> List[ActionRow]:
+) -> List[ActionRowPayload]:
     if isinstance(components, ActionRow):
-        return [components]
+        return [components.to_component_dict()]
 
     if isinstance(components, Item):
-        return [ActionRow(components)]
+        return [ActionRow(components).to_component_dict()]
 
     if not isinstance(components, list):
         raise ValueError("components must be an Item, a list of ActionRows or a list of Items")
@@ -237,13 +237,13 @@ def components_to_action_rows(
 
     for component in components:
         if isinstance(component, ActionRow):
-            action_rows.append(component)
+            action_rows.append(component.to_component_dict())
 
         elif isinstance(component, Item):
-            action_rows.append(ActionRow(component))
+            action_rows.append(ActionRow(component).to_component_dict())
 
         elif isinstance(component, list):
-            action_rows.append(ActionRow(*component))
+            action_rows.append(ActionRow(*component).to_component_dict())
 
         else:
             raise ValueError("components must be an Item, a list of ActionRows or a list of Items")

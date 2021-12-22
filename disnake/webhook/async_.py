@@ -55,7 +55,7 @@ from ..asset import Asset
 from ..http import Route, to_multipart
 from ..mixins import Hashable
 from ..channel import PartialMessageable
-from ..ui.action_row import components_to_action_rows
+from ..ui.action_row import components_to_dict
 
 __all__ = (
     "Webhook",
@@ -521,12 +521,7 @@ def handle_message_parameters(
     if view is not MISSING:
         payload["components"] = view.to_components() if view is not None else []
     if components is not MISSING:
-        if components is None:
-            payload["components"] = None
-        else:
-            payload["components"] = [
-                comp.to_component_dict() for comp in components_to_action_rows(components)
-            ]
+        payload["components"] = [] if components is None else components_to_dict(components)
 
     if attachments is not MISSING:
         payload["attachments"] = [a.to_dict() for a in attachments]
@@ -749,7 +744,7 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.0
         components: Optional[Any]
-            A list of components to include in the message. This can not be specified together with ``view``.
+            A list of components to update the message with. This can not be specified together with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4

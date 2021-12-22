@@ -57,7 +57,7 @@ from .invite import Invite
 from .file import File
 from .voice_client import VoiceClient, VoiceProtocol
 from .sticker import GuildSticker, StickerItem
-from .ui.action_row import components_to_action_rows
+from .ui.action_row import components_to_dict
 from . import utils
 
 __all__ = (
@@ -1430,9 +1430,7 @@ class Messageable:
             components_payload = view.to_components()
 
         elif components:
-            components_payload = [
-                component.to_component_dict() for component in components_to_action_rows(components)
-            ]
+            components_payload = components_to_dict(components)
 
         else:
             components_payload = None
