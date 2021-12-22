@@ -50,6 +50,7 @@ if TYPE_CHECKING:
     from .view import View
     from ..components import Component
     from ..interactions import MessageInteraction
+
     ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 
