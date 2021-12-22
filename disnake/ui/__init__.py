@@ -9,6 +9,7 @@ Bot UI Kit helper for the Discord API
 
 """
 
+from .action_row import *
 from .view import *
 from .item import *
 from .button import *
