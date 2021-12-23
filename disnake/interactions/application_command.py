@@ -110,7 +110,7 @@ class ApplicationCommandInteraction(Interaction):
         The interaction's bot. There is an alias for this named ``client``.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
-    locale: Optional[:class:`str`]
+    locale: :class:`str`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4

@@ -116,7 +116,7 @@ class Interaction:
         The application ID that the interaction was for.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
-    locale: Optional[:class:`str`]
+    locale: :class:`str`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
@@ -163,7 +163,7 @@ class Interaction:
         self.channel_id: Optional[int] = utils._get_as_snowflake(data, "channel_id")
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.application_id: int = int(data["application_id"])
-        self.locale: Optional[str] = data.get("locale")
+        self.locale: str = data.get("locale")
         self.guild_locale: Optional[str] = data.get("guild_locale")
         # think about the user's experience
         self.author: Union[User, Member] = None  # type: ignore
