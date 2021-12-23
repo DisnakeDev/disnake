@@ -117,8 +117,8 @@ class ApplicationCommandInteraction(Interaction):
     guild: Optional[:class:`Guild`]
         The guild the interaction was sent from.
     guild_locale: Optional[:class:`str`]
-        The selected language of the interaction's guild. Only available if the guild has ``COMMUNITY`` feature,
-        if not, then this is always en-US.
+        The selected language of the interaction's guild.
+        This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
 
         .. versionadded:: 2.4
     channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
