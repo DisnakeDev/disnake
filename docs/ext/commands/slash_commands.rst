@@ -121,6 +121,7 @@ Discord itself supports only a few built-in types which are guaranteed to be enf
 - :class:`disnake.User` or :class:`disnake.Member`
 - :class:`disnake.abc.GuildChannel`\*
 - :class:`disnake.Role`\*\*
+- :class:`disnake.Attachment`
 
 All the other types may be converted implicitly, similarly to :ref:`ext_commands_basic_converters`
 
@@ -139,7 +140,7 @@ All the other types may be converted implicitly, similarly to :ref:`ext_commands
         ...
 
 .. note::
-  \* All channel subclasses and unions are also supported, see :attr:`Option.channel_types <Option>`
+  \* All channel subclasses and unions are also supported. See :attr:`.ParamInfo.channel_types` for more fine-grained control
 
   \*\* Role and Member may be used together to create a "mentionable" (:class:`Union[Role, Member]`)
 
