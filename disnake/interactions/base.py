@@ -105,12 +105,21 @@ class Interaction:
         The interaction type.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
+    guild_locale: Optional[:class:`str`]
+        The selected language of the interaction's guild. Only available if the guild has ``COMMUNITY`` feature,
+        if not, then this is always en-US.
+
+        .. versionadded:: 2.4
     channel_id: Optional[:class:`int`]
         The channel ID the interaction was sent from.
     application_id: :class:`int`
         The application ID that the interaction was for.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
+    locale: Optional[:class:`str`]
+        The selected language of the interaction's author.
+
+        .. versionadded:: 2.4
     token: :class:`str`
         The token to continue the interaction. These are valid
         for 15 minutes.
@@ -126,6 +135,8 @@ class Interaction:
         "token",
         "version",
         "bot",
+        "locale",
+        "guild_locale",
         "_permissions",
         "_state",
         "_session",
@@ -152,6 +163,8 @@ class Interaction:
         self.channel_id: Optional[int] = utils._get_as_snowflake(data, "channel_id")
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.application_id: int = int(data["application_id"])
+        self.locale: Optional[str] = data.get("locale")
+        self.guild_locale: Optional[str] = data.get("guild_locale")
         # think about the user's experience
         self.author: Union[User, Member] = None  # type: ignore
         self._permissions: int = 0
