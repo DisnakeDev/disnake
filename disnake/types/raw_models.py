@@ -23,10 +23,11 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-from typing import TypedDict, List
-from .snowflake import Snowflake
-from .member import Member
+from typing import List, TypedDict
+
 from .emoji import PartialEmoji
+from .member import Member
+from .snowflake import Snowflake
 
 
 class _MessageEventOptional(TypedDict, total=False):

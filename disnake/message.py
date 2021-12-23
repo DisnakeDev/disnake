@@ -27,76 +27,64 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-import re
 import io
+import re
 from os import PathLike
 from typing import (
-    Dict,
     TYPE_CHECKING,
-    Union,
-    List,
-    Optional,
     Any,
     Callable,
-    Tuple,
     ClassVar,
+    Dict,
+    List,
     Optional,
-    overload,
-    TypeVar,
+    Tuple,
     Type,
+    TypeVar,
+    Union,
+    overload,
 )
 
 from . import utils
-from .reaction import Reaction
-from .emoji import Emoji
-from .partial_emoji import PartialEmoji
-from .enums import (
-    MessageType,
-    ChannelType,
-    InteractionType,
-    try_enum,
-    try_enum_to_int,
-)
-from .errors import InvalidArgument, HTTPException
 from .components import _component_factory
 from .embeds import Embed
-from .member import Member
-from .flags import MessageFlags
+from .emoji import Emoji
+from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
+from .errors import HTTPException, InvalidArgument
 from .file import File
-from .user import User
-from .utils import escape_mentions, MISSING
+from .flags import MessageFlags
 from .guild import Guild
+from .member import Member
 from .mixins import Hashable
+from .partial_emoji import PartialEmoji
+from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
+from .user import User
+from .utils import MISSING, escape_mentions
 
 if TYPE_CHECKING:
-    from .types.message import (
-        Message as MessagePayload,
-        Attachment as AttachmentPayload,
-        MessageReference as MessageReferencePayload,
-        MessageApplication as MessageApplicationPayload,
-        MessageActivity as MessageActivityPayload,
-        Reaction as ReactionPayload,
-    )
-
-    from .types.components import Component as ComponentPayload
-    from .types.member import (
-        Member as MemberPayload,
-        UserWithMember as UserWithMemberPayload,
-    )
-    from .types.user import User as UserPayload
-    from .types.embed import Embed as EmbedPayload
-    from .types.interactions import MessageInteraction as InteractionReferencePayload
-    from .types.threads import ThreadArchiveDurationLiteral
-    from .abc import Snowflake
-    from .abc import GuildChannel, MessageableChannel, MessageableChannel
+    from .abc import GuildChannel, MessageableChannel, Snowflake
+    from .channel import DMChannel, TextChannel, VoiceChannel
     from .components import Component
-    from .state import ConnectionState
-    from .channel import TextChannel, DMChannel, VoiceChannel
     from .mentions import AllowedMentions
     from .role import Role
+    from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration
+    from .types.components import Component as ComponentPayload
+    from .types.embed import Embed as EmbedPayload
+    from .types.interactions import MessageInteraction as InteractionReferencePayload
+    from .types.member import Member as MemberPayload, UserWithMember as UserWithMemberPayload
+    from .types.message import (
+        Attachment as AttachmentPayload,
+        Message as MessagePayload,
+        MessageActivity as MessageActivityPayload,
+        MessageApplication as MessageApplicationPayload,
+        MessageReference as MessageReferencePayload,
+        Reaction as ReactionPayload,
+    )
+    from .types.threads import ThreadArchiveDurationLiteral
+    from .types.user import User as UserPayload
     from .ui.view import View
 
     MR = TypeVar("MR", bound="MessageReference")

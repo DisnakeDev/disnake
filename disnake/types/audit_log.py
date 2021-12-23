@@ -27,19 +27,20 @@ from __future__ import annotations
 
 import datetime
 from typing import List, Literal, Optional, TypedDict, Union
-from .webhook import Webhook
+
+from .channel import ChannelType, PermissionOverwrite, VideoQualityMode
 from .guild import (
+    DefaultMessageNotificationLevel,
+    ExplicitContentFilterLevel,
     MFALevel,
     VerificationLevel,
-    ExplicitContentFilterLevel,
-    DefaultMessageNotificationLevel,
 )
 from .integration import IntegrationExpireBehavior, PartialIntegration
-from .user import User
-from .snowflake import Snowflake
 from .role import Role
-from .channel import ChannelType, VideoQualityMode, PermissionOverwrite
+from .snowflake import Snowflake
 from .threads import Thread
+from .user import User
+from .webhook import Webhook
 
 AuditLogEvent = Literal[
     1,

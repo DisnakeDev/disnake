@@ -1,5 +1,6 @@
-from setuptools import setup
 import re
+
+from setuptools import setup
 
 requirements = []
 with open("requirements.txt", encoding="utf-8") as f:

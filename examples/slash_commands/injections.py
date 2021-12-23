@@ -1,11 +1,11 @@
-from typing import Any, Literal, Optional
 from dataclasses import dataclass
-
-import disnake
-from disnake.ext import commands
+from typing import Any, Literal, Optional
 
 # this file uses pytz in one of its examples but it is completely optional
 import pytz
+
+import disnake
+from disnake.ext import commands
 
 bot = commands.Bot("!")
 
