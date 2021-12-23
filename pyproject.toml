@@ -7,5 +7,4 @@ profile = "black"
 py_version = 38
 line_length = 100
 combine_as_imports = true
-src_paths = ["disnake"]
-extend_skip = ["examples", "tests"]
+filter_files = true
