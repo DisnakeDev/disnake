@@ -62,8 +62,17 @@ class MessageInteraction(Interaction):
         The application ID that the interaction was for.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
+    locale: :class:`str`
+        The selected language of the interaction's author.
+
+        .. versionadded:: 2.4
     guild: Optional[:class:`Guild`]
         The guild the interaction was sent from.
+    guild_locale: Optional[:class:`str`]
+        The selected language of the interaction's guild. Only available if the guild has ``COMMUNITY`` feature,
+        if not, then this is always en-US.
+
+        .. versionadded:: 2.4
     channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
         The channel the interaction was sent from.
     message: Optional[:class:`Message`]
