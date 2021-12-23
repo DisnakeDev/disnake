@@ -35,7 +35,7 @@ from .role import Role
 from .user import User
 
 if TYPE_CHECKING:
-    from .message import AllowedMentions, Message
+    from .message import AllowedMentions, Message, Attachment
 
 
 ApplicationCommandType = Literal[1, 2, 3]
@@ -58,7 +58,7 @@ class _ApplicationCommandOptionOptional(TypedDict, total=False):
     options: List[ApplicationCommandOption]
 
 
-ApplicationCommandOptionType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+ApplicationCommandOptionType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 
 class ApplicationCommandOption(_ApplicationCommandOptionOptional):
@@ -123,7 +123,7 @@ class _ApplicationCommandInteractionDataOptionBoolean(_ApplicationCommandInterac
 
 
 class _ApplicationCommandInteractionDataOptionSnowflake(_ApplicationCommandInteractionDataOption):
-    type: Literal[6, 7, 8, 9]
+    type: Literal[6, 7, 8, 9, 11]
     value: Snowflake
 
 
@@ -155,6 +155,7 @@ class ApplicationCommandInteractionDataResolved(TypedDict, total=False):
     roles: Dict[Snowflake, Role]
     channels: Dict[Snowflake, ApplicationCommandResolvedPartialChannel]
     messages: Dict[Snowflake, Message]
+    attachments: Dict[Snowflake, Attachment]
 
 
 class _ApplicationCommandInteractionDataOptional(TypedDict, total=False):
