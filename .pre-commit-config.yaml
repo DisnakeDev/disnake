@@ -15,4 +15,4 @@ repos:
     rev: 21.11b1
     hooks:
       - id: black
-        name: Running black in all files. 
+        name: Running black in all files.
