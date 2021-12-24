@@ -163,7 +163,7 @@ class Interaction:
         self.channel_id: Optional[int] = utils._get_as_snowflake(data, "channel_id")
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.application_id: int = int(data["application_id"])
-        self.locale: str = data.get("locale")
+        self.locale: str = data["locale"]
         self.guild_locale: Optional[str] = data.get("guild_locale")
         # think about the user's experience
         self.author: Union[User, Member] = None  # type: ignore
