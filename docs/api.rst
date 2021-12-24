@@ -4709,6 +4709,14 @@ View
 .. autoclass:: disnake.ui.View
     :members:
 
+ActionRow
+~~~~~~~~~~
+
+.. attributetable:: disnake.ui.ActionRow
+
+.. autoclass:: disnake.ui.ActionRow
+    :members:
+
 Item
 ~~~~~~~
 

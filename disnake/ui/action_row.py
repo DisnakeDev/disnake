@@ -47,7 +47,7 @@ if TYPE_CHECKING:
 
 
 class ActionRow:
-    """Represents a UI action row.
+    """Represents a UI action row. Useful for lower level component manipulation.
 
     .. versionadded:: 2.4
 

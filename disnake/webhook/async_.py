@@ -740,11 +740,11 @@ class WebhookMessage(Message):
             .. versionadded:: 2.2
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
-            the view is removed. This can not be specified together with ``components``.
+            the view is removed. This can not be mixed with ``components``.
 
             .. versionadded:: 2.0
-        components: Optional[Any]
-            A list of components to update the message with. This can not be specified together with ``view``.
+        components: Optional[|components_type|]
+            A list of components to update the message with. This can not be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
@@ -1434,11 +1434,11 @@ class Webhook(BaseWebhook):
             The view to send with the message. You can only send a view
             if this webhook is not partial and has state attached. A
             webhook has state attached if the webhook is managed by the
-            library. This can not be specified together with ``components``.
+            library. This can not be mixed with ``components``.
 
             .. versionadded:: 2.0
-        components: Any
-            A list of components to include in the message. This can not be specified together with ``view``.
+        components: |components_type|
+            A list of components to include in the message. This can not be mixed with ``view``.
 
             .. versionadded:: 2.4
         thread: :class:`~disnake.abc.Snowflake`
@@ -1661,11 +1661,11 @@ class Webhook(BaseWebhook):
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed. The webhook must have state attached, similar to
-            :meth:`send`. This can not be specified together with ``components``.
+            :meth:`send`. This can not be mixed with ``components``.
 
             .. versionadded:: 2.0
-        components: Any
-            A list of components to update this message with. This can not be specified together with ``view``.
+        components: |components_type|
+            A list of components to update this message with. This can not be mixed with ``view``.
 
             .. versionadded:: 2.4
         allowed_mentions: :class:`AllowedMentions`
