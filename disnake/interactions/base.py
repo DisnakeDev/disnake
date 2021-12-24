@@ -108,6 +108,7 @@ class Interaction:
     guild_locale: Optional[:class:`str`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
+        If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
     channel_id: Optional[:class:`int`]
