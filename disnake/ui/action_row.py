@@ -26,14 +26,14 @@ from __future__ import annotations
 
 from typing import List, Optional, TYPE_CHECKING, Union
 
+from .button import Button
 from .item import Item
+from .select import Select
 
 from ..components import (
     Component,
     ActionRow as ActionRowComponent,
-    Button as ButtonComponent,
     SelectOption,
-    SelectMenu,
 )
 from ..enums import ButtonStyle, ComponentType
 from ..utils import MISSING
@@ -147,18 +147,13 @@ class ActionRow:
         ValueError
             The width of the action row exceeds 5.
         """
-        if self._total_width >= 5:
-            raise ValueError("Too many items in this row, can not add a button.")
-
-        self._total_width += 1
-        self._underlying.children.append(
-            ButtonComponent._raw_construct(
-                type=ComponentType.button,
+        self.append_item(
+            Button(
+                style=style,
+                label=label,
+                disabled=disabled,
                 custom_id=custom_id,
                 url=url,
-                disabled=disabled,
-                label=label,
-                style=style,
                 emoji=emoji,
             )
         )
@@ -201,14 +196,9 @@ class ActionRow:
         ValueError
             The width of the action row exceeds 5.
         """
-        if self._total_width >= 5:
-            raise ValueError("Too many items in this row, can not add a select menu.")
-
-        self._total_width += 5
-        self._underlying.children.append(
-            SelectMenu._raw_construct(
+        self.append_item(
+            Select(
                 custom_id=custom_id,
-                type=ComponentType.select,
                 placeholder=placeholder,
                 min_values=min_values,
                 max_values=max_values,
@@ -224,14 +214,8 @@ class ActionRow:
 def components_to_dict(
     components: Union[ActionRow, Item, List[Union[ActionRow, Item, List[Item]]]]
 ) -> List[ActionRowPayload]:
-    if isinstance(components, ActionRow):
-        return [components.to_component_dict()]
-
-    if isinstance(components, Item):
-        return [ActionRow(components).to_component_dict()]
-
     if not isinstance(components, list):
-        raise ValueError("components must be an Item, a list of ActionRows or a list of Items")
+        components = [components]
 
     action_rows = []
 
