@@ -82,10 +82,9 @@ if TYPE_CHECKING:
     from ..guild import Guild
     from ..channel import TextChannel, VoiceChannel
     from ..abc import Snowflake
-    from ..ui import ActionRow, Item, View
+    from ..ui.action_row import Components
+    from ..ui.view import View
     import datetime
-
-    Components = Union[ActionRow, Item, List[Union[ActionRow, Item, List[Item]]]]
 
 MISSING = utils.MISSING
 

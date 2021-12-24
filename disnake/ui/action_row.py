@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import List, Optional, TYPE_CHECKING, Union
+from typing import List, Optional, TYPE_CHECKING, TypeVar, Union
 
 from .button import Button
 from .item import Item
@@ -44,6 +44,9 @@ if TYPE_CHECKING:
     from ..emoji import Emoji
     from ..partial_emoji import PartialEmoji
     from ..types.components import ActionRow as ActionRowPayload
+
+    ActionRowT = TypeVar("ActionRowT", bound="ActionRow")
+    Components = Union[ActionRowT, Item, List[Union[ActionRowT, Item, List[Item]]]]
 
 
 class ActionRow:
@@ -211,9 +214,7 @@ class ActionRow:
         return self._underlying.to_dict()
 
 
-def components_to_dict(
-    components: Union[ActionRow, Item, List[Union[ActionRow, Item, List[Item]]]]
-) -> List[ActionRowPayload]:
+def components_to_dict(components: Components) -> List[ActionRowPayload]:
     if not isinstance(components, list):
         components = [components]
 

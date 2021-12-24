@@ -65,7 +65,8 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from aiohttp import ClientSession
     from ..embeds import Embed
-    from ..ui import ActionRow, Item, View
+    from ..ui.action_row import Components
+    from ..ui.view import View
     from ..channel import (
         VoiceChannel,
         StageChannel,
@@ -86,8 +87,6 @@ if TYPE_CHECKING:
         Thread,
         PartialMessageable,
     ]
-
-    Components = Union[ActionRow, Item, List[Union[ActionRow, Item, List[Item]]]]
 
 MISSING: Any = utils.MISSING
 

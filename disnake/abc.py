@@ -87,8 +87,7 @@ if TYPE_CHECKING:
     from .threads import Thread
     from .enums import InviteTarget
     from .guild_scheduled_event import GuildScheduledEvent
-    from .ui.action_row import ActionRow
-    from .ui.item import Item
+    from .ui.action_row import Components
     from .ui.view import View
     from .types.channel import (
         PermissionOverwrite as PermissionOverwritePayload,
@@ -99,7 +98,6 @@ if TYPE_CHECKING:
 
     MessageableChannel = Union[TextChannel, Thread, DMChannel, PartialMessageable, VoiceChannel]
     SnowflakeTime = Union["Snowflake", datetime]
-    Components = Union[ActionRow, Item, List[Union[ActionRow, Item, List[Item]]]]
 
 MISSING = utils.MISSING
 
