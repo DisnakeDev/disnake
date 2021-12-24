@@ -568,6 +568,9 @@ class Interaction:
             delete_after=delete_after,
         )
 
+        original_message = await self.original_message()
+        return original_message 
+
 
 class InteractionResponse:
     """Represents a Discord interaction response.
