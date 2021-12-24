@@ -569,7 +569,7 @@ class Interaction:
         )
 
         original_message = await self.original_message()
-        return original_message 
+        return original_message
 
 
 class InteractionResponse:
