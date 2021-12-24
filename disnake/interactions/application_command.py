@@ -185,9 +185,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
     to seem like the interaction is specifically a user command.
     """
 
-    target: Member
-    guild: Guild
-    me: Member
+    target: Union[User, Member]
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction):
