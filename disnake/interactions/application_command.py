@@ -110,8 +110,18 @@ class ApplicationCommandInteraction(Interaction):
         The interaction's bot. There is an alias for this named ``client``.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
+    locale: :class:`str`
+        The selected language of the interaction's author.
+
+        .. versionadded:: 2.4
     guild: Optional[:class:`Guild`]
         The guild the interaction was sent from.
+    guild_locale: Optional[:class:`str`]
+        The selected language of the interaction's guild.
+        This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
+        If the interaction was in a DM, then this value is ``None``.
+
+        .. versionadded:: 2.4
     channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
         The channel the interaction was sent from.
     me: Union[:class:`.Member`, :class:`.ClientUser`]
@@ -166,6 +176,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
 
     guild: Guild
     me: Member
+    guild_locale: str
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
@@ -175,9 +186,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
     to seem like the interaction is specifically a user command.
     """
 
-    target: Member
-    guild: Guild
-    me: Member
+    target: Union[User, Member]
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction):
