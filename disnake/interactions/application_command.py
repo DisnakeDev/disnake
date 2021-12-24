@@ -175,6 +175,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
 
     guild: Guild
     me: Member
+    guild_locale: str
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
