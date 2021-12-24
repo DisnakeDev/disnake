@@ -20,8 +20,8 @@ class Menu(disnake.ui.View):
         self.prev_page.disabled = True
 
         # Sets the footer of the embeds with their respective page numbers.
-        for i in range(len(embeds)):
-            self.embeds[i].set_footer(text=f"Page {i + 1} of {len(embeds)}")
+        for i, embed in enumerate(self.embeds):
+            embed.set_footer(text=f"Page {i + 1} of {len(self.embeds)}")
 
     @disnake.ui.button(label="Previous page", emoji="◀️", style=disnake.ButtonStyle.red)
     async def prev_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
