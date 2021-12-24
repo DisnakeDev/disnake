@@ -61,16 +61,16 @@ class ActionRow:
     """
 
     def __init__(self, *items: Item):
-        self._total_width = 0
+        self.width: int = 0
         components = []
         # Validate the components
         for item in items:
             if not isinstance(item, Item):
                 raise ValueError("ActionRow must contain only Item instances")
 
-            self._total_width += item.width
+            self.width += item.width
 
-            if self._total_width > 5:
+            if self.width > 5:
                 raise ValueError(
                     "Too many items in 1 row. There should be not more than 5 buttons or 1 menu."
                 )
@@ -108,10 +108,10 @@ class ActionRow:
         ValueError
             The width of the action row exceeds 5.
         """
-        if self._total_width + item.width > 5:
+        if self.width + item.width > 5:
             raise ValueError("Too many items in this row, can not appen a new one.")
 
-        self._total_width += item.width
+        self.width += item.width
         self._underlying.children.append(item._underlying)  # type: ignore
 
     def add_button(
@@ -219,18 +219,32 @@ def components_to_dict(components: Components) -> List[ActionRowPayload]:
         components = [components]
 
     action_rows = []
+    auto_row = ActionRow()
 
     for component in components:
-        if isinstance(component, ActionRow):
-            action_rows.append(component.to_component_dict())
-
-        elif isinstance(component, Item):
-            action_rows.append(ActionRow(component).to_component_dict())
-
-        elif isinstance(component, list):
-            action_rows.append(ActionRow(*component).to_component_dict())
-
+        if isinstance(component, Item):
+            try:
+                auto_row.append_item(component)
+            except ValueError:
+                action_rows.append(auto_row.to_component_dict())
+                auto_row = ActionRow(component)
         else:
-            raise ValueError("components must be an Item, a list of ActionRows or a list of Items")
+            if auto_row.width > 0:
+                action_rows.append(auto_row.to_component_dict())
+                auto_row = ActionRow()
+
+            if isinstance(component, ActionRow):
+                action_rows.append(component.to_component_dict())
+
+            elif isinstance(component, list):
+                action_rows.append(ActionRow(*component).to_component_dict())
+
+            else:
+                raise ValueError(
+                    "components must be an Item, a list of ActionRows or a list of Items"
+                )
+
+    if auto_row.width > 0:
+        action_rows.append(auto_row.to_component_dict())
 
     return action_rows
