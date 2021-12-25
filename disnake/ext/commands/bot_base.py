@@ -25,33 +25,31 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-
 import asyncio
 import collections
 import collections.abc
 import inspect
 import sys
 import traceback
-from typing import Any, Callable, List, TYPE_CHECKING, Optional, TypeVar, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Type, TypeVar, Union
 
 import disnake
 
-from .core import GroupMixin
-from .view import StringView
-from .context import Context
 from . import errors
-from .help import HelpCommand, DefaultHelpCommand
 from .common_bot_base import CommonBotBase
+from .context import Context
+from .core import GroupMixin
+from .help import DefaultHelpCommand, HelpCommand
+from .view import StringView
 
 if TYPE_CHECKING:
 
     from typing_extensions import ParamSpec
-    from disnake.message import Message
+
     from disnake.interactions import ApplicationCommandInteraction
-    from ._types import (
-        Check,
-        CoroFunc,
-    )
+    from disnake.message import Message
+
+    from ._types import Check, CoroFunc
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True

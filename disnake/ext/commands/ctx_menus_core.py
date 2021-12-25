@@ -21,18 +21,19 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Callable, Coroutine, Optional, TypeVar, Union, Sequence
+
+import asyncio
+from typing import TYPE_CHECKING, Any, Callable, Coroutine, Optional, Sequence, TypeVar, Union
+
+from disnake.app_commands import MessageCommand, UserCommand
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
 from .params import safe_call
 
-from disnake.app_commands import UserCommand, MessageCommand
-
-import asyncio
-
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
+
     from disnake.interactions import ApplicationCommandInteraction
 
     ApplicationCommandInteractionT = TypeVar(

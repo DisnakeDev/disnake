@@ -24,10 +24,10 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from typing import List, Literal, Optional, TypedDict, Union
-from .user import PartialUser
-from .snowflake import Snowflake
-from .threads import ThreadArchiveDurationLiteral, ThreadMetadata, ThreadMember
 
+from .snowflake import Snowflake
+from .threads import ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
+from .user import PartialUser
 
 OverwriteType = Literal[0, 1]
 

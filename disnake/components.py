@@ -25,20 +25,21 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Any, ClassVar, Dict, List, Optional, TYPE_CHECKING, Tuple, Type, TypeVar, Union
-from .enums import try_enum, ComponentType, ButtonStyle
-from .utils import get_slots, MISSING
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, TypeVar, Union
+
+from .enums import ButtonStyle, ComponentType, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
+from .utils import MISSING, get_slots
 
 if TYPE_CHECKING:
+    from .emoji import Emoji
     from .types.components import (
-        Component as ComponentPayload,
+        ActionRow as ActionRowPayload,
         ButtonComponent as ButtonComponentPayload,
+        Component as ComponentPayload,
         SelectMenu as SelectMenuPayload,
         SelectOption as SelectOptionPayload,
-        ActionRow as ActionRowPayload,
     )
-    from .emoji import Emoji
 
 
 __all__ = (

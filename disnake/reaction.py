@@ -24,18 +24,19 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
-from typing import Any, TYPE_CHECKING, Union, Optional
+
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from .iterators import ReactionIterator
 
 __all__ = ("Reaction",)
 
 if TYPE_CHECKING:
-    from .types.message import Reaction as ReactionPayload
+    from .abc import Snowflake
+    from .emoji import Emoji
     from .message import Message
     from .partial_emoji import PartialEmoji
-    from .emoji import Emoji
-    from .abc import Snowflake
+    from .types.message import Reaction as ReactionPayload
 
 
 class Reaction:

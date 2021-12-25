@@ -27,9 +27,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import sys
 import re
+import sys
+import weakref
 from typing import (
+    TYPE_CHECKING,
     Any,
     ClassVar,
     Coroutine,
@@ -38,65 +40,58 @@ from typing import (
     List,
     Optional,
     Sequence,
-    TYPE_CHECKING,
     Tuple,
     Type,
     TypeVar,
     Union,
 )
 from urllib.parse import quote as _uriquote
-import weakref
 
 import aiohttp
 
+from . import __version__, utils
 from .errors import (
-    HTTPException,
-    Forbidden,
-    NotFound,
-    LoginFailure,
     DiscordServerError,
+    Forbidden,
     GatewayNotFound,
+    HTTPException,
     InvalidArgument,
+    LoginFailure,
+    NotFound,
 )
 from .gateway import DiscordClientWebSocketResponse
-from . import __version__, utils
 from .utils import MISSING
 
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from types import TracebackType
+
+    from .enums import AuditLogAction, InteractionResponseType
     from .file import File
     from .message import Attachment
-    from .enums import (
-        AuditLogAction,
-        InteractionResponseType,
-    )
-
     from .types import (
         appinfo,
         audit_log,
         channel,
         components,
-        emoji,
         embed,
+        emoji,
         guild,
         integration,
         interactions,
         invite,
         member,
         message,
-        template,
         role,
+        sticker,
+        template,
+        threads,
         user,
         webhook,
-        channel,
         widget,
-        threads,
-        sticker,
     )
     from .types.snowflake import Snowflake, SnowflakeList
-
-    from types import TracebackType
 
     T = TypeVar("T")
     BE = TypeVar("BE", bound=BaseException)

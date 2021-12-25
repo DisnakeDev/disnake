@@ -26,68 +26,66 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import copy
-import unicodedata
 import datetime
+import unicodedata
 from typing import (
+    TYPE_CHECKING,
     Any,
     ClassVar,
     Dict,
     List,
-    NamedTuple,
-    Sequence,
-    Set,
     Literal,
     Mapping,
+    NamedTuple,
     Optional,
-    TYPE_CHECKING,
+    Sequence,
+    Set,
     Tuple,
     Union,
     cast,
     overload,
 )
 
-from . import utils, abc
+from . import abc, utils
 from .app_commands import (
     GuildApplicationCommandPermissions,
     PartialGuildApplicationCommandPermissions,
 )
-from .role import Role
-from .member import Member, VoiceState
-from .emoji import Emoji
-from .errors import InvalidData
-from .permissions import PermissionOverwrite
-from .colour import Colour
-from .errors import InvalidArgument, ClientException
+from .asset import Asset
 from .channel import *
-from .channel import _guild_channel_factory
-from .channel import _threaded_guild_channel_factory
+from .channel import _guild_channel_factory, _threaded_guild_channel_factory
+from .colour import Colour
+from .emoji import Emoji
 from .enums import (
     AuditLogAction,
-    VideoQualityMode,
-    VoiceRegion,
     ChannelType,
-    try_enum,
-    VerificationLevel,
     ContentFilter,
+    GuildScheduledEventEntityType,
+    GuildScheduledEventPrivacyLevel,
     NotificationLevel,
     NSFWLevel,
     StagePrivacyLevel,
-    GuildScheduledEventEntityType,
-    GuildScheduledEventPrivacyLevel,
+    VerificationLevel,
+    VideoQualityMode,
+    VoiceRegion,
+    try_enum,
 )
-from .mixins import Hashable
-from .user import User
+from .errors import ClientException, InvalidArgument, InvalidData
+from .file import File
+from .flags import SystemChannelFlags
+from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
+from .integrations import Integration, _integration_factory
 from .invite import Invite
 from .iterators import AuditLogIterator, MemberIterator
-from .widget import Widget
-from .asset import Asset
-from .flags import SystemChannelFlags
-from .integrations import Integration, _integration_factory
+from .member import Member, VoiceState
+from .mixins import Hashable
+from .permissions import PermissionOverwrite
+from .role import Role
 from .stage_instance import StageInstance
-from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
-from .threads import Thread, ThreadMember
 from .sticker import GuildSticker
-from .file import File
+from .threads import Thread, ThreadMember
+from .user import User
+from .widget import Widget
 
 __all__ = ("Guild",)
 
@@ -96,19 +94,17 @@ MISSING = utils.MISSING
 
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime, User as ABCUser
-    from .types.guild import Ban as BanPayload, Guild as GuildPayload, MFALevel, GuildFeature
-    from .types.threads import (
-        Thread as ThreadPayload,
-    )
-    from .types.integration import IntegrationType
-    from .types.voice import GuildVoiceState
-    from .permissions import Permissions
-    from .channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel
-    from .template import Template
-    from .webhook import Webhook
-    from .state import ConnectionState
-    from .voice_client import VoiceProtocol
     from .app_commands import ApplicationCommand
+    from .channel import CategoryChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel
+    from .permissions import Permissions
+    from .state import ConnectionState
+    from .template import Template
+    from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
+    from .types.integration import IntegrationType
+    from .types.threads import Thread as ThreadPayload
+    from .types.voice import GuildVoiceState
+    from .voice_client import VoiceProtocol
+    from .webhook import Webhook
 
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]

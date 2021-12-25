@@ -42,13 +42,13 @@ from ..errors import (
     InteractionTimedOut,
     NotFound,
 )
+from ..guild import Guild
 from ..member import Member
 from ..message import Attachment, Message
 from ..object import Object
 from ..permissions import Permissions
 from ..user import ClientUser, User
 from ..webhook.async_ import Webhook, async_context, handle_message_parameters
-from ..guild import Guild
 
 __all__ = (
     "Interaction",
@@ -57,24 +57,26 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
+    from aiohttp import ClientSession
+
+    from ..channel import (
+        CategoryChannel,
+        PartialMessageable,
+        StageChannel,
+        StoreChannel,
+        TextChannel,
+        VoiceChannel,
+    )
+    from ..embeds import Embed
     from ..ext.commands.bot import Bot
-    from ..types.interactions import Interaction as InteractionPayload
-    from ..state import ConnectionState
     from ..file import File
     from ..mentions import AllowedMentions
-    from aiohttp import ClientSession
-    from ..embeds import Embed
-    from ..ui.view import View
-    from ..channel import (
-        VoiceChannel,
-        StageChannel,
-        TextChannel,
-        CategoryChannel,
-        StoreChannel,
-        PartialMessageable,
-    )
+    from ..state import ConnectionState
     from ..threads import Thread
-    from datetime import datetime
+    from ..types.interactions import Interaction as InteractionPayload
+    from ..ui.view import View
 
     InteractionChannel = Union[
         VoiceChannel,
