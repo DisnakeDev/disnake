@@ -108,7 +108,7 @@ def remove_optionals(annotation: Any) -> Any:
         if len(args) == 1:
             annotation = args[0]
         else:
-            annotation.__args__ = args
+            annotation = Union[tuple(args)]  # type: ignore
 
     return annotation
 
