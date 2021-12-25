@@ -23,6 +23,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import sys
 import traceback
 import warnings
@@ -90,6 +91,9 @@ CFT = TypeVar("CFT", bound="CoroFunc")
 CXT = TypeVar("CXT", bound="Context")
 
 
+_log = logging.getLogger(__name__)
+
+
 def _app_commands_diff(
     new_commands: Iterable[ApplicationCommand],
     old_commands: Iterable[ApplicationCommand],
@@ -126,26 +130,25 @@ def _app_commands_diff(
     return diff
 
 
-def _show_diff(diff: Dict[str, List[ApplicationCommand]], line_prefix: str = "") -> None:
-    to_upsert = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["upsert"]) or "-"
-    to_edit = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["edit"]) or "-"
-    to_delete = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["delete"]) or "-"
-    change_type = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["change_type"]) or "-"
-    no_changes = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["no_changes"]) or "-"
-    print(
-        f"{line_prefix}To upsert:",
-        f"    {to_upsert}",
-        f"To edit:",
-        f"    {to_edit}",
-        f"To delete:",
-        f"    {to_delete}",
-        f"Type migration:",
-        f"    {change_type}",
-        f"No changes:",
-        f"    {no_changes}",
-        sep=f"\n{line_prefix}",
-        end="\n\n",
-    )
+_diff_map = {
+    "upsert": "To upsert:",
+    "edit": "To edit:",
+    "delete": "To delete:",
+    "change_type": "Type migration:",
+    "no_changes": "No changes:",
+}
+
+
+def _format_diff(diff: Dict[str, List[ApplicationCommand]]) -> str:
+    lines: List[str] = []
+    for key, label in _diff_map.items():
+        lines.append(label)
+        if changes := diff[key]:
+            lines.extend(f"    {cmd}" for cmd in changes)
+        else:
+            lines.append("    -")
+
+    return "\n".join(f"| {line}" for line in lines)
 
 
 class InteractionBotBase(CommonBotBase):
@@ -690,14 +693,14 @@ class InteractionBotBase(CommonBotBase):
 
         if self._sync_commands_debug:
             # Show the difference
-            print(
-                "GLOBAL COMMANDS\n===============",
-                "| NOTE: global commands can take up to 1 hour to show up after registration.",
-                "|",
-                f"| Update is required: {update_required}",
-                sep="\n",
+            _log.info(
+                "Application command synchronization:\n"
+                "GLOBAL COMMANDS\n"
+                "===============\n"
+                "| NOTE: global commands can take up to 1 hour to show up after registration.\n"
+                "|\n"
+                f"| Update is required: {update_required}\n{_format_diff(diff)}"
             )
-            _show_diff(diff, "| ")
 
         if update_required:
             # Notice that we don't do any API requests if there're no changes.
@@ -726,12 +729,12 @@ class InteractionBotBase(CommonBotBase):
             )
             # Show diff
             if self._sync_commands_debug:
-                print(
-                    f'COMMANDS IN {guild_id}\n============{"=" * 18}',
-                    f"| Update is required: {update_required}",
-                    sep="\n",
+                _log.info(
+                    "Application command synchronization:\n"
+                    f"COMMANDS IN {guild_id}\n"
+                    "===============================\n"
+                    f"| Update is required: {update_required}\n{_format_diff(diff)}"
                 )
-                _show_diff(diff, "| ")
             # Do API requests and cache
             if update_required:
                 try:
@@ -748,7 +751,7 @@ class InteractionBotBase(CommonBotBase):
                     )
         # Last debug message
         if self._sync_commands_debug:
-            print("DEBUG: Command synchronization task has been finished", end="\n\n")
+            _log.info("Command synchronization task has finished")
 
     async def _cache_application_command_permissions(self) -> None:
         # This method is usually called once per bot start
@@ -831,7 +834,7 @@ class InteractionBotBase(CommonBotBase):
                 for new_cmd_perms in new_array
             ):
                 if self._sync_commands_debug:
-                    print(f"DEBUG: Command permissions in <Guild id={guild_id}>: no changes")
+                    _log.info(f"Command permissions in <Guild id={guild_id}>: no changes")
                 continue
             # If we got here, the permissions require an update
             try:
@@ -843,7 +846,7 @@ class InteractionBotBase(CommonBotBase):
                 )
             finally:
                 if self._sync_commands_debug:
-                    print(f"DEBUG: Command permissions in <Guild id={guild_id}>: edited")
+                    _log.info(f"Command permissions in <Guild id={guild_id}>: edited")
 
     async def _prepare_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):
