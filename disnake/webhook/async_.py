@@ -25,36 +25,35 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import logging
 import asyncio
+import logging
 import re
-
-from urllib.parse import quote as urlquote
+from contextvars import ContextVar
 from typing import (
+    TYPE_CHECKING,
     Any,
     Dict,
     List,
     Literal,
     NamedTuple,
     Optional,
-    TYPE_CHECKING,
     Tuple,
     Union,
     overload,
 )
-from contextvars import ContextVar
+from urllib.parse import quote as urlquote
 
 import aiohttp
 
 from .. import utils
-from ..errors import InvalidArgument, HTTPException, Forbidden, NotFound, DiscordServerError
-from ..message import Message
-from ..enums import try_enum, WebhookType
-from ..user import BaseUser, User
 from ..asset import Asset
-from ..http import Route, to_multipart
-from ..mixins import Hashable
 from ..channel import PartialMessageable
+from ..enums import WebhookType, try_enum
+from ..errors import DiscordServerError, Forbidden, HTTPException, InvalidArgument, NotFound
+from ..http import Route, to_multipart
+from ..message import Message
+from ..mixins import Hashable
+from ..user import BaseUser, User
 
 __all__ = (
     "Webhook",
@@ -66,23 +65,20 @@ __all__ = (
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from ..file import File
-    from ..message import Attachment
-    from ..embeds import Embed
-    from ..mentions import AllowedMentions
-    from ..state import ConnectionState
-    from ..http import Response
-    from ..types.webhook import (
-        Webhook as WebhookPayload,
-    )
-    from ..types.message import (
-        Message as MessagePayload,
-    )
-    from ..guild import Guild
-    from ..channel import TextChannel, VoiceChannel
-    from ..abc import Snowflake
-    from ..ui.view import View
     import datetime
+
+    from ..abc import Snowflake
+    from ..channel import TextChannel, VoiceChannel
+    from ..embeds import Embed
+    from ..file import File
+    from ..guild import Guild
+    from ..http import Response
+    from ..mentions import AllowedMentions
+    from ..message import Attachment
+    from ..state import ConnectionState
+    from ..types.message import Message as MessagePayload
+    from ..types.webhook import Webhook as WebhookPayload
+    from ..ui.view import View
 
 MISSING = utils.MISSING
 
@@ -1502,16 +1498,21 @@ class Webhook(BaseWebhook):
         if thread is not MISSING:
             thread_id = thread.id
 
-        data = await adapter.execute_webhook(
-            self.id,
-            self.token,
-            session=self.session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-            thread_id=thread_id,
-            wait=wait,
-        )
+        try:
+            data = await adapter.execute_webhook(
+                self.id,
+                self.token,
+                session=self.session,
+                payload=params.payload,
+                multipart=params.multipart,
+                files=params.files,
+                thread_id=thread_id,
+                wait=wait,
+            )
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
 
         msg = None
         if wait:
@@ -1688,15 +1689,20 @@ class Webhook(BaseWebhook):
             previous_allowed_mentions=previous_mentions,
         )
         adapter = async_context.get()
-        data = await adapter.edit_webhook_message(
-            self.id,
-            self.token,
-            message_id,
-            session=self.session,
-            payload=params.payload,
-            multipart=params.multipart,
-            files=params.files,
-        )
+        try:
+            data = await adapter.edit_webhook_message(
+                self.id,
+                self.token,
+                message_id,
+                session=self.session,
+                payload=params.payload,
+                multipart=params.multipart,
+                files=params.files,
+            )
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
 
         message = self._create_message(data)
         if view and not view.is_finished():

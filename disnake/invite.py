@@ -25,13 +25,14 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import List, Optional, Type, TypeVar, Union, TYPE_CHECKING
-from .asset import Asset
-from .utils import parse_time, snowflake_time, _get_as_snowflake
-from .object import Object
-from .mixins import Hashable
-from .enums import ChannelType, VerificationLevel, InviteTarget, try_enum
+from typing import TYPE_CHECKING, List, Optional, Type, TypeVar, Union
+
 from .appinfo import PartialAppInfo
+from .asset import Asset
+from .enums import ChannelType, InviteTarget, VerificationLevel, try_enum
+from .mixins import Hashable
+from .object import Object
+from .utils import _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
     "PartialInviteChannel",
@@ -40,18 +41,16 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from .abc import GuildChannel
+    from .guild import Guild
+    from .state import ConnectionState
+    from .types.channel import PartialChannel as InviteChannelPayload
+    from .types.guild import GuildFeature
     from .types.invite import (
+        GatewayInvite as GatewayInvitePayload,
         Invite as InvitePayload,
         InviteGuild as InviteGuildPayload,
-        GatewayInvite as GatewayInvitePayload,
     )
-    from .types.channel import (
-        PartialChannel as InviteChannelPayload,
-    )
-    from .types.guild import GuildFeature
-    from .state import ConnectionState
-    from .guild import Guild
-    from .abc import GuildChannel
     from .user import User
 
     InviteGuildType = Union[Guild, "PartialInviteGuild", Object]
@@ -266,6 +265,7 @@ class Invite(Hashable):
     | :attr:`expires_at`                 | :meth:`Client.fetch_invite` with `with_expiration` enabled        |
     +------------------------------------+-------------------------------------------------------------------+
     | :attr:`guild_scheduled_event`      | :meth:`Client.fetch_invite` with valid `guild_scheduled_event_id` |
+    |                                    | or valid event ID in URL or invite object                         |
     +------------------------------------+-------------------------------------------------------------------+
 
     If it's not in the table above then it is available by all methods.

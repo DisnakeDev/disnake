@@ -31,29 +31,30 @@ import itertools
 import sys
 from operator import attrgetter
 from typing import (
+    TYPE_CHECKING,
     Any,
     Dict,
     List,
     Literal,
     Optional,
-    TYPE_CHECKING,
     Tuple,
     Type,
     TypeVar,
     Union,
+    overload,
 )
 
 import disnake.abc
 
 from . import utils
+from .activity import ActivityTypes, create_activity
 from .asset import Asset
-from .utils import MISSING
-from .user import BaseUser, User, _UserTag
-from .activity import create_activity, ActivityTypes
-from .permissions import Permissions
-from .enums import Status, try_enum
 from .colour import Colour
+from .enums import Status, try_enum
 from .object import Object
+from .permissions import Permissions
+from .user import BaseUser, User, _UserTag
+from .utils import MISSING
 
 __all__ = (
     "VoiceState",
@@ -61,23 +62,25 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from .abc import Snowflake
     from .asset import Asset
-    from .channel import DMChannel, VoiceChannel, StageChannel
+    from .channel import DMChannel, StageChannel, VoiceChannel
     from .flags import PublicUserFlags
     from .guild import Guild
+    from .message import Message
+    from .role import Role
+    from .state import ConnectionState
     from .types.activity import PartialPresenceUpdate
     from .types.member import (
-        MemberWithUser as MemberWithUserPayload,
         Member as MemberPayload,
+        MemberWithUser as MemberWithUserPayload,
         UserWithMember as UserWithMemberPayload,
     )
     from .types.user import User as UserPayload
-    from .abc import Snowflake
-    from .state import ConnectionState
-    from .message import Message
-    from .role import Role
-    from .types.voice import VoiceState as VoiceStatePayload
-    from .types.voice import GuildVoiceState as GuildVoiceStatePayload
+    from .types.voice import (
+        GuildVoiceState as GuildVoiceStatePayload,
+        VoiceState as VoiceStatePayload,
+    )
 
     VocalGuildChannel = Union[VoiceChannel, StageChannel]
 
@@ -289,6 +292,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         "_user",
         "_state",
         "_avatar",
+        "_communication_disabled_until",
     )
 
     if TYPE_CHECKING:
@@ -321,6 +325,8 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.nick: Optional[str] = data.get("nick", None)
         self.pending: bool = data.get("pending", False)
         self._avatar: Optional[str] = data.get("avatar")
+        timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
+        self._communication_disabled_until: Optional[datetime.datetime] = timeout_datetime
 
     def __str__(self) -> str:
         return str(self._user)
@@ -380,6 +386,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.activities = member.activities
         self._state = member._state
         self._avatar = member._avatar
+        self._communication_disabled_until = member.current_timeout
 
         # Reference will not be copied unless necessary by PRESENCE_UPDATE
         # See below
@@ -406,6 +413,8 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.premium_since = utils.parse_time(data.get("premium_since"))
         self._roles = utils.SnowflakeList(map(int, data["roles"]))
         self._avatar = data.get("avatar")
+        timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
+        self._communication_disabled_until = timeout_datetime
 
     def _presence_update(
         self, data: PartialPresenceUpdate, user: UserPayload
@@ -653,6 +662,22 @@ class Member(disnake.abc.Messageable, _UserTag):
         """Optional[:class:`VoiceState`]: Returns the member's current voice state."""
         return self.guild._voice_state_for(self._user.id)
 
+    @property
+    def current_timeout(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: Returns the datetime when the timeout expires, if any.
+
+        .. versionadded:: 2.3
+        """
+
+        if self._communication_disabled_until is None:
+            return None
+
+        if self._communication_disabled_until < utils.utcnow():
+            self._communication_disabled_until = None
+            return None
+
+        return self._communication_disabled_until
+
     async def ban(
         self,
         *,
@@ -688,6 +713,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         suppress: bool = MISSING,
         roles: List[disnake.abc.Snowflake] = MISSING,
         voice_channel: Optional[VocalGuildChannel] = MISSING,
+        timeout: Optional[Union[float, datetime.timedelta, datetime.datetime]] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[Member]:
         """|coro|
@@ -696,19 +722,21 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Depending on the parameter passed, this requires different permissions listed below:
 
-        +---------------+--------------------------------------+
-        |   Parameter   |              Permission              |
-        +---------------+--------------------------------------+
-        | nick          | :attr:`Permissions.manage_nicknames` |
-        +---------------+--------------------------------------+
-        | mute          | :attr:`Permissions.mute_members`     |
-        +---------------+--------------------------------------+
-        | deafen        | :attr:`Permissions.deafen_members`   |
-        +---------------+--------------------------------------+
-        | roles         | :attr:`Permissions.manage_roles`     |
-        +---------------+--------------------------------------+
-        | voice_channel | :attr:`Permissions.move_members`     |
-        +---------------+--------------------------------------+
+        +------------------------------+-------------------------------------+
+        |   Parameter                  |              Permission             |
+        +------------------------------+-------------------------------------+
+        | nick                         | :attr:`Permissions.manage_nicknames`|
+        +------------------------------+-------------------------------------+
+        | mute                         | :attr:`Permissions.mute_members`    |
+        +------------------------------+-------------------------------------+
+        | deafen                       | :attr:`Permissions.deafen_members`  |
+        +------------------------------+-------------------------------------+
+        | roles                        | :attr:`Permissions.manage_roles`    |
+        +------------------------------+-------------------------------------+
+        | voice_channel                | :attr:`Permissions.move_members`    |
+        +------------------------------+-------------------------------------+
+        | timeout                      | :attr:`Permissions.moderate_members`|
+        +------------------------------+-------------------------------------+
 
         All parameters are optional.
 
@@ -730,12 +758,17 @@ class Member(disnake.abc.Messageable, _UserTag):
             Indicates if the member should be suppressed in stage channels.
 
             .. versionadded:: 1.7
-
         roles: List[:class:`Role`]
             The member's new list of roles. This *replaces* the roles.
         voice_channel: Optional[:class:`VoiceChannel`]
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
+        timeout: Optional[Union[:class:`float`, :class:`datetime.timedelta`, :class:`datetime.datetime`]]
+            The duration (seconds or timedelta) or the expiry (datetime) of the timeout;
+            until then, the member will not be able to interact with the guild.
+            Set to ``None`` to remove the timeout. Supports up to 28 days in the future.
+
+            .. versionadded:: 2.3
         reason: Optional[:class:`str`]
             The reason for editing this member. Shows up on the audit log.
 
@@ -796,6 +829,18 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         if roles is not MISSING:
             payload["roles"] = tuple(r.id for r in roles)
+
+        if timeout is not MISSING:
+            if timeout is not None:
+                if isinstance(timeout, datetime.datetime):
+                    dt = timeout.astimezone(tz=datetime.timezone.utc)
+                elif isinstance(timeout, datetime.timedelta):
+                    dt = utils.utcnow() + timeout
+                else:
+                    dt = utils.utcnow() + datetime.timedelta(seconds=timeout)
+                payload["communication_disabled_until"] = dt.isoformat()
+            else:
+                payload["communication_disabled_until"] = None
 
         if payload:
             data = await http.edit_member(guild_id, self.id, reason=reason, **payload)
@@ -963,3 +1008,68 @@ class Member(disnake.abc.Messageable, _UserTag):
             The role or ``None`` if not found in the member's roles.
         """
         return self.guild.get_role(role_id) if self._roles.has(role_id) else None
+
+    @overload
+    async def timeout(
+        self,
+        *,
+        duration: Optional[Union[float, datetime.timedelta]],
+        reason: Optional[str] = None,
+    ) -> Member:
+        ...
+
+    @overload
+    async def timeout(
+        self,
+        *,
+        until: Optional[datetime.datetime],
+        reason: Optional[str] = None,
+    ) -> Member:
+        ...
+
+    async def timeout(
+        self,
+        *,
+        duration: Optional[Union[float, datetime.timedelta]] = MISSING,
+        until: Optional[datetime.datetime] = MISSING,
+        reason: Optional[str] = None,
+    ) -> Member:
+        """|coro|
+
+        Times out the member from the guild; until then, the member will not be able to interact with the guild.
+
+        Exactly one of ``duration`` or ``until`` must be provided. To remove a timeout, set one of the parameters to ``None``.
+
+        You must have the :attr:`Permissions.moderate_members` permission to do this.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        ----------
+        duration: Optional[Union[:class:`float`, :class:`datetime.timedelta`]]
+            The duration (seconds or timedelta) of the member's timeout. Set to ``None`` to remove the timeout.
+            Supports up to 28 days in the future.
+            May not be used in combination with the ``until`` parameter.
+        until: Optional[:class:`datetime.datetime`]
+            The expiry date/time of the member's timeout. Set to ``None`` to remove the timeout.
+            Supports up to 28 days in the future.
+            May not be used in combination with the ``duration`` parameter.
+        reason: Optional[:class:`str`]
+            The reason for this timeout. Appears on the audit log.
+
+        Raises
+        -------
+        Forbidden
+            You do not have permissions to timeout this member.
+        HTTPException
+            Timing out the member failed.
+
+        Returns
+        -------
+        :class:`Member`
+            The newly updated member.
+        """
+        if duration is not MISSING:
+            return await self.guild.timeout(self, duration=duration, reason=reason)
+        else:
+            return await self.guild.timeout(self, until=until, reason=reason)

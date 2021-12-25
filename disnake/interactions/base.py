@@ -42,6 +42,7 @@ from ..errors import (
     InteractionTimedOut,
     NotFound,
 )
+from ..guild import Guild
 from ..member import Member
 from ..message import Attachment, Message
 from ..object import Object
@@ -56,25 +57,26 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
+    from aiohttp import ClientSession
+
+    from ..channel import (
+        CategoryChannel,
+        PartialMessageable,
+        StageChannel,
+        StoreChannel,
+        TextChannel,
+        VoiceChannel,
+    )
+    from ..embeds import Embed
     from ..ext.commands.bot import Bot
-    from ..types.interactions import Interaction as InteractionPayload
-    from ..guild import Guild
-    from ..state import ConnectionState
     from ..file import File
     from ..mentions import AllowedMentions
-    from aiohttp import ClientSession
-    from ..embeds import Embed
-    from ..ui.view import View
-    from ..channel import (
-        VoiceChannel,
-        StageChannel,
-        TextChannel,
-        CategoryChannel,
-        StoreChannel,
-        PartialMessageable,
-    )
+    from ..state import ConnectionState
     from ..threads import Thread
-    from datetime import datetime
+    from ..types.interactions import Interaction as InteractionPayload
+    from ..ui.view import View
 
     InteractionChannel = Union[
         VoiceChannel,
@@ -105,12 +107,22 @@ class Interaction:
         The interaction type.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
+    guild_locale: Optional[:class:`str`]
+        The selected language of the interaction's guild.
+        This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
+        If the interaction was in a DM, then this value is ``None``.
+
+        .. versionadded:: 2.4
     channel_id: Optional[:class:`int`]
         The channel ID the interaction was sent from.
     application_id: :class:`int`
         The application ID that the interaction was for.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
+    locale: :class:`str`
+        The selected language of the interaction's author.
+
+        .. versionadded:: 2.4
     token: :class:`str`
         The token to continue the interaction. These are valid
         for 15 minutes.
@@ -126,6 +138,8 @@ class Interaction:
         "token",
         "version",
         "bot",
+        "locale",
+        "guild_locale",
         "_permissions",
         "_state",
         "_session",
@@ -152,6 +166,8 @@ class Interaction:
         self.channel_id: Optional[int] = utils._get_as_snowflake(data, "channel_id")
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.application_id: int = int(data["application_id"])
+        self.locale: str = data["locale"]
+        self.guild_locale: Optional[str] = data.get("guild_locale")
         # think about the user's experience
         self.author: Union[User, Member] = None  # type: ignore
         self._permissions: int = 0
@@ -165,7 +181,7 @@ class Interaction:
                 pass
             else:
                 self.author = (
-                    guild
+                    isinstance(guild, Guild)
                     and guild.get_member(int(member["user"]["id"]))  # type: ignore
                     or Member(state=self._state, guild=guild, data=member)  # type: ignore
                 )
@@ -406,6 +422,10 @@ class Interaction:
             if e.code == 10015:
                 raise InteractionNotResponded(self) from e
             raise
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
 
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
@@ -774,12 +794,12 @@ class InteractionResponse:
             if e.code == 10062:
                 raise InteractionTimedOut(self._parent) from e
             raise
+        finally:
+            if files:
+                for f in files:
+                    f.close()
 
         self._responded = True
-
-        if files is not MISSING:
-            for f in files:
-                f.close()
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
@@ -912,14 +932,19 @@ class InteractionResponse:
             payload["components"] = [] if view is None else view.to_components()
 
         adapter = async_context.get()
-        await adapter.create_interaction_response(
-            parent.id,
-            parent.token,
-            session=parent._session,
-            type=InteractionResponseType.message_update.value,
-            data=payload,
-            files=files,
-        )
+        try:
+            await adapter.create_interaction_response(
+                parent.id,
+                parent.token,
+                session=parent._session,
+                type=InteractionResponseType.message_update.value,
+                data=payload,
+                files=files,
+            )
+        finally:
+            if files:
+                for f in files:
+                    f.close()
 
         if view and not view.is_finished():
             state.store_view(view, message_id)

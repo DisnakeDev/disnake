@@ -26,67 +26,66 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import copy
+import datetime
 import unicodedata
 from typing import (
+    TYPE_CHECKING,
     Any,
     ClassVar,
     Dict,
     List,
-    NamedTuple,
-    Sequence,
-    Set,
     Literal,
     Mapping,
+    NamedTuple,
     Optional,
-    TYPE_CHECKING,
+    Sequence,
+    Set,
     Tuple,
     Union,
     cast,
     overload,
 )
 
-from . import utils, abc
+from . import abc, utils
 from .app_commands import (
     GuildApplicationCommandPermissions,
     PartialGuildApplicationCommandPermissions,
 )
-from .role import Role
-from .member import Member, VoiceState
-from .emoji import Emoji
-from .errors import InvalidData
-from .permissions import PermissionOverwrite
-from .colour import Colour
-from .errors import InvalidArgument, ClientException
+from .asset import Asset
 from .channel import *
-from .channel import _guild_channel_factory
-from .channel import _threaded_guild_channel_factory
+from .channel import _guild_channel_factory, _threaded_guild_channel_factory
+from .colour import Colour
+from .emoji import Emoji
 from .enums import (
     AuditLogAction,
-    VideoQualityMode,
-    VoiceRegion,
     ChannelType,
-    try_enum,
-    VerificationLevel,
     ContentFilter,
+    GuildScheduledEventEntityType,
+    GuildScheduledEventPrivacyLevel,
     NotificationLevel,
     NSFWLevel,
     StagePrivacyLevel,
-    GuildScheduledEventEntityType,
-    GuildScheduledEventPrivacyLevel,
+    VerificationLevel,
+    VideoQualityMode,
+    VoiceRegion,
+    try_enum,
 )
-from .mixins import Hashable
-from .user import User
+from .errors import ClientException, InvalidArgument, InvalidData
+from .file import File
+from .flags import SystemChannelFlags
+from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
+from .integrations import Integration, _integration_factory
 from .invite import Invite
 from .iterators import AuditLogIterator, MemberIterator
-from .widget import Widget
-from .asset import Asset
-from .flags import SystemChannelFlags
-from .integrations import Integration, _integration_factory
+from .member import Member, VoiceState
+from .mixins import Hashable
+from .permissions import PermissionOverwrite
+from .role import Role
 from .stage_instance import StageInstance
-from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
-from .threads import Thread, ThreadMember
 from .sticker import GuildSticker
-from .file import File
+from .threads import Thread, ThreadMember
+from .user import User
+from .widget import Widget
 
 __all__ = ("Guild",)
 
@@ -95,21 +94,17 @@ MISSING = utils.MISSING
 
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime, User as ABCUser
-    from .types.guild import Ban as BanPayload, Guild as GuildPayload, MFALevel, GuildFeature
-    from .types.threads import (
-        Thread as ThreadPayload,
-    )
-    from .types.integration import IntegrationType
-    from .types.voice import GuildVoiceState
-    from .permissions import Permissions
-    from .channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel
-    from .template import Template
-    from .webhook import Webhook
-    from .state import ConnectionState
-    from .voice_client import VoiceProtocol
     from .app_commands import ApplicationCommand
-
-    import datetime
+    from .channel import CategoryChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel
+    from .permissions import Permissions
+    from .state import ConnectionState
+    from .template import Template
+    from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
+    from .types.integration import IntegrationType
+    from .types.threads import Thread as ThreadPayload
+    from .types.voice import GuildVoiceState
+    from .voice_client import VoiceProtocol
+    from .webhook import Webhook
 
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
@@ -1852,6 +1847,7 @@ class Guild(Hashable):
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         scheduled_end_time: datetime.datetime = MISSING,
         description: str = MISSING,
+        reason: Optional[str] = None,
     ) -> GuildScheduledEvent:
         """|coro|
 
@@ -1877,6 +1873,8 @@ class Guild(Hashable):
             The entity type of the guild scheduled event.
         entity_metadata: :class:`GuildScheduledEventMetadata`
             The entity metadata of the guild scheduled event.
+        reason: Optional[:class:`str`]
+            The reason for creating the guild scheduled event. Shows up on the audit log.
 
         Raises
         ------
@@ -1920,7 +1918,7 @@ class Guild(Hashable):
         if scheduled_end_time is not MISSING:
             fields["scheduled_end_time"] = scheduled_end_time.isoformat()
 
-        data = await self._state.http.create_guild_scheduled_event(self.id, **fields)
+        data = await self._state.http.create_guild_scheduled_event(self.id, reason=reason, **fields)
         return GuildScheduledEvent(state=self._state, data=data)
 
     # TODO: Remove Optional typing here when async iterators are refactored
@@ -3405,3 +3403,94 @@ class Guild(Hashable):
             A list of edited permissions of application commands.
         """
         return await self._state.bulk_edit_command_permissions(self.id, permissions)
+
+    @overload
+    async def timeout(
+        self,
+        user: Snowflake,
+        *,
+        duration: Optional[Union[float, datetime.timedelta]],
+        reason: Optional[str] = None,
+    ) -> Member:
+        ...
+
+    @overload
+    async def timeout(
+        self,
+        user: Snowflake,
+        *,
+        until: Optional[datetime.datetime],
+        reason: Optional[str] = None,
+    ) -> Member:
+        ...
+
+    async def timeout(
+        self,
+        user: Snowflake,
+        *,
+        duration: Optional[Union[float, datetime.timedelta]] = MISSING,
+        until: Optional[datetime.datetime] = MISSING,
+        reason: Optional[str] = None,
+    ) -> Member:
+        """|coro|
+
+        Times out the member from the guild; until then, the member will not be able to interact with the guild.
+
+        Exactly one of ``duration`` or ``until`` must be provided. To remove a timeout, set one of the parameters to ``None``.
+
+        The user must meet the :class:`abc.Snowflake` abc.
+
+        You must have the :attr:`~Permissions.moderate_members` permission to do this.
+
+        .. versionadded:: 2.3
+
+        Parameters
+        -----------
+        user: :class:`abc.Snowflake`
+            The member to timeout.
+        duration: Optional[Union[:class:`float`, :class:`datetime.timedelta`]]
+            The duration (seconds or timedelta) of the member's timeout. Set to ``None`` to remove the timeout.
+            Supports up to 28 days in the future.
+            May not be used in combination with the ``until`` parameter.
+        until: Optional[:class:`datetime.datetime`]
+            The expiry date/time of the member's timeout. Set to ``None`` to remove the timeout.
+            Supports up to 28 days in the future.
+            May not be used in combination with the ``duration`` parameter.
+        reason: Optional[:class:`str`]
+            The reason for this timeout. Shows up on the audit log.
+
+        Raises
+        -------
+        Forbidden
+            You do not have permissions to timeout this member.
+        HTTPException
+            Timing out the member failed.
+
+        Returns
+        --------
+        :class:`Member`
+            The newly updated member.
+        """
+
+        if not (duration is MISSING) ^ (until is MISSING):
+            raise ValueError("Exactly one of `duration` and `until` must be provided")
+
+        payload: Dict[str, Any] = {}
+
+        if duration is not MISSING:
+            if duration is None:
+                until = None
+            elif isinstance(duration, datetime.timedelta):
+                until = utils.utcnow() + duration
+            else:
+                until = utils.utcnow() + datetime.timedelta(seconds=duration)
+
+        # at this point `until` cannot be `MISSING`
+        if until is not None:
+            until = until.astimezone(datetime.timezone.utc)
+            payload["communication_disabled_until"] = until.isoformat()
+        else:
+            payload["communication_disabled_until"] = None
+
+        data = await self._state.http.edit_member(self.id, user.id, reason=reason, **payload)
+        return Member(data=data, guild=self, state=self._state)

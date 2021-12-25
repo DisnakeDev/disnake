@@ -21,14 +21,14 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from typing import List, Optional, Union, TYPE_CHECKING
 
-from .base import Interaction
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from ..components import ActionRow, Button, SelectMenu
 from ..enums import ComponentType, try_enum
-from ..utils import cached_slot_property
 from ..message import Message
+from ..utils import cached_slot_property
+from .base import Interaction
 
 __all__ = (
     "MessageInteraction",
@@ -36,11 +36,11 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from ..types.interactions import (
-        Interaction as InteractionPayload,
-        ComponentInteractionData as ComponentInteractionDataPayload,
-    )
     from ..state import ConnectionState
+    from ..types.interactions import (
+        ComponentInteractionData as ComponentInteractionDataPayload,
+        Interaction as InteractionPayload,
+    )
 
 
 class MessageInteraction(Interaction):
@@ -62,8 +62,18 @@ class MessageInteraction(Interaction):
         The application ID that the interaction was for.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
+    locale: :class:`str`
+        The selected language of the interaction's author.
+
+        .. versionadded:: 2.4
     guild: Optional[:class:`Guild`]
         The guild the interaction was sent from.
+    guild_locale: Optional[:class:`str`]
+        The selected language of the interaction's guild.
+        This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
+        If the interaction was in a DM, then this value is ``None``.
+
+        .. versionadded:: 2.4
     channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
         The channel the interaction was sent from.
     message: Optional[:class:`Message`]

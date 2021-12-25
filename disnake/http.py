@@ -27,9 +27,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import sys
 import re
+import sys
+import weakref
 from typing import (
+    TYPE_CHECKING,
     Any,
     ClassVar,
     Coroutine,
@@ -38,65 +40,58 @@ from typing import (
     List,
     Optional,
     Sequence,
-    TYPE_CHECKING,
     Tuple,
     Type,
     TypeVar,
     Union,
 )
 from urllib.parse import quote as _uriquote
-import weakref
 
 import aiohttp
 
+from . import __version__, utils
 from .errors import (
-    HTTPException,
-    Forbidden,
-    NotFound,
-    LoginFailure,
     DiscordServerError,
+    Forbidden,
     GatewayNotFound,
+    HTTPException,
     InvalidArgument,
+    LoginFailure,
+    NotFound,
 )
 from .gateway import DiscordClientWebSocketResponse
-from . import __version__, utils
 from .utils import MISSING
 
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from types import TracebackType
+
+    from .enums import AuditLogAction, InteractionResponseType
     from .file import File
     from .message import Attachment
-    from .enums import (
-        AuditLogAction,
-        InteractionResponseType,
-    )
-
     from .types import (
         appinfo,
         audit_log,
         channel,
         components,
-        emoji,
         embed,
+        emoji,
         guild,
         integration,
         interactions,
         invite,
         member,
         message,
-        template,
         role,
+        sticker,
+        template,
+        threads,
         user,
         webhook,
-        channel,
         widget,
-        threads,
-        sticker,
     )
     from .types.snowflake import Snowflake, SnowflakeList
-
-    from types import TracebackType
 
     T = TypeVar("T")
     BE = TypeVar("BE", bound=BaseException)
@@ -1870,6 +1865,7 @@ class HTTPClient:
         entity_metadata: Dict[str, Any] = None,
         scheduled_end_time: str = None,
         description: str = None,
+        reason: Optional[str] = None,
     ):
         r = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
         payload = {
@@ -1891,7 +1887,7 @@ class HTTPClient:
         if description is not None:
             payload["description"] = description
 
-        return self.request(r, json=payload)
+        return self.request(r, json=payload, reason=reason)
 
     def get_guild_scheduled_event(
         self, guild_id: Snowflake, event_id: Snowflake, with_user_count: bool = False
@@ -1905,7 +1901,9 @@ class HTTPClient:
         )
         return self.request(route, params=params)
 
-    def edit_guild_scheduled_event(self, guild_id: Snowflake, event_id: Snowflake, **fields):
+    def edit_guild_scheduled_event(
+        self, guild_id: Snowflake, event_id: Snowflake, *, reason: Optional[str] = None, **fields
+    ):
         route = Route(
             method="PATCH",
             path="/guilds/{guild_id}/scheduled-events/{event_id}",
@@ -1913,7 +1911,7 @@ class HTTPClient:
             event_id=event_id,
         )
 
-        return self.request(route, json=fields)
+        return self.request(route, json=fields, reason=reason)
 
     def delete_guild_scheduled_event(self, guild_id: Snowflake, event_id: Snowflake):
         route = Route(

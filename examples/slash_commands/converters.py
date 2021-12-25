@@ -1,7 +1,6 @@
 import disnake
 from disnake.ext import commands
 
-
 bot = commands.Bot("!")
 
 # classic commands.Converter classes have been replaced by more user-friendly converter functions

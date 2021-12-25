@@ -61,8 +61,12 @@ if TYPE_CHECKING:
 
     from .emoji import Emoji
     from .guild import Guild
+    from .guild_scheduled_event import GuildScheduledEvent
     from .member import Member
     from .role import Role
+    from .stage_instance import StageInstance
+    from .sticker import GuildSticker
+    from .threads import Thread
     from .types.audit_log import (
         AuditLogChange as AuditLogChangePayload,
         AuditLogEntry as AuditLogEntryPayload,
@@ -71,9 +75,6 @@ if TYPE_CHECKING:
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
     from .user import User
-    from .stage_instance import StageInstance
-    from .sticker import GuildSticker
-    from .threads import Thread
 
 
 def _transform_permissions(entry: AuditLogEntry, data: str) -> Permissions:
@@ -174,6 +175,10 @@ def _transform_type(entry: AuditLogEntry, data: int) -> Union[enums.ChannelType,
         return enums.try_enum(enums.ChannelType, data)
 
 
+def _transform_datetime(entry: AuditLogEntry, data: Optional[str]) -> Optional[datetime.datetime]:
+    return utils.parse_time(data)
+
+
 def _transform_privacy_level(
     entry: AuditLogEntry, data: int
 ) -> Optional[Union[enums.StagePrivacyLevel, enums.GuildScheduledEventPrivacyLevel]]:
@@ -235,6 +240,7 @@ class AuditLogChanges:
         'guild_id':                      ('guild', _transform_guild_id),
         'tags':                          ('emoji', None),
         'default_message_notifications': ('default_notifications', _enum_transformer(enums.NotificationLevel)),
+        'communication_disabled_until':  ('timeout', _transform_datetime),
         'region':                        (None, _enum_transformer(enums.VoiceRegion)),
         'rtc_region':                    (None, _enum_transformer(enums.VoiceRegion)),
         'video_quality_mode':            (None, _enum_transformer(enums.VideoQualityMode)),
@@ -502,6 +508,7 @@ class AuditLogEntry(Hashable):
         StageInstance,
         GuildSticker,
         Thread,
+        GuildScheduledEvent,
         Object,
         None,
     ]:
@@ -583,3 +590,8 @@ class AuditLogEntry(Hashable):
 
     def _convert_target_thread(self, target_id: int) -> Union[Thread, Object]:
         return self.guild.get_thread(target_id) or Object(id=target_id)
+
+    def _convert_target_guild_scheduled_event(
+        self, target_id: int
+    ) -> Union[GuildScheduledEvent, Object]:
+        return self.guild.get_scheduled_event(target_id) or Object(id=target_id)

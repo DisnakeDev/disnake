@@ -25,32 +25,34 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import re
+import functools
 import inspect
+import re
 from typing import (
+    TYPE_CHECKING,
     Any,
     Dict,
     Generic,
     Iterable,
+    List,
     Literal,
     Optional,
-    TYPE_CHECKING,
-    List,
     Protocol,
+    Tuple,
     Type,
     TypeVar,
-    Tuple,
     Union,
     runtime_checkable,
 )
-import functools
 
 import disnake
+
 from .errors import *
 
 if TYPE_CHECKING:
-    from .context import Context
     from disnake.message import MessageableChannel
+
+    from .context import Context
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES
 
@@ -889,7 +891,12 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
 
 
 class PermissionsConverter(Converter[disnake.Permissions]):
-    """Converts to a  :class:`~disnake.Permissions`."""
+    """Converts to a :class:`~disnake.Permissions`.
+
+    Accepts an integer or a string of space-separated permission names (or just a single one) as input.
+
+    .. versionadded:: 2.3
+    """
 
     async def convert(self, ctx: Context, argument: str) -> disnake.Permissions:
         # try the permission bit value

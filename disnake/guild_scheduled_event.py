@@ -25,17 +25,18 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+
 from .enums import (
     GuildScheduledEventEntityType,
-    GuildScheduledEventStatus,
     GuildScheduledEventPrivacyLevel,
+    GuildScheduledEventStatus,
     try_enum,
 )
-from .user import User
 from .member import Member
 from .mixins import Hashable
-from .utils import cached_slot_property, parse_time, _get_as_snowflake, MISSING
+from .user import User
+from .utils import MISSING, _get_as_snowflake, cached_slot_property, parse_time
 
 if TYPE_CHECKING:
     from .abc import GuildChannel
@@ -255,6 +256,7 @@ class GuildScheduledEvent(Hashable):
         entity_type: GuildScheduledEventEntityType = MISSING,
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         status: GuildScheduledEventStatus = MISSING,
+        reason: Optional[str] = None,
     ):
         """|coro|
 
@@ -287,6 +289,8 @@ class GuildScheduledEvent(Hashable):
             The entity metadata of the guild scheduled event.
         status: :class:`GuildScheduledEventStatus`
             The status of the guild scheduled event.
+        reason: Optional[:class:`str`]
+            The reason for editing the guild scheduled event. Shows up on the audit log.
 
         Returns
         -------
@@ -366,7 +370,7 @@ class GuildScheduledEvent(Hashable):
             raise ValueError(error_for_external_entity.format("scheduled_end_time", "provided"))
 
         data = await self._state.http.edit_guild_scheduled_event(
-            guild_id=self.guild_id, event_id=self.id, **fields
+            guild_id=self.guild_id, event_id=self.id, reason=reason, **fields
         )
         return GuildScheduledEvent(state=self._state, data=data)
 

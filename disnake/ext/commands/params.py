@@ -593,7 +593,7 @@ def collect_params(
                 cog_param = parameter
             else:
                 raise TypeError(
-                    f"Found two candidates for the cog parameter in {function!r}: {inter_param.name} and {parameter.name}"
+                    f"Found two candidates for the cog parameter in {function!r}: {cog_param.name} and {parameter.name}"
                 )
         else:
             paraminfo = ParamInfo.from_param(parameter, {}, doc)
@@ -683,7 +683,16 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
 
     Returns the created options
     """
-    params = collect_nested_params(command.callback)
+    sig = signature(command.callback)
+    _, inter_param, params, injections = collect_params(command.callback)
+
+    if inter_param is None:
+        raise TypeError(f"Couldn't find an interaction parameter in {command.callback}")
+
+    for injection in injections.values():
+        params += collect_nested_params(injection.function)
+
+    params = sorted(params, key=lambda param: not param.required)
 
     # update connectors and autocompleters
     for param in params:
@@ -692,7 +701,8 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         if param.autocomplete:
             command.autocompleters[param.name] = param.autocomplete
 
-    # TODO: Apply stuff like GuildCommandInteraction
+    if issubclass_(sig.parameters[inter_param].annotation, disnake.GuildCommandInteraction):
+        command.guild_only = True
 
     return [param.to_option() for param in params]
 
@@ -798,6 +808,8 @@ def inject(function: Callable[..., Any]) -> Any:
     """
     A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your application command.
+
+    .. versionadded:: 2.3
     """
     return Injection(function)
 
@@ -819,7 +831,7 @@ class ConverterMethod(classmethod):
     A decorator to register a method as the converter method
     """
 
-    def __set_name__(self, owner: Type[Any], name: str):
+    def __set_name__(self, owner: Any, name: str):
         # this feels wrong
         function = self.__get__(None, owner)
         ParamInfo._registered_converters[owner] = function
@@ -832,13 +844,17 @@ if TYPE_CHECKING:
 else:
 
     def converter_method(function: Any) -> ConverterMethod:
-        """A decorator to register a method as the converter method"""
+        """A decorator to register a method as the converter method
+
+        .. versionadded:: 2.3
+        """
         return ConverterMethod(function)
 
 
 def register_injection(function: CallableT) -> CallableT:
-    """
-    A decorator to register a global injection.
+    """A decorator to register a global injection.
+
+    .. versionadded:: 2.3
     """
     sig = signature(function)
     tp = sig.return_annotation

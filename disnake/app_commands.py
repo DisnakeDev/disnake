@@ -21,12 +21,12 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from abc import ABC
 
-import re
 import math
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
+import re
 import warnings
+from abc import ABC
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
 
 from .abc import User
 from .custom_warnings import ConfigWarning
@@ -34,13 +34,13 @@ from .enums import (
     ApplicationCommandType,
     ChannelType,
     OptionType,
-    try_enum,
     enum_if_int,
+    try_enum,
     try_enum_to_int,
 )
 from .errors import InvalidArgument
 from .role import Role
-from .utils import _get_as_snowflake, _get_and_cast
+from .utils import _get_and_cast, _get_as_snowflake
 
 if TYPE_CHECKING:
     from .state import ConnectionState
@@ -166,9 +166,7 @@ class Option:
         min_value: float = None,
         max_value: float = None,
     ):
-        assert name.islower(), f"Option name {name!r} must be lowercase"
-
-        self.name: str = name
+        self.name: str = name.lower()
         self.description: Optional[str] = description
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
@@ -423,8 +421,9 @@ class SlashCommand(ApplicationCommand):
         default_permission: bool = True,
         **kwargs,
     ):
-        assert (
-            re.match(r"^[\w-]{1,32}$", name) is not None and name.islower()
+        name = name.lower()
+        assert re.fullmatch(
+            r"[\w-]{1,32}", name
         ), f"Slash command name {name!r} should consist of these symbols: a-z, 0-9, -, _"
 
         super().__init__(

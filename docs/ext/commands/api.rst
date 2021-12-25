@@ -312,6 +312,8 @@ Helper Functions
 
 .. autofunction:: disnake.ext.commands.register_injection
 
+.. autofunction:: disnake.ext.commands.converter_method
+
 Application Command
 ~~~~~~~~~~~~~~~~~~~
 
@@ -653,7 +655,7 @@ Checks
 .. autofunction:: disnake.ext.commands.is_nsfw(,)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.guild_permissions(guild_id, role_ids, user_ids, owner)
+.. autofunction:: disnake.ext.commands.guild_permissions(guild_id, roles, users, owner)
     :decorator:
 
 .. _ext_commands_api_context:
@@ -748,6 +750,9 @@ Converters
     :members:
 
 .. autoclass:: disnake.ext.commands.GuildStickerConverter
+    :members:
+
+.. autoclass:: disnake.ext.commands.PermissionsConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.clean_content

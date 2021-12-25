@@ -24,25 +24,24 @@ DEALINGS IN THE SOFTWARE.
 """
 from __future__ import annotations
 
-import threading
-import traceback
-import subprocess
-import audioop
 import asyncio
-import logging
-import shlex
-import time
-import json
-import sys
-import re
+import audioop
 import io
-
-from typing import Any, Callable, Generic, IO, Optional, TYPE_CHECKING, Tuple, Type, TypeVar, Union
+import json
+import logging
+import re
+import shlex
+import subprocess
+import sys
+import threading
+import time
+import traceback
+from typing import IO, TYPE_CHECKING, Any, Callable, Generic, Optional, Tuple, Type, TypeVar, Union
 
 from . import utils
 from .errors import ClientException
-from .opus import Encoder as OpusEncoder
 from .oggparse import OggStream
+from .opus import Encoder as OpusEncoder
 
 if TYPE_CHECKING:
     from .voice_client import VoiceClient
