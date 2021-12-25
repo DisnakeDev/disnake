@@ -104,7 +104,7 @@ def remove_optionals(annotation: Any) -> Any:
     if get_origin(annotation) in (Union, UnionType):
         annotation = cast(Any, annotation)
 
-        args = [i for i in annotation.__args__ if i not in (None, type(None))]
+        args = tuple(i for i in annotation.__args__ if i not in (None, type(None)))
         if len(args) == 1:
             annotation = args[0]
         else:
