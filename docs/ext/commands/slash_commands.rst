@@ -39,7 +39,8 @@ This code sample shows how to set the registration to be local:
 For global registration, don't specify this parameter.
 
 Another useful parameter is ``sync_commands_debug``. If set to ``True``, you receive debug messages related to the
-app command registration. This is useful if you want to figure out some registration details:
+app command registration by default, without having to change the log level of any loggers.
+This is useful if you want to figure out some registration details:
 
 .. code-block:: python3
 

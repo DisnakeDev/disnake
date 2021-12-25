@@ -234,10 +234,15 @@ class Client:
 
         .. versionadded:: 2.1
     sync_commands_debug: :class:`bool`
-        Whether to enable messages logging the synchronization process.
+        Whether to change the log level of log messages in the synchronization process to ``INFO``,
+        instead of the default ``DEBUG`` which isn't shown unless the log level is changed manually.
         Useful for tracking the commands being registered in the API.
 
         .. versionadded:: 2.1
+
+        .. versionchanged:: 2.4
+            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO``, instead of
+            controlling whether they are enabled at all.
 
     Attributes
     -----------
