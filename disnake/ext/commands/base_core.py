@@ -21,11 +21,12 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from abc import ABC
-from typing import Any, Callable, Dict, List, Mapping, Optional, TypeVar, TYPE_CHECKING
+
 import asyncio
 import datetime
 import functools
+from abc import ABC
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, TypeVar
 
 from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
@@ -36,8 +37,10 @@ from .errors import *
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
+
     from disnake.interactions import ApplicationCommandInteraction
-    from ._types import Check, Hook, Error
+
+    from ._types import Check, Error, Hook
     from .cog import Cog
 
 

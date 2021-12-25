@@ -26,11 +26,11 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, overload
 
 from .asset import Asset
-from .enums import ActivityType, try_enum
 from .colour import Colour
+from .enums import ActivityType, try_enum
 from .partial_emoji import PartialEmoji
 from .utils import _get_as_snowflake
 
@@ -94,10 +94,10 @@ t.ActivityFlags = {
 if TYPE_CHECKING:
     from .types.activity import (
         Activity as ActivityPayload,
-        ActivityTimestamps,
-        ActivityParty,
         ActivityAssets,
         ActivityButton,
+        ActivityParty,
+        ActivityTimestamps,
     )
 
 
