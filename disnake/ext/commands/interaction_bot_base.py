@@ -680,6 +680,8 @@ class InteractionBotBase(CommonBotBase):
         if global_cmds is None:
             return
 
+        log_level = logging.INFO if self._sync_commands_debug else logging.DEBUG
+
         # Update global commands first
         diff = _app_commands_diff(
             global_cmds, self._connection._global_application_commands.values()
@@ -691,16 +693,16 @@ class InteractionBotBase(CommonBotBase):
             or bool(diff["delete"])
         )
 
-        if self._sync_commands_debug:
-            # Show the difference
-            _log.info(
-                "Application command synchronization:\n"
-                "GLOBAL COMMANDS\n"
-                "===============\n"
-                "| NOTE: global commands can take up to 1 hour to show up after registration.\n"
-                "|\n"
-                f"| Update is required: {update_required}\n{_format_diff(diff)}"
-            )
+        # Show the difference
+        _log.log(
+            log_level,
+            "Application command synchronization:\n"
+            "GLOBAL COMMANDS\n"
+            "===============\n"
+            "| NOTE: global commands can take up to 1 hour to show up after registration.\n"
+            "|\n"
+            f"| Update is required: {update_required}\n{_format_diff(diff)}",
+        )
 
         if update_required:
             # Notice that we don't do any API requests if there're no changes.
@@ -728,13 +730,13 @@ class InteractionBotBase(CommonBotBase):
                 or bool(diff["delete"])
             )
             # Show diff
-            if self._sync_commands_debug:
-                _log.info(
-                    "Application command synchronization:\n"
-                    f"COMMANDS IN {guild_id}\n"
-                    "===============================\n"
-                    f"| Update is required: {update_required}\n{_format_diff(diff)}"
-                )
+            _log.log(
+                log_level,
+                "Application command synchronization:\n"
+                f"COMMANDS IN {guild_id}\n"
+                "===============================\n"
+                f"| Update is required: {update_required}\n{_format_diff(diff)}",
+            )
             # Do API requests and cache
             if update_required:
                 try:
@@ -750,8 +752,7 @@ class InteractionBotBase(CommonBotBase):
                         SyncWarning,
                     )
         # Last debug message
-        if self._sync_commands_debug:
-            _log.info("Command synchronization task has finished")
+        _log.log(log_level, "Command synchronization task has finished")
 
     async def _cache_application_command_permissions(self) -> None:
         # This method is usually called once per bot start
@@ -790,6 +791,8 @@ class InteractionBotBase(CommonBotBase):
 
         if not self._sync_permissions or self._is_closed or self.loop.is_closed():
             return
+
+        log_level = logging.INFO if self._sync_commands_debug else logging.DEBUG
 
         guilds_to_compare: Dict[
             int, List[PartialGuildApplicationCommandPermissions]
@@ -833,8 +836,7 @@ class InteractionBotBase(CommonBotBase):
                 and old_perms[new_cmd_perms.id].permissions == new_cmd_perms.permissions
                 for new_cmd_perms in new_array
             ):
-                if self._sync_commands_debug:
-                    _log.info(f"Command permissions in <Guild id={guild_id}>: no changes")
+                _log.log(log_level, f"Command permissions in <Guild id={guild_id}>: no changes")
                 continue
             # If we got here, the permissions require an update
             try:
@@ -845,8 +847,7 @@ class InteractionBotBase(CommonBotBase):
                     SyncWarning,
                 )
             finally:
-                if self._sync_commands_debug:
-                    _log.info(f"Command permissions in <Guild id={guild_id}>: edited")
+                _log.log(log_level, f"Command permissions in <Guild id={guild_id}>: edited")
 
     async def _prepare_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):
