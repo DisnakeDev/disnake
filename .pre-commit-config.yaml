@@ -1,0 +1,18 @@
+repos:
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
+        args: ["--profile", "black", "--extend-skip", "examples"]
+        name: Running isort in all files.
+      - id: isort
+        args: ["--profile", "black", "--thirdparty", "disnake"]
+        name: Running isort in examples.
+        files: ^examples/
+
+  - repo: https://github.com/psf/black
+    rev: 21.12b0
+    hooks:
+      - id: black
+        name: Running black in all files.

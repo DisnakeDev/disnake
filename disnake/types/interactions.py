@@ -189,6 +189,7 @@ class _InteractionOptional(TypedDict, total=False):
     member: Member
     user: User
     message: Message
+    guild_locale: str
 
 
 class Interaction(_InteractionOptional):
@@ -197,6 +198,7 @@ class Interaction(_InteractionOptional):
     type: InteractionType
     token: str
     version: int
+    locale: str
 
 
 class InteractionApplicationCommandCallbackData(TypedDict, total=False):
