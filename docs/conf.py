@@ -69,6 +69,7 @@ rst_prolog = """
 .. |coro| replace:: This function is a |coroutine_link|_.
 .. |maybecoro| replace:: This function *could be a* |coroutine_link|_.
 .. |coroutine_link| replace:: *coroutine*
+.. |components_type| replace:: Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.Item`, List[Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.Item`, List[:class:`disnake.ui.Item`]]]]
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
 """
 
@@ -190,7 +191,7 @@ def linkcode_resolve(domain, info):
         if isinstance(obj, property):
             obj = inspect.unwrap(obj.fget)  # type: ignore
 
-        path = os.path.relpath(inspect.getsourcefile(obj), start=_disnake_module_path)
+        path = os.path.relpath(inspect.getsourcefile(obj), start=_disnake_module_path)  # type: ignore
         src, lineno = inspect.getsourcelines(obj)
     except Exception:
         return None

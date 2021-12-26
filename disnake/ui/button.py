@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Callable, Optional, Tuple, Type, TypeVar, Unio
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
-from .item import DecoratedItem, Item, ItemCallbackType
+from .item import DecoratedItem, Item
 
 __all__ = (
     "Button",
@@ -41,6 +41,7 @@ __all__ = (
 
 if TYPE_CHECKING:
     from ..emoji import Emoji
+    from .item import ItemCallbackType
     from .view import View
 
 B = TypeVar("B", bound="Button")

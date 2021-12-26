@@ -53,12 +53,13 @@ from ..components import (
     _component_factory,
 )
 from ..enums import try_enum_to_int
-from .item import Item, ItemCallbackType
+from .item import Item
 
 __all__ = ("View",)
 
 
 if TYPE_CHECKING:
+    from .item import ItemCallbackType
     from ..interactions import MessageInteraction
     from ..message import Message
     from ..state import ConnectionState

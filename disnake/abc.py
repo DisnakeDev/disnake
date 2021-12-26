@@ -57,6 +57,7 @@ from .mentions import AllowedMentions
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
 from .sticker import GuildSticker, StickerItem
+from .ui.action_row import components_to_dict
 from .voice_client import VoiceClient, VoiceProtocol
 
 __all__ = (
@@ -90,7 +91,7 @@ if TYPE_CHECKING:
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
-    from .ui.view import View
+    from .ui import Components, View
     from .user import ClientUser
 
     MessageableChannel = Union[TextChannel, Thread, DMChannel, PartialMessageable, VoiceChannel]
@@ -1188,6 +1189,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
+        components: Components = ...,
     ) -> Message:
         ...
 
@@ -1206,6 +1208,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
+        components: Components = ...,
     ) -> Message:
         ...
 
@@ -1224,6 +1227,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
+        components: Components = ...,
     ) -> Message:
         ...
 
@@ -1242,6 +1246,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
+        components: Components = ...,
     ) -> Message:
         ...
 
@@ -1261,6 +1266,7 @@ class Messageable:
         reference=None,
         mention_author=None,
         view=None,
+        components=None,
     ):
         """|coro|
 
@@ -1333,7 +1339,13 @@ class Messageable:
 
             .. versionadded:: 1.6
         view: :class:`disnake.ui.View`
-            A Discord UI View to add to the message.
+            A Discord UI View to add to the message. This can not be mixed with ``components``.
+
+            .. versionadded:: 2.0
+        components: |components_type|
+            A list of components to include in the message. This can not be mixed with ``view``.
+
+            .. versionadded:: 2.4
 
         Raises
         --------
@@ -1403,13 +1415,20 @@ class Messageable:
                     "reference parameter must be Message, MessageReference, or PartialMessage"
                 ) from None
 
-        if view:
+        if view is not None and components is not None:
+            raise InvalidArgument("cannot pass both view and components parameter to send()")
+
+        elif view:
             if not hasattr(view, "__discord_ui_view__"):
                 raise InvalidArgument(f"view parameter must be View not {view.__class__!r}")
 
-            components = view.to_components()
+            components_payload = view.to_components()
+
+        elif components:
+            components_payload = components_to_dict(components)
+
         else:
-            components = None
+            components_payload = None
 
         if files is not None:
             if len(files) > 10:
@@ -1429,7 +1448,7 @@ class Messageable:
                     allowed_mentions=allowed_mentions,
                     message_reference=reference,
                     stickers=stickers,
-                    components=components,
+                    components=components_payload,  # type: ignore
                 )
             finally:
                 for f in files:
@@ -1445,7 +1464,7 @@ class Messageable:
                 allowed_mentions=allowed_mentions,
                 message_reference=reference,
                 stickers=stickers,
-                components=components,
+                components=components_payload,  # type: ignore
             )
 
         ret = state.create_message(channel=channel, data=data)

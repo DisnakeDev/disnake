@@ -60,6 +60,7 @@ from .partial_emoji import PartialEmoji
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
+from .ui.action_row import components_to_dict
 from .user import User
 from .utils import MISSING, escape_mentions
 
@@ -85,7 +86,7 @@ if TYPE_CHECKING:
     )
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
-    from .ui.view import View
+    from .ui import Components, View
 
     MR = TypeVar("MR", bound="MessageReference")
     EmojiInputType = Union[Emoji, PartialEmoji, str]
@@ -133,11 +134,14 @@ async def _edit_handler(
     delete_after: Optional[float] = None,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     view: Optional[View] = MISSING,
+    components: Optional[Components] = MISSING,
 ) -> Message:
     if embed is not MISSING and embeds is not MISSING:
         raise InvalidArgument("Cannot mix embed and embeds keyword arguments.")
     if file is not MISSING and files is not MISSING:
         raise InvalidArgument("Cannot mix file and files keyword arguments.")
+    if view is not MISSING and components is not MISSING:
+        raise InvalidArgument("Cannot mix view and components keyword arguments.")
 
     payload: Dict[str, Any] = {}
     if content is not MISSING:
@@ -184,6 +188,9 @@ async def _edit_handler(
             payload["components"] = view.to_components()
         else:
             payload["components"] = []
+
+    if components is not MISSING:
+        payload["components"] = [] if components is None else components_to_dict(components)
 
     try:
         data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)
@@ -1374,6 +1381,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
+        components: Optional[Components] = ...,
     ) -> Message:
         ...
 
@@ -1389,6 +1397,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
+        components: Optional[Components] = ...,
     ) -> Message:
         ...
 
@@ -1404,6 +1413,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
+        components: Optional[Components] = ...,
     ) -> Message:
         ...
 
@@ -1419,6 +1429,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
+        components: Optional[Components] = ...,
     ) -> Message:
         ...
 
@@ -1488,8 +1499,15 @@ class Message(Hashable):
 
             .. versionadded:: 1.4
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. If ``None`` is passed then
-            the view is removed.
+            The updated view to update this message with. This can not be mixed with ``components``.
+            If ``None`` is passed then the view is removed.
+
+            .. versionadded:: 2.0
+        components: |components_type|
+            The updated components to update this message with. This can not be mixed with ``view``.
+            If ``None`` is passed then the components are removed.
+
+            .. versionadded:: 2.4
 
         Raises
         -------
@@ -2047,10 +2065,15 @@ class PartialMessage(Hashable):
                 Unlike :meth:`Message.edit`, this does not default to
                 :attr:`Client.allowed_mentions` if no object is passed.
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. If ``None`` is passed then
-            the view is removed.
+            The updated view to update this message with. This can not be mixed with ``components``.
+            If ``None`` is passed then the view is removed.
 
             .. versionadded:: 2.0
+        components: |components_type|
+            The updated components to update this message with. This can not be mixed with ``view``.
+            If ``None`` is passed then the components are removed.
+
+            .. versionadded:: 2.4
 
         Raises
         -------
