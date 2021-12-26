@@ -6,4 +6,4 @@ if __name__ == "__main__":
 
     os.environ["BOT_TOKEN"] = token
 
-    import tests.main
+    import test_bot.main
