@@ -680,8 +680,6 @@ class InteractionBotBase(CommonBotBase):
         if global_cmds is None:
             return
 
-        log_level = logging.INFO if self._sync_commands_debug else logging.DEBUG
-
         # Update global commands first
         diff = _app_commands_diff(
             global_cmds, self._connection._global_application_commands.values()
@@ -694,14 +692,13 @@ class InteractionBotBase(CommonBotBase):
         )
 
         # Show the difference
-        _log.log(
-            log_level,
+        self._log_sync_debug(
             "Application command synchronization:\n"
             "GLOBAL COMMANDS\n"
             "===============\n"
             "| NOTE: global commands can take up to 1 hour to show up after registration.\n"
             "|\n"
-            f"| Update is required: {update_required}\n{_format_diff(diff)}",
+            f"| Update is required: {update_required}\n{_format_diff(diff)}"
         )
 
         if update_required:
@@ -730,12 +727,11 @@ class InteractionBotBase(CommonBotBase):
                 or bool(diff["delete"])
             )
             # Show diff
-            _log.log(
-                log_level,
+            self._log_sync_debug(
                 "Application command synchronization:\n"
                 f"COMMANDS IN {guild_id}\n"
                 "===============================\n"
-                f"| Update is required: {update_required}\n{_format_diff(diff)}",
+                f"| Update is required: {update_required}\n{_format_diff(diff)}"
             )
             # Do API requests and cache
             if update_required:
@@ -752,7 +748,7 @@ class InteractionBotBase(CommonBotBase):
                         SyncWarning,
                     )
         # Last debug message
-        _log.log(log_level, "Command synchronization task has finished")
+        self._log_sync_debug("Command synchronization task has finished")
 
     async def _cache_application_command_permissions(self) -> None:
         # This method is usually called once per bot start
@@ -791,8 +787,6 @@ class InteractionBotBase(CommonBotBase):
 
         if not self._sync_permissions or self._is_closed or self.loop.is_closed():
             return
-
-        log_level = logging.INFO if self._sync_commands_debug else logging.DEBUG
 
         guilds_to_compare: Dict[
             int, List[PartialGuildApplicationCommandPermissions]
@@ -836,7 +830,7 @@ class InteractionBotBase(CommonBotBase):
                 and old_perms[new_cmd_perms.id].permissions == new_cmd_perms.permissions
                 for new_cmd_perms in new_array
             ):
-                _log.log(log_level, f"Command permissions in <Guild id={guild_id}>: no changes")
+                self._log_sync_debug(f"Command permissions in <Guild id={guild_id}>: no changes")
                 continue
             # If we got here, the permissions require an update
             try:
@@ -847,7 +841,20 @@ class InteractionBotBase(CommonBotBase):
                     SyncWarning,
                 )
             finally:
-                _log.log(log_level, f"Command permissions in <Guild id={guild_id}>: edited")
+                self._log_sync_debug(f"Command permissions in <Guild id={guild_id}>: edited")
+
+    def _log_sync_debug(self, text: str) -> None:
+        if self._sync_commands_debug:
+            # if sync debugging is enabled, *always* output logs
+            if _log.isEnabledFor(logging.INFO):
+                # if the log level is `INFO` or higher, use that
+                _log.info(text)
+            else:
+                # if not, nothing would be logged, so just print instead
+                print(text)
+        else:
+            # if debugging is not explicitly enabled, always use the debug log level
+            _log.debug(text)
 
     async def _prepare_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):
