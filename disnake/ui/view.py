@@ -59,11 +59,11 @@ __all__ = ("View",)
 
 
 if TYPE_CHECKING:
-    from .item import ItemCallbackType
     from ..interactions import MessageInteraction
     from ..message import Message
     from ..state import ConnectionState
     from ..types.components import Component as ComponentPayload
+    from .item import ItemCallbackType
 
 
 def _walk_all_components(components: List[Component]) -> Iterator[Component]:

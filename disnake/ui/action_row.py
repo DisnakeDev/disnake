@@ -24,19 +24,14 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import List, Optional, TYPE_CHECKING, TypeVar, Union
+from typing import TYPE_CHECKING, List, Optional, TypeVar, Union
 
+from ..components import ActionRow as ActionRowComponent, Component, SelectOption
+from ..enums import ButtonStyle, ComponentType
+from ..utils import MISSING
 from .button import Button
 from .item import Item
 from .select import Select
-
-from ..components import (
-    Component,
-    ActionRow as ActionRowComponent,
-    SelectOption,
-)
-from ..enums import ButtonStyle, ComponentType
-from ..utils import MISSING
 
 __all__ = ("ActionRow",)
 

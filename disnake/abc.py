@@ -91,7 +91,8 @@ if TYPE_CHECKING:
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
-    from .ui import Components, View
+    from .ui.action_row import Components
+    from .ui.view import View
     from .user import ClientUser
 
     MessageableChannel = Union[TextChannel, Thread, DMChannel, PartialMessageable, VoiceChannel]
