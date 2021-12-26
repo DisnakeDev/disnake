@@ -1329,3 +1329,23 @@ div.code-block-caption {
     margin-right: auto;
   }
 }
+
+
+/* hoverxref stuff */
+
+.tooltipster-sidetip.tooltipster-borderless.tooltipster-borderless-custom .tooltipster-box {
+  background: rgba(10, 10, 10, 0.95);
+}
+
+.tooltipster-sidetip.tooltipster-borderless.tooltipster-borderless-custom .tooltipster-content {
+  font-size: 80%;
+  padding: 18px;
+}
+
+.tooltipster-sidetip.tooltipster-borderless.tooltipster-borderless-custom .tooltipster-content p {
+  font-size: 100% !important;
+}
+
+.tooltipster-sidetip.tooltipster-borderless.tooltipster-borderless-custom .tooltipster-content .headerlink {
+  visibility: hidden;
+}
