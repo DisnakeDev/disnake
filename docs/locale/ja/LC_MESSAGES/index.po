@@ -80,4 +80,3 @@ msgstr ":ref:`search`"
 
 #~ msgid ":ref:`modindex`"
 #~ msgstr ":ref:`modindex`"
-

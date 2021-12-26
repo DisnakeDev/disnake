@@ -80,4 +80,3 @@ msgstr "稀ではありますが、エクステンションにクリーンアッ
 #: ../../ext/commands/extensions.rst:57
 msgid "basic_ext.py"
 msgstr "basic_ext.py"
-
