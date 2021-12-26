@@ -24,7 +24,16 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
+
+import asyncio
+import os
+import sys
+import time
+import traceback
+from functools import partial
+from itertools import groupby
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
@@ -33,26 +42,18 @@ from typing import (
     List,
     Optional,
     Sequence,
-    TYPE_CHECKING,
     Tuple,
 )
-from functools import partial
-from itertools import groupby
 
-import traceback
-import asyncio
-import sys
-import time
-import os
-from .item import Item
-from ..enums import try_enum_to_int
 from ..components import (
-    Component,
     ActionRow as ActionRowComponent,
-    _component_factory,
     Button as ButtonComponent,
+    Component,
     SelectMenu as SelectComponent,
+    _component_factory,
 )
+from ..enums import try_enum_to_int
+from .item import Item
 
 __all__ = ("View",)
 
@@ -61,8 +62,8 @@ if TYPE_CHECKING:
     from .item import ItemCallbackType
     from ..interactions import MessageInteraction
     from ..message import Message
-    from ..types.components import Component as ComponentPayload
     from ..state import ConnectionState
+    from ..types.components import Component as ComponentPayload
 
 
 def _walk_all_components(components: List[Component]) -> Iterator[Component]:

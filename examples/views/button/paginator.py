@@ -1,7 +1,7 @@
+from typing import List
+
 import disnake
 from disnake.ext import commands
-
-from typing import List
 
 bot = commands.Bot(command_prefix="-")
 

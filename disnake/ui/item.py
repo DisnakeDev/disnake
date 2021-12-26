@@ -26,13 +26,13 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Coroutine,
     Dict,
     Generic,
     Optional,
-    TYPE_CHECKING,
     Protocol,
     Tuple,
     Type,
@@ -46,10 +46,10 @@ I = TypeVar("I", bound="Item")
 V = TypeVar("V", bound="View", covariant=True)
 
 if TYPE_CHECKING:
-    from ..enums import ComponentType
-    from .view import View
     from ..components import Component
+    from ..enums import ComponentType
     from ..interactions import MessageInteraction
+    from .view import View
 
     ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
 

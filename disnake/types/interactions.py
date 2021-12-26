@@ -25,13 +25,14 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING, Dict, TypedDict, Union, List, Literal, Any
-from .snowflake import Snowflake
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, TypedDict, Union
+
+from .channel import ChannelType
 from .components import Component, ComponentType
 from .embed import Embed
-from .channel import ChannelType
 from .member import Member
 from .role import Role
+from .snowflake import Snowflake
 from .user import User
 
 if TYPE_CHECKING:
@@ -188,6 +189,7 @@ class _InteractionOptional(TypedDict, total=False):
     member: Member
     user: User
     message: Message
+    guild_locale: str
 
 
 class Interaction(_InteractionOptional):
@@ -196,6 +198,7 @@ class Interaction(_InteractionOptional):
     type: InteractionType
     token: str
     version: int
+    locale: str
 
 
 class InteractionApplicationCommandCallbackData(TypedDict, total=False):
