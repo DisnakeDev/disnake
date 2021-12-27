@@ -36,6 +36,7 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    overload,
     List,
     Literal,
     Optional,
@@ -66,10 +67,6 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypeGuard
 
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    Annotated = object()
 if sys.version_info >= (3, 10):
     from types import UnionType
 else:
@@ -83,6 +80,9 @@ Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
 TChoice = TypeVar("TChoice", bound=ChoiceValue)
 
 __all__ = (
+    "Range",
+    "IntRange",
+    "FloatRange",
     "ParamInfo",
     "Param",
     "param",
@@ -175,6 +175,103 @@ class Injection:
         self = cls(function)
         cls._registered[annotation] = self
         return function
+
+
+class Range(type):
+    """Type depicting a limited range of allowed values"""
+
+    min_value: Optional[float]
+    max_value: Optional[float]
+
+    @overload
+    @classmethod
+    def create(
+        cls,
+        min_value: int = None,
+        max_value: int = None,
+        le: int = None,
+        lt: int = None,
+        ge: int = None,
+        gt: int = None,
+    ) -> Type[int]:
+        ...
+
+    @overload
+    @classmethod
+    def create(
+        cls,
+        min_value: float = None,
+        max_value: float = None,
+        le: float = None,
+        lt: float = None,
+        ge: float = None,
+        gt: float = None,
+    ) -> Type[float]:
+        ...
+
+    @classmethod
+    def create(
+        cls,
+        min_value: float = None,
+        max_value: float = None,
+        le: float = None,
+        lt: float = None,
+        ge: float = None,
+        gt: float = None,
+    ) -> Any:
+        """Construct a new range with any possible constraints"""
+        self = cls(cls.__name__, (), {})
+        self.max_value = min_value or _xt_to_xe(le, lt, -1)
+        self.min_value = max_value or _xt_to_xe(ge, gt, 1)
+        return self
+
+    @property
+    def underlying_type(self) -> Union[Type[int], Type[float]]:
+        if isinstance(self.min_value, float) or isinstance(self.max_value, float):
+            return float
+
+        return int
+
+    def __repr__(self) -> str:
+        a = "..." if self.min_value is None else self.min_value
+        b = "..." if self.max_value is None else self.max_value
+        return f"{type(self).__name__}[{a}, {b}]"
+
+    @overload
+    def __class_getitem__(
+        cls, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]
+    ) -> Type[int]:
+        ...
+
+    @overload
+    def __class_getitem__(
+        cls, args: Tuple[Union[float, ellipsis], Union[float, ellipsis]]
+    ) -> Type[float]:
+        ...
+
+    def __class_getitem__(cls, args: Tuple[Any, ...]) -> Any:
+        a, b = [None if x is Ellipsis else x for x in args]
+        return cls.create(min_value=a, max_value=b)
+
+
+if TYPE_CHECKING:
+
+    class IntRange(int, Range):
+        """Type depicting a limited range of allowed int values
+
+        Meant to be used with linters which do not support __class_getitem__ like pyright
+        """
+
+    class FloatRange(float, Range):
+        """Type depicting a limited range of allowed float values
+
+        Meant to be used with linters which do not support __class_getitem__ like pyright
+        """
+
+
+else:
+    IntRange = Range
+    FloatRange = Range
 
 
 class ParamInfo:
@@ -321,27 +418,6 @@ class ParamInfo:
 
         return default
 
-    async def verify_type(self, inter: CommandInteraction, argument: Any) -> Any:
-        """Check if a type of an argument is correct and possibly fix it"""
-        # these types never need to be verified
-        if self.discord_type.value in [3, 4, 5, 8, 9, 10]:
-            return argument
-
-        if issubclass(self.type, disnake.Member):
-            if isinstance(argument, disnake.Member):
-                return argument
-
-            raise errors.MemberNotFound(str(argument.id))
-
-        if issubclass(self.type, disnake.abc.GuildChannel):
-            if isinstance(argument, self.type):
-                return argument
-
-            raise errors.ChannelNotFound(str(argument.id))
-
-        # unexpected types may just be ignored
-        return argument
-
     async def convert_argument(self, inter: CommandInteraction, argument: Any) -> Any:
         """Convert a value if a converter is given"""
         if self.large:
@@ -351,7 +427,8 @@ class ParamInfo:
                 raise errors.ConversionError(int, e) from e
 
         if self.converter is None:
-            return await self.verify_type(inter, argument)
+            # TODO: Custom validators
+            return argument
 
         try:
             argument = self.converter(inter, argument)
@@ -393,9 +470,17 @@ class ParamInfo:
                 self.parse_converter_annotation(self.converter, annotation)
                 return True
 
+        # short circuit if user forgot to provide annotations
         if annotation is inspect.Parameter.empty or annotation is Any:
             return False
-        elif self.large:
+
+        # resolve type aliases
+        if isinstance(annotation, Range):
+            self.min_value = annotation.min_value
+            self.max_value = annotation.max_value
+            annotation = annotation.underlying_type
+
+        if self.large:
             self.type = str
             if annotation is not int:
                 raise TypeError("Large integers must be annotated with int")

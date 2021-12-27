@@ -19,7 +19,7 @@ async def autocomplete_langs(inter, string: str) -> List[str]:
 
 @bot.slash_command()
 async def autocomplete(
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     language: str = commands.Param(autocomplete=autocomplete_langs),
 ):
     ...
@@ -28,11 +28,11 @@ async def autocomplete(
 # In case you need don't want to use Param or need to use self in a cog you you may
 # create autocomplete options with the decorator @slash_command.autocomplete()
 @bot.slash_command()
-async def languages(inter: disnake.ApplicationCommandInteraction, language: str):
+async def languages(inter: disnake.CommandInteraction, language: str):
     ...
 
 
 @languages.autocomplete("language")
-async def language_autocomp(inter: disnake.ApplicationCommandInteraction, string: str):
+async def language_autocomp(inter: disnake.CommandInteraction, string: str):
     string = string.lower()
     return [lang for lang in LANGUAGES if string in lang.lower()]
