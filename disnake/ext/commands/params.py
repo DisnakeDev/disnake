@@ -177,6 +177,7 @@ class Injection:
 
 class RangeMeta(type):
     """Custom Generic implementation for Range"""
+
     @overload
     def __getitem__(self, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]) -> Type[int]:
         ...
@@ -231,14 +232,16 @@ class Range(type, metaclass=RangeMeta):
         cls,
         min_value: float = None,
         max_value: float = None,
-        **kwargs: Optional[float],
+        *,
+        le: float = None,
+        lt: float = None,
+        ge: float = None,
+        gt: float = None,
     ) -> Any:
         """Construct a new range with any possible constraints"""
         self = cls(cls.__name__, (), {})
-        ge = kwargs.get("ge", min_value)
-        le = kwargs.get("le", max_value)
-        self.min_value = _xt_to_xe(ge, kwargs.get("gt"), 1)
-        self.max_value = _xt_to_xe(le, kwargs.get("lt"), -1)
+        self.min_value = min_value if min_value is not None else _xt_to_xe(le, lt, -1)
+        self.max_value = max_value if max_value is not None else _xt_to_xe(ge, gt, 1)
         return self
 
     @property
@@ -381,7 +384,7 @@ class ParamInfo:
         return converter
 
     def __repr__(self) -> str:
-        args = ", ".join(f"{k}={'...' if v is Ellipsis else repr(v)}" for k, v in vars(self).items())
+        args = ", ".join(f"{k}={'...' if v is ... else repr(v)}" for k, v in vars(self).items())
         return f"{type(self).__name__}({args})"
 
     async def get_default(self, inter: CommandInteraction) -> Any:

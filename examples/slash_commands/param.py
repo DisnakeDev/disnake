@@ -68,7 +68,7 @@ async def defaults(
 
 
 # You may limit numbers into a certain range using commands.Range
-# "..." is impicitlyinfinity. Range[0, ...] therefore means any integer from 0 to infinity and Range[..., 0] means from -inf to 0
+# "..." is impicitly infinity. Range[0, ...] therefore means any integer from 0 to infinity and Range[..., 0] means from -inf to 0
 # The 1.0 in fraction is very important, the usage of a float says that the argument may be any float in that range.
 @bot.slash_command()
 async def ranges(

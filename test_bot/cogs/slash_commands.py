@@ -51,7 +51,7 @@ class SlashCommands(commands.Cog):
         a: int = commands.Param(None, lt=0),
         b: commands.Range[1, ...] = None,
         c: commands.Range[0, 10] = None,
-        d: commands.Range[0.0, 10] = None,
+        d: commands.Range[0, 10.0] = None,
     ):
         """limit slash command options to a range of values
 
@@ -63,8 +63,6 @@ class SlashCommands(commands.Cog):
         d: 0 - 10 float
         """
         await inter.send(f"{inter.options}")
-
-    print(ranges.options)
 
 
 def setup(bot):
