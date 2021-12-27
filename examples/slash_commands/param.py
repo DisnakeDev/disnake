@@ -1,4 +1,3 @@
-from typing import Type
 import disnake
 from disnake.ext import commands
 
@@ -69,17 +68,14 @@ async def defaults(
 
 
 # You may limit numbers into a certain range using commands.Range
-# ... implictly means infinity. Range[0, ...] therefore means any integer from 0 to infinity and Range[..., 0] means from -inf to 0
+# "..." is impicitlyinfinity. Range[0, ...] therefore means any integer from 0 to infinity and Range[..., 0] means from -inf to 0
 # The 1.0 in fraction is very important, the usage of a float says that the argument may be any float in that range.
-#
-# If your linter complains about wrong types you may use IntRange or FloatRange
-# They are however completely optional and only there to improve user experience.
 @bot.slash_command()
 async def ranges(
     inter: disnake.CommandInteraction,
     ranking: commands.Range[1, 10],
-    negative: commands.IntRange[..., 0],
-    fraction: commands.FloatRange[0, 1.0],
+    negative: commands.Range[..., 0],
+    fraction: commands.Range[0, 1.0],
 ):
     """Command with limited ranges
 
@@ -89,20 +85,3 @@ async def ranges(
     negative: An integer lower than 0
     fraction: A floating point number between 0 and 1
     """
-    ...
-
-
-# All of these may also be created separately if you so choose
-Ranking: Type = commands.Range[1, 10]
-Negative: Type = commands.Range.create(lt=0)
-Fraction: Type = commands.Range.create(min_value=0, max_value=1)
-
-
-@bot.slash_command()
-async def seprate_ranges(
-    inter: disnake.CommandInteraction,
-    ranking: Ranking,
-    negative: Negative,
-    fraction: Fraction,
-):
-    ...

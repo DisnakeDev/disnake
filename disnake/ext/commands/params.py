@@ -36,7 +36,6 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
-    overload,
     List,
     Literal,
     Optional,
@@ -47,6 +46,7 @@ from typing import (
     cast,
     get_origin,
     get_type_hints,
+    overload,
 )
 
 import disnake
@@ -81,8 +81,6 @@ TChoice = TypeVar("TChoice", bound=ChoiceValue)
 
 __all__ = (
     "Range",
-    "IntRange",
-    "FloatRange",
     "ParamInfo",
     "Param",
     "param",
@@ -177,7 +175,24 @@ class Injection:
         return function
 
 
-class Range(type):
+class RangeMeta(type):
+    """Custom Generic implementation for Range"""
+    @overload
+    def __getitem__(self, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]) -> Type[int]:
+        ...
+
+    @overload
+    def __getitem__(
+        self, args: Tuple[Union[float, ellipsis], Union[float, ellipsis]]
+    ) -> Type[float]:
+        ...
+
+    def __getitem__(self, args: Tuple[Any, ...]) -> Any:
+        a, b = [None if x is Ellipsis else x for x in args]
+        return Range.create(min_value=a, max_value=b)
+
+
+class Range(type, metaclass=RangeMeta):
     """Type depicting a limited range of allowed values"""
 
     min_value: Optional[float]
@@ -189,6 +204,7 @@ class Range(type):
         cls,
         min_value: int = None,
         max_value: int = None,
+        *,
         le: int = None,
         lt: int = None,
         ge: int = None,
@@ -202,6 +218,7 @@ class Range(type):
         cls,
         min_value: float = None,
         max_value: float = None,
+        *,
         le: float = None,
         lt: float = None,
         ge: float = None,
@@ -214,15 +231,14 @@ class Range(type):
         cls,
         min_value: float = None,
         max_value: float = None,
-        le: float = None,
-        lt: float = None,
-        ge: float = None,
-        gt: float = None,
+        **kwargs: Optional[float],
     ) -> Any:
         """Construct a new range with any possible constraints"""
         self = cls(cls.__name__, (), {})
-        self.max_value = min_value or _xt_to_xe(le, lt, -1)
-        self.min_value = max_value or _xt_to_xe(ge, gt, 1)
+        ge = kwargs.get("ge", min_value)
+        le = kwargs.get("le", max_value)
+        self.min_value = _xt_to_xe(ge, kwargs.get("gt"), 1)
+        self.max_value = _xt_to_xe(le, kwargs.get("lt"), -1)
         return self
 
     @property
@@ -236,42 +252,6 @@ class Range(type):
         a = "..." if self.min_value is None else self.min_value
         b = "..." if self.max_value is None else self.max_value
         return f"{type(self).__name__}[{a}, {b}]"
-
-    @overload
-    def __class_getitem__(
-        cls, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]
-    ) -> Type[int]:
-        ...
-
-    @overload
-    def __class_getitem__(
-        cls, args: Tuple[Union[float, ellipsis], Union[float, ellipsis]]
-    ) -> Type[float]:
-        ...
-
-    def __class_getitem__(cls, args: Tuple[Any, ...]) -> Any:
-        a, b = [None if x is Ellipsis else x for x in args]
-        return cls.create(min_value=a, max_value=b)
-
-
-if TYPE_CHECKING:
-
-    class IntRange(int, Range):
-        """Type depicting a limited range of allowed int values
-
-        Meant to be used with linters which do not support __class_getitem__ like pyright
-        """
-
-    class FloatRange(float, Range):
-        """Type depicting a limited range of allowed float values
-
-        Meant to be used with linters which do not support __class_getitem__ like pyright
-        """
-
-
-else:
-    IntRange = Range
-    FloatRange = Range
 
 
 class ParamInfo:
@@ -355,7 +335,7 @@ class ParamInfo:
 
     @property
     def required(self) -> bool:
-        return self.default is ...
+        return self.default is Ellipsis
 
     @property
     def discord_type(self) -> OptionType:
@@ -401,7 +381,7 @@ class ParamInfo:
         return converter
 
     def __repr__(self) -> str:
-        args = ", ".join(f"{k}={'...' if v is ... else repr(v)}" for k, v in vars(self).items())
+        args = ", ".join(f"{k}={'...' if v is Ellipsis else repr(v)}" for k, v in vars(self).items())
         return f"{type(self).__name__}({args})"
 
     async def get_default(self, inter: CommandInteraction) -> Any:
@@ -530,7 +510,7 @@ class ParamInfo:
         _, parameter = parameters.popitem()
         annotation = parameter.annotation
 
-        if parameter.default is not inspect.Parameter.empty and self.default is ...:
+        if parameter.default is not inspect.Parameter.empty and self.required:
             self.default = parameter.default
             self.convert_default = True
 
