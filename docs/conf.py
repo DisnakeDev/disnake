@@ -202,13 +202,13 @@ def linkcode_resolve(domain, info):
 
 
 hoverx_default_type = "tooltip"
-hoverxref_auto_ref = True
 hoverxref_domains = ["py"]
 hoverxref_role_types = dict.fromkeys(
     ["ref", "class", "func", "meth", "attr", "exc", "data"],
     "tooltip",
 )
-hoverxref_tooltip_theme = ["tooltipster-borderless", "tooltipster-borderless-custom"]
+hoverxref_tooltip_theme = ["tooltipster-custom"]
+hoverxref_api_host = "https://rtd-cors.hmmmm.workers.dev/disnake"
 
 
 # -- Options for HTML output ----------------------------------------------
