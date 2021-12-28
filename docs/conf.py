@@ -208,7 +208,6 @@ hoverxref_role_types = dict.fromkeys(
     "tooltip",
 )
 hoverxref_tooltip_theme = ["tooltipster-custom"]
-hoverxref_api_host = "https://rtd-cors.hmmmm.workers.dev/disnake"
 
 
 # -- Options for HTML output ----------------------------------------------
