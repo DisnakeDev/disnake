@@ -28,15 +28,15 @@ from __future__ import annotations
 import array
 import ctypes
 import ctypes.util
+import gc
 import logging
 import math
 import os.path
 import struct
 import sys
-import gc
 import threading
-import traceback
 import time
+import traceback
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -75,8 +75,8 @@ class SignalCtl(TypedDict):
 
 __all__ = (
     "Encoder",
-    'Decoder',
-    'DecodeManager',
+    "Decoder",
+    "DecodeManager",
     "OpusError",
     "OpusNotLoaded",
 )
@@ -517,11 +517,11 @@ class Decoder(_OpusStruct):
         )
 
         return array.array("h", pcm[: ret * channel_count]).tobytes()
-    
+
 
 class DecodeManager(threading.Thread, _OpusStruct):
     def __init__(self, client):
-        super().__init__(daemon=True, name='DecodeManager')
+        super().__init__(daemon=True, name="DecodeManager")
 
         self.client = client
         self.decode_queue = []
@@ -546,7 +546,7 @@ class DecodeManager(threading.Thread, _OpusStruct):
                 if data.decrypted_data is None:
                     continue
                 else:
-                    data.decoded_data = self.get_decoder(data.ssrc).decode(data.decrypted_data)   
+                    data.decoded_data = self.get_decoder(data.ssrc).decode(data.decrypted_data)
             except OpusError:
                 print("Error occurred decoding opus frame.")
                 continue
@@ -560,14 +560,14 @@ class DecodeManager(threading.Thread, _OpusStruct):
             gc.collect()
             print("Decoder Process Terminated")
         self._end_thread.set()
-        
+
     def get_decoder(self, ssrc):
         d = self.decoder.get(ssrc)
         if d is None:
             self.decoder[ssrc] = Decoder()
             return self.decoder[ssrc]
         else:
-            return d 
+            return d
 
     @property
     def decoding(self):

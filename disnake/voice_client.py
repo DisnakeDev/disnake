@@ -42,10 +42,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import select
 import socket
 import struct
 import threading
-import select
 import time
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple
 
@@ -54,7 +54,7 @@ from .backoff import ExponentialBackoff
 from .errors import ClientException, ConnectionClosed, RecordingException
 from .gateway import *
 from .player import AudioPlayer, AudioSource
-from .sink import Sink, RawData
+from .sink import RawData, Sink
 from .utils import MISSING
 
 if TYPE_CHECKING:
@@ -574,7 +574,7 @@ class VoiceClient(VoiceProtocol):
         self.checked_add("_lite_nonce", 1, 4294967295)
 
         return header + box.encrypt(bytes(data), bytes(nonce)).ciphertext + nonce[:4]
-    
+
     def _decrypt_xsalsa20_poly1305(self, header, data):
         box = nacl.secret.SecretBox(bytes(self.secret_key))
 
@@ -602,14 +602,14 @@ class VoiceClient(VoiceProtocol):
 
     @staticmethod
     def strip_header_ext(data):
-        if data[0] == 0xbe and data[1] == 0xde and len(data) > 4:
-            _, length = struct.unpack_from('>HH', data)
+        if data[0] == 0xBE and data[1] == 0xDE and len(data) > 4:
+            _, length = struct.unpack_from(">HH", data)
             offset = 4 + length * 4
             data = data[offset:]
         return data
 
     def get_ssrc(self, user_id):
-        return {info['user_id']: ssrc for ssrc, info in self.ws.ssrc_map.items()}[user_id]
+        return {info["user_id"]: ssrc for ssrc, info in self.ws.ssrc_map.items()}[user_id]
 
     def play(
         self, source: AudioSource, *, after: Callable[[Optional[Exception]], Any] = None
@@ -733,7 +733,7 @@ class VoiceClient(VoiceProtocol):
             )
 
         self.checked_add("timestamp", opus.Encoder.SAMPLES_PER_FRAME, 4294967295)
-        
+
     def unpack_audio(self, data):
         """Takes an audio packet received from Discord and decodes it into pcm audio data.
         If there are no users talking in the channel, `None` will be returned.
@@ -754,7 +754,7 @@ class VoiceClient(VoiceProtocol):
 
         data = RawData(data, self)
 
-        if data.decrypted_data == b'\xf8\xff\xfe':  # Frame of silence
+        if data.decrypted_data == b"\xf8\xff\xfe":  # Frame of silence
             return
 
         self.decoder.decode(data)
@@ -782,7 +782,7 @@ class VoiceClient(VoiceProtocol):
             Must provide a Sink object.
         """
         if not self.is_connected():
-            raise RecordingException('Not connected to voice channel.')
+            raise RecordingException("Not connected to voice channel.")
         if self.recording:
             raise RecordingException("Already recording.")
         if not isinstance(sink, Sink):
@@ -796,7 +796,14 @@ class VoiceClient(VoiceProtocol):
         self.sink = sink
         sink.init(self)
 
-        t = threading.Thread(target=self.recv_audio, args=(sink, callback, *args,))
+        t = threading.Thread(
+            target=self.recv_audio,
+            args=(
+                sink,
+                callback,
+                *args,
+            ),
+        )
         t.start()
 
     def stop_recording(self):
@@ -820,7 +827,7 @@ class VoiceClient(VoiceProtocol):
         ------
         RecordingException
             Not currently recording.
-         """
+        """
         if not self.recording:
             raise RecordingException("Not currently recording audio.")
         self.paused = not self.paused
@@ -841,8 +848,7 @@ class VoiceClient(VoiceProtocol):
         self.user_timestamps = {}
         self.starting_time = time.perf_counter()
         while self.recording:
-            ready, _, err = select.select([self.socket], [],
-                                          [self.socket], 0.01)
+            ready, _, err = select.select([self.socket], [], [self.socket], 0.01)
             if not ready:
                 if err:
                     print(f"Socket error: {err}")
@@ -868,14 +874,20 @@ class VoiceClient(VoiceProtocol):
         if data.ssrc not in self.user_timestamps:
             self.user_timestamps.update({data.ssrc: data.timestamp})
             # Add silence of when they were not being recorded.
-            data.decoded_data = struct.pack('<h', 0) * round(
-                self.decoder.CHANNELS * self.decoder.SAMPLING_RATE * (time.perf_counter() - self.starting_time)
-            ) + data.decoded_data
+            data.decoded_data = (
+                struct.pack("<h", 0)
+                * round(
+                    self.decoder.CHANNELS
+                    * self.decoder.SAMPLING_RATE
+                    * (time.perf_counter() - self.starting_time)
+                )
+                + data.decoded_data
+            )
         else:
             self.user_timestamps[data.ssrc] = data.timestamp
 
         silence = data.timestamp - self.user_timestamps[data.ssrc] - 960
-        data.decoded_data = struct.pack('<h', 0) * silence + data.decoded_data
+        data.decoded_data = struct.pack("<h", 0) * silence + data.decoded_data
         while data.ssrc not in self.ws.ssrc_map:
             time.sleep(0.05)
-        self.sink.write(data.decoded_data, self.ws.ssrc_map[data.ssrc]['user_id'])
+        self.sink.write(data.decoded_data, self.ws.ssrc_map[data.ssrc]["user_id"])

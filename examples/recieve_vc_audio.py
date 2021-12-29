@@ -1,5 +1,6 @@
-import discord
 import os
+
+import discord
 
 
 def vc_required(func):
@@ -8,25 +9,26 @@ def vc_required(func):
         if not vc:
             return
         await func(self, msg, vc)
+
     return get_vc
 
 
 def args_to_filters(args):
     filters = {}
-    if '--time' in args:
-        index = args.index('--time')
+    if "--time" in args:
+        index = args.index("--time")
         try:
-            seconds = args[index+1]
+            seconds = args[index + 1]
         except IndexError:
             return "You must provide an amount of seconds for the time."
         try:
             seconds = int(seconds)
         except ValueError:
             return "You must provide an integer value."
-        filters.update({'time': seconds})
-    if '--users' in args:
+        filters.update({"time": seconds})
+    if "--users" in args:
         users = []
-        index = args.index('--users')+1
+        index = args.index("--users") + 1
         while True:
             try:
                 users.append(int(args[index]))
@@ -37,22 +39,22 @@ def args_to_filters(args):
             index += 1
         if not users:
             return "You must provide at least one user, or multiple users separated by spaces."
-        filters.update({'users': users})
+        filters.update({"users": users})
     return filters
 
 
 def get_encoding(args):
-    if '--output' in args:
-        index = args.index('--output')
+    if "--output" in args:
+        index = args.index("--output")
         try:
-            encoding = args[index+1].lower()
+            encoding = args[index + 1].lower()
             if encoding not in discord.Sink.valid_encodings:
                 return
             return encoding
         except IndexError:
             return
     else:
-        return 'wav'
+        return "wav"
 
 
 class Client(discord.Client):
@@ -62,9 +64,9 @@ class Client(discord.Client):
         self.playlists = {}
 
         self.commands = {
-            '!start': self.start_recording,
-            '!stop': self.stop_recording,
-            '!pause': self.toggle_pause,
+            "!start": self.start_recording,
+            "!stop": self.stop_recording,
+            "!pause": self.toggle_pause,
         }
 
     async def get_vc(self, message):
@@ -101,7 +103,9 @@ class Client(discord.Client):
         if encoding is None:
             return await msg.channel.send("You must provide a valid output encoding.")
 
-        vc.start_recording(discord.Sink(encoding=encoding, filters=filters), self.finished_callback, msg.channel)
+        vc.start_recording(
+            discord.Sink(encoding=encoding, filters=filters), self.finished_callback, msg.channel
+        )
 
         await msg.channel.send("The recording has started!")
 
@@ -116,7 +120,10 @@ class Client(discord.Client):
 
     async def finished_callback(self, sink, channel, *args):
         # Note: sink.audio_data = {user_id: AudioData}
-        recorded_users = [f" <@{str(user_id)}> ({os.path.split(audio.file)[1]}) " for user_id, audio in sink.audio_data.items()]
+        recorded_users = [
+            f" <@{str(user_id)}> ({os.path.split(audio.file)[1]}) "
+            for user_id, audio in sink.audio_data.items()
+        ]
         await channel.send(f"Finished! Recorded audio for {', '.join(recorded_users)}.")
 
     async def on_voice_state_update(self, member, before, after):
@@ -130,7 +137,6 @@ class Client(discord.Client):
         del self.connections[member.guild.id]
 
 
-
 intents = discord.Intents.default()
 client = Client(intents=intents)
-client.run('token')
+client.run("token")
