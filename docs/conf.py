@@ -175,6 +175,12 @@ nitpick_ignore_files = [
 ]
 
 
+# unreferenced static images to copy
+copy_static_images = [
+    "images/drop_down_icon.svg",
+]
+
+
 _disnake_module_path = os.path.dirname(importlib.util.find_spec("disnake").origin)  # type: ignore
 
 
