@@ -45,6 +45,8 @@ import logging
 import socket
 import struct
 import threading
+import select
+import time
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple
 
 from . import opus, utils
