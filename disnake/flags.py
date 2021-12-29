@@ -327,7 +327,7 @@ class MessageFlags(BaseFlags):
         return 128
 
     @flag_value
-    def failed_to_mention_roles(self):
+    def failed_to_mention_roles_in_thread(self):
         """:class:`bool`: Returns ``True`` if the source message failed to
         mention some roles and add their members to the thread.
 
