@@ -152,11 +152,16 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
     sync_commands_debug: :class:`bool`
-        Whether to enable messages logging the synchronization process.
+        Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
+        If disabled, uses the default ``DEBUG`` log level which isn't shown unless the log level is changed manually.
         Useful for tracking the commands being registered in the API.
         Defaults to ``False``.
 
         .. versionadded:: 2.1
+
+        .. versionchanged:: 2.4
+            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
+            instead of controlling whether they are enabled at all.
     sync_permissions: :class:`bool`
         Whether to enable automatic synchronization of app command permissions in your code.
         Defaults to ``False``.
@@ -218,11 +223,16 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
     sync_commands_debug: :class:`bool`
-        Whether to enable messages logging the synchronization process.
+        Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
+        If disabled, uses the default ``DEBUG`` log level which isn't shown unless the log level is changed manually.
         Useful for tracking the commands being registered in the API.
         Defaults to ``False``.
 
         .. versionadded:: 2.1
+
+        .. versionchanged:: 2.4
+            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
+            instead of controlling whether they are enabled at all.
     sync_permissions: :class:`bool`
         Whether to enable automatic synchronization of app command permissions in your code.
         Defaults to ``False``.
