@@ -34,7 +34,7 @@ class Menu(disnake.ui.View):
         # Enables the next page button and disables the previous page button if we're on the first embed.
         self.next_page.disabled = False
         if self.embed_count == 0:
-            button.disabled = True
+            self.prev_page.disabled = True
 
         await interaction.response.edit_message(embed=embed, view=self)
 
@@ -49,7 +49,7 @@ class Menu(disnake.ui.View):
         # Enables the previous page button and disables the next page button if we're on the last embed.
         self.prev_page.disabled = False
         if self.embed_count == len(self.embeds) - 1:
-            button.disabled = True
+            self.next_page.disabled = True
 
         await interaction.response.edit_message(embed=embed, view=self)
 
