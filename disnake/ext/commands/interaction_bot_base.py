@@ -26,6 +26,7 @@ import asyncio
 import sys
 import traceback
 import warnings
+from itertools import chain
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -189,15 +190,16 @@ class InteractionBotBase(CommonBotBase):
         self._schedule_app_command_preparation()
 
     @property
+    def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
+        return chain(
+            self.all_slash_commands.values(),
+            self.all_user_commands.values(),
+            self.all_message_commands.values(),
+        )
+
+    @property
     def application_commands(self) -> Set[InvokableApplicationCommand]:
-        result = set()
-        for cmd in self.all_slash_commands.values():
-            result.add(cmd)
-        for cmd in self.all_user_commands.values():
-            result.add(cmd)
-        for cmd in self.all_message_commands.values():
-            result.add(cmd)
-        return result
+        return set(self.application_commands_iterator)
 
     @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:
@@ -619,18 +621,23 @@ class InteractionBotBase(CommonBotBase):
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
         global_cmds = []
         guilds = {}
-        for cmd in self.application_commands:
+
+        for cmd in self.application_commands_iterator:
             if not cmd.auto_sync:
                 cmd.body._always_synced = True
+
             guild_ids = cmd.guild_ids or test_guilds
+
             if guild_ids is None:
                 global_cmds.append(cmd.body)
-            else:
-                for guild_id in guild_ids:
-                    if guild_id not in guilds:
-                        guilds[guild_id] = [cmd.body]
-                    else:
-                        guilds[guild_id].append(cmd.body)
+                continue
+
+            for guild_id in guild_ids:
+                if guild_id not in guilds:
+                    guilds[guild_id] = [cmd.body]
+                else:
+                    guilds[guild_id].append(cmd.body)
+
         return global_cmds, guilds
 
     async def _cache_application_commands(self) -> None:
@@ -756,7 +763,7 @@ class InteractionBotBase(CommonBotBase):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
 
         guilds_to_cache = set()
-        for cmd in self.application_commands:
+        for cmd in self.application_commands_iterator:
             if not cmd.auto_sync:
                 continue
             for guild_id in cmd.permissions:
@@ -792,7 +799,7 @@ class InteractionBotBase(CommonBotBase):
             int, List[PartialGuildApplicationCommandPermissions]
         ] = {}  # {guild_id: [partial_perms, ...], ...}
 
-        for cmd_wrapper in self.application_commands:
+        for cmd_wrapper in self.application_commands_iterator:
             if not cmd_wrapper.auto_sync:
                 continue
 
