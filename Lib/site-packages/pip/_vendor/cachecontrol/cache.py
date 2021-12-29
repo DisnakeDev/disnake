@@ -6,7 +6,6 @@ from threading import Lock
 
 
 class BaseCache(object):
-
     def get(self, key):
         raise NotImplementedError()
 
@@ -21,7 +20,6 @@ class BaseCache(object):
 
 
 class DictCache(BaseCache):
-
     def __init__(self, init_dict=None):
         self.lock = Lock()
         self.data = init_dict or {}

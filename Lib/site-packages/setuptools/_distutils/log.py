@@ -11,14 +11,14 @@ FATAL = 5
 
 import sys
 
-class Log:
 
+class Log:
     def __init__(self, threshold=WARN):
         self.threshold = threshold
 
     def _log(self, level, msg, args):
         if level not in (DEBUG, INFO, WARN, ERROR, FATAL):
-            raise ValueError('%s wrong log level' % str(level))
+            raise ValueError("%s wrong log level" % str(level))
 
         if level >= self.threshold:
             if args:
@@ -28,12 +28,12 @@ class Log:
             else:
                 stream = sys.stdout
             try:
-                stream.write('%s\n' % msg)
+                stream.write("%s\n" % msg)
             except UnicodeEncodeError:
                 # emulate backslashreplace error handler
                 encoding = stream.encoding
                 msg = msg.encode(encoding, "backslashreplace").decode(encoding)
-                stream.write('%s\n' % msg)
+                stream.write("%s\n" % msg)
             stream.flush()
 
     def log(self, level, msg, *args):
@@ -54,6 +54,7 @@ class Log:
     def fatal(self, msg, *args):
         self._log(FATAL, msg, args)
 
+
 _global_log = Log()
 log = _global_log.log
 debug = _global_log.debug
@@ -62,11 +63,13 @@ warn = _global_log.warn
 error = _global_log.error
 fatal = _global_log.fatal
 
+
 def set_threshold(level):
     # return the old threshold for use from tests
     old = _global_log.threshold
     _global_log.threshold = level
     return old
+
 
 def set_verbosity(v):
     if v <= 0:

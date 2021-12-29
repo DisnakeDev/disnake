@@ -20,15 +20,15 @@ def is_appengine_sandbox():
 
 
 def is_local_appengine():
-    return "APPENGINE_RUNTIME" in os.environ and os.environ.get(
-        "SERVER_SOFTWARE", ""
-    ).startswith("Development/")
+    return "APPENGINE_RUNTIME" in os.environ and os.environ.get("SERVER_SOFTWARE", "").startswith(
+        "Development/"
+    )
 
 
 def is_prod_appengine():
-    return "APPENGINE_RUNTIME" in os.environ and os.environ.get(
-        "SERVER_SOFTWARE", ""
-    ).startswith("Google App Engine/")
+    return "APPENGINE_RUNTIME" in os.environ and os.environ.get("SERVER_SOFTWARE", "").startswith(
+        "Google App Engine/"
+    )
 
 
 def is_prod_appengine_mvms():

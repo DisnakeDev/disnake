@@ -54,7 +54,6 @@ def _secure_open_write(filename, fmode):
 
 
 class FileCache(BaseCache):
-
     def __init__(
         self,
         directory,

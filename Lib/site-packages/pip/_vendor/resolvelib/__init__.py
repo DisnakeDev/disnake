@@ -19,8 +19,8 @@ from .reporters import BaseReporter
 from .resolvers import (
     InconsistentCandidate,
     RequirementsConflicted,
-    Resolver,
     ResolutionError,
     ResolutionImpossible,
     ResolutionTooDeep,
+    Resolver,
 )

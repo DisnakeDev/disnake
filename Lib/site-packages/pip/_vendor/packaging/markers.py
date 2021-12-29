@@ -111,9 +111,7 @@ ALIASES = {
 }
 VARIABLE.setParseAction(lambda s, l, t: Variable(ALIASES.get(t[0], t[0])))
 
-VERSION_CMP = (
-    L("===") | L("==") | L(">=") | L("<=") | L("!=") | L("~=") | L(">") | L("<")
-)
+VERSION_CMP = L("===") | L("==") | L(">=") | L("<=") | L("!=") | L("~=") | L(">") | L("<")
 
 MARKER_OP = VERSION_CMP | L("not in") | L("in")
 MARKER_OP.setParseAction(lambda s, l, t: Op(t[0]))
@@ -155,11 +153,7 @@ def _format_marker(
     # where the single item is itself it's own list. In that case we want skip
     # the rest of this function so that we don't get extraneous () on the
     # outside.
-    if (
-        isinstance(marker, list)
-        and len(marker) == 1
-        and isinstance(marker[0], (list, tuple))
-    ):
+    if isinstance(marker, list) and len(marker) == 1 and isinstance(marker[0], (list, tuple)):
         return _format_marker(marker[0])
 
     if isinstance(marker, list):
@@ -212,9 +206,7 @@ def _get_env(environment: Dict[str, str], name: str) -> str:
     value: Union[str, Undefined] = environment.get(name, _undefined)
 
     if isinstance(value, Undefined):
-        raise UndefinedEnvironmentName(
-            f"{name!r} does not exist in evaluation environment."
-        )
+        raise UndefinedEnvironmentName(f"{name!r} does not exist in evaluation environment.")
 
     return value
 
@@ -278,8 +270,7 @@ class Marker:
             self._markers = _coerce_parse_result(MARKER.parseString(marker))
         except ParseException as e:
             raise InvalidMarker(
-                f"Invalid marker: {marker!r}, parse error at "
-                f"{marker[e.loc : e.loc + 8]!r}"
+                f"Invalid marker: {marker!r}, parse error at " f"{marker[e.loc : e.loc + 8]!r}"
             )
 
     def __str__(self) -> str:

@@ -25,8 +25,8 @@
 # 02110-1301  USA
 ######################### END LICENSE BLOCK #########################
 
-from .enums import ProbingState
 from .charsetprober import CharSetProber
+from .enums import ProbingState
 
 
 class CharSetGroupProber(CharSetProber):
@@ -95,10 +95,10 @@ class CharSetGroupProber(CharSetProber):
             if not prober:
                 continue
             if not prober.active:
-                self.logger.debug('%s not active', prober.charset_name)
+                self.logger.debug("%s not active", prober.charset_name)
                 continue
             conf = prober.get_confidence()
-            self.logger.debug('%s %s confidence = %s', prober.charset_name, prober.language, conf)
+            self.logger.debug("%s %s confidence = %s", prober.charset_name, prober.language, conf)
             if best_conf < conf:
                 best_conf = conf
                 self._best_guess_prober = prober

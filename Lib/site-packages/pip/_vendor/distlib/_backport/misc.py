@@ -8,14 +8,15 @@
 import os
 import sys
 
-__all__ = ['cache_from_source', 'callable', 'fsencode']
+__all__ = ["cache_from_source", "callable", "fsencode"]
 
 
 try:
     from imp import cache_from_source
 except ImportError:
+
     def cache_from_source(py_file, debug=__debug__):
-        ext = debug and 'c' or 'o'
+        ext = debug and "c" or "o"
         return py_file + ext
 
 
@@ -31,11 +32,11 @@ except NameError:
 try:
     fsencode = os.fsencode
 except AttributeError:
+
     def fsencode(filename):
         if isinstance(filename, bytes):
             return filename
         elif isinstance(filename, str):
             return filename.encode(sys.getfilesystemencoding())
         else:
-            raise TypeError("expect bytes or str, not %s" %
-                            type(filename).__name__)
+            raise TypeError("expect bytes or str, not %s" % type(filename).__name__)

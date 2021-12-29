@@ -12,7 +12,7 @@ class saveopts(option_base):
 
         for cmd in dist.command_options:
 
-            if cmd == 'saveopts':
+            if cmd == "saveopts":
                 continue  # don't save our own options!
 
             for opt, (src, val) in dist.get_option_dict(cmd).items():

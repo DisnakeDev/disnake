@@ -16,7 +16,9 @@ class MacOS(PlatformDirsABC):
     @property
     def user_data_dir(self) -> str:
         """:return: data directory tied to the user, e.g. ``~/Library/Application Support/$appname/$version``"""
-        return self._append_app_name_and_version(os.path.expanduser("~/Library/Application Support/"))
+        return self._append_app_name_and_version(
+            os.path.expanduser("~/Library/Application Support/")
+        )
 
     @property
     def site_data_dir(self) -> str:
@@ -56,7 +58,9 @@ class MacOS(PlatformDirsABC):
     @property
     def user_runtime_dir(self) -> str:
         """:return: runtime directory tied to the user, e.g. ``~/Library/Caches/TemporaryItems/$appname/$version``"""
-        return self._append_app_name_and_version(os.path.expanduser("~/Library/Caches/TemporaryItems"))
+        return self._append_app_name_and_version(
+            os.path.expanduser("~/Library/Caches/TemporaryItems")
+        )
 
 
 __all__ = [

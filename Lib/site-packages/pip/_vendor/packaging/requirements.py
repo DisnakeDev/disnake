@@ -67,9 +67,7 @@ VERSION_SPEC = originalTextFor(_VERSION_SPEC)("specifier")
 VERSION_SPEC.setParseAction(lambda s, l, t: t[1])
 
 MARKER_EXPR = originalTextFor(MARKER_EXPR())("marker")
-MARKER_EXPR.setParseAction(
-    lambda s, l, t: Marker(s[t._original_start : t._original_end])
-)
+MARKER_EXPR.setParseAction(lambda s, l, t: Marker(s[t._original_start : t._original_end]))
 MARKER_SEPARATOR = SEMICOLON
 MARKER = MARKER_SEPARATOR + MARKER_EXPR
 

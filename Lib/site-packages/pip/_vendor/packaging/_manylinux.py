@@ -92,9 +92,7 @@ def _is_linux_armhf() -> bool:
     result = elf_header.e_ident_class == elf_header.ELFCLASS32
     result &= elf_header.e_ident_data == elf_header.ELFDATA2LSB
     result &= elf_header.e_machine == elf_header.EM_ARM
-    result &= (
-        elf_header.e_flags & elf_header.EF_ARM_ABIMASK
-    ) == elf_header.EF_ARM_ABI_VER5
+    result &= (elf_header.e_flags & elf_header.EF_ARM_ABIMASK) == elf_header.EF_ARM_ABI_VER5
     result &= (
         elf_header.e_flags & elf_header.EF_ARM_ABI_FLOAT_HARD
     ) == elf_header.EF_ARM_ABI_FLOAT_HARD
@@ -211,8 +209,7 @@ def _parse_glibc_version(version_str: str) -> Tuple[int, int]:
     m = re.match(r"(?P<major>[0-9]+)\.(?P<minor>[0-9]+)", version_str)
     if not m:
         warnings.warn(
-            "Expected glibc version with 2 components major.minor,"
-            " got: %s" % version_str,
+            "Expected glibc version with 2 components major.minor," " got: %s" % version_str,
             RuntimeWarning,
         )
         return -1, -1

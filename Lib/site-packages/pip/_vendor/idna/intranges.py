@@ -8,6 +8,7 @@ in the original list?" in time O(log(# runs)).
 import bisect
 from typing import List, Tuple
 
+
 def intranges_from_list(list_):
     # type: (List[int]) -> Tuple[int, ...]
     """Represent a list of integers as a sequence of ranges:
@@ -21,18 +22,20 @@ def intranges_from_list(list_):
     ranges = []
     last_write = -1
     for i in range(len(sorted_list)):
-        if i+1 < len(sorted_list):
-            if sorted_list[i] == sorted_list[i+1]-1:
+        if i + 1 < len(sorted_list):
+            if sorted_list[i] == sorted_list[i + 1] - 1:
                 continue
-        current_range = sorted_list[last_write+1:i+1]
+        current_range = sorted_list[last_write + 1 : i + 1]
         ranges.append(_encode_range(current_range[0], current_range[-1] + 1))
         last_write = i
 
     return tuple(ranges)
 
+
 def _encode_range(start, end):
     # type: (int, int) -> int
     return (start << 32) | end
+
 
 def _decode_range(r):
     # type: (int) -> Tuple[int, int]
@@ -47,7 +50,7 @@ def intranges_contain(int_, ranges):
     # we could be immediately ahead of a tuple (start, end)
     # with start < int_ <= end
     if pos > 0:
-        left, right = _decode_range(ranges[pos-1])
+        left, right = _decode_range(ranges[pos - 1])
         if left <= int_ < right:
             return True
     # or we could be immediately behind a tuple (int_, end)

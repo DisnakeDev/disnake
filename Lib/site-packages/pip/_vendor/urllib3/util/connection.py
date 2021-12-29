@@ -66,9 +66,7 @@ def create_connection(
     try:
         host.encode("idna")
     except UnicodeError:
-        return six.raise_from(
-            LocationParseError(u"'%s', label empty or too long" % host), None
-        )
+        return six.raise_from(LocationParseError("'%s', label empty or too long" % host), None)
 
     for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
         af, socktype, proto, canonname, sa = res

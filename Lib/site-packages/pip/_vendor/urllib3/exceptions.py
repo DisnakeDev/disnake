@@ -264,9 +264,7 @@ class InvalidChunkLength(HTTPError, httplib_IncompleteRead):
     """Invalid chunk length in a chunked response."""
 
     def __init__(self, response, length):
-        super(InvalidChunkLength, self).__init__(
-            response.tell(), response.length_remaining
-        )
+        super(InvalidChunkLength, self).__init__(response.tell(), response.length_remaining)
         self.response = response
         self.length = length
 
@@ -296,10 +294,7 @@ class ProxySchemeUnknown(AssertionError, URLSchemeUnknown):
         if scheme is None:
             message = "Proxy URL had no scheme, should start with http:// or https://"
         else:
-            message = (
-                "Proxy URL had unsupported scheme %s, should use http:// or https://"
-                % scheme
-            )
+            message = "Proxy URL had unsupported scheme %s, should use http:// or https://" % scheme
         super(ProxySchemeUnknown, self).__init__(message)
 
 

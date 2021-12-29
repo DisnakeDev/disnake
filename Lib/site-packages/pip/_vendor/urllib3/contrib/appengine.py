@@ -104,9 +104,7 @@ class AppEngineManager(RequestMethods):
         urlfetch_retries=True,
     ):
         if not urlfetch:
-            raise AppEnginePlatformError(
-                "URLFetch is not available in this environment."
-            )
+            raise AppEnginePlatformError("URLFetch is not available in this environment.")
 
         warnings.warn(
             "urllib3 is using URLFetch on Google App Engine sandbox instead "
@@ -137,7 +135,7 @@ class AppEngineManager(RequestMethods):
         retries=None,
         redirect=True,
         timeout=Timeout.DEFAULT_TIMEOUT,
-        **response_kw
+        **response_kw,
     ):
 
         retries = self._get_retries(retries, redirect)
@@ -182,9 +180,7 @@ class AppEngineManager(RequestMethods):
             raise SSLError(e)
 
         except urlfetch.InvalidMethodError as e:
-            raise AppEnginePlatformError(
-                "URLFetch does not support method: %s" % method, e
-            )
+            raise AppEnginePlatformError("URLFetch does not support method: %s" % method, e)
 
         http_response = self._urlfetch_response_to_http_response(
             response, retries=retries, **response_kw
@@ -201,9 +197,7 @@ class AppEngineManager(RequestMethods):
                     method = "GET"
 
                 try:
-                    retries = retries.increment(
-                        method, url, response=http_response, _pool=self
-                    )
+                    retries = retries.increment(method, url, response=http_response, _pool=self)
                 except MaxRetryError:
                     if retries.raise_on_redirect:
                         raise MaxRetryError(self, url, "too many redirects")
@@ -220,7 +214,7 @@ class AppEngineManager(RequestMethods):
                     retries=retries,
                     redirect=redirect,
                     timeout=timeout,
-                    **response_kw
+                    **response_kw,
                 )
 
         # Check if we should retry the HTTP response.
@@ -237,7 +231,7 @@ class AppEngineManager(RequestMethods):
                 retries=retries,
                 redirect=redirect,
                 timeout=timeout,
-                **response_kw
+                **response_kw,
             )
 
         return http_response
@@ -267,7 +261,7 @@ class AppEngineManager(RequestMethods):
             msg=urlfetch_resp.header_msg,
             headers=urlfetch_resp.headers,
             status=urlfetch_resp.status_code,
-            **response_kw
+            **response_kw,
         )
 
         return HTTPResponse(
@@ -275,7 +269,7 @@ class AppEngineManager(RequestMethods):
             headers=urlfetch_resp.headers,
             status=urlfetch_resp.status_code,
             original_response=original_response,
-            **response_kw
+            **response_kw,
         )
 
     def _get_absolute_timeout(self, timeout):
