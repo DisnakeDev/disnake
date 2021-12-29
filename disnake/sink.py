@@ -185,22 +185,40 @@ class Sink(Filters):
         if self.encoding == "pcm":
             return
         if self.encoding == "mp3":
-            mp3_file = audio.file.split(".")[0] + ".mp3"
-            args = ["ffmpeg", "-f", "s16le", "-ar", "48000", "-ac", "2", "-i", audio.file, mp3_file]
-            process = None
-            if os.path.exists(mp3_file):
-                os.remove(
-                    mp3_file
-                )  # process will get stuck asking whether or not to overwrite, if file already exists.
             try:
-                process = subprocess.Popen(args, creationflags=CREATE_NO_WINDOW)
-            except FileNotFoundError:
-                raise ClientException("ffmpeg was not found.") from None
-            except subprocess.SubprocessError as exc:
-                raise ClientException(
-                    "Popen failed: {0.__class__.__name__}: {0}".format(exc)
-                ) from exc
-            process.wait()
+                mp3_file = audio.file.split(".")[0] + ".mp3"
+                args = ["ffmpeg", "-f", "s16le", "-ar", "48000", "-ac", "2", "-i", audio.file, mp3_file]
+                process = None
+                if os.path.exists(mp3_file):
+                    os.remove(
+                        mp3_file
+                    )  # process will get stuck asking whether or not to overwrite, if file already exists.
+                try:
+                    process = subprocess.Popen(args, creationflags=CREATE_NO_WINDOW)
+                except FileNotFoundError:
+                    raise ClientException("ffmpeg was not found.") from None
+                except subprocess.SubprocessError as exc:
+                    raise ClientException(
+                        "Popen failed: {0.__class__.__name__}: {0}".format(exc)
+                    ) from exc
+                process.wait()
+            except:
+                mp3_file = audio.file.split(".")[0] + ".mp3"
+                args = [sys.executable, "-m", "ffmpeg", "-f", "s16le", "-ar", "48000", "-ac", "2", "-i", audio.file, mp3_file]
+                process = None
+                if os.path.exists(mp3_file):
+                    os.remove(
+                        mp3_file
+                    )  # process will get stuck asking whether or not to overwrite, if file already exists.
+                try:
+                    process = subprocess.Popen(args, creationflags=CREATE_NO_WINDOW)
+                except FileNotFoundError:
+                    raise ClientException("ffmpeg was not found.") from None
+                except subprocess.SubprocessError as exc:
+                    raise ClientException(
+                        "Popen failed: {0.__class__.__name__}: {0}".format(exc)
+                    ) from exc
+                process.wait()
         elif self.encoding == "wav":
             with open(audio.file, "rb") as pcm:
                 data = pcm.read()
