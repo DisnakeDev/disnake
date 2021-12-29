@@ -1,2 +1,0 @@
-class FatalError(RuntimeError):
-    pass
