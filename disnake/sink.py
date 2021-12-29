@@ -25,6 +25,7 @@ import sys
 import threading
 import time
 import wave
+import ffmpeg
 
 from .errors import ClientException
 
