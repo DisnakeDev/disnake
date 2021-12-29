@@ -40,6 +40,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.linkcode",
     "sphinxcontrib_trio",
+    "hoverxref.extension",
     "details",
     "exception_hierarchy",
     "attributetable",
@@ -204,6 +205,15 @@ def linkcode_resolve(domain, info):
 
     path = f"{path}#L{lineno}-L{lineno + len(src) - 1}"
     return f"{github_repo}/blob/{git_ref}/disnake/{path}"
+
+
+hoverx_default_type = "tooltip"
+hoverxref_domains = ["py"]
+hoverxref_role_types = dict.fromkeys(
+    ["ref", "class", "func", "meth", "attr", "exc", "data"],
+    "tooltip",
+)
+hoverxref_tooltip_theme = ["tooltipster-custom"]
 
 
 # -- Options for HTML output ----------------------------------------------
