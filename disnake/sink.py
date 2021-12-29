@@ -28,13 +28,6 @@ import sys
 import struct
 
 
- Bluenix2 on May 19 Contributor
-
-This file should define an __all__.
-
- Sheepposu on May 19 Author
-
-I'll add that
 __all__ = (
     'Filters',
     'Sink',
