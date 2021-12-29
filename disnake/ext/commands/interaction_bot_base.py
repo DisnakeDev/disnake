@@ -189,7 +189,6 @@ class InteractionBotBase(CommonBotBase):
 
         self._schedule_app_command_preparation()
 
-    @property
     def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
         return chain(
             self.all_slash_commands.values(),
@@ -199,7 +198,7 @@ class InteractionBotBase(CommonBotBase):
 
     @property
     def application_commands(self) -> Set[InvokableApplicationCommand]:
-        return set(self.application_commands_iterator)
+        return set(self.application_commands_iterator())
 
     @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:
@@ -622,7 +621,7 @@ class InteractionBotBase(CommonBotBase):
         global_cmds = []
         guilds = {}
 
-        for cmd in self.application_commands_iterator:
+        for cmd in self.application_commands_iterator():
             if not cmd.auto_sync:
                 cmd.body._always_synced = True
 
@@ -763,7 +762,7 @@ class InteractionBotBase(CommonBotBase):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
 
         guilds_to_cache = set()
-        for cmd in self.application_commands_iterator:
+        for cmd in self.application_commands_iterator():
             if not cmd.auto_sync:
                 continue
             for guild_id in cmd.permissions:
@@ -799,7 +798,7 @@ class InteractionBotBase(CommonBotBase):
             int, List[PartialGuildApplicationCommandPermissions]
         ] = {}  # {guild_id: [partial_perms, ...], ...}
 
-        for cmd_wrapper in self.application_commands_iterator:
+        for cmd_wrapper in self.application_commands_iterator():
             if not cmd_wrapper.auto_sync:
                 continue
 
