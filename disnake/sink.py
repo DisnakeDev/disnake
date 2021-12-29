@@ -186,7 +186,7 @@ class Sink(Filters):
             return
         if self.encoding == "mp3":
             mp3_file = audio.file.split(".")[0] + ".mp3"
-            args = [sys.executable, "-m", "ffmpeg", "-f", "s16le", "-ar", "48000", "-ac", "2", "-i", audio.file, mp3_file]
+            args = ["ffmpeg", "-f", "s16le", "-ar", "48000", "-ac", "2", "-i", audio.file, mp3_file]
             process = None
             if os.path.exists(mp3_file):
                 os.remove(
