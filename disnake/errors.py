@@ -53,6 +53,7 @@ __all__ = (
     "LoginFailure",
     "ConnectionClosed",
     "PrivilegedIntentsRequired",
+    'RecordingException',
     "InteractionException",
     "InteractionTimedOut",
     "InteractionResponded",
