@@ -33,6 +33,9 @@ import math
 import os.path
 import struct
 import sys
+import threading
+import traceback
+import time
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -70,6 +73,8 @@ class SignalCtl(TypedDict):
 
 __all__ = (
     "Encoder",
+    'Decoder',
+    'DecodeManager',
     "OpusError",
     "OpusNotLoaded",
 )
@@ -498,11 +503,11 @@ class Decoder(_OpusStruct):
             channel_count = self.CHANNELS
         else:
             frames = self.packet_get_nb_frames(data)
-            channel_count = self.packet_get_nb_channels(data)
+            channel_count = self.CHANNELS
             samples_per_frame = self.packet_get_samples_per_frame(data)
             frame_size = frames * samples_per_frame
 
-        pcm = (ctypes.c_int16 * (frame_size * channel_count))()
+        pcm = (ctypes.c_int16 * (frame_size * channel_count * ctypes.sizeof(ctypes.c_int16)))()
         pcm_ptr = ctypes.cast(pcm, c_int16_ptr)
 
         ret = _lib.opus_decode(
@@ -510,3 +515,44 @@ class Decoder(_OpusStruct):
         )
 
         return array.array("h", pcm[: ret * channel_count]).tobytes()
+    
+
+class DecodeManager(threading.Thread, _OpusStruct):
+    def __init__(self, client):
+        super().__init__(daemon=True, name='DecodeManager')
+
+        self.client = client
+        self.decode_queue = []
+
+        self.decoder = Decoder()
+
+        self._end_thread = threading.Event()
+
+    def decode(self, opus_frame):
+        if not isinstance(opus_frame, RawData):
+            raise TypeError("opus_frame should be a RawData object.")
+        self.decode_queue.append(opus_frame)
+
+    def run(self):
+        while not self._end_thread.is_set():
+            try:
+                data = self.decode_queue.pop(0)
+            except IndexError:
+                continue
+
+            try:
+                data.decoded_data = self.decoder.decode(data.decrypted_data)
+            except OpusError:
+                print("Error occurred decoding opus frame.")
+                continue
+
+            self.client.recv_decoded_audio(data)
+
+    def stop(self):
+        while self.decoding:
+            time.sleep(0.1)
+        self._end_thread.set()
+
+    @property
+    def decoding(self):
+        return bool(self.decode_queue)
