@@ -52,6 +52,7 @@ from .player import *
 from .raw_models import *
 from .reaction import *
 from .role import *
+from .sink import *
 from .shard import *
 from .stage_instance import *
 from .sticker import *
