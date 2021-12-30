@@ -1,8 +1,13 @@
+import asyncio
 import os
+import sys
 import traceback
 
 import disnake
 from disnake.ext import commands
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 def fancy_traceback(exc: Exception) -> str:
