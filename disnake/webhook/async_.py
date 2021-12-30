@@ -50,7 +50,7 @@ from ..asset import Asset
 from ..channel import PartialMessageable
 from ..enums import WebhookType, try_enum
 from ..errors import DiscordServerError, Forbidden, HTTPException, InvalidArgument, NotFound
-from ..http import Route, to_multipart_with_attachments
+from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
 from ..mixins import Hashable
 from ..ui.action_row import components_to_dict
@@ -410,10 +410,12 @@ class AsyncWebhookAdapter:
         }
 
         if data is not None:
+            if files:
+                set_attachments(data, files)
             payload["data"] = data
 
         if files:
-            multipart = to_multipart_with_attachments(payload, files)
+            multipart = to_multipart(payload, files)
             return self.request(route, session=session, multipart=multipart, files=files)
         return self.request(route, session=session, payload=payload)
 
