@@ -30,6 +30,8 @@ import collections.abc
 import datetime
 import functools
 import json
+import os
+import pkgutil
 import re
 import sys
 import types
@@ -87,6 +89,7 @@ __all__ = (
     "escape_mentions",
     "as_chunks",
     "format_dt",
+    "search_directory",
 )
 
 DISCORD_EPOCH = 1420070400000
@@ -1187,3 +1190,18 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
     if isinstance(dt, datetime.datetime):
         dt = dt.timestamp()
     return f"<t:{int(dt)}:{style}>"
+
+
+def search_directory(path: str) -> Iterator[str]:
+    """Walk through a directory and yield all modules."""
+    relpath = os.path.relpath(path)  # relative and normalized
+    if ".." in relpath:
+        raise ValueError("Modules outside the cwd require a package to be specified")
+
+    prefix = relpath.replace(os.sep, ".")
+
+    for finder, name, ispkg in pkgutil.iter_modules([path]):
+        if ispkg:
+            yield from search_directory(os.path.join(path, name))
+        else:
+            yield prefix + "." + name

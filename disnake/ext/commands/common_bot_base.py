@@ -591,6 +591,11 @@ class CommonBotBase(Generic[CogT]):
             sys.modules.update(modules)
             raise
 
+    def load_extensions(self, path: str) -> None:
+        """Loads all extensions in a directory."""
+        for extension in disnake.utils.search_directory(path):
+            self.load_extension(extension)
+
     @property
     def extensions(self) -> Mapping[str, types.ModuleType]:
         """Mapping[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
