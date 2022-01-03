@@ -46,6 +46,10 @@ class TestBot(commands.Bot):
         )
         # fmt: on
 
+    def add_cog(self, cog, *, override: bool = False) -> None:
+        logger.info(f"Loading cog {cog}.")
+        return super().add_cog(cog, override=override)
+
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
         embed = disnake.Embed(
             title=f"Command `{ctx.command}` failed due to `{error}`",
