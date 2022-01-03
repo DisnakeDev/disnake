@@ -1193,7 +1193,18 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
 
 
 def search_directory(path: str) -> Iterator[str]:
-    """Walk through a directory and yield all modules."""
+    """Walk through a directory and yield all modules.
+
+    Parameters
+    -----------
+    path: :class:`str`
+        The path to search for modules
+
+    Yields
+    -------
+    :class:`str`
+        The name of the found module. (usable in load_extension)
+    """
     relpath = os.path.relpath(path)  # relative and normalized
     if ".." in relpath:
         raise ValueError("Modules outside the cwd require a package to be specified")

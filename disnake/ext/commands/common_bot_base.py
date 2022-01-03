@@ -592,7 +592,13 @@ class CommonBotBase(Generic[CogT]):
             raise
 
     def load_extensions(self, path: str) -> None:
-        """Loads all extensions in a directory."""
+        """Loads all extensions in a directory.
+
+        Parameters
+        ----------
+        path: :class:`str`
+            The path to search for extensions
+        """
         for extension in disnake.utils.search_directory(path):
             self.load_extension(extension)
 
