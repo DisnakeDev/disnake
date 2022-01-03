@@ -141,6 +141,7 @@ else:
 
 
 T = TypeVar("T")
+V = TypeVar("V")
 T_co = TypeVar("T_co", covariant=True)
 _Iter = Union[Iterator[T], AsyncIterator[T]]
 
@@ -496,11 +497,10 @@ def _get_as_snowflake(data: Any, key: str) -> Optional[int]:
         return value and int(value)
 
 
-def _get_and_cast(data: dict, key: Any, converter: Callable, default: Any = None) -> Any:
-    try:
-        return converter(data[key])
-    except KeyError:
+def _maybe_cast(value: V, converter: Callable[[V], T], default: T = None) -> Optional[T]:
+    if value is MISSING:
         return default
+    return converter(value)
 
 
 def _get_mime_type_for_image(data: bytes):
