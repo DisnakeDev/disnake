@@ -113,6 +113,7 @@ class TestBot(commands.Bot):
 
 print(f"disnake: {disnake.__version__}\n")
 
-bot = TestBot()
-bot.load_all_extensions("cogs")
-bot.run(TOKEN)
+if __name__ == "__main__":
+    bot = TestBot()
+    bot.load_all_extensions("cogs")
+    bot.run(TOKEN)
