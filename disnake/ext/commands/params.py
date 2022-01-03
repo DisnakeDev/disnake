@@ -401,6 +401,17 @@ class ParamInfo:
 
         return default
 
+    async def verify_type(self, inter: CommandInteraction, argument: Any) -> Any:
+        """Check if a type of an argument is correct and possibly fix it"""
+        if issubclass(self.type, disnake.Member):
+            if isinstance(argument, disnake.Member):
+                return argument
+
+            raise errors.MemberNotFound(str(argument.id))
+
+        # unexpected types may just be ignored
+        return argument
+
     async def convert_argument(self, inter: CommandInteraction, argument: Any) -> Any:
         """Convert a value if a converter is given"""
         if self.large:
@@ -411,7 +422,7 @@ class ParamInfo:
 
         if self.converter is None:
             # TODO: Custom validators
-            return argument
+            return await self.verify_type(inter, argument)
 
         try:
             argument = self.converter(inter, argument)
