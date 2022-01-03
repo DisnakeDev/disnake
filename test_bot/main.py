@@ -4,6 +4,21 @@ import traceback
 import disnake
 from disnake.ext import commands
 
+try:
+    import dotenv
+except ModuleNotFoundError:
+    print("Not loading .env")
+else:
+    dotenv.load_dotenv()
+
+TEST_GUILDS = os.environ.get("TEST_GUILDS")
+PREFIX = os.environ.get("PREFIX", "..")
+
+if TEST_GUILDS:
+    TEST_GUILDS = [int(x.strip()) for x in TEST_GUILDS.split(",")]
+    print("TEST_GUILDS FOUND")
+TOKEN = os.environ.get("BOT_TOKEN")
+
 
 def fancy_traceback(exc: Exception) -> str:
     """May not fit the message content limit"""
@@ -14,12 +29,12 @@ def fancy_traceback(exc: Exception) -> str:
 class TestBot(commands.Bot):
     def __init__(self):
         super().__init__(
-            command_prefix="..",
+            command_prefix=PREFIX,
             intents=disnake.Intents.all(),
             help_command=None,  # type: ignore
             sync_commands_debug=True,
             sync_permissions=True,
-            test_guilds=[570841314200125460, 768247229840359465, 808030843078836254],
+            test_guilds=TEST_GUILDS,
         )
 
     def load_all_extensions(self, folder: str) -> None:
@@ -100,4 +115,4 @@ print(f"disnake: {disnake.__version__}\n")
 
 bot = TestBot()
 bot.load_all_extensions("cogs")
-bot.run(os.environ.get("BOT_TOKEN"))
+bot.run(TOKEN)
