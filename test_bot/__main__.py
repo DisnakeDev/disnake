@@ -1,23 +1,11 @@
+import logging
 import os
 import traceback
 
 import disnake
 from disnake.ext import commands
 
-try:
-    import dotenv
-except ModuleNotFoundError:
-    print("Not loading .env")
-else:
-    dotenv.load_dotenv()
-
-TEST_GUILDS = os.environ.get("TEST_GUILDS")
-PREFIX = os.environ.get("PREFIX", "..")
-
-if TEST_GUILDS:
-    TEST_GUILDS = [int(x.strip()) for x in TEST_GUILDS.split(",")]
-    print("TEST_GUILDS FOUND")
-TOKEN = os.environ.get("BOT_TOKEN")
+from . import config
 
 
 def fancy_traceback(exc: Exception) -> str:
@@ -26,15 +14,19 @@ def fancy_traceback(exc: Exception) -> str:
     return f"```py\n{text[-4086:]}\n```"
 
 
+logger = logging.getLogger(__name__)
+
+
 class TestBot(commands.Bot):
     def __init__(self):
         super().__init__(
-            command_prefix=PREFIX,
+            command_prefix=config.Client.prefix,
             intents=disnake.Intents.all(),
             help_command=None,  # type: ignore
-            sync_commands_debug=True,
-            sync_permissions=True,
-            test_guilds=TEST_GUILDS,
+            sync_commands_debug=config.Client.sync_commands_debug,
+            sync_permissions=config.Client.sync_permissions,
+            test_guilds=config.Client.test_guilds,
+            reload=config.Client.auto_reload,
         )
 
     def load_all_extensions(self, folder: str) -> None:
@@ -115,5 +107,5 @@ print(f"disnake: {disnake.__version__}\n")
 
 if __name__ == "__main__":
     bot = TestBot()
-    bot.load_all_extensions("cogs")
-    bot.run(TOKEN)
+    bot.load_all_extensions(config.Client.cogs_folder)
+    bot.run(config.Client.token)
