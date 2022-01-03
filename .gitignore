@@ -21,5 +21,6 @@ ADVANCED.rst
 secrets/
 *_test.py
 *.env
+!example.env
 venvs/
 .idea

@@ -7,14 +7,16 @@ from disnake.ext import commands
 
 from . import config
 
+logger = logging.getLogger(__name__)
+
+if not config.Client.test_guilds:
+    logger.warning("No test guilds configured. Using global commands.")
+
 
 def fancy_traceback(exc: Exception) -> str:
     """May not fit the message content limit"""
     text = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
     return f"```py\n{text[-4086:]}\n```"
-
-
-logger = logging.getLogger(__name__)
 
 
 class TestBot(commands.Bot):
