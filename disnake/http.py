@@ -115,7 +115,7 @@ def set_attachments(payload: Dict[str, Any], files: Sequence[File]) -> None:
     """
     Updates the payload's attachments list based on the provided files
 
-    note: this method modifies the provided `payload` and `payload["attachments"]` collections
+    note: this method modifies the provided ``payload`` and ``payload["attachments"]`` collections
     """
 
     attachments = payload.get("attachments", [])
@@ -160,7 +160,7 @@ def to_multipart_with_attachments(
     """
     Updates the payload's attachments and converts it to a multipart payload
 
-    Shorthand for `set_attachments` + `to_multipart`
+    Shorthand for ``set_attachments`` + ``to_multipart``
     """
 
     set_attachments(payload, files)
