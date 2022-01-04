@@ -320,6 +320,17 @@ class ApplicationCommand(ABC):
     The base class for application commands
     """
 
+    __slots__ = (
+        "type",
+        "name",
+        "default_permission",
+        "id",
+        "application_id",
+        "guild_id",
+        "version",
+        "_always_synced",
+    )
+
     def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
@@ -359,6 +370,8 @@ class ApplicationCommand(ABC):
 
 
 class UserCommand(ApplicationCommand):
+    __slots__ = ()
+
     def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.user,
@@ -384,6 +397,8 @@ class UserCommand(ApplicationCommand):
 
 
 class MessageCommand(ApplicationCommand):
+    __slots__ = ()
+
     def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.message,
@@ -423,6 +438,8 @@ class SlashCommand(ApplicationCommand):
     default_permission : :class:`bool`
         Whether the command is enabled by default when the app is added to a guild
     """
+
+    __slots__ = ("description", "options")
 
     def __init__(
         self,
