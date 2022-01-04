@@ -318,19 +318,23 @@ class ApplicationCommand(ABC):
     The base class for application commands
     """
 
-    def __init__(
-        self, type: ApplicationCommandType, name: str, default_permission: bool = True, **kwargs
-    ):
+    def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
         self.default_permission: bool = default_permission
 
-        self.id: Optional[int] = _get_as_snowflake(kwargs, "id")
-        self.application_id: Optional[int] = _get_as_snowflake(kwargs, "application_id")
-        self.guild_id: Optional[int] = _get_as_snowflake(kwargs, "guild_id")
-        self.version: Optional[int] = _get_as_snowflake(kwargs, "version")
+        self.id: Optional[int] = None
+        self.application_id: Optional[int] = None
+        self.guild_id: Optional[int] = None
+        self.version: Optional[int] = None
 
         self._always_synced: bool = False
+
+    def _update_common(self, data: ApplicationCommandPayload) -> None:
+        self.id = _get_as_snowflake(data, "id")
+        self.application_id = _get_as_snowflake(data, "application_id")
+        self.guild_id = _get_as_snowflake(data, "guild_id")
+        self.version = _get_as_snowflake(data, "version")
 
     def __repr__(self) -> str:
         return f"<ApplicationCommand type={self.type!r} name={self.name!r}>"
@@ -353,12 +357,11 @@ class ApplicationCommand(ABC):
 
 
 class UserCommand(ApplicationCommand):
-    def __init__(self, name: str, default_permission: bool = True, **kwargs):
+    def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             default_permission=default_permission,
-            **kwargs,
         )
 
     def __repr__(self) -> str:
@@ -370,23 +373,20 @@ class UserCommand(ApplicationCommand):
         if cmd_type != ApplicationCommandType.user.value:
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
-        return UserCommand(
+        self = UserCommand(
             name=data["name"],
             default_permission=data.get("default_permission", True),
-            id=data.get("id"),
-            application_id=data.get("application_id"),
-            guild_id=data.get("guild_id"),
-            version=data.get("version"),
         )
+        self._update_common(data)
+        return self
 
 
 class MessageCommand(ApplicationCommand):
-    def __init__(self, name: str, default_permission: bool = True, **kwargs):
+    def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             default_permission=default_permission,
-            **kwargs,
         )
 
     def __repr__(self) -> str:
@@ -398,14 +398,12 @@ class MessageCommand(ApplicationCommand):
         if cmd_type != ApplicationCommandType.message.value:
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
-        return MessageCommand(
+        self = MessageCommand(
             name=data["name"],
             default_permission=data.get("default_permission", True),
-            id=data.get("id"),
-            application_id=data.get("application_id"),
-            guild_id=data.get("guild_id"),
-            version=data.get("version"),
         )
+        self._update_common(data)
+        return self
 
 
 class SlashCommand(ApplicationCommand):
@@ -430,7 +428,6 @@ class SlashCommand(ApplicationCommand):
         description: str,
         options: List[Option] = None,
         default_permission: bool = True,
-        **kwargs,
     ):
         name = name.lower()
         assert re.fullmatch(
@@ -441,7 +438,6 @@ class SlashCommand(ApplicationCommand):
             type=ApplicationCommandType.chat_input,
             name=name,
             default_permission=default_permission,
-            **kwargs,
         )
         self.description: str = description
         self.options: List[Option] = options or []
@@ -468,18 +464,16 @@ class SlashCommand(ApplicationCommand):
         if cmd_type != ApplicationCommandType.chat_input.value:
             raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
 
-        return SlashCommand(
+        self = SlashCommand(
             name=data["name"],
             description=data["description"],
             default_permission=data.get("default_permission", True),
             options=_maybe_cast(
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
             ),
-            id=data.get("id"),
-            application_id=data.get("application_id"),
-            guild_id=data.get("guild_id"),
-            version=data.get("version"),
         )
+        self._update_common(data)
+        return self
 
     def add_option(
         self,
