@@ -53,6 +53,12 @@ if TYPE_CHECKING:
         GuildApplicationCommandPermissions as GuildApplicationCommandPermissionsPayload,
     )
 
+    Choices = Union[
+        List["OptionChoice"],
+        List[ApplicationCommandOptionChoiceValue],
+        Dict[str, ApplicationCommandOptionChoiceValue],
+    ]
+
 __all__ = (
     "application_command_factory",
     "ApplicationCommand",
@@ -109,13 +115,6 @@ class OptionChoice:
     @classmethod
     def from_dict(cls, data: ApplicationCommandOptionChoicePayload):
         return OptionChoice(name=data["name"], value=data["value"])
-
-
-Choices = Union[
-    List[OptionChoice],
-    List[ApplicationCommandOptionChoiceValue],
-    Dict[str, ApplicationCommandOptionChoiceValue],
-]
 
 
 class Option:
