@@ -612,7 +612,7 @@ class InteractionResponse:
         """
         return self._responded
 
-    async def defer(self, *, ephemeral: bool = False) -> None:
+    async def defer(self, *, show_message: bool = False, ephemeral: bool = False) -> None:
         """|coro|
 
         Defers the interaction response.
@@ -622,9 +622,12 @@ class InteractionResponse:
 
         Parameters
         -----------
+        show_message: :class:`bool`
+            Indicates whether or not the respond will be a message. Shows a loading screen to the user.
+            This only applies for interactions of type :attr:`InteractionType.component`.
         ephemeral: :class:`bool`
             Indicates whether the deferred message will eventually be ephemeral.
-            This only applies for interactions of type :attr:`InteractionType.application_command`.
+            This only applies for interactions of type :attr:`InteractionType.application_command` or when :attr:`show_message` is True.
 
         Raises
         -------
@@ -639,12 +642,12 @@ class InteractionResponse:
         defer_type: int = 0
         data: Optional[Dict[str, Any]] = None
         parent = self._parent
-        if parent.type is InteractionType.component:
-            defer_type = InteractionResponseType.deferred_message_update.value
-        elif parent.type is InteractionType.application_command:
+        if parent.type is InteractionType.application_command or show_message:
             defer_type = InteractionResponseType.deferred_channel_message.value
             if ephemeral:
                 data = {"flags": 64}
+        elif parent.type is InteractionType.component:
+            defer_type = InteractionResponseType.deferred_message_update.value
 
         if defer_type:
             adapter = async_context.get()
