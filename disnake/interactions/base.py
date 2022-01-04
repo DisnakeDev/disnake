@@ -623,7 +623,7 @@ class InteractionResponse:
         Parameters
         -----------
         show_message: :class:`bool`
-            Indicates whether or not the respond will be a message. Shows a loading screen to the user.
+            Indicates whether the response will be a message with thinking state (bot is thinking...)
             This only applies for interactions of type :attr:`InteractionType.component`.
         ephemeral: :class:`bool`
             Indicates whether the deferred message will eventually be ephemeral.
