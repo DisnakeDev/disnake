@@ -241,9 +241,9 @@ class MessageInteraction(TypedDict):
 class _EditApplicationCommandOptional(TypedDict, total=False):
     description: str
     options: Optional[List[ApplicationCommandOption]]
+    default_permission: bool
     type: ApplicationCommandType
 
 
 class EditApplicationCommand(_EditApplicationCommandOptional):
     name: str
-    default_permission: bool

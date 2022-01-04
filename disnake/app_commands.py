@@ -26,7 +26,7 @@ import math
 import re
 import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union, cast
 
 from .abc import User
 from .custom_warnings import ConfigWarning
@@ -50,7 +50,10 @@ if TYPE_CHECKING:
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         ApplicationCommandOptionChoiceValue,
         ApplicationCommandPermissions as ApplicationCommandPermissionsPayload,
+        ApplicationCommandPermissionType,
+        EditApplicationCommand as EditApplicationCommandPayload,
         GuildApplicationCommandPermissions as GuildApplicationCommandPermissionsPayload,
+        PartialGuildApplicationCommandPermissions as PartialGuildApplicationCommandPermissionsPayload,
     )
 
     Choices = Union[
@@ -75,7 +78,7 @@ __all__ = (
 )
 
 
-def application_command_factory(data: ApplicationCommandPayload) -> Any:
+def application_command_factory(data: ApplicationCommandPayload) -> ApplicationCommand:
     cmd_type = try_enum(ApplicationCommandType, data.get("type", 1))
     if cmd_type is ApplicationCommandType.chat_input:
         return SlashCommand.from_dict(data)
@@ -109,7 +112,7 @@ class OptionChoice:
     def __eq__(self, other) -> bool:
         return self.name == other.name and self.value == other.value
 
-    def to_dict(self) -> Dict[str, ApplicationCommandOptionChoiceValue]:
+    def to_dict(self) -> ApplicationCommandOptionChoicePayload:
         return {"name": self.name, "value": self.value}
 
     @classmethod
@@ -229,7 +232,7 @@ class Option:
         )
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandOptionPayload):
+    def from_dict(cls, data: ApplicationCommandOptionPayload) -> Option:
         return Option(
             name=data["name"],
             description=data.get("description"),
@@ -289,8 +292,8 @@ class Option:
             )
         )
 
-    def to_dict(self) -> Dict[str, Any]:
-        payload = {
+    def to_dict(self) -> ApplicationCommandOptionPayload:
+        payload: ApplicationCommandOptionPayload = {
             "name": self.name,
             "description": self.description,
             "type": try_enum_to_int(self.type),
@@ -345,8 +348,8 @@ class ApplicationCommand(ABC):
             and self.default_permission == other.default_permission
         )
 
-    def to_dict(self) -> Dict[str, Any]:
-        data = {
+    def to_dict(self) -> EditApplicationCommandPayload:
+        data: EditApplicationCommandPayload = {
             "type": try_enum_to_int(self.type),
             "name": self.name,
         }
@@ -367,7 +370,7 @@ class UserCommand(ApplicationCommand):
         return f"<UserCommand name={self.name!r}>"
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload):
+    def from_dict(cls, data: ApplicationCommandPayload) -> UserCommand:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.user.value:
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
@@ -392,7 +395,7 @@ class MessageCommand(ApplicationCommand):
         return f"<MessageCommand name={self.name!r}>"
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload):
+    def from_dict(cls, data: ApplicationCommandPayload) -> MessageCommand:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.message.value:
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
@@ -458,7 +461,7 @@ class SlashCommand(ApplicationCommand):
         )
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload):
+    def from_dict(cls, data: ApplicationCommandPayload) -> SlashCommand:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.chat_input.value:
             raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
@@ -506,7 +509,7 @@ class SlashCommand(ApplicationCommand):
             )
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> EditApplicationCommandPayload:
         res = super().to_dict()
         res["description"] = self.description
         res["options"] = [o.to_dict() for o in self.options]
@@ -531,7 +534,7 @@ class ApplicationCommandPermissions:
 
     def __init__(self, *, data: ApplicationCommandPermissionsPayload):
         self.id: int = int(data["id"])
-        self.type: int = data["type"]
+        self.type: ApplicationCommandPermissionType = data["type"]
         self.permission: bool = data["permission"]
 
     def __repr__(self):
@@ -542,7 +545,7 @@ class ApplicationCommandPermissions:
             self.id == other.id and self.type == other.type and self.permission == other.permission
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> ApplicationCommandPermissionsPayload:
         return {"id": self.id, "type": self.type, "permission": self.permission}
 
 
@@ -580,7 +583,7 @@ class GuildApplicationCommandPermissions:
             f" guild_id={self.guild_id!r} permissions={self.permissions!r}>"
         )
 
-    def to_dict(self) -> Any:
+    def to_dict(self) -> GuildApplicationCommandPermissionsPayload:
         return {
             "id": self.id,
             "application_id": self.application_id,
@@ -608,7 +611,7 @@ class GuildApplicationCommandPermissions:
             User IDs to booleans.
         """
 
-        data = []
+        data: List[ApplicationCommandPermissionsPayload] = []
 
         if permissions is not None:
             for obj, value in permissions.items():
@@ -695,7 +698,7 @@ class PartialGuildApplicationCommandPermissions:
                 }
                 self.permissions.append(ApplicationCommandPermissions(data=data))
 
-    def to_dict(self) -> Any:
+    def to_dict(self) -> PartialGuildApplicationCommandPermissionsPayload:
         return {
             "id": self.id,
             "permissions": [perm.to_dict() for perm in self.permissions],
