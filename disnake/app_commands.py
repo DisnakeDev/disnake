@@ -174,7 +174,7 @@ class Option:
         max_value: float = None,
     ):
         self.name: str = name.lower()
-        self.description: Optional[str] = description
+        self.description: str = description or "\u200b"
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
         self.options: List[Option] = options or []
