@@ -359,7 +359,7 @@ class ParamInfo:
         cls,
         param: inspect.Parameter,
         type_hints: Dict[str, Any],
-        parsed_docstring: Dict[str, Any] = None,
+        parsed_docstring: Dict[str, disnake.utils._DocstringParam] = None,
     ) -> ParamInfo:
         # hopefully repeated parsing won't cause any problems
         parsed_docstring = parsed_docstring or {}
