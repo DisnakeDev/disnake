@@ -410,7 +410,17 @@ class View:
             try:
                 older = old_state[(component.type.value, component.custom_id)]  # type: ignore
             except (KeyError, AttributeError):
-                children.append(_component_to_item(component))
+                for child in self.children:
+                    if (
+                        child.type.value == 2  # Button
+                        and child.label == component.label  # type: ignore
+                        and child.url == component.url  # type: ignore
+                    ):
+                        child.refresh_component(component)
+                        children.append(child)
+                        break
+                else:
+                    children.append(_component_to_item(component))
             else:
                 older.refresh_component(component)
                 children.append(older)
