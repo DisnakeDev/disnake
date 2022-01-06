@@ -196,7 +196,7 @@ class Loop(Generic[LF]):
         if obj is None:
             return self
 
-        copy: Loop[LF] = Loop(
+        copy: Loop[LF] = self.__class__(
             self.coro,
             seconds=self._seconds,
             hours=self._hours,
