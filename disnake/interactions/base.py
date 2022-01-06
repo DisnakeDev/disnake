@@ -1133,7 +1133,7 @@ class InteractionResponse:
             parent._state.store_modal(parent.author.id, modal)
         else:
             if components and len(components) > 5:
-                raise ValueError("maximum of componentes exceeded")
+                raise ValueError("maximum of components exceeded")
 
             modal_data = {
                 "title": title,
