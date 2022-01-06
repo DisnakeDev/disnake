@@ -43,8 +43,10 @@ ApplicationCommandType = Literal[1, 2, 3]
 
 
 class _ApplicationCommandOptional(TypedDict, total=False):
-    options: List[ApplicationCommandOption]
     type: ApplicationCommandType
+    guild_id: Snowflake
+    options: List[ApplicationCommandOption]
+    default_permission: bool
 
 
 class ApplicationCommand(_ApplicationCommandOptional):
@@ -52,11 +54,17 @@ class ApplicationCommand(_ApplicationCommandOptional):
     application_id: Snowflake
     name: str
     description: str
+    version: Snowflake
 
 
 class _ApplicationCommandOptionOptional(TypedDict, total=False):
+    required: bool
     choices: List[ApplicationCommandOptionChoice]
     options: List[ApplicationCommandOption]
+    channel_types: List[ChannelType]
+    min_value: float
+    max_value: float
+    autocomplete: bool
 
 
 ApplicationCommandOptionType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -66,12 +74,14 @@ class ApplicationCommandOption(_ApplicationCommandOptionOptional):
     type: ApplicationCommandOptionType
     name: str
     description: str
-    required: bool
+
+
+ApplicationCommandOptionChoiceValue = Union[str, int, float]
 
 
 class ApplicationCommandOptionChoice(TypedDict):
     name: str
-    value: Union[str, int]
+    value: ApplicationCommandOptionChoiceValue
 
 
 ApplicationCommandPermissionType = Literal[1, 2]
@@ -231,9 +241,9 @@ class MessageInteraction(TypedDict):
 class _EditApplicationCommandOptional(TypedDict, total=False):
     description: str
     options: Optional[List[ApplicationCommandOption]]
+    default_permission: bool
     type: ApplicationCommandType
 
 
 class EditApplicationCommand(_EditApplicationCommandOptional):
     name: str
-    default_permission: bool

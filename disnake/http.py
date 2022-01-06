@@ -2323,7 +2323,7 @@ class HTTPClient:
         application_id: Snowflake,
         guild_id: Snowflake,
         payload: List[interactions.PartialGuildApplicationCommandPermissions],
-    ) -> Response[List[interactions.ApplicationCommandPermissions]]:
+    ) -> Response[List[interactions.GuildApplicationCommandPermissions]]:
         r = Route(
             "PUT",
             "/applications/{application_id}/guilds/{guild_id}/commands/permissions",
