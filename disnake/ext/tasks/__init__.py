@@ -195,8 +195,13 @@ class Loop(Generic[LF]):
     def __get__(self, obj: T, objtype: Type[T]) -> Loop[LF]:
         if obj is None:
             return self
+        copy = self.copy(obj)
+        copy._injected = obj
+        setattr(obj, self.coro.__name__, copy)
+        return copy
 
-        copy: Loop[LF] = self.__class__(
+    def copy(self, injected: object) -> Loop[LF]:
+        instance = self.__class__(
             self.coro,
             seconds=self._seconds,
             hours=self._hours,
@@ -206,12 +211,10 @@ class Loop(Generic[LF]):
             reconnect=self.reconnect,
             loop=self.loop,
         )
-        copy._injected = obj
-        copy._before_loop = self._before_loop
-        copy._after_loop = self._after_loop
-        copy._error = self._error
-        setattr(obj, self.coro.__name__, copy)
-        return copy
+        instance._before_loop = self._before_loop
+        instance._after_loop = self._after_loop
+        instance._error = self._error
+        return instance
 
     @property
     def seconds(self) -> Optional[float]:
