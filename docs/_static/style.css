@@ -107,6 +107,7 @@ Historically however, thanks to:
   --attribute-table-entry-hover-text: var(--blue-2);
   --attribute-table-badge: var(--grey-7);
   --highlighted-text: rgb(252, 233, 103);
+  --tooltip-background: #f8f8f8;
 }
 
 :root[data-font="serif"] {
@@ -167,6 +168,7 @@ Historically however, thanks to:
   --attribute-table-entry-hover-text: var(--blue-1);
   --attribute-table-badge: var(--grey-4);
   --highlighted-text: rgba(250, 166, 26, 0.2);
+  --tooltip-background: rgba(10, 10, 10, 0.95);
 }
 
 img[src$="snake_dark.svg"]  {
@@ -315,7 +317,7 @@ header > nav > a:hover {
   border-bottom: 1px solid var(--search-border);
 
   appearance: none;
-  background-image: url('/_images/drop_down_icon.svg');
+  background-image: url('../_images/drop_down_icon.svg');
   background-repeat: no-repeat;
   background-position-x: 100%;
   background-position-y: 50%;
@@ -1328,4 +1330,108 @@ div.code-block-caption {
     margin-left: auto;
     margin-right: auto;
   }
+}
+
+
+/* hoverxref stuff */
+/* (this is mostly just a merge of the 'shadow' and 'borderless' themes) */
+
+.tooltipster-sidetip.tooltipster-custom .tooltipster-content {
+  color: inherit;
+}
+
+.tooltipster-sidetip.tooltipster-custom .tooltipster-box {
+	border: none;
+	background: var(--tooltip-background);
+}
+
+:root[data-theme="light"] .tooltipster-sidetip.tooltipster-custom .tooltipster-box {
+  box-shadow: 0px 0px 10px 6px rgba(0,0,0,0.1);
+}
+
+.tooltipster-sidetip.tooltipster-custom.tooltipster-bottom .tooltipster-box {
+	margin-top: 8px;
+}
+
+.tooltipster-sidetip.tooltipster-custom.tooltipster-left .tooltipster-box {
+	margin-right: 8px;
+}
+
+.tooltipster-sidetip.tooltipster-custom.tooltipster-right .tooltipster-box {
+	margin-left: 8px;
+}
+
+.tooltipster-sidetip.tooltipster-custom.tooltipster-top .tooltipster-box {
+	margin-bottom: 8px;
+}
+
+.tooltipster-sidetip.tooltipster-custom .tooltipster-arrow {
+	height: 8px;
+	margin-left: -8px;
+	width: 16px;
+}
+
+.tooltipster-sidetip.tooltipster-custom.tooltipster-left .tooltipster-arrow,
+.tooltipster-sidetip.tooltipster-custom.tooltipster-right .tooltipster-arrow {
+	height: 16px;
+	margin-left: 0;
+	margin-top: -8px;
+	width: 8px;
+}
+
+.tooltipster-sidetip.tooltipster-custom .tooltipster-arrow-background {
+	display: none;
+}
+
+.tooltipster-sidetip.tooltipster-custom .tooltipster-arrow-border {
+	border: 8px solid transparent;
+}
+
+.tooltipster-sidetip.tooltipster-custom.tooltipster-bottom .tooltipster-arrow-border {
+	border-bottom-color: var(--tooltip-background);
+}
+
+.tooltipster-sidetip.tooltipster-custom.tooltipster-left .tooltipster-arrow-border {
+	border-left-color: var(--tooltip-background);
+}
+
+.tooltipster-sidetip.tooltipster-custom.tooltipster-right .tooltipster-arrow-border {
+	border-right-color: var(--tooltip-background);
+}
+
+.tooltipster-sidetip.tooltipster-custom.tooltipster-top .tooltipster-arrow-border {
+	border-top-color: var(--tooltip-background);
+}
+
+.tooltipster-sidetip.tooltipster-custom.tooltipster-bottom .tooltipster-arrow-uncropped {
+	top: -8px;
+}
+
+.tooltipster-sidetip.tooltipster-custom.tooltipster-right .tooltipster-arrow-uncropped {
+	left: -8px;
+}
+
+
+/* hoverxref stuff (hoverxref custom additions) */
+
+.hoverxref {
+  border-bottom: 1px dotted;
+  border-color: gray;
+}
+
+.tooltipster-box {
+  max-height: 600px;
+}
+
+.tooltipster-sidetip.tooltipster-custom .tooltipster-content {
+  font-size: 80%;
+  padding: 18px;
+}
+
+.tooltipster-sidetip.tooltipster-custom .tooltipster-content p {
+  font-size: 100% !important;
+}
+
+.tooltipster-sidetip.tooltipster-custom .tooltipster-content .headerlink {
+  visibility: hidden;
 }

@@ -24,20 +24,16 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
-from typing import List, Optional, TYPE_CHECKING, Tuple, TypeVar, Type, Callable, Union
+
 import inspect
 import os
+from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Type, TypeVar, Union
 
-from .item import Item, ItemCallbackType, DecoratedItem
+from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
 from ..partial_emoji import PartialEmoji
-from ..emoji import Emoji
-from ..interactions import MessageInteraction
 from ..utils import MISSING
-from ..components import (
-    SelectOption,
-    SelectMenu,
-)
+from .item import DecoratedItem, Item
 
 __all__ = (
     "Select",
@@ -45,8 +41,11 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from .view import View
+    from ..emoji import Emoji
+    from ..interactions import MessageInteraction
     from ..types.components import SelectMenu as SelectMenuPayload
+    from .item import ItemCallbackType
+    from .view import View
 
 S = TypeVar("S", bound="Select")
 V = TypeVar("V", bound="View", covariant=True)

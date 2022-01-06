@@ -1,5 +1,6 @@
-from setuptools import setup
 import re
+
+from setuptools import setup
 
 requirements = []
 with open("requirements.txt", encoding="utf-8") as f:
@@ -41,7 +42,7 @@ extras_require = {
     "docs": [
         "sphinx==4.0.2",
         "sphinxcontrib_trio==1.1.2",
-        "sphinxcontrib-websupport",
+        "sphinx-hoverxref~=1.0.0",
     ],
     "speed": [
         "orjson>=3.5.4",

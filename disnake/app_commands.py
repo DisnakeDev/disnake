@@ -21,12 +21,12 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from abc import ABC
 
-import re
 import math
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Union, cast
+import re
 import warnings
+from abc import ABC
+from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union, cast
 
 from .abc import User
 from .custom_warnings import ConfigWarning
@@ -34,16 +34,33 @@ from .enums import (
     ApplicationCommandType,
     ChannelType,
     OptionType,
-    try_enum,
     enum_if_int,
+    try_enum,
     try_enum_to_int,
 )
 from .errors import InvalidArgument
 from .role import Role
-from .utils import _get_as_snowflake, _get_and_cast
+from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:
     from .state import ConnectionState
+    from .types.interactions import (
+        ApplicationCommand as ApplicationCommandPayload,
+        ApplicationCommandOption as ApplicationCommandOptionPayload,
+        ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
+        ApplicationCommandOptionChoiceValue,
+        ApplicationCommandPermissions as ApplicationCommandPermissionsPayload,
+        ApplicationCommandPermissionType,
+        EditApplicationCommand as EditApplicationCommandPayload,
+        GuildApplicationCommandPermissions as GuildApplicationCommandPermissionsPayload,
+        PartialGuildApplicationCommandPermissions as PartialGuildApplicationCommandPermissionsPayload,
+    )
+
+    Choices = Union[
+        List["OptionChoice"],
+        List[ApplicationCommandOptionChoiceValue],
+        Dict[str, ApplicationCommandOptionChoiceValue],
+    ]
 
 __all__ = (
     "application_command_factory",
@@ -61,8 +78,7 @@ __all__ = (
 )
 
 
-def application_command_factory(data: Mapping[str, Any]) -> Any:
-    data = dict(data)
+def application_command_factory(data: ApplicationCommandPayload) -> ApplicationCommand:
     cmd_type = try_enum(ApplicationCommandType, data.get("type", 1))
     if cmd_type is ApplicationCommandType.chat_input:
         return SlashCommand.from_dict(data)
@@ -72,9 +88,6 @@ def application_command_factory(data: Mapping[str, Any]) -> Any:
         return MessageCommand.from_dict(data)
 
     raise TypeError(f"Application command of type {cmd_type} is not valid")
-
-
-ChoiceValue = Union[str, int, float]
 
 
 class OptionChoice:
@@ -89,9 +102,9 @@ class OptionChoice:
         the value of the option choice
     """
 
-    def __init__(self, name: str, value: ChoiceValue):
+    def __init__(self, name: str, value: ApplicationCommandOptionChoiceValue):
         self.name: str = name
-        self.value: ChoiceValue = value
+        self.value: ApplicationCommandOptionChoiceValue = value
 
     def __repr__(self) -> str:
         return f"<OptionChoice name={self.name!r} value={self.value!r}>"
@@ -99,15 +112,12 @@ class OptionChoice:
     def __eq__(self, other) -> bool:
         return self.name == other.name and self.value == other.value
 
-    def to_dict(self) -> Dict[str, ChoiceValue]:
+    def to_dict(self) -> ApplicationCommandOptionChoicePayload:
         return {"name": self.name, "value": self.value}
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: ApplicationCommandOptionChoicePayload):
         return OptionChoice(name=data["name"], value=data["value"])
-
-
-Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
 
 
 class Option:
@@ -157,7 +167,7 @@ class Option:
         self,
         name: str,
         description: str = None,
-        type: OptionType = None,
+        type: Union[OptionType, int] = None,
         required: bool = False,
         choices: Choices = None,
         options: list = None,
@@ -167,7 +177,7 @@ class Option:
         max_value: float = None,
     ):
         self.name: str = name.lower()
-        self.description: Optional[str] = description
+        self.description: str = description or "\u200b"
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
         self.options: List[Option] = options or []
@@ -222,16 +232,20 @@ class Option:
         )
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: ApplicationCommandOptionPayload) -> Option:
         return Option(
             name=data["name"],
             description=data.get("description"),
             type=data.get("type"),
             required=data.get("required", False),
-            choices=_get_and_cast(data, "choices", lambda x: list(map(OptionChoice.from_dict, x))),
-            options=_get_and_cast(data, "options", lambda x: list(map(Option.from_dict, x))),
-            channel_types=_get_and_cast(
-                data, "channel_types", lambda x: [try_enum(ChannelType, t) for t in x]
+            choices=_maybe_cast(
+                data.get("choices", MISSING), lambda x: list(map(OptionChoice.from_dict, x))
+            ),
+            options=_maybe_cast(
+                data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
+            ),
+            channel_types=_maybe_cast(
+                data.get("channel_types", MISSING), lambda x: [try_enum(ChannelType, t) for t in x]
             ),
             autocomplete=data.get("autocomplete", False),
             min_value=data.get("min_value"),
@@ -278,8 +292,8 @@ class Option:
             )
         )
 
-    def to_dict(self) -> Dict[str, Any]:
-        payload = {
+    def to_dict(self) -> ApplicationCommandOptionPayload:
+        payload: ApplicationCommandOptionPayload = {
             "name": self.name,
             "description": self.description,
             "type": try_enum_to_int(self.type),
@@ -306,20 +320,34 @@ class ApplicationCommand(ABC):
     The base class for application commands
     """
 
-    def __init__(
-        self, type: ApplicationCommandType, name: str, default_permission: bool = True, **kwargs
-    ):
+    __slots__ = (
+        "type",
+        "name",
+        "default_permission",
+        "id",
+        "application_id",
+        "guild_id",
+        "version",
+        "_always_synced",
+    )
+
+    def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
         self.default_permission: bool = default_permission
 
-        self.id: Optional[int] = _get_as_snowflake(kwargs, "id")
-        self.application_id: Optional[int] = _get_as_snowflake(kwargs, "application_id")
-        self.guild_id: Optional[int] = _get_as_snowflake(kwargs, "guild_id")
-        self.version: Optional[int] = _get_as_snowflake(kwargs, "version")
+        self.id: Optional[int] = None
+        self.application_id: Optional[int] = None
+        self.guild_id: Optional[int] = None
+        self.version: Optional[int] = None
 
-        self._state: Optional[ConnectionState] = None
         self._always_synced: bool = False
+
+    def _update_common(self, data: ApplicationCommandPayload) -> None:
+        self.id = _get_as_snowflake(data, "id")
+        self.application_id = _get_as_snowflake(data, "application_id")
+        self.guild_id = _get_as_snowflake(data, "guild_id")
+        self.version = _get_as_snowflake(data, "version")
 
     def __repr__(self) -> str:
         return f"<ApplicationCommand type={self.type!r} name={self.name!r}>"
@@ -331,8 +359,8 @@ class ApplicationCommand(ABC):
             and self.default_permission == other.default_permission
         )
 
-    def to_dict(self) -> Dict[str, Any]:
-        data = {
+    def to_dict(self) -> EditApplicationCommandPayload:
+        data: EditApplicationCommandPayload = {
             "type": try_enum_to_int(self.type),
             "name": self.name,
         }
@@ -342,59 +370,57 @@ class ApplicationCommand(ABC):
 
 
 class UserCommand(ApplicationCommand):
-    def __init__(self, name: str, default_permission: bool = True, **kwargs):
+    __slots__ = ()
+
+    def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             default_permission=default_permission,
-            **kwargs,
         )
 
     def __repr__(self) -> str:
         return f"<UserCommand name={self.name!r}>"
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]):
+    def from_dict(cls, data: ApplicationCommandPayload) -> UserCommand:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.user.value:
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
-        return UserCommand(
+        self = UserCommand(
             name=data["name"],
             default_permission=data.get("default_permission", True),
-            id=data.get("id"),
-            application_id=data.get("application_id"),
-            guild_id=data.get("guild_id"),
-            version=data.get("version"),
         )
+        self._update_common(data)
+        return self
 
 
 class MessageCommand(ApplicationCommand):
-    def __init__(self, name: str, default_permission: bool = True, **kwargs):
+    __slots__ = ()
+
+    def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             default_permission=default_permission,
-            **kwargs,
         )
 
     def __repr__(self) -> str:
         return f"<MessageCommand name={self.name!r}>"
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]):
+    def from_dict(cls, data: ApplicationCommandPayload) -> MessageCommand:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.message.value:
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
-        return MessageCommand(
+        self = MessageCommand(
             name=data["name"],
             default_permission=data.get("default_permission", True),
-            id=data.get("id"),
-            application_id=data.get("application_id"),
-            guild_id=data.get("guild_id"),
-            version=data.get("version"),
         )
+        self._update_common(data)
+        return self
 
 
 class SlashCommand(ApplicationCommand):
@@ -413,13 +439,14 @@ class SlashCommand(ApplicationCommand):
         Whether the command is enabled by default when the app is added to a guild
     """
 
+    __slots__ = ("description", "options")
+
     def __init__(
         self,
         name: str,
         description: str,
-        options: list = None,
+        options: List[Option] = None,
         default_permission: bool = True,
-        **kwargs,
     ):
         name = name.lower()
         assert re.fullmatch(
@@ -430,7 +457,6 @@ class SlashCommand(ApplicationCommand):
             type=ApplicationCommandType.chat_input,
             name=name,
             default_permission=default_permission,
-            **kwargs,
         )
         self.description: str = description
         self.options: List[Option] = options or []
@@ -452,21 +478,21 @@ class SlashCommand(ApplicationCommand):
         )
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]):
+    def from_dict(cls, data: ApplicationCommandPayload) -> SlashCommand:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.chat_input.value:
             raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
 
-        return SlashCommand(
+        self = SlashCommand(
             name=data["name"],
             description=data["description"],
             default_permission=data.get("default_permission", True),
-            options=_get_and_cast(data, "options", lambda x: list(map(Option.from_dict, x))),
-            id=data.get("id"),
-            application_id=data.get("application_id"),
-            guild_id=data.get("guild_id"),
-            version=data.get("version"),
+            options=_maybe_cast(
+                data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
+            ),
         )
+        self._update_common(data)
+        return self
 
     def add_option(
         self,
@@ -500,7 +526,7 @@ class SlashCommand(ApplicationCommand):
             )
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> EditApplicationCommandPayload:
         res = super().to_dict()
         res["description"] = self.description
         res["options"] = [o.to_dict() for o in self.options]
@@ -523,9 +549,9 @@ class ApplicationCommandPermissions:
 
     __slots__ = ("id", "type", "permission")
 
-    def __init__(self, *, data: Dict[str, Any]):
+    def __init__(self, *, data: ApplicationCommandPermissionsPayload):
         self.id: int = int(data["id"])
-        self.type: int = data["type"]
+        self.type: ApplicationCommandPermissionType = data["type"]
         self.permission: bool = data["permission"]
 
     def __repr__(self):
@@ -536,7 +562,7 @@ class ApplicationCommandPermissions:
             self.id == other.id and self.type == other.type and self.permission == other.permission
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> ApplicationCommandPermissionsPayload:
         return {"id": self.id, "type": self.type, "permission": self.permission}
 
 
@@ -558,7 +584,7 @@ class GuildApplicationCommandPermissions:
 
     __slots__ = ("_state", "id", "application_id", "guild_id", "permissions")
 
-    def __init__(self, *, state: ConnectionState, data: Mapping[str, Any]):
+    def __init__(self, *, state: ConnectionState, data: GuildApplicationCommandPermissionsPayload):
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
@@ -574,7 +600,7 @@ class GuildApplicationCommandPermissions:
             f" guild_id={self.guild_id!r} permissions={self.permissions!r}>"
         )
 
-    def to_dict(self) -> Any:
+    def to_dict(self) -> GuildApplicationCommandPermissionsPayload:
         return {
             "id": self.id,
             "application_id": self.application_id,
@@ -602,7 +628,7 @@ class GuildApplicationCommandPermissions:
             User IDs to booleans.
         """
 
-        data = []
+        data: List[ApplicationCommandPermissionsPayload] = []
 
         if permissions is not None:
             for obj, value in permissions.items():
@@ -664,20 +690,32 @@ class PartialGuildApplicationCommandPermissions:
                     target_type = 2
                 else:
                     raise ValueError("Permission target should be an instance of Role or abc.User")
-                data = {"id": obj.id, "type": target_type, "permission": value}
+                data: ApplicationCommandPermissionsPayload = {
+                    "id": obj.id,
+                    "type": target_type,
+                    "permission": value,
+                }
                 self.permissions.append(ApplicationCommandPermissions(data=data))
 
         if role_ids is not None:
             for role_id, value in role_ids.items():
-                data = {"id": role_id, "type": 1, "permission": value}
+                data: ApplicationCommandPermissionsPayload = {
+                    "id": role_id,
+                    "type": 1,
+                    "permission": value,
+                }
                 self.permissions.append(ApplicationCommandPermissions(data=data))
 
         if user_ids is not None:
             for user_id, value in user_ids.items():
-                data = {"id": user_id, "type": 2, "permission": value}
+                data: ApplicationCommandPermissionsPayload = {
+                    "id": user_id,
+                    "type": 2,
+                    "permission": value,
+                }
                 self.permissions.append(ApplicationCommandPermissions(data=data))
 
-    def to_dict(self) -> Any:
+    def to_dict(self) -> PartialGuildApplicationCommandPermissionsPayload:
         return {
             "id": self.id,
             "permissions": [perm.to_dict() for perm in self.permissions],

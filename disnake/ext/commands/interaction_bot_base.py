@@ -23,9 +23,13 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import sys
 import traceback
+import warnings
+from itertools import chain
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Coroutine,
@@ -36,43 +40,40 @@ from typing import (
     Sequence,
     Set,
     Tuple,
-    TYPE_CHECKING,
     TypeVar,
     Union,
 )
-import warnings
 
 import disnake
-
-from .base_core import InvokableApplicationCommand
-from .slash_core import InvokableSlashCommand, SubCommandGroup, SubCommand
-from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
-from .common_bot_base import CommonBotBase
-from .context import Context
-from .errors import CommandRegistrationError
-from . import errors
-from .cog import Cog
-from .slash_core import slash_command
-from .ctx_menus_core import user_command, message_command
-
 from disnake.app_commands import (
-    Option,
     ApplicationCommand,
+    Option,
     PartialGuildApplicationCommandPermissions,
 )
 from disnake.custom_warnings import ConfigWarning, SyncWarning
 from disnake.enums import ApplicationCommandType
 
+from . import errors
+from .base_core import InvokableApplicationCommand
+from .cog import Cog
+from .common_bot_base import CommonBotBase
+from .context import Context
+from .ctx_menus_core import (
+    InvokableMessageCommand,
+    InvokableUserCommand,
+    message_command,
+    user_command,
+)
+from .errors import CommandRegistrationError
+from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
+
 if TYPE_CHECKING:
 
     from typing_extensions import Concatenate, ParamSpec
-    from disnake.interactions import (
-        ApplicationCommandInteraction,
-    )
-    from ._types import (
-        Check,
-        CoroFunc,
-    )
+
+    from disnake.interactions import ApplicationCommandInteraction
+
+    from ._types import Check, CoroFunc
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
@@ -89,6 +90,9 @@ MISSING: Any = disnake.utils.MISSING
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
 CXT = TypeVar("CXT", bound="Context")
+
+
+_log = logging.getLogger(__name__)
 
 
 def _app_commands_diff(
@@ -127,26 +131,25 @@ def _app_commands_diff(
     return diff
 
 
-def _show_diff(diff: Dict[str, List[ApplicationCommand]], line_prefix: str = "") -> None:
-    to_upsert = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["upsert"]) or "-"
-    to_edit = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["edit"]) or "-"
-    to_delete = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["delete"]) or "-"
-    change_type = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["change_type"]) or "-"
-    no_changes = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["no_changes"]) or "-"
-    print(
-        f"{line_prefix}To upsert:",
-        f"    {to_upsert}",
-        f"To edit:",
-        f"    {to_edit}",
-        f"To delete:",
-        f"    {to_delete}",
-        f"Type migration:",
-        f"    {change_type}",
-        f"No changes:",
-        f"    {no_changes}",
-        sep=f"\n{line_prefix}",
-        end="\n\n",
-    )
+_diff_map = {
+    "upsert": "To upsert:",
+    "edit": "To edit:",
+    "delete": "To delete:",
+    "change_type": "Type migration:",
+    "no_changes": "No changes:",
+}
+
+
+def _format_diff(diff: Dict[str, List[ApplicationCommand]]) -> str:
+    lines: List[str] = []
+    for key, label in _diff_map.items():
+        lines.append(label)
+        if changes := diff[key]:
+            lines.extend(f"    {cmd}" for cmd in changes)
+        else:
+            lines.append("    -")
+
+    return "\n".join(f"| {line}" for line in lines)
 
 
 class InteractionBotBase(CommonBotBase):
@@ -189,16 +192,16 @@ class InteractionBotBase(CommonBotBase):
 
         self._schedule_app_command_preparation()
 
+    def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
+        return chain(
+            self.all_slash_commands.values(),
+            self.all_user_commands.values(),
+            self.all_message_commands.values(),
+        )
+
     @property
     def application_commands(self) -> Set[InvokableApplicationCommand]:
-        result = set()
-        for cmd in self.all_slash_commands.values():
-            result.add(cmd)
-        for cmd in self.all_user_commands.values():
-            result.add(cmd)
-        for cmd in self.all_message_commands.values():
-            result.add(cmd)
-        return result
+        return set(self.application_commands_iterator())
 
     @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:
@@ -620,18 +623,23 @@ class InteractionBotBase(CommonBotBase):
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
         global_cmds = []
         guilds = {}
-        for cmd in self.application_commands:
+
+        for cmd in self.application_commands_iterator():
             if not cmd.auto_sync:
                 cmd.body._always_synced = True
+
             guild_ids = cmd.guild_ids or test_guilds
+
             if guild_ids is None:
                 global_cmds.append(cmd.body)
-            else:
-                for guild_id in guild_ids:
-                    if guild_id not in guilds:
-                        guilds[guild_id] = [cmd.body]
-                    else:
-                        guilds[guild_id].append(cmd.body)
+                continue
+
+            for guild_id in guild_ids:
+                if guild_id not in guilds:
+                    guilds[guild_id] = [cmd.body]
+                else:
+                    guilds[guild_id].append(cmd.body)
+
         return global_cmds, guilds
 
     async def _cache_application_commands(self) -> None:
@@ -689,16 +697,15 @@ class InteractionBotBase(CommonBotBase):
             or bool(diff["delete"])
         )
 
-        if self._sync_commands_debug:
-            # Show the difference
-            print(
-                "GLOBAL COMMANDS\n===============",
-                "| NOTE: global commands can take up to 1 hour to show up after registration.",
-                "|",
-                f"| Update is required: {update_required}",
-                sep="\n",
-            )
-            _show_diff(diff, "| ")
+        # Show the difference
+        self._log_sync_debug(
+            "Application command synchronization:\n"
+            "GLOBAL COMMANDS\n"
+            "===============\n"
+            "| NOTE: global commands can take up to 1 hour to show up after registration.\n"
+            "|\n"
+            f"| Update is required: {update_required}\n{_format_diff(diff)}"
+        )
 
         if update_required:
             # Notice that we don't do any API requests if there're no changes.
@@ -726,13 +733,12 @@ class InteractionBotBase(CommonBotBase):
                 or bool(diff["delete"])
             )
             # Show diff
-            if self._sync_commands_debug:
-                print(
-                    f'COMMANDS IN {guild_id}\n============{"=" * 18}',
-                    f"| Update is required: {update_required}",
-                    sep="\n",
-                )
-                _show_diff(diff, "| ")
+            self._log_sync_debug(
+                "Application command synchronization:\n"
+                f"COMMANDS IN {guild_id}\n"
+                "===============================\n"
+                f"| Update is required: {update_required}\n{_format_diff(diff)}"
+            )
             # Do API requests and cache
             if update_required:
                 try:
@@ -748,8 +754,7 @@ class InteractionBotBase(CommonBotBase):
                         SyncWarning,
                     )
         # Last debug message
-        if self._sync_commands_debug:
-            print("DEBUG: Command synchronization task has been finished", end="\n\n")
+        self._log_sync_debug("Command synchronization task has finished")
 
     async def _cache_application_command_permissions(self) -> None:
         # This method is usually called once per bot start
@@ -757,7 +762,7 @@ class InteractionBotBase(CommonBotBase):
             raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
 
         guilds_to_cache = set()
-        for cmd in self.application_commands:
+        for cmd in self.application_commands_iterator():
             if not cmd.auto_sync:
                 continue
             for guild_id in cmd.permissions:
@@ -793,7 +798,7 @@ class InteractionBotBase(CommonBotBase):
             int, List[PartialGuildApplicationCommandPermissions]
         ] = {}  # {guild_id: [partial_perms, ...], ...}
 
-        for cmd_wrapper in self.application_commands:
+        for cmd_wrapper in self.application_commands_iterator():
             if not cmd_wrapper.auto_sync:
                 continue
 
@@ -831,8 +836,7 @@ class InteractionBotBase(CommonBotBase):
                 and old_perms[new_cmd_perms.id].permissions == new_cmd_perms.permissions
                 for new_cmd_perms in new_array
             ):
-                if self._sync_commands_debug:
-                    print(f"DEBUG: Command permissions in <Guild id={guild_id}>: no changes")
+                self._log_sync_debug(f"Command permissions in <Guild id={guild_id}>: no changes")
                 continue
             # If we got here, the permissions require an update
             try:
@@ -843,8 +847,20 @@ class InteractionBotBase(CommonBotBase):
                     SyncWarning,
                 )
             finally:
-                if self._sync_commands_debug:
-                    print(f"DEBUG: Command permissions in <Guild id={guild_id}>: edited")
+                self._log_sync_debug(f"Command permissions in <Guild id={guild_id}>: edited")
+
+    def _log_sync_debug(self, text: str) -> None:
+        if self._sync_commands_debug:
+            # if sync debugging is enabled, *always* output logs
+            if _log.isEnabledFor(logging.INFO):
+                # if the log level is `INFO` or higher, use that
+                _log.info(text)
+            else:
+                # if not, nothing would be logged, so just print instead
+                print(text)
+        else:
+            # if debugging is not explicitly enabled, always use the debug log level
+            _log.debug(text)
 
     async def _prepare_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):

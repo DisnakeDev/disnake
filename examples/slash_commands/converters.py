@@ -1,14 +1,13 @@
 import disnake
 from disnake.ext import commands
 
-
 bot = commands.Bot("!")
 
 # classic commands.Converter classes have been replaced by more user-friendly converter functions
 # These can be set using a parameter of Param
 @bot.slash_command()
 async def clean_content_converter(
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     text: str = commands.Param(converter=lambda inter, text: text.replace("@", "\\@")),
 ):
     ...
@@ -16,13 +15,13 @@ async def clean_content_converter(
 
 # Converters may also set the type of the option using annotations
 # here the converter is actually using a user option despite the actual command being annotated as str
-def avatar_converter(inter: disnake.ApplicationCommandInteraction, user: disnake.User) -> str:
+def avatar_converter(inter: disnake.CommandInteraction, user: disnake.User) -> str:
     return user.display_avatar.url
 
 
 @bot.slash_command()
 async def command_with_avatar(
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     avatar: str = commands.Param(converter=avatar_converter),
 ):
     ...
@@ -35,13 +34,13 @@ class SomeCustomClass:
         self.discriminator = discriminator
 
     @classmethod
-    async def from_option(cls, inter: disnake.ApplicationCommandInteraction, user: disnake.User):
+    async def from_option(cls, inter: disnake.CommandInteraction, user: disnake.User):
         return cls(user.name, user.discriminator)
 
 
 @bot.slash_command()
 async def command_with_clsmethod(
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     some: SomeCustomClass = commands.Param(converter=SomeCustomClass.from_option),
 ):
     ...
@@ -55,13 +54,13 @@ class OtherCustomClass:
         self.discriminator = discriminator
 
     @commands.converter_method
-    async def convert(cls, inter: disnake.ApplicationCommandInteraction, user: disnake.User):
+    async def convert(cls, inter: disnake.CommandInteraction, user: disnake.User):
         return cls(user.name, user.discriminator)
 
 
 @bot.slash_command()
 async def command_with_convmethod(
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     other: OtherCustomClass,
 ):
     ...

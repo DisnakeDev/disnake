@@ -42,13 +42,14 @@ from ..errors import (
     InteractionTimedOut,
     NotFound,
 )
+from ..guild import Guild
 from ..member import Member
 from ..message import Attachment, Message
 from ..object import Object
 from ..permissions import Permissions
+from ..ui.action_row import components_to_dict
 from ..user import ClientUser, User
 from ..webhook.async_ import Webhook, async_context, handle_message_parameters
-from ..guild import Guild
 
 __all__ = (
     "Interaction",
@@ -57,24 +58,27 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
+    from aiohttp import ClientSession
+
+    from ..channel import (
+        CategoryChannel,
+        PartialMessageable,
+        StageChannel,
+        StoreChannel,
+        TextChannel,
+        VoiceChannel,
+    )
+    from ..embeds import Embed
     from ..ext.commands.bot import Bot
-    from ..types.interactions import Interaction as InteractionPayload
-    from ..state import ConnectionState
     from ..file import File
     from ..mentions import AllowedMentions
-    from aiohttp import ClientSession
-    from ..embeds import Embed
-    from ..ui.view import View
-    from ..channel import (
-        VoiceChannel,
-        StageChannel,
-        TextChannel,
-        CategoryChannel,
-        StoreChannel,
-        PartialMessageable,
-    )
+    from ..state import ConnectionState
     from ..threads import Thread
-    from datetime import datetime
+    from ..types.interactions import Interaction as InteractionPayload
+    from ..ui.action_row import Components
+    from ..ui.view import View
 
     InteractionChannel = Union[
         VoiceChannel,
@@ -105,12 +109,22 @@ class Interaction:
         The interaction type.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
+    guild_locale: Optional[:class:`str`]
+        The selected language of the interaction's guild.
+        This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
+        If the interaction was in a DM, then this value is ``None``.
+
+        .. versionadded:: 2.4
     channel_id: Optional[:class:`int`]
         The channel ID the interaction was sent from.
     application_id: :class:`int`
         The application ID that the interaction was for.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
+    locale: :class:`str`
+        The selected language of the interaction's author.
+
+        .. versionadded:: 2.4
     token: :class:`str`
         The token to continue the interaction. These are valid
         for 15 minutes.
@@ -126,6 +140,8 @@ class Interaction:
         "token",
         "version",
         "bot",
+        "locale",
+        "guild_locale",
         "_permissions",
         "_state",
         "_session",
@@ -152,6 +168,8 @@ class Interaction:
         self.channel_id: Optional[int] = utils._get_as_snowflake(data, "channel_id")
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.application_id: int = int(data["application_id"])
+        self.locale: str = data["locale"]
+        self.guild_locale: Optional[str] = data.get("guild_locale")
         # think about the user's experience
         self.author: Union[User, Member] = None  # type: ignore
         self._permissions: int = 0
@@ -307,6 +325,7 @@ class Interaction:
         files: List[File] = MISSING,
         attachments: List[Attachment] = MISSING,
         view: Optional[View] = MISSING,
+        components: Optional[Components] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> InteractionMessage:
         """|coro|
@@ -353,7 +372,12 @@ class Interaction:
             .. versionadded:: 2.2
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
-            the view is removed.
+            the view is removed. This can not be mixed with ``components``.
+        components: Optional[|components_type|]
+            A list of components to update this message with. This can not be mixed with ``view``.
+            If ``None`` is passed then the components are removed.
+
+            .. versionadded:: 2.4
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -389,6 +413,7 @@ class Interaction:
             embed=embed,
             embeds=embeds,
             view=view,
+            components=components,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
@@ -476,6 +501,7 @@ class Interaction:
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
+        components: Components = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
         delete_after: float = MISSING,
@@ -518,7 +544,11 @@ class Interaction:
         tts: :class:`bool`
             Indicates if the message should be sent using text-to-speech.
         view: :class:`disnake.ui.View`
-            The view to send with the message.
+            The view to send with the message. This can not be mixed with ``components``.
+        components: |components_type|
+            A list of components to send with the message. This can not be mixed with ``view``.
+
+            .. versionadded:: 2.4
         ephemeral: :class:`bool`
             Indicates if the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
@@ -549,6 +579,7 @@ class Interaction:
             files=files,
             allowed_mentions=allowed_mentions,
             view=view,
+            components=components,
             tts=tts,
             ephemeral=ephemeral,
             delete_after=delete_after,
@@ -660,6 +691,7 @@ class InteractionResponse:
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
+        components: Components = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
         delete_after: float = MISSING,
@@ -686,7 +718,11 @@ class InteractionResponse:
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: :class:`disnake.ui.View`
-            The view to send with the message.
+            The view to send with the message. This can not be mixed with ``components``.
+        components: |components_type|
+            A list of components to send with the message. This can not be mixed with ``view``.
+
+            .. versionadded:: 2.4
         tts: :class:`bool`
             Indicates if the message should be sent using text-to-speech.
         ephemeral: :class:`bool`
@@ -725,6 +761,9 @@ class InteractionResponse:
         if file is not MISSING and files is not MISSING:
             raise TypeError("cannot mix file and files keyword arguments")
 
+        if view is not MISSING and components is not MISSING:
+            raise TypeError("cannot mix view and components keyword arguments")
+
         if file is not MISSING:
             files = [file]
 
@@ -762,6 +801,9 @@ class InteractionResponse:
 
         if view is not MISSING:
             payload["components"] = view.to_components()
+
+        if components is not MISSING:
+            payload["components"] = components_to_dict(components)
 
         parent = self._parent
         adapter = async_context.get()
@@ -805,6 +847,7 @@ class InteractionResponse:
         # attachments: List[Attachment] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
+        components: Optional[Components] = MISSING,
     ) -> None:
         """|coro|
 
@@ -849,8 +892,13 @@ class InteractionResponse:
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. If ``None`` is passed then
-            the view is removed.
+            The updated view to update this message with. This can not be mixed with ``components``.
+            If ``None`` is passed then the view is removed.
+        components: Optional[|components_type|]
+            A list of components to update this message with. This can not be mixed with ``view``.
+            If ``None`` is passed then the components are removed.
+
+            .. versionadded:: 2.4
 
         Raises
         -------
@@ -910,10 +958,16 @@ class InteractionResponse:
         # if attachments is not MISSING:
         #     payload["attachments"] = [a.to_dict() for a in attachments]
 
+        if view is not MISSING and components is not MISSING:
+            raise TypeError("cannot mix view and components keyword arguments")
+
         if view is not MISSING:
             if message_id:
                 state.prevent_view_updates_for(message_id)
             payload["components"] = [] if view is None else view.to_components()
+
+        if components is not MISSING:
+            payload["components"] = [] if components is None else components_to_dict(components)
 
         adapter = async_context.get()
         try:
@@ -1034,6 +1088,7 @@ class InteractionMessage(Message):
         files: List[File] = MISSING,
         attachments: List[Attachment] = MISSING,
         view: Optional[View] = MISSING,
+        components: Optional[Components] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> InteractionMessage:
         """|coro|
@@ -1073,8 +1128,13 @@ class InteractionMessage(Message):
 
             .. versionadded:: 2.2
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. If ``None`` is passed then
-            the view is removed.
+            The updated view to update this message with. This can not be mixed with ``components``.
+            If ``None`` is passed then the view is removed.
+        components: Optional[|components_type|]
+            A list of components to update this message with. This can not be mixed with ``view``.
+            If ``None`` is passed then the components are removed.
+
+            .. versionadded:: 2.4
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -1109,6 +1169,7 @@ class InteractionMessage(Message):
             files=files,
             attachments=attachments,
             view=view,
+            components=components,
             allowed_mentions=allowed_mentions,
         )
 

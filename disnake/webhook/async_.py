@@ -25,36 +25,36 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import logging
 import asyncio
+import logging
 import re
-
-from urllib.parse import quote as urlquote
+from contextvars import ContextVar
 from typing import (
+    TYPE_CHECKING,
     Any,
     Dict,
     List,
     Literal,
     NamedTuple,
     Optional,
-    TYPE_CHECKING,
     Tuple,
     Union,
     overload,
 )
-from contextvars import ContextVar
+from urllib.parse import quote as urlquote
 
 import aiohttp
 
 from .. import utils
-from ..errors import InvalidArgument, HTTPException, Forbidden, NotFound, DiscordServerError
-from ..message import Message
-from ..enums import try_enum, WebhookType
-from ..user import BaseUser, User
 from ..asset import Asset
-from ..http import Route, to_multipart
-from ..mixins import Hashable
 from ..channel import PartialMessageable
+from ..enums import WebhookType, try_enum
+from ..errors import DiscordServerError, Forbidden, HTTPException, InvalidArgument, NotFound
+from ..http import Route, to_multipart
+from ..message import Message
+from ..mixins import Hashable
+from ..ui.action_row import components_to_dict
+from ..user import BaseUser, User
 
 __all__ = (
     "Webhook",
@@ -66,23 +66,21 @@ __all__ = (
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from ..file import File
-    from ..message import Attachment
-    from ..embeds import Embed
-    from ..mentions import AllowedMentions
-    from ..state import ConnectionState
-    from ..http import Response
-    from ..types.webhook import (
-        Webhook as WebhookPayload,
-    )
-    from ..types.message import (
-        Message as MessagePayload,
-    )
-    from ..guild import Guild
-    from ..channel import TextChannel, VoiceChannel
-    from ..abc import Snowflake
-    from ..ui.view import View
     import datetime
+
+    from ..abc import Snowflake
+    from ..channel import TextChannel, VoiceChannel
+    from ..embeds import Embed
+    from ..file import File
+    from ..guild import Guild
+    from ..http import Response
+    from ..mentions import AllowedMentions
+    from ..message import Attachment
+    from ..state import ConnectionState
+    from ..types.message import Message as MessagePayload
+    from ..types.webhook import Webhook as WebhookPayload
+    from ..ui.action_row import Components
+    from ..ui.view import View
 
 MISSING = utils.MISSING
 
@@ -487,6 +485,7 @@ def handle_message_parameters(
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
+    components: Optional[Components] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
 ) -> ExecuteWebhookParameters:
@@ -494,6 +493,8 @@ def handle_message_parameters(
         raise TypeError("Cannot mix file and files keyword arguments.")
     if embeds is not MISSING and embed is not MISSING:
         raise TypeError("Cannot mix embed and embeds keyword arguments.")
+    if view is not MISSING and components is not MISSING:
+        raise TypeError("Cannot mix view and components keyword arguments.")
 
     if file is not MISSING:
         files = [file]
@@ -514,6 +515,8 @@ def handle_message_parameters(
         payload["content"] = str(content) if content is not None else None
     if view is not MISSING:
         payload["components"] = view.to_components() if view is not None else []
+    if components is not MISSING:
+        payload["components"] = [] if components is None else components_to_dict(components)
 
     if attachments is not MISSING:
         payload["attachments"] = [a.to_dict() for a in attachments]
@@ -682,6 +685,7 @@ class WebhookMessage(Message):
         files: List[File] = MISSING,
         attachments: List[Attachment] = MISSING,
         view: Optional[View] = MISSING,
+        components: Optional[Components] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> WebhookMessage:
         """|coro|
@@ -731,9 +735,14 @@ class WebhookMessage(Message):
             .. versionadded:: 2.2
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
-            the view is removed.
+            the view is removed. This can not be mixed with ``components``.
 
             .. versionadded:: 2.0
+        components: Optional[|components_type|]
+            A list of components to update the message with. This can not be mixed with ``view``.
+            If ``None`` is passed then the components are removed.
+
+            .. versionadded:: 2.4
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -771,6 +780,7 @@ class WebhookMessage(Message):
             files=files,
             attachments=attachments,
             view=view,
+            components=components,
             allowed_mentions=allowed_mentions,
         )
 
@@ -1313,6 +1323,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
+        components: Components = MISSING,
         thread: Snowflake = MISSING,
         wait: Literal[True],
         delete_after: float = MISSING,
@@ -1334,6 +1345,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
+        components: Components = MISSING,
         thread: Snowflake = MISSING,
         wait: Literal[False] = ...,
         delete_after: float = MISSING,
@@ -1354,6 +1366,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
+        components: Components = MISSING,
         thread: Snowflake = MISSING,
         wait: bool = False,
         delete_after: float = MISSING,
@@ -1416,9 +1429,13 @@ class Webhook(BaseWebhook):
             The view to send with the message. You can only send a view
             if this webhook is not partial and has state attached. A
             webhook has state attached if the webhook is managed by the
-            library.
+            library. This can not be mixed with ``components``.
 
             .. versionadded:: 2.0
+        components: |components_type|
+            A list of components to include in the message. This can not be mixed with ``view``.
+
+            .. versionadded:: 2.4
         thread: :class:`~disnake.abc.Snowflake`
             The thread to send this webhook to.
 
@@ -1494,6 +1511,7 @@ class Webhook(BaseWebhook):
             embeds=embeds,
             ephemeral=ephemeral,
             view=view,
+            components=components,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
@@ -1582,6 +1600,7 @@ class Webhook(BaseWebhook):
         files: List[File] = MISSING,
         attachments: List[Attachment] = MISSING,
         view: Optional[View] = MISSING,
+        components: Optional[Components] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> WebhookMessage:
         """|coro|
@@ -1637,9 +1656,13 @@ class Webhook(BaseWebhook):
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed. The webhook must have state attached, similar to
-            :meth:`send`.
+            :meth:`send`. This can not be mixed with ``components``.
 
             .. versionadded:: 2.0
+        components: |components_type|
+            A list of components to update this message with. This can not be mixed with ``view``.
+
+            .. versionadded:: 2.4
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -1689,6 +1712,7 @@ class Webhook(BaseWebhook):
             embed=embed,
             embeds=embeds,
             view=view,
+            components=components,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )

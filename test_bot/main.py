@@ -1,8 +1,8 @@
-import disnake
-from disnake.ext import commands
-
 import os
 import traceback
+
+import disnake
+from disnake.ext import commands
 
 
 def fancy_traceback(exc: Exception) -> str:
@@ -23,8 +23,8 @@ class TestBot(commands.Bot):
         )
 
     def load_all_extensions(self, folder: str) -> None:
-        py_path = f"tests.{folder}"
-        folder = f"tests/{folder}"
+        py_path = f"test_bot.{folder}"
+        folder = f"test_bot/{folder}"
         for name in os.listdir(folder):
             if name.endswith(".py") and os.path.isfile(f"{folder}/{name}"):
                 self.load_extension(f"{py_path}.{name[:-3]}")

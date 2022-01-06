@@ -46,6 +46,7 @@ from typing import (
     cast,
     get_origin,
     get_type_hints,
+    overload,
 )
 
 import disnake
@@ -66,10 +67,10 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypeGuard
 
-if sys.version_info >= (3, 9):
-    from typing import Annotated
+if sys.version_info >= (3, 10):
+    from types import UnionType
 else:
-    Annotated = object()
+    UnionType = object()
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
@@ -79,6 +80,7 @@ Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
 TChoice = TypeVar("TChoice", bound=ChoiceValue)
 
 __all__ = (
+    "Range",
     "ParamInfo",
     "Param",
     "param",
@@ -97,14 +99,14 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
 
 def remove_optionals(annotation: Any) -> Any:
     """remove unwanted optionals from an annotation"""
-    if get_origin(annotation) is Union:
+    if get_origin(annotation) in (Union, UnionType):
         annotation = cast(Any, annotation)
 
-        args = [i for i in annotation.__args__ if i not in (None, type(None))]
+        args = tuple(i for i in annotation.__args__ if i not in (None, type(None)))
         if len(args) == 1:
             annotation = args[0]
         else:
-            annotation.__args__ = args
+            annotation = Union[args]  # type: ignore
 
     return annotation
 
@@ -171,6 +173,88 @@ class Injection:
         self = cls(function)
         cls._registered[annotation] = self
         return function
+
+
+class RangeMeta(type):
+    """Custom Generic implementation for Range"""
+
+    @overload
+    def __getitem__(self, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]) -> Type[int]:
+        ...
+
+    @overload
+    def __getitem__(
+        self, args: Tuple[Union[float, ellipsis], Union[float, ellipsis]]
+    ) -> Type[float]:
+        ...
+
+    def __getitem__(self, args: Tuple[Any, ...]) -> Any:
+        a, b = [None if x is Ellipsis else x for x in args]
+        return Range.create(min_value=a, max_value=b)
+
+
+class Range(type, metaclass=RangeMeta):
+    """Type depicting a limited range of allowed values"""
+
+    min_value: Optional[float]
+    max_value: Optional[float]
+
+    @overload
+    @classmethod
+    def create(
+        cls,
+        min_value: int = None,
+        max_value: int = None,
+        *,
+        le: int = None,
+        lt: int = None,
+        ge: int = None,
+        gt: int = None,
+    ) -> Type[int]:
+        ...
+
+    @overload
+    @classmethod
+    def create(
+        cls,
+        min_value: float = None,
+        max_value: float = None,
+        *,
+        le: float = None,
+        lt: float = None,
+        ge: float = None,
+        gt: float = None,
+    ) -> Type[float]:
+        ...
+
+    @classmethod
+    def create(
+        cls,
+        min_value: float = None,
+        max_value: float = None,
+        *,
+        le: float = None,
+        lt: float = None,
+        ge: float = None,
+        gt: float = None,
+    ) -> Any:
+        """Construct a new range with any possible constraints"""
+        self = cls(cls.__name__, (), {})
+        self.min_value = min_value if min_value is not None else _xt_to_xe(le, lt, -1)
+        self.max_value = max_value if max_value is not None else _xt_to_xe(ge, gt, 1)
+        return self
+
+    @property
+    def underlying_type(self) -> Union[Type[int], Type[float]]:
+        if isinstance(self.min_value, float) or isinstance(self.max_value, float):
+            return float
+
+        return int
+
+    def __repr__(self) -> str:
+        a = "..." if self.min_value is None else self.min_value
+        b = "..." if self.max_value is None else self.max_value
+        return f"{type(self).__name__}[{a}, {b}]"
 
 
 class ParamInfo:
@@ -257,7 +341,7 @@ class ParamInfo:
 
     @property
     def required(self) -> bool:
-        return self.default is ...
+        return self.default is Ellipsis
 
     @property
     def discord_type(self) -> OptionType:
@@ -322,21 +406,11 @@ class ParamInfo:
 
     async def verify_type(self, inter: CommandInteraction, argument: Any) -> Any:
         """Check if a type of an argument is correct and possibly fix it"""
-        # these types never need to be verified
-        if self.discord_type.value in [3, 4, 5, 8, 9, 10, 11]:
-            return argument
-
         if issubclass(self.type, disnake.Member):
             if isinstance(argument, disnake.Member):
                 return argument
 
             raise errors.MemberNotFound(str(argument.id))
-
-        if issubclass(self.type, disnake.abc.GuildChannel):
-            if isinstance(argument, self.type):
-                return argument
-
-            raise errors.ChannelNotFound(str(argument.id))
 
         # unexpected types may just be ignored
         return argument
@@ -350,6 +424,7 @@ class ParamInfo:
                 raise errors.ConversionError(int, e) from e
 
         if self.converter is None:
+            # TODO: Custom validators
             return await self.verify_type(inter, argument)
 
         try:
@@ -392,9 +467,17 @@ class ParamInfo:
                 self.parse_converter_annotation(self.converter, annotation)
                 return True
 
+        # short circuit if user forgot to provide annotations
         if annotation is inspect.Parameter.empty or annotation is Any:
             return False
-        elif self.large:
+
+        # resolve type aliases
+        if isinstance(annotation, Range):
+            self.min_value = annotation.min_value
+            self.max_value = annotation.max_value
+            annotation = annotation.underlying_type
+
+        if self.large:
             self.type = str
             if annotation is not int:
                 raise TypeError("Large integers must be annotated with int")
@@ -405,7 +488,7 @@ class ParamInfo:
             or get_origin(annotation) is Literal
         ):
             self._parse_enum(annotation)
-        elif get_origin(annotation) is Union:
+        elif get_origin(annotation) in (Union, UnionType):
             args = annotation.__args__
             if all(issubclass_(channel, disnake.abc.GuildChannel) for channel in args):
                 self._parse_guild_channel(*args)
@@ -444,7 +527,7 @@ class ParamInfo:
         _, parameter = parameters.popitem()
         annotation = parameter.annotation
 
-        if parameter.default is not inspect.Parameter.empty and self.default is ...:
+        if parameter.default is not inspect.Parameter.empty and self.required:
             self.default = parameter.default
             self.convert_default = True
 

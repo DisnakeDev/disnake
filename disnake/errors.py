@@ -24,7 +24,8 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
-from typing import Dict, List, Optional, TYPE_CHECKING, Any, Tuple, Union
+
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse, ClientWebSocketResponse
@@ -87,7 +88,7 @@ class GatewayNotFound(DiscordException):
     """An exception that is raised when the gateway for Discord could not be found"""
 
     def __init__(self):
-        message = "The gateway to connect to disnake was not found."
+        message = "The gateway to connect to Discord was not found."
         super().__init__(message)
 
 

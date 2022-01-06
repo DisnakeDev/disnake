@@ -40,6 +40,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.linkcode",
     "sphinxcontrib_trio",
+    "hoverxref.extension",
     "details",
     "exception_hierarchy",
     "attributetable",
@@ -69,6 +70,7 @@ rst_prolog = """
 .. |coro| replace:: This function is a |coroutine_link|_.
 .. |maybecoro| replace:: This function *could be a* |coroutine_link|_.
 .. |coroutine_link| replace:: *coroutine*
+.. |components_type| replace:: Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.Item`, List[Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.Item`, List[:class:`disnake.ui.Item`]]]]
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
 """
 
@@ -174,6 +176,12 @@ nitpick_ignore_files = [
 ]
 
 
+# unreferenced static images to copy
+copy_static_images = [
+    "images/drop_down_icon.svg",
+]
+
+
 _disnake_module_path = os.path.dirname(importlib.util.find_spec("disnake").origin)  # type: ignore
 
 
@@ -190,13 +198,26 @@ def linkcode_resolve(domain, info):
         if isinstance(obj, property):
             obj = inspect.unwrap(obj.fget)  # type: ignore
 
-        path = os.path.relpath(inspect.getsourcefile(obj), start=_disnake_module_path)
+        path = os.path.relpath(inspect.getsourcefile(obj), start=_disnake_module_path)  # type: ignore
         src, lineno = inspect.getsourcelines(obj)
     except Exception:
         return None
 
     path = f"{path}#L{lineno}-L{lineno + len(src) - 1}"
     return f"{github_repo}/blob/{git_ref}/disnake/{path}"
+
+
+hoverx_default_type = "tooltip"
+hoverxref_domains = ["py"]
+hoverxref_role_types = dict.fromkeys(
+    ["ref", "class", "func", "meth", "attr", "exc", "data"],
+    "tooltip",
+)
+hoverxref_tooltip_theme = ["tooltipster-custom"]
+
+# use proxied API endpoint on rtd to avoid CORS issues
+if os.environ.get("READTHEDOCS"):
+    hoverxref_api_host = "/_"
 
 
 # -- Options for HTML output ----------------------------------------------

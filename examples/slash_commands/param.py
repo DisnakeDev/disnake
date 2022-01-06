@@ -1,7 +1,6 @@
 import disnake
 from disnake.ext import commands
 
-
 bot = commands.Bot("!")
 
 
@@ -16,7 +15,7 @@ bot = commands.Bot("!")
 # disnake takes care of parsing the annotation and adding a description for it.
 @bot.slash_command()
 async def simple(
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     required: str,
     optional: int = 0,
 ):
@@ -27,7 +26,7 @@ async def simple(
 # You can also use various other types like User, Member, Role, TextChannel, Emoji, ...
 @bot.slash_command()
 async def other_types(
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     user: disnake.User,
     emoji: disnake.Emoji,
 ):
@@ -36,14 +35,16 @@ async def other_types(
 
 # Adding descriptions is very simple, just use the docstring
 @bot.slash_command()
-async def description(inter: disnake.ApplicationCommandInteraction, user: disnake.User):
+async def description(inter: disnake.CommandInteraction, user: disnake.User):
     """A random command"""
 
 
 # Options can also be added into the docstring
 @bot.slash_command()
 async def full_description(
-    inter: disnake.ApplicationCommandInteraction, user: disnake.User, channel: disnake.TextChannel
+    inter: disnake.CommandInteraction,
+    user: disnake.User,
+    channel: disnake.TextChannel,
 ):
     """A random command
 
@@ -59,22 +60,28 @@ async def full_description(
 # This is so the annotation actually stays correct.
 @bot.slash_command()
 async def defaults(
-    self,
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     string: str = None,
     user: disnake.User = commands.Param(lambda inter: inter.author),
 ):
     ...
 
 
-# You may limit numbers into a certain range using gt, ge, lt, le (greater than, greater or equal, less than, less or equal)
-# Alternatively you may use min_value instead of ge and max_value instead of le
+# You may limit numbers into a certain range using commands.Range
+# "..." is impicitly infinity. Range[0, ...] therefore means any integer from 0 to infinity and Range[..., 0] means from -inf to 0
+# The 1.0 in fraction is very important, the usage of a float says that the argument may be any float in that range.
 @bot.slash_command()
 async def ranges(
-    self,
-    inter: disnake.ApplicationCommandInteraction,
-    ranking: int = commands.Param(gt=0, le=10),
-    negative: float = commands.Param(lt=0),
-    fraction: float = commands.Param(ge=0, lt=1),
+    inter: disnake.CommandInteraction,
+    ranking: commands.Range[1, 10],
+    negative: commands.Range[..., 0],
+    fraction: commands.Range[0, 1.0],
 ):
-    ...
+    """Command with limited ranges
+
+    Parameters
+    ----------
+    ranking: An integer between 1 and 10
+    negative: An integer lower than 0
+    fraction: A floating point number between 0 and 1
+    """

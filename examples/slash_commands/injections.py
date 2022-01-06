@@ -1,11 +1,11 @@
-from typing import Any, Literal, Optional
 from dataclasses import dataclass
+from typing import Any, Literal, Optional
 
 import disnake
-from disnake.ext import commands
 
 # this file uses pytz in one of its examples but it is completely optional
 import pytz
+from disnake.ext import commands
 
 bot = commands.Bot("!")
 
@@ -22,7 +22,7 @@ class Config:
 
 
 async def get_config(
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     locale: Optional[str] = None,
     timezone: str = "UTC",
     theme: Literal["light", "dark", "amoled"] = "dark",
@@ -53,7 +53,7 @@ async def get_config(
 # `config` will be whatever `get_config()` returns.
 @bot.slash_command()
 async def injected1(
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     number: int,
     config: Config = commands.inject(get_config),
 ):
@@ -67,7 +67,7 @@ async def injected1(
 
 @bot.slash_command()
 async def injected2(
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     string: str,
     config: Config = commands.inject(get_config),
 ):
@@ -92,7 +92,7 @@ conn: Any = ...  # a placeholder for an actual database connection
 
 @commands.register_injection
 async def get_game_user(
-    inter: disnake.ApplicationCommandInteraction,
+    inter: disnake.CommandInteraction,
     user: str = None,
     server: Literal["eu", "us", "cn"] = None,
 ) -> GameUser:
@@ -114,5 +114,5 @@ async def get_game_user(
 
 
 @bot.slash_command()
-async def implicit_injection(inter: disnake.ApplicationCommandInteraction, user: GameUser):
+async def implicit_injection(inter: disnake.CommandInteraction, user: GameUser):
     """A command which uses an implicit injection"""

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from pprint import pformat
 from typing import Optional, Tuple
+
 import disnake
 from disnake.ext import commands
-from pprint import pformat
 
 
 def injected(user: disnake.User, channel: disnake.TextChannel):
@@ -26,7 +27,7 @@ class PrefixConverter:
         self.prefix = prefix
         self.suffix = suffix
 
-    def __call__(self, inter: disnake.ApplicationCommandInteraction, a: str = "init"):
+    def __call__(self, inter: disnake.CommandInteraction, a: str = "init"):
         return self.prefix + a + self.suffix
 
 
@@ -36,7 +37,7 @@ class HopeToGod:
         self.discriminator = discriminator
 
     @commands.converter_method
-    async def convert(cls, inter: disnake.ApplicationCommandInteraction, user: disnake.User):
+    async def convert(cls, inter: disnake.CommandInteraction, user: disnake.User):
         return cls(user.name, user.discriminator)
 
     def __repr__(self) -> str:
@@ -84,7 +85,7 @@ class InjectionSlashCommands(commands.Cog):
     @commands.slash_command()
     async def injection_command(
         self,
-        inter: disnake.ApplicationCommandInteraction,
+        inter: disnake.CommandInteraction,
         sqrt: Optional[float] = commands.Param(None, converter=lambda i, x: x ** 0.5),
         prefixed: str = commands.Param(converter=PrefixConverter("__", "__")),
         other: Tuple[int, str] = commands.inject(injected),
@@ -104,7 +105,7 @@ class InjectionSlashCommands(commands.Cog):
     @commands.slash_command()
     async def discerned_injections(
         self,
-        inter: disnake.ApplicationCommandInteraction,
+        inter: disnake.CommandInteraction,
         perhaps: PerhapsThis,
         god: HopeToGod = None,
     ):

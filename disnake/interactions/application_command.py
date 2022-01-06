@@ -21,18 +21,18 @@
 # DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
-from typing import Any, Dict, List, Mapping, Optional, TYPE_CHECKING, Union, Tuple, TypeVar
 
-from .base import Interaction
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, TypeVar, Union
 
-from ..utils import MISSING
 from ..channel import _threaded_channel_factory
-from ..enums import OptionType, ApplicationCommandType, try_enum
+from ..enums import ApplicationCommandType, OptionType, try_enum
 from ..guild import Guild
+from ..member import Member
+from ..message import Attachment, Message
 from ..role import Role
 from ..user import User
-from ..member import Member
-from ..message import Message, Attachment
+from ..utils import MISSING
+from .base import Interaction
 
 __all__ = (
     "ApplicationCommandInteraction",
@@ -53,22 +53,22 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from ..channel import (
+        CategoryChannel,
+        PartialMessageable,
+        StageChannel,
+        StoreChannel,
+        TextChannel,
+        VoiceChannel,
+    )
+    from ..ext.commands import AutoShardedBot, Bot, InvokableApplicationCommand
+    from ..state import ConnectionState
+    from ..threads import Thread
     from ..types.interactions import (
-        Interaction as InteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
         ApplicationCommandInteractionDataResolved as ApplicationCommandInteractionDataResolvedPayload,
+        Interaction as InteractionPayload,
     )
-    from ..state import ConnectionState
-    from ..channel import (
-        VoiceChannel,
-        StageChannel,
-        TextChannel,
-        CategoryChannel,
-        StoreChannel,
-        PartialMessageable,
-    )
-    from ..threads import Thread
-    from ..ext.commands import InvokableApplicationCommand, Bot, AutoShardedBot
 
     BotBase = Union[Bot, AutoShardedBot]
 
@@ -110,8 +110,18 @@ class ApplicationCommandInteraction(Interaction):
         The interaction's bot. There is an alias for this named ``client``.
     author: Optional[Union[:class:`User`, :class:`Member`]]
         The user or member that sent the interaction.
+    locale: :class:`str`
+        The selected language of the interaction's author.
+
+        .. versionadded:: 2.4
     guild: Optional[:class:`Guild`]
         The guild the interaction was sent from.
+    guild_locale: Optional[:class:`str`]
+        The selected language of the interaction's guild.
+        This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
+        If the interaction was in a DM, then this value is ``None``.
+
+        .. versionadded:: 2.4
     channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
         The channel the interaction was sent from.
     me: Union[:class:`.Member`, :class:`.ClientUser`]
@@ -166,6 +176,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
 
     guild: Guild
     me: Member
+    guild_locale: str
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
@@ -175,9 +186,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
     to seem like the interaction is specifically a user command.
     """
 
-    target: Member
-    guild: Guild
-    me: Member
+    target: Union[User, Member]
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction):

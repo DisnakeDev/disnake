@@ -61,8 +61,12 @@ if TYPE_CHECKING:
 
     from .emoji import Emoji
     from .guild import Guild
+    from .guild_scheduled_event import GuildScheduledEvent
     from .member import Member
     from .role import Role
+    from .stage_instance import StageInstance
+    from .sticker import GuildSticker
+    from .threads import Thread
     from .types.audit_log import (
         AuditLogChange as AuditLogChangePayload,
         AuditLogEntry as AuditLogEntryPayload,
@@ -71,10 +75,6 @@ if TYPE_CHECKING:
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
     from .user import User
-    from .stage_instance import StageInstance
-    from .sticker import GuildSticker
-    from .threads import Thread
-    from .guild_scheduled_event import GuildScheduledEvent
 
 
 def _transform_permissions(entry: AuditLogEntry, data: str) -> Permissions:

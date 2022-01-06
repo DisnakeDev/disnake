@@ -26,11 +26,12 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import Any, Dict, Optional, TYPE_CHECKING, Type, Tuple
-from .utils import _get_as_snowflake, parse_time, MISSING
-from .user import User
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type
+
+from .enums import ExpireBehaviour, try_enum
 from .errors import InvalidArgument
-from .enums import try_enum, ExpireBehaviour
+from .user import User
+from .utils import MISSING, _get_as_snowflake, parse_time
 
 __all__ = (
     "IntegrationAccount",
@@ -41,16 +42,16 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from .types.integration import (
-        IntegrationAccount as IntegrationAccountPayload,
-        Integration as IntegrationPayload,
-        StreamIntegration as StreamIntegrationPayload,
-        BotIntegration as BotIntegrationPayload,
-        IntegrationType,
-        IntegrationApplication as IntegrationApplicationPayload,
-    )
     from .guild import Guild
     from .role import Role
+    from .types.integration import (
+        BotIntegration as BotIntegrationPayload,
+        Integration as IntegrationPayload,
+        IntegrationAccount as IntegrationAccountPayload,
+        IntegrationApplication as IntegrationApplicationPayload,
+        IntegrationType,
+        StreamIntegration as StreamIntegrationPayload,
+    )
 
 
 class IntegrationAccount:
@@ -359,7 +360,7 @@ class BotIntegration(Integration):
 
 
 def _integration_factory(value: str) -> Tuple[Type[Integration], str]:
-    if value == "disnake":
+    if value == "discord":
         return BotIntegration, value
     elif value in ("twitch", "youtube"):
         return StreamIntegration, value
