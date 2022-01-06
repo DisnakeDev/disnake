@@ -195,12 +195,12 @@ class Loop(Generic[LF]):
     def __get__(self, obj: T, objtype: Type[T]) -> Loop[LF]:
         if obj is None:
             return self
-        copy = self.copy(obj)
+        copy = self.copy()
         copy._injected = obj
         setattr(obj, self.coro.__name__, copy)
         return copy
 
-    def copy(self, injected: object) -> Loop[LF]:
+    def copy(self) -> Loop[LF]:
         instance = self.__class__(
             self.coro,
             seconds=self._seconds,
