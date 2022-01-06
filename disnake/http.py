@@ -141,7 +141,7 @@ def to_multipart(payload: Dict[str, Any], files: Iterable[File]) -> List[Dict[st
 
 
 class Route:
-    BASE: ClassVar[str] = "https://discord.com/api/v8"
+    BASE: ClassVar[str] = "https://discord.com/api/v9"
 
     def __init__(self, method: str, path: str, **parameters: Any) -> None:
         self.path: str = path
