@@ -63,7 +63,12 @@ from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import _integration_factory
-from .interactions import ApplicationCommandInteraction, Interaction, MessageInteraction
+from .interactions import (
+    ApplicationCommandInteraction,
+    Interaction,
+    MessageInteraction,
+    ModalInteraction,
+)
 from .invite import Invite
 from .member import Member
 from .mentions import AllowedMentions
@@ -75,6 +80,7 @@ from .role import Role
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
+from .ui.modal import Modal, ModalStore
 from .ui.view import View, ViewStore
 from .user import ClientUser, User
 from .utils import MISSING
@@ -263,7 +269,9 @@ class ConnectionState:
 
         self.clear()
 
-    def clear(self, *, views: bool = True, application_commands: bool = True) -> None:
+    def clear(
+        self, *, views: bool = True, application_commands: bool = True, modals: bool = True
+    ) -> None:
         self.user: ClientUser = MISSING
         # Originally, this code used WeakValueDictionary to maintain references to the
         # global user mapping.
@@ -291,6 +299,9 @@ class ConnectionState:
 
         if views:
             self._view_store: ViewStore = ViewStore(self)
+
+        if modals:
+            self._modal_store: ModalStore = ModalStore(self)
 
         self._voice_clients: Dict[int, VoiceProtocol] = {}
 
@@ -399,6 +410,9 @@ class ConnectionState:
 
     def store_view(self, view: View, message_id: Optional[int] = None) -> None:
         self._view_store.add_view(view, message_id)
+
+    def store_modal(self, user_id: int, modal: Modal) -> None:
+        self._modal_store.add_modal(user_id, modal)
 
     def prevent_view_updates_for(self, message_id: int) -> Optional[View]:
         return self._view_store.remove_message_tracking(message_id)
@@ -730,7 +744,7 @@ class ConnectionState:
             self._ready_task.cancel()
 
         self._ready_state = asyncio.Queue()
-        self.clear(views=False, application_commands=False)
+        self.clear(views=False, application_commands=False, modals=False)
         self.user = ClientUser(state=self, data=data["user"])
         self.store_user(data["user"])
 
@@ -900,6 +914,10 @@ class ConnectionState:
         elif data["type"] == 4:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch("application_command_autocomplete", interaction)
+        elif data["type"] == 5:
+            interaction = ModalInteraction(data=data, state=self)
+            self._modal_store.dispatch(interaction)
+            self.dispatch("modal_submit", interaction)
         else:
             return
 

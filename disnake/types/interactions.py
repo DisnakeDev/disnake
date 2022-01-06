@@ -28,7 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, TypedDict, Union
 
 from .channel import ChannelType
-from .components import Component, ComponentType
+from .components import ActionRow, Component, ComponentType
 from .embed import Embed
 from .member import Member
 from .role import Role
@@ -179,7 +179,14 @@ class ComponentInteractionData(_ComponentInteractionDataOptional):
     component_type: ComponentType
 
 
-InteractionData = Union[ApplicationCommandInteractionData, ComponentInteractionData]
+class ModalInteractionData(TypedDict):
+    custom_id: str
+    components: List[ActionRow]
+
+
+InteractionData = Union[
+    ApplicationCommandInteractionData, ComponentInteractionData, ModalInteractionData
+]
 
 
 class _InteractionOptional(TypedDict, total=False):

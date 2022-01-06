@@ -28,7 +28,18 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+    overload,
+)
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -37,6 +48,7 @@ from ..enums import InteractionResponseType, InteractionType, try_enum
 from ..errors import (
     ClientException,
     HTTPException,
+    InteractionException,
     InteractionNotResponded,
     InteractionResponded,
     InteractionTimedOut,
@@ -78,6 +90,8 @@ if TYPE_CHECKING:
     from ..threads import Thread
     from ..types.interactions import Interaction as InteractionPayload
     from ..ui.action_row import Components
+    from ..ui.input_text import InputText
+    from ..ui.modal import Modal
     from ..ui.view import View
 
     InteractionChannel = Union[
@@ -999,6 +1013,7 @@ class InteractionResponse:
         ],
     ) -> None:
         """|coro|
+
         Responds to this interaction by displaying a list of possible autocomplete results.
         Only works for autocomplete interactions.
 
@@ -1037,6 +1052,107 @@ class InteractionResponse:
             data=data,
         )
 
+        self._responded = True
+
+    @overload
+    async def send_modal(self, modal: Modal = None) -> None:
+        ...
+
+    @overload
+    async def send_modal(
+        self,
+        *,
+        title: str = None,
+        custom_id: str = None,
+        components: List[InputText] = None,
+    ) -> None:
+        ...
+
+    async def send_modal(
+        self,
+        modal: Modal = None,
+        *,
+        title: str = None,
+        custom_id: str = None,
+        components: List[InputText] = None,
+    ) -> None:
+        """|coro|
+
+        Responds to this interaction by displaying a modal.
+
+        Parameters
+        ----------
+        modal: Union[class:`Modal`]
+            The modal to display. This cannot be mixed with ``title``, ``custom_id``, and ``components`` parameters.
+        title: :class:`str`
+            The title of the modal. This cannot be mixed with ``modal`` parameter.
+        custom_id: :class:`str`
+            The custom ID of the modal. This cannot be mixed with ``modal`` parameter.
+        components: List[:class:`.ui.InputText`]
+            The list of components to display in the modal. Maximum of 5.
+            This cannot be mixed with ``modal`` parameter.
+
+        Raises
+        ------
+        TypeError
+            Cannot mix ``modal`` and ``title``, ``custom_id``, ``components`` parameters.
+        ValueError
+            Maximum of components exceeded. (5)
+        HTTPException
+            Displaying the modal failed.
+        InteractionException
+            This interaction can't be responded with a modal.
+        InteractionResponded
+            This interaction has already been responded to before.
+        """
+        kwargs_passed = title is not None or custom_id is not None or components is not None
+
+        if modal is None and not kwargs_passed:
+            raise TypeError("cannot send a modal with no arguments passed")
+
+        if modal is not None and kwargs_passed:
+            raise TypeError(f"cannot mix modal argument and title, custom_id, components arguments")
+
+        if modal is None and (title is None or custom_id is None or components is None):
+            raise TypeError("you must pass all keyword arguments")
+
+        parent = self._parent
+        adapter = async_context.get()
+
+        if parent.type == InteractionType.modal_submit:
+            # New `ModalInteractionResponded` error?
+            raise InteractionException("You cannot respond to a modal with another modal")
+
+        if self._responded:
+            raise InteractionResponded(parent)
+
+        modal_data: Dict[str, Any] = {}
+
+        if modal is not None:
+            modal_data = modal.to_components()
+            parent._state.store_modal(parent.author.id, modal)
+        else:
+            if components and len(components) > 5:
+                raise ValueError("maximum of componentes exceeded")
+
+            modal_data = {
+                "title": title,
+                "custom_id": custom_id,
+                "components": [],
+            }
+
+            for component in components:  # type: ignore
+                modal_data["components"].append(
+                    {"type": 1, "components": [component.to_component_dict()]}
+                )
+
+        await adapter.create_interaction_response(
+            parent.id,
+            parent.token,
+            session=parent._session,
+            type=InteractionResponseType.modal_submit.value,
+            data=modal_data,
+        )
         self._responded = True
 
 

@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
-from .enums import ButtonStyle, ComponentType, try_enum
+from .enums import ButtonStyle, ComponentType, InputTextStyle, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, get_slots
 
@@ -37,6 +37,8 @@ if TYPE_CHECKING:
         ActionRow as ActionRowPayload,
         ButtonComponent as ButtonComponentPayload,
         Component as ComponentPayload,
+        InputText as InputTextPayload,
+        Modal as ModalPayload,
         SelectMenu as SelectMenuPayload,
         SelectOption as SelectOptionPayload,
     )
@@ -48,6 +50,8 @@ __all__ = (
     "Button",
     "SelectMenu",
     "SelectOption",
+    "Modal",
+    "InputText",
 )
 
 C = TypeVar("C", bound="Component")
@@ -372,6 +376,136 @@ class SelectOption:
 
         if self.description:
             payload["description"] = self.description
+
+        return payload
+
+
+class Modal:
+    """Represents a modal from the Discord Bot UI Kit.
+
+    .. versionadded:: 2.4
+
+    Parameters
+    ----------
+    title: :class:`str`
+        The title of the modal.
+    custom_id: :class:`str`
+        The ID of the modal that gets received during an interaction.
+    components: List[:class:`InputText`]
+        A list of components that the modal has.
+    """
+
+    __slots__: Tuple[str, ...] = ("title", "custom_id", "components")
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: ModalPayload) -> None:
+        from .ui.input_text import InputText as InputTextUI
+
+        self.title: str = data["title"]
+        self.custom_id: str = data["custom_id"]
+        self.components: List[InputTextUI] = [
+            InputTextUI.from_dict(component) for component in data["components"]
+        ]
+
+    @classmethod
+    def _raw_construct(cls: Type[Modal], **kwargs: Any) -> Modal:
+        self: Modal = cls.__new__(cls)
+        for slot in get_slots(cls):
+            try:
+                value = kwargs[slot]
+            except KeyError:
+                pass
+            else:
+                setattr(self, slot, value)
+        return self
+
+    def to_dict(self) -> ModalPayload:
+        payload: ModalPayload = {
+            "title": self.title,
+            "custom_id": self.custom_id,
+            "components": [component.to_component_dict() for component in self.components],
+        }
+
+        return payload
+
+
+class InputText(Component):
+    """Represents an input text from the Discord Bot UI Kit.
+
+    This can only be used in a :class:`.ui.Modal`.
+
+    .. versionadded:: 2.4
+
+    Attributes
+    -----------
+    style: :class:`InputTextStyle`
+        The style of the input text.
+    label: :class:`str`
+        The label of the input text.
+    custom_id: :class:`str`
+        The ID of the input text that gets received during an interaction.
+    placeholder: Optional[:class:`str`]
+        The placeholder text that is shown if nothing is entered.
+    value: Optional[:class:`str`]
+        The pre-filled text of the input text.
+    required: :class:`bool`
+        Whether the input text is required. Defaults to ``True``.
+    min_length: Optional[:class:`int`]
+        The minimum length of the input text. Defaults to ``0``.
+    max_length: Optional[:class:`int`]
+        The maximum length of the input text.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "style",
+        "custom_id",
+        "label",
+        "placeholder",
+        "value",
+        "required",
+        "max_length",
+        "min_length",
+    )
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: InputTextPayload) -> None:
+        self.type = try_enum(ComponentType, data["type"])
+        self.style = try_enum(InputTextStyle, data["style"])
+        self.label = data["label"]
+        self.custom_id = data["custom_id"]
+        self.placeholder = data.get("placeholder")
+        self.value = data.get("value")
+        self.required = data.get("required", True)
+        self.min_length = data.get("min_length", 0)
+        self.max_length = data.get("max_length")
+
+    def __repr__(self) -> str:
+        return (
+            f"<InputText style={self.style!r} label={self.label!r} custom_id={self.custom_id!r} "
+            f"placeholder={self.placeholder!r} value={self.value!r} required={self.required!r} "
+            f"min_length={self.min_length!r} max_length={self.max_length!r}>"
+        )
+
+    def to_dict(self) -> InputTextPayload:
+        payload: InputTextPayload = {
+            "type": self.type.value,
+            "style": self.style.value,  # type: ignore
+            "label": self.label,
+            "custom_id": self.custom_id,
+            "required": self.required,
+            "min_length": self.min_length,
+        }
+
+        if self.placeholder:
+            payload["placeholder"] = self.placeholder
+
+        if self.value:
+            payload["value"] = self.value
+
+        if self.max_length:
+            payload["max_length"] = self.max_length
 
         return payload
 
