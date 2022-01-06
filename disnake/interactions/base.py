@@ -1150,7 +1150,7 @@ class InteractionResponse:
             parent.id,
             parent.token,
             session=parent._session,
-            type=InteractionResponseType.modal_submit.value,
+            type=InteractionResponseType.modal.value,
             data=modal_data,
         )
         self._responded = True
