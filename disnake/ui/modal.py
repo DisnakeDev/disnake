@@ -214,7 +214,6 @@ class ModalStore:
         # Waits 10 minutes and then removes the modal from cache, this is done just in case the user closed the modal,
         # as there isn't an event for that.
 
-        # TODO: on_modal_timeout event?
         await asyncio.sleep(600)
         try:
             self.remove_modal(user_id, modal_custom_id)
