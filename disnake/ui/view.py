@@ -254,7 +254,7 @@ class View:
             return time.monotonic() + self.timeout
         return None
 
-    def add_item(self, item: Item) -> None:
+    def add_item(self, item: Item) -> View:
         """Adds an item to the view.
 
         Parameters
@@ -281,8 +281,9 @@ class View:
 
         item._view = self
         self.children.append(item)
+        return self
 
-    def remove_item(self, item: Item) -> None:
+    def remove_item(self, item: Item) -> View:
         """Removes an item from the view.
 
         Parameters
@@ -297,11 +298,13 @@ class View:
             pass
         else:
             self.__weights.remove_item(item)
+        return self
 
-    def clear_items(self) -> None:
+    def clear_items(self) -> View:
         """Removes all items from the view."""
         self.children.clear()
         self.__weights.clear()
+        return self
 
     async def interaction_check(self, interaction: MessageInteraction) -> bool:
         """|coro|
