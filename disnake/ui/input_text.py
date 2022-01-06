@@ -35,6 +35,9 @@ if TYPE_CHECKING:
 IT = TypeVar("IT", bound="InputText")
 
 
+__all__ = ["InputText"]
+
+
 class InputText:
     def __init__(
         self,

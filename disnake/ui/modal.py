@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState
 
+
 __all__ = ["Modal"]
 
 
