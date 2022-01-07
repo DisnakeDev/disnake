@@ -52,7 +52,7 @@ from ..components import (
     SelectMenu as SelectComponent,
     _component_factory,
 )
-from ..enums import try_enum_to_int, ComponentType
+from ..enums import ComponentType, try_enum_to_int
 from .item import Item
 
 __all__ = ("View",)
