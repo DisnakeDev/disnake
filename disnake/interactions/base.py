@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -1014,14 +1014,17 @@ class InteractionResponse:
             raise InteractionResponded(self._parent)
 
         choices_data: List[ApplicationCommandOptionChoicePayload]
-        if not choices:
-            choices_data = []
-        elif isinstance(choices, Mapping):
+        if isinstance(choices, Mapping):
             choices_data = [{"name": n, "value": v} for n, v in choices.items()]
-        elif isinstance(choices, Iterable) and not isinstance(choices[0], OptionChoice):
-            choices_data = [{"name": n, "value": n} for n in choices]  # type: ignore
         else:
-            choices_data = [c.to_dict() for c in choices]  # type: ignore
+            choices_data = []
+            value: ApplicationCommandOptionChoicePayload
+            for c in choices:
+                if isinstance(c, OptionChoice):
+                    value = c.to_dict()
+                else:
+                    value = {"name": str(c), "value": c}
+                choices_data.append(value)
 
         parent = self._parent
         adapter = async_context.get()

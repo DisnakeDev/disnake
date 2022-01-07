@@ -26,7 +26,7 @@ import math
 import re
 import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union
 
 from .abc import User
 from .custom_warnings import ConfigWarning
@@ -195,19 +195,19 @@ class Option:
 
         self.channel_types: List[ChannelType] = channel_types or []
 
-        if choices is not None and autocomplete:
-            raise InvalidArgument("can not specify both choices and autocomplete args")
+        self.choices: List[OptionChoice] = []
+        if choices is not None:
+            if autocomplete:
+                raise InvalidArgument("can not specify both choices and autocomplete args")
 
-        if choices is None:
-            choices = []
-        elif isinstance(choices, Mapping):
-            choices = [OptionChoice(name, value) for name, value in choices.items()]
-        elif isinstance(choices, Iterable) and not isinstance(choices[0], OptionChoice):
-            choices = [OptionChoice(str(value), value) for value in choices]  # type: ignore
-        else:
-            choices = cast(List[OptionChoice], choices)
+            if isinstance(choices, Mapping):
+                self.choices = [OptionChoice(name, value) for name, value in choices.items()]
+            else:
+                for c in choices:
+                    if not isinstance(c, OptionChoice):
+                        c = OptionChoice(str(c), c)
+                    self.choices.append(c)
 
-        self.choices: List[OptionChoice] = choices
         self.autocomplete: bool = autocomplete
 
     def __repr__(self) -> str:
