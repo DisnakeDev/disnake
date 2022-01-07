@@ -31,13 +31,27 @@ import inspect
 import sys
 import traceback
 from collections.abc import Sequence
-from typing import Any, Awaitable, Callable, Generic, List, Optional, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    Generic,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+)
 
 import aiohttp
 
 import disnake
 from disnake.backoff import ExponentialBackoff
 from disnake.utils import MISSING
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__ = ("loop",)
 
@@ -200,7 +214,8 @@ class Loop(Generic[LF]):
         setattr(obj, self.coro.__name__, copy)
         return copy
 
-    def copy(self) -> Loop[LF]:
+    def copy(self) -> Self:
+        # not really copy
         instance = self.__class__(
             self.coro,
             seconds=self._seconds,
@@ -214,6 +229,7 @@ class Loop(Generic[LF]):
         instance._before_loop = self._before_loop
         instance._after_loop = self._after_loop
         instance._error = self._error
+        instance._injected = self._injected
         return instance
 
     @property
