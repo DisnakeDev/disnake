@@ -273,7 +273,7 @@ class ParamInfo:
         The name of this slash command option.
     description: :class:`str`
         The description of this slash command option.
-    choices: Iterable[Any]
+    choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of choices of this slash command option.
     ge: :class:`float`
         The lowest allowed value for this option.
