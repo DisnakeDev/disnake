@@ -99,8 +99,8 @@ def _app_commands_diff(
     new_commands: Iterable[ApplicationCommand],
     old_commands: Iterable[ApplicationCommand],
 ) -> Dict[str, List[ApplicationCommand]]:
-    new_cmds = {cmd.name: cmd for cmd in new_commands}
-    old_cmds = {cmd.name: cmd for cmd in old_commands}
+    new_cmds = {(cmd.name, cmd.type): cmd for cmd in new_commands}
+    old_cmds = {(cmd.name, cmd.type): cmd for cmd in old_commands}
 
     diff = {
         "no_changes": [],
@@ -110,8 +110,8 @@ def _app_commands_diff(
         "change_type": [],
     }
 
-    for name, new_cmd in new_cmds.items():
-        old_cmd = old_cmds.get(name)
+    for name_and_type, new_cmd in new_cmds.items():
+        old_cmd = old_cmds.get(name_and_type)
         if old_cmd is None:
             diff["upsert"].append(new_cmd)
         elif old_cmd.type != new_cmd.type:
@@ -124,8 +124,8 @@ def _app_commands_diff(
         else:
             diff["no_changes"].append(new_cmd)
 
-    for name, old_cmd in old_cmds.items():
-        if name not in new_cmds:
+    for name_and_type, old_cmd in old_cmds.items():
+        if name_and_type not in new_cmds:
             diff["delete"].append(old_cmd)
 
     return diff
