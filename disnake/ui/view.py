@@ -43,6 +43,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    Iterable,
 )
 
 from ..components import (
@@ -54,6 +55,7 @@ from ..components import (
 )
 from ..enums import try_enum_to_int
 from .item import Item
+from.button import Button as UIButton
 
 __all__ = ("View",)
 
@@ -551,3 +553,24 @@ class ViewStore:
         # pre-req: is_message_tracked == true
         view = self._synced_message_views[message_id]
         view.refresh([_component_factory(d) for d in components])
+
+
+class Keyboard(View):
+    def from_iterables(self, *iterables: Iterable[UIButton]) -> View:
+        # not classmethod for supporting all __init__ args
+        for row, buttons in enumerate(iterables):
+            for button in buttons:
+                button.row = row
+                self.add_item(button)
+        return self
+
+    def add_row(
+        self,
+        *buttons: UIButton,
+        row: int | None = None
+    ) -> View:
+        for i in buttons:
+            if row is not None:
+                i.row = row
+            self.add_item(i)
+        return self
