@@ -52,7 +52,7 @@ from ..components import (
     SelectMenu as SelectComponent,
     _component_factory,
 )
-from ..enums import try_enum_to_int
+from ..enums import try_enum_to_int, ComponentType
 from .item import Item
 
 __all__ = ("View",)
@@ -412,7 +412,7 @@ class View:
             except (KeyError, AttributeError):
                 for child in self.children:
                     if (
-                        child.type.value == 2  # Button
+                        child.type is ComponentType.button
                         and child.label == component.label  # type: ignore
                         and child.url == component.url  # type: ignore
                     ):
