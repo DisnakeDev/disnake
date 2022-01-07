@@ -1209,6 +1209,12 @@ def search_directory(path: str) -> Iterator[str]:
     if ".." in relpath:
         raise ValueError("Modules outside the cwd require a package to be specified")
 
+    abspath = os.path.abspath(path)
+    if not os.path.exists(relpath):
+        raise ValueError(f"Provided path '{abspath}' does not exist")
+    if not os.path.isdir(relpath):
+        raise ValueError(f"Provided path '{abspath}' is not a directory")
+
     prefix = relpath.replace(os.sep, ".")
 
     for finder, name, ispkg in pkgutil.iter_modules([path]):
