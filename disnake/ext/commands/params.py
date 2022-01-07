@@ -61,11 +61,16 @@ from . import errors
 from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
+    from disnake.app_commands import Choices
+    from disnake.types.interactions import ApplicationCommandOptionChoiceValue
+
     from .slash_core import InvokableSlashCommand, SubCommand
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 
     from typing_extensions import TypeGuard
+
+    TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
 
 if sys.version_info >= (3, 10):
     from types import UnionType
@@ -75,9 +80,6 @@ else:
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
 CallableT = TypeVar("CallableT", bound=Callable[..., Any])
-ChoiceValue = Union[str, int, float]
-Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
-TChoice = TypeVar("TChoice", bound=ChoiceValue)
 
 __all__ = (
     "Range",
@@ -822,7 +824,7 @@ def Param(
     description: :class:`str`
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
-    choices: Iterable[Any]
+    choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.
     converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.
@@ -901,8 +903,7 @@ def option_enum(
     choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
 ) -> Type[TChoice]:
     if isinstance(choices, list):
-        # invariance issue, please fix
-        choices = cast(Dict[str, TChoice], {str(i): i for i in choices})
+        choices = {str(i): i for i in choices}
 
     choices = choices or kwargs
     first, *_ = choices.values()

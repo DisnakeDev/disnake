@@ -134,7 +134,7 @@ class Option:
         the option type, e.g. :class:`OptionType.user`
     required: :class:`bool`
         whether this option is required or not
-    choices: Union[List[:class:`OptionChoice`], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
+    choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         the list of option choices
     options: List[:class:`Option`]
         the list of sub options. Normally you don't have to specify it directly,

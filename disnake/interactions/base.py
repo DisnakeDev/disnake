@@ -62,6 +62,7 @@ if TYPE_CHECKING:
 
     from aiohttp import ClientSession
 
+    from ..app_commands import Choices
     from ..channel import (
         CategoryChannel,
         PartialMessageable,
@@ -76,7 +77,10 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
     from ..threads import Thread
-    from ..types.interactions import Interaction as InteractionPayload
+    from ..types.interactions import (
+        ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
+        Interaction as InteractionPayload,
+    )
     from ..ui.action_row import Components
     from ..ui.view import View
 
@@ -989,22 +993,14 @@ class InteractionResponse:
 
         self._responded = True
 
-    async def autocomplete(
-        self,
-        *,
-        choices: Union[
-            Dict[str, str],
-            List[str],
-            List[OptionChoice],
-        ],
-    ) -> None:
+    async def autocomplete(self, *, choices: Choices) -> None:
         """|coro|
         Responds to this interaction by displaying a list of possible autocomplete results.
         Only works for autocomplete interactions.
 
         Parameters
         -----------
-        choices: Union[Dict[:class:`str`, :class:`str`], List[:class:`OptionChoice`]]
+        choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
             The list of choices to suggest.
 
         Raises
@@ -1017,15 +1013,15 @@ class InteractionResponse:
         if self._responded:
             raise InteractionResponded(self._parent)
 
-        data = {}
+        choices_data: List[ApplicationCommandOptionChoicePayload]
         if not choices:
-            data["choices"] = []
+            choices_data = []
         elif isinstance(choices, Mapping):
-            data["choices"] = [{"name": n, "value": v} for n, v in choices.items()]
+            choices_data = [{"name": n, "value": v} for n, v in choices.items()]
         elif isinstance(choices, Iterable) and not isinstance(choices[0], OptionChoice):
-            data["choices"] = [{"name": n, "value": n} for n in choices]
+            choices_data = [{"name": n, "value": n} for n in choices]  # type: ignore
         else:
-            data["choices"] = [c.to_dict() for c in choices]  # type: ignore
+            choices_data = [c.to_dict() for c in choices]  # type: ignore
 
         parent = self._parent
         adapter = async_context.get()
@@ -1034,7 +1030,7 @@ class InteractionResponse:
             parent.token,
             session=parent._session,
             type=InteractionResponseType.application_command_autocomplete_result.value,
-            data=data,
+            data={"choices": choices_data},
         )
 
         self._responded = True

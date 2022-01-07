@@ -2144,7 +2144,7 @@ class HTTPClient:
         token: str,
         *,
         type: InteractionResponseType,
-        data: Optional[interactions.InteractionApplicationCommandCallbackData] = None,
+        data: Optional[interactions.InteractionCallbackData] = None,
     ) -> Response[None]:
         r = Route(
             "POST",

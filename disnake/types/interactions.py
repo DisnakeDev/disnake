@@ -220,11 +220,19 @@ class InteractionApplicationCommandCallbackData(TypedDict, total=False):
     components: List[Component]
 
 
+class InteractionAutocompleteCallbackData(TypedDict):
+    choices: List[ApplicationCommandOptionChoice]
+
+
 InteractionResponseType = Literal[1, 4, 5, 6, 7]
+
+InteractionCallbackData = Union[
+    InteractionApplicationCommandCallbackData, InteractionAutocompleteCallbackData
+]
 
 
 class _InteractionResponseOptional(TypedDict, total=False):
-    data: InteractionApplicationCommandCallbackData
+    data: InteractionCallbackData
 
 
 class InteractionResponse(_InteractionResponseOptional):
