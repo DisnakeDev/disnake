@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from .partial_emoji import PartialEmoji
     from .types.raw_models import (
         BulkMessageDeleteEvent,
+        GuildScheduledEventUserActionEvent,
         IntegrationDeleteEvent,
         MessageDeleteEvent,
         MessageUpdateEvent,
@@ -300,8 +301,7 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
 
     __slots__ = ("guild_scheduled_event_id", "user_id", "guild_id")
 
-    def __init__(self, data: dict):
-        # TODO: typed dicts
+    def __init__(self, data: GuildScheduledEventUserActionEvent):
         self.event_id: int = int(data["guild_scheduled_event_id"])
         self.user_id: int = int(data["user_id"])
         self.guild_id: int = int(data["guild_id"])

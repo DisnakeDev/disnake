@@ -98,3 +98,9 @@ class TypingEvent(_TypingEventOptional):
     user_id: Snowflake
     channel_id: Snowflake
     timestamp: int
+
+
+class GuildScheduledEventUserActionEvent(TypedDict):
+    guild_scheduled_event_id: Snowflake
+    user_id: Snowflake
+    guild_id: Snowflake

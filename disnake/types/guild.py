@@ -26,11 +26,13 @@ DEALINGS IN THE SOFTWARE.
 from typing import List, Literal, Optional, TypedDict
 
 from .activity import PartialPresenceUpdate
-from .channel import GuildChannel
+from .channel import GuildChannel, StageInstance
 from .emoji import Emoji
+from .guild_scheduled_event import GuildScheduledEvent
 from .member import Member
 from .role import Role
 from .snowflake import Snowflake
+from .sticker import GuildSticker
 from .threads import Thread
 from .user import User
 from .voice import GuildVoiceState
@@ -70,6 +72,9 @@ class _GuildOptional(TypedDict, total=False):
     max_video_channel_users: int
     approximate_member_count: int
     approximate_presence_count: int
+    stage_instances: List[StageInstance]
+    stickers: List[GuildSticker]
+    guild_scheduled_events: List[GuildScheduledEvent]
 
 
 DefaultMessageNotificationLevel = Literal[0, 1]
