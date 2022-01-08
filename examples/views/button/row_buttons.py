@@ -46,7 +46,7 @@ class RowButtons(disnake.ui.View):
 async def buttons(ctx):
 
     # Sends a message with a row of buttons.
-    await ctx.send("Here are some buttons!", view=row_buttons())
+    await ctx.send("Here are some buttons!", view=RowButtons())
 
     # This is how the command would look like: https://i.imgur.com/ZYdX1Jw.png
 
