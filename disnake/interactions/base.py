@@ -627,7 +627,6 @@ class InteractionResponse:
             This only applies for interactions of type :attr:`InteractionType.component`, and is ``True`` otherwise.
 
             .. versionadded:: 2.4
-
         ephemeral: :class:`bool`
             Indicates whether the deferred message will eventually be ephemeral.
             This only applies for interactions of type :attr:`InteractionType.application_command` or when ``with_message`` is True
