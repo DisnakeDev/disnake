@@ -45,7 +45,6 @@ from typing import (
 )
 
 import aiohttp
-
 import disnake
 from disnake.backoff import ExponentialBackoff
 from disnake.utils import MISSING
