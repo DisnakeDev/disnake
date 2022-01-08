@@ -33,11 +33,11 @@ GuildScheduledEventStatus = Literal[1, 2, 3, 4]
 GuildScheduledEventEntityType = Literal[1, 2, 3]
 
 
-class OptionalGuildScheduledEventUser(TypedDict, total=False):
+class _OptionalGuildScheduledEventUser(TypedDict, total=False):
     member: MemberWithUser
 
 
-class GuildScheduledEventUser(OptionalGuildScheduledEventUser):
+class GuildScheduledEventUser(_OptionalGuildScheduledEventUser):
     guild_scheduled_event_id: Snowflake
     user: User
 
@@ -46,13 +46,13 @@ class GuildScheduledEventEntityMetadata(TypedDict):
     location: str
 
 
-class OptionalGuildScheduledEvent(TypedDict, total=False):
+class _OptionalGuildScheduledEvent(TypedDict, total=False):
     description: str
     creator: User
     user_count: int
 
 
-class GuildScheduledEvent(OptionalGuildScheduledEvent):
+class GuildScheduledEvent(_OptionalGuildScheduledEvent):
     id: Snowflake
     guild_id: Snowflake
     channel_id: Optional[Snowflake]
