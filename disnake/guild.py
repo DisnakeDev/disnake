@@ -3158,10 +3158,7 @@ class Guild(Hashable):
         return Widget(state=self._state, data=data)
 
     async def edit_widget(
-        self,
-        *,
-        enabled: bool = MISSING,
-        channel: Optional[Snowflake] = MISSING,
+        self, *, enabled: bool = MISSING, channel: Optional[Snowflake] = MISSING
     ) -> None:
         """|coro|
 
