@@ -61,6 +61,7 @@ __all__ = ("View",)
 
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
     from ..interactions import MessageInteraction
     from ..message import Message
     from ..state import ConnectionState
@@ -256,7 +257,7 @@ class View:
             return time.monotonic() + self.timeout
         return None
 
-    def add_item(self, item: Item) -> View:
+    def add_item(self, item: Item) -> Self:
         """Adds an item to the view.
 
         Parameters
@@ -271,6 +272,10 @@ class View:
         ValueError
             Maximum number of children has been exceeded (25)
             or the row the item is trying to be added to is full.
+
+        Returns
+        ---------
+        `Self`
         """
 
         if len(self.children) > 25:
@@ -285,13 +290,17 @@ class View:
         self.children.append(item)
         return self
 
-    def remove_item(self, item: Item) -> View:
+    def remove_item(self, item: Item) -> Self:
         """Removes an item from the view.
 
         Parameters
         -----------
         item: :class:`Item`
             The item to remove from the view.
+
+        Returns
+        ---------
+        `Self`
         """
 
         try:
@@ -302,8 +311,14 @@ class View:
             self.__weights.remove_item(item)
         return self
 
-    def clear_items(self) -> View:
-        """Removes all items from the view."""
+    def clear_items(self) -> Self:
+        """Removes all items from the view.
+
+        Returns
+        ---------
+        `Self`
+        """
+
         self.children.clear()
         self.__weights.clear()
         return self
@@ -556,9 +571,29 @@ class ViewStore:
 
 
 class Keyboard(View):
-    def from_iterables(self, *iterables: Iterable[UIButton]) -> View:
+    """:class:`View` for buttons, providing special interfaces for them."""
+
+    def from_iterables(
+        self,
+        *iterables: Iterable[UIButton],
+        start: int = 0
+    ) -> Self:
+        """Adds buttons to view from their 2D representation and sets correct row for them.
+
+        Parameters
+        -----------
+        *iterables: Iterable[:class:`~disnake.ui.Button`]
+            Row of buttons.
+        start: :class:`int`, default=0
+            Row number from which counting started.
+
+        Returns
+        -----------
+        `Self`
+        """
         # not classmethod for supporting all __init__ args
-        for row, buttons in enumerate(iterables):
+
+        for row, buttons in enumerate(iterables, start=start):
             for button in buttons:
                 button.row = row
                 self.add_item(button)
@@ -568,7 +603,21 @@ class Keyboard(View):
         self,
         *buttons: UIButton,
         row: int | None = None
-    ) -> View:
+    ) -> Self:
+        """Adds row of buttons to view
+
+        Parameters
+        -----------
+        *buttons: :class:`~disnake.ui.Button`
+            Buttons to be inserted into row.
+        row: :class:`int`, optional
+            Insert row number.
+
+        Returns
+        -----------
+        `Self`
+        """
+
         for i in buttons:
             if row is not None:
                 i.row = row
