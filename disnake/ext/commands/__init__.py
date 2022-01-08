@@ -4,7 +4,7 @@ disnake.ext.commands
 
 An extension module to facilitate creation of bot commands.
 
-:copyright: (c) 2015-present Rapptz
+:copyright: (c) 2015-present Rapptz, 2021-present Disnake Development
 :license: MIT, see LICENSE for more details.
 """
 
