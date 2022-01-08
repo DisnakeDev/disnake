@@ -38,12 +38,12 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Iterable,
     Iterator,
     List,
     Optional,
     Sequence,
     Tuple,
-    Iterable,
 )
 
 from ..components import (
@@ -54,14 +54,15 @@ from ..components import (
     _component_factory,
 )
 from ..enums import try_enum_to_int
+from .button import Button as UIButton
 from .item import Item
-from.button import Button as UIButton
 
 __all__ = ("View",)
 
 
 if TYPE_CHECKING:
     from typing_extensions import Self
+
     from ..interactions import MessageInteraction
     from ..message import Message
     from ..state import ConnectionState
