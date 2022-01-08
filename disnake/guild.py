@@ -3162,7 +3162,6 @@ class Guild(Hashable):
         *,
         enabled: bool = MISSING,
         channel: Optional[Snowflake] = MISSING,
-        reason: Optional[str] = None,
     ) -> None:
         """|coro|
 
@@ -3179,8 +3178,6 @@ class Guild(Hashable):
             Whether to enable the widget for the guild.
         channel: Optional[:class:`~disnake.abc.Snowflake`]
             The new widget channel. ``None`` removes the widget channel.
-        reason: Optional[:class:`str`]
-            The reason for editing the widget. Shows up on the audit log.
 
         Raises
         -------
@@ -3195,7 +3192,7 @@ class Guild(Hashable):
         if enabled is not MISSING:
             payload["enabled"] = enabled
 
-        await self._state.http.edit_widget(self.id, payload=payload, reason=reason)
+        await self._state.http.edit_widget(self.id, payload=payload)
 
     async def chunk(self, *, cache: bool = True) -> None:
         """|coro|
