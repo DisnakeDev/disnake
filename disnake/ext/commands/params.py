@@ -38,7 +38,6 @@ from typing import (
     Dict,
     List,
     Literal,
-    NewType,
     Optional,
     Tuple,
     Type,
