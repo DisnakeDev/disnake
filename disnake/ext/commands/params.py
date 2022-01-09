@@ -38,6 +38,7 @@ from typing import (
     Dict,
     List,
     Literal,
+    NewType,
     Optional,
     Tuple,
     Type,
@@ -71,6 +72,14 @@ if TYPE_CHECKING:
     from typing_extensions import TypeGuard
 
     TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
+    LargeInt = int
+else:
+
+    class LargeInt(type):
+        """Type for large integers."""
+
+        pass
+
 
 if sys.version_info >= (3, 10):
     from types import UnionType
@@ -83,6 +92,7 @@ CallableT = TypeVar("CallableT", bound=Callable[..., Any])
 
 __all__ = (
     "Range",
+    "LargeInt",
     "ParamInfo",
     "Param",
     "param",
@@ -475,11 +485,14 @@ class ParamInfo:
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
+        if issubclass(annotation, LargeInt):
+            self.large = True
+            annotation = int
 
         if self.large:
             self.type = str
             if annotation is not int:
-                raise TypeError("Large integers must be annotated with int")
+                raise TypeError("Large integers must be annotated with int or LargeInt")
         elif annotation in self.TYPES:
             self.type = annotation
         elif (
