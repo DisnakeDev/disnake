@@ -262,9 +262,7 @@ class Range(type, metaclass=RangeMeta):
 
 
 class LargeInt(int):
-    """Type for large integers"""
-
-    pass
+    """Type for large integers in slash commands."""
 
 
 class ParamInfo:
