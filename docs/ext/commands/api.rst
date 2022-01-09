@@ -503,7 +503,7 @@ GroupMixin
 LargeInt
 ~~~~~~~~
 
-This is a type alias of :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
+This is a class which inherits from :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
 
 .. _ext_commands_api_cogs:
 

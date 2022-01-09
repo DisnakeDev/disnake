@@ -71,13 +71,6 @@ if TYPE_CHECKING:
     from typing_extensions import TypeGuard
 
     TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
-    LargeInt = int
-else:
-
-    class LargeInt(type):
-        """Type for large integers."""
-
-        pass
 
 
 if sys.version_info >= (3, 10):
@@ -266,6 +259,12 @@ class Range(type, metaclass=RangeMeta):
         a = "..." if self.min_value is None else self.min_value
         b = "..." if self.max_value is None else self.max_value
         return f"{type(self).__name__}[{a}, {b}]"
+
+
+class LargeInt(int):
+    """Type for large integers"""
+
+    pass
 
 
 class ParamInfo:
