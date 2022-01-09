@@ -1411,6 +1411,7 @@ class HTTPClient:
         guild_id: Snowflake,
         payload: sticker.CreateGuildSticker,
         file: File,
+        *,
         reason: Optional[str] = None,
     ) -> Response[sticker.GuildSticker]:
         initial_bytes = file.fp.read(16)
@@ -1454,6 +1455,7 @@ class HTTPClient:
         guild_id: Snowflake,
         sticker_id: Snowflake,
         payload: sticker.EditGuildSticker,
+        *,
         reason: Optional[str] = None,
     ) -> Response[sticker.GuildSticker]:
         return self.request(
@@ -1468,7 +1470,7 @@ class HTTPClient:
         )
 
     def delete_guild_sticker(
-        self, guild_id: Snowflake, sticker_id: Snowflake, reason: Optional[str] = None
+        self, guild_id: Snowflake, sticker_id: Snowflake, *, reason: Optional[str] = None
     ) -> Response[None]:
         return self.request(
             Route(
