@@ -83,6 +83,7 @@ CallableT = TypeVar("CallableT", bound=Callable[..., Any])
 
 __all__ = (
     "Range",
+    "LargeInt",
     "ParamInfo",
     "Param",
     "param",
@@ -257,6 +258,10 @@ class Range(type, metaclass=RangeMeta):
         a = "..." if self.min_value is None else self.min_value
         b = "..." if self.max_value is None else self.max_value
         return f"{type(self).__name__}[{a}, {b}]"
+
+
+class LargeInt(int):
+    """Type for large integers in slash commands."""
 
 
 class ParamInfo:
@@ -475,11 +480,14 @@ class ParamInfo:
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
+        if issubclass(annotation, LargeInt):
+            self.large = True
+            annotation = int
 
         if self.large:
             self.type = str
             if annotation is not int:
-                raise TypeError("Large integers must be annotated with int")
+                raise TypeError("Large integers must be annotated with int or LargeInt")
         elif annotation in self.TYPES:
             self.type = annotation
         elif (

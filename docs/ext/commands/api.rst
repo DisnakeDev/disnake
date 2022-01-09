@@ -500,6 +500,11 @@ GroupMixin
     .. automethod:: GroupMixin.group(*args, **kwargs)
         :decorator:
 
+LargeInt
+~~~~~~~~
+
+This is a class which inherits from :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
+
 .. _ext_commands_api_cogs:
 
 Cogs

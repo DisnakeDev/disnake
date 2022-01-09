@@ -85,3 +85,10 @@ async def ranges(
     negative: An integer lower than 0
     fraction: A floating point number between 0 and 1
     """
+
+
+# You can also allow large numbers with commands.LargeInt.
+# Since Discord only allows numbers between -2^53 and 2^53, this allows you to use larger numbers.
+@bot.slash_command()
+async def large(inter: disnake.CommandInteraction, largenumber: commands.LargeInt):
+    ...
