@@ -72,7 +72,6 @@ if TYPE_CHECKING:
 
     TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
 
-
 if sys.version_info >= (3, 10):
     from types import UnionType
 else:
