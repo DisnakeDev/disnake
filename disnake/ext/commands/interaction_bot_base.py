@@ -107,15 +107,12 @@ def _app_commands_diff(
         "upsert": [],
         "edit": [],
         "delete": [],
-        "change_type": [],
     }
 
     for name_and_type, new_cmd in new_cmds.items():
         old_cmd = old_cmds.get(name_and_type)
         if old_cmd is None:
             diff["upsert"].append(new_cmd)
-        elif old_cmd.type != new_cmd.type:
-            diff["change_type"].append(new_cmd)
         elif new_cmd._always_synced:
             diff["no_changes"].append(old_cmd)
             continue
@@ -135,7 +132,6 @@ _diff_map = {
     "upsert": "To upsert:",
     "edit": "To edit:",
     "delete": "To delete:",
-    "change_type": "Type migration:",
     "no_changes": "No changes:",
 }
 
@@ -693,7 +689,6 @@ class InteractionBotBase(CommonBotBase):
         update_required = (
             bool(diff["upsert"])
             or bool(diff["edit"])
-            or bool(diff["change_type"])
             or bool(diff["delete"])
         )
 
@@ -710,13 +705,7 @@ class InteractionBotBase(CommonBotBase):
         if update_required:
             # Notice that we don't do any API requests if there're no changes.
             try:
-                to_send = diff["no_changes"] + diff["edit"]
-                if bool(diff["change_type"]):
-                    # We can't just "edit" the command type, so we bulk delete the commands with old type first.
-                    await self.bulk_overwrite_global_commands(to_send)
-                # Finally, we make an API call that applies all changes from the code.
-                to_send.extend(diff["upsert"])
-                to_send.extend(diff["change_type"])
+                to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
                 await self.bulk_overwrite_global_commands(to_send)
             except Exception as e:
                 warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
@@ -729,7 +718,6 @@ class InteractionBotBase(CommonBotBase):
             update_required = (
                 bool(diff["upsert"])
                 or bool(diff["edit"])
-                or bool(diff["change_type"])
                 or bool(diff["delete"])
             )
             # Show diff
@@ -742,11 +730,7 @@ class InteractionBotBase(CommonBotBase):
             # Do API requests and cache
             if update_required:
                 try:
-                    to_send = diff["no_changes"] + diff["edit"]
-                    if bool(diff["change_type"]):
-                        await self.bulk_overwrite_guild_commands(guild_id, to_send)
-                    to_send.extend(diff["upsert"])
-                    to_send.extend(diff["change_type"])
+                    to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
                     await self.bulk_overwrite_guild_commands(guild_id, to_send)
                 except Exception as e:
                     warnings.warn(
