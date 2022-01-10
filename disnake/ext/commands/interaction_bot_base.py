@@ -686,11 +686,7 @@ class InteractionBotBase(CommonBotBase):
         diff = _app_commands_diff(
             global_cmds, self._connection._global_application_commands.values()
         )
-        update_required = (
-            bool(diff["upsert"])
-            or bool(diff["edit"])
-            or bool(diff["delete"])
-        )
+        update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
 
         # Show the difference
         self._log_sync_debug(
@@ -715,11 +711,7 @@ class InteractionBotBase(CommonBotBase):
         for guild_id, cmds in guild_cmds.items():
             current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
             diff = _app_commands_diff(cmds, current_guild_cmds.values())
-            update_required = (
-                bool(diff["upsert"])
-                or bool(diff["edit"])
-                or bool(diff["delete"])
-            )
+            update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
             # Show diff
             self._log_sync_debug(
                 "Application command synchronization:\n"
