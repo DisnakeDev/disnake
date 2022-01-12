@@ -9,12 +9,6 @@ else:
     dotenv.load_dotenv()
 
 
-logging.basicConfig(
-    format="%(asctime)s: [%(levelname)s] (%(threadName)s) %(name)s: %(message)s",
-    level=logging.INFO,
-)
-
-
 class Client:
     token = os.environ.get("BOT_TOKEN")
     prefix = os.environ.get("PREFIX", ".")
