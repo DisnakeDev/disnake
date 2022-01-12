@@ -782,7 +782,7 @@ class Embed:
 
     @classmethod
     def set_default_colour(cls, value: Optional[Union[int, Colour]]):
-        """Set the default colour of all new embeds."""
+        """Set the default colour of all embeds without a colour set."""
         if value == None:
             cls._default_colour = cls.Empty
         elif isinstance(value, (Colour, _EmptyEmbed)):
