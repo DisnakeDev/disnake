@@ -94,7 +94,7 @@ def is_valid_locale(locale: str) -> TypeGuard[ApplicationCommandLocale]:
     """
     Returns ``True`` if the locale is valid for use with the API, ``False`` otherwise.
 
-    .. versionadded: 2.4
+    .. versionadded:: 2.4
     """
     return locale in VALID_LOCALES
 
@@ -103,7 +103,7 @@ class LocalizationValue:
     """
     Internal container type for (pending) localization data
 
-    .. versionadded: 2.4
+    .. versionadded:: 2.4
     """
 
     __slots__ = ("_key", "_data")
@@ -155,7 +155,7 @@ class LocalizationStore:
     """
     Manages a key-value mapping of localizations
 
-    .. versionadded: 2.4
+    .. versionadded:: 2.4
 
     Attributes
     ------------

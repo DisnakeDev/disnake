@@ -226,7 +226,7 @@ def user_command(
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``name``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     default_permission: :class:`bool`
         whether the command is enabled by default when the app is added to a guild.
     auto_sync: :class:`bool`
@@ -291,7 +291,7 @@ def message_command(
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``name``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     default_permission: :class:`bool`
         whether the command is enabled by default when the app is added to a guild.
     auto_sync: :class:`bool`

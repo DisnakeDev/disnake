@@ -439,11 +439,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
             localizations for ``name``
 
-            .. versionadded: 2.4
+            .. versionadded:: 2.4
         description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
             localizations for ``description``
 
-            .. versionadded: 2.4
+            .. versionadded:: 2.4
         options: List[:class:`.Option`]
             the options of the subcommand for registration in API
         connectors: Dict[:class:`str`, :class:`str`]
@@ -507,7 +507,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
             localizations for ``name``
 
-            .. versionadded: 2.4
+            .. versionadded:: 2.4
 
         Returns
         --------
@@ -692,11 +692,11 @@ def slash_command(
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``name``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``description``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     options: List[:class:`.Option`]
         the list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.

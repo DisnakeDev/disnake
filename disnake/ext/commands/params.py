@@ -282,11 +282,11 @@ class ParamInfo:
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``name``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``description``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of choices of this slash command option.
     ge: :class:`float`
@@ -856,11 +856,11 @@ def Param(
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``name``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``description``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.
     converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
@@ -870,7 +870,7 @@ def Param(
         Whether to also apply the converter to the provided default value.
         Defaults to ``False``.
 
-        .. versionadded: 2.3
+        .. versionadded:: 2.3
     autocomplete: Callable[[:class:`ApplicationCommandInteraction`, :class:`str`], Any]
         A function that will suggest possible autocomplete options while typing.
         See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
@@ -889,7 +889,7 @@ def Param(
         Whether to accept large :class:`int` values (if this is ``False``, only
         values in the range ``(-2^53, 2^53)`` would be accepted due to an API limitation).
 
-        .. versionadded: 2.3
+        .. versionadded:: 2.3
 
     Returns
     -------

@@ -116,7 +116,7 @@ class OptionChoice:
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``name``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     """
 
     def __init__(
@@ -174,11 +174,11 @@ class Option:
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``name``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``description``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     type: :class:`OptionType`
         the option type, e.g. :class:`OptionType.user`
     required: :class:`bool`
@@ -559,11 +559,11 @@ class SlashCommand(ApplicationCommand):
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``name``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         localizations for ``description``
 
-        .. versionadded: 2.4
+        .. versionadded:: 2.4
     options : List[:class:`Option`]
         The options of the command
     default_permission : :class:`bool`
