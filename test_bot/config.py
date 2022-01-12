@@ -9,7 +9,7 @@ else:
     dotenv.load_dotenv()
 
 
-class Client:
+class Config:
     token = os.environ.get("BOT_TOKEN")
     prefix = os.environ.get("PREFIX", ".")
     cogs_folder = os.environ.get("COGS_FOLDER", "cogs")

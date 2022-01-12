@@ -5,11 +5,11 @@ import traceback
 import disnake
 from disnake.ext import commands
 
-from . import config
+from .config import Config
 
 logger = logging.getLogger(__name__)
 
-if not config.Client.test_guilds:
+if not Config.test_guilds:
     logger.warning("No test guilds configured. Using global commands.")
 
 
@@ -22,13 +22,13 @@ def fancy_traceback(exc: Exception) -> str:
 class TestBot(commands.Bot):
     def __init__(self):
         super().__init__(
-            command_prefix=config.Client.prefix,
+            command_prefix=Config.prefix,
             intents=disnake.Intents.all(),
             help_command=None,  # type: ignore
-            sync_commands_debug=config.Client.sync_commands_debug,
-            sync_permissions=config.Client.sync_permissions,
-            test_guilds=config.Client.test_guilds,
-            reload=config.Client.auto_reload,
+            sync_commands_debug=Config.sync_commands_debug,
+            sync_permissions=Config.sync_permissions,
+            test_guilds=Config.test_guilds,
+            reload=Config.auto_reload,
         )
 
     def load_all_extensions(self, folder: str) -> None:
@@ -113,5 +113,5 @@ print(f"disnake: {disnake.__version__}\n")
 
 if __name__ == "__main__":
     bot = TestBot()
-    bot.load_all_extensions(config.Client.cogs_folder)
-    bot.run(config.Client.token)
+    bot.load_all_extensions(Config.cogs_folder)
+    bot.run(Config.token)
