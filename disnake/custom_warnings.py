@@ -4,6 +4,7 @@ __all__ = (
     "DiscordWarning",
     "ConfigWarning",
     "SyncWarning",
+    "LocalizationWarning",
 )
 
 
@@ -26,6 +27,14 @@ class ConfigWarning(DiscordWarning):
 class SyncWarning(DiscordWarning):
     """
     Warning class for application command synchronization issues
+    """
+
+    pass
+
+
+class LocalizationWarning(DiscordWarning):
+    """
+    Warning class for localization issues
     """
 
     pass

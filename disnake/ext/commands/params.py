@@ -62,6 +62,7 @@ from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
     from disnake.app_commands import Choices
+    from disnake.i18n import Localizations
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 
     from .slash_core import InvokableSlashCommand, SubCommand
@@ -278,6 +279,14 @@ class ParamInfo:
         The name of this slash command option.
     description: :class:`str`
         The description of this slash command option.
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``name``
+
+        .. versionadded: 2.4
+    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``description``
+
+        .. versionadded: 2.4
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of choices of this slash command option.
     ge: :class:`float`
@@ -317,6 +326,8 @@ class ParamInfo:
         *,
         name: str = "",
         description: str = None,
+        name_localizations: Localizations = None,
+        description_localizations: Localizations = None,
         converter: Callable[[CommandInteraction, Any], Any] = None,
         convert_default: bool = False,
         autcomplete: Callable[[CommandInteraction, str], Any] = None,
@@ -342,6 +353,8 @@ class ParamInfo:
         self.max_value = _xt_to_xe(le, lt, -1)
         self.min_value = _xt_to_xe(ge, gt, 1)
         self.large = large
+        self.name_localizations = name_localizations
+        self.description_localizations = description_localizations
 
     @property
     def required(self) -> bool:
@@ -380,7 +393,7 @@ class ParamInfo:
         self.parse_parameter(param)
         doc = parsed_docstring.get(param.name)
         if doc:
-            self.parse_doc(doc["type"], doc["description"])
+            self.parse_doc(doc)
         self.parse_annotation(type_hints.get(param.name, param.annotation))
 
         return self
@@ -553,10 +566,14 @@ class ParamInfo:
         self.name = self.name or param.name
         self.param_name = param.name
 
-    def parse_doc(self, doc_type: Any, doc_description: str) -> None:
-        self.description = self.description or doc_description
-        if self.type == str and doc_type is not None:
-            self.parse_annotation(doc_type)
+    def parse_doc(self, doc: disnake.utils._DocstringParam) -> None:
+        self.description = self.description or doc["description"]
+        if self.type == str and doc["type"] is not None:
+            self.parse_annotation(doc["type"])
+        self.name_localizations = self.name_localizations or doc["localization_key_name"]
+        self.description_localizations = (
+            self.description_localizations or doc["localization_key_desc"]
+        )
 
     def to_option(self) -> Option:
         if self.name == "":
@@ -572,6 +589,8 @@ class ParamInfo:
             autocomplete=self.autocomplete is not None,
             min_value=self.min_value,
             max_value=self.max_value,
+            name_localizations=self.name_localizations,
+            description_localizations=self.description_localizations,
         )
 
 
@@ -805,6 +824,8 @@ def Param(
     *,
     name: str = "",
     description: str = None,
+    name_localizations: Localizations = None,
+    description_localizations: Localizations = None,
     choices: Choices = None,
     converter: Callable[[CommandInteraction, Any], Any] = None,
     convert_defaults: bool = False,
@@ -832,6 +853,14 @@ def Param(
     description: :class:`str`
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``name``
+
+        .. versionadded: 2.4
+    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``description``
+
+        .. versionadded: 2.4
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.
     converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
@@ -881,6 +910,8 @@ def Param(
         default,
         name=name,
         description=description,
+        name_localizations=name_localizations,
+        description_localizations=description_localizations,
         choices=choices,
         converter=converter,
         convert_default=convert_defaults,

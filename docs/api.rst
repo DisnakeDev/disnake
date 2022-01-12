@@ -4750,6 +4750,20 @@ Select
 .. autofunction:: disnake.ui.select
 
 
+Localization
+------------
+
+The library uses the following types/methods to support localization.
+
+.. autofunction:: disnake.i18n.is_valid_locale
+
+LocalizationStore
+~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: disnake.i18n.LocalizationStore
+    :members:
+
+
 Exceptions
 ------------
 
@@ -4828,6 +4842,8 @@ Warnings
 
 .. autoclass:: SyncWarning
 
+.. autoclass:: LocalizationWarning
+
 Warning Hierarchy
 ~~~~~~~~~~~~~~~~~~~
 
@@ -4836,3 +4852,4 @@ Warning Hierarchy
     - :class:`DiscordWarning`
         - :class:`ConfigWarning`
         - :class:`SyncWarning`
+        - :class:`LocalizationWarning`

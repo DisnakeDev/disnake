@@ -20,7 +20,10 @@ class TestBot(commands.Bot):
             sync_commands_debug=True,
             sync_permissions=True,
             test_guilds=[570841314200125460, 768247229840359465, 808030843078836254],
+            strict_localization=True,
         )
+
+        self.i18n.load("test_bot/locale")
 
     def load_all_extensions(self, folder: str) -> None:
         py_path = f"test_bot.{folder}"

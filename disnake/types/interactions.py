@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
 
 from .channel import ChannelType
 from .components import Component, ComponentType
@@ -39,6 +39,42 @@ if TYPE_CHECKING:
     from .message import AllowedMentions, Message
 
 
+# see https://discord.com/developers/docs/dispatch/field-values#predefined-field-values-accepted-locales
+ApplicationCommandLocale = Literal[
+    "bg",
+    "cs",
+    "da",
+    "de",
+    "el",
+    "en-GB",
+    "en-US",
+    "es-ES",
+    "fi",
+    "fr",
+    "hi",
+    "hr",
+    "hu",
+    "it",
+    "ja",
+    "ko",
+    "lt",
+    "nl",
+    "no",
+    "pl",
+    "pt-BR",
+    "ro",
+    "ru",
+    "sv-SE",
+    "th",
+    "tr",
+    "uk",
+    "vi",
+    "zh-CN",
+    "zh-TW",
+]
+ApplicationCommandLocalizations = Dict[ApplicationCommandLocale, str]
+
+
 ApplicationCommandType = Literal[1, 2, 3]
 
 
@@ -47,6 +83,9 @@ class _ApplicationCommandOptional(TypedDict, total=False):
     guild_id: Snowflake
     options: List[ApplicationCommandOption]
     default_permission: bool
+    # TODO: are these really optional/nullable?
+    name_localizations: Optional[ApplicationCommandLocalizations]
+    description_localizations: Optional[ApplicationCommandLocalizations]
 
 
 class ApplicationCommand(_ApplicationCommandOptional):
@@ -65,6 +104,9 @@ class _ApplicationCommandOptionOptional(TypedDict, total=False):
     min_value: float
     max_value: float
     autocomplete: bool
+    # TODO: are these really optional/nullable?
+    name_localizations: Optional[ApplicationCommandLocalizations]
+    description_localizations: Optional[ApplicationCommandLocalizations]
 
 
 ApplicationCommandOptionType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -79,7 +121,12 @@ class ApplicationCommandOption(_ApplicationCommandOptionOptional):
 ApplicationCommandOptionChoiceValue = Union[str, int, float]
 
 
-class ApplicationCommandOptionChoice(TypedDict):
+class _ApplicationCommandOptionChoiceOptional(TypedDict, total=False):
+    # TODO: is this really optional/nullable?
+    name_localizations: Optional[ApplicationCommandLocalizations]
+
+
+class ApplicationCommandOptionChoice(_ApplicationCommandOptionChoiceOptional):
     name: str
     value: ApplicationCommandOptionChoiceValue
 
@@ -251,6 +298,9 @@ class _EditApplicationCommandOptional(TypedDict, total=False):
     options: Optional[List[ApplicationCommandOption]]
     default_permission: bool
     type: ApplicationCommandType
+    # TODO: are these really optional/nullable?
+    name_localizations: Optional[ApplicationCommandLocalizations]
+    description_localizations: Optional[ApplicationCommandLocalizations]
 
 
 class EditApplicationCommand(_EditApplicationCommandOptional):

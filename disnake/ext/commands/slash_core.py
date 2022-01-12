@@ -50,6 +50,7 @@ if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
 
     from disnake.app_commands import Choices
+    from disnake.i18n import Localizations
 
     from .cog import CogT
 
@@ -143,11 +144,22 @@ class SubCommandGroup(InvokableApplicationCommand):
         event.
     """
 
-    def __init__(self, func, *, name: str = None, **kwargs):
+    def __init__(
+        self,
+        func,
+        *,
+        name: str = None,
+        name_localizations: Localizations = None,
+        **kwargs,
+    ):
         super().__init__(func, name=name, **kwargs)
         self.children: Dict[str, SubCommand] = {}
         self.option = Option(
-            name=self.name, description="-", type=OptionType.sub_command_group, options=[]
+            name=self.name,
+            name_localizations=name_localizations,
+            description="-",
+            type=OptionType.sub_command_group,
+            options=[],
         )
         self.qualified_name: str = ""
 
@@ -157,6 +169,8 @@ class SubCommandGroup(InvokableApplicationCommand):
         description: str = None,
         options: list = None,
         connectors: dict = None,
+        name_localizations: Localizations = None,
+        description_localizations: Localizations = None,
         **kwargs,
     ) -> Callable[
         [
@@ -188,6 +202,8 @@ class SubCommandGroup(InvokableApplicationCommand):
                 func,
                 name=name,
                 description=description,
+                name_localizations=name_localizations,
+                description_localizations=description_localizations,
                 options=options,
                 connectors=connectors,
                 **kwargs,
@@ -234,6 +250,8 @@ class SubCommand(InvokableApplicationCommand):
         *,
         name: str = None,
         description: str = None,
+        name_localizations: Localizations = None,
+        description_localizations: Localizations = None,
         options: list = None,
         connectors: Dict[str, str] = None,
         **kwargs,
@@ -251,6 +269,10 @@ class SubCommand(InvokableApplicationCommand):
         self.option = Option(
             name=self.name,
             description=description or "-",
+            name_localizations=name_localizations or self.docstring["localization_key_name"],
+            description_localizations=(
+                description_localizations or self.docstring["localization_key_desc"]
+            ),
             type=OptionType.sub_command,
             options=options,
         )
@@ -342,6 +364,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         *,
         name: str = None,
         description: str = None,
+        name_localizations: Localizations = None,
+        description_localizations: Localizations = None,
         options: List[Option] = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
@@ -367,6 +391,10 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             description=description or "-",
             options=options or [],
             default_permission=default_permission,
+            name_localizations=name_localizations or self.docstring["localization_key_name"],
+            description_localizations=(
+                description_localizations or self.docstring["localization_key_desc"]
+            ),
         )
 
     @property
@@ -387,6 +415,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         description: str = None,
         options: list = None,
         connectors: dict = None,
+        name_localizations: Localizations = None,
+        description_localizations: Localizations = None,
         **kwargs,
     ) -> Callable[
         [
@@ -406,6 +436,14 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             the name of the subcommand. Defaults to the function name
         description: :class:`str`
             the description of the subcommand
+        name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+            localizations for ``name``
+
+            .. versionadded: 2.4
+        description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+            localizations for ``description``
+
+            .. versionadded: 2.4
         options: List[:class:`.Option`]
             the options of the subcommand for registration in API
         connectors: Dict[:class:`str`, :class:`str`]
@@ -432,6 +470,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 func,
                 name=name,
                 description=description,
+                name_localizations=name_localizations,
+                description_localizations=description_localizations,
                 options=options,
                 connectors=connectors,
                 **kwargs,
@@ -444,7 +484,10 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return decorator
 
     def sub_command_group(
-        self, name: str = None, **kwargs
+        self,
+        name: str = None,
+        name_localizations: Localizations = None,
+        **kwargs,
     ) -> Callable[
         [
             Union[
@@ -461,6 +504,10 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         ----------
         name : :class:`str`
             the name of the subcommand group. Defaults to the function name
+        name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+            localizations for ``name``
+
+            .. versionadded: 2.4
 
         Returns
         --------
@@ -476,7 +523,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         ) -> SubCommandGroup:
             if len(self.children) == 0 and len(self.body.options) > 0:
                 self.body.options = []
-            new_func = SubCommandGroup(func, name=name, **kwargs)
+            new_func = SubCommandGroup(
+                func,
+                name=name,
+                name_localizations=name_localizations,
+                **kwargs,
+            )
             new_func.qualified_name = f"{self.qualified_name} {new_func.name}"
             self.children[new_func.name] = new_func
             self.body.options.append(new_func.option)
@@ -609,6 +661,8 @@ def slash_command(
     *,
     name: str = None,
     description: str = None,
+    name_localizations: Localizations = None,
+    description_localizations: Localizations = None,
     options: List[Option] = None,
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
@@ -635,6 +689,14 @@ def slash_command(
         name of the slash command you want to respond to (equals to function name by default).
     description: :class:`str`
         the description of the slash command. It will be visible in Discord.
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``name``
+
+        .. versionadded: 2.4
+    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``description``
+
+        .. versionadded: 2.4
     options: List[:class:`.Option`]
         the list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
@@ -670,6 +732,8 @@ def slash_command(
             func,
             name=name,
             description=description,
+            name_localizations=name_localizations,
+            description_localizations=description_localizations,
             options=options,
             default_permission=default_permission,
             guild_ids=guild_ids,

@@ -39,6 +39,7 @@ from .file import *
 from .flags import *
 from .guild import *
 from .guild_scheduled_event import *
+from .i18n import *
 from .integrations import *
 from .interactions import *
 from .invite import *

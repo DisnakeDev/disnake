@@ -146,6 +146,8 @@ All the other types may be converted implicitly, similarly to :ref:`ext_commands
   \*\* Role and Member may be used together to create a "mentionable" (:class:`Union[Role, Member]`)
 
 
+.. _docstrings:
+
 Docstrings
 ----------
 
@@ -382,3 +384,135 @@ Injections
 ----------
 
 We have them, look at `this example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_ for more information ✨
+
+
+Localizations
+-------------
+
+The names and descriptions of commands and options, as well as the names of choices
+(for use with fixed choices or autocompletion), support localization for a fixed set of locales.
+
+Currently supported locales are:
+bg, cs, da, de, el, en-GB, en-US, es-ES, fi, fr, hi, hr, hu, it, ja, ko, lt, nl, no, pl, pt-BR, ro, ru, sv-SE, th, tr, uk, vi, zh-CN, zh-TW
+
+The preferred (and most versatile) way of adding localizations is to use ``<locale>.json`` files,
+containing mappings from user-defined keys to localized/translated strings,
+and referencing these keys in the commands' :ref:`docstrings <docstrings>`.
+As an example, consider this command:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def add_5(inter: disnake.ApplicationCommandInteraction, num: int):
+        """
+        Adds 5 to a number. {{ADD_NUM}}
+
+        Parameters
+        ----------
+        num: Some number {{ COOL_NUMBER }}
+        """
+        await inter.response.send_message(f"{num} + 5 = {num + 5}")
+
+The keys (e.g. ``{{XYZ}}``) are automatically extracted from the docstrings
+(whitespace is ignored, the positioning inside the line doesn't matter),
+and used for looking up names (``XYZ_NAME``) and descriptions (``XYZ_DESCRIPTION``).
+
+For instance, to add German localizations, create a ``locale/de.json`` file
+(the directory name/path can be changed arbitrarily, ``locale`` is just the one used here):
+
+.. code-block:: json
+
+    {
+        "ADD_NUM_NAME": "addiere_5",
+        "ADD_NUM_DESCRIPTION": "Addiere 5 zu einer anderen Zahl.",
+        "COOL_NUMBER_NAME": "zahl",
+        "COOL_NUMBER_DESCRIPTION": "Eine Zahl",
+    }
+
+To load a directory (or file) containing localizations, use :func:`bot.i18n.load(path) <i18n.LocalizationStore.load>`:
+
+.. code-block:: python3
+
+    ...
+    bot.i18n.load("locale/")  # loads all files in the "locale/" directory
+    bot.run(...)
+
+.. note::
+    If :attr:`Bot.reload <ext.commands.Bot.reload>` is ``True``, all currently loaded localization files
+    are reloaded when an extension gets automatically reloaded.
+
+
+Strict Localization
++++++++++++++++++++
+
+By default, missing keys that couldn't be found in any ``.json`` files only result in runtime warnings (:class:`~disnake.LocalizationWarning`).
+To instead raise an exception when a key is missing, pass the ``strict_localization=True`` parameter to the bot constructor
+(see :attr:`Bot.strict_localization <ext.commands.Bot.strict_localization>`).
+
+
+Customization
++++++++++++++
+
+If you want more customization or low-level control over localizations, you can specify arbitrary keys for the commands/options directly.
+This would create the same command as the code above, though you're free to change the keys like ``ADD_NUM_DESCRIPTION`` however you want:
+
+.. code-block:: python3
+
+    @bot.slash_command(name_localizations="ADD_NUM_NAME", description_localizations="ADD_NUM_DESCRIPTION")
+    async def add_5(
+        inter: disnake.ApplicationCommandInteraction,
+        num: int = commands.Param(name_localizations="COOL_NUMBER_NAME", description_localizations="COOL_NUMBER_DESCRIPTION"),
+    ):
+        """
+        Adds 5 to a number.
+
+        Parameters
+        ----------
+        num: Some number
+        """
+        await inter.response.send_message(f"{num} + 5 = {num + 5}")
+
+While not recommended, it is also possible to not use ``.json`` files at all and instead specify localizations directly in the code:
+
+.. code-block:: python3
+
+    @bot.slash_command(
+        name_localizations={"de": "addiere_5"},
+        description_localizations={"de": "Addiere 5 zu einer anderen Zahl."},
+    )
+    async def add_5(
+        inter: disnake.ApplicationCommandInteraction,
+        num: int = commands.Param(
+            name_localizations={"de": "zahl"},
+            description_localizations={"de": "Eine Zahl"},
+        ),
+    ):
+        ...
+
+
+Choices/Autocomplete
+++++++++++++++++++++
+
+:ref:`Option choices <option_choices>` and :ref:`autocomplete items <autocompleters>` can also be localized, through the use of :class:`OptionChoice`:
+
+.. code-block:: python3
+
+    LANGUAGES = ["english", "german", "spanish", "japanese"]
+
+    async def autocomp_langs(inter: disnake.ApplicationCommandInteraction, user_input: str):
+        return [
+            OptionChoice(lang, lang, name_localizations=f"AUTOCOMP_{lang.upper()}")
+            for lang in LANGUAGES
+            if user_input.lower() in lang
+        ]
+
+    @bot.slash_command()
+    async def example(
+        inter: disnake.ApplicationCommandInteraction,
+        animal: str = commands.Param(choices=[
+            OptionChoice("Cat", "cat", name_localizations="OPTION_CAT"),
+            OptionChoice("Dolphin", "dolphin", name_localizations="OPTION_DOLPHIN"),
+        ]),
+        language: str = commands.Param(autocomplete=autocomp_langs),
+    ):
+        ...

@@ -887,13 +887,18 @@ def escape_mentions(text: str) -> str:
 # Custom docstring parser
 
 
-class _DocstringParam(TypedDict):
+class _DocstringLocalizationsMixin(TypedDict):
+    localization_key_name: Optional[str]
+    localization_key_desc: Optional[str]
+
+
+class _DocstringParam(_DocstringLocalizationsMixin):
     name: str
     type: None
     description: str
 
 
-class _ParsedDocstring(TypedDict):
+class _ParsedDocstring(_DocstringLocalizationsMixin):
     description: str
     params: Dict[str, _DocstringParam]
 
@@ -934,6 +939,15 @@ def _get_description(lines: List[str]) -> str:
     return "\n".join(lines[:end]).strip()
 
 
+def _extract_localization_key(desc: str) -> Tuple[str, Tuple[Optional[str], Optional[str]]]:
+    match = re.search(r"\{\{(.*?)\}\}", desc)
+    if match:
+        desc = desc.replace(match.group(0), "").strip()
+        loc_key = match.group(1).strip()
+        return desc, (f"{loc_key}_NAME", f"{loc_key}_DESCRIPTION")
+    return desc, (None, None)
+
+
 def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
     start = _get_header_line(lines, "Parameters", "-") + 2
     end = _get_next_header_line(lines, "-", start)
@@ -951,8 +965,15 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
         elif maybe_type:
             desc = maybe_type
         if desc is not None:
+            desc, (loc_key_name, loc_key_desc) = _extract_localization_key(desc)
             # TODO: maybe parse types in the future
-            options[param] = {"name": param, "type": None, "description": desc}
+            options[param] = {
+                "name": param,
+                "type": None,
+                "description": desc,
+                "localization_key_name": loc_key_name,
+                "localization_key_desc": loc_key_desc,
+            }
 
     desc_lines: List[str] = []
     param: Optional[str] = None
@@ -981,9 +1002,20 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
 def parse_docstring(func: Callable) -> _ParsedDocstring:
     doc = _getdoc(func)
     if doc is None:
-        return {"description": "", "params": {}}
+        return {
+            "description": "",
+            "params": {},
+            "localization_key_name": None,
+            "localization_key_desc": None,
+        }
     lines = doc.splitlines()
-    return {"description": _get_description(lines), "params": _get_option_desc(lines)}
+    desc, (loc_key_name, loc_key_desc) = _extract_localization_key(_get_description(lines))
+    return {
+        "description": desc,
+        "localization_key_name": loc_key_name,
+        "localization_key_desc": loc_key_desc,
+        "params": _get_option_desc(lines),
+    }
 
 
 # Chunkers

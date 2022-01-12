@@ -70,6 +70,7 @@ from .flags import ApplicationFlags, Intents
 from .gateway import *
 from .guild import Guild
 from .http import HTTPClient
+from .i18n import LocalizationStore
 from .invite import Invite
 from .iterators import GuildIterator
 from .mentions import AllowedMentions
@@ -243,6 +244,11 @@ class Client:
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
+    strict_localization: :class:`bool`
+        Whether to raise an exception when localizations for a specific key couldn't be found.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.4
 
     Attributes
     -----------
@@ -297,6 +303,8 @@ class Client:
         if VoiceClient.warn_nacl:
             VoiceClient.warn_nacl = False
             _log.warning("PyNaCl is not installed, voice will NOT be supported")
+
+        self.i18n = LocalizationStore(strict=options.pop("strict_localization", False))
 
     # internals
 
@@ -2067,6 +2075,7 @@ class Client:
         :class:`.ApplicationCommand`
             The application command that was created.
         """
+        application_command.localize(self.i18n)
         return await self._connection.create_global_command(application_command)
 
     async def edit_global_command(
@@ -2090,6 +2099,7 @@ class Client:
         :class:`.ApplicationCommand`
             The edited application command.
         """
+        new_command.localize(self.i18n)
         return await self._connection.edit_global_command(command_id, new_command)
 
     async def delete_global_command(self, command_id: int) -> None:
@@ -2125,6 +2135,8 @@ class Client:
         List[:class:`.ApplicationCommand`]
             A list of registered application commands.
         """
+        for cmd in application_commands:
+            cmd.localize(self.i18n)
         return await self._connection.bulk_overwrite_global_commands(application_commands)
 
     # Application commands (guild)
@@ -2190,6 +2202,7 @@ class Client:
         :class:`.ApplicationCommand`
             The application command that was created.
         """
+        application_command.localize(self.i18n)
         return await self._connection.create_guild_command(guild_id, application_command)
 
     async def edit_guild_command(
@@ -2215,6 +2228,7 @@ class Client:
         :class:`.ApplicationCommand`
             The edited application command.
         """
+        new_command.localize(self.i18n)
         return await self._connection.edit_guild_command(guild_id, command_id, new_command)
 
     async def delete_guild_command(self, guild_id: int, command_id: int) -> None:
@@ -2254,6 +2268,8 @@ class Client:
         List[:class:`.ApplicationCommand`]
             A list of registered application commands.
         """
+        for cmd in application_commands:
+            cmd.localize(self.i18n)
         return await self._connection.bulk_overwrite_guild_commands(guild_id, application_commands)
 
     # Application command permissions

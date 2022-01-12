@@ -639,6 +639,12 @@ class CommonBotBase(Generic[CogT]):
                 if os.stat(file).st_mtime > last:
                     extensions.add(name)
 
+            if extensions:
+                try:
+                    self.i18n.reload()  # type: ignore
+                except Exception as e:
+                    reload_log.exception(e)
+
             for name in extensions:
                 try:
                     self.reload_extension(name)

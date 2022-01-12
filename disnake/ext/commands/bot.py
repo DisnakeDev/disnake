@@ -171,6 +171,11 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
         .. versionadded:: 2.1
+    strict_localization: :class:`bool`
+        Whether to raise an exception when localizations for a specific key couldn't be found.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.4
     """
 
     pass
@@ -244,6 +249,11 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
         .. versionadded:: 2.1
+    strict_localization: :class:`bool`
+        Whether to raise an exception when localizations for a specific key couldn't be found.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.4
     """
 
     pass

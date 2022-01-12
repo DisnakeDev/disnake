@@ -39,10 +39,12 @@ from .enums import (
     try_enum_to_int,
 )
 from .errors import InvalidArgument
+from .i18n import LocalizationValue
 from .role import Role
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:
+    from .i18n import Localizations, LocalizationStore
     from .state import ConnectionState
     from .types.interactions import (
         ApplicationCommand as ApplicationCommandPayload,
@@ -90,6 +92,17 @@ def application_command_factory(data: ApplicationCommandPayload) -> ApplicationC
     raise TypeError(f"Application command of type {cmd_type} is not valid")
 
 
+def _validate_name(name: str) -> None:
+    # used for slash command names and option names
+    # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
+
+    assert name == name.lower() and re.fullmatch(r"[\w-]{1,32}", name), (
+        f"Slash command or option name '{name}' should be lowercase, "
+        "between 1 and 32 characters long, and only consist of "
+        "these symbols: a-z, 0-9, -, _, and other languages'/scripts' symbols"
+    )
+
+
 class OptionChoice:
     """
     Represents an option choice.
@@ -100,24 +113,52 @@ class OptionChoice:
         the name of the option choice (visible to users)
     value: Union[:class:`str`, :class:`int`]
         the value of the option choice
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``name``
+
+        .. versionadded: 2.4
     """
 
-    def __init__(self, name: str, value: ApplicationCommandOptionChoiceValue):
+    def __init__(
+        self,
+        name: str,
+        value: ApplicationCommandOptionChoiceValue,
+        *,
+        name_localizations: Localizations = None,
+    ):
         self.name: str = name
         self.value: ApplicationCommandOptionChoiceValue = value
+        self.name_localizations: LocalizationValue = LocalizationValue(name_localizations)
 
     def __repr__(self) -> str:
         return f"<OptionChoice name={self.name!r} value={self.value!r}>"
 
     def __eq__(self, other) -> bool:
-        return self.name == other.name and self.value == other.value
+        return (
+            self.name == other.name
+            and self.value == other.value
+            and self.name_localizations == other.name_localizations
+        )
 
     def to_dict(self) -> ApplicationCommandOptionChoicePayload:
-        return {"name": self.name, "value": self.value}
+        payload: ApplicationCommandOptionChoicePayload = {
+            "name": self.name,
+            "value": self.value,
+        }
+        if (loc := self.name_localizations.to_dict()) is not None:
+            payload["name_localizations"] = loc
+        return payload
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandOptionChoicePayload):
-        return OptionChoice(name=data["name"], value=data["value"])
+        return OptionChoice(
+            name=data["name"],
+            value=data["value"],
+            name_localizations=data.get("name_localizations"),
+        )
+
+    def localize(self, store: LocalizationStore) -> None:
+        self.name_localizations._link(store)
 
 
 class Option:
@@ -130,6 +171,14 @@ class Option:
         option's name
     description: :class:`str`
         option's description
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``name``
+
+        .. versionadded: 2.4
+    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``description``
+
+        .. versionadded: 2.4
     type: :class:`OptionType`
         the option type, e.g. :class:`OptionType.user`
     required: :class:`bool`
@@ -161,6 +210,8 @@ class Option:
         "autocomplete",
         "min_value",
         "max_value",
+        "name_localizations",
+        "description_localizations",
     )
 
     def __init__(
@@ -175,8 +226,11 @@ class Option:
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
+        name_localizations: Localizations = None,
+        description_localizations: Localizations = None,
     ):
         self.name: str = name.lower()
+        _validate_name(self.name)
         self.description: str = description or "\u200b"
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
@@ -210,6 +264,11 @@ class Option:
 
         self.autocomplete: bool = autocomplete
 
+        self.name_localizations: LocalizationValue = LocalizationValue(name_localizations)
+        self.description_localizations: LocalizationValue = LocalizationValue(
+            description_localizations
+        )
+
     def __repr__(self) -> str:
         return (
             f"<Option name={self.name!r} description={self.description!r}"
@@ -229,6 +288,8 @@ class Option:
             and self.autocomplete == other.autocomplete
             and self.min_value == other.min_value
             and self.max_value == other.max_value
+            and self.name_localizations == other.name_localizations
+            and self.description_localizations == other.description_localizations
         )
 
     @classmethod
@@ -250,14 +311,27 @@ class Option:
             autocomplete=data.get("autocomplete", False),
             min_value=data.get("min_value"),
             max_value=data.get("max_value"),
+            name_localizations=data.get("name_localizations"),
+            description_localizations=data.get("description_localizations"),
         )
 
-    def add_choice(self, name: str, value: Union[str, int]) -> None:
+    def add_choice(
+        self,
+        name: str,
+        value: Union[str, int],
+        name_localizations: Localizations = None,
+    ) -> None:
         """
         Adds an OptionChoice to the list of current choices
         Parameters are the same as for :class:`OptionChoice`
         """
-        self.choices.append(OptionChoice(name=name, value=value))
+        self.choices.append(
+            OptionChoice(
+                name=name,
+                value=value,
+                name_localizations=name_localizations,
+            )
+        )
 
     def add_option(
         self,
@@ -271,6 +345,8 @@ class Option:
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
+        name_localizations: Localizations = None,
+        description_localizations: Localizations = None,
     ) -> None:
         """
         Adds an option to the current list of options
@@ -289,6 +365,8 @@ class Option:
                 autocomplete=autocomplete,
                 min_value=min_value,
                 max_value=max_value,
+                name_localizations=name_localizations,
+                description_localizations=description_localizations,
             )
         )
 
@@ -312,7 +390,24 @@ class Option:
             payload["min_value"] = self.min_value
         if self.max_value is not None:
             payload["max_value"] = self.max_value
+        if (loc := self.name_localizations.to_dict()) is not None:
+            payload["name_localizations"] = loc
+        if (loc := self.description_localizations.to_dict()) is not None:
+            payload["description_localizations"] = loc
         return payload
+
+    def localize(self, store: LocalizationStore) -> None:
+        self.name_localizations._link(store)
+        self.description_localizations._link(store)
+
+        if (name_loc := self.name_localizations.to_dict()) is not None:
+            for value in name_loc.values():
+                _validate_name(value)
+
+        for c in self.choices:
+            c.localize(store)
+        for o in self.options:
+            o.localize(store)
 
 
 class ApplicationCommand(ABC):
@@ -324,6 +419,7 @@ class ApplicationCommand(ABC):
         "type",
         "name",
         "default_permission",
+        "name_localizations",
         "id",
         "application_id",
         "guild_id",
@@ -331,10 +427,17 @@ class ApplicationCommand(ABC):
         "_always_synced",
     )
 
-    def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        type: ApplicationCommandType,
+        name: str,
+        default_permission: bool = True,
+        name_localizations: Localizations = None,
+    ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
         self.default_permission: bool = default_permission
+        self.name_localizations: LocalizationValue = LocalizationValue(name_localizations)
 
         self.id: Optional[int] = None
         self.application_id: Optional[int] = None
@@ -357,6 +460,7 @@ class ApplicationCommand(ABC):
             self.type == other.type
             and self.name == other.name
             and self.default_permission == other.default_permission
+            and self.name_localizations == other.name_localizations
         )
 
     def to_dict(self) -> EditApplicationCommandPayload:
@@ -366,17 +470,28 @@ class ApplicationCommand(ABC):
         }
         if not self.default_permission:
             data["default_permission"] = False
+        if (loc := self.name_localizations.to_dict()) is not None:
+            data["name_localizations"] = loc
         return data
+
+    def localize(self, store: LocalizationStore) -> None:
+        self.name_localizations._link(store)
 
 
 class UserCommand(ApplicationCommand):
     __slots__ = ()
 
-    def __init__(self, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        name: str,
+        default_permission: bool = True,
+        name_localizations: Localizations = None,
+    ):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             default_permission=default_permission,
+            name_localizations=name_localizations,
         )
 
     def __repr__(self) -> str:
@@ -391,6 +506,7 @@ class UserCommand(ApplicationCommand):
         self = UserCommand(
             name=data["name"],
             default_permission=data.get("default_permission", True),
+            name_localizations=data.get("name_localizations"),
         )
         self._update_common(data)
         return self
@@ -399,11 +515,17 @@ class UserCommand(ApplicationCommand):
 class MessageCommand(ApplicationCommand):
     __slots__ = ()
 
-    def __init__(self, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        name: str,
+        default_permission: bool = True,
+        name_localizations: Localizations = None,
+    ):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             default_permission=default_permission,
+            name_localizations=name_localizations,
         )
 
     def __repr__(self) -> str:
@@ -418,6 +540,7 @@ class MessageCommand(ApplicationCommand):
         self = MessageCommand(
             name=data["name"],
             default_permission=data.get("default_permission", True),
+            name_localizations=data.get("name_localizations"),
         )
         self._update_common(data)
         return self
@@ -432,14 +555,22 @@ class SlashCommand(ApplicationCommand):
     name : :class:`str`
         The command name
     description : :class:`str`
-        The command description (it'll be displayed by disnake)
+        The command description (it'll be displayed by Discord)
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``name``
+
+        .. versionadded: 2.4
+    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``description``
+
+        .. versionadded: 2.4
     options : List[:class:`Option`]
         The options of the command
     default_permission : :class:`bool`
         Whether the command is enabled by default when the app is added to a guild
     """
 
-    __slots__ = ("description", "options")
+    __slots__ = ("description", "options", "description_localizations")
 
     def __init__(
         self,
@@ -447,19 +578,23 @@ class SlashCommand(ApplicationCommand):
         description: str,
         options: List[Option] = None,
         default_permission: bool = True,
+        name_localizations: Localizations = None,
+        description_localizations: Localizations = None,
     ):
         name = name.lower()
-        assert re.fullmatch(
-            r"[\w-]{1,32}", name
-        ), f"Slash command name {name!r} should consist of these symbols: a-z, 0-9, -, _"
+        _validate_name(name)
 
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
             default_permission=default_permission,
+            name_localizations=name_localizations,
         )
         self.description: str = description
         self.options: List[Option] = options or []
+        self.description_localizations: LocalizationValue = LocalizationValue(
+            description_localizations
+        )
 
     def __repr__(self) -> str:
         return (
@@ -475,6 +610,7 @@ class SlashCommand(ApplicationCommand):
             super().__eq__(other)
             and self.description == other.description
             and self.options == other.options
+            and self.description_localizations == other.description_localizations
         )
 
     @classmethod
@@ -490,6 +626,8 @@ class SlashCommand(ApplicationCommand):
             options=_maybe_cast(
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
             ),
+            name_localizations=data.get("name_localizations"),
+            description_localizations=data.get("description_localizations"),
         )
         self._update_common(data)
         return self
@@ -506,6 +644,8 @@ class SlashCommand(ApplicationCommand):
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
+        name_localizations: Localizations = None,
+        description_localizations: Localizations = None,
     ) -> None:
         """
         Adds an option to the current list of options
@@ -523,6 +663,8 @@ class SlashCommand(ApplicationCommand):
                 autocomplete=autocomplete,
                 min_value=min_value,
                 max_value=max_value,
+                name_localizations=name_localizations,
+                description_localizations=description_localizations,
             )
         )
 
@@ -530,7 +672,20 @@ class SlashCommand(ApplicationCommand):
         res = super().to_dict()
         res["description"] = self.description
         res["options"] = [o.to_dict() for o in self.options]
+        if (loc := self.description_localizations.to_dict()) is not None:
+            res["description_localizations"] = loc
         return res
+
+    def localize(self, store: LocalizationStore) -> None:
+        super().localize(store)
+        if (name_loc := self.name_localizations.to_dict()) is not None:
+            for value in name_loc.values():
+                _validate_name(value)
+
+        self.description_localizations._link(store)
+
+        for o in self.options:
+            o.localize(store)
 
 
 class ApplicationCommandPermissions:

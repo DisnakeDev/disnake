@@ -71,6 +71,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Concatenate, ParamSpec
 
+    from disnake.i18n import Localizations
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import Check, CoroFunc
@@ -230,12 +231,16 @@ class InteractionBotBase(CommonBotBase):
             If the slash command passed is not an instance of :class:`.InvokableSlashCommand`.
         """
 
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+
         if not isinstance(slash_command, InvokableSlashCommand):
             raise TypeError("The slash_command passed must be an instance of InvokableSlashCommand")
 
         if slash_command.name in self.all_slash_commands:
             raise CommandRegistrationError(slash_command.name)
 
+        slash_command.body.localize(self.i18n)
         self.all_slash_commands[slash_command.name] = slash_command
 
     def add_user_command(self, user_command: InvokableUserCommand) -> None:
@@ -257,12 +262,16 @@ class InteractionBotBase(CommonBotBase):
             If the user command passed is not an instance of :class:`.InvokableUserCommand`.
         """
 
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+
         if not isinstance(user_command, InvokableUserCommand):
             raise TypeError("The user_command passed must be an instance of InvokableUserCommand")
 
         if user_command.name in self.all_user_commands:
             raise CommandRegistrationError(user_command.name)
 
+        user_command.body.localize(self.i18n)
         self.all_user_commands[user_command.name] = user_command
 
     def add_message_command(self, message_command: InvokableMessageCommand) -> None:
@@ -284,6 +293,9 @@ class InteractionBotBase(CommonBotBase):
             If the message command passed is not an instance of :class:`.InvokableMessageCommand`.
         """
 
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+
         if not isinstance(message_command, InvokableMessageCommand):
             raise TypeError(
                 "The message_command passed must be an instance of InvokableMessageCommand"
@@ -292,6 +304,7 @@ class InteractionBotBase(CommonBotBase):
         if message_command.name in self.all_message_commands:
             raise CommandRegistrationError(message_command.name)
 
+        message_command.body.localize(self.i18n)
         self.all_message_commands[message_command.name] = message_command
 
     def remove_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
@@ -429,6 +442,8 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: str = None,
         description: str = None,
+        name_localizations: Localizations = None,
+        description_localizations: Localizations = None,
         options: List[Option] = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
@@ -456,6 +471,14 @@ class InteractionBotBase(CommonBotBase):
             name of the slash command you want to respond to (equals to function name by default).
         description: :class:`str`
             the description of the slash command. It will be visible in Discord.
+        name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+            localizations for ``name``
+
+            .. versionadded: 2.4
+        description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+            localizations for ``description``
+
+            .. versionadded: 2.4
         options: List[:class:`.Option`]
             the list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
@@ -486,6 +509,8 @@ class InteractionBotBase(CommonBotBase):
             result = slash_command(
                 name=name,
                 description=description,
+                name_localizations=name_localizations,
+                description_localizations=description_localizations,
                 options=options,
                 default_permission=default_permission,
                 guild_ids=guild_ids,
@@ -502,6 +527,7 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: str = None,
+        name_localizations: Localizations = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
@@ -525,6 +551,10 @@ class InteractionBotBase(CommonBotBase):
             whether to automatically register the command or not. Defaults to ``True``.
         name: :class:`str`
             name of the user command you want to respond to (equals to function name by default).
+        name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+            localizations for ``name``
+
+            .. versionadded: 2.4
         default_permission: :class:`bool`
             whether the command is enabled by default when the app is added to a guild.
         guild_ids: List[:class:`int`]
@@ -545,6 +575,7 @@ class InteractionBotBase(CommonBotBase):
         ) -> InvokableUserCommand:
             result = user_command(
                 name=name,
+                name_localizations=name_localizations,
                 default_permission=default_permission,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
@@ -559,6 +590,7 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: str = None,
+        name_localizations: Localizations = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
@@ -582,6 +614,10 @@ class InteractionBotBase(CommonBotBase):
             whether to automatically register the command or not. Defaults to ``True``
         name: :class:`str`
             name of the message command you want to respond to (equals to function name by default).
+        name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+            localizations for ``name``
+
+            .. versionadded: 2.4
         default_permission: :class:`bool`
             whether the command is enabled by default when the app is added to a guild.
         guild_ids: List[:class:`int`]
@@ -602,6 +638,7 @@ class InteractionBotBase(CommonBotBase):
         ) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
+                name_localizations=name_localizations,
                 default_permission=default_permission,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,

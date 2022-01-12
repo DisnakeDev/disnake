@@ -34,6 +34,7 @@ from .params import safe_call
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
 
+    from disnake.i18n import Localizations
     from disnake.interactions import ApplicationCommandInteraction
 
     ApplicationCommandInteractionT = TypeVar(
@@ -80,6 +81,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         func,
         *,
         name: str = None,
+        name_localizations: Localizations = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
@@ -88,7 +90,11 @@ class InvokableUserCommand(InvokableApplicationCommand):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = UserCommand(name=self.name, default_permission=default_permission)
+        self.body = UserCommand(
+            name=self.name,
+            default_permission=default_permission,
+            name_localizations=name_localizations,
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -151,6 +157,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         func,
         *,
         name: str = None,
+        name_localizations: Localizations = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
@@ -159,7 +166,11 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = MessageCommand(name=self.name, default_permission=default_permission)
+        self.body = MessageCommand(
+            name=self.name,
+            default_permission=default_permission,
+            name_localizations=name_localizations,
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -191,6 +202,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: str = None,
+    name_localizations: Localizations = None,
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
@@ -211,6 +223,10 @@ def user_command(
     ----------
     name: :class:`str`
         name of the user command you want to respond to (equals to function name by default).
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``name``
+
+        .. versionadded: 2.4
     default_permission: :class:`bool`
         whether the command is enabled by default when the app is added to a guild.
     auto_sync: :class:`bool`
@@ -238,6 +254,7 @@ def user_command(
         return InvokableUserCommand(
             func,
             name=name,
+            name_localizations=name_localizations,
             default_permission=default_permission,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
@@ -250,6 +267,7 @@ def user_command(
 def message_command(
     *,
     name: str = None,
+    name_localizations: Localizations = None,
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
@@ -270,6 +288,10 @@ def message_command(
     ----------
     name: :class:`str`
         name of the message command you want to respond to (equals to function name by default).
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        localizations for ``name``
+
+        .. versionadded: 2.4
     default_permission: :class:`bool`
         whether the command is enabled by default when the app is added to a guild.
     auto_sync: :class:`bool`
@@ -297,6 +319,7 @@ def message_command(
         return InvokableMessageCommand(
             func,
             name=name,
+            name_localizations=name_localizations,
             default_permission=default_permission,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
