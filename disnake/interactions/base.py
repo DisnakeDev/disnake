@@ -627,7 +627,8 @@ class InteractionResponse:
             This only applies for interactions of type :attr:`InteractionType.application_command` or when ``with_message`` is True
         with_message: :class:`bool`
             Indicates whether the response will be a message with thinking state (bot is thinking...).
-            This only applies for interactions of type :attr:`InteractionType.component`, and is ``True`` otherwise.
+            This is always True for interactions of type :attr:`InteractionType.application_command`.
+            For interactions of type :attr:`InteractionType.component` this defaults to False.
 
             .. versionadded:: 2.4
 
