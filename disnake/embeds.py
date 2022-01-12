@@ -26,7 +26,19 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, Final, List, Mapping, Protocol, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Final,
+    List,
+    Mapping,
+    Optional,
+    Protocol,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from . import utils
 from .colour import Colour
@@ -174,8 +186,8 @@ class Embed:
         "_files",
     )
 
-    _default_colour: Union[int, Colour] = Colour(0)
     Empty: Final = EmptyEmbed
+    _default_colour: Union[int, Colour] = Empty
 
     def __init__(
         self,
@@ -188,10 +200,8 @@ class Embed:
         description: MaybeEmpty[Any] = EmptyEmbed,
         timestamp: datetime.datetime = None,
     ):
-
-        self.colour = colour if colour is not EmptyEmbed else color
-        if self.colour is EmptyEmbed:
-            self.colour = Embed._default_colour
+        if colour or color:
+            self.colour = colour if colour is not EmptyEmbed else color
         self.title = title
         self.type = type
         self.url = url
@@ -303,7 +313,7 @@ class Embed:
                 self.title,
                 self.url,
                 self.description,
-                self.colour,
+                hasattr(self, "_colour") and self.colour,
                 self.fields,
                 self.timestamp,
                 self.author,
@@ -317,7 +327,7 @@ class Embed:
 
     @property
     def colour(self) -> MaybeEmpty[Colour]:
-        return getattr(self, "_colour", EmptyEmbed)
+        return getattr(self, "_colour", type(self)._default_colour)
 
     @colour.setter
     def colour(self, value: Union[int, Colour, _EmptyEmbed]):  # type: ignore
@@ -332,7 +342,7 @@ class Embed:
 
     @colour.deleter
     def colour(self):
-        self.colour = Embed._default_colour
+        del self._colour
 
     color = colour
 
@@ -771,9 +781,11 @@ class Embed:
         return result  # type: ignore
 
     @classmethod
-    def set_default_colour(cls, value: Union[int, Colour]):
+    def set_default_colour(cls, value: Optional[Union[int, Colour]]):
         """Set the default colour of all new embeds."""
-        if isinstance(value, (Colour, _EmptyEmbed)):
+        if value == None:
+            cls._default_colour = cls.Empty
+        elif isinstance(value, (Colour, _EmptyEmbed)):
             cls._default_colour = value
         elif isinstance(value, int):
             cls._default_colour = Colour(value=value)
@@ -783,3 +795,10 @@ class Embed:
             )
 
     set_default_color = set_default_colour
+
+    @classmethod
+    def get_default_colour(cls) -> Optional[Union[int, Colour]]:
+        """Get the default colour."""
+        return cls._default_colour
+
+    get_default_color = get_default_colour
