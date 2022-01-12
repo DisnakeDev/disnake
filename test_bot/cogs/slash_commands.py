@@ -32,7 +32,6 @@ class SlashCommands(commands.Cog):
         return ["XD", ":D", ":)", ":|", ":("]
 
     @commands.slash_command()
-    @commands.guild_permissions(768247229840359465, roles={815866581233041428: False})
     async def alt_auto(
         self,
         inter: disnake.AppCmdInter,
