@@ -407,23 +407,26 @@ class View:
         # fmt: on
         children: List[Item] = []
         for component in _walk_all_components(components):
+            older: Optional[Item] = None
             try:
                 older = old_state[(component.type.value, component.custom_id)]  # type: ignore
             except (KeyError, AttributeError):
-                for child in self.children:
-                    if (
-                        child.type is ComponentType.button
-                        and child.label == component.label  # type: ignore
-                        and child.url == component.url  # type: ignore
-                    ):
-                        child.refresh_component(component)
-                        children.append(child)
-                        break
-                else:
-                    children.append(_component_to_item(component))
-            else:
+                # workaround for url buttons, since they're not part of `old_state`
+                if isinstance(component, ButtonComponent):
+                    for child in self.children:
+                        if (
+                            child.type is ComponentType.button
+                            and child.label == component.label  # type: ignore
+                            and child.url == component.url  # type: ignore
+                        ):
+                            older = child
+                            break
+
+            if older:
                 older.refresh_component(component)
                 children.append(older)
+            else:
+                children.append(_component_to_item(component))
 
         self.children = children
 
