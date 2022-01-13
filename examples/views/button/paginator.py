@@ -5,7 +5,7 @@ from disnake.ext import commands
 
 bot = commands.Bot(command_prefix="-")
 
-# Defines a simple paginator of buttons for the embed.
+# Defines a simple paginator of buttons for the embed.    
 class Menu(disnake.ui.View):
     def __init__(self, embeds: List[disnake.Embed]):
         super().__init__(timeout=None)
@@ -23,8 +23,10 @@ class Menu(disnake.ui.View):
         for i, embed in enumerate(self.embeds):
             embed.set_footer(text=f"Page {i + 1} of {len(self.embeds)}")
 
-    @disnake.ui.button(label="Previous page", emoji="◀️", style=disnake.ButtonStyle.red)
-    async def prev_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+    @disnake.ui.button(label="Back", style=disnake.ButtonStyle.blurple)
+    async def prev_page(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
         # Decrements the embed count.
         self.embed_count -= 1
 
@@ -37,15 +39,17 @@ class Menu(disnake.ui.View):
             self.prev_page.disabled = True
 
         await interaction.response.edit_message(embed=embed, view=self)
-        
-    @disnake.ui.button(label="Quit", emoji="❌", style=disnake.ButtonStyle.red)
-    async def remove(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+
+    @disnake.ui.button(label="Quit", style=disnake.ButtonStyle.red)
+    async def remove(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
         await interaction.response.edit_message(view=None)
 
-
-
-    @disnake.ui.button(label="Next page", emoji="▶️", style=disnake.ButtonStyle.green)
-    async def next_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+    @disnake.ui.button(label="Next", style=disnake.ButtonStyle.blurple)
+    async def next_page(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
         # Increments the embed count.
         self.embed_count += 1
 
@@ -58,7 +62,6 @@ class Menu(disnake.ui.View):
             self.next_page.disabled = True
 
         await interaction.response.edit_message(embed=embed, view=self)
-
 
 @bot.command()
 async def paginator(ctx: commands.Context):
