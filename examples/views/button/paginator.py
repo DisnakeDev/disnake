@@ -37,6 +37,12 @@ class Menu(disnake.ui.View):
             self.prev_page.disabled = True
 
         await interaction.response.edit_message(embed=embed, view=self)
+        
+    @disnake.ui.button(label="Quit", emoji="❌", style=disnake.ButtonStyle.red)
+    async def remove(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+        await interaction.response.edit_message(view=None)
+
+
 
     @disnake.ui.button(label="Next page", emoji="▶️", style=disnake.ButtonStyle.green)
     async def next_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
