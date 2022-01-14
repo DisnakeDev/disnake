@@ -1937,7 +1937,7 @@ class HTTPClient:
             params["limit"] = limit
 
         if with_member is not None:
-            params["with_member"] = with_member
+            params["with_member"] = int(with_member)
 
         if before is not None:
             params["before"] = before
