@@ -2503,7 +2503,7 @@ class Guild(Hashable):
 
         payload["tags"] = emoji
 
-        data = await self._state.http.create_guild_sticker(self.id, payload, file, reason)
+        data = await self._state.http.create_guild_sticker(self.id, payload, file, reason=reason)
         return self._state.store_sticker(self, data)
 
     async def delete_sticker(self, sticker: Snowflake, *, reason: Optional[str] = None) -> None:
@@ -2530,7 +2530,7 @@ class Guild(Hashable):
         HTTPException
             An error occurred deleting the sticker.
         """
-        await self._state.http.delete_guild_sticker(self.id, sticker.id, reason)
+        await self._state.http.delete_guild_sticker(self.id, sticker.id, reason=reason)
 
     async def fetch_emojis(self) -> List[Emoji]:
         r"""|coro|
@@ -3158,7 +3158,11 @@ class Guild(Hashable):
         return Widget(state=self._state, data=data)
 
     async def edit_widget(
-        self, *, enabled: bool = MISSING, channel: Optional[Snowflake] = MISSING
+        self,
+        *,
+        enabled: bool = MISSING,
+        channel: Optional[Snowflake] = MISSING,
+        reason: Optional[str] = None,
     ) -> None:
         """|coro|
 
@@ -3175,6 +3179,10 @@ class Guild(Hashable):
             Whether to enable the widget for the guild.
         channel: Optional[:class:`~disnake.abc.Snowflake`]
             The new widget channel. ``None`` removes the widget channel.
+        reason: Optional[:class:`str`]
+            The reason for editing the widget. Shows up on the audit log.
+
+            .. versionadded:: 2.4
 
         Raises
         -------
@@ -3189,7 +3197,7 @@ class Guild(Hashable):
         if enabled is not MISSING:
             payload["enabled"] = enabled
 
-        await self._state.http.edit_widget(self.id, payload=payload)
+        await self._state.http.edit_widget(self.id, payload=payload, reason=reason)
 
     async def chunk(self, *, cache: bool = True) -> None:
         """|coro|
