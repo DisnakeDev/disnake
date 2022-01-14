@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from typing import Literal, Optional, TypedDict
 
-from .member import MemberWithUser
+from .member import Member
 from .snowflake import Snowflake
 from .user import User
 
@@ -34,7 +34,7 @@ GuildScheduledEventEntityType = Literal[1, 2, 3]
 
 
 class _OptionalGuildScheduledEventUser(TypedDict, total=False):
-    member: MemberWithUser
+    member: Member
 
 
 class GuildScheduledEventUser(_OptionalGuildScheduledEventUser):
@@ -42,7 +42,7 @@ class GuildScheduledEventUser(_OptionalGuildScheduledEventUser):
     user: User
 
 
-class GuildScheduledEventEntityMetadata(TypedDict):
+class GuildScheduledEventEntityMetadata(TypedDict, total=False):
     location: str
 
 

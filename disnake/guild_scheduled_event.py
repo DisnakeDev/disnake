@@ -72,8 +72,10 @@ class GuildScheduledEventMetadata:
     def __repr__(self) -> str:
         return f"<GuildScheduledEventMetadata location={self.location!r}>"
 
-    def to_dict(self) -> Dict[str, Optional[str]]:
-        return {"location": self.location}
+    def to_dict(self) -> GuildScheduledEventEntityMetadataPayload:
+        if self.location is not None:
+            return {"location": self.location}
+        return {}
 
     @classmethod
     def from_dict(
@@ -360,7 +362,9 @@ class GuildScheduledEvent(Hashable):
 
         if channel_id is not MISSING:
             if channel_id is not None and is_external:
-                raise ValueError(error_for_external_entity.format("channel_id", "None or MISSING"))
+                raise ValueError(
+                    error_for_external_entity.format("channel_id", "None or not provided")
+                )
             fields["channel_id"] = channel_id
         elif channel_id is None and is_external:
             fields["channel_id"] = None
