@@ -24,9 +24,7 @@ class Menu(disnake.ui.View):
             embed.set_footer(text=f"Page {i + 1} of {len(self.embeds)}")
 
     @disnake.ui.button(label="Previous page", emoji="◀️", style=disnake.ButtonStyle.red)
-    async def prev_page(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):
+    async def prev_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         # Decrements the embed count.
         self.embed_count -= 1
 
@@ -41,15 +39,11 @@ class Menu(disnake.ui.View):
         await interaction.response.edit_message(embed=embed, view=self)
 
     @disnake.ui.button(label="Quit", emoji="❌", style=disnake.ButtonStyle.red)
-    async def remove(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):
+    async def remove(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         await interaction.response.edit_message(view=None)
 
     @disnake.ui.button(label="Next page", emoji="▶️", style=disnake.ButtonStyle.green)
-    async def next_page(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):
+    async def next_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         # Increments the embed count.
         self.embed_count += 1
 
