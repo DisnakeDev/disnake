@@ -296,7 +296,7 @@ aside {
   color: var(--nav-text);
   left: 0;
   padding: 12px;
-  overflow: scroll;
+  overflow: auto;
   z-index: 3;
   max-height: 100vh;
   max-width: 300px;
@@ -522,14 +522,14 @@ main section section {
 }
 
 dt.sig {
-  overflow: scroll;
+  overflow: auto;
   display: inline-block;
   max-width: 100%;
 }
 
 section h3 {
   max-width: 100%;
-  overflow: scroll;
+  overflow: auto;
 }
 
 /* jumplinks and sticky header */
