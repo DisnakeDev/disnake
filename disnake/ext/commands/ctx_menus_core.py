@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Coroutine, Optional, Sequence, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
 from disnake.app_commands import MessageCommand, UserCommand
 
@@ -70,7 +70,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func,
+        func: CommandCallback,
         *,
         name: str = None,
         default_permission: bool = True,
@@ -141,7 +141,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func,
+        func: CommandCallback,
         *,
         name: str = None,
         default_permission: bool = True,

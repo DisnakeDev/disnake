@@ -105,9 +105,9 @@ class InvokableApplicationCommand(ABC):
 
     body: ApplicationCommand
 
-    def __init__(self, func, *, name: str = None, **kwargs):
+    def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
         self.__command_flag__ = None
-        self._callback: Callable[..., Any] = func
+        self._callback: CommandCallback = func
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
         # only an internal feature for now
@@ -158,8 +158,8 @@ class InvokableApplicationCommand(ABC):
         self._after_invoke: Optional[Hook] = None
 
     @property
-    def callback(self) -> Callable[..., Any]:
-        """Callable[..., Any]: The callback associated with the interaction."""
+    def callback(self) -> CommandCallback:
+        """Callable[..., Coroutine]: The callback associated with the interaction."""
         return self._callback
 
     def add_check(self, func: Check) -> None:
@@ -205,9 +205,9 @@ class InvokableApplicationCommand(ABC):
 
         """
         if self.cog is not None:
-            return await self.callback(self.cog, interaction, *args, **kwargs)
+            return await self.callback(self.cog, interaction, *args, **kwargs)  # type: ignore
         else:
-            return await self.callback(interaction, *args, **kwargs)
+            return await self.callback(interaction, *args, **kwargs)  # type: ignore
 
     def _prepare_cooldowns(self, inter: ApplicationCommandInteraction) -> None:
         if self._buckets.valid:

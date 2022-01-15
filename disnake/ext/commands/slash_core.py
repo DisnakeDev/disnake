@@ -24,18 +24,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Coroutine,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Union
 
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
@@ -135,7 +124,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         event.
     """
 
-    def __init__(self, func, *, name: str = None, **kwargs):
+    def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
         super().__init__(func, name=name, **kwargs)
         self.children: Dict[str, SubCommand] = {}
         self.option = Option(
@@ -209,7 +198,7 @@ class SubCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func,
+        func: CommandCallback,
         *,
         name: str = None,
         description: str = None,
@@ -317,7 +306,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func,
+        func: CommandCallback,
         *,
         name: str = None,
         description: str = None,
