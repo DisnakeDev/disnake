@@ -249,12 +249,12 @@ header > nav.mobile-only .search-wrapper {
 
 .main-heading {
   margin-right: auto;
-  max-height: 100px;
+  max-height: 80px;
 }
 
 .main-heading img {
   max-width: 100%;
-  max-height: 100px;
+  max-height: 80px;
 }
 
 header > nav a:not(.main-heading) {
@@ -534,7 +534,7 @@ section h3 {
 
 /* jumplinks and sticky header */
 :target {
-  scroll-margin-top: 100px;
+  scroll-margin-top: 80px;
 }
 
 
