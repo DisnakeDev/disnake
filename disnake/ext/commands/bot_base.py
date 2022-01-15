@@ -43,21 +43,9 @@ from .help import DefaultHelpCommand, HelpCommand
 from .view import StringView
 
 if TYPE_CHECKING:
-
-    from typing_extensions import ParamSpec
-
-    from disnake.interactions import ApplicationCommandInteraction
     from disnake.message import Message
 
     from ._types import Check, CoroFunc
-
-    ApplicationCommandInteractionT = TypeVar(
-        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
-    )
-    AnyMessageCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
-    AnyUserCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
-
-    P = ParamSpec("P")
 
 __all__ = (
     "when_mentioned",

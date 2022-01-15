@@ -26,7 +26,18 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
@@ -36,12 +47,23 @@ from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import *
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec
+    from typing_extensions import Concatenate, ParamSpec
 
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import Check, Error, Hook
-    from .cog import Cog
+    from .cog import Cog, CogT
+
+    ApplicationCommandInteractionT = TypeVar(
+        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
+    )
+
+    P = ParamSpec("P")
+
+    CommandCallback = Union[
+        Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+        Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
+    ]
 
 
 __all__ = ("InvokableApplicationCommand", "guild_permissions")
@@ -52,11 +74,6 @@ AppCommandT = TypeVar("AppCommandT", bound="InvokableApplicationCommand")
 CogT = TypeVar("CogT", bound="Cog")
 HookT = TypeVar("HookT", bound="Hook")
 ErrorT = TypeVar("ErrorT", bound="Error")
-
-if TYPE_CHECKING:
-    P = ParamSpec("P")
-else:
-    P = TypeVar("P")
 
 
 def _get_overridden_method(method):
