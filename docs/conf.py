@@ -179,6 +179,8 @@ nitpick_ignore_files = [
 # unreferenced static images to copy
 copy_static_images = [
     "images/drop_down_icon.svg",
+    "images/disnake-banner.png",
+    "images/disnake-readme-banner.png",
 ]
 
 

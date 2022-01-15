@@ -191,46 +191,11 @@ body {
   color: var(--main-text);
 }
 
-
-/* Scrollbar related */
-
-#sidebar::-webkit-scrollbar {
-  width: 0.5em;
-}
-
-#sidebar::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar);
-  border-radius: 0.25em;
-}
-
-#sidebar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scrollbar-hover);
-}
-
-
-/* grid related */
-
-.main-grid {
-  display: grid;
-  min-height: 100%;
-  grid-auto-rows: min-content auto min-content;
-  grid-template-areas:
-    "s"
-    "h"
-    "n"
-    "c"
-    "f";
-}
-
-.grid-item {
-  max-width: 100vw;
-  padding: 0.8em;
-}
-
 /* all URLs only show underline on hover */
 a {
   text-decoration: none;
   color: var(--link-text);
+  transition: color 0.6s;
 }
 
 a:hover {
@@ -240,20 +205,23 @@ a:hover {
 
 /* headers */
 
-header.grid-item {
-  grid-area: h;
+header{
   color: var(--main-text);
-  position: relative;
-  z-index: 1;
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 40;
   padding: 0;
 }
 
 header > nav {
+  color: var(--nav-text);
   background-color: var(--sub-header-background);
-  padding: 0.8em;
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
+  flex-wrap: wrap;
   align-items: center;
 }
 
@@ -281,6 +249,12 @@ header > nav.mobile-only .search-wrapper {
 
 .main-heading {
   margin-right: auto;
+  max-height: 100px;
+}
+
+.main-heading img {
+  max-width: 100%;
+  max-height: 100px;
 }
 
 header > nav a:not(.main-heading) {
@@ -290,63 +264,6 @@ header > nav a:not(.main-heading) {
 header > nav > a:hover {
   color: var(--grey-1-8);
   text-decoration: underline;
-}
-
-.sub-header {
-  grid-area: n;
-  background-color: var(--sub-header-background);
-  color: var(--white);
-  display: none;
-}
-
-/* these aren't shown on mobile */
-
-.sub-header > label {
-  display: none;
-  margin-right: 1em;
-}
-
-.sub-header > select {
-  display: none;
-  background-color: transparent;
-  padding: 0.4em 0;
-  font-size: 1em;
-  width: 13.5%;
-  color: white;
-  border: none;
-  border-bottom: 1px solid var(--search-border);
-
-  appearance: none;
-  background-image: url('../_images/drop_down_icon.svg');
-  background-repeat: no-repeat;
-  background-position-x: 100%;
-  background-position-y: 50%;
-
-  cursor: pointer;
-}
-
-.sub-header option {
-    color: black;
-}
-
-.sub-header > select:focus {
-  outline: none;
-}
-
-.sub-header > .settings {
-  color: var(--settings);
-  display: none;
-  margin-left: 1em;
-  margin-right: 0.5em;
-}
-
-.setting h3 {
-  display: inline-block;
-  margin-left: 2em;
-}
-
-.sub-header > .settings:hover {
-  color: var(--settings-hover);
 }
 
 /* footer stuff */
@@ -364,19 +281,96 @@ footer a {
 
 /* sidebar stuff */
 
+main {
+  margin-left: 300px;
+  padding: 12px;
+  z-index: 1;
+}
+
 aside {
-  grid-area: s;
   font-size: 14px;
   line-height: 1.75em;
-  top: 0;
-  position: -webkit-sticky; /* safari */
-  position: sticky;
-  background-color: var(--mobile-nav-background);
-  color: var(--mobile-nav-text);
-  z-index: 2;
+  position: fixed;
+  /* top: 0; Intentionally missing to give space for sticky header */
+  background-color: var(--nav-background);
+  color: var(--nav-text);
+  left: 0;
+  padding: 12px;
+  overflow: scroll;
+  z-index: 3;
   max-height: 100vh;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
+  max-width: 300px;
+}
+
+header .header-breakpoint {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0px 6px;
+}
+
+.main-heading img.small {
+  display: none;
+}
+
+@media screen and (max-width: 1000px) {
+  main {
+    margin-left: 0;
+  }
+  aside {
+    position: relative;
+    max-width: 100%;
+    max-height: unset;
+  }
+
+  #sidebar {
+    height: auto !important;
+  }
+
+  header nav {
+    justify-content: center;
+    align-items: center;
+  }
+
+  header .main-heading {
+    line-height: 0; /* avoid layout issue */
+    flex-basis: 100%;
+    text-align: center;
+    background-image: linear-gradient(to right, #ffd545 0%, #ffd545 50%, #3773a5 50%, #3773a5 100%);
+  }
+
+  .main-heading img.large {
+    display: none;
+  }
+
+  .main-heading img.small {
+    display: inline-block;
+    max-height: 50px;
+  }
+
+  header .header-breakpoint {
+    flex-basis: 100%;
+    padding: 8px;
+  }
+
+  header .extension-nav {
+    padding: 6px 10px;
+  }
+
+  header form.search {
+    flex-grow: 1;
+    max-width: 400px;
+  }
+
+  header .search-wrapper {
+    margin: auto;
+  }
+}
+
+#scrollbar {
+  height: auto !important;
+  overflow: scroll;
 }
 
 aside h3 {
@@ -406,12 +400,7 @@ aside h3 {
   left: -20px;
 }
 
-#settings-toggle {
-  float: right;
-}
-
-aside .material-icons,
-.settings > .material-icons {
+aside .material-icons {
   cursor: pointer;
   font-size: 2em;
 }
@@ -420,16 +409,12 @@ aside .material-icons,
   display: unset !important;
 }
 
-#sidebar {
-  display: none;
-}
-
 #sidebar a {
-  color: var(--mobile-nav-text);
+  color: var(--nav-text);
 }
 
 #sidebar a:hover {
-  color: var(--mobile-nav-hover-text);
+  color: var(--nav-hover-text);
 }
 
 #sidebar h3 {
@@ -484,11 +469,13 @@ aside .material-icons,
 }
 
 .search-wrapper {
-  border-bottom: 1px solid var(--search-border);
+  border: 2px solid var(--search-border);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .search-wrapper:focus-within {
-  border-bottom: 1px solid var(--search-focus);
+  border-color: var(--search-focus);
 }
 
 /* .search-wrapper > input[type=search] {
@@ -525,60 +512,31 @@ input[type=search]:focus ~ button[type=submit] {
   color: var(--search-button-hover);
 }
 
-/* main content area */
-
-main {
-  grid-area: c;
-}
-
 p {
   margin-bottom: 8px;
 }
 
-/* modal stuff */
-
-div.modal {
-  position: fixed;
-  z-index: 10;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background-color: rgba(0,0,0,0.4);
-  cursor: pointer;
-  display: none;
+/* prevent breakage if overflow happens */
+main section section {
+  overflow: auto;
 }
 
-div.modal-content {
-  background-color: var(--main-background);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.54);
-  padding: 24px;
-  border-radius: 4px;
-  max-width: 40%;
-  min-width: 350px;
-  cursor: initial;
-  flex: 1;
-  margin: auto;
+dt.sig {
+  overflow: scroll;
+  display: inline-block;
+  max-width: 100%;
 }
 
-div.modal-content > span.close {
-  color: #888;
-  float: right;
-  font-weight: bold;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  cursor: pointer;
+section h3 {
+  max-width: 100%;
+  overflow: scroll;
 }
 
-div.modal-content > span.close:hover,
-div.modal-content > span.close:focus {
-  color: #444;
+/* jumplinks and sticky header */
+:target {
+  scroll-margin-top: 100px;
 }
 
-div.modal input {
-  cursor: pointer;
-}
 
 /* scroll to top button */
 
@@ -1174,8 +1132,18 @@ section#welcome-to-disnake-py > h1 {
 }
 
 .active {
-  background-color: var(--mobile-active-toc);
-  border-left: 5px solid var(--mobile-active-toc);
+  background-color: var(--active-toc);
+  border-left: 5px solid var(--active-toc);
+  font-weight: bold;
+}
+
+/* Only mark the label if it's a tree */
+li.active {
+  font-weight: normal;
+}
+
+li.active > a {
+  font-weight: bold;
 }
 
 div.code-block-caption {
@@ -1186,150 +1154,6 @@ div.code-block-caption {
 .viewcode-link {
   font-size: small;
   margin-top: 2px;
-}
-
-
-/* desktop stuff */
-
-@media screen and (min-width: 600px) {
-  .grid-item {
-    max-width: unset;
-  }
-
-  .main-grid {
-    grid-template-areas:
-      "h h h h h h"
-      "n n n n n n"
-      "s s c c c c"
-      "s s f f f f";
-  }
-
-  .mobile-only {
-    display: none;
-  }
-
-  header {
-    background-color: var(--black);
-  }
-
-  header > nav {
-    background-color: unset;
-  }
-
-  .sub-header {
-    display: flex;
-    align-items: center;
-  }
-
-  .sub-header > label {
-    display: initial;
-  }
-
-  .sub-header > select {
-    display: initial;
-    margin-right: auto;
-  }
-
-  .sub-header > .settings {
-    display: initial;
-  }
-
-  aside {
-    top: initial;
-    position: initial;
-    background-color: var(--nav-background);
-    color: var(--nav-text);
-    max-height: unset;
-    overflow-y: unset;
-    overscroll-behavior-y: unset;
-  }
-
-  aside h3 {
-    color: var(--nav-header-text);
-  }
-
-  #sidebar {
-    display: inline-block;
-    position: sticky;
-    top: 1em;
-    max-height: calc(100vh - 2em);
-    overflow-y: auto;
-    margin: 1em;
-  }
-
-  #sidebar a {
-    color: var(--nav-text);
-  }
-
-  .active {
-    background-color: transparent;
-    border-left: none;
-    position: relative;
-  }
-
-  .active::before {
-    content: "";
-    display: inline-block;
-    background-color: var(--active-toc);
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    width: calc(100% + 0.5em);
-    border-radius: 4px;
-    z-index: -1;
-  }
-
-  #sidebar a:hover {
-    color: var(--nav-hover-text);
-  }
-
-  #hamburger-toggle, #settings-toggle {
-    display: none;
-
-  }
-}
-
-@media screen and (min-width: 1200px) {
-  .main-grid {
-    /* 62.5% width => multiple of 5/8 content */
-    /* sidebar takes up 20% of the inner area */
-    grid-template-columns: repeat(16, 1fr);
-    grid-template-areas:
-      "h h h h h h h h h h h h h h h h"
-      "n n n n n n n n n n n n n n n n"
-      "s s s . . c c c c c c c c c . ."
-      "s s s f f f f f f f f f f f f f"
-  }
-
-  header > nav {
-    margin-left: 18.75%;
-    margin-right: 18.75%;
-  }
-
-  .sub-header > label {
-    margin-left: 18.75%;
-    margin-right: 1em;
-  }
-
-  .sub-header > .settings {
-    margin-right: 18.75%;
-    margin-left: 1em;
-  }
-
-  .sub-header > .search {
-    width: 20%;
-  }
-
-  .py-attribute-table-column:not(:first-child) {
-    margin-top: unset;
-  }
-
-  main img {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
 }
 
 
