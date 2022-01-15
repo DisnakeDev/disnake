@@ -164,18 +164,18 @@ For instance, you could restrict an option to only accept positive integers:
 
 
 Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`Range` annotation.
-The range bounds are both inclusive; the type of the option is determined by the range bounds,
-with the option being a :class:`float` if at least one of the bounds is a :class:`float`, and :class:`int` otherwise.
+The range bounds are both inclusive; using ``...`` as a bound indicates that this end of the range is unbounded.
+The type of the option is determined by the range bounds, with the option being a
+:class:`float` if at least one of the bounds is a :class:`float`, and :class:`int` otherwise.
 
 .. code-block:: python3
 
     @bot.slash_command()
     async def ranges(
         inter: disnake.ApplicationCommandInteraction,
-        a: int = commands.Param(lt=0),  # negative int
-        b: commands.Range[1, ...],      # positive int
-        c: commands.Range[0, 10],       # 0 - 10 int
-        d: commands.Range[0, 10.0],     # 0 - 10 float
+        a: commands.Range[0, 10],       # 0 - 10 int
+        b: commands.Range[0, 10.0],     # 0 - 10 float
+        c: commands.Range[1, ...],      # positive int
     ):
         ...
 
