@@ -128,7 +128,7 @@ class Item(Generic[V]):
         """Optional[:class:`View`]: The underlying view for this item."""
         return self._view
 
-    async def callback(self, interaction: MessageInteraction):
+    async def callback(self, interaction: MessageInteraction, /):
         """|coro|
 
         The callback associated with this UI item.

@@ -149,10 +149,10 @@ class View:
     """
 
     __discord_ui_view__: ClassVar[bool] = True
-    __view_children_items__: ClassVar[List[ItemCallbackType]] = []
+    __view_children_items__: ClassVar[List[ItemCallbackType[Item]]] = []
 
     def __init_subclass__(cls) -> None:
-        children: List[ItemCallbackType] = []
+        children: List[ItemCallbackType[Item]] = []
         for base in reversed(cls.__mro__):
             for member in base.__dict__.values():
                 if hasattr(member, "__discord_ui_model_type__"):
