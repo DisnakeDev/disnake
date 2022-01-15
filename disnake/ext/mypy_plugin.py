@@ -24,7 +24,6 @@ def range_type_analyze_callback(ctx: AnalyzeTypeContext) -> Type:
         if isinstance(arg, EllipsisType):
             continue
         if not isinstance(arg, RawExpressionType):
-            # not sure when/how/if this actually happens, but handled just in case
             ctx.api.fail('invalid usage of "Range"', ctx.context)
             return AnyType(TypeOfAny.from_error)
 

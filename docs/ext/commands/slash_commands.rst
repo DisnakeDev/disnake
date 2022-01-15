@@ -181,21 +181,21 @@ with the option being a :class:`float` if at least one of the bounds is a :class
 
 .. note::
 
-    Type-checker support for :class:`Range` is limited. Pylance/Pyright seem to handle it correctly;
+    Type checker support for :class:`Range` is limited. Pylance/Pyright seem to handle it correctly;
     MyPy currently needs a plugin for it to understand :class:`Range` semantics, which can be added in
     the configuration file (``setup.cfg``, ``mypy.ini``):
 
     .. code-block:: ini
 
         [mypy]
-        plugins = disnake.mypy_plugin
+        plugins = disnake.ext.mypy_plugin
 
     For ``pyproject.toml`` configs, use this instead:
 
     .. code-block:: toml
 
         [tool.mypy]
-        plugins = "disnake.mypy_plugin"
+        plugins = "disnake.ext.mypy_plugin"
 
 
 Docstrings
