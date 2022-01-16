@@ -236,7 +236,7 @@ def get_class_results(lookup, modulename, name, fullname):
                 badge = attributetablebadge("cls", "cls")
                 badge["badge-type"] = _("classmethod")
             elif inspect.isfunction(value):
-                if doc.startswith(("A decorator", "A shortcut decorator")):
+                if doc.lstrip().startswith(("A decorator", "A shortcut decorator")):
                     # finicky but surprisingly consistent
                     badge = attributetablebadge("@", "@")
                     badge["badge-type"] = _("decorator")
