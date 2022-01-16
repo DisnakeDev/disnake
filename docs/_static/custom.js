@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let showHideSidebar = (e) => {
     sidebar.element.parentElement.classList.toggle('sidebar-toggle');
     let button = hamburgerToggle.firstElementChild;
+    button.parentElement.classList.toggle("opened");
     if (button.textContent == 'menu') {
       button.textContent = 'close';
     }
