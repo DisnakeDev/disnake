@@ -377,6 +377,11 @@ header .header-breakpoint {
   header .search-wrapper {
     margin: auto;
   }
+
+  :target {
+    scroll-margin-top: 190px;
+  }
+
   #hamburger-toggle {
     position: fixed;
     top: 12px;
