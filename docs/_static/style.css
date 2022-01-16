@@ -454,6 +454,10 @@ nav a {
   #sidebar > h3:first-child {
     margin-top: 0;
   }
+
+  .search-wrapper > input[type=search] {
+    width: 130px; /* Minimum width, low for small screens */
+  }
 }
 
 #scrollbar {
