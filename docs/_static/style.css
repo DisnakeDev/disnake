@@ -298,7 +298,6 @@ aside {
   z-index: 3;
   max-height: 100vh;
   max-width: 300px;
-  overflow-y: scroll;
   overscroll-behavior: contain;
 }
 
