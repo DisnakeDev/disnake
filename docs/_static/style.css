@@ -328,6 +328,10 @@ nav a {
   display: none !important;
 }
 
+.mobile-heading {
+  display: none !important;
+}
+
 @media screen and (max-width: 800px) {
   main {
     margin-left: 0;
@@ -343,8 +347,17 @@ nav a {
     display: none !important;
   }
 
-  .mobile {
-    display: block;
+  .mobile-heading {
+    display: flex !important;
+    background-color: var(--sub-header-background);
+    width: 100%;
+    height: 50px;
+    align-items: center;
+  }
+
+  .disnake-mobile-logo {
+    max-height: 24px;
+    margin: 0 0.5em;
   }
 
   #sidebar {

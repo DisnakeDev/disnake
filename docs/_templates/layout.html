@@ -97,7 +97,10 @@
       </nav>
     </header>
     {#- The sidebar component #}
-<aside> 
+<aside>
+  <a href="{{ pathto(master_doc)|e }}" class="mobile-heading">
+    <img class="disnake-mobile-logo" src="{{ pathto('_images/' + 'disnake.svg', 1)|e }}" alt="disnake">
+  </a>
   <div id="sidebar">
     {%- include "localtoc.html" %}
   </div>
