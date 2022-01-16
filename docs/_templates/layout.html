@@ -57,37 +57,51 @@
   <div class="main">
     {#- The main navigation header #}
     <a id="hamburger-toggle" title="mobile-toc"><span class="material-icons">menu</span></a>
-
-    <header>
+    <header class="top-header mobile">
       <nav>
-        <a href="{{ pathto(master_doc)|e }}"  class="main-heading">
-          <img class="large" src="{{ pathto('_images/' + 'disnake-banner.png', 1)|e }}" alt="disnake">
-          <img class="small" src="{{ pathto('_images/' + 'disnake-readme-banner.png', 1)|e }}" alt="disnake">
-        </a>
-        <div class="header-breakpoint">
+          <div class="header-breakpoint">
         <a href="{{ pathto('api')|e }}" class="extension-nav">API Reference</a>
         {%- for ext, p in discord_extensions %}
-        <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename is prefixedwith p %}current-page{% endif %}">{{ ext }}</a>
+          {% set ext_name = ext.split('.') %}
+        <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename is prefixedwith p %}current-page{% endif %}">{{ ext_name[-1] }}</a>
         {%- endfor %}
         </div>
+      </nav>
+    </header>
+    <header class="sticky-header">
+      <nav>
+        <a href="{{ pathto(master_doc)|e }}" class="main-heading desktop">
+          <img class="disnake-main-logo" src="{{ pathto('_images/' + 'disnake.svg', 1)|e }}" alt="disnake">
+        </a>
+        <div class="header-breakpoint desktop extension-breakpoint desktop">
+          <a href="{{ pathto('api')|e }}" class="extension-nav">API Reference</a>
+          {%- for ext, p in discord_extensions %}
+          {% set ext_name = ext.split('.') %}
+          <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename is prefixedwith p %}current-page{% endif %}">{{ ext_name[-1] }}</a>
+          {%- endfor %}
+        </div>
         <div class="header-breakpoint search-breakpoint">
-        <form role="search" class="search" action="{{ pathto('search') }}" method="get">
-          <div class="search-wrapper">
-            <input type="search" name="q" placeholder="{{ _('Search documentation') }}" />
-            <button type="submit">
-              <span class="material-icons">search</span>
-            </button>
-          </div>
-        </form>
-        <a href="https://github.com/DisnakeDev/disnake" title="GitHub"><span class="material-icons custom-icons">github</span></a>
-        <a href="{{ discord_invite }}" title="{{ _('Discord') }}"><span class="material-icons custom-icons">discord</span></a>
-        <a href="{{ pathto('faq') }}" title="FAQ"><span class="material-icons">help_center</span></a>
-        {#- If we have more links we can put them here #}
+          <form role="search" class="search" action="{{ pathto('search') }}" method="get">
+            <div class="search-wrapper">
+              <input type="search" name="q" placeholder="{{ _('Search documentation') }}" />
+              <button type="submit">
+                <span class="material-icons">search</span>
+              </button>
+            </div>
+          </form>
+          <a href="https://github.com/DisnakeDev/disnake" title="GitHub"><span class="material-icons custom-icons">github</span></a>
+          <a href="{{ discord_invite }}" title="{{ _('Discord') }}"><span class="material-icons custom-icons">discord</span></a>
+          <a href="{{ pathto('faq') }}" title="FAQ"><span class="material-icons">help_center</span></a>
+          {#- If we have more links we can put them here #}
         </div>
       </nav>
     </header>
     {#- The sidebar component #}
 <aside>
+  <a href="{{ pathto(master_doc)|e }}"  class="main-heading">
+
+    <img class="small" src="{{ pathto('_images/' + 'disnake-readme-banner.png', 1)|e }}" alt="disnake">
+  </a>
   <div id="sidebar">
     {%- include "localtoc.html" %}
   </div>

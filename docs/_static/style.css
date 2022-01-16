@@ -247,18 +247,9 @@ header > nav.mobile-only .search-wrapper {
   background-color: var(--sub-header-background);
 }
 
-.main-heading {
-  margin-right: auto;
-  max-height: 80px;
-}
-
 .main-heading img {
   max-width: 100%;
-  max-height: 80px;
-}
-
-header > nav a:not(.main-heading) {
-  margin: 0 0.5em;
+  max-height: 24px;
 }
 
 header > nav > a:hover {
@@ -307,15 +298,32 @@ header .header-breakpoint {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  padding: 0px 6px;
+  padding: 6px;
+}
+
+header .extension-breakpoint {
+  flex-grow: 1;
+  justify-content: flex-end;
 }
 
 .main-heading img.small {
   display: none;
 }
 
+nav a {
+  margin: 0 0.5em;
+}
+
+.extension-nav {
+  text-transform: capitalize;
+}
+
 #hamburger-toggle {
   display: none;
+}
+
+.mobile {
+  display: none !important;
 }
 
 @media screen and (max-width: 1000px) {
@@ -326,10 +334,20 @@ header .header-breakpoint {
     position: relative;
     max-width: 100%;
     max-height: unset;
+    padding: 0;
+  }
+
+  .desktop {
+    display: none !important;
+  }
+
+  .mobile {
+    display: block;
   }
 
   #sidebar {
     height: auto !important;
+    padding: 12px;
   }
 
   header nav {
@@ -337,14 +355,20 @@ header .header-breakpoint {
     align-items: center;
   }
 
-  header .main-heading {
+  header.top-header {
+    position: relative;
+  }
+
+  .main-heading {
+    display: block;
     line-height: 0; /* avoid layout issue */
     flex-basis: 100%;
     text-align: center;
+    width: 100%;
     background-image: linear-gradient(to right, #ffd545 0%, #ffd545 50%, #3773a5 50%, #3773a5 100%);
   }
 
-  .main-heading img.large {
+  .disnake-main-logo {
     display: none;
   }
 
@@ -355,11 +379,19 @@ header .header-breakpoint {
 
   header .header-breakpoint {
     flex-basis: 100%;
-    padding: 6px;
+  }
+
+  .top-header .header-breakpoint {
+    padding: 10px;
+    padding-left: 42px;
   }
 
   header .search-breakpoint {
-    padding-top: 0px;
+    padding-left: 42px;
+  }
+
+  header .search-breakpoint > *  {
+    margin: 0 0.5em;
   }
 
   header .extension-nav {
@@ -367,11 +399,13 @@ header .header-breakpoint {
     flex-basis: 50px;
     flex-grow: 1;
     text-align: center;
+    text-transform: capitalize;
   }
 
   header form.search {
     flex-grow: 1;
     max-width: 400px;
+    margin-left: auto;
   }
 
   header .search-wrapper {
@@ -388,8 +422,8 @@ header .header-breakpoint {
     left: 12px;
     display: block;
     z-index: 60;
-    color: black;
-    transition: left 0.75s, right 0.75s, color 0.75s;
+    color: white;
+    transition: left 0.6s, right 0.6s, color 0.6s;
     cursor: pointer;
   }
 
@@ -399,17 +433,19 @@ header .header-breakpoint {
   }
 
   aside {
+    visibility: hidden;
     position: fixed;
     top: 0;
     bottom: 0;
     left: -100vw;
     width: 100vw;
-    transition: left 0.75s;
+    transition: left 0.6s, visibility 0.6s;
     overflow: auto;
     z-index: 50;
   }
 
   aside.sidebar-toggle {
+    visibility: visible;
     left: 0;
   }
 
@@ -513,8 +549,7 @@ aside .material-icons {
   background-color: var(--sub-header-background);
   border: none;
   color: var(--search-text);
-  padding: 0.5em;
-  min-height: 2.5em;
+  padding: 0.25em;
   flex: 9;
 }
 
