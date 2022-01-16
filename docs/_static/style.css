@@ -336,12 +336,6 @@ nav a {
   main {
     margin-left: 0;
   }
-  aside {
-    position: relative;
-    max-width: 100%;
-    max-height: unset;
-    padding: 0;
-  }
 
   .desktop {
     display: none !important;
@@ -444,13 +438,16 @@ nav a {
   }
 
   aside {
-    visibility: hidden;
     position: fixed;
     top: 0;
     bottom: 0;
     left: -100vw;
     width: 100vw;
     transition: left 0.6s, visibility 0.6s;
+    max-width: 100%;
+    max-height: unset;
+    padding: 0;
+    visibility: hidden;
     overflow: auto;
     z-index: 50;
   }
@@ -655,9 +652,7 @@ section h3 {
   scroll-margin-top: 40px;
 }
 
-
 /* scroll to top button */
-
 #to-top {
   position: fixed;
   bottom: 50px;
