@@ -110,75 +110,75 @@ Historically however, thanks to:
   --tooltip-background: #f8f8f8;
 }
 
-:root[data-font="serif"] {
-  --font-family: 'Georgia', 'Yu Gothic', 'Noto Sans CJK JP Regular', serif;
-}
+@media screen and (prefers-color-scheme: dark) {
+  :root {
+    --main-background: var(--grey-7);
+    --link-text: var(--blue-1);
+    --link-hover-text: var(--blue-2);
+    --main-text: var(--white);
+    --sub-header-background: var(--grey-8);
+    --search-border: var(--grey-5);
+    --nav-background: var(--main-background);
+    --nav-text: var(--grey-1);
+    --nav-hover-text: var(--grey-2);
+    --nav-header-text: var(--white);
+    --footer-text: var(--grey-2);
+    --footer-link: var(--grey-1);
+    --hr-border: var(--grey-1);
+    --main-big-headers-text: var(--grey-1);
+    --main-big-headers-border: var(--grey-1);
+    --main-h5-header-text: var(--grey-4);
+    --main-h6-header-text: var(--grey-5);
+    --main-h4-header-border: var(--grey-2);
+    --header-link: var(--grey-2);
+    --header-link-hover-text: var(--grey-6);
+    --admonition-background: var(--grey-8);
+    --note-background: var(--blue-3);
+    --note-text: var(--white);
+    --warning-background: #d7b600;
+    --warning-text: var(--black);
+    --error-background: #d70022;
+    --error-text: var(--white);
+    --helpful-background: #008ea4;
+    --helpful-text: var(--white);
+    --codeblock-background: var(--grey-6);
+    --codeblock-border: var(--black);
+    --codeblock-text: var(--grey-1);
+    --inline-code-background: var(--grey-8);
+    --xref-code-background: transparent;
+    --api-entry-background: var(--grey-6);
+    --table-header-background: var(--grey-6);
+    --table-text: var(--grey-1);
+    --table-border: var(--grey-4);
+    --active-toc: var(--grey-6);
+    --scrollbar: rgba(0, 0, 0, 0.5);
+    --scrollbar-hover: rgba(0, 0, 0, 0.7);
+    --rtd-ad-border: var(--grey-6);
+    --rtd-ad-background: var(--grey-5);
+    --rtd-ad-main-text: var(--grey-2);
+    --rtd-ad-small-text: var(--grey-1);
+    --attribute-table-title: var(--grey-3);
+    --attribute-table-entry-border: var(--grey-5);
+    --attribute-table-entry-text: var(--grey-3);
+    --attribute-table-entry-hover-border: var(--blue-1);
+    --attribute-table-entry-hover-background: var(--grey-6);
+    --attribute-table-entry-hover-text: var(--blue-1);
+    --attribute-table-badge: var(--grey-4);
+    --highlighted-text: rgba(250, 166, 26, 0.2);
+    --tooltip-background: rgba(10, 10, 10, 0.95);
+  }
 
-:root[data-theme="dark"] {
-  --main-background: var(--grey-7);
-  --link-text: var(--blue-1);
-  --link-hover-text: var(--blue-2);
-  --main-text: var(--white);
-  --sub-header-background: var(--grey-8);
-  --search-border: var(--grey-5);
-  --nav-background: var(--main-background);
-  --nav-text: var(--grey-1);
-  --nav-hover-text: var(--grey-2);
-  --nav-header-text: var(--white);
-  --footer-text: var(--grey-2);
-  --footer-link: var(--grey-1);
-  --hr-border: var(--grey-1);
-  --main-big-headers-text: var(--grey-1);
-  --main-big-headers-border: var(--grey-1);
-  --main-h5-header-text: var(--grey-4);
-  --main-h6-header-text: var(--grey-5);
-  --main-h4-header-border: var(--grey-2);
-  --header-link: var(--grey-2);
-  --header-link-hover-text: var(--grey-6);
-  --admonition-background: var(--grey-8);
-  --note-background: var(--blue-3);
-  --note-text: var(--white);
-  --warning-background: #d7b600;
-  --warning-text: var(--black);
-  --error-background:  #d70022;
-  --error-text: var(--white);
-  --helpful-background: #008ea4;
-  --helpful-text: var(--white);
-  --codeblock-background: var(--grey-6);
-  --codeblock-border: var(--black);
-  --codeblock-text: var(--grey-1);
-  --inline-code-background: var(--grey-8);
-  --xref-code-background: transparent;
-  --api-entry-background: var(--grey-6);
-  --table-header-background: var(--grey-6);
-  --table-text: var(--grey-1);
-  --table-border: var(--grey-4);
-  --active-toc: var(--grey-6);
-  --scrollbar: rgba(0,0,0,0.5);
-  --scrollbar-hover: rgba(0,0,0,0.7);
-  --rtd-ad-border: var(--grey-6);
-  --rtd-ad-background: var(--grey-5);
-  --rtd-ad-main-text: var(--grey-2);
-  --rtd-ad-small-text: var(--grey-1);
-  --attribute-table-title: var(--grey-3);
-  --attribute-table-entry-border: var(--grey-5);
-  --attribute-table-entry-text: var(--grey-3);
-  --attribute-table-entry-hover-border: var(--blue-1);
-  --attribute-table-entry-hover-background: var(--grey-6);
-  --attribute-table-entry-hover-text: var(--blue-1);
-  --attribute-table-badge: var(--grey-4);
-  --highlighted-text: rgba(250, 166, 26, 0.2);
-  --tooltip-background: rgba(10, 10, 10, 0.95);
+  img[src$="snake.svg"] {
+    display: none;
+  }
+
+  img[src$="snake_dark.svg"] {
+    display: inherit;
+  }
 }
 
 img[src$="snake_dark.svg"]  {
   display: none;
-}
-:root[data-theme="dark"] img[src$="snake.svg"] {
-  display: none;
-}
-:root[data-theme="dark"] img[src$="snake_dark.svg"] {
-  display: inherit;
 }
 
 body {
