@@ -168,16 +168,16 @@ Historically however, thanks to:
     --tooltip-background: rgba(10, 10, 10, 0.95);
   }
 
-  img[src$="snake.svg"] {
+  img[src$="/snake.svg"] {
     display: none;
   }
 
-  img[src$="snake_dark.svg"] {
+  img[src$="/snake_dark.svg"] {
     display: inherit;
   }
 }
 
-img[src$="snake_dark.svg"]  {
+img[src$="/snake_dark.svg"]  {
   display: none;
 }
 
