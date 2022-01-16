@@ -524,6 +524,10 @@ aside .material-icons {
   font-size: 2em;
 }
 
+.material-icons {
+  max-width: 24px;
+}
+
 .sidebar-toggle {
   display: unset !important;
 }
