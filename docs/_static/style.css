@@ -55,6 +55,8 @@ Historically however, thanks to:
   --nav-text: var(--grey-6);
   --nav-hover-text: var(--grey-6);
   --nav-header-text: var(--black);
+  --nav-link-text: var(--white);
+  --nav-link-hover-text: var(--blue-2);
   --sub-header-background: var(--grey-6);
   --search-border: var(--grey-4);
   --search-text: var(--white);
@@ -226,7 +228,12 @@ header > nav {
 }
 
 header > nav a {
-  color: var(--white);
+  color: var(--nav-link-text);
+  margin: 0 0.5em;
+}
+
+header > nav a:hover {
+  color: var(--nav-link-hover-text);
 }
 
 header > nav.mobile-only {
@@ -310,10 +317,6 @@ header .extension-breakpoint {
 
 .main-heading img.small {
   display: none;
-}
-
-nav a {
-  margin: 0 0.5em;
 }
 
 .extension-nav {
@@ -487,12 +490,12 @@ aside h3 {
 .sidebar-extension-list a {
   margin: 0.25em 0.5em;
   padding: 0.5em;
-  color: white;
+  color: var(--nav-link-text);
   font-size: 16px;
 }
 
 .sidebar-extension-list a:hover {
-  color: var(--link-hover-text);
+  color: var(--nav-link-hover-text);
 }
 
 .collapsible-arrow {
