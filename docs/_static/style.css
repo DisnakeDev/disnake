@@ -364,6 +364,9 @@ header .header-breakpoint {
 
   header .extension-nav {
     padding: 6px 10px;
+    flex-basis: 50px;
+    flex-grow: 1;
+    text-align: center;
   }
 
   header form.search {
