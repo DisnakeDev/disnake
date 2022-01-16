@@ -460,6 +460,13 @@ nav a {
     left: 0;
   }
 
+  .sidebar-extension-list {
+    background: var(--sub-header-background);
+    display: flex !important;
+    justify-content: space-around;
+    height: auto;
+  }
+
   #sidebar > h3:first-child {
     margin-top: 0;
   }
@@ -478,6 +485,17 @@ aside h3 {
   color: var(--mobile-nav-header-text);
   font-size: 24px;
   font-weight: normal;
+}
+
+.sidebar-extension-list a {
+  margin: 0.25em 0.5em;
+  padding: 0.5em;
+  color: white;
+  font-size: 16px;
+}
+
+.sidebar-extension-list a:hover {
+  color: var(--link-hover-text);
 }
 
 .collapsible-arrow {
