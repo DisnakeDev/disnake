@@ -435,6 +435,19 @@ header .extension-breakpoint {
     cursor: pointer;
   }
 
+  /* a nice clickbox for the X */
+  #hamburger-toggle::before {
+    position: absolute;
+    content: " ";
+    display: block;
+    background: transparent;
+    z-index: -1;
+    top: -12px;
+    left: -36px;
+    width: 72px;
+    height: 48px;
+  }
+
   #hamburger-toggle.opened {
     left: calc(100vw - 36px);
     color: white;
