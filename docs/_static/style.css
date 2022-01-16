@@ -355,7 +355,11 @@ header .header-breakpoint {
 
   header .header-breakpoint {
     flex-basis: 100%;
-    padding: 8px;
+    padding: 6px;
+  }
+
+  header .search-breakpoint {
+    padding-top: 0px;
   }
 
   header .extension-nav {
