@@ -180,7 +180,6 @@ nitpick_ignore_files = [
 copy_static_images = [
     "images/drop_down_icon.svg",
     "images/disnake.svg",
-    "images/disnake-readme-banner.png",
 ]
 
 
