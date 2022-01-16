@@ -314,6 +314,10 @@ header .header-breakpoint {
   display: none;
 }
 
+#hamburger-toggle {
+  display: none;
+}
+
 @media screen and (max-width: 1000px) {
   main {
     margin-left: 0;
@@ -365,6 +369,33 @@ header .header-breakpoint {
 
   header .search-wrapper {
     margin: auto;
+  }
+  #hamburger-toggle {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    display: block;
+    z-index: 60;
+    color: white;
+  }
+
+  aside {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 100vw;
+    width: 100vw;
+    transition: left 1s;
+    overflow: auto;
+    z-index: 50;
+  }
+
+  aside.sidebar-toggle {
+    left: 0;
+  }
+
+  #sidebar > h3:first-child {
+    margin-top: 0;
   }
 }
 

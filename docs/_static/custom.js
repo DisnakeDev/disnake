@@ -64,17 +64,24 @@ document.addEventListener('DOMContentLoaded', () => {
   toTop = document.getElementById('to-top');
   toTop.hidden = !(window.scrollY > 0);
 
+  let showHideSidebar = (e) => {
+    sidebar.element.parentElement.classList.toggle('sidebar-toggle');
+    let button = hamburgerToggle.firstElementChild;
+    if (button.textContent == 'menu') {
+      button.textContent = 'close';
+    }
+    else {
+      button.textContent = 'menu';
+    }
+  };
+
   if (hamburgerToggle) {
-    hamburgerToggle.addEventListener('click', (e) => {
-      sidebar.element.classList.toggle('sidebar-toggle');
-      let button = hamburgerToggle.firstElementChild;
-      if (button.textContent == 'menu') {
-        button.textContent = 'close';
-      }
-      else {
-        button.textContent = 'menu';
-      }
-    });
+    hamburgerToggle.addEventListener('click', showHideSidebar);
+    // close panel when clicking a jump link
+    const jumplinks = document.querySelectorAll("aside a.reference");
+    jumplinks.forEach(element => {
+      element.addEventListener('click', showHideSidebar);
+    })
   }
 
   const tables = document.querySelectorAll('.py-attribute-table[data-move-to-id]');
