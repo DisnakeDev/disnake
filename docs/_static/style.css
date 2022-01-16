@@ -314,6 +314,10 @@ header .extension-breakpoint {
   justify-content: flex-end;
 }
 
+header form.search {
+  padding-right: 6px;
+}
+
 .main-heading img.small {
   display: none;
 }
@@ -349,6 +353,7 @@ header .extension-breakpoint {
     width: 100%;
     height: 50px;
     align-items: center;
+    padding: 0 0.5em;
   }
 
   .disnake-mobile-logo {
