@@ -328,7 +328,7 @@ nav a {
   display: none !important;
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 800px) {
   main {
     margin-left: 0;
   }
