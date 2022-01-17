@@ -41,7 +41,6 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinxcontrib_trio",
     "hoverxref.extension",
-    "details",
     "exception_hierarchy",
     "attributetable",
     "resourcelinks",
