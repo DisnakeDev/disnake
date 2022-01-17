@@ -269,9 +269,9 @@ header > nav > a:hover {
 
 /* footer stuff */
 footer {
-  grid-area: f;
+  padding: 0.8em;
   font-size: 14px;
-  text-align: right;
+  text-align: center;
   color: var(--footer-text);
 }
 
