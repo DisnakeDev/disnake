@@ -63,7 +63,7 @@ if TYPE_CHECKING:
         TextChannel,
         VoiceChannel,
     )
-    from ..ext.commands import AutoShardedBot, Bot, InvokableApplicationCommand
+    from ..ext.commands import InvokableApplicationCommand
     from ..state import ConnectionState
     from ..threads import Thread
     from ..types.interactions import (
@@ -71,8 +71,6 @@ if TYPE_CHECKING:
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
         ApplicationCommandInteractionDataResolved as ApplicationCommandInteractionDataResolvedPayload,
     )
-
-    BotBase = Union[Bot, AutoShardedBot]
 
     InteractionChannel = Union[
         VoiceChannel,
@@ -110,8 +108,6 @@ class ApplicationCommandInteraction(Interaction):
         The guild ID the interaction was sent from.
     channel_id: :class:`int`
         The channel ID the interaction was sent from.
-    bot: Optional[:class:`.Bot`]
-        The interaction's bot. There is an alias for this named ``client``.
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
     locale: :class:`str`
@@ -134,9 +130,9 @@ class ApplicationCommandInteraction(Interaction):
         Returns the follow up webhook for follow up interactions.
     data: :class:`ApplicationCommandInteractionData`
         The wrapped interaction data.
+    client: :class:`Client`
+        The interaction client.
     """
-
-    bot: BotBase
 
     def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)

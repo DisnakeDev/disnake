@@ -4049,6 +4049,7 @@ Interaction
 
 .. autoclass:: Interaction()
     :members:
+    :inherited-members:
 
 ApplicationCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

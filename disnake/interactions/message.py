@@ -88,9 +88,9 @@ class MessageInteraction(Interaction):
         Returns the follow up webhook for follow up interactions.
     data: :class:`MessageInteractionData`
         The wrapped interaction data.
+    client: :class:`Client`
+        The interaction client.
     """
-
-    target: Message
 
     def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)

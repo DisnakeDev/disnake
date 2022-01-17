@@ -70,8 +70,9 @@ if TYPE_CHECKING:
         TextChannel,
         VoiceChannel,
     )
+    from ..client import Client
     from ..embeds import Embed
-    from ..ext.commands.bot import Bot
+    from ..ext.commands import AutoShardedBot, Bot
     from ..file import File
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
@@ -92,6 +93,8 @@ if TYPE_CHECKING:
         Thread,
         PartialMessageable,
     ]
+
+    AnyBot = Union[Bot, AutoShardedBot]
 
 MISSING: Any = utils.MISSING
 
@@ -130,6 +133,8 @@ class Interaction:
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
+    client: :class:`Client`
+        The interaction client.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -141,9 +146,9 @@ class Interaction:
         "author",
         "token",
         "version",
-        "bot",
         "locale",
         "guild_locale",
+        "client",
         "_permissions",
         "_state",
         "_session",
@@ -158,8 +163,8 @@ class Interaction:
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
+        self.client: Client = state._get_client()
         self._original_message: Optional[InteractionMessage] = None
-        self.bot: Optional[Bot] = None
         self._from_data(data)
 
     def _from_data(self, data: InteractionPayload):
@@ -189,12 +194,17 @@ class Interaction:
             self.author = self._state.store_user(user)
 
     @property
-    def created_at(self) -> datetime:
-        return utils.snowflake_time(self.id)
+    def bot(self) -> AnyBot:
+        """:class:`~disnake.ext.commands.Bot`: The bot handling the interaction.
+
+        Only applicable when used with :class:`~disnake.ext.commands.Bot`.
+        This is an alias for :attr:`.client`.
+        """
+        return self.client  # type: ignore
 
     @property
-    def client(self) -> Optional[Bot]:
-        return self.bot
+    def created_at(self) -> datetime:
+        return utils.snowflake_time(self.id)
 
     @property
     def user(self) -> Union[User, Member]:
