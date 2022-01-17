@@ -670,11 +670,6 @@ p {
   margin-bottom: 8px;
 }
 
-/* prevent breakage if overflow happens */
-main section section {
-  overflow: auto;
-}
-
 dt.sig {
   overflow: auto;
   max-width: 100%;
@@ -687,7 +682,7 @@ section h3 {
 
 /* jumplinks and sticky header */
 :target {
-  scroll-margin-top: 40px;
+  scroll-margin-top: 60px;
 }
 
 /* scroll to top button */
