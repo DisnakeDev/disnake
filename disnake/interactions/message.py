@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..types.interactions import (
         ComponentInteractionData as ComponentInteractionDataPayload,
-        Interaction as InteractionPayload,
+        MessageInteraction as MessageInteractionPayload,
     )
 
 
@@ -97,10 +97,10 @@ class MessageInteraction(Interaction):
 
     target: Message
 
-    def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
-        self.data = MessageInteractionData(data=data.get("data", {}))
-        self.message = Message(state=self._state, channel=self.channel, data=data["message"])  # type: ignore
+        self.data = MessageInteractionData(data=data["data"])
+        self.message = Message(state=self._state, channel=self.channel, data=data["message"])
 
     @property
     def values(self) -> Optional[List[str]]:
@@ -141,6 +141,6 @@ class MessageInteractionData:
     __slots__ = ("custom_id", "component_type", "values")
 
     def __init__(self, *, data: ComponentInteractionDataPayload):
-        self.custom_id: str = data.get("custom_id")
-        self.component_type: ComponentType = try_enum(ComponentType, data.get("component_type", 0))
+        self.custom_id: str = data["custom_id"]
+        self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
         self.values: Optional[List[str]] = data.get("values")

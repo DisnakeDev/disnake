@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, TypeVar, Union
 
+from .. import utils
 from ..channel import _threaded_channel_factory
 from ..enums import ApplicationCommandType, OptionType, try_enum
 from ..guild import Guild
@@ -31,7 +32,6 @@ from ..member import Member
 from ..message import Message
 from ..role import Role
 from ..user import User
-from ..utils import MISSING
 from .base import Interaction
 
 __all__ = (
@@ -52,6 +52,8 @@ __all__ = (
     "AppCmdInter",
 )
 
+MISSING = utils.MISSING
+
 if TYPE_CHECKING:
     from ..channel import (
         CategoryChannel,
@@ -65,9 +67,9 @@ if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..threads import Thread
     from ..types.interactions import (
+        ApplicationCommandInteraction as ApplicationCommandInteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
         ApplicationCommandInteractionDataResolved as ApplicationCommandInteractionDataResolvedPayload,
-        Interaction as InteractionPayload,
     )
 
     BotBase = Union[Bot, AutoShardedBot]
@@ -141,10 +143,10 @@ class ApplicationCommandInteraction(Interaction):
 
     bot: BotBase
 
-    def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
         self.data = ApplicationCommandInteractionData(
-            data=data["data"], state=state, guild=self.guild  # type: ignore
+            data=data["data"], state=state, guild=self.guild
         )
         self.application_command: InvokableApplicationCommand = MISSING
         self.command_failed: bool = False
@@ -241,12 +243,11 @@ class ApplicationCommandInteractionData:
     ):
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data.get("type"))
+        self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
         self.resolved = ApplicationCommandInteractionDataResolved(
             data=data.get("resolved", {}), state=state, guild=guild
         )
-        target_id = data.get("target_id")
-        self.target_id: Optional[int] = None if target_id is None else int(target_id)
+        self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
         self.target: Optional[Union[User, Member, Message]] = self.resolved.get(self.target_id)  # type: ignore
         self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
