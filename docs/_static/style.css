@@ -510,6 +510,19 @@ header form.search {
   }
 }
 
+
+@media screen and (min-width: 1500px) {
+  .main {
+    max-width: 1500px;
+    margin: auto;
+  }
+
+  aside {
+    left: calc(calc(100vw - 1500px) / 2);
+  }
+
+}
+
 #scrollbar {
   height: auto !important;
   overflow: scroll;
