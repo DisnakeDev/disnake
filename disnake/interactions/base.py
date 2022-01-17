@@ -178,25 +178,16 @@ class Interaction:
         self.author: Union[User, Member] = MISSING
         self._permissions: int = 0
 
-        # TODO: there's a potential data loss here
-        if self.guild_id:
-            guild = self.guild or Object(id=self.guild_id)
-            try:
-                member = data["member"]  # type: ignore
-            except KeyError:
-                pass
-            else:
-                self.author = (
-                    isinstance(guild, Guild)
-                    and guild.get_member(int(member["user"]["id"]))  # type: ignore
-                    or Member(state=self._state, guild=guild, data=member)  # type: ignore
-                )
-                self._permissions = int(member.get("permissions", 0))
-        else:
-            try:
-                self.author = User(state=self._state, data=data["user"])
-            except KeyError:
-                pass
+        if self.guild_id and (member := data.get("member")):
+            guild: Guild = self.guild or Object(id=self.guild_id)  # type: ignore
+            self.author = (
+                isinstance(guild, Guild)
+                and guild.get_member(int(member["user"]["id"]))
+                or Member(state=self._state, guild=guild, data=member)
+            )
+            self._permissions = int(member.get("permissions", 0))
+        elif user := data.get("user"):
+            self.author = self._state.store_user(user)
 
     @property
     def created_at(self) -> datetime:
