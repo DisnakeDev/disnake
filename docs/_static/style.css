@@ -345,7 +345,7 @@ header form.search {
   display: none !important;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 900px) {
   main {
     margin-left: 0;
     overflow: hidden;
