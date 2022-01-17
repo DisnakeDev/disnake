@@ -224,7 +224,7 @@ class InteractionBotBase(CommonBotBase):
 
         Raises
         -------
-        :exc:`.CommandRegistrationError`
+        CommandRegistrationError
             If the slash command is already registered.
         TypeError
             If the slash command passed is not an instance of :class:`.InvokableSlashCommand`.
@@ -251,7 +251,7 @@ class InteractionBotBase(CommonBotBase):
 
         Raises
         -------
-        :exc:`.CommandRegistrationError`
+        CommandRegistrationError
             If the user command is already registered.
         TypeError
             If the user command passed is not an instance of :class:`.InvokableUserCommand`.
@@ -278,7 +278,7 @@ class InteractionBotBase(CommonBotBase):
 
         Raises
         -------
-        :exc:`.CommandRegistrationError`
+        CommandRegistrationError
             If the message command is already registered.
         TypeError
             If the message command passed is not an instance of :class:`.InvokableMessageCommand`.

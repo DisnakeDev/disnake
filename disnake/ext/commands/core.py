@@ -1203,7 +1203,7 @@ class GroupMixin(Generic[CogT]):
         :meth:`~.GroupMixin.group` shortcut decorators are used instead.
 
         .. versionchanged:: 1.4
-             Raise :exc:`.CommandRegistrationError` instead of generic :exc:`.ClientException`
+             Raise :exc:`CommandRegistrationError` instead of generic :exc:`.ClientException`
 
         Parameters
         -----------
@@ -1212,7 +1212,7 @@ class GroupMixin(Generic[CogT]):
 
         Raises
         -------
-        :exc:`.CommandRegistrationError`
+        CommandRegistrationError
             If the command or its alias is already registered by different command.
         TypeError
             If the command passed is not a subclass of :class:`.Command`.

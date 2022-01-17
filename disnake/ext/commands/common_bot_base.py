@@ -297,7 +297,7 @@ class CommonBotBase(Generic[CogT]):
             The cog does not inherit from :class:`.Cog`.
         CommandError
             An error happened during loading.
-        .ClientException
+        ClientException
             A cog with the same name is already loaded.
         """
 
