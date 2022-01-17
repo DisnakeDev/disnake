@@ -665,7 +665,6 @@ main section section {
 
 dt.sig {
   overflow: auto;
-  display: inline-block;
   max-width: 100%;
 }
 
