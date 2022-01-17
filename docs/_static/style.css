@@ -112,6 +112,11 @@ Historically however, thanks to:
   --tooltip-background: #f8f8f8;
 }
 
+
+img[src$="/snake_dark.svg"]  {
+  display: none;
+}
+
 @media screen and (prefers-color-scheme: dark) {
   :root {
     --main-background: var(--grey-7);
@@ -179,9 +184,6 @@ Historically however, thanks to:
   }
 }
 
-img[src$="/snake_dark.svg"]  {
-  display: none;
-}
 
 body {
   font-family: var(--font-family);
