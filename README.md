@@ -1,7 +1,6 @@
 [![Disnake Banner](https://raw.githubusercontent.com/DisnakeDev/disnake/master/assets/banner.png)](https://disnake.dev/)
 
-disnake
-=======
+# disnake Technical Documentation
 
 <p align="center">
     <a href="https://discord.gg/gJDbCw8aQy"><img src="https://img.shields.io/discord/808030843078836254?style=flat-square&color=5865f2&logo=discord&logoColor=ffffff&label=discord" alt="Discord server invite" /></a>
@@ -10,7 +9,12 @@ disnake
     <a href="https://github.com/DisnakeDev/disnake/commits"><img src="https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg?style=flat-square" alt="Commit activity" /></a>
 </p>
 
+**Last updated:** 2022-01-17\
+_Document generation aided by **Documatic**_
+
+<ENTER SHORT PROJECT DESCRIPTION>
 A modern, easy to use, feature-rich, and async ready API wrapper for Discord written in Python.
+
 
 Key Features
 ------------
@@ -50,8 +54,40 @@ This project does **not** quite follow semantic versioning; for more details, se
 
 To be on the safe side and avoid unexpected breaking changes, pin the dependency to a minor version (e.g. `disnake==a.b.*` or `disnake~=a.b.c`) or an exact version (e.g. `disnake==a.b.c`).
 
-Quick Example
--------------
+
+
+
+<!---Documatic-section-helloworld: setup-end--->
+`disnake.test_launcher` has a  `__main__` entrypoint.
+
+`disnake.disnake.__main__` has a `__main__` entrypoint, which calls:
+
+* `disnake.disnake.__main__.main`
+
+
+<!---Documatic-section-helloworld: entrypoints-start--->
+
+
+## Entrypoints
+
+There are 0 source code entrypoints in top-level `__main__`/`__init__` files.
+
+
+<!---Documatic-section-helloworld: entrypoints-end--->
+
+<!---Documatic-section-helloworld: classes-start--->
+The project has classes which are used in multiple functions:
+
+* `..disnake.audit_logs.AuditLogEntry` is a base class. It is used 12 times.
+```python
+class AuditLogEntry(self, *, users: Dict[int, User], data: AuditLogEntryPayload, guild: Guild)
+```
+
+
+<!---Documatic-section-helloworld: classes-end--->
+
+<!---Documatic-section-group: concept-start--->
+## Examples
 
 ### Slash Commands Example
 
@@ -101,8 +137,34 @@ bot.run("BOT_TOKEN")
 ```
 
 You can find more examples in the [examples directory](./examples).
+<!---Documatic-section-group: concept-end--->
 
-<br>
+<!---Documatic-section-group: helloworld-end--->
+
+<!---Documatic-section-group: dev-start--->
+
+
+## Developers
+<!---Documatic-section-dev: setup-start--->
+* This project uses `pre-commit` to enforce code style on commit. Run `pre-commit install` in a terminal to setup
+
+
+
+
+<!---Documatic-section-dev: setup-end--->
+
+<!---Documatic-section-dev: ci-start--->
+The project uses GitHub Actions for CI/CD.
+
+| CI File | Purpose |
+|:----|:----|
+| pre-commit | Executes on push for any branch, pull_request for any branch |
+
+
+<!---Documatic-section-dev: ci-end--->
+
+<!---Documatic-section-group: dev-end--->
+ <br>
 <p align="center">
     <a href="https://docs.disnake.dev/">Documentation</a>
     ⁕
@@ -113,3 +175,4 @@ You can find more examples in the [examples directory](./examples).
     <a href="https://discord.gg/discord-api">Discord API</a>
 </p>
 <br>
+
