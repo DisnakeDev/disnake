@@ -355,6 +355,7 @@ header form.search {
 @media screen and (max-width: 800px) {
   main {
     margin-left: 0;
+    overflow: hidden;
   }
 
   .desktop {
@@ -713,6 +714,12 @@ section h3 {
 
 /* jumplinks and sticky header */
 :target {
+  overflow: initial; /* chrome bug */
+  scroll-margin-top: 60px;
+}
+
+.sig[id] {
+  overflow: initial;
   scroll-margin-top: 60px;
 }
 
