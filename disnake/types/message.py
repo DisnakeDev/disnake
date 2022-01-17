@@ -31,7 +31,7 @@ from .channel import ChannelType
 from .components import Component
 from .embed import Embed
 from .emoji import PartialEmoji
-from .interactions import MessageInteraction
+from .interactions import InteractionMessageReference
 from .member import Member, UserWithMember
 from .snowflake import Snowflake, SnowflakeList
 from .sticker import StickerItem
@@ -107,7 +107,7 @@ class _MessageOptional(TypedDict, total=False):
     flags: int
     sticker_items: List[StickerItem]
     referenced_message: Optional[Message]
-    interaction: MessageInteraction
+    interaction: InteractionMessageReference
     components: List[Component]
 
 

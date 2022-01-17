@@ -74,7 +74,9 @@ if TYPE_CHECKING:
     from .threads import AnyThreadArchiveDuration
     from .types.components import Component as ComponentPayload
     from .types.embed import Embed as EmbedPayload
-    from .types.interactions import MessageInteraction as InteractionReferencePayload
+    from .types.interactions import (
+        InteractionMessageReference as InteractionMessageReferencePayload,
+    )
     from .types.member import Member as MemberPayload, UserWithMember as UserWithMemberPayload
     from .types.message import (
         Attachment as AttachmentPayload,
@@ -650,7 +652,7 @@ class InteractionReference:
 
     __slots__ = ("id", "type", "name", "user", "_state")
 
-    def __init__(self, *, state: ConnectionState, data: InteractionReferencePayload):
+    def __init__(self, *, state: ConnectionState, data: InteractionMessageReferencePayload):
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, int(data["type"]))

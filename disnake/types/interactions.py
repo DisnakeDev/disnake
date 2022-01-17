@@ -239,7 +239,7 @@ class InteractionResponse(_InteractionResponseOptional):
     type: InteractionResponseType
 
 
-class MessageInteraction(TypedDict):
+class InteractionMessageReference(TypedDict):
     id: Snowflake
     type: InteractionType
     name: str
