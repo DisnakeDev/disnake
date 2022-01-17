@@ -304,6 +304,14 @@ aside {
   overscroll-behavior: contain;
 }
 
+.small-toc aside {
+  display: none;
+}
+
+.small-toc main {
+  margin-left: 0;
+}
+
 header .header-breakpoint {
   display: flex;
   justify-content: center;
@@ -473,6 +481,10 @@ header form.search {
     visibility: hidden;
     overflow: auto;
     z-index: 50;
+  }
+
+  .small-toc aside {
+    bottom: auto;
   }
 
   aside.sidebar-toggle {

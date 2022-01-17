@@ -52,7 +52,7 @@
   {%- endif %}
   {%- endblock %}
 </head>
-<body>
+<body{% if not display_toc %} class="small-toc"{% endif %}>
 {%- block header %}{% endblock %}
   <div class="main">
     {#- The main navigation header #}
