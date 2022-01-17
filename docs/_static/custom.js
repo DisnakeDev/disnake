@@ -81,10 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (hamburgerToggle) {
     hamburgerToggle.addEventListener('click', showHideSidebar);
     // close panel when clicking a jump link
-    const jumplinks = document.querySelectorAll("aside a.reference");
-    jumplinks.forEach(element => {
+    const jump_links = document.querySelectorAll("aside a.reference");
+    jump_links.forEach(element => {
       element.addEventListener('click', showHideSidebar);
-    })
+    });
+    const extension_links = document.querySelectorAll("aside a.extension-nav");
+    extension_links.forEach(element => {
+      element.addEventListener('click', showHideSidebar);
+    });
   }
 
   const tables = document.querySelectorAll('.py-attribute-table[data-move-to-id]');
