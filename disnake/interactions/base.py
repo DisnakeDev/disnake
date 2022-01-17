@@ -110,6 +110,10 @@ class Interaction:
         The interaction's ID.
     type: :class:`InteractionType`
         The interaction type.
+    application_id: :class:`int`
+        The application ID that the interaction was for.
+    token: :class:`str`
+        The token to continue the interaction. These are valid for 15 minutes.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
     guild_locale: Optional[:class:`str`]
@@ -118,19 +122,14 @@ class Interaction:
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
-    channel_id: Optional[:class:`int`]
+    channel_id: :class:`int`
         The channel ID the interaction was sent from.
-    application_id: :class:`int`
-        The application ID that the interaction was for.
-    author: Optional[Union[:class:`User`, :class:`Member`]]
+    author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
     locale: :class:`str`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
-    token: :class:`str`
-        The token to continue the interaction. These are valid
-        for 15 minutes.
     """
 
     __slots__: Tuple[str, ...] = (

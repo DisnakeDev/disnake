@@ -102,30 +102,28 @@ class ApplicationCommandInteraction(Interaction):
         The interaction's ID.
     type: :class:`InteractionType`
         The interaction type.
-    guild_id: Optional[:class:`int`]
-        The guild ID the interaction was sent from.
-    channel_id: Optional[:class:`int`]
-        The channel ID the interaction was sent from.
     application_id: :class:`int`
         The application ID that the interaction was for.
+    token: :class:`str`
+        The token to continue the interaction. These are valid for 15 minutes.
+    guild_id: Optional[:class:`int`]
+        The guild ID the interaction was sent from.
+    channel_id: :class:`int`
+        The channel ID the interaction was sent from.
     bot: Optional[:class:`.Bot`]
         The interaction's bot. There is an alias for this named ``client``.
-    author: Optional[Union[:class:`User`, :class:`Member`]]
+    author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
     locale: :class:`str`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
-    guild: Optional[:class:`Guild`]
-        The guild the interaction was sent from.
     guild_locale: Optional[:class:`str`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
-    channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
-        The channel the interaction was sent from.
     me: Union[:class:`.Member`, :class:`.ClientUser`]
         Similar to :attr:`.Guild.me`
     permissions: :class:`Permissions`
@@ -134,9 +132,6 @@ class ApplicationCommandInteraction(Interaction):
         Returns an object responsible for handling responding to the interaction.
     followup: :class:`Webhook`
         Returns the follow up webhook for follow up interactions.
-    token: :class:`str`
-        The token to continue the interaction. These are valid
-        for 15 minutes.
     data: :class:`ApplicationCommandInteractionData`
         The wrapped interaction data.
     """
