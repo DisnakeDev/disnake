@@ -54,6 +54,8 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+let showHideSidebar;
+
 document.addEventListener('DOMContentLoaded', () => {
   mobileSearch = new SearchBar();
 
@@ -64,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
   toTop = document.getElementById('to-top');
   toTop.hidden = !(window.scrollY > 0);
 
-  let showHideSidebar = (e) => {
+  showHideSidebar = (e) => {
     sidebar.element.parentElement.classList.toggle('sidebar-toggle');
     let button = hamburgerToggle.firstElementChild;
     button.parentElement.classList.toggle("opened");
