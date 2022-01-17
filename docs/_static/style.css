@@ -328,6 +328,10 @@ header form.search {
   padding-right: 6px;
 }
 
+.main-heading {
+  line-height: 0; /* avoid layout issue */
+}
+
 .main-heading img.small {
   display: none;
 }
@@ -387,7 +391,6 @@ header form.search {
 
   .main-heading {
     display: block;
-    line-height: 0; /* avoid layout issue */
     flex-basis: 100%;
     text-align: center;
     width: 100%;
