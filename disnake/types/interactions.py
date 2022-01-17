@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, TypedDict,
 from .channel import ChannelType
 from .components import Component, ComponentType
 from .embed import Embed
-from .member import Member
+from .member import Member, MemberWithUser
 from .role import Role
 from .snowflake import Snowflake
 from .user import User
@@ -172,12 +172,12 @@ class _ApplicationCommandInteractionDataOptional(TypedDict, total=False):
     options: List[ApplicationCommandInteractionDataOption]
     resolved: ApplicationCommandInteractionDataResolved
     target_id: Snowflake
-    type: ApplicationCommandType
 
 
 class ApplicationCommandInteractionData(_ApplicationCommandInteractionDataOptional):
     id: Snowflake
     name: str
+    type: ApplicationCommandType
 
 
 class _ComponentInteractionDataOptional(TypedDict, total=False):
@@ -192,23 +192,37 @@ class ComponentInteractionData(_ComponentInteractionDataOptional):
 InteractionData = Union[ApplicationCommandInteractionData, ComponentInteractionData]
 
 
-class _InteractionOptional(TypedDict, total=False):
-    data: InteractionData
-    guild_id: Snowflake
-    channel_id: Snowflake
-    member: Member
-    user: User
-    message: Message
-    guild_locale: str
-
-
-class Interaction(_InteractionOptional):
+class BaseInteraction(TypedDict):
     id: Snowflake
     application_id: Snowflake
     type: InteractionType
     token: str
     version: int
+
+
+# common properties in appcmd and component interactions (or generally, non-ping interactions)
+class _InteractionOptional(TypedDict, total=False):
+    guild_id: Snowflake
+    # one of these two will always exist, according to docs
+    user: User
+    member: MemberWithUser
+    guild_locale: str
+
+
+class Interaction(BaseInteraction, _InteractionOptional):
+    # the docs specify `channel_id` as optional,
+    # but it is assumed to always exist on appcmd and component interactions
+    channel_id: Snowflake
     locale: str
+
+
+class ApplicationCommandInteraction(Interaction):
+    data: ApplicationCommandInteractionData
+
+
+class MessageInteraction(Interaction):
+    data: ComponentInteractionData
+    message: Message
 
 
 class InteractionApplicationCommandCallbackData(TypedDict, total=False):
