@@ -463,7 +463,7 @@ header form.search {
   }
 
   #hamburger-toggle.opened {
-    left: calc(100vw - 36px);
+    left: calc(100vw - 44px);
     color: white;
   }
 
