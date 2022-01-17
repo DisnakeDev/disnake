@@ -645,7 +645,7 @@ aside::-webkit-scrollbar-thumb:hover {
   background-color: var(--sub-header-background);
   border: none;
   color: var(--search-text);
-  padding: 0.25em;
+  padding: 0.25em 0.5em;
   flex: 9;
 }
 
