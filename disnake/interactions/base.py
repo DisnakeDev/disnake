@@ -165,9 +165,7 @@ class Interaction:
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
         self.client: Client = state._get_client()
         self._original_message: Optional[InteractionMessage] = None
-        self._from_data(data)
 
-    def _from_data(self, data: InteractionPayload):
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, data["type"])
         self.token: str = data["token"]
