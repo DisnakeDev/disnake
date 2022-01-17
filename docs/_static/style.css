@@ -217,6 +217,7 @@ header{
   width: 100%;
   z-index: 40;
   padding: 0;
+  box-shadow: rgba(0, 0, 0, 0.5) 0 3px 6px;
 }
 
 header > nav {
