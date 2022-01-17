@@ -258,6 +258,7 @@ header > nav.mobile-only .search-wrapper {
 }
 
 .main-heading img {
+  padding-left: 6px;
   max-width: 100%;
   max-height: 24px;
 }
