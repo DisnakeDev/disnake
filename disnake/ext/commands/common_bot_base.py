@@ -636,7 +636,7 @@ class CommonBotBase(Generic[CogT]):
             extensions = set()
             for name, module in self.extensions.items():
                 file = module.__file__
-                if os.stat(file).st_mtime > last:
+                if file and os.stat(file).st_mtime > last:
                     extensions.add(name)
 
             for name in extensions:

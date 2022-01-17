@@ -267,9 +267,9 @@ class VoiceClient(VoiceProtocol):
     )
 
     @property
-    def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild we're connected to, if applicable."""
-        return getattr(self.channel, "guild", None)
+    def guild(self) -> Guild:
+        """:class:`Guild`: The guild we're connected to, if applicable."""
+        return self.channel.guild
 
     @property
     def user(self) -> ClientUser:

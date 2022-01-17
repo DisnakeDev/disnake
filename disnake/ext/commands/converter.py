@@ -1096,7 +1096,7 @@ def is_generic_type(tp: Any, *, _GenericAlias: Type = _GenericAlias) -> bool:
     return isinstance(tp, type) and issubclass(tp, Generic) or isinstance(tp, _GenericAlias)  # type: ignore
 
 
-CONVERTER_MAPPING: Dict[Type[Any], Any] = {
+CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
     disnake.Object: ObjectConverter,
     disnake.Member: MemberConverter,
     disnake.User: UserConverter,
@@ -1121,22 +1121,22 @@ CONVERTER_MAPPING: Dict[Type[Any], Any] = {
 }
 
 
-async def _actual_conversion(ctx: Context, converter, argument: str, param: inspect.Parameter):
+async def _actual_conversion(
+    ctx: Context,
+    converter: Union[Type[T], Converter[T], Callable[[str], T]],
+    argument: str,
+    param: inspect.Parameter,
+) -> T:
     if converter is bool:
-        return _convert_to_bool(argument)
+        return _convert_to_bool(argument)  # type: ignore
 
-    try:
+    if isinstance(converter, type):
         module = converter.__module__
-    except AttributeError:
-        pass
-    else:
-        if module is not None and (
-            module.startswith("disnake.") and not module.endswith("converter")
-        ):
+        if module.startswith("disnake.") and not module.endswith("converter"):
             converter = CONVERTER_MAPPING.get(converter, converter)
 
     try:
-        if inspect.isclass(converter) and issubclass(converter, Converter):
+        if isinstance(converter, type) and issubclass(converter, Converter):
             if inspect.ismethod(converter.convert):
                 return await converter.convert(ctx, argument)
             else:
@@ -1156,7 +1156,7 @@ async def _actual_conversion(ctx: Context, converter, argument: str, param: insp
         try:
             name = converter.__name__
         except AttributeError:
-            name = converter.__class__.__name__
+            name = converter.__class__.__name__  # type: ignore
 
         raise BadArgument(f'Converting to "{name}" failed for parameter "{param.name}".') from exc
 
