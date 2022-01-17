@@ -11,7 +11,7 @@ filter_files = true
 
 [tool.taskipy.tasks]
 black = { cmd = "task lint black", help = "Run black" }
-docs = { cmd = "cd docs && sphinx-autobuild . _build/html --ignore _build --watch ../disnake --port 8009", help = "Build the documentation on an autoreloading server."}
+docs = { cmd = "cd docs && sphinx-autobuild -b dirhtml . _build/html --ignore _build --watch ../disnake --port 8009", help = "Build the documentation on an autoreloading server."}
 isort = { cmd = "task lint isort", help = "Run isort" }
 lint = { cmd = "pre-commit run --all-files", help = "Checks all files for linting errors" }
 precommit = { cmd = "pre-commit install --install-hooks", help = "Installs the precommit hook" }
