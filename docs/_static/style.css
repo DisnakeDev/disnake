@@ -1272,8 +1272,21 @@ section#welcome-to-disnake-py > h1 {
 
 .active {
   background-color: var(--active-toc);
-  border-left: 5px solid var(--active-toc);
+  position: relative;
   font-weight: bold;
+}
+
+.active::before {
+  content:"";
+  display:inline-block;
+  background-color:var(--active-toc);
+  position:absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  width:calc(100% + 0.5em);
+  border-radius:4px;
+  z-index:-1
 }
 
 /* Only mark the label if it's a tree */
