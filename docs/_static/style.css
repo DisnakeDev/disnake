@@ -443,6 +443,9 @@ header form.search {
     color: white;
     transition: left 0.3s, right 0.3s, color 0.3s;
     cursor: pointer;
+    background-color: var(--sub-header-background);
+    border-radius: 50%;
+    line-height: 0;
   }
 
   /* a nice clickbox for the X */
