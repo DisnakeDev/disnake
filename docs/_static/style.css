@@ -303,14 +303,6 @@ aside {
   overscroll-behavior: contain;
 }
 
-.small-toc aside {
-  display: none;
-}
-
-.small-toc main {
-  margin-left: 0;
-}
-
 header .header-breakpoint {
   display: flex;
   justify-content: center;
