@@ -63,7 +63,7 @@ from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import _integration_factory
-from .interactions import ApplicationCommandInteraction, Interaction, MessageInteraction
+from .interactions import ApplicationCommandInteraction, MessageInteraction
 from .invite import Invite
 from .member import Member
 from .mentions import AllowedMentions
@@ -885,7 +885,8 @@ class ConnectionState:
 
     def parse_interaction_create(self, data) -> None:
         if data["type"] == 1:
-            interaction = Interaction(data=data, state=self)
+            # PING interaction should never be received
+            return
         elif data["type"] == 2:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch("application_command", interaction)
