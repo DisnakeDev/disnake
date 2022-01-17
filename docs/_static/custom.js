@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     jump_links.forEach(element => {
       element.addEventListener('click', showHideSidebar);
     });
-    const extension_links = document.querySelectorAll("aside a.extension-nav");
+    const extension_links = document.querySelectorAll("aside a.extension-nav[href='#']");
     extension_links.forEach(element => {
       element.addEventListener('click', showHideSidebar);
     });
