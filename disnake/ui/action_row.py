@@ -79,7 +79,7 @@ class ActionRow:
 
     @property
     def children(self) -> List[Component]:
-        """List[:class:`Component`]: The components of this row."""
+        """List[:class:`.Component`]: The components of this row."""
         return self._underlying.children
 
     @children.setter

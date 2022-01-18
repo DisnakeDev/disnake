@@ -977,7 +977,7 @@ class InteractionBotBase(CommonBotBase):
         func
             The function that will be used as a global check.
         call_once: :class:`bool`
-            Whether the function should only be called once per :meth:`invoke` call.
+            Whether the function should only be called once per :meth:`.InvokableApplicationCommand.invoke` call.
         slash_commands: :class:`bool`
             Whether this check is for slash commands.
         user_commands: :class:`bool`
@@ -1110,7 +1110,7 @@ class InteractionBotBase(CommonBotBase):
             This function can either be a regular function or a coroutine.
 
         Similar to a command :func:`check`\, this takes a single parameter
-        of type :class:`ApplicationCommandInteraction` and can only raise exceptions inherited from
+        of type :class:`.ApplicationCommandInteraction` and can only raise exceptions inherited from
         :exc:`CommandError`.
 
         Example
@@ -1125,7 +1125,7 @@ class InteractionBotBase(CommonBotBase):
         Parameters
         ----------
         call_once: :class:`bool`
-            Whether the function should only be called once per :meth:`.invoke` call.
+            Whether the function should only be called once per :meth:`.InvokableApplicationCommand.invoke` call.
         slash_commands: :class:`bool`
             Whether this check is for slash commands.
         user_commands: :class:`bool`
@@ -1235,8 +1235,8 @@ class InteractionBotBase(CommonBotBase):
         This function processes the application command autocompletions.
         Without this coroutine, none of the autocompletions will be performed.
 
-        By default, this coroutine is called inside the :func:`.on_application_command_autocompletion`
-        event. If you choose to override the :func:`.on_application_command_autocompletion` event, then
+        By default, this coroutine is called inside the :func:`.on_application_command_autocomplete`
+        event. If you choose to override the :func:`.on_application_command_autocomplete` event, then
         you should invoke this coroutine as well.
 
         Parameters

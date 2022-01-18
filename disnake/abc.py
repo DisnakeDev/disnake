@@ -228,10 +228,10 @@ class GuildChannel(ABC):
 
     The following implement this ABC:
 
-    - :class:`TextChannel`
-    - :class:`VoiceChannel`
-    - :class:`CategoryChannel`
-    - :class:`StageChannel`
+    - :class:`.TextChannel`
+    - :class:`.VoiceChannel`
+    - :class:`.CategoryChannel`
+    - :class:`.StageChannel`
 
     This ABC must also implement :class:`.abc.Snowflake`.
 
@@ -239,7 +239,7 @@ class GuildChannel(ABC):
     -----------
     name: :class:`str`
         The channel name.
-    guild: :class:`Guild`
+    guild: :class:`.Guild`
         The guild the channel belongs to.
     position: :class:`int`
         The position in the channel list. This is a number that starts at 0.
@@ -428,8 +428,8 @@ class GuildChannel(ABC):
 
     @property
     def changed_roles(self) -> List[Role]:
-        """List[:class:`Role`]: Returns a list of roles that have been overridden from
-        their default values in the :attr:`Guild.roles` attribute."""
+        """List[:class:`.Role`]: Returns a list of roles that have been overridden from
+        their default values in the :attr:`.Guild.roles` attribute."""
         ret = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):
@@ -457,7 +457,7 @@ class GuildChannel(ABC):
 
         Parameters
         -----------
-        obj: Union[:class:`Role`, :class:`abc.User`]
+        obj: Union[:class:`.Role`, :class:`.abc.User`]
             The role or user denoting
             whose overwrite to get.
 
@@ -678,12 +678,12 @@ class GuildChannel(ABC):
 
         Deletes the channel.
 
-        You must have :attr:`~Permissions.manage_channels` permission to do this.
+        You must have :attr:`.Permissions.manage_channels` permission to do this.
 
         Parameters
         -----------
         reason: Optional[:class:`str`]
-            The reason for deleting this channel.Shows up on the audit log.
+            The reason for deleting this channel. Shows up on the audit log.
 
         Raises
         -------
@@ -722,19 +722,19 @@ class GuildChannel(ABC):
          Sets the channel specific permission overwrites for a target in the
          channel.
 
-         The ``target`` parameter should either be a :class:`Member` or a
-         :class:`Role` that belongs to guild.
+         The ``target`` parameter should either be a :class:`.Member` or a
+         :class:`.Role` that belongs to guild.
 
          The ``overwrite`` parameter, if given, must either be ``None`` or
-         :class:`PermissionOverwrite`. For convenience, you can pass in
-         keyword arguments denoting :class:`Permissions` attributes. If this is
+         :class:`.PermissionOverwrite`. For convenience, you can pass in
+         keyword arguments denoting :class:`.Permissions` attributes. If this is
          done, then you cannot mix the keyword arguments with the ``overwrite``
          parameter.
 
          If the ``overwrite`` parameter is ``None``, then the permission
          overwrites are deleted.
 
-         You must have :attr:`Permissions.manage_roles` permission to do this.
+         You must have :attr:`.Permissions.manage_roles` permission to do this.
 
          .. note::
 
@@ -752,7 +752,7 @@ class GuildChannel(ABC):
 
              await channel.set_permissions(member, overwrite=None)
 
-         Using :class:`PermissionOverwrite` ::
+         Using :class:`.PermissionOverwrite` ::
 
              overwrite = disnake.PermissionOverwrite()
              overwrite.send_messages = False
@@ -761,9 +761,9 @@ class GuildChannel(ABC):
 
          Parameters
          -----------
-         target: Union[:class:`Member`, :class:`.Role`]
+         target: Union[:class:`.Member`, :class:`.Role`]
              The member or role to overwrite permissions for.
-         overwrite: Optional[:class:`~PermissionOverwrite`]
+         overwrite: Optional[:class:`.PermissionOverwrite`]
              The permissions to allow and deny to the target, or ``None`` to
              delete the overwrite.
          \*\*permissions
@@ -776,13 +776,13 @@ class GuildChannel(ABC):
          -------
          Forbidden
              You do not have permissions to edit channel specific permissions.
-        HTTPException
+         HTTPException
              Editing channel specific permissions failed.
          NotFound
              The role or member being edited is not part of the guild.
          InvalidArgument
              The overwrite parameter invalid or the target type was not
-             :class:`Role` or :class:`Member`.
+             :class:`.Role` or :class:`.Member`.
         """
         http = self._state.http
 
@@ -843,7 +843,7 @@ class GuildChannel(ABC):
         Clones this channel. This creates a channel with the same properties
         as this channel.
 
-        You must have :attr:`~Permissions.manage_channels` permission to
+        You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
         .. versionadded:: 1.1
@@ -924,7 +924,7 @@ class GuildChannel(ABC):
 
         If exact position movement is required, ``edit`` should be used instead.
 
-        You must have :attr:`~Permissions.manage_channels` permission to
+        You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
         .. note::
@@ -1056,7 +1056,7 @@ class GuildChannel(ABC):
 
         Creates an instant invite from a text or voice channel.
 
-        You must have :attr:`~Permissions.create_instant_invite` permission to
+        You must have :attr:`.Permissions.create_instant_invite` permission to
         do this.
 
         Parameters
@@ -1107,7 +1107,7 @@ class GuildChannel(ABC):
 
         Returns
         --------
-        :class:`Invite`
+        :class:`.Invite`
             The newly created invite.
         """
         data = await self._state.http.create_invite(
@@ -1130,7 +1130,7 @@ class GuildChannel(ABC):
 
         Returns a list of all active instant invites from this channel.
 
-        You must have :attr:`~Permissions.manage_channels` permission to use this.
+        You must have :attr:`.Permissions.manage_channels` permission to use this.
 
         Raises
         -------
@@ -1141,7 +1141,7 @@ class GuildChannel(ABC):
 
         Returns
         -------
-        List[:class:`Invite`]
+        List[:class:`.Invite`]
             The list of invites that are currently active.
         """
         state = self._state
@@ -1274,12 +1274,12 @@ class Messageable:
         be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
-        single :class:`File` object. To upload multiple files, the ``files``
+        single :class:`.File` object. To upload multiple files, the ``files``
         parameter should be used with a :class:`list` of :class:`.File` objects.
         **Specifying both parameters will lead to an exception**.
 
         To upload a single embed, the ``embed`` parameter should be used with a
-        single :class:`Embed` object. To upload multiple embeds, the ``embeds``
+        single :class:`.Embed` object. To upload multiple embeds, the ``embeds``
         parameter should be used with a :class:`list` of :class:`.Embed` objects.
         **Specifying both parameters will lead to an exception**.
 
@@ -1326,8 +1326,8 @@ class Messageable:
             .. versionadded:: 1.4
 
         reference: Union[:class:`.Message`, :class:`.MessageReference`, :class:`.PartialMessage`]
-            A reference to the :class:`Message` to which you are replying, this can be created using
-            :meth:`.Message.to_reference` or passed directly as a :class:`Message`. You can control
+            A reference to the :class:`.Message` to which you are replying, this can be created using
+            :meth:`.Message.to_reference` or passed directly as a :class:`.Message`. You can control
             whether this mentions the author of the referenced message using the :attr:`.AllowedMentions.replied_user`
             attribute of ``allowed_mentions`` or by setting ``mention_author``.
 

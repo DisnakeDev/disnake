@@ -151,7 +151,7 @@ class IDConverter(Converter[T_co]):
 
 
 class ObjectConverter(IDConverter[disnake.Object]):
-    """Converts to a :class:`Object`.
+    """Converts to a :class:`~disnake.Object`.
 
     The argument must follow the valid ID or mention formats (e.g. `<@80088516616269824>`).
 
@@ -177,7 +177,7 @@ class ObjectConverter(IDConverter[disnake.Object]):
 
 
 class MemberConverter(IDConverter[disnake.Member]):
-    """Converts to a :class:`Member`.
+    """Converts to a :class:`~disnake.Member`.
 
     All lookups are via the local guild. If in a DM context, then the lookup
     is done by the global cache.
@@ -267,7 +267,7 @@ class MemberConverter(IDConverter[disnake.Member]):
 
 
 class UserConverter(IDConverter[disnake.User]):
-    """Converts to a :class:`User`.
+    """Converts to a :class:`~disnake.User`.
 
     All lookups are via the global user cache.
 
@@ -330,7 +330,7 @@ class UserConverter(IDConverter[disnake.User]):
 
 
 class PartialMessageConverter(Converter[disnake.PartialMessage]):
-    """Converts to a :class:`PartialMessage`.
+    """Converts to a :class:`~disnake.PartialMessage`.
 
     .. versionadded:: 1.7
 
@@ -384,7 +384,7 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
 
 
 class MessageConverter(IDConverter[disnake.Message]):
-    """Converts to a :class:`Message`.
+    """Converts to a :class:`~disnake.Message`.
 
     .. versionadded:: 1.1
 
@@ -488,7 +488,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
 
 
 class TextChannelConverter(IDConverter[disnake.TextChannel]):
-    """Converts to a :class:`TextChannel`.
+    """Converts to a :class:`~disnake.TextChannel`.
 
     All lookups are via the local guild. If in a DM context, then the lookup
     is done by the global cache.
@@ -510,7 +510,7 @@ class TextChannelConverter(IDConverter[disnake.TextChannel]):
 
 
 class VoiceChannelConverter(IDConverter[disnake.VoiceChannel]):
-    """Converts to a :class:`VoiceChannel`.
+    """Converts to a :class:`~disnake.VoiceChannel`.
 
     All lookups are via the local guild. If in a DM context, then the lookup
     is done by the global cache.
@@ -532,7 +532,7 @@ class VoiceChannelConverter(IDConverter[disnake.VoiceChannel]):
 
 
 class StageChannelConverter(IDConverter[disnake.StageChannel]):
-    """Converts to a :class:`StageChannel`.
+    """Converts to a :class:`~disnake.StageChannel`.
 
     .. versionadded:: 1.7
 
@@ -553,7 +553,7 @@ class StageChannelConverter(IDConverter[disnake.StageChannel]):
 
 
 class CategoryChannelConverter(IDConverter[disnake.CategoryChannel]):
-    """Converts to a :class:`CategoryChannel`.
+    """Converts to a :class:`~disnake.CategoryChannel`.
 
     All lookups are via the local guild. If in a DM context, then the lookup
     is done by the global cache.
@@ -575,7 +575,7 @@ class CategoryChannelConverter(IDConverter[disnake.CategoryChannel]):
 
 
 class StoreChannelConverter(IDConverter[disnake.StoreChannel]):
-    """Converts to a :class:`StoreChannel`.
+    """Converts to a :class:`~disnake.StoreChannel`.
 
     All lookups are via the local guild. If in a DM context, then the lookup
     is done by the global cache.
@@ -596,7 +596,7 @@ class StoreChannelConverter(IDConverter[disnake.StoreChannel]):
 
 
 class ThreadConverter(IDConverter[disnake.Thread]):
-    """Coverts to a :class:`Thread`.
+    """Coverts to a :class:`~disnake.Thread`.
 
     All lookups are via the local guild.
 
@@ -614,7 +614,7 @@ class ThreadConverter(IDConverter[disnake.Thread]):
 
 
 class ColourConverter(Converter[disnake.Colour]):
-    """Converts to a :class:`Colour`.
+    """Converts to a :class:`~disnake.Colour`.
 
     .. versionchanged:: 1.5
         Add an alias named ColorConverter
@@ -625,7 +625,7 @@ class ColourConverter(Converter[disnake.Colour]):
     - ``#<hex>``
     - ``0x#<hex>``
     - ``rgb(<number>, <number>, <number>)``
-    - Any of the ``classmethod`` in :class:`Colour`
+    - Any of the ``classmethod`` in :class:`~disnake.Colour`
 
         - The ``_`` in the name can be optionally replaced with spaces.
 
@@ -702,7 +702,7 @@ ColorConverter = ColourConverter
 
 
 class RoleConverter(IDConverter[disnake.Role]):
-    """Converts to a :class:`Role`.
+    """Converts to a :class:`~disnake.Role`.
 
     All lookups are via the local guild. If in a DM context, the converter raises
     :exc:`.NoPrivateMessage` exception.
@@ -734,14 +734,14 @@ class RoleConverter(IDConverter[disnake.Role]):
 
 
 class GameConverter(Converter[disnake.Game]):
-    """Converts to :class:`Game`."""
+    """Converts to :class:`~disnake.Game`."""
 
     async def convert(self, ctx: Context, argument: str) -> disnake.Game:
         return disnake.Game(name=argument)
 
 
 class InviteConverter(Converter[disnake.Invite]):
-    """Converts to a :class:`Invite`.
+    """Converts to a :class:`~disnake.Invite`.
 
     This is done via an HTTP request using :meth:`.Bot.fetch_invite`.
 
@@ -758,7 +758,7 @@ class InviteConverter(Converter[disnake.Invite]):
 
 
 class GuildConverter(IDConverter[disnake.Guild]):
-    """Converts to a :class:`Guild`.
+    """Converts to a :class:`~disnake.Guild`.
 
     The lookup strategy is as follows (in order):
 
@@ -785,7 +785,7 @@ class GuildConverter(IDConverter[disnake.Guild]):
 
 
 class EmojiConverter(IDConverter[disnake.Emoji]):
-    """Converts to a :class:`Emoji`.
+    """Converts to a :class:`~disnake.Emoji`.
 
     All lookups are done for the local guild first, if available. If that lookup
     fails, then it checks the client's global cache.
@@ -828,7 +828,7 @@ class EmojiConverter(IDConverter[disnake.Emoji]):
 
 
 class PartialEmojiConverter(Converter[disnake.PartialEmoji]):
-    """Converts to a :class:`PartialEmoji`.
+    """Converts to a :class:`~disnake.PartialEmoji`.
 
     This is done by extracting the animated flag, name and ID from the emoji.
 
@@ -852,7 +852,7 @@ class PartialEmojiConverter(Converter[disnake.PartialEmoji]):
 
 
 class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
-    """Converts to a :class:`GuildSticker`.
+    """Converts to a :class:`~disnake.GuildSticker`.
 
     All lookups are done for the local guild first, if available. If that lookup
     fails, then it checks the client's global cache.
@@ -891,7 +891,7 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
 
 
 class PermissionsConverter(Converter[disnake.Permissions]):
-    """Converts to a :class:`Permissions`.
+    """Converts to a :class:`~disnake.Permissions`.
 
     Accepts an integer or a string of space-separated permission names (or just a single one) as input.
 
@@ -939,7 +939,7 @@ class clean_content(Converter[str]):
     """Converts the argument to mention scrubbed version of
     said content.
 
-    This behaves similarly to :attr:`Message.clean_content`.
+    This behaves similarly to :attr:`~disnake.Message.clean_content`.
 
     Attributes
     ------------

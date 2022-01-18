@@ -143,7 +143,7 @@ class CommonBotBase(Generic[CogT]):
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
         """|coro|
 
-        Checks if a :class:`User` or :class:`Member` is the owner of
+        Checks if a :class:`~disnake.User` or :class:`~disnake.Member` is the owner of
         this bot.
 
         If an :attr:`owner_id` is not set, it is fetched automatically

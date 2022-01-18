@@ -524,7 +524,7 @@ class Loop(Generic[LF]):
     def error(self, coro: ET) -> ET:
         """A decorator that registers a coroutine to be called if the task encounters an unhandled exception.
 
-        The coroutine must take only one argument the exception raised (and ``self`` in a class context).
+        The coroutine must take only one argument the exception raised (except ``self`` in a class context).
 
         By default this prints to :data:`sys.stderr` however it could be
         overridden to have a different implementation.

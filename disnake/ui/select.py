@@ -187,7 +187,7 @@ class Select(Item[V]):
     ):
         """Adds an option to the select menu.
 
-        To append a pre-existing :class:`SelectOption` use the
+        To append a pre-existing :class:`.SelectOption` use the
         :meth:`append_option` method instead.
 
         Parameters
@@ -281,8 +281,8 @@ class Select(Item[V]):
 
     @property
     def type(self) -> ComponentType:
-        """:class:`ComponentType`: The type of the select menu. This will always return
-        :attr:`ComponentType.select`."""
+        """:class:`.ComponentType`: The type of the select menu. This will always return
+        :attr:`.ComponentType.select`."""
         return self._underlying.type
 
     def is_dispatchable(self) -> bool:

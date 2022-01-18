@@ -694,7 +694,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_application_command(interaction)
 
-    Called when an application_command is invoked.
+    Called when an application command is invoked.
 
     .. warning::
 

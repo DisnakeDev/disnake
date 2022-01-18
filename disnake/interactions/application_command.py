@@ -302,7 +302,7 @@ class ApplicationCommandInteractionDataOption:
         The list of options of this option. Only exists for subcommands and groups.
     focused: :class:`bool`
         Whether this option is focused by the user. May be ``True`` in
-        case of :class:`ApplicationCommandAutocompleteInteraction`.
+        autocomplete interactions.
     """
 
     __slots__ = ("name", "type", "value", "options", "focused")
@@ -362,7 +362,7 @@ class ApplicationCommandInteractionDataResolved:
         A mapping of IDs to users.
     roles: Dict[:class:`int`, :class:`Role`]
         A mapping of IDs to roles.
-    channels: Dict[:class:`int`, :class:`Channel`]
+    channels: Dict[:class:`int`, Channel]
         A mapping of IDs to partial channels (only ``id``, ``name`` and ``permissions`` are included,
         threads also have ``thread_metadata`` and ``parent_id``).
     messages: Dict[:class:`int`, :class:`Message`]

@@ -1817,7 +1817,7 @@ class Client:
 
         Returns
         --------
-        :class:`User`
+        :class:`~disnake.User`
             The user you requested.
         """
         data = await self.http.get_user(user_id)

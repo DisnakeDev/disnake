@@ -1039,6 +1039,7 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
     max_size: :class:`int`
         The maximum chunk size.
 
+
     .. warning::
 
         The last chunk collected may not be as large as ``max_size``.

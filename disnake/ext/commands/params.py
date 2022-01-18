@@ -284,11 +284,11 @@ class ParamInfo:
         The greatest allowed value for this option.
     type: Any
         The type of the parameter.
-    channel_types: List[:class:`ChannelType`]
+    channel_types: List[:class:`.ChannelType`]
         The list of channel types supported by this slash command option.
-    autocomplete: Callable[[:class:`ApplicationCommandInteraction`, :class:`str`], Any]
+    autocomplete: Callable[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
         The function that will suggest possible autocomplete options while typing.
-    converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
+    converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         The function that will convert the original input to a desired format.
     """
 
@@ -831,7 +831,7 @@ def Param(
         Kwarg aliases: ``desc``.
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.
-    converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
+    converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.
         Kwarg aliases: ``conv``.
     convert_defaults: :class:`bool`
@@ -839,10 +839,10 @@ def Param(
         Defaults to ``False``.
 
         .. versionadded: 2.3
-    autocomplete: Callable[[:class:`ApplicationCommandInteraction`, :class:`str`], Any]
+    autocomplete: Callable[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
         A function that will suggest possible autocomplete options while typing.
         See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
-    channel_types: Iterable[:class:`ChannelType`]
+    channel_types: Iterable[:class:`.ChannelType`]
         A list of channel types that should be allowed.
         By default these are discerned from the annotation.
     lt: :class:`float`

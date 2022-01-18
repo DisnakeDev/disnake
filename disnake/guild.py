@@ -435,37 +435,49 @@ class Guild(Hashable):
         return role
 
     def get_command(self, application_command_id: int, /) -> Optional[ApplicationCommand]:
-        """
-        Gets a cached application command matching the specified ID.
+        """Gets a cached application command matching the specified ID.
 
         Parameters
         ----------
         name: :class:`int`
             The application command ID to search for.
+
+        Returns
+        -------
+        Optional[:class:`ApplicationCommand`]
+            The application command if found, or ``None`` otherwise.
         """
         self._state._get_guild_application_command(self.id, application_command_id)
 
     def get_command_named(self, name: str, /) -> Optional[ApplicationCommand]:
-        """
-        Gets a cached application command matching the specified name.
+        """Gets a cached application command matching the specified name.
 
         Parameters
         ----------
         name: :class:`str`
             The appllication command name to search for.
+
+        Returns
+        -------
+        Optional[:class:`ApplicationCommand`]
+            The application command if found, or ``None`` otherwise.
         """
         return self._state._get_guild_command_named(self.id, name)
 
     def get_command_permissions(
         self, command_id: int, /
     ) -> Optional[GuildApplicationCommandPermissions]:
-        """
-        Gets a cached application command permissions matching the specified ID.
+        """Gets a cached application command permissions matching the specified ID.
 
         Parameters
         ----------
         command_id: :class:`int`
             The application command ID to search for.
+
+        Returns
+        -------
+        Optional[:class:`GuildApplicationCommandPermissions`]
+            The application command permissions if found, or ``None`` otherwise.
         """
         return self._state._get_command_permissions(self.id, command_id)
 

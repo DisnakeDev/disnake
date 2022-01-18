@@ -642,9 +642,9 @@ class Thread(Messageable, Hashable):
 
         Adds a user to this thread.
 
-        You must have :attr:`~Permissions.send_messages` and :attr:`~Permissions.use_threads`
-        to add a user to a public thread. If the thread is private then :attr:`~Permissions.send_messages`
-        and either :attr:`~Permissions.use_private_threads` or :attr:`~Permissions.manage_messages`
+        You must have :attr:`~.Permissions.send_messages` permission to add a user to a public thread.
+        If the thread is private then :attr:`~.Permissions.send_messages` and either :attr:`~.Permissions.create_private_threads`
+        or :attr:`~.Permissions.manage_messages` permissions
         is required to add a user to the thread.
 
         Parameters

@@ -319,7 +319,7 @@ class View:
 
         Parameters
         -----------
-        interaction: :class:`MessageInteraction`
+        interaction: :class:`.MessageInteraction`
             The interaction that occurred.
 
         Returns
@@ -350,7 +350,7 @@ class View:
             The exception that was raised.
         item: :class:`Item`
             The item that failed the dispatch.
-        interaction: :class:`MessageInteraction`
+        interaction: :class:`.MessageInteraction`
             The interaction that led to the failure.
         """
         print(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)

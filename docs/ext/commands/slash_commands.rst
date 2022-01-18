@@ -143,7 +143,7 @@ All the other types may be converted implicitly, similarly to :ref:`ext_commands
 .. note::
   \* All channel subclasses and unions are also supported, see :attr:`Option.channel_types <Option>`
 
-  \*\* Role and Member may be used together to create a "mentionable" (Union[:class:`disnake.Role`, :class:`disnake.Member`])
+  \*\* Role and Member may be used together to create a "mentionable" (``Union[Role, Member]``)
 
 
 Docstrings
