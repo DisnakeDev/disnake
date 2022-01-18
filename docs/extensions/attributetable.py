@@ -48,15 +48,16 @@ def visit_attributetabletitle_node(self, node):
 
 
 def visit_attributetablebadge_node(self, node):
+    """Add a class to each badge of the type that it is."""
+    assert node["badge-type"] in ("coroutine", "decorator", "method", "classmethod")
     attributes = {
-        "class": "py-attribute-table-badge",
-        "title": node["badge-type"],
+        "class": f"badge-{node['badge-type']}",
     }
     self.body.append(self.starttag(node, "span", **attributes))
 
 
 def visit_attributetable_item_node(self, node):
-    self.body.append(self.starttag(node, "li", CLASS="py-attribute-table-entry"))
+    self.body.append(self.starttag(node, "li"))
 
 
 def depart_attributetable_node(self, node):
@@ -254,6 +255,7 @@ def get_class_results(lookup, modulename, name, fullname):
 def class_results_to_node(key, elements):
     title = attributetabletitle(key, key)
     ul = nodes.bullet_list("")
+    ul.set_class("py-attribute-table-list")
     for element in elements:
         ref = nodes.reference(
             "",

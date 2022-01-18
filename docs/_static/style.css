@@ -102,11 +102,11 @@ Historically however, thanks to:
   --rtd-version-background: #272525;
   --rtd-version-main-text: #fcfcfc;
   --attribute-table-title: var(--grey-6);
-  --attribute-table-entry-border: var(--grey-3);
-  --attribute-table-entry-text: var(--grey-5);
-  --attribute-table-entry-hover-border: var(--blue-2);
-  --attribute-table-entry-hover-background: var(--grey-2);
-  --attribute-table-entry-hover-text: var(--blue-2);
+  --attribute-table-list-border: var(--grey-3);
+  --attribute-table-list-text: var(--grey-5);
+  --attribute-table-list-hover-border: var(--blue-2);
+  --attribute-table-list-hover-background: var(--grey-2);
+  --attribute-table-list-hover-text: var(--blue-2);
   --attribute-table-badge: var(--grey-7);
   --highlighted-text: rgb(252, 233, 103);
   --tooltip-background: #f8f8f8;
@@ -165,11 +165,11 @@ img[src$="/snake_dark.svg"]  {
     --rtd-ad-main-text: var(--grey-2);
     --rtd-ad-small-text: var(--grey-1);
     --attribute-table-title: var(--grey-3);
-    --attribute-table-entry-border: var(--grey-5);
-    --attribute-table-entry-text: var(--grey-3);
-    --attribute-table-entry-hover-border: var(--blue-1);
-    --attribute-table-entry-hover-background: var(--grey-6);
-    --attribute-table-entry-hover-text: var(--blue-1);
+    --attribute-table-list-border: var(--grey-5);
+    --attribute-table-list-text: var(--grey-3);
+    --attribute-table-list-hover-border: var(--blue-1);
+    --attribute-table-list-hover-background: var(--grey-6);
+    --attribute-table-list-hover-text: var(--blue-1);
     --attribute-table-badge: var(--grey-4);
     --highlighted-text: rgba(250, 166, 26, 0.2);
     --tooltip-background: rgba(10, 10, 10, 0.95);
@@ -1072,10 +1072,6 @@ a.reference.rfc > strong {
   flex: 1 1 auto;
 }
 
-.py-attribute-table-column:not(:first-child) {
-  margin-top: 1em;
-}
-
 .py-attribute-table-column > span {
   font-weight: bold;
   color: var(--attribute-table-title);
@@ -1088,33 +1084,33 @@ main .py-attribute-table-column > ul {
   font-size: 0.95em;
 }
 
-.py-attribute-table-entry {
+.py-attribute-table-list > li {
   margin: 0;
   padding: 2px 0;
   padding-left: 0.2em;
-  border-left: 2px solid var(--attribute-table-entry-border);
+  border-left: 2px solid var(--attribute-table-list-border);
   display: flex;
   line-height: 1.2em;
 }
 
-.py-attribute-table-entry > a {
+.py-attribute-table-list > li > a {
   padding-left: 0.5em;
-  color: var(--attribute-table-entry-text);
+  color: var(--attribute-table-list-text);
   flex-grow: 1;
 }
 
-.py-attribute-table-entry > a:hover {
-  color: var(--attribute-table-entry-hover-text);
+.py-attribute-table-list > li > a:hover {
+  color: var(--attribute-table-list-hover-text);
   text-decoration: none;
 }
 
-.py-attribute-table-entry:hover {
-  background-color: var(--attribute-table-entry-hover-background);
-  border-left: 2px solid var(--attribute-table-entry-hover-border);
+.py-attribute-table-list > li:hover {
+  background-color: var(--attribute-table-list-hover-background);
+  border-left: 2px solid var(--attribute-table-list-hover-border);
   text-decoration: none;
 }
 
-.py-attribute-table-badge {
+.py-attribute-table-list :where(.badge-coroutine, .badge-method, .badge-decorator, .badge-classmethod) {
   flex-basis: 3em;
   text-align: right;
   font-size: 0.9em;
