@@ -63,6 +63,7 @@ class AppInfo:
         The application's team.
 
         .. versionadded:: 1.3
+
     description: :class:`str`
         The application's description.
     bot_public: :class:`bool`
@@ -78,35 +79,42 @@ class AppInfo:
         this field will be the summary field for the store page of its primary SKU.
 
         .. versionadded:: 1.3
+
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
         GameSDK's `GetTicket <https://discord.com/developers/docs/game-sdk/applications#getticket>`_.
 
         .. versionadded:: 1.3
+
     guild_id: Optional[:class:`int`]
         If this application is a game sold on Discord,
         this field will be the guild to which it has been linked to.
 
         .. versionadded:: 1.3
+
     primary_sku_id: Optional[:class:`int`]
         If this application is a game sold on Discord,
         this field will be the ID of the "Game SKU" that is created,
         if it exists.
 
         .. versionadded:: 1.3
+
     slug: Optional[:class:`str`]
         If this application is a game sold on Discord,
         this field will be the URL slug that links to the store page.
 
         .. versionadded:: 1.3
+
     terms_of_service_url: Optional[:class:`str`]
         The application's terms of service URL, if set.
 
         .. versionadded:: 2.0
+
     privacy_policy_url: Optional[:class:`str`]
         The application's privacy policy URL, if set.
 
         .. versionadded:: 2.0
+
     flags: Optional[:class:`ApplicationFlags`]
         The application's public flags.
 

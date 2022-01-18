@@ -194,6 +194,7 @@ class Activity(BaseActivity):
         - ``url``: A string representing the URL opened upon clicking the button.
 
         .. versionadded:: 2.0
+
     emoji: Optional[:class:`PartialEmoji`]
         The emoji that belongs to this activity.
     """
@@ -461,6 +462,7 @@ class Streaming(BaseActivity):
         Where the user is streaming from (ie. YouTube, Twitch).
 
         .. versionadded:: 1.3
+
     name: Optional[:class:`str`]
         The stream's name.
     details: Optional[:class:`str`]
@@ -469,6 +471,7 @@ class Streaming(BaseActivity):
         The game being streamed.
 
         .. versionadded:: 1.3
+
     url: :class:`str`
         The stream's URL.
     assets: :class:`dict`

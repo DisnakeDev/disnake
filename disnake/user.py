@@ -315,6 +315,7 @@ class ClientUser(BaseUser):
         Specifies if the user is a system user (i.e. represents Discord officially).
 
         .. versionadded:: 1.3
+
     verified: :class:`bool`
         Specifies if the user's email is verified.
     locale: Optional[:class:`str`]

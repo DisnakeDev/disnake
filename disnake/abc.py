@@ -1078,19 +1078,23 @@ class GuildChannel(ABC):
             The type of target for the voice channel invite, if any.
 
             .. versionadded:: 2.0
+
         target_user: Optional[:class:`User`]
             The user whose stream to display for this invite, required if `target_type` is `TargetType.stream`.
             The user must be streaming in the channel.
 
             .. versionadded:: 2.0
+
         target_application: Optional[:class:`.PartyType`]
             The ID of the embedded application for the invite, required if `target_type` is `TargetType.embedded_application`.
 
             .. versionadded:: 2.0
+
         guild_scheduled_event: Optional[:class:`.GuildScheduledEvent`]
             The guild scheduled event to include with the invite.
 
             .. versionadded:: 2.3
+
         reason: Optional[:class:`str`]
             The reason for creating this invite. Shows up on the audit log.
 
@@ -1293,6 +1297,7 @@ class Messageable:
             This cannot be mixed with the ``embed`` parameter.
 
             .. versionadded:: 2.0
+
         file: :class:`.File`
             The file to upload. This cannot be mixed with ``files`` parameter.
         files: List[:class:`.File`]
@@ -1302,6 +1307,7 @@ class Messageable:
             A list of stickers to upload. Must be a maximum of 3.
 
             .. versionadded:: 2.0
+
         nonce: :class:`int`
             The nonce to use for sending this message. If the message was successfully sent,
             then the message will have a nonce with this value.
@@ -1318,6 +1324,7 @@ class Messageable:
             are used instead.
 
             .. versionadded:: 1.4
+
         reference: Union[:class:`.Message`, :class:`.MessageReference`, :class:`.PartialMessage`]
             A reference to the :class:`Message` to which you are replying, this can be created using
             :meth:`.Message.to_reference` or passed directly as a :class:`Message`. You can control
@@ -1325,14 +1332,17 @@ class Messageable:
             attribute of ``allowed_mentions`` or by setting ``mention_author``.
 
             .. versionadded:: 1.6
+
         mention_author: Optional[:class:`bool`]
             If set, overrides the :attr:`.AllowedMentions.replied_user` attribute of ``allowed_mentions``.
 
             .. versionadded:: 1.6
+
         view: :class:`.ui.View`
             A Discord UI View to add to the message. This can not be mixed with ``components``.
 
             .. versionadded:: 2.0
+
         components: |components_type|
             A list of components to include in the message. This can not be mixed with ``view``.
 

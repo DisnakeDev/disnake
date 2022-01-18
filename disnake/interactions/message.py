@@ -66,6 +66,7 @@ class MessageInteraction(Interaction):
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
+
     guild: Optional[:class:`Guild`]
         The guild the interaction was sent from.
     guild_locale: Optional[:class:`str`]
@@ -74,6 +75,7 @@ class MessageInteraction(Interaction):
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
+
     channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
         The channel the interaction was sent from.
     message: Optional[:class:`Message`]

@@ -303,20 +303,24 @@ class Invite(Hashable):
         `Client.fetch_invite` with `with_expiration` enabled, the invite will never expire.
 
         .. versionadded:: 2.0
+
     channel: Optional[Union[:class:`abc.GuildChannel`, :class:`Object`, :class:`PartialInviteChannel`]]
         The channel the invite is for.
     target_type: :class:`InviteTarget`
         The type of target for the voice channel invite.
 
         .. versionadded:: 2.0
+
     target_user: Optional[:class:`User`]
         The user whose stream to display for this invite, if any.
 
         .. versionadded:: 2.0
+
     target_application: Optional[:class:`PartialAppInfo`]
         The embedded application the invite targets, if any.
 
         .. versionadded:: 2.0
+
     guild_scheduled_event: Optional[:class:`GuildScheduledEvent`]
         The guild scheduled event included in the invite, if any.
 

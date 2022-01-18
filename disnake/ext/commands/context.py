@@ -90,6 +90,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         This is only of use for within converters.
 
         .. versionadded:: 2.0
+
     prefix: Optional[:class:`str`]
         The prefix that was used to invoke the command.
     command: Optional[:class:`Command`]
@@ -104,6 +105,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         For example in commands ``?a b c test``, the invoked parents are ``['a', 'b', 'c']``.
 
         .. versionadded:: 1.7
+
     invoked_subcommand: Optional[:class:`Command`]
         The subcommand that was invoked.
         If no valid subcommand was invoked then this is equal to ``None``.

@@ -260,6 +260,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         the user to specify at least one argument. Defaults to ``False``.
 
         .. versionadded:: 1.5
+
     ignore_extra: :class:`bool`
         If ``True``\, ignores extraneous strings passed to a command if all its
         requirements are met (e.g. ``?foo a b c`` when only expecting ``a``

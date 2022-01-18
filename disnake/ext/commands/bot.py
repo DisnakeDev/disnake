@@ -129,28 +129,33 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
 
         .. versionadded:: 1.3
+
     strip_after_prefix: :class:`bool`
         Whether to strip whitespace characters after encountering the command
         prefix. This allows for ``!   hello`` and ``!hello`` to both work if
         the ``command_prefix`` is set to ``!``. Defaults to ``False``.
 
         .. versionadded:: 1.7
+
     test_guilds: List[:class:`int`]
         The list of IDs of the guilds where you're going to test your app commands.
         Defaults to ``None``, which means global registration of commands across
         all guilds.
 
         .. versionadded:: 2.1
+
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
         with the commands in your code.
 
         .. versionadded:: 2.1
+
     sync_commands_on_cog_unload: :class:`bool`
         Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
 
         .. versionadded:: 2.1
+
     sync_commands_debug: :class:`bool`
         Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
         If disabled, uses the default ``DEBUG`` log level which isn't shown unless the log level is changed manually.
@@ -212,16 +217,19 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         all guilds.
 
         .. versionadded:: 2.1
+
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
         with the commands in your code.
 
         .. versionadded:: 2.1
+
     sync_commands_on_cog_unload: :class:`bool`
         Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
 
         .. versionadded:: 2.1
+
     sync_commands_debug: :class:`bool`
         Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
         If disabled, uses the default ``DEBUG`` log level which isn't shown unless the log level is changed manually.
@@ -238,6 +246,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         Defaults to ``False``.
 
         .. versionadded:: 2.1
+
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically

@@ -102,6 +102,7 @@ class VoiceState:
         Whether the user is currently streaming via 'Go Live' feature.
 
         .. versionadded:: 1.3
+
     self_video: :class:`bool`
         Whether the user is currently broadcasting video.
     suppress: :class:`bool`
@@ -110,6 +111,7 @@ class VoiceState:
         Only applies to stage channels.
 
         .. versionadded:: 1.7
+
     requested_to_speak_at: Optional[:class:`datetime.datetime`]
         An aware datetime object that specifies the date and time in UTC that the member
         requested to speak. It will be ``None`` if they are not requesting to speak
@@ -118,6 +120,7 @@ class VoiceState:
         Only applies to stage channels.
 
         .. versionadded:: 1.7
+
     afk: :class:`bool`
         Whether the user is currently in the AFK channel in the guild.
     channel: Optional[Union[:class:`VoiceChannel`, :class:`StageChannel`]]
@@ -271,6 +274,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         Whether the member is pending member verification.
 
         .. versionadded:: 1.6
+
     premium_since: Optional[:class:`datetime.datetime`]
         An aware datetime object that specifies the date and time in UTC when the member used their
         "Nitro boost" on the guild, if available. This could be ``None``.
@@ -752,6 +756,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             Whether the member should be suppressed in stage channels.
 
             .. versionadded:: 1.7
+
         roles: List[:class:`Role`]
             The member's new list of roles. This *replaces* the roles.
         voice_channel: Optional[:class:`VoiceChannel`]
@@ -763,6 +768,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             Set to ``None`` to remove the timeout. Supports up to 28 days in the future.
 
             .. versionadded:: 2.3
+
         reason: Optional[:class:`str`]
             The reason for editing this member. Shows up on the audit log.
 

@@ -174,12 +174,14 @@ class Client:
         If not given, defaults to a regularly constructed :class:`Intents` class.
 
         .. versionadded:: 1.5
+
     member_cache_flags: :class:`MemberCacheFlags`
         Allows for finer control over how the library caches members.
         If not given, defaults to cache as much as possible with the
         currently selected intents.
 
         .. versionadded:: 1.5
+
     chunk_guilds_at_startup: :class:`bool`
         Indicates if :func:`.on_ready` should be delayed to chunk all guilds
         at start-up if necessary. This operation is incredibly slow for large
@@ -187,6 +189,7 @@ class Client:
         is ``True``.
 
         .. versionadded:: 1.5
+
     status: Optional[:class:`.Status`]
         A status to start your presence with upon logging on to Discord.
     activity: Optional[:class:`.BaseActivity`]
@@ -195,6 +198,7 @@ class Client:
         Control how the client handles mentions by default on every message sent.
 
         .. versionadded:: 1.4
+
     heartbeat_timeout: :class:`float`
         The maximum numbers of seconds before timing out and restarting the
         WebSocket in the case of not receiving a HEARTBEAT_ACK. Useful if
@@ -205,6 +209,7 @@ class Client:
         preparing the member cache and firing READY. The default timeout is 2 seconds.
 
         .. versionadded:: 1.4
+
     assume_unsync_clock: :class:`bool`
         Whether to assume the system clock is unsynced. This applies to the ratelimit handling
         code. If this is set to ``True``, the default, then the library uses the time to reset
@@ -213,6 +218,7 @@ class Client:
         sync your system clock to Google's NTP server.
 
         .. versionadded:: 1.3
+
     enable_debug_events: :class:`bool`
         Whether to enable events that are useful only for debugging gateway related information.
 
@@ -221,18 +227,21 @@ class Client:
         To enable these events, this must be set to ``True``. Defaults to ``False``.
 
         .. versionadded:: 2.0
+
     test_guilds: List[:class:`int`]
         The list of IDs of the guilds where you're going to test your app commands.
         Defaults to ``None``, which means global registration of commands across
         all guilds.
 
         .. versionadded:: 2.1
+
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
         with the commands specified in your code.
 
         .. versionadded:: 2.1
+
     sync_commands_debug: :class:`bool`
         Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
         If disabled, uses the default ``DEBUG`` log level which isn't shown unless the log level is changed manually.
@@ -1670,6 +1679,7 @@ class Client:
             :attr:`.Invite.expires_at` field.
 
             .. versionadded:: 2.0
+
         guild_scheduled_event_id: :class:`int`
             The ID of the scheduled event to include in the invite.
             If not provided, defaults to the ``event`` parameter in the URL if it exists,

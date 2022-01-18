@@ -744,12 +744,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Defaults to ``True``.
 
             .. versionadded:: 2.3
+
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
 
             .. versionadded:: 2.3
+
         reason: :class:`str`
             The reason for creating the thread. Shows up on the audit log.
 
@@ -984,6 +986,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         A value of ``None`` indicates automatic voice region detection.
 
         .. versionadded:: 1.7
+
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
     nsfw: :class:`bool`
@@ -994,6 +997,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
 
         .. versionadded:: 2.3
+
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
         in this channel. A value of `0` denotes that it is disabled.
@@ -1001,6 +1005,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         :attr:`~Permissions.manage_messages` bypass slowmode.
 
         .. versionadded:: 2.3
+
     last_message_id: Optional[:class:`int`]
         The last message ID of the message sent to this channel. It may
         *not* point to an existing or valid message.
@@ -1166,14 +1171,17 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             A value of ``None`` indicates automatic voice region detection.
 
             .. versionadded:: 1.7
+
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the voice channel's participants.
 
             .. versionadded:: 2.0
+
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW.
 
             .. versionadded:: 2.3
+
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
@@ -1464,6 +1472,7 @@ class StageChannel(VocalGuildChannel):
             The camera video quality for the stage channel's participants.
 
             .. versionadded:: 2.0
+
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
@@ -1890,6 +1899,7 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
             :class:`PermissionOverwrite` to apply to the channel.
 
             .. versionadded:: 1.3
+
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
@@ -2077,6 +2087,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         The owner ID that owns the group channel.
 
         .. versionadded:: 2.0
+
     name: Optional[:class:`str`]
         The group channel's name if provided.
     """

@@ -720,28 +720,33 @@ class WebhookMessage(Message):
             to remove/replace existing files.
 
             .. versionadded:: 2.0
+
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
+
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         view: Optional[:class:`~disnake.ui.View`]
             The view to update this message with. If ``None`` is passed then
             the view is removed. This can not be mixed with ``components``.
 
             .. versionadded:: 2.0
+
         components: Optional[|components_type|]
             A list of components to update the message with. This can not be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -977,6 +982,7 @@ class Webhook(BaseWebhook):
         The webhook's type.
 
         .. versionadded:: 1.3
+
     token: Optional[:class:`str`]
         The authentication token of the webhook. If this is ``None``
         then the webhook cannot be used to make requests.
@@ -994,6 +1000,7 @@ class Webhook(BaseWebhook):
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
+
     source_channel: Optional[:class:`PartialWebhookChannel`]
         The channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
@@ -1039,6 +1046,7 @@ class Webhook(BaseWebhook):
             will not close it.
 
             .. versionadded:: 2.0
+
         bot_token: Optional[:class:`str`]
             The bot authentication token for authenticated requests
             involving the webhook.
@@ -1075,6 +1083,7 @@ class Webhook(BaseWebhook):
             will not close it.
 
             .. versionadded:: 2.0
+
         bot_token: Optional[:class:`str`]
             The bot authentication token for authenticated requests
             involving the webhook.
@@ -1186,6 +1195,7 @@ class Webhook(BaseWebhook):
             The reason for deleting this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
+
         prefer_auth: :class:`bool`
             Whether to use the bot token over the webhook token,
             if available. Defaults to ``True``.
@@ -1240,11 +1250,13 @@ class Webhook(BaseWebhook):
             The webhook's new channel. This requires an authenticated webhook.
 
             .. versionadded:: 2.0
+
         prefer_auth: :class:`bool`
             Whether to use the bot token over the webhook token
             if available. Defaults to ``True``.
 
             .. versionadded:: 2.0
+
         reason: Optional[:class:`str`]
             The reason for editing this webhook. Shows up on the audit log.
 
@@ -1405,6 +1417,7 @@ class Webhook(BaseWebhook):
             then the timeout is set to 15 minutes.
 
             .. versionadded:: 2.0
+
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
         files: List[:class:`File`]
@@ -1424,6 +1437,7 @@ class Webhook(BaseWebhook):
             are used instead.
 
             .. versionadded:: 1.4
+
         view: :class:`disnake.ui.View`
             The view to send with the message. You can only send a view
             if this webhook is not partial and has state attached. A
@@ -1431,14 +1445,17 @@ class Webhook(BaseWebhook):
             library. This can not be mixed with ``components``.
 
             .. versionadded:: 2.0
+
         components: |components_type|
             A list of components to include in the message. This can not be mixed with ``view``.
 
             .. versionadded:: 2.4
+
         thread: :class:`~disnake.abc.Snowflake`
             The thread to send this webhook to.
 
             .. versionadded:: 2.0
+
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
             means that the return type of this function changes from ``None`` to
@@ -1638,28 +1655,33 @@ class Webhook(BaseWebhook):
             to remove/replace existing files.
 
             .. versionadded:: 2.0
+
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
+
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed. The webhook must have state attached, similar to
             :meth:`send`. This can not be mixed with ``components``.
 
             .. versionadded:: 2.0
+
         components: |components_type|
             A list of components to update this message with. This can not be mixed with ``view``.
 
             .. versionadded:: 2.4
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.

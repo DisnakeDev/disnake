@@ -257,10 +257,12 @@ class Attachment(Hashable):
         The attachment's `media type <https://en.wikipedia.org/wiki/Media_type>`_
 
         .. versionadded:: 1.7
+
     ephemeral: :class:`bool`
         Whether the attachment is ephemeral.
 
         .. versionadded:: 2.1
+
     description: :class:`str`
         The attachment's description
 
@@ -417,10 +419,12 @@ class Attachment(Hashable):
             on some types of attachments.
 
             .. versionadded:: 1.4
+
         spoiler: :class:`bool`
             Whether the file is a spoiler.
 
             .. versionadded:: 1.4
+
         description: Optional[:class:`str`]
             The file's description. Copies this attachment's description by default,
             set to ``None`` to remove.
@@ -524,6 +528,7 @@ class MessageReference:
         if the message no longer exists or Discord could not fetch the message.
 
         .. versionadded:: 1.7
+
     resolved: Optional[Union[:class:`Message`, :class:`DeletedReferencedMessage`]]
         The message that this reference resolved to. If this is ``None``
         then the original message was not fetched either due to the Discord API
@@ -724,11 +729,13 @@ class Message(Hashable):
         followed channel integration, or message replies.
 
         .. versionadded:: 1.5
+
     interaction: Optional[:class:`~disnake.InteractionReference`]
         The interaction that this message references.
         This exists only when the message is a response to an interaction without an existing message.
 
         .. versionadded:: 2.1
+
     mention_everyone: :class:`bool`
         Specifies if the message mentions everyone.
 
@@ -763,6 +770,7 @@ class Message(Hashable):
         Extra features of the message.
 
         .. versionadded:: 1.3
+
     reactions : List[:class:`Reaction`]
         Reactions to a message. Reactions can be either custom emoji or standard unicode emoji.
     activity: Optional[:class:`dict`]
@@ -787,10 +795,12 @@ class Message(Hashable):
         A list of sticker items given to the message.
 
         .. versionadded:: 1.6
+
     components: List[:class:`Component`]
         A list of components in the message.
 
         .. versionadded:: 2.0
+
     guild: Optional[:class:`Guild`]
         The guild that the message belongs to, if applicable.
     """
@@ -1458,18 +1468,21 @@ class Message(Hashable):
             To remove all embeds ``[]`` should be passed.
 
             .. versionadded:: 2.0
+
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.1
+
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.1
+
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
@@ -1492,11 +1505,13 @@ class Message(Hashable):
             are used instead.
 
             .. versionadded:: 1.4
+
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. This can not be mixed with ``components``.
             If ``None`` is passed then the view is removed.
 
             .. versionadded:: 2.0
+
         components: |components_type|
             The updated components to update this message with. This can not be mixed with ``view``.
             If ``None`` is passed then the components are removed.
@@ -2013,24 +2028,28 @@ class PartialMessage(Hashable):
             To remove all embeds ``[]`` should be passed.
 
             .. versionadded:: 2.1
+
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.1
+
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.1
+
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
+
         suppress: :class:`bool`
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
@@ -2054,6 +2073,7 @@ class PartialMessage(Hashable):
             If ``None`` is passed then the view is removed.
 
             .. versionadded:: 2.0
+
         components: |components_type|
             The updated components to update this message with. This can not be mixed with ``view``.
             If ``None`` is passed then the components are removed.

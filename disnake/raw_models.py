@@ -128,10 +128,12 @@ class RawMessageUpdateEvent(_RawReprMixin):
         The channel ID where the update took place.
 
         .. versionadded:: 1.3
+
     guild_id: Optional[:class:`int`]
         The guild ID where the update took place, if applicable.
 
         .. versionadded:: 1.7
+
     data: :class:`dict`
         The raw data given by the `gateway <https://discord.com/developers/docs/topics/gateway#message-update>`_
     cached_message: Optional[:class:`Message`]
@@ -172,6 +174,7 @@ class RawReactionActionEvent(_RawReprMixin):
         The member who added the reaction. Only available if `event_type` is `REACTION_ADD` and the reaction is inside a guild.
 
         .. versionadded:: 1.3
+
     event_type: :class:`str`
         The event type that triggered this action. Can be
         ``REACTION_ADD`` for reaction addition or

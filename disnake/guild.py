@@ -155,6 +155,7 @@ class Guild(Hashable):
         All stickers that the guild owns.
 
         .. versionadded:: 2.0
+
     region: :class:`VoiceRegion`
         The region the guild belongs on. There is a chance that the region
         will be a :class:`str` if the value is not recognised by the enumerator.
@@ -184,6 +185,7 @@ class Guild(Hashable):
         The maximum amount of users in a video channel.
 
         .. versionadded:: 1.4
+
     description: Optional[:class:`str`]
         The guild's description.
     mfa_level: :class:`int`
@@ -246,11 +248,13 @@ class Guild(Hashable):
         The guild's NSFW level.
 
         .. versionadded:: 2.0
+
     approximate_member_count: Optional[:class:`int`]
         The approximate number of members in the guild.
         Only available for manually fetched guilds.
 
         .. versionadded:: 2.3
+
     approximate_presence_count: Optional[:class:`int`]
         The approximate number of members currently active in the guild.
         This includes idle, dnd, online, and invisible members. Offline members are excluded.
@@ -1269,10 +1273,12 @@ class Guild(Hashable):
             A value of ``None`` indicates automatic voice region detection.
 
             .. versionadded:: 1.7
+
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the voice channel's participants.
 
             .. versionadded:: 2.0
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -3271,6 +3277,7 @@ class Guild(Hashable):
             to ``False``.
 
             .. versionadded:: 1.6
+
         cache: :class:`bool`
             Whether to cache the members internally. This makes operations
             such as :meth:`get_member` work for those that matched.

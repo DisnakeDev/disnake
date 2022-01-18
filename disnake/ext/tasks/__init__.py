@@ -723,6 +723,7 @@ def loop(
             Duplicate times will be ignored, and only run once.
 
         .. versionadded:: 2.0
+
     count: Optional[:class:`int`]
         The number of loops to do, ``None`` if it should be an
         infinite loop.

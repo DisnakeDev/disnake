@@ -305,6 +305,7 @@ def oauth_url(
         An optional valid list of scopes. Defaults to ``('bot',)``.
 
         .. versionadded:: 1.7
+
     disable_guild_select: :class:`bool`
         Whether to disallow the user from changing the guild dropdown.
 

@@ -444,6 +444,7 @@ class SyncWebhookMessage(Message):
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -535,6 +536,7 @@ class SyncWebhook(BaseWebhook):
         The webhook's type.
 
         .. versionadded:: 1.3
+
     token: Optional[:class:`str`]
         The authentication token of the webhook. If this is ``None``
         then the webhook cannot be used to make requests.
@@ -552,6 +554,7 @@ class SyncWebhook(BaseWebhook):
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
+
     source_channel: Optional[:class:`PartialWebhookChannel`]
         The channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
@@ -715,6 +718,7 @@ class SyncWebhook(BaseWebhook):
             The reason for deleting this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
+
         prefer_auth: :class:`bool`
             Whether to use the bot token over the webhook token,
             if available. Defaults to ``True``.
@@ -919,10 +923,12 @@ class SyncWebhook(BaseWebhook):
             Controls the mentions being processed in this message.
 
             .. versionadded:: 1.4
+
         thread: :class:`~disnake.abc.Snowflake`
             The thread to send this message to.
 
             .. versionadded:: 2.0
+
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
             means that the return type of this function changes from ``None`` to
@@ -1083,6 +1089,7 @@ class SyncWebhook(BaseWebhook):
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.

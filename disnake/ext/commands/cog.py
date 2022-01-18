@@ -114,6 +114,7 @@ class CogMeta(type):
         The cog description. By default, it is the cleaned docstring of the class.
 
         .. versionadded:: 1.6
+
     command_attrs: :class:`dict`
         A list of attributes to apply to every command inside this cog. The dictionary
         is passed into the :class:`Command` options at ``__init__``.

@@ -119,6 +119,7 @@ class Interaction:
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
+
     channel_id: Optional[:class:`int`]
         The channel ID the interaction was sent from.
     application_id: :class:`int`
@@ -129,6 +130,7 @@ class Interaction:
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
+
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
     """
@@ -376,6 +378,7 @@ class Interaction:
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed. This can not be mixed with ``components``.
@@ -384,6 +387,7 @@ class Interaction:
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -554,6 +558,7 @@ class Interaction:
             A list of components to send with the message. This can not be mixed with ``view``.
 
             .. versionadded:: 2.4
+
         ephemeral: :class:`bool`
             Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
@@ -734,6 +739,7 @@ class InteractionResponse:
             A list of components to send with the message. This can not be mixed with ``view``.
 
             .. versionadded:: 2.4
+
         tts: :class:`bool`
             Whether the message should be sent using text-to-speech.
         ephemeral: :class:`bool`
@@ -895,11 +901,13 @@ class InteractionResponse:
             Files will be appended to the message.
 
             .. versionadded:: 2.2
+
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with ``file`` parameter.
             Files will be appended to the message.
 
             .. versionadded:: 2.2
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
@@ -1134,6 +1142,7 @@ class InteractionMessage(Message):
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. This can not be mixed with ``components``.
             If ``None`` is passed then the view is removed.
@@ -1142,6 +1151,7 @@ class InteractionMessage(Message):
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
