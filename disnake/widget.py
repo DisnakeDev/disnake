@@ -25,17 +25,18 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from .activity import BaseActivity, Spotify, create_activity
 from .enums import Status, try_enum
 from .invite import Invite
 from .user import BaseUser
-from .utils import _get_as_snowflake, resolve_invite, snowflake_time
+from .utils import MISSING, _get_as_snowflake, resolve_invite, snowflake_time
 
 if TYPE_CHECKING:
     import datetime
 
+    from .abc import Snowflake
     from .state import ConnectionState
     from .types.widget import Widget as WidgetPayload, WidgetMember as WidgetMemberPayload
 
@@ -317,3 +318,43 @@ class Widget:
         invite_id = resolve_invite(self._invite)
         data = await self._state.http.get_invite(invite_id, with_counts=with_counts)
         return Invite.from_incomplete(state=self._state, data=data)
+
+    async def edit(
+        self,
+        *,
+        enabled: bool = MISSING,
+        channel: Optional[Snowflake] = MISSING,
+        reason: Optional[str] = None,
+    ) -> None:
+        """|coro|
+
+        Edits the widget.
+
+        You must have :attr:`~Permissions.manage_guild` permission to
+        do this
+
+        .. versionadded:: 2.4
+
+        Parameters
+        -----------
+        enabled: :class:`bool`
+            Whether to enable the widget.
+        channel: Optional[:class:`~disnake.abc.Snowflake`]
+            The new widget channel. Pass ``None`` to remove the widget channel.
+        reason: Optional[:class:`str`]
+            The reason for editing the widget. Shows up on the audit log.
+
+        Raises
+        -------
+        Forbidden
+            You do not have permission to edit the widget.
+        HTTPException
+            Editing the widget failed.
+        """
+        payload: Dict[str, Any] = {}
+        if enabled is not MISSING:
+            payload["enabled"] = enabled
+        if channel is not MISSING:
+            payload["channel_id"] = None if channel is None else channel.id
+
+        await self._state.http.edit_widget(self.id, payload, reason=reason)

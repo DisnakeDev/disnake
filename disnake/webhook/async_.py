@@ -79,12 +79,7 @@ if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
-<<<<<<< HEAD
-    from ..ui.action_row import Components
-    from ..ui.view import View
-=======
     from ..ui import Components, View
->>>>>>> upstream/master
 
 MISSING = utils.MISSING
 

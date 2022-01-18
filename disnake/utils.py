@@ -30,6 +30,8 @@ import collections.abc
 import datetime
 import functools
 import json
+import os
+import pkgutil
 import re
 import sys
 import types
@@ -57,6 +59,7 @@ from typing import (
     Sequence,
     Tuple,
     Type,
+    TypedDict,
     TypeVar,
     Union,
     overload,
@@ -87,6 +90,7 @@ __all__ = (
     "escape_mentions",
     "as_chunks",
     "format_dt",
+    "search_directory",
 )
 
 DISCORD_EPOCH = 1420070400000
@@ -883,6 +887,17 @@ def escape_mentions(text: str) -> str:
 # Custom docstring parser
 
 
+class _DocstringParam(TypedDict):
+    name: str
+    type: None
+    description: str
+
+
+class _ParsedDocstring(TypedDict):
+    description: str
+    params: Dict[str, _DocstringParam]
+
+
 def _count_left_spaces(string: str) -> int:
     res = 0
     for s in string:
@@ -892,7 +907,7 @@ def _count_left_spaces(string: str) -> int:
     return res
 
 
-def _get_header_line(lines: List[str], header: str, underline: str):
+def _get_header_line(lines: List[str], header: str, underline: str) -> int:
     underlining = len(header) * underline
     for i, line in enumerate(lines):
         if line.rstrip() == header and i + 1 < len(lines) and lines[i + 1].startswith(underlining):
@@ -919,18 +934,18 @@ def _get_description(lines: List[str]) -> str:
     return "\n".join(lines[:end]).strip()
 
 
-def _get_option_desc(lines: List[str]) -> Dict[str, Any]:
+def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
     start = _get_header_line(lines, "Parameters", "-") + 2
     end = _get_next_header_line(lines, "-", start)
     if start >= len(lines):
         return {}
     # Read option descriptions
-    options = {}
+    options: Dict[str, _DocstringParam] = {}
 
-    def add_param(param, desc_lines, maybe_type):
+    def add_param(param: Optional[str], desc_lines: List[str], maybe_type: Optional[str]) -> None:
         if param is None:
             return
-        desc = None
+        desc: Optional[str] = None
         if desc_lines:
             desc = "\n".join(desc_lines)
         elif maybe_type:
@@ -939,9 +954,9 @@ def _get_option_desc(lines: List[str]) -> Dict[str, Any]:
             # TODO: maybe parse types in the future
             options[param] = {"name": param, "type": None, "description": desc}
 
-    desc_lines = []
-    param = None
-    maybe_type = None
+    desc_lines: List[str] = []
+    param: Optional[str] = None
+    maybe_type: Optional[str] = None
     for line in lines[start:end]:
         spaces = _count_left_spaces(line)
         if spaces == 0:
@@ -963,7 +978,7 @@ def _get_option_desc(lines: List[str]) -> Dict[str, Any]:
     return options
 
 
-def parse_docstring(func: Callable) -> Dict[str, Any]:
+def parse_docstring(func: Callable) -> _ParsedDocstring:
     doc = _getdoc(func)
     if doc is None:
         return {"description": "", "params": {}}
@@ -1187,3 +1202,35 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
     if isinstance(dt, datetime.datetime):
         dt = dt.timestamp()
     return f"<t:{int(dt)}:{style}>"
+
+
+def search_directory(path: str) -> Iterator[str]:
+    """Walk through a directory and yield all modules.
+
+    Parameters
+    -----------
+    path: :class:`str`
+        The path to search for modules
+
+    Yields
+    -------
+    :class:`str`
+        The name of the found module. (usable in load_extension)
+    """
+    relpath = os.path.relpath(path)  # relative and normalized
+    if ".." in relpath:
+        raise ValueError("Modules outside the cwd require a package to be specified")
+
+    abspath = os.path.abspath(path)
+    if not os.path.exists(relpath):
+        raise ValueError(f"Provided path '{abspath}' does not exist")
+    if not os.path.isdir(relpath):
+        raise ValueError(f"Provided path '{abspath}' is not a directory")
+
+    prefix = relpath.replace(os.sep, ".")
+
+    for finder, name, ispkg in pkgutil.iter_modules([path]):
+        if ispkg:
+            yield from search_directory(os.path.join(path, name))
+        else:
+            yield prefix + "." + name

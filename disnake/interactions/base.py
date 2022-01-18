@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -63,6 +63,7 @@ if TYPE_CHECKING:
 
     from aiohttp import ClientSession
 
+    from ..app_commands import Choices
     from ..channel import (
         CategoryChannel,
         PartialMessageable,
@@ -77,13 +78,12 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
     from ..threads import Thread
-    from ..types.interactions import Interaction as InteractionPayload
-<<<<<<< HEAD
+    from ..types.interactions import (
+        ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
+        Interaction as InteractionPayload,
+    )
     from ..ui.action_row import Components
     from ..ui.view import View
-=======
-    from ..ui import Components, View
->>>>>>> upstream/master
 
     InteractionChannel = Union[
         VoiceChannel,
@@ -617,7 +617,7 @@ class InteractionResponse:
         """
         return self._responded
 
-    async def defer(self, *, ephemeral: bool = False) -> None:
+    async def defer(self, *, ephemeral: bool = False, with_message: bool = False) -> None:
         """|coro|
 
         Defers the interaction response.
@@ -629,7 +629,13 @@ class InteractionResponse:
         -----------
         ephemeral: :class:`bool`
             Indicates whether the deferred message will eventually be ephemeral.
-            This only applies for interactions of type :attr:`InteractionType.application_command`.
+            This only applies for interactions of type :attr:`InteractionType.application_command` or when ``with_message`` is True
+        with_message: :class:`bool`
+            Indicates whether the response will be a message with thinking state (bot is thinking...).
+            This is always True for interactions of type :attr:`InteractionType.application_command`.
+            For interactions of type :attr:`InteractionType.component` this defaults to False.
+
+            .. versionadded:: 2.4
 
         Raises
         -------
@@ -644,12 +650,12 @@ class InteractionResponse:
         defer_type: int = 0
         data: Optional[Dict[str, Any]] = None
         parent = self._parent
-        if parent.type is InteractionType.component:
-            defer_type = InteractionResponseType.deferred_message_update.value
-        elif parent.type is InteractionType.application_command:
+        if parent.type is InteractionType.application_command or with_message:
             defer_type = InteractionResponseType.deferred_channel_message.value
             if ephemeral:
                 data = {"flags": 64}
+        elif parent.type is InteractionType.component:
+            defer_type = InteractionResponseType.deferred_message_update.value
 
         if defer_type:
             adapter = async_context.get()
@@ -994,22 +1000,14 @@ class InteractionResponse:
 
         self._responded = True
 
-    async def autocomplete(
-        self,
-        *,
-        choices: Union[
-            Dict[str, str],
-            List[str],
-            List[OptionChoice],
-        ],
-    ) -> None:
+    async def autocomplete(self, *, choices: Choices) -> None:
         """|coro|
         Responds to this interaction by displaying a list of possible autocomplete results.
         Only works for autocomplete interactions.
 
         Parameters
         -----------
-        choices: Union[Dict[:class:`str`, :class:`str`], List[:class:`OptionChoice`]]
+        choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
             The list of choices to suggest.
 
         Raises
@@ -1022,15 +1020,18 @@ class InteractionResponse:
         if self._responded:
             raise InteractionResponded(self._parent)
 
-        data = {}
-        if not choices:
-            data["choices"] = []
-        elif isinstance(choices, Mapping):
-            data["choices"] = [{"name": n, "value": v} for n, v in choices.items()]
-        elif isinstance(choices, Iterable) and not isinstance(choices[0], OptionChoice):
-            data["choices"] = [{"name": n, "value": n} for n in choices]
+        choices_data: List[ApplicationCommandOptionChoicePayload]
+        if isinstance(choices, Mapping):
+            choices_data = [{"name": n, "value": v} for n, v in choices.items()]
         else:
-            data["choices"] = [c.to_dict() for c in choices]  # type: ignore
+            choices_data = []
+            value: ApplicationCommandOptionChoicePayload
+            for c in choices:
+                if isinstance(c, OptionChoice):
+                    value = c.to_dict()
+                else:
+                    value = {"name": str(c), "value": c}
+                choices_data.append(value)
 
         parent = self._parent
         adapter = async_context.get()
@@ -1039,7 +1040,7 @@ class InteractionResponse:
             parent.token,
             session=parent._session,
             type=InteractionResponseType.application_command_autocomplete_result.value,
-            data=data,
+            data={"choices": choices_data},
         )
 
         self._responded = True

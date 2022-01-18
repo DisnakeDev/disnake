@@ -64,6 +64,10 @@ class SlashCommands(commands.Cog):
         """
         await inter.send(f"{inter.options}")
 
+    @commands.slash_command()
+    async def largenumber(self, inter: disnake.CommandInteraction, largenum: commands.LargeInt):
+        await inter.send(f"Is int: {isinstance(largenum, int)}")
+
 
 def setup(bot):
     bot.add_cog(SlashCommands(bot))

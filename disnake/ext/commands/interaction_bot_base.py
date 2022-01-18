@@ -99,23 +99,20 @@ def _app_commands_diff(
     new_commands: Iterable[ApplicationCommand],
     old_commands: Iterable[ApplicationCommand],
 ) -> Dict[str, List[ApplicationCommand]]:
-    new_cmds = {cmd.name: cmd for cmd in new_commands}
-    old_cmds = {cmd.name: cmd for cmd in old_commands}
+    new_cmds = {(cmd.name, cmd.type): cmd for cmd in new_commands}
+    old_cmds = {(cmd.name, cmd.type): cmd for cmd in old_commands}
 
     diff = {
         "no_changes": [],
         "upsert": [],
         "edit": [],
         "delete": [],
-        "change_type": [],
     }
 
-    for name, new_cmd in new_cmds.items():
-        old_cmd = old_cmds.get(name)
+    for name_and_type, new_cmd in new_cmds.items():
+        old_cmd = old_cmds.get(name_and_type)
         if old_cmd is None:
             diff["upsert"].append(new_cmd)
-        elif old_cmd.type != new_cmd.type:
-            diff["change_type"].append(new_cmd)
         elif new_cmd._always_synced:
             diff["no_changes"].append(old_cmd)
             continue
@@ -124,8 +121,8 @@ def _app_commands_diff(
         else:
             diff["no_changes"].append(new_cmd)
 
-    for name, old_cmd in old_cmds.items():
-        if name not in new_cmds:
+    for name_and_type, old_cmd in old_cmds.items():
+        if name_and_type not in new_cmds:
             diff["delete"].append(old_cmd)
 
     return diff
@@ -135,7 +132,6 @@ _diff_map = {
     "upsert": "To upsert:",
     "edit": "To edit:",
     "delete": "To delete:",
-    "change_type": "Type migration:",
     "no_changes": "No changes:",
 }
 
@@ -690,12 +686,7 @@ class InteractionBotBase(CommonBotBase):
         diff = _app_commands_diff(
             global_cmds, self._connection._global_application_commands.values()
         )
-        update_required = (
-            bool(diff["upsert"])
-            or bool(diff["edit"])
-            or bool(diff["change_type"])
-            or bool(diff["delete"])
-        )
+        update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
 
         # Show the difference
         self._log_sync_debug(
@@ -710,13 +701,7 @@ class InteractionBotBase(CommonBotBase):
         if update_required:
             # Notice that we don't do any API requests if there're no changes.
             try:
-                to_send = diff["no_changes"] + diff["edit"]
-                if bool(diff["change_type"]):
-                    # We can't just "edit" the command type, so we bulk delete the commands with old type first.
-                    await self.bulk_overwrite_global_commands(to_send)
-                # Finally, we make an API call that applies all changes from the code.
-                to_send.extend(diff["upsert"])
-                to_send.extend(diff["change_type"])
+                to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
                 await self.bulk_overwrite_global_commands(to_send)
             except Exception as e:
                 warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
@@ -726,12 +711,7 @@ class InteractionBotBase(CommonBotBase):
         for guild_id, cmds in guild_cmds.items():
             current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
             diff = _app_commands_diff(cmds, current_guild_cmds.values())
-            update_required = (
-                bool(diff["upsert"])
-                or bool(diff["edit"])
-                or bool(diff["change_type"])
-                or bool(diff["delete"])
-            )
+            update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
             # Show diff
             self._log_sync_debug(
                 "Application command synchronization:\n"
@@ -742,11 +722,7 @@ class InteractionBotBase(CommonBotBase):
             # Do API requests and cache
             if update_required:
                 try:
-                    to_send = diff["no_changes"] + diff["edit"]
-                    if bool(diff["change_type"]):
-                        await self.bulk_overwrite_guild_commands(guild_id, to_send)
-                    to_send.extend(diff["upsert"])
-                    to_send.extend(diff["change_type"])
+                    to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
                     await self.bulk_overwrite_guild_commands(guild_id, to_send)
                 except Exception as e:
                     warnings.warn(
