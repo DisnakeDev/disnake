@@ -143,7 +143,7 @@ All the other types may be converted implicitly, similarly to :ref:`ext_commands
 .. note::
   \* All channel subclasses and unions are also supported, see :attr:`Option.channel_types <Option>`
 
-  \*\* Role and Member may be used together to create a "mentionable" (:class:`Union[Role, Member]`)
+  \*\* Role and Member may be used together to create a "mentionable" (Union[:class:`disnake.Role`, :class:`disnake.Member`])
 
 
 Docstrings
@@ -202,7 +202,7 @@ Parameter Descriptors
 +++++++++++++++++++++
 
 Python has no truly *clean* way to provide metadata for parameters, so disnake uses the same approach as fastapi using
-parameter defaults. At the current time there's only :class:`Param`.
+parameter defaults. At the current time there's only :class:`~disnake.ext.commands.Param`.
 
 With this you may set the name, description, custom converters and :ref:`autocompleters`.
 

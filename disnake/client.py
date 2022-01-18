@@ -644,9 +644,9 @@ class Client:
 
         Raises
         ------
-        :exc:`.LoginFailure`
+        LoginFailure
             The wrong credentials are passed.
-        :exc:`.HTTPException`
+        HTTPException
             An unknown HTTP related error occurred,
             usually when it isn't 200 or the known incorrect credentials
             passing status code.
@@ -674,10 +674,10 @@ class Client:
 
         Raises
         -------
-        :exc:`.GatewayNotFound`
+        GatewayNotFound
             If the gateway to connect to Discord is not found. Usually if this
             is thrown then there is a Discord API outage.
-        :exc:`.ConnectionClosed`
+        ConnectionClosed
             The websocket connection has been terminated.
         """
         backoff = ExponentialBackoff()
