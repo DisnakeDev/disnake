@@ -86,7 +86,8 @@ if TYPE_CHECKING:
     )
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
-    from .ui import Components, View
+    from .ui.action_row import Components
+    from .ui.view import View
 
     MR = TypeVar("MR", bound="MessageReference")
     EmojiInputType = Union[Emoji, PartialEmoji, str]
