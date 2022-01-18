@@ -701,6 +701,31 @@ to handle it, which defaults to print a traceback and ignoring the exception.
         This is a low level function that is not generally meant to be used.
         Consider using :class:`~ext.commands.Bot` or :class:`~ext.commands.InteractionBot` instead.
 
+    .. warning::
+
+        If you decide to override this event and are using :class:`~disnake.ext.commands.Bot` or related types,
+        make sure to call :func:`Bot.process_application_commands <disnake.ext.commands.Bot.process_application_commands>`
+        to ensure that the application commands are processed.
+
+    .. versionadded:: 2.0
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`ApplicationCommandInteraction`
+
+.. function:: on_application_command_autocomplete(interaction)
+
+    Called when an application command autocomplete is called.
+
+    .. warning::
+
+        This is a low level function that is not generally meant to be used.
+        Consider using :class:`~ext.commands.Bot` or :class:`~ext.commands.InteractionBot` instead.
+
+    .. warning::
+        If you decide to override this event and are using :class:`~disnake.ext.commands.Bot` or related types,
+        make sure to call :func:`Bot.process_app_command_autocompletion <disnake.ext.commands.Bot.process_app_command_autocompletion>`
+        to ensure that the application command autocompletion is processed.
+
     .. versionadded:: 2.0
 
     :param interaction: The interaction object.
