@@ -40,7 +40,11 @@ from .enums import (
 )
 from .errors import InvalidArgument
 from .role import Role
+<<<<<<< HEAD
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
+=======
+from .utils import _get_and_cast, _get_as_snowflake
+>>>>>>> upstream/master
 
 if TYPE_CHECKING:
     from .state import ConnectionState

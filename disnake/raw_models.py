@@ -34,7 +34,10 @@ if TYPE_CHECKING:
     from .partial_emoji import PartialEmoji
     from .types.raw_models import (
         BulkMessageDeleteEvent,
+<<<<<<< HEAD
         GuildScheduledEventUserActionEvent,
+=======
+>>>>>>> upstream/master
         IntegrationDeleteEvent,
         MessageDeleteEvent,
         MessageUpdateEvent,

@@ -92,7 +92,11 @@ if TYPE_CHECKING:
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
+<<<<<<< HEAD
     from .types.raw_models import GuildScheduledEventUserActionEvent, TypingEvent
+=======
+    from .types.raw_models import TypingEvent
+>>>>>>> upstream/master
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
     from .voice_client import VoiceProtocol

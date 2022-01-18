@@ -50,6 +50,7 @@ from ..permissions import Permissions
 from ..ui.action_row import components_to_dict
 from ..user import ClientUser, User
 from ..webhook.async_ import Webhook, async_context, handle_message_parameters
+from ..ui.action_row import components_to_dict
 
 __all__ = (
     "Interaction",
@@ -77,8 +78,12 @@ if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..threads import Thread
     from ..types.interactions import Interaction as InteractionPayload
+<<<<<<< HEAD
     from ..ui.action_row import Components
     from ..ui.view import View
+=======
+    from ..ui import Components, View
+>>>>>>> upstream/master
 
     InteractionChannel = Union[
         VoiceChannel,

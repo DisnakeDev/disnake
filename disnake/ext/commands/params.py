@@ -70,7 +70,7 @@ if TYPE_CHECKING:
 if sys.version_info >= (3, 10):
     from types import UnionType
 else:
-    UnionType = object()
+    Annotated = object()
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
