@@ -83,14 +83,13 @@ class MessageInteraction(Interaction):
     permissions: :class:`Permissions`
         The resolved permissions of the member in the channel, including overwrites.
     response: :class:`InteractionResponse`
-        Returns an object responsible for handling responding to the interaction.
+        Returns an object responsible for handling response to the interaction.
     followup: :class:`Webhook`
         Returns the follow up webhook for follow up interactions.
     type: :class:`InteractionType`
-        The interaction type.
+        The interaction's type.
     token: :class:`str`
-        The token to continue the interaction. These are valid
-        for 15 minutes.
+        The token to continue the interaction. These are valid for 15 minutes.
     data: :class:`MessageInteractionData`
         The wrapped interaction data.
     """
@@ -104,7 +103,7 @@ class MessageInteraction(Interaction):
 
     @property
     def values(self) -> Optional[List[str]]:
-        """Optional[List[:class:`str`]]: The values the user selected"""
+        """Optional[List[:class:`str`]]: The values the user selected."""
         return self.data.values
 
     @cached_slot_property("_cs_component")

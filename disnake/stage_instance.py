@@ -109,6 +109,10 @@ class StageInstance(Hashable):
         return self._state.get_channel(self.channel_id)  # type: ignore
 
     def is_public(self) -> bool:
+        """Whether the stage instance is public.
+
+        :return type: :class:`bool`
+        """
         return self.privacy_level is StagePrivacyLevel.public
 
     async def edit(
@@ -143,7 +147,6 @@ class StageInstance(Hashable):
         HTTPException
             Editing a stage instance failed.
         """
-
         payload = {}
 
         if topic is not MISSING:

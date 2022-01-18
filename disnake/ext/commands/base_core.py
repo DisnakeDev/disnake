@@ -535,7 +535,7 @@ def guild_permissions(
     *,
     roles: Optional[Mapping[int, bool]] = None,
     users: Optional[Mapping[int, bool]] = None,
-    owner: bool = None,
+    owner: Optional[bool] = None,
     **kwargs: None,
 ) -> Callable[[T], T]:
     """
@@ -546,13 +546,13 @@ def guild_permissions(
     Parameters
     ----------
     guild_id: :class:`int`
-        the ID of the guild to apply the permissions to.
-    roles: Mapping[:class:`int`, :class:`bool`]
-        a mapping of role IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
-    users: Mapping[:class:`int`, :class:`bool`]
-        a mapping of user IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
-    owner: :class:`bool`
-        whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
+        The ID of the guild to apply the permissions to.
+    roles: Optional[Mapping[:class:`int`, :class:`bool`]]
+        A mapping of role IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
+    users: Optional[Mapping[:class:`int`, :class:`bool`]]
+        A mapping of user IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
+    owner: Optional[:class:`bool`]
+        Whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
     """
     if kwargs:
         warn_deprecated(

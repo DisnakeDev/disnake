@@ -54,9 +54,11 @@ autodoc_typehints = "none"
 # napoleon_attr_annotations = False
 
 github_repo = "https://github.com/DisnakeDev/disnake"
+dpy_github_repo = "https://github.com/Rapptz/discord.py"
 
 extlinks = {
     "issue": (f"{github_repo}/issues/%s", "#"),
+    "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#"),
 }
 
 # Links used for cross-referencing stuff in other documentation
@@ -88,7 +90,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "disnake"
-copyright = "2015-2021, Rapptz, 2021-present, EQUENOS"
+copyright = "2015-2021, Rapptz, 2021-present, Disnake Development"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

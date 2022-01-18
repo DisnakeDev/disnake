@@ -270,7 +270,6 @@ class View:
             Maximum number of children has been exceeded (25)
             or the row the item is trying to be added to is full.
         """
-
         if len(self.children) > 25:
             raise ValueError("maximum number of children exceeded")
 
@@ -290,7 +289,6 @@ class View:
         item: :class:`Item`
             The item to remove from the view.
         """
-
         try:
             self.children.remove(item)
         except ValueError:
@@ -321,7 +319,7 @@ class View:
 
         Parameters
         -----------
-        interaction: :class:`~disnake.MessageInteraction`
+        interaction: :class:`MessageInteraction`
             The interaction that occurred.
 
         Returns
@@ -352,7 +350,7 @@ class View:
             The exception that was raised.
         item: :class:`Item`
             The item that failed the dispatch.
-        interaction: :class:`~disnake.MessageInteraction`
+        interaction: :class:`MessageInteraction`
             The interaction that led to the failure.
         """
         print(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)

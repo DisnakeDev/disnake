@@ -74,7 +74,7 @@ class Reaction:
     me: :class:`bool`
         If the user sent this reaction.
     message: :class:`Message`
-        Message this reaction is for.
+        The message this reaction belongs to.
     """
 
     __slots__ = ("message", "count", "emoji", "me")
@@ -95,7 +95,7 @@ class Reaction:
 
     # TODO: typeguard
     def is_custom_emoji(self) -> bool:
-        """If this is a custom emoji.
+        """Whether the emoji is a custom emoji.
 
         :return type: :class:`bool`
         """
@@ -121,7 +121,7 @@ class Reaction:
     async def remove(self, user: Snowflake) -> None:
         """|coro|
 
-        Remove the reaction by the provided :class:`User` from the message.
+        Removes the reaction by the provided :class:`User` from the message.
 
         If the reaction is not your own (i.e. ``user`` parameter is not you) then
         the :attr:`~Permissions.manage_messages` permission is needed.
@@ -132,7 +132,7 @@ class Reaction:
         Parameters
         -----------
         user: :class:`abc.Snowflake`
-             The user or member from which to remove the reaction.
+            The user or member from which to remove the reaction.
 
         Raises
         -------
@@ -143,7 +143,6 @@ class Reaction:
         NotFound
             The user you specified, or the reaction's message was not found.
         """
-
         await self.message.remove_reaction(self.emoji, user)
 
     async def clear(self) -> None:
@@ -178,10 +177,9 @@ class Reaction:
 
         Examples
         ---------
-
         Usage ::
 
-            # I do not actually recommend doing this.
+            # We do not actually recommend doing this.
             async for user in reaction.users():
                 await channel.send(f'{user} has reacted with {reaction.emoji}!')
 
@@ -214,7 +212,6 @@ class Reaction:
             in a guild message context. Sometimes it can be a :class:`User`
             if the member has left the guild.
         """
-
         if not isinstance(self.emoji, str):
             emoji = f"{self.emoji.name}:{self.emoji.id}"
         else:

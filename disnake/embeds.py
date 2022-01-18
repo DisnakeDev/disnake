@@ -137,7 +137,7 @@ class Embed:
     type: :class:`str`
         The type of embed. Usually "rich".
         This can be set during initialisation.
-        Possible strings for embed types can be found on disnake's
+        Possible strings for embed types can be found on discord's
         `api docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-types>`_
     description: :class:`str`
         The description of the embed.
@@ -371,7 +371,6 @@ class Embed:
         icon_url: :class:`str`
             The URL of the footer icon. Only HTTP(S) is supported.
         """
-
         self._footer = {}
         if text is not EmptyEmbed:
             self._footer["text"] = str(text)
@@ -555,7 +554,6 @@ class Embed:
         icon_url: :class:`str`
             The URL of the author icon. Only HTTP(S) is supported.
         """
-
         self._author = {
             "name": str(name),
         }
@@ -608,7 +606,6 @@ class Embed:
         inline: :class:`bool`
             Whether the field should be displayed inline.
         """
-
         field = {
             "inline": inline,
             "name": str(name),
@@ -641,7 +638,6 @@ class Embed:
         inline: :class:`bool`
             Whether the field should be displayed inline.
         """
-
         field = {
             "inline": inline,
             "name": str(name),
@@ -707,7 +703,6 @@ class Embed:
         IndexError
             An invalid index was provided.
         """
-
         try:
             field = self._fields[index]
         except (TypeError, IndexError, AttributeError):

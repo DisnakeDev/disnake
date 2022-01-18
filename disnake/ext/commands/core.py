@@ -227,13 +227,12 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
     aliases: Union[List[:class:`str`], Tuple[:class:`str`]]
         The list of aliases the command can be invoked under.
     enabled: :class:`bool`
-        A boolean that indicates if the command is currently enabled.
+        Whether the command is currently enabled.
         If the command is invoked while it is disabled, then
         :exc:`.DisabledCommand` is raised to the :func:`.on_command_error`
         event. Defaults to ``True``.
     parent: Optional[:class:`Group`]
-        The parent group that this command belongs to. ``None`` if there
-        isn't one.
+        The parent group that this command belongs to. ``None`` if there isn't one.
     cog: Optional[:class:`Cog`]
         The cog that this command belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.Context`], :class:`bool`]]
@@ -246,8 +245,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
     description: :class:`str`
         The message prefixed into the default help command.
     hidden: :class:`bool`
-        If ``True``\, the default help command does not show this in the
-        help output.
+        If ``True``\, the default help command does not show this in the help output.
     rest_is_raw: :class:`bool`
         If ``False`` and a keyword-only argument is provided then the keyword
         only argument is stripped and handled as if it was a regular argument
@@ -262,7 +260,6 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         the user to specify at least one argument. Defaults to ``False``.
 
         .. versionadded:: 1.5
-
     ignore_extra: :class:`bool`
         If ``True``\, ignores extraneous strings passed to a command if all its
         requirements are met (e.g. ``?foo a b c`` when only expecting ``a``
@@ -277,7 +274,6 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         .. note::
             This object may be copied by the library.
-
 
         .. versionadded:: 2.0
     """
@@ -435,7 +431,6 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         func
             The function that will be used as a check.
         """
-
         self.checks.append(func)
 
     def remove_check(self, func: Check) -> None:
@@ -451,7 +446,6 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         func
             The function to remove from the checks.
         """
-
         try:
             self.checks.remove(func)
         except ValueError:
@@ -956,7 +950,6 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("The error handler must be a coroutine.")
 
@@ -964,9 +957,11 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return coro
 
     def has_error_handler(self) -> bool:
-        """:class:`bool`: Checks whether the command has an error handler registered.
+        """Whether the command has an error handler registered.
 
         .. versionadded:: 1.7
+
+        :return type: :class:`bool`
         """
         return hasattr(self, "on_error")
 
@@ -1115,7 +1110,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         command is disabled.
 
         .. versionchanged:: 1.3
-            Checks whether the command is disabled or not
+            Checks whether the command is disabled.
 
         Parameters
         -----------
@@ -1124,16 +1119,15 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         Raises
         -------
-        :class:`CommandError`
+        CommandError
             Any command error that was raised during a check call will be propagated
             by this function.
 
         Returns
         --------
         :class:`bool`
-            A boolean indicating if the command can be invoked.
+            Whether the command can be invoked.
         """
-
         if not self.enabled:
             raise DisabledCommand(f"{self.name} command is disabled")
 
@@ -1203,7 +1197,7 @@ class GroupMixin(Generic[CogT]):
         :meth:`~.GroupMixin.group` shortcut decorators are used instead.
 
         .. versionchanged:: 1.4
-             Raise :exc:`.CommandRegistrationError` instead of generic :exc:`.ClientException`
+            Raise :exc:`.CommandRegistrationError` instead of generic :exc:`.ClientException`
 
         Parameters
         -----------
@@ -1212,12 +1206,11 @@ class GroupMixin(Generic[CogT]):
 
         Raises
         -------
-        :exc:`.CommandRegistrationError`
+        CommandRegistrationError
             If the command or its alias is already registered by different command.
         TypeError
             If the command passed is not a subclass of :class:`.Command`.
         """
-
         if not isinstance(command, Command):
             raise TypeError("The command passed must be a subclass of Command")
 
@@ -1307,7 +1300,6 @@ class GroupMixin(Generic[CogT]):
         Optional[:class:`Command`]
             The command that was requested. If not found, returns ``None``.
         """
-
         # fast path, no space in name.
         if " " not in name:
             return self.all_commands.get(name)
@@ -1837,7 +1829,6 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         async def only_for_owners(ctx):
             await ctx.send('Hello mister owner!')
     """
-
     unwrapped = []
     for wrapped in checks:
         try:
@@ -2044,7 +2035,6 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
             await ctx.send('You can manage messages.')
 
     """
-
     invalid = set(perms) - set(disnake.Permissions.VALID_FLAGS)
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
@@ -2070,7 +2060,6 @@ def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
     This check raises a special exception, :exc:`.BotMissingPermissions`
     that is inherited from :exc:`.CheckFailure`.
     """
-
     invalid = set(perms) - set(disnake.Permissions.VALID_FLAGS)
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
@@ -2097,7 +2086,6 @@ def has_guild_permissions(**perms: bool) -> Callable[[T], T]:
 
     .. versionadded:: 1.3
     """
-
     invalid = set(perms) - set(disnake.Permissions.VALID_FLAGS)
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
@@ -2123,7 +2111,6 @@ def bot_has_guild_permissions(**perms: bool) -> Callable[[T], T]:
 
     .. versionadded:: 1.3
     """
-
     invalid = set(perms) - set(disnake.Permissions.VALID_FLAGS)
     if invalid:
         raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")

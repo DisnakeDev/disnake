@@ -110,7 +110,7 @@ class Interaction:
     id: :class:`int`
         The interaction's ID.
     type: :class:`InteractionType`
-        The interaction type.
+        The interaction's type.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
     guild_locale: Optional[:class:`str`]
@@ -130,8 +130,7 @@ class Interaction:
 
         .. versionadded:: 2.4
     token: :class:`str`
-        The token to continue the interaction. These are valid
-        for 15 minutes.
+        The token to continue the interaction. These are valid for 15 minutes.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -200,14 +199,18 @@ class Interaction:
 
     @property
     def created_at(self) -> datetime:
+        """:class:`datetime.datetime`: Returns the interaction's creation time in UTC."""
         return utils.snowflake_time(self.id)
 
     @property
     def client(self) -> Optional[Bot]:
+        """Optional[:class:`.Bot`]: The interaction's bot. There is an alias for this named :attr:``bot``."""
         return self.bot
 
     @property
     def user(self) -> Optional[Union[User, Member]]:
+        """Optional[Union[:class:`.User`, :class:`.Member`]]: The user or member that sent the interaction.
+        There is an alias for this named :attr:`author`."""
         return self.author
 
     @property
@@ -299,7 +302,6 @@ class Interaction:
         InteractionMessage
             The original interaction response message.
         """
-
         if self._original_message is not None:
             return self._original_message
 
@@ -402,7 +404,6 @@ class Interaction:
         :class:`InteractionMessage`
             The newly edited message.
         """
-
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
@@ -532,12 +533,12 @@ class Interaction:
             ``embeds`` parameter.
         embeds: List[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
-            This cannot be mixed with the ``embed`` parameter.
+            This cannot be mixed with ``embed`` parameter.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
         files: List[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
-            This cannot be mixed with the ``file`` parameter.
+            This cannot be mixed with ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message. If this is
             passed, then the object is merged with :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`.
@@ -546,7 +547,7 @@ class Interaction:
             If no object is passed at all then the defaults given by :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`
             are used instead.
         tts: :class:`bool`
-            Indicates if the message should be sent using text-to-speech.
+            Whether the message should be sent using text-to-speech.
         view: :class:`disnake.ui.View`
             The view to send with the message. This can not be mixed with ``components``.
         components: |components_type|
@@ -554,7 +555,7 @@ class Interaction:
 
             .. versionadded:: 2.4
         ephemeral: :class:`bool`
-            Indicates if the message should only be visible to the user who started the interaction.
+            Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
             is set to 15 minutes.
         delete_after: :class:`float`
@@ -608,7 +609,7 @@ class InteractionResponse:
         self._responded: bool = False
 
     def is_done(self) -> bool:
-        """Indicates whether an interaction response has been done before.
+        """Whether an interaction response has been done before.
 
         An interaction can only be responded to once.
 
@@ -627,8 +628,8 @@ class InteractionResponse:
         Parameters
         -----------
         ephemeral: :class:`bool`
-            Indicates whether the deferred message will eventually be ephemeral.
-            This only applies for interactions of type :attr:`InteractionType.application_command` or when ``with_message`` is True
+            Whether the deferred message will eventually be ephemeral.
+            This only applies for interactions of type :attr:`InteractionType.application_command`.
         with_message: :class:`bool`
             Indicates whether the response will be a message with thinking state (bot is thinking...).
             This is always True for interactions of type :attr:`InteractionType.application_command`.
@@ -719,12 +720,12 @@ class InteractionResponse:
             ``embeds`` parameter.
         embeds: List[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
-            This cannot be mixed with the ``embed`` parameter.
+            This cannot be mixed with ``embed`` parameter.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
         files: List[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
-            This cannot be mixed with the ``file`` parameter.
+            This cannot be mixed with ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: :class:`disnake.ui.View`
@@ -734,9 +735,9 @@ class InteractionResponse:
 
             .. versionadded:: 2.4
         tts: :class:`bool`
-            Indicates if the message should be sent using text-to-speech.
+            Whether the message should be sent using text-to-speech.
         ephemeral: :class:`bool`
-            Indicates if the message should only be visible to the user who started the interaction.
+            Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
             is set to 15 minutes.
         delete_after: :class:`float`
@@ -882,12 +883,12 @@ class InteractionResponse:
         content: Optional[:class:`str`]
             The new content to replace the message with. ``None`` removes the content.
         embed: Optional[:class:`Embed`]
-            The new embed to replace the original with. This cannot be mixed with the
+            The new embed to replace the original with. This cannot be mixed with
             ``embeds`` parameter.
             Could be ``None`` to remove the embed.
         embeds: List[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
-            This cannot be mixed with the ``embed`` parameter.
+            This cannot be mixed with ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
@@ -895,7 +896,7 @@ class InteractionResponse:
 
             .. versionadded:: 2.2
         files: List[:class:`File`]
-            A list of files to upload. This cannot be mixed with the ``file`` parameter.
+            A list of files to upload. This cannot be mixed with ``file`` parameter.
             Files will be appended to the message.
 
             .. versionadded:: 2.2
@@ -1001,6 +1002,7 @@ class InteractionResponse:
 
     async def autocomplete(self, *, choices: Choices) -> None:
         """|coro|
+
         Responds to this interaction by displaying a list of possible autocomplete results.
         Only works for autocomplete interactions.
 
@@ -1111,19 +1113,19 @@ class InteractionMessage(Message):
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
-            The new embed to replace the original with. This cannot be mixed with the
+            The new embed to replace the original with. This cannot be mixed with
             ``embeds`` parameter.
             Could be ``None`` to remove the embed.
         embeds: List[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
-            This cannot be mixed with the ``embed`` parameter.
+            This cannot be mixed with ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
         files: List[:class:`File`]
-            A list of files to upload. This cannot be mixed with the ``file`` parameter.
+            A list of files to upload. This cannot be mixed with ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
         attachments: List[:class:`Attachment`]
@@ -1160,7 +1162,6 @@ class InteractionMessage(Message):
         :class:`InteractionMessage`
             The newly edited message.
         """
-
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
@@ -1198,7 +1199,6 @@ class InteractionMessage(Message):
         HTTPException
             Deleting the message failed.
         """
-
         if delay is not None:
 
             async def inner_call(delay: float = delay):

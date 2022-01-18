@@ -275,7 +275,6 @@ class Thread(Messageable, Hashable):
         Optional[:class:`CategoryChannel`]
             The parent channel's category.
         """
-
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")

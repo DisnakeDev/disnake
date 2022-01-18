@@ -63,7 +63,7 @@ class Button(Item[V]):
     url: Optional[:class:`str`]
         The URL this button sends you to.
     disabled: :class:`bool`
-        Whether the button is disabled or not.
+        Whether the button is disabled.
     label: Optional[:class:`str`]
         The label of the button, if any.
     emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
@@ -165,7 +165,7 @@ class Button(Item[V]):
 
     @property
     def disabled(self) -> bool:
-        """:class:`bool`: Whether the button is disabled or not."""
+        """:class:`bool`: Whether the button is disabled."""
         return self._underlying.disabled
 
     @disabled.setter
@@ -214,6 +214,8 @@ class Button(Item[V]):
 
     @property
     def type(self) -> ComponentType:
+        """:class:`disnake.ComponentType`: The type of the button. This will always return
+        :attr:``ComponentType.button``."""
         return self._underlying.type
 
     def to_component_dict(self):
@@ -264,7 +266,7 @@ def button(
     style: :class:`.ButtonStyle`
         The style of the button. Defaults to :attr:`.ButtonStyle.grey`.
     disabled: :class:`bool`
-        Whether the button is disabled or not. Defaults to ``False``.
+        Whether the button is disabled. Defaults to ``False``.
     emoji: Optional[Union[:class:`str`, :class:`.Emoji`, :class:`.PartialEmoji`]]
         The emoji of the button. This can be in string form or a :class:`.PartialEmoji`
         or a full :class:`.Emoji`.

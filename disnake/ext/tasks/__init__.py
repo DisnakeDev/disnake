@@ -284,7 +284,6 @@ class Loop(Generic[LF]):
         \*\*kwargs
             The keyword arguments to use.
         """
-
         if self._injected is not None:
             args = (self._injected, *args)
 
@@ -310,7 +309,6 @@ class Loop(Generic[LF]):
         :class:`asyncio.Task`
             The task that has been created.
         """
-
         if self._task is not MISSING and not self._task.done():
             raise RuntimeError("Task is already launched and is not completed.")
 
@@ -396,7 +394,6 @@ class Loop(Generic[LF]):
         TypeError
             An exception passed is either not a class or not inherited from :class:`BaseException`.
         """
-
         for exc in exceptions:
             if not inspect.isclass(exc):
                 raise TypeError(f"{exc!r} must be a class.")
@@ -432,24 +429,34 @@ class Loop(Generic[LF]):
         return len(self._valid_exception) == old_length - len(exceptions)
 
     def get_task(self) -> Optional[asyncio.Task[None]]:
-        """Optional[:class:`asyncio.Task`]: Fetches the internal task or ``None`` if there isn't one running."""
+        """Fetches the internal task or ``None`` if there isn't one running.
+
+        :return type: Optional[:class:`asyncio.Task`]
+        """
         return self._task if self._task is not MISSING else None
 
     def is_being_cancelled(self) -> bool:
-        """Whether the task is being cancelled."""
+        """Whether the task is being cancelled.
+
+        :return type: :class:`bool`
+        """
         return self._is_being_cancelled
 
     def failed(self) -> bool:
-        """:class:`bool`: Whether the internal task has failed.
+        """Whether the internal task has failed.
 
         .. versionadded:: 1.2
+
+        :return type: :class:`bool`
         """
         return self._has_failed
 
     def is_running(self) -> bool:
-        """:class:`bool`: Check if the task is currently running.
+        """Check if the task is currently running.
 
         .. versionadded:: 1.4
+
+        :return type: :class:`bool`
         """
         return not bool(self._task.done()) if self._task is not MISSING else False
 
@@ -481,7 +488,6 @@ class Loop(Generic[LF]):
         TypeError
             The function was not a coroutine.
         """
-
         if not inspect.iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
@@ -509,7 +515,6 @@ class Loop(Generic[LF]):
         TypeError
             The function was not a coroutine.
         """
-
         if not inspect.iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
@@ -519,7 +524,7 @@ class Loop(Generic[LF]):
     def error(self, coro: ET) -> ET:
         """A decorator that registers a coroutine to be called if the task encounters an unhandled exception.
 
-        The coroutine must take only one argument the exception raised (except ``self`` in a class context).
+        The coroutine must take only one argument the exception raised (and ``self`` in a class context).
 
         By default this prints to :data:`sys.stderr` however it could be
         overridden to have a different implementation.
@@ -655,7 +660,6 @@ class Loop(Generic[LF]):
             An invalid value for the ``time`` parameter was passed, or the
             ``time`` parameter was passed in conjunction with relative time parameters.
         """
-
         if time is MISSING:
             seconds = seconds or 0
             minutes = minutes or 0
@@ -719,7 +723,6 @@ def loop(
             Duplicate times will be ignored, and only run once.
 
         .. versionadded:: 2.0
-
     count: Optional[:class:`int`]
         The number of loops to do, ``None`` if it should be an
         infinite loop.

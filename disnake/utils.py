@@ -341,7 +341,7 @@ def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
     Returns
     --------
     Tuple[:class:`int`, :class:`datetime.datetime`, :class:`bytes`]
-        the bot's id, the time when the token was generated and the hmac.
+        The bot's ID, the time when the token was generated and the hmac.
     """
     parts = token.split(".")
 
@@ -610,7 +610,7 @@ async def sleep_until(when: datetime.datetime, result: Optional[T] = None) -> Op
         The timestamp in which to sleep until. If the datetime is naive then
         it is assumed to be local time.
     result: Any
-        If provided is returned to the caller when the coroutine completes.
+        If provided, is returned to the caller when the coroutine completes.
     """
     delta = compute_timedelta(when)
     return await asyncio.sleep(delta, result)
@@ -707,8 +707,7 @@ def resolve_invite(
     Parameters
     -----------
     invite: Union[:class:`~disnake.Invite`, :class:`str`]
-        The invite.
-
+        The invite to resolve.
     with_params: :class:`bool`
         Whether to also return the query parameters of the invite, if it's a url.
 
@@ -1038,7 +1037,6 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
         The iterator to chunk, can be sync or async.
     max_size: :class:`int`
         The maximum chunk size.
-
 
     .. warning::
 

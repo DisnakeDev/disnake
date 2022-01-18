@@ -148,7 +148,7 @@ class Guild(Hashable):
     Attributes
     ----------
     name: :class:`str`
-        The guild name.
+        The guild's name.
     emojis: Tuple[:class:`Emoji`, ...]
         All emojis that the guild owns.
     stickers: Tuple[:class:`GuildSticker`, ...]
@@ -165,13 +165,13 @@ class Guild(Hashable):
     id: :class:`int`
         The guild's ID.
     owner_id: :class:`int`
-        The guild owner's ID. Use :attr:`Guild.owner` instead.
+        The guild owner's ID. Use :attr:`Guild.owner` if you want to get a :class:`Member` object instead.
     unavailable: :class:`bool`
-        Indicates if the guild is unavailable. If this is ``True`` then the
+        Whether the guild is unavailable. If this is ``True`` then the
         reliability of other attributes outside of :attr:`Guild.id` is slim and they might
         all be ``None``. It is best to not do anything with the guild if it is unavailable.
 
-        Check the :func:`on_guild_unavailable` and :func:`on_guild_available` events.
+        Check :func:`on_guild_unavailable` and :func:`on_guild_available` events.
     max_presences: Optional[:class:`int`]
         The maximum amount of presences for the guild.
     max_members: Optional[:class:`int`]
@@ -232,7 +232,6 @@ class Guild(Hashable):
         - ``VERIFIED``: Guild is a verified server.
         - ``VIP_REGIONS``: Guild has VIP voice regions.
         - ``WELCOME_SCREEN_ENABLED``: Guild has enabled the welcome screen.
-
     premium_progress_bar_enabled: :class:`bool`
         Whether the server boost progress bar is enabled.
     premium_tier: :class:`int`
@@ -438,7 +437,7 @@ class Guild(Hashable):
         Parameters
         ----------
         name: :class:`int`
-            the ID to compare to.
+            The application command ID to search for.
         """
         self._state._get_guild_application_command(self.id, application_command_id)
 
@@ -449,13 +448,21 @@ class Guild(Hashable):
         Parameters
         ----------
         name: :class:`str`
-            the name to compare to.
+            The appllication command name to search for.
         """
         return self._state._get_guild_command_named(self.id, name)
 
     def get_command_permissions(
         self, command_id: int, /
     ) -> Optional[GuildApplicationCommandPermissions]:
+        """
+        Gets a cached application command permissions matching the specified ID.
+
+        Parameters
+        ----------
+        command_id: :class:`int`
+            The application command ID to search for.
+        """
         return self._state._get_command_permissions(self.id, command_id)
 
     def _from_data(self, guild: GuildPayload) -> None:
@@ -583,7 +590,7 @@ class Guild(Hashable):
 
     @property
     def large(self) -> bool:
-        """:class:`bool`: Indicates if the guild is a 'large' guild.
+        """:class:`bool`: Whether the guild is a 'large' guild.
 
         A large guild is defined as having more than ``large_threshold`` count
         members, which for this library is set to the maximum of 250.
@@ -774,7 +781,7 @@ class Guild(Hashable):
     @property
     def public_updates_channel(self) -> Optional[TextChannel]:
         """Optional[:class:`TextChannel`]: Return's the guild's channel where admins and
-        moderators of the guilds receive notices from Discord. The guild must be a
+        moderators of the guild receive notices from Discord. The guild must be a
         Community guild.
 
         If no channel is set, then this returns ``None``.
@@ -869,7 +876,7 @@ class Guild(Hashable):
 
     @property
     def premium_subscriber_role(self) -> Optional[Role]:
-        """Optional[:class:`Role`]: Gets the premium subscriber role, AKA "boost" role, in this guild.
+        """Optional[:class:`Role`]: Gets the premium subscriber role, AKA "boost" role, in this guild, if any.
 
         .. versionadded:: 1.6
         """
@@ -944,7 +951,7 @@ class Guild(Hashable):
 
     @property
     def owner(self) -> Optional[Member]:
-        """Optional[:class:`Member`]: The member that owns the guild."""
+        """Optional[:class:`Member`]: Returns the member that owns the guild."""
         return self.get_member(self.owner_id)  # type: ignore
 
     @property
@@ -985,7 +992,6 @@ class Guild(Hashable):
 
             Due to a Discord limitation, in order for this attribute to remain up-to-date and
             accurate, it requires :attr:`Intents.members` to be specified.
-
         """
         try:
             return self._member_count
@@ -994,7 +1000,7 @@ class Guild(Hashable):
 
     @property
     def chunked(self) -> bool:
-        """:class:`bool`: Returns a boolean indicating if the guild is "chunked".
+        """:class:`bool`: Whether the guild is "chunked".
 
         A chunked guild means that :attr:`member_count` is equal to the
         number of members stored in the internal :attr:`members` cache.
@@ -1046,7 +1052,6 @@ class Guild(Hashable):
             The member in this guild with the associated name. If not found
             then ``None`` is returned.
         """
-
         result = None
         members = self.members
         if len(name) > 5 and name[-5] == "#":
@@ -1122,7 +1127,7 @@ class Guild(Hashable):
 
         Creates a :class:`TextChannel` for the guild.
 
-        Note that you need the :attr:`~Permissions.manage_channels` permission
+        You need :attr:`~Permissions.manage_channels` permission
         to create the channel.
 
         The ``overwrites`` parameter can be used to create a 'secret'
@@ -1172,13 +1177,13 @@ class Guild(Hashable):
             The position in the channel list. This is a number that starts
             at 0. e.g. the top channel is position 0.
         topic: :class:`str`
-            The new channel's topic.
+            The channel's topic.
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
         nsfw: :class:`bool`
-            To mark the channel as NSFW or not.
+            Whether mark the channel as NSFW or not.
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1196,7 +1201,6 @@ class Guild(Hashable):
         :class:`TextChannel`
             The channel that was just created.
         """
-
         options = {}
         if position is not MISSING:
             options["position"] = position
@@ -1337,7 +1341,7 @@ class Guild(Hashable):
         name: :class:`str`
             The channel's name.
         topic: :class:`str`
-            The new channel's topic.
+            The channel's topic.
         overwrites: Dict[Union[:class:`Role`, :class:`Member`], :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
@@ -1366,7 +1370,6 @@ class Guild(Hashable):
         :class:`StageChannel`
             The channel that was just created.
         """
-
         options: Dict[str, Any] = {
             "topic": topic,
         }
@@ -1403,6 +1406,19 @@ class Guild(Hashable):
 
             The ``category`` parameter is not supported in this function since categories
             cannot have categories.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The category's name.
+        overwrites: Dict[Union[:class:`Role`, :class:`Member`], :class:`PermissionOverwrite`]
+            A :class:`dict` of target (either a role or a member) to
+            :class:`PermissionOverwrite` which can be synced to channels.
+        position: :class:`int`
+            The position in the category list. This is a number that starts
+            at 0. e.g. the top category is position 0.
+        reason: Optional[:class:`str`]
+            The reason for creating this category. Shows up on the audit log.
 
         Raises
         ------
@@ -1463,7 +1479,6 @@ class Guild(Hashable):
         Forbidden
             You do not have permissions to delete the guild.
         """
-
         await self._state.http.delete_guild(self.id)
 
     async def edit(
@@ -1496,8 +1511,8 @@ class Guild(Hashable):
 
         Edits the guild.
 
-        You must have the :attr:`~Permissions.manage_guild` permission
-        to edit the guild.
+        You must have :attr:`~Permissions.manage_guild` permission
+        to use this.
 
         .. versionchanged:: 1.4
             The `rules_channel` and `public_updates_channel` keyword-only parameters were added.
@@ -1569,10 +1584,10 @@ class Guild(Hashable):
             The new channel that is used for public updates from Discord. This is only available to
             guilds that contain ``PUBLIC`` in :attr:`Guild.features`. Could be ``None`` for no
             public updates channel.
-        reason: Optional[:class:`str`]
-            The reason for editing this guild. Shows up on the audit log.
         premium_progress_bar_enabled: :class:`bool`
             Whether the server boost progress bar is enabled.
+        reason: Optional[:class:`str`]
+            The reason for editing this guild. Shows up on the audit log.
 
         Raises
         -------
@@ -1591,7 +1606,6 @@ class Guild(Hashable):
             The newly updated guild. Note that this has the same limitations as
             mentioned in :meth:`Client.fetch_guild` and may not have full data.
         """
-
         http = self._state.http
 
         if vanity_code is not MISSING:
@@ -1733,7 +1747,7 @@ class Guild(Hashable):
         Returns
         -------
         Sequence[:class:`abc.GuildChannel`]
-            All channels in the guild.
+            All channels the guild has.
         """
         data = await self._state.http.get_all_guild_channels(self.id)
 
@@ -1764,7 +1778,7 @@ class Guild(Hashable):
         Returns
         --------
         List[:class:`Thread`]
-            The active threads
+            The active threads.
         """
         data = await self._state.http.get_active_threads(self.id)
         threads = [Thread(guild=self, state=self._state, data=d) for d in data.get("threads", [])]
@@ -1781,7 +1795,7 @@ class Guild(Hashable):
     ) -> List[GuildScheduledEvent]:
         """|coro|
 
-        Retrieves a list of all :class:`GuildScheduledEvent` instances of the guild.
+        Retrieves a list of all existing :class:`GuildScheduledEvent` instances that the guild has.
 
         .. versionadded:: 2.3
 
@@ -1884,7 +1898,7 @@ class Guild(Hashable):
         Returns
         --------
         :class:`GuildScheduledEvent`
-            The guild scheduled event.
+            The newly created guild scheduled event.
         """
         if not isinstance(entity_type, GuildScheduledEventEntityType):
             raise ValueError("entity_type must be an instance of GuildScheduledEventEntityType")
@@ -1971,7 +1985,6 @@ class Guild(Hashable):
             members = await guild.fetch_members(limit=150).flatten()
             # members is now a list of Member...
         """
-
         if not self._state._intents.members:
             raise ClientException("Intents.members must be enabled to use this.")
 
@@ -1980,7 +1993,7 @@ class Guild(Hashable):
     async def fetch_member(self, member_id: int, /) -> Member:
         """|coro|
 
-        Retrieves a :class:`Member` from a guild ID, and a member ID.
+        Retrieves a :class:`Member` with the given ID.
 
         .. note::
 
@@ -2011,8 +2024,8 @@ class Guild(Hashable):
 
         Retrieves the :class:`BanEntry` for a user.
 
-        You must have the :attr:`~Permissions.ban_members` permission
-        to get this information.
+        You must have :attr:`~Permissions.ban_members` permission
+        to use this.
 
         Parameters
         -----------
@@ -2039,7 +2052,7 @@ class Guild(Hashable):
     async def fetch_channel(self, channel_id: int, /) -> Union[GuildChannel, Thread]:
         """|coro|
 
-        Retrieves a :class:`.abc.GuildChannel` or :class:`.Thread` with the specified ID.
+        Retrieves a :class:`.abc.GuildChannel` or :class:`.Thread` with the given ID.
 
         .. note::
 
@@ -2049,15 +2062,15 @@ class Guild(Hashable):
 
         Raises
         -------
-        :exc:`.InvalidData`
+        InvalidData
             An unknown channel type was received from Discord
             or the guild the channel belongs to is not the same
             as the one in this object points to.
-        :exc:`.HTTPException`
+        HTTPException
             Retrieving the channel failed.
-        :exc:`.NotFound`
+        NotFound
             Invalid Channel ID.
-        :exc:`.Forbidden`
+        Forbidden
             You do not have permission to fetch this channel.
 
         Returns
@@ -2086,8 +2099,8 @@ class Guild(Hashable):
 
         Retrieves all the users that are banned from the guild as a :class:`list` of :class:`BanEntry`.
 
-        You must have the :attr:`~Permissions.ban_members` permission
-        to get this information.
+        You must have :attr:`~Permissions.ban_members` permission
+        to use this.
 
         Raises
         -------
@@ -2122,7 +2135,7 @@ class Guild(Hashable):
         The inactive members are denoted if they have not logged on in
         ``days`` number of days and they have no roles.
 
-        You must have the :attr:`~Permissions.kick_members` permission
+        You must have :attr:`~Permissions.kick_members` permission
         to use this.
 
         To check how many members you would prune without actually pruning,
@@ -2137,8 +2150,6 @@ class Guild(Hashable):
         -----------
         days: :class:`int`
             The number of days before counting as inactive.
-        reason: Optional[:class:`str`]
-            The reason for doing this action. Shows up on the audit log.
         compute_prune_count: :class:`bool`
             Whether to compute the prune count. This defaults to ``True``
             which makes it prone to timeouts in very large guilds. In order
@@ -2147,6 +2158,8 @@ class Guild(Hashable):
         roles: List[:class:`abc.Snowflake`]
             A list of :class:`abc.Snowflake` that represent roles to include in the pruning process. If a member
             has a role that is not specified, they'll be excluded.
+        reason: Optional[:class:`str`]
+            The reason for doing this action. Shows up on the audit log.
 
         Raises
         -------
@@ -2163,7 +2176,6 @@ class Guild(Hashable):
             The number of members pruned. If ``compute_prune_count`` is ``False``
             then this returns ``None``.
         """
-
         if not isinstance(days, int):
             raise InvalidArgument(
                 f"Expected int for ``days``, received {days.__class__.__name__} instead."
@@ -2184,7 +2196,8 @@ class Guild(Hashable):
 
         Gets the list of templates from this guild.
 
-        Requires :attr:`~.Permissions.manage_guild` permissions.
+        You must have :attr:`~.Permissions.manage_guild` permission
+        to use this.
 
         .. versionadded:: 1.7
 
@@ -2208,7 +2221,8 @@ class Guild(Hashable):
 
         Gets the list of webhooks from this guild.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` permission
+        to use this.
 
         Raises
         -------
@@ -2220,7 +2234,6 @@ class Guild(Hashable):
         List[:class:`Webhook`]
             The webhooks for this guild.
         """
-
         from .webhook import Webhook
 
         data = await self._state.http.guild_webhooks(self.id)
@@ -2257,7 +2270,6 @@ class Guild(Hashable):
         :class:`int`
             The number of members estimated to be pruned.
         """
-
         if not isinstance(days, int):
             raise InvalidArgument(
                 f"Expected int for ``days``, received {days.__class__.__name__} instead."
@@ -2276,8 +2288,8 @@ class Guild(Hashable):
 
         Returns a list of all active instant invites from the guild.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to get
-        this information.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this
 
         Raises
         -------
@@ -2291,7 +2303,6 @@ class Guild(Hashable):
         List[:class:`Invite`]
             The list of invites that are currently active.
         """
-
         data = await self._state.http.invites_from(self.id)
         result = []
         for invite in data:
@@ -2305,8 +2316,8 @@ class Guild(Hashable):
 
         Creates a template for the guild.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         .. versionadded:: 1.7
 
@@ -2333,8 +2344,8 @@ class Guild(Hashable):
 
         Attaches an integration to the guild.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         .. versionadded:: 1.4
 
@@ -2359,8 +2370,8 @@ class Guild(Hashable):
 
         Returns a list of all integrations attached to the guild.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         .. versionadded:: 1.4
 
@@ -2391,7 +2402,7 @@ class Guild(Hashable):
     async def fetch_stickers(self) -> List[GuildSticker]:
         r"""|coro|
 
-        Retrieves a list of all :class:`Sticker`\s for the guild.
+        Retrieves a list of all :class:`Sticker`\s that the guild has.
 
         .. versionadded:: 2.0
 
@@ -2485,7 +2496,7 @@ class Guild(Hashable):
         Returns
         --------
         :class:`GuildSticker`
-            The created sticker.
+            The newly created sticker.
         """
         payload: Any = {
             "name": name,
@@ -2535,7 +2546,7 @@ class Guild(Hashable):
     async def fetch_emojis(self) -> List[Emoji]:
         r"""|coro|
 
-        Retrieves all custom :class:`Emoji`\s from the guild.
+        Retrieves all custom :class:`Emoji`\s that the guild has.
 
         .. note::
 
@@ -2596,10 +2607,18 @@ class Guild(Hashable):
 
         Creates a custom :class:`Emoji` for the guild.
 
-        There is currently a limit of 50 static and animated emojis respectively per guild,
-        unless the guild has the ``MORE_EMOJI`` feature which extends the limit to 200.
+        Depending on the boost level of your guild (which can be obtained via :attr:`premium_tier`),
+        the ammount of custom emojis that can be created are the following:
 
-        You must have the :attr:`~Permissions.manage_emojis` permission to
+        .. csv-table::
+            :header: "Boost level", "Max custom emoji limit"
+
+            "0", "50"
+            "1", "100"
+            "2", "150"
+            "3", "200"
+
+        You must have :attr:`~Permissions.manage_emojis` permission to
         do this.
 
         Parameters
@@ -2624,9 +2643,8 @@ class Guild(Hashable):
         Returns
         --------
         :class:`Emoji`
-            The created emoji.
+            The newly created emoji.
         """
-
         img = utils._bytes_to_base64_data(image)
         if roles:
             role_ids = [role.id for role in roles]
@@ -2660,7 +2678,6 @@ class Guild(Hashable):
         HTTPException
             An error occurred deleting the emoji.
         """
-
         await self._state.http.delete_custom_emoji(self.id, emoji.id, reason=reason)
 
     async def fetch_roles(self) -> List[Role]:
@@ -2682,7 +2699,7 @@ class Guild(Hashable):
         Returns
         -------
         List[:class:`Role`]
-            All roles in the guild.
+            All roles the guild has.
         """
         data = await self._state.http.get_roles(self.id)
         return [Role(guild=self, state=self._state, data=d) for d in data]
@@ -2702,8 +2719,8 @@ class Guild(Hashable):
     ) -> Optional[Member]:
         """|coro|
 
-        Tries to get a member from the cache by ID. If fails, it fetches
-        the user from the API and caches it.
+        Tries to get a member from the cache with the given ID. If fails, it fetches
+        the member from the API and caches it.
 
         Parameters
         -----------
@@ -2713,7 +2730,7 @@ class Guild(Hashable):
         Returns
         --------
         :class:`Member`
-            The member with the given ID
+            The member with the given ID.
         """
         member = self.get_member(member_id)
         if member is not None:
@@ -2778,7 +2795,7 @@ class Guild(Hashable):
 
         All fields are optional.
 
-        You must have the :attr:`~Permissions.manage_roles` permission to
+        You must have :attr:`~Permissions.manage_roles` permission to
         do this.
 
         .. versionchanged:: 1.6
@@ -2789,19 +2806,19 @@ class Guild(Hashable):
         name: :class:`str`
             The role name. Defaults to 'new role'.
         permissions: :class:`Permissions`
-            The permissions to have. Defaults to no permissions.
+            The permissions the role should have. Defaults to no permissions.
         colour: Union[:class:`Colour`, :class:`int`]
             The colour for the role. Defaults to :meth:`Colour.default`.
             This is aliased to ``color`` as well.
         hoist: :class:`bool`
-            Indicates if the role should be shown separately in the member list.
+            Whether the role should be shown separately in the member list.
             Defaults to ``False``.
         icon: :class:`bytes`
-            The role's new icon image (if the guild has the ``ROLE_ICONS`` feature).
+            The role's icon image (if the guild has the ``ROLE_ICONS`` feature).
         emoji: :class:`str`
-            The role's new unicode emoji.
+            The role's unicode emoji.
         mentionable: :class:`bool`
-            Indicates if the role should be mentionable by others.
+            Whether the role should be mentionable by others.
             Defaults to ``False``.
         reason: Optional[:class:`str`]
             The reason for creating this role. Shows up on the audit log.
@@ -2863,7 +2880,7 @@ class Guild(Hashable):
 
         Bulk edits a list of :class:`Role` in the guild.
 
-        You must have the :attr:`~Permissions.manage_roles` permission to
+        You must have :attr:`~Permissions.manage_roles` permission to
         do this.
 
         .. versionadded:: 1.4
@@ -2928,7 +2945,7 @@ class Guild(Hashable):
 
         The user must meet the :class:`abc.Snowflake` abc.
 
-        You must have the :attr:`~Permissions.kick_members` permission to
+        You must have :attr:`~Permissions.kick_members` permission to
         do this.
 
         Parameters
@@ -2936,7 +2953,7 @@ class Guild(Hashable):
         user: :class:`abc.Snowflake`
             The user to kick from their guild.
         reason: Optional[:class:`str`]
-            The reason the user got kicked.
+            The reason for kicking this user. Shows up on the audit log.
 
         Raises
         -------
@@ -2960,18 +2977,18 @@ class Guild(Hashable):
 
         The user must meet the :class:`abc.Snowflake` abc.
 
-        You must have the :attr:`~Permissions.ban_members` permission to
+        You must have :attr:`~Permissions.ban_members` permission to
         do this.
 
         Parameters
         -----------
         user: :class:`abc.Snowflake`
-            The user to ban from their guild.
+            The user to ban from the guild.
         delete_message_days: :class:`int`
             The number of days worth of messages to delete from the user
             in the guild. The minimum is 0 and the maximum is 7.
         reason: Optional[:class:`str`]
-            The reason the user got banned.
+            The reason for banning this user. Shows up on the audit log.
 
         Raises
         -------
@@ -2989,7 +3006,7 @@ class Guild(Hashable):
 
         The user must meet the :class:`abc.Snowflake` abc.
 
-        You must have the :attr:`~Permissions.ban_members` permission to
+        You must have :attr:`~Permissions.ban_members` permission to
         do this.
 
         Parameters
@@ -2997,7 +3014,7 @@ class Guild(Hashable):
         user: :class:`abc.Snowflake`
             The user to unban.
         reason: Optional[:class:`str`]
-            The reason for doing this action. Shows up on the audit log.
+            The reason for unbanning this user. Shows up on the audit log.
 
         Raises
         -------
@@ -3015,8 +3032,8 @@ class Guild(Hashable):
 
         The guild must have ``VANITY_URL`` in :attr:`~Guild.features`.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to use
-        this as well.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         Raises
         -------
@@ -3031,7 +3048,6 @@ class Guild(Hashable):
             The special vanity invite. If ``None`` then the guild does not
             have a vanity invite set.
         """
-
         # we start with { code: abc }
         payload: Any = await self._state.http.get_vanity_code(self.id)
         if not payload["code"]:
@@ -3062,7 +3078,7 @@ class Guild(Hashable):
     ) -> AuditLogIterator:
         """Returns an :class:`AsyncIterator` that enables receiving the guild's audit logs.
 
-        You must have the :attr:`~Permissions.view_audit_log` permission to use this.
+        You must have :attr:`~Permissions.view_audit_log` permission to use this.
 
         Examples
         ----------
@@ -3168,7 +3184,7 @@ class Guild(Hashable):
 
         Edits the widget of the guild.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
+        You must have :attr:`~Permissions.manage_guild` permission to
         use this
 
         .. versionadded:: 2.0
@@ -3219,7 +3235,6 @@ class Guild(Hashable):
         ClientException
             The members intent is not enabled.
         """
-
         if not self._state._intents.members:
             raise ClientException("Intents.members must be enabled to use this.")
 
@@ -3256,7 +3271,6 @@ class Guild(Hashable):
             to ``False``.
 
             .. versionadded:: 1.6
-
         cache: :class:`bool`
             Whether to cache the members internally. This makes operations
             such as :meth:`get_member` work for those that matched.
@@ -3280,7 +3294,6 @@ class Guild(Hashable):
         List[:class:`Member`]
             The list of members that have matched the query.
         """
-
         if presences and not self._state._intents.presences:
             raise ClientException("Intents.presences must be enabled to use this.")
 
@@ -3314,11 +3327,11 @@ class Guild(Hashable):
         Parameters
         -----------
         channel: Optional[:class:`VoiceChannel`]
-            Channel the client wants to join. Use ``None`` to disconnect.
+            The channel the client wants to join. Use ``None`` to disconnect.
         self_mute: :class:`bool`
-            Indicates if the client should be self-muted.
+            Whether the client should be self-muted.
         self_deaf: :class:`bool`
-            Indicates if the client should be self-deafened.
+            Whether the client should be self-deafened.
         """
         ws = self._state._get_websocket(self.id)
         channel_id = channel.id if channel else None
@@ -3347,12 +3360,12 @@ class Guild(Hashable):
         Parameters
         ----------
         command_id: :class:`int`
-            the ID of the application command
+            The ID of the application command.
 
         Returns
         -------
         :class:`GuildApplicationCommandPermissions`
-            The edited app command permissions.
+            The application command permissions.
         """
         return await self._state.fetch_command_permissions(self.id, command_id)
 
@@ -3370,7 +3383,7 @@ class Guild(Hashable):
         Parameters
         ----------
         command_id: :class:`int`
-            The ID of the app command you want to apply these permissions to.
+            The ID of the application command you want to apply these permissions to.
         permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
         role_ids: Mapping[:class:`int`, :class:`bool`]
@@ -3381,7 +3394,7 @@ class Guild(Hashable):
         Returns
         -------
         :class:`GuildApplicationCommandPermissions`
-            The object representing the edited app command permissions.
+            The object representing the edited application command permissions.
         """
         perms = PartialGuildApplicationCommandPermissions(
             command_id=command_id,

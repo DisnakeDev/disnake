@@ -167,8 +167,7 @@ class Permissions(BaseFlags):
     @classmethod
     def all(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
-        permissions set to ``True``.
-        """
+        permissions set to ``True``."""
         return cls(0b11111111111111111111111111111111111111111)
 
     @classmethod

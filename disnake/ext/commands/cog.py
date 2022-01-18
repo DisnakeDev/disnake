@@ -114,7 +114,6 @@ class CogMeta(type):
         The cog description. By default, it is the cleaned docstring of the class.
 
         .. versionadded:: 1.6
-
     command_attrs: :class:`dict`
         A list of attributes to apply to every command inside this cog. The dictionary
         is passed into the :class:`Command` options at ``__init__``.
@@ -261,12 +260,14 @@ class Cog(metaclass=CogMeta):
         return self
 
     def get_commands(self) -> List[Command]:
-        r"""
+        r"""Returns a list of commands the cog has.
+
         Returns
         --------
         List[:class:`.Command`]
             A :class:`list` of :class:`.Command`\s that are
-            defined inside this cog.
+            defined inside this cog. Returns an empty list if
+            no commands exist.
 
             .. note::
 
@@ -275,12 +276,14 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_commands__ if c.parent is None]
 
     def get_application_commands(self) -> List[InvokableApplicationCommand]:
-        r"""
+        r"""Returns a list of application commands the cog has.
+
         Returns
         --------
         List[:class:`.InvokableApplicationCommand`]
             A :class:`list` of :class:`.InvokableApplicationCommand`\s that are
-            defined inside this cog.
+            defined inside this cog. Returns an empty list if no application
+            commands exist.
 
             .. note::
 
@@ -289,12 +292,14 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_app_commands__]
 
     def get_slash_commands(self) -> List[InvokableSlashCommand]:
-        r"""
+        r"""Returns a list of slash commands the cog has.
+
         Returns
         --------
         List[:class:`.InvokableSlashCommand`]
             A :class:`list` of :class:`.InvokableSlashCommand`\s that are
-            defined inside this cog.
+            defined inside this cog. Returns an empty list if no slash
+            commands exist.
 
             .. note::
 
@@ -303,22 +308,26 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableSlashCommand)]
 
     def get_user_commands(self) -> List[InvokableUserCommand]:
-        r"""
+        r"""Returns a list of user commands the cog has.
+
         Returns
         --------
         List[:class:`.InvokableUserCommand`]
             A :class:`list` of :class:`.InvokableUserCommand`\s that are
-            defined inside this cog.
+            defined inside this cog. Returns an empty list if no user
+            commands exist.
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableUserCommand)]
 
     def get_message_commands(self) -> List[InvokableMessageCommand]:
-        r"""
+        r"""Returns a list of message commands the cog has.
+
         Returns
         --------
         List[:class:`.InvokableMessageCommand`]
             A :class:`list` of :class:`.InvokableMessageCommand`\s that are
-            defined inside this cog.
+            defined inside this cog. Returns an empty list if no message
+            commands exist.
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableMessageCommand)]
 
@@ -353,7 +362,7 @@ class Cog(metaclass=CogMeta):
                     yield from command.walk_commands()
 
     def get_listeners(self) -> List[Tuple[str, Callable[..., Any]]]:
-        """Returns a :class:`list` of (name, function) listener pairs that are defined in this cog.
+        """Returns a :class:`list` of (name, function) listener pairs the cog has.
 
         Returns
         --------
@@ -385,7 +394,6 @@ class Cog(metaclass=CogMeta):
             The function is not a coroutine function or a string was not passed as
             the name.
         """
-
         if name is not MISSING and not isinstance(name, str):
             raise TypeError(
                 f"Cog.listener expected str but received {name.__class__.__name__!r} instead."
@@ -412,22 +420,33 @@ class Cog(metaclass=CogMeta):
         return decorator
 
     def has_error_handler(self) -> bool:
-        """:class:`bool`: Checks whether the cog has an error handler.
+        """Whether the cog has an error handler.
 
         .. versionadded:: 1.7
+
+        :return type: :class:`bool`
         """
         return not hasattr(self.cog_command_error.__func__, "__cog_special_method__")
 
     def has_slash_error_handler(self) -> bool:
-        """:class:`bool`: Checks whether the cog has a slash error handler."""
+        """Whether the cog has a slash command error handler.
+
+        :return type: :class:`bool`
+        """
         return not hasattr(self.cog_slash_command_error.__func__, "__cog_special_method__")
 
     def has_user_error_handler(self) -> bool:
-        """:class:`bool`: Checks whether the cog has a slash error handler."""
+        """Whether the cog has a user command error handler.
+
+        :return type: :class:`bool`
+        """
         return not hasattr(self.cog_user_command_error.__func__, "__cog_special_method__")
 
     def has_message_error_handler(self) -> bool:
-        """:class:`bool`: Checks whether the cog has a slash error handler."""
+        """Whether the cog has a message command error handler.
+
+        :return type: :class:`bool`
+        """
         return not hasattr(self.cog_message_command_error.__func__, "__cog_special_method__")
 
     @_cog_special_method
@@ -468,31 +487,47 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     def bot_slash_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+        """A special method that registers as a :meth:`.Bot.slash_command_check_once`
+        check.
+
+        This function **can** be a coroutine and must take a sole parameter,
+        ``inter``, to represent the :class:`.ApplicationCommandInteraction`.
+        """
         return True
 
     @_cog_special_method
     def bot_slash_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+        """A special method that registers as a :meth:`.Bot.slash_command_check`
+        check.
+
+        This function **can** be a coroutine and must take a sole parameter,
+        ``inter``, to represent the :class:`.ApplicationCommandInteraction`.
+        """
         return True
 
     @_cog_special_method
     def bot_user_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+        """Similar to :meth:`.Bot.slash_command_check_once` but for user commands."""
         return True
 
     @_cog_special_method
     def bot_user_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+        """Similar to :meth:`.Bot.slash_command_check` but for user commands."""
         return True
 
     @_cog_special_method
     def bot_message_command_check_once(self, inter: ApplicationCommandInteraction) -> bool:
+        """Similar to :meth:`.Bot.slash_command_check_once` but for message commands."""
         return True
 
     @_cog_special_method
     def bot_message_command_check(self, inter: ApplicationCommandInteraction) -> bool:
+        """Similar to :meth:`.Bot.slash_command_check` but for message commands."""
         return True
 
     @_cog_special_method
     def cog_check(self, ctx: Context) -> bool:
-        """A special method that registers as a :func:`~disnake.ext.commands.check`
+        """A special method that registers as a :func:`~.ext.commands.check`
         for every command and subcommand in this cog.
 
         This function **can** be a coroutine and must take a sole parameter,
@@ -502,7 +537,7 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     def cog_slash_command_check(self, inter: ApplicationCommandInteraction) -> bool:
-        """A special method that registers as a :func:`~disnake.ext.commands.check`
+        """A special method that registers as a :func:`~.ext.commands.check`
         for every slash command and subcommand in this cog.
 
         This function **can** be a coroutine and must take a sole parameter,
@@ -512,22 +547,12 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     def cog_user_command_check(self, inter: ApplicationCommandInteraction) -> bool:
-        """A special method that registers as a :func:`~disnake.ext.commands.check`
-        for every user command in this cog.
-
-        This function **can** be a coroutine and must take a sole parameter,
-        ``inter``, to represent the :class:`.ApplicationCommandInteraction`.
-        """
+        """Similar to :meth:`.Cog.cog_slash_command_check` but for user commands."""
         return True
 
     @_cog_special_method
     def cog_message_command_check(self, inter: ApplicationCommandInteraction) -> bool:
-        """A special method that registers as a :func:`~disnake.ext.commands.check`
-        for every message command in this cog.
-
-        This function **can** be a coroutine and must take a sole parameter,
-        ``inter``, to represent the :class:`.ApplicationCommandInteraction`.
-        """
+        """Similar to :meth:`.Cog.cog_slash_command_check` but for message commands."""
         return True
 
     @_cog_special_method
@@ -545,7 +570,7 @@ class Cog(metaclass=CogMeta):
         ctx: :class:`.Context`
             The invocation context where the error happened.
         error: :class:`CommandError`
-            The error that happened.
+            The error that was raised.
         """
         pass
 
@@ -553,18 +578,35 @@ class Cog(metaclass=CogMeta):
     async def cog_slash_command_error(
         self, inter: ApplicationCommandInteraction, error: Exception
     ) -> None:
+        """A special method that is called whenever an error
+        is dispatched inside this cog.
+
+        This is similar to :func:`.on_slash_command_error` except only applying
+        to the slash commands inside this cog.
+
+        This **must** be a coroutine.
+
+        Parameters
+        -----------
+        inter: :class:`.ApplicationCommandInteraction`
+            The interaction where the error happened.
+        error: :class:`CommandError`
+            The error that was raised.
+        """
         pass
 
     @_cog_special_method
     async def cog_user_command_error(
         self, inter: ApplicationCommandInteraction, error: Exception
     ) -> None:
+        """Similar to :func:`cog_slash_command_error` but for user commands."""
         pass
 
     @_cog_special_method
     async def cog_message_command_error(
         self, inter: ApplicationCommandInteraction, error: Exception
     ) -> None:
+        """Similar to :func:`cog_slash_command_error` but for message commands."""
         pass
 
     @_cog_special_method
@@ -599,26 +641,52 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     async def cog_before_slash_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+        """A special method that acts as a cog local pre-invoke hook.
+
+        This is similar to :meth:`.Command.before_invoke` but for slash commands.
+
+        This **must** be a coroutine.
+
+        Parameters
+        -----------
+        inter: :class:`.ApplicationCommandInteraction`
+            The interaction of the slash command.
+        """
         pass
 
     @_cog_special_method
     async def cog_after_slash_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+        """A special method that acts as a cog local post-invoke hook.
+
+        This is similar to :meth:`.Command.after_invoke` but for slash commands.
+
+        This **must** be a coroutine.
+
+        Parameters
+        -----------
+        inter: :class:`.ApplicationCommandInteraction`
+            The interaction of the slash command.
+        """
         pass
 
     @_cog_special_method
     async def cog_before_user_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+        """Similar to :meth:`cog_before_slash_command_invoke` but for user commands."""
         pass
 
     @_cog_special_method
     async def cog_after_user_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+        """Similar to :meth:`cog_after_slash_command_invoke` but for user commands."""
         pass
 
     @_cog_special_method
     async def cog_before_message_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+        """Similar to :meth:`cog_before_slash_command_invoke` but for message commands."""
         pass
 
     @_cog_special_method
     async def cog_after_message_command_invoke(self, inter: ApplicationCommandInteraction) -> None:
+        """Similar to :meth:`cog_after_slash_command_invoke` but for message commands."""
         pass
 
     def _inject(self: CogT, bot: AnyBot) -> CogT:

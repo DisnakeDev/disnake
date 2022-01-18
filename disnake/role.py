@@ -155,7 +155,7 @@ class Role(Hashable):
     Attributes
     ----------
     id: :class:`int`
-        The ID for the role.
+        The ID of the role.
     name: :class:`str`
         The name of the role.
     guild: :class:`Guild`
@@ -173,7 +173,6 @@ class Role(Hashable):
             checking for role hierarchy. The recommended and correct way to
             compare for roles in the hierarchy is using the comparison
             operators on the role objects themselves.
-
     managed: :class:`bool`
         Indicates if the role is managed by the guild through some form of
         integrations such as Twitch.
@@ -432,7 +431,7 @@ class Role(Hashable):
         permissions: :class:`Permissions`
             The new permissions to change to.
         colour: Union[:class:`Colour`, :class:`int`]
-            The new colour to change to. (aliased to color as well)
+            The new colour to change to. (aliased to ``color`` as well)
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
         icon: :class:`bytes`
@@ -519,5 +518,4 @@ class Role(Hashable):
         HTTPException
             Deleting the role failed.
         """
-
         await self._state.http.delete_role(self.guild.id, self.id, reason=reason)

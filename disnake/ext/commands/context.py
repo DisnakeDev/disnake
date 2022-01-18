@@ -69,7 +69,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
     the invocation context. This class is not created manually and is instead
     passed around to commands as the first parameter.
 
-    This class implements the :class:`~disnake.abc.Messageable` ABC.
+    This class implements the :class:`.abc.Messageable` ABC.
 
     Attributes
     -----------
@@ -104,7 +104,6 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         For example in commands ``?a b c test``, the invoked parents are ``['a', 'b', 'c']``.
 
         .. versionadded:: 1.7
-
     invoked_subcommand: Optional[:class:`Command`]
         The subcommand that was invoked.
         If no valid subcommand was invoked then this is equal to ``None``.
@@ -114,8 +113,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         nonsense string. If nothing was passed to attempt a call to a
         subcommand then this is set to ``None``.
     command_failed: :class:`bool`
-        A boolean that indicates if the command failed to be parsed, checked,
-        or invoked.
+        Whether the command failed to be parsed, checked, or invoked.
     """
 
     def __init__(
@@ -188,13 +186,13 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
         Calls the command again.
 
-        This is similar to :meth:`~.Context.invoke` except that it bypasses
+        This is similar to :meth:`.invoke` except that it bypasses
         checks, cooldowns, and error handlers.
 
         .. note::
 
             If you want to bypass :exc:`.UserInputError` derived exceptions,
-            it is recommended to use the regular :meth:`~.Context.invoke`
+            it is recommended to use the regular :meth:`.invoke`
             as it will work more naturally. After all, this will end up
             using the old arguments the user has used and will thus just
             fail again.
@@ -247,7 +245,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
     @property
     def valid(self) -> bool:
-        """:class:`bool`: Checks if the invocation context is valid to be invoked with."""
+        """:class:`bool`: Whether the invocation context is valid to be invoked with."""
         return self.prefix is not None and self.command is not None
 
     async def _get_channel(self) -> disnake.abc.Messageable:
@@ -272,15 +270,14 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
     @property
     def cog(self) -> Optional[Cog]:
-        """Optional[:class:`.Cog`]: Returns the cog associated with this context's command. None if it does not exist."""
-
+        """Optional[:class:`.Cog`]: Returns the cog associated with this context's command. Returns ``None`` if it does not exist."""
         if self.command is None:
             return None
         return self.command.cog
 
     @disnake.utils.cached_property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`.Guild`]: Returns the guild associated with this context's command. None if not available."""
+        """Optional[:class:`.Guild`]: Returns the guild associated with this context's command. Returns ``None`` if not available."""
         return self.message.guild
 
     @disnake.utils.cached_property
@@ -288,7 +285,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         """Union[:class:`.abc.Messageable`]: Returns the channel associated with this context's command.
         Shorthand for :attr:`.Message.channel`.
         """
-        return self.message.channel  # type: ignore
+        return self.message.channel
 
     @disnake.utils.cached_property
     def author(self) -> Union[User, Member]:
@@ -303,7 +300,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
         """
         # bot.user will never be None at this point.
-        return self.guild.me if self.guild is not None else self.bot.user  # type: ignore
+        return self.guild.me if self.guild is not None else self.bot.user
 
     @property
     def voice_client(self) -> Optional[VoiceProtocol]:
@@ -401,7 +398,7 @@ class GuildContext(Context):
     """A Context subclass meant for annotation
 
     No runtime behavior is changed but annotations are modified
-    to seem like the context may never be invoked ina  dm.
+    to seem like the context may never be invoked in a DM.
     """
 
     guild: Guild

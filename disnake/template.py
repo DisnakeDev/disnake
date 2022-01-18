@@ -214,7 +214,7 @@ class Template:
     async def sync(self) -> Template:
         """|coro|
 
-        Sync the template to the guild's current state.
+        Syncs the template to the guild's current state.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.
@@ -250,7 +250,7 @@ class Template:
     ) -> Template:
         """|coro|
 
-        Edit the template metadata.
+        Edits the template metadata.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.
@@ -294,7 +294,7 @@ class Template:
     async def delete(self) -> None:
         """|coro|
 
-        Delete the template.
+        Deletes the template.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.

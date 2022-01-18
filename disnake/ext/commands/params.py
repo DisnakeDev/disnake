@@ -148,7 +148,6 @@ def signature(func: Callable) -> inspect.Signature:
 def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) -> Optional[float]:
     """Function for combining xt and xe
 
-
     * x > xt && x >= xe ; x >= f(xt, xe, 1)
     * x < xt && x <= xe ; x <= f(xt, xe, -1)
     """
@@ -265,8 +264,7 @@ class LargeInt(int):
 
 
 class ParamInfo:
-    """
-    A class that basically connects function params with slash command options.
+    """A class that basically connects function params with slash command options.
     The instances of this class are not created manually, but via the functional interface instead.
     See :func:`Param`.
 
@@ -817,8 +815,7 @@ def Param(
     large: bool = False,
     **kwargs: Any,
 ) -> Any:
-    """
-    A special function that creates an instance of :class:`ParamInfo` that contains some information about a
+    """A special function that creates an instance of :class:`ParamInfo` that contains some information about a
     slash command option. This instance should be assigned to a parameter of a function representing your slash command.
 
     See :ref:`param_syntax` for more info.
@@ -862,6 +859,11 @@ def Param(
 
         .. versionadded: 2.3
 
+    Raises
+    ------
+    TypeError
+        Param got unexpected keyword arguments.
+
     Returns
     -------
     :class:`ParamInfo`
@@ -898,9 +900,8 @@ param = Param
 
 
 def inject(function: Callable[..., Any]) -> Any:
-    """
-    A special function to use the provided function for injections.
-    This should be assigned to a parameter of a function representing your application command.
+    """A special function to use the provided function for injections.
+    This should be assigned to a parameter of a function representing your slash command.
 
     .. versionadded:: 2.3
     """
@@ -919,9 +920,7 @@ def option_enum(
 
 
 class ConverterMethod(classmethod):
-    """
-    A decorator to register a method as the converter method
-    """
+    """A class to help register a method as a converter method."""
 
     def __set_name__(self, owner: Any, name: str):
         # this feels wrong
@@ -936,8 +935,8 @@ if TYPE_CHECKING:
 else:
 
     def converter_method(function: Any) -> ConverterMethod:
-        """A decorator to register a method as the converter method
-
+        """A decorator to register a method as the converter method.
+        
         .. versionadded:: 2.3
         """
         return ConverterMethod(function)

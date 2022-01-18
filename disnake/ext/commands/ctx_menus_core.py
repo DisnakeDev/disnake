@@ -72,7 +72,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
     guild_ids: Optional[List[:class:`int`]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
-        Whether to sync the command in the API with ``body`` or not.
+        Whether to automatically register the command.
     """
 
     def __init__(
@@ -143,7 +143,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     guild_ids: Optional[List[:class:`int`]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
-        Whether to sync the command in the API with ``body`` or not.
+        Whether to automatically register the command.
     """
 
     def __init__(
@@ -204,20 +204,24 @@ def user_command(
     ],
     InvokableUserCommand,
 ]:
-    """
-    A shortcut decorator that builds a user command.
+    """A shortcut decorator that builds a user command.
 
     Parameters
     ----------
     name: :class:`str`
-        name of the user command you want to respond to (equals to function name by default).
+        The name of the user command (defaults to the function name).
     default_permission: :class:`bool`
-        whether the command is enabled by default when the app is added to a guild.
+        Whether the command is enabled by default when the app is added to a guild.
     auto_sync: :class:`bool`
-        whether to automatically register / edit the command or not. Defaults to ``True``.
+        Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
-        if specified, the client will register the command in these guilds.
+        If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
+
+    Raises
+    ------
+    TypeError
+        The function is not a coroutine or the command is already registered.
 
     Returns
     --------
@@ -263,20 +267,24 @@ def message_command(
     ],
     InvokableMessageCommand,
 ]:
-    """
-    A decorator that builds a message command.
+    """A decorator that builds a message command.
 
     Parameters
     ----------
     name: :class:`str`
-        name of the message command you want to respond to (equals to function name by default).
+        The name of the message command (defaults to the function name).
     default_permission: :class:`bool`
-        whether the command is enabled by default when the app is added to a guild.
+        Whether the command is enabled by default when the app is added to a guild.
     auto_sync: :class:`bool`
-        whether to automatically register / edit the command or not. Defaults to ``True``.
+        Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
-        if specified, the client will register the command in these guilds.
+        If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
+
+    Raises
+    ------
+    TypeError
+        The function is not a coroutine or the command is already registered.
 
     Returns
     --------

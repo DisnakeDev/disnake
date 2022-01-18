@@ -91,15 +91,14 @@ def application_command_factory(data: ApplicationCommandPayload) -> ApplicationC
 
 
 class OptionChoice:
-    """
-    Represents an option choice.
+    """Represents an option choice.
 
     Parameters
     ----------
     name: :class:`str`
-        the name of the option choice (visible to users)
+        The name of the option choice (visible to users).
     value: Union[:class:`str`, :class:`int`]
-        the value of the option choice
+        The value of the option choice.
     """
 
     def __init__(self, name: str, value: ApplicationCommandOptionChoiceValue):
@@ -121,33 +120,32 @@ class OptionChoice:
 
 
 class Option:
-    """
-    Represents a slash command option.
+    """Represents a slash command option.
 
     Parameters
     ----------
     name: :class:`str`
-        option's name
+        The option's name.
     description: :class:`str`
-        option's description
+        The option's description.
     type: :class:`OptionType`
-        the option type, e.g. :class:`OptionType.user`
+        The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
-        whether this option is required or not
+        Whether this option is required.
     choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
-        the list of option choices
+        The list of option choices.
     options: List[:class:`Option`]
-        the list of sub options. Normally you don't have to specify it directly,
+        The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
     channel_types: List[:class:`ChannelType`]
-        the list of channel types that your option supports, if the type is :class:`OptionType.channel`.
+        The list of channel types that your option supports, if the type is :class:`OptionType.channel`.
         By default, it supports all channel types.
     autocomplete: :class:`bool`
-        whether this option can be autocompleted.
+        Whether this option can be autocompleted.
     min_value: Union[:class:`int`, :class:`float`]
-        the minimum value permitted
+        The minimum value permitted.
     max_value: Union[:class:`int`, :class:`float`]
-        the maximum value permitted
+        The maximum value permitted.
     """
 
     __slots__ = (
@@ -253,9 +251,8 @@ class Option:
         )
 
     def add_choice(self, name: str, value: Union[str, int]) -> None:
-        """
-        Adds an OptionChoice to the list of current choices
-        Parameters are the same as for :class:`OptionChoice`
+        """Adds an OptionChoice to the list of current choices,
+        parameters are the same as for :class:`OptionChoice`.
         """
         self.choices.append(OptionChoice(name=name, value=value))
 
@@ -272,10 +269,8 @@ class Option:
         min_value: float = None,
         max_value: float = None,
     ) -> None:
-        """
-        Adds an option to the current list of options
-        Parameters are the same as for :class:`Option`
-        """
+        """Adds an option to the current list of options,
+        parameters are the same as for :class:`Option`."""
         type = type or OptionType.string
         self.options.append(
             Option(
@@ -316,8 +311,28 @@ class Option:
 
 
 class ApplicationCommand(ABC):
-    """
-    The base class for application commands
+    """The base class for building application commands.
+
+    Parameters
+    ----------
+    type: :class:`ApplicationCommandType`
+        The application command's type.
+    name: :class:`str`
+        The application command's name.
+    description: :class:`str`
+        The application command's description.
+    default_permission: :class:`bool`
+        Whether the application command is enabled by default when it's added to a guild.
+    id: :class:`int`
+        The application command's ID.
+    application_id: :class:`int`
+        The parent application's ID. (This is usually yout bot's ID.)
+    guild_id: Optional[:class:`int`]
+        The ID of the guild this application command is enabled in. Or ``None`` if it's global.
+    version: :class:`int`
+        Autoincrementing version identifier updated during substantial record changes.
+    options: List[:class:`Option`]
+        A list of options that the application command has.
     """
 
     __slots__ = (
@@ -370,6 +385,26 @@ class ApplicationCommand(ABC):
 
 
 class UserCommand(ApplicationCommand):
+    """The base class for building user commands.
+
+    Parameters
+    ----------
+    type: :class:`ApplicationCommandType`
+        The user command's type.
+    name: :class:`str`
+        The user command's name.
+    default_permission: :class:`bool`
+        Whether the user command is enabled by default when it's added to a guild.
+    id: :class:`int`
+        The user command's ID.
+    application_id: :class:`int`
+        The parent application's ID. (This is usually yout bot's ID.)
+    guild_id: Optional[:class:`int`]
+        The ID of the guild this user command is enabled in. Or ``None`` if it's global.
+    version: :class:`int`
+        Autoincrementing version identifier updated during substantial record changes.
+    """
+
     __slots__ = ()
 
     def __init__(self, name: str, default_permission: bool = True):
@@ -397,6 +432,26 @@ class UserCommand(ApplicationCommand):
 
 
 class MessageCommand(ApplicationCommand):
+    """The base class for building message commands.
+
+    Parameters
+    ----------
+    type: :class:`ApplicationCommandType`
+        The message command's type.
+    name: :class:`str`
+        The message command's name.
+    default_permission: :class:`bool`
+        Whether the message command is enabled by default when it's added to a guild.
+    id: :class:`int`
+        The message command's ID.
+    application_id: :class:`int`
+        The parent application's ID. (This is usually yout bot's ID.)
+    guild_id: Optional[:class:`int`]
+        The ID of the guild this message command is enabled in. Or ``None`` if it's global.
+    version: :class:`int`
+        Autoincrementing version identifier updated during substantial record changes.
+    """
+
     __slots__ = ()
 
     def __init__(self, name: str, default_permission: bool = True):
@@ -429,14 +484,22 @@ class SlashCommand(ApplicationCommand):
 
     Parameters
     ----------
-    name : :class:`str`
-        The command name
-    description : :class:`str`
-        The command description (it'll be displayed by disnake)
-    options : List[:class:`Option`]
-        The options of the command
-    default_permission : :class:`bool`
-        Whether the command is enabled by default when the app is added to a guild
+    name: :class:`str`
+        The slash command's name.
+    description: :class:`str`
+        The slash command's description.
+    default_permission: :class:`bool`
+        Whether the slash command is enabled by default when it's added to a guild.
+    id: :class:`int`
+        The slash command's ID.
+    application_id: :class:`int`
+        The parent application's ID. (This is usually yout bot's ID.)
+    guild_id: Optional[:class:`int`]
+        The ID of the guild this slash command is enabled in. Or ``None`` if it's global.
+    version: :class:`int`
+        Autoincrementing version identifier updated during substantial record changes.
+    options: List[:class:`Option`]
+        A list of options that the slash command has.
     """
 
     __slots__ = ("description", "options")
@@ -507,9 +570,8 @@ class SlashCommand(ApplicationCommand):
         min_value: float = None,
         max_value: float = None,
     ) -> None:
-        """
-        Adds an option to the current list of options
-        Parameters are the same as for :class:`Option`
+        """Adds an option to the current list of options,
+        parameters are the same as for :class:`Option`
         """
         self.options.append(
             Option(
@@ -534,17 +596,17 @@ class SlashCommand(ApplicationCommand):
 
 
 class ApplicationCommandPermissions:
-    """
-    Represents application command permissions for a role or a user.
+    """Represents application command permissions for a role or a user.
 
     Attributes
     ----------
-    id : :class:`int`
-        ID of a target
-    type : :class:`int`
-        1 if target is a role; 2 if target is a user
-    permission : :class:`bool`
-        Allow or deny the access to the command
+    id: :class:`int`
+        The ID of the role or user.
+    type: :class:`int`
+        The type of the target.
+        1 if target is a role; 2 if target is a user.
+    permission: :class:`bool`
+        Whether to allow or deny the access to the application command.
     """
 
     __slots__ = ("id", "type", "permission")
@@ -567,15 +629,14 @@ class ApplicationCommandPermissions:
 
 
 class GuildApplicationCommandPermissions:
-    """
-    Represents application command permissions in a guild.
+    """Represents application command permissions in a guild.
 
     Attributes
     ----------
     id: :class:`int`
-        The ID of the corresponding command.
+        The application command's ID.
     application_id: :class:`int`
-        The ID of your application.
+        The parent application's ID. (This is usually yout bot's ID.)
     guild_id: :class:`int`
         The ID of the guild where these permissions are applied.
     permissions: List[:class:`ApplicationCommandPermissions`]
@@ -615,8 +676,7 @@ class GuildApplicationCommandPermissions:
         role_ids: Dict[int, bool] = None,
         user_ids: Dict[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
-        """
-        Replaces current permissions with specified ones.
+        """Replaces the current permissions with the specified ones.
 
         Parameters
         ----------
@@ -626,8 +686,12 @@ class GuildApplicationCommandPermissions:
             Role IDs to booleans.
         user_ids: Mapping[:class:`int`, :class:`bool`]
             User IDs to booleans.
-        """
 
+        Returns
+        -------
+        :class:`GuildApplicationCommandPermissions`
+            The newly updated permissions.
+        """
         data: List[ApplicationCommandPermissionsPayload] = []
 
         if permissions is not None:
@@ -656,13 +720,12 @@ class GuildApplicationCommandPermissions:
 
 
 class PartialGuildApplicationCommandPermissions:
-    """
-    Creates an object representing permissions of the application command.
+    """Creates a partial object representing permissions of the application command.
 
     Parameters
     ----------
     command_id: :class:`int`
-        The ID of the app command you want to apply these permissions to.
+        The ID of the application command you want to apply these permissions to.
     permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
         Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
     role_ids: Mapping[:class:`int`, :class:`bool`]
@@ -726,8 +789,7 @@ PartialGuildAppCmdPerms = PartialGuildApplicationCommandPermissions
 
 
 class UnresolvedGuildApplicationCommandPermissions:
-    """
-    Creates an object representing permissions of an application command,
+    """Creates an object representing permissions of an application command,
     without a specific command ID.
 
     Parameters
@@ -739,7 +801,7 @@ class UnresolvedGuildApplicationCommandPermissions:
     user_ids: Mapping[:class:`int`, :class:`bool`]
         User IDs to booleans.
     owner: :class:`bool`
-        Allow/deny the bot owner(s).
+        Whether to allow or deny the bot owner(s).
     """
 
     def __init__(
@@ -766,9 +828,9 @@ class UnresolvedGuildApplicationCommandPermissions:
         Parameters
         ----------
         command_id: :class:`int`
-            the command ID to be used
+            The command ID to use.
         owners: Iterable[:class:`int`]
-            the owner IDs, used for extending the user ID mapping
+            The owner IDs, used for extending the user ID mapping
             based on the previously set ``owner`` permission if applicable
 
         Returns
@@ -777,7 +839,6 @@ class UnresolvedGuildApplicationCommandPermissions:
             A new permissions object based on this instance
             and the provided command ID and owner IDs.
         """
-
         resolved_users: Optional[Mapping[int, bool]]
         if self.owner is not None:
             owner_ids = dict.fromkeys(owners, self.owner)

@@ -227,9 +227,9 @@ class SelectMenu(Component):
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
     options: List[:class:`SelectOption`]
-        A list of options that can be selected in this menu.
+        A list of options that can be selected in this select menu.
     disabled: :class:`bool`
-        Whether the select is disabled or not.
+        Whether the select menu is disabled or not.
     """
 
     __slots__: Tuple[str, ...] = (

@@ -195,7 +195,7 @@ class StickerItem(_StickerTag):
     name: :class:`str`
         The sticker's name.
     id: :class:`int`
-        The id of the sticker.
+        The ID of the sticker.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
     url: :class:`str`
@@ -261,11 +261,11 @@ class Sticker(_StickerTag):
     name: :class:`str`
         The sticker's name.
     id: :class:`int`
-        The id of the sticker.
+        The ID of the sticker.
     description: :class:`str`
         The description of the sticker.
     pack_id: :class:`int`
-        The id of the sticker's pack.
+        The ID of the sticker's pack.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
     url: :class:`str`
@@ -321,11 +321,11 @@ class StandardSticker(Sticker):
     name: :class:`str`
         The sticker's name.
     id: :class:`int`
-        The id of the sticker.
+        The ID of the sticker.
     description: :class:`str`
         The description of the sticker.
     pack_id: :class:`int`
-        The id of the sticker's pack.
+        The ID of the sticker's pack.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
     tags: List[:class:`str`]
@@ -400,7 +400,7 @@ class GuildSticker(Sticker):
     name: :class:`str`
         The sticker's name.
     id: :class:`int`
-        The id of the sticker.
+        The ID of the sticker.
     description: :class:`str`
         The description of the sticker.
     format: :class:`StickerFormatType`

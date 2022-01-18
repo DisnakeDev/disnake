@@ -200,14 +200,14 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         return hash((self.id, self.name))
 
     def is_custom_emoji(self) -> bool:
-        """Checks if this is a custom non-Unicode emoji.
+        """Whether the partial emoji is a custom non-Unicode emoji.
 
         :return type: :class:`bool`
         """
         return self.id is not None
 
     def is_unicode_emoji(self) -> bool:
-        """Checks if this is a Unicode emoji.
+        """Whether the partial emoji is a Unicode emoji.
 
         :return type: :class:`bool`
         """
@@ -220,7 +220,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
     @property
     def created_at(self) -> Optional[datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the emoji's creation time in UTC, or None if Unicode emoji.
+        """Optional[:class:`datetime.datetime`]: Returns the emoji's creation time in UTC, or None if it's a Unicode emoji.
 
         .. versionadded:: 1.6
         """
@@ -242,6 +242,24 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         return f"{Asset.BASE}/emojis/{self.id}.{fmt}"
 
     async def read(self) -> bytes:
+        """|coro|
+
+        Retrieves the content of this asset as a :class:`bytes` object.
+
+        Raises
+        ------
+        DiscordException
+            There was no internal connection state.
+        HTTPException
+            Downloading the asset failed.
+        NotFound
+            The asset was deleted.
+
+        Returns
+        -------
+        :class:`bytes`
+            The content of the asset.
+        """
         if self.is_unicode_emoji():
             raise InvalidArgument("PartialEmoji is not a custom emoji")
 

@@ -371,6 +371,24 @@ New Features
 - |commands| Add :meth:`Bot.user_command_check_once <ext.commands.Bot.user_command_check_once>`
 - |commands| Add :meth:`Bot.message_command_check <ext.commands.Bot.message_command_check>`
 - |commands| Add :meth:`Bot.message_command_check_once <ext.commands.Bot.message_command_check_once>`
+- |commands| Add :meth:`Cog.cog_slash_command_check <ext.commands.Cog.cog_slash_command_check>`
+- |commands| Add :meth:`Cog.cog_user_command_check <ext.commands.Cog.cog_user_command_check>`
+- |commands| Add :meth:`Cog.cog_message_command_check <ext.commands.Cog.cog_message_command_check>`
+- |commands| Add :meth:`Cog.cog_slash_command_error <ext.commands.Cog.cog_slash_command_error>`
+- |commands| Add :meth:`Cog.cog_user_command_error <ext.commands.Cog.cog_user_command_error>`
+- |commands| Add :meth:`Cog.cog_message_command_error <ext.commands.Cog.cog_message_command_error>`
+- |commands| Add :meth:`Cog.cog_before_slash_command_invoke <ext.commands.Cog.cog_before_slash_command_invoke>`
+- |commands| Add :meth:`Cog.cog_after_slash_command_invoke <ext.commands.Cog.cog_after_slash_command_invoke>`
+- |commands| Add :meth:`Cog.cog_before_user_command_invoke <ext.commands.Cog.cog_before_user_command_invoke>`
+- |commands| Add :meth:`Cog.cog_after_user_command_invoke <ext.commands.Cog.cog_after_user_command_invoke>`
+- |commands| Add :meth:`Cog.cog_before_message_command_invoke <ext.commands.Cog.cog_before_message_command_invoke>`
+- |commands| Add :meth:`Cog.cog_after_message_command_invoke <ext.commands.Cog.cog_after_message_command_invoke>`
+- |commands| Add :meth:`Cog.bot_slash_command_check <ext.commands.Cog.bot_slash_command_check>`
+- |commands| Add :meth:`Cog.bot_slash_command_check_once <ext.commands.Cog.bot_slash_command_check_once>`
+- |commands| Add :meth:`Cog.bot_user_command_check <ext.commands.Cog.bot_user_command_check>`
+- |commands| Add :meth:`Cog.bot_user_command_check_once <ext.commands.Cog.bot_user_command_check_once>`
+- |commands| Add :meth:`Cog.bot_message_command_check <ext.commands.Cog.bot_message_command_check>`
+- |commands| Add :meth:`Cog.bot_message_command_check_once <ext.commands.Cog.bot_message_command_check_once>`
 
 .. _vp1p7p3:
 

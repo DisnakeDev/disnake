@@ -182,7 +182,6 @@ class BaseUser(_UserTag):
 
         .. versionadded:: 2.0
 
-
         .. note::
             This information is only available via :meth:`Client.fetch_user`.
         """
@@ -267,7 +266,7 @@ class BaseUser(_UserTag):
         Parameters
         -----------
         message: :class:`Message`
-            The message to check if you're mentioned in.
+            The message to check if the user is mentioned.
 
         Returns
         -------
@@ -316,7 +315,6 @@ class ClientUser(BaseUser):
         Specifies if the user is a system user (i.e. represents Discord officially).
 
         .. versionadded:: 1.3
-
     verified: :class:`bool`
         Specifies if the user's email is verified.
     locale: Optional[:class:`str`]

@@ -168,8 +168,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         SubCommand,
     ]:
         """
-        A decorator that creates a subcommand in the
-        subcommand group.
+        A decorator that creates a subcommand in the subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
 
         Returns
@@ -294,8 +293,7 @@ class SubCommand(InvokableApplicationCommand):
             await self.call_after_hooks(inter)
 
     def autocomplete(self, option_name: str) -> Callable[[Callable], Callable]:
-        """
-        A decorator that registers an autocomplete function for the specified option.
+        """A decorator that registers an autocomplete function for the specified option.
 
         Parameters
         ----------
@@ -624,27 +622,26 @@ def slash_command(
     ],
     InvokableSlashCommand,
 ]:
-    """
-    A decorator that builds a slash command.
+    """A decorator that builds a slash command.
 
     Parameters
     ----------
     auto_sync: :class:`bool`
-        whether to automatically register the command or not. Defaults to ``True``
+        Whether to automatically register the command. Defaults to ``True``
     name: :class:`str`
-        name of the slash command you want to respond to (equals to function name by default).
+        The name of the slash command. (equals to function name by default).
     description: :class:`str`
-        the description of the slash command. It will be visible in Discord.
+        The description of the slash command. It will be visible in Discord.
     options: List[:class:`.Option`]
-        the list of slash command options. The options will be visible in Discord.
+        The list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
     default_permission: :class:`bool`
-        whether the command is enabled by default when the app is added to a guild.
+        Whether the command is enabled by default when the app is added to a guild.
     guild_ids: List[:class:`int`]
-        if specified, the client will register a command in these guilds.
+        If specified, the client will register a command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
     connectors: Dict[:class:`str`, :class:`str`]
-        binds function names to option names. If the name
+        Binds function names to option names. If the name
         of an option already matches the corresponding function param,
         you don't have to specify the connectors. Connectors template:
         ``{"option-name": "param_name", ...}``.

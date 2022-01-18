@@ -50,11 +50,11 @@ class Team:
     id: :class:`int`
         The team ID.
     name: :class:`str`
-        The team name
+        The team name.
     owner_id: :class:`int`
         The team's owner ID.
     members: List[:class:`TeamMember`]
-        A list of the members in the team
+        A list of the members in the team.
 
         .. versionadded:: 1.3
     """

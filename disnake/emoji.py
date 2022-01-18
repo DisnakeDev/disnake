@@ -76,22 +76,22 @@ class Emoji(_EmojiTag, AssetMixin):
     Attributes
     -----------
     name: :class:`str`
-        The name of the emoji.
+        The emoji's name.
     id: :class:`int`
         The emoji's ID.
     require_colons: :class:`bool`
-        If colons are required to use this emoji in the client (:PJSalt: vs PJSalt).
+        Whether colons are required to use this emoji in the client (:PJSalt: vs PJSalt).
     animated: :class:`bool`
-        Whether an emoji is animated or not.
+        Whether the emoji is animated or not.
     managed: :class:`bool`
-        If this emoji is managed by a Twitch integration.
+        Whether the emoji is managed by a Twitch integration.
     guild_id: :class:`int`
         The guild ID the emoji belongs to.
     available: :class:`bool`
         Whether the emoji is available for use.
     user: Optional[:class:`User`]
         The user that created the emoji. This can only be retrieved using :meth:`Guild.fetch_emoji` and
-        having the :attr:`~Permissions.manage_emojis` permission.
+        having :attr:`~Permissions.manage_emojis` permission.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -163,7 +163,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def roles(self) -> List[Role]:
-        """List[:class:`Role`]: A :class:`list` of roles that is allowed to use this emoji.
+        """List[:class:`Role`]: A :class:`list` of roles that are allowed to use this emoji.
 
         If roles is empty, the emoji is unrestricted.
         """
@@ -213,7 +213,6 @@ class Emoji(_EmojiTag, AssetMixin):
         HTTPException
             An error occurred deleting the emoji.
         """
-
         await self._state.http.delete_custom_emoji(self.guild.id, self.id, reason=reason)
 
     async def edit(
@@ -250,7 +249,6 @@ class Emoji(_EmojiTag, AssetMixin):
         :class:`Emoji`
             The newly updated emoji.
         """
-
         payload = {}
         if name is not MISSING:
             payload["name"] = name

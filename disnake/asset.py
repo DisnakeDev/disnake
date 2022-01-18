@@ -106,7 +106,6 @@ class AssetMixin:
         :class:`int`
             The number of bytes written.
         """
-
         data = await self.read()
         if isinstance(fp, io.BufferedIOBase):
             written = fp.write(data)
@@ -286,7 +285,7 @@ class Asset(AssetMixin):
         return self._key
 
     def is_animated(self) -> bool:
-        """Returns whether the asset is animated.
+        """Whether the asset is animated.
 
         :return type: :class:`bool`
         """
@@ -365,7 +364,7 @@ class Asset(AssetMixin):
         Returns
         --------
         :class:`Asset`
-            The new updated asset.
+            The newly updated asset.
         """
         if not utils.valid_icon_size(size):
             raise InvalidArgument("size must be a power of 2 between 16 and 4096")
@@ -389,9 +388,8 @@ class Asset(AssetMixin):
         Returns
         --------
         :class:`Asset`
-            The new updated asset.
+            The newly updated asset.
         """
-
         if self._animated:
             if format not in VALID_ASSET_FORMATS:
                 raise InvalidArgument(f"format must be one of {VALID_ASSET_FORMATS}")
@@ -423,9 +421,8 @@ class Asset(AssetMixin):
         Returns
         --------
         :class:`Asset`
-            The new updated asset.
+            The newly updated asset.
         """
-
         if self._animated:
             return self
         return self.with_format(format)

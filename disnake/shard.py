@@ -392,7 +392,10 @@ class AutoShardedClient(Client):
         return [(shard_id, shard.ws.latency) for shard_id, shard in self.__shards.items()]
 
     def get_shard(self, shard_id: int) -> Optional[ShardInfo]:
-        """Optional[:class:`ShardInfo`]: Gets the shard information at a given shard ID or ``None`` if not found."""
+        """Gets the shard information at a given shard ID or ``None`` if not found.
+
+        :return type: Optional[:class:`ShardInfo`]
+        """
         try:
             parent = self.__shards[shard_id]
         except KeyError:
@@ -525,7 +528,6 @@ class AutoShardedClient(Client):
         InvalidArgument
             If the ``activity`` parameter is not of proper type.
         """
-
         if status is None:
             status_value = "online"
             status_enum = Status.online

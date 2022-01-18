@@ -134,8 +134,8 @@ class Integration:
 
         Deletes the integration.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         Parameters
         -----------
@@ -172,7 +172,7 @@ class StreamIntegration(Integration):
     enabled: :class:`bool`
         Whether the integration is currently enabled.
     syncing: :class:`bool`
-        Where the integration is currently syncing.
+        Whether the integration is currently syncing.
     enable_emoticons: Optional[:class:`bool`]
         Whether emoticons should be synced for this integration (currently twitch only).
     expire_behaviour: :class:`ExpireBehaviour`
@@ -230,8 +230,8 @@ class StreamIntegration(Integration):
 
         Edits the integration.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         Parameters
         -----------
@@ -273,8 +273,8 @@ class StreamIntegration(Integration):
 
         Syncs the integration.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         Raises
         -------
@@ -295,13 +295,13 @@ class IntegrationApplication:
     Attributes
     ----------
     id: :class:`int`
-        The ID for this application.
+        The application ID.
     name: :class:`str`
-        The application's name.
+        The application name.
     icon: Optional[:class:`str`]
-        The application's icon hash.
+        The application icon hash.
     description: :class:`str`
-        The application's description. Can be an empty string.
+        The application description. Can be an empty string.
     summary: :class:`str`
         The summary of the application. Can be an empty string.
     user: Optional[:class:`User`]

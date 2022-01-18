@@ -280,11 +280,11 @@ class Invite(Hashable):
     guild: Optional[Union[:class:`Guild`, :class:`Object`, :class:`PartialInviteGuild`]]
         The guild the invite is for. Can be ``None`` if it's from a group direct message.
     revoked: :class:`bool`
-        Indicates if the invite has been revoked.
+        Whether the invite has been revoked.
     created_at: :class:`datetime.datetime`
         An aware UTC datetime object denoting the time the invite was created.
     temporary: :class:`bool`
-        Indicates that the invite grants temporary membership.
+        Whether the invite grants temporary membership.
         If ``True``, members who joined via this invite will be kicked upon disconnect.
     uses: :class:`int`
         How many times the invite has been used.
@@ -303,24 +303,20 @@ class Invite(Hashable):
         `Client.fetch_invite` with `with_expiration` enabled, the invite will never expire.
 
         .. versionadded:: 2.0
-
     channel: Optional[Union[:class:`abc.GuildChannel`, :class:`Object`, :class:`PartialInviteChannel`]]
         The channel the invite is for.
     target_type: :class:`InviteTarget`
         The type of target for the voice channel invite.
 
         .. versionadded:: 2.0
-
     target_user: Optional[:class:`User`]
         The user whose stream to display for this invite, if any.
 
         .. versionadded:: 2.0
-
     target_application: Optional[:class:`PartialAppInfo`]
         The embedded application the invite targets, if any.
 
         .. versionadded:: 2.0
-
     guild_scheduled_event: Optional[:class:`GuildScheduledEvent`]
         The guild scheduled event included in the invite, if any.
 
@@ -494,7 +490,7 @@ class Invite(Hashable):
 
         Revokes the instant invite.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to do this.
+        You must have :attr:`~Permissions.manage_channels` permission to do this.
 
         Parameters
         -----------
@@ -510,5 +506,4 @@ class Invite(Hashable):
         HTTPException
             Revoking the invite failed.
         """
-
         await self._state.http.delete_invite(self.code, reason=reason)

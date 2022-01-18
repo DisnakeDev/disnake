@@ -99,7 +99,7 @@ class ApplicationCommandInteraction(Interaction):
     id: :class:`int`
         The interaction's ID.
     type: :class:`InteractionType`
-        The interaction type.
+        The interaction's type.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
     channel_id: Optional[:class:`int`]
@@ -125,7 +125,7 @@ class ApplicationCommandInteraction(Interaction):
     channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
         The channel the interaction was sent from.
     me: Union[:class:`.Member`, :class:`.ClientUser`]
-        Similar to :attr:`.Guild.me`
+        Similar to :attr:`.Guild.me`.
     permissions: :class:`Permissions`
         The resolved permissions of the member in the channel, including overwrites.
     response: :class:`InteractionResponse`
@@ -133,8 +133,7 @@ class ApplicationCommandInteraction(Interaction):
     followup: :class:`Webhook`
         Returns the follow up webhook for follow up interactions.
     token: :class:`str`
-        The token to continue the interaction. These are valid
-        for 15 minutes.
+        The token to continue the interaction. These are valid for 15 minutes.
     data: :class:`ApplicationCommandInteractionData`
         The wrapped interaction data.
     """
@@ -167,8 +166,7 @@ class ApplicationCommandInteraction(Interaction):
 
 
 class GuildCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation
-
+    """An ApplicationCommandInteraction Context subclass meant for annotation.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction can only ever be invoked in guilds.
@@ -180,7 +178,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation
+    """An ApplicationCommandInteraction Context subclass meant for annotation.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a user command.
@@ -190,7 +188,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation
+    """An ApplicationCommandInteraction Context subclass meant for annotation.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a message command.
@@ -288,17 +286,16 @@ class ApplicationCommandInteractionData:
 
 
 class ApplicationCommandInteractionDataOption:
-    """
-    This class represents the structure of an interaction data option from the API.
+    """This class represents the structure of an interaction data option from the API.
 
     Attributes
     ----------
     name: :class:`str`
-        The name of the option.
+        The option's name.
     type: :class:`OptionType`
-        The type of the option.
+        The option's type.
     value: :class:`Any`
-        The value of the option.
+        The option's value.
     options: List[:class:`ApplicationCommandInteractionDataOption`]
         The list of options of this option. Only exists for subcommands and groups.
     focused: :class:`bool`
@@ -351,24 +348,23 @@ class ApplicationCommandInteractionDataOption:
 
 
 class ApplicationCommandInteractionDataResolved:
-    """Represents the resolved data related to
-    an interaction with an application command.
+    """Represents the resolved data related to an interaction with an application command.
 
     .. versionadded:: 2.1
 
     Attributes
     ----------
     members: Dict[:class:`int`, :class:`Member`]
-        IDs and partial members (missing ``deaf`` and ``mute``)
+        A mapping of IDs to partial members (``deaf`` and ``mute`` attributes are missing).
     users: Dict[:class:`int`, :class:`User`]
-        IDs and users
+        A mapping of IDs to users.
     roles: Dict[:class:`int`, :class:`Role`]
-        IDs and roles
+        A mapping of IDs to roles.
     channels: Dict[:class:`int`, :class:`Channel`]
-        IDs and partial channels (only ``id``, ``name`` and ``permissions`` are included,
+        A mapping of IDs to partial channels (only ``id``, ``name`` and ``permissions`` are included,
         threads also have ``thread_metadata`` and ``parent_id``).
     messages: Dict[:class:`int`, :class:`Message`]
-        IDs and messages
+        A mapping of IDs to messages.
     """
 
     __slots__ = ("members", "users", "roles", "channels", "messages")
