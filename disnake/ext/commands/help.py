@@ -916,7 +916,7 @@ class DefaultHelpCommand(HelpCommand):
 
     def shorten_text(self, text):
         """Shortens text to fit into the :attr:`width`.
-        
+
         :return type: :class:`str`
         """
         if len(text) > self.width:
@@ -925,7 +925,7 @@ class DefaultHelpCommand(HelpCommand):
 
     def get_ending_note(self):
         """Returns help command's ending note. This is mainly useful to override for i18n purposes.
-        
+
         :return type: :class:`str`
         """
         command_name = self.invoked_with

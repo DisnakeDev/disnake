@@ -936,7 +936,7 @@ else:
 
     def converter_method(function: Any) -> ConverterMethod:
         """A decorator to register a method as the converter method.
-        
+
         .. versionadded:: 2.3
         """
         return ConverterMethod(function)
