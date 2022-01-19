@@ -743,19 +743,14 @@ class Embed:
         result = {
             key[1:]: getattr(self, key)
             for key in self.__slots__
-            if key[0] == '_' and hasattr(self, key) and key != "_files"
+            if key[0] == '_' and hasattr(self, key) and key not in ("_colour", "_files")
         }
         # fmt: on
 
         # deal with basic convenience wrappers
 
-        try:
-            colour = result.pop("colour")
-        except KeyError:
-            pass
-        else:
-            if colour:
-                result["color"] = colour.value
+        if isinstance(self.colour, Colour):
+            result["color"] = self.colour.value
 
         try:
             timestamp = result.pop("timestamp")
