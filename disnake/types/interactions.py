@@ -250,6 +250,8 @@ class _EditApplicationCommandOptional(TypedDict, total=False):
     description: str
     options: Optional[List[ApplicationCommandOption]]
     default_permission: bool
+    dm_permission: bool
+    default_member_permissions: str
     type: ApplicationCommandType
 
 

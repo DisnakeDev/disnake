@@ -34,6 +34,7 @@ from .params import safe_call
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
 
+    from disnake.permissions import Permissions
     from disnake.interactions import ApplicationCommandInteraction
 
     ApplicationCommandInteractionT = TypeVar(
@@ -81,6 +82,8 @@ class InvokableUserCommand(InvokableApplicationCommand):
         *,
         name: str = None,
         default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -88,7 +91,24 @@ class InvokableUserCommand(InvokableApplicationCommand):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = UserCommand(name=self.name, default_permission=default_permission)
+        self.body = UserCommand(
+            name=self.name,
+            default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
+        )
+
+    @property
+    def default_permission(self) -> bool:
+        return self.body.default_permission
+
+    @property
+    def dm_permission(self) -> bool:
+        return self.body.dm_permission
+
+    @property
+    def default_member_permissions(self) -> Permissions:
+        return self.body.default_member_permissions
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -152,14 +172,40 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         *,
         name: str = None,
         default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
+        try:
+            perms_value = func.__default_member_permissions__
+        except AttributeError:
+            perms_value = 0
+
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = MessageCommand(name=self.name, default_permission=default_permission)
+        self.body = MessageCommand(
+            name=self.name,
+            default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
+        )
+        if not self.body._default_member_permissions:
+            self.body._default_member_permissions = perms_value
+
+    @property
+    def default_permission(self) -> bool:
+        return self.body.default_permission
+
+    @property
+    def dm_permission(self) -> bool:
+        return self.body.dm_permission
+
+    @property
+    def default_member_permissions(self) -> Permissions:
+        return self.body.default_member_permissions
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError

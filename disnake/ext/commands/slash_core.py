@@ -50,8 +50,9 @@ if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
 
     from disnake.app_commands import Choices
+    from disnake.permissions import Permissions
 
-    from .cog import CogT
+    from .cog import Cog
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
@@ -161,7 +162,7 @@ class SubCommandGroup(InvokableApplicationCommand):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
                 Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ],
@@ -180,7 +181,7 @@ class SubCommandGroup(InvokableApplicationCommand):
 
         def decorator(
             func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
                 Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ) -> SubCommand:
@@ -342,13 +343,20 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         *,
         name: str = None,
         description: str = None,
-        options: List[Option] = None,
         default_permission: bool = True,
-        guild_ids: Sequence[int] = None,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
+        options: List[Option] = None,
         connectors: Dict[str, str] = None,
+        guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
+        try:
+            perms_value = func.__default_member_permissions__
+        except AttributeError:
+            perms_value = 0
+
         super().__init__(func, name=name, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
@@ -367,7 +375,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             description=description or "-",
             options=options or [],
             default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
         )
+        if not self.body._default_member_permissions:
+            self.body._default_member_permissions = perms_value
 
     @property
     def description(self) -> str:
@@ -381,6 +393,14 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     def default_permission(self) -> bool:
         return self.body.default_permission
 
+    @property
+    def dm_permission(self) -> bool:
+        return self.body.dm_permission
+
+    @property
+    def default_member_permissions(self) -> Permissions:
+        return self.body.default_member_permissions
+
     def sub_command(
         self,
         name: str = None,
@@ -391,7 +411,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
                 Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ],
@@ -422,7 +442,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         def decorator(
             func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
                 Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ) -> SubCommand:
@@ -448,7 +468,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     ) -> Callable[
         [
             Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
                 Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ],
@@ -470,7 +490,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         def decorator(
             func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
                 Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
             ]
         ) -> SubCommandGroup:
@@ -609,16 +629,16 @@ def slash_command(
     *,
     name: str = None,
     description: str = None,
-    options: List[Option] = None,
     default_permission: bool = True,
-    guild_ids: Sequence[int] = None,
+    options: List[Option] = None,
     connectors: Dict[str, str] = None,
+    guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     **kwargs,
 ) -> Callable[
     [
         Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+            Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
             Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
         ]
     ],
@@ -658,7 +678,7 @@ def slash_command(
 
     def decorator(
         func: Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+            Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
             Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
         ]
     ) -> InvokableSlashCommand:
@@ -666,6 +686,7 @@ def slash_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
+
         return InvokableSlashCommand(
             func,
             name=name,

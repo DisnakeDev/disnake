@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, 
 
 from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
+from disnake.permissions import Permissions
 from disnake.utils import async_all, maybe_coroutine, warn_deprecated
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
@@ -44,7 +45,7 @@ if TYPE_CHECKING:
     from .cog import Cog
 
 
-__all__ = ("InvokableApplicationCommand", "guild_permissions")
+__all__ = ("InvokableApplicationCommand", "guild_permissions", "require_permissions")
 
 
 T = TypeVar("T")
@@ -573,6 +574,27 @@ def guild_permissions(
             if not hasattr(func, "__app_command_permissions__"):
                 func.__app_command_permissions__ = {}  # type: ignore
             func.__app_command_permissions__[guild_id] = perms  # type: ignore
+        return func
+
+    return decorator
+
+
+def require_permissions(**permissions: bool) -> Callable[[Callable], Callable]:
+    """
+    A decorator that sets default required member permissions in all guilds.
+
+    Parameters
+    ----------
+    permissions
+        Allow or deny specific permissions.
+    """
+    perms_value = Permissions(**permissions).value
+
+    def decorator(func: Callable) -> Callable:
+        if isinstance(func, InvokableApplicationCommand):
+            func.body._default_member_permissions = perms_value
+        else:
+            func.__default_member_permissions__ = perms_value
         return func
 
     return decorator

@@ -39,6 +39,7 @@ from .enums import (
     try_enum_to_int,
 )
 from .errors import InvalidArgument
+from .permissions import Permissions
 from .role import Role
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
@@ -336,17 +337,34 @@ class ApplicationCommand(ABC):
         "type",
         "name",
         "default_permission",
+        "dm_permission",
         "id",
         "application_id",
         "guild_id",
         "version",
         "_always_synced",
+        "_default_member_permissions",
     )
 
-    def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        *,
+        type: ApplicationCommandType,
+        name: str,
+        default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
+    ):
+        # NOTE: default_permission will be deprecated and eventually removed.
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
         self.default_permission: bool = default_permission
+        self.dm_permission: bool = dm_permission
+        self._default_member_permissions: int
+        if default_member_permissions is None:
+            self._default_member_permissions = 0
+        else:
+            self._default_member_permissions = default_member_permissions.value
 
         self.id: Optional[int] = None
         self.application_id: Optional[int] = None
@@ -360,6 +378,13 @@ class ApplicationCommand(ABC):
         self.application_id = _get_as_snowflake(data, "application_id")
         self.guild_id = _get_as_snowflake(data, "guild_id")
         self.version = _get_as_snowflake(data, "version")
+        self._default_member_permissions = int(data.get("default_member_permissions") or 0)
+        # ^ here we use "data.get() or 0" because this field sometimes contains None
+
+    @property
+    def default_member_permissions(self) -> Permissions:
+        """:class:`Permissions`: Returns the default member permissions."""
+        return Permissions(self._default_member_permissions)
 
     def __repr__(self) -> str:
         return f"<ApplicationCommand type={self.type!r} name={self.name!r}>"
@@ -369,6 +394,8 @@ class ApplicationCommand(ABC):
             self.type == other.type
             and self.name == other.name
             and self.default_permission == other.default_permission
+            and self.dm_permission == other.dm_permission
+            and self._default_member_permissions == other._default_member_permissions
         )
 
     def to_dict(self) -> EditApplicationCommandPayload:
@@ -378,17 +405,31 @@ class ApplicationCommand(ABC):
         }
         if not self.default_permission:
             data["default_permission"] = False
+        if not self.dm_permission:
+            data["dm_permission"] = False
+        if self._default_member_permissions:
+            data["default_member_permissions"] = str(self._default_member_permissions)
+
         return data
 
 
 class UserCommand(ApplicationCommand):
     __slots__ = ()
 
-    def __init__(self, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        *,
+        name: str,
+        default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
+    ):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
         )
 
     def __repr__(self) -> str:
@@ -403,6 +444,7 @@ class UserCommand(ApplicationCommand):
         self = UserCommand(
             name=data["name"],
             default_permission=data.get("default_permission", True),
+            dm_permission=data.get("dm_permission", True),
         )
         self._update_common(data)
         return self
@@ -411,11 +453,20 @@ class UserCommand(ApplicationCommand):
 class MessageCommand(ApplicationCommand):
     __slots__ = ()
 
-    def __init__(self, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        *,
+        name: str,
+        default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
+    ):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
         )
 
     def __repr__(self) -> str:
@@ -430,6 +481,7 @@ class MessageCommand(ApplicationCommand):
         self = MessageCommand(
             name=data["name"],
             default_permission=data.get("default_permission", True),
+            dm_permission=data.get("dm_permission", True),
         )
         self._update_common(data)
         return self
@@ -459,6 +511,8 @@ class SlashCommand(ApplicationCommand):
         description: str,
         options: List[Option] = None,
         default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
     ):
         name = name.lower()
         _validate_name(name)
@@ -467,6 +521,8 @@ class SlashCommand(ApplicationCommand):
             type=ApplicationCommandType.chat_input,
             name=name,
             default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
         )
         self.description: str = description
         self.options: List[Option] = options or []
@@ -497,6 +553,7 @@ class SlashCommand(ApplicationCommand):
             name=data["name"],
             description=data["description"],
             default_permission=data.get("default_permission", True),
+            dm_permission=data.get("dm_permission", True),
             options=_maybe_cast(
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
             ),
