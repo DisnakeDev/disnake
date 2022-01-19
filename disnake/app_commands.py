@@ -326,7 +326,7 @@ class ApplicationCommand(ABC):
     id: :class:`int`
         The application command's ID.
     application_id: :class:`int`
-        The parent application's ID. (This is usually yout bot's ID.)
+        The parent application's ID. (This is usually your bot's ID.)
     guild_id: Optional[:class:`int`]
         The ID of the guild this application command is enabled in. Or ``None`` if it's global.
     version: :class:`int`
@@ -398,7 +398,7 @@ class UserCommand(ApplicationCommand):
     id: :class:`int`
         The user command's ID.
     application_id: :class:`int`
-        The parent application's ID. (This is usually yout bot's ID.)
+        The parent application's ID. (This is usually your bot's ID.)
     guild_id: Optional[:class:`int`]
         The ID of the guild this user command is enabled in. Or ``None`` if it's global.
     version: :class:`int`
@@ -445,7 +445,7 @@ class MessageCommand(ApplicationCommand):
     id: :class:`int`
         The message command's ID.
     application_id: :class:`int`
-        The parent application's ID. (This is usually yout bot's ID.)
+        The parent application's ID. (This is usually your bot's ID.)
     guild_id: Optional[:class:`int`]
         The ID of the guild this message command is enabled in. Or ``None`` if it's global.
     version: :class:`int`
@@ -493,7 +493,7 @@ class SlashCommand(ApplicationCommand):
     id: :class:`int`
         The slash command's ID.
     application_id: :class:`int`
-        The parent application's ID. (This is usually yout bot's ID.)
+        The parent application's ID. (This is usually your bot's ID.)
     guild_id: Optional[:class:`int`]
         The ID of the guild this slash command is enabled in. Or ``None`` if it's global.
     version: :class:`int`
@@ -636,7 +636,7 @@ class GuildApplicationCommandPermissions:
     id: :class:`int`
         The application command's ID.
     application_id: :class:`int`
-        The parent application's ID. (This is usually yout bot's ID.)
+        The parent application's ID. (This is usually your bot's ID.)
     guild_id: :class:`int`
         The ID of the guild where these permissions are applied.
     permissions: List[:class:`ApplicationCommandPermissions`]
