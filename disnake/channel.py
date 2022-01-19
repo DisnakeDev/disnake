@@ -455,7 +455,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         also needed to retrieve message history.
 
         Examples
-        ---------
+        --------
 
         Deleting bot's messages ::
 

@@ -741,7 +741,7 @@ class GuildChannel(ABC):
             This method *replaces* the old overwrites with the ones given.
 
         Examples
-        ----------
+        --------
 
         Setting allow and deny: ::
 
@@ -1574,7 +1574,7 @@ class Messageable:
         You must have :attr:`.Permissions.read_message_history` permission to use this.
 
         Examples
-        ---------
+        --------
 
         Usage ::
 

@@ -1729,7 +1729,7 @@ def check(predicate: Check) -> Callable[[T], T]:
         The ``predicate`` attribute was added.
 
     Examples
-    ---------
+    --------
 
     Creating a basic check to see if the command invoker is you.
 
@@ -1813,7 +1813,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         decorator.
 
     Examples
-    ---------
+    --------
 
     Creating a basic check to see if it's the bot owner or
     the server owner:

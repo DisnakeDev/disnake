@@ -440,7 +440,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     ``None`` is returned.
 
     Examples
-    ---------
+    --------
 
     Basic usage:
 

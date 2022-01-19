@@ -1272,7 +1272,7 @@ class Client:
         This function returns the **first event that meets the requirements**.
 
         Examples
-        ---------
+        --------
 
         Waiting for a user reply: ::
 
@@ -1457,7 +1457,7 @@ class Client:
             This method is an API call. For general usage, consider :attr:`guilds` instead.
 
         Examples
-        ---------
+        --------
 
         Usage ::
 

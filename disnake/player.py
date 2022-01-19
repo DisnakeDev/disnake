@@ -449,7 +449,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         the input source for audio codec and bitrate information.
 
         Examples
-        ----------
+        --------
 
         Use this function to create an :class:`FFmpegOpusAudio` instance instead of the constructor: ::
 

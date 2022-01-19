@@ -443,7 +443,7 @@ class Thread(Messageable, Hashable):
         also needed to retrieve message history.
 
         Examples
-        ---------
+        --------
 
         Deleting bot's messages ::
 

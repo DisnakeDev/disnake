@@ -1158,7 +1158,7 @@ class Guild(Hashable):
             will be required to update the position of the channel in the channel list.
 
         Examples
-        ----------
+        --------
 
         Creating a basic channel:
 
@@ -3099,7 +3099,7 @@ class Guild(Hashable):
         You must have :attr:`~Permissions.view_audit_log` permission to use this.
 
         Examples
-        ----------
+        --------
 
         Getting the first 100 entries: ::
 
