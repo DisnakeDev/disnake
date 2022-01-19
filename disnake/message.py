@@ -1824,7 +1824,7 @@ class Message(Hashable):
         Parameters
         ----------
         fail_if_not_exists: :class:`bool`
-            Whether replying using the message reference should raise :class:`HTTPException`
+            Whether replying using the message reference should raise :exc:`HTTPException`
             if the message no longer exists or Discord could not fetch the message.
 
             .. versionadded:: 2.3

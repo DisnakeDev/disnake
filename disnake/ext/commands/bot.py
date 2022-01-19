@@ -196,7 +196,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     anything that you can do with a :class:`disnake.Client` you can do with
     this bot.
 
-    This class also subclasses :class:`.InteractionBotBase` to provide the functionality
+    This class also subclasses InteractionBotBase to provide the functionality
     to manage application commands.
 
     Attributes
