@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import inspect
 import os
-from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Type, TypeVar, Union
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
@@ -291,14 +291,9 @@ class Select(Item[V]):
 
 def select(
     *,
-    placeholder: Optional[str] = None,
-    custom_id: str = MISSING,
-    min_values: int = 1,
-    max_values: int = 1,
-    options: List[SelectOption] = MISSING,
-    disabled: bool = False,
-    row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], DecoratedItem[Select]]:
+    cls: Type[S] = Select,
+    kwargs: Any
+) -> Callable[[ItemCallbackType[S]], DecoratedItem[S]]:
     """A decorator that attaches a select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -310,43 +305,20 @@ def select(
 
     Parameters
     ------------
-    placeholder: Optional[:class:`str`]
-        The placeholder text that is shown if nothing is selected, if any.
-    custom_id: :class:`str`
-        The ID of the select menu that gets received during an interaction.
-        It is recommended not to set this parameter to prevent conflicts.
-    row: Optional[:class:`int`]
-        The relative row this select menu belongs to. A Discord component can only have 5
-        rows. By default, items are arranged automatically into those 5 rows. If you'd
-        like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
-        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
-    min_values: :class:`int`
-        The minimum number of items that must be chosen for this select menu.
-        Defaults to 1 and must be between 1 and 25.
-    max_values: :class:`int`
-        The maximum number of items that must be chosen for this select menu.
-        Defaults to 1 and must be between 1 and 25.
-    options: List[:class:`disnake.SelectOption`]
-        A list of options that can be selected in this menu.
-    disabled: :class:`bool`
-        Whether the select is disabled or not. Defaults to ``False``.
+    cls: :class:`Select`
+        The select subclass to create an instance of.
+    kwargs: Any
+        Keywords that are passed directly to the cls constructor.
     """
+    if not issubclass(cls, Select):
+        raise TypeError("cls argument must be a class subclassing Select")
 
-    def decorator(func: ItemCallbackType) -> DecoratedItem[Select]:
+    def decorator(func: ItemCallbackType[S]) -> DecoratedItem[S]:
         if not inspect.iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 
-        func.__discord_ui_model_type__ = Select
-        func.__discord_ui_model_kwargs__ = {
-            "placeholder": placeholder,
-            "custom_id": custom_id,
-            "row": row,
-            "min_values": min_values,
-            "max_values": max_values,
-            "options": options,
-            "disabled": disabled,
-        }
+        func.__discord_ui_model_type__ = cls
+        func.__discord_ui_model_kwargs__ = kwargs
         return func  # type: ignore
 
     return decorator
