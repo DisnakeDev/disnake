@@ -358,7 +358,8 @@ class _AuditLogProxyStageInstanceAction:
 
 
 class AuditLogEntry(Hashable):
-    r"""Represents an Audit Log entry.
+    """
+    Represents an Audit Log entry.
 
     You retrieve these via :meth:`Guild.audit_logs`.
 

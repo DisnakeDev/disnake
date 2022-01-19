@@ -243,7 +243,8 @@ class BotBase(CommonBotBase, GroupMixin):
             pass
 
     def check(self, func: T) -> T:
-        r"""A decorator that adds a global check to the bot.
+        """
+        A decorator that adds a global check to the bot.
 
         A global check is similar to a :func:`.check` that is applied
         on a per command basis except it is run before any command checks
@@ -272,7 +273,8 @@ class BotBase(CommonBotBase, GroupMixin):
         return func
 
     def check_once(self, func: CFT) -> CFT:
-        r"""A decorator that adds a "call once" global check to the bot.
+        """
+        A decorator that adds a "call once" global check to the bot.
 
         Unlike regular global checks, this one is called only once
         per :meth:`.invoke` call.
@@ -351,7 +353,8 @@ class BotBase(CommonBotBase, GroupMixin):
         return coro
 
     def after_invoke(self, coro: CFT) -> CFT:
-        r"""A decorator that registers a coroutine as a post-invoke hook.
+        """
+        A decorator that registers a coroutine as a post-invoke hook.
 
         A post-invoke hook is called directly after the command is
         called. This makes it a useful function to clean-up database
@@ -461,7 +464,8 @@ class BotBase(CommonBotBase, GroupMixin):
         return ret
 
     async def get_context(self, message: Message, *, cls: Type[CXT] = Context) -> CXT:
-        r"""|coro|
+        """
+        |coro|
 
         Returns the invocation context from the message.
 

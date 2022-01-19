@@ -685,7 +685,8 @@ def flatten_handlers(cls):
 
 @flatten_handlers
 class Message(Hashable):
-    r"""Represents a message from Discord.
+    """
+    Represents a message from Discord.
 
     .. container:: operations
 
@@ -1223,7 +1224,8 @@ class Message(Hashable):
 
     @utils.cached_slot_property("_cs_system_content")
     def system_content(self):
-        r""":class:`str`: A property that returns the content that is rendered
+        """
+        :class:`str`: A property that returns the content that is rendered
         regardless of the :attr:`Message.type`.
 
         In the case of :attr:`MessageType.default` and :attr:`MessageType.reply`\,

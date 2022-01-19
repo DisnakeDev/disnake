@@ -717,7 +717,8 @@ class GuildChannel(ABC):
         ...
 
     async def set_permissions(self, target, *, overwrite=_undefined, reason=None, **permissions):
-        r"""|coro|
+        """
+        |coro|
 
         Sets the channel specific permission overwrites for a target in the
         channel.

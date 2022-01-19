@@ -63,7 +63,8 @@ else:
 
 
 class Context(disnake.abc.Messageable, Generic[BotT]):
-    r"""Represents the context in which a command is being invoked under.
+    """
+    Represents the context in which a command is being invoked under.
 
     This class contains a lot of meta data to help you understand more about
     the invocation context. This class is not created manually and is instead
@@ -151,7 +152,8 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         self._state: ConnectionState = self.message._state
 
     async def invoke(self, command: Command[CogT, P, T], /, *args: P.args, **kwargs: P.kwargs) -> T:
-        r"""|coro|
+        """
+        |coro|
 
         Calls a command with the arguments given.
 

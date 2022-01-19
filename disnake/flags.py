@@ -160,7 +160,8 @@ class BaseFlags:
 
 @fill_with_flags(inverted=True)
 class SystemChannelFlags(BaseFlags):
-    r"""Wraps up a Discord system channel flag value.
+    """
+    Wraps up a Discord system channel flag value.
 
     Similar to :class:`Permissions`\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -241,7 +242,8 @@ class SystemChannelFlags(BaseFlags):
 
 @fill_with_flags()
 class MessageFlags(BaseFlags):
-    r"""Wraps up a Discord Message flag value.
+    """
+    Wraps up a Discord Message flag value.
 
     See :class:`SystemChannelFlags`.
 
@@ -338,7 +340,8 @@ class MessageFlags(BaseFlags):
 
 @fill_with_flags()
 class PublicUserFlags(BaseFlags):
-    r"""Wraps up the Discord User Public flags.
+    """
+    Wraps up the Discord User Public flags.
 
     .. container:: operations
 
@@ -473,7 +476,8 @@ class PublicUserFlags(BaseFlags):
 
 @fill_with_flags()
 class Intents(BaseFlags):
-    r"""Wraps up a Discord gateway intent flag.
+    """
+    Wraps up a Discord gateway intent flag.
 
     Similar to :class:`Permissions`\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -1077,7 +1081,8 @@ class MemberCacheFlags(BaseFlags):
 
 @fill_with_flags()
 class ApplicationFlags(BaseFlags):
-    r"""Wraps up the Discord Application flags.
+    """
+    Wraps up the Discord Application flags.
 
     .. container:: operations
 

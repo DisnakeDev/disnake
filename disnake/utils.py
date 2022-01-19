@@ -425,7 +425,8 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
 
 
 def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
-    r"""A helper that returns the first element in the iterable that meets
+    """
+    A helper that returns the first element in the iterable that meets
     all the traits passed in ``attrs``. This is an alternative for
     :func:`~disnake.utils.find`.
 
@@ -816,7 +817,8 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
 
 
 def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = True) -> str:
-    r"""A helper function that escapes Discord's markdown.
+    """
+    A helper function that escapes Discord's markdown.
 
     Parameters
     ----------

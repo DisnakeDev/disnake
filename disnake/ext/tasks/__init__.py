@@ -271,7 +271,8 @@ class Loop(Generic[LF]):
         return self._next_iteration
 
     async def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        r"""|coro|
+        """
+        |coro|
 
         Calls the internal callback that the task holds.
 
@@ -290,7 +291,8 @@ class Loop(Generic[LF]):
         return await self.coro(*args, **kwargs)
 
     def start(self, *args: Any, **kwargs: Any) -> asyncio.Task[None]:
-        r"""Starts the internal task in the event loop.
+        """
+        Starts the internal task in the event loop.
 
         Parameters
         ----------
@@ -322,7 +324,8 @@ class Loop(Generic[LF]):
         return self._task
 
     def stop(self) -> None:
-        r"""Gracefully stops the task from running.
+        """
+        Gracefully stops the task from running.
 
         Unlike :meth:`cancel`\, this allows the task to finish its
         current iteration before gracefully exiting.
@@ -351,7 +354,8 @@ class Loop(Generic[LF]):
             self._task.cancel()
 
     def restart(self, *args: Any, **kwargs: Any) -> None:
-        r"""A convenience method to restart the internal task.
+        """
+        A convenience method to restart the internal task.
 
         .. note::
 
@@ -375,7 +379,8 @@ class Loop(Generic[LF]):
             self._task.cancel()
 
     def add_exception_type(self, *exceptions: Type[BaseException]) -> None:
-        r"""Adds exception types to be handled during the reconnect logic.
+        """
+        Adds exception types to be handled during the reconnect logic.
 
         By default the exception types handled are those handled by
         :meth:`disnake.Client.connect`\, which includes a lot of internet disconnection
@@ -412,7 +417,8 @@ class Loop(Generic[LF]):
         self._valid_exception = tuple()
 
     def remove_exception_type(self, *exceptions: Type[BaseException]) -> bool:
-        r"""Removes exception types from being handled during the reconnect logic.
+        """
+        Removes exception types from being handled during the reconnect logic.
 
         Parameters
         ----------

@@ -207,7 +207,8 @@ class _CaseInsensitiveDict(dict):
 
 
 class Command(_BaseCommand, Generic[CogT, P, T]):
-    r"""A class that implements the protocol for a bot text command.
+    """
+    A class that implements the protocol for a bot text command.
 
     These are not created manually, instead they are created via the
     decorator or functional interface.
@@ -278,6 +279,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         .. versionadded:: 2.0
     """
+
     __original_kwargs__: Dict[str, Any]
 
     def __new__(cls: Type[CommandT], *args: Any, **kwargs: Any) -> CommandT:
@@ -1693,7 +1695,8 @@ def group(
 
 
 def check(predicate: Check) -> Callable[[T], T]:
-    r"""A decorator that adds a check to the :class:`.Command` or its
+    """
+    A decorator that adds a check to the :class:`.Command` or its
     subclasses. These checks could be accessed via :attr:`.Command.checks`.
 
     These checks should be predicates that take in a single parameter taking
@@ -1788,7 +1791,8 @@ def check(predicate: Check) -> Callable[[T], T]:
 
 
 def check_any(*checks: Check) -> Callable[[T], T]:
-    r"""A :func:`check` that is added that checks if any of the checks passed
+    """
+    A :func:`check` that is added that checks if any of the checks passed
     will pass, i.e. using logical OR.
 
     If all checks fail then :exc:`.CheckAnyFailure` is raised to signal the failure.
@@ -1899,7 +1903,8 @@ def has_role(item: Union[int, str]) -> Callable[[T], T]:
 
 
 def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
-    r"""A :func:`.check` that is added that checks if the member invoking the
+    """
+    A :func:`.check` that is added that checks if the member invoking the
     command has **any** of the roles specified. This means that if they have
     one out of the three roles specified, then this check will return `True`.
 

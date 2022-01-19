@@ -277,7 +277,8 @@ class Permissions(BaseFlags):
         return cls(1 << 3)
 
     def update(self, **kwargs: bool) -> None:
-        r"""Bulk updates this permission object.
+        """
+        Bulk updates this permission object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties
@@ -633,7 +634,8 @@ def _augment_from_permissions(cls):
 
 @_augment_from_permissions
 class PermissionOverwrite:
-    r"""A type that is used to represent a channel specific permission.
+    """
+    A type that is used to represent a channel specific permission.
 
     Unlike a regular :class:`Permissions`\, the default value of a
     permission is equivalent to ``None`` and not ``False``. Setting
@@ -780,7 +782,8 @@ class PermissionOverwrite:
         return len(self._values) == 0
 
     def update(self, **kwargs: bool) -> None:
-        r"""Bulk updates this permission overwrite object.
+        """
+        Bulk updates this permission overwrite object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties

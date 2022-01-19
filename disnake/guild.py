@@ -1525,7 +1525,8 @@ class Guild(Hashable):
         public_updates_channel: Optional[TextChannel] = MISSING,
         premium_progress_bar_enabled: bool = MISSING,
     ) -> Guild:
-        r"""|coro|
+        """
+        |coro|
 
         Edits the guild.
 
@@ -2146,7 +2147,8 @@ class Guild(Hashable):
         roles: List[Snowflake] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[int]:
-        r"""|coro|
+        """
+        |coro|
 
         Prunes the guild from its inactive members.
 
@@ -2418,7 +2420,8 @@ class Guild(Hashable):
         return [convert(d) for d in data]
 
     async def fetch_stickers(self) -> List[GuildSticker]:
-        r"""|coro|
+        """
+        |coro|
 
         Retrieves a list of all :class:`Sticker`\s that the guild has.
 
@@ -2562,7 +2565,8 @@ class Guild(Hashable):
         await self._state.http.delete_guild_sticker(self.id, sticker.id, reason=reason)
 
     async def fetch_emojis(self) -> List[Emoji]:
-        r"""|coro|
+        """
+        |coro|
 
         Retrieves all custom :class:`Emoji`\s that the guild has.
 
@@ -2621,7 +2625,8 @@ class Guild(Hashable):
         roles: Sequence[Role] = MISSING,
         reason: Optional[str] = None,
     ) -> Emoji:
-        r"""|coro|
+        """
+        |coro|
 
         Creates a custom :class:`Emoji` for the guild.
 

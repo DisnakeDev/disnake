@@ -33,7 +33,8 @@ __all__ = ("File",)
 
 
 class File:
-    r"""A parameter object used for :meth:`abc.Messageable.send`
+    """
+    A parameter object used for :meth:`abc.Messageable.send`
     for sending file objects.
 
     .. note::

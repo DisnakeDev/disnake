@@ -261,7 +261,8 @@ class _HelpCommandImpl(Command):
 
 
 class HelpCommand:
-    r"""The base implementation for help command formatting.
+    """
+    The base implementation for help command formatting.
 
     .. note::
 

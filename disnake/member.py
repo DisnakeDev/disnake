@@ -907,7 +907,8 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def add_roles(
         self, *roles: Snowflake, reason: Optional[str] = None, atomic: bool = True
     ) -> None:
-        r"""|coro|
+        """
+        |coro|
 
         Gives the member a number of :class:`Role`\s.
 
@@ -947,7 +948,8 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def remove_roles(
         self, *roles: Snowflake, reason: Optional[str] = None, atomic: bool = True
     ) -> None:
-        r"""|coro|
+        """
+        |coro|
 
         Removes :class:`Role`\s from this member.
 
