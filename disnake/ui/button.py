@@ -241,15 +241,19 @@ def button(
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType], DecoratedItem[Button]]:
     """A decorator that attaches a button to a component.
+
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.Button` being pressed and
     the :class:`disnake.MessageInteraction` you receive.
+
     .. note::
+
         Buttons with a URL cannot be created with this function.
         Consider creating a :class:`Button` manually instead.
         This is because buttons with a URL do not have a callback
         associated with them since Discord does not do any processing
         with it.
+
     Parameters
     ------------
     label: Optional[:class:`str`]
