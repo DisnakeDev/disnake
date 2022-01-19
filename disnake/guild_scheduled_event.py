@@ -27,6 +27,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+from .asset import Asset
 from .enums import (
     GuildScheduledEventEntityType,
     GuildScheduledEventPrivacyLevel,
@@ -36,7 +37,13 @@ from .enums import (
 from .member import Member
 from .mixins import Hashable
 from .user import User
-from .utils import MISSING, _get_as_snowflake, cached_slot_property, parse_time
+from .utils import (
+    MISSING,
+    _bytes_to_base64_data,
+    _get_as_snowflake,
+    cached_slot_property,
+    parse_time,
+)
 
 if TYPE_CHECKING:
     from .abc import GuildChannel
@@ -159,6 +166,7 @@ class GuildScheduledEvent(Hashable):
         "entity_metadata",
         "creator",
         "user_count",
+        "_image",
         "_cs_guild",
         "_cs_channel",
     )
@@ -200,6 +208,7 @@ class GuildScheduledEvent(Hashable):
             self.creator = None
 
         self.user_count: Optional[int] = data.get("user_count")
+        self._image: Optional[str] = data.get("image")
 
     def __repr__(self) -> str:
         return (
@@ -234,7 +243,14 @@ class GuildScheduledEvent(Hashable):
         guild = self.guild
         return None if guild is None else guild.get_channel(self.channel_id)
 
-    async def delete(self) -> None:
+    @property
+    def image(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: The image associated with the guild scheduled event, if any."""
+        if self._image is None:
+            return None
+        return Asset._from_guild_scheduled_event_image(self._state, self.id, self._image)
+
+    async def delete(self):
         """|coro|
 
         Deletes the guild scheduled event.
@@ -255,6 +271,7 @@ class GuildScheduledEvent(Hashable):
         *,
         name: str = MISSING,
         description: str = MISSING,
+        image: Optional[bytes] = MISSING,
         channel_id: Optional[int] = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         scheduled_start_time: datetime = MISSING,
@@ -280,6 +297,11 @@ class GuildScheduledEvent(Hashable):
             The name of the guild scheduled event.
         description: :class:`str`
             The description of the guild scheduled event.
+        image: Optional[:class:`bytes`]
+            The image of the guild scheduled event. Set to ``None`` to remove the image.
+
+            .. versionadded:: 2.4
+
         channel_id: Optional[:class:`int`]
             The channel ID in which the guild scheduled event will be hosted.
             Set to ``None`` if changing ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
@@ -359,6 +381,12 @@ class GuildScheduledEvent(Hashable):
 
         if description is not MISSING:
             fields["description"] = description
+
+        if image is not MISSING:
+            if image is None:
+                fields["image"] = None
+            else:
+                fields["image"] = _bytes_to_base64_data(image)
 
         if channel_id is not MISSING:
             if channel_id is not None and is_external:

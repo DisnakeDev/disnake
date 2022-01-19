@@ -1876,6 +1876,7 @@ class HTTPClient:
         entity_metadata: Optional[Dict[str, Any]] = None,
         scheduled_end_time: Optional[str] = None,
         description: Optional[str] = None,
+        image: Optional[str] = None,
         reason: Optional[str] = None,
     ) -> Response[guild_scheduled_event.GuildScheduledEvent]:
         r = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
@@ -1897,6 +1898,9 @@ class HTTPClient:
 
         if description is not None:
             payload["description"] = description
+
+        if image is not None:
+            payload["image"] = image
 
         return self.request(r, json=payload, reason=reason)
 
