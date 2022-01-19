@@ -292,7 +292,7 @@ class Select(Item[V]):
 def select(
     *,
     cls: Type[S] = Select,
-    kwargs: Any
+    **kwargs: Any
 ) -> Callable[[ItemCallbackType[S]], DecoratedItem[S]]:
     """A decorator that attaches a select menu to a component.
 

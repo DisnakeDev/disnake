@@ -234,7 +234,7 @@ class Button(Item[V]):
 def button(
     *,
     cls: Type[B] = Button,
-    kwargs: Any
+    **kwargs: Any
 ) -> Callable[[ItemCallbackType[B]], DecoratedItem[B]]:
     """A decorator that attaches a button to a component.
 
