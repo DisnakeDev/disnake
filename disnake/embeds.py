@@ -777,7 +777,17 @@ class Embed:
 
     @classmethod
     def set_default_colour(cls, value: Optional[Union[int, Colour]]):
-        """Set the default colour of all embeds without a colour set."""
+        """
+        Set the default colour of all new embeds.
+
+        .. versionadded:: 2.4
+
+        Returns
+        -------
+        :class:`Colour`
+            The colour that was set.
+
+        """
         if value == None:
             cls._default_colour = cls.Empty
         elif isinstance(value, (Colour, _EmptyEmbed)):
@@ -788,12 +798,23 @@ class Embed:
             raise TypeError(
                 f"Expected disnake.Colour, or int, but received {type(value).__name__} instead."
             )
+        return cls._default_colour
 
     set_default_color = set_default_colour
 
     @classmethod
     def get_default_colour(cls) -> MaybeEmpty[Colour]:
-        """Get the default colour."""
+        """
+        Get the default colour of all new embeds.
+
+        .. versionadded:: 2.4
+
+        Returns
+        -------
+        :class:`Colour`
+            The default colour.
+
+        """
         return cls._default_colour
 
     get_default_color = get_default_colour
