@@ -187,7 +187,7 @@ class Embed:
     )
 
     Empty: Final = EmptyEmbed
-    _default_colour: Union[int, Colour] = Empty
+    _default_colour: MaybeEmpty[Colour] = Empty
 
     def __init__(
         self,
@@ -797,7 +797,7 @@ class Embed:
     set_default_color = set_default_colour
 
     @classmethod
-    def get_default_colour(cls) -> Optional[Union[int, Colour]]:
+    def get_default_colour(cls) -> MaybeEmpty[Colour]:
         """Get the default colour."""
         return cls._default_colour
 
