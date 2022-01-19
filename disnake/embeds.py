@@ -263,7 +263,7 @@ class Embed:
         try:
             self._colour = Colour(value=data["color"])
         except KeyError:
-            pass
+            self._colour = EmptyEmbed
 
         try:
             self._timestamp = utils.parse_time(data["timestamp"])
@@ -283,6 +283,7 @@ class Embed:
     def copy(self: E) -> E:
         """Returns a shallow copy of the embed."""
         embed = type(self).from_dict(self.to_dict())
+        embed.colour = getattr(self, "_colour", EmptyEmbed)
         embed._files = self._files  # TODO: Maybe copy these too?
         return embed
 
