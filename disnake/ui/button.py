@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import inspect
 import os
-from typing import TYPE_CHECKING, Callable, Optional, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, Type, TypeVar, Union
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
@@ -233,13 +233,9 @@ class Button(Item[V]):
 
 def button(
     *,
-    label: Optional[str] = None,
-    custom_id: Optional[str] = None,
-    disabled: bool = False,
-    style: ButtonStyle = ButtonStyle.secondary,
-    emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-    row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], DecoratedItem[Button]]:
+    cls: Type[B] = Button,
+    kwargs: Any
+) -> Callable[[ItemCallbackType[B]], DecoratedItem[B]]:
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -256,40 +252,20 @@ def button(
 
     Parameters
     ------------
-    label: Optional[:class:`str`]
-        The label of the button, if any.
-    custom_id: Optional[:class:`str`]
-        The ID of the button that gets received during an interaction.
-        It is recommended not to set this parameter to prevent conflicts.
-    style: :class:`.ButtonStyle`
-        The style of the button. Defaults to :attr:`.ButtonStyle.grey`.
-    disabled: :class:`bool`
-        Whether the button is disabled or not. Defaults to ``False``.
-    emoji: Optional[Union[:class:`str`, :class:`.Emoji`, :class:`.PartialEmoji`]]
-        The emoji of the button. This can be in string form or a :class:`.PartialEmoji`
-        or a full :class:`.Emoji`.
-    row: Optional[:class:`int`]
-        The relative row this button belongs to. A Discord component can only have 5
-        rows. By default, items are arranged automatically into those 5 rows. If you'd
-        like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
-        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
+    cls: :class:`Button`
+        The button subclass to create an instance of.
+    kwargs: Any
+        Keywords that are passed directly to the cls constructor.
     """
+    if not issubclass(cls, Button):
+        raise TypeError("cls argument must be a class subclassing Button")
 
-    def decorator(func: ItemCallbackType) -> DecoratedItem[Button]:
+    def decorator(func: ItemCallbackType[B]) -> DecoratedItem[B]:
         if not inspect.iscoroutinefunction(func):
             raise TypeError("button function must be a coroutine function")
 
-        func.__discord_ui_model_type__ = Button
-        func.__discord_ui_model_kwargs__ = {
-            "style": style,
-            "custom_id": custom_id,
-            "url": None,
-            "disabled": disabled,
-            "label": label,
-            "emoji": emoji,
-            "row": row,
-        }
+        func.__discord_ui_model_type__ = cls
+        func.__discord_ui_model_kwargs__ = kwargs
         return func  # type: ignore
 
     return decorator
