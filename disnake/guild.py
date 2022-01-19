@@ -521,8 +521,8 @@ class Guild(Hashable):
             self._stage_instances[stage_instance.id] = stage_instance
 
         self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
-        for s in guild.get("guild_scheduled_events", []):
-            scheduled_event = GuildScheduledEvent(state=state, data=s)
+        for e in guild.get("guild_scheduled_events", []):
+            scheduled_event = GuildScheduledEvent(state=state, data=e)
             self._scheduled_events[scheduled_event.id] = scheduled_event
 
         cache_joined = self._state.member_cache_flags.joined
@@ -1891,7 +1891,7 @@ class Guild(Hashable):
 
         if privacy_level is MISSING:
             privacy_level = GuildScheduledEventPrivacyLevel.guild_only
-        elif not isinstance(privacy_level, StagePrivacyLevel):
+        elif not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
             raise ValueError("privacy_level must be an instance of GuildScheduledEventPrivacyLevel")
 
         fields: Dict[str, Any] = {
