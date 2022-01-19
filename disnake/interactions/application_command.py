@@ -95,7 +95,7 @@ class ApplicationCommandInteraction(Interaction):
     .. versionadded:: 2.1
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The interaction's ID.
     type: :class:`InteractionType`

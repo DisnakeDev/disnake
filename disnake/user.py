@@ -264,7 +264,7 @@ class BaseUser(_UserTag):
         """Checks if the user is mentioned in the specified message.
 
         Parameters
-        -----------
+        ----------
         message: :class:`Message`
             The message to check if the user is mentioned.
 
@@ -302,7 +302,7 @@ class ClientUser(BaseUser):
             Returns the user's name with discriminator.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The user's username.
     id: :class:`int`
@@ -367,7 +367,7 @@ class ClientUser(BaseUser):
             The edit is no longer in-place, instead the newly edited client user is returned.
 
         Parameters
-        -----------
+        ----------
         username: :class:`str`
             The new username you wish to change to.
         avatar: :class:`bytes`
@@ -382,7 +382,7 @@ class ClientUser(BaseUser):
             Wrong image format passed for ``avatar``.
 
         Returns
-        ---------
+        -------
         :class:`ClientUser`
             The newly edited client user.
         """
@@ -419,7 +419,7 @@ class User(BaseUser, disnake.abc.Messageable):
             Returns the user's name with discriminator.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The user's username.
     id: :class:`int`

@@ -107,7 +107,7 @@ class CogMeta(type):
                 pass
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The cog name. By default, it is the name of the class with no modification.
     description: :class:`str`
@@ -264,7 +264,7 @@ class Cog(metaclass=CogMeta):
         r"""Returns a list of commands the cog has.
 
         Returns
-        --------
+        -------
         List[:class:`.Command`]
             A :class:`list` of :class:`.Command`\s that are
             defined inside this cog. Returns an empty list if
@@ -280,7 +280,7 @@ class Cog(metaclass=CogMeta):
         r"""Returns a list of application commands the cog has.
 
         Returns
-        --------
+        -------
         List[:class:`.InvokableApplicationCommand`]
             A :class:`list` of :class:`.InvokableApplicationCommand`\s that are
             defined inside this cog. Returns an empty list if no application
@@ -296,7 +296,7 @@ class Cog(metaclass=CogMeta):
         r"""Returns a list of slash commands the cog has.
 
         Returns
-        --------
+        -------
         List[:class:`.InvokableSlashCommand`]
             A :class:`list` of :class:`.InvokableSlashCommand`\s that are
             defined inside this cog. Returns an empty list if no slash
@@ -312,7 +312,7 @@ class Cog(metaclass=CogMeta):
         r"""Returns a list of user commands the cog has.
 
         Returns
-        --------
+        -------
         List[:class:`.InvokableUserCommand`]
             A :class:`list` of :class:`.InvokableUserCommand`\s that are
             defined inside this cog. Returns an empty list if no user
@@ -324,7 +324,7 @@ class Cog(metaclass=CogMeta):
         r"""Returns a list of message commands the cog has.
 
         Returns
-        --------
+        -------
         List[:class:`.InvokableMessageCommand`]
             A :class:`list` of :class:`.InvokableMessageCommand`\s that are
             defined inside this cog. Returns an empty list if no message
@@ -366,7 +366,7 @@ class Cog(metaclass=CogMeta):
         """Returns a :class:`list` of (name, function) listener pairs the cog has.
 
         Returns
-        --------
+        -------
         List[Tuple[:class:`str`, :ref:`coroutine <coroutine>`]]
             The listeners defined in this cog.
         """
@@ -384,13 +384,13 @@ class Cog(metaclass=CogMeta):
         This is the cog equivalent of :meth:`.Bot.listen`.
 
         Parameters
-        ------------
+        ----------
         name: :class:`str`
             The name of the event being listened to. If not provided, it
             defaults to the function's name.
 
         Raises
-        --------
+        ------
         TypeError
             The function is not a coroutine function or a string was not passed as
             the name.
@@ -567,7 +567,7 @@ class Cog(metaclass=CogMeta):
         This **must** be a coroutine.
 
         Parameters
-        -----------
+        ----------
         ctx: :class:`.Context`
             The invocation context where the error happened.
         error: :class:`CommandError`
@@ -588,7 +588,7 @@ class Cog(metaclass=CogMeta):
         This **must** be a coroutine.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction where the error happened.
         error: :class:`CommandError`
@@ -619,7 +619,7 @@ class Cog(metaclass=CogMeta):
         This **must** be a coroutine.
 
         Parameters
-        -----------
+        ----------
         ctx: :class:`.Context`
             The invocation context.
         """
@@ -634,7 +634,7 @@ class Cog(metaclass=CogMeta):
         This **must** be a coroutine.
 
         Parameters
-        -----------
+        ----------
         ctx: :class:`.Context`
             The invocation context.
         """
@@ -649,7 +649,7 @@ class Cog(metaclass=CogMeta):
         This **must** be a coroutine.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction of the slash command.
         """
@@ -664,7 +664,7 @@ class Cog(metaclass=CogMeta):
         This **must** be a coroutine.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction of the slash command.
         """

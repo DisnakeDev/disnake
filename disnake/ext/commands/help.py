@@ -76,7 +76,7 @@ class Paginator:
             Returns the total number of characters in the paginator.
 
     Attributes
-    -----------
+    ----------
     prefix: :class:`str`
         The prefix inserted to every page. e.g. three backticks.
     suffix: :class:`str`
@@ -124,7 +124,7 @@ class Paginator:
         is raised.
 
         Parameters
-        -----------
+        ----------
         line: :class:`str`
             The line to add.
         empty: :class:`bool`
@@ -273,7 +273,7 @@ class HelpCommand:
         the same between command invocations would not work as expected.
 
     Attributes
-    ------------
+    ----------
     context: Optional[:class:`Context`]
         The context that invoked this help formatter. This is generally set after
         the help command assigned, :func:`command_callback`\, has been called.
@@ -389,7 +389,7 @@ class HelpCommand:
         then it returns the internal command name of the help command.
 
         Returns
-        ---------
+        -------
         :class:`str`
             The command name that triggered this invocation.
         """
@@ -403,12 +403,12 @@ class HelpCommand:
         """Retrieves the signature portion of the help page.
 
         Parameters
-        ------------
+        ----------
         command: :class:`Command`
             The command to get the signature of.
 
         Returns
-        --------
+        -------
         :class:`str`
             The signature for the command.
         """
@@ -460,7 +460,7 @@ class HelpCommand:
         To unbind the cog from the help command, you can set it to ``None``.
 
         Returns
-        --------
+        -------
         Optional[:class:`Cog`]
             The cog that is currently set for the help command.
         """
@@ -484,13 +484,13 @@ class HelpCommand:
         Defaults to ``No command called {0} found.``
 
         Parameters
-        ------------
+        ----------
         string: :class:`str`
             The string that contains the invalid command. Note that this has
             had mentions removed to prevent abuse.
 
         Returns
-        ---------
+        -------
         :class:`str`
             The string to use when a command has not been found.
         """
@@ -510,7 +510,7 @@ class HelpCommand:
             - If the ``command`` parameter has subcommands but not one named ``string``.
 
         Parameters
-        ------------
+        ----------
         command: :class:`Command`
             The command that did not have the subcommand requested.
         string: :class:`str`
@@ -518,7 +518,7 @@ class HelpCommand:
             had mentions removed to prevent abuse.
 
         Returns
-        ---------
+        -------
         :class:`str`
             The string to use when the command did not have the subcommand requested.
         """
@@ -535,7 +535,7 @@ class HelpCommand:
         attributes.
 
         Parameters
-        ------------
+        ----------
         commands: Iterable[:class:`Command`]
             An iterable of commands that are getting filtered.
         sort: :class:`bool`
@@ -546,7 +546,7 @@ class HelpCommand:
             passed as ``True`` then this will default as the command name.
 
         Returns
-        ---------
+        -------
         List[:class:`Command`]
             A list of commands that passed the filter.
         """
@@ -585,12 +585,12 @@ class HelpCommand:
         """Returns the largest name length of the specified command list.
 
         Parameters
-        ------------
+        ----------
         commands: Sequence[:class:`Command`]
             A sequence of commands to check for the largest size.
 
         Returns
-        --------
+        -------
         :class:`int`
             The maximum width of the commands.
         """
@@ -627,7 +627,7 @@ class HelpCommand:
             You can access the invocation context with :attr:`HelpCommand.context`.
 
         Parameters
-        ------------
+        ----------
         error: :class:`str`
             The error message to display to the user. Note that this has
             had mentions removed to prevent abuse.
@@ -648,7 +648,7 @@ class HelpCommand:
         error handlers.
 
         Parameters
-        ------------
+        ----------
         ctx: :class:`Context`
             The invocation context.
         error: :class:`CommandError`
@@ -677,7 +677,7 @@ class HelpCommand:
             you will have to call :meth:`filter_commands` yourself.
 
         Parameters
-        ------------
+        ----------
         mapping: Mapping[Optional[:class:`Cog`], List[:class:`Command`]]
             A mapping of cogs to commands that have been requested by the user for help.
             The key of the mapping is the :class:`~.commands.Cog` that the command belongs to, or
@@ -707,7 +707,7 @@ class HelpCommand:
             :meth:`filter_commands` yourself.
 
         Parameters
-        -----------
+        ----------
         cog: :class:`Cog`
             The cog that was requested for help.
         """
@@ -735,7 +735,7 @@ class HelpCommand:
             filtering you will have to call :meth:`filter_commands` yourself.
 
         Parameters
-        -----------
+        ----------
         group: :class:`Group`
             The group that was requested for help.
         """
@@ -773,7 +773,7 @@ class HelpCommand:
             these to help you get started to get the output that you want.
 
         Parameters
-        -----------
+        ----------
         command: :class:`Command`
             The command that was requested for help.
         """
@@ -795,7 +795,7 @@ class HelpCommand:
             the usual rules that happen inside apply here as well.
 
         Parameters
-        -----------
+        ----------
         ctx: :class:`Context`
             The invocation context.
         command: Optional[:class:`str`]
@@ -874,7 +874,7 @@ class DefaultHelpCommand(HelpCommand):
     It extends it with the following attributes.
 
     Attributes
-    ------------
+    ----------
     width: :class:`int`
         The maximum number of characters that fit in a line.
         Defaults to 80.
@@ -945,7 +945,7 @@ class DefaultHelpCommand(HelpCommand):
         to fit into the :attr:`width`.
 
         Parameters
-        -----------
+        ----------
         commands: Sequence[:class:`Command`]
             A list of commands to indent for output.
         heading: :class:`str`
@@ -979,7 +979,7 @@ class DefaultHelpCommand(HelpCommand):
         """A utility function to format the non-indented block of commands and groups.
 
         Parameters
-        ------------
+        ----------
         command: :class:`Command`
             The command to format.
         """
@@ -1082,7 +1082,7 @@ class MinimalHelpCommand(HelpCommand):
     This inherits from :class:`HelpCommand`.
 
     Attributes
-    ------------
+    ----------
     sort_commands: :class:`bool`
         Whether to sort the commands in the output alphabetically. Defaults to ``True``.
     commands_heading: :class:`str`
@@ -1168,7 +1168,7 @@ class MinimalHelpCommand(HelpCommand):
         by commands separated by an EN SPACE (U+2002) in the next line.
 
         Parameters
-        -----------
+        ----------
         commands: Sequence[:class:`Command`]
             A list of commands that belong to the heading.
         heading: :class:`str`
@@ -1189,7 +1189,7 @@ class MinimalHelpCommand(HelpCommand):
         optionally followed by an En dash and the command's :attr:`Command.short_doc`.
 
         Parameters
-        -----------
+        ----------
         command: :class:`Command`
             The command to show information of.
         """
@@ -1209,7 +1209,7 @@ class MinimalHelpCommand(HelpCommand):
         This is not called if there are no aliases to format.
 
         Parameters
-        -----------
+        ----------
         aliases: Sequence[:class:`str`]
             A list of aliases to format.
         """
@@ -1219,7 +1219,7 @@ class MinimalHelpCommand(HelpCommand):
         """A utility function to format commands and groups.
 
         Parameters
-        ------------
+        ----------
         command: :class:`Command`
             The command to format.
         """

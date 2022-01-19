@@ -154,12 +154,12 @@ class CommonBotBase(Generic[CogT]):
             :attr:`owner_ids` is not set.
 
         Parameters
-        -----------
+        ----------
         user: :class:`.abc.User`
             The user to check for.
 
         Returns
-        --------
+        -------
         :class:`bool`
             Whether the user is the owner.
         """
@@ -184,7 +184,7 @@ class CommonBotBase(Generic[CogT]):
         """The non decorator alternative to :meth:`.listen`.
 
         Parameters
-        -----------
+        ----------
         func: :ref:`coroutine <coroutine>`
             The function to call.
         name: :class:`str`
@@ -220,7 +220,7 @@ class CommonBotBase(Generic[CogT]):
         """Removes a listener from the pool of listeners.
 
         Parameters
-        -----------
+        ----------
         func
             The function that was used as a listener to remove.
         name: :class:`str`
@@ -260,7 +260,7 @@ class CommonBotBase(Generic[CogT]):
         Would print one and two in an unspecified order.
 
         Raises
-        -------
+        ------
         TypeError
             The function being listened to is not a coroutine.
         """
@@ -284,7 +284,7 @@ class CommonBotBase(Generic[CogT]):
             is already loaded.
 
         Parameters
-        -----------
+        ----------
         cog: :class:`.Cog`
             The cog to register to the bot.
         override: :class:`bool`
@@ -294,7 +294,7 @@ class CommonBotBase(Generic[CogT]):
             .. versionadded:: 2.0
 
         Raises
-        -------
+        ------
         TypeError
             The cog does not inherit from :class:`.Cog`.
         CommandError
@@ -323,14 +323,14 @@ class CommonBotBase(Generic[CogT]):
         If the cog is not found, ``None`` is returned instead.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the cog you are requesting.
             This is equivalent to the name passed via keyword
             argument in class creation or the class name if unspecified.
 
         Returns
-        --------
+        -------
         Optional[:class:`Cog`]
             The cog that was requested. If not found, returns ``None``.
         """
@@ -345,7 +345,7 @@ class CommonBotBase(Generic[CogT]):
         If no cog is found then this method has no effect.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the cog to remove.
 
@@ -451,7 +451,7 @@ class CommonBotBase(Generic[CogT]):
         point must have a single argument, the ``bot``.
 
         Parameters
-        ------------
+        ----------
         name: :class:`str`
             The extension name to load. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
@@ -464,7 +464,7 @@ class CommonBotBase(Generic[CogT]):
             .. versionadded:: 1.7
 
         Raises
-        --------
+        ------
         ExtensionNotFound
             The extension could not be imported.
             This is also raised if the name of the extension could not
@@ -498,7 +498,7 @@ class CommonBotBase(Generic[CogT]):
         :meth:`~.Bot.load_extension`.
 
         Parameters
-        ------------
+        ----------
         name: :class:`str`
             The extension name to unload. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
@@ -511,7 +511,7 @@ class CommonBotBase(Generic[CogT]):
             .. versionadded:: 1.7
 
         Raises
-        -------
+        ------
         ExtensionNotFound
             The name of the extension could not
             be resolved using the provided ``package`` parameter.
@@ -535,7 +535,7 @@ class CommonBotBase(Generic[CogT]):
         the bot will roll-back to the prior working state.
 
         Parameters
-        ------------
+        ----------
         name: :class:`str`
             The extension name to reload. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
@@ -548,7 +548,7 @@ class CommonBotBase(Generic[CogT]):
             .. versionadded:: 1.7
 
         Raises
-        -------
+        ------
         ExtensionNotLoaded
             The extension was not loaded.
         ExtensionNotFound

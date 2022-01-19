@@ -53,7 +53,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
     decorator or functional interface.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the user command.
     body: :class:`.UserCommand`
@@ -124,7 +124,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     decorator or functional interface.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the message command.
     body: :class:`.MessageCommand`
@@ -224,7 +224,7 @@ def user_command(
         The function is not a coroutine or the command is already registered.
 
     Returns
-    --------
+    -------
     Callable[..., :class:`InvokableUserCommand`]
         A decorator that converts the provided method into a InvokableUserCommand and returns it.
     """
@@ -287,7 +287,7 @@ def message_command(
         The function is not a coroutine or the command is already registered.
 
     Returns
-    --------
+    -------
     Callable[..., :class:`InvokableMessageCommand`]
         A decorator that converts the provided method into a InvokableMessageCommand and then returns it.
     """

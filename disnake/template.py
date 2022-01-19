@@ -94,7 +94,7 @@ class Template:
     .. versionadded:: 1.4
 
     Attributes
-    -----------
+    ----------
     code: :class:`str`
         The template code.
     uses: :class:`int`
@@ -225,7 +225,7 @@ class Template:
             The template is no longer edited in-place, instead it is returned.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden
@@ -234,7 +234,7 @@ class Template:
             This template does not exist.
 
         Returns
-        --------
+        -------
         :class:`Template`
             The newly edited template.
         """
@@ -261,14 +261,14 @@ class Template:
             The template is no longer edited in-place, instead it is returned.
 
         Parameters
-        ------------
+        ----------
         name: :class:`str`
             The template's new name.
         description: Optional[:class:`str`]
             The template's new description.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden
@@ -277,7 +277,7 @@ class Template:
             This template does not exist.
 
         Returns
-        --------
+        -------
         :class:`Template`
             The newly edited template.
         """
@@ -302,7 +302,7 @@ class Template:
         .. versionadded:: 1.7
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden

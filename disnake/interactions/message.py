@@ -51,7 +51,7 @@ class MessageInteraction(Interaction):
     .. versionadded:: 2.1
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The interaction's ID.
     guild_id: Optional[:class:`int`]

@@ -125,7 +125,7 @@ class SubCommandGroup(InvokableApplicationCommand):
     decorator or functional interface.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the group.
     option: :class:`.Option`
@@ -172,7 +172,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
 
         Returns
-        --------
+        -------
         Callable[..., :class:`SubCommand`]
             A decorator that converts the provided method into a SubCommand, adds it to the bot, then returns it.
         """
@@ -207,7 +207,7 @@ class SubCommand(InvokableApplicationCommand):
     decorator or functional interface.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the subcommand.
     option: :class:`.Option`
@@ -310,7 +310,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     decorator or functional interface.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the command.
     body: :class:`.SlashCommand`
@@ -413,7 +413,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             ``{"option-name": "param_name", ...}``
 
         Returns
-        --------
+        -------
         Callable[..., :class:`SubCommand`]
             A decorator that converts the provided method into a :class:`SubCommand`, adds it to the bot, then returns it.
         """
@@ -461,7 +461,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             the name of the subcommand group. Defaults to the function name
 
         Returns
-        --------
+        -------
         Callable[..., :class:`SubCommandGroup`]
             A decorator that converts the provided method into a :class:`SubCommandGroup`, adds it to the bot, then returns it.
         """
@@ -648,7 +648,7 @@ def slash_command(
         If you're using :ref:`param_syntax`, you don't need to specify this.
 
     Returns
-    --------
+    -------
     Callable[..., :class:`InvokableSlashCommand`]
         A decorator that converts the provided method into a InvokableSlashCommand and returns it.
     """

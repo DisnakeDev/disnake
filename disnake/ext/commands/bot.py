@@ -77,7 +77,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
     to manage commands.
 
     Attributes
-    -----------
+    ----------
     command_prefix
         The command prefix is what the message content must contain initially
         to have a command invoked. This prefix could either be a string to
@@ -200,7 +200,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     to manage application commands.
 
     Attributes
-    -----------
+    ----------
     owner_id: Optional[:class:`int`]
         The user ID that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using

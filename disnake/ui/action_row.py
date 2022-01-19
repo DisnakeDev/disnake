@@ -50,7 +50,7 @@ class ActionRow:
     .. versionadded:: 2.4
 
     Parameters
-    ------------
+    ----------
     *items: :class:`Item`
         The items of this action row.
     """
@@ -94,12 +94,12 @@ class ActionRow:
         """Appends an item to the action row.
 
         Parameters
-        -----------
+        ----------
         item: :class:`disnake.ui.Item`
             The item to append to the action row.
 
         Raises
-        -------
+        ------
         ValueError
             The width of the action row exceeds 5.
         """
@@ -125,7 +125,7 @@ class ActionRow:
         :meth:`append_item` method instead.
 
         Parameters
-        -----------
+        ----------
         style: :class:`disnake.ButtonStyle`
             The style of the button.
         custom_id: Optional[:class:`str`]
@@ -141,7 +141,7 @@ class ActionRow:
             The emoji of the button, if available.
 
         Raises
-        -------
+        ------
         ValueError
             The width of the action row exceeds 5.
         """
@@ -172,7 +172,7 @@ class ActionRow:
         :meth:`append_item` method instead.
 
         Parameters
-        -----------
+        ----------
         custom_id: :class:`str`
             The ID of the select menu that gets received during an interaction.
             If not given then one is generated for you.
@@ -190,7 +190,7 @@ class ActionRow:
             Whether the select is disabled or not.
 
         Raises
-        -------
+        ------
         ValueError
             The width of the action row exceeds 5.
         """

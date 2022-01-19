@@ -834,7 +834,7 @@ class UnresolvedGuildApplicationCommandPermissions:
             based on the previously set ``owner`` permission if applicable
 
         Returns
-        --------
+        -------
         :class:`PartialGuildApplicationCommandPermissions`
             A new permissions object based on this instance
             and the provided command ID and owner IDs.

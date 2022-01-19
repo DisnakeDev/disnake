@@ -127,7 +127,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Returns the channel's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The channel's name.
     guild: :class:`Guild`
@@ -275,7 +275,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             attribute.
 
         Returns
-        ---------
+        -------
         Optional[:class:`Message`]
             The last message in this channel or ``None`` if not found.
         """
@@ -363,7 +363,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Editing the channel failed.
 
         Returns
-        --------
+        -------
         Optional[:class:`.TextChannel`]
             The newly edited text channel. If the edit was only positional
             then ``None`` is returned instead.
@@ -400,7 +400,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         do this.
 
         Parameters
-        -----------
+        ----------
         messages: Iterable[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
@@ -466,7 +466,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             await channel.send(f'Deleted {len(deleted)} message(s)')
 
         Parameters
-        -----------
+        ----------
         limit: Optional[:class:`int`]
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
@@ -487,14 +487,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             fall back to single delete if messages are older than two weeks.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have proper permissions to do the actions required.
         HTTPException
             Purging the messages failed.
 
         Returns
-        --------
+        -------
         List[:class:`.Message`]
             A list of messages that were deleted.
         """
@@ -554,12 +554,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         use this.
 
         Raises
-        -------
+        ------
         Forbidden
             You don't have permissions to get the webhooks.
 
         Returns
-        --------
+        -------
         List[:class:`Webhook`]
             The webhooks for this channel.
         """
@@ -582,7 +582,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The ``reason`` keyword-only parameter was added.
 
         Parameters
-        -------------
+        ----------
         name: :class:`str`
             The webhook's name.
         avatar: Optional[:class:`bytes`]
@@ -592,14 +592,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The reason for creating this webhook. Shows up in the audit logs.
 
         Raises
-        -------
+        ------
         HTTPException
             Creating the webhook failed.
         Forbidden
             You do not have permissions to create a webhook.
 
         Returns
-        --------
+        -------
         :class:`Webhook`
             The newly created webhook.
         """
@@ -628,7 +628,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 1.3
 
         Parameters
-        -----------
+        ----------
         destination: :class:`TextChannel`
             The channel you would like to follow from.
         reason: Optional[:class:`str`]
@@ -637,14 +637,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             .. versionadded:: 1.4
 
         Raises
-        -------
+        ------
         HTTPException
             Following the channel failed.
         Forbidden
             You do not have the permissions to create a webhook.
 
         Returns
-        --------
+        -------
         :class:`Webhook`
             The newly created webhook.
         """
@@ -670,12 +670,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 1.6
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
             The message ID to create a partial message for.
 
         Returns
-        ---------
+        -------
         :class:`PartialMessage`
             The requested partial message.
         """
@@ -689,12 +689,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         thread_id: :class:`int`
             The ID to search for.
 
         Returns
-        --------
+        -------
         Optional[:class:`Thread`]
             The returned thread or ``None`` if not found.
         """
@@ -721,7 +721,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the thread.
         message: Optional[:class:`abc.Snowflake`]
@@ -756,14 +756,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The reason for creating the thread. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to create a thread.
         HTTPException
             Starting the thread failed.
 
         Returns
-        --------
+        -------
         :class:`Thread`
             The newly created thread
         """
@@ -813,7 +813,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         limit: Optional[:class:`bool`]
             The number of threads to retrieve.
             If ``None``, retrieves every archived thread in the channel. Note, however,
@@ -918,7 +918,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
             when the member cache is unavailable.
 
         Returns
-        --------
+        -------
         Mapping[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
@@ -965,7 +965,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             Returns the channel's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The channel's name.
     guild: :class:`Guild`
@@ -1080,7 +1080,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         .. versionadded:: 2.3
 
         Returns
-        ---------
+        -------
         Optional[:class:`Message`]
             The last message in this channel or ``None`` if not found.
         """
@@ -1095,12 +1095,12 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         .. versionadded:: 2.3
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
             The message ID to create a partial message for.
 
         Returns
-        ---------
+        -------
         :class:`PartialMessage`
             The requested partial message.
         """
@@ -1198,7 +1198,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             Editing the channel failed.
 
         Returns
-        --------
+        -------
         Optional[:class:`.VoiceChannel`]
             The newly edited voice channel. If the edit was only positional
             then ``None`` is returned instead.
@@ -1233,7 +1233,7 @@ class StageChannel(VocalGuildChannel):
             Returns the channel's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The channel's name.
     guild: :class:`Guild`
@@ -1361,7 +1361,7 @@ class StageChannel(VocalGuildChannel):
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         topic: :class:`str`
             The stage instance's topic.
         privacy_level: :class:`StagePrivacyLevel`
@@ -1379,7 +1379,7 @@ class StageChannel(VocalGuildChannel):
             Creating a stage instance failed.
 
         Returns
-        --------
+        -------
         :class:`StageInstance`
             The newly created stage instance.
         """
@@ -1402,14 +1402,14 @@ class StageChannel(VocalGuildChannel):
         .. versionadded:: 2.0
 
         Raises
-        -------
+        ------
         NotFound
             The stage instance or channel could not be found.
         HTTPException
             Getting the stage instance failed.
 
         Returns
-        --------
+        -------
         :class:`StageInstance`
             The stage instance.
         """
@@ -1486,7 +1486,7 @@ class StageChannel(VocalGuildChannel):
             Editing the channel failed.
 
         Returns
-        --------
+        -------
         Optional[:class:`.StageChannel`]
             The newly edited stage channel. If the edit was only positional
             then ``None`` is returned instead.
@@ -1521,7 +1521,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             Returns the category's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The category name.
     guild: :class:`Guild`
@@ -1633,7 +1633,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             Editing the category failed.
 
         Returns
-        --------
+        -------
         Optional[:class:`.CategoryChannel`]
             The newly edited category channel. If the edit was only positional
             then ``None`` is returned instead.
@@ -1773,7 +1773,7 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
             Returns the channel's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The channel's name.
     guild: :class:`Guild`
@@ -1914,7 +1914,7 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
             Editing the channel failed.
 
         Returns
-        --------
+        -------
         Optional[:class:`.StoreChannel`]
             The newly edited store channel. If the edit was only positional
             then ``None`` is returned instead.
@@ -2013,13 +2013,13 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
 
         Parameters
-        -----------
+        ----------
         obj: :class:`User`
             The user to check permissions for. This parameter is ignored
             but kept for compatibility with other ``permissions_for`` methods.
 
         Returns
-        --------
+        -------
         :class:`Permissions`
             The resolved permissions.
         """
@@ -2038,12 +2038,12 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         .. versionadded:: 1.6
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
             The message ID to create a partial message for.
 
         Returns
-        ---------
+        -------
         :class:`PartialMessage`
             The requested partial message.
         """
@@ -2161,12 +2161,12 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         This also checks the kick_members permission if the user is the owner.
 
         Parameters
-        -----------
+        ----------
         obj: :class:`~disnake.abc.Snowflake`
             The user to check permissions for.
 
         Returns
-        --------
+        -------
         :class:`Permissions`
             The resolved permissions for the user.
         """
@@ -2189,7 +2189,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         If you are the only one in the group, this deletes it as well.
 
         Raises
-        -------
+        ------
         HTTPException
             Leaving the group failed.
         """
@@ -2221,7 +2221,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
             Returns the partial messageable's hash.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The channel ID associated with this partial messageable.
     type: Optional[:class:`ChannelType`]
@@ -2244,12 +2244,12 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         doing an unnecessary API call.
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
             The message ID to create a partial message for.
 
         Returns
-        ---------
+        -------
         :class:`PartialMessage`
             The requested partial message.
         """

@@ -120,7 +120,7 @@ class Snowflake(Protocol):
     :class:`.Object`.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The model's unique ID.
     """
@@ -142,7 +142,7 @@ class User(Snowflake, Protocol):
     This ABC must also implement :class:`~disnake.abc.Snowflake`.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The user's username.
     discriminator: :class:`str`
@@ -183,7 +183,7 @@ class PrivateChannel(Snowflake, Protocol):
     This ABC must also implement :class:`~disnake.abc.Snowflake`.
 
     Attributes
-    -----------
+    ----------
     me: :class:`~disnake.ClientUser`
         The user representing yourself.
     """
@@ -236,7 +236,7 @@ class GuildChannel(ABC):
     This ABC must also implement :class:`.abc.Snowflake`.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The channel name.
     guild: :class:`.Guild`
@@ -456,13 +456,13 @@ class GuildChannel(ABC):
         """Returns the channel-specific overwrites for a member or a role.
 
         Parameters
-        -----------
+        ----------
         obj: Union[:class:`.Role`, :class:`.abc.User`]
             The role or user denoting
             whose overwrite to get.
 
         Returns
-        ---------
+        -------
         :class:`~disnake.PermissionOverwrite`
             The permission overwrites for this object.
         """
@@ -490,7 +490,7 @@ class GuildChannel(ABC):
         overwrite as a :class:`~disnake.PermissionOverwrite`.
 
         Returns
-        --------
+        -------
         Dict[Union[:class:`~disnake.Role`, :class:`~disnake.Member`], :class:`~disnake.PermissionOverwrite`]
             The channel's permission overwrites.
         """
@@ -681,12 +681,12 @@ class GuildChannel(ABC):
         You must have :attr:`.Permissions.manage_channels` permission to do this.
 
         Parameters
-        -----------
+        ----------
         reason: Optional[:class:`str`]
             The reason for deleting this channel. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have proper permissions to delete the channel.
         NotFound
@@ -760,7 +760,7 @@ class GuildChannel(ABC):
             await channel.set_permissions(member, overwrite=overwrite)
 
         Parameters
-        -----------
+        ----------
         target: Union[:class:`.Member`, :class:`.Role`]
             The member or role to overwrite permissions for.
         overwrite: Optional[:class:`.PermissionOverwrite`]
@@ -773,7 +773,7 @@ class GuildChannel(ABC):
             The reason for doing this action. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to edit channel specific permissions.
         HTTPException
@@ -849,21 +849,21 @@ class GuildChannel(ABC):
         .. versionadded:: 1.1
 
         Parameters
-        ------------
+        ----------
         name: Optional[:class:`str`]
             The name of the new channel. If not provided, defaults to this channel name.
         reason: Optional[:class:`str`]
             The reason for cloning this channel. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
 
         Returns
-        --------
+        -------
         :class:`.abc.GuildChannel`
             The channel that was created.
         """
@@ -935,7 +935,7 @@ class GuildChannel(ABC):
         .. versionadded:: 1.7
 
         Parameters
-        ------------
+        ----------
         beginning: :class:`bool`
             Whether to move the channel to the beginning of the
             channel list (or category if given).
@@ -967,7 +967,7 @@ class GuildChannel(ABC):
             The reason for moving this channel. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         InvalidArgument
             An invalid position was given or a bad mix of arguments were passed.
         Forbidden
@@ -1060,7 +1060,7 @@ class GuildChannel(ABC):
         do this.
 
         Parameters
-        ------------
+        ----------
         max_age: :class:`int`
             How long the invite should last in seconds. If it's 0 then the invite
             doesn't expire. Defaults to ``0``.
@@ -1099,14 +1099,14 @@ class GuildChannel(ABC):
             The reason for creating this invite. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         HTTPException
             Invite creation failed.
         NotFound
             The channel that was passed is a category or an invalid channel.
 
         Returns
-        --------
+        -------
         :class:`.Invite`
             The newly created invite.
         """
@@ -1133,7 +1133,7 @@ class GuildChannel(ABC):
         You must have :attr:`.Permissions.manage_channels` permission to use this.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have proper permissions to get the information.
         HTTPException
@@ -1284,7 +1284,7 @@ class Messageable:
         **Specifying both parameters will lead to an exception**.
 
         Parameters
-        ------------
+        ----------
         content: Optional[:class:`str`]
             The content of the message to send.
         tts: :class:`bool`
@@ -1349,7 +1349,7 @@ class Messageable:
             .. versionadded:: 2.4
 
         Raises
-        --------
+        ------
         HTTPException
             Sending the message failed.
         Forbidden
@@ -1362,7 +1362,7 @@ class Messageable:
             :class:`.MessageReference` or :class:`.PartialMessage`.
 
         Returns
-        ---------
+        -------
         :class:`.Message`
             The message that was sent.
         """
@@ -1512,12 +1512,12 @@ class Messageable:
         Retrieves a single :class:`.Message` from the destination.
 
         Parameters
-        ------------
+        ----------
         id: :class:`int`
             The message ID to look for.
 
         Raises
-        --------
+        ------
         NotFound
             The specified message was not found.
         Forbidden
@@ -1526,7 +1526,7 @@ class Messageable:
             Retrieving the message failed.
 
         Returns
-        --------
+        -------
         :class:`.Message`
             The message asked for.
         """
@@ -1546,12 +1546,12 @@ class Messageable:
             :attr:`.Message.reactions` data.
 
         Raises
-        -------
+        ------
         HTTPException
             Retrieving the pinned messages failed.
 
         Returns
-        --------
+        -------
         List[:class:`.Message`]
             The messages that are currently pinned.
         """
@@ -1591,7 +1591,7 @@ class Messageable:
         All parameters are optional.
 
         Parameters
-        -----------
+        ----------
         limit: Optional[:class:`int`]
             The number of messages to retrieve.
             If ``None``, retrieves every message in the channel. Note, however,
@@ -1672,7 +1672,7 @@ class Connectable(Protocol):
         This requires :attr:`Intents.voice_states`.
 
         Parameters
-        -----------
+        ----------
         timeout: :class:`float`
             The timeout in seconds to wait for the voice endpoint.
         reconnect: :class:`bool`
@@ -1684,7 +1684,7 @@ class Connectable(Protocol):
             Defaults to :class:`VoiceClient`.
 
         Raises
-        -------
+        ------
         asyncio.TimeoutError
             Could not connect to the voice channel in time.
         ClientException
@@ -1693,7 +1693,7 @@ class Connectable(Protocol):
             The opus library has not been loaded.
 
         Returns
-        --------
+        -------
         :class:`VoiceProtocol`
             A voice client that is fully connected to the voice server.
         """

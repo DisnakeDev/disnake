@@ -130,7 +130,7 @@ class Embed:
     casted to :class:`str` for you.
 
     Attributes
-    -----------
+    ----------
     title: :class:`str`
         The title of the embed.
         This can be set during initialisation.
@@ -220,7 +220,7 @@ class Embed:
         __ DiscordDocs_
 
         Parameters
-        -----------
+        ----------
         data: :class:`dict`
             The dictionary to convert into an embed.
         """
@@ -365,7 +365,7 @@ class Embed:
         chaining.
 
         Parameters
-        -----------
+        ----------
         text: :class:`str`
             The footer text.
         icon_url: :class:`str`
@@ -420,7 +420,7 @@ class Embed:
             Passing :attr:`Empty` removes the image.
 
         Parameters
-        -----------
+        ----------
         url: :class:`str`
             The source URL for the image. Only HTTP(S) is supported.
         file: :class:`File`
@@ -472,7 +472,7 @@ class Embed:
             Passing :attr:`Empty` removes the thumbnail.
 
         Parameters
-        -----------
+        ----------
         url: :class:`str`
             The source URL for the thumbnail. Only HTTP(S) is supported.
         file: :class:`File`
@@ -546,7 +546,7 @@ class Embed:
         chaining.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the author.
         url: :class:`str`
@@ -598,7 +598,7 @@ class Embed:
         chaining.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the field.
         value: :class:`str`
@@ -628,7 +628,7 @@ class Embed:
         .. versionadded:: 1.2
 
         Parameters
-        -----------
+        ----------
         index: :class:`int`
             The index of where to insert the field.
         name: :class:`str`
@@ -670,7 +670,7 @@ class Embed:
             shift to fill the gap just like a regular list.
 
         Parameters
-        -----------
+        ----------
         index: :class:`int`
             The index of the field to remove.
         """
@@ -688,7 +688,7 @@ class Embed:
         chaining.
 
         Parameters
-        -----------
+        ----------
         index: :class:`int`
             The index of the field to modify.
         name: :class:`str`
@@ -699,7 +699,7 @@ class Embed:
             Whether the field should be displayed inline.
 
         Raises
-        -------
+        ------
         IndexError
             An invalid index was provided.
         """

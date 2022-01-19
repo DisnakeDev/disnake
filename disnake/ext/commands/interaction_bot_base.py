@@ -222,12 +222,12 @@ class InteractionBotBase(CommonBotBase):
         shortcut decorators are used.
 
         Parameters
-        -----------
+        ----------
         slash_command: :class:`InvokableSlashCommand`
             The slash command to add.
 
         Raises
-        -------
+        ------
         CommandRegistrationError
             The slash command is already registered.
         TypeError
@@ -248,12 +248,12 @@ class InteractionBotBase(CommonBotBase):
         shortcut decorators are used.
 
         Parameters
-        -----------
+        ----------
         user_command: :class:`InvokableUserCommand`
             The user command to add.
 
         Raises
-        -------
+        ------
         CommandRegistrationError
             The user command is already registered.
         TypeError
@@ -274,12 +274,12 @@ class InteractionBotBase(CommonBotBase):
         shortcut decorators are used.
 
         Parameters
-        -----------
+        ----------
         message_command: :class:`InvokableMessageCommand`
             The message command to add.
 
         Raises
-        -------
+        ------
         CommandRegistrationError
             The message command is already registered.
         TypeError
@@ -300,12 +300,12 @@ class InteractionBotBase(CommonBotBase):
         of slash commands.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the slash command to remove.
 
         Returns
-        --------
+        -------
         Optional[:class:`InvokableSlashCommand`]
             The slash command that was removed. If the name is not valid then ``None`` is returned instead.
         """
@@ -319,12 +319,12 @@ class InteractionBotBase(CommonBotBase):
         of user commands.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the user command to remove.
 
         Returns
-        --------
+        -------
         Optional[:class:`InvokableUserCommand`]
             The user command that was removed. If the name is not valid then ``None`` is returned instead.
         """
@@ -338,12 +338,12 @@ class InteractionBotBase(CommonBotBase):
         of message commands.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the message command to remove.
 
         Returns
-        --------
+        -------
         Optional[:class:`InvokableMessageCommand`]
             The message command that was removed. If the name is not valid then ``None`` is returned instead.
         """
@@ -363,7 +363,7 @@ class InteractionBotBase(CommonBotBase):
         ``foo`` if found, otherwise ``None``.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the slash command to get.
 
@@ -373,7 +373,7 @@ class InteractionBotBase(CommonBotBase):
             The name is not a string.
 
         Returns
-        --------
+        -------
         Optional[Union[:class:`InvokableSlashCommand`, :class:`SubCommandGroup`, :class:`SubCommand`]]
             The slash command that was requested. If not found, returns ``None``.
         """
@@ -399,12 +399,12 @@ class InteractionBotBase(CommonBotBase):
         of user commands.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the user command to get.
 
         Returns
-        --------
+        -------
         Optional[:class:`InvokableUserCommand`]
             The user command that was requested. If not found, returns ``None``.
         """
@@ -415,12 +415,12 @@ class InteractionBotBase(CommonBotBase):
         of message commands.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the message command to get.
 
         Returns
-        --------
+        -------
         Optional[:class:`InvokableMessageCommand`]
             The message command that was requested. If not found, returns ``None``.
         """
@@ -473,7 +473,7 @@ class InteractionBotBase(CommonBotBase):
             If you're using :ref:`param_syntax`, you don't need to specify this.
 
         Returns
-        --------
+        -------
         Callable[..., :class:`InvokableSlashCommand`]
             A decorator that converts the provided method into a InvokableSlashCommand, adds it to the bot, then returns it.
         """
@@ -532,7 +532,7 @@ class InteractionBotBase(CommonBotBase):
             Otherwise this command will be registered globally in ~1 hour.
 
         Returns
-        --------
+        -------
         Callable[..., :class:`InvokableUserCommand`]
             A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
@@ -588,7 +588,7 @@ class InteractionBotBase(CommonBotBase):
             Otherwise this command will be registered globally in ~1 hour.
 
         Returns
-        --------
+        -------
         Callable[..., :class:`InvokableMessageCommand`]
             A decorator that converts the provided method into a InvokableMessageCommand, adds it to the bot, then returns it.
         """
@@ -973,7 +973,7 @@ class InteractionBotBase(CommonBotBase):
         it won't add the check.
 
         Parameters
-        -----------
+        ----------
         func
             The function that will be used as a global check.
         call_once: :class:`bool`
@@ -1021,7 +1021,7 @@ class InteractionBotBase(CommonBotBase):
         it won't add the check.
 
         Parameters
-        -----------
+        ----------
         func
             The function to remove from the global checks.
         call_once: :class:`bool`
@@ -1240,7 +1240,7 @@ class InteractionBotBase(CommonBotBase):
         you should invoke this coroutine as well.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process.
         """
@@ -1268,7 +1268,7 @@ class InteractionBotBase(CommonBotBase):
         you should invoke this coroutine as well.
 
         Parameters
-        -----------
+        ----------
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """

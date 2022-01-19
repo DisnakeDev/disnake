@@ -151,7 +151,7 @@ class InvokableApplicationCommand(ABC):
         This is the non-decorator interface to :func:`.check`.
 
         Parameters
-        -----------
+        ----------
         func
             The function that will be used as a check.
         """
@@ -165,7 +165,7 @@ class InvokableApplicationCommand(ABC):
         if the function is not in the command's checks.
 
         Parameters
-        -----------
+        ----------
         func
             The function to remove from the checks.
         """
@@ -223,12 +223,12 @@ class InvokableApplicationCommand(ABC):
         """Checks whether the application command is currently on cooldown.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction with the application command currently being invoked.
 
         Returns
-        --------
+        -------
         :class:`bool`
             A boolean indicating if the application command is on cooldown.
         """
@@ -244,7 +244,7 @@ class InvokableApplicationCommand(ABC):
         """Resets the cooldown on this application command.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction with this application command
         """
@@ -256,12 +256,12 @@ class InvokableApplicationCommand(ABC):
         """Retrieves the amount of seconds before this application command can be tried again.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction with this application command.
 
         Returns
-        --------
+        -------
         :class:`float`
             The amount of time left on this command's cooldown in seconds.
             If this is ``0.0`` then the command isn't on cooldown.
@@ -307,12 +307,12 @@ class InvokableApplicationCommand(ABC):
         A local error handler is an error event limited to a single application command.
 
         Parameters
-        -----------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register as the local error handler.
 
         Raises
-        -------
+        ------
         TypeError
             The coroutine passed is not actually a coroutine.
         """
@@ -426,12 +426,12 @@ class InvokableApplicationCommand(ABC):
         This pre-invoke hook takes a sole parameter, a :class:`.ApplicationCommandInteraction`.
 
         Parameters
-        -----------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register as the pre-invoke hook.
 
         Raises
-        -------
+        ------
         TypeError
             The coroutine passed is not actually a coroutine.
         """
@@ -449,12 +449,12 @@ class InvokableApplicationCommand(ABC):
         This post-invoke hook takes a sole parameter, a :class:`.ApplicationCommandInteraction`.
 
         Parameters
-        -----------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register as the post-invoke hook.
 
         Raises
-        -------
+        ------
         TypeError
             The coroutine passed is not actually a coroutine.
         """
@@ -476,18 +476,18 @@ class InvokableApplicationCommand(ABC):
         inside the :attr:`~Command.checks` attribute.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction with the application command currently being invoked.
 
         Raises
-        -------
+        ------
         :class:`CommandError`
             Any application command error that was raised during a check call will be propagated
             by this function.
 
         Returns
-        --------
+        -------
         :class:`bool`
             A boolean indicating if the application command can be invoked.
         """

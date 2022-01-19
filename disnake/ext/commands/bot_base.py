@@ -202,7 +202,7 @@ class BotBase(CommonBotBase, GroupMixin):
         text commands only.
 
         Parameters
-        -----------
+        ----------
         func
             The function that was used as a global check.
         call_once: :class:`bool`
@@ -229,7 +229,7 @@ class BotBase(CommonBotBase, GroupMixin):
         text commands only.
 
         Parameters
-        -----------
+        ----------
         func
             The function to remove from the global checks.
         call_once: :class:`bool`
@@ -335,12 +335,12 @@ class BotBase(CommonBotBase, GroupMixin):
             then the hooks are not called.
 
         Parameters
-        -----------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register as the pre-invoke hook.
 
         Raises
-        -------
+        ------
         TypeError
             The coroutine passed is not actually a coroutine.
         """
@@ -368,12 +368,12 @@ class BotBase(CommonBotBase, GroupMixin):
             This makes it ideal for clean-up scenarios.
 
         Parameters
-        -----------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register as the post-invoke hook.
 
         Raises
-        -------
+        ------
         TypeError
             The coroutine passed is not actually a coroutine.
         """
@@ -424,12 +424,12 @@ class BotBase(CommonBotBase, GroupMixin):
         with the message as a context.
 
         Parameters
-        -----------
+        ----------
         message: :class:`disnake.Message`
             The message context to get the prefix of.
 
         Returns
-        --------
+        -------
         Optional[Union[List[:class:`str`], :class:`str`]]
             A list of prefixes or a single prefix that the bot is
             listening for. None if the bot isn't listening for prefixes.
@@ -474,7 +474,7 @@ class BotBase(CommonBotBase, GroupMixin):
         invoked under :meth:`~.Bot.invoke`.
 
         Parameters
-        -----------
+        ----------
         message: :class:`disnake.Message`
             The message to get the invocation context from.
         cls
@@ -484,7 +484,7 @@ class BotBase(CommonBotBase, GroupMixin):
             interface.
 
         Returns
-        --------
+        -------
         :class:`.Context`
             The invocation context. The type of this can change via the
             ``cls`` parameter.
@@ -548,7 +548,7 @@ class BotBase(CommonBotBase, GroupMixin):
         handles all the internal event dispatch mechanisms.
 
         Parameters
-        -----------
+        ----------
         ctx: :class:`.Context`
             The invocation context to invoke.
         """
@@ -585,7 +585,7 @@ class BotBase(CommonBotBase, GroupMixin):
         call :meth:`~.Bot.get_context` or :meth:`~.Bot.invoke` if so.
 
         Parameters
-        -----------
+        ----------
         message: :class:`disnake.Message`
             The message to process commands for.
         """

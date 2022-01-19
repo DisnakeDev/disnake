@@ -54,7 +54,7 @@ class Button(Item[V]):
     .. versionadded:: 2.0
 
     Parameters
-    ------------
+    ----------
     style: :class:`disnake.ButtonStyle`
         The style of the button.
     custom_id: Optional[:class:`str`]
@@ -257,7 +257,7 @@ def button(
         with it.
 
     Parameters
-    ------------
+    ----------
     label: Optional[:class:`str`]
         The label of the button, if any.
     custom_id: Optional[:class:`str`]

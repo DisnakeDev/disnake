@@ -42,7 +42,7 @@ class File:
         multiple :meth:`abc.Messageable.send`\s.
 
     Attributes
-    -----------
+    ----------
     fp: Union[:class:`os.PathLike`, :class:`io.BufferedIOBase`]
         A file-like object opened in binary mode and read mode
         or a filename representing a file in the hard drive to

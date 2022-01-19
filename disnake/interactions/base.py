@@ -106,7 +106,7 @@ class Interaction:
     .. versionadded:: 2.0
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The interaction's ID.
     type: :class:`InteractionType`
@@ -293,14 +293,14 @@ class Interaction:
         Repeated calls to this will return a cached value.
 
         Raises
-        -------
+        ------
         HTTPException
             Fetching the original response message failed.
         ClientException
             The channel for the message could not be resolved.
 
         Returns
-        --------
+        -------
         InteractionMessage
             The original interaction response message.
         """
@@ -353,7 +353,7 @@ class Interaction:
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
-        ------------
+        ----------
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
@@ -393,7 +393,7 @@ class Interaction:
             See :meth:`.abc.Messageable.send` for more information.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the message failed.
         Forbidden
@@ -404,7 +404,7 @@ class Interaction:
             The length of ``embeds`` was invalid.
 
         Returns
-        --------
+        -------
         :class:`InteractionMessage`
             The newly edited message.
         """
@@ -468,7 +468,7 @@ class Interaction:
             then it is silently ignored.
 
         Raises
-        -------
+        ------
         HTTPException
             Deleting the message failed.
         Forbidden
@@ -529,7 +529,7 @@ class Interaction:
             directly instead of this method if you're sending a followup message.
 
         Parameters
-        -----------
+        ----------
         content: Optional[:class:`str`]
             The content of the message to send.
         embed: :class:`Embed`
@@ -569,7 +569,7 @@ class Interaction:
             then it is silently ignored.
 
         Raises
-        -------
+        ------
         HTTPException
             Sending the message failed.
         TypeError
@@ -631,7 +631,7 @@ class InteractionResponse:
         and a secondary action will be done later.
 
         Parameters
-        -----------
+        ----------
         ephemeral: :class:`bool`
             Whether the deferred message will eventually be ephemeral.
             This only applies for interactions of type :attr:`InteractionType.application_command`.
@@ -643,7 +643,7 @@ class InteractionResponse:
             .. versionadded:: 2.4
 
         Raises
-        -------
+        ------
         HTTPException
             Deferring the interaction failed.
         InteractionResponded
@@ -677,7 +677,7 @@ class InteractionResponse:
         This should rarely be used.
 
         Raises
-        -------
+        ------
         HTTPException
             Ponging the interaction failed.
         InteractionResponded
@@ -717,7 +717,7 @@ class InteractionResponse:
         Responds to this interaction by sending a message.
 
         Parameters
-        -----------
+        ----------
         content: Optional[:class:`str`]
             The content of the message to send.
         embed: :class:`Embed`
@@ -752,7 +752,7 @@ class InteractionResponse:
             then it is silently ignored.
 
         Raises
-        -------
+        ------
         HTTPException
             Sending the message failed.
         TypeError
@@ -885,7 +885,7 @@ class InteractionResponse:
             (i.e. by setting ``file``/``files``, or adding an embed with local files).
 
         Parameters
-        -----------
+        ----------
         content: Optional[:class:`str`]
             The new content to replace the message with. ``None`` removes the content.
         embed: Optional[:class:`Embed`]
@@ -920,7 +920,7 @@ class InteractionResponse:
             .. versionadded:: 2.4
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the message failed.
         TypeError
@@ -1015,12 +1015,12 @@ class InteractionResponse:
         Only works for autocomplete interactions.
 
         Parameters
-        -----------
+        ----------
         choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
             The list of choices to suggest.
 
         Raises
-        -------
+        ------
         HTTPException
             Autocomplete response has failed.
         InteractionResponded
@@ -1117,7 +1117,7 @@ class InteractionMessage(Message):
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
-        ------------
+        ----------
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
@@ -1157,7 +1157,7 @@ class InteractionMessage(Message):
             See :meth:`.abc.Messageable.send` for more information.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the message failed.
         Forbidden
@@ -1168,7 +1168,7 @@ class InteractionMessage(Message):
             The length of ``embeds`` was invalid.
 
         Returns
-        ---------
+        -------
         :class:`InteractionMessage`
             The newly edited message.
         """
@@ -1195,7 +1195,7 @@ class InteractionMessage(Message):
         Deletes the message.
 
         Parameters
-        -----------
+        ----------
         delay: Optional[:class:`float`]
             If provided, the number of seconds to wait before deleting the message.
             The waiting is done in the background and deletion failures are ignored.
