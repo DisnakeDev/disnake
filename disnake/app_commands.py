@@ -391,7 +391,7 @@ class ApplicationCommand(ABC):
 
     def __repr__(self) -> str:
         content = " ".join(
-            f"{name}={getattr(self, name)!r}"for name in self.__slots__ if name[0] != "_"
+            f"{name}={getattr(self, name)!r}" for name in self.__slots__ if name[0] != "_"
         )
         return (
             f"<ApplicationCommand {content} "
