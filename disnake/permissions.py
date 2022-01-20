@@ -244,17 +244,16 @@ class Permissions(BaseFlags):
            no longer part of the general permissions.
         """
         if not cls._GENERAL:
-            general_permissions = {
-                "view_channel",
-                "manage_channels",
-                "manage_roles",
-                "manage_emojis_and_stickers",
-                "view_audit_log",
-                "view_guild_insights",
-                "manage_webhooks",
-                "manage_guild",
-            }
-            instance = cls(**dict.fromkeys(general_permissions, True))
+            instance = cls(
+                view_channel=True,
+                manage_channels=True,
+                manage_roles=True,
+                manage_emojis_and_stickers=True,
+                view_audit_log=True,
+                view_guild_insights=True,
+                manage_webhooks=True,
+                manage_guild=True,
+            )
             cls._GENERAL = instance.value
             return instance
         return cls(cls._GENERAL)
@@ -270,15 +269,15 @@ class Permissions(BaseFlags):
             Added :attr:`moderate_members` permission.
         """
         if not cls._MEMBERSHIP:
-            membership_permissions = {
-                "create_instant_invite",
-                "change_nickname",
-                "manage_nicknames",
-                "kick_members",
-                "ban_members",
-                "moderate_members",
-            }
-            instance = cls(**dict.fromkeys(membership_permissions, True))
+
+            instance = cls(
+                create_instant_invite=True,
+                change_nickname=True,
+                manage_nicknames=True,
+                kick_members=True,
+                ban_members=True,
+                moderate_members=True,
+            )
             cls._MEMBERSHIP = instance.value
             return instance
         return cls(cls._MEMBERSHIP)
@@ -297,24 +296,23 @@ class Permissions(BaseFlags):
            :attr:`send_messages_in_threads` and :attr:`use_external_stickers` permissions.
         """
         if not cls._TEXT:
-            text_permissions = {
-                "send_messages",
-                "send_messages_in_threads",
-                "create_public_threads",
-                "create_private_threads",
-                "embed_links",
-                "attach_files",
-                "add_reactions",
-                "use_external_emojis",
-                "use_external_stickers",
-                "mention_everyone",
-                "manage_messages",
-                "manage_threads",
-                "read_message_history",
-                "send_tts_messages",
-                "use_slash_commands",
-            }
-            instance = cls(**dict.fromkeys(text_permissions, True))
+            instance = cls(
+                send_messages=True,
+                send_messages_in_threads=True,
+                create_public_threads=True,
+                create_private_threads=True,
+                embed_links=True,
+                attach_files=True,
+                add_reactions=True,
+                use_external_emojis=True,
+                use_external_stickers=True,
+                mention_everyone=True,
+                manage_messages=True,
+                manage_threads=True,
+                read_message_history=True,
+                send_tts_messages=True,
+                use_slash_commands=True,
+            )
             cls._TEXT = instance.value
             return instance
         return cls(cls._TEXT)
@@ -328,18 +326,17 @@ class Permissions(BaseFlags):
             Added :attr:`start_embedded_activities` permission.
         """
         if not cls._VOICE:
-            voice_permissions = {
-                "connect",
-                "speak",
-                "stream",
-                "start_embedded_activities",
-                "use_voice_activation",
-                "priority_speaker",
-                "mute_members",
-                "deafen_members",
-                "move_members",
-            }
-            instance = cls(**dict.fromkeys(voice_permissions, True))
+            instance = cls(
+                connect=True,
+                speak=True,
+                stream=True,
+                start_embedded_activities=True,
+                use_voice_activation=True,
+                priority_speaker=True,
+                mute_members=True,
+                deafen_members=True,
+                move_members=True,
+            )
             cls._VOICE = instance.value
             return instance
         return cls(cls._VOICE)
@@ -352,10 +349,9 @@ class Permissions(BaseFlags):
         .. versionadded:: 1.7
         """
         if not cls._STAGE:
-            stage_permissions = {
-                "request_to_speak",
-            }
-            instance = cls(**dict.fromkeys(stage_permissions, True))
+            instance = cls(
+                request_to_speak=True,
+            )
             cls._STAGE = instance.value
             return instance
         return cls(cls._STAGE)
@@ -368,12 +364,11 @@ class Permissions(BaseFlags):
         .. versionadded:: 1.7
         """
         if not cls._STAGE_MODERATOR:
-            stage_moderator_permissions = {
-                "manage_channels",
-                "mute_members",
-                "move_members",
-            }
-            instance = cls(**dict.fromkeys(stage_moderator_permissions, True))
+            instance = cls(
+                manage_channels=True,
+                mute_members=True,
+                move_members=True,
+            )
             cls._STAGE_MODERATOR = instance.value
             return instance
         return cls(cls._STAGE_MODERATOR)
@@ -386,10 +381,9 @@ class Permissions(BaseFlags):
         .. versionadded:: 2.4
         """
         if not cls._EVENTS:
-            event_permissions = {
-                "manage_events",
-            }
-            instance = cls(**dict.fromkeys(event_permissions, True))
+            instance = cls(
+                manage_events=True,
+            )
             cls._EVENTS = instance.value
             return instance
         return cls(cls._EVENTS)
@@ -402,10 +396,9 @@ class Permissions(BaseFlags):
         .. versionadded:: 1.7
         """
         if not cls._ADVANCED:
-            advanced_permissions = {
-                "administrator",
-            }
-            instance = cls(**dict.fromkeys(advanced_permissions, True))
+            instance = cls(
+                administrator=True,
+            )
             cls._ADVANCED = instance.value
             return instance
         return cls(cls._ADVANCED)
