@@ -127,7 +127,8 @@ class Thread(Messageable, Hashable):
     archive_timestamp: :class:`datetime.datetime`
         An aware timestamp of when the thread's archived status was last updated in UTC.
     create_timestamp: Optional[:class:`datetime.datetime`]
-        An aware timestamp of when the thread was created in UTC. This is only available for threads created after 2022-01-09
+        An aware timestamp of when the thread was created in UTC.
+        This is only available for threads created after 2022-01-09.
 
         .. versionadded:: 2.4
     """
