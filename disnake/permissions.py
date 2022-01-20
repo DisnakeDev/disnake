@@ -115,6 +115,17 @@ class Permissions(BaseFlags):
 
     __slots__ = ()
 
+    _ALL: int = 0
+    _ALL_CHANNEL: int = 0
+    _GENERAL: int = 0
+    _MEMBERSHIP: int = 0
+    _TEXT: int = 0
+    _VOICE: int = 0
+    _STAGE: int = 0
+    _STAGE_MODERATOR: int = 0
+    _EVENTS: int = 0
+    _ADVANCED: int = 0
+
     def __init__(self, permissions: int = 0, **kwargs: bool):
         if not isinstance(permissions, int):
             raise TypeError(
@@ -169,7 +180,11 @@ class Permissions(BaseFlags):
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
-        return cls(**dict.fromkeys(cls.VALID_FLAGS.keys(), True))
+        if not cls._ALL:
+            instance = cls(**dict.fromkeys(cls.VALID_FLAGS.keys(), True))
+            cls._ALL = instance.value
+            return instance
+        return cls(cls._ALL)
 
     @classmethod
     def all_channel(cls: Type[P]) -> P:
@@ -198,21 +213,24 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`start_embedded_activities` permission.
         """
-        guild_specific_perms = {
-            "administrator",
-            "ban_members",
-            "change_nickname",
-            "kick_members",
-            "manage_emojis",
-            "manage_guild",
-            "manage_nicknames",
-            "moderate_members",
-            "view_audit_log",
-            "view_guild_insights",
-        }
-        instance = cls.all()
-        instance.update(**dict.fromkeys(guild_specific_perms, False))
-        return instance
+        if not cls._ALL_CHANNEL:
+            guild_specific_perms = {
+                "administrator",
+                "ban_members",
+                "change_nickname",
+                "kick_members",
+                "manage_emojis",
+                "manage_guild",
+                "manage_nicknames",
+                "moderate_members",
+                "view_audit_log",
+                "view_guild_insights",
+            }
+            instance = cls.all()
+            instance.update(**dict.fromkeys(guild_specific_perms, False))  # type: ignore
+            cls._ALL_CHANNEL = instance.value
+            return instance
+        return cls(cls._ALL_CHANNEL)
 
     @classmethod
     def general(cls: Type[P]) -> P:
@@ -225,17 +243,21 @@ class Permissions(BaseFlags):
            :attr:`ban_members`, :attr:`change_nickname` and :attr:`manage_nicknames` are
            no longer part of the general permissions.
         """
-        general_permissions = {
-            "view_channel",
-            "manage_channels",
-            "manage_roles",
-            "manage_emojis_and_stickers",
-            "view_audit_log",
-            "view_guild_insights",
-            "manage_webhooks",
-            "manage_guild",
-        }
-        return cls(**dict.fromkeys(general_permissions, True))
+        if not cls._GENERAL:
+            general_permissions = {
+                "view_channel",
+                "manage_channels",
+                "manage_roles",
+                "manage_emojis_and_stickers",
+                "view_audit_log",
+                "view_guild_insights",
+                "manage_webhooks",
+                "manage_guild",
+            }
+            instance = cls(**dict.fromkeys(general_permissions, True))
+            cls._GENERAL = instance.value
+            return instance
+        return cls(cls._GENERAL)
 
     @classmethod
     def membership(cls: Type[P]) -> P:
@@ -247,15 +269,19 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`moderate_members` permission.
         """
-        membership_permissions = {
-            "create_instant_invite",
-            "change_nickname",
-            "manage_nicknames",
-            "kick_members",
-            "ban_members",
-            "moderate_members",
-        }
-        return cls(**dict.fromkeys(membership_permissions, True))
+        if not cls._MEMBERSHIP:
+            membership_permissions = {
+                "create_instant_invite",
+                "change_nickname",
+                "manage_nicknames",
+                "kick_members",
+                "ban_members",
+                "moderate_members",
+            }
+            instance = cls(**dict.fromkeys(membership_permissions, True))
+            cls._MEMBERSHIP = instance.value
+            return instance
+        return cls(cls._MEMBERSHIP)
 
     @classmethod
     def text(cls: Type[P]) -> P:
@@ -270,24 +296,28 @@ class Permissions(BaseFlags):
            Added :attr:`create_public_threads`, :attr:`create_private_threads`, :attr:`manage_threads`,
            :attr:`send_messages_in_threads` and :attr:`use_external_stickers` permissions.
         """
-        text_permissions = {
-            "send_messages",
-            "send_messages_in_threads",
-            "create_public_threads",
-            "create_private_threads",
-            "embed_links",
-            "attach_files",
-            "add_reactions",
-            "use_external_emojis",
-            "use_external_stickers",
-            "mention_everyone",
-            "manage_messages",
-            "manage_threads",
-            "read_message_history",
-            "send_tts_messages",
-            "use_slash_commands",
-        }
-        return cls(**dict.fromkeys(text_permissions, True))
+        if not cls._TEXT:
+            text_permissions = {
+                "send_messages",
+                "send_messages_in_threads",
+                "create_public_threads",
+                "create_private_threads",
+                "embed_links",
+                "attach_files",
+                "add_reactions",
+                "use_external_emojis",
+                "use_external_stickers",
+                "mention_everyone",
+                "manage_messages",
+                "manage_threads",
+                "read_message_history",
+                "send_tts_messages",
+                "use_slash_commands",
+            }
+            instance = cls(**dict.fromkeys(text_permissions, True))
+            cls._TEXT = instance.value
+            return instance
+        return cls(cls._TEXT)
 
     @classmethod
     def voice(cls: Type[P]) -> P:
@@ -297,18 +327,22 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`start_embedded_activities` permission.
         """
-        voice_permissions = {
-            "connect",
-            "speak",
-            "stream",
-            "start_embedded_activities",
-            "use_voice_activation",
-            "priority_speaker",
-            "mute_members",
-            "deafen_members",
-            "move_members",
-        }
-        return cls(**dict.fromkeys(voice_permissions, True))
+        if not cls._VOICE:
+            voice_permissions = {
+                "connect",
+                "speak",
+                "stream",
+                "start_embedded_activities",
+                "use_voice_activation",
+                "priority_speaker",
+                "mute_members",
+                "deafen_members",
+                "move_members",
+            }
+            instance = cls(**dict.fromkeys(voice_permissions, True))
+            cls._VOICE = instance.value
+            return instance
+        return cls(cls._VOICE)
 
     @classmethod
     def stage(cls: Type[P]) -> P:
@@ -317,7 +351,14 @@ class Permissions(BaseFlags):
 
         .. versionadded:: 1.7
         """
-        return cls(request_to_speak=True)
+        if not cls._STAGE:
+            stage_permissions = {
+                "request_to_speak",
+            }
+            instance = cls(**dict.fromkeys(stage_permissions, True))
+            cls._STAGE = instance.value
+            return instance
+        return cls(cls._STAGE)
 
     @classmethod
     def stage_moderator(cls: Type[P]) -> P:
@@ -326,12 +367,16 @@ class Permissions(BaseFlags):
 
         .. versionadded:: 1.7
         """
-        stage_moderator_permissions = {
-            "manage_channels",
-            "mute_members",
-            "move_members",
-        }
-        return cls(**dict.fromkeys(stage_moderator_permissions, True))
+        if not cls._STAGE_MODERATOR:
+            stage_moderator_permissions = {
+                "manage_channels",
+                "mute_members",
+                "move_members",
+            }
+            instance = cls(**dict.fromkeys(stage_moderator_permissions, True))
+            cls._STAGE_MODERATOR = instance.value
+            return instance
+        return cls(cls._STAGE_MODERATOR)
 
     @classmethod
     def events(cls: Type[P]) -> P:
@@ -340,7 +385,14 @@ class Permissions(BaseFlags):
 
         .. versionadded:: 2.4
         """
-        return cls(manage_events=True)
+        if not cls._EVENTS:
+            event_permissions = {
+                "manage_events",
+            }
+            instance = cls(**dict.fromkeys(event_permissions, True))
+            cls._EVENTS = instance.value
+            return instance
+        return cls(cls._EVENTS)
 
     @classmethod
     def advanced(cls: Type[P]) -> P:
@@ -349,7 +401,14 @@ class Permissions(BaseFlags):
 
         .. versionadded:: 1.7
         """
-        return cls(administrator=True)
+        if not cls._ADVANCED:
+            advanced_permissions = {
+                "administrator",
+            }
+            instance = cls(**dict.fromkeys(advanced_permissions, True))
+            cls._ADVANCED = instance.value
+            return instance
+        return cls(cls._ADVANCED)
 
     def update(self, **kwargs: bool) -> None:
         r"""Bulk updates this permission object.
