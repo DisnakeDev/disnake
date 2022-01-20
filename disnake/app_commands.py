@@ -28,7 +28,7 @@ import warnings
 from abc import ABC
 from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union
 
-from .abc import User, GuildChannel
+from .abc import GuildChannel, User
 from .custom_warnings import ConfigWarning
 from .enums import (
     ApplicationCommandType,
@@ -391,7 +391,7 @@ class ApplicationCommand(ABC):
 
     def __repr__(self) -> str:
         content = " ".join(
-            f"{name}={getattr(self, name)!r}" for name in self.__slots__ if name[0] != "_"
+            f"{name}={getattr(self, name)!r}"for name in self.__slots__ if name[0] != "_"
         )
         return (
             f"<ApplicationCommand {content} "
@@ -446,7 +446,8 @@ class UserCommand(ApplicationCommand):
 
     def __repr__(self) -> str:
         content = " ".join(
-            f"{name}={getattr(self, name)!r}" for name in super().__slots__
+            f"{name}={getattr(self, name)!r}"
+            for name in super().__slots__
             if name[0] != "_" and name != "type"
         )
         return (
@@ -488,7 +489,8 @@ class MessageCommand(ApplicationCommand):
 
     def __repr__(self) -> str:
         content = " ".join(
-            f"{name}={getattr(self, name)!r}" for name in super().__slots__
+            f"{name}={getattr(self, name)!r}"
+            for name in super().__slots__
             if name[0] != "_" and name != "type"
         )
         return (
@@ -552,7 +554,8 @@ class SlashCommand(ApplicationCommand):
 
     def __repr__(self) -> str:
         content = " ".join(
-            f"{name}={getattr(self, name)!r}" for name in super().__slots__ + self.__slots__
+            f"{name}={getattr(self, name)!r}"
+            for name in super().__slots__ + self.__slots__
             if name[0] != "_" and name != "type"
         )
         return (

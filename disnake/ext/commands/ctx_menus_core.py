@@ -34,8 +34,8 @@ from .params import safe_call
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
 
-    from disnake.permissions import Permissions
     from disnake.interactions import ApplicationCommandInteraction
+    from disnake.permissions import Permissions
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
