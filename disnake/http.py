@@ -2003,11 +2003,6 @@ class HTTPClient:
         command_id: Snowflake,
         payload: interactions.EditApplicationCommand,
     ) -> Response[interactions.ApplicationCommand]:
-        valid_keys = (
-            "name",
-            "description",
-            "options",
-        )
         payload = {k: v for k, v in payload.items() if k in valid_keys}  # type: ignore
         r = Route(
             "PATCH",
@@ -2083,11 +2078,6 @@ class HTTPClient:
         command_id: Snowflake,
         payload: interactions.EditApplicationCommand,
     ) -> Response[interactions.ApplicationCommand]:
-        valid_keys = (
-            "name",
-            "description",
-            "options",
-        )
         payload = {k: v for k, v in payload.items() if k in valid_keys}  # type: ignore
         r = Route(
             "PATCH",

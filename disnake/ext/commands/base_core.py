@@ -579,7 +579,7 @@ def guild_permissions(
     return decorator
 
 
-def require_permissions(**permissions: bool) -> Callable[[Callable], Callable]:
+def require_permissions(**permissions: bool) -> Callable[[T], T]:
     """
     A decorator that sets default required member permissions in all guilds.
 
@@ -590,11 +590,11 @@ def require_permissions(**permissions: bool) -> Callable[[Callable], Callable]:
     """
     perms_value = Permissions(**permissions).value
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: T) -> T:
         if isinstance(func, InvokableApplicationCommand):
             func.body._default_member_permissions = perms_value
         else:
-            func.__default_member_permissions__ = perms_value
+            func.__default_member_permissions__ = perms_value  # type: ignore
         return func
 
     return decorator

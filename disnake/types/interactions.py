@@ -84,7 +84,7 @@ class ApplicationCommandOptionChoice(TypedDict):
     value: ApplicationCommandOptionChoiceValue
 
 
-ApplicationCommandPermissionType = Literal[1, 2]
+ApplicationCommandPermissionType = Literal[1, 2, 3]
 
 
 class ApplicationCommandPermissions(TypedDict):
