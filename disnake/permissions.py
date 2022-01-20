@@ -61,6 +61,18 @@ def make_permission_alias(alias: str) -> Callable[[Callable[[Any], int]], permis
     return decorator
 
 
+def cached_creation(func):
+    def wrapped(cls):
+        try:
+            value = func.__stored_value__
+        except AttributeError:
+            value = func(cls).value
+            func.__stored_value__ = value
+        return cls(value)
+
+    return wrapped
+
+
 P = TypeVar("P", bound="Permissions")
 
 
@@ -115,17 +127,6 @@ class Permissions(BaseFlags):
 
     __slots__ = ()
 
-    _ALL: int = 0
-    _ALL_CHANNEL: int = 0
-    _GENERAL: int = 0
-    _MEMBERSHIP: int = 0
-    _TEXT: int = 0
-    _VOICE: int = 0
-    _STAGE: int = 0
-    _STAGE_MODERATOR: int = 0
-    _EVENTS: int = 0
-    _ADVANCED: int = 0
-
     def __init__(self, permissions: int = 0, **kwargs: bool):
         if not isinstance(permissions, int):
             raise TypeError(
@@ -170,23 +171,22 @@ class Permissions(BaseFlags):
     __gt__ = is_strict_superset
 
     @classmethod
+    @cached_creation
     def none(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``False``."""
         return cls(0)
 
     @classmethod
+    @cached_creation
     def all(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
-        if not cls._ALL:
-            instance = cls(**dict.fromkeys(cls.VALID_FLAGS.keys(), True))
-            cls._ALL = instance.value
-            return instance
-        return cls(cls._ALL)
+        return cls(**dict.fromkeys(cls.VALID_FLAGS.keys(), True))
 
     @classmethod
+    @cached_creation
     def all_channel(cls: Type[P]) -> P:
         """A :class:`Permissions` with all channel-specific permissions set to
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
@@ -213,26 +213,24 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`start_embedded_activities` permission.
         """
-        if not cls._ALL_CHANNEL:
-            guild_specific_perms = {
-                "administrator",
-                "ban_members",
-                "change_nickname",
-                "kick_members",
-                "manage_emojis",
-                "manage_guild",
-                "manage_nicknames",
-                "moderate_members",
-                "view_audit_log",
-                "view_guild_insights",
-            }
-            instance = cls.all()
-            instance.update(**dict.fromkeys(guild_specific_perms, False))  # type: ignore
-            cls._ALL_CHANNEL = instance.value
-            return instance
-        return cls(cls._ALL_CHANNEL)
+        guild_specific_perms = {
+            "administrator",
+            "ban_members",
+            "change_nickname",
+            "kick_members",
+            "manage_emojis",
+            "manage_guild",
+            "manage_nicknames",
+            "moderate_members",
+            "view_audit_log",
+            "view_guild_insights",
+        }
+        instance = cls.all()
+        instance.update(**dict.fromkeys(guild_specific_perms, False))  # type: ignore
+        return instance
 
     @classmethod
+    @cached_creation
     def general(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "General" permissions from the official Discord UI set to ``True``.
@@ -243,22 +241,19 @@ class Permissions(BaseFlags):
            :attr:`ban_members`, :attr:`change_nickname` and :attr:`manage_nicknames` are
            no longer part of the general permissions.
         """
-        if not cls._GENERAL:
-            instance = cls(
-                view_channel=True,
-                manage_channels=True,
-                manage_roles=True,
-                manage_emojis_and_stickers=True,
-                view_audit_log=True,
-                view_guild_insights=True,
-                manage_webhooks=True,
-                manage_guild=True,
-            )
-            cls._GENERAL = instance.value
-            return instance
-        return cls(cls._GENERAL)
+        return cls(
+            view_channel=True,
+            manage_channels=True,
+            manage_roles=True,
+            manage_emojis_and_stickers=True,
+            view_audit_log=True,
+            view_guild_insights=True,
+            manage_webhooks=True,
+            manage_guild=True,
+        )
 
     @classmethod
+    @cached_creation
     def membership(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Membership" permissions from the official Discord UI set to ``True``.
@@ -268,21 +263,17 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`moderate_members` permission.
         """
-        if not cls._MEMBERSHIP:
-
-            instance = cls(
-                create_instant_invite=True,
-                change_nickname=True,
-                manage_nicknames=True,
-                kick_members=True,
-                ban_members=True,
-                moderate_members=True,
-            )
-            cls._MEMBERSHIP = instance.value
-            return instance
-        return cls(cls._MEMBERSHIP)
+        return cls(
+            create_instant_invite=True,
+            change_nickname=True,
+            manage_nicknames=True,
+            kick_members=True,
+            ban_members=True,
+            moderate_members=True,
+        )
 
     @classmethod
+    @cached_creation
     def text(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Text" permissions from the official Discord UI set to ``True``.
@@ -295,29 +286,26 @@ class Permissions(BaseFlags):
            Added :attr:`create_public_threads`, :attr:`create_private_threads`, :attr:`manage_threads`,
            :attr:`send_messages_in_threads` and :attr:`use_external_stickers` permissions.
         """
-        if not cls._TEXT:
-            instance = cls(
-                send_messages=True,
-                send_messages_in_threads=True,
-                create_public_threads=True,
-                create_private_threads=True,
-                embed_links=True,
-                attach_files=True,
-                add_reactions=True,
-                use_external_emojis=True,
-                use_external_stickers=True,
-                mention_everyone=True,
-                manage_messages=True,
-                manage_threads=True,
-                read_message_history=True,
-                send_tts_messages=True,
-                use_slash_commands=True,
-            )
-            cls._TEXT = instance.value
-            return instance
-        return cls(cls._TEXT)
+        return cls(
+            send_messages=True,
+            send_messages_in_threads=True,
+            create_public_threads=True,
+            create_private_threads=True,
+            embed_links=True,
+            attach_files=True,
+            add_reactions=True,
+            use_external_emojis=True,
+            use_external_stickers=True,
+            mention_everyone=True,
+            manage_messages=True,
+            manage_threads=True,
+            read_message_history=True,
+            send_tts_messages=True,
+            use_slash_commands=True,
+        )
 
     @classmethod
+    @cached_creation
     def voice(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Voice" permissions from the official Discord UI set to ``True``.
@@ -325,83 +313,67 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`start_embedded_activities` permission.
         """
-        if not cls._VOICE:
-            instance = cls(
-                connect=True,
-                speak=True,
-                stream=True,
-                start_embedded_activities=True,
-                use_voice_activation=True,
-                priority_speaker=True,
-                mute_members=True,
-                deafen_members=True,
-                move_members=True,
-            )
-            cls._VOICE = instance.value
-            return instance
-        return cls(cls._VOICE)
+        return cls(
+            connect=True,
+            speak=True,
+            stream=True,
+            start_embedded_activities=True,
+            use_voice_activation=True,
+            priority_speaker=True,
+            mute_members=True,
+            deafen_members=True,
+            move_members=True,
+        )
 
     @classmethod
+    @cached_creation
     def stage(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Channel" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        if not cls._STAGE:
-            instance = cls(
-                request_to_speak=True,
-            )
-            cls._STAGE = instance.value
-            return instance
-        return cls(cls._STAGE)
+        return cls(
+            request_to_speak=True,
+        )
 
     @classmethod
+    @cached_creation
     def stage_moderator(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Moderator" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        if not cls._STAGE_MODERATOR:
-            instance = cls(
-                manage_channels=True,
-                mute_members=True,
-                move_members=True,
-            )
-            cls._STAGE_MODERATOR = instance.value
-            return instance
-        return cls(cls._STAGE_MODERATOR)
+        return cls(
+            manage_channels=True,
+            mute_members=True,
+            move_members=True,
+        )
 
     @classmethod
+    @cached_creation
     def events(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Events" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 2.4
         """
-        if not cls._EVENTS:
-            instance = cls(
-                manage_events=True,
-            )
-            cls._EVENTS = instance.value
-            return instance
-        return cls(cls._EVENTS)
+        return cls(
+            manage_events=True,
+        )
 
     @classmethod
+    @cached_creation
     def advanced(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Advanced" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        if not cls._ADVANCED:
-            instance = cls(
-                administrator=True,
-            )
-            cls._ADVANCED = instance.value
-            return instance
-        return cls(cls._ADVANCED)
+        return cls(
+            administrator=True,
+        )
 
     def update(self, **kwargs: bool) -> None:
         r"""Bulk updates this permission object.
