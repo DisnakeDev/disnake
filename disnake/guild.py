@@ -1863,7 +1863,7 @@ class Guild(Hashable):
         description: :class:`str`
             The description of the guild scheduled event.
         image: :class:`bytes`
-            The image of the guild scheduled event.
+            The cover image of the guild scheduled event.
 
             .. versionadded:: 2.4
 

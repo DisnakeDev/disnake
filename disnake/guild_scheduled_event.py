@@ -245,7 +245,7 @@ class GuildScheduledEvent(Hashable):
 
     @property
     def image(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: The image associated with the guild scheduled event, if any."""
+        """Optional[:class:`Asset`]: The cover image asset of the guild scheduled event, if available."""
         if self._image is None:
             return None
         return Asset._from_guild_scheduled_event_image(self._state, self.id, self._image)
@@ -298,7 +298,7 @@ class GuildScheduledEvent(Hashable):
         description: :class:`str`
             The description of the guild scheduled event.
         image: Optional[:class:`bytes`]
-            The image of the guild scheduled event. Set to ``None`` to remove the image.
+            The cover image of the guild scheduled event. Set to ``None`` to remove the image.
 
             .. versionadded:: 2.4
 
