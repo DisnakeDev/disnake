@@ -803,7 +803,7 @@ class Message(Hashable):
     thread: Optional[:class:`Thread`]
         The thread that was started from this message, if applicable.
 
-        ..versionadded: 2.4
+        ..versionadded:: 2.4
     """
 
     __slots__ = (
