@@ -838,7 +838,6 @@ class Message(Hashable):
         "stickers",
         "components",
         "guild",
-        "thread",
     )
 
     if TYPE_CHECKING:
@@ -849,7 +848,6 @@ class Message(Hashable):
         mentions: List[Union[User, Member]]
         author: Union[User, Member]
         role_mentions: List[Role]
-        thread: Optional[Thread]
 
     def __init__(
         self,
@@ -903,11 +901,8 @@ class Message(Hashable):
             self.guild = state._get_guild(utils._get_as_snowflake(data, "guild_id"))
 
         if thread_data := data.get("thread"):
-
-            self.thread = self._state.get_channel(thread_data["id"])  # type: ignore
             if not self.thread and self.guild:
-                self.thread = Thread(guild=self.guild, data=thread_data, state=self._state)
-                self.guild._add_thread(self.thread)
+                self.guild._store_thread(thread_data)
 
         try:
             ref = data["message_reference"]
@@ -1211,6 +1206,11 @@ class Message(Hashable):
         """:class:`str`: Returns a URL that allows the client to jump to this message."""
         guild_id = getattr(self.guild, "id", "@me")
         return f"https://discord.com/channels/{guild_id}/{self.channel.id}/{self.id}"
+
+    @property
+    def thread(self) -> Optional[Thread]:
+        """Optional[:class:`Thread`]: The thread started from this message. None if no thread was started."""
+        return self.guild and self.guild.get_thread(self.id)
 
     def is_system(self) -> bool:
         """Whether the message is a system message.
