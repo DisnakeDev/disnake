@@ -133,6 +133,9 @@ class StageInstance(Hashable):
             The stage instance's new topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's new privacy level.
+
+            .. deprecated:: 2.4
+
         reason: :class:`str`
             The reason the stage instance was edited. Shows up on the audit log.
 
