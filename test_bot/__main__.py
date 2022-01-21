@@ -1,8 +1,16 @@
+import logging
 import os
 import traceback
 
 import disnake
 from disnake.ext import commands
+
+from .config import Config
+
+logger = logging.getLogger(__name__)
+
+if not Config.test_guilds:
+    logger.warning("No test guilds configured. Using global commands.")
 
 
 def fancy_traceback(exc: Exception) -> str:
@@ -14,12 +22,13 @@ def fancy_traceback(exc: Exception) -> str:
 class TestBot(commands.Bot):
     def __init__(self):
         super().__init__(
-            command_prefix="..",
+            command_prefix=Config.prefix,
             intents=disnake.Intents.all(),
             help_command=None,  # type: ignore
-            sync_commands_debug=True,
-            sync_permissions=True,
-            test_guilds=[570841314200125460, 768247229840359465, 808030843078836254],
+            sync_commands_debug=Config.sync_commands_debug,
+            sync_permissions=Config.sync_permissions,
+            test_guilds=Config.test_guilds,
+            reload=Config.auto_reload,
         )
 
     def load_all_extensions(self, folder: str) -> None:
@@ -38,6 +47,10 @@ class TestBot(commands.Bot):
             f"ID: {self.user.id}\n"
         )
         # fmt: on
+
+    def add_cog(self, cog, *, override: bool = False) -> None:
+        logger.info(f"Loading cog {cog}.")
+        return super().add_cog(cog, override=override)
 
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
         embed = disnake.Embed(
@@ -98,6 +111,7 @@ class TestBot(commands.Bot):
 
 print(f"disnake: {disnake.__version__}\n")
 
-bot = TestBot()
-bot.load_all_extensions("cogs")
-bot.run(os.environ.get("BOT_TOKEN"))
+if __name__ == "__main__":
+    bot = TestBot()
+    bot.load_all_extensions(Config.cogs_folder)
+    bot.run(Config.token)

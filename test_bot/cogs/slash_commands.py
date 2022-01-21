@@ -32,7 +32,6 @@ class SlashCommands(commands.Cog):
         return ["XD", ":D", ":)", ":|", ":("]
 
     @commands.slash_command()
-    @commands.guild_permissions(768247229840359465, roles={815866581233041428: False})
     async def alt_auto(
         self,
         inter: disnake.AppCmdInter,
@@ -71,4 +70,3 @@ class SlashCommands(commands.Cog):
 
 def setup(bot):
     bot.add_cog(SlashCommands(bot))
-    print(f"> Extension {__name__} is ready\n")
