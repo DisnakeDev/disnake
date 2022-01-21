@@ -49,6 +49,8 @@ from .params import call_param_func, expand_params
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
 
+    from disnake.app_commands import Choices
+
     from .cog import CogT
 
     ApplicationCommandInteractionT = TypeVar(
@@ -82,8 +84,11 @@ def _autocomplete(
 
 
 async def _call_autocompleter(
-    self, param: str, inter: ApplicationCommandInteraction, user_input: str
-) -> Any:
+    self: Union[InvokableSlashCommand, SubCommand],
+    param: str,
+    inter: ApplicationCommandInteraction,
+    user_input: str,
+) -> Optional[Choices]:
     autocomp = self.autocompleters.get(param)
     if autocomp is None:
         return None
@@ -257,7 +262,7 @@ class SubCommand(InvokableApplicationCommand):
 
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str
-    ) -> Any:
+    ) -> Optional[Choices]:
         return await _call_autocompleter(self, param, inter, user_input)
 
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
@@ -508,7 +513,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str
-    ) -> Any:
+    ) -> Optional[Choices]:
         return await _call_autocompleter(self, param, inter, user_input)
 
     async def _call_relevant_autocompleter(self, inter: ApplicationCommandInteraction) -> None:

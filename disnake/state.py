@@ -98,7 +98,7 @@ if TYPE_CHECKING:
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
-    from .types.raw_models import TypingEvent
+    from .types.raw_models import GuildScheduledEventUserActionEvent, TypingEvent
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
     from .voice_client import VoiceProtocol
@@ -1487,7 +1487,9 @@ class ConnectionState:
             guild._scheduled_events.pop(scheduled_event.id, None)
         self.dispatch("guild_scheduled_event_delete", scheduled_event)
 
-    def parse_guild_scheduled_event_user_add(self, data) -> None:
+    def parse_guild_scheduled_event_user_add(
+        self, data: GuildScheduledEventUserActionEvent
+    ) -> None:
         payload = RawGuildScheduledEventUserActionEvent(data)
         self.dispatch("raw_guild_scheduled_event_subscribe", payload)
         guild = self._get_guild(payload.guild_id)
@@ -1502,7 +1504,9 @@ class ConnectionState:
         if event is not None and user is not None:
             self.dispatch("guild_scheduled_event_subscribe", event, user)
 
-    def parse_guild_scheduled_event_user_remove(self, data) -> None:
+    def parse_guild_scheduled_event_user_remove(
+        self, data: GuildScheduledEventUserActionEvent
+    ) -> None:
         payload = RawGuildScheduledEventUserActionEvent(data)
         self.dispatch("raw_guild_scheduled_event_unsubscribe", payload)
         guild = self._get_guild(payload.guild_id)

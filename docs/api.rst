@@ -1253,6 +1253,8 @@ Utility Functions
 
 .. autofunction:: disnake.utils.as_chunks
 
+.. autofunction:: disnake.utils.search_directory
+
 .. _discord-api-enums:
 
 Enumerations

@@ -493,7 +493,7 @@ class GuildSticker(Sticker):
             payload["tags"] = emoji
 
         data: GuildStickerPayload = await self._state.http.modify_guild_sticker(
-            self.guild_id, self.id, payload, reason
+            self.guild_id, self.id, payload, reason=reason
         )
         return GuildSticker(state=self._state, data=data)
 
@@ -517,7 +517,7 @@ class GuildSticker(Sticker):
         HTTPException
             An error occurred deleting the sticker.
         """
-        await self._state.http.delete_guild_sticker(self.guild_id, self.id, reason)
+        await self._state.http.delete_guild_sticker(self.guild_id, self.id, reason=reason)
 
 
 def _sticker_factory(
