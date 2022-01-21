@@ -84,7 +84,7 @@ if TYPE_CHECKING:
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
     )
-    from .types.threads import ThreadArchiveDurationLiteral
+    from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
     from .ui.action_row import Components
     from .ui.view import View
@@ -800,6 +800,10 @@ class Message(Hashable):
         .. versionadded:: 2.0
     guild: Optional[:class:`Guild`]
         The guild that the message belongs to, if applicable.
+    thread: Optional[:class:`Thread`]
+        The thread that was started from this message, if applicable.
+
+        ..versionadded: 2.4
     """
 
     __slots__ = (
@@ -834,6 +838,7 @@ class Message(Hashable):
         "stickers",
         "components",
         "guild",
+        "thread",
     )
 
     if TYPE_CHECKING:
@@ -844,6 +849,7 @@ class Message(Hashable):
         mentions: List[Union[User, Member]]
         author: Union[User, Member]
         role_mentions: List[Role]
+        thread: Optional[Thread]
 
     def __init__(
         self,
@@ -864,7 +870,7 @@ class Message(Hashable):
         self.embeds: List[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
         self.application: Optional[MessageApplicationPayload] = data.get("application")
         self.activity: Optional[MessageActivityPayload] = data.get("activity")
-        # for user experince, on_message has no bussiness getting partials
+        # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
         self.channel: Union[TextChannel, DMChannel, Thread, VoiceChannel] = channel  # type: ignore
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
@@ -895,6 +901,13 @@ class Message(Hashable):
             self.guild = channel.guild  # type: ignore
         except AttributeError:
             self.guild = state._get_guild(utils._get_as_snowflake(data, "guild_id"))
+
+        if thread_data := data.get("thread"):
+
+            self.thread = self._state.get_channel(thread_data["id"])  # type: ignore
+            if not self.thread and self.guild:
+                self.thread = Thread(guild=self.guild, data=thread_data, state=self._state)
+                self.guild._add_thread(self.thread)
 
         try:
             ref = data["message_reference"]
@@ -1805,7 +1818,9 @@ class Message(Hashable):
             auto_archive_duration=auto_archive_duration or default_auto_archive_duration,
             rate_limit_per_user=slowmode_delay or 0,
         )
-        return Thread(guild=self.guild, state=self._state, data=data)
+        thread = Thread(guild=self.guild, state=self._state, data=data)
+        self.thread = thread
+        return thread
 
     async def reply(
         self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs

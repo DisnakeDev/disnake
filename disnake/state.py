@@ -1037,6 +1037,10 @@ class ConnectionState:
         if not has_thread:
             self.dispatch("thread_join", thread)
 
+        # we need to update the message that corresponds to the thread
+        if msg := self._get_message(thread.id):
+            msg.thread = thread
+
     def parse_thread_update(self, data) -> None:
         guild_id = int(data["guild_id"])
         guild = self._get_guild(guild_id)
