@@ -88,20 +88,21 @@ __all__ = (
 )
 
 
-def _get_from_guilds(bot, getter, argument):
-    result = None
-    for guild in bot.guilds:
-        result = getattr(guild, getter)(argument)
-        if result:
-            return result
-    return result
-
-
 _utils_get = disnake.utils.get
 T = TypeVar("T")
+U = TypeVar("U")
 T_co = TypeVar("T_co", covariant=True)
 CT = TypeVar("CT", bound=disnake.abc.GuildChannel)
 TT = TypeVar("TT", bound=disnake.Thread)
+
+
+def _get_from_guilds(
+    client: disnake.Client, func: Callable[[disnake.Guild, T], Optional[U]], argument: T
+) -> Optional[U]:
+    for guild in client.guilds:
+        if result := func(guild, argument):
+            return result
+    return None
 
 
 @runtime_checkable
@@ -232,17 +233,18 @@ class MemberConverter(IDConverter[disnake.Member]):
 
     # note: this uses `Context` instead of `AnyContext`, as it's not used by application commands
     async def convert(self, ctx: Context, argument: str) -> disnake.Member:
-        bot = ctx.bot
+        bot: disnake.Client = ctx.bot
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{15,20})>$", argument)
         guild = ctx.guild
-        result = None
-        user_id = None
+        result: Optional[disnake.Member] = None
+        user_id: Optional[int] = None
+
         if match is None:
             # not a mention...
             if guild:
                 result = guild.get_member_named(argument)
             else:
-                result = _get_from_guilds(bot, "get_member_named", argument)
+                result = _get_from_guilds(bot, lambda g, a: g.get_member_named(a), argument)
         else:
             user_id = int(match.group(1))
             if guild:
@@ -251,7 +253,7 @@ class MemberConverter(IDConverter[disnake.Member]):
                 )
                 result = guild.get_member(user_id) or _utils_get(mentions, id=user_id)
             else:
-                result = _get_from_guilds(bot, "get_member", user_id)
+                result = _get_from_guilds(bot, lambda g, a: g.get_member(a), user_id)
 
         if result is None:
             if guild is None:
@@ -291,7 +293,6 @@ class UserConverter(IDConverter[disnake.User]):
     # note: this uses `Context` instead of `AnyContext`, as it's not used by application commands
     async def convert(self, ctx: Context, argument: str) -> disnake.User:
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{15,20})>$", argument)
-        result = None
         state = ctx._state
 
         if match is not None:
@@ -437,7 +438,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
 
     @staticmethod
     def _resolve_channel(ctx: AnyContext, argument: str, attribute: str, type: Type[CT]) -> CT:
-        bot = ctx.bot
+        bot: disnake.Client = ctx.bot
 
         match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{15,20})>$", argument)
         result: Optional[disnake.abc.GuildChannel] = None
@@ -457,9 +458,9 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
         else:
             channel_id = int(match.group(1))
             if guild:
-                result = guild.get_channel(channel_id)  # type: ignore
+                result = guild.get_channel(channel_id)
             else:
-                result = _get_from_guilds(bot, "get_channel", channel_id)
+                result = _get_from_guilds(bot, lambda g, a: g.get_channel(a), channel_id)
 
         if not isinstance(result, type):
             raise ChannelNotFound(argument)
@@ -468,8 +469,6 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
 
     @staticmethod
     def _resolve_thread(ctx: AnyContext, argument: str, attribute: str, type: Type[TT]) -> TT:
-        bot = ctx.bot
-
         match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{15,20})>$", argument)
         result: Optional[disnake.Thread] = None
         guild = ctx.guild
