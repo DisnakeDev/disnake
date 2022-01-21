@@ -31,6 +31,7 @@ import re
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
     Generic,
     Iterable,
@@ -108,7 +109,7 @@ def _get_from_guilds(
 @runtime_checkable
 class Converter(Protocol[T_co]):
     """The base class of custom converters that require the :class:`.Context`
-    to be passed to be useful.
+    or :class:`.ApplicationCommandInteraction` to be passed to be useful.
 
     This allows you to implement converters that function similar to the
     special cased ``disnake`` classes.
@@ -128,7 +129,7 @@ class Converter(Protocol[T_co]):
 
         Parameters
         -----------
-        ctx: :class:`.Context`
+        ctx: Union[:class:`.Context`, :class:`.ApplicationCommandInteraction`]
             The invocation context that the argument is being used in.
         argument: :class:`str`
             The argument that is being converted.
