@@ -47,11 +47,11 @@ class Modal:
     Parameters
     ----------
     title: str
-        The title of the modal
+        The title of the modal.
     custom_id: str
         The custom ID of the modal.
     components: List[:class:`.ui.InputText`]
-        A list of components to display in the modal. Maximum of 5.
+        The components to display in the modal. Maximum of 5.
     """
 
     def __init__(
@@ -115,6 +115,7 @@ class Modal:
         ----------
         component: Union[:class:`.ui.InputText`, List[:class:`.ui.InputText`]]
             The component to add to the modal.
+            This can be a single component or a list of components.
 
         Raises
         ------

@@ -80,7 +80,7 @@ class ModalInteractionData:
     custom_id: str
         The custom ID of the modal.
     components: List[:class:`ActionRow`]
-        A list with the components of the modal.
+        The components the modal has.
     """
 
     __slots__ = ("custom_id", "components")

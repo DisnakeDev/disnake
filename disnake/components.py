@@ -392,7 +392,7 @@ class Modal:
     custom_id: :class:`str`
         The ID of the modal that gets received during an interaction.
     components: List[:class:`InputText`]
-        A list of components that the modal has.
+        The components the modal has.
     """
 
     __slots__: Tuple[str, ...] = ("title", "custom_id", "components")
@@ -451,7 +451,7 @@ class InputText(Component):
         The pre-filled text of the input text.
     required: :class:`bool`
         Whether the input text is required. Defaults to ``True``.
-    min_length: Optional[:class:`int`]
+    min_length: :class:`int`
         The minimum length of the input text. Defaults to ``0``.
     max_length: Optional[:class:`int`]
         The maximum length of the input text.

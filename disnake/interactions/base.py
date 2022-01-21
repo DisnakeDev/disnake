@@ -1076,20 +1076,21 @@ class InteractionResponse:
 
         Parameters
         ----------
-        modal: Union[class:`Modal`]
+        modal: class:`.ui.Modal`
             The modal to display. This cannot be mixed with ``title``, ``custom_id``, and ``components`` parameters.
         title: :class:`str`
             The title of the modal. This cannot be mixed with ``modal`` parameter.
         custom_id: :class:`str`
-            The custom ID of the modal. This cannot be mixed with ``modal`` parameter.
+            The ID of the modal that gets received during an interaction.
+            This cannot be mixed with ``modal`` parameter.
         components: List[:class:`.ui.InputText`]
-            The list of components to display in the modal. Maximum of 5.
+            The components to display in the modal. A maximum of 5.
             This cannot be mixed with ``modal`` parameter.
 
         Raises
         ------
         TypeError
-            Cannot mix ``modal`` and ``title``, ``custom_id``, ``components`` parameters.
+            Cannot mix ``modal`` parameter and ``title``, ``custom_id``, ``components`` parameters.
         ValueError
             Maximum of components exceeded. (5)
         HTTPException

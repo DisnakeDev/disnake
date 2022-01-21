@@ -101,7 +101,7 @@ class InputText:
 
     @property
     def placeholder(self) -> Optional[str]:
-        """:class:`str`: The placeholder text that is shown if nothing is entered."""
+        """Optional[:class:`str`]: The placeholder text that is shown if nothing is entered."""
         return self._underlying.placeholder
 
     @placeholder.setter
@@ -110,7 +110,7 @@ class InputText:
 
     @property
     def value(self) -> Optional[str]:
-        """:class:`str`: The pre-filled text of the input text."""
+        """Optional[:class:`str`]: The pre-filled text of the input text."""
         return self._underlying.value
 
     @value.setter
@@ -137,7 +137,7 @@ class InputText:
 
     @property
     def max_length(self) -> Optional[int]:
-        """:class:`int`: The maximum length of the input text."""
+        """Optional[:class:`int`]: The maximum length of the input text."""
         return self._underlying.max_length
 
     @max_length.setter
