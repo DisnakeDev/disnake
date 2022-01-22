@@ -395,7 +395,7 @@ The names and descriptions of commands and options, as well as the names of choi
 Currently supported locales are:
 bg, cs, da, de, el, en-GB, en-US, es-ES, fi, fr, hi, hr, hu, it, ja, ko, lt, nl, no, pl, pt-BR, ro, ru, sv-SE, th, tr, uk, vi, zh-CN, zh-TW
 
-The preferred (and most versatile) way of adding localizations is to use ``<locale>.json`` files,
+The preferred way of adding localizations is to use ``<locale>.json`` files,
 containing mappings from user-defined keys to localized/translated strings,
 and referencing these keys in the commands' :ref:`docstrings <docstrings>`.
 As an example, consider this command:
@@ -516,3 +516,16 @@ Choices/Autocomplete
         language: str = commands.Param(autocomplete=autocomp_langs),
     ):
         ...
+
+Yet again, with a file like ``locale/de.json`` containing localizations like this:
+
+.. code-block:: json
+
+    {
+        "OPTION_CAT": "Katze",
+        "OPTION_DOLPHIN": "Delfin",
+        "AUTOCOMP_ENGLISH": "Englisch",
+        "AUTOCOMP_GERMAN": "Deutsch",
+        "AUTOCOMP_SPANISH": "Spanisch",
+        "AUTOCOMP_JAPANESE": "Japanisch"
+    }
