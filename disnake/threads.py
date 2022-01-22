@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import asyncio
 import time
-from distutils.log import warn
 from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Optional, Union
 
 from .abc import Messageable
