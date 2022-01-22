@@ -69,9 +69,13 @@ if TYPE_CHECKING:
 __all__ = (
     "application_command_factory",
     "ApplicationCommand",
+    "APIApplicationCommand",
     "SlashCommand",
+    "APISlashCommand",
     "UserCommand",
+    "APIUserCommand",
     "MessageCommand",
+    "APIMessageCommand",
     "OptionChoice",
     "Option",
     "ApplicationCommandPermissions",
