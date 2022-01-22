@@ -4884,6 +4884,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: InteractionTimedOut
 
+.. autoexception:: ModalInteractionException
+
 .. autoexception:: disnake.opus.OpusError
 
 .. autoexception:: disnake.opus.OpusNotLoaded
@@ -4905,6 +4907,7 @@ Exception Hierarchy
                     - :exc:`InteractionResponded`
                     - :exc:`InteractionNotResponded`
                     - :exc:`InteractionTimedOut`
+                    - :exc:`ModalInteractionException`
             - :exc:`NoMoreItems`
             - :exc:`GatewayNotFound`
             - :exc:`HTTPException`

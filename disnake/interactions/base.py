@@ -41,6 +41,7 @@ from ..errors import (
     InteractionNotResponded,
     InteractionResponded,
     InteractionTimedOut,
+    ModalInteractionException,
     NotFound,
 )
 from ..guild import Guild
@@ -1114,9 +1115,8 @@ class InteractionResponse:
         parent = self._parent
         adapter = async_context.get()
 
-        if parent.type == InteractionType.modal_submit:
-            # New `ModalInteractionResponded` error?
-            raise InteractionException("You cannot respond to a modal with another modal")
+        if parent.type is InteractionType.modal_submit:
+            raise ModalInteractionException(self._parent)  # type: ignore
 
         if self._responded:
             raise InteractionResponded(parent)
