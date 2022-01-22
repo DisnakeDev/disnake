@@ -1818,9 +1818,7 @@ class Message(Hashable):
             auto_archive_duration=auto_archive_duration or default_auto_archive_duration,
             rate_limit_per_user=slowmode_delay or 0,
         )
-        thread = Thread(guild=self.guild, state=self._state, data=data)
-        self.thread = thread
-        return thread
+        return Thread(guild=self.guild, state=self._state, data=data)
 
     async def reply(
         self, content: Optional[str] = None, *, fail_if_not_exists: bool = True, **kwargs
