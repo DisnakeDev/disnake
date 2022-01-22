@@ -51,7 +51,7 @@ class Modal:
         The title of the modal.
     custom_id: str
         The custom ID of the modal.
-    components: List[:class:`.ui.InputText`]
+    components: List[:class:`~.ui.InputText`]
         The components to display in the modal. Maximum of 5.
     """
 
@@ -98,7 +98,7 @@ class Modal:
 
     @property
     def components(self) -> List[InputText]:
-        """List[:class:`.ui.InputText`]: A list of components the modal contains."""
+        """List[:class:`~.ui.InputText`]: A list of components the modal contains."""
         return self._underlying.components
 
     @overload
@@ -114,7 +114,7 @@ class Modal:
 
         Parameters
         ----------
-        component: Union[:class:`.ui.InputText`, List[:class:`.ui.InputText`]]
+        component: Union[:class:`~.ui.InputText`, List[:class:`~.ui.InputText`]]
             The component to add to the modal.
             This can be a single component or a list of components.
 
@@ -147,7 +147,7 @@ class Modal:
 
         Parameters
         ----------
-        interaction: :class:`ModalInteraction`
+        interaction: :class:`.ModalInteraction`
             The interaction that triggered this modal.
         """
         pass
@@ -163,7 +163,7 @@ class Modal:
         ----------
         error: :class:`Exception`
             The exception that was raised.
-        interaction: :class:`ModalInteraction`
+        interaction: :class:`.ModalInteraction`
             The interaction that triggered this modal.
         """
         traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)

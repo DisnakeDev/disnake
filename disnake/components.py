@@ -385,13 +385,18 @@ class Modal(Component):
 
     .. versionadded:: 2.4
 
-    Parameters
+    .. note::
+
+        The user constructible and usable type to create a modal is
+        :class:`disnake.ui.Modal`, not this one.
+
+    Attributes
     ----------
     title: :class:`str`
         The title of the modal.
     custom_id: :class:`str`
         The ID of the modal that gets received during an interaction.
-    components: List[:class:`InputText`]
+    components: List[:class:`~.ui.InputText`]
         The components the modal has.
     """
 
@@ -421,9 +426,14 @@ class Modal(Component):
 class InputText(Component):
     """Represents an input text from the Discord Bot UI Kit.
 
-    This can only be used in a :class:`.ui.Modal`.
+    This can only be used in a :class:`~.ui.Modal`.
 
     .. versionadded:: 2.4
+
+    .. note::
+
+        The user constructible and usable type to create an input text is
+        :class:`disnake.ui.InputText`, not this one.
 
     Attributes
     -----------

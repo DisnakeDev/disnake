@@ -3997,6 +3997,24 @@ SelectMenu
     :members:
     :inherited-members:
 
+Modal
+~~~~~
+
+.. attributetable:: Modal
+
+.. autoclass:: Modal()
+    :members:
+    :inherited-members:
+
+InputText
+~~~~~~~~~
+
+.. attributetable:: InputText
+
+.. autoclass:: InputText()
+    :members:
+    :inherited-members:
+
 
 DeletedReferencedMessage
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4112,6 +4130,16 @@ MessageInteraction
     :inherited-members:
     :exclude-members: channel, followup, guild, me, permissions, response
 
+ModalInteraction
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: ModalInteraction
+
+.. autoclass:: ModalInteraction()
+    :members:
+    :inherited-members:
+    :exclude-members: channel, followup, guild, me, permissions, response
+
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -4158,6 +4186,14 @@ MessageInteractionData
 .. attributetable:: MessageInteractionData
 
 .. autoclass:: MessageInteractionData()
+    :members:
+
+ModalInteractionData
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ModalInteractionData
+
+.. autoclass:: ModalInteractionData()
     :members:
 
 Member
@@ -4790,6 +4826,22 @@ Select
     :inherited-members:
 
 .. autofunction:: disnake.ui.select
+
+Modal
+~~~~~
+
+.. attributetable:: disnake.ui.Modal
+
+.. autoclass:: disnake.ui.Modal
+    :members:
+
+InputText
+~~~~~~~~~
+
+.. attributetable:: disnake.ui.InputText
+
+.. autoclass:: disnake.ui.InputText
+    :members:
 
 
 Exceptions

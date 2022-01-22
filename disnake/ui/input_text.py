@@ -39,6 +39,32 @@ __all__ = ["InputText"]
 
 
 class InputText:
+    """Represents a UI input text.
+
+    This can only be used in :class:`~.ui.Modal`.
+
+    .. versionadded:: 2.4
+
+    Parameters
+    ----------
+    style: :class:`.InputTextStyle`
+        The style of the input text.
+    label: :class:`str`
+        The label of the input text.
+    custom_id: :class:`str`
+        The ID of the input text that gets received during an interaction.
+    placeholder: Optional[:class:`str`]
+        The placeholder text that is shown if nothing is entered.
+    value: Optional[:class:`str`]
+        The pre-filled value of the input text.
+    required: :class:`bool`
+        Whether the input text is required. Defaults to ``True``.
+    min_length: :class:`int`
+        The minimum length of the input text. Defaults to ``0``.
+    max_length: Optional[:class:`int`]
+        The maximum length of the input text.
+    """
+
     def __init__(
         self,
         *,
@@ -69,12 +95,12 @@ class InputText:
 
     @property
     def type(self) -> ComponentType:
-        """:class:`ComponentType`: The type of the input text. This is always ``ComponentType.input_text``."""
+        """:class:`.ComponentType`: The type of the input text. This is always :attr:`.ComponentType.input_text`."""
         return self._underlying.type
 
     @property
     def style(self) -> InputTextStyle:
-        """:class:`InputTextStyle`: The style of the input text."""
+        """:class:`.InputTextStyle`: The style of the input text."""
         return self._underlying.style
 
     @style.setter

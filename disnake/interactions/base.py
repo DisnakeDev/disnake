@@ -1076,14 +1076,14 @@ class InteractionResponse:
 
         Parameters
         ----------
-        modal: class:`.ui.Modal`
+        modal: :class:`~.ui.Modal`
             The modal to display. This cannot be mixed with ``title``, ``custom_id``, and ``components`` parameters.
         title: :class:`str`
             The title of the modal. This cannot be mixed with ``modal`` parameter.
         custom_id: :class:`str`
             The ID of the modal that gets received during an interaction.
             This cannot be mixed with ``modal`` parameter.
-        components: List[:class:`.ui.InputText`]
+        components: List[:class:`~.ui.InputText`]
             The components to display in the modal. A maximum of 5.
             This cannot be mixed with ``modal`` parameter.
 
