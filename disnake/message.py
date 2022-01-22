@@ -84,7 +84,7 @@ if TYPE_CHECKING:
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
     )
-    from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
+    from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
     from .ui.action_row import Components
     from .ui.view import View
@@ -800,10 +800,6 @@ class Message(Hashable):
         .. versionadded:: 2.0
     guild: Optional[:class:`Guild`]
         The guild that the message belongs to, if applicable.
-    thread: Optional[:class:`Thread`]
-        The thread that was started from this message, if applicable.
-
-        ..versionadded:: 2.4
     """
 
     __slots__ = (
@@ -1209,7 +1205,11 @@ class Message(Hashable):
 
     @property
     def thread(self) -> Optional[Thread]:
-        """Optional[:class:`Thread`]: The thread started from this message. None if no thread was started."""
+        """
+        Optional[:class:`Thread`]: The thread started from this message. None if no thread was started.
+
+        ..versionadded:: 2.4
+        """
         return self.guild and self.guild.get_thread(self.id)
 
     def is_system(self) -> bool:
