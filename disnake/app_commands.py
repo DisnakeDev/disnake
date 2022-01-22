@@ -26,7 +26,7 @@ import math
 import re
 import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union
+from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Type, TypeVar, Union
 
 from .abc import User
 from .custom_warnings import ConfigWarning
@@ -61,6 +61,10 @@ if TYPE_CHECKING:
         List[ApplicationCommandOptionChoiceValue],
         Dict[str, ApplicationCommandOptionChoiceValue],
     ]
+
+    UserCommandT = TypeVar("UserCommandT", bound="UserCommand")
+    MessageCommandT = TypeVar("MessageCommandT", bound="MessageCommand")
+    SlashCommandT = TypeVar("SlashCommandT", bound="SlashCommand")
 
 __all__ = (
     "application_command_factory",
@@ -336,10 +340,6 @@ class ApplicationCommand(ABC):
         "type",
         "name",
         "default_permission",
-        "id",
-        "application_id",
-        "guild_id",
-        "version",
         "_always_synced",
     )
 
@@ -348,18 +348,7 @@ class ApplicationCommand(ABC):
         self.name: str = name
         self.default_permission: bool = default_permission
 
-        self.id: Optional[int] = None
-        self.application_id: Optional[int] = None
-        self.guild_id: Optional[int] = None
-        self.version: Optional[int] = None
-
         self._always_synced: bool = False
-
-    def _update_common(self, data: ApplicationCommandPayload) -> None:
-        self.id = _get_as_snowflake(data, "id")
-        self.application_id = _get_as_snowflake(data, "application_id")
-        self.guild_id = _get_as_snowflake(data, "guild_id")
-        self.version = _get_as_snowflake(data, "version")
 
     def __repr__(self) -> str:
         return f"<ApplicationCommand type={self.type!r} name={self.name!r}>"
@@ -381,6 +370,30 @@ class ApplicationCommand(ABC):
         return data
 
 
+class APIApplicationCommand(ApplicationCommand):
+    """
+    The base class for application commands returned by the API
+    """
+
+    # note: subtypes should call `self._update_common`
+
+    # the `from_dict` methods in subtypes could've been part of this class,
+    # but typing super calls in mixins is difficult
+
+    __slots__ = (
+        "id",
+        "application_id",
+        "guild_id",
+        "version",
+    )
+
+    def _update_common(self, data: ApplicationCommandPayload) -> None:
+        self.id: int = int(data["id"])
+        self.application_id: int = int(data["application_id"])
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.version: int = int(data["version"])
+
+
 class UserCommand(ApplicationCommand):
     __slots__ = ()
 
@@ -395,15 +408,22 @@ class UserCommand(ApplicationCommand):
         return f"<UserCommand name={self.name!r}>"
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> UserCommand:
+    def from_dict(cls: Type[UserCommandT], data: ApplicationCommandPayload) -> UserCommandT:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.user.value:
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
-        self = UserCommand(
+        self = cls(
             name=data["name"],
             default_permission=data.get("default_permission", True),
         )
+        return self
+
+
+class APIUserCommand(UserCommand, APIApplicationCommand):
+    @classmethod
+    def from_dict(cls, data: ApplicationCommandPayload) -> APIUserCommand:
+        self = super().from_dict(data)
         self._update_common(data)
         return self
 
@@ -422,15 +442,22 @@ class MessageCommand(ApplicationCommand):
         return f"<MessageCommand name={self.name!r}>"
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> MessageCommand:
+    def from_dict(cls: Type[MessageCommandT], data: ApplicationCommandPayload) -> MessageCommandT:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.message.value:
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
-        self = MessageCommand(
+        self = cls(
             name=data["name"],
             default_permission=data.get("default_permission", True),
         )
+        return self
+
+
+class APIMessageCommand(MessageCommand, APIApplicationCommand):
+    @classmethod
+    def from_dict(cls, data: ApplicationCommandPayload) -> APIMessageCommand:
+        self = super().from_dict(data)
         self._update_common(data)
         return self
 
@@ -488,12 +515,12 @@ class SlashCommand(ApplicationCommand):
         )
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> SlashCommand:
+    def from_dict(cls: Type[SlashCommandT], data: ApplicationCommandPayload) -> SlashCommandT:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.chat_input.value:
             raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
 
-        self = SlashCommand(
+        self = cls(
             name=data["name"],
             description=data["description"],
             default_permission=data.get("default_permission", True),
@@ -501,7 +528,6 @@ class SlashCommand(ApplicationCommand):
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
             ),
         )
-        self._update_common(data)
         return self
 
     def add_option(
@@ -541,6 +567,14 @@ class SlashCommand(ApplicationCommand):
         res["description"] = self.description
         res["options"] = [o.to_dict() for o in self.options]
         return res
+
+
+class APISlashCommand(SlashCommand, APIApplicationCommand):
+    @classmethod
+    def from_dict(cls, data: ApplicationCommandPayload) -> APISlashCommand:
+        self = super().from_dict(data)
+        self._update_common(data)
+        return self
 
 
 class ApplicationCommandPermissions:
