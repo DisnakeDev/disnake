@@ -307,7 +307,7 @@ class VoiceClient(VoiceProtocol):
             _log.info("Ignoring extraneous voice server update.")
             return
 
-        self.token = data.get("token")
+        self.token = data["token"]
         self.server_id = int(data["guild_id"])
         endpoint = data.get("endpoint")
 
