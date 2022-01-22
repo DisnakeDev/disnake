@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from ..types.components import Modal as ModalPayload
 
 
-__all__ = ["Modal"]
+__all__ = ("Modal",)
 
 
 class Modal:
