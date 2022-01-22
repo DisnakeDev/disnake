@@ -380,7 +380,7 @@ class SelectOption:
         return payload
 
 
-class Modal:
+class Modal(Component):
     """Represents a modal from the Discord Bot UI Kit.
 
     .. versionadded:: 2.4
@@ -407,18 +407,6 @@ class Modal:
         self.components: List[InputTextUI] = [
             InputTextUI.from_dict(component) for component in data["components"]
         ]
-
-    @classmethod
-    def _raw_construct(cls: Type[Modal], **kwargs: Any) -> Modal:
-        self: Modal = cls.__new__(cls)
-        for slot in get_slots(cls):
-            try:
-                value = kwargs[slot]
-            except KeyError:
-                pass
-            else:
-                setattr(self, slot, value)
-        return self
 
     def to_dict(self) -> ModalPayload:
         payload: ModalPayload = {
