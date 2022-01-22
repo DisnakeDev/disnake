@@ -84,9 +84,7 @@ class Modal(TypedDict):
 
 class _InputTextOptional(TypedDict, total=False):
     value: str
-    required: bool
     placeholder: str
-    min_length: int
     max_length: int
 
 
@@ -95,6 +93,8 @@ class InputText(_InputTextOptional):
     custom_id: str
     style: InputTextStyle
     label: str
+    required: bool
+    min_length: int
 
 
 Component = Union[ActionRow, ButtonComponent, SelectMenu, InputText]

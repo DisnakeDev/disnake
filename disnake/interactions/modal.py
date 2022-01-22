@@ -52,11 +52,11 @@ class ModalInteraction(Interaction):
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
-        self.data = ModalInteractionData(data=data.get("data", {}))  # type: ignore
+        self.data = ModalInteractionData(data=data["data"])  # type: ignore
 
     @property
     def values(self) -> Dict[str, str]:
-        """Dict[str, str]: Returns the values the user has entered in the modal.
+        """Dict[:class:`str`, :class:`str`]: Returns the values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``."""
         values: Dict[str, str] = {}
         for action_row in self.data.components:
@@ -77,7 +77,7 @@ class ModalInteractionData:
 
     Attributes
     ----------
-    custom_id: str
+    custom_id: :class:`str`
         The custom ID of the modal.
     components: List[:class:`ActionRow`]
         The components the modal has.
@@ -86,5 +86,5 @@ class ModalInteractionData:
     __slots__ = ("custom_id", "components")
 
     def __init__(self, *, data: ModalInteractionDataPayload):
-        self.custom_id: str = data.get("custom_id")  # type: ignore # Is the custom ID always present?
-        self.components: List[ActionRowPayload] = data.get("components", [])
+        self.custom_id: str = data["custom_id"]
+        self.components: List[ActionRowPayload] = data["components"]

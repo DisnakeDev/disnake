@@ -34,6 +34,7 @@ from .input_text import InputText
 if TYPE_CHECKING:
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState
+    from ..types.components import Modal as ModalPayload
 
 
 __all__ = ["Modal"]
@@ -167,8 +168,8 @@ class Modal:
         """
         traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
 
-    def to_components(self) -> Dict[str, Any]:
-        components: Dict[str, Any] = {
+    def to_components(self) -> ModalPayload:
+        components: ModalPayload = {
             "title": self._underlying.title,
             "custom_id": self._underlying.custom_id,
             "components": [],
@@ -176,7 +177,7 @@ class Modal:
 
         for component in self._underlying.components:
             components["components"].append(
-                {"type": 1, "components": [component.to_component_dict()]}
+                {"type": 1, "components": [component.to_component_dict()]}  # type: ignore
             )
 
         return components
