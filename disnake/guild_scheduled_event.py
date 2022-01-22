@@ -250,7 +250,7 @@ class GuildScheduledEvent(Hashable):
             return None
         return Asset._from_guild_scheduled_event_image(self._state, self.id, self._image)
 
-    async def delete(self):
+    async def delete(self) -> None:
         """|coro|
 
         Deletes the guild scheduled event.
