@@ -3873,6 +3873,38 @@ MessageCommand
 .. autoclass:: MessageCommand()
     :members:
 
+APIApplicationCommand
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: APIApplicationCommand
+
+.. autoclass:: APIApplicationCommand()
+    :members:
+
+APISlashCommand
+~~~~~~~~~~~~~~~
+
+.. attributetable:: APISlashCommand
+
+.. autoclass:: APISlashCommand()
+    :members:
+
+APIUserCommand
+~~~~~~~~~~~~~~
+
+.. attributetable:: APIUserCommand
+
+.. autoclass:: APIUserCommand()
+    :members:
+
+APIMessageCommand
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: APIMessageCommand
+
+.. autoclass:: APIMessageCommand()
+    :members:
+
 Option
 ~~~~~~
 
