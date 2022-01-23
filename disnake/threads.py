@@ -314,7 +314,7 @@ class Thread(Messageable, Hashable):
         :class:`datetime.datetime`: Returns the thread's creation time in UTC.
 
         .. versionchanged:: 2.4
-            If create_timestamp is provided by discord, that will be used instead of the time in the id.
+            If create_timestamp is provided by discord, that will be used instead of the time in the ID.
         """
         return self.create_timestamp or snowflake_time(self.id)
 
