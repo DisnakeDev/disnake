@@ -313,9 +313,9 @@ class Thread(Messageable, Hashable):
 
         .. warning::
 
-            This property will be deleted in a future version.
+            This property will be removed in a future version.
         """
-        warn_deprecated("archiver_id is deprecated and will be removed in a future version.")
+        warn_deprecated("archiver_id is deprecated and will be removed in a future version.", stacklevel=2)
         return self._archiver_id
 
     def is_private(self) -> bool:
