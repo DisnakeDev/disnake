@@ -391,6 +391,9 @@ class APIApplicationCommand(ApplicationCommand):
         "version",
     )
 
+    def __repr__(self) -> str:
+        return f"<APIApplicationCommand type={self.type!r} name={self.name!r} id={self.id!r}>"
+
     def _update_common(self, data: ApplicationCommandPayload) -> None:
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
@@ -431,6 +434,9 @@ class APIUserCommand(UserCommand, APIApplicationCommand):
         self._update_common(data)
         return self
 
+    def __repr__(self) -> str:
+        return f"<APIUserCommand name={self.name!r} id={self.id!r}>"
+
 
 class MessageCommand(ApplicationCommand):
     __slots__ = ()
@@ -464,6 +470,9 @@ class APIMessageCommand(MessageCommand, APIApplicationCommand):
         self = super().from_dict(data)
         self._update_common(data)
         return self
+
+    def __repr__(self) -> str:
+        return f"<APIMessageCommand name={self.name!r} id={self.id!r}>"
 
 
 class SlashCommand(ApplicationCommand):
@@ -579,6 +588,12 @@ class APISlashCommand(SlashCommand, APIApplicationCommand):
         self = super().from_dict(data)
         self._update_common(data)
         return self
+
+    def __repr__(self) -> str:
+        return (
+            f"<APISlashCommand name={self.name!r} description={self.description!r} "
+            f"default_permission={self.default_permission!r} options={self.options!r} id={self.id!r}>"
+        )
 
 
 class ApplicationCommandPermissions:
