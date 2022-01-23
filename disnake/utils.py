@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import array
 import asyncio
-import collections.abc
 import datetime
 import functools
 import json
@@ -194,7 +193,7 @@ def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlo
     return decorator
 
 
-class SequenceProxy(Generic[T_co], collections.abc.Sequence):
+class SequenceProxy(Sequence[T_co]):
     """Read-only proxy of a Sequence."""
 
     def __init__(self, proxied: Sequence[T_co]):
