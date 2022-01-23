@@ -340,13 +340,6 @@ class ApplicationCommand(ABC):
     The base class for application commands
     """
 
-    __slots__ = (
-        "type",
-        "name",
-        "default_permission",
-        "_always_synced",
-    )
-
     def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
@@ -384,13 +377,6 @@ class APIApplicationCommand(ApplicationCommand):
     # the `from_dict` methods in subtypes could've been part of this class,
     # but typing super calls in mixins is difficult
 
-    __slots__ = (
-        "id",
-        "application_id",
-        "guild_id",
-        "version",
-    )
-
     def __repr__(self) -> str:
         return f"<APIApplicationCommand type={self.type!r} name={self.name!r} id={self.id!r}>"
 
@@ -402,8 +388,6 @@ class APIApplicationCommand(ApplicationCommand):
 
 
 class UserCommand(ApplicationCommand):
-    __slots__ = ()
-
     def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.user,
@@ -439,8 +423,6 @@ class APIUserCommand(UserCommand, APIApplicationCommand):
 
 
 class MessageCommand(ApplicationCommand):
-    __slots__ = ()
-
     def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.message,
@@ -490,8 +472,6 @@ class SlashCommand(ApplicationCommand):
     default_permission : :class:`bool`
         Whether the command is enabled by default when the app is added to a guild
     """
-
-    __slots__ = ("description", "options")
 
     def __init__(
         self,
