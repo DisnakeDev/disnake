@@ -92,7 +92,11 @@ if TYPE_CHECKING:
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
-    from .types.raw_models import GuildScheduledEventUserActionEvent, TypingEvent
+    from .types.raw_models import (
+        GuildScheduledEventUserActionEvent,
+        ReactionActionEvent,
+        TypingEvent,
+    )
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
     from .voice_client import VoiceProtocol
@@ -810,11 +814,14 @@ class ConnectionState:
         if "components" in data and self._view_store.is_message_tracked(raw.message_id):
             self._view_store.update_from_message(raw.message_id, data["components"])
 
-    def parse_message_reaction_add(self, data) -> None:
+    def parse_message_reaction_add(self, data: ReactionActionEvent) -> None:
         emoji = data["emoji"]
         emoji_id = utils._get_as_snowflake(emoji, "id")
         emoji = PartialEmoji.with_state(
-            self, id=emoji_id, animated=emoji.get("animated", False), name=emoji["name"]
+            self,
+            id=emoji_id,
+            animated=emoji.get("animated", False),
+            name=emoji["name"],  # type: ignore
         )
         raw = RawReactionActionEvent(data, emoji, "REACTION_ADD")
 

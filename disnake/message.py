@@ -86,6 +86,7 @@ if TYPE_CHECKING:
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
     )
+    from .types.raw_models import ReactionActionEvent
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
     from .ui.action_row import Components
@@ -946,12 +947,19 @@ class Message(Hashable):
             else:
                 setattr(self, key, transform(value))
 
-    def _add_reaction(self, data, emoji, user_id) -> Reaction:
+    def _add_reaction(
+        self, data: ReactionActionEvent, emoji: EmojiInputType, user_id: int
+    ) -> Reaction:
         reaction = utils.find(lambda r: r.emoji == emoji, self.reactions)
-        is_me = data["me"] = user_id == self._state.self_id
+        is_me = user_id == self._state.self_id
 
         if reaction is None:
-            reaction = Reaction(message=self, data=data, emoji=emoji)
+            reaction_data: ReactionPayload = {
+                "count": 1,
+                "me": is_me,
+                "emoji": data["emoji"],
+            }
+            reaction = Reaction(message=self, data=reaction_data, emoji=emoji)
             self.reactions.append(reaction)
         else:
             reaction.count += 1
