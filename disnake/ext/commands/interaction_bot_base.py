@@ -45,6 +45,7 @@ from typing import (
 )
 
 import disnake
+from disnake import utils
 from disnake.app_commands import (
     ApplicationCommand,
     Option,
@@ -66,7 +67,6 @@ from .ctx_menus_core import (
 )
 from .errors import CommandRegistrationError
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
-from disnake import utils
 
 if TYPE_CHECKING:
 
@@ -163,7 +163,9 @@ class InteractionBotBase(CommonBotBase):
         super().__init__(**options)
 
         if test_guilds and (test_guild := utils.iterable_is(test_guilds, int)) is not True:
-            raise ValueError(f"test_guilds must be an sequence of int, but {type(test_guild).__name__} was given.")
+            raise ValueError(
+                f"test_guilds must be an sequence of int, but {type(test_guild).__name__} was given."
+            )
 
         self._test_guilds: Optional[Sequence[int]] = test_guilds
         self._sync_commands: bool = sync_commands

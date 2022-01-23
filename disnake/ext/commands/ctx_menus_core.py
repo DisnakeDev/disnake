@@ -26,11 +26,11 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Coroutine, Optional, Sequence, TypeVar, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.utils import iterable_is
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
 from .params import safe_call
-from disnake.utils import iterable_is
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
