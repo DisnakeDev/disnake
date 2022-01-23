@@ -86,14 +86,14 @@ __all__ = (
 )
 
 
-def application_command_factory(data: ApplicationCommandPayload) -> ApplicationCommand:
+def application_command_factory(data: ApplicationCommandPayload) -> APIApplicationCommand:
     cmd_type = try_enum(ApplicationCommandType, data.get("type", 1))
     if cmd_type is ApplicationCommandType.chat_input:
-        return SlashCommand.from_dict(data)
+        return APISlashCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.user:
-        return UserCommand.from_dict(data)
+        return APIUserCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.message:
-        return MessageCommand.from_dict(data)
+        return APIMessageCommand.from_dict(data)
 
     raise TypeError(f"Application command of type {cmd_type} is not valid")
 
