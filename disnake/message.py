@@ -1206,9 +1206,9 @@ class Message(Hashable):
     @property
     def thread(self) -> Optional[Thread]:
         """
-        Optional[:class:`Thread`]: The thread started from this message. None if no thread was started.
+        Optional[:class:`Thread`]: The thread started from this message. ``None`` if no thread has been started.
 
-        ..versionadded:: 2.4
+        .. versionadded:: 2.4
         """
         return self.guild and self.guild.get_thread(self.id)
 
