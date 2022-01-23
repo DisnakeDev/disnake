@@ -596,7 +596,7 @@ def compute_timedelta(dt: datetime.datetime):
 
 
 def iterable_is(iterable: Iterable[Any], tp: type) -> Union[Literal[True], Any]:
-    """Checks if all items of the iterable is of the specified type
+    """Checks if all items of the iterable is of the specified type.
 
     Parameters
     ----------
