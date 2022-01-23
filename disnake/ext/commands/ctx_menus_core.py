@@ -301,7 +301,7 @@ def message_command(
             raise TypeError("Callback is already a command.")
         if guild_ids and (guild_id := iterable_is(guild_ids, int)) is not True:
             raise ValueError(
-                f"guild_ids must be a sequence of int, but {type(guild_id).__name__} was given,"
+                f"guild_ids must be a sequence of int, but {type(guild_id).__name__} was given."
             )
 
         return InvokableMessageCommand(

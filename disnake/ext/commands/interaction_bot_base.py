@@ -164,7 +164,7 @@ class InteractionBotBase(CommonBotBase):
 
         if test_guilds and (test_guild := utils.iterable_is(test_guilds, int)) is not True:
             raise ValueError(
-                f"test_guilds must be an sequence of int, but {type(test_guild).__name__} was given."
+                f"test_guilds must be a sequence of int, but {type(test_guild).__name__} was given."
             )
 
         self._test_guilds: Optional[Sequence[int]] = test_guilds
