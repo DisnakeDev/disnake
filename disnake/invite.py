@@ -150,14 +150,14 @@ class PartialInviteGuild:
     description: Optional[:class:`str`]
         The partial guild's description.
     features: List[:class:`str`]
-        A list of features the guild has. See :attr:`Guild.features` for more information.
+        A list of features the partial guild has. See :attr:`Guild.features` for more information.
     nsfw_level: :class:`NSFWLevel`
-        The guild's nsfw level.
+        The partial guild's nsfw level.
 
         .. versionadded:: 2.4
 
     vanity_url_code: Optional[:class:`str`]
-        The guild's vanity url code if it exists.
+        The partial guild's vanity url code, if any.
 
         .. versionadded:: 2.4
 
