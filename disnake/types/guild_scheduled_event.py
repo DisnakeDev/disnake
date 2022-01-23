@@ -1,7 +1,6 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2021 Rapptz
 Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,29 +22,46 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-from __future__ import annotations
+from typing import Literal, Optional, TypedDict
 
-from typing import Optional, TypedDict
-
-from .guild import Guild
+from .member import Member
 from .snowflake import Snowflake
 from .user import User
 
+GuildScheduledEventPrivacyLevel = Literal[2]
+GuildScheduledEventStatus = Literal[1, 2, 3, 4]
+GuildScheduledEventEntityType = Literal[1, 2, 3]
 
-class CreateTemplate(TypedDict):
-    name: str
-    description: Optional[str]
+
+class _GuildScheduledEventUserOptional(TypedDict, total=False):
+    member: Member
 
 
-class Template(TypedDict):
-    code: str
-    name: str
-    description: Optional[str]
-    usage_count: int
-    creator_id: Snowflake
+class GuildScheduledEventUser(_GuildScheduledEventUserOptional):
+    guild_scheduled_event_id: Snowflake
+    user: User
+
+
+class GuildScheduledEventEntityMetadata(TypedDict, total=False):
+    location: str
+
+
+class _GuildScheduledEventOptional(TypedDict, total=False):
+    description: str
     creator: User
-    created_at: str
-    updated_at: str
-    source_guild_id: Snowflake
-    serialized_source_guild: Guild
-    is_dirty: Optional[bool]
+    user_count: int
+
+
+class GuildScheduledEvent(_GuildScheduledEventOptional):
+    id: Snowflake
+    guild_id: Snowflake
+    channel_id: Optional[Snowflake]
+    creator_id: Optional[Snowflake]
+    name: str
+    scheduled_start_time: str
+    scheduled_end_time: Optional[str]
+    privacy_level: GuildScheduledEventPrivacyLevel
+    status: GuildScheduledEventStatus
+    entity_type: GuildScheduledEventEntityType
+    entity_id: Optional[Snowflake]
+    entity_metadata: Optional[GuildScheduledEventEntityMetadata]

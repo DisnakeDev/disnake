@@ -423,7 +423,7 @@ class ParamInfo:
 
     async def verify_type(self, inter: CommandInteraction, argument: Any) -> Any:
         """Check if a type of an argument is correct and possibly fix it"""
-        if issubclass(self.type, disnake.Member):
+        if issubclass_(self.type, disnake.Member):
             if isinstance(argument, disnake.Member):
                 return argument
 
@@ -493,7 +493,7 @@ class ParamInfo:
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
-        if issubclass(annotation, LargeInt):
+        if issubclass_(annotation, LargeInt):
             self.large = True
             annotation = int
 

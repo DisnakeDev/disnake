@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, List, Optional, Type, TypeVar, Union
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
-from .enums import ChannelType, InviteTarget, VerificationLevel, try_enum
+from .enums import ChannelType, InviteTarget, NSFWLevel, VerificationLevel, try_enum
 from .mixins import Hashable
 from .object import Object
 from .utils import _get_as_snowflake, parse_time, snowflake_time
@@ -147,12 +147,22 @@ class PartialInviteGuild:
         The partial guild's name.
     id: :class:`int`
         The partial guild's ID.
-    verification_level: :class:`VerificationLevel`
-        The partial guild's verification level.
-    features: List[:class:`str`]
-        A list of features the guild has. See :attr:`Guild.features` for more information.
     description: Optional[:class:`str`]
         The partial guild's description.
+    features: List[:class:`str`]
+        A list of features the partial guild has. See :attr:`Guild.features` for more information.
+    nsfw_level: :class:`NSFWLevel`
+        The partial guild's nsfw level.
+
+        .. versionadded:: 2.4
+
+    vanity_url_code: Optional[:class:`str`]
+        The partial guild's vanity url code, if any.
+
+        .. versionadded:: 2.4
+
+    verification_level: :class:`VerificationLevel`
+        The partial guild's verification level.
     """
 
     __slots__ = (
@@ -163,8 +173,10 @@ class PartialInviteGuild:
         "id",
         "name",
         "_splash",
-        "verification_level",
         "description",
+        "nsfw_level",
+        "vanity_url_code",
+        "verification_level",
     )
 
     def __init__(self, state: ConnectionState, data: InviteGuildPayload, id: int):
@@ -175,6 +187,8 @@ class PartialInviteGuild:
         self._icon: Optional[str] = data.get("icon")
         self._banner: Optional[str] = data.get("banner")
         self._splash: Optional[str] = data.get("splash")
+        self.nsfw_level: NSFWLevel = try_enum(NSFWLevel, data.get("nsfw_level", 0))
+        self.vanity_url_code: Optional[str] = data.get("vanity_url_code")
         self.verification_level: VerificationLevel = try_enum(
             VerificationLevel, data.get("verification_level")
         )
