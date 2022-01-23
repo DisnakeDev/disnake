@@ -42,6 +42,10 @@ if TYPE_CHECKING:
     from .abc import GuildChannel
     from .guild import Guild
     from .state import ConnectionState
+    from .types.guild_scheduled_event import (
+        GuildScheduledEvent as GuildScheduledEventPayload,
+        GuildScheduledEventEntityMetadata as GuildScheduledEventEntityMetadataPayload,
+    )
 
 
 __all__ = ("GuildScheduledEventMetadata", "GuildScheduledEvent")
@@ -62,17 +66,21 @@ class GuildScheduledEventMetadata:
 
     __slots__ = ("location",)
 
-    def __init__(self, *, location: str = None):
+    def __init__(self, *, location: Optional[str] = None):
         self.location: Optional[str] = location
 
     def __repr__(self) -> str:
         return f"<GuildScheduledEventMetadata location={self.location!r}>"
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {"location": self.location}
+    def to_dict(self) -> GuildScheduledEventEntityMetadataPayload:
+        if self.location is not None:
+            return {"location": self.location}
+        return {}
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(
+        cls, data: GuildScheduledEventEntityMetadataPayload
+    ) -> GuildScheduledEventMetadata:
         return GuildScheduledEventMetadata(location=data.get("location"))
 
 
@@ -155,20 +163,18 @@ class GuildScheduledEvent(Hashable):
         "_cs_channel",
     )
 
-    def __init__(self, *, state: ConnectionState, data: Dict[str, Any]):
+    def __init__(self, *, state: ConnectionState, data: GuildScheduledEventPayload):
         self._state: ConnectionState = state
         self._update(data)
 
-    def _update(self, data: Dict[str, Any]):
+    def _update(self, data: GuildScheduledEventPayload) -> None:
         self.id: int = int(data["id"])
         self.guild_id: int = int(data["guild_id"])
         self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
         self.creator_id: Optional[int] = _get_as_snowflake(data, "creator_id")
         self.name: str = data["name"]
         self.description: Optional[str] = data.get("description")
-        self.scheduled_start_time: datetime = parse_time(  # type: ignore
-            data["scheduled_start_time"]
-        )
+        self.scheduled_start_time: datetime = parse_time(data["scheduled_start_time"])
         self.scheduled_end_time: Optional[datetime] = parse_time(data["scheduled_end_time"])
         self.privacy_level: GuildScheduledEventPrivacyLevel = try_enum(
             GuildScheduledEventPrivacyLevel, data["privacy_level"]
@@ -228,7 +234,7 @@ class GuildScheduledEvent(Hashable):
         guild = self.guild
         return None if guild is None else guild.get_channel(self.channel_id)
 
-    async def delete(self):
+    async def delete(self) -> None:
         """|coro|
 
         Deletes the guild scheduled event.
@@ -257,7 +263,7 @@ class GuildScheduledEvent(Hashable):
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         status: GuildScheduledEventStatus = MISSING,
         reason: Optional[str] = None,
-    ):
+    ) -> GuildScheduledEvent:
         """|coro|
 
         Edits the guild scheduled event.
@@ -356,7 +362,9 @@ class GuildScheduledEvent(Hashable):
 
         if channel_id is not MISSING:
             if channel_id is not None and is_external:
-                raise ValueError(error_for_external_entity.format("channel_id", "None or MISSING"))
+                raise ValueError(
+                    error_for_external_entity.format("channel_id", "None or not provided")
+                )
             fields["channel_id"] = channel_id
         elif channel_id is None and is_external:
             fields["channel_id"] = None
@@ -377,10 +385,10 @@ class GuildScheduledEvent(Hashable):
     async def fetch_users(
         self,
         *,
-        limit: int = None,
+        limit: Optional[int] = None,
         with_members: bool = True,
-        before_id: int = None,
-        after_id: int = None,
+        before_id: Optional[int] = None,
+        after_id: Optional[int] = None,
     ) -> List[Union[Member, User]]:
         """|coro|
 
@@ -388,13 +396,13 @@ class GuildScheduledEvent(Hashable):
 
         Parameters
         ----------
-        limit: :class:`int`
+        limit: Optional[:class:`int`]
             The number of users to retrieve.
         with_members: :class:`bool`
             Whether to include some users as members. Defaults to ``True``.
-        before_id: :class:`int`
+        before_id: Optional[:class:`int`]
             Consider only users before given user ID.
-        after_id: :class:`int`
+        after_id: Optional[:class:`int`]
             Consider only users after given user ID.
 
         Returns
@@ -421,13 +429,17 @@ class GuildScheduledEvent(Hashable):
             after=after_id,
         )
         users = []
+        user: Union[User, Member]
 
         for data in raw_users:
             member_data = data.get("member")
             if member_data is not None and self.guild is not None:
-                user = Member(data=member_data, guild=self.guild, state=self._state)
+                member_data["user"] = data["user"]  # upgrade to MemberWithUser
+                user = self.guild.get_member(int(member_data["user"]["id"])) or Member(
+                    data=member_data, guild=self.guild, state=self._state
+                )
             else:
-                user = User(data=data["user"], state=self._state)
+                user = self._state.store_user(data["user"])
             users.append(user)
 
         return users

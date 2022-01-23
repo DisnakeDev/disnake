@@ -26,7 +26,7 @@ import math
 import re
 import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union
 
 from .abc import User
 from .custom_warnings import ConfigWarning
@@ -90,6 +90,17 @@ def application_command_factory(data: ApplicationCommandPayload) -> ApplicationC
     raise TypeError(f"Application command of type {cmd_type} is not valid")
 
 
+def _validate_name(name: str) -> None:
+    # used for slash command names and option names
+    # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
+
+    assert name == name.lower() and re.fullmatch(r"[\w-]{1,32}", name), (
+        f"Slash command or option name '{name}' should be lowercase, "
+        "between 1 and 32 characters long, and only consist of "
+        "these symbols: a-z, 0-9, -, _, and other languages'/scripts' symbols"
+    )
+
+
 class OptionChoice:
     """
     Represents an option choice.
@@ -134,7 +145,7 @@ class Option:
         the option type, e.g. :class:`OptionType.user`
     required: :class:`bool`
         whether this option is required or not
-    choices: Union[List[:class:`OptionChoice`], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
+    choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         the list of option choices
     options: List[:class:`Option`]
         the list of sub options. Normally you don't have to specify it directly,
@@ -177,6 +188,7 @@ class Option:
         max_value: float = None,
     ):
         self.name: str = name.lower()
+        _validate_name(self.name)
         self.description: str = description or "\u200b"
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
@@ -195,19 +207,19 @@ class Option:
 
         self.channel_types: List[ChannelType] = channel_types or []
 
-        if choices is not None and autocomplete:
-            raise InvalidArgument("can not specify both choices and autocomplete args")
+        self.choices: List[OptionChoice] = []
+        if choices is not None:
+            if autocomplete:
+                raise InvalidArgument("can not specify both choices and autocomplete args")
 
-        if choices is None:
-            choices = []
-        elif isinstance(choices, Mapping):
-            choices = [OptionChoice(name, value) for name, value in choices.items()]
-        elif isinstance(choices, Iterable) and not isinstance(choices[0], OptionChoice):
-            choices = [OptionChoice(str(value), value) for value in choices]  # type: ignore
-        else:
-            choices = cast(List[OptionChoice], choices)
+            if isinstance(choices, Mapping):
+                self.choices = [OptionChoice(name, value) for name, value in choices.items()]
+            else:
+                for c in choices:
+                    if not isinstance(c, OptionChoice):
+                        c = OptionChoice(str(c), c)
+                    self.choices.append(c)
 
-        self.choices: List[OptionChoice] = choices
         self.autocomplete: bool = autocomplete
 
     def __repr__(self) -> str:
@@ -449,9 +461,7 @@ class SlashCommand(ApplicationCommand):
         default_permission: bool = True,
     ):
         name = name.lower()
-        assert re.fullmatch(
-            r"[\w-]{1,32}", name
-        ), f"Slash command name {name!r} should consist of these symbols: a-z, 0-9, -, _"
+        _validate_name(name)
 
         super().__init__(
             type=ApplicationCommandType.chat_input,

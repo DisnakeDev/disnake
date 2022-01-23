@@ -30,6 +30,7 @@ from typing import Any, Dict, Literal, Optional, TypedDict, Union
 from .appinfo import PartialAppInfo
 from .channel import PartialChannel
 from .guild import InviteGuild
+from .guild_scheduled_event import GuildScheduledEvent
 from .snowflake import Snowflake
 from .user import PartialUser
 
@@ -44,7 +45,7 @@ class _InviteOptional(TypedDict, total=False):
     target_application: PartialAppInfo
     approximate_member_count: int
     approximate_presence_count: int
-    guild_scheduled_event: Dict[str, Any]  # TODO: add GuildScheduledEvent payload
+    guild_scheduled_event: GuildScheduledEvent
 
 
 class _InviteMetadata(TypedDict, total=False):
