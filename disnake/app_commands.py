@@ -380,6 +380,8 @@ class APIApplicationCommand(ApplicationCommand):
     """
     The base class for application commands returned by the API
 
+    .. versionadded:: 2.4
+
     Attributes
     ----------
     type: :class:`ApplicationCommandType`
@@ -452,6 +454,8 @@ class APIUserCommand(UserCommand, APIApplicationCommand):
     """
     A user context menu command returned by the API
 
+    .. versionadded:: 2.4
+
     Attributes
     ----------
     name: :class:`str`
@@ -516,6 +520,8 @@ class MessageCommand(ApplicationCommand):
 class APIMessageCommand(MessageCommand, APIApplicationCommand):
     """
     A message context menu command returned by the API
+
+    .. versionadded:: 2.4
 
     Attributes
     ----------
@@ -651,6 +657,8 @@ class SlashCommand(ApplicationCommand):
 class APISlashCommand(SlashCommand, APIApplicationCommand):
     """
     A slash command returned by the API
+
+    .. versionadded:: 2.4
 
     Attributes
     ----------
