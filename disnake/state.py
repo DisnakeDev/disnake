@@ -46,6 +46,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    cast,
 )
 
 from . import utils
@@ -617,6 +618,7 @@ class ConnectionState:
             if channel is None:
                 if "author" in data:
                     # MessagePayload
+                    data = cast(MessagePayload, data)
                     user_id = int(data["author"]["id"])
                 else:
                     # TypingEvent
@@ -1714,7 +1716,7 @@ class ConnectionState:
 
             if member is not None:
                 timestamp = datetime.datetime.fromtimestamp(
-                    data.get("timestamp"), tz=datetime.timezone.utc
+                    data["timestamp"], tz=datetime.timezone.utc
                 )
                 self.dispatch("typing", channel, member, timestamp)
 

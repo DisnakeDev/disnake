@@ -91,7 +91,7 @@ class IntegrationDeleteEvent(_IntegrationDeleteEventOptional):
 
 class _TypingEventOptional(TypedDict, total=False):
     guild_id: Snowflake
-    member: Member
+    member: MemberWithUser
 
 
 class TypingEvent(_TypingEventOptional):
