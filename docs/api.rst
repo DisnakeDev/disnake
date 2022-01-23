@@ -1255,6 +1255,8 @@ Utility Functions
 
 .. autofunction:: disnake.utils.search_directory
 
+.. autofunction:: disnake.utils.iterable_is
+
 .. _discord-api-enums:
 
 Enumerations
