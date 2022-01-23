@@ -30,6 +30,7 @@ from disnake.app_commands import MessageCommand, UserCommand
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
 from .params import safe_call
+from disnake.utils import iterable_is
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec
@@ -235,6 +236,10 @@ def user_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
+        if guild_ids and (guild_id := iterable_is(guild_ids, int)) is not True:
+            raise ValueError(
+                f"guild_ids must be a sequence of int, but {type(guild_id).__name__} was given."
+            )
         return InvokableUserCommand(
             func,
             name=name,
@@ -294,6 +299,11 @@ def message_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
+        if guild_ids and (guild_id := iterable_is(guild_ids, int)) is not True:
+            raise ValueError(
+                f"guild_ids must be a sequence of int, but {type(guild_id).__name__} was given,"
+            )
+
         return InvokableMessageCommand(
             func,
             name=name,

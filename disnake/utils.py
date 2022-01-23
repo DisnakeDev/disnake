@@ -595,6 +595,28 @@ def compute_timedelta(dt: datetime.datetime):
     return max((dt - now).total_seconds(), 0)
 
 
+def iterable_is(iterable: Iterable[Any], tp: type) -> Union[Literal[True], Any]:
+    """Checks if all items of the iterable is of the specified type
+
+    Parameters
+    ----------
+    iterable: Iterable[Any]
+        The iterable to check.
+    tp: :class:`type`
+        The type to check against.
+
+    Returns
+    -------
+    Union[Literal[True], Any]
+        The first item that is not of the specified type.
+        If all items are of the specified type, ``True`` is returned instead.
+    """
+    for value in iterable:
+        if not isinstance(value, tp):
+            return value
+    return True
+
+
 async def sleep_until(when: datetime.datetime, result: Optional[T] = None) -> Optional[T]:
     """|coro|
 

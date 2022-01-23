@@ -66,6 +66,7 @@ from .ctx_menus_core import (
 )
 from .errors import CommandRegistrationError
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
+from disnake import utils
 
 if TYPE_CHECKING:
 
@@ -85,7 +86,7 @@ if TYPE_CHECKING:
 
 __all__ = ("InteractionBotBase",)
 
-MISSING: Any = disnake.utils.MISSING
+MISSING: Any = utils.MISSING
 
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
@@ -160,6 +161,9 @@ class InteractionBotBase(CommonBotBase):
         **options: Any,
     ):
         super().__init__(**options)
+
+        if test_guilds and (test_guild := utils.iterable_is(test_guilds, int)) is not True:
+            raise ValueError(f"test_guilds must be an sequence of int, but {type(test_guild).__name__} was given.")
 
         self._test_guilds: Optional[Sequence[int]] = test_guilds
         self._sync_commands: bool = sync_commands
