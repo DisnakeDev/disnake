@@ -43,6 +43,7 @@ class ThreadMember(TypedDict):
 class _ThreadMetadataOptional(TypedDict, total=False):
     locked: bool
     invitable: bool
+    create_timestamp: str
 
 
 class ThreadMetadata(_ThreadMetadataOptional):

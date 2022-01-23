@@ -124,6 +124,11 @@ class Thread(Messageable, Hashable):
         Usually a value of 60, 1440, 4320 and 10080.
     archive_timestamp: :class:`datetime.datetime`
         An aware timestamp of when the thread's archived status was last updated in UTC.
+    create_timestamp: Optional[:class:`datetime.datetime`]
+        An aware timestamp of when the thread was created in UTC.
+        This is only available for threads created after 2022-01-09.
+
+        .. versionadded:: 2.4
     """
 
     __slots__ = (
@@ -142,6 +147,7 @@ class Thread(Messageable, Hashable):
         "invitable",
         "auto_archive_duration",
         "archive_timestamp",
+        "create_timestamp",
         "_type",
         "_state",
         "_members",
@@ -192,6 +198,7 @@ class Thread(Messageable, Hashable):
         self.archive_timestamp = parse_time(data["archive_timestamp"])
         self.locked = data.get("locked", False)
         self.invitable = data.get("invitable", True)
+        self.create_timestamp = parse_time(data.get("create_timestamp"))
 
     def _update(self, data):
         try:
@@ -301,8 +308,13 @@ class Thread(Messageable, Hashable):
 
     @property
     def created_at(self) -> datetime.datetime:
-        """:class:`datetime.datetime`: Returns the thread's creation time in UTC."""
-        return snowflake_time(self.id)
+        """
+        :class:`datetime.datetime`: Returns the thread's creation time in UTC.
+
+        .. versionchanged:: 2.4
+            If create_timestamp is provided by discord, that will be used instead of the time in the ID.
+        """
+        return self.create_timestamp or snowflake_time(self.id)
 
     @property
     def archiver_id(self) -> Optional[int]:
@@ -315,7 +327,9 @@ class Thread(Messageable, Hashable):
 
             This property will be removed in a future version.
         """
-        warn_deprecated("archiver_id is deprecated and will be removed in a future version.", stacklevel=2)
+        warn_deprecated(
+            "archiver_id is deprecated and will be removed in a future version.", stacklevel=2
+        )
         return self._archiver_id
 
     def is_private(self) -> bool:
