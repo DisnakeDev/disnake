@@ -28,6 +28,8 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, List, Optional, Set
 
+from .utils import get_slots
+
 if TYPE_CHECKING:
     from .member import Member
     from .message import Message
@@ -59,9 +61,11 @@ __all__ = (
 
 
 class _RawReprMixin:
+    __slots__ = ()
+
     def __repr__(self) -> str:
-        value = " ".join(f"{attr}={getattr(self, attr)!r}" for attr in self.__slots__)
-        return f"<{self.__class__.__name__} {value}>"
+        value = " ".join(f"{attr}={getattr(self, attr)!r}" for attr in get_slots(type(self)))
+        return f"<{type(self).__name__} {value}>"
 
 
 class RawMessageDeleteEvent(_RawReprMixin):
@@ -299,7 +303,7 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
         The guild ID where the guild scheduled event is located.
     """
 
-    __slots__ = ("guild_scheduled_event_id", "user_id", "guild_id")
+    __slots__ = ("event_id", "user_id", "guild_id")
 
     def __init__(self, data: GuildScheduledEventUserActionEvent):
         self.event_id: int = int(data["guild_scheduled_event_id"])
