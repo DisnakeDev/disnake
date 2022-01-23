@@ -91,17 +91,16 @@ __all__ = (
 
 _utils_get = disnake.utils.get
 T = TypeVar("T")
-U = TypeVar("U")
 T_co = TypeVar("T_co", covariant=True)
 CT = TypeVar("CT", bound=disnake.abc.GuildChannel)
 TT = TypeVar("TT", bound=disnake.Thread)
 
 
 def _get_from_guilds(
-    client: disnake.Client, func: Callable[[disnake.Guild, T], Optional[U]], argument: T
-) -> Optional[U]:
+    client: disnake.Client, func: Callable[[disnake.Guild], Optional[T]]
+) -> Optional[T]:
     for guild in client.guilds:
-        if result := func(guild, argument):
+        if result := func(guild):
             return result
     return None
 
@@ -249,7 +248,7 @@ class MemberConverter(IDConverter[disnake.Member]):
             if guild:
                 result = guild.get_member_named(argument)
             else:
-                result = _get_from_guilds(bot, lambda g, a: g.get_member_named(a), argument)
+                result = _get_from_guilds(bot, lambda g: g.get_member_named(argument))
         else:
             user_id = int(match.group(1))
             if guild:
@@ -258,7 +257,7 @@ class MemberConverter(IDConverter[disnake.Member]):
                 )
                 result = guild.get_member(user_id) or _utils_get(mentions, id=user_id)
             else:
-                result = _get_from_guilds(bot, lambda g, a: g.get_member(a), user_id)
+                result = _get_from_guilds(bot, lambda g: g.get_member(user_id))
 
         if result is None:
             if guild is None:
@@ -467,7 +466,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
             if guild:
                 result = guild.get_channel(channel_id)
             else:
-                result = _get_from_guilds(bot, lambda g, a: g.get_channel(a), channel_id)
+                result = _get_from_guilds(bot, lambda g: g.get_channel(channel_id))
 
         if not isinstance(result, type):
             raise ChannelNotFound(argument)
