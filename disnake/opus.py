@@ -41,12 +41,14 @@ from typing import (
     Literal,
     Optional,
     Tuple,
+    Type,
     TypedDict,
     TypeVar,
     overload,
 )
 
 from .errors import DiscordException, InvalidArgument
+from .utils import MISSING
 
 if TYPE_CHECKING:
     T = TypeVar("T")
@@ -80,7 +82,7 @@ c_int_ptr = ctypes.POINTER(ctypes.c_int)
 c_int16_ptr = ctypes.POINTER(ctypes.c_int16)
 c_float_ptr = ctypes.POINTER(ctypes.c_float)
 
-_lib = None
+_lib: Any = MISSING
 
 
 class EncoderStruct(ctypes.Structure):
@@ -149,7 +151,9 @@ def _err_ne(result: T, func: Callable, args: List) -> T:
 # The second one are the types of arguments it takes.
 # The third is the result type.
 # The fourth is the error handler.
-exported_functions: List[Tuple[Any, ...]] = [
+exported_functions: List[
+    Tuple[str, Optional[List[Type[ctypes._CData]]], Optional[Type[ctypes._CData]], Any]
+] = [
     # Generic
     ("opus_get_version_string", None, ctypes.c_char_p, None),
     ("opus_strerror", [ctypes.c_int], ctypes.c_char_p, None),
@@ -226,7 +230,7 @@ def libopus_loader(name: str) -> Any:
 
     # register the functions...
     for item in exported_functions:
-        func = getattr(lib, item[0])
+        func: ctypes._NamedFuncPointer = getattr(lib, item[0])
 
         try:
             if item[1]:
@@ -257,9 +261,9 @@ def _load_default() -> bool:
         else:
             _lib = libopus_loader(ctypes.util.find_library("opus"))
     except Exception:
-        _lib = None
+        _lib = MISSING
 
-    return _lib is not None
+    return _lib is not MISSING
 
 
 def load_opus(name: str) -> None:
@@ -313,7 +317,7 @@ def is_loaded() -> bool:
         Indicates if the opus library has been loaded.
     """
     global _lib
-    return _lib is not None
+    return _lib is not MISSING
 
 
 class OpusError(DiscordException):
