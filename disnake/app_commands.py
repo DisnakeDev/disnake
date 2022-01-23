@@ -338,6 +338,15 @@ class Option:
 class ApplicationCommand(ABC):
     """
     The base class for application commands
+
+    Attributes
+    ----------
+    type: :class:`ApplicationCommandType`
+        The command type
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
     """
 
     def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
@@ -370,6 +379,23 @@ class ApplicationCommand(ABC):
 class APIApplicationCommand(ApplicationCommand):
     """
     The base class for application commands returned by the API
+
+    Attributes
+    ----------
+    type: :class:`ApplicationCommandType`
+        The command type
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
+    id: :class:`int`
+        The command ID
+    application_id: :class:`int`
+        The ID of the application this command belongs to
+    guild_id: Optional[:class:`int`]
+        The guild ID of the command, if not global
+    version: :class:`int`
+        The version identifier of the command, updated on substantial changes
     """
 
     # note: subtypes should call `self._update_common`
@@ -388,6 +414,17 @@ class APIApplicationCommand(ApplicationCommand):
 
 
 class UserCommand(ApplicationCommand):
+    """
+    A user context menu command
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
+    """
+
     def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.user,
@@ -412,6 +449,25 @@ class UserCommand(ApplicationCommand):
 
 
 class APIUserCommand(UserCommand, APIApplicationCommand):
+    """
+    A user context menu command returned by the API
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
+    id: :class:`int`
+        The command ID
+    application_id: :class:`int`
+        The ID of the application this command belongs to
+    guild_id: Optional[:class:`int`]
+        The guild ID of the command, if not global
+    version: :class:`int`
+        The version identifier of the command, updated on substantial changes
+    """
+
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> APIUserCommand:
         self = super().from_dict(data)
@@ -423,6 +479,17 @@ class APIUserCommand(UserCommand, APIApplicationCommand):
 
 
 class MessageCommand(ApplicationCommand):
+    """
+    A message context menu command
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
+    """
+
     def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.message,
@@ -447,6 +514,25 @@ class MessageCommand(ApplicationCommand):
 
 
 class APIMessageCommand(MessageCommand, APIApplicationCommand):
+    """
+    A message context menu command returned by the API
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
+    id: :class:`int`
+        The command ID
+    application_id: :class:`int`
+        The ID of the application this command belongs to
+    guild_id: Optional[:class:`int`]
+        The guild ID of the command, if not global
+    version: :class:`int`
+        The version identifier of the command, updated on substantial changes
+    """
+
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> APIMessageCommand:
         self = super().from_dict(data)
@@ -463,14 +549,14 @@ class SlashCommand(ApplicationCommand):
 
     Parameters
     ----------
-    name : :class:`str`
+    name: :class:`str`
         The command name
-    description : :class:`str`
-        The command description (it'll be displayed by disnake)
-    options : List[:class:`Option`]
-        The options of the command
-    default_permission : :class:`bool`
+    default_permission: :class:`bool`
         Whether the command is enabled by default when the app is added to a guild
+    description: :class:`str`
+        The command description
+    options: List[:class:`Option`]
+        The options of the command
     """
 
     def __init__(
@@ -563,6 +649,29 @@ class SlashCommand(ApplicationCommand):
 
 
 class APISlashCommand(SlashCommand, APIApplicationCommand):
+    """
+    A slash command returned by the API
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
+    description: :class:`str`
+        The command description
+    options: List[:class:`Option`]
+        The options of the command
+    id: :class:`int`
+        The command ID
+    application_id: :class:`int`
+        The ID of the application this command belongs to
+    guild_id: Optional[:class:`int`]
+        The guild ID of the command, if not global
+    version: :class:`int`
+        The version identifier of the command, updated on substantial changes
+    """
+
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> APISlashCommand:
         self = super().from_dict(data)
