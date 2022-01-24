@@ -226,7 +226,7 @@ class Permissions(BaseFlags):
             "view_guild_insights",
         }
         instance = cls.all()
-        instance.update(**dict.fromkeys(guild_specific_perms, False))  # type: ignore
+        instance.update(**dict.fromkeys(guild_specific_perms, False))
         return instance
 
     @classmethod
