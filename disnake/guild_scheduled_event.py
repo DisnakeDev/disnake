@@ -432,11 +432,11 @@ class GuildScheduledEvent(Hashable):
         user: Union[User, Member]
 
         for data in raw_users:
+            user_data = data["user"]
             member_data = data.get("member")
             if member_data is not None and self.guild is not None:
-                member_data["user"] = data["user"]  # upgrade to MemberWithUser
-                user = self.guild.get_member(int(member_data["user"]["id"])) or Member(
-                    data=member_data, guild=self.guild, state=self._state
+                user = self.guild.get_member(int(user_data["id"])) or Member(
+                    data=member_data, user_data=user_data, guild=self.guild, state=self._state
                 )
             else:
                 user = self._state.store_user(data["user"])

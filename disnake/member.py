@@ -41,6 +41,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
     overload,
 )
 
@@ -72,6 +73,7 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .types.activity import PartialPresenceUpdate
     from .types.member import (
+        BaseMember as BaseMemberPayload,
         Member as MemberPayload,
         MemberWithUser as MemberWithUserPayload,
         UserWithMember as UserWithMemberPayload,
@@ -311,10 +313,41 @@ class Member(disnake.abc.Messageable, _UserTag):
         accent_color: Optional[Colour]
         accent_colour: Optional[Colour]
 
-    def __init__(self, *, data: MemberWithUserPayload, guild: Guild, state: ConnectionState):
+    @overload
+    def __init__(
+        self,
+        *,
+        data: MemberWithUserPayload,
+        guild: Guild,
+        state: ConnectionState,
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        data: BaseMemberPayload,
+        guild: Guild,
+        state: ConnectionState,
+        user_data: UserPayload,
+    ):
+        ...
+
+    def __init__(
+        self,
+        *,
+        data: Union[BaseMemberPayload, MemberWithUserPayload],
+        guild: Guild,
+        state: ConnectionState,
+        user_data: Optional[UserPayload] = None,
+    ):
         self._state: ConnectionState = state
-        self._user: User = state.store_user(data["user"])
+        if user_data is None:
+            user_data = cast("MemberWithUserPayload", data)["user"]
+        self._user: User = state.store_user(user_data)
         self.guild: Guild = guild
+
         self.joined_at: Optional[datetime.datetime] = utils.parse_time(data.get("joined_at"))
         self.premium_since: Optional[datetime.datetime] = utils.parse_time(
             data.get("premium_since")
@@ -348,9 +381,13 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @classmethod
     def _from_message(cls: Type[M], *, message: Message, data: MemberPayload) -> M:
-        author = message.author
-        data["user"] = author._to_minimal_user_json()  # type: ignore
-        return cls(data=data, guild=message.guild, state=message._state)  # type: ignore
+        user_data = message.author._to_minimal_user_json()  # type: ignore
+        return cls(
+            data=data,
+            user_data=user_data,
+            guild=message.guild,  # type: ignore
+            state=message._state,
+        )
 
     def _update_from_message(self, data: MemberPayload) -> None:
         self.joined_at = utils.parse_time(data.get("joined_at"))
@@ -369,8 +406,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         except KeyError:
             return state.create_user(data)
         else:
-            member_data["user"] = data  # type: ignore
-            return cls(data=member_data, guild=guild, state=state)  # type: ignore
+            return cls(data=member_data, user_data=data, guild=guild, state=state)
 
     @classmethod
     def _copy(cls: Type[M], member: M) -> M:
