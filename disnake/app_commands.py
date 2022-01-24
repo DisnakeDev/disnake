@@ -26,7 +26,7 @@ import math
 import re
 import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
 from .abc import User
 from .custom_warnings import ConfigWarning
@@ -347,6 +347,8 @@ class ApplicationCommand(ABC):
         Whether the command is usable by default
     """
 
+    __repr_info__: ClassVar[Tuple[str, ...]] = ("type", "name")
+
     def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
@@ -355,7 +357,8 @@ class ApplicationCommand(ABC):
         self._always_synced: bool = False
 
     def __repr__(self) -> str:
-        return f"<ApplicationCommand type={self.type!r} name={self.name!r}>"
+        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
+        return f"<{type(self).__name__} {attrs}>"
 
     def __eq__(self, other) -> bool:
         return (
@@ -375,6 +378,8 @@ class ApplicationCommand(ABC):
 
 
 class _APIApplicationCommandMixin:
+    __repr_info__ = ("id",)
+
     def _update_common(self, data: ApplicationCommandPayload) -> None:
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
@@ -394,15 +399,14 @@ class UserCommand(ApplicationCommand):
         Whether the command is usable by default
     """
 
+    __repr_info__ = ("name", "default_permission")
+
     def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             default_permission=default_permission,
         )
-
-    def __repr__(self) -> str:
-        return f"<UserCommand name={self.name!r}>"
 
 
 class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
@@ -427,6 +431,8 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         The version identifier of the command, updated on substantial changes
     """
 
+    __repr_info__ = UserCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> APIUserCommand:
         cmd_type = data.get("type", 0)
@@ -439,9 +445,6 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         )
         self._update_common(data)
         return self
-
-    def __repr__(self) -> str:
-        return f"<APIUserCommand name={self.name!r} id={self.id!r}>"
 
 
 class MessageCommand(ApplicationCommand):
@@ -456,15 +459,14 @@ class MessageCommand(ApplicationCommand):
         Whether the command is usable by default
     """
 
+    __repr_info__ = ("name", "default_permission")
+
     def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             default_permission=default_permission,
         )
-
-    def __repr__(self) -> str:
-        return f"<MessageCommand name={self.name!r}>"
 
 
 class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
@@ -489,6 +491,8 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         The version identifier of the command, updated on substantial changes
     """
 
+    __repr_info__ = MessageCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> APIMessageCommand:
         cmd_type = data.get("type", 0)
@@ -501,9 +505,6 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         )
         self._update_common(data)
         return self
-
-    def __repr__(self) -> str:
-        return f"<APIMessageCommand name={self.name!r} id={self.id!r}>"
 
 
 class SlashCommand(ApplicationCommand):
@@ -522,6 +523,8 @@ class SlashCommand(ApplicationCommand):
         The options of the command
     """
 
+    __repr_info__ = ("name", "description", "options", "default_permission")
+
     def __init__(
         self,
         name: str,
@@ -539,12 +542,6 @@ class SlashCommand(ApplicationCommand):
         )
         self.description: str = description
         self.options: List[Option] = options or []
-
-    def __repr__(self) -> str:
-        return (
-            f"<SlashCommand name={self.name!r} description={self.description!r} "
-            f"default_permission={self.default_permission!r} options={self.options!r}>"
-        )
 
     def __str__(self) -> str:
         return f"<SlashCommand name={self.name!r}>"
@@ -621,6 +618,8 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         The version identifier of the command, updated on substantial changes
     """
 
+    __repr_info__ = SlashCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> APISlashCommand:
         cmd_type = data.get("type", 0)
@@ -637,12 +636,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         )
         self._update_common(data)
         return self
-
-    def __repr__(self) -> str:
-        return (
-            f"<APISlashCommand name={self.name!r} description={self.description!r} "
-            f"default_permission={self.default_permission!r} options={self.options!r} id={self.id!r}>"
-        )
 
 
 class ApplicationCommandPermissions:
