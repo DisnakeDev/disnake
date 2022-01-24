@@ -402,7 +402,8 @@ class ApplicationCommandInteractionDataResolved:
                     guild
                     and guild.get_member(user_id)
                     or Member(
-                        data={**member, "user": user},  # type: ignore
+                        data=member,
+                        user_data=user,
                         guild=guild,  # type: ignore
                         state=state,
                     )
