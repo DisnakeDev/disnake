@@ -355,7 +355,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._roles: utils.SnowflakeList = utils.SnowflakeList(map(int, data["roles"]))
         self._client_status: Dict[Optional[str], str] = {None: "offline"}
         self.activities: Tuple[ActivityTypes, ...] = tuple()
-        self.nick: Optional[str] = data.get("nick", None)
+        self.nick: Optional[str] = data.get("nick")
         self.pending: bool = data.get("pending", False)
         self._avatar: Optional[str] = data.get("avatar")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
