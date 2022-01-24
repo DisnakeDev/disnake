@@ -654,7 +654,7 @@ class InteractionBotBase(CommonBotBase):
 
         try:
             commands = await self.fetch_global_commands()
-            self._connection._global_application_commands = {  # type: ignore
+            self._connection._global_application_commands = {
                 command.id: command for command in commands
             }
         except Exception:
@@ -663,7 +663,7 @@ class InteractionBotBase(CommonBotBase):
             try:
                 commands = await self.fetch_guild_commands(guild_id)
                 if commands:
-                    self._connection._guild_application_commands[guild_id] = {  # type: ignore
+                    self._connection._guild_application_commands[guild_id] = {
                         command.id: command for command in commands
                     }
             except Exception:
@@ -795,7 +795,7 @@ class InteractionBotBase(CommonBotBase):
                 if not self.owner_id and not self.owner_ids:
                     await self._fill_owners()
                 resolved_perms = perms.resolve(
-                    command_id=cmd.id,  # type: ignore
+                    command_id=cmd.id,
                     owners=[self.owner_id] if self.owner_id else self.owner_ids,
                 )
 
