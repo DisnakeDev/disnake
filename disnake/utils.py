@@ -596,7 +596,7 @@ def compute_timedelta(dt: datetime.datetime):
 
 
 def iterable_isinstance(
-    iterable: Iterable[Any], tp: type | tuple[type | tuple[Any, ...], ...], /
+    iterable: Iterable[Any], tp: Union[type, Tuple[Union[type, Tuple[Any, ...]], ...]], /
 ) -> Union[Literal[True], Any]:
     """Checks if all items of the iterable is of the specified type.
 
