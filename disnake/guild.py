@@ -465,7 +465,7 @@ class Guild(Hashable):
         if member_count is not None:
             self._member_count: int = member_count
 
-        self.name: str = guild.get("name")
+        self.name: str = guild.get("name", "")
         self.region: VoiceRegion = try_enum(VoiceRegion, guild.get("region"))
         self.verification_level: VerificationLevel = try_enum(
             VerificationLevel, guild.get("verification_level")
@@ -476,7 +476,7 @@ class Guild(Hashable):
         self.explicit_content_filter: ContentFilter = try_enum(
             ContentFilter, guild.get("explicit_content_filter", 0)
         )
-        self.afk_timeout: int = guild.get("afk_timeout")
+        self.afk_timeout: int = guild.get("afk_timeout", 0)
         self._icon: Optional[str] = guild.get("icon")
         self._banner: Optional[str] = guild.get("banner")
         self.unavailable: bool = guild.get("unavailable", False)
@@ -487,7 +487,7 @@ class Guild(Hashable):
             role = Role(guild=self, data=r, state=state)
             self._roles[role.id] = role
 
-        self.mfa_level: MFALevel = guild.get("mfa_level")
+        self.mfa_level: MFALevel = guild.get("mfa_level", 0)
         self.emojis: Tuple[Emoji, ...] = tuple(
             map(lambda d: state.store_emoji(self, d), guild.get("emojis", []))
         )

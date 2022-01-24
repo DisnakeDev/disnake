@@ -42,6 +42,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
     overload,
 )
 
@@ -290,8 +291,8 @@ class Attachment(Hashable):
         self.height: Optional[int] = data.get("height")
         self.width: Optional[int] = data.get("width")
         self.filename: str = data["filename"]
-        self.url: str = data.get("url")
-        self.proxy_url: str = data.get("proxy_url")
+        self.url: str = data["url"]
+        self.proxy_url: str = data["proxy_url"]
         self._http = state.http
         self.content_type: Optional[str] = data.get("content_type")
         self.ephemeral: bool = data.get("ephemeral", False)
@@ -1814,8 +1815,8 @@ class Message(Hashable):
             raise InvalidArgument("This message does not have guild info attached.")
 
         if auto_archive_duration is not None:
-            auto_archive_duration: ThreadArchiveDurationLiteral = try_enum_to_int(
-                auto_archive_duration
+            auto_archive_duration = cast(
+                ThreadArchiveDurationLiteral, try_enum_to_int(auto_archive_duration)
             )
 
         default_auto_archive_duration: ThreadArchiveDurationLiteral = getattr(

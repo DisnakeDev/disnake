@@ -150,7 +150,7 @@ class VoiceState:
         data: Union[VoiceStatePayload, GuildVoiceStatePayload],
         channel: Optional[VocalGuildChannel] = None,
     ):
-        self.session_id: str = data.get("session_id")
+        self.session_id: str = data["session_id"]
         self._update(data, channel)
 
     def _update(
