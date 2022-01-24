@@ -1096,7 +1096,7 @@ class InteractionResponse:
             Maximum of components exceeded. (5)
         HTTPException
             Displaying the modal failed.
-        InteractionException
+        ModalInteractionException
             This interaction can't be responded with a modal.
         InteractionResponded
             This interaction has already been responded to before.
@@ -1116,7 +1116,7 @@ class InteractionResponse:
         adapter = async_context.get()
 
         if parent.type is InteractionType.modal_submit:
-            raise ModalInteractionException(self._parent)  # type: ignore
+            raise ModalInteractionException(parent)  # type: ignore
 
         if self._responded:
             raise InteractionResponded(parent)
