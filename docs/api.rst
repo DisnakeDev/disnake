@@ -3873,14 +3873,6 @@ MessageCommand
 .. autoclass:: MessageCommand()
     :members:
 
-APIApplicationCommand
-~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: APIApplicationCommand
-
-.. autoclass:: APIApplicationCommand()
-    :members:
-
 APISlashCommand
 ~~~~~~~~~~~~~~~
 

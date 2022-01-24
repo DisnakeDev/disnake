@@ -53,7 +53,6 @@ import aiohttp
 from . import utils
 from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
-    APIApplicationCommand,
     APIMessageCommand,
     APISlashCommand,
     APIUserCommand,
@@ -89,6 +88,7 @@ from .widget import Widget
 
 if TYPE_CHECKING:
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime, User as ABCUser
+    from .app_commands import APIApplicationCommand
     from .channel import DMChannel
     from .member import Member
     from .message import Message
@@ -419,7 +419,7 @@ class Client:
 
     @property
     def global_application_commands(self) -> List[APIApplicationCommand]:
-        """List[:class:`.APIApplicationCommand`]: The client's global application commands."""
+        """List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]: The client's global application commands."""
         return list(self._connection._global_application_commands.values())
 
     @property
@@ -1101,7 +1101,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.APIApplicationCommand`]
+        List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             The list of application commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
@@ -1169,7 +1169,7 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`.APIApplicationCommand`]
+        Optional[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             The application command.
         """
         return self._connection._get_global_application_command(id)
@@ -1187,7 +1187,7 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`.APIApplicationCommand`]
+        Optional[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             The application command.
         """
         return self._connection._get_guild_application_command(guild_id, id)
@@ -1207,7 +1207,7 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`.APIApplicationCommand`]
+        Optional[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             The application command.
         """
         return self._connection._get_global_command_named(name, cmd_type)
@@ -1229,7 +1229,7 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`.APIApplicationCommand`]
+        Optional[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             The application command.
         """
         return self._connection._get_guild_command_named(guild_id, name, cmd_type)
@@ -2025,7 +2025,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.APIApplicationCommand`]
+        List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of application commands.
         """
         return await self._connection.fetch_global_commands()
@@ -2044,7 +2044,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIApplicationCommand`
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The requested application command.
         """
         return await self._connection.fetch_global_command(command_id)
@@ -2065,7 +2065,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIApplicationCommand`
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The application command that was created.
         """
         return await self._connection.create_global_command(application_command)
@@ -2088,7 +2088,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIApplicationCommand`
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The edited application command.
         """
         return await self._connection.edit_global_command(command_id, new_command)
@@ -2123,7 +2123,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.APIApplicationCommand`]
+        List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of registered application commands.
         """
         return await self._connection.bulk_overwrite_global_commands(application_commands)
@@ -2144,7 +2144,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.APIApplicationCommand`]
+        List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of application commands.
         """
         return await self._connection.fetch_guild_commands(guild_id)
@@ -2165,7 +2165,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIApplicationCommand`
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The requested application command.
         """
         return await self._connection.fetch_guild_command(guild_id, command_id)
@@ -2188,7 +2188,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIApplicationCommand`
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The application command that was created.
         """
         return await self._connection.create_guild_command(guild_id, application_command)
@@ -2213,7 +2213,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIApplicationCommand`
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The edited application command.
         """
         return await self._connection.edit_guild_command(guild_id, command_id, new_command)
@@ -2252,7 +2252,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.APIApplicationCommand`]
+        List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of registered application commands.
         """
         return await self._connection.bulk_overwrite_guild_commands(guild_id, application_commands)

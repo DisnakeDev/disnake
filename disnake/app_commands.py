@@ -26,7 +26,7 @@ import math
 import re
 import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union
 
 from .abc import User
 from .custom_warnings import ConfigWarning
@@ -62,14 +62,12 @@ if TYPE_CHECKING:
         Dict[str, ApplicationCommandOptionChoiceValue],
     ]
 
-    UserCommandT = TypeVar("UserCommandT", bound="UserCommand")
-    MessageCommandT = TypeVar("MessageCommandT", bound="MessageCommand")
-    SlashCommandT = TypeVar("SlashCommandT", bound="SlashCommand")
+    APIApplicationCommand = Union["APIUserCommand", "APIMessageCommand", "APISlashCommand"]
+
 
 __all__ = (
     "application_command_factory",
     "ApplicationCommand",
-    "APIApplicationCommand",
     "SlashCommand",
     "APISlashCommand",
     "UserCommand",
@@ -376,38 +374,7 @@ class ApplicationCommand(ABC):
         return data
 
 
-class APIApplicationCommand(ApplicationCommand):
-    """
-    The base class for application commands returned by the API
-
-    .. versionadded:: 2.4
-
-    Attributes
-    ----------
-    type: :class:`ApplicationCommandType`
-        The command type
-    name: :class:`str`
-        The command name
-    default_permission: :class:`bool`
-        Whether the command is usable by default
-    id: :class:`int`
-        The command ID
-    application_id: :class:`int`
-        The ID of the application this command belongs to
-    guild_id: Optional[:class:`int`]
-        The guild ID of the command, if not global
-    version: :class:`int`
-        The version identifier of the command, updated on substantial changes
-    """
-
-    # note: subtypes should call `self._update_common`
-
-    # the `from_dict` methods in subtypes could've been part of this class,
-    # but typing super calls in mixins is difficult
-
-    def __repr__(self) -> str:
-        return f"<APIApplicationCommand type={self.type!r} name={self.name!r} id={self.id!r}>"
-
+class _APIApplicationCommandMixin:
     def _update_common(self, data: ApplicationCommandPayload) -> None:
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
@@ -437,20 +404,8 @@ class UserCommand(ApplicationCommand):
     def __repr__(self) -> str:
         return f"<UserCommand name={self.name!r}>"
 
-    @classmethod
-    def from_dict(cls: Type[UserCommandT], data: ApplicationCommandPayload) -> UserCommandT:
-        cmd_type = data.get("type", 0)
-        if cmd_type != ApplicationCommandType.user.value:
-            raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
-        self = cls(
-            name=data["name"],
-            default_permission=data.get("default_permission", True),
-        )
-        return self
-
-
-class APIUserCommand(UserCommand, APIApplicationCommand):
+class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     """
     A user context menu command returned by the API
 
@@ -474,7 +429,14 @@ class APIUserCommand(UserCommand, APIApplicationCommand):
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> APIUserCommand:
-        self = super().from_dict(data)
+        cmd_type = data.get("type", 0)
+        if cmd_type != ApplicationCommandType.user.value:
+            raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
+
+        self = cls(
+            name=data["name"],
+            default_permission=data.get("default_permission", True),
+        )
         self._update_common(data)
         return self
 
@@ -504,20 +466,8 @@ class MessageCommand(ApplicationCommand):
     def __repr__(self) -> str:
         return f"<MessageCommand name={self.name!r}>"
 
-    @classmethod
-    def from_dict(cls: Type[MessageCommandT], data: ApplicationCommandPayload) -> MessageCommandT:
-        cmd_type = data.get("type", 0)
-        if cmd_type != ApplicationCommandType.message.value:
-            raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
-        self = cls(
-            name=data["name"],
-            default_permission=data.get("default_permission", True),
-        )
-        return self
-
-
-class APIMessageCommand(MessageCommand, APIApplicationCommand):
+class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     """
     A message context menu command returned by the API
 
@@ -541,7 +491,14 @@ class APIMessageCommand(MessageCommand, APIApplicationCommand):
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> APIMessageCommand:
-        self = super().from_dict(data)
+        cmd_type = data.get("type", 0)
+        if cmd_type != ApplicationCommandType.message.value:
+            raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
+
+        self = cls(
+            name=data["name"],
+            default_permission=data.get("default_permission", True),
+        )
         self._update_common(data)
         return self
 
@@ -599,22 +556,6 @@ class SlashCommand(ApplicationCommand):
             and self.options == other.options
         )
 
-    @classmethod
-    def from_dict(cls: Type[SlashCommandT], data: ApplicationCommandPayload) -> SlashCommandT:
-        cmd_type = data.get("type", 0)
-        if cmd_type != ApplicationCommandType.chat_input.value:
-            raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
-
-        self = cls(
-            name=data["name"],
-            description=data["description"],
-            default_permission=data.get("default_permission", True),
-            options=_maybe_cast(
-                data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
-            ),
-        )
-        return self
-
     def add_option(
         self,
         name: str,
@@ -654,7 +595,7 @@ class SlashCommand(ApplicationCommand):
         return res
 
 
-class APISlashCommand(SlashCommand, APIApplicationCommand):
+class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     """
     A slash command returned by the API
 
@@ -682,7 +623,18 @@ class APISlashCommand(SlashCommand, APIApplicationCommand):
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> APISlashCommand:
-        self = super().from_dict(data)
+        cmd_type = data.get("type", 0)
+        if cmd_type != ApplicationCommandType.chat_input.value:
+            raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
+
+        self = cls(
+            name=data["name"],
+            description=data["description"],
+            default_permission=data.get("default_permission", True),
+            options=_maybe_cast(
+                data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
+            ),
+        )
         self._update_common(data)
         return self
 
