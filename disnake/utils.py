@@ -595,14 +595,16 @@ def compute_timedelta(dt: datetime.datetime):
     return max((dt - now).total_seconds(), 0)
 
 
-def iterable_is(iterable: Iterable[Any], tp: type) -> Union[Literal[True], Any]:
+def iterable_isinstance(
+    iterable: Iterable[Any], tp: type | tuple[type | tuple[Any, ...], ...], /
+) -> Union[Literal[True], Any]:
     """Checks if all items of the iterable is of the specified type.
 
     Parameters
     ----------
     iterable: Iterable[Any]
         The iterable to check.
-    tp: :class:`type`
+    tp: Union[:class:`type`, Tuple[:class:`type`, Tuple[Any, ...], ...]]
         The type to check against.
 
     Returns

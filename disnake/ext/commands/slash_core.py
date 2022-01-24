@@ -666,7 +666,7 @@ def slash_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        if guild_ids and (guild_id := utils.iterable_is(guild_ids, int)) is not True:
+        if guild_ids and (guild_id := utils.iterable_isinstance(guild_ids, int)) is not True:
             raise ValueError(
                 f"guild_ids must be a sequence of int, but {type(guild_id).__name__} was given."
             )

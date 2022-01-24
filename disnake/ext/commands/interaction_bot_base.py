@@ -162,7 +162,7 @@ class InteractionBotBase(CommonBotBase):
     ):
         super().__init__(**options)
 
-        if test_guilds and (test_guild := utils.iterable_is(test_guilds, int)) is not True:
+        if test_guilds and (test_guild := utils.iterable_isinstance(test_guilds, int)) is not True:
             raise ValueError(
                 f"test_guilds must be a sequence of int, but {type(test_guild).__name__} was given."
             )

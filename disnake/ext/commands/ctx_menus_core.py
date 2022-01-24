@@ -26,7 +26,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Coroutine, Optional, Sequence, TypeVar, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
-from disnake.utils import iterable_is
+from disnake.utils import iterable_isinstance
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -236,7 +236,7 @@ def user_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        if guild_ids and (guild_id := iterable_is(guild_ids, int)) is not True:
+        if guild_ids and (guild_id := iterable_isinstance(guild_ids, int)) is not True:
             raise ValueError(
                 f"guild_ids must be a sequence of int, but {type(guild_id).__name__} was given."
             )
@@ -299,7 +299,7 @@ def message_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        if guild_ids and (guild_id := iterable_is(guild_ids, int)) is not True:
+        if guild_ids and (guild_id := iterable_isinstance(guild_ids, int)) is not True:
             raise ValueError(
                 f"guild_ids must be a sequence of int, but {type(guild_id).__name__} was given."
             )
