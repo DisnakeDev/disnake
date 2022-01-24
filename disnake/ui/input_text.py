@@ -89,6 +89,13 @@ class InputText:
             max_length=max_length,
         )
 
+    def __repr__(self) -> str:
+        return (
+            f"<InputText style={self.style!r} label={self.label!r} custom_id={self.custom_id!r} "
+            f"placeholder={self.placeholder!r} value={self.value!r} required={self.required!r} "
+            f"min_length={self.min_length!r} max_length={self.max_length!r}>"
+        )
+
     @property
     def width(self) -> int:
         return 5

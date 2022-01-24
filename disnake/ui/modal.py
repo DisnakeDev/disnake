@@ -76,7 +76,9 @@ class Modal:
         )
 
     def __repr__(self) -> str:
-        return f"<Modal {self.title}, custom_id={self.custom_id}, components={self.components}>"
+        return (
+            f"<Modal {self.title!r}, custom_id={self.custom_id!r}, components={self.components!r}>"
+        )
 
     @property
     def title(self) -> str:
