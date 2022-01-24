@@ -595,28 +595,9 @@ def compute_timedelta(dt: datetime.datetime):
     return max((dt - now).total_seconds(), 0)
 
 
-def iterable_isinstance(
-    iterable: Iterable[Any], tp: Union[type, Tuple[Union[type, Tuple[Any, ...]], ...]], /
-) -> Union[Literal[True], Any]:
-    """Checks if all items of the iterable is of the specified type.
-
-    Parameters
-    ----------
-    iterable: Iterable[Any]
-        The iterable to check.
-    tp: Union[:class:`type`, Tuple[:class:`type`, Tuple[Any, ...], ...]]
-        The type to check against.
-
-    Returns
-    -------
-    Union[Literal[True], Any]
-        The first item that is not of the specified type.
-        If all items are of the specified type, ``True`` is returned instead.
-    """
-    for value in iterable:
-        if not isinstance(value, tp):
-            return value
-    return True
+def validate_guild_ids(guild_ids: Iterable[int]) -> None:
+    if not all(isinstance(guild_id, int) for guild_id in guild_ids):
+        raise ValueError("test_guilds or guild_ids must be a sequence of int.")
 
 
 async def sleep_until(when: datetime.datetime, result: Optional[T] = None) -> Optional[T]:
