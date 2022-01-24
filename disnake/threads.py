@@ -33,7 +33,7 @@ from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .mixins import Hashable
-from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
+from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time, warn_deprecated
 
 __all__ = (
     "Thread",
@@ -119,8 +119,6 @@ class Thread(Messageable, Hashable):
     invitable: :class:`bool`
         Whether non-moderators can add other non-moderators to this thread.
         This is always ``True`` for public threads.
-    archiver_id: Optional[:class:`int`]
-        The user's ID that archived this thread.
     auto_archive_duration: :class:`int`
         The duration in minutes until the thread is automatically archived due to inactivity.
         Usually a value of 60, 1440, 4320 and 10080.
@@ -137,9 +135,6 @@ class Thread(Messageable, Hashable):
         "name",
         "id",
         "guild",
-        "_type",
-        "_state",
-        "_members",
         "owner_id",
         "parent_id",
         "last_message_id",
@@ -150,10 +145,13 @@ class Thread(Messageable, Hashable):
         "locked",
         "archived",
         "invitable",
-        "archiver_id",
         "auto_archive_duration",
         "archive_timestamp",
         "create_timestamp",
+        "_type",
+        "_state",
+        "_members",
+        "_archiver_id",
     )
 
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload):
@@ -195,7 +193,7 @@ class Thread(Messageable, Hashable):
 
     def _unroll_metadata(self, data: ThreadMetadata):
         self.archived = data["archived"]
-        self.archiver_id = _get_as_snowflake(data, "archiver_id")
+        self._archiver_id = _get_as_snowflake(data, "archiver_id")
         self.auto_archive_duration = data["auto_archive_duration"]
         self.archive_timestamp = parse_time(data["archive_timestamp"])
         self.locked = data.get("locked", False)
@@ -317,6 +315,22 @@ class Thread(Messageable, Hashable):
             If create_timestamp is provided by discord, that will be used instead of the time in the ID.
         """
         return self.create_timestamp or snowflake_time(self.id)
+
+    @property
+    def archiver_id(self) -> Optional[int]:
+        """Optional[:class:`int`]: The user's ID that archived this thread.
+
+        As of June 10th, 2021, this value will always be ``None`` since Discord
+        doesn't provide this information anymore.
+
+        .. warning::
+
+            This property will be removed in a future version.
+        """
+        warn_deprecated(
+            "archiver_id is deprecated and will be removed in a future version.", stacklevel=2
+        )
+        return self._archiver_id
 
     def is_private(self) -> bool:
         """Whether the thread is a private thread.
