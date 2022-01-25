@@ -1,3 +1,28 @@
+[tool.poetry]
+name = "repl_python3_discordpy-testing"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+motor = "^2.5.1"
+dnspython = "^2.1.0"
+pastecord = "^1.0.0"
+Flask = "^2.0.2"
+disnake = "^2.2.2"
+yapf = "^0.32.0"
+platformdirs = "^2.4.1"
+typing-extensions = "^4.0.1"
+virtualenv = "^23.13.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
 [tool.black]
 line-length = 100
 target-version = ["py38", "py39", "py310"]
