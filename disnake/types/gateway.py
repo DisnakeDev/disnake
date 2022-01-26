@@ -64,7 +64,7 @@ class GatewayPayload(TypedDict):
 
 
 class HeartbeatCommand(TypedDict):
-    op: Literal[1]
+    op: int  # no literal since normal ws and voice ws are different
     d: Optional[int]
 
 

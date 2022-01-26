@@ -188,10 +188,15 @@ class GatewayRatelimiter:
 
 class KeepAliveHandler(threading.Thread):
     def __init__(
-        self, *args, ws: DiscordWebSocket, interval: float, shard_id: Optional[int] = None, **kwargs
+        self,
+        *args: Any,
+        ws: HeartbeatWebSocket,
+        interval: float,
+        shard_id: Optional[int] = None,
+        **kwargs: Any,
     ):
         super().__init__(*args, **kwargs)
-        self.ws: DiscordWebSocket = ws
+        self.ws: HeartbeatWebSocket = ws
         self._main_thread_id: int = ws.thread_id
         self.interval: float = interval
         self.daemon: bool = True
@@ -252,7 +257,7 @@ class KeepAliveHandler(threading.Thread):
                 self._last_send = time.perf_counter()
 
     def get_payload(self) -> HeartbeatCommand:
-        return {"op": self.ws.HEARTBEAT, "d": self.ws.sequence}
+        return {"op": self.ws.HEARTBEAT, "d": self.ws.get_heartbeat_data()}
 
     def stop(self) -> None:
         self._stop_ev.set()
@@ -269,15 +274,12 @@ class KeepAliveHandler(threading.Thread):
 
 
 class VoiceKeepAliveHandler(KeepAliveHandler):
-    def __init__(self, *args, ws: DiscordVoiceWebSocket, interval: float, **kwargs):
+    def __init__(self, *args: Any, ws: HeartbeatWebSocket, interval: float, **kwargs: Any):
         super().__init__(*args, ws=ws, interval=interval, **kwargs)
         self.recent_ack_latencies: Deque[float] = deque(maxlen=20)
         self.msg: str = "Keeping shard ID %s voice websocket alive with timestamp %s."
         self.block_msg: str = "Shard ID %s voice heartbeat blocked for more than %s seconds"
         self.behind_msg: str = "High socket latency, shard ID %s heartbeat is %.1fs behind"
-
-    def get_payload(self) -> HeartbeatCommand:
-        return {"op": self.ws.HEARTBEAT, "d": int(time.time() * 1000)}
 
     def ack(self) -> None:
         ack_time = time.perf_counter()
@@ -290,6 +292,23 @@ class VoiceKeepAliveHandler(KeepAliveHandler):
 class DiscordClientWebSocketResponse(aiohttp.ClientWebSocketResponse):
     async def close(self, *, code: int = 4000, message: bytes = b"") -> bool:
         return await super().close(code=code, message=message)
+
+
+class HeartbeatWebSocket(Protocol):
+    HEARTBEAT: Final[int]  # type: ignore
+
+    thread_id: int
+    loop: asyncio.AbstractEventLoop
+    _max_heartbeat_timeout: float
+
+    async def close(self, code: int) -> None:
+        ...
+
+    async def send_heartbeat(self, data: HeartbeatCommand) -> None:
+        ...
+
+    def get_heartbeat_data(self) -> Optional[int]:
+        ...
 
 
 class DiscordWebSocket:
@@ -726,6 +745,9 @@ class DiscordWebSocket:
             if not self._can_handle_close():
                 raise ConnectionClosed(self.socket, shard_id=self.shard_id) from exc
 
+    def get_heartbeat_data(self) -> Optional[int]:
+        return self.sequence
+
     async def change_presence(
         self,
         *,
@@ -882,6 +904,9 @@ class DiscordVoiceWebSocket:
         await self.ws.send_str(utils._to_json(data))
 
     send_heartbeat = send_as_json
+
+    def get_heartbeat_data(self) -> Optional[int]:
+        return int(time.time() * 1000)
 
     async def resume(self) -> None:
         state = self._connection
