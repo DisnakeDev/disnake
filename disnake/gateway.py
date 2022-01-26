@@ -837,8 +837,6 @@ class DiscordVoiceWebSocket:
         Receive only. Tells you that your websocket connection was acknowledged.
     RESUMED
         Sent only. Tells you that your RESUME request has succeeded.
-    CLIENT_CONNECT
-        Indicates a user has connected to voice.
     CLIENT_DISCONNECT
         Receive only.  Indicates a user has disconnected from voice.
     """
@@ -853,7 +851,6 @@ class DiscordVoiceWebSocket:
     RESUME: Final[Literal[7]] = 7
     HELLO: Final[Literal[8]] = 8
     RESUMED: Final[Literal[9]] = 9
-    CLIENT_CONNECT: Final[Literal[12]] = 12
     CLIENT_DISCONNECT: Final[Literal[13]] = 13
 
     def __init__(
@@ -944,11 +941,6 @@ class DiscordVoiceWebSocket:
                 "data": {"address": ip, "port": port, "mode": mode},
             },
         }
-
-        await self.send_as_json(payload)
-
-    async def client_connect(self):
-        payload = {"op": self.CLIENT_CONNECT, "d": {"audio_ssrc": self._connection.ssrc}}
 
         await self.send_as_json(payload)
 
