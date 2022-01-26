@@ -295,7 +295,7 @@ class DiscordClientWebSocketResponse(aiohttp.ClientWebSocketResponse):
 
 
 class HeartbeatWebSocket(Protocol):
-    HEARTBEAT: Final[int]  # type: ignore
+    HEARTBEAT: Final[Literal[1, 3]]  # type: ignore
 
     thread_id: int
     loop: asyncio.AbstractEventLoop
