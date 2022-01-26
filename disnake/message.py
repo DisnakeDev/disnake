@@ -864,7 +864,7 @@ class Message(Hashable):
         self.embeds: List[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
         self.application: Optional[MessageApplicationPayload] = data.get("application")
         self.activity: Optional[MessageActivityPayload] = data.get("activity")
-        # for user experince, on_message has no bussiness getting partials
+        # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
         self.channel: Union[TextChannel, DMChannel, Thread, VoiceChannel] = channel  # type: ignore
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
@@ -895,6 +895,10 @@ class Message(Hashable):
             self.guild = channel.guild  # type: ignore
         except AttributeError:
             self.guild = state._get_guild(utils._get_as_snowflake(data, "guild_id"))
+
+        if thread_data := data.get("thread"):
+            if not self.thread and self.guild:
+                self.guild._store_thread(thread_data)
 
         try:
             ref = data["message_reference"]
@@ -1198,6 +1202,15 @@ class Message(Hashable):
         """:class:`str`: Returns a URL that allows the client to jump to this message."""
         guild_id = getattr(self.guild, "id", "@me")
         return f"https://discord.com/channels/{guild_id}/{self.channel.id}/{self.id}"
+
+    @property
+    def thread(self) -> Optional[Thread]:
+        """
+        Optional[:class:`Thread`]: The thread started from this message. ``None`` if no thread has been started.
+
+        .. versionadded:: 2.4
+        """
+        return self.guild and self.guild.get_thread(self.id)
 
     def is_system(self) -> bool:
         """Whether the message is a system message.

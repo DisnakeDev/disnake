@@ -61,6 +61,18 @@ def make_permission_alias(alias: str) -> Callable[[Callable[[Any], int]], permis
     return decorator
 
 
+def cached_creation(func):
+    def wrapped(cls):
+        try:
+            value = func.__stored_value__
+        except AttributeError:
+            value = func(cls).value
+            func.__stored_value__ = value
+        return cls(value)
+
+    return wrapped
+
+
 P = TypeVar("P", bound="Permissions")
 
 
@@ -159,19 +171,22 @@ class Permissions(BaseFlags):
     __gt__ = is_strict_superset
 
     @classmethod
+    @cached_creation
     def none(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``False``."""
         return cls(0)
 
     @classmethod
+    @cached_creation
     def all(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
-        return cls(0b11111111111111111111111111111111111111111)
+        return cls(**dict.fromkeys(cls.VALID_FLAGS.keys(), True))
 
     @classmethod
+    @cached_creation
     def all_channel(cls: Type[P]) -> P:
         """A :class:`Permissions` with all channel-specific permissions set to
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
@@ -198,9 +213,24 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`start_embedded_activities` permission.
         """
-        return cls(0b1111110110110011111101111111111101010001)
+        guild_specific_perms = {
+            "administrator",
+            "ban_members",
+            "change_nickname",
+            "kick_members",
+            "manage_emojis",
+            "manage_guild",
+            "manage_nicknames",
+            "moderate_members",
+            "view_audit_log",
+            "view_guild_insights",
+        }
+        instance = cls.all()
+        instance.update(**dict.fromkeys(guild_specific_perms, False))
+        return instance
 
     @classmethod
+    @cached_creation
     def general(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "General" permissions from the official Discord UI set to ``True``.
@@ -211,9 +241,19 @@ class Permissions(BaseFlags):
            :attr:`ban_members`, :attr:`change_nickname` and :attr:`manage_nicknames` are
            no longer part of the general permissions.
         """
-        return cls(0b01110000000010000000010010110000)
+        return cls(
+            view_channel=True,
+            manage_channels=True,
+            manage_roles=True,
+            manage_emojis_and_stickers=True,
+            view_audit_log=True,
+            view_guild_insights=True,
+            manage_webhooks=True,
+            manage_guild=True,
+        )
 
     @classmethod
+    @cached_creation
     def membership(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Membership" permissions from the official Discord UI set to ``True``.
@@ -223,9 +263,17 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`moderate_members` permission.
         """
-        return cls(0b10000000000001100000000000000000000000111)
+        return cls(
+            create_instant_invite=True,
+            change_nickname=True,
+            manage_nicknames=True,
+            kick_members=True,
+            ban_members=True,
+            moderate_members=True,
+        )
 
     @classmethod
+    @cached_creation
     def text(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Text" permissions from the official Discord UI set to ``True``.
@@ -238,9 +286,26 @@ class Permissions(BaseFlags):
            Added :attr:`create_public_threads`, :attr:`create_private_threads`, :attr:`manage_threads`,
            :attr:`send_messages_in_threads` and :attr:`use_external_stickers` permissions.
         """
-        return cls(0b111110010000000000001111111100001000000)
+        return cls(
+            send_messages=True,
+            send_messages_in_threads=True,
+            create_public_threads=True,
+            create_private_threads=True,
+            embed_links=True,
+            attach_files=True,
+            add_reactions=True,
+            use_external_emojis=True,
+            use_external_stickers=True,
+            mention_everyone=True,
+            manage_messages=True,
+            manage_threads=True,
+            read_message_history=True,
+            send_tts_messages=True,
+            use_slash_commands=True,
+        )
 
     @classmethod
+    @cached_creation
     def voice(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Voice" permissions from the official Discord UI set to ``True``.
@@ -248,34 +313,67 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`start_embedded_activities` permission.
         """
-        return cls(0b1000000000000011111100000000001100000000)
+        return cls(
+            connect=True,
+            speak=True,
+            stream=True,
+            start_embedded_activities=True,
+            use_voice_activation=True,
+            priority_speaker=True,
+            mute_members=True,
+            deafen_members=True,
+            move_members=True,
+        )
 
     @classmethod
+    @cached_creation
     def stage(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Channel" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        return cls(1 << 32)
+        return cls(
+            request_to_speak=True,
+        )
 
     @classmethod
+    @cached_creation
     def stage_moderator(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Moderator" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        return cls(0b100000001010000000000000000000000)
+        return cls(
+            manage_channels=True,
+            mute_members=True,
+            move_members=True,
+        )
 
     @classmethod
+    @cached_creation
+    def events(cls: Type[P]) -> P:
+        """A factory method that creates a :class:`Permissions` with all
+        "Events" permissions from the official Discord UI set to ``True``.
+
+        .. versionadded:: 2.4
+        """
+        return cls(
+            manage_events=True,
+        )
+
+    @classmethod
+    @cached_creation
     def advanced(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Advanced" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        return cls(1 << 3)
+        return cls(
+            administrator=True,
+        )
 
     def update(self, **kwargs: bool) -> None:
         r"""Bulk updates this permission object.
