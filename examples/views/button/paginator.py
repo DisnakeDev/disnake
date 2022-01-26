@@ -100,4 +100,3 @@ async def paginator(ctx: commands.Context):
 
 
 bot.run("token")
-
