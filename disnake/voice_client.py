@@ -227,8 +227,6 @@ class VoiceClient(VoiceProtocol):
     voice_port: int
     secret_key: List[int]
     ssrc: int
-    ip: str
-    port: int
 
     def __init__(self, client: Client, channel: abc.Connectable):
         if not has_nacl:
