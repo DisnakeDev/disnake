@@ -201,9 +201,9 @@ class KeepAliveHandler(threading.Thread):
         self.interval: float = interval
         self.daemon: bool = True
         self.shard_id: Optional[int] = shard_id
-        self.msg: str = "Keeping shard ID %s websocket alive with sequence %s."
-        self.block_msg: str = "Shard ID %s heartbeat blocked for more than %s seconds."
-        self.behind_msg: str = "Can't keep up, shard ID %s websocket is %.1fs behind."
+        self.msg = "Keeping shard ID %s websocket alive with sequence %s."
+        self.block_msg = "Shard ID %s heartbeat blocked for more than %s seconds."
+        self.behind_msg = "Can't keep up, shard ID %s websocket is %.1fs behind."
         self._stop_ev: threading.Event = threading.Event()
         self._last_ack: float = time.perf_counter()
         self._last_send: float = time.perf_counter()
@@ -277,9 +277,9 @@ class VoiceKeepAliveHandler(KeepAliveHandler):
     def __init__(self, *args: Any, ws: HeartbeatWebSocket, interval: float, **kwargs: Any):
         super().__init__(*args, ws=ws, interval=interval, **kwargs)
         self.recent_ack_latencies: Deque[float] = deque(maxlen=20)
-        self.msg: str = "Keeping shard ID %s voice websocket alive with timestamp %s."
-        self.block_msg: str = "Shard ID %s voice heartbeat blocked for more than %s seconds"
-        self.behind_msg: str = "High socket latency, shard ID %s heartbeat is %.1fs behind"
+        self.msg = "Keeping shard ID %s voice websocket alive with timestamp %s."
+        self.block_msg = "Shard ID %s voice heartbeat blocked for more than %s seconds"
+        self.behind_msg = "High socket latency, shard ID %s heartbeat is %.1fs behind"
 
     def ack(self) -> None:
         ack_time = time.perf_counter()
