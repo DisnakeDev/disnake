@@ -1602,7 +1602,7 @@ of :class:`enum.Enum`.
         The "Sketch Heads" activity.
 
         .. versionadded:: 2.4
-    .. attribute:: Ocho
+    .. attribute:: ocho
 
         The "Ocho" activity.
 
