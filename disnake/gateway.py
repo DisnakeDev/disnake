@@ -865,6 +865,7 @@ class DiscordVoiceWebSocket:
         self._keep_alive: Optional[VoiceKeepAliveHandler] = None
         self._close_code: Optional[int] = None
         self.secret_key: Optional[List[int]] = None
+        self.thread_id: int = threading.get_ident()
         if hook:
             self._hook = hook  # type: ignore
 
@@ -872,7 +873,6 @@ class DiscordVoiceWebSocket:
         self.gateway: str
         self._connection: VoiceClient
         self._max_heartbeat_timeout: float
-        self.thread_id: int
 
     async def _hook(self, *args: Any) -> None:
         pass
@@ -924,7 +924,6 @@ class DiscordVoiceWebSocket:
         ws.gateway = gateway
         ws._connection = client
         ws._max_heartbeat_timeout = 60.0
-        ws.thread_id = threading.get_ident()
 
         if resume:
             await ws.resume()
