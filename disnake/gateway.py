@@ -188,7 +188,7 @@ class GatewayRatelimiter:
 
 class KeepAliveHandler(threading.Thread):
     def __init__(
-        self, *args, ws: DiscordWebSocket, interval: float, shard_id: Optional[int], **kwargs
+        self, *args, ws: DiscordWebSocket, interval: float, shard_id: Optional[int] = None, **kwargs
     ):
         super().__init__(*args, **kwargs)
         self.ws: DiscordWebSocket = ws
@@ -270,7 +270,7 @@ class KeepAliveHandler(threading.Thread):
 
 class VoiceKeepAliveHandler(KeepAliveHandler):
     def __init__(self, *args, ws: DiscordVoiceWebSocket, interval: float, **kwargs):
-        super().__init__(*args, ws=ws, interval=interval, shard_id=None, **kwargs)
+        super().__init__(*args, ws=ws, interval=interval, **kwargs)
         self.recent_ack_latencies: Deque[float] = deque(maxlen=20)
         self.msg: str = "Keeping shard ID %s voice websocket alive with timestamp %s."
         self.block_msg: str = "Shard ID %s voice heartbeat blocked for more than %s seconds"
