@@ -1,4 +1,36 @@
 [flake8]
-# For error codes, see this https://flake8.pycqa.org/en/latest/user/error-codes.html
-ignore = F401, F404, F406, F541, F841,
 max-line-length = 100
+statistics = true
+exclude =
+    .svn
+    CVS
+    .bzr
+    .hg
+    .git
+    __pycache__
+    .tox
+    .nox
+    .eggs
+    *.egg
+    .venv
+    venv
+
+# For error codes, see this https://flake8.pycqa.org/en/latest/user/error-codes.html
+ignore =
+    # not compatiable with black
+    E203, W503,
+    # line too long. Acceptable at the moment since these are mostly comments
+    E501,
+    # assigning lambdas to variables
+    E731,
+    # ambiguous variable names
+    E741,
+    # may be undefined, or defined from star imports
+    F403,F405,
+per-file-ignores =
+    # unused imports, star imports
+    */__init__.py: F401, F403
+    # ignore whitespacing on flags
+    disnake/audit_logs.py:E241
+    # ignore whitespacing on flags
+    disnake/enums.py:E221,E241
