@@ -1597,6 +1597,16 @@ of :class:`enum.Enum`.
         The "Watch Together" activity, a Youtube application.
 
         .. versionadded:: 2.3
+    .. attribute:: sketch_heads
+
+        The "Sketch Heads" activity.
+
+        .. versionadded:: 2.4
+    .. attribute:: ocho
+
+        The "Ocho" activity.
+
+        .. versionadded:: 2.4
 
 .. class:: ApplicationCommandType
 
