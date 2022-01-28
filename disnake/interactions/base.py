@@ -1211,7 +1211,7 @@ class InteractionResponse:
             This interaction has already been responded to before.
         """
         if modal is not None and any((title, components, custom_id)):
-            raise TypeError(f"Cannot mix modal argument and title, custom_id, components arguments")
+            raise TypeError("Cannot mix modal argument and title, custom_id, components arguments")
 
         parent = self._parent
 

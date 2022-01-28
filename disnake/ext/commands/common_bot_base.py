@@ -625,7 +625,7 @@ class CommonBotBase(Generic[CogT]):
         else:
             is_closed = lambda: False
 
-        reload_log.info(f"WATCHDOG: Watching extensions")
+        reload_log.info("WATCHDOG: Watching extensions")
 
         last = time.time()
         while not is_closed():
