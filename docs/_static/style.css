@@ -284,7 +284,8 @@ footer a {
 /* sidebar stuff */
 
 main {
-  margin-left: 385px;
+  /* aside width + 10px because of scrollbar gutter */
+  margin-left: 395px;
   padding: 12px;
   z-index: 1;
 }
@@ -346,7 +347,7 @@ header form.search {
   display: none !important;
 }
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 1050px) {
   main {
     margin-left: 0;
     overflow: hidden;
@@ -617,6 +618,7 @@ aside .material-icons {
 
 aside::-webkit-scrollbar {
   width: 0.5em;
+  overflow-y: overlay;
 }
 
 aside::-webkit-scrollbar-thumb {
