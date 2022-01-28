@@ -304,6 +304,7 @@ aside {
   max-height: 100vh;
   width: 385px;
   overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 
 header .header-breakpoint {
