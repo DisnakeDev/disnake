@@ -3124,7 +3124,7 @@ class Guild(Hashable):
         try:
             member = await self.fetch_member(member_id)
             self._add_member(member)
-        except:
+        except HTTPException:
             if strict:
                 raise
             return None

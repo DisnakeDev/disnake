@@ -5,3 +5,8 @@ mypy~=0.910
 python-dotenv[cli]~=0.19.2
 # this is not pyright itself, but the python wrapper
 pyright==1.1.244
+
+flake8~=4.0
+flake8-bandit~=2.1.2
+flake8-isort~=4.1.1
+flake8-bugbear~=22.1.11
