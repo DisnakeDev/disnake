@@ -11,11 +11,15 @@ combine_as_imports = true
 filter_files = true
 
 
+[tool.taskipy.settings]
+runner = "dotenv -f task.env run --"
+
 [tool.taskipy.tasks]
 black = { cmd = "task lint black", help = "Run black" }
 isort = { cmd = "task lint isort", help = "Run isort" }
-lint = { cmd = "pre-commit run --all-files", help = "Checks all files for linting errors" }
-precommit = { cmd = "pre-commit install --install-hooks", help = "Installs the precommit hook" }
+lint = { cmd = "pre-commit run --all-files", help = "Check all files for linting errors" }
+precommit = { cmd = "pre-commit install --install-hooks", help = "Install the precommit hook" }
+pyright = { cmd = "pyright", help = "Run pyright" }
 
 
 [tool.pyright]

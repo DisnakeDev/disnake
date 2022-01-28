@@ -32,7 +32,7 @@ jobs:
         python-version: ["3.8", "3.9", "3.10"]
       fail-fast: false
     env:
-      PYRIGHT_VERSION: 1.1.216  # should match scripts/run_pyright.py
+      PYRIGHT_VERSION: 1.1.216  # should match task.env
     steps:
     - name: Checkout code
       uses: actions/checkout@v1
