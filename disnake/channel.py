@@ -2297,7 +2297,9 @@ def _threaded_guild_channel_factory(channel_type: int):
     return cls, value
 
 
-def _channel_type_factory(cls: Type[disnake.abc.GuildChannel]) -> List[ChannelType]:
+def _channel_type_factory(
+    cls: Union[Type[disnake.abc.GuildChannel], Type[Thread]]
+) -> List[ChannelType]:
     return {
         disnake.abc.GuildChannel: list(ChannelType.__members__.values()),
         VocalGuildChannel: [ChannelType.voice, ChannelType.stage_voice],
