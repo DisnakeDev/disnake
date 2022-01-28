@@ -2399,7 +2399,7 @@ class HTTPClient:
         self,
         application_id: Snowflake,
         token: str,
-        files: List[File] = [],
+        files: List[File] = None,
         content: Optional[str] = None,
         tts: bool = False,
         embeds: Optional[List[embed.Embed]] = None,
@@ -2411,6 +2411,8 @@ class HTTPClient:
             application_id=application_id,
             interaction_token=token,
         )
+        if files is None:
+            files = []
         return self.send_multipart_helper(
             r,
             content=content,
