@@ -37,7 +37,6 @@ from ..enums import InteractionResponseType, InteractionType, try_enum
 from ..errors import (
     ClientException,
     HTTPException,
-    InteractionException,
     InteractionNotResponded,
     InteractionResponded,
     InteractionTimedOut,
@@ -84,7 +83,6 @@ if TYPE_CHECKING:
         Interaction as InteractionPayload,
     )
     from ..ui.action_row import Components
-    from ..ui.input_text import InputText
     from ..ui.modal import Modal
     from ..ui.view import View
 
@@ -1059,7 +1057,7 @@ class InteractionResponse:
         *,
         title: str = None,
         custom_id: str = None,
-        components: List[InputText] = None,
+        components: Components = None,
     ) -> None:
         ...
 
@@ -1069,7 +1067,7 @@ class InteractionResponse:
         *,
         title: str = None,
         custom_id: str = None,
-        components: List[InputText] = None,
+        components: Components = None,
     ) -> None:
         """|coro|
 
@@ -1084,7 +1082,7 @@ class InteractionResponse:
         custom_id: :class:`str`
             The ID of the modal that gets received during an interaction.
             This cannot be mixed with ``modal`` parameter.
-        components: List[:class:`~.ui.InputText`]
+        components: |components_type|
             The components to display in the modal. A maximum of 5.
             This cannot be mixed with ``modal`` parameter.
 
@@ -1121,25 +1119,16 @@ class InteractionResponse:
         if self._responded:
             raise InteractionResponded(parent)
 
-        modal_data: Dict[str, Any] = {}
+        modal_data: Dict[str, Any]
 
         if modal is not None:
-            modal_data = modal.to_components()
-            parent._state.store_modal(parent.author.id, modal)
+            modal_data = modal.to_components()  # type: ignore
         else:
-            if components and len(components) > 5:
-                raise ValueError("maximum of components exceeded")
-
             modal_data = {
                 "title": title,
                 "custom_id": custom_id,
-                "components": [],
+                "components": components_to_dict(components),  # type: ignore
             }
-
-            for component in components:  # type: ignore
-                modal_data["components"].append(
-                    {"type": 1, "components": [component.to_component_dict()]}
-                )
 
         await adapter.create_interaction_response(
             parent.id,
@@ -1149,6 +1138,9 @@ class InteractionResponse:
             data=modal_data,
         )
         self._responded = True
+
+        if modal is not None:
+            parent._state.store_modal(parent.author.id, modal)
 
 
 class _InteractionMessageState:

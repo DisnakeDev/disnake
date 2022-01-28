@@ -23,22 +23,20 @@ DEALINGS IN THE SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Optional, Tuple
 
 from ..components import InputText as InputTextComponent
-from ..enums import ComponentType
+from ..enums import ComponentType, InputTextStyle
+from .item import WrappedComponent
 
 if TYPE_CHECKING:
-    from ..enums import InputTextStyle
     from ..types.components import InputText as InputTextPayload
-
-IT = TypeVar("IT", bound="InputText")
 
 
 __all__ = ("InputText",)
 
 
-class InputText:
+class InputText(WrappedComponent):
     """Represents a UI input text.
 
     This can only be used in :class:`~.ui.Modal`.
@@ -47,12 +45,12 @@ class InputText:
 
     Parameters
     ----------
-    style: :class:`.InputTextStyle`
-        The style of the input text.
     label: :class:`str`
         The label of the input text.
     custom_id: :class:`str`
         The ID of the input text that gets received during an interaction.
+    style: :class:`.InputTextStyle`
+        The style of the input text.
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is entered.
     value: Optional[:class:`str`]
@@ -65,12 +63,23 @@ class InputText:
         The maximum length of the input text.
     """
 
+    __repr_attributes__: Tuple[str, ...] = (
+        "style",
+        "label",
+        "custom_id",
+        "placeholder",
+        "value",
+        "required",
+        "min_length",
+        "max_length",
+    )
+
     def __init__(
         self,
         *,
-        style: InputTextStyle,  # Default to InputTextStyle.short?
         label: str,
         custom_id: str,
+        style: InputTextStyle = InputTextStyle.short,
         placeholder: Optional[str] = None,
         value: Optional[str] = None,
         required: bool = True,
@@ -87,13 +96,6 @@ class InputText:
             required=required,
             min_length=min_length,
             max_length=max_length,
-        )
-
-    def __repr__(self) -> str:
-        return (
-            f"<InputText style={self.style!r} label={self.label!r} custom_id={self.custom_id!r} "
-            f"placeholder={self.placeholder!r} value={self.value!r} required={self.required!r} "
-            f"min_length={self.min_length!r} max_length={self.max_length!r}>"
         )
 
     @property
@@ -117,7 +119,7 @@ class InputText:
     @property
     def label(self) -> str:
         """:class:`str`: The label of the input text."""
-        return self._underlying.label
+        return self._underlying.label  # type: ignore
 
     @label.setter
     def label(self, value: str) -> None:
@@ -179,16 +181,3 @@ class InputText:
 
     def to_component_dict(self) -> InputTextPayload:
         return self._underlying.to_dict()
-
-    @classmethod
-    def from_dict(cls: Type[IT], data: InputTextPayload) -> IT:
-        return cls(
-            style=data["style"],  # type: ignore
-            label=data["label"],
-            custom_id=data["custom_id"],
-            placeholder=data.get("placeholder"),
-            value=data.get("value"),
-            required=data.get("required", True),
-            min_length=data.get("min_length", 0),
-            max_length=data.get("max_length"),
-        )

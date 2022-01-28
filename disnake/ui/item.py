@@ -40,7 +40,7 @@ from typing import (
     overload,
 )
 
-__all__ = ("Item",)
+__all__ = ("Item", "WrappedComponent")
 
 I = TypeVar("I", bound="Item")
 V = TypeVar("V", bound="View", covariant=True)
@@ -54,7 +54,37 @@ if TYPE_CHECKING:
     ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 
-class Item(Generic[V]):
+class WrappedComponent:
+    """Represents the base UI component that all UI components inherit from.
+
+    The current UI components supported are:
+
+    - :class:`disnake.ui.Button`
+    - :class:`disnake.ui.Select`
+    - :class:`disnake.ui.InputText`
+
+    .. versionadded:: 2.4
+    """
+
+    __repr_attributes__: Tuple[str, ...]
+
+    def to_component_dict(self) -> Dict[str, Any]:
+        raise NotImplementedError
+
+    @property
+    def type(self) -> ComponentType:
+        raise NotImplementedError
+
+    def __repr__(self) -> str:
+        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
+        return f"<{self.__class__.__name__} {attrs}>"
+
+    @property
+    def width(self) -> int:
+        return 1
+
+
+class Item(WrappedComponent, Generic[V]):
     """Represents the base UI item that all UI components inherit from.
 
     The current UI items supported are:
@@ -65,7 +95,7 @@ class Item(Generic[V]):
     .. versionadded:: 2.0
     """
 
-    __item_repr_attributes__: Tuple[str, ...] = ("row",)
+    __repr_attributes__: Tuple[str, ...] = ("row",)
 
     def __init__(self):
         self._view: Optional[V] = None
@@ -79,9 +109,6 @@ class Item(Generic[V]):
         # only called upon edit and we're mainly interested during initial creation time.
         self._provided_custom_id: bool = False
 
-    def to_component_dict(self) -> Dict[str, Any]:
-        raise NotImplementedError
-
     def refresh_component(self, component: Component) -> None:
         return None
 
@@ -92,19 +119,11 @@ class Item(Generic[V]):
     def from_component(cls: Type[I], component: Component) -> I:
         return cls()
 
-    @property
-    def type(self) -> ComponentType:
-        raise NotImplementedError
-
     def is_dispatchable(self) -> bool:
         return False
 
     def is_persistent(self) -> bool:
         return self._provided_custom_id
-
-    def __repr__(self) -> str:
-        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__item_repr_attributes__)
-        return f"<{self.__class__.__name__} {attrs}>"
 
     @property
     def row(self) -> Optional[int]:
@@ -118,10 +137,6 @@ class Item(Generic[V]):
             self._row = value
         else:
             raise ValueError("row cannot be negative or greater than or equal to 5")
-
-    @property
-    def width(self) -> int:
-        return 1
 
     @property
     def view(self) -> Optional[V]:

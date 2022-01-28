@@ -26,15 +26,17 @@ from __future__ import annotations
 import asyncio
 import sys
 import traceback
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union, overload
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, overload
 
-from ..components import Modal as ModalComponent
+from ..enums import InputTextStyle
+from .action_row import ActionRow, components_to_rows
 from .input_text import InputText
 
 if TYPE_CHECKING:
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState
     from ..types.components import Modal as ModalPayload
+    from .action_row import Components
 
 
 __all__ = ("Modal",)
@@ -47,71 +49,51 @@ class Modal:
 
     Parameters
     ----------
-    title: str
+    title: :class:`str`
         The title of the modal.
-    custom_id: str
+    custom_id: :class:`str`
         The custom ID of the modal.
-    components: List[:class:`~.ui.InputText`]
-        The components to display in the modal. Maximum of 5.
+    components: |components_type|
+        The components to display in the modal. Up to 5 action rows.
+    timeout: :class:`float`
+        The time to wait until the modal is removed from cache, if no interaction is made.
+        Modals without timeouts are not supported, since there's no event for when a modal is closed.
+        Defaults to 600 seconds.
     """
+
+    __slots__ = ("title", "custom_id", "components", "timeout")
 
     def __init__(
         self,
         *,
         title: str,
         custom_id: str,
-        components: List[InputText],  # Discord will support other components as well.
+        components: Components,
+        timeout: float = 600,
     ) -> None:
-        if len(components) > 5:
-            raise ValueError("maximum of components is 5.")
+        if timeout is None:
+            raise ValueError("timeout must be a float value.")
 
-        for component in components:
-            if not isinstance(component, InputText):
-                raise TypeError(
-                    f"components must be a list of InputTexts, but {component.__class__.__name__} was given."
-                )
-
-        self._underlying = ModalComponent._raw_construct(
-            title=title, custom_id=custom_id, components=components
-        )
+        self.title: str = title
+        self.custom_id: str = custom_id
+        self.components: List[ActionRow] = components_to_rows(components)
+        self.timeout: float = timeout
 
     def __repr__(self) -> str:
         return (
-            f"<Modal {self.title!r}, custom_id={self.custom_id!r}, components={self.components!r}>"
+            f"<Modal custom_id={self.custom_id!r} title={self.title!r} "
+            f"components={self.components!r}>"
         )
 
-    @property
-    def title(self) -> str:
-        """:class:`str`: The title of the modal."""
-        return self._underlying.title
-
-    @title.setter
-    def title(self, title: str) -> None:
-        self._underlying.title = title
-
-    @property
-    def custom_id(self) -> str:
-        """:class:`str`: The ID of the modal that gets received during an interaction."""
-        return self._underlying.custom_id
-
-    @custom_id.setter
-    def custom_id(self, custom_id: str) -> None:
-        self._underlying.custom_id = custom_id
-
-    @property
-    def components(self) -> List[InputText]:
-        """List[:class:`~.ui.InputText`]: A list of components the modal contains."""
-        return self._underlying.components
-
     @overload
-    def add_component(self, component: List[InputText]) -> None:
+    def append_component(self, component: List[InputText]) -> None:
         ...
 
     @overload
-    def add_component(self, component: InputText) -> None:
+    def append_component(self, component: InputText) -> None:
         ...
 
-    def add_component(self, component: Union[InputText, List[InputText]]) -> None:
+    def append_component(self, component: Union[InputText, List[InputText]]) -> None:
         """Adds a component to the modal.
 
         Parameters
@@ -138,7 +120,61 @@ class Modal:
                 raise TypeError(
                     f"component must be of type InputText or a list of InputText, not {c.__class__.__name__}."
                 )
-            self._underlying.components.append(c)
+            try:
+                self.components[-1].append_item(c)
+            except (ValueError, IndexError):
+                self.components.append(ActionRow(c))
+
+    def add_input_text(
+        self,
+        *,
+        label: str,
+        custom_id: str,
+        style: InputTextStyle = InputTextStyle.short,
+        placeholder: Optional[str] = None,
+        value: Optional[str] = None,
+        required: bool = True,
+        min_length: int = 0,
+        max_length: Optional[int] = None,
+    ):
+        """Adds an input text component to the modal.
+
+        To append a pre-existing :class:`disnake.ui.InputText` use the
+        :meth:`append_component` method instead.
+
+        Parameters
+        ----------
+        label: :class:`str`
+            The label of the input text.
+        custom_id: :class:`str`
+            The ID of the input text that gets received during an interaction.
+        style: :class:`.InputTextStyle`
+            The style of the input text.
+        placeholder: Optional[:class:`str`]
+            The placeholder text that is shown if nothing is entered.
+        value: Optional[:class:`str`]
+            The pre-filled value of the input text.
+        required: :class:`bool`
+            Whether the input text is required. Defaults to ``True``.
+        min_length: :class:`int`
+            The minimum length of the input text. Defaults to ``0``.
+        max_length: Optional[:class:`int`]
+            The maximum length of the input text.
+        """
+        self.components.append(
+            ActionRow(
+                InputText(
+                    label=label,
+                    custom_id=custom_id,
+                    style=style,
+                    placeholder=placeholder,
+                    value=value,
+                    required=required,
+                    min_length=min_length,
+                    max_length=max_length,
+                )
+            )
+        )
 
     async def callback(self, interaction: ModalInteraction) -> None:
         """|coro|
@@ -170,19 +206,22 @@ class Modal:
         """
         traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
 
+    async def on_timeout(self) -> None:
+        """|coro|
+
+        A callback that is called when the modal is removed from the cache
+        without an interaction being made.
+        """
+        pass
+
     def to_components(self) -> ModalPayload:
-        components: ModalPayload = {
-            "title": self._underlying.title,
-            "custom_id": self._underlying.custom_id,
-            "components": [],
+        payload: ModalPayload = {
+            "title": self.title,
+            "custom_id": self.custom_id,
+            "components": [component.to_component_dict() for component in self.components],
         }
 
-        for component in self._underlying.components:
-            components["components"].append(
-                {"type": 1, "components": [component.to_component_dict()]}  # type: ignore
-            )
-
-        return components
+        return payload
 
     async def _scheduled_task(self, interaction: ModalInteraction) -> None:
         try:
@@ -209,18 +248,19 @@ class ModalStore:
     def add_modal(self, user_id: int, modal: Modal) -> None:
         loop = asyncio.get_event_loop()
         self._modals[(user_id, modal.custom_id)] = modal
-        loop.create_task(self.handle_timeout(user_id, modal.custom_id))
+        loop.create_task(self.handle_timeout(user_id, modal.custom_id, modal.timeout))
 
-    def remove_modal(self, user_id: int, modal_custom_id: str) -> None:
-        self._modals.pop((user_id, modal_custom_id))
+    def remove_modal(self, user_id: int, modal_custom_id: str) -> Modal:
+        return self._modals.pop((user_id, modal_custom_id))
 
-    async def handle_timeout(self, user_id: int, modal_custom_id: str) -> None:
+    async def handle_timeout(self, user_id: int, modal_custom_id: str, timeout: float) -> None:
         # Waits 10 minutes and then removes the modal from cache, this is done just in case the user closed the modal,
         # as there isn't an event for that.
 
-        await asyncio.sleep(600)
+        await asyncio.sleep(timeout)
         try:
-            self.remove_modal(user_id, modal_custom_id)
+            modal = self.remove_modal(user_id, modal_custom_id)
+            await modal.on_timeout()
         except KeyError:
             # The modal has already been removed.
             pass

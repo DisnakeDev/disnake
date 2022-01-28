@@ -85,7 +85,7 @@ class Select(Item[V]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __item_repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: Tuple[str, ...] = (
         "placeholder",
         "min_values",
         "max_values",

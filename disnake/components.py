@@ -38,7 +38,6 @@ if TYPE_CHECKING:
         ButtonComponent as ButtonComponentPayload,
         Component as ComponentPayload,
         InputText as InputTextPayload,
-        Modal as ModalPayload,
         SelectMenu as SelectMenuPayload,
         SelectOption as SelectOptionPayload,
     )
@@ -50,11 +49,11 @@ __all__ = (
     "Button",
     "SelectMenu",
     "SelectOption",
-    "Modal",
     "InputText",
 )
 
 C = TypeVar("C", bound="Component")
+NestedComponent = Union["Button", "SelectMenu", "InputText"]
 
 
 class Component:
@@ -65,6 +64,7 @@ class Component:
     - :class:`ActionRow`
     - :class:`Button`
     - :class:`SelectMenu`
+    - :class:`InputText`
 
     This class is abstract and cannot be instantiated.
 
@@ -102,7 +102,7 @@ class Component:
 
 
 class ActionRow(Component):
-    """Represents a Discord Bot UI Kit Action Row.
+    """Represents an Action Row.
 
     This is a component that holds up to 5 children components in a row.
 
@@ -114,7 +114,7 @@ class ActionRow(Component):
     ------------
     type: :class:`ComponentType`
         The type of component.
-    children: List[:class:`Component`]
+    children: List[Union[:class:`Button`, :class:`SelectMenu`, :class:`InputText`]]
         The children components that this holds, if any.
     """
 
@@ -124,7 +124,9 @@ class ActionRow(Component):
 
     def __init__(self, data: ComponentPayload):
         self.type: ComponentType = try_enum(ComponentType, data["type"])
-        self.children: List[Component] = [_component_factory(d) for d in data.get("components", [])]
+        self.children: List[NestedComponent] = [  # type: ignore
+            _component_factory(d) for d in data.get("components", [])
+        ]
 
     def to_dict(self) -> ActionRowPayload:
         return {
@@ -380,49 +382,6 @@ class SelectOption:
         return payload
 
 
-class Modal(Component):
-    """Represents a modal from the Discord Bot UI Kit.
-
-    .. versionadded:: 2.4
-
-    .. note::
-
-        The user constructible and usable type to create a modal is
-        :class:`disnake.ui.Modal`, not this one.
-
-    Attributes
-    ----------
-    title: :class:`str`
-        The title of the modal.
-    custom_id: :class:`str`
-        The ID of the modal that gets received during an interaction.
-    components: List[:class:`~.ui.InputText`]
-        The components the modal has.
-    """
-
-    __slots__: Tuple[str, ...] = ("title", "custom_id", "components")
-
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
-
-    def __init__(self, data: ModalPayload) -> None:
-        from .ui.input_text import InputText as InputTextUI
-
-        self.title: str = data["title"]
-        self.custom_id: str = data["custom_id"]
-        self.components: List[InputTextUI] = [
-            InputTextUI.from_dict(component) for component in data["components"]
-        ]
-
-    def to_dict(self) -> ModalPayload:
-        payload: ModalPayload = {
-            "title": self.title,
-            "custom_id": self.custom_id,
-            "components": [component.to_component_dict() for component in self.components],
-        }
-
-        return payload
-
-
 class InputText(Component):
     """Represents an input text from the Discord Bot UI Kit.
 
@@ -439,7 +398,7 @@ class InputText(Component):
     -----------
     style: :class:`InputTextStyle`
         The style of the input text.
-    label: :class:`str`
+    label: Optional[:class:`str`]
         The label of the input text.
     custom_id: :class:`str`
         The ID of the input text that gets received during an interaction.
@@ -469,28 +428,23 @@ class InputText(Component):
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: InputTextPayload) -> None:
-        self.type = try_enum(ComponentType, data["type"])
-        self.style = try_enum(InputTextStyle, data["style"])
-        self.label = data["label"]
-        self.custom_id = data["custom_id"]
-        self.placeholder = data.get("placeholder")
-        self.value = data.get("value")
-        self.required = data.get("required", True)
-        self.min_length = data.get("min_length", 0)
-        self.max_length = data.get("max_length")
+        style = data.get("style", InputTextStyle.short.value)
 
-    def __repr__(self) -> str:
-        return (
-            f"<InputText style={self.style!r} label={self.label!r} custom_id={self.custom_id!r} "
-            f"placeholder={self.placeholder!r} value={self.value!r} required={self.required!r} "
-            f"min_length={self.min_length!r} max_length={self.max_length!r}>"
-        )
+        self.type: ComponentType = try_enum(ComponentType, data["type"])
+        self.custom_id: str = data["custom_id"]
+        self.style: InputTextStyle = try_enum(InputTextStyle, style)
+        self.label: Optional[str] = data.get("label")
+        self.placeholder: Optional[str] = data.get("placeholder")
+        self.value: Optional[str] = data.get("value")
+        self.required: bool = data.get("required", True)
+        self.min_length: int = data.get("min_length", 0)
+        self.max_length: Optional[int] = data.get("max_length")
 
     def to_dict(self) -> InputTextPayload:
         payload: InputTextPayload = {
             "type": self.type.value,
             "style": self.style.value,  # type: ignore
-            "label": self.label,
+            "label": self.label,  # type: ignore
             "custom_id": self.custom_id,
             "required": self.required,
             "min_length": self.min_length,

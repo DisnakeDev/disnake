@@ -898,12 +898,16 @@ class ConnectionState:
                     self.dispatch("reaction_clear_emoji", reaction)
 
     def parse_interaction_create(self, data) -> None:
-        if data["type"] == 1:
+        interaction_type = data["type"]
+
+        if interaction_type == 1:
             interaction = Interaction(data=data, state=self)
-        elif data["type"] == 2:
+
+        elif interaction_type == 2:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch("application_command", interaction)
-        elif data["type"] == 3:
+
+        elif interaction_type == 3:
             interaction = MessageInteraction(data=data, state=self)
             self._view_store.dispatch(interaction)
             self.dispatch("message_interaction", interaction)
@@ -911,13 +915,16 @@ class ConnectionState:
                 self.dispatch("button_click", interaction)
             elif interaction.data.component_type is ComponentType.select:
                 self.dispatch("dropdown", interaction)
-        elif data["type"] == 4:
+
+        elif interaction_type == 4:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch("application_command_autocomplete", interaction)
-        elif data["type"] == 5:
+
+        elif interaction_type == 5:
             interaction = ModalInteraction(data=data, state=self)
             self._modal_store.dispatch(interaction)
             self.dispatch("modal_submit", interaction)
+
         else:
             return
 

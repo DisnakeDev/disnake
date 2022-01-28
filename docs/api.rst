@@ -3997,15 +3997,6 @@ SelectMenu
     :members:
     :inherited-members:
 
-Modal
-~~~~~
-
-.. attributetable:: Modal
-
-.. autoclass:: Modal()
-    :members:
-    :inherited-members:
-
 InputText
 ~~~~~~~~~
 
@@ -4803,6 +4794,14 @@ Item
 .. attributetable:: disnake.ui.Item
 
 .. autoclass:: disnake.ui.Item
+    :members:
+
+WrappedComponent
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.WrappedComponent
+
+.. autoclass:: disnake.ui.WrappedComponent
     :members:
 
 Button

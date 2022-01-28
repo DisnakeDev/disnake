@@ -79,13 +79,15 @@ class SelectMenu(_SelectMenuOptional):
 class Modal(TypedDict):
     title: str
     custom_id: str
-    components: List[InputText]
+    components: List[ActionRow]
 
 
 class _InputTextOptional(TypedDict, total=False):
     value: str
     placeholder: str
+    min_length: int
     max_length: int
+    required: bool
 
 
 class InputText(_InputTextOptional):
@@ -93,8 +95,6 @@ class InputText(_InputTextOptional):
     custom_id: str
     style: InputTextStyle
     label: str
-    required: bool
-    min_length: int
 
 
 Component = Union[ActionRow, ButtonComponent, SelectMenu, InputText]

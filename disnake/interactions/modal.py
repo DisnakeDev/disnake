@@ -26,11 +26,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List
 
+from ..components import ActionRow
 from .base import Interaction
 
 if TYPE_CHECKING:
     from ..state import ConnectionState
-    from ..types.components import ActionRow as ActionRowPayload
     from ..types.interactions import (
         Interaction as InteractionPayload,
         ModalInteractionData as ModalInteractionDataPayload,
@@ -94,9 +94,10 @@ class ModalInteraction(Interaction):
         """Dict[:class:`str`, :class:`str`]: Returns the values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``."""
         values: Dict[str, str] = {}
-        for action_row in self.data.components:
-            component = action_row["components"][0]
-            values[component["custom_id"]] = component["value"]  # type: ignore
+        for action_row in self.data._components:
+            for component in action_row.children:
+                # assuming that action rows from modals only have input_text components
+                values[component.custom_id] = component.value  # type: ignore
         return values
 
     @property
@@ -114,12 +115,11 @@ class ModalInteractionData:
     ----------
     custom_id: :class:`str`
         The custom ID of the modal.
-    components: List[:class:`ActionRow`]
-        The components the modal has.
     """
 
-    __slots__ = ("custom_id", "components")
+    __slots__ = ("custom_id", "_components")
 
     def __init__(self, *, data: ModalInteractionDataPayload):
         self.custom_id: str = data["custom_id"]
-        self.components: List[ActionRowPayload] = data["components"]
+        # this attribute is not meant to be used since it lacks most of the component data
+        self._components: List[ActionRow] = [ActionRow(d) for d in data["components"]]
