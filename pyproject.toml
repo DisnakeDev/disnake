@@ -24,6 +24,13 @@ pyright = { cmd = "pyright", help = "Run pyright" }
 
 [tool.pyright]
 typeCheckingMode = "basic"
+include = [
+    "disnake",
+    "docs",
+    "scripts",
+    "test_bot",
+    "*.py",
+]
 
 reportPropertyTypeMismatch = true
 reportDuplicateImport = true
