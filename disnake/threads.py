@@ -363,7 +363,13 @@ class Thread(Messageable, Hashable):
         parent = self.parent
         return parent is not None and parent.is_nsfw()
 
-    def permissions_for(self, obj: Union[Member, Role], /) -> Permissions:
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
         """Handles permission resolution for the :class:`~disnake.Member`
         or :class:`~disnake.Role`.
 
@@ -378,6 +384,13 @@ class Thread(Messageable, Hashable):
             The object to resolve permissions for. This could be either
             a member or a role. If it's a role then member overwrites
             are not computed.
+        ignore_timeout: :class:`bool`
+            Whether or not to ignore the user's timeout.
+            Defaults to ``True`` for backwards compatibility.
+
+            .. versionadded:: 2.4
+
+            .. note:: This only applies to :class:`~disnake.Member` objects.
 
         Raises
         -------
@@ -393,7 +406,7 @@ class Thread(Messageable, Hashable):
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
-        return parent.permissions_for(obj)
+        return parent.permissions_for(obj, ignore_timeout=ignore_timeout)
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
         """|coro|
