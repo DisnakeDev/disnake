@@ -34,7 +34,7 @@ from .params import safe_call
 if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction
 
-    from .base_core import CommandCallback
+    from .base_core import InteractionCommandCallback
 
 __all__ = ("InvokableUserCommand", "InvokableMessageCommand", "user_command", "message_command")
 
@@ -70,7 +70,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func: CommandCallback,
+        func: InteractionCommandCallback,
         *,
         name: str = None,
         default_permission: bool = True,
@@ -141,7 +141,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func: CommandCallback,
+        func: InteractionCommandCallback,
         *,
         name: str = None,
         default_permission: bool = True,
@@ -188,7 +188,7 @@ def user_command(
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     **kwargs,
-) -> Callable[[CommandCallback], InvokableUserCommand]:
+) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
     """
     A shortcut decorator that builds a user command.
 
@@ -210,7 +210,7 @@ def user_command(
         A decorator that converts the provided method into a InvokableUserCommand and returns it.
     """
 
-    def decorator(func: CommandCallback) -> InvokableUserCommand:
+    def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
@@ -234,7 +234,7 @@ def message_command(
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     **kwargs,
-) -> Callable[[CommandCallback], InvokableMessageCommand]:
+) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
     """
     A decorator that builds a message command.
 
@@ -256,7 +256,7 @@ def message_command(
         A decorator that converts the provided method into a InvokableMessageCommand and then returns it.
     """
 
-    def decorator(func: CommandCallback) -> InvokableMessageCommand:
+    def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):

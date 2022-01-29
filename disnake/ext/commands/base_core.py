@@ -60,7 +60,8 @@ if TYPE_CHECKING:
 
     P = ParamSpec("P")
 
-    CommandCallback = Union[
+    CommandCallback = Callable[..., Coroutine]
+    InteractionCommandCallback = Union[
         Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
         Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
     ]
@@ -205,9 +206,9 @@ class InvokableApplicationCommand(ABC):
 
         """
         if self.cog is not None:
-            return await self.callback(self.cog, interaction, *args, **kwargs)  # type: ignore
+            return await self.callback(self.cog, interaction, *args, **kwargs)
         else:
-            return await self.callback(interaction, *args, **kwargs)  # type: ignore
+            return await self.callback(interaction, *args, **kwargs)
 
     def _prepare_cooldowns(self, inter: ApplicationCommandInteraction) -> None:
         if self._buckets.valid:

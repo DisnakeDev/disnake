@@ -71,7 +71,7 @@ if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import Check, CoroFunc
-    from .base_core import CommandCallback
+    from .base_core import CommandCallback, InteractionCommandCallback
 
 
 __all__ = ("InteractionBotBase",)
@@ -484,7 +484,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
-    ) -> Callable[[CommandCallback], InvokableUserCommand]:
+    ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
         """
         A shortcut decorator that invokes :func:`.user_command` and adds it to
         the internal command list.
@@ -507,7 +507,7 @@ class InteractionBotBase(CommonBotBase):
             A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
         """
 
-        def decorator(func: CommandCallback) -> InvokableUserCommand:
+        def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
             result = user_command(
                 name=name,
                 default_permission=default_permission,
@@ -528,7 +528,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
-    ) -> Callable[[CommandCallback], InvokableMessageCommand]:
+    ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
         """
         A shortcut decorator that invokes :func:`.message_command` and adds it to
         the internal command list.
@@ -548,10 +548,10 @@ class InteractionBotBase(CommonBotBase):
         Returns
         --------
         Callable[..., :class:`InvokableUserCommand`]
-            A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
+            A decorator that converts the provided method into a InvokableMessageCommand, adds it to the bot, then returns it.
         """
 
-        def decorator(func: CommandCallback) -> InvokableMessageCommand:
+        def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
                 default_permission=default_permission,
