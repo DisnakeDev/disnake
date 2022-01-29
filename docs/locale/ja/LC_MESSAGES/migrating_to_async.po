@@ -360,4 +360,3 @@ msgstr "以前の ``Client.run`` 同様、新しくなった関数も最後に�
 #: ../../migrating_to_async.rst:297
 msgid "This is a utility function that abstracts the event loop for you. There's no need for the run call to be blocking and out of your control. Indeed, if you want control of the event loop then doing so is quite straightforward:"
 msgstr "これはイベントループを抽象化するユーティリティ関数です。 実行呼び出しがブロックされ、コントロールから外れる必要はありません。実際に、イベントループを制御したい場合、この方法では非常に簡単です。"
-

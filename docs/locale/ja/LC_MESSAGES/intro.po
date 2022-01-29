@@ -120,4 +120,3 @@ msgstr "disnake.pyは :ref:`イベント <disnake-api-events>` の概念を中�
 #: ../../intro.rst:97
 msgid "A quick example to showcase how events work:"
 msgstr "以下はイベントの仕組みを紹介する簡単な例です。"
-
