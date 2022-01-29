@@ -364,7 +364,7 @@ class Thread(Messageable, Hashable):
 
             .. versionadded:: 2.4
 
-            .. note:: This only applies to `~disnake.Member` objects.
+            .. note:: This only applies to :class:`~disnake.Member` objects.
 
         Raises
         -------
