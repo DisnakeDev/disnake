@@ -87,8 +87,8 @@ class NoMoreItems(DiscordException):
 class GatewayNotFound(DiscordException):
     """An exception that is raised when the gateway for Discord could not be found"""
 
-    def __init__(self):
-        message = "The gateway to connect to disnake was not found."
+    def __init__(self) -> None:
+        message = "The gateway to connect to Discord was not found."
         super().__init__(message)
 
 

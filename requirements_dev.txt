@@ -1,1 +1,2 @@
 pre-commit~=2.16.0
+taskipy>=1.9.0

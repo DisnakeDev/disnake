@@ -539,7 +539,13 @@ class GuildChannel(ABC):
         category = self.guild.get_channel(self.category_id)
         return bool(category and category.overwrites == self.overwrites)
 
-    def permissions_for(self, obj: Union[Member, Role], /) -> Permissions:
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
         """Handles permission resolution for the :class:`~disnake.Member`
         or :class:`~disnake.Role`.
 
@@ -549,6 +555,7 @@ class GuildChannel(ABC):
         - Guild roles
         - Channel overrides
         - Member overrides
+        - Timeouts
 
         If a :class:`~disnake.Role` is passed, then it checks the permissions
         someone with that role would have, which is essentially:
@@ -567,6 +574,20 @@ class GuildChannel(ABC):
             The object to resolve permissions for. This could be either
             a member or a role. If it's a role then member overwrites
             are not computed.
+        ignore_timeout: :class:`bool`
+            Whether or not to ignore the user's timeout.
+            Defaults to ``True`` for backwards compatibility.
+
+            .. versionadded:: 2.4
+
+            .. note::
+
+                This only applies to :class:`~disnake.Member` objects.
+
+        Raises
+        ------
+        TypeError
+            ``ignore_timeout`` is only supported for :class:`~disnake.Member` objects.
 
         Returns
         -------
@@ -583,10 +604,16 @@ class GuildChannel(ABC):
         # have to take into effect.
         # After all that is done.. you have to do the following:
 
-        # If manage permissions is True, then all permissions are set to True.
-
         # The operation first takes into consideration the denied
         # and then the allowed.
+
+        # Timeouted users have only read_messages and read_message_history
+        # if they already have them.
+        if ignore_timeout is not MISSING and isinstance(obj, Role):
+            raise TypeError("ignore_timeout is only supported for disnake.Member objects")
+
+        if ignore_timeout is MISSING:
+            ignore_timeout = True
 
         if self.guild.owner_id == obj.id:
             return Permissions.all()
@@ -672,6 +699,12 @@ class GuildChannel(ABC):
         if not base.read_messages:
             denied = Permissions.all_channel()
             base.value &= ~denied.value
+
+        # if you have a timeout then you can't have any permissions
+        # except read messages and read message history
+        if not ignore_timeout and obj.current_timeout:
+            denied = Permissions(read_messages=True, read_message_history=True)
+            base.value &= denied.value
 
         return base
 

@@ -225,8 +225,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return ChannelType.text.value
 
     @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(self, obj: Union[Member, Role], /) -> Permissions:
-        base = super().permissions_for(obj)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
 
         # text channels do not have voice related permissions
         denied = Permissions.voice()
@@ -933,8 +939,14 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         # fmt: on
 
     @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(self, obj: Union[Member, Role], /) -> Permissions:
-        base = super().permissions_for(obj)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
 
         # voice channels cannot be edited by people who can't connect to them
         # It also implicitly denies all other voice perms
@@ -1823,8 +1835,14 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
         return ChannelType.store
 
     @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(self, obj: Union[Member, Role], /) -> Permissions:
-        base = super().permissions_for(obj)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
 
         # store channels do not have voice related permissions
         denied = Permissions.voice()
@@ -1993,7 +2011,13 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         """:class:`datetime.datetime`: Returns the direct message channel's creation time in UTC."""
         return utils.snowflake_time(self.id)
 
-    def permissions_for(self, obj: Any = None, /) -> Permissions:
+    def permissions_for(
+        self,
+        obj: Any = None,
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
         """Handles permission resolution for a :class:`User`.
 
         This function is there for compatibility with other channel types.
@@ -2010,6 +2034,10 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         obj: :class:`User`
             The user to check permissions for. This parameter is ignored
             but kept for compatibility with other ``permissions_for`` methods.
+
+        ignore_timeout: :class:`bool`
+            Whether to ignore the guild timeout when checking permsisions.
+            This parameter is ignored but kept for compatibility with other ``permissions_for`` methods.
 
         Returns
         --------
@@ -2140,7 +2168,13 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         """:class:`datetime.datetime`: Returns the channel's creation time in UTC."""
         return utils.snowflake_time(self.id)
 
-    def permissions_for(self, obj: Snowflake, /) -> Permissions:
+    def permissions_for(
+        self,
+        obj: Snowflake,
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
         """Handles permission resolution for a :class:`User`.
 
         This function is there for compatibility with other channel types.
@@ -2158,6 +2192,10 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         -----------
         obj: :class:`~disnake.abc.Snowflake`
             The user to check permissions for.
+
+        ignore_timeout: :class:`bool`
+            Whether to ignore the guild timeout when checking permsisions.
+            This parameter is ignored but kept for compatibility with other ``permissions_for`` methods.
 
         Returns
         --------
@@ -2297,7 +2335,9 @@ def _threaded_guild_channel_factory(channel_type: int):
     return cls, value
 
 
-def _channel_type_factory(cls: Type[disnake.abc.GuildChannel]) -> List[ChannelType]:
+def _channel_type_factory(
+    cls: Union[Type[disnake.abc.GuildChannel], Type[Thread]]
+) -> List[ChannelType]:
     return {
         disnake.abc.GuildChannel: list(ChannelType.__members__.values()),
         VocalGuildChannel: [ChannelType.voice, ChannelType.stage_voice],

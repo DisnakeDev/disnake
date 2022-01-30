@@ -46,6 +46,7 @@ from typing import (
     cast,
     get_origin,
     get_type_hints,
+    overload,
 )
 
 import disnake
@@ -60,16 +61,17 @@ from . import errors
 from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
+    from disnake.app_commands import Choices
+    from disnake.types.interactions import ApplicationCommandOptionChoiceValue
+
     from .slash_core import InvokableSlashCommand, SubCommand
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 
     from typing_extensions import TypeGuard
 
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    Annotated = object()
+    TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
+
 if sys.version_info >= (3, 10):
     from types import UnionType
 else:
@@ -78,11 +80,10 @@ else:
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
 CallableT = TypeVar("CallableT", bound=Callable[..., Any])
-ChoiceValue = Union[str, int, float]
-Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
-TChoice = TypeVar("TChoice", bound=ChoiceValue)
 
 __all__ = (
+    "Range",
+    "LargeInt",
     "ParamInfo",
     "Param",
     "param",
@@ -177,6 +178,92 @@ class Injection:
         return function
 
 
+class RangeMeta(type):
+    """Custom Generic implementation for Range"""
+
+    @overload
+    def __getitem__(self, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]) -> Type[int]:
+        ...
+
+    @overload
+    def __getitem__(
+        self, args: Tuple[Union[float, ellipsis], Union[float, ellipsis]]
+    ) -> Type[float]:
+        ...
+
+    def __getitem__(self, args: Tuple[Any, ...]) -> Any:
+        a, b = [None if x is Ellipsis else x for x in args]
+        return Range.create(min_value=a, max_value=b)
+
+
+class Range(type, metaclass=RangeMeta):
+    """Type depicting a limited range of allowed values"""
+
+    min_value: Optional[float]
+    max_value: Optional[float]
+
+    @overload
+    @classmethod
+    def create(
+        cls,
+        min_value: int = None,
+        max_value: int = None,
+        *,
+        le: int = None,
+        lt: int = None,
+        ge: int = None,
+        gt: int = None,
+    ) -> Type[int]:
+        ...
+
+    @overload
+    @classmethod
+    def create(
+        cls,
+        min_value: float = None,
+        max_value: float = None,
+        *,
+        le: float = None,
+        lt: float = None,
+        ge: float = None,
+        gt: float = None,
+    ) -> Type[float]:
+        ...
+
+    @classmethod
+    def create(
+        cls,
+        min_value: float = None,
+        max_value: float = None,
+        *,
+        le: float = None,
+        lt: float = None,
+        ge: float = None,
+        gt: float = None,
+    ) -> Any:
+        """Construct a new range with any possible constraints"""
+        self = cls(cls.__name__, (), {})
+        self.min_value = min_value if min_value is not None else _xt_to_xe(le, lt, -1)
+        self.max_value = max_value if max_value is not None else _xt_to_xe(ge, gt, 1)
+        return self
+
+    @property
+    def underlying_type(self) -> Union[Type[int], Type[float]]:
+        if isinstance(self.min_value, float) or isinstance(self.max_value, float):
+            return float
+
+        return int
+
+    def __repr__(self) -> str:
+        a = "..." if self.min_value is None else self.min_value
+        b = "..." if self.max_value is None else self.max_value
+        return f"{type(self).__name__}[{a}, {b}]"
+
+
+class LargeInt(int):
+    """Type for large integers in slash commands."""
+
+
 class ParamInfo:
     """
     A class that basically connects function params with slash command options.
@@ -191,7 +278,7 @@ class ParamInfo:
         The name of this slash command option.
     description: :class:`str`
         The description of this slash command option.
-    choices: Iterable[Any]
+    choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of choices of this slash command option.
     ge: :class:`float`
         The lowest allowed value for this option.
@@ -258,7 +345,7 @@ class ParamInfo:
 
     @property
     def required(self) -> bool:
-        return self.default is ...
+        return self.default is Ellipsis
 
     @property
     def discord_type(self) -> OptionType:
@@ -279,7 +366,7 @@ class ParamInfo:
         cls,
         param: inspect.Parameter,
         type_hints: Dict[str, Any],
-        parsed_docstring: Dict[str, Any] = None,
+        parsed_docstring: Dict[str, disnake.utils._DocstringParam] = None,
     ) -> ParamInfo:
         # hopefully repeated parsing won't cause any problems
         parsed_docstring = parsed_docstring or {}
@@ -323,21 +410,11 @@ class ParamInfo:
 
     async def verify_type(self, inter: CommandInteraction, argument: Any) -> Any:
         """Check if a type of an argument is correct and possibly fix it"""
-        # these types never need to be verified
-        if self.discord_type.value in [3, 4, 5, 8, 9, 10]:
-            return argument
-
-        if issubclass(self.type, disnake.Member):
+        if issubclass_(self.type, disnake.Member):
             if isinstance(argument, disnake.Member):
                 return argument
 
             raise errors.MemberNotFound(str(argument.id))
-
-        if issubclass(self.type, disnake.abc.GuildChannel):
-            if isinstance(argument, self.type):
-                return argument
-
-            raise errors.ChannelNotFound(str(argument.id))
 
         # unexpected types may just be ignored
         return argument
@@ -351,6 +428,7 @@ class ParamInfo:
                 raise errors.ConversionError(int, e) from e
 
         if self.converter is None:
+            # TODO: Custom validators
             return await self.verify_type(inter, argument)
 
         try:
@@ -370,7 +448,11 @@ class ParamInfo:
 
         self.type = type(self.choices[0].value)
 
-    def _parse_guild_channel(self, *channels: Type[disnake.abc.GuildChannel]) -> None:
+    def _parse_guild_channel(
+        self, *channels: Union[Type[disnake.abc.GuildChannel], Type[disnake.Thread]]
+    ) -> None:
+        # this variable continues to be GuildChannel because the type is still
+        # determined from the TYPE mapping in the class definition
         self.type = disnake.abc.GuildChannel
 
         if not self.channel_types:
@@ -393,12 +475,23 @@ class ParamInfo:
                 self.parse_converter_annotation(self.converter, annotation)
                 return True
 
+        # short circuit if user forgot to provide annotations
         if annotation is inspect.Parameter.empty or annotation is Any:
             return False
-        elif self.large:
+
+        # resolve type aliases
+        if isinstance(annotation, Range):
+            self.min_value = annotation.min_value
+            self.max_value = annotation.max_value
+            annotation = annotation.underlying_type
+        if issubclass_(annotation, LargeInt):
+            self.large = True
+            annotation = int
+
+        if self.large:
             self.type = str
             if annotation is not int:
-                raise TypeError("Large integers must be annotated with int")
+                raise TypeError("Large integers must be annotated with int or LargeInt")
         elif annotation in self.TYPES:
             self.type = annotation
         elif (
@@ -408,13 +501,15 @@ class ParamInfo:
             self._parse_enum(annotation)
         elif get_origin(annotation) in (Union, UnionType):
             args = annotation.__args__
-            if all(issubclass_(channel, disnake.abc.GuildChannel) for channel in args):
+            if all(
+                issubclass_(channel, (disnake.abc.GuildChannel, disnake.Thread)) for channel in args
+            ):
                 self._parse_guild_channel(*args)
             else:
                 raise TypeError(
                     "Unions for anything else other than channels or a mentionable are not supported"
                 )
-        elif issubclass_(annotation, disnake.abc.GuildChannel):
+        elif issubclass_(annotation, (disnake.abc.GuildChannel, disnake.Thread)):
             self._parse_guild_channel(annotation)
         elif issubclass_(get_origin(annotation), collections.abc.Sequence):
             raise TypeError(
@@ -445,7 +540,7 @@ class ParamInfo:
         _, parameter = parameters.popitem()
         annotation = parameter.annotation
 
-        if parameter.default is not inspect.Parameter.empty and self.default is ...:
+        if parameter.default is not inspect.Parameter.empty and self.required:
             self.default = parameter.default
             self.convert_default = True
 
@@ -743,7 +838,7 @@ def Param(
     description: :class:`str`
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
-    choices: Iterable[Any]
+    choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.
     converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.
@@ -822,8 +917,7 @@ def option_enum(
     choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
 ) -> Type[TChoice]:
     if isinstance(choices, list):
-        # invariance issue, please fix
-        choices = cast(Dict[str, TChoice], {str(i): i for i in choices})
+        choices = {str(i): i for i in choices}
 
     choices = choices or kwargs
     first, *_ = choices.values()
