@@ -1021,10 +1021,10 @@ class DiscordVoiceWebSocket:
         # the ip is ascii starting at the 4th byte and ending at the first null
         ip_start = 4
         ip_end = recv.index(0, ip_start)
-        ip = recv[ip_start:ip_end].decode("ascii")
+        state.ip = recv[ip_start:ip_end].decode("ascii")
 
-        port = struct.unpack_from(">H", recv, len(recv) - 2)[0]
-        _log.debug("detected ip: %s port: %s", ip, port)
+        state.port = struct.unpack_from(">H", recv, len(recv) - 2)[0]
+        _log.debug("detected ip: %s port: %s", state.ip, state.port)
 
         # there *should* always be at least one supported mode (xsalsa20_poly1305)
         modes: List[SupportedModes] = [
@@ -1033,7 +1033,7 @@ class DiscordVoiceWebSocket:
         _log.debug("received supported encryption modes: %s", ", ".join(modes))
 
         mode = modes[0]
-        await self.select_protocol(ip, port, mode)
+        await self.select_protocol(state.ip, state.port, mode)
         _log.info("selected the voice protocol for use (%s)", mode)
 
     @property
