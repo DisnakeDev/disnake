@@ -25,6 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -46,15 +47,16 @@ I = TypeVar("I", bound="Item")
 V = TypeVar("V", bound="View", covariant=True)
 
 if TYPE_CHECKING:
-    from ..components import Component
+    from ..components import NestedComponent
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
+    from ..types.components import Component as ComponentPayload
     from .view import View
 
     ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 
-class WrappedComponent:
+class WrappedComponent(ABC):
     """Represents the base UI component that all UI components inherit from.
 
     The current UI components supported are:
@@ -68,24 +70,33 @@ class WrappedComponent:
 
     __repr_attributes__: Tuple[str, ...]
 
-    def to_component_dict(self) -> Dict[str, Any]:
-        raise NotImplementedError
+    @property
+    @abstractmethod
+    def _underlying(self) -> NestedComponent:
+        ...
 
     @property
-    def type(self) -> ComponentType:
-        raise NotImplementedError
+    @abstractmethod
+    def width(self) -> int:
+        ...
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
         return f"<{self.__class__.__name__} {attrs}>"
 
     @property
-    def width(self) -> int:
-        return 1
+    def type(self) -> ComponentType:
+        return self._underlying.type
+
+    def to_component_dict(self) -> ComponentPayload:
+        return self._underlying.to_dict()
 
 
 class Item(WrappedComponent, Generic[V]):
-    """Represents the base UI item that all UI components inherit from.
+    """Represents the base UI item that all UI items inherit from.
+
+    This class adds more functionality on top of the :class:`WrappedComponent` base class.
+    This functionality mostly relates to :class:`disnake.ui.View`.
 
     The current UI items supported are:
 
@@ -109,14 +120,14 @@ class Item(WrappedComponent, Generic[V]):
         # only called upon edit and we're mainly interested during initial creation time.
         self._provided_custom_id: bool = False
 
-    def refresh_component(self, component: Component) -> None:
+    def refresh_component(self, component: NestedComponent) -> None:
         return None
 
     def refresh_state(self, interaction: MessageInteraction) -> None:
         return None
 
     @classmethod
-    def from_component(cls: Type[I], component: Component) -> I:
+    def from_component(cls: Type[I], component: NestedComponent) -> I:
         return cls()
 
     def is_dispatchable(self) -> bool:

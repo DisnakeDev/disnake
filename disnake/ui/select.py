@@ -43,7 +43,6 @@ __all__ = (
 if TYPE_CHECKING:
     from ..emoji import Emoji
     from ..interactions import MessageInteraction
-    from ..types.components import SelectMenu as SelectMenuPayload
     from .item import ItemCallbackType
     from .view import View
 
@@ -92,6 +91,8 @@ class Select(Item[V]):
         "options",
         "disabled",
     )
+    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    _underlying: SelectMenu = MISSING
 
     def __init__(
         self,
@@ -260,9 +261,6 @@ class Select(Item[V]):
     def width(self) -> int:
         return 5
 
-    def to_component_dict(self) -> SelectMenuPayload:
-        return self._underlying.to_dict()
-
     def refresh_component(self, component: SelectMenu) -> None:
         self._underlying = component
 
@@ -280,10 +278,6 @@ class Select(Item[V]):
             disabled=component.disabled,
             row=None,
         )
-
-    @property
-    def type(self) -> ComponentType:
-        return self._underlying.type
 
     def is_dispatchable(self) -> bool:
         return True

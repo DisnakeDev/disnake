@@ -23,15 +23,12 @@ DEALINGS IN THE SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import Optional, Tuple
 
 from ..components import InputText as InputTextComponent
 from ..enums import ComponentType, InputTextStyle
+from ..utils import MISSING
 from .item import WrappedComponent
-
-if TYPE_CHECKING:
-    from ..types.components import InputText as InputTextPayload
-
 
 __all__ = ("InputText",)
 
@@ -73,6 +70,8 @@ class InputText(WrappedComponent):
         "min_length",
         "max_length",
     )
+    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    _underlying: InputTextComponent = MISSING
 
     def __init__(
         self,
@@ -101,11 +100,6 @@ class InputText(WrappedComponent):
     @property
     def width(self) -> int:
         return 5
-
-    @property
-    def type(self) -> ComponentType:
-        """:class:`.ComponentType`: The type of the input text. This is always :attr:`.ComponentType.input_text`."""
-        return self._underlying.type
 
     @property
     def style(self) -> InputTextStyle:
@@ -178,6 +172,3 @@ class InputText(WrappedComponent):
     @max_length.setter
     def max_length(self, value: Optional[int]) -> None:
         self._underlying.max_length = value
-
-    def to_component_dict(self) -> InputTextPayload:
-        return self._underlying.to_dict()

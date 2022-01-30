@@ -32,6 +32,7 @@ from typing import TYPE_CHECKING, Callable, Optional, Tuple, Type, TypeVar, Unio
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
+from ..utils import MISSING
 from .item import DecoratedItem, Item
 
 __all__ = (
@@ -84,6 +85,8 @@ class Button(Item[V]):
         "emoji",
         "row",
     )
+    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    _underlying: ButtonComponent = MISSING
 
     def __init__(
         self,
@@ -127,6 +130,10 @@ class Button(Item[V]):
             emoji=emoji,
         )
         self.row = row
+
+    @property
+    def width(self) -> int:
+        return 1
 
     @property
     def style(self) -> ButtonStyle:
@@ -211,13 +218,6 @@ class Button(Item[V]):
             emoji=button.emoji,
             row=None,
         )
-
-    @property
-    def type(self) -> ComponentType:
-        return self._underlying.type
-
-    def to_component_dict(self):
-        return self._underlying.to_dict()
 
     def is_dispatchable(self) -> bool:
         return self.custom_id is not None
