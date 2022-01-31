@@ -653,7 +653,7 @@ class InteractionBotBase(CommonBotBase):
 
         try:
             commands = await self.fetch_global_commands()
-            self._connection._global_application_commands = {  # type: ignore
+            self._connection._global_application_commands = {
                 command.id: command for command in commands
             }
         except Exception:
@@ -662,7 +662,7 @@ class InteractionBotBase(CommonBotBase):
             try:
                 commands = await self.fetch_guild_commands(guild_id)
                 if commands:
-                    self._connection._guild_application_commands[guild_id] = {  # type: ignore
+                    self._connection._guild_application_commands[guild_id] = {
                         command.id: command for command in commands
                     }
             except Exception:
@@ -794,7 +794,7 @@ class InteractionBotBase(CommonBotBase):
                 if not self.owner_id and not self.owner_ids:
                     await self._fill_owners()
                 resolved_perms = perms.resolve(
-                    command_id=cmd.id,  # type: ignore
+                    command_id=cmd.id,
                     owners=[self.owner_id] if self.owner_id else self.owner_ids,
                 )
 
@@ -1250,7 +1250,6 @@ class InteractionBotBase(CommonBotBase):
         if slash_command is None:
             return
 
-        inter.bot = self  # type: ignore
         inter.application_command = slash_command
         if slash_command.guild_ids is None or inter.guild_id in slash_command.guild_ids:
             await slash_command._call_relevant_autocompleter(inter)
@@ -1299,7 +1298,6 @@ class InteractionBotBase(CommonBotBase):
                     pass
                 return
 
-        interaction.bot = self  # type: ignore
         command_type = interaction.data.type
         command_name = interaction.data.name
         app_command = None

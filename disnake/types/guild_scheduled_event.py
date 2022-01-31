@@ -1,7 +1,6 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2021 Rapptz
 Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,55 +22,47 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-from __future__ import annotations
+from typing import Literal, Optional, TypedDict
 
-from typing import List, Literal, Optional, TypedDict
-
+from .member import Member
 from .snowflake import Snowflake
+from .user import User
 
-ThreadType = Literal[10, 11, 12]
-ThreadArchiveDurationLiteral = Literal[60, 1440, 4320, 10080]
-
-
-class ThreadMember(TypedDict):
-    id: Snowflake
-    user_id: Snowflake
-    join_timestamp: str
-    flags: int
+GuildScheduledEventPrivacyLevel = Literal[2]
+GuildScheduledEventStatus = Literal[1, 2, 3, 4]
+GuildScheduledEventEntityType = Literal[1, 2, 3]
 
 
-class _ThreadMetadataOptional(TypedDict, total=False):
-    locked: bool
-    invitable: bool
-    create_timestamp: str
+class _GuildScheduledEventUserOptional(TypedDict, total=False):
+    member: Member
 
 
-class ThreadMetadata(_ThreadMetadataOptional):
-    archived: bool
-    auto_archive_duration: ThreadArchiveDurationLiteral
-    archive_timestamp: str
+class GuildScheduledEventUser(_GuildScheduledEventUserOptional):
+    guild_scheduled_event_id: Snowflake
+    user: User
 
 
-class _ThreadOptional(TypedDict, total=False):
-    member: ThreadMember
-    owner_id: Snowflake
-    last_message_id: Optional[Snowflake]
-    last_pin_timestamp: Optional[Snowflake]
+class GuildScheduledEventEntityMetadata(TypedDict, total=False):
+    location: str
 
 
-class Thread(_ThreadOptional):
+class _GuildScheduledEventOptional(TypedDict, total=False):
+    description: str
+    creator: User
+    user_count: int
+
+
+class GuildScheduledEvent(_GuildScheduledEventOptional):
     id: Snowflake
     guild_id: Snowflake
-    parent_id: Snowflake
+    channel_id: Optional[Snowflake]
+    creator_id: Optional[Snowflake]
     name: str
-    type: ThreadType
-    member_count: int
-    message_count: int
-    rate_limit_per_user: int
-    thread_metadata: ThreadMetadata
-
-
-class ThreadPaginationPayload(TypedDict):
-    threads: List[Thread]
-    members: List[ThreadMember]
-    has_more: bool
+    scheduled_start_time: str
+    scheduled_end_time: Optional[str]
+    privacy_level: GuildScheduledEventPrivacyLevel
+    status: GuildScheduledEventStatus
+    entity_type: GuildScheduledEventEntityType
+    entity_id: Optional[Snowflake]
+    entity_metadata: Optional[GuildScheduledEventEntityMetadata]
+    image: Optional[str]

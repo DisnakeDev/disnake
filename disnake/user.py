@@ -136,7 +136,7 @@ class BaseUser(_UserTag):
 
         return self
 
-    def _to_minimal_user_json(self) -> Dict[str, Any]:
+    def _to_minimal_user_json(self) -> UserPayload:
         return {
             "username": self.name,
             "id": self.id,

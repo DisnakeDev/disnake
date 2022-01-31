@@ -26,7 +26,19 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, Final, List, Mapping, Protocol, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Final,
+    List,
+    Mapping,
+    Optional,
+    Protocol,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from . import utils
 from .colour import Colour
@@ -175,6 +187,7 @@ class Embed:
     )
 
     Empty: Final = EmptyEmbed
+    _default_colour: MaybeEmpty[Colour] = Empty
 
     def __init__(
         self,
@@ -187,8 +200,8 @@ class Embed:
         description: MaybeEmpty[Any] = EmptyEmbed,
         timestamp: datetime.datetime = None,
     ):
-
-        self.colour = colour if colour is not EmptyEmbed else color
+        if colour or color:
+            self.colour = colour if colour is not EmptyEmbed else color
         self.title = title
         self.type = type
         self.url = url
@@ -250,7 +263,7 @@ class Embed:
         try:
             self._colour = Colour(value=data["color"])
         except KeyError:
-            pass
+            self._colour = EmptyEmbed
 
         try:
             self._timestamp = utils.parse_time(data["timestamp"])
@@ -269,7 +282,8 @@ class Embed:
 
     def copy(self: E) -> E:
         """Returns a shallow copy of the embed."""
-        embed = self.__class__.from_dict(self.to_dict())
+        embed = type(self).from_dict(self.to_dict())
+        embed.colour = getattr(self, "_colour", EmptyEmbed)
         embed._files = self._files  # TODO: Maybe copy these too?
         return embed
 
@@ -300,7 +314,7 @@ class Embed:
                 self.title,
                 self.url,
                 self.description,
-                self.colour,
+                hasattr(self, "_colour") and self.colour,
                 self.fields,
                 self.timestamp,
                 self.author,
@@ -314,7 +328,7 @@ class Embed:
 
     @property
     def colour(self) -> MaybeEmpty[Colour]:
-        return getattr(self, "_colour", EmptyEmbed)
+        return getattr(self, "_colour", type(self)._default_colour)
 
     @colour.setter
     def colour(self, value: Union[int, Colour, _EmptyEmbed]):  # type: ignore
@@ -324,8 +338,12 @@ class Embed:
             self._colour = Colour(value=value)
         else:
             raise TypeError(
-                f"Expected disnake.Colour, int, or Embed.Empty but received {value.__class__.__name__} instead."
+                f"Expected disnake.Colour, int, or Embed.Empty but received {type(value).__name__} instead."
             )
+
+    @colour.deleter
+    def colour(self):
+        del self._colour
 
     color = colour
 
@@ -343,7 +361,7 @@ class Embed:
             self._timestamp = value
         else:
             raise TypeError(
-                f"Expected datetime.datetime or Embed.Empty received {value.__class__.__name__} instead"
+                f"Expected datetime.datetime or Embed.Empty received {type(value).__name__} instead"
             )
 
     @property
@@ -721,19 +739,14 @@ class Embed:
         result = {
             key[1:]: getattr(self, key)
             for key in self.__slots__
-            if key[0] == '_' and hasattr(self, key) and key != "_files"
+            if key[0] == '_' and hasattr(self, key) and key not in ("_colour", "_files")
         }
         # fmt: on
 
         # deal with basic convenience wrappers
 
-        try:
-            colour = result.pop("colour")
-        except KeyError:
-            pass
-        else:
-            if colour:
-                result["color"] = colour.value
+        if isinstance(self.colour, Colour):
+            result["color"] = self.colour.value
 
         try:
             timestamp = result.pop("timestamp")
@@ -757,3 +770,47 @@ class Embed:
             result["title"] = self.title
 
         return result  # type: ignore
+
+    @classmethod
+    def set_default_colour(cls, value: Optional[Union[int, Colour]]):
+        """
+        Set the default colour of all new embeds.
+
+        .. versionadded:: 2.4
+
+        Returns
+        -------
+        :class:`Colour`
+            The colour that was set.
+
+        """
+        if value == None:
+            cls._default_colour = cls.Empty
+        elif isinstance(value, (Colour, _EmptyEmbed)):
+            cls._default_colour = value
+        elif isinstance(value, int):
+            cls._default_colour = Colour(value=value)
+        else:
+            raise TypeError(
+                f"Expected disnake.Colour, or int, but received {type(value).__name__} instead."
+            )
+        return cls._default_colour
+
+    set_default_color = set_default_colour
+
+    @classmethod
+    def get_default_colour(cls) -> MaybeEmpty[Colour]:
+        """
+        Get the default colour of all new embeds.
+
+        .. versionadded:: 2.4
+
+        Returns
+        -------
+        :class:`Colour`
+            The default colour.
+
+        """
+        return cls._default_colour
+
+    get_default_color = get_default_colour

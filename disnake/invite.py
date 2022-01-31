@@ -29,10 +29,10 @@ from typing import TYPE_CHECKING, List, Optional, Type, TypeVar, Union
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
-from .enums import ChannelType, InviteTarget, VerificationLevel, try_enum
+from .enums import ChannelType, InviteTarget, NSFWLevel, VerificationLevel, try_enum
 from .mixins import Hashable
 from .object import Object
-from .utils import _get_as_snowflake, parse_time, snowflake_time
+from .utils import _get_as_snowflake, parse_time, snowflake_time, warn_deprecated
 
 __all__ = (
     "PartialInviteChannel",
@@ -147,12 +147,22 @@ class PartialInviteGuild:
         The partial guild's name.
     id: :class:`int`
         The partial guild's ID.
-    verification_level: :class:`VerificationLevel`
-        The partial guild's verification level.
-    features: List[:class:`str`]
-        A list of features the guild has. See :attr:`Guild.features` for more information.
     description: Optional[:class:`str`]
         The partial guild's description.
+    features: List[:class:`str`]
+        A list of features the partial guild has. See :attr:`Guild.features` for more information.
+    nsfw_level: :class:`NSFWLevel`
+        The partial guild's nsfw level.
+
+        .. versionadded:: 2.4
+
+    vanity_url_code: Optional[:class:`str`]
+        The partial guild's vanity url code, if any.
+
+        .. versionadded:: 2.4
+
+    verification_level: :class:`VerificationLevel`
+        The partial guild's verification level.
     """
 
     __slots__ = (
@@ -163,8 +173,10 @@ class PartialInviteGuild:
         "id",
         "name",
         "_splash",
-        "verification_level",
         "description",
+        "nsfw_level",
+        "vanity_url_code",
+        "verification_level",
     )
 
     def __init__(self, state: ConnectionState, data: InviteGuildPayload, id: int):
@@ -175,6 +187,8 @@ class PartialInviteGuild:
         self._icon: Optional[str] = data.get("icon")
         self._banner: Optional[str] = data.get("banner")
         self._splash: Optional[str] = data.get("splash")
+        self.nsfw_level: NSFWLevel = try_enum(NSFWLevel, data.get("nsfw_level", 0))
+        self.vanity_url_code: Optional[str] = data.get("vanity_url_code")
         self.verification_level: VerificationLevel = try_enum(
             VerificationLevel, data.get("verification_level")
         )
@@ -280,8 +294,6 @@ class Invite(Hashable):
         The URL fragment used for the invite.
     guild: Optional[Union[:class:`Guild`, :class:`Object`, :class:`PartialInviteGuild`]]
         The guild the invite is for. Can be ``None`` if it's from a group direct message.
-    revoked: :class:`bool`
-        Whether the invite has been revoked.
     created_at: :class:`datetime.datetime`
         An aware UTC datetime object denoting the time the invite was created.
     temporary: :class:`bool`
@@ -332,7 +344,6 @@ class Invite(Hashable):
         "max_age",
         "code",
         "guild",
-        "revoked",
         "created_at",
         "uses",
         "temporary",
@@ -341,12 +352,13 @@ class Invite(Hashable):
         "channel",
         "target_user",
         "target_type",
-        "_state",
         "approximate_member_count",
         "approximate_presence_count",
         "target_application",
         "expires_at",
         "guild_scheduled_event",
+        "_revoked",
+        "_state",
     )
 
     BASE = "https://discord.gg"
@@ -363,13 +375,13 @@ class Invite(Hashable):
         self.max_age: Optional[int] = data.get("max_age")
         self.code: str = data["code"]
         self.guild: Optional[InviteGuildType] = self._resolve_guild(data.get("guild"), guild)
-        self.revoked: Optional[bool] = data.get("revoked")
         self.created_at: Optional[datetime.datetime] = parse_time(data.get("created_at"))
         self.temporary: Optional[bool] = data.get("temporary")
         self.uses: Optional[int] = data.get("uses")
         self.max_uses: Optional[int] = data.get("max_uses")
         self.approximate_presence_count: Optional[int] = data.get("approximate_presence_count")
         self.approximate_member_count: Optional[int] = data.get("approximate_member_count")
+        self._revoked: Optional[bool] = data.get("revoked")
 
         expires_at = data.get("expires_at", None)
         self.expires_at: Optional[datetime.datetime] = (
@@ -489,6 +501,22 @@ class Invite(Hashable):
         if self.guild_scheduled_event:
             url += f"?event={self.guild_scheduled_event.id}"
         return url
+
+    @property
+    def revoked(self) -> Optional[bool]:
+        """Optional[:class:`bool`]: Whether the invite has been revoked.
+
+        As of September 16th, 2019, this value will always be ``None`` since Discord
+        doesn't provide this information anymore.
+
+        .. warning::
+
+            This property will be removed in a future version.
+        """
+        warn_deprecated(
+            "revoked is deprecated and will be removed in a future version.", stacklevel=2
+        )
+        return self._revoked
 
     async def delete(self, *, reason: Optional[str] = None):
         """|coro|
