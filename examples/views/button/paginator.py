@@ -14,6 +14,10 @@ class Menu(disnake.ui.View):
 
         self.first_page.disabled = True
         self.prev_page.disabled = True
+        
+        # Sets the footer of the embeds with their respective page numbers.
+        for i, embed in enumerate(self.embeds):
+            embed.set_footer(text=f"Page {i + 1} of {len(self.embeds)}")
 
     @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.blurple)
     async def first_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
@@ -31,7 +35,6 @@ class Menu(disnake.ui.View):
     async def prev_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         self.embed_count -= 1
         embed = self.embeds[self.embed_count]
-        embed.set_footer(text=f"Page {self.embed_count + 1} of {len(self.embeds)}")
 
         self.next_page.disabled = False
         self.last_page.disabled = False
@@ -48,7 +51,6 @@ class Menu(disnake.ui.View):
     async def next_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         self.embed_count += 1
         embed = self.embeds[self.embed_count]
-        embed.set_footer(text=f"Page {self.embed_count + 1} of {len(self.embeds)}")
 
         self.first_page.disabled = False
         self.prev_page.disabled = False
@@ -61,7 +63,6 @@ class Menu(disnake.ui.View):
     async def last_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         self.embed_count = len(self.embeds) - 1
         embed = self.embeds[self.embed_count]
-        embed.set_footer(text=f"Page {len(self.embeds)} of {len(self.embeds)}")
 
         self.first_page.disabled = False
         self.prev_page.disabled = False
@@ -91,9 +92,6 @@ async def paginator(ctx: commands.Context):
             colour=disnake.Color.random(),
         ),
     ]
-
-    # Sets the footer of the first embed.
-    embeds[0].set_footer(text=f"Page 1 of {len(embeds)}")
 
     # Sends first embed with the buttons, it also passes the embeds list into the View class.
     await ctx.send(embed=embeds[0], view=Menu(embeds))
