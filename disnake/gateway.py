@@ -554,6 +554,7 @@ class DiscordWebSocket:
 
         self.log_receive(raw_msg)
         msg: GatewayPayload = utils._from_json(raw_msg)
+        del raw_msg  # no need to keep this in memory
 
         _log.debug("For Shard ID %s: WebSocket Event: %s", self.shard_id, msg)
         event = msg.get("t")
