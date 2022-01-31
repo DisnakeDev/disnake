@@ -25,9 +25,9 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Any, List, Literal, Optional, Tuple, TypedDict, Union
+from typing import Any, List, Literal, Optional, Sequence, Tuple, TypedDict, Union
 
-from .activity import Activity
+from .activity import SendableActivity
 from .snowflake import Snowflake, SnowflakeList
 from .voice import SupportedModes
 
@@ -103,7 +103,7 @@ class IdentifyCommand(TypedDict):
 
 class PresenceUpdateData(TypedDict):
     since: Optional[int]
-    activities: List[Activity]
+    activities: Sequence[SendableActivity]
     status: str
     afk: bool
 
