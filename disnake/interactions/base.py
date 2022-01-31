@@ -33,9 +33,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Uni
 from .. import utils
 from ..app_commands import OptionChoice
 from ..channel import ChannelType, PartialMessageable
-from ..enums import InteractionResponseType, InteractionType, try_enum
+from ..enums import InteractionResponseType, InteractionType, WebhookType, try_enum
 from ..errors import (
-    ClientException,
     HTTPException,
     InteractionNotResponded,
     InteractionResponded,
@@ -71,8 +70,9 @@ if TYPE_CHECKING:
         TextChannel,
         VoiceChannel,
     )
+    from ..client import Client
     from ..embeds import Embed
-    from ..ext.commands.bot import Bot
+    from ..ext.commands import AutoShardedBot, Bot
     from ..file import File
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
@@ -94,14 +94,16 @@ if TYPE_CHECKING:
         PartialMessageable,
     ]
 
+    AnyBot = Union[Bot, AutoShardedBot]
+
 MISSING: Any = utils.MISSING
 
 
 class Interaction:
-    """A base class representing a Discord interaction.
+    """A base class representing a user-initiated Discord interaction.
 
-    An interaction happens when a user does an action that needs to
-    be notified. Current examples are application commands and components.
+    An interaction happens when a user performs an action that the client needs to
+    be notified of. Current examples are application commands and components.
 
     .. versionadded:: 2.0
 
@@ -111,6 +113,10 @@ class Interaction:
         The interaction's ID.
     type: :class:`InteractionType`
         The interaction type.
+    application_id: :class:`int`
+        The application ID that the interaction was for.
+    token: :class:`str`
+        The token to continue the interaction. These are valid for 15 minutes.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
     guild_locale: Optional[:class:`str`]
@@ -119,19 +125,16 @@ class Interaction:
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
-    channel_id: Optional[:class:`int`]
+    channel_id: :class:`int`
         The channel ID the interaction was sent from.
-    application_id: :class:`int`
-        The application ID that the interaction was for.
-    author: Optional[Union[:class:`User`, :class:`Member`]]
+    author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
     locale: :class:`str`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
-    token: :class:`str`
-        The token to continue the interaction. These are valid
-        for 15 minutes.
+    client: :class:`Client`
+        The interaction client.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -143,9 +146,9 @@ class Interaction:
         "author",
         "token",
         "version",
-        "bot",
         "locale",
         "guild_locale",
+        "client",
         "_permissions",
         "_state",
         "_session",
@@ -160,60 +163,55 @@ class Interaction:
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
+        self.client: Client = state._get_client()
         self._original_message: Optional[InteractionMessage] = None
-        self._from_data(data)
-        self.bot: Optional[Bot] = None
 
-    def _from_data(self, data: InteractionPayload):
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, data["type"])
         self.token: str = data["token"]
         self.version: int = data["version"]
-        self.channel_id: Optional[int] = utils._get_as_snowflake(data, "channel_id")
-        self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.application_id: int = int(data["application_id"])
+
+        self.channel_id: int = int(data["channel_id"])
+        self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.locale: str = data["locale"]
         self.guild_locale: Optional[str] = data.get("guild_locale")
-        # think about the user's experience
-        self.author: Union[User, Member] = None  # type: ignore
+        # one of user and member will always exist
+        self.author: Union[User, Member] = MISSING
         self._permissions: int = 0
 
-        # TODO: there's a potential data loss here
-        if self.guild_id:
-            guild = self.guild or Object(id=self.guild_id)
-            try:
-                member = data["member"]  # type: ignore
-            except KeyError:
-                pass
-            else:
-                self.author = (
-                    isinstance(guild, Guild)
-                    and guild.get_member(int(member["user"]["id"]))  # type: ignore
-                    or Member(state=self._state, guild=guild, data=member)  # type: ignore
-                )
-                self._permissions = int(member.get("permissions", 0))
-        else:
-            try:
-                self.author = User(state=self._state, data=data["user"])
-            except KeyError:
-                pass
+        if self.guild_id and (member := data.get("member")):
+            guild: Guild = self.guild or Object(id=self.guild_id)  # type: ignore
+            self.author = (
+                isinstance(guild, Guild)
+                and guild.get_member(int(member["user"]["id"]))
+                or Member(state=self._state, guild=guild, data=member)
+            )
+            self._permissions = int(member.get("permissions", 0))
+        elif user := data.get("user"):
+            self.author = self._state.store_user(user)
+
+    @property
+    def bot(self) -> AnyBot:
+        """:class:`~disnake.ext.commands.Bot`: The bot handling the interaction.
+
+        Only applicable when used with :class:`~disnake.ext.commands.Bot`.
+        This is an alias for :attr:`.client`.
+        """
+        return self.client  # type: ignore
 
     @property
     def created_at(self) -> datetime:
         return utils.snowflake_time(self.id)
 
     @property
-    def client(self) -> Optional[Bot]:
-        return self.bot
-
-    @property
-    def user(self) -> Optional[Union[User, Member]]:
+    def user(self) -> Union[User, Member]:
         return self.author
 
     @property
     def guild(self) -> Optional[Guild]:
         """Optional[:class:`Guild`]: The guild the interaction was sent from."""
-        return self._state and self._state._get_guild(self.guild_id)
+        return self._state._get_guild(self.guild_id)
 
     @utils.cached_slot_property("_cs_me")
     def me(self) -> Union[Member, ClientUser]:
@@ -226,7 +224,7 @@ class Interaction:
 
     @utils.cached_slot_property("_cs_channel")
     def channel(self) -> Union[TextChannel, Thread, VoiceChannel]:
-        """Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]: The channel the interaction was sent from.
+        """Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]: The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels are not resolved since there is
         no data to complete them. These are :class:`PartialMessageable` instead.
@@ -235,12 +233,10 @@ class Interaction:
         guild = self.guild
         channel = guild and guild._resolve_channel(self.channel_id)
         if channel is None:
-            if self.channel_id is not None:
-                type = (
-                    None if self.guild_id is not None else ChannelType.private
-                )  # could be a text, voice, or thread channel in a guild
-                return PartialMessageable(state=self._state, id=self.channel_id, type=type)  # type: ignore
-            return None  # type: ignore
+            type = (
+                None if self.guild_id is not None else ChannelType.private
+            )  # could be a text, voice, or thread channel in a guild
+            return PartialMessageable(state=self._state, id=self.channel_id, type=type)  # type: ignore
         return channel  # type: ignore
 
     @property
@@ -265,7 +261,7 @@ class Interaction:
         """:class:`Webhook`: Returns the follow up webhook for follow up interactions."""
         payload = {
             "id": self.application_id,
-            "type": 3,
+            "type": WebhookType.application.value,
             "token": self.token,
         }
         return Webhook.from_state(data=payload, state=self._state)
@@ -291,8 +287,6 @@ class Interaction:
         -------
         HTTPException
             Fetching the original response message failed.
-        ClientException
-            The channel for the message could not be resolved.
 
         Returns
         --------
@@ -303,11 +297,6 @@ class Interaction:
         if self._original_message is not None:
             return self._original_message
 
-        # TODO: fix later to not raise?
-        channel = self.channel
-        if channel is None:
-            raise ClientException("Channel for message could not be resolved")
-
         adapter = async_context.get()
         data = await adapter.get_original_interaction_response(
             application_id=self.application_id,
@@ -315,7 +304,7 @@ class Interaction:
             session=self._session,
         )
         state = _InteractionMessageState(self, self._state)
-        message = InteractionMessage(state=state, channel=channel, data=data)  # type: ignore
+        message = InteractionMessage(state=state, channel=self.channel, data=data)  # type: ignore
         self._original_message = message
         return message
 

@@ -1260,7 +1260,6 @@ class InteractionBotBase(CommonBotBase):
         if slash_command is None:
             return
 
-        inter.bot = self  # type: ignore
         inter.application_command = slash_command
         if slash_command.guild_ids is None or inter.guild_id in slash_command.guild_ids:
             await slash_command._call_relevant_autocompleter(inter)
@@ -1309,7 +1308,6 @@ class InteractionBotBase(CommonBotBase):
                     pass
                 return
 
-        interaction.bot = self  # type: ignore
         command_type = interaction.data.type
         command_name = interaction.data.name
         app_command = None
