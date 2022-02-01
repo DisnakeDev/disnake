@@ -63,12 +63,7 @@ from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import _integration_factory
-from .interactions import (
-    ApplicationCommandInteraction,
-    Interaction,
-    MessageInteraction,
-    ModalInteraction,
-)
+from .interactions import ApplicationCommandInteraction, MessageInteraction, ModalInteraction
 from .invite import Invite
 from .member import Member
 from .mentions import AllowedMentions
@@ -87,7 +82,7 @@ from .utils import MISSING
 
 if TYPE_CHECKING:
     from .abc import PrivateChannel
-    from .app_commands import ApplicationCommand
+    from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
     from .gateway import DiscordWebSocket
     from .guild import GuildChannel, VocalGuildChannel
@@ -291,8 +286,8 @@ class ConnectionState:
         self._guilds: Dict[int, Guild] = {}
 
         if application_commands:
-            self._global_application_commands: Dict[int, ApplicationCommand] = {}
-            self._guild_application_commands: Dict[int, Dict[int, ApplicationCommand]] = {}
+            self._global_application_commands: Dict[int, APIApplicationCommand] = {}
+            self._guild_application_commands: Dict[int, Dict[int, APIApplicationCommand]] = {}
             self._application_command_permissions: Dict[
                 int, Dict[int, GuildApplicationCommandPermissions]
             ] = {}
@@ -447,10 +442,12 @@ class ConnectionState:
 
     def _get_global_application_command(
         self, application_command_id: int
-    ) -> Optional[ApplicationCommand]:
+    ) -> Optional[APIApplicationCommand]:
         return self._global_application_commands.get(application_command_id)
 
-    def _add_global_application_command(self, application_command: ApplicationCommand, /) -> None:
+    def _add_global_application_command(
+        self, application_command: APIApplicationCommand, /
+    ) -> None:
         assert application_command.id
         self._global_application_commands[application_command.id] = application_command
 
@@ -463,13 +460,13 @@ class ConnectionState:
 
     def _get_guild_application_command(
         self, guild_id: int, application_command_id: int
-    ) -> Optional[ApplicationCommand]:
+    ) -> Optional[APIApplicationCommand]:
         granula = self._guild_application_commands.get(guild_id)
         if granula is not None:
             return granula.get(application_command_id)
 
     def _add_guild_application_command(
-        self, guild_id: int, application_command: ApplicationCommand
+        self, guild_id: int, application_command: APIApplicationCommand
     ) -> None:
         assert application_command.id
         try:
@@ -493,14 +490,14 @@ class ConnectionState:
 
     def _get_global_command_named(
         self, name: str, cmd_type: ApplicationCommandType = None
-    ) -> Optional[ApplicationCommand]:
+    ) -> Optional[APIApplicationCommand]:
         for cmd in self._global_application_commands.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
 
     def _get_guild_command_named(
         self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None
-    ) -> Optional[ApplicationCommand]:
+    ) -> Optional[APIApplicationCommand]:
         granula = self._guild_application_commands.get(guild_id, {})
         for cmd in granula.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
@@ -901,7 +898,8 @@ class ConnectionState:
         interaction_type = data["type"]
 
         if interaction_type == 1:
-            interaction = Interaction(data=data, state=self)
+            # PING interaction should never be received
+            return
 
         elif interaction_type == 2:
             interaction = ApplicationCommandInteraction(data=data, state=self)
@@ -1787,17 +1785,17 @@ class ConnectionState:
     # All these methods (except fetchers) update the application command cache as well,
     # since there're no events related to application command updates
 
-    async def fetch_global_commands(self) -> List[ApplicationCommand]:
+    async def fetch_global_commands(self) -> List[APIApplicationCommand]:
         results = await self.http.get_global_commands(self.application_id)  # type: ignore
         return [application_command_factory(data) for data in results]
 
-    async def fetch_global_command(self, command_id: int) -> ApplicationCommand:
+    async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
         result = await self.http.get_global_command(self.application_id, command_id)  # type: ignore
         return application_command_factory(result)
 
     async def create_global_command(
         self, application_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         result = await self.http.upsert_global_command(
             self.application_id, application_command.to_dict()  # type: ignore
         )
@@ -1807,7 +1805,7 @@ class ConnectionState:
 
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         result = await self.http.edit_global_command(
             self.application_id, command_id, new_command.to_dict()  # type: ignore
         )
@@ -1821,7 +1819,7 @@ class ConnectionState:
 
     async def bulk_overwrite_global_commands(
         self, application_commands: List[ApplicationCommand]
-    ) -> List[ApplicationCommand]:
+    ) -> List[APIApplicationCommand]:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_global_commands(self.application_id, payload)  # type: ignore
         commands = [application_command_factory(data) for data in results]
@@ -1830,17 +1828,17 @@ class ConnectionState:
 
     # Application commands (guild)
 
-    async def fetch_guild_commands(self, guild_id: int) -> List[ApplicationCommand]:
+    async def fetch_guild_commands(self, guild_id: int) -> List[APIApplicationCommand]:
         results = await self.http.get_guild_commands(self.application_id, guild_id)  # type: ignore
         return [application_command_factory(data) for data in results]
 
-    async def fetch_guild_command(self, guild_id: int, command_id: int) -> ApplicationCommand:
+    async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
         result = await self.http.get_guild_command(self.application_id, guild_id, command_id)  # type: ignore
         return application_command_factory(result)
 
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         result = await self.http.upsert_guild_command(
             self.application_id, guild_id, application_command.to_dict()  # type: ignore
         )
@@ -1850,7 +1848,7 @@ class ConnectionState:
 
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         result = await self.http.edit_guild_command(
             self.application_id, guild_id, command_id, new_command.to_dict()  # type: ignore
         )
@@ -1866,13 +1864,13 @@ class ConnectionState:
 
     async def bulk_overwrite_guild_commands(
         self, guild_id: int, application_commands: List[ApplicationCommand]
-    ) -> List[ApplicationCommand]:
+    ) -> List[APIApplicationCommand]:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_guild_commands(
             self.application_id, guild_id, payload  # type: ignore
         )
         commands = [application_command_factory(data) for data in results]
-        self._guild_application_commands[guild_id] = {cmd.id: cmd for cmd in commands}  # type: ignore
+        self._guild_application_commands[guild_id] = {cmd.id: cmd for cmd in commands}
         return commands
 
     # Application command permissions

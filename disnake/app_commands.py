@@ -26,7 +26,7 @@ import math
 import re
 import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
 from .abc import User
 from .custom_warnings import ConfigWarning
@@ -62,12 +62,18 @@ if TYPE_CHECKING:
         Dict[str, ApplicationCommandOptionChoiceValue],
     ]
 
+    APIApplicationCommand = Union["APIUserCommand", "APIMessageCommand", "APISlashCommand"]
+
+
 __all__ = (
     "application_command_factory",
     "ApplicationCommand",
     "SlashCommand",
+    "APISlashCommand",
     "UserCommand",
+    "APIUserCommand",
     "MessageCommand",
+    "APIMessageCommand",
     "OptionChoice",
     "Option",
     "ApplicationCommandPermissions",
@@ -78,14 +84,14 @@ __all__ = (
 )
 
 
-def application_command_factory(data: ApplicationCommandPayload) -> ApplicationCommand:
+def application_command_factory(data: ApplicationCommandPayload) -> APIApplicationCommand:
     cmd_type = try_enum(ApplicationCommandType, data.get("type", 1))
     if cmd_type is ApplicationCommandType.chat_input:
-        return SlashCommand.from_dict(data)
+        return APISlashCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.user:
-        return UserCommand.from_dict(data)
+        return APIUserCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.message:
-        return MessageCommand.from_dict(data)
+        return APIMessageCommand.from_dict(data)
 
     raise TypeError(f"Application command of type {cmd_type} is not valid")
 
@@ -330,39 +336,29 @@ class Option:
 class ApplicationCommand(ABC):
     """
     The base class for application commands
+
+    Attributes
+    ----------
+    type: :class:`ApplicationCommandType`
+        The command type
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
     """
 
-    __slots__ = (
-        "type",
-        "name",
-        "default_permission",
-        "id",
-        "application_id",
-        "guild_id",
-        "version",
-        "_always_synced",
-    )
+    __repr_info__: ClassVar[Tuple[str, ...]] = ("type", "name")
 
     def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
         self.default_permission: bool = default_permission
 
-        self.id: Optional[int] = None
-        self.application_id: Optional[int] = None
-        self.guild_id: Optional[int] = None
-        self.version: Optional[int] = None
-
         self._always_synced: bool = False
 
-    def _update_common(self, data: ApplicationCommandPayload) -> None:
-        self.id = _get_as_snowflake(data, "id")
-        self.application_id = _get_as_snowflake(data, "application_id")
-        self.guild_id = _get_as_snowflake(data, "guild_id")
-        self.version = _get_as_snowflake(data, "version")
-
     def __repr__(self) -> str:
-        return f"<ApplicationCommand type={self.type!r} name={self.name!r}>"
+        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
+        return f"<{type(self).__name__} {attrs}>"
 
     def __eq__(self, other) -> bool:
         return (
@@ -381,8 +377,29 @@ class ApplicationCommand(ABC):
         return data
 
 
+class _APIApplicationCommandMixin:
+    __repr_info__ = ("id",)
+
+    def _update_common(self, data: ApplicationCommandPayload) -> None:
+        self.id: int = int(data["id"])
+        self.application_id: int = int(data["application_id"])
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.version: int = int(data["version"])
+
+
 class UserCommand(ApplicationCommand):
-    __slots__ = ()
+    """
+    A user context menu command
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
+    """
+
+    __repr_info__ = ("name", "default_permission")
 
     def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
@@ -391,16 +408,38 @@ class UserCommand(ApplicationCommand):
             default_permission=default_permission,
         )
 
-    def __repr__(self) -> str:
-        return f"<UserCommand name={self.name!r}>"
+
+class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
+    """
+    A user context menu command returned by the API
+
+    .. versionadded:: 2.4
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
+    id: :class:`int`
+        The command ID
+    application_id: :class:`int`
+        The ID of the application this command belongs to
+    guild_id: Optional[:class:`int`]
+        The guild ID of the command, if not global
+    version: :class:`int`
+        The version identifier of the command, updated on substantial changes
+    """
+
+    __repr_info__ = UserCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> UserCommand:
+    def from_dict(cls, data: ApplicationCommandPayload) -> APIUserCommand:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.user.value:
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
-        self = UserCommand(
+        self = cls(
             name=data["name"],
             default_permission=data.get("default_permission", True),
         )
@@ -409,7 +448,18 @@ class UserCommand(ApplicationCommand):
 
 
 class MessageCommand(ApplicationCommand):
-    __slots__ = ()
+    """
+    A message context menu command
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
+    """
+
+    __repr_info__ = ("name", "default_permission")
 
     def __init__(self, name: str, default_permission: bool = True):
         super().__init__(
@@ -418,16 +468,38 @@ class MessageCommand(ApplicationCommand):
             default_permission=default_permission,
         )
 
-    def __repr__(self) -> str:
-        return f"<MessageCommand name={self.name!r}>"
+
+class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
+    """
+    A message context menu command returned by the API
+
+    .. versionadded:: 2.4
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
+    id: :class:`int`
+        The command ID
+    application_id: :class:`int`
+        The ID of the application this command belongs to
+    guild_id: Optional[:class:`int`]
+        The guild ID of the command, if not global
+    version: :class:`int`
+        The version identifier of the command, updated on substantial changes
+    """
+
+    __repr_info__ = MessageCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> MessageCommand:
+    def from_dict(cls, data: ApplicationCommandPayload) -> APIMessageCommand:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.message.value:
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
-        self = MessageCommand(
+        self = cls(
             name=data["name"],
             default_permission=data.get("default_permission", True),
         )
@@ -441,17 +513,17 @@ class SlashCommand(ApplicationCommand):
 
     Parameters
     ----------
-    name : :class:`str`
+    name: :class:`str`
         The command name
-    description : :class:`str`
-        The command description (it'll be displayed by disnake)
-    options : List[:class:`Option`]
-        The options of the command
-    default_permission : :class:`bool`
+    default_permission: :class:`bool`
         Whether the command is enabled by default when the app is added to a guild
+    description: :class:`str`
+        The command description
+    options: List[:class:`Option`]
+        The options of the command
     """
 
-    __slots__ = ("description", "options")
+    __repr_info__ = ("name", "description", "options", "default_permission")
 
     def __init__(
         self,
@@ -471,12 +543,6 @@ class SlashCommand(ApplicationCommand):
         self.description: str = description
         self.options: List[Option] = options or []
 
-    def __repr__(self) -> str:
-        return (
-            f"<SlashCommand name={self.name!r} description={self.description!r} "
-            f"default_permission={self.default_permission!r} options={self.options!r}>"
-        )
-
     def __str__(self) -> str:
         return f"<SlashCommand name={self.name!r}>"
 
@@ -486,23 +552,6 @@ class SlashCommand(ApplicationCommand):
             and self.description == other.description
             and self.options == other.options
         )
-
-    @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> SlashCommand:
-        cmd_type = data.get("type", 0)
-        if cmd_type != ApplicationCommandType.chat_input.value:
-            raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
-
-        self = SlashCommand(
-            name=data["name"],
-            description=data["description"],
-            default_permission=data.get("default_permission", True),
-            options=_maybe_cast(
-                data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
-            ),
-        )
-        self._update_common(data)
-        return self
 
     def add_option(
         self,
@@ -541,6 +590,52 @@ class SlashCommand(ApplicationCommand):
         res["description"] = self.description
         res["options"] = [o.to_dict() for o in self.options]
         return res
+
+
+class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
+    """
+    A slash command returned by the API
+
+    .. versionadded:: 2.4
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is usable by default
+    description: :class:`str`
+        The command description
+    options: List[:class:`Option`]
+        The options of the command
+    id: :class:`int`
+        The command ID
+    application_id: :class:`int`
+        The ID of the application this command belongs to
+    guild_id: Optional[:class:`int`]
+        The guild ID of the command, if not global
+    version: :class:`int`
+        The version identifier of the command, updated on substantial changes
+    """
+
+    __repr_info__ = SlashCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+
+    @classmethod
+    def from_dict(cls, data: ApplicationCommandPayload) -> APISlashCommand:
+        cmd_type = data.get("type", 0)
+        if cmd_type != ApplicationCommandType.chat_input.value:
+            raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
+
+        self = cls(
+            name=data["name"],
+            description=data["description"],
+            default_permission=data.get("default_permission", True),
+            options=_maybe_cast(
+                data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
+            ),
+        )
+        self._update_common(data)
+        return self
 
 
 class ApplicationCommandPermissions:

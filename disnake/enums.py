@@ -256,6 +256,8 @@ class PartyType(Enum):
     awkword = 879863881349087252
     sketchy_artist = 879864070101172255
     watch_together = 880218394199220334
+    sketch_heads = 902271654783242291
+    ocho = 832025144389533716
 
 
 class VoiceRegion(Enum):

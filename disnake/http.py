@@ -112,20 +112,15 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
     return text
 
 
-def to_multipart(payload: Dict[str, Any], files: Iterable[File]) -> List[Dict[str, Any]]:
-    # NOTE: this method modifies the provided `payload` and `payload["attachments"]` collections
+def set_attachments(payload: Dict[str, Any], files: Sequence[File]) -> None:
+    """
+    Updates the payload's attachments list based on the provided files
+
+    note: this method modifies the provided ``payload`` and ``payload["attachments"]`` collections
+    """
 
     attachments = payload.get("attachments", [])
-    multipart: List[Dict[str, Any]] = []
     for index, file in enumerate(files):
-        multipart.append(
-            {
-                "name": f"files[{index}]",
-                "value": file.fp,
-                "filename": file.filename,
-                "content_type": "application/octet-stream",
-            }
-        )
         attachments.append(
             {
                 "id": index,
@@ -137,8 +132,40 @@ def to_multipart(payload: Dict[str, Any], files: Iterable[File]) -> List[Dict[st
     # didn't add any new ones, don't add the list to the payload.
     if attachments:
         payload["attachments"] = attachments
+
+
+def to_multipart(payload: Dict[str, Any], files: Sequence[File]) -> List[Dict[str, Any]]:
+    """
+    Converts the payload and list of files to a multipart payload,
+    as specified by https://discord.com/developers/docs/reference#uploading-files
+    """
+
+    multipart: List[Dict[str, Any]] = []
+    for index, file in enumerate(files):
+        multipart.append(
+            {
+                "name": f"files[{index}]",
+                "value": file.fp,
+                "filename": file.filename,
+                "content_type": "application/octet-stream",
+            }
+        )
+
     multipart.append({"name": "payload_json", "value": utils._to_json(payload)})
     return multipart
+
+
+def to_multipart_with_attachments(
+    payload: Dict[str, Any], files: Sequence[File]
+) -> List[Dict[str, Any]]:
+    """
+    Updates the payload's attachments and converts it to a multipart payload
+
+    Shorthand for ``set_attachments`` + ``to_multipart``
+    """
+
+    set_attachments(payload, files)
+    return to_multipart(payload, files)
 
 
 class Route:
@@ -225,7 +252,7 @@ class HTTPClient:
                 connector=self.connector, ws_response_class=DiscordClientWebSocketResponse
             )
 
-    async def ws_connect(self, url: str, *, compress: int = 0) -> Any:
+    async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
         kwargs = {
             "proxy_auth": self.proxy_auth,
             "proxy": self.proxy,
@@ -238,7 +265,7 @@ class HTTPClient:
             "compress": compress,
         }
 
-        return await self.__session.ws_connect(url, **kwargs)  # type: ignore
+        return await self.__session.ws_connect(url, **kwargs)
 
     async def request(
         self,
@@ -579,7 +606,7 @@ class HTTPClient:
         if stickers:
             payload["sticker_ids"] = stickers
 
-        multipart = to_multipart(payload, files)
+        multipart = to_multipart_with_attachments(payload, files)
 
         return self.request(route, form=multipart, files=files)
 
@@ -649,7 +676,7 @@ class HTTPClient:
             message_id=message_id,
         )
         if files:
-            multipart = to_multipart(fields, files)
+            multipart = to_multipart_with_attachments(fields, files)
             return self.request(r, form=multipart, files=files)
         return self.request(r, json=fields)
 
@@ -1876,6 +1903,7 @@ class HTTPClient:
         entity_metadata: Optional[Dict[str, Any]] = None,
         scheduled_end_time: Optional[str] = None,
         description: Optional[str] = None,
+        image: Optional[str] = None,
         reason: Optional[str] = None,
     ) -> Response[guild_scheduled_event.GuildScheduledEvent]:
         r = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
@@ -1897,6 +1925,9 @@ class HTTPClient:
 
         if description is not None:
             payload["description"] = description
+
+        if image is not None:
+            payload["image"] = image
 
         return self.request(r, json=payload, reason=reason)
 
@@ -2152,7 +2183,7 @@ class HTTPClient:
             payload["attachments"] = attachments
 
         if file:
-            multipart = to_multipart(payload, [file])
+            multipart = to_multipart_with_attachments(payload, [file])
             return self.request(route, form=multipart, files=[file])
         return self.request(route, json=payload)
 

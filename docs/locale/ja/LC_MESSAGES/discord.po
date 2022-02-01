@@ -176,4 +176,3 @@ msgid ""
 msgstr ""
 "このURLを実行時に動的に生成したい場合は、 :class:`disnake.Permissions` インターフェイスから "
 ":func:`disnake.utils.oauth_url` を使用できます。"
-

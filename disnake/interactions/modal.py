@@ -48,26 +48,25 @@ class ModalInteraction(Interaction):
     ----------
     id: :class:`int`
         The interaction's ID.
-    guild_id: Optional[:class:`int`]
-        The guild ID the interaction was sent from.
-    channel_id: Optional[:class:`int`]
-        The channel ID the interaction was sent from.
+    type: :class:`InteractionType`
+        The interaction type.
     application_id: :class:`int`
         The application ID that the interaction was for.
-    author: Optional[Union[:class:`User`, :class:`Member`]]
+    token: :class:`str`
+        The token to continue the interaction. These are valid
+        for 15 minutes.
+    guild_id: Optional[:class:`int`]
+        The guild ID the interaction was sent from.
+    channel_id: :class:`int`
+        The channel ID the interaction was sent from.
+    author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
     locale: :class:`str`
         The selected language of the interaction's author.
-    guild: Optional[:class:`Guild`]
-        The guild the interaction was sent from.
     guild_locale: Optional[:class:`str`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
-    channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
-        The channel the interaction was sent from.
-    message: Optional[:class:`Message`]
-        The message that sent this interaction.
     me: Union[:class:`.Member`, :class:`.ClientUser`]
         Similar to :attr:`.Guild.me`
     permissions: :class:`Permissions`
@@ -76,13 +75,10 @@ class ModalInteraction(Interaction):
         Returns an object responsible for handling responding to the interaction.
     followup: :class:`Webhook`
         Returns the follow up webhook for follow up interactions.
-    type: :class:`InteractionType`
-        The interaction type.
-    token: :class:`str`
-        The token to continue the interaction. These are valid
-        for 15 minutes.
     data: :class:`ModalInteractionData`
         The wrapped interaction data.
+    client: :class:`Client`
+        The interaction client.
     """
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):

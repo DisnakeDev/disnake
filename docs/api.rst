@@ -1597,6 +1597,16 @@ of :class:`enum.Enum`.
         The "Watch Together" activity, a Youtube application.
 
         .. versionadded:: 2.3
+    .. attribute:: sketch_heads
+
+        The "Sketch Heads" activity.
+
+        .. versionadded:: 2.4
+    .. attribute:: ocho
+
+        The "Ocho" activity.
+
+        .. versionadded:: 2.4
 
 .. class:: ApplicationCommandType
 
@@ -1793,12 +1803,12 @@ of :class:`enum.Enum`.
 
         An alias for :attr:`short`.
     .. attribute:: multiline
-            
+
         An alias for :attr:`paragraph`.
     .. attribute:: long
 
         An alias for :attr:`paragraph`.
-    
+
 
 .. class:: VoiceRegion
 
@@ -3915,6 +3925,30 @@ MessageCommand
 .. autoclass:: MessageCommand()
     :members:
 
+APISlashCommand
+~~~~~~~~~~~~~~~
+
+.. attributetable:: APISlashCommand
+
+.. autoclass:: APISlashCommand()
+    :members:
+
+APIUserCommand
+~~~~~~~~~~~~~~
+
+.. attributetable:: APIUserCommand
+
+.. autoclass:: APIUserCommand()
+    :members:
+
+APIMessageCommand
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: APIMessageCommand
+
+.. autoclass:: APIMessageCommand()
+    :members:
+
 Option
 ~~~~~~
 
@@ -4100,6 +4134,7 @@ Interaction
 
 .. autoclass:: Interaction()
     :members:
+    :inherited-members:
 
 ApplicationCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
