@@ -3386,7 +3386,7 @@ class Guild(Hashable):
                     self,
                     query=None,
                     limit=limit,
-                    user_ids=unresolved_ids[i:i + 100],
+                    user_ids=unresolved_ids[i : i + 100],
                     presences=presences,
                     cache=cache,
                 )
