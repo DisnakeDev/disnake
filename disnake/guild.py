@@ -3323,7 +3323,7 @@ class Guild(Hashable):
 
         Tries to get the guild members matching the provided IDs from cache.
         If some of them were not found, the method requests the missing members using websocket operations.
-        If ``cache`` kwarg is ``True`` (default value) the missing members are cached.
+        If ``cache`` kwarg is ``True`` (default value) the missing members will be cached.
 
         If more than 100 members are missing, several websocket operations are made. Otherwise only one.
 
@@ -3333,7 +3333,7 @@ class Guild(Hashable):
 
         Parameters
         -----------
-        member_ids: :class:`bool`
+        member_ids: List[:class:`int`]
             List of user IDs to search for. If the user ID is not in the guild then it won't be returned.
         presences: :class:`bool`
             Whether to request for presences to be provided. This defaults to ``False``.
