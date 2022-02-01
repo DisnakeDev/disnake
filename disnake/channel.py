@@ -2024,10 +2024,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
         Actual direct messages do not really have the concept of permissions.
 
-        This returns all the Text related permissions set to ``True`` except:
-
-        - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
-        - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        This returns all the :meth:`Permissions.private_channel` set to ``True``.
 
         Parameters
         -----------
@@ -2045,11 +2042,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
             The resolved permissions.
         """
 
-        base = Permissions.text()
-        base.read_messages = True
-        base.send_tts_messages = False
-        base.manage_messages = False
-        return base
+        return Permissions.private_channel()
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
         """Creates a :class:`PartialMessage` from the message ID.
@@ -2181,10 +2174,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
 
         Actual direct messages do not really have the concept of permissions.
 
-        This returns all the Text related permissions set to ``True`` except:
-
-        - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
-        - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        This returns all the :meth:`Permissions.private_channel` set to ``True``.
 
         This also checks the kick_members permission if the user is the owner.
 
@@ -2203,11 +2193,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
             The resolved permissions for the user.
         """
 
-        base = Permissions.text()
-        base.read_messages = True
-        base.send_tts_messages = False
-        base.manage_messages = False
-        base.mention_everyone = True
+        base = Permissions.private_channel()
 
         if obj.id == self.owner_id:
             base.kick_members = True
