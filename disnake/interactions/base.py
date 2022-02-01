@@ -178,7 +178,6 @@ class Interaction:
         self.guild_locale: Optional[str] = data.get("guild_locale")
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
-        self._permissions: int = 0
 
         if self.guild_id and (member := data.get("member")):
             guild: Guild = self.guild or Object(id=self.guild_id)  # type: ignore
@@ -190,6 +189,7 @@ class Interaction:
             self._permissions = int(member.get("permissions", 0))
         elif user := data.get("user"):
             self.author = self._state.store_user(user)
+            self._permissions = None
 
     @property
     def bot(self) -> AnyBot:
@@ -243,9 +243,11 @@ class Interaction:
     def permissions(self) -> Permissions:
         """:class:`Permissions`: The resolved permissions of the member in the channel, including overwrites.
 
-        In a non-guild context where this doesn't apply, an empty permissions object is returned.
+        In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
         """
-        return Permissions(self._permissions)
+        if self._permissions is not None:
+            return Permissions(self._permissions)
+        return Permissions.private_channel()
 
     @utils.cached_slot_property("_cs_response")
     def response(self) -> InteractionResponse:
