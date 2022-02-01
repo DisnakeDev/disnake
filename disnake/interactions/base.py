@@ -1048,16 +1048,16 @@ class InteractionResponse:
         self._responded = True
 
     @overload
-    async def send_modal(self, modal: Modal = None) -> None:
+    async def send_modal(self, modal: Modal) -> None:
         ...
 
     @overload
     async def send_modal(
         self,
         *,
-        title: str = None,
-        custom_id: str = None,
-        components: Components = None,
+        title: str,
+        custom_id: str,
+        components: Components,
     ) -> None:
         ...
 
