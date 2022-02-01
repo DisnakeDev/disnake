@@ -64,13 +64,12 @@ from .enums import (
     GuildScheduledEventPrivacyLevel,
     NotificationLevel,
     NSFWLevel,
-    StagePrivacyLevel,
     VerificationLevel,
     VideoQualityMode,
     VoiceRegion,
     try_enum,
 )
-from .errors import ClientException, InvalidArgument, InvalidData
+from .errors import ClientException, HTTPException, InvalidArgument, InvalidData
 from .file import File
 from .flags import SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
@@ -2714,6 +2713,8 @@ class Guild(Hashable):
         Tries to get a member from the cache by ID. If fails, it fetches
         the user from the API and caches it.
 
+        If you want to make a bulk get-or-fetch call, use :meth:`get_or_fetch_members`.
+
         Parameters
         -----------
         member_id: :class:`int`
@@ -3294,13 +3295,13 @@ class Guild(Hashable):
             raise ClientException("Intents.presences must be enabled to use this.")
 
         if query is None:
-            if query == "":
-                raise ValueError("Cannot pass empty query string.")
-
             if user_ids is None:
                 raise ValueError("Must pass either query or user_ids")
 
-        if user_ids is not None and query is not None:
+        elif query == "":
+            raise ValueError("Cannot pass empty query string.")
+
+        elif user_ids is not None:
             raise ValueError("Cannot pass both query and user_ids")
 
         if user_ids is not None and not user_ids:
@@ -3310,6 +3311,89 @@ class Guild(Hashable):
         return await self._state.query_members(
             self, query=query, limit=limit, user_ids=user_ids, presences=presences, cache=cache
         )
+
+    async def get_or_fetch_members(
+        self,
+        member_ids: List[int],
+        *,
+        presences: bool = False,
+        cache: bool = True,
+    ) -> List[Member]:
+        """|coro|
+
+        Tries to get the guild members matching the provided IDs from cache.
+        If some of them were not found, the method requests the missing members using websocket operations.
+        If ``cache`` kwarg is ``True`` (default value) the missing members are cached.
+
+        If more than 100 members are missing, several websocket operations are made. Otherwise only one.
+
+        Websocket operations can be slow, however, this method is cheaper than multiple :meth:`get_or_fetch_member` calls.
+
+        .. versionadded:: 2.4
+
+        Parameters
+        -----------
+        member_ids: :class:`bool`
+            List of user IDs to search for. If the user ID is not in the guild then it won't be returned.
+        presences: :class:`bool`
+            Whether to request for presences to be provided. This defaults to ``False``.
+        cache: :class:`bool`
+            Whether to cache the missing members internally. This makes operations
+            such as :meth:`get_member` work for those that matched.
+            It also speeds up this method on repeated calls. Defaults to ``True``.
+
+        Raises
+        -------
+        asyncio.TimeoutError
+            The query timed out waiting for the members.
+        ClientException
+            The presences intent is not enabled.
+
+        Returns
+        --------
+        List[:class:`Member`]
+            The list of members that have matched the IDs.
+        """
+        if presences and not self._state._intents.presences:
+            raise ClientException("Intents.presences must be enabled to use this.")
+
+        members: List[Member] = []
+        unresolved_ids: List[int] = []
+
+        for member_id in member_ids:
+            member = self.get_member(member_id)
+            if member is None:
+                unresolved_ids.append(member_id)
+            else:
+                members.append(member)
+
+        if not unresolved_ids:
+            return members
+
+        if len(unresolved_ids) == 1:
+            # fetch_member is cheaper than query_members
+            try:
+                members.append(await self.fetch_member(unresolved_ids[0]))
+            except HTTPException:
+                pass
+        else:
+            # We have to split the request into several smaller requests
+            # because the limit is 100 members per request.
+            # Imo no one should ever request more than 100 members using this method.
+            for i in range(0, len(unresolved_ids), 100):
+                limit = min(100, len(unresolved_ids) - i)
+                members += await self._state.query_members(
+                    self,
+                    query=None,
+                    limit=limit,
+                    user_ids=unresolved_ids[i:i + 100],
+                    presences=presences,
+                    cache=cache,
+                )
+
+        return members
+
+    getch_members = get_or_fetch_members
 
     async def change_voice_state(
         self, *, channel: Optional[Snowflake], self_mute: bool = False, self_deaf: bool = False
