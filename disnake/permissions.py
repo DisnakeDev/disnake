@@ -25,6 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+from functools import wraps
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -62,6 +63,7 @@ def make_permission_alias(alias: str) -> Callable[[Callable[[Any], int]], permis
 
 
 def cached_creation(func):
+    @wraps(func)
     def wrapped(cls):
         try:
             value = func.__stored_value__
