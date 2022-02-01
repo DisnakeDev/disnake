@@ -85,14 +85,6 @@ class Modal:
             f"components={self.components!r}>"
         )
 
-    @overload
-    def append_component(self, component: List[InputText]) -> None:
-        ...
-
-    @overload
-    def append_component(self, component: InputText) -> None:
-        ...
-
     def append_component(self, component: Union[InputText, List[InputText]]) -> None:
         """Adds a component to the modal.
 
