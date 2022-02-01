@@ -377,6 +377,34 @@ class Permissions(BaseFlags):
             administrator=True,
         )
 
+    @classmethod
+    @cached_creation
+    def private_channel(cls: Type[P]) -> P:
+        """A factor method that creates a :class:`Permissions` with the
+        best representation of a PrivateChannel's permissions.
+
+        This exists to maintain compatibility with other channel types.
+
+        This is equivalent to :meth:`Permissions.text` with :attr:`~Permissions.view_channel` with the following set to False:
+        - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
+        - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        - :attr:`~Permissions.manage_threads`: You cannot manage threads in a DM.
+        - :attr:`~Permissions.send_messages_in_threads`: You cannot make threads in a DM.
+        - :attr:`~Permissions.create_public_threads`: You cannot make public threads in a DM.
+        - :attr:`~Permissions.create_private_threads`: You cannot make private threads in a DM.
+
+        .. versionadded:: 2.4
+        """
+        base = cls.text()
+        base.read_messages = True
+        base.send_tts_messages = False
+        base.manage_messages = False
+        base.manage_threads = False
+        base.send_messages_in_threads = False
+        base.create_private_threads = False
+        base.create_private_threads = False
+        return base
+
     def update(self, **kwargs: bool) -> None:
         r"""Bulk updates this permission object.
 
