@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, TypeVar, Union
 
+from .. import utils
 from ..channel import _threaded_channel_factory
 from ..enums import ApplicationCommandType, OptionType, try_enum
 from ..guild import Guild
@@ -31,7 +32,6 @@ from ..member import Member
 from ..message import Attachment, Message
 from ..role import Role
 from ..user import User
-from ..utils import MISSING
 from .base import Interaction
 
 __all__ = (
@@ -52,6 +52,8 @@ __all__ = (
     "AppCmdInter",
 )
 
+MISSING = utils.MISSING
+
 if TYPE_CHECKING:
     from ..channel import (
         CategoryChannel,
@@ -61,16 +63,14 @@ if TYPE_CHECKING:
         TextChannel,
         VoiceChannel,
     )
-    from ..ext.commands import AutoShardedBot, Bot, InvokableApplicationCommand
+    from ..ext.commands import InvokableApplicationCommand
     from ..state import ConnectionState
     from ..threads import Thread
     from ..types.interactions import (
+        ApplicationCommandInteraction as ApplicationCommandInteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
         ApplicationCommandInteractionDataResolved as ApplicationCommandInteractionDataResolvedPayload,
-        Interaction as InteractionPayload,
     )
-
-    BotBase = Union[Bot, AutoShardedBot]
 
     InteractionChannel = Union[
         VoiceChannel,
@@ -100,30 +100,26 @@ class ApplicationCommandInteraction(Interaction):
         The interaction's ID.
     type: :class:`InteractionType`
         The interaction type.
-    guild_id: Optional[:class:`int`]
-        The guild ID the interaction was sent from.
-    channel_id: Optional[:class:`int`]
-        The channel ID the interaction was sent from.
     application_id: :class:`int`
         The application ID that the interaction was for.
-    bot: Optional[:class:`.Bot`]
-        The interaction's bot. There is an alias for this named ``client``.
-    author: Optional[Union[:class:`User`, :class:`Member`]]
+    token: :class:`str`
+        The token to continue the interaction. These are valid for 15 minutes.
+    guild_id: Optional[:class:`int`]
+        The guild ID the interaction was sent from.
+    channel_id: :class:`int`
+        The channel ID the interaction was sent from.
+    author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
     locale: :class:`str`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
-    guild: Optional[:class:`Guild`]
-        The guild the interaction was sent from.
     guild_locale: Optional[:class:`str`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
-    channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
-        The channel the interaction was sent from.
     me: Union[:class:`.Member`, :class:`.ClientUser`]
         Similar to :attr:`.Guild.me`
     permissions: :class:`Permissions`
@@ -132,19 +128,16 @@ class ApplicationCommandInteraction(Interaction):
         Returns an object responsible for handling responding to the interaction.
     followup: :class:`Webhook`
         Returns the follow up webhook for follow up interactions.
-    token: :class:`str`
-        The token to continue the interaction. These are valid
-        for 15 minutes.
     data: :class:`ApplicationCommandInteractionData`
         The wrapped interaction data.
+    client: :class:`Client`
+        The interaction client.
     """
 
-    bot: BotBase
-
-    def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
         self.data = ApplicationCommandInteractionData(
-            data=data["data"], state=state, guild=self.guild  # type: ignore
+            data=data["data"], state=state, guild=self.guild
         )
         self.application_command: InvokableApplicationCommand = MISSING
         self.command_failed: bool = False
@@ -241,12 +234,11 @@ class ApplicationCommandInteractionData:
     ):
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data.get("type"))
+        self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
         self.resolved = ApplicationCommandInteractionDataResolved(
             data=data.get("resolved", {}), state=state, guild=guild
         )
-        target_id = data.get("target_id")
-        self.target_id: Optional[int] = None if target_id is None else int(target_id)
+        self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
         self.target: Optional[Union[User, Member, Message]] = self.resolved.get(self.target_id)  # type: ignore
         self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
@@ -404,7 +396,8 @@ class ApplicationCommandInteractionDataResolved:
                     guild
                     and guild.get_member(user_id)
                     or Member(
-                        data={**member, "user": user},  # type: ignore
+                        data=member,
+                        user_data=user,
                         guild=guild,  # type: ignore
                         state=state,
                     )

@@ -61,11 +61,16 @@ from . import errors
 from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
+    from disnake.app_commands import Choices
+    from disnake.types.interactions import ApplicationCommandOptionChoiceValue
+
     from .slash_core import InvokableSlashCommand, SubCommand
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 
     from typing_extensions import TypeGuard
+
+    TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
 
 if sys.version_info >= (3, 10):
     from types import UnionType
@@ -75,12 +80,10 @@ else:
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
 CallableT = TypeVar("CallableT", bound=Callable[..., Any])
-ChoiceValue = Union[str, int, float]
-Choices = Union[List[OptionChoice], List[ChoiceValue], Dict[str, ChoiceValue]]
-TChoice = TypeVar("TChoice", bound=ChoiceValue)
 
 __all__ = (
     "Range",
+    "LargeInt",
     "ParamInfo",
     "Param",
     "param",
@@ -257,6 +260,10 @@ class Range(type, metaclass=RangeMeta):
         return f"{type(self).__name__}[{a}, {b}]"
 
 
+class LargeInt(int):
+    """Type for large integers in slash commands."""
+
+
 class ParamInfo:
     """
     A class that basically connects function params with slash command options.
@@ -271,7 +278,7 @@ class ParamInfo:
         The name of this slash command option.
     description: :class:`str`
         The description of this slash command option.
-    choices: Iterable[Any]
+    choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of choices of this slash command option.
     ge: :class:`float`
         The lowest allowed value for this option.
@@ -362,7 +369,7 @@ class ParamInfo:
         cls,
         param: inspect.Parameter,
         type_hints: Dict[str, Any],
-        parsed_docstring: Dict[str, Any] = None,
+        parsed_docstring: Dict[str, disnake.utils._DocstringParam] = None,
     ) -> ParamInfo:
         # hopefully repeated parsing won't cause any problems
         parsed_docstring = parsed_docstring or {}
@@ -406,7 +413,7 @@ class ParamInfo:
 
     async def verify_type(self, inter: CommandInteraction, argument: Any) -> Any:
         """Check if a type of an argument is correct and possibly fix it"""
-        if issubclass(self.type, disnake.Member):
+        if issubclass_(self.type, disnake.Member):
             if isinstance(argument, disnake.Member):
                 return argument
 
@@ -444,7 +451,11 @@ class ParamInfo:
 
         self.type = type(self.choices[0].value)
 
-    def _parse_guild_channel(self, *channels: Type[disnake.abc.GuildChannel]) -> None:
+    def _parse_guild_channel(
+        self, *channels: Union[Type[disnake.abc.GuildChannel], Type[disnake.Thread]]
+    ) -> None:
+        # this variable continues to be GuildChannel because the type is still
+        # determined from the TYPE mapping in the class definition
         self.type = disnake.abc.GuildChannel
 
         if not self.channel_types:
@@ -476,11 +487,14 @@ class ParamInfo:
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
+        if issubclass_(annotation, LargeInt):
+            self.large = True
+            annotation = int
 
         if self.large:
             self.type = str
             if annotation is not int:
-                raise TypeError("Large integers must be annotated with int")
+                raise TypeError("Large integers must be annotated with int or LargeInt")
         elif annotation in self.TYPES:
             self.type = annotation
         elif (
@@ -490,13 +504,15 @@ class ParamInfo:
             self._parse_enum(annotation)
         elif get_origin(annotation) in (Union, UnionType):
             args = annotation.__args__
-            if all(issubclass_(channel, disnake.abc.GuildChannel) for channel in args):
+            if all(
+                issubclass_(channel, (disnake.abc.GuildChannel, disnake.Thread)) for channel in args
+            ):
                 self._parse_guild_channel(*args)
             else:
                 raise TypeError(
                     "Unions for anything else other than channels or a mentionable are not supported"
                 )
-        elif issubclass_(annotation, disnake.abc.GuildChannel):
+        elif issubclass_(annotation, (disnake.abc.GuildChannel, disnake.Thread)):
             self._parse_guild_channel(annotation)
         elif issubclass_(get_origin(annotation), collections.abc.Sequence):
             raise TypeError(
@@ -825,7 +841,7 @@ def Param(
     description: :class:`str`
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
-    choices: Iterable[Any]
+    choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.
     converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.
@@ -904,8 +920,7 @@ def option_enum(
     choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
 ) -> Type[TChoice]:
     if isinstance(choices, list):
-        # invariance issue, please fix
-        choices = cast(Dict[str, TChoice], {str(i): i for i in choices})
+        choices = {str(i): i for i in choices}
 
     choices = choices or kwargs
     first, *_ = choices.values()
