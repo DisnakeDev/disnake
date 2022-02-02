@@ -358,9 +358,13 @@ class ApplicationCommandInteractionDataResolved:
         IDs and roles
     channels: Dict[:class:`int`, :class:`Channel`]
         IDs and partial channels (only ``id``, ``name`` and ``permissions`` are included,
-        threads also have ``thread_metadata`` and ``parent_id``).
+        threads also have ``thread_metadata`` and ``parent_id``)
     messages: Dict[:class:`int`, :class:`Message`]
         IDs and messages
+    attachments: Dict[:class:`int`, :class:`Attachment`]
+        IDs and attachments
+
+        .. versionadded:: 2.4
     """
 
     __slots__ = ("members", "users", "roles", "channels", "messages", "attachments")
