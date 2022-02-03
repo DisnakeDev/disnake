@@ -168,7 +168,7 @@ class Modal:
             )
         )
 
-    async def callback(self, interaction: ModalInteraction) -> None:
+    async def callback(self, interaction: ModalInteraction, /) -> None:
         """|coro|
 
         The callback associated with this modal.
