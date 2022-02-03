@@ -327,13 +327,13 @@ class ParamInfo:
         if self.discord_type.value in [3, 4, 5, 8, 9, 10]:
             return argument
 
-        if issubclass(self.type, disnake.Member):
+        if issubclass_(self.type, disnake.Member):
             if isinstance(argument, disnake.Member):
                 return argument
 
             raise errors.MemberNotFound(str(argument.id))
 
-        if issubclass(self.type, disnake.abc.GuildChannel):
+        if issubclass_(self.type, disnake.abc.GuildChannel):
             if isinstance(argument, self.type):
                 return argument
 
