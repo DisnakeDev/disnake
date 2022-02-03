@@ -53,8 +53,8 @@ class ModalInteraction(Interaction):
     application_id: :class:`int`
         The application ID that the interaction was for.
     token: :class:`str`
-        The token to continue the interaction. These are valid
-        for 15 minutes.
+        The token to continue the interaction.
+        These are valid for 15 minutes.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
     channel_id: :class:`int`

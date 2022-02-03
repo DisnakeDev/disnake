@@ -91,18 +91,18 @@ class Modal:
         Parameters
         ----------
         component: Union[:class:`~.ui.InputText`, List[:class:`~.ui.InputText`]]
-            The component to add to the modal.
+            The component(s) to add to the modal.
             This can be a single component or a list of components.
 
         Raises
         ------
         ValueError
-            Maximum of components exceeded. (5)
+            Maximum number of components (5) exceeded.
         TypeError
             An :class:`InputText` object was not passed.
         """
         if len(self.components) == 5:
-            raise ValueError("maximum of components exceeded.")
+            raise ValueError("maximum number of components exceeded.")
 
         if not isinstance(component, list):
             component = [component]
@@ -110,7 +110,7 @@ class Modal:
         for c in component:
             if not isinstance(c, InputText):
                 raise TypeError(
-                    f"component must be of type InputText or a list of InputText, not {c.__class__.__name__}."
+                    f"component must be of type InputText or a list of InputText, not {type(c).__name__}."
                 )
             try:
                 self.components[-1].append_item(c)
@@ -128,7 +128,7 @@ class Modal:
         required: bool = True,
         min_length: int = 0,
         max_length: Optional[int] = None,
-    ):
+    ) -> None:
         """Adds an input text component to the modal.
 
         To append a pre-existing :class:`disnake.ui.InputText` use the
@@ -246,8 +246,8 @@ class ModalStore:
         return self._modals.pop((user_id, modal_custom_id))
 
     async def handle_timeout(self, user_id: int, modal_custom_id: str, timeout: float) -> None:
-        # Waits 10 minutes and then removes the modal from cache, this is done just in case the user closed the modal,
-        # as there isn't an event for that.
+        # Waits for the timeout and then removes the modal from cache, this is done just in case
+        # the user closed the modal, as there isn't an event for that.
 
         await asyncio.sleep(timeout)
         try:

@@ -1065,26 +1065,26 @@ class InteractionResponse:
         Parameters
         ----------
         modal: :class:`~.ui.Modal`
-            The modal to display. This cannot be mixed with ``title``, ``custom_id``, and ``components`` parameters.
+            The modal to display. This cannot be mixed with the ``title``, ``custom_id``, and ``components`` parameters.
         title: :class:`str`
-            The title of the modal. This cannot be mixed with ``modal`` parameter.
+            The title of the modal. This cannot be mixed with the ``modal`` parameter.
         custom_id: :class:`str`
             The ID of the modal that gets received during an interaction.
-            This cannot be mixed with ``modal`` parameter.
+            This cannot be mixed with the ``modal`` parameter.
         components: |components_type|
             The components to display in the modal. A maximum of 5.
-            This cannot be mixed with ``modal`` parameter.
+            This cannot be mixed with the ``modal`` parameter.
 
         Raises
         ------
         TypeError
-            Cannot mix ``modal`` parameter and ``title``, ``custom_id``, ``components`` parameters.
+            Cannot mix the ``modal`` parameter and the ``title``, ``custom_id``, ``components`` parameters.
         ValueError
-            Maximum of components exceeded. (5)
+            Maximum number of components (5) exceeded.
         HTTPException
             Displaying the modal failed.
         ModalInteractionException
-            This interaction can't be responded with a modal.
+            This interaction cannot be responded with a modal.
         InteractionResponded
             This interaction has already been responded to before.
         """

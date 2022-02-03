@@ -36,7 +36,7 @@ __all__ = ("InputText",)
 class InputText(WrappedComponent):
     """Represents a UI input text.
 
-    This can only be used in :class:`~.ui.Modal`.
+    This can only be used in a :class:`~.ui.Modal`.
 
     .. versionadded:: 2.4
 
