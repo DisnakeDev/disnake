@@ -45,7 +45,6 @@ from typing import (
 )
 
 import disnake
-from disnake import utils
 from disnake.app_commands import (
     ApplicationCommand,
     Option,
@@ -86,7 +85,7 @@ if TYPE_CHECKING:
 
 __all__ = ("InteractionBotBase",)
 
-MISSING: Any = utils.MISSING
+MISSING: Any = disnake.utils.MISSING
 
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
@@ -162,7 +161,8 @@ class InteractionBotBase(CommonBotBase):
     ):
         super().__init__(**options)
 
-        utils.validate_guild_ids(test_guilds) if test_guilds else None
+        if not all(isinstance(guild_id, int) for guild_id in test_guilds):
+            raise ValueError("test_guilds must be a sequence of int.")
 
         self._test_guilds: Optional[Sequence[int]] = test_guilds
         self._sync_commands: bool = sync_commands

@@ -595,11 +595,6 @@ def compute_timedelta(dt: datetime.datetime):
     return max((dt - now).total_seconds(), 0)
 
 
-def validate_guild_ids(guild_ids: Iterable[int]) -> None:
-    if not all(isinstance(guild_id, int) for guild_id in guild_ids):
-        raise ValueError("test_guilds or guild_ids must be a sequence of int.")
-
-
 async def sleep_until(when: datetime.datetime, result: Optional[T] = None) -> Optional[T]:
     """|coro|
 
