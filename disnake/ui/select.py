@@ -78,6 +78,10 @@ class Select(Item[V]):
 
     .. versionadded:: 2.0
 
+    .. versionchanged:: 2.4
+        Parameter `options` now also accepts a list of str or a dict of str to str,
+        which are then appropriately parsed as :class:`SelectOption` labels and values.
+
     Parameters
     ------------
     custom_id: :class:`str`
