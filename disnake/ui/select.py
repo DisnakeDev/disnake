@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import inspect
 import os
-from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
@@ -49,6 +49,24 @@ if TYPE_CHECKING:
 
 S = TypeVar("S", bound="Select")
 V = TypeVar("V", bound="View", covariant=True)
+
+
+def _parse_select_options(
+    options: Union[List[SelectOption], List[str], Dict[str, str]]
+) -> List[SelectOption]:
+    is_opt = (isinstance(opt, SelectOption) for opt in options)
+    if any(is_opt):
+        if all(is_opt):
+            return options
+        raise TypeError("options must either all be SelectOptions or all be str")
+
+    if isinstance(options, list):
+        return [SelectOption(label=opt) for opt in options]
+
+    if isinstance(options, dict):
+        return [SelectOption(label=key, value=val) for key, val in options.items()]
+
+    raise TypeError("options must be a list of SelectOption or str, or a dict mapping str to str")
 
 
 class Select(Item[V]):
@@ -73,8 +91,10 @@ class Select(Item[V]):
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: List[:class:`disnake.SelectOption`]
-        A list of options that can be selected in this menu.
+    options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+        A list of options that can be selected in this menu. Use explicit :class:`SelectOption`s
+        for fine-grained control over the options. Alternatively, a list of strings will be treated
+        as a list of labels, and a dict will be treated as a mapping of labels to values.
     disabled: :class:`bool`
         Whether the select is disabled or not.
     row: Optional[:class:`int`]
@@ -100,7 +120,7 @@ class Select(Item[V]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: List[SelectOption] = MISSING,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
         disabled: bool = False,
         row: Optional[int] = None,
     ) -> None:
@@ -108,7 +128,7 @@ class Select(Item[V]):
         self._selected_values: List[str] = []
         self._provided_custom_id = custom_id is not MISSING
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        options = [] if options is MISSING else options
+        options = [] if options is MISSING else _parse_select_options(options)
         self._underlying = SelectMenu._raw_construct(
             custom_id=custom_id,
             type=ComponentType.select,
@@ -295,7 +315,7 @@ def select(
     custom_id: str = MISSING,
     min_values: int = 1,
     max_values: int = 1,
-    options: List[SelectOption] = MISSING,
+    options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
     disabled: bool = False,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType], DecoratedItem[Select]]:
@@ -327,8 +347,10 @@ def select(
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: List[:class:`disnake.SelectOption`]
-        A list of options that can be selected in this menu.
+    options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+        A list of options that can be selected in this menu. Use explicit :class:`SelectOption`s
+        for fine-grained control over the options. Alternatively, a list of strings will be treated
+        as a list of labels, and a dict will be treated as a mapping of labels to values.
     disabled: :class:`bool`
         Whether the select is disabled or not. Defaults to ``False``.
     """
@@ -344,7 +366,7 @@ def select(
             "row": row,
             "min_values": min_values,
             "max_values": max_values,
-            "options": options,
+            "options": _parse_select_options(options),
             "disabled": disabled,
         }
         return func  # type: ignore
