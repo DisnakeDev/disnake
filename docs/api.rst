@@ -706,6 +706,19 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param interaction: The interaction object.
     :type interaction: :class:`ApplicationCommandInteraction`
 
+.. function:: on_modal_submit(interaction)
+
+    Called when a modal is submitted.
+
+    .. warning::
+
+        Consider using the callbacks associated with the :class:`~disnake.ui.Modal` instead.
+
+    .. versionadded:: 2.4
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`ModalInteraction`
+
 .. function:: on_private_channel_update(before, after)
 
     Called whenever a private group DM is updated. e.g. changed name or topic.
