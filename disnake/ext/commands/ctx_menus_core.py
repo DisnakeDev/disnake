@@ -235,7 +235,7 @@ def user_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        if not all(isinstance(guild_id, int) for guild_id in guild_ids):
+        if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
             raise ValueError("guild_ids must be a sequence of int.")
         return InvokableUserCommand(
             func,
@@ -296,7 +296,7 @@ def message_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        if not all(isinstance(guild_id, int) for guild_id in guild_ids):
+        if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
             raise ValueError("guild_ids must be a sequence of int.")
         return InvokableMessageCommand(
             func,
