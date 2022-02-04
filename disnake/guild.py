@@ -101,6 +101,7 @@ if TYPE_CHECKING:
     from .template import Template
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
     from .types.integration import IntegrationType
+    from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload
     from .types.voice import GuildVoiceState
     from .voice_client import VoiceProtocol
@@ -2476,7 +2477,7 @@ class Guild(Hashable):
         name: :class:`str`
             The sticker name. Must be at least 2 characters.
         description: Optional[:class:`str`]
-            The sticker's description. Can be ``None``.
+            The sticker's description. You can pass ``None`` or an empty string to not set a description.
         emoji: :class:`str`
             The name of a unicode emoji that represents the sticker's expression.
         file: :class:`File`
@@ -2496,12 +2497,10 @@ class Guild(Hashable):
         :class:`GuildSticker`
             The created sticker.
         """
-        payload: Any = {
-            "name": name,
-        }
+        if description is None:
+            description = ""
 
-        if description:
-            payload["description"] = description
+        payload: CreateStickerPayload = {"name": name, "description": description}  # type: ignore
 
         try:
             emoji = unicodedata.name(emoji)
