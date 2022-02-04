@@ -535,12 +535,21 @@ class ViewStore:
 
     def dispatch(self, interaction: MessageInteraction):
         self.__verify_integrity()
-        message_id: Optional[int] = interaction.message and interaction.message.id
+
+        # this can be None, message.id or message.interaction.id
+        main_id: Optional[int]
+        if interaction.message is None:
+            main_id = None
+        elif interaction.message.interaction is None:
+            main_id = interaction.message.id
+        else:
+            main_id = interaction.message.interaction.id
+
         component_type = try_enum_to_int(interaction.data.component_type)
         custom_id = interaction.data.custom_id
-        key = (component_type, message_id, custom_id)
-        # Fallback to None message_id searches in case a persistent view
-        # was added without an associated message_id
+        key = (component_type, main_id, custom_id)
+        # Fallback to None main_id searches in case a persistent view
+        # was added without an associated main_id
         value = self._views.get(key) or self._views.get((component_type, None, custom_id))
         if value is None:
             return
