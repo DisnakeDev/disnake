@@ -914,7 +914,15 @@ class InteractionResponse:
         parent = self._parent
         msg: Optional[Message] = getattr(parent, "message", None)
         state = parent._state
-        message_id = msg.id if msg else None
+
+        id_for_view: Optional[int]
+        if msg is None:
+            id_for_view = None
+        elif msg.interaction is None:
+            id_for_view = msg.id
+        else:
+            id_for_view = msg.interaction.id
+
         if parent.type is not InteractionType.component:
             return
 
@@ -961,8 +969,8 @@ class InteractionResponse:
             raise TypeError("cannot mix view and components keyword arguments")
 
         if view is not MISSING:
-            if message_id:
-                state.prevent_view_updates_for(message_id)
+            if id_for_view:
+                state.prevent_view_updates_for(id_for_view)
             payload["components"] = [] if view is None else view.to_components()
 
         if components is not MISSING:
@@ -984,7 +992,7 @@ class InteractionResponse:
                     f.close()
 
         if view and not view.is_finished():
-            state.store_view(view, message_id)
+            state.store_view(view, id_for_view)
 
         self._responded = True
 
