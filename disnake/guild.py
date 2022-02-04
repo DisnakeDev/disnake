@@ -2500,8 +2500,6 @@ class Guild(Hashable):
         if description is None:
             description = ""
 
-        payload: CreateStickerPayload = {"name": name, "description": description}  # type: ignore
-
         try:
             emoji = unicodedata.name(emoji)
         except TypeError:
@@ -2509,7 +2507,7 @@ class Guild(Hashable):
         else:
             emoji = emoji.replace(" ", "_")
 
-        payload["tags"] = emoji
+        payload: CreateStickerPayload = {"name": name, "description": description, "tags": emoji}
 
         data = await self._state.http.create_guild_sticker(self.id, payload, file, reason=reason)
         return self._state.store_sticker(self, data)
