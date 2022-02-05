@@ -434,10 +434,10 @@ class Interaction:
         message = InteractionMessage(state=state, channel=self.channel, data=data)  # type: ignore
 
         if view and not view.is_finished():
-            if self.response._responded is InteractionResponseType.deferred_message_update:
-                key_id = self.message.interaction.id  # type: ignore
-            else:
+            if message.interaction is None:
                 key_id = message.id
+            else:
+                key_id = message.interaction.id
             self._state.store_view(view, key_id)
 
         return message
@@ -566,7 +566,7 @@ class Interaction:
         ValueError
             The length of ``embeds`` was invalid.
         """
-        if self.response.is_done():
+        if self.response._responded:
             sender = self.followup.send
         else:
             sender = self.response.send_message
@@ -600,7 +600,7 @@ class InteractionResponse:
 
     def __init__(self, parent: Interaction):
         self._parent: Interaction = parent
-        self._responded: Optional[InteractionResponseType] = None
+        self._responded: bool = False
 
     def is_done(self) -> bool:
         """Indicates whether an interaction response has been done before.
@@ -609,7 +609,7 @@ class InteractionResponse:
 
         :return type: :class:`bool`
         """
-        return self._responded is not None
+        return self._responded
 
     async def defer(self, *, ephemeral: bool = False, with_message: bool = False) -> None:
         """|coro|
@@ -638,25 +638,25 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self.is_done():
+        if self._responded:
             raise InteractionResponded(self._parent)
 
-        defer_type: Optional[InteractionResponseType] = None
+        defer_type: int = 0
         data: Optional[Dict[str, Any]] = None
         parent = self._parent
         if parent.type is InteractionType.application_command or with_message:
-            defer_type = InteractionResponseType.deferred_channel_message
+            defer_type = InteractionResponseType.deferred_channel_message.value
             if ephemeral:
                 data = {"flags": 64}
         elif parent.type is InteractionType.component:
-            defer_type = InteractionResponseType.deferred_message_update
+            defer_type = InteractionResponseType.deferred_message_update.value
 
         if defer_type:
             adapter = async_context.get()
             await adapter.create_interaction_response(
-                parent.id, parent.token, session=parent._session, type=defer_type.value, data=data
+                parent.id, parent.token, session=parent._session, type=defer_type, data=data
             )
-            self._responded = defer_type
+            self._responded = True
 
     async def pong(self) -> None:
         """|coro|
@@ -672,7 +672,7 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self.is_done():
+        if self._responded:
             raise InteractionResponded(self._parent)
 
         parent = self._parent
@@ -684,7 +684,7 @@ class InteractionResponse:
                 session=parent._session,
                 type=InteractionResponseType.pong.value,
             )
-            self._responded = InteractionResponseType.pong
+            self._responded = True
 
     async def send_message(
         self,
@@ -750,7 +750,7 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self.is_done():
+        if self._responded:
             raise InteractionResponded(self._parent)
 
         payload: Dict[str, Any] = {
@@ -830,7 +830,7 @@ class InteractionResponse:
                 for f in files:
                     f.close()
 
-        self._responded = InteractionResponseType.channel_message
+        self._responded = True
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
@@ -914,20 +914,20 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self.is_done():
+        if self._responded:
             raise InteractionResponded(self._parent)
 
         parent = self._parent
         msg: Optional[Message] = getattr(parent, "message", None)
         state = parent._state
 
-        id_for_view: Optional[int]
+        key_id: Optional[int]
         if msg is None:
-            id_for_view = None
+            key_id = None
         elif msg.interaction is None:
-            id_for_view = msg.id
+            key_id = msg.id
         else:
-            id_for_view = msg.interaction.id
+            key_id = msg.interaction.id
 
         if parent.type is not InteractionType.component:
             return
@@ -975,8 +975,8 @@ class InteractionResponse:
             raise TypeError("cannot mix view and components keyword arguments")
 
         if view is not MISSING:
-            if id_for_view:
-                state.prevent_view_updates_for(id_for_view)
+            if key_id:
+                state.prevent_view_updates_for(key_id)
             payload["components"] = [] if view is None else view.to_components()
 
         if components is not MISSING:
@@ -998,9 +998,9 @@ class InteractionResponse:
                     f.close()
 
         if view and not view.is_finished():
-            state.store_view(view, id_for_view)
+            state.store_view(view, key_id)
 
-        self._responded = InteractionResponseType.message_update
+        self._responded = True
 
     async def autocomplete(self, *, choices: Choices) -> None:
         """|coro|
@@ -1019,7 +1019,7 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        if self.is_done():
+        if self._responded:
             raise InteractionResponded(self._parent)
 
         choices_data: List[ApplicationCommandOptionChoicePayload]
@@ -1045,7 +1045,7 @@ class InteractionResponse:
             data={"choices": choices_data},
         )
 
-        self._responded = InteractionResponseType.application_command_autocomplete_result
+        self._responded = True
 
 
 class _InteractionMessageState:
