@@ -15,10 +15,10 @@ in specific versions.
 .. _vp2p3p1:
 
 v2.3.1
--------
+------
 
 Bug Fixes
-~~~~~~~~~~
+~~~~~~~~~
 
 - |commands| Fix Python 3.10 union type annotations in slash commands (:issue:`231`)
 - Fix double ``@`` when mentioning default role (:issue:`244`)
@@ -34,14 +34,14 @@ Bug Fixes
 
 
 Documentation
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Fix :func:`~ext.commands.guild_permissions` documentation
 - Fix missing dropdown icon (:issue:`235`)
 
 
 Miscellaneous
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 - Add ``isort`` and ``black`` pre-commit hooks, run isort (:issue:`169`, :issue:`173`, :issue:`233`)
 - Rename ``tests`` directory (:issue:`232`)
