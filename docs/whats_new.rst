@@ -31,6 +31,7 @@ Bug Fixes
 - |commands| Fix exceptions that occurred when using a :class:`Union` in a slash command parameter annotation
 - |commands| Fix dynamic command cooldowns (:issue:`320`)
 - Fix type-checking of ``guild_ids`` / ``test_guilds`` parameters which could break application command caching (:issue:`300`, :issue:`325`)
+- Fix :func:`Guild.create_sticker` not working when no description was provided (:issue:`328`)
 
 
 Documentation
