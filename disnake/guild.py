@@ -2476,7 +2476,7 @@ class Guild(Hashable):
         name: :class:`str`
             The sticker name. Must be at least 2 characters.
         description: Optional[:class:`str`]
-            The sticker's description. Can be ``None``.
+            The sticker's description. You can pass ``None`` or an empty string to not set a description.
         emoji: :class:`str`
             The name of a unicode emoji that represents the sticker's expression.
         file: :class:`File`
@@ -2496,12 +2496,8 @@ class Guild(Hashable):
         :class:`GuildSticker`
             The created sticker.
         """
-        payload: Any = {
-            "name": name,
-        }
-
-        if description:
-            payload["description"] = description
+        if description is None:
+            description = ""
 
         try:
             emoji = unicodedata.name(emoji)
@@ -2510,7 +2506,7 @@ class Guild(Hashable):
         else:
             emoji = emoji.replace(" ", "_")
 
-        payload["tags"] = emoji
+        payload: CreateStickerPayload = {"name": name, "description": description, "tags": emoji}
 
         data = await self._state.http.create_guild_sticker(self.id, payload, file, reason=reason)
         return self._state.store_sticker(self, data)
