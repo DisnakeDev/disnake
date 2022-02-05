@@ -70,7 +70,6 @@ if TYPE_CHECKING:
         ApplicationCommandInteraction as ApplicationCommandInteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
         ApplicationCommandInteractionDataResolved as ApplicationCommandInteractionDataResolvedPayload,
-        Interaction as InteractionPayload,
     )
 
     InteractionChannel = Union[
