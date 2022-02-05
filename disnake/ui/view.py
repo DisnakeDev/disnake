@@ -24,7 +24,16 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
+
+import asyncio
+import os
+import sys
+import time
+import traceback
+from functools import partial
+from itertools import groupby
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
@@ -33,26 +42,18 @@ from typing import (
     List,
     Optional,
     Sequence,
-    TYPE_CHECKING,
     Tuple,
 )
-from functools import partial
-from itertools import groupby
 
-import traceback
-import asyncio
-import sys
-import time
-import os
-from .item import Item, ItemCallbackType
-from ..enums import try_enum_to_int
 from ..components import (
-    Component,
     ActionRow as ActionRowComponent,
-    _component_factory,
     Button as ButtonComponent,
+    Component,
     SelectMenu as SelectComponent,
+    _component_factory,
 )
+from ..enums import ComponentType, try_enum_to_int
+from .item import Item, ItemCallbackType
 
 __all__ = ("View",)
 
@@ -60,8 +61,8 @@ __all__ = ("View",)
 if TYPE_CHECKING:
     from ..interactions import MessageInteraction
     from ..message import Message
-    from ..types.components import Component as ComponentPayload
     from ..state import ConnectionState
+    from ..types.components import Component as ComponentPayload
 
 
 def _walk_all_components(components: List[Component]) -> Iterator[Component]:
@@ -395,23 +396,34 @@ class View:
         )
 
     def refresh(self, components: List[Component]):
-        # This is pretty hacky at the moment
-        # fmt: off
+        # TODO: this is pretty hacky at the moment
         old_state: Dict[Tuple[int, str], Item] = {
             (item.type.value, item.custom_id): item  # type: ignore
             for item in self.children
             if item.is_dispatchable()
         }
-        # fmt: on
         children: List[Item] = []
         for component in _walk_all_components(components):
+            older: Optional[Item] = None
             try:
                 older = old_state[(component.type.value, component.custom_id)]  # type: ignore
             except (KeyError, AttributeError):
-                children.append(_component_to_item(component))
-            else:
+                # workaround for url buttons, since they're not part of `old_state`
+                if isinstance(component, ButtonComponent):
+                    for child in self.children:
+                        if (
+                            child.type is ComponentType.button
+                            and child.label == component.label  # type: ignore
+                            and child.url == component.url  # type: ignore
+                        ):
+                            older = child
+                            break
+
+            if older:
                 older.refresh_component(component)
                 children.append(older)
+            else:
+                children.append(_component_to_item(component))
 
         self.children = children
 

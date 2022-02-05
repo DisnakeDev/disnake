@@ -26,6 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from typing import List, Literal, TypedDict, Union
+
 from .snowflake import Snowflake
 from .user import User
 
@@ -75,13 +76,10 @@ class StickerPack(TypedDict):
     banner_asset_id: Snowflake
 
 
-class _CreateGuildStickerOptional(TypedDict, total=False):
-    description: str
-
-
-class CreateGuildSticker(_CreateGuildStickerOptional):
+class CreateGuildSticker(TypedDict):
     name: str
     tags: str
+    description: str
 
 
 class EditGuildSticker(TypedDict, total=False):

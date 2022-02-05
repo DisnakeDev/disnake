@@ -26,68 +26,66 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import copy
-import unicodedata
 import datetime
+import unicodedata
 from typing import (
+    TYPE_CHECKING,
     Any,
     ClassVar,
     Dict,
     List,
-    NamedTuple,
-    Sequence,
-    Set,
     Literal,
     Mapping,
+    NamedTuple,
     Optional,
-    TYPE_CHECKING,
+    Sequence,
+    Set,
     Tuple,
     Union,
     cast,
     overload,
 )
 
-from . import utils, abc
+from . import abc, utils
 from .app_commands import (
     GuildApplicationCommandPermissions,
     PartialGuildApplicationCommandPermissions,
 )
-from .role import Role
-from .member import Member, VoiceState
-from .emoji import Emoji
-from .errors import InvalidData
-from .permissions import PermissionOverwrite
-from .colour import Colour
-from .errors import InvalidArgument, ClientException
+from .asset import Asset
 from .channel import *
-from .channel import _guild_channel_factory
-from .channel import _threaded_guild_channel_factory
+from .channel import _guild_channel_factory, _threaded_guild_channel_factory
+from .colour import Colour
+from .emoji import Emoji
 from .enums import (
     AuditLogAction,
-    VideoQualityMode,
-    VoiceRegion,
     ChannelType,
-    try_enum,
-    VerificationLevel,
     ContentFilter,
+    GuildScheduledEventEntityType,
+    GuildScheduledEventPrivacyLevel,
     NotificationLevel,
     NSFWLevel,
     StagePrivacyLevel,
-    GuildScheduledEventEntityType,
-    GuildScheduledEventPrivacyLevel,
+    VerificationLevel,
+    VideoQualityMode,
+    VoiceRegion,
+    try_enum,
 )
-from .mixins import Hashable
-from .user import User
+from .errors import ClientException, InvalidArgument, InvalidData
+from .file import File
+from .flags import SystemChannelFlags
+from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
+from .integrations import Integration, _integration_factory
 from .invite import Invite
 from .iterators import AuditLogIterator, MemberIterator
-from .widget import Widget
-from .asset import Asset
-from .flags import SystemChannelFlags
-from .integrations import Integration, _integration_factory
+from .member import Member, VoiceState
+from .mixins import Hashable
+from .permissions import PermissionOverwrite
+from .role import Role
 from .stage_instance import StageInstance
-from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
-from .threads import Thread, ThreadMember
 from .sticker import GuildSticker
-from .file import File
+from .threads import Thread, ThreadMember
+from .user import User
+from .widget import Widget
 
 __all__ = ("Guild",)
 
@@ -96,19 +94,18 @@ MISSING = utils.MISSING
 
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime, User as ABCUser
-    from .types.guild import Ban as BanPayload, Guild as GuildPayload, MFALevel, GuildFeature
-    from .types.threads import (
-        Thread as ThreadPayload,
-    )
-    from .types.integration import IntegrationType
-    from .types.voice import GuildVoiceState
-    from .permissions import Permissions
-    from .channel import VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel
-    from .template import Template
-    from .webhook import Webhook
-    from .state import ConnectionState
-    from .voice_client import VoiceProtocol
     from .app_commands import ApplicationCommand
+    from .channel import CategoryChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel
+    from .permissions import Permissions
+    from .state import ConnectionState
+    from .template import Template
+    from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
+    from .types.integration import IntegrationType
+    from .types.sticker import CreateGuildSticker as CreateStickerPayload
+    from .types.threads import Thread as ThreadPayload
+    from .types.voice import GuildVoiceState
+    from .voice_client import VoiceProtocol
+    from .webhook import Webhook
 
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
@@ -525,8 +522,8 @@ class Guild(Hashable):
             self._stage_instances[stage_instance.id] = stage_instance
 
         self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
-        for s in guild.get("guild_scheduled_events", []):
-            scheduled_event = GuildScheduledEvent(state=state, data=s)
+        for e in guild.get("guild_scheduled_events", []):
+            scheduled_event = GuildScheduledEvent(state=state, data=e)
             self._scheduled_events[scheduled_event.id] = scheduled_event
 
         cache_joined = self._state.member_cache_flags.joined
@@ -1895,7 +1892,7 @@ class Guild(Hashable):
 
         if privacy_level is MISSING:
             privacy_level = GuildScheduledEventPrivacyLevel.guild_only
-        elif not isinstance(privacy_level, StagePrivacyLevel):
+        elif not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
             raise ValueError("privacy_level must be an instance of GuildScheduledEventPrivacyLevel")
 
         fields: Dict[str, Any] = {
@@ -2471,7 +2468,7 @@ class Guild(Hashable):
         name: :class:`str`
             The sticker name. Must be at least 2 characters.
         description: Optional[:class:`str`]
-            The sticker's description. Can be ``None``.
+            The sticker's description. You can pass ``None`` or an empty string to not set a description.
         emoji: :class:`str`
             The name of a unicode emoji that represents the sticker's expression.
         file: :class:`File`
@@ -2491,12 +2488,8 @@ class Guild(Hashable):
         :class:`GuildSticker`
             The created sticker.
         """
-        payload: Any = {
-            "name": name,
-        }
-
-        if description:
-            payload["description"] = description
+        if description is None:
+            description = ""
 
         try:
             emoji = unicodedata.name(emoji)
@@ -2505,7 +2498,7 @@ class Guild(Hashable):
         else:
             emoji = emoji.replace(" ", "_")
 
-        payload["tags"] = emoji
+        payload: CreateStickerPayload = {"name": name, "description": description, "tags": emoji}
 
         data = await self._state.http.create_guild_sticker(self.id, payload, file, reason)
         return self._state.store_sticker(self, data)

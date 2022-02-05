@@ -25,7 +25,9 @@ from __future__ import annotations
 import asyncio
 import sys
 import traceback
+import warnings
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Coroutine,
@@ -36,43 +38,40 @@ from typing import (
     Sequence,
     Set,
     Tuple,
-    TYPE_CHECKING,
     TypeVar,
     Union,
 )
-import warnings
 
 import disnake
-
-from .base_core import InvokableApplicationCommand
-from .slash_core import InvokableSlashCommand, SubCommandGroup, SubCommand
-from .ctx_menus_core import InvokableUserCommand, InvokableMessageCommand
-from .common_bot_base import CommonBotBase
-from .context import Context
-from .errors import CommandRegistrationError
-from . import errors
-from .cog import Cog
-from .slash_core import slash_command
-from .ctx_menus_core import user_command, message_command
-
 from disnake.app_commands import (
-    Option,
     ApplicationCommand,
+    Option,
     PartialGuildApplicationCommandPermissions,
 )
 from disnake.custom_warnings import ConfigWarning, SyncWarning
 from disnake.enums import ApplicationCommandType
 
+from . import errors
+from .base_core import InvokableApplicationCommand
+from .cog import Cog
+from .common_bot_base import CommonBotBase
+from .context import Context
+from .ctx_menus_core import (
+    InvokableMessageCommand,
+    InvokableUserCommand,
+    message_command,
+    user_command,
+)
+from .errors import CommandRegistrationError
+from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
+
 if TYPE_CHECKING:
 
     from typing_extensions import Concatenate, ParamSpec
-    from disnake.interactions import (
-        ApplicationCommandInteraction,
-    )
-    from ._types import (
-        Check,
-        CoroFunc,
-    )
+
+    from disnake.interactions import ApplicationCommandInteraction
+
+    from ._types import Check, CoroFunc
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
@@ -95,23 +94,20 @@ def _app_commands_diff(
     new_commands: Iterable[ApplicationCommand],
     old_commands: Iterable[ApplicationCommand],
 ) -> Dict[str, List[ApplicationCommand]]:
-    new_cmds = {cmd.name: cmd for cmd in new_commands}
-    old_cmds = {cmd.name: cmd for cmd in old_commands}
+    new_cmds = {(cmd.name, cmd.type): cmd for cmd in new_commands}
+    old_cmds = {(cmd.name, cmd.type): cmd for cmd in old_commands}
 
     diff = {
         "no_changes": [],
         "upsert": [],
         "edit": [],
         "delete": [],
-        "change_type": [],
     }
 
-    for name, new_cmd in new_cmds.items():
-        old_cmd = old_cmds.get(name)
+    for name_and_type, new_cmd in new_cmds.items():
+        old_cmd = old_cmds.get(name_and_type)
         if old_cmd is None:
             diff["upsert"].append(new_cmd)
-        elif old_cmd.type != new_cmd.type:
-            diff["change_type"].append(new_cmd)
         elif new_cmd._always_synced:
             diff["no_changes"].append(old_cmd)
             continue
@@ -120,8 +116,8 @@ def _app_commands_diff(
         else:
             diff["no_changes"].append(new_cmd)
 
-    for name, old_cmd in old_cmds.items():
-        if name not in new_cmds:
+    for name_and_type, old_cmd in old_cmds.items():
+        if name_and_type not in new_cmds:
             diff["delete"].append(old_cmd)
 
     return diff
@@ -131,7 +127,6 @@ def _show_diff(diff: Dict[str, List[ApplicationCommand]], line_prefix: str = "")
     to_upsert = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["upsert"]) or "-"
     to_edit = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["edit"]) or "-"
     to_delete = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["delete"]) or "-"
-    change_type = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["change_type"]) or "-"
     no_changes = f",\n{line_prefix}    ".join(str(cmd) for cmd in diff["no_changes"]) or "-"
     print(
         f"{line_prefix}To upsert:",
@@ -140,8 +135,6 @@ def _show_diff(diff: Dict[str, List[ApplicationCommand]], line_prefix: str = "")
         f"    {to_edit}",
         f"To delete:",
         f"    {to_delete}",
-        f"Type migration:",
-        f"    {change_type}",
         f"No changes:",
         f"    {no_changes}",
         sep=f"\n{line_prefix}",
@@ -160,6 +153,9 @@ class InteractionBotBase(CommonBotBase):
         test_guilds: Sequence[int] = None,
         **options: Any,
     ):
+        if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
+            raise ValueError("test_guilds must be a sequence of int.")
+
         super().__init__(**options)
 
         self._test_guilds: Optional[Sequence[int]] = test_guilds
@@ -682,12 +678,7 @@ class InteractionBotBase(CommonBotBase):
         diff = _app_commands_diff(
             global_cmds, self._connection._global_application_commands.values()
         )
-        update_required = (
-            bool(diff["upsert"])
-            or bool(diff["edit"])
-            or bool(diff["change_type"])
-            or bool(diff["delete"])
-        )
+        update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
 
         if self._sync_commands_debug:
             # Show the difference
@@ -703,13 +694,7 @@ class InteractionBotBase(CommonBotBase):
         if update_required:
             # Notice that we don't do any API requests if there're no changes.
             try:
-                to_send = diff["no_changes"] + diff["edit"]
-                if bool(diff["change_type"]):
-                    # We can't just "edit" the command type, so we bulk delete the commands with old type first.
-                    await self.bulk_overwrite_global_commands(to_send)
-                # Finally, we make an API call that applies all changes from the code.
-                to_send.extend(diff["upsert"])
-                to_send.extend(diff["change_type"])
+                to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
                 await self.bulk_overwrite_global_commands(to_send)
             except Exception as e:
                 warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
@@ -719,12 +704,7 @@ class InteractionBotBase(CommonBotBase):
         for guild_id, cmds in guild_cmds.items():
             current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
             diff = _app_commands_diff(cmds, current_guild_cmds.values())
-            update_required = (
-                bool(diff["upsert"])
-                or bool(diff["edit"])
-                or bool(diff["change_type"])
-                or bool(diff["delete"])
-            )
+            update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
             # Show diff
             if self._sync_commands_debug:
                 print(
@@ -736,11 +716,7 @@ class InteractionBotBase(CommonBotBase):
             # Do API requests and cache
             if update_required:
                 try:
-                    to_send = diff["no_changes"] + diff["edit"]
-                    if bool(diff["change_type"]):
-                        await self.bulk_overwrite_guild_commands(guild_id, to_send)
-                    to_send.extend(diff["upsert"])
-                    to_send.extend(diff["change_type"])
+                    to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
                     await self.bulk_overwrite_guild_commands(guild_id, to_send)
                 except Exception as e:
                     warnings.warn(

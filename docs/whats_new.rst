@@ -11,6 +11,43 @@ Changelog
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
+
+.. _vp2p3p1:
+
+v2.3.1
+------
+
+Bug Fixes
+~~~~~~~~~
+
+- |commands| Fix Python 3.10 union type annotations in slash commands (:issue:`231`)
+- Fix double ``@`` when mentioning default role (:issue:`244`)
+- Fix a command sync bug which prevented registering two application commands with the same name but different types (:issue:`254`)
+- Fix :func:`GuildScheduledEvent.fetch_users` (:issue:`274`)
+- Fix bug when editing a :class:`~ui.View` with URL buttons that resulted in the ``row`` attribute being reset (:issue:`252`)
+- |commands| Fix :class:`~ext.commands.MessageConverter` not defaulting to current channel if no channel ID specified (:issue:`284`)
+- Fix attachment descriptions not working after recent API change (:issue:`241`)
+- Fix incorrect type check in :func:`Guild.create_scheduled_event` using :class:`StagePrivacyLevel` instead of :class:`GuildScheduledEventPrivacyLevel` (:issue:`263`)
+- |commands| Fix exceptions that occurred when using a :class:`Union` in a slash command parameter annotation
+- |commands| Fix dynamic command cooldowns (:issue:`320`)
+- Fix type-checking of ``guild_ids`` / ``test_guilds`` parameters which could break application command caching (:issue:`300`, :issue:`325`)
+- Fix :func:`Guild.create_sticker` not working when no description was provided (:issue:`328`)
+
+
+Documentation
+~~~~~~~~~~~~~
+
+- Fix :func:`~ext.commands.guild_permissions` documentation
+- Fix missing dropdown icon (:issue:`235`)
+
+
+Miscellaneous
+~~~~~~~~~~~~~
+
+- Add ``isort`` and ``black`` pre-commit hooks, run isort (:issue:`169`, :issue:`173`, :issue:`233`)
+- Rename ``tests`` directory (:issue:`232`)
+
+
 .. _vp2p3p0:
 
 v2.3.0
@@ -72,7 +109,7 @@ New Features
         - :attr:`AuditLogAction.guild_scheduled_event_create`
         - :attr:`AuditLogAction.guild_scheduled_event_update`
         - :attr:`AuditLogAction.guild_scheduled_event_delete`
-- Add guild timeouts (:issue:`161`, :issue:`219`, :issue:`221`)
+- Add guild timeouts (:issue:`161`, :issue:`221`, :issue:`223`)
     - :func:`Guild.timeout`
     - :func:`Member.timeout`
     - :attr:`Member.current_timeout`
@@ -83,7 +120,7 @@ New Features
     - Important notes:
         - This feature is only available in a very limited number of servers at the time of writing this, and the API is still being developed; therefore, expect changes in the future
         - Text-in-voice currently does **not** support these text channel features (note: this is not guaranteed to be an exhaustive list): threads, webhooks, nsfw flags, slowmode
-        - The ``nsfw`` and ``slowmode_delay`` values/parameters are currently not supported by the API, however according to Discord developers these are TBD
+        - The ``nsfw`` and ``slowmode_delay`` values/parameters are currently not supported by the API and are still TBD
         - Pinned messages are currently not exposed in the client UI, and while the API for them works, their future is uncertain
     - :class:`VoiceChannel` now inherits from :class:`abc.Messageable`
     - New :class:`VoiceChannel` properties:

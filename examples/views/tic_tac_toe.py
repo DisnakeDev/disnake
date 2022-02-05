@@ -1,6 +1,8 @@
 from typing import List
-from disnake.ext import commands
+
 import disnake
+from disnake.ext import commands
+
 
 # Defines a custom button that contains the logic of the game.
 # The ['TicTacToe'] bit is for type hinting purposes to tell your IDE or linter

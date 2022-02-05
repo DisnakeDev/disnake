@@ -1,5 +1,6 @@
-from setuptools import setup
 import re
+
+from setuptools import setup
 
 requirements = []
 with open("requirements.txt", encoding="utf-8") as f:
@@ -75,7 +76,7 @@ setup(
     license="MIT",
     description="A Python wrapper for the Discord API",
     long_description=readme,
-    long_description_content_type="text/x-rst",
+    long_description_content_type="text/markdown",
     include_package_data=True,
     install_requires=requirements,
     extras_require=extras_require,

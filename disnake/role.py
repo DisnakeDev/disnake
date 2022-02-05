@@ -24,15 +24,16 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, TypeVar, Union, TYPE_CHECKING
 
-from .permissions import Permissions
-from .errors import InvalidArgument
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar, Union
+
 from .asset import Asset
 from .colour import Colour
-from .partial_emoji import PartialEmoji
+from .errors import InvalidArgument
 from .mixins import Hashable
-from .utils import snowflake_time, _get_as_snowflake, _bytes_to_base64_data, MISSING
+from .partial_emoji import PartialEmoji
+from .permissions import Permissions
+from .utils import MISSING, _bytes_to_base64_data, _get_as_snowflake, snowflake_time
 
 __all__ = (
     "RoleTags",
@@ -41,14 +42,12 @@ __all__ = (
 
 if TYPE_CHECKING:
     import datetime
-    from .types.role import (
-        Role as RolePayload,
-        RoleTags as RoleTagPayload,
-    )
-    from .types.guild import RolePositionUpdate
+
     from .guild import Guild
     from .member import Member
     from .state import ConnectionState
+    from .types.guild import RolePositionUpdate
+    from .types.role import Role as RolePayload, RoleTags as RoleTagPayload
 
 
 class RoleTags:
@@ -356,6 +355,8 @@ class Role(Hashable):
     @property
     def mention(self) -> str:
         """:class:`str`: Returns a string that allows you to mention a role."""
+        if self.is_default():
+            return "@everyone"
         return f"<@&{self.id}>"
 
     @property

@@ -25,41 +25,39 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import collections.abc
-import disnake.utils
-import types
-import importlib.util
-import sys
-import logging
 import asyncio
-import time
+import collections.abc
+import importlib.util
+import logging
 import os
-
-import disnake
-
+import sys
+import time
+import types
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
     Generic,
+    List,
+    Mapping,
     Optional,
-    TYPE_CHECKING,
+    Set,
     TypeVar,
     Union,
-    Mapping,
-    List,
-    Set,
 )
+
+import disnake
+import disnake.utils
 
 from . import errors
 from .cog import Cog
 
 if TYPE_CHECKING:
     import importlib.machinery
-    from .bot import Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot
-    from ._types import (
-        CoroFunc,
-    )
+
+    from ._types import CoroFunc
+    from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
 
     AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 

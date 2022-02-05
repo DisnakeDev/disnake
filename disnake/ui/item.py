@@ -26,13 +26,13 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Coroutine,
     Dict,
     Generic,
     Optional,
-    TYPE_CHECKING,
     Protocol,
     Tuple,
     Type,
@@ -45,9 +45,9 @@ from ..interactions import MessageInteraction
 __all__ = ("Item",)
 
 if TYPE_CHECKING:
+    from ..components import Component
     from ..enums import ComponentType
     from .view import View
-    from ..components import Component
 
 I = TypeVar("I", bound="Item")
 V = TypeVar("V", bound="View", covariant=True)

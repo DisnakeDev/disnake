@@ -25,32 +25,34 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import re
+import functools
 import inspect
+import re
 from typing import (
+    TYPE_CHECKING,
     Any,
     Dict,
     Generic,
     Iterable,
+    List,
     Literal,
     Optional,
-    TYPE_CHECKING,
-    List,
     Protocol,
+    Tuple,
     Type,
     TypeVar,
-    Tuple,
     Union,
     runtime_checkable,
 )
-import functools
 
 import disnake
+
 from .errors import *
 
 if TYPE_CHECKING:
-    from .context import Context
     from disnake.message import MessageableChannel
+
+    from .context import Context
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES
 
@@ -351,7 +353,7 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
         if not match:
             raise MessageNotFound(argument)
         data = match.groupdict()
-        channel_id = disnake.utils._get_as_snowflake(data, "channel_id")
+        channel_id = disnake.utils._get_as_snowflake(data, "channel_id") or ctx.channel.id
         message_id = int(data["message_id"])
         guild_id = data.get("guild_id")
         if guild_id is None:

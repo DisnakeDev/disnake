@@ -70,6 +70,10 @@ if sys.version_info >= (3, 9):
     from typing import Annotated
 else:
     Annotated = object()
+if sys.version_info >= (3, 10):
+    from types import UnionType
+else:
+    UnionType = object()
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
@@ -97,14 +101,14 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
 
 def remove_optionals(annotation: Any) -> Any:
     """remove unwanted optionals from an annotation"""
-    if get_origin(annotation) is Union:
+    if get_origin(annotation) in (Union, UnionType):
         annotation = cast(Any, annotation)
 
-        args = [i for i in annotation.__args__ if i not in (None, type(None))]
+        args = tuple(i for i in annotation.__args__ if i not in (None, type(None)))
         if len(args) == 1:
             annotation = args[0]
         else:
-            annotation.__args__ = args
+            annotation = Union[args]  # type: ignore
 
     return annotation
 
@@ -323,13 +327,13 @@ class ParamInfo:
         if self.discord_type.value in [3, 4, 5, 8, 9, 10]:
             return argument
 
-        if issubclass(self.type, disnake.Member):
+        if issubclass_(self.type, disnake.Member):
             if isinstance(argument, disnake.Member):
                 return argument
 
             raise errors.MemberNotFound(str(argument.id))
 
-        if issubclass(self.type, disnake.abc.GuildChannel):
+        if issubclass_(self.type, disnake.abc.GuildChannel):
             if isinstance(argument, self.type):
                 return argument
 
@@ -402,7 +406,7 @@ class ParamInfo:
             or get_origin(annotation) is Literal
         ):
             self._parse_enum(annotation)
-        elif get_origin(annotation) is Union:
+        elif get_origin(annotation) in (Union, UnionType):
             args = annotation.__args__
             if all(issubclass_(channel, disnake.abc.GuildChannel) for channel in args):
                 self._parse_guild_channel(*args)

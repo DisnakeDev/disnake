@@ -25,18 +25,20 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import disnake
 
 from .bot_base import BotBase, when_mentioned, when_mentioned_or
-from .interaction_bot_base import InteractionBotBase
 from .context import Context
+from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
 
     from typing_extensions import ParamSpec
+
     from disnake.interactions import ApplicationCommandInteraction
+
     from ._types import CoroFunc
 
     ApplicationCommandInteractionT = TypeVar(

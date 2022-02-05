@@ -1,1 +1,1 @@
-black>=21.9b0
+pre-commit~=2.16.0

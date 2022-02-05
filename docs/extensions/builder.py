@@ -46,6 +46,12 @@ class DPYStandaloneHTMLBuilder(StandaloneHTMLBuilder):
         else:
             self.handle_page("genindex", genindexcontext, "genindex.html")
 
+    def post_process_images(self, doctree) -> None:
+        super().post_process_images(doctree)
+
+        for path in self.app.config.copy_static_images:
+            self.images[path] = path.split("/")[-1]
+
 
 def add_custom_jinja2(app):
     env = app.builder.templates.environment
@@ -73,5 +79,7 @@ def add_builders(app):
 
 
 def setup(app):
+    app.add_config_value("copy_static_images", [], "env")
+
     add_builders(app)
     app.connect("builder-inited", add_custom_jinja2)

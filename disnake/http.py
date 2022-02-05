@@ -27,9 +27,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import sys
 import re
+import sys
+import weakref
 from typing import (
+    TYPE_CHECKING,
     Any,
     ClassVar,
     Coroutine,
@@ -38,65 +40,58 @@ from typing import (
     List,
     Optional,
     Sequence,
-    TYPE_CHECKING,
     Tuple,
     Type,
     TypeVar,
     Union,
 )
 from urllib.parse import quote as _uriquote
-import weakref
 
 import aiohttp
 
+from . import __version__, utils
 from .errors import (
-    HTTPException,
-    Forbidden,
-    NotFound,
-    LoginFailure,
     DiscordServerError,
+    Forbidden,
     GatewayNotFound,
+    HTTPException,
     InvalidArgument,
+    LoginFailure,
+    NotFound,
 )
 from .gateway import DiscordClientWebSocketResponse
-from . import __version__, utils
 from .utils import MISSING
 
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from types import TracebackType
+
+    from .enums import AuditLogAction, InteractionResponseType
     from .file import File
     from .message import Attachment
-    from .enums import (
-        AuditLogAction,
-        InteractionResponseType,
-    )
-
     from .types import (
         appinfo,
         audit_log,
         channel,
         components,
-        emoji,
         embed,
+        emoji,
         guild,
         integration,
         interactions,
         invite,
         member,
         message,
-        template,
         role,
+        sticker,
+        template,
+        threads,
         user,
         webhook,
-        channel,
         widget,
-        threads,
-        sticker,
     )
     from .types.snowflake import Snowflake, SnowflakeList
-
-    from types import TracebackType
 
     T = TypeVar("T")
     BE = TypeVar("BE", bound=BaseException)
@@ -116,20 +111,15 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
     return text
 
 
-def to_multipart(payload: Dict[str, Any], files: Iterable[File]) -> List[Dict[str, Any]]:
-    # NOTE: this method modifies the provided `payload` and `payload["attachments"]` collections
+def set_attachments(payload: Dict[str, Any], files: Sequence[File]) -> None:
+    """
+    Updates the payload's attachments list based on the provided files
+
+    note: this method modifies the provided ``payload`` and ``payload["attachments"]`` collections
+    """
 
     attachments = payload.get("attachments", [])
-    multipart: List[Dict[str, Any]] = []
     for index, file in enumerate(files):
-        multipart.append(
-            {
-                "name": f"files[{index}]",
-                "value": file.fp,
-                "filename": file.filename,
-                "content_type": "application/octet-stream",
-            }
-        )
         attachments.append(
             {
                 "id": index,
@@ -141,8 +131,40 @@ def to_multipart(payload: Dict[str, Any], files: Iterable[File]) -> List[Dict[st
     # didn't add any new ones, don't add the list to the payload.
     if attachments:
         payload["attachments"] = attachments
+
+
+def to_multipart(payload: Dict[str, Any], files: Sequence[File]) -> List[Dict[str, Any]]:
+    """
+    Converts the payload and list of files to a multipart payload,
+    as specified by https://discord.com/developers/docs/reference#uploading-files
+    """
+
+    multipart: List[Dict[str, Any]] = []
+    for index, file in enumerate(files):
+        multipart.append(
+            {
+                "name": f"files[{index}]",
+                "value": file.fp,
+                "filename": file.filename,
+                "content_type": "application/octet-stream",
+            }
+        )
+
     multipart.append({"name": "payload_json", "value": utils._to_json(payload)})
     return multipart
+
+
+def to_multipart_with_attachments(
+    payload: Dict[str, Any], files: Sequence[File]
+) -> List[Dict[str, Any]]:
+    """
+    Updates the payload's attachments and converts it to a multipart payload
+
+    Shorthand for ``set_attachments`` + ``to_multipart``
+    """
+
+    set_attachments(payload, files)
+    return to_multipart(payload, files)
 
 
 class Route:
@@ -579,7 +601,7 @@ class HTTPClient:
         if stickers:
             payload["sticker_ids"] = stickers
 
-        multipart = to_multipart(payload, files)
+        multipart = to_multipart_with_attachments(payload, files)
 
         return self.request(route, form=multipart, files=files)
 
@@ -649,7 +671,7 @@ class HTTPClient:
             message_id=message_id,
         )
         if files:
-            multipart = to_multipart(fields, files)
+            multipart = to_multipart_with_attachments(fields, files)
             return self.request(r, form=multipart, files=files)
         return self.request(r, json=fields)
 
@@ -1942,7 +1964,7 @@ class HTTPClient:
             params["limit"] = limit
 
         if with_member is not None:
-            params["with_member"] = with_member
+            params["with_member"] = int(with_member)
 
         if before is not None:
             params["before"] = before
@@ -2139,7 +2161,7 @@ class HTTPClient:
             payload["attachments"] = attachments
 
         if file:
-            multipart = to_multipart(payload, [file])
+            multipart = to_multipart_with_attachments(payload, [file])
             return self.request(route, form=multipart, files=[file])
         return self.request(route, json=payload)
 

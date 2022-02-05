@@ -26,24 +26,23 @@ from __future__ import annotations
 
 import inspect
 import re
-
-from typing import Any, Dict, Generic, List, Optional, TYPE_CHECKING, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, TypeVar, Union
 
 import disnake.abc
 import disnake.utils
-
 from disnake.message import Message
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
-    from disnake.channel import TextChannel, Thread, DMChannel, VoiceChannel
+
+    from disnake.channel import DMChannel, TextChannel, Thread, VoiceChannel
     from disnake.guild import Guild
     from disnake.member import Member
     from disnake.state import ConnectionState
     from disnake.user import ClientUser, User
     from disnake.voice_client import VoiceProtocol
 
-    from .bot import Bot, AutoShardedBot
+    from .bot import AutoShardedBot, Bot
     from .cog import Cog
     from .core import Command
     from .view import StringView
@@ -342,7 +341,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         Any
             The result of the help command, if any.
         """
-        from .core import Group, Command, wrap_callback
+        from .core import Command, Group, wrap_callback
         from .errors import CommandError
 
         bot = self.bot
