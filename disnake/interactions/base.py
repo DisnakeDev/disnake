@@ -836,7 +836,16 @@ class InteractionResponse:
             if ephemeral and view.timeout is None:
                 view.timeout = 15 * 60.0
 
-            self._parent._state.store_view(view, self._parent.id)
+            key_id = None
+            if self._parent.type is InteractionType.component:
+                try:
+                    key_id = (await self._parent.original_message()).id
+                except HTTPException:
+                    pass
+            else:
+                key_id = self._parent.id
+
+            self._parent._state.store_view(view, key_id)
 
         if delete_after is not MISSING:
             await self._parent.delete_original_message(delay=delete_after)
