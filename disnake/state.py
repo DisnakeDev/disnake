@@ -1034,11 +1034,15 @@ class ConnectionState:
             _log.debug("THREAD_CREATE referencing an unknown guild ID: %s. Discarding", guild_id)
             return
 
+        if data.get("newly_created") is None:
+            # Skipping since we just want thread create event,
+            # as thread join is handled in thread_members_update.
+            return
+
         thread = Thread(guild=guild, state=guild._state, data=data)
-        has_thread = guild.get_thread(thread.id)
         guild._add_thread(thread)
-        if not has_thread:
-            self.dispatch("thread_join", thread)
+        if thread._newly_created is True:
+            self.dispatch("thread_create", thread)
 
     def parse_thread_update(self, data) -> None:
         guild_id = int(data["guild_id"])

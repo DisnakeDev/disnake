@@ -148,6 +148,7 @@ class Thread(Messageable, Hashable):
         "auto_archive_duration",
         "archive_timestamp",
         "create_timestamp",
+        "_newly_created",
         "_type",
         "_state",
         "_members",
@@ -182,6 +183,7 @@ class Thread(Messageable, Hashable):
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self.message_count = data.get("message_count")
         self.member_count = data.get("member_count")
+        self._newly_created: Optional[bool] = data.get("newly_created")
         self._unroll_metadata(data["thread_metadata"])
 
         try:
