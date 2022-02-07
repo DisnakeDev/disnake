@@ -433,7 +433,7 @@ class GuildScheduledEvent(Hashable):
         NotFound
             The event does not exist.
         HTTPException
-            The request failed.
+            Retrieving the users failed.
 
         Returns
         -------

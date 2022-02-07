@@ -1826,7 +1826,7 @@ class Guild(Hashable):
         Raises
         ------
         HTTPException
-            The request failed.
+            Retrieving the guild scheduled events failed.
 
         Returns
         -------
@@ -1857,7 +1857,7 @@ class Guild(Hashable):
         Raises
         ------
         HTTPException
-            The request failed.
+            Retrieving the guild scheduled event failed.
 
         Returns
         -------
@@ -1993,7 +1993,7 @@ class Guild(Hashable):
         ClientException
             The members intent is not enabled.
         HTTPException
-            Getting the members failed.
+            Retrieving the members failed.
 
         Yields
         ------
@@ -2037,7 +2037,7 @@ class Guild(Hashable):
         Forbidden
             You do not have access to the guild.
         HTTPException
-            Fetching the member failed.
+            Retrieving the member failed.
 
         Returns
         -------
@@ -2429,8 +2429,7 @@ class Guild(Hashable):
         return [convert(d) for d in data]
 
     async def fetch_stickers(self) -> List[GuildSticker]:
-        """
-        |coro|
+        """|coro|
 
         Retrieves a list of all :class:`Sticker`\s that the guild has.
 
@@ -2443,7 +2442,7 @@ class Guild(Hashable):
         Raises
         ------
         HTTPException
-            An error occurred fetching the stickers.
+            Retrieving the stickers failed.
 
         Returns
         -------
@@ -2475,7 +2474,7 @@ class Guild(Hashable):
         NotFound
             The sticker requested could not be found.
         HTTPException
-            An error occurred fetching the sticker.
+            Retrieving the sticker failed.
 
         Returns
         -------
@@ -2574,8 +2573,7 @@ class Guild(Hashable):
         await self._state.http.delete_guild_sticker(self.id, sticker.id, reason=reason)
 
     async def fetch_emojis(self) -> List[Emoji]:
-        """
-        |coro|
+        """|coro|
 
         Retrieves all custom :class:`Emoji`\s that the guild has.
 
@@ -2586,7 +2584,7 @@ class Guild(Hashable):
         Raises
         ------
         HTTPException
-            An error occurred fetching the emojis.
+            Retrieving the emojis failed.
 
         Returns
         -------
@@ -3386,7 +3384,7 @@ class Guild(Hashable):
     ) -> GuildApplicationCommandPermissions:
         """|coro|
 
-        Requests :class:`GuildApplicationCommandPermissions` for a specific command.
+        Retrieves :class:`GuildApplicationCommandPermissions` for a specific command.
 
         .. versionadded:: 2.1
 

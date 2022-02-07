@@ -1499,7 +1499,7 @@ class Client:
         Raises
         ------
         HTTPException
-            Getting the guilds failed.
+            Retrieving the guilds failed.
 
         Yields
         --------
@@ -1511,7 +1511,7 @@ class Client:
     async def fetch_template(self, code: Union[Template, str]) -> Template:
         """|coro|
 
-        Gets a :class:`.Template` from a discord.new URL or code.
+        Retrieves a :class:`.Template` from a discord.new URL or code.
 
         Parameters
         ----------
@@ -1523,7 +1523,7 @@ class Client:
         NotFound
             The template is invalid.
         HTTPException
-            Getting the template failed.
+            Retrieving the template failed.
 
         Returns
         -------
@@ -1558,7 +1558,7 @@ class Client:
         Forbidden
             You do not have access to the guild.
         HTTPException
-            Fetching the guild failed.
+            Retrieving the guild failed.
 
         Returns
         -------
@@ -1644,7 +1644,7 @@ class Client:
         NotFound
             The stage instance or channel could not be found.
         HTTPException
-            Fetching the stage instance failed.
+            Retrieving the stage instance failed.
 
         Returns
         -------
@@ -1701,7 +1701,7 @@ class Client:
         NotFound
             The invite has expired or is invalid.
         HTTPException
-            Getting the invite failed.
+            Retrieving the invite failed.
 
         Returns
         -------
@@ -1822,7 +1822,7 @@ class Client:
         NotFound
             A user with this ID does not exist.
         HTTPException
-            Fetching the user failed.
+            Retrieving the user failed.
 
         Returns
         -------
@@ -2296,7 +2296,7 @@ class Client:
     ) -> GuildApplicationCommandPermissions:
         """|coro|
 
-        Requests :class:`.GuildApplicationCommandPermissions` for a specific application command.
+        Retrieves :class:`.GuildApplicationCommandPermissions` for a specific application command.
 
         .. versionadded:: 2.1
 

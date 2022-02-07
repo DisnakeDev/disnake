@@ -1418,7 +1418,7 @@ class StageChannel(VocalGuildChannel):
         NotFound
             The stage instance or channel could not be found.
         HTTPException
-            Getting the stage instance failed.
+            Retrieving the stage instance failed.
 
         Returns
         -------

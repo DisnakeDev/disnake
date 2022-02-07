@@ -724,7 +724,7 @@ class Thread(Messageable, Hashable):
     async def fetch_member(self, member_id: int, /) -> ThreadMember:
         """|coro|
 
-        Retrieve a single :class:`ThreadMember` from this thread.
+        Retrieves a single :class:`ThreadMember` from this thread.
 
         Parameters
         ----------
