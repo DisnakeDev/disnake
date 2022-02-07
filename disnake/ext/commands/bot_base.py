@@ -164,6 +164,8 @@ class BotBase(CommonBotBase, GroupMixin):
 
         The default command error handler provided by the bot.
 
+        This is for text commands only, and doesn't apply to application commands.
+
         By default this prints to :data:`sys.stderr` however it could be
         overridden to have a different implementation.
 
@@ -195,11 +197,9 @@ class BotBase(CommonBotBase, GroupMixin):
     ) -> None:
         """Adds a global check to the bot.
 
-        This is the non-decorator interface to :meth:`.check`,
-        :meth:`.check_once`, :meth:`.slash_command_check` and etc.
+        This is for text commands only, and doesn't apply to application commands.
 
-        If none of bool params are specified, the check is for
-        text commands only.
+        This is the non-decorator interface to :meth:`.check` and :meth:`.check_once`.
 
         Parameters
         ----------
@@ -222,11 +222,10 @@ class BotBase(CommonBotBase, GroupMixin):
     ) -> None:
         """Removes a global check from the bot.
 
+        This is for text commands only, and doesn't apply to application commands.
+
         This function is idempotent and will not raise an exception
         if the function is not in the global checks.
-
-        If none of bool params are specified, the check is for
-        text commands only.
 
         Parameters
         ----------
@@ -245,6 +244,8 @@ class BotBase(CommonBotBase, GroupMixin):
     def check(self, func: T) -> T:
         """
         A decorator that adds a global check to the bot.
+
+        This is for text commands only, and doesn't apply to application commands.
 
         A global check is similar to a :func:`.check` that is applied
         on a per command basis except it is run before any command checks
@@ -275,6 +276,8 @@ class BotBase(CommonBotBase, GroupMixin):
     def check_once(self, func: CFT) -> CFT:
         """
         A decorator that adds a "call once" global check to the bot.
+
+        This is for text commands only, and doesn't apply to application commands.
 
         Unlike regular global checks, this one is called only once
         per :meth:`.invoke` call.
@@ -323,6 +326,8 @@ class BotBase(CommonBotBase, GroupMixin):
     def before_invoke(self, coro: CFT) -> CFT:
         """A decorator that registers a coroutine as a pre-invoke hook.
 
+        This is for text commands only, and doesn't apply to application commands.
+
         A pre-invoke hook is called directly before the command is
         called. This makes it a useful function to set up database
         connections or any type of set up required.
@@ -355,6 +360,8 @@ class BotBase(CommonBotBase, GroupMixin):
     def after_invoke(self, coro: CFT) -> CFT:
         """
         A decorator that registers a coroutine as a post-invoke hook.
+
+        This is for text commands only, and doesn't apply to application commands.
 
         A post-invoke hook is called directly after the command is
         called. This makes it a useful function to clean-up database

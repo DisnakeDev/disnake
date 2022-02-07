@@ -476,6 +476,8 @@ class Cog(metaclass=CogMeta):
         """A special method that registers as a :meth:`.Bot.check_once`
         check.
 
+        This is for text commands only, and doesn't apply to application commands.
+
         This function **can** be a coroutine and must take a sole parameter,
         ``ctx``, to represent the :class:`.Context`.
         """
@@ -485,6 +487,8 @@ class Cog(metaclass=CogMeta):
     def bot_check(self, ctx: Context) -> bool:
         """A special method that registers as a :meth:`.Bot.check`
         check.
+
+        This is for text commands only, and doesn't apply to application commands.
 
         This function **can** be a coroutine and must take a sole parameter,
         ``ctx``, to represent the :class:`.Context`.
@@ -534,7 +538,9 @@ class Cog(metaclass=CogMeta):
     @_cog_special_method
     def cog_check(self, ctx: Context) -> bool:
         """A special method that registers as a :func:`~.ext.commands.check`
-        for every command and subcommand in this cog.
+        for every text command and subcommand in this cog.
+
+        This is for text commands only, and doesn't apply to application commands.
 
         This function **can** be a coroutine and must take a sole parameter,
         ``ctx``, to represent the :class:`.Context`.
@@ -565,6 +571,8 @@ class Cog(metaclass=CogMeta):
     async def cog_command_error(self, ctx: Context, error: Exception) -> None:
         """A special method that is called whenever an error
         is dispatched inside this cog.
+
+        This is for text commands only, and doesn't apply to application commands.
 
         This is similar to :func:`.on_command_error` except only applying
         to the commands inside this cog.
@@ -617,9 +625,10 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     async def cog_before_invoke(self, ctx: Context) -> None:
-        """A special method that acts as a cog local pre-invoke hook.
+        """A special method that acts as a cog local pre-invoke hook,
+        similar to :meth:`.Command.before_invoke`.
 
-        This is similar to :meth:`.Command.before_invoke`.
+        This is for text commands only, and doesn't apply to application commands.
 
         This **must** be a coroutine.
 
@@ -632,9 +641,10 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     async def cog_after_invoke(self, ctx: Context) -> None:
-        """A special method that acts as a cog local post-invoke hook.
+        """A special method that acts as a cog local post-invoke hook,
+        similar to :meth:`.Command.after_invoke`.
 
-        This is similar to :meth:`.Command.after_invoke`.
+        This is for text commands only, and doesn't apply to application commands.
 
         This **must** be a coroutine.
 
