@@ -620,7 +620,7 @@ class MessageReference:
 
     def to_dict(self) -> MessageReferencePayload:
         result: MessageReferencePayload = (
-            {"message_id": self.message_id} if self.message_id is not None else {}  # type: ignore
+            {"message_id": self.message_id} if self.message_id is not None else {}
         )
         result["channel_id"] = self.channel_id
         if self.guild_id is not None:
@@ -1762,7 +1762,7 @@ class Message(Hashable):
         self,
         *,
         name: str,
-        auto_archive_duration: AnyThreadArchiveDuration = None,  # type: ignore
+        auto_archive_duration: AnyThreadArchiveDuration = None,
         slowmode_delay: int = None,
     ) -> Thread:
         """|coro|
@@ -1841,7 +1841,7 @@ class Message(Hashable):
         Parameters
         ----------
         fail_if_not_exists: :class:`bool`
-            Whether replying using the message reference should raise :exc:`HTTPException`
+            Whether replying using the message reference should raise :exc:`~disnake.HTTPException`
             if the message no longer exists or Discord could not fetch the message.
 
             .. versionadded:: 2.3

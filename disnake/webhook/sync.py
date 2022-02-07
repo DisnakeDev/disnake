@@ -908,7 +908,7 @@ class SyncWebhook(BaseWebhook):
             then the default avatar for the webhook is used. If this is not a
             string then it is explicitly cast using ``str``.
         tts: :class:`bool`
-            Whether sthe message should be sent using text-to-speech.
+            Whether the message should be sent using text-to-speech.
         file: :class:`File`
             The file to upload. This cannot be mixed with ``files`` parameter.
         files: List[:class:`File`]

@@ -208,7 +208,7 @@ class Interaction:
 
     @property
     def user(self) -> Union[User, Member]:
-        """Optional[Union[:class:`.User`, :class:`.Member`]]: The user or member that sent the interaction.
+        """Union[:class:`.User`, :class:`.Member`]: The user or member that sent the interaction.
         There is an alias for this named :attr:`author`."""
         return self.author
 

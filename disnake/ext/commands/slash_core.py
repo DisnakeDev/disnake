@@ -331,7 +331,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     connectors: Dict[:class:`str`, :class:`str`]
         A mapping of option names to function parameter names, mainly for internal processes.
     auto_sync: :class:`bool`
-        Whether to sync the command in the API with ``body`` or not.
+        Whether to automatically register the command.
     """
 
     def __init__(

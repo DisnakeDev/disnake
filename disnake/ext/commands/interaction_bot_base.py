@@ -969,8 +969,8 @@ class InteractionBotBase(CommonBotBase):
         This is the non-decorator interface to :meth:`.check`,
         :meth:`.check_once`, :meth:`.slash_command_check` and etc.
 
-        You must specify at least one of the bool parameters. Otherwise
-        it won't add the check.
+        You must specify at least one of the bool parameters, otherwise
+        the check won't be added.
 
         Parameters
         ----------
@@ -1012,13 +1012,13 @@ class InteractionBotBase(CommonBotBase):
         user_commands: bool = False,
         message_commands: bool = False,
     ) -> None:
-        """Removes a global application check from the bot.
+        """Removes a global application command check from the bot.
 
         This function is idempotent and will not raise an exception
         if the function is not in the global checks.
 
-        You must specify at least one of the bool parameters. Otherwise
-        it won't add the check.
+        You must specify at least one of the bool parameters, otherwise
+        the check won't be removed.
 
         Parameters
         ----------

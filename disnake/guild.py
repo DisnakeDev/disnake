@@ -455,7 +455,7 @@ class Guild(Hashable):
         Parameters
         ----------
         name: :class:`str`
-            The appllication command name to search for.
+            The application command name to search for.
 
         Returns
         -------
@@ -1766,7 +1766,7 @@ class Guild(Hashable):
         Returns
         -------
         Sequence[:class:`abc.GuildChannel`]
-            All channels the guild has.
+            All channels that the guild has.
         """
         data = await self._state.http.get_all_guild_channels(self.id)
 
@@ -1814,7 +1814,7 @@ class Guild(Hashable):
     ) -> List[GuildScheduledEvent]:
         """|coro|
 
-        Retrieves a list of all existing :class:`GuildScheduledEvent` instances that the guild has.
+        Retrieves a list of all :class:`GuildScheduledEvent` instances that the guild has.
 
         .. versionadded:: 2.3
 
@@ -2318,7 +2318,7 @@ class Guild(Hashable):
         Returns a list of all active instant invites from the guild.
 
         You must have :attr:`~Permissions.manage_guild` permission to
-        use this
+        use this.
 
         Raises
         ------
@@ -2640,7 +2640,7 @@ class Guild(Hashable):
         Creates a custom :class:`Emoji` for the guild.
 
         Depending on the boost level of your guild (which can be obtained via :attr:`premium_tier`),
-        the ammount of custom emojis that can be created are the following:
+        the amount of custom emojis that can be created changes:
 
         .. csv-table::
             :header: "Boost level", "Max custom emoji limit"
@@ -2731,7 +2731,7 @@ class Guild(Hashable):
         Returns
         -------
         List[:class:`Role`]
-            All roles the guild has.
+            All roles that the guild has.
         """
         data = await self._state.http.get_roles(self.id)
         return [Role(guild=self, state=self._state, data=d) for d in data]
@@ -2983,7 +2983,7 @@ class Guild(Hashable):
         Parameters
         ----------
         user: :class:`abc.Snowflake`
-            The user to kick from their guild.
+            The user to kick from the guild.
         reason: Optional[:class:`str`]
             The reason for kicking this user. Shows up on the audit log.
 
