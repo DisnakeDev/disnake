@@ -268,7 +268,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
     @property
     def last_message(self) -> Optional[Message]:
-        """Gets the last message from this channel in cache.
+        """Gets the last message in this channel from the cache.
 
         The message might not be valid or point to an existing message.
 
@@ -554,7 +554,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     async def webhooks(self) -> List[Webhook]:
         """|coro|
 
-        Gets a list of webhooks this channel has.
+        Gets the list of webhooks this channel has.
 
         You must have :attr:`~.Permissions.manage_webhooks` permission to
         use this.
@@ -1077,7 +1077,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     @property
     def last_message(self) -> Optional[Message]:
-        """Gets the last message from this channel in cache.
+        """Gets the last message in this channel from the cache.
 
         The message might not be valid or point to an existing message.
 
@@ -1610,7 +1610,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     async def edit(self, *, reason=None, **options):
         """|coro|
 
-        Edits the channel.
+        Edits the category.
 
         You must have :attr:`~Permissions.manage_channels` permission to
         do this.

@@ -231,7 +231,7 @@ class Client:
         .. versionadded:: 2.0
 
     test_guilds: List[:class:`int`]
-        The list of IDs of the guilds where you're going to test your app commands.
+        The list of IDs of the guilds where you're going to test your application commands.
         Defaults to ``None``, which means global registration of commands across
         all guilds.
 
@@ -1179,7 +1179,7 @@ class Client:
 
     def get_guild_command(self, guild_id: int, id: int) -> Optional[APIApplicationCommand]:
         """
-        Returns a guild application command with the given guild ID and app command ID.
+        Returns a guild application command with the given guild ID and application command ID.
 
         Parameters
         ----------
@@ -2177,7 +2177,7 @@ class Client:
         guild_id: :class:`int`
             The ID of the guild to fetch command from.
         command_id: :class:`int`
-            The ID of the application command to fetch.
+            The ID of the application command to retrieve.
 
         Returns
         -------

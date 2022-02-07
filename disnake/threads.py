@@ -247,7 +247,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def last_message(self) -> Optional[Message]:
-        """Fetches the last message from this channel in cache.
+        """Gets the last message in this channel from the cache.
 
         The message might not be valid or point to an existing message.
 
