@@ -389,9 +389,9 @@ class UserCommand(ApplicationCommand):
     Attributes
     ----------
     name: :class:`str`
-        The command name
+        The user command's name.
     default_permission: :class:`bool`
-        Whether the command is usable by default
+        Whether the user command is enabled by default when it's added to a guild.
     """
 
     __repr_info__ = ("name", "default_permission")
@@ -413,7 +413,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     Attributes
     ----------
     name: :class:`str`
-        The command name.
+        The user command's name.
     default_permission: :class:`bool`
         Whether the user command is enabled by default when it's added to a guild.
     id: :class:`int`
@@ -449,9 +449,9 @@ class MessageCommand(ApplicationCommand):
     Attributes
     ----------
     name: :class:`str`
-        The command name
+        The message command's name.
     default_permission: :class:`bool`
-        Whether the command is usable by default
+        Whether the message command is enabled by default when it's added to a guild.
     """
 
     __repr_info__ = ("name", "default_permission")
@@ -515,7 +515,7 @@ class SlashCommand(ApplicationCommand):
     description: :class:`str`
         The slash command's description.
     options: List[:class:`Option`]
-        A list of options that the slash command has.
+        The list of options the slash command has.
     """
 
     __repr_info__ = ("name", "description", "options", "default_permission")
@@ -603,7 +603,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     description: :class:`str`
         The slash command's description.
     options: List[:class:`Option`]
-        A list of options that the slash command has.
+        The list of options the slash command has.
     application_id: :class:`int`
         The parent application's ID. (This is usually your bot's ID.)
     guild_id: Optional[:class:`int`]
