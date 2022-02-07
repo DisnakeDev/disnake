@@ -71,8 +71,6 @@ class MessageInteraction(Interaction):
 
         .. versionadded:: 2.4
 
-    guild: Optional[:class:`Guild`]
-        The guild the interaction was sent from.
     guild_locale: Optional[:class:`str`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
@@ -80,18 +78,8 @@ class MessageInteraction(Interaction):
 
         .. versionadded:: 2.4
 
-    channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
-        The channel the interaction was sent from.
     message: Optional[:class:`Message`]
         The message that sent this interaction.
-    me: Union[:class:`.Member`, :class:`.ClientUser`]
-        Similar to :attr:`.Guild.me`
-    permissions: :class:`Permissions`
-        The resolved permissions of the member in the channel, including overwrites.
-    response: :class:`InteractionResponse`
-        Returns an object responsible for handling response to the interaction.
-    followup: :class:`Webhook`
-        Returns the follow up webhook for follow up interactions.
     data: :class:`MessageInteractionData`
         The wrapped interaction data.
     client: :class:`Client`

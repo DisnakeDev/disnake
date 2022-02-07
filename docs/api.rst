@@ -4118,7 +4118,6 @@ ApplicationCommandInteraction
 .. autoclass:: ApplicationCommandInteraction()
     :members:
     :inherited-members:
-    :exclude-members: channel, followup, guild, me, permissions, response
 
 MessageInteraction
 ~~~~~~~~~~~~~~~~~~
@@ -4128,7 +4127,6 @@ MessageInteraction
 .. autoclass:: MessageInteraction()
     :members:
     :inherited-members:
-    :exclude-members: channel, followup, guild, me, permissions, response
 
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
