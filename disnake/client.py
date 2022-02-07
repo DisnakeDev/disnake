@@ -1551,7 +1551,7 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            The guild's ID to fetch from.
+            The ID of the guild to fetch.
 
         Raises
         ------
@@ -1815,7 +1815,7 @@ class Client:
         Parameters
         ----------
         user_id: :class:`int`
-            The user's ID to fetch from.
+            The ID the user to fetch.
 
         Raises
         ------
@@ -1848,7 +1848,7 @@ class Client:
         Parameters
         ----------
         channel_id: :class:`int`
-            The channel's ID to fetch from.
+            The ID of the channel to fetch.
 
         Raises
         ------
@@ -1892,7 +1892,7 @@ class Client:
         Parameters
         ----------
         webhook_id: :class:`int`
-            The webhook's ID to fetch from.
+            The ID of the webhook to fetch.
 
         Raises
         ------
@@ -1921,7 +1921,7 @@ class Client:
         Parameters
         ----------
         sticker_id: :class:`int`
-            The sticker's ID to fetch from.
+            The ID of the sticker to fetch.
 
         Raises
         ------
