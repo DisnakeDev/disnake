@@ -433,15 +433,19 @@ class Guild(Hashable):
         return role
 
     def get_command(self, application_command_id: int, /) -> Optional[APIApplicationCommand]:
-        """
-        Gets a cached application command matching the specified ID.
+        """Gets a cached application command matching the specified ID.
 
         Parameters
         ----------
-        name: :class:`int`
-            the ID to compare to.
+        application_command_id: :class:`int`
+            The application command ID to search for.
+
+        Returns
+        -------
+        Optional[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
+            The application command if found, or ``None`` otherwise.
         """
-        self._state._get_guild_application_command(self.id, application_command_id)
+        return self._state._get_guild_application_command(self.id, application_command_id)
 
     def get_command_named(self, name: str, /) -> Optional[APIApplicationCommand]:
         """
