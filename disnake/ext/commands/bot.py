@@ -138,7 +138,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         .. versionadded:: 1.7
 
     test_guilds: List[:class:`int`]
-        The list of IDs of the guilds where you're going to test your app commands.
+        The list of IDs of the guilds where you're going to test your application commands.
         Defaults to ``None``, which means global registration of commands across
         all guilds.
 
@@ -168,7 +168,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
     sync_permissions: :class:`bool`
-        Whether to enable automatic synchronization of app command permissions in your code.
+        Whether to enable automatic synchronization of application command permissions in your code.
         Defaults to ``False``.
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
@@ -212,7 +212,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         For performance reasons it is recommended to use a :class:`set`
         for the collection. You cannot set both ``owner_id`` and ``owner_ids``.
     test_guilds: List[:class:`int`]
-        The list of IDs of the guilds where you're going to test your app commands.
+        The list of IDs of the guilds where you're going to test your application commands.
         Defaults to ``None``, which means global registration of commands across
         all guilds.
 
@@ -242,7 +242,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
     sync_permissions: :class:`bool`
-        Whether to enable automatic synchronization of app command permissions in your code.
+        Whether to enable automatic synchronization of application command permissions in your code.
         Defaults to ``False``.
 
         .. versionadded:: 2.1

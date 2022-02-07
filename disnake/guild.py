@@ -3449,7 +3449,7 @@ class Guild(Hashable):
         Parameters
         ----------
         permissions: List[:class:`PartialGuildApplicationCommandPermissions`]
-            A list of partial permissions for each app command you want to edit.
+            A list of partial permissions for each application command you want to edit.
 
         Returns
         -------
