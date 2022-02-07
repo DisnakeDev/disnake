@@ -1324,7 +1324,7 @@ class Messageable:
         tts: :class:`bool`
             Whether the message should be sent using text-to-speech.
         embed: :class:`.Embed`
-            The rich embed for the content to send. This cannot be mixed with
+            The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
         embeds: List[:class:`.Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
@@ -1333,7 +1333,7 @@ class Messageable:
             .. versionadded:: 2.0
 
         file: :class:`.File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.

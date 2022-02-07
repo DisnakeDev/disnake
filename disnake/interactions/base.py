@@ -353,7 +353,7 @@ class Interaction:
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
         files: List[:class:`File`]
@@ -521,16 +521,16 @@ class Interaction:
         content: Optional[:class:`str`]
             The content of the message to send.
         embed: :class:`Embed`
-            The rich embed for the content to send. This cannot be mixed with
+            The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
         embeds: List[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
-            This cannot be mixed with ``embed`` parameter.
+            This cannot be mixed with the ``embed`` parameter.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
-            This cannot be mixed with ``file`` parameter.
+            This cannot be mixed with the ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message. If this is
             passed, then the object is merged with :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`.
@@ -709,16 +709,16 @@ class InteractionResponse:
         content: Optional[:class:`str`]
             The content of the message to send.
         embed: :class:`Embed`
-            The rich embed for the content to send. This cannot be mixed with
+            The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
         embeds: List[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
-            This cannot be mixed with ``embed`` parameter.
+            This cannot be mixed with the ``embed`` parameter.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
-            This cannot be mixed with ``file`` parameter.
+            This cannot be mixed with the ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: :class:`disnake.ui.View`
@@ -877,21 +877,21 @@ class InteractionResponse:
         content: Optional[:class:`str`]
             The new content to replace the message with. ``None`` removes the content.
         embed: Optional[:class:`Embed`]
-            The new embed to replace the original with. This cannot be mixed with
+            The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
             Could be ``None`` to remove the embed.
         embeds: List[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
-            This cannot be mixed with ``embed`` parameter.
+            This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message.
 
             .. versionadded:: 2.2
 
         files: List[:class:`File`]
-            A list of files to upload. This cannot be mixed with ``file`` parameter.
+            A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message.
 
             .. versionadded:: 2.2
@@ -1109,19 +1109,19 @@ class InteractionMessage(Message):
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
-            The new embed to replace the original with. This cannot be mixed with
+            The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
             Could be ``None`` to remove the embed.
         embeds: List[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
-            This cannot be mixed with ``embed`` parameter.
+            This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
         files: List[:class:`File`]
-            A list of files to upload. This cannot be mixed with ``file`` parameter.
+            A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
         attachments: List[:class:`Attachment`]

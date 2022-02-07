@@ -717,7 +717,7 @@ class WebhookMessage(Message):
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
@@ -1421,12 +1421,12 @@ class Webhook(BaseWebhook):
             .. versionadded:: 2.0
 
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         embed: :class:`Embed`
-            The rich embed for the content to send. This cannot be mixed with ``embeds`` parameter.
+            The rich embed for the content to send. This cannot be mixed with the ``embeds`` parameter.
         embeds: List[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
@@ -1652,7 +1652,7 @@ class Webhook(BaseWebhook):
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 

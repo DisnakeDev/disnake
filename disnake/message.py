@@ -1487,7 +1487,7 @@ class Message(Hashable):
             .. versionadded:: 2.0
 
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
@@ -2047,7 +2047,7 @@ class PartialMessage(Hashable):
             .. versionadded:: 2.1
 
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
