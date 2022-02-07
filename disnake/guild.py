@@ -166,7 +166,7 @@ class Guild(Hashable):
     id: :class:`int`
         The guild's ID.
     owner_id: :class:`int`
-        The guild owner's ID. Use :attr:`Guild.owner` if you want to get a :class:`Member` object instead.
+        The guild owner's ID. Use :attr:`Guild.owner` if you need a :class:`Member` object instead.
     unavailable: :class:`bool`
         Whether the guild is unavailable. If this is ``True`` then the
         reliability of other attributes outside of :attr:`Guild.id` is slim and they might
@@ -467,7 +467,7 @@ class Guild(Hashable):
     def get_command_permissions(
         self, command_id: int, /
     ) -> Optional[GuildApplicationCommandPermissions]:
-        """Gets a cached application command permissions matching the specified ID.
+        """Gets the cached application command permissions for the command with the specified ID.
 
         Parameters
         ----------

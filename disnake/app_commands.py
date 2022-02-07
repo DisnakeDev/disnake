@@ -421,7 +421,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     application_id: :class:`int`
         The parent application's ID. (This is usually your bot's ID.)
     guild_id: Optional[:class:`int`]
-        The ID of the guild this user command is enabled in. Or ``None`` if it's global.
+        The ID of the guild this user command is enabled in, or ``None`` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
     """
@@ -481,7 +481,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     application_id: :class:`int`
         The parent application's ID. (This is usually your bot's ID.)
     guild_id: Optional[:class:`int`]
-        The ID of the guild this message command is enabled in. Or ``None`` if it's global.
+        The ID of the guild this message command is enabled in, or ``None`` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
     """
@@ -607,7 +607,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     application_id: :class:`int`
         The parent application's ID. (This is usually your bot's ID.)
     guild_id: Optional[:class:`int`]
-        The ID of the guild this slash command is enabled in. Or ``None`` if it's global.
+        The ID of the guild this slash command is enabled in, or ``None`` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
     """
