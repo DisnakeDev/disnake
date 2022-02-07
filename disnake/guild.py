@@ -2646,7 +2646,7 @@ class Guild(Hashable):
             "0", "50"
             "1", "100"
             "2", "150"
-            "3", "200"
+            "3", "250"
 
         You must have :attr:`~Permissions.manage_emojis` permission to
         do this.
