@@ -1095,7 +1095,7 @@ class Client:
             yield from guild.members
 
     def get_guild_application_commands(self, guild_id: int) -> List[APIApplicationCommand]:
-        """Returns a list of all application commands in the given guild id.
+        """Returns a list of all application commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1112,7 +1112,7 @@ class Client:
 
     def get_guild_slash_commands(self, guild_id: int) -> List[APISlashCommand]:
         """
-        Returns a list of all slash commands in the given guild id.
+        Returns a list of all slash commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1129,7 +1129,7 @@ class Client:
 
     def get_guild_user_commands(self, guild_id: int) -> List[APIUserCommand]:
         """
-        Returns a list of all user commands in the given guild id.
+        Returns a list of all user commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1146,7 +1146,7 @@ class Client:
 
     def get_guild_message_commands(self, guild_id: int) -> List[APIMessageCommand]:
         """
-        Returns a list of all message commands in the given guild id.
+        Returns a list of all message commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -2280,7 +2280,7 @@ class Client:
     ) -> List[GuildApplicationCommandPermissions]:
         """|coro|
 
-        Retrieves a list of :class:`.GuildApplicationCommandPermissions` configured for the given guild ID.
+        Retrieves a list of :class:`.GuildApplicationCommandPermissions` configured for the guild with the given ID.
 
         .. versionadded:: 2.1
 
