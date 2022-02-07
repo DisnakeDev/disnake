@@ -650,7 +650,7 @@ def slash_command(
     Returns
     -------
     Callable[..., :class:`InvokableSlashCommand`]
-        A decorator that converts the provided method into a InvokableSlashCommand and returns it.
+        A decorator that converts the provided method into an InvokableSlashCommand and returns it.
     """
 
     def decorator(

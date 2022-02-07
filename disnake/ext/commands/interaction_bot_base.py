@@ -296,7 +296,7 @@ class InteractionBotBase(CommonBotBase):
         self.all_message_commands[message_command.name] = message_command
 
     def remove_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
-        """Removes a :class:`InvokableSlashCommand` from the internal list
+        """Removes an :class:`InvokableSlashCommand` from the internal list
         of slash commands.
 
         Parameters
@@ -315,7 +315,7 @@ class InteractionBotBase(CommonBotBase):
         return command
 
     def remove_user_command(self, name: str) -> Optional[InvokableUserCommand]:
-        """Removes a :class:`InvokableUserCommand` from the internal list
+        """Removes an :class:`InvokableUserCommand` from the internal list
         of user commands.
 
         Parameters
@@ -334,7 +334,7 @@ class InteractionBotBase(CommonBotBase):
         return command
 
     def remove_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
-        """Removes a :class:`InvokableMessageCommand` from the internal list
+        """Removes an :class:`InvokableMessageCommand` from the internal list
         of message commands.
 
         Parameters
@@ -395,7 +395,7 @@ class InteractionBotBase(CommonBotBase):
                 return group.children.get(chain[2])
 
     def get_user_command(self, name: str) -> Optional[InvokableUserCommand]:
-        """Gets a :class:`InvokableUserCommand` from the internal list
+        """Gets an :class:`InvokableUserCommand` from the internal list
         of user commands.
 
         Parameters
@@ -411,7 +411,7 @@ class InteractionBotBase(CommonBotBase):
         return self.all_user_commands.get(name)
 
     def get_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
-        """Gets a :class:`InvokableMessageCommand` from the internal list
+        """Gets an :class:`InvokableMessageCommand` from the internal list
         of message commands.
 
         Parameters
@@ -475,7 +475,7 @@ class InteractionBotBase(CommonBotBase):
         Returns
         -------
         Callable[..., :class:`InvokableSlashCommand`]
-            A decorator that converts the provided method into a InvokableSlashCommand, adds it to the bot, then returns it.
+            A decorator that converts the provided method into an InvokableSlashCommand, adds it to the bot, then returns it.
         """
 
         def decorator(
@@ -534,7 +534,7 @@ class InteractionBotBase(CommonBotBase):
         Returns
         -------
         Callable[..., :class:`InvokableUserCommand`]
-            A decorator that converts the provided method into a InvokableUserCommand, adds it to the bot, then returns it.
+            A decorator that converts the provided method into an InvokableUserCommand, adds it to the bot, then returns it.
         """
 
         def decorator(
@@ -590,7 +590,7 @@ class InteractionBotBase(CommonBotBase):
         Returns
         -------
         Callable[..., :class:`InvokableMessageCommand`]
-            A decorator that converts the provided method into a InvokableMessageCommand, adds it to the bot, then returns it.
+            A decorator that converts the provided method into an InvokableMessageCommand, adds it to the bot, then returns it.
         """
 
         def decorator(

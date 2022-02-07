@@ -226,7 +226,7 @@ def user_command(
     Returns
     -------
     Callable[..., :class:`InvokableUserCommand`]
-        A decorator that converts the provided method into a InvokableUserCommand and returns it.
+        A decorator that converts the provided method into an InvokableUserCommand and returns it.
     """
 
     def decorator(
@@ -289,7 +289,7 @@ def message_command(
     Returns
     -------
     Callable[..., :class:`InvokableMessageCommand`]
-        A decorator that converts the provided method into a InvokableMessageCommand and then returns it.
+        A decorator that converts the provided method into an InvokableMessageCommand and then returns it.
     """
 
     def decorator(
