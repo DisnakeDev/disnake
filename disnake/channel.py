@@ -683,7 +683,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         Returns
         -------
         :class:`PartialMessage`
-            The requested partial message.
+            The partial message object.
         """
         from .message import PartialMessage
 
@@ -1114,7 +1114,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         Returns
         -------
         :class:`PartialMessage`
-            The requested partial message.
+            The partial message object.
         """
         from .message import PartialMessage
 
@@ -2073,7 +2073,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         Returns
         -------
         :class:`PartialMessage`
-            The requested partial message.
+            The partial message object.
         """
         from .message import PartialMessage
 
@@ -2289,7 +2289,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         Returns
         -------
         :class:`PartialMessage`
-            The requested partial message.
+            The partial message object.
         """
         from .message import PartialMessage
 
