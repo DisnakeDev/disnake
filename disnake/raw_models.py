@@ -65,7 +65,7 @@ class _RawReprMixin:
 
 
 class RawMessageDeleteEvent(_RawReprMixin):
-    """Represents the event payload for :func:`on_raw_message_delete` event.
+    """Represents the event payload for an :func:`on_raw_message_delete` event.
 
     Attributes
     ----------
@@ -92,7 +92,7 @@ class RawMessageDeleteEvent(_RawReprMixin):
 
 
 class RawBulkMessageDeleteEvent(_RawReprMixin):
-    """Represents the event payload for :func:`on_raw_bulk_message_delete` event.
+    """Represents the event payload for an :func:`on_raw_bulk_message_delete` event.
 
     Attributes
     ----------
@@ -119,7 +119,7 @@ class RawBulkMessageDeleteEvent(_RawReprMixin):
 
 
 class RawMessageUpdateEvent(_RawReprMixin):
-    """Represents the event payload for :func:`on_raw_message_edit` event.
+    """Represents the event payload for an :func:`on_raw_message_edit` event.
 
     Attributes
     ----------
@@ -200,16 +200,16 @@ class RawReactionActionEvent(_RawReprMixin):
 
 
 class RawReactionClearEvent(_RawReprMixin):
-    """Represents the event payload for :func:`on_raw_reaction_clear` event.
+    """Represents the event payload for an :func:`on_raw_reaction_clear` event.
 
     Attributes
     ----------
     message_id: :class:`int`
         The message ID that got its reactions cleared.
     channel_id: :class:`int`
-        The channel ID where the reactions clear took place.
+        The channel ID where the reaction clear took place.
     guild_id: Optional[:class:`int`]
-        The guild ID where the reactions clear took place, if applicable.
+        The guild ID where the reaction clear took place, if applicable.
     """
 
     __slots__ = ("message_id", "channel_id", "guild_id")
@@ -224,7 +224,7 @@ class RawReactionClearEvent(_RawReprMixin):
 
 
 class RawReactionClearEmojiEvent(_RawReprMixin):
-    """Represents the event payload for :func:`on_raw_reaction_clear_emoji` event.
+    """Represents the event payload for an :func:`on_raw_reaction_clear_emoji` event.
 
     .. versionadded:: 1.3
 
@@ -233,9 +233,9 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
     message_id: :class:`int`
         The message ID that got its reactions cleared.
     channel_id: :class:`int`
-        The channel ID where the reactions clear took place.
+        The channel ID where the reaction clear took place.
     guild_id: Optional[:class:`int`]
-        The guild ID where the reactions clear took place, if applicable.
+        The guild ID where the reaction clear took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being removed.
     """
@@ -253,7 +253,7 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
 
 
 class RawIntegrationDeleteEvent(_RawReprMixin):
-    """Represents the event payload for :func:`on_raw_integration_delete` event.
+    """Represents the event payload for an :func:`on_raw_integration_delete` event.
 
     .. versionadded:: 2.0
 
@@ -279,7 +279,7 @@ class RawIntegrationDeleteEvent(_RawReprMixin):
 
 
 class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
-    """Represents the event payload for :func:`on_raw_guild_scheduled_event_subscribe`
+    """Represents the event payload for an :func:`on_raw_guild_scheduled_event_subscribe`
     and :func:`on_raw_guild_scheduled_event_unsubscribe` events.
 
     .. versionadded:: 2.3
@@ -303,7 +303,7 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
 
 
 class RawTypingEvent(_RawReprMixin):
-    """Represents the event payload for :func:`on_raw_typing` event.
+    """Represents the event payload for an :func:`on_raw_typing` event.
 
     Attributes
     ----------
