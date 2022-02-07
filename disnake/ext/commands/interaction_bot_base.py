@@ -459,7 +459,8 @@ class InteractionBotBase(CommonBotBase):
             The list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
         default_permission: :class:`bool`
-            Whether the command is enabled by default when the app is added to a guild.
+            Whether the command is enabled by default. If set to ``False``, this command
+            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: List[:class:`int`]
@@ -524,7 +525,8 @@ class InteractionBotBase(CommonBotBase):
         name: :class:`str`
             The name of the user command (defaults to function name).
         default_permission: :class:`bool`
-            Whether the command is enabled by default when the app is added to a guild.
+            Whether the command is enabled by default. If set to ``False``, this command
+            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
         guild_ids: List[:class:`int`]
@@ -580,7 +582,8 @@ class InteractionBotBase(CommonBotBase):
         name: :class:`str`
             The name of the message command (defaults to function name).
         default_permission: :class:`bool`
-            Whether the command is enabled by default when the app is added to a guild.
+            Whether the command is enabled by default. If set to ``False``, this command
+            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: List[:class:`int`]

@@ -339,7 +339,8 @@ class ApplicationCommand(ABC):
     name: :class:`str`
         The command name
     default_permission: :class:`bool`
-        Whether the command is usable by default
+        Whether the command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     """
 
     __repr_info__: ClassVar[Tuple[str, ...]] = ("type", "name")
@@ -391,7 +392,8 @@ class UserCommand(ApplicationCommand):
     name: :class:`str`
         The user command's name.
     default_permission: :class:`bool`
-        Whether the user command is enabled by default when it's added to a guild.
+        Whether the user command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     """
 
     __repr_info__ = ("name", "default_permission")
@@ -415,7 +417,8 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     name: :class:`str`
         The user command's name.
     default_permission: :class:`bool`
-        Whether the user command is enabled by default when it's added to a guild.
+        Whether the user command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     id: :class:`int`
         The user command's ID.
     application_id: :class:`int`
@@ -451,7 +454,8 @@ class MessageCommand(ApplicationCommand):
     name: :class:`str`
         The message command's name.
     default_permission: :class:`bool`
-        Whether the message command is enabled by default when it's added to a guild.
+        Whether the message command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     """
 
     __repr_info__ = ("name", "default_permission")
@@ -475,7 +479,8 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     name: :class:`str`
         The message command's name.
     default_permission: :class:`bool`
-        Whether the message command is enabled by default when it's added to a guild.
+        Whether the message command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     id: :class:`int`
         The message command's ID.
     application_id: :class:`int`
@@ -511,7 +516,8 @@ class SlashCommand(ApplicationCommand):
     name: :class:`str`
         The slash command's name.
     default_permission: :class:`bool`
-        Whether the slash command is enabled by default when it's added to a guild.
+        Whether the slash command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     description: :class:`str`
         The slash command's description.
     options: List[:class:`Option`]
@@ -597,7 +603,8 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     name: :class:`str`
         The slash command's name.
     default_permission: :class:`bool`
-        Whether the slash command is enabled by default when it's added to a guild.
+        Whether the slash command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     id: :class:`int`
         The slash command's ID.
     description: :class:`str`

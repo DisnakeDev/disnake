@@ -636,7 +636,8 @@ def slash_command(
         The list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
     default_permission: :class:`bool`
-        Whether the command is enabled by default when the app is added to a guild.
+        Whether the command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     guild_ids: List[:class:`int`]
         If specified, the client will register a command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.

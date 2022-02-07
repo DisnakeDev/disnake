@@ -211,7 +211,8 @@ def user_command(
     name: :class:`str`
         The name of the user command (defaults to the function name).
     default_permission: :class:`bool`
-        Whether the command is enabled by default when the app is added to a guild.
+        Whether the command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
@@ -267,14 +268,15 @@ def message_command(
     ],
     InvokableMessageCommand,
 ]:
-    """A decorator that builds a message command.
+    """A shortcut decorator that builds a message command.
 
     Parameters
     ----------
     name: :class:`str`
         The name of the message command (defaults to the function name).
     default_permission: :class:`bool`
-        Whether the command is enabled by default when the app is added to a guild.
+        Whether the command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
