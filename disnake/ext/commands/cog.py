@@ -268,8 +268,7 @@ class Cog(metaclass=CogMeta):
         -------
         List[:class:`.Command`]
             A :class:`list` of :class:`.Command`\s that are
-            defined inside this cog. Returns an empty list if
-            no commands exist.
+            defined inside this cog.
 
             .. note::
 
@@ -285,8 +284,7 @@ class Cog(metaclass=CogMeta):
         -------
         List[:class:`.InvokableApplicationCommand`]
             A :class:`list` of :class:`.InvokableApplicationCommand`\s that are
-            defined inside this cog. Returns an empty list if no application
-            commands exist.
+            defined inside this cog.
 
             .. note::
 
@@ -302,8 +300,7 @@ class Cog(metaclass=CogMeta):
         -------
         List[:class:`.InvokableSlashCommand`]
             A :class:`list` of :class:`.InvokableSlashCommand`\s that are
-            defined inside this cog. Returns an empty list if no slash
-            commands exist.
+            defined inside this cog.
 
             .. note::
 
@@ -319,8 +316,7 @@ class Cog(metaclass=CogMeta):
         -------
         List[:class:`.InvokableUserCommand`]
             A :class:`list` of :class:`.InvokableUserCommand`\s that are
-            defined inside this cog. Returns an empty list if no user
-            commands exist.
+            defined inside this cog.
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableUserCommand)]
 
@@ -332,8 +328,7 @@ class Cog(metaclass=CogMeta):
         -------
         List[:class:`.InvokableMessageCommand`]
             A :class:`list` of :class:`.InvokableMessageCommand`\s that are
-            defined inside this cog. Returns an empty list if no message
-            commands exist.
+            defined inside this cog.
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableMessageCommand)]
 
