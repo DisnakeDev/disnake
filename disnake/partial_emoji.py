@@ -244,10 +244,12 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     async def read(self) -> bytes:
         """|coro|
 
-        Retrieves the content of this asset as a :class:`bytes` object.
+        Retrieves the data of this emoji as a :class:`bytes` object.
 
         Raises
         ------
+        InvalidArgument
+            The emoji is not a custom emoji.
         DiscordException
             There was no internal connection state.
         HTTPException
