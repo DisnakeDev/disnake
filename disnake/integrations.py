@@ -295,17 +295,17 @@ class IntegrationApplication:
     Attributes
     ----------
     id: :class:`int`
-        The application ID.
+        The application's ID.
     name: :class:`str`
-        The application name.
+        The application's name.
     icon: Optional[:class:`str`]
-        The application icon hash.
+        The application's icon hash.
     description: :class:`str`
-        The application description. Can be an empty string.
+        The application's description. Can be an empty string.
     summary: :class:`str`
-        The summary of the application. Can be an empty string.
+        The application's summary. Can be an empty string.
     user: Optional[:class:`User`]
-        The bot user on this application.
+        The bot user associated with this application.
     """
 
     __slots__ = (
