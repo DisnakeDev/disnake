@@ -219,11 +219,6 @@ def user_command(
         If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
 
-    Raises
-    ------
-    TypeError
-        The function is not a coroutine or the command is already registered.
-
     Returns
     -------
     Callable[..., :class:`InvokableUserCommand`]
@@ -282,11 +277,6 @@ def message_command(
     guild_ids: Sequence[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
-
-    Raises
-    ------
-    TypeError
-        The function is not a coroutine or the command is already registered.
 
     Returns
     -------

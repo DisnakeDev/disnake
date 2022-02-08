@@ -868,7 +868,7 @@ def Param(
     Raises
     ------
     TypeError
-        Param got unexpected keyword arguments.
+        Unexpected keyword arguments were provided.
 
     Returns
     -------
