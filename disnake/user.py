@@ -266,7 +266,7 @@ class BaseUser(_UserTag):
         Parameters
         ----------
         message: :class:`Message`
-            The message to check if the user is mentioned.
+            The message to check.
 
         Returns
         -------

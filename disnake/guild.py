@@ -1433,8 +1433,8 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` which can be synced to channels.
         position: :class:`int`
-            The position in the category list. This is a number that starts
-            at 0. e.g. the top category is position 0.
+            The position in the channel list. This is a number that starts
+            at 0. e.g. the top channel is position 0.
         reason: Optional[:class:`str`]
             The reason for creating this category. Shows up on the audit log.
 

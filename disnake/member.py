@@ -639,7 +639,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         Parameters
         ----------
         message: :class:`Message`
-            The message to check if the member is mentioned.
+            The message to check.
 
         Returns
         -------
