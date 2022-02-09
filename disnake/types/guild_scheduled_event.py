@@ -1,7 +1,6 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2021 Rapptz
 Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -23,70 +22,47 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-from __future__ import annotations
+from typing import Literal, Optional, TypedDict
 
-from typing import List, Literal, TypedDict, Union
-
+from .member import Member
 from .snowflake import Snowflake
 from .user import User
 
-StickerFormatType = Literal[1, 2, 3]
+GuildScheduledEventPrivacyLevel = Literal[2]
+GuildScheduledEventStatus = Literal[1, 2, 3, 4]
+GuildScheduledEventEntityType = Literal[1, 2, 3]
 
 
-class StickerItem(TypedDict):
-    id: Snowflake
-    name: str
-    format_type: StickerFormatType
+class _GuildScheduledEventUserOptional(TypedDict, total=False):
+    member: Member
 
 
-class BaseSticker(TypedDict):
-    id: Snowflake
-    name: str
-    description: str
-    tags: str
-    format_type: StickerFormatType
-
-
-class StandardSticker(BaseSticker):
-    type: Literal[1]
-    sort_value: int
-    pack_id: Snowflake
-
-
-class _GuildStickerOptional(TypedDict, total=False):
+class GuildScheduledEventUser(_GuildScheduledEventUserOptional):
+    guild_scheduled_event_id: Snowflake
     user: User
 
 
-class GuildSticker(BaseSticker, _GuildStickerOptional):
-    type: Literal[2]
-    available: bool
-    guild_id: Snowflake
+class GuildScheduledEventEntityMetadata(TypedDict, total=False):
+    location: str
 
 
-Sticker = Union[BaseSticker, StandardSticker, GuildSticker]
+class _GuildScheduledEventOptional(TypedDict, total=False):
+    description: str
+    creator: User
+    user_count: int
 
 
-class StickerPack(TypedDict):
+class GuildScheduledEvent(_GuildScheduledEventOptional):
     id: Snowflake
-    stickers: List[StandardSticker]
+    guild_id: Snowflake
+    channel_id: Optional[Snowflake]
+    creator_id: Optional[Snowflake]
     name: str
-    sku_id: Snowflake
-    cover_sticker_id: Snowflake
-    description: str
-    banner_asset_id: Snowflake
-
-
-class CreateGuildSticker(TypedDict):
-    name: str
-    tags: str
-    description: str
-
-
-class EditGuildSticker(TypedDict, total=False):
-    name: str
-    tags: str
-    description: str
-
-
-class ListPremiumStickerPacks(TypedDict):
-    sticker_packs: List[StickerPack]
+    scheduled_start_time: str
+    scheduled_end_time: Optional[str]
+    privacy_level: GuildScheduledEventPrivacyLevel
+    status: GuildScheduledEventStatus
+    entity_type: GuildScheduledEventEntityType
+    entity_id: Optional[Snowflake]
+    entity_metadata: Optional[GuildScheduledEventEntityMetadata]
+    image: Optional[str]

@@ -35,6 +35,9 @@ class MyView(disnake.ui.View):
         # view = None removes the view
         await interaction.response.edit_message(view=None)
 
+        # Prevents on_timeout from being triggered after the view is removed
+        self.stop()
+
 
 @bot.command()
 async def view(ctx):

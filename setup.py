@@ -62,6 +62,7 @@ packages = [
     "disnake.interactions",
     "disnake.ext.commands",
     "disnake.ext.tasks",
+    "disnake.ext.mypy_plugin",
 ]
 
 setup(

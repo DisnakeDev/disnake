@@ -88,4 +88,3 @@ msgstr "その他のシステムの場合:"
 #: ../../quickstart.rst:76
 msgid "Now you can try playing around with your basic bot."
 msgstr "これで、あなたが作ったBotと遊ぶことができます。"
-

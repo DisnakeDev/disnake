@@ -410,7 +410,7 @@ class ParamInfo:
 
     async def verify_type(self, inter: CommandInteraction, argument: Any) -> Any:
         """Check if a type of an argument is correct and possibly fix it"""
-        if issubclass(self.type, disnake.Member):
+        if issubclass_(self.type, disnake.Member):
             if isinstance(argument, disnake.Member):
                 return argument
 
@@ -448,7 +448,11 @@ class ParamInfo:
 
         self.type = type(self.choices[0].value)
 
-    def _parse_guild_channel(self, *channels: Type[disnake.abc.GuildChannel]) -> None:
+    def _parse_guild_channel(
+        self, *channels: Union[Type[disnake.abc.GuildChannel], Type[disnake.Thread]]
+    ) -> None:
+        # this variable continues to be GuildChannel because the type is still
+        # determined from the TYPE mapping in the class definition
         self.type = disnake.abc.GuildChannel
 
         if not self.channel_types:
@@ -480,7 +484,7 @@ class ParamInfo:
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
-        if issubclass(annotation, LargeInt):
+        if issubclass_(annotation, LargeInt):
             self.large = True
             annotation = int
 
@@ -497,13 +501,15 @@ class ParamInfo:
             self._parse_enum(annotation)
         elif get_origin(annotation) in (Union, UnionType):
             args = annotation.__args__
-            if all(issubclass_(channel, disnake.abc.GuildChannel) for channel in args):
+            if all(
+                issubclass_(channel, (disnake.abc.GuildChannel, disnake.Thread)) for channel in args
+            ):
                 self._parse_guild_channel(*args)
             else:
                 raise TypeError(
                     "Unions for anything else other than channels or a mentionable are not supported"
                 )
-        elif issubclass_(annotation, disnake.abc.GuildChannel):
+        elif issubclass_(annotation, (disnake.abc.GuildChannel, disnake.Thread)):
             self._parse_guild_channel(annotation)
         elif issubclass_(get_origin(annotation), collections.abc.Sequence):
             raise TypeError(

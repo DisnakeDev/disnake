@@ -94,13 +94,14 @@ MISSING = utils.MISSING
 
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime, User as ABCUser
-    from .app_commands import ApplicationCommand
+    from .app_commands import APIApplicationCommand
     from .channel import CategoryChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
     from .types.integration import IntegrationType
+    from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload
     from .types.voice import GuildVoiceState
     from .voice_client import VoiceProtocol
@@ -431,18 +432,22 @@ class Guild(Hashable):
 
         return role
 
-    def get_command(self, application_command_id: int, /) -> Optional[ApplicationCommand]:
-        """
-        Gets a cached application command matching the specified ID.
+    def get_command(self, application_command_id: int, /) -> Optional[APIApplicationCommand]:
+        """Gets a cached application command matching the specified ID.
 
         Parameters
         ----------
-        name: :class:`int`
-            the ID to compare to.
-        """
-        self._state._get_guild_application_command(self.id, application_command_id)
+        application_command_id: :class:`int`
+            The application command ID to search for.
 
-    def get_command_named(self, name: str, /) -> Optional[ApplicationCommand]:
+        Returns
+        -------
+        Optional[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
+            The application command if found, or ``None`` otherwise.
+        """
+        return self._state._get_guild_application_command(self.id, application_command_id)
+
+    def get_command_named(self, name: str, /) -> Optional[APIApplicationCommand]:
         """
         Gets a cached application command matching the specified name.
 
@@ -521,8 +526,8 @@ class Guild(Hashable):
             self._stage_instances[stage_instance.id] = stage_instance
 
         self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
-        for s in guild.get("guild_scheduled_events", []):
-            scheduled_event = GuildScheduledEvent(state=state, data=s)
+        for e in guild.get("guild_scheduled_events", []):
+            scheduled_event = GuildScheduledEvent(state=state, data=e)
             self._scheduled_events[scheduled_event.id] = scheduled_event
 
         cache_joined = self._state.member_cache_flags.joined
@@ -1843,10 +1848,11 @@ class Guild(Hashable):
         scheduled_start_time: datetime.datetime,
         entity_type: GuildScheduledEventEntityType,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
-        channel_id: Snowflake = MISSING,
+        channel_id: int = MISSING,
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         scheduled_end_time: datetime.datetime = MISSING,
         description: str = MISSING,
+        image: bytes = MISSING,
         reason: Optional[str] = None,
     ) -> GuildScheduledEvent:
         """|coro|
@@ -1861,6 +1867,11 @@ class Guild(Hashable):
             The name of the guild scheduled event.
         description: :class:`str`
             The description of the guild scheduled event.
+        image: :class:`bytes`
+            The cover image of the guild scheduled event.
+
+            .. versionadded:: 2.4
+
         channel_id: :class:`int`
             The channel ID in which the guild scheduled event will be hosted.
         privacy_level: :class:`GuildScheduledEventPrivacyLevel`
@@ -1891,7 +1902,7 @@ class Guild(Hashable):
 
         if privacy_level is MISSING:
             privacy_level = GuildScheduledEventPrivacyLevel.guild_only
-        elif not isinstance(privacy_level, StagePrivacyLevel):
+        elif not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
             raise ValueError("privacy_level must be an instance of GuildScheduledEventPrivacyLevel")
 
         fields: Dict[str, Any] = {
@@ -1911,6 +1922,9 @@ class Guild(Hashable):
 
         if description is not MISSING:
             fields["description"] = description
+
+        if image is not MISSING:
+            fields["image"] = utils._bytes_to_base64_data(image)
 
         if channel_id is not MISSING:
             fields["channel_id"] = channel_id
@@ -2467,7 +2481,7 @@ class Guild(Hashable):
         name: :class:`str`
             The sticker name. Must be at least 2 characters.
         description: Optional[:class:`str`]
-            The sticker's description. Can be ``None``.
+            The sticker's description. You can pass ``None`` or an empty string to not set a description.
         emoji: :class:`str`
             The name of a unicode emoji that represents the sticker's expression.
         file: :class:`File`
@@ -2487,12 +2501,8 @@ class Guild(Hashable):
         :class:`GuildSticker`
             The created sticker.
         """
-        payload: Any = {
-            "name": name,
-        }
-
-        if description:
-            payload["description"] = description
+        if description is None:
+            description = ""
 
         try:
             emoji = unicodedata.name(emoji)
@@ -2501,7 +2511,7 @@ class Guild(Hashable):
         else:
             emoji = emoji.replace(" ", "_")
 
-        payload["tags"] = emoji
+        payload: CreateStickerPayload = {"name": name, "description": description, "tags": emoji}
 
         data = await self._state.http.create_guild_sticker(self.id, payload, file, reason=reason)
         return self._state.store_sticker(self, data)
