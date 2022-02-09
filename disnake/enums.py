@@ -641,11 +641,10 @@ class ButtonStyle(Enum):
 class TextInputStyle(Enum):
     short = 1
     paragraph = 2
-
     # Aliases
-    singleline = 1
+    single_line = 1
+    multi_line = 2
     long = 2
-    multiline = 2
 
     def __int__(self) -> int:
         return self.value
