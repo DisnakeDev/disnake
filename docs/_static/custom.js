@@ -179,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       color_scheme = "light";
     }
+    document.documentElement.setAttribute('data-theme', color_scheme);
   } else {
     if (toggle_set) {
       color_scheme = "dark";
