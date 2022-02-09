@@ -1551,7 +1551,7 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            The ID of the guild to fetch.
+            The ID of the guild to retrieve.
 
         Raises
         ------
@@ -1755,7 +1755,7 @@ class Client:
     async def fetch_widget(self, guild_id: int, /) -> Widget:
         """|coro|
 
-        Retrieves a :class:`.Widget` from a guild ID.
+        Retrieves a :class:`.Widget` for the given guild ID.
 
         .. note::
 
@@ -1815,7 +1815,7 @@ class Client:
         Parameters
         ----------
         user_id: :class:`int`
-            The ID the user to fetch.
+            The ID of the user to retrieve.
 
         Raises
         ------
@@ -1848,7 +1848,7 @@ class Client:
         Parameters
         ----------
         channel_id: :class:`int`
-            The ID of the channel to fetch.
+            The ID of the channel to retrieve.
 
         Raises
         ------
@@ -1892,7 +1892,7 @@ class Client:
         Parameters
         ----------
         webhook_id: :class:`int`
-            The ID of the webhook to fetch.
+            The ID of the webhook to retrieve.
 
         Raises
         ------
@@ -1921,7 +1921,7 @@ class Client:
         Parameters
         ----------
         sticker_id: :class:`int`
-            The ID of the sticker to fetch.
+            The ID of the sticker to retrieve.
 
         Raises
         ------
@@ -2198,9 +2198,9 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            The ID of the guild where the applicaion command should be inserted.
+            The ID of the guild where the application command should be created.
         application_command: :class:`.ApplicationCommand`
-            An object representing the application command.
+            The application command.
 
         Returns
         -------

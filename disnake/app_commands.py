@@ -422,7 +422,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     id: :class:`int`
         The user command's ID.
     application_id: :class:`int`
-        The parent application's ID. (This is usually your bot's ID.)
+        The application ID this command belongs to.
     guild_id: Optional[:class:`int`]
         The ID of the guild this user command is enabled in, or ``None`` if it's global.
     version: :class:`int`
@@ -484,7 +484,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     id: :class:`int`
         The message command's ID.
     application_id: :class:`int`
-        The parent application's ID. (This is usually your bot's ID.)
+        The application ID this command belongs to.
     guild_id: Optional[:class:`int`]
         The ID of the guild this message command is enabled in, or ``None`` if it's global.
     version: :class:`int`
@@ -612,7 +612,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     options: List[:class:`Option`]
         The list of options the slash command has.
     application_id: :class:`int`
-        The parent application's ID. (This is usually your bot's ID.)
+        The application ID this command belongs to.
     guild_id: Optional[:class:`int`]
         The ID of the guild this slash command is enabled in, or ``None`` if it's global.
     version: :class:`int`
@@ -680,7 +680,7 @@ class GuildApplicationCommandPermissions:
     id: :class:`int`
         The application command's ID.
     application_id: :class:`int`
-        The parent application's ID. (This is usually your bot's ID.)
+        The application ID this command belongs to.
     guild_id: :class:`int`
         The ID of the guild where these permissions are applied.
     permissions: List[:class:`ApplicationCommandPermissions`]

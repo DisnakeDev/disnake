@@ -554,7 +554,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     async def webhooks(self) -> List[Webhook]:
         """|coro|
 
-        Gets the list of webhooks this channel has.
+        Retrieves the list of webhooks this channel has.
 
         You must have :attr:`~.Permissions.manage_webhooks` permission to
         use this.
@@ -567,7 +567,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         Returns
         -------
         List[:class:`Webhook`]
-            The webhooks for this channel.
+            The list of webhooks this channel has.
         """
         from .webhook import Webhook
 
@@ -1070,6 +1070,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     def is_nsfw(self) -> bool:
         """Whether the channel is marked as NSFW.
+
+        .. versionadded:: 2.3
 
         :return type: :class:`bool`
         """
