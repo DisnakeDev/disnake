@@ -7,6 +7,7 @@
   {%- block extrahead %} {% endblock %}
   <!-- end extra head -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://css.gg/css?=|moon|sun" rel="stylesheet">
   {%- block css %}
   {%- for css in css_files %}
     {%- if css|attr("filename") %}
@@ -92,6 +93,13 @@
           <a href="https://github.com/DisnakeDev/disnake" title="GitHub"><span class="material-icons custom-icons">github</span></a>
           <a href="{{ discord_invite }}" title="{{ _('Discord') }}"><span class="material-icons custom-icons">discord</span></a>
           <a href="{{ pathto('faq') }}" title="FAQ"><span class="material-icons">help_center</span></a>
+          <div id="dark-mode-switch" class="">
+              <div class="switch-outer"></div>
+              <div class="switch-inner"></div>
+              <i class="theme-icon light gg-sun"></i>
+              <div class="knob dark"></div>
+              <i class="theme-icon dark gg-moon"></i>
+          </div>
           {#- If we have more links we can put them here #}
         </div>
       </nav>

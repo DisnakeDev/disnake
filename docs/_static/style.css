@@ -1453,3 +1453,92 @@ div.code-block-caption {
 .tooltipster-sidetip.tooltipster-custom .tooltipster-content .headerlink {
   visibility: hidden;
 }
+
+
+/* Dark mode toggle */
+
+#dark-mode-switch {
+  position: relative;
+  height: 1.5em;
+  width: 3em;
+  cursor: pointer;
+}
+
+#dark-mode-switch .switch-outer {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  border-radius: 2em;
+  transition: background-color 0.1s ease-out;
+}
+
+#dark-mode-switch.dark .switch-outer {
+  background-color: #10162b;
+}
+
+#dark-mode-switch.light .switch-outer {
+  background-color: #3f61d9;
+}
+
+#dark-mode-switch .switch-inner {
+  display: absolute;
+  height: 90%;
+  width: 95%;
+  top: 50%;
+  transform: translate(2.5%, 5%);
+  border-radius: 2em;
+  transition: background-color 0.2s ease-out;
+}
+#dark-mode-switch.light .switch-inner {
+  background-color: #7289da;
+}
+#dark-mode-switch.dark .switch-inner {
+  background-color: #1b2137;
+}
+
+#dark-mode-switch .knob {
+  display: absolute;
+  height: 75%;
+  width: 37.5%;
+  top: 50%;
+  transform: translate(0%, -120%);
+  border-radius: 10em;
+  transition: all 0.3s ease-out;
+}
+
+#dark-mode-switch .knob.dark {
+  background-color: #586282;
+  margin: 6% auto auto 8%;
+}
+
+#dark-mode-switch .knob.light {
+  background-color: #364c94;
+  margin: 6% auto auto 56%;
+}
+
+#dark-mode-switch .theme-icon {
+  position: absolute !important;
+  color: white;
+  --ggs: 2;
+  opacity: 100%;
+  transition: opacity 0.2s ease-out;
+  top: 33%;
+  bottom: auto;
+}
+
+#dark-mode-switch .theme-icon.light {
+  left: 18%;
+}
+
+#dark-mode-switch .theme-icon.dark {
+  right: 18%;
+  top: 35%
+}
+
+#dark-mode-switch.dark .theme-icon.light {
+  opacity: 0%;
+}
+
+#dark-mode-switch.light .theme-icon.dark {
+  opacity: 0%;
+}
