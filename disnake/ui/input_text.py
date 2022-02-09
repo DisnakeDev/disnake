@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2021-present DisnakeDev
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -82,7 +82,7 @@ class TextInput(WrappedComponent):
         placeholder: Optional[str] = None,
         value: Optional[str] = None,
         required: bool = True,
-        min_length: int = 0,
+        min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
         self._underlying = TextInputComponent._raw_construct(
