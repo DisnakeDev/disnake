@@ -1116,14 +1116,14 @@ class InteractionResponse:
 
         if modal is not None:
             modal_data = modal.to_components()
-        elif title and components:
+        elif title and components and custom_id:
             modal_data = {
                 "title": title,
-                "custom_id": os.urandom(16).hex() if custom_id is None else custom_id,
+                "custom_id": custom_id,
                 "components": components_to_dict(components),
             }
         else:
-            raise TypeError("Either modal or title, custom_id, components must be provided")
+            raise TypeError("Either modal, title or custom_id, components must be provided")
 
         await adapter.create_interaction_response(
             parent.id,

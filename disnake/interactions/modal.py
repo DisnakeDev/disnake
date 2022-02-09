@@ -86,7 +86,10 @@ class ModalInteraction(Interaction):
         self.data = ModalInteractionData(data=data["data"])  # type: ignore
 
     def walk_components(self) -> Iterable[NestedComponent]:
-        """Returns an iterator that yields components from action rows one by one."""
+        """Returns an iterator that yields components from action rows one by one.
+
+        :return type: Iterable[Union[:class:`Button`, :class:`SelectMenu`, :class:`TextInput`]]
+        """
         for action_row in self.data._components:
             yield from action_row.children
 
