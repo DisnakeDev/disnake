@@ -1094,16 +1094,13 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        kwargs_passed = title is not None or custom_id is not None or components is not None
+        # title and components must always be provided if any of them are provided, but custom_id is optional
 
-        if modal is None and not kwargs_passed:
-            raise TypeError("cannot send a modal with no arguments passed")
+        if modal and any((title, components, custom_id)):
+            raise TypeError(f"Cannot mix modal argument and title, custom_id, components arguments")
 
-        if modal is not None and kwargs_passed:
-            raise TypeError(f"cannot mix modal argument and title, custom_id, components arguments")
-
-        if modal is None and (title is None or custom_id is None or components is None):
-            raise TypeError("you must pass all keyword arguments")
+        if not modal and not all((title, components)):
+            raise TypeError("Either modal or title, custom_id, components must be provided")
 
         parent = self._parent
         adapter = async_context.get()
