@@ -1062,6 +1062,11 @@ class InteractionResponse:
 
         Responds to this interaction by displaying a modal.
 
+        .. note::
+
+            Not passing a modal here will not register a callback, and a modal_submit interaction
+            will need to be handled manually.
+
         Parameters
         ----------
         modal: :class:`~.ui.Modal`

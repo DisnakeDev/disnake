@@ -350,7 +350,7 @@ class InteractionNotResponded(InteractionException):
 
 
 class ModalInteractionException(InteractionException):
-    """Exception that's raised when responding a modal with another modal
+    """Exception that's raised when responding to a modal with another modal.
 
     .. versionadded:: 2.4
 
