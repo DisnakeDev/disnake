@@ -24,9 +24,9 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Dict, Iterable, List
 
-from ..components import ActionRow
+from ..components import ActionRow, NestedComponent
 from .base import Interaction
 
 if TYPE_CHECKING:
@@ -85,15 +85,20 @@ class ModalInteraction(Interaction):
         super().__init__(data=data, state=state)
         self.data = ModalInteractionData(data=data["data"])  # type: ignore
 
+    def walk_components(self) -> Iterable[NestedComponent]:
+        """Returns an iterator that yields components from action rows one by one."""
+        for action_row in self.data._components:
+            yield from action_row.children
+
     @property
     def values(self) -> Dict[str, str]:
         """Dict[:class:`str`, :class:`str`]: Returns the values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``."""
         values: Dict[str, str] = {}
-        for action_row in self.data._components:
-            for component in action_row.children:
-                # assuming that action rows from modals only have text_input components
-                values[component.custom_id] = component.value  # type: ignore
+        for component in self.walk_components():
+            # assuming that action rows from modals only have text_input components
+            values[component.custom_id] = component.value  # type: ignore
+
         return values
 
     @property

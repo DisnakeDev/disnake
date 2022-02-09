@@ -102,7 +102,7 @@ class Component:
 
 
 class ActionRow(Component):
-    """Represents an Action Row.
+    """Represents an action row.
 
     This is a component that holds up to 5 children components in a row.
 
@@ -385,8 +385,6 @@ class SelectOption:
 class TextInput(Component):
     """Represents an text input from the Discord Bot UI Kit.
 
-    This can only be used in a :class:`~.ui.Modal`.
-
     .. versionadded:: 2.4
 
     .. note::
@@ -395,7 +393,7 @@ class TextInput(Component):
         :class:`disnake.ui.TextInput`, not this one.
 
     Attributes
-    -----------
+    ----------
     style: :class:`TextInputStyle`
         The style of the text input.
     label: Optional[:class:`str`]
