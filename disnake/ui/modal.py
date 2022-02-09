@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 from ..enums import TextInputStyle
 from ..utils import MISSING
 from .action_row import ActionRow, components_to_rows
-from .input_text import TextInput
+from .text_input import TextInput
 
 if TYPE_CHECKING:
     from ..interactions.modal import ModalInteraction
@@ -121,7 +121,7 @@ class Modal:
             except (ValueError, IndexError):
                 self.components.append(ActionRow(c))
 
-    def add_input_text(
+    def add_text_input(
         self,
         *,
         label: str,
@@ -133,7 +133,7 @@ class Modal:
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
-        """Creates and adds an input text component to the modal.
+        """Creates and adds an text input component to the modal.
 
         To append a pre-existing instance of :class:`disnake.ui.TextInput` use the
         :meth:`append_component` method.
@@ -141,21 +141,21 @@ class Modal:
         Parameters
         ----------
         label: :class:`str`
-            The label of the input text.
+            The label of the text input.
         custom_id: :class:`str`
-            The ID of the input text that gets received during an interaction.
+            The ID of the text input that gets received during an interaction.
         style: :class:`.TextInputStyle`
-            The style of the input text.
+            The style of the text input.
         placeholder: Optional[:class:`str`]
             The placeholder text that is shown if nothing is entered.
         value: Optional[:class:`str`]
-            The pre-filled value of the input text.
+            The pre-filled value of the text input.
         required: :class:`bool`
-            Whether the input text is required. Defaults to ``True``.
+            Whether the text input is required. Defaults to ``True``.
         min_length: :class:`int`
-            The minimum length of the input text. Defaults to ``0``.
+            The minimum length of the text input. Defaults to ``0``.
         max_length: Optional[:class:`int`]
-            The maximum length of the input text.
+            The maximum length of the text input.
 
         Raises
         ------

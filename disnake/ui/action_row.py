@@ -30,9 +30,9 @@ from ..components import ActionRow as ActionRowComponent, NestedComponent, Selec
 from ..enums import ButtonStyle, ComponentType, TextInputStyle
 from ..utils import MISSING
 from .button import Button
-from .input_text import TextInput
 from .item import WrappedComponent
 from .select import Select
+from .text_input import TextInput
 
 __all__ = ("ActionRow",)
 
@@ -211,7 +211,7 @@ class ActionRow:
             )
         )
 
-    def add_input_text(
+    def add_text_input(
         self,
         *,
         label: str,
@@ -223,7 +223,7 @@ class ActionRow:
         min_length: int = 0,
         max_length: Optional[int] = None,
     ):
-        """Adds an input text to the action row.
+        """Adds a text input to the action row.
 
         To append a pre-existing :class:`~disnake.ui.TextInput` use the
         :meth:`append_item` method instead.
@@ -233,21 +233,21 @@ class ActionRow:
         Parameters
         ----------
         style: :class:`.TextInputStyle`
-            The style of the input text.
+            The style of the text input.
         label: :class:`str`
-            The label of the input text.
+            The label of the text input.
         custom_id: :class:`str`
-            The ID of the input text that gets received during an interaction.
+            The ID of the text input that gets received during an interaction.
         placeholder: Optional[:class:`str`]
             The placeholder text that is shown if nothing is entered.
         value: Optional[:class:`str`]
-            The pre-filled value of the input text.
+            The pre-filled value of the text input.
         required: :class:`bool`
-            Whether the input text is required. Defaults to ``True``.
+            Whether the text input is required. Defaults to ``True``.
         min_length: :class:`int`
-            The minimum length of the input text. Defaults to ``0``.
+            The minimum length of the text input. Defaults to ``0``.
         max_length: Optional[:class:`int`]
-            The maximum length of the input text.
+            The maximum length of the text input.
 
         Raises
         ------

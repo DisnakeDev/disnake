@@ -92,7 +92,7 @@ class ModalInteraction(Interaction):
         values: Dict[str, str] = {}
         for action_row in self.data._components:
             for component in action_row.children:
-                # assuming that action rows from modals only have input_text components
+                # assuming that action rows from modals only have text_input components
                 values[component.custom_id] = component.value  # type: ignore
         return values
 

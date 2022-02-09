@@ -383,7 +383,7 @@ class SelectOption:
 
 
 class TextInput(Component):
-    """Represents an input text from the Discord Bot UI Kit.
+    """Represents an text input from the Discord Bot UI Kit.
 
     This can only be used in a :class:`~.ui.Modal`.
 
@@ -391,27 +391,27 @@ class TextInput(Component):
 
     .. note::
 
-        The user constructible and usable type to create an input text is
+        The user constructible and usable type to create an text input is
         :class:`disnake.ui.TextInput`, not this one.
 
     Attributes
     -----------
     style: :class:`TextInputStyle`
-        The style of the input text.
+        The style of the text input.
     label: Optional[:class:`str`]
-        The label of the input text.
+        The label of the text input.
     custom_id: :class:`str`
-        The ID of the input text that gets received during an interaction.
+        The ID of the text input that gets received during an interaction.
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is entered.
     value: Optional[:class:`str`]
-        The pre-filled text of the input text.
+        The pre-filled text of the text input.
     required: :class:`bool`
-        Whether the input text is required. Defaults to ``True``.
+        Whether the text input is required. Defaults to ``True``.
     min_length: :class:`int`
-        The minimum length of the input text. Defaults to ``0``.
+        The minimum length of the text input. Defaults to ``0``.
     max_length: Optional[:class:`int`]
-        The maximum length of the input text.
+        The maximum length of the text input.
     """
 
     __slots__: Tuple[str, ...] = (

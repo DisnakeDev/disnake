@@ -1717,9 +1717,9 @@ of :class:`enum.Enum`.
     .. attribute:: select
 
         Represents a select component.
-    .. attribute:: input_text
+    .. attribute:: text_input
 
-        Represents an input text component.
+        Represents an text input component.
 
 .. class:: OptionType
 
@@ -1807,16 +1807,16 @@ of :class:`enum.Enum`.
 
 .. class:: TextInputStyle
 
-    Represents a style of the input text component.
+    Represents a style of the text input component.
 
     .. versionadded:: 2.4
 
     .. attribute:: short
 
-        Represents a single-line input text component.
+        Represents a single-line text input component.
     .. attribute:: paragraph
 
-        Represents a multi-line input text component.
+        Represents a multi-line text input component.
     .. attribute:: singleline
 
         An alias for :attr:`short`.
