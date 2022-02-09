@@ -620,8 +620,8 @@ class InteractionResponse:
         -----------
         ephemeral: :class:`bool`
             Indicates whether the deferred message will eventually be ephemeral.
-            This applies for interactions of type :attr:`InteractionType.application_command`, :attr:`InteractionType.modal_submit`,
-            or when ``with_message`` is True
+            This applies for interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
+            or when the ``with_message`` parameter is ``True``.
         with_message: :class:`bool`
             Indicates whether the response will be a message with thinking state (bot is thinking...).
             This only applies to interactions of type :attr:`InteractionType.component`.
