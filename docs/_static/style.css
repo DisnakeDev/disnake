@@ -45,8 +45,6 @@ Historically however, thanks to:
   --disnake-blue: #376fa1;
   --disnake-light-blue: #578fc1;
 
-  --settings: var(--grey-1);
-  --settings-hover: var(--grey-1-8);
   --main-background: var(--grey-1);
   --link-text: var(--blue-2);
   --link-hover-text: var(--blue-6);
