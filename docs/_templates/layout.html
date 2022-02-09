@@ -7,7 +7,6 @@
   {%- block extrahead %} {% endblock %}
   <!-- end extra head -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://css.gg/css?=|moon|sun" rel="stylesheet">
   {%- block css %}
   {%- for css in css_files %}
     {%- if css|attr("filename") %}
@@ -96,9 +95,9 @@
           <div id="dark-mode-switch" class="">
               <div class="switch-outer"></div>
               <div class="switch-inner"></div>
-              <i class="theme-icon light gg-sun"></i>
+              <span class="material-icons theme-icon light">light_mode</span>
               <div class="knob dark"></div>
-              <i class="theme-icon dark gg-moon"></i>
+              <span class="material-icons theme-icon dark">dark_mode</span>
           </div>
           {#- If we have more links we can put them here #}
         </div>
