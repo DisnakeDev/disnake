@@ -1719,7 +1719,7 @@ of :class:`enum.Enum`.
         Represents a select component.
     .. attribute:: text_input
 
-        Represents an text input component.
+        Represents a text input component.
 
 .. class:: OptionType
 
@@ -1817,10 +1817,10 @@ of :class:`enum.Enum`.
     .. attribute:: paragraph
 
         Represents a multi-line text input component.
-    .. attribute:: singleline
+    .. attribute:: single_line
 
         An alias for :attr:`short`.
-    .. attribute:: multiline
+    .. attribute:: multi_line
 
         An alias for :attr:`paragraph`.
     .. attribute:: long
