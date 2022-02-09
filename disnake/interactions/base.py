@@ -620,11 +620,11 @@ class InteractionResponse:
         -----------
         ephemeral: :class:`bool`
             Indicates whether the deferred message will eventually be ephemeral.
-            This only applies for interactions of type :attr:`InteractionType.application_command` or when ``with_message`` is True
+            This applies for interactions of type :attr:`InteractionType.application_command`, :attr:`InteractionType.modal_submit`,
+            or when ``with_message`` is True
         with_message: :class:`bool`
             Indicates whether the response will be a message with thinking state (bot is thinking...).
-            This is always True for interactions of type :attr:`InteractionType.application_command`.
-            For interactions of type :attr:`InteractionType.component` this defaults to False.
+            This only applies to interactions of type :attr:`InteractionType.component`.
 
             .. versionadded:: 2.4
 
@@ -641,7 +641,10 @@ class InteractionResponse:
         defer_type: int = 0
         data: Optional[Dict[str, Any]] = None
         parent = self._parent
-        if parent.type is InteractionType.application_command or with_message:
+        if (
+            parent.type in (InteractionType.application_command, InteractionType.modal_submit)
+            or with_message
+        ):
             defer_type = InteractionResponseType.deferred_channel_message.value
             if ephemeral:
                 data = {"flags": 64}
