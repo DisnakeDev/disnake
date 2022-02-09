@@ -664,6 +664,8 @@ def slash_command(
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
+        if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
+            raise ValueError("guild_ids must be a sequence of int.")
         return InvokableSlashCommand(
             func,
             name=name,

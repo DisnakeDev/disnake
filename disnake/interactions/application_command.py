@@ -29,7 +29,7 @@ from ..channel import _threaded_channel_factory
 from ..enums import ApplicationCommandType, OptionType, try_enum
 from ..guild import Guild
 from ..member import Member
-from ..message import Message
+from ..message import Attachment, Message
 from ..role import Role
 from ..user import User
 from .base import Interaction
@@ -352,9 +352,13 @@ class ApplicationCommandInteractionDataResolved:
         threads also have ``thread_metadata`` and ``parent_id``).
     messages: Dict[:class:`int`, :class:`Message`]
         A mapping of IDs to messages.
+    attachments: Dict[:class:`int`, :class:`Attachment`]
+        A mapping of IDs to attachments.
+
+        .. versionadded:: 2.4
     """
 
-    __slots__ = ("members", "users", "roles", "channels", "messages")
+    __slots__ = ("members", "users", "roles", "channels", "messages", "attachments")
 
     def __init__(
         self,
@@ -370,12 +374,14 @@ class ApplicationCommandInteractionDataResolved:
         self.roles: Dict[int, Role] = {}
         self.channels: Dict[int, InteractionChannel] = {}
         self.messages: Dict[int, Message] = {}
+        self.attachments: Dict[int, Attachment] = {}
 
         users = data.get("users", {})
         members = data.get("members", {})
         roles = data.get("roles", {})
         channels = data.get("channels", {})
         messages = data.get("messages", {})
+        attachments = data.get("attachments", {})
 
         for str_id, user in users.items():
             user_id = int(str_id)
@@ -414,6 +420,9 @@ class ApplicationCommandInteractionDataResolved:
                 channel = state.get_channel(channel_id)
             self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)  # type: ignore
 
+        for str_id, attachment in attachments.items():
+            self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
+
     def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
         if isinstance(option_type, int):
             option_type = try_enum(OptionType, option_type)
@@ -440,11 +449,15 @@ class ApplicationCommandInteractionDataResolved:
         if option_type is OptionType.role:
             return self.roles.get(int(key), default)
 
+        if option_type is OptionType.attachment:
+            return self.attachments.get(int(key), default)
+
         return default
 
     def get(self, key: int):
         if key is None:
             return None
+
         res = self.members.get(key)
         if res is not None:
             return res
@@ -457,7 +470,14 @@ class ApplicationCommandInteractionDataResolved:
         res = self.channels.get(key)
         if res is not None:
             return res
-        return self.messages.get(key)
+        res = self.messages.get(key)
+        if res is not None:
+            return res
+        res = self.attachments.get(key)
+        if res is not None:
+            return res
+
+        return None
 
 
 # People asked about shorter aliases, let's see which one catches on the most

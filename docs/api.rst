@@ -1750,6 +1750,11 @@ of :class:`enum.Enum`.
     .. attribute:: number
 
         Represents a float option.
+    .. attribute:: attachment
+
+        Represents an attachment option.
+
+        .. versionadded:: 2.4
 
 
 .. class:: ButtonStyle
