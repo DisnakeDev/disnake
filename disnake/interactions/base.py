@@ -79,6 +79,7 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
     from ..threads import Thread
+    from ..types.components import Modal as ModalPayload
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
@@ -1099,11 +1100,8 @@ class InteractionResponse:
         """
         # title and components must always be provided if any of them are provided, but custom_id is optional
 
-        if modal and any((title, components, custom_id)):
+        if modal is not None and any((title, components, custom_id)):
             raise TypeError(f"Cannot mix modal argument and title, custom_id, components arguments")
-
-        if not modal and not all((title, components)):
-            raise TypeError("Either modal or title, custom_id, components must be provided")
 
         parent = self._parent
         adapter = async_context.get()
@@ -1114,23 +1112,25 @@ class InteractionResponse:
         if self._responded:
             raise InteractionResponded(parent)
 
-        modal_data: Dict[str, Any]
+        modal_data: ModalPayload
 
         if modal is not None:
-            modal_data = modal.to_components()  # type: ignore
-        else:
+            modal_data = modal.to_components()
+        elif title and components:
             modal_data = {
                 "title": title,
                 "custom_id": os.urandom(16).hex() if custom_id is None else custom_id,
-                "components": components_to_dict(components),  # type: ignore
+                "components": components_to_dict(components),
             }
+        else:
+            raise TypeError("Either modal or title, custom_id, components must be provided")
 
         await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
             type=InteractionResponseType.modal.value,
-            data=modal_data,
+            data=modal_data,  # type: ignore
         )
         self._responded = True
 
