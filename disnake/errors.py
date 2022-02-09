@@ -57,7 +57,7 @@ __all__ = (
     "InteractionTimedOut",
     "InteractionResponded",
     "InteractionNotResponded",
-    "ModalInteractionException",
+    "ModalChainNotSupported",
 )
 
 
@@ -349,7 +349,7 @@ class InteractionNotResponded(InteractionException):
         super().__init__("This interaction hasn't been responded to yet")
 
 
-class ModalInteractionException(InteractionException):
+class ModalChainNotSupported(InteractionException):
     """Exception that's raised when responding to a modal with another modal.
 
     .. versionadded:: 2.4

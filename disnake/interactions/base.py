@@ -39,7 +39,7 @@ from ..errors import (
     InteractionNotResponded,
     InteractionResponded,
     InteractionTimedOut,
-    ModalInteractionException,
+    ModalChainNotSupported,
     NotFound,
 )
 from ..guild import Guild
@@ -1092,7 +1092,7 @@ class InteractionResponse:
             Maximum number of components (5) exceeded.
         HTTPException
             Displaying the modal failed.
-        ModalInteractionException
+        ModalChainNotSupported
             This interaction cannot be responded with a modal.
         InteractionResponded
             This interaction has already been responded to before.
@@ -1106,7 +1106,7 @@ class InteractionResponse:
         adapter = async_context.get()
 
         if parent.type is InteractionType.modal_submit:
-            raise ModalInteractionException(parent)  # type: ignore
+            raise ModalChainNotSupported(parent)  # type: ignore
 
         if self._responded:
             raise InteractionResponded(parent)
