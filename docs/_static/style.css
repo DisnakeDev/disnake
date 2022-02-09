@@ -228,6 +228,7 @@ header > nav {
   justify-content: flex-end;
   flex-wrap: wrap;
   align-items: center;
+  line-height: 1em; /* It defaults to 1.2, pushing some icons out of vertical alignment */
 }
 
 header > nav a {
