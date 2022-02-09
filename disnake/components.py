@@ -436,8 +436,8 @@ class TextInput(Component):
         self.label: Optional[str] = data.get("label")
         self.placeholder: Optional[str] = data.get("placeholder")
         self.value: Optional[str] = data.get("value")
-        self.required: bool = data.get("required", True)
-        self.min_length: int = data.get("min_length", 0)
+        self.required: bool = data.get("required", False)
+        self.min_length: Optional[int] = data.get("min_length")
         self.max_length: Optional[int] = data.get("max_length")
 
     def to_dict(self) -> TextInputPayload:
@@ -447,7 +447,6 @@ class TextInput(Component):
             "label": self.label,  # type: ignore
             "custom_id": self.custom_id,
             "required": self.required,
-            "min_length": self.min_length,
         }
 
         if self.placeholder:
