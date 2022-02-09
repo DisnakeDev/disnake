@@ -1116,6 +1116,10 @@ class InteractionResponse:
         if modal is not None:
             modal_data = modal.to_components()
         elif title and components and custom_id:
+
+            if len(components) > 5:
+                raise ValueError("Maximum number of components exceeded.")
+
             modal_data = {
                 "title": title,
                 "custom_id": custom_id,
