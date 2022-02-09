@@ -24,11 +24,13 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 import traceback
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, overload
 
 from ..enums import TextInputStyle
+from ..utils import MISSING
 from .action_row import ActionRow, components_to_rows
 from .input_text import TextInput
 
@@ -67,15 +69,15 @@ class Modal:
         self,
         *,
         title: str,
-        custom_id: str,
         components: Components,
+        custom_id: str = MISSING,
         timeout: float = 600,
     ) -> None:
         if timeout is None:
             raise ValueError("timeout must be a float value.")
 
         self.title: str = title
-        self.custom_id: str = custom_id
+        self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
         self.components: List[ActionRow] = components_to_rows(components)
         self.timeout: float = timeout
 

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
+import os
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, overload
 
 from .. import utils
@@ -1120,7 +1121,7 @@ class InteractionResponse:
         else:
             modal_data = {
                 "title": title,
-                "custom_id": custom_id,
+                "custom_id": os.urandom(16).hex() if custom_id is None else custom_id,
                 "components": components_to_dict(components),  # type: ignore
             }
 
