@@ -114,7 +114,7 @@ class Modal:
         for c in component:
             if not isinstance(c, TextInput):
                 raise TypeError(
-                    f"Component must be of type 'TextInput' or a list of 'TextInput' objects, not {type(c).__name__}."
+                    f"component must be of type 'TextInput' or a list of 'TextInput' objects, not {type(c).__name__}."
                 )
             try:
                 self.components[-1].append_item(c)
@@ -125,12 +125,12 @@ class Modal:
         self,
         *,
         label: str,
-        custom_id: str = MISSING,
+        custom_id: str,
         style: TextInputStyle = TextInputStyle.short,
         placeholder: Optional[str] = None,
         value: Optional[str] = None,
         required: bool = True,
-        min_length: Optional[int] = None,
+        min_length: int = 0,
         max_length: Optional[int] = None,
     ) -> None:
         """Creates and adds an text input component to the modal.

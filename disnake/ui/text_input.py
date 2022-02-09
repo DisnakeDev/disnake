@@ -156,8 +156,8 @@ class TextInput(WrappedComponent):
         self._underlying.required = value
 
     @property
-    def min_length(self) -> Optional[int]:
-        """Optional[:class:`int`]: The minimum length of the text input."""
+    def min_length(self) -> int:
+        """:class:`int`: The minimum length of the text input."""
         return self._underlying.min_length
 
     @min_length.setter
