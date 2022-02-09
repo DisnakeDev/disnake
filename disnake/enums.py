@@ -52,7 +52,7 @@ __all__ = (
     "VideoQualityMode",
     "ComponentType",
     "ButtonStyle",
-    "InputTextStyle",
+    "TextInputStyle",
     "StagePrivacyLevel",
     "InteractionType",
     "InteractionResponseType",
@@ -638,7 +638,7 @@ class ButtonStyle(Enum):
         return self.value
 
 
-class InputTextStyle(Enum):
+class TextInputStyle(Enum):
     short = 1
     paragraph = 2
 

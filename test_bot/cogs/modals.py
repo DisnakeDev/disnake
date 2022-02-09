@@ -1,23 +1,23 @@
 import disnake
-from disnake.enums import InputTextStyle
+from disnake.enums import TextInputStyle
 from disnake.ext import commands
 
 
 class MyModal(disnake.ui.Modal):
     def __init__(self) -> None:
         components = [
-            disnake.ui.InputText(
+            disnake.ui.TextInput(
                 label="Name",
                 placeholder="The name of the tag",
                 custom_id="name",
-                style=InputTextStyle.short,
+                style=TextInputStyle.short,
                 max_length=50,
             ),
-            disnake.ui.InputText(
+            disnake.ui.TextInput(
                 label="Description",
                 placeholder="The description of the tag",
                 custom_id="description",
-                style=InputTextStyle.paragraph,
+                style=TextInputStyle.paragraph,
             ),
         ]
         super().__init__(title="Create Tag", custom_id="create_tag", components=components)
@@ -45,18 +45,18 @@ class Modals(commands.Cog):
             title="Create Tag",
             custom_id="create_tag2",
             components=[
-                disnake.ui.InputText(
+                disnake.ui.TextInput(
                     label="Name",
                     placeholder="The name of the tag",
                     custom_id="name",
-                    style=InputTextStyle.short,
+                    style=TextInputStyle.short,
                     max_length=50,
                 ),
-                disnake.ui.InputText(
+                disnake.ui.TextInput(
                     label="Description",
                     placeholder="The description of the tag",
                     custom_id="description",
-                    style=InputTextStyle.paragraph,
+                    style=TextInputStyle.paragraph,
                 ),
             ],
         )

@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
-from .enums import ButtonStyle, ComponentType, InputTextStyle, try_enum
+from .enums import ButtonStyle, ComponentType, TextInputStyle, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, get_slots
 
@@ -37,9 +37,9 @@ if TYPE_CHECKING:
         ActionRow as ActionRowPayload,
         ButtonComponent as ButtonComponentPayload,
         Component as ComponentPayload,
-        InputText as InputTextPayload,
         SelectMenu as SelectMenuPayload,
         SelectOption as SelectOptionPayload,
+        TextInput as TextInputPayload,
     )
 
 
@@ -49,11 +49,11 @@ __all__ = (
     "Button",
     "SelectMenu",
     "SelectOption",
-    "InputText",
+    "TextInput",
 )
 
 C = TypeVar("C", bound="Component")
-NestedComponent = Union["Button", "SelectMenu", "InputText"]
+NestedComponent = Union["Button", "SelectMenu", "TextInput"]
 
 
 class Component:
@@ -64,7 +64,7 @@ class Component:
     - :class:`ActionRow`
     - :class:`Button`
     - :class:`SelectMenu`
-    - :class:`InputText`
+    - :class:`TextInput`
 
     This class is abstract and cannot be instantiated.
 
@@ -114,7 +114,7 @@ class ActionRow(Component):
     ------------
     type: :class:`ComponentType`
         The type of component.
-    children: List[Union[:class:`Button`, :class:`SelectMenu`, :class:`InputText`]]
+    children: List[Union[:class:`Button`, :class:`SelectMenu`, :class:`TextInput`]]
         The children components that this holds, if any.
     """
 
@@ -382,7 +382,7 @@ class SelectOption:
         return payload
 
 
-class InputText(Component):
+class TextInput(Component):
     """Represents an input text from the Discord Bot UI Kit.
 
     This can only be used in a :class:`~.ui.Modal`.
@@ -392,11 +392,11 @@ class InputText(Component):
     .. note::
 
         The user constructible and usable type to create an input text is
-        :class:`disnake.ui.InputText`, not this one.
+        :class:`disnake.ui.TextInput`, not this one.
 
     Attributes
     -----------
-    style: :class:`InputTextStyle`
+    style: :class:`TextInputStyle`
         The style of the input text.
     label: Optional[:class:`str`]
         The label of the input text.
@@ -427,12 +427,12 @@ class InputText(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: InputTextPayload) -> None:
-        style = data.get("style", InputTextStyle.short.value)
+    def __init__(self, data: TextInputPayload) -> None:
+        style = data.get("style", TextInputStyle.short.value)
 
         self.type: ComponentType = try_enum(ComponentType, data["type"])
         self.custom_id: str = data["custom_id"]
-        self.style: InputTextStyle = try_enum(InputTextStyle, style)
+        self.style: TextInputStyle = try_enum(TextInputStyle, style)
         self.label: Optional[str] = data.get("label")
         self.placeholder: Optional[str] = data.get("placeholder")
         self.value: Optional[str] = data.get("value")
@@ -440,8 +440,8 @@ class InputText(Component):
         self.min_length: int = data.get("min_length", 0)
         self.max_length: Optional[int] = data.get("max_length")
 
-    def to_dict(self) -> InputTextPayload:
-        payload: InputTextPayload = {
+    def to_dict(self) -> TextInputPayload:
+        payload: TextInputPayload = {
             "type": self.type.value,
             "style": self.style.value,  # type: ignore
             "label": self.label,  # type: ignore
@@ -471,7 +471,7 @@ def _component_factory(data: ComponentPayload) -> Component:
     elif component_type == 3:
         return SelectMenu(data)  # type: ignore
     elif component_type == 4:
-        return InputText(data)  # type: ignore
+        return TextInput(data)  # type: ignore
     else:
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)

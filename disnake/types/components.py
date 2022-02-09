@@ -31,7 +31,7 @@ from .emoji import PartialEmoji
 
 ComponentType = Literal[1, 2, 3, 4]
 ButtonStyle = Literal[1, 2, 3, 4, 5]
-InputTextStyle = Literal[1, 2]
+TextInputStyle = Literal[1, 2]
 
 
 class ActionRow(TypedDict):
@@ -82,7 +82,7 @@ class Modal(TypedDict):
     components: List[ActionRow]
 
 
-class _InputTextOptional(TypedDict, total=False):
+class _TextInputOptional(TypedDict, total=False):
     value: str
     placeholder: str
     min_length: int
@@ -90,11 +90,11 @@ class _InputTextOptional(TypedDict, total=False):
     required: bool
 
 
-class InputText(_InputTextOptional):
+class TextInput(_TextInputOptional):
     type: Literal[4]
     custom_id: str
-    style: InputTextStyle
+    style: TextInputStyle
     label: str
 
 
-Component = Union[ActionRow, ButtonComponent, SelectMenu, InputText]
+Component = Union[ActionRow, ButtonComponent, SelectMenu, TextInput]

@@ -63,7 +63,7 @@ class WrappedComponent(ABC):
 
     - :class:`disnake.ui.Button`
     - :class:`disnake.ui.Select`
-    - :class:`disnake.ui.InputText`
+    - :class:`disnake.ui.TextInput`
 
     .. versionadded:: 2.4
     """

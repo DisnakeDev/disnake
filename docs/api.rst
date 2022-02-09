@@ -1800,7 +1800,7 @@ of :class:`enum.Enum`.
 
         An alias for :attr:`link`.
 
-.. class:: InputTextStyle
+.. class:: TextInputStyle
 
     Represents a style of the input text component.
 
@@ -4044,12 +4044,12 @@ SelectMenu
     :members:
     :inherited-members:
 
-InputText
+TextInput
 ~~~~~~~~~
 
-.. attributetable:: InputText
+.. attributetable:: TextInput
 
-.. autoclass:: InputText()
+.. autoclass:: TextInput()
     :members:
     :inherited-members:
 
@@ -4882,12 +4882,12 @@ Modal
 .. autoclass:: disnake.ui.Modal
     :members:
 
-InputText
+TextInput
 ~~~~~~~~~
 
-.. attributetable:: disnake.ui.InputText
+.. attributetable:: disnake.ui.TextInput
 
-.. autoclass:: disnake.ui.InputText
+.. autoclass:: disnake.ui.TextInput
     :members:
 
 

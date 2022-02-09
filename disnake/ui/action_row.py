@@ -27,10 +27,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List, Optional, Sequence, TypeVar, Union
 
 from ..components import ActionRow as ActionRowComponent, NestedComponent, SelectOption
-from ..enums import ButtonStyle, ComponentType, InputTextStyle
+from ..enums import ButtonStyle, ComponentType, TextInputStyle
 from ..utils import MISSING
 from .button import Button
-from .input_text import InputText
+from .input_text import TextInput
 from .item import WrappedComponent
 from .select import Select
 
@@ -85,7 +85,7 @@ class ActionRow:
 
     @property
     def children(self) -> List[NestedComponent]:
-        """List[Union[:class:`~disnake.Button`, :class:`~disnake.SelectMenu`, :class:`~disnake.InputText`]]: The components of this row."""
+        """List[Union[:class:`~disnake.Button`, :class:`~disnake.SelectMenu`, :class:`~disnake.TextInput`]]: The components of this row."""
         return self._underlying.children
 
     @children.setter
@@ -216,7 +216,7 @@ class ActionRow:
         *,
         label: str,
         custom_id: str,
-        style: InputTextStyle = InputTextStyle.short,
+        style: TextInputStyle = TextInputStyle.short,
         placeholder: Optional[str] = None,
         value: Optional[str] = None,
         required: bool = True,
@@ -225,14 +225,14 @@ class ActionRow:
     ):
         """Adds an input text to the action row.
 
-        To append a pre-existing :class:`~disnake.ui.InputText` use the
+        To append a pre-existing :class:`~disnake.ui.TextInput` use the
         :meth:`append_item` method instead.
 
         .. versionadded:: 2.4
 
         Parameters
         ----------
-        style: :class:`.InputTextStyle`
+        style: :class:`.TextInputStyle`
             The style of the input text.
         label: :class:`str`
             The label of the input text.
@@ -255,7 +255,7 @@ class ActionRow:
             The width of the action row exceeds 5.
         """
         self.append_item(
-            InputText(
+            TextInput(
                 label=label,
                 custom_id=custom_id,
                 style=style,

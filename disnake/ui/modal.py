@@ -28,9 +28,9 @@ import sys
 import traceback
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, overload
 
-from ..enums import InputTextStyle
+from ..enums import TextInputStyle
 from .action_row import ActionRow, components_to_rows
-from .input_text import InputText
+from .input_text import TextInput
 
 if TYPE_CHECKING:
     from ..interactions.modal import ModalInteraction
@@ -85,12 +85,12 @@ class Modal:
             f"components={self.components!r}>"
         )
 
-    def append_component(self, component: Union[InputText, List[InputText]]) -> None:
+    def append_component(self, component: Union[TextInput, List[TextInput]]) -> None:
         """Adds a component to the modal.
 
         Parameters
         ----------
-        component: Union[:class:`~.ui.InputText`, List[:class:`~.ui.InputText`]]
+        component: Union[:class:`~.ui.TextInput`, List[:class:`~.ui.TextInput`]]
             The component(s) to add to the modal.
             This can be a single component or a list of components.
 
@@ -99,7 +99,7 @@ class Modal:
         ValueError
             Maximum number of components (5) exceeded.
         TypeError
-            An :class:`InputText` object was not passed.
+            An :class:`TextInput` object was not passed.
         """
         if len(self.components) == 5:
             raise ValueError("maximum number of components exceeded.")
@@ -108,9 +108,9 @@ class Modal:
             component = [component]
 
         for c in component:
-            if not isinstance(c, InputText):
+            if not isinstance(c, TextInput):
                 raise TypeError(
-                    f"component must be of type InputText or a list of InputText, not {type(c).__name__}."
+                    f"component must be of type TextInput or a list of TextInput, not {type(c).__name__}."
                 )
             try:
                 self.components[-1].append_item(c)
@@ -122,7 +122,7 @@ class Modal:
         *,
         label: str,
         custom_id: str,
-        style: InputTextStyle = InputTextStyle.short,
+        style: TextInputStyle = TextInputStyle.short,
         placeholder: Optional[str] = None,
         value: Optional[str] = None,
         required: bool = True,
@@ -131,7 +131,7 @@ class Modal:
     ) -> None:
         """Adds an input text component to the modal.
 
-        To append a pre-existing :class:`disnake.ui.InputText` use the
+        To append a pre-existing :class:`disnake.ui.TextInput` use the
         :meth:`append_component` method instead.
 
         Parameters
@@ -140,7 +140,7 @@ class Modal:
             The label of the input text.
         custom_id: :class:`str`
             The ID of the input text that gets received during an interaction.
-        style: :class:`.InputTextStyle`
+        style: :class:`.TextInputStyle`
             The style of the input text.
         placeholder: Optional[:class:`str`]
             The placeholder text that is shown if nothing is entered.
@@ -155,7 +155,7 @@ class Modal:
         """
         self.components.append(
             ActionRow(
-                InputText(
+                TextInput(
                     label=label,
                     custom_id=custom_id,
                     style=style,

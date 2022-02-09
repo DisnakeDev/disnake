@@ -25,15 +25,15 @@ from __future__ import annotations
 
 from typing import Optional, Tuple
 
-from ..components import InputText as InputTextComponent
-from ..enums import ComponentType, InputTextStyle
+from ..components import TextInput as TextInputComponent
+from ..enums import ComponentType, TextInputStyle
 from ..utils import MISSING
 from .item import WrappedComponent
 
-__all__ = ("InputText",)
+__all__ = ("TextInput",)
 
 
-class InputText(WrappedComponent):
+class TextInput(WrappedComponent):
     """Represents a UI input text.
 
     This can only be used in a :class:`~.ui.Modal`.
@@ -46,7 +46,7 @@ class InputText(WrappedComponent):
         The label of the input text.
     custom_id: :class:`str`
         The ID of the input text that gets received during an interaction.
-    style: :class:`.InputTextStyle`
+    style: :class:`.TextInputStyle`
         The style of the input text.
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is entered.
@@ -71,21 +71,21 @@ class InputText(WrappedComponent):
         "max_length",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
-    _underlying: InputTextComponent = MISSING
+    _underlying: TextInputComponent = MISSING
 
     def __init__(
         self,
         *,
         label: str,
         custom_id: str,
-        style: InputTextStyle = InputTextStyle.short,
+        style: TextInputStyle = TextInputStyle.short,
         placeholder: Optional[str] = None,
         value: Optional[str] = None,
         required: bool = True,
         min_length: int = 0,
         max_length: Optional[int] = None,
     ) -> None:
-        self._underlying = InputTextComponent._raw_construct(
+        self._underlying = TextInputComponent._raw_construct(
             type=ComponentType.input_text,
             style=style,
             label=label,
@@ -102,12 +102,12 @@ class InputText(WrappedComponent):
         return 5
 
     @property
-    def style(self) -> InputTextStyle:
-        """:class:`.InputTextStyle`: The style of the input text."""
+    def style(self) -> TextInputStyle:
+        """:class:`.TextInputStyle`: The style of the input text."""
         return self._underlying.style
 
     @style.setter
-    def style(self, value: InputTextStyle) -> None:
+    def style(self, value: TextInputStyle) -> None:
         self._underlying.style = value
 
     @property
