@@ -3211,7 +3211,9 @@ class Guild(Hashable):
 
     async def chunk(self, *, cache: bool = True) -> None:
         """|coro|
-
+        
+        Returns a :class:`list` of all guild members.
+        
         Requests all members that belong to this guild. In order to use this,
         :meth:`Intents.members` must be enabled.
 
