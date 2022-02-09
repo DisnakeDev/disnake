@@ -36,6 +36,7 @@ from .snowflake import Snowflake
 from .user import User
 
 if TYPE_CHECKING:
+    from .components import Modal
     from .message import AllowedMentions, Message
 
 
@@ -248,7 +249,9 @@ class InteractionAutocompleteCallbackData(TypedDict):
 InteractionResponseType = Literal[1, 4, 5, 6, 7]
 
 InteractionCallbackData = Union[
-    InteractionApplicationCommandCallbackData, InteractionAutocompleteCallbackData
+    InteractionApplicationCommandCallbackData,
+    InteractionAutocompleteCallbackData,
+    Modal,
 ]
 
 
