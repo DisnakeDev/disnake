@@ -3209,7 +3209,7 @@ class Guild(Hashable):
 
         await self._state.http.edit_widget(self.id, payload=payload, reason=reason)
 
-    async def chunk(self, *, cache: bool = True) -> None:
+    async def chunk(self, *, cache: bool = True) -> Optional[List[Member]]:
         """|coro|
         
         Returns a :class:`list` of all guild members.
