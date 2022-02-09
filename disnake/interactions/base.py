@@ -28,7 +28,6 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-import os
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, overload
 
 from .. import utils
@@ -1123,7 +1122,7 @@ class InteractionResponse:
                 "components": components_to_dict(components),
             }
         else:
-            raise TypeError("Either modal, title or custom_id, components must be provided")
+            raise TypeError("Either modal ot title, custom_id, components must be provided")
 
         await adapter.create_interaction_response(
             parent.id,
