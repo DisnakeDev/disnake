@@ -160,21 +160,16 @@ class Modal:
         ValueError
             Maximum number of components (5) exceeded.
         """
-        if len(self.components) >= 5:
-            raise ValueError("Maximum number of components exceeded.")
-
-        self.components.append(
-            ActionRow(
-                TextInput(
-                    label=label,
-                    custom_id=custom_id,
-                    style=style,
-                    placeholder=placeholder,
-                    value=value,
-                    required=required,
-                    min_length=min_length,
-                    max_length=max_length,
-                )
+        self.append_component(
+            TextInput(
+                label=label,
+                custom_id=custom_id,
+                style=style,
+                placeholder=placeholder,
+                value=value,
+                required=required,
+                min_length=min_length,
+                max_length=max_length,
             )
         )
 
