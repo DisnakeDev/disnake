@@ -710,10 +710,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when a modal is submitted.
 
-    .. warning::
-
-        Consider using the callbacks associated with the :class:`~disnake.ui.Modal` instead.
-
     .. versionadded:: 2.4
 
     :param interaction: The interaction object.

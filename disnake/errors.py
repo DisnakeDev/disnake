@@ -355,7 +355,7 @@ class ModalInteractionException(InteractionException):
     .. versionadded:: 2.4
 
     Attributes
-    -----------
+    ----------
     interaction: :class:`ModalInteraction`
         The interaction that was responded to.
     """

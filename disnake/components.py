@@ -389,7 +389,7 @@ class TextInput(Component):
 
     .. note::
 
-        The user constructible and usable type to create an text input is
+        The user constructible and usable type to create a text input is
         :class:`disnake.ui.TextInput`, not this one.
 
     Attributes

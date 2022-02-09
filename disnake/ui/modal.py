@@ -53,10 +53,10 @@ class Modal:
     ----------
     title: :class:`str`
         The title of the modal.
-    custom_id: :class:`str`
-        The custom ID of the modal.
     components: |components_type|
         The components to display in the modal. Up to 5 action rows.
+    custom_id: :class:`str`
+        The custom ID of the modal.
     timeout: :class:`float`
         The time to wait until the modal is removed from cache, if no interaction is made.
         Modals without timeouts are not supported, since there's no event for when a modal is closed.
@@ -133,7 +133,7 @@ class Modal:
         min_length: int = 0,
         max_length: Optional[int] = None,
     ) -> None:
-        """Creates and adds an text input component to the modal.
+        """Creates and adds a text input component to the modal.
 
         To append a pre-existing instance of :class:`disnake.ui.TextInput` use the
         :meth:`append_component` method.
