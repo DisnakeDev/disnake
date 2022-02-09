@@ -1,7 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2021-present DisnakeDev
+Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -27,7 +27,7 @@ import asyncio
 import os
 import sys
 import traceback
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, overload
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 from ..enums import TextInputStyle
 from ..utils import MISSING
@@ -68,17 +68,19 @@ class Modal:
     def __init__(
         self,
         *,
-        title: str,
-        components: Components,
+        title: str = MISSING,
+        components: Components = MISSING,
         custom_id: str = MISSING,
         timeout: float = 600,
     ) -> None:
         if timeout is None:
-            raise ValueError("timeout must be a float value.")
+            raise ValueError("Timeout may not be None")
 
-        self.title: str = title
+        self.title: str = "" if title is MISSING else title
         self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        self.components: List[ActionRow] = components_to_rows(components)
+        self.components: List[ActionRow] = (
+            [] if components is MISSING else components_to_rows(components)
+        )
         self.timeout: float = timeout
 
     def __repr__(self) -> str:
@@ -101,10 +103,10 @@ class Modal:
         ValueError
             Maximum number of components (5) exceeded.
         TypeError
-            An :class:`TextInput` object was not passed.
+            An object of type :class:`TextInput` was not passed.
         """
-        if len(self.components) == 5:
-            raise ValueError("maximum number of components exceeded.")
+        if len(self.components) >= 5:
+            raise ValueError("Maximum number of components exceeded.")
 
         if not isinstance(component, list):
             component = [component]
@@ -112,7 +114,7 @@ class Modal:
         for c in component:
             if not isinstance(c, TextInput):
                 raise TypeError(
-                    f"component must be of type TextInput or a list of TextInput, not {type(c).__name__}."
+                    f"Component must be of type 'TextInput' or a list of 'TextInput' objects, not {type(c).__name__}."
                 )
             try:
                 self.components[-1].append_item(c)
@@ -123,18 +125,18 @@ class Modal:
         self,
         *,
         label: str,
-        custom_id: str,
+        custom_id: str = MISSING,
         style: TextInputStyle = TextInputStyle.short,
         placeholder: Optional[str] = None,
         value: Optional[str] = None,
         required: bool = True,
-        min_length: int = 0,
+        min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
-        """Adds an input text component to the modal.
+        """Creates and adds an input text component to the modal.
 
-        To append a pre-existing :class:`disnake.ui.TextInput` use the
-        :meth:`append_component` method instead.
+        To append a pre-existing instance of :class:`disnake.ui.TextInput` use the
+        :meth:`append_component` method.
 
         Parameters
         ----------
@@ -154,7 +156,15 @@ class Modal:
             The minimum length of the input text. Defaults to ``0``.
         max_length: Optional[:class:`int`]
             The maximum length of the input text.
+
+        Raises
+        ------
+        ValueError
+            Maximum number of components (5) exceeded.
         """
+        if len(self.components) >= 5:
+            raise ValueError("Maximum number of components exceeded.")
+
         self.components.append(
             ActionRow(
                 TextInput(
