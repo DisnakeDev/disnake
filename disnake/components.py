@@ -383,7 +383,7 @@ class SelectOption:
 
 
 class TextInput(Component):
-    """Represents an text input from the Discord Bot UI Kit.
+    """Represents a text input from the Discord Bot UI Kit.
 
     .. versionadded:: 2.4
 
