@@ -68,19 +68,17 @@ class Modal:
     def __init__(
         self,
         *,
-        title: str = MISSING,
-        components: Components = MISSING,
+        title: str,
+        components: Components,
         custom_id: str = MISSING,
         timeout: float = 600,
     ) -> None:
         if timeout is None:
             raise ValueError("Timeout may not be None")
 
-        self.title: str = "" if title is MISSING else title
+        self.title: str = title
         self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        self.components: List[ActionRow] = (
-            [] if components is MISSING else components_to_rows(components)
-        )
+        self.components: List[ActionRow] = components_to_rows(components)
         self.timeout: float = timeout
 
     def __repr__(self) -> str:
