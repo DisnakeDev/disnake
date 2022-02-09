@@ -433,6 +433,7 @@ header form.search {
     flex-grow: 1;
     max-width: 400px;
     margin-left: auto;
+    padding-right: 0;
   }
 
   header .search-wrapper {
@@ -521,6 +522,18 @@ header form.search {
   aside {
     left: calc(calc(100vw - 1500px) / 2);
   }
+}
+
+/* Shrink inter-icon padding to fit stuff on very small screens */
+@media screen and (max-width: 425px) {
+  header .search-breakpoint > * {
+    margin: 0 0.15em;
+  }
+
+  #hamburger-toggle {
+    left: 8px;
+  }
+}
 
 }
 
