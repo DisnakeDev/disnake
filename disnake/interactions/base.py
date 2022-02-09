@@ -1122,7 +1122,7 @@ class InteractionResponse:
                 "components": components_to_dict(components),
             }
         else:
-            raise TypeError("Either modal ot title, custom_id, components must be provided")
+            raise TypeError("Either modal or title, custom_id, components must be provided")
 
         await adapter.create_interaction_response(
             parent.id,
