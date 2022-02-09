@@ -3228,13 +3228,18 @@ class Guild(Hashable):
         -------
         ClientException
             The members intent is not enabled.
+
+        Returns
+        --------
+        Optional[List[:class:`Member`]]
+             Returns a list of all the members within the guild.
         """
 
         if not self._state._intents.members:
             raise ClientException("Intents.members must be enabled to use this.")
 
         if not self._state.is_guild_evicted(self):
-            await self._state.chunk_guild(self, cache=cache)
+            return await self._state.chunk_guild(self, cache=cache)
 
     async def query_members(
         self,
