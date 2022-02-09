@@ -41,6 +41,10 @@ Historically however, thanks to:
   --blue-5: #002275;
   --blue-6: #000f40;
 
+  --disnake-yellow: #ffd444;
+  --disnake-blue: #376fa1;
+  --disnake-light-blue: #578fc1;
+
   --settings: var(--grey-1);
   --settings-hover: var(--grey-1-8);
   --main-background: var(--grey-1);
@@ -1537,7 +1541,6 @@ div.code-block-caption {
 
 #dark-mode-switch .theme-icon {
   position: absolute !important;
-  color: white;
   opacity: 100%;
   transition: opacity 0.2s ease-out;
   top: 18%;
@@ -1547,11 +1550,13 @@ div.code-block-caption {
 
 #dark-mode-switch .theme-icon.light {
   left: 11%;
+  color: var(--disnake-yellow);
 }
 
 #dark-mode-switch .theme-icon.dark {
   right: 11%;
-  top: 18%
+  top: 18%;
+  color: var(--disnake-light-blue);
 }
 
 #dark-mode-switch.dark .theme-icon.light {
