@@ -101,6 +101,7 @@ if TYPE_CHECKING:
     from .template import Template
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
     from .types.integration import IntegrationType
+    from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload
     from .types.voice import GuildVoiceState
     from .voice_client import VoiceProtocol
@@ -432,15 +433,19 @@ class Guild(Hashable):
         return role
 
     def get_command(self, application_command_id: int, /) -> Optional[APIApplicationCommand]:
-        """
-        Gets a cached application command matching the specified ID.
+        """Gets a cached application command matching the specified ID.
 
         Parameters
         ----------
-        name: :class:`int`
-            the ID to compare to.
+        application_command_id: :class:`int`
+            The application command ID to search for.
+
+        Returns
+        -------
+        Optional[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
+            The application command if found, or ``None`` otherwise.
         """
-        self._state._get_guild_application_command(self.id, application_command_id)
+        return self._state._get_guild_application_command(self.id, application_command_id)
 
     def get_command_named(self, name: str, /) -> Optional[APIApplicationCommand]:
         """
@@ -2476,7 +2481,7 @@ class Guild(Hashable):
         name: :class:`str`
             The sticker name. Must be at least 2 characters.
         description: Optional[:class:`str`]
-            The sticker's description. Can be ``None``.
+            The sticker's description. You can pass ``None`` or an empty string to not set a description.
         emoji: :class:`str`
             The name of a unicode emoji that represents the sticker's expression.
         file: :class:`File`
@@ -2496,12 +2501,8 @@ class Guild(Hashable):
         :class:`GuildSticker`
             The created sticker.
         """
-        payload: Any = {
-            "name": name,
-        }
-
-        if description:
-            payload["description"] = description
+        if description is None:
+            description = ""
 
         try:
             emoji = unicodedata.name(emoji)
@@ -2510,7 +2511,7 @@ class Guild(Hashable):
         else:
             emoji = emoji.replace(" ", "_")
 
-        payload["tags"] = emoji
+        payload: CreateStickerPayload = {"name": name, "description": description, "tags": emoji}
 
         data = await self._state.http.create_guild_sticker(self.id, payload, file, reason=reason)
         return self._state.store_sticker(self, data)
