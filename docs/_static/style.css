@@ -535,6 +535,10 @@ header form.search {
   }
 }
 
+@media screen and (max-width: 365px) {
+  #dark-mode-switch {
+    display: none;
+  }
 }
 
 #scrollbar {
