@@ -1480,6 +1480,7 @@ div.code-block-caption {
   height: 1.5em;
   width: 3em;
   cursor: pointer;
+  user-select: none;
 }
 
 #dark-mode-switch .switch-outer {
@@ -1491,11 +1492,11 @@ div.code-block-caption {
 }
 
 #dark-mode-switch.dark .switch-outer {
-  background-color: #10162b;
+  background-color: var(--black);
 }
 
 #dark-mode-switch.light .switch-outer {
-  background-color: #3f61d9;
+  background-color: var(--black);
 }
 
 #dark-mode-switch .switch-inner {
@@ -1508,10 +1509,10 @@ div.code-block-caption {
   transition: background-color 0.2s ease-out;
 }
 #dark-mode-switch.light .switch-inner {
-  background-color: #7289da;
+  background-color: var(--grey-5);
 }
 #dark-mode-switch.dark .switch-inner {
-  background-color: #1b2137;
+  background-color: var(--black);
 }
 
 #dark-mode-switch .knob {
@@ -1525,12 +1526,12 @@ div.code-block-caption {
 }
 
 #dark-mode-switch .knob.dark {
-  background-color: #586282;
+  background-color: var(--grey-5);
   margin: 6% auto auto 8%;
 }
 
 #dark-mode-switch .knob.light {
-  background-color: #364c94;
+  background-color: var(--grey-4);
   margin: 6% auto auto 56%;
 }
 
