@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (on) {
       document.documentElement.setAttribute('data-theme', 'dark');
     } else {
-      document.documentElement.setAttribute('data-theme', 'light');      
+      document.documentElement.setAttribute('data-theme', 'light');
     }
 
     localStorage.setItem("dark-mode", on);
@@ -141,28 +141,28 @@ document.addEventListener('DOMContentLoaded', () => {
   function switchToggle(event) {
     let switchToggle = document.querySelector("#dark-mode-switch");
     let knob = document.querySelector("#dark-mode-switch .knob");
-   
+
     if (knob.classList.contains("dark")) {
       knob.classList.remove("dark");
       knob.classList.add("light");
 
       toggleDarkMode(false);
-      
+
       // After 100ms, switch the icons
-      setTimeout(function() {  
+      setTimeout(function() {
         switchToggle.classList.remove("dark");
-        switchToggle.classList.add("light");      
+        switchToggle.classList.add("light");
       }, 100);
     } else {
       knob.classList.remove("light");
       knob.classList.add("dark");
 
       toggleDarkMode(true);
-      
+
       // After 100ms, switch the icons
-      setTimeout(function() {  
-        switchToggle.classList.remove("light");      
-        switchToggle.classList.add("dark");      
+      setTimeout(function() {
+        switchToggle.classList.remove("light");
+        switchToggle.classList.add("dark");
       }, 100);
     }
   }
