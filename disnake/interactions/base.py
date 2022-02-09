@@ -1117,13 +1117,14 @@ class InteractionResponse:
             modal_data = modal.to_components()
         elif title and components and custom_id:
 
-            if len(components) > 5:
+            rows = components_to_dict(components)
+            if len(rows) > 5:
                 raise ValueError("Maximum number of components exceeded.")
 
             modal_data = {
                 "title": title,
                 "custom_id": custom_id,
-                "components": components_to_dict(components),
+                "components": rows,
             }
         else:
             raise TypeError("Either modal or title, custom_id, components must be provided")

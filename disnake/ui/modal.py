@@ -76,12 +76,13 @@ class Modal:
         if timeout is None:
             raise ValueError("Timeout may not be None")
 
-        if len(components) > 5:
+        rows = components_to_rows(components)
+        if len(rows) > 5:
             raise ValueError("Maximum number of components exceeded.")
 
         self.title: str = title
         self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        self.components: List[ActionRow] = components_to_rows(components)
+        self.components: List[ActionRow] = rows
         self.timeout: float = timeout
 
     def __repr__(self) -> str:
