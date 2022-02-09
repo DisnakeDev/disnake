@@ -1110,13 +1110,19 @@ main .py-attribute-table-column > ul {
 .py-attribute-table-list > li {
   margin: 0;
   padding: 0;
+  padding-left: 0.5em;
   border-left: 2px solid var(--attribute-table-list-border);
   display: flex;
   line-height: 1.2em;
 }
 
+.py-attribute-table-list > li > span:first-child {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
 .py-attribute-table-list > li > a {
-  padding-left: 0.7em;
+  padding-left: 0.2em;
   padding-top: 2px;
   padding-bottom: 2px;
   color: var(--attribute-table-list-text);
