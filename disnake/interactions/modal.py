@@ -24,10 +24,10 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Generator, List
 
 from ..components import ActionRow, NestedComponent, TextInput
+from ..utils import cached_slot_property
 from .base import Interaction
 
 if TYPE_CHECKING:
@@ -82,6 +82,8 @@ class ModalInteraction(Interaction):
         The interaction client.
     """
 
+    __slots__ = ("data", "_cs_values")
+
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
         self.data = ModalInteractionData(data=data["data"])  # type: ignore
@@ -94,7 +96,7 @@ class ModalInteraction(Interaction):
         for action_row in self.data._components:
             yield from action_row.children
 
-    @cached_property
+    @cached_slot_property("_cs_values")
     def values(self) -> Dict[str, str]:
         """Dict[:class:`str`, :class:`str`]: Returns the values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``."""
