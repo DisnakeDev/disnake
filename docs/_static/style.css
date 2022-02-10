@@ -525,9 +525,13 @@ header form.search {
   }
 
   main > * {
-    margin-left: calc(calc(calc(100vw - 1500px) / 2) + 395px);
+    margin-left: calc(calc(calc(100vw - 1500px) / 2) + 395px) !important;
     max-width: calc(1500px - 395px);
     padding-right: 12px;
+  }
+
+  main > .admonition {
+    max-width: calc(calc(1500px - 395px) - 12px);
   }
 
   aside {
@@ -537,6 +541,11 @@ header form.search {
   header > nav {
     margin-left: calc(calc(100vw - 1500px) / 2);
     margin-right: auto;
+    max-width: 1500px;
+  }
+
+  footer {
+    margin-left: calc(calc(100vw - 1500px) / 2);
     max-width: 1500px;
   }
 }
