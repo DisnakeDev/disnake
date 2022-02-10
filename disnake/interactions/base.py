@@ -178,6 +178,7 @@ class Interaction:
         self.guild_locale: Optional[str] = data.get("guild_locale")
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
+        self._permissions = None
 
         if self.guild_id and (member := data.get("member")):
             guild: Guild = self.guild or Object(id=self.guild_id)  # type: ignore
@@ -189,7 +190,6 @@ class Interaction:
             self._permissions = int(member.get("permissions", 0))
         elif user := data.get("user"):
             self.author = self._state.store_user(user)
-            self._permissions = None
 
     @property
     def bot(self) -> AnyBot:
