@@ -60,7 +60,7 @@ Historically however, thanks to:
   --nav-link-text: var(--white);
   --nav-link-hover-text: var(--blue-1);
   --sub-header-background: var(--grey-8);
-  --search-border: var(--grey-4);
+  --search-border: var(--grey-5);
   --search-text: var(--white);
   --search-focus: var(--blue-1);
   --search-button: var(--grey-1);
@@ -126,7 +126,7 @@ img[src$="/snake_dark.svg"]  {
     --link-hover-text: var(--blue-2);
     --main-text: var(--white);
     --sub-header-background: var(--grey-8);
-    --search-border: var(--grey-5);
+    --search-border: var(--grey-6);
     --nav-background: var(--main-background);
     --nav-text: var(--grey-1);
     --nav-hover-text: var(--grey-2);
