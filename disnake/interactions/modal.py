@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Iterable, List
+from typing import TYPE_CHECKING, Dict, Generator, List
 
 from ..components import ActionRow, NestedComponent
 from .base import Interaction
@@ -85,8 +85,8 @@ class ModalInteraction(Interaction):
         super().__init__(data=data, state=state)
         self.data = ModalInteractionData(data=data["data"])  # type: ignore
 
-    def walk_components(self) -> Iterable[NestedComponent]:
-        """Returns an iterator that yields components from action rows one by one.
+    def walk_components(self) -> Generator[NestedComponent, None, None]:
+        """Returns a generator that yields components from action rows one by one.
 
         :return type: Iterable[Union[:class:`Button`, :class:`SelectMenu`, :class:`TextInput`]]
         """
