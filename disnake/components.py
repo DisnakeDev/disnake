@@ -464,14 +464,15 @@ class TextInput(Component):
 
 def _component_factory(data: ComponentPayload) -> Component:
     component_type = data["type"]
-    if component_type == 1:
-        return ActionRow(data)
-    elif component_type == 2:
-        return Button(data)  # type: ignore
-    elif component_type == 3:
-        return SelectMenu(data)  # type: ignore
-    elif component_type == 4:
-        return TextInput(data)  # type: ignore
-    else:
-        as_enum = try_enum(ComponentType, component_type)
-        return Component._raw_construct(type=as_enum)
+    components = {
+        ComponentType.action_row.value: ActionRow,
+        ComponentType.button.value: Button,
+        ComponentType.select.value: SelectMenu,
+        ComponentType.text_input.value: TextInput,
+    }
+
+    if cls := components.get(component_type):  # type: ignore
+        return cls(data)
+
+    as_enum = try_enum(ComponentType, component_type)
+    return Component._raw_construct(type=as_enum)
