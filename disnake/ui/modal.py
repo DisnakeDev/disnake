@@ -137,7 +137,7 @@ class Modal:
     ) -> None:
         """Creates and adds a text input component to the modal.
 
-        To append a pre-existing instance of :class:`disnake.ui.TextInput` use the
+        To append a pre-existing instance of :class:`~disnake.ui.TextInput` use the
         :meth:`append_component` method.
 
         Parameters
@@ -163,6 +163,8 @@ class Modal:
         ------
         ValueError
             Maximum number of components (5) exceeded.
+        TypeError
+            An object of type :class:`TextInput` was not passed.
         """
         self.append_component(
             TextInput(

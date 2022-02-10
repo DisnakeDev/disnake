@@ -1068,8 +1068,8 @@ class InteractionResponse:
 
         .. note::
 
-            Not passing the ``modal`` parameter here will not register a callback, and a :ref:`on_modal_submit` interaction
-            will need to be handled manually.
+            Not passing the ``modal`` parameter here will not register a callback, and a :func:`on_modal_submit`
+            interaction will need to be handled manually.
 
         Parameters
         ----------
