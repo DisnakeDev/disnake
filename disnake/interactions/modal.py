@@ -82,7 +82,7 @@ class ModalInteraction(Interaction):
         The interaction client.
     """
 
-    __slots__ = ("data", "_cs_values")
+    __slots__ = ("data", "_cs_text_values")
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
@@ -96,18 +96,15 @@ class ModalInteraction(Interaction):
         for action_row in self.data._components:
             yield from action_row.children
 
-    @cached_slot_property("_cs_values")
-    def values(self) -> Dict[str, str]:
-        """Dict[:class:`str`, :class:`str`]: Returns the values the user has entered in the modal.
+    @cached_slot_property("_cs_text_values")
+    def text_values(self) -> Dict[str, str]:
+        """Dict[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``."""
-        values: Dict[str, str] = {}
-        for component in self.walk_components():
-            if isinstance(component, TextInput):
-                values[component.custom_id] = component.value or ""
-            # we're not using a one-line expression because we will
-            # most likely extended this code in the future to support selects
-
-        return values
+        return {
+            component.custom_id: component.value or ""
+            for component in self.walk_components()
+            if isinstance(component, TextInput)
+        }
 
     @property
     def custom_id(self) -> str:
