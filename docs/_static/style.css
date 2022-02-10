@@ -524,7 +524,7 @@ header form.search {
     padding-right: 0;
   }
 
-  main > section {
+  main > * {
     margin-left: calc(calc(calc(100vw - 1500px) / 2) + 395px);
     max-width: calc(1500px - 395px);
     padding-right: 12px;
