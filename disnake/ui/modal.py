@@ -229,10 +229,13 @@ class Modal:
             await self.callback(interaction)
         except Exception as e:
             await self.on_error(e, interaction)
-        else:
-            interaction._state._modal_store.remove_modal(
-                interaction.author.id, interaction.custom_id
-            )
+        finally:
+            # if the interaction was responded to (no matter if in the callback or error handler),
+            # the modal closed for the user and therefore can be removed from the store
+            if interaction.response._responded:
+                interaction._state._modal_store.remove_modal(
+                    interaction.author.id, interaction.custom_id
+                )
 
     def dispatch(self, interaction: ModalInteraction) -> None:
         asyncio.create_task(
