@@ -37,7 +37,7 @@ import aiohttp
 
 import disnake
 from disnake.backoff import ExponentialBackoff
-from disnake.utils import MISSING
+from disnake.utils import MISSING, utcnow
 
 __all__ = ("loop",)
 
@@ -146,7 +146,7 @@ class Loop(Generic[LF]):
             self._prepare_time_index()
             self._next_iteration = self._get_next_sleep_time()
         else:
-            self._next_iteration = datetime.datetime.now(datetime.timezone.utc)
+            self._next_iteration = utcnow()
         try:
             await self._try_sleep_until(self._next_iteration)
             while True:
@@ -167,7 +167,7 @@ class Loop(Generic[LF]):
                     if self._stop_next_iteration:
                         return
 
-                    now = datetime.datetime.now(datetime.timezone.utc)
+                    now = utcnow()
                     if now > self._next_iteration:
                         self._next_iteration = now
                         if self._time is not MISSING:
@@ -551,7 +551,7 @@ class Loop(Generic[LF]):
             if self._current_loop == 0:
                 # if we're at the last index on the first iteration, we need to sleep until tomorrow
                 return datetime.datetime.combine(
-                    datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1),
+                    utcnow() + datetime.timedelta(days=1),
                     self._time[0],
                 )
 
@@ -559,13 +559,13 @@ class Loop(Generic[LF]):
 
         if self._current_loop == 0:
             self._time_index += 1
-            if next_time > datetime.datetime.now(datetime.timezone.utc).timetz():
+            if next_time > utcnow().timetz():
                 return datetime.datetime.combine(
-                    datetime.datetime.now(datetime.timezone.utc), next_time
+                    utcnow(), next_time
                 )
             else:
                 return datetime.datetime.combine(
-                    datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1), 
+                    utcnow() + datetime.timedelta(days=1), 
                     next_time,
                 )
 
@@ -584,7 +584,7 @@ class Loop(Generic[LF]):
         time_now = (
             now
             if now is not MISSING
-            else datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
+            else utcnow().replace(microsecond=0)
         ).timetz()
         for idx, time in enumerate(self._time):
             if time >= time_now:
