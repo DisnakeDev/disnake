@@ -560,12 +560,10 @@ class Loop(Generic[LF]):
         if self._current_loop == 0:
             self._time_index += 1
             if next_time > utcnow().timetz():
-                return datetime.datetime.combine(
-                    utcnow(), next_time
-                )
+                return datetime.datetime.combine(utcnow(), next_time)
             else:
                 return datetime.datetime.combine(
-                    utcnow() + datetime.timedelta(days=1), 
+                    utcnow() + datetime.timedelta(days=1),
                     next_time,
                 )
 
@@ -581,11 +579,7 @@ class Loop(Generic[LF]):
         # to calculate the next time index from
 
         # pre-condition: self._time is set
-        time_now = (
-            now
-            if now is not MISSING
-            else utcnow().replace(microsecond=0)
-        ).timetz()
+        time_now = (now if now is not MISSING else utcnow().replace(microsecond=0)).timetz()
         for idx, time in enumerate(self._time):
             if time >= time_now:
                 self._time_index = idx
