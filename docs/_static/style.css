@@ -201,12 +201,13 @@ body {
 a {
   text-decoration: none;
   color: var(--link-text);
-  transition: color 0.6s;
+  transition: color 0.3s;
 }
 
 a:hover {
   text-decoration: underline;
   color: var(--link-hover-text);
+  transition: color 0.05s;
 }
 
 /* headers */
@@ -1514,7 +1515,7 @@ div.code-block-caption {
   top: 50%;
   transform: translate(2.5%, 5%);
   border-radius: 2em;
-  transition: background-color 0.2s ease-out;
+  transition: background-color 0.1s ease-out;
 }
 #dark-mode-switch.light .switch-inner {
   background-color: var(--grey-5);
@@ -1530,7 +1531,7 @@ div.code-block-caption {
   top: 50%;
   transform: translate(0%, -120%);
   border-radius: 10em;
-  transition: all 0.3s ease-out;
+  transition: all 0.15s ease-out;
 }
 
 #dark-mode-switch .knob.dark {
@@ -1546,7 +1547,7 @@ div.code-block-caption {
 #dark-mode-switch .theme-icon {
   position: absolute !important;
   opacity: 100%;
-  transition: opacity 0.2s ease-out;
+  transition: opacity 0.1s ease-out;
   top: 18%;
   bottom: auto;
   font-size: 1em;
