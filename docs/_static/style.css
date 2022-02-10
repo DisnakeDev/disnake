@@ -520,13 +520,16 @@ header form.search {
 
 
 @media screen and (min-width: 1500px) {
-  .main {
-    margin: auto;
+  main {
+    margin-left: 0;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   main > section {
-    margin-left: calc(calc(100vw - 1500px) / 2);
+    margin-left: calc(calc(calc(100vw - 1500px) / 2) + 395px);
     max-width: calc(1500px - 395px);
+    padding-right: 12px;
   }
 
   aside {
