@@ -163,8 +163,6 @@ class Modal:
         ------
         ValueError
             Maximum number of components (5) exceeded.
-        TypeError
-            An object of type :class:`TextInput` was not passed.
         """
         self.append_component(
             TextInput(
