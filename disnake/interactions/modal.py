@@ -24,9 +24,10 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Generator, List
 
-from ..components import ActionRow, NestedComponent
+from ..components import ActionRow, NestedComponent, TextInput
 from .base import Interaction
 
 if TYPE_CHECKING:
@@ -93,14 +94,16 @@ class ModalInteraction(Interaction):
         for action_row in self.data._components:
             yield from action_row.children
 
-    @property
+    @cached_property
     def values(self) -> Dict[str, str]:
         """Dict[:class:`str`, :class:`str`]: Returns the values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``."""
         values: Dict[str, str] = {}
         for component in self.walk_components():
-            # assuming that action rows from modals only have text_input components
-            values[component.custom_id] = component.value  # type: ignore
+            if isinstance(component, TextInput):
+                values[component.custom_id] = component.value or ""
+            # we're not using a one-line expression because we will
+            # most likely extended this code in the future to support selects
 
         return values
 
