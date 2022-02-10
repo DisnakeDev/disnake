@@ -565,7 +565,8 @@ class Loop(Generic[LF]):
                 )
             else:
                 return datetime.datetime.combine(
-                    datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1), next_time
+                    datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1), 
+                    next_time
                 )
 
         next_date = cast(datetime.datetime, self._last_iteration)
