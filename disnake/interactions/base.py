@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast, overload
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -39,6 +39,7 @@ from ..errors import (
     InteractionNotResponded,
     InteractionResponded,
     InteractionTimedOut,
+    ModalChainNotSupported,
     NotFound,
 )
 from ..guild import Guild
@@ -77,11 +78,13 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
     from ..threads import Thread
+    from ..types.components import Modal as ModalPayload
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
     )
     from ..ui.action_row import Components
+    from ..ui.modal import Modal
     from ..ui.view import View
     from .message import MessageInteraction
 
@@ -620,11 +623,11 @@ class InteractionResponse:
         -----------
         ephemeral: :class:`bool`
             Indicates whether the deferred message will eventually be ephemeral.
-            This only applies for interactions of type :attr:`InteractionType.application_command` or when ``with_message`` is True
+            This applies to interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
+            or when the ``with_message`` parameter is ``True``.
         with_message: :class:`bool`
             Indicates whether the response will be a message with thinking state (bot is thinking...).
-            This is always True for interactions of type :attr:`InteractionType.application_command`.
-            For interactions of type :attr:`InteractionType.component` this defaults to False.
+            This only applies to interactions of type :attr:`InteractionType.component`.
 
             .. versionadded:: 2.4
 
@@ -641,7 +644,10 @@ class InteractionResponse:
         defer_type: int = 0
         data: Optional[Dict[str, Any]] = None
         parent = self._parent
-        if parent.type is InteractionType.application_command or with_message:
+        if (
+            parent.type in (InteractionType.application_command, InteractionType.modal_submit)
+            or with_message
+        ):
             defer_type = InteractionResponseType.deferred_channel_message.value
             if ephemeral:
                 data = {"flags": 64}
@@ -997,6 +1003,7 @@ class InteractionResponse:
 
     async def autocomplete(self, *, choices: Choices) -> None:
         """|coro|
+
         Responds to this interaction by displaying a list of possible autocomplete results.
         Only works for autocomplete interactions.
 
@@ -1039,6 +1046,107 @@ class InteractionResponse:
         )
 
         self._responded = True
+
+    @overload
+    async def send_modal(self, modal: Modal) -> None:
+        ...
+
+    @overload
+    async def send_modal(
+        self,
+        *,
+        title: str,
+        custom_id: str,
+        components: Components,
+    ) -> None:
+        ...
+
+    async def send_modal(
+        self,
+        modal: Modal = None,
+        *,
+        title: str = None,
+        custom_id: str = None,
+        components: Components = None,
+    ) -> None:
+        """|coro|
+
+        Responds to this interaction by displaying a modal.
+
+        .. versionadded:: 2.4
+
+        .. note::
+
+            Not passing the ``modal`` parameter here will not register a callback, and a :func:`on_modal_submit`
+            interaction will need to be handled manually.
+
+        Parameters
+        ----------
+        modal: :class:`~.ui.Modal`
+            The modal to display. This cannot be mixed with the ``title``, ``custom_id`` and ``components`` parameters.
+        title: :class:`str`
+            The title of the modal. This cannot be mixed with the ``modal`` parameter.
+        custom_id: :class:`str`
+            The ID of the modal that gets received during an interaction.
+            This cannot be mixed with the ``modal`` parameter.
+        components: |components_type|
+            The components to display in the modal. A maximum of 5.
+            This cannot be mixed with the ``modal`` parameter.
+
+        Raises
+        ------
+        TypeError
+            Cannot mix the ``modal`` parameter and the ``title``, ``custom_id``, ``components`` parameters.
+        ValueError
+            Maximum number of components (5) exceeded.
+        HTTPException
+            Displaying the modal failed.
+        ModalChainNotSupported
+            This interaction cannot be responded with a modal.
+        InteractionResponded
+            This interaction has already been responded to before.
+        """
+        if modal is not None and any((title, components, custom_id)):
+            raise TypeError(f"Cannot mix modal argument and title, custom_id, components arguments")
+
+        parent = self._parent
+
+        if parent.type is InteractionType.modal_submit:
+            raise ModalChainNotSupported(parent)  # type: ignore
+
+        if self._responded:
+            raise InteractionResponded(parent)
+
+        modal_data: ModalPayload
+
+        if modal is not None:
+            modal_data = modal.to_components()
+        elif title and components and custom_id:
+
+            rows = components_to_dict(components)
+            if len(rows) > 5:
+                raise ValueError("Maximum number of components exceeded.")
+
+            modal_data = {
+                "title": title,
+                "custom_id": custom_id,
+                "components": rows,
+            }
+        else:
+            raise TypeError("Either modal or title, custom_id, components must be provided")
+
+        adapter = async_context.get()
+        await adapter.create_interaction_response(
+            parent.id,
+            parent.token,
+            session=parent._session,
+            type=InteractionResponseType.modal.value,
+            data=modal_data,  # type: ignore
+        )
+        self._responded = True
+
+        if modal is not None:
+            parent._state.store_modal(parent.author.id, modal)
 
 
 class _InteractionMessageState:

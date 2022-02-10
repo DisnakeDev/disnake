@@ -28,7 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, TypedDict, Union
 
 from .channel import ChannelType
-from .components import Component, ComponentType
+from .components import ActionRow, Component, ComponentType
 from .embed import Embed
 from .member import Member, MemberWithUser
 from .role import Role
@@ -36,6 +36,7 @@ from .snowflake import Snowflake
 from .user import User
 
 if TYPE_CHECKING:
+    from .components import Modal
     from .message import AllowedMentions, Attachment, Message
 
 
@@ -190,7 +191,14 @@ class ComponentInteractionData(_ComponentInteractionDataOptional):
     component_type: ComponentType
 
 
-InteractionData = Union[ApplicationCommandInteractionData, ComponentInteractionData]
+class ModalInteractionData(TypedDict):
+    custom_id: str
+    components: List[ActionRow]
+
+
+InteractionData = Union[
+    ApplicationCommandInteractionData, ComponentInteractionData, ModalInteractionData
+]
 
 
 class BaseInteraction(TypedDict):
@@ -242,7 +250,9 @@ class InteractionAutocompleteCallbackData(TypedDict):
 InteractionResponseType = Literal[1, 4, 5, 6, 7]
 
 InteractionCallbackData = Union[
-    InteractionApplicationCommandCallbackData, InteractionAutocompleteCallbackData
+    InteractionApplicationCommandCallbackData,
+    InteractionAutocompleteCallbackData,
+    Modal,
 ]
 
 
