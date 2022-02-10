@@ -212,7 +212,7 @@ a:hover {
 
 /* headers */
 
-header{
+header {
   color: var(--main-text);
   position: sticky;
   top: 0;
@@ -220,12 +220,14 @@ header{
   width: 100%;
   z-index: 40;
   padding: 0;
-  box-shadow: rgba(0, 0, 0, 0.5) 0 3px 6px;
+  background-color: var(--sub-header-background);
+  box-shadow: rgba(0, 0, 0, 0.2) 0 3px 6px;
 }
 
 header > nav {
+  max-width: 1500px;
+  margin: auto;
   color: var(--nav-text);
-  background-color: var(--sub-header-background);
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
@@ -241,6 +243,7 @@ header > nav a {
 
 header > nav a:hover {
   color: var(--nav-link-hover-text);
+  text-decoration: none;
 }
 
 header > nav.mobile-only {
@@ -518,8 +521,12 @@ header form.search {
 
 @media screen and (min-width: 1500px) {
   .main {
-    max-width: 1500px;
     margin: auto;
+  }
+
+  main > section {
+    margin-left: calc(calc(100vw - 1500px) / 2);
+    max-width: calc(1500px - 395px);
   }
 
   aside {
