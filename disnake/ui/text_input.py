@@ -54,8 +54,8 @@ class TextInput(WrappedComponent):
         The pre-filled value of the text input.
     required: :class:`bool`
         Whether the text input is required. Defaults to ``True``.
-    min_length: :class:`int`
-        The minimum length of the text input. Defaults to ``0``.
+    min_length: Optional[:class:`int`]
+        The minimum length of the text input.
     max_length: Optional[:class:`int`]
         The maximum length of the text input.
     """
@@ -156,12 +156,12 @@ class TextInput(WrappedComponent):
         self._underlying.required = value
 
     @property
-    def min_length(self) -> int:
+    def min_length(self) -> Optional[int]:
         """:class:`int`: The minimum length of the text input."""
         return self._underlying.min_length
 
     @min_length.setter
-    def min_length(self, value: int) -> None:
+    def min_length(self, value: Optional[int]) -> None:
         self._underlying.min_length = value
 
     @property

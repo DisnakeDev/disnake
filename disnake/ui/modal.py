@@ -132,7 +132,7 @@ class Modal:
         placeholder: Optional[str] = None,
         value: Optional[str] = None,
         required: bool = True,
-        min_length: int = 0,
+        min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
         """Creates and adds a text input component to the modal.
@@ -154,8 +154,8 @@ class Modal:
             The pre-filled value of the text input.
         required: :class:`bool`
             Whether the text input is required. Defaults to ``True``.
-        min_length: :class:`int`
-            The minimum length of the text input. Defaults to ``0``.
+        min_length: Optional[:class:`int`]
+            The minimum length of the text input.
         max_length: Optional[:class:`int`]
             The maximum length of the text input.
 

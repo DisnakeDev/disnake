@@ -406,8 +406,8 @@ class TextInput(Component):
         The pre-filled text of the text input.
     required: :class:`bool`
         Whether the text input is required. Defaults to ``True``.
-    min_length: :class:`int`
-        The minimum length of the text input. Defaults to ``0``.
+    min_length: Optional[:class:`int`]
+        The minimum length of the text input.
     max_length: Optional[:class:`int`]
         The maximum length of the text input.
     """
@@ -435,7 +435,7 @@ class TextInput(Component):
         self.placeholder: Optional[str] = data.get("placeholder")
         self.value: Optional[str] = data.get("value")
         self.required: bool = data.get("required", True)
-        self.min_length: int = data.get("min_length", 0)
+        self.min_length: Optional[int] = data.get("min_length")
         self.max_length: Optional[int] = data.get("max_length")
 
     def to_dict(self) -> TextInputPayload:
@@ -445,7 +445,6 @@ class TextInput(Component):
             "label": self.label,  # type: ignore
             "custom_id": self.custom_id,
             "required": self.required,
-            "min_length": self.min_length,
         }
 
         if self.placeholder is not None:
@@ -453,6 +452,9 @@ class TextInput(Component):
 
         if self.value is not None:
             payload["value"] = self.value
+
+        if self.min_length is not None:
+            payload["min_length"] = self.min_length
 
         if self.max_length is not None:
             payload["max_length"] = self.max_length
