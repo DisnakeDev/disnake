@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast, overload
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -86,6 +86,7 @@ if TYPE_CHECKING:
     from ..ui.action_row import Components
     from ..ui.modal import Modal
     from ..ui.view import View
+    from .message import MessageInteraction
 
     InteractionChannel = Union[
         VoiceChannel,
@@ -98,6 +99,8 @@ if TYPE_CHECKING:
     ]
 
     AnyBot = Union[Bot, AutoShardedBot]
+else:
+    MessageInteraction = ...  # only used for typecasting
 
 MISSING: Any = utils.MISSING
 
@@ -849,7 +852,7 @@ class InteractionResponse:
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        # attachments: List[Attachment] = MISSING,
+        attachments: List[Attachment] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components] = MISSING,
@@ -860,17 +863,10 @@ class InteractionResponse:
         a component interaction.
 
         .. note::
-            The ``attachments`` parameter is currently non-functional, removing/replacing existing
-            attachments using this method is presently not supported (API limitation, see
-            `this <https://github.com/discord/discord-api-docs/discussions/3335>`_).
-            As a workaround, respond to the interaction first (e.g. using :meth:`.defer`),
-            then edit the message using :meth:`Interaction.edit_original_message`.
-
-        .. note::
             If the original message has embeds with images that were created from local files
             (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
             those images will be removed if the message's attachments are edited in any way
-            (i.e. by setting ``file``/``files``, or adding an embed with local files).
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
         -----------
@@ -894,6 +890,12 @@ class InteractionResponse:
             Files will be appended to the message.
 
             .. versionadded:: 2.2
+        attachments: List[:class:`Attachment`]
+            A list of attachments to keep in the message. If ``[]`` is passed
+            then all existing attachments are removed.
+            Keeps existing attachments if not provided.
+
+            .. versionadded:: 2.4
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
@@ -923,6 +925,7 @@ class InteractionResponse:
         message_id = msg.id if msg else None
         if parent.type is not InteractionType.component:
             return
+        parent = cast(MessageInteraction, parent)
 
         payload = {}
         if content is not MISSING:
@@ -960,8 +963,12 @@ class InteractionResponse:
         elif previous_mentions is not None:
             payload["allowed_mentions"] = previous_mentions.to_dict()
 
-        # if attachments is not MISSING:
-        #     payload["attachments"] = [a.to_dict() for a in attachments]
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if attachments is MISSING and (file or files):
+            attachments = parent.message.attachments
+        if attachments is not MISSING:
+            payload["attachments"] = [a.to_dict() for a in attachments]
 
         if view is not MISSING and components is not MISSING:
             raise TypeError("cannot mix view and components keyword arguments")
