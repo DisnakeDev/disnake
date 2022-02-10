@@ -24,7 +24,7 @@ class MyModal(disnake.ui.Modal):
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         embed = disnake.Embed(title="Tag Creation")
-        for key, value in inter.values.items():
+        for key, value in inter.text_values.items():
             embed.add_field(name=key.capitalize(), value=value, inline=False)
         await inter.response.send_message(embed=embed)
 
@@ -67,7 +67,7 @@ class Modals(commands.Cog):
         )
 
         embed = disnake.Embed(title="Tag Creation")
-        for key, value in modal_inter.values.items():
+        for key, value in modal_inter.text_values.items():
             embed.add_field(name=key.capitalize(), value=value, inline=False)
         await modal_inter.response.send_message(embed=embed)
 
