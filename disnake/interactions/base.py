@@ -620,7 +620,7 @@ class InteractionResponse:
         -----------
         ephemeral: :class:`bool`
             Indicates whether the deferred message will eventually be ephemeral.
-            This applies for interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
+            This applies to interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
             or when the ``with_message`` parameter is ``True``.
         with_message: :class:`bool`
             Indicates whether the response will be a message with thinking state (bot is thinking...).
@@ -1066,6 +1066,8 @@ class InteractionResponse:
 
         Responds to this interaction by displaying a modal.
 
+        .. versionadded:: 2.4
+
         .. note::
 
             Not passing the ``modal`` parameter here will not register a callback, and a :func:`on_modal_submit`
@@ -1097,13 +1099,10 @@ class InteractionResponse:
         InteractionResponded
             This interaction has already been responded to before.
         """
-        # title and components must always be provided if any of them are provided, but custom_id is optional
-
         if modal is not None and any((title, components, custom_id)):
             raise TypeError(f"Cannot mix modal argument and title, custom_id, components arguments")
 
         parent = self._parent
-        adapter = async_context.get()
 
         if parent.type is InteractionType.modal_submit:
             raise ModalChainNotSupported(parent)  # type: ignore
@@ -1129,6 +1128,7 @@ class InteractionResponse:
         else:
             raise TypeError("Either modal or title, custom_id, components must be provided")
 
+        adapter = async_context.get()
         await adapter.create_interaction_response(
             parent.id,
             parent.token,

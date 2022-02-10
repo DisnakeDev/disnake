@@ -92,7 +92,7 @@ class Modal:
         )
 
     def append_component(self, component: Union[TextInput, List[TextInput]]) -> None:
-        """Adds a component to the modal.
+        """Adds one or multiple component(s) to the modal.
 
         Parameters
         ----------
