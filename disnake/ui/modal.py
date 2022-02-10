@@ -261,10 +261,11 @@ class ModalStore:
         await asyncio.sleep(timeout)
         try:
             modal = self.remove_modal(user_id, modal_custom_id)
-            await modal.on_timeout()
         except KeyError:
             # The modal has already been removed.
             pass
+        else:
+            await modal.on_timeout()
 
     def dispatch(self, interaction: ModalInteraction) -> None:
         key = (interaction.author.id, interaction.custom_id)
