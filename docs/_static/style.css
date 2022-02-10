@@ -940,7 +940,7 @@ div.admonition {
   padding: 0 0.8em 0.8em 0.8em !important;
   margin: 0.8em 0;
   border-radius: 2.5px;
-  border-left-width: 6px;
+  border-left-width: 3px;
   border-left-style: solid;
   background-color: var(--admonition-background);
 }
