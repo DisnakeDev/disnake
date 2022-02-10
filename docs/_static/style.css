@@ -225,8 +225,6 @@ header {
 }
 
 header > nav {
-  max-width: 1500px;
-  margin: auto;
   color: var(--nav-text);
   display: flex;
   flex-direction: row;
@@ -534,6 +532,12 @@ header form.search {
 
   aside {
     left: calc(calc(100vw - 1500px) / 2);
+  }
+
+  header > nav {
+    margin-left: calc(calc(100vw - 1500px) / 2);
+    margin-right: auto;
+    max-width: 1500px;
   }
 }
 
