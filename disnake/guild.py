@@ -1155,8 +1155,8 @@ class Guild(Hashable):
         .. code-block:: python3
 
             overwrites = {
-                guild.default_role: disnake.PermissionOverwrite(read_messages=False),
-                guild.me: disnake.PermissionOverwrite(read_messages=True)
+                guild.default_role: disnake.PermissionOverwrite(view_channel=False),
+                guild.me: disnake.PermissionOverwrite(view_channel=True)
             }
 
             channel = await guild.create_text_channel('secret', overwrites=overwrites)
