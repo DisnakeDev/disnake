@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast, overload
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -39,6 +39,7 @@ from ..errors import (
     InteractionNotResponded,
     InteractionResponded,
     InteractionTimedOut,
+    ModalChainNotSupported,
     NotFound,
 )
 from ..guild import Guild
@@ -77,12 +78,15 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
     from ..threads import Thread
+    from ..types.components import Modal as ModalPayload
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
     )
     from ..ui.action_row import Components
+    from ..ui.modal import Modal
     from ..ui.view import View
+    from .message import MessageInteraction
 
     InteractionChannel = Union[
         VoiceChannel,
@@ -95,6 +99,8 @@ if TYPE_CHECKING:
     ]
 
     AnyBot = Union[Bot, AutoShardedBot]
+else:
+    MessageInteraction = ...  # only used for typecasting
 
 MISSING: Any = utils.MISSING
 
@@ -178,7 +184,7 @@ class Interaction:
         self.guild_locale: Optional[str] = data.get("guild_locale")
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
-        self._permissions: int = 0
+        self._permissions = None
 
         if self.guild_id and (member := data.get("member")):
             guild: Guild = self.guild or Object(id=self.guild_id)  # type: ignore
@@ -243,9 +249,11 @@ class Interaction:
     def permissions(self) -> Permissions:
         """:class:`Permissions`: The resolved permissions of the member in the channel, including overwrites.
 
-        In a non-guild context where this doesn't apply, an empty permissions object is returned.
+        In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
         """
-        return Permissions(self._permissions)
+        if self._permissions is not None:
+            return Permissions(self._permissions)
+        return Permissions.private_channel()
 
     @utils.cached_slot_property("_cs_response")
     def response(self) -> InteractionResponse:
@@ -617,11 +625,11 @@ class InteractionResponse:
         -----------
         ephemeral: :class:`bool`
             Indicates whether the deferred message will eventually be ephemeral.
-            This only applies for interactions of type :attr:`InteractionType.application_command` or when ``with_message`` is True
+            This applies to interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
+            or when the ``with_message`` parameter is ``True``.
         with_message: :class:`bool`
             Indicates whether the response will be a message with thinking state (bot is thinking...).
-            This is always True for interactions of type :attr:`InteractionType.application_command`.
-            For interactions of type :attr:`InteractionType.component` this defaults to False.
+            This only applies to interactions of type :attr:`InteractionType.component`.
 
             .. versionadded:: 2.4
 
@@ -638,7 +646,10 @@ class InteractionResponse:
         defer_type: int = 0
         data: Optional[Dict[str, Any]] = None
         parent = self._parent
-        if parent.type is InteractionType.application_command or with_message:
+        if (
+            parent.type in (InteractionType.application_command, InteractionType.modal_submit)
+            or with_message
+        ):
             defer_type = InteractionResponseType.deferred_channel_message.value
             if ephemeral:
                 data = {"flags": 64}
@@ -843,7 +854,7 @@ class InteractionResponse:
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        # attachments: List[Attachment] = MISSING,
+        attachments: List[Attachment] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components] = MISSING,
@@ -854,17 +865,10 @@ class InteractionResponse:
         a component interaction.
 
         .. note::
-            The ``attachments`` parameter is currently non-functional, removing/replacing existing
-            attachments using this method is presently not supported (API limitation, see
-            `this <https://github.com/discord/discord-api-docs/discussions/3335>`_).
-            As a workaround, respond to the interaction first (e.g. using :meth:`.defer`),
-            then edit the message using :meth:`Interaction.edit_original_message`.
-
-        .. note::
             If the original message has embeds with images that were created from local files
             (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
             those images will be removed if the message's attachments are edited in any way
-            (i.e. by setting ``file``/``files``, or adding an embed with local files).
+            (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
         -----------
@@ -888,6 +892,12 @@ class InteractionResponse:
             Files will be appended to the message.
 
             .. versionadded:: 2.2
+        attachments: List[:class:`Attachment`]
+            A list of attachments to keep in the message. If ``[]`` is passed
+            then all existing attachments are removed.
+            Keeps existing attachments if not provided.
+
+            .. versionadded:: 2.4
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
@@ -917,6 +927,7 @@ class InteractionResponse:
         message_id = msg.id if msg else None
         if parent.type is not InteractionType.component:
             return
+        parent = cast(MessageInteraction, parent)
 
         payload = {}
         if content is not MISSING:
@@ -954,8 +965,12 @@ class InteractionResponse:
         elif previous_mentions is not None:
             payload["allowed_mentions"] = previous_mentions.to_dict()
 
-        # if attachments is not MISSING:
-        #     payload["attachments"] = [a.to_dict() for a in attachments]
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        if attachments is MISSING and (file or files):
+            attachments = parent.message.attachments
+        if attachments is not MISSING:
+            payload["attachments"] = [a.to_dict() for a in attachments]
 
         if view is not MISSING and components is not MISSING:
             raise TypeError("cannot mix view and components keyword arguments")
@@ -990,6 +1005,7 @@ class InteractionResponse:
 
     async def autocomplete(self, *, choices: Choices) -> None:
         """|coro|
+
         Responds to this interaction by displaying a list of possible autocomplete results.
         Only works for autocomplete interactions.
 
@@ -1032,6 +1048,107 @@ class InteractionResponse:
         )
 
         self._responded = True
+
+    @overload
+    async def send_modal(self, modal: Modal) -> None:
+        ...
+
+    @overload
+    async def send_modal(
+        self,
+        *,
+        title: str,
+        custom_id: str,
+        components: Components,
+    ) -> None:
+        ...
+
+    async def send_modal(
+        self,
+        modal: Modal = None,
+        *,
+        title: str = None,
+        custom_id: str = None,
+        components: Components = None,
+    ) -> None:
+        """|coro|
+
+        Responds to this interaction by displaying a modal.
+
+        .. versionadded:: 2.4
+
+        .. note::
+
+            Not passing the ``modal`` parameter here will not register a callback, and a :func:`on_modal_submit`
+            interaction will need to be handled manually.
+
+        Parameters
+        ----------
+        modal: :class:`~.ui.Modal`
+            The modal to display. This cannot be mixed with the ``title``, ``custom_id`` and ``components`` parameters.
+        title: :class:`str`
+            The title of the modal. This cannot be mixed with the ``modal`` parameter.
+        custom_id: :class:`str`
+            The ID of the modal that gets received during an interaction.
+            This cannot be mixed with the ``modal`` parameter.
+        components: |components_type|
+            The components to display in the modal. A maximum of 5.
+            This cannot be mixed with the ``modal`` parameter.
+
+        Raises
+        ------
+        TypeError
+            Cannot mix the ``modal`` parameter and the ``title``, ``custom_id``, ``components`` parameters.
+        ValueError
+            Maximum number of components (5) exceeded.
+        HTTPException
+            Displaying the modal failed.
+        ModalChainNotSupported
+            This interaction cannot be responded with a modal.
+        InteractionResponded
+            This interaction has already been responded to before.
+        """
+        if modal is not None and any((title, components, custom_id)):
+            raise TypeError(f"Cannot mix modal argument and title, custom_id, components arguments")
+
+        parent = self._parent
+
+        if parent.type is InteractionType.modal_submit:
+            raise ModalChainNotSupported(parent)  # type: ignore
+
+        if self._responded:
+            raise InteractionResponded(parent)
+
+        modal_data: ModalPayload
+
+        if modal is not None:
+            modal_data = modal.to_components()
+        elif title and components and custom_id:
+
+            rows = components_to_dict(components)
+            if len(rows) > 5:
+                raise ValueError("Maximum number of components exceeded.")
+
+            modal_data = {
+                "title": title,
+                "custom_id": custom_id,
+                "components": rows,
+            }
+        else:
+            raise TypeError("Either modal or title, custom_id, components must be provided")
+
+        adapter = async_context.get()
+        await adapter.create_interaction_response(
+            parent.id,
+            parent.token,
+            session=parent._session,
+            type=InteractionResponseType.modal.value,
+            data=modal_data,  # type: ignore
+        )
+        self._responded = True
+
+        if modal is not None:
+            parent._state.store_modal(parent.author.id, modal)
 
 
 class _InteractionMessageState:

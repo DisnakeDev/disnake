@@ -150,6 +150,9 @@ class InteractionBotBase(CommonBotBase):
         test_guilds: Sequence[int] = None,
         **options: Any,
     ):
+        if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
+            raise ValueError("test_guilds must be a sequence of int.")
+
         super().__init__(**options)
 
         self._test_guilds: Optional[Sequence[int]] = test_guilds

@@ -295,19 +295,22 @@ class ParamInfo:
     """
 
     TYPES: ClassVar[Dict[type, int]] = {
-        str: 3,
-        int: 4,
-        bool: 5,
-        disnake.abc.User: 6,
-        disnake.User: 6,
-        disnake.Member: 6,
-        Union[disnake.User, disnake.Member]: 6,
+        # fmt: off
+        str:                                 OptionType.string.value,
+        int:                                 OptionType.integer.value,
+        bool:                                OptionType.boolean.value,
+        disnake.abc.User:                    OptionType.user.value,
+        disnake.User:                        OptionType.user.value,
+        disnake.Member:                      OptionType.user.value,
+        Union[disnake.User, disnake.Member]: OptionType.user.value,
         # channels handled separately
-        disnake.abc.GuildChannel: 7,
-        disnake.Role: 8,
-        Union[disnake.Member, disnake.Role]: 9,
-        disnake.abc.Snowflake: 9,
-        float: 10,
+        disnake.abc.GuildChannel:            OptionType.channel.value,
+        disnake.Role:                        OptionType.role.value,
+        Union[disnake.Member, disnake.Role]: OptionType.mentionable.value,
+        disnake.abc.Snowflake:               OptionType.mentionable.value,
+        float:                               OptionType.number.value,
+        disnake.Attachment:                  OptionType.attachment.value,
+        # fmt: on
     }
     _registered_converters: ClassVar[Dict[type, Callable]] = {}
 
@@ -570,7 +573,7 @@ class ParamInfo:
 
         return Option(
             name=self.name,
-            description=self.description or "\u200b",
+            description=self.description or "-",
             type=self.discord_type,
             required=self.required,
             choices=self.choices or None,

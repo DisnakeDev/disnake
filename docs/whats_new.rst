@@ -11,6 +11,54 @@ Changelog
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
+
+.. _vp2p3p2:
+
+v2.3.2
+------
+
+Bug Fixes
+~~~~~~~~~
+
+- Fix invalid default value for application command option descriptions (:issue:`338`)
+
+
+.. _vp2p3p1:
+
+v2.3.1
+------
+
+Bug Fixes
+~~~~~~~~~
+
+- |commands| Fix Python 3.10 union type annotations in slash commands (:issue:`231`)
+- Fix double ``@`` when mentioning default role (:issue:`244`)
+- Fix a command sync bug which prevented registering two application commands with the same name but different types (:issue:`254`)
+- Fix :func:`GuildScheduledEvent.fetch_users` (:issue:`274`)
+- Fix bug when editing a :class:`~ui.View` with URL buttons that resulted in the ``row`` attribute being reset (:issue:`252`)
+- |commands| Fix :class:`~ext.commands.MessageConverter` not defaulting to current channel if no channel ID specified (:issue:`284`)
+- Fix attachment descriptions not working after recent API change (:issue:`241`)
+- Fix incorrect type check in :func:`Guild.create_scheduled_event` using :class:`StagePrivacyLevel` instead of :class:`GuildScheduledEventPrivacyLevel` (:issue:`263`)
+- |commands| Fix exceptions that occurred when using a :class:`Union` in a slash command parameter annotation
+- |commands| Fix dynamic command cooldowns (:issue:`320`)
+- Fix type-checking of ``guild_ids`` / ``test_guilds`` parameters which could break application command caching (:issue:`300`, :issue:`325`)
+- Fix :func:`Guild.create_sticker` not working when no description was provided (:issue:`328`)
+
+
+Documentation
+~~~~~~~~~~~~~
+
+- Fix :func:`~ext.commands.guild_permissions` documentation
+- Fix missing dropdown icon (:issue:`235`)
+
+
+Miscellaneous
+~~~~~~~~~~~~~
+
+- Add ``isort`` and ``black`` pre-commit hooks, run isort (:issue:`169`, :issue:`173`, :issue:`233`)
+- Rename ``tests`` directory (:issue:`232`)
+
+
 .. _vp2p3p0:
 
 v2.3.0
@@ -182,6 +230,17 @@ Miscellaneous
 - Add guide for configuring inviting a bot through its profile (:issue:`153`)
 - Rewrite project README (:issue:`191`)
 - Improve examples (:issue:`143`)
+
+
+.. _vp2p2p3:
+
+v2.2.3
+------
+
+Bug Fixes
+~~~~~~~~~
+
+- Fix invalid default value for application command option descriptions (:issue:`338`)
 
 
 .. _vp2p2p2:
