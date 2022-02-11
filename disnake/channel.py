@@ -2024,7 +2024,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
         Actual direct messages do not really have the concept of permissions.
 
-        This returns all the :meth:`Permissions.private_channel` set to ``True``.
+        This returns all the :meth:`Permissions.private_channel` permissions set to ``True``.
 
         Parameters
         -----------
