@@ -12,6 +12,17 @@ This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
 
+.. _vp2p3p2:
+
+v2.3.2
+------
+
+Bug Fixes
+~~~~~~~~~
+
+- Fix invalid default value for application command option descriptions (:issue:`338`)
+
+
 .. _vp2p3p1:
 
 v2.3.1
@@ -219,6 +230,17 @@ Miscellaneous
 - Add guide for configuring inviting a bot through its profile (:issue:`153`)
 - Rewrite project README (:issue:`191`)
 - Improve examples (:issue:`143`)
+
+
+.. _vp2p2p3:
+
+v2.2.3
+------
+
+Bug Fixes
+~~~~~~~~~
+
+- Fix invalid default value for application command option descriptions (:issue:`338`)
 
 
 .. _vp2p2p2:
