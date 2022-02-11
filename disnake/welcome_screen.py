@@ -44,7 +44,7 @@ class WelcomeScreenChannel:
     Attributes
     ----------
     id: :class:`int`
-        The ID of the channel this welcome screen channel represents.
+        The ID of the guild channel this welcome screen channel represents.
     description: :class:`str`
         The description of this channel in the official UI.
     emoji: Optional[:class:`PartialEmoji`]
@@ -57,9 +57,7 @@ class WelcomeScreenChannel:
         self.emoji = emoji
 
     def __repr__(self):
-        return (
-            f"<WelcomeScreenChannel id={self.id} emoji={self.emoji} description={self.description}>"
-        )
+        return f"<WelcomeScreenChannel id={self.id!r} emoji={self.emoji!r} description={self.description!r}>"
 
     @classmethod
     def _from_data(
@@ -95,11 +93,9 @@ class WelcomeScreen:
         The welcome screen description.
     channels: List[:class:`WelcomeScreenChannel`]
         The welcome screen's channels.
-
-        .. note::
-
-            To know if the welcome screen is enabled for a specific guild check
-            for the presence of ``WELCOME_SCREEN_ENABLED`` in :attr:`Guild.features`
+    enabled: class:`bool`:
+        Whether the welcome screen is displayed to users.
+        This is equivalent to checking if ``WELCOME_SCREEN_ENABLED`` is present in :attr:`Guild.features`.
     """
 
     def __init__(self, *, data: WelcomeScreenPayload, state: ConnectionState, guild: Guild):
@@ -112,7 +108,11 @@ class WelcomeScreen:
         ]
 
     def __repr__(self) -> str:
-        return f"<WelcomeScreen description={self.description} channels={self.channels}>"
+        return f"<WelcomeScreen description={self.description!r} channels={self.channels!r} enabled={self.enabled!r}>"
+
+    @property
+    def enabled(self) -> bool:
+        return "WELCOME_SCREEN_ENABLED" in self._guild.features
 
     async def edit(
         self,

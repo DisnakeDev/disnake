@@ -1970,7 +1970,7 @@ class Guild(Hashable):
         description: str = MISSING,
         reason: str = None,
     ) -> WelcomeScreen:
-        """This is a lower level method to :meth:`WelcomeScreen.edit` that  allows you
+        """This is a lower level method to :meth:`WelcomeScreen.edit` that allows you
         to edit the welcome screen without fetching it and save an api request.
 
         Raises
