@@ -767,7 +767,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. versionchanged:: 2.4
 
         This is now only dispatched when the bot joins a thread, not when a thread is created.
-        If you want an event for when a thread is created, use :ref:`on_thread_created` instead.
+        If you want an event for when a thread is created, use :ref:`on_thread_create` instead.
 
     Note that you can get the guild from :attr:`Thread.guild`.
 
