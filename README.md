@@ -1,4 +1,4 @@
-[![Disnake Banner](https://raw.githubusercontent.com/InvisibleOS/disnake/master/assets/banner.png)](https://disnake.dev/)
+[![Disnake Banner](https://raw.githubusercontent.com/InvisibleOS/disnake/master/assets/.png)](https://disnake.dev/)
 
 disnake
 =======
