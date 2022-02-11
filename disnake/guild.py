@@ -3144,7 +3144,6 @@ class Guild(Hashable):
 
     async def widget(self) -> Widget:
         """|coro|
-
         Returns the widget of the guild.
 
         .. note::
@@ -3209,8 +3208,10 @@ class Guild(Hashable):
 
         await self._state.http.edit_widget(self.id, payload=payload, reason=reason)
 
-    async def chunk(self, *, cache: bool = True) -> None:
+    async def chunk(self, *, cache: bool = True) -> Optional[List[Member]]:
         """|coro|
+
+        Returns a :class:`list` of all guild members.
 
         Requests all members that belong to this guild. In order to use this,
         :meth:`Intents.members` must be enabled.
@@ -3228,13 +3229,18 @@ class Guild(Hashable):
         -------
         ClientException
             The members intent is not enabled.
+
+        Returns
+        --------
+        Optional[List[:class:`Member`]]
+             Returns a list of all the members within the guild.
         """
 
         if not self._state._intents.members:
             raise ClientException("Intents.members must be enabled to use this.")
 
         if not self._state.is_guild_evicted(self):
-            await self._state.chunk_guild(self, cache=cache)
+            return await self._state.chunk_guild(self, cache=cache)
 
     async def query_members(
         self,
