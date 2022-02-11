@@ -11,6 +11,18 @@ Changelog
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
+
+.. _vp2p2p3:
+
+v2.2.3
+------
+
+Bug Fixes
+~~~~~~~~~
+
+- Fix invalid default value for application command option descriptions (:issue:`338`)
+
+
 .. _vp2p2p2:
 
 v2.2.2
