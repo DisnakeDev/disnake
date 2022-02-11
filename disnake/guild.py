@@ -3144,7 +3144,6 @@ class Guild(Hashable):
 
     async def widget(self) -> Widget:
         """|coro|
-        
         Returns the widget of the guild.
 
         .. note::
