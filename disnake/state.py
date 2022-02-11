@@ -1034,7 +1034,7 @@ class ConnectionState:
             _log.debug("THREAD_CREATE referencing an unknown guild ID: %s. Discarding", guild_id)
             return
 
-        if data.get("newly_created") is None:
+        if "newly_created" not in data:
             # Skipping since we just want thread create event,
             # as thread join is handled in thread_members_update.
             return
