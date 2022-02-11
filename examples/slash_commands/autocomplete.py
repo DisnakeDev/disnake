@@ -25,7 +25,7 @@ async def autocomplete(
     ...
 
 
-# In case you need don't want to use Param or need to use self in a cog you you may
+# In case you need don't want to use Param or need to use self in a cog you may
 # create autocomplete options with the decorator @slash_command.autocomplete()
 @bot.slash_command()
 async def languages(inter: disnake.CommandInteraction, language: str):
