@@ -1948,6 +1948,8 @@ class Guild(Hashable):
             To know if the welcome screen is enabled check for the
             presence of ``WELCOME_SCREEN_ENABLED`` in :attr:`Guild.features`
 
+        .. versionadded:: 2.4
+
         Raises
         ------
         NotFound
@@ -1972,6 +1974,8 @@ class Guild(Hashable):
     ) -> WelcomeScreen:
         """This is a lower level method to :meth:`WelcomeScreen.edit` that allows you
         to edit the welcome screen without fetching it and save an api request.
+
+        .. versionadded:: 2.4
 
         Raises
         ------
