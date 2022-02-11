@@ -41,12 +41,14 @@ from typing import (
     Deque,
     Dict,
     List,
+    Literal,
     Optional,
     Sequence,
     Tuple,
     TypeVar,
     Union,
     cast,
+    overload,
 )
 
 from . import utils
@@ -1313,7 +1315,21 @@ class ConnectionState:
     def is_guild_evicted(self, guild) -> bool:
         return guild.id not in self._guilds
 
-    async def chunk_guild(self, guild, *, wait=True, cache=None):
+    @overload
+    async def chunk_guild(
+        self, guild: Guild, *, wait: Literal[False], cache: Optional[bool] = None
+    ) -> asyncio.Future[List[Member]]:
+        ...
+
+    @overload
+    async def chunk_guild(
+        self, guild: Guild, *, wait: Literal[True] = True, cache: Optional[bool] = None
+    ) -> List[Member]:
+        ...
+
+    async def chunk_guild(
+        self, guild: Guild, *, wait: bool = True, cache: Optional[bool] = None
+    ) -> Union[List[Member], asyncio.Future[List[Member]]]:
         cache = cache or self.member_cache_flags.joined
         request = self._chunk_requests.get(guild.id)
         if request is None:
