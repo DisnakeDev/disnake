@@ -4485,6 +4485,22 @@ Widget
 .. autoclass:: Widget()
     :members:
 
+WelcomeScreen
+~~~~~~~~~~~~~~
+
+.. attributetable:: WelcomeScreen
+
+.. autoclass:: WelcomeScreen()
+    :members:
+
+WelcomeScreenChannel
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: WelcomeScreenChannel
+
+.. autoclass:: WelcomeScreenChannel()
+    :members:
+
 StickerPack
 ~~~~~~~~~~~~~
 

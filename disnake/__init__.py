@@ -61,6 +61,7 @@ from .threads import *
 from .user import *
 from .voice_client import *
 from .webhook import *
+from .welcome_screen import *
 from .widget import *
 
 

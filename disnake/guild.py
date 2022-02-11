@@ -85,6 +85,7 @@ from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
 from .user import User
+from .welcome_screen import WelcomeScreen, WelcomeScreenChannel
 from .widget import Widget
 
 __all__ = ("Guild",)
@@ -1934,6 +1935,70 @@ class Guild(Hashable):
 
         data = await self._state.http.create_guild_scheduled_event(self.id, reason=reason, **fields)
         return GuildScheduledEvent(state=self._state, data=data)
+
+    async def fetch_welcome_screen(self):
+        """|coro|
+
+        Fetches the guild's :class:`WelcomeScreen`.
+
+        Requires the :attr:`~Permissions.manage_guild` permission if the welcome screen is not enabled.
+
+        .. note::
+
+            To know if the welcome screen is enabled check for the
+            presence of ``WELCOME_SCREEN_ENABLED`` in :attr:`Guild.features`
+
+        Raises
+        ------
+        NotFound
+            The welcome screen is not set up, or you do not have permissions to view it.
+
+
+        Returns
+        -------
+        WelcomeScreen
+            The guild's welcome screen.
+        """
+        data = await self._state.http.get_guild_welcome_screen(self.id)
+        return WelcomeScreen(state=self._state, data=data, guild=self)
+
+    async def edit_welcome_screen(
+        self,
+        *,
+        enabled: bool = MISSING,
+        welcome_channels: List[WelcomeScreenChannel] = MISSING,
+        description: str = MISSING,
+        reason: str = None,
+    ) -> WelcomeScreen:
+        """This is a lower level method to :meth:`WelcomeScreen.edit` that  allows you
+        to edit the welcome screen without fetching it and save an api request.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the :attr:`~Permissions.manage_guild` or the
+            guild is not allowed to create welcome screens.
+        HTTPException
+            Editing the welcome screen failed.
+
+        Returns
+        -------
+        WelcomeScreen
+            The newly edited welcome screen.
+        """
+        payload = {}
+
+        if enabled is not MISSING:
+            payload["enabled"] = enabled
+
+        if description is not MISSING:
+            payload["description"] = description
+
+        if welcome_channels is not MISSING:
+            payload["welcome_channels"] = [c.to_dict() for c in welcome_channels]
+
+        data = await self._state.http.edit_guild_welcome_screen(self.id, reason=reason, **payload)
+        return WelcomeScreen(state=self._state, data=data, guild=self)
 
     # TODO: Remove Optional typing here when async iterators are refactored
     def fetch_members(
