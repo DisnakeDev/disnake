@@ -2014,22 +2014,15 @@ class HTTPClient:
     def edit_guild_welcome_screen(
         self,
         guild_id: Snowflake,
-        enabled: bool = None,
-        welcome_channels: List[welcome_screen.WelcomeScreenChannel] = None,
-        description: str = None,
         reason: str = None,
+        **kwargs,
     ) -> Response[welcome_screen.WelcomeScreen]:
-
-        payload: Dict[str, Any] = {}
-
-        if description is not None:
-            payload["description"] = description
-
-        if enabled is not None:
-            payload["enabled"] = enabled
-
-        if welcome_channels is not None:
-            payload["welcome_channels"] = welcome_channels
+        valid_keys = (
+            "enabled",
+            "welcome_channels",
+            "description",
+        )
+        payload = {k: v for k, v in kwargs.items() if k in valid_keys}
 
         r = Route("PATCH", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
         return self.request(r, json=payload, reason=reason)

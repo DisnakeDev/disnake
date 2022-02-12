@@ -1954,7 +1954,8 @@ class Guild(Hashable):
         ------
         NotFound
             The welcome screen is not set up, or you do not have permissions to view it.
-
+        HTTPException
+            Editing the welcome screen failed.
 
         Returns
         -------
@@ -1980,7 +1981,7 @@ class Guild(Hashable):
         Raises
         ------
         Forbidden
-            You do not have the :attr:`~Permissions.manage_guild` or the
+            You do not have the :attr:`~Permissions.manage_guild` permission or the
             guild is not allowed to create welcome screens.
         HTTPException
             Editing the welcome screen failed.
@@ -1999,7 +2000,17 @@ class Guild(Hashable):
             payload["description"] = description
 
         if welcome_channels is not MISSING:
-            payload["welcome_channels"] = [c.to_dict() for c in welcome_channels]
+            if welcome_channels is None:
+                payload["welcome_channels"] = None
+            elif isinstance(welcome_channels, list):
+                welcome_channel_payload = []
+                for channel in welcome_channels:
+                    if not isinstance(channel, WelcomeScreenChannel):
+                        raise TypeError(
+                            "'welcome_channels' must be a list of 'WelcomeScreenChannel' objects"
+                        )
+                    welcome_channel_payload.append(channel.to_dict())
+                payload["welcome_channels"] = welcome_channel_payload
 
         data = await self._state.http.edit_guild_welcome_screen(self.id, reason=reason, **payload)
         return WelcomeScreen(state=self._state, data=data, guild=self)

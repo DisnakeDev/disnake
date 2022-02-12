@@ -23,7 +23,7 @@ DEALINGS IN THE SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, overload
 
 from .partial_emoji import PartialEmoji
 from .utils import MISSING, _get_as_snowflake
@@ -53,6 +53,12 @@ class WelcomeScreenChannel:
         The emoji associated with this channel's welcome message, if any.
     """
 
+    __slots__ = (
+        "id",
+        "description",
+        "emoji",
+    )
+
     def __init__(self, *, id: int, description: str, emoji: Optional[PartialEmoji] = None):
         self.id = id
         self.description = description
@@ -73,7 +79,7 @@ class WelcomeScreenChannel:
 
         return cls(id=int(data["channel_id"]), description=data["description"], emoji=emoji)
 
-    def to_dict(self):
+    def to_dict(self) -> WelcomeScreenChannelPayload:
 
         result = {
             "channel_id": self.id,
@@ -83,7 +89,7 @@ class WelcomeScreenChannel:
             result["emoji_id"] = self.emoji.id
             result["emoji_name"] = self.emoji.name
 
-        return result
+        return result  # type: ignore
 
 
 class WelcomeScreen:
@@ -93,29 +99,36 @@ class WelcomeScreen:
 
     Attributes
     ----------
-    description: :class:`str`
+    description: Optional[:class:`str`]
         The welcome screen description.
     channels: List[:class:`WelcomeScreenChannel`]
         The welcome screen's channels.
-    enabled: class:`bool`:
-        Whether the welcome screen is displayed to users.
-        This is equivalent to checking if ``WELCOME_SCREEN_ENABLED`` is present in :attr:`Guild.features`.
     """
+
+    __slots__ = (
+        "_state",
+        "_guild",
+        "description",
+        "welcome_channels",
+    )
 
     def __init__(self, *, data: WelcomeScreenPayload, state: ConnectionState, guild: Guild):
         self._state = state
         self._guild = guild
-        self.description = data["description"]
-        self.channels = [
+        self.description: Optional[str] = data.get("description")
+        self.welcome_channels: List[WelcomeScreenChannel] = [
             WelcomeScreenChannel._from_data(data=channel, state=state)
             for channel in data["welcome_channels"]
         ]
 
     def __repr__(self) -> str:
-        return f"<WelcomeScreen description={self.description!r} channels={self.channels!r} enabled={self.enabled!r}>"
+        return f"<WelcomeScreen description={self.description!r} welcome_channels={self.welcome_channels!r} enabled={self.enabled!r}>"
 
     @property
     def enabled(self) -> bool:
+        """bool: Whether the welcome screen is displayed to users.
+        This is equivalent to checking if ``WELCOME_SCREEN_ENABLED`` is present in :attr:`Guild.features`.
+        """
         return "WELCOME_SCREEN_ENABLED" in self._guild.features
 
     async def edit(
@@ -125,13 +138,13 @@ class WelcomeScreen:
         description: str = MISSING,
         welcome_channels: List[WelcomeScreenChannel] = MISSING,
         reason: str = None,
-    ):
+    ) -> WelcomeScreen:
         """Edits the welcome screen.
 
         You must have the :attr:`~Permissions.manage_guild` permission to
         use this.
 
-        All fields are optional.
+        All fields are optional and nullable.
 
         Parameters
         -----------
@@ -165,9 +178,19 @@ class WelcomeScreen:
             payload["description"] = description
 
         if welcome_channels is not MISSING:
-            payload["welcome_channels"] = [channel.to_dict() for channel in welcome_channels]
+            if welcome_channels is None:
+                payload["welcome_channels"] = None
+            elif isinstance(welcome_channels, list):
+                welcome_channel_payload = []
+                for channel in welcome_channels:
+                    if not isinstance(channel, WelcomeScreenChannel):
+                        raise TypeError(
+                            "'welcome_channels' must be a list of 'WelcomeScreenChannel' objects"
+                        )
+                    welcome_channel_payload.append(channel.to_dict())
+                payload["welcome_channels"] = welcome_channel_payload
 
         data = await self._state.http.edit_guild_welcome_screen(
             self._guild.id, reason=reason, **payload
         )
-        return WelcomeScreen(data=data, state=self._state, guild=self._guild)
+        return WelcomeScreen(state=self._state, data=data, guild=self._guild)
