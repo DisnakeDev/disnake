@@ -591,6 +591,8 @@ class CommonBotBase(Generic[CogT]):
     def load_extensions(self, path: str) -> None:
         """Loads all extensions in a directory.
 
+        .. versionadded:: 2.4
+
         Parameters
         ----------
         path: :class:`str`
