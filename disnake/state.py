@@ -1034,15 +1034,20 @@ class ConnectionState:
             _log.debug("THREAD_CREATE referencing an unknown guild ID: %s. Discarding", guild_id)
             return
 
-        if "newly_created" not in data:
-            # Skipping since we just want thread create event,
-            # as thread join is handled in thread_members_update.
+        if int(data["type"]) == 12 and "member" in data:
+            # We don't want to create `Thread` instances and dispatch `on_thread_join` for when
+            # the bot joins a public thread. As this is handled in `parse_thread_members_update`.
             return
 
         thread = Thread(guild=guild, state=guild._state, data=data)
-        guild._add_thread(thread)
         if thread._newly_created:
             self.dispatch("thread_create", thread)
+            guild._add_thread(thread)
+            # We only cache the thread here since if a bot joins a private thread, and we cache it,
+            # if the bot joins that thread again, `on_thread_join` would be called twice,
+            # one below, and one in `parse_thread_members_update`.
+        elif thread.is_private():
+            self.dispatch("thread_join", thread)
 
     def parse_thread_update(self, data) -> None:
         guild_id = int(data["guild_id"])
