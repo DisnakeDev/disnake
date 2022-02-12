@@ -375,8 +375,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             default_permission=default_permission,
         )
         # `SlashCommand.__init__` converts names to lowercase, need to use that name here as well
-        self.name = self.body.name
-        self.qualified_name = self.name
+        self.qualified_name = self.name = self.body.name
 
     @property
     def description(self) -> str:
