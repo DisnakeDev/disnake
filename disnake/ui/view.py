@@ -43,12 +43,14 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    cast,
 )
 
 from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
     Component,
+    NestedComponent,
     SelectMenu as SelectComponent,
     _component_factory,
 )
@@ -66,15 +68,15 @@ if TYPE_CHECKING:
     from .item import ItemCallbackType
 
 
-def _walk_all_components(components: List[Component]) -> Iterator[Component]:
+def _walk_all_components(components: List[Component]) -> Iterator[NestedComponent]:
     for item in components:
         if isinstance(item, ActionRowComponent):
             yield from item.children
         else:
-            yield item
+            yield cast(NestedComponent, item)
 
 
-def _component_to_item(component: Component) -> Item:
+def _component_to_item(component: NestedComponent) -> Item:
     if isinstance(component, ButtonComponent):
         from .button import Button
 

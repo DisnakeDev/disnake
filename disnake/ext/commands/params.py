@@ -571,7 +571,7 @@ class ParamInfo:
 
         return Option(
             name=self.name,
-            description=self.description or "\u200b",
+            description=self.description or "-",
             type=self.discord_type,
             required=self.required,
             choices=self.choices or None,

@@ -605,7 +605,7 @@ class GuildChannel(ABC):
         # The operation first takes into consideration the denied
         # and then the allowed.
 
-        # Timeouted users have only read_messages and read_message_history
+        # Timeouted users have only view_channel and read_message_history
         # if they already have them.
         if ignore_timeout is not MISSING and isinstance(obj, Role):
             raise TypeError("ignore_timeout is only supported for disnake.Member objects")
@@ -693,15 +693,15 @@ class GuildChannel(ABC):
             base.embed_links = False
             base.attach_files = False
 
-        # if you can't read a channel then you have no permissions there
-        if not base.read_messages:
+        # if you can't view a channel then you have no permissions there
+        if not base.view_channel:
             denied = Permissions.all_channel()
             base.value &= ~denied.value
 
         # if you have a timeout then you can't have any permissions
         # except read messages and read message history
         if not ignore_timeout and obj.current_timeout:
-            denied = Permissions(read_messages=True, read_message_history=True)
+            denied = Permissions(view_channel=True, read_message_history=True)
             base.value &= denied.value
 
         return base
@@ -779,7 +779,7 @@ class GuildChannel(ABC):
 
         Setting allow and deny: ::
 
-            await message.channel.set_permissions(message.author, read_messages=True,
+            await message.channel.set_permissions(message.author, view_channel=True,
                                                                   send_messages=False)
 
         Deleting overwrites ::
@@ -790,7 +790,7 @@ class GuildChannel(ABC):
 
             overwrite = disnake.PermissionOverwrite()
             overwrite.send_messages = False
-            overwrite.read_messages = True
+            overwrite.view_channel = True
             await channel.set_permissions(member, overwrite=overwrite)
 
         Parameters

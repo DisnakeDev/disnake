@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     except ModuleNotFoundError:
         _ResponseType = ClientResponse
 
-    from .interactions import Interaction
+    from .interactions import Interaction, ModalInteraction
 
 __all__ = (
     "DiscordException",
@@ -57,6 +57,7 @@ __all__ = (
     "InteractionTimedOut",
     "InteractionResponded",
     "InteractionNotResponded",
+    "ModalChainNotSupported",
 )
 
 
@@ -346,3 +347,19 @@ class InteractionNotResponded(InteractionException):
     def __init__(self, interaction: Interaction):
         self.interaction: Interaction = interaction
         super().__init__("This interaction hasn't been responded to yet")
+
+
+class ModalChainNotSupported(InteractionException):
+    """Exception that's raised when responding to a modal with another modal.
+
+    .. versionadded:: 2.4
+
+    Attributes
+    ----------
+    interaction: :class:`ModalInteraction`
+        The interaction that was responded to.
+    """
+
+    def __init__(self, interaction: ModalInteraction):
+        self.interaction: ModalInteraction = interaction
+        super().__init__("You cannot respond to a modal with another modal.")

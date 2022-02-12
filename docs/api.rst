@@ -731,6 +731,15 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param interaction: The interaction object.
     :type interaction: :class:`ApplicationCommandInteraction`
 
+.. function:: on_modal_submit(interaction)
+
+    Called when a modal is submitted.
+
+    .. versionadded:: 2.4
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`ModalInteraction`
+
 .. function:: on_private_channel_update(before, after)
 
     Called whenever a private group DM is updated. e.g. changed name or topic.
@@ -1660,10 +1669,16 @@ of :class:`enum.Enum`.
         Represents Discord pinging to see if the interaction response server is alive.
     .. attribute:: application_command
 
-        Represents a slash command interaction.
+        Represents an application command interaction.
     .. attribute:: component
 
         Represents a component based interaction, i.e. using the Discord Bot UI Kit.
+    .. attribute:: application_command_autocomplete
+
+        Represents an application command autocomplete interaction.
+    .. attribute:: modal_submit
+
+        Represents a modal submit interaction.
 
 .. class:: InteractionResponseType
 
@@ -1697,6 +1712,16 @@ of :class:`enum.Enum`.
         Responds to the interaction by editing the message.
 
         See also :meth:`InteractionResponse.edit_message`
+    .. attribute:: application_command_autocomplete_result
+
+        Responds to the autocomplete interaction with suggested choices.
+
+        See also :meth:`InteractionResponse.autocomplete`
+    .. attribute:: modal
+
+        Responds to the interaction by displaying a modal.
+
+        See also :meth:`InteractionResponse.send_modal`
 
 .. class:: ComponentType
 
@@ -1713,6 +1738,9 @@ of :class:`enum.Enum`.
     .. attribute:: select
 
         Represents a select component.
+    .. attribute:: text_input
+
+        Represents a text input component.
 
 .. class:: OptionType
 
@@ -1797,6 +1825,29 @@ of :class:`enum.Enum`.
     .. attribute:: url
 
         An alias for :attr:`link`.
+
+.. class:: TextInputStyle
+
+    Represents a style of the text input component.
+
+    .. versionadded:: 2.4
+
+    .. attribute:: short
+
+        Represents a single-line text input component.
+    .. attribute:: paragraph
+
+        Represents a multi-line text input component.
+    .. attribute:: single_line
+
+        An alias for :attr:`short`.
+    .. attribute:: multi_line
+
+        An alias for :attr:`paragraph`.
+    .. attribute:: long
+
+        An alias for :attr:`paragraph`.
+
 
 .. class:: VoiceRegion
 
@@ -4019,6 +4070,15 @@ SelectMenu
     :members:
     :inherited-members:
 
+TextInput
+~~~~~~~~~
+
+.. attributetable:: TextInput
+
+.. autoclass:: TextInput()
+    :members:
+    :inherited-members:
+
 
 DeletedReferencedMessage
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4133,6 +4193,16 @@ MessageInteraction
     :members:
     :inherited-members:
 
+ModalInteraction
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: ModalInteraction
+
+.. autoclass:: ModalInteraction()
+    :members:
+    :inherited-members:
+    :exclude-members: channel, followup, guild, me, permissions, response
+
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -4179,6 +4249,14 @@ MessageInteractionData
 .. attributetable:: MessageInteractionData
 
 .. autoclass:: MessageInteractionData()
+    :members:
+
+ModalInteractionData
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ModalInteractionData
+
+.. autoclass:: ModalInteractionData()
     :members:
 
 Member
@@ -4790,6 +4868,14 @@ Item
 .. autoclass:: disnake.ui.Item
     :members:
 
+WrappedComponent
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.WrappedComponent
+
+.. autoclass:: disnake.ui.WrappedComponent
+    :members:
+
 Button
 ~~~~~~~
 
@@ -4811,6 +4897,22 @@ Select
     :inherited-members:
 
 .. autofunction:: disnake.ui.select
+
+Modal
+~~~~~
+
+.. attributetable:: disnake.ui.Modal
+
+.. autoclass:: disnake.ui.Modal
+    :members:
+
+TextInput
+~~~~~~~~~
+
+.. attributetable:: disnake.ui.TextInput
+
+.. autoclass:: disnake.ui.TextInput
+    :members:
 
 
 Exceptions
@@ -4853,6 +4955,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: InteractionTimedOut
 
+.. autoexception:: ModalChainNotSupported
+
 .. autoexception:: disnake.opus.OpusError
 
 .. autoexception:: disnake.opus.OpusNotLoaded
@@ -4874,6 +4978,7 @@ Exception Hierarchy
                     - :exc:`InteractionResponded`
                     - :exc:`InteractionNotResponded`
                     - :exc:`InteractionTimedOut`
+                    - :exc:`ModalChainNotSupported`
             - :exc:`NoMoreItems`
             - :exc:`GatewayNotFound`
             - :exc:`HTTPException`

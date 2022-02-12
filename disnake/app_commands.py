@@ -193,7 +193,7 @@ class Option:
     ):
         self.name: str = name.lower()
         _validate_name(self.name)
-        self.description: str = description or "\u200b"
+        self.description: str = description or "-"
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
         self.options: List[Option] = options or []

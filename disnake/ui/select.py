@@ -43,7 +43,6 @@ __all__ = (
 if TYPE_CHECKING:
     from ..emoji import Emoji
     from ..interactions import MessageInteraction
-    from ..types.components import SelectMenu as SelectMenuPayload
     from .item import ItemCallbackType
     from .view import View
 
@@ -85,13 +84,15 @@ class Select(Item[V]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __item_repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: Tuple[str, ...] = (
         "placeholder",
         "min_values",
         "max_values",
         "options",
         "disabled",
     )
+    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    _underlying: SelectMenu = MISSING
 
     def __init__(
         self,
@@ -258,9 +259,6 @@ class Select(Item[V]):
     def width(self) -> int:
         return 5
 
-    def to_component_dict(self) -> SelectMenuPayload:
-        return self._underlying.to_dict()
-
     def refresh_component(self, component: SelectMenu) -> None:
         self._underlying = component
 
@@ -278,12 +276,6 @@ class Select(Item[V]):
             disabled=component.disabled,
             row=None,
         )
-
-    @property
-    def type(self) -> ComponentType:
-        """:class:`.ComponentType`: The type of the select menu. This will always return
-        :attr:`.ComponentType.select`."""
-        return self._underlying.type
 
     def is_dispatchable(self) -> bool:
         """Whether the select menu is dispatchable. This will always return ``True``.

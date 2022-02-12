@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
-from .enums import ButtonStyle, ComponentType, try_enum
+from .enums import ButtonStyle, ComponentType, TextInputStyle, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, get_slots
 
@@ -39,6 +39,7 @@ if TYPE_CHECKING:
         Component as ComponentPayload,
         SelectMenu as SelectMenuPayload,
         SelectOption as SelectOptionPayload,
+        TextInput as TextInputPayload,
     )
 
 
@@ -48,9 +49,11 @@ __all__ = (
     "Button",
     "SelectMenu",
     "SelectOption",
+    "TextInput",
 )
 
 C = TypeVar("C", bound="Component")
+NestedComponent = Union["Button", "SelectMenu", "TextInput"]
 
 
 class Component:
@@ -61,6 +64,7 @@ class Component:
     - :class:`ActionRow`
     - :class:`Button`
     - :class:`SelectMenu`
+    - :class:`TextInput`
 
     This class is abstract and cannot be instantiated.
 
@@ -98,7 +102,7 @@ class Component:
 
 
 class ActionRow(Component):
-    """Represents a Discord Bot UI Kit Action Row.
+    """Represents an action row.
 
     This is a component that holds up to 5 children components in a row.
 
@@ -110,7 +114,7 @@ class ActionRow(Component):
     ----------
     type: :class:`ComponentType`
         The type of component.
-    children: List[:class:`Component`]
+    children: List[Union[:class:`Button`, :class:`SelectMenu`, :class:`TextInput`]]
         The children components that this holds, if any.
     """
 
@@ -120,7 +124,9 @@ class ActionRow(Component):
 
     def __init__(self, data: ComponentPayload):
         self.type: ComponentType = try_enum(ComponentType, data["type"])
-        self.children: List[Component] = [_component_factory(d) for d in data.get("components", [])]
+        self.children: List[NestedComponent] = [  # type: ignore
+            _component_factory(d) for d in data.get("components", [])
+        ]
 
     def to_dict(self) -> ActionRowPayload:
         return {
@@ -376,7 +382,89 @@ class SelectOption:
         return payload
 
 
+class TextInput(Component):
+    """Represents a text input from the Discord Bot UI Kit.
+
+    .. versionadded:: 2.4
+
+    .. note::
+
+        The user constructible and usable type to create a text input is
+        :class:`disnake.ui.TextInput`, not this one.
+
+    Attributes
+    ----------
+    style: :class:`TextInputStyle`
+        The style of the text input.
+    label: Optional[:class:`str`]
+        The label of the text input.
+    custom_id: :class:`str`
+        The ID of the text input that gets received during an interaction.
+    placeholder: Optional[:class:`str`]
+        The placeholder text that is shown if nothing is entered.
+    value: Optional[:class:`str`]
+        The pre-filled text of the text input.
+    required: :class:`bool`
+        Whether the text input is required. Defaults to ``True``.
+    min_length: Optional[:class:`int`]
+        The minimum length of the text input.
+    max_length: Optional[:class:`int`]
+        The maximum length of the text input.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "style",
+        "custom_id",
+        "label",
+        "placeholder",
+        "value",
+        "required",
+        "max_length",
+        "min_length",
+    )
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: TextInputPayload) -> None:
+        style = data.get("style", TextInputStyle.short.value)
+
+        self.type: ComponentType = try_enum(ComponentType, data["type"])
+        self.custom_id: str = data["custom_id"]
+        self.style: TextInputStyle = try_enum(TextInputStyle, style)
+        self.label: Optional[str] = data.get("label")
+        self.placeholder: Optional[str] = data.get("placeholder")
+        self.value: Optional[str] = data.get("value")
+        self.required: bool = data.get("required", True)
+        self.min_length: Optional[int] = data.get("min_length")
+        self.max_length: Optional[int] = data.get("max_length")
+
+    def to_dict(self) -> TextInputPayload:
+        payload: TextInputPayload = {
+            "type": self.type.value,
+            "style": self.style.value,  # type: ignore
+            "label": self.label,  # type: ignore
+            "custom_id": self.custom_id,
+            "required": self.required,
+        }
+
+        if self.placeholder is not None:
+            payload["placeholder"] = self.placeholder
+
+        if self.value is not None:
+            payload["value"] = self.value
+
+        if self.min_length is not None:
+            payload["min_length"] = self.min_length
+
+        if self.max_length is not None:
+            payload["max_length"] = self.max_length
+
+        return payload
+
+
 def _component_factory(data: ComponentPayload) -> Component:
+    # NOTE: due to speed, this method does not use the ComponentType enum
+    #       as this runs every single time a component is received from the api
     component_type = data["type"]
     if component_type == 1:
         return ActionRow(data)
@@ -384,6 +472,8 @@ def _component_factory(data: ComponentPayload) -> Component:
         return Button(data)  # type: ignore
     elif component_type == 3:
         return SelectMenu(data)  # type: ignore
+    elif component_type == 4:
+        return TextInput(data)  # type: ignore
     else:
         as_enum = try_enum(ComponentType, component_type)
         return Component._raw_construct(type=as_enum)
