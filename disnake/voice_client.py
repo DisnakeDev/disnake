@@ -269,7 +269,7 @@ class VoiceClient(VoiceProtocol):
 
     @property
     def guild(self) -> Guild:
-        """:class:`Guild`: The guild we're connected to, if applicable."""
+        """:class:`Guild`: The guild we're connected to."""
         return self.channel.guild
 
     @property

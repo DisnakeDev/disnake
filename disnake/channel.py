@@ -896,8 +896,9 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         )
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.position: int = data["position"]
-        self.bitrate: int = data["bitrate"]
-        self.user_limit: int = data["user_limit"]
+        # these don't exist in partial channel objects of slash command options
+        self.bitrate: int = data.get("bitrate", 0)
+        self.user_limit: int = data.get("user_limit", 0)
         self._fill_overwrites(data)
 
     @property
