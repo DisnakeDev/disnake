@@ -3314,7 +3314,7 @@ class Guild(Hashable):
 
     async def get_or_fetch_members(
         self,
-        member_ids: List[int],
+        user_ids: List[int],
         *,
         presences: bool = False,
         cache: bool = True,
@@ -3325,7 +3325,7 @@ class Guild(Hashable):
         If some of them were not found, the method requests the missing members using websocket operations.
         If ``cache`` kwarg is ``True`` (default value) the missing members will be cached.
 
-        If more than 100 members are missing, several websocket operations are made. Otherwise only one.
+        If more than 100 members are missing, several websocket operations are made.
 
         Websocket operations can be slow, however, this method is cheaper than multiple :meth:`get_or_fetch_member` calls.
 
@@ -3333,10 +3333,10 @@ class Guild(Hashable):
 
         Parameters
         -----------
-        member_ids: List[:class:`int`]
+        user_ids: List[:class:`int`]
             List of user IDs to search for. If the user ID is not in the guild then it won't be returned.
         presences: :class:`bool`
-            Whether to request for presences to be provided. This defaults to ``False``.
+            Whether to request for presences to be provided. Defaults to ``False``.
         cache: :class:`bool`
             Whether to cache the missing members internally. This makes operations
             such as :meth:`get_member` work for those that matched.
@@ -3352,7 +3352,7 @@ class Guild(Hashable):
         Returns
         --------
         List[:class:`Member`]
-            The list of members that have matched the IDs.
+            The list of members with the given IDs, if they exist.
         """
         if presences and not self._state._intents.presences:
             raise ClientException("Intents.presences must be enabled to use this.")
@@ -3360,10 +3360,10 @@ class Guild(Hashable):
         members: List[Member] = []
         unresolved_ids: List[int] = []
 
-        for member_id in member_ids:
-            member = self.get_member(member_id)
+        for user_id in user_ids:
+            member = self.get_member(user_id)
             if member is None:
-                unresolved_ids.append(member_id)
+                unresolved_ids.append(user_id)
             else:
                 members.append(member)
 
@@ -3379,7 +3379,6 @@ class Guild(Hashable):
         else:
             # We have to split the request into several smaller requests
             # because the limit is 100 members per request.
-            # Imo no one should ever request more than 100 members using this method.
             for i in range(0, len(unresolved_ids), 100):
                 limit = min(100, len(unresolved_ids) - i)
                 members += await self._state.query_members(
