@@ -42,14 +42,13 @@ New Features
 - Add :attr:`Interaction.locale` and :attr:`Interaction.guild_locale` properties to interactions (:issue:`225`)
 - Add :class:`ui.ActionRow` and ``components`` kwarg to send methods (:issue:`224`)
 - Add :class:`ui.WrappedComponent` as a base class for all UI components (:issue:`253`)
-- :class:`ui.Item` now inherits from :class:`ui.WrappedComponent`. It's no longer a base class for all UI components.
+    - :class:`ui.Item` now inherits from :class:`ui.WrappedComponent`. It's no longer a base class for all UI components.
 - Implement modals and text inputs (:issue:`253`)
-- Add :class:`TextInput` component.
-- Add :class:`ui.Modal` as a high-level implementation of modals.
-- Add :class:`ui.TextInput` for modals. It inherits from :class:`ui.WrappedComponent` and adds more functionality on top of :class:`TextInput`.
-- Add :meth:`InteractionResponse.send_modal` to support new interaction response type.
-- Add :func:`on_modal_submit` event.
-    - TODO
+    - Add :class:`TextInput` component.
+    - Add :class:`ui.Modal` as a high-level implementation of modals.
+    - Add :class:`ui.TextInput` for modals. It inherits from :class:`ui.WrappedComponent` and adds more functionality on top of :class:`TextInput`.
+    - Add :meth:`InteractionResponse.send_modal` to support new interaction response type.
+    - Add :func:`on_modal_submit` event.
 - Add :attr:`MessageFlags.failed_to_mention_roles_in_thread` (:issue:`238`)
 - Use logger for application command sync debug (:issue:`230`)
 - |commands| Improve application command sync algorithm (:issue:`240`)
@@ -72,9 +71,8 @@ New Features
 - Support :class:`disnake.Attachment` options in slash commands (:issue:`226`)
 - Add ``attachments`` parameter to :func:`InteractionResponse.edit_message` (:issue:`335`)
 - Add :meth:`Guild.get_or_fetch_members` with an alias :meth:`Guild.getch_members` (:issue:`322`).
-- Add :attr:`GuildChannel.jump_url` (:issue:`319`)
-- Add :attr:`DMChannel.jump_url` (:issue:`319`)
-- Add :attr:`Thread.jump_url` (:issue:`319`)
+- Add :attr:`abc.GuildChannel.jump_url`, :attr:`DMChannel.jump_url` and :attr:`Thread.jump_url` (:issue:`319`)
+
 
 Bug Fixes
 ~~~~~~~~~~
