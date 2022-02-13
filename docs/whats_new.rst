@@ -72,7 +72,9 @@ New Features
 - Support :class:`disnake.Attachment` options in slash commands (:issue:`226`)
 - Add ``attachments`` parameter to :func:`InteractionResponse.edit_message` (:issue:`335`)
 - Add :meth:`Guild.get_or_fetch_members` with an alias :meth:`Guild.getch_members` (:issue:`322`).
-
+- Add :attr:`GuildChannel.jump_url` (:issue:`319`)
+- Add :attr:`DMChannel.jump_url` (:issue:`319`)
+- Add :attr:`Thread.jump_url` (:issue:`319`)
 
 Bug Fixes
 ~~~~~~~~~~
