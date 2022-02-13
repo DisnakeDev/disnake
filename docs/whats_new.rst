@@ -76,6 +76,7 @@ Bug Fixes
 - Fix :func:`Guild.get_command` never returning any commands (:issue:`333`)
 - Return list of members from :func:`Guild.chunk` (:issue:`334`)
 - Fix handling of uppercase slash command names (:issue:`346`)
+- Fix ``permissions`` annotation of :func:`GuildChannel.set_permissions` (:issue:`349`)
 
 
 Documentation
