@@ -332,6 +332,15 @@ class Thread(Messageable, Hashable):
         )
         return self._archiver_id
 
+    @property
+    def jump_url(self) -> str:
+        """
+        A URL that can be used to jump to this thread.
+
+        .. versionadded:: 2.4
+        """
+        return f"https://discord.com/channels/{self.guild.id}/{self.id}"
+
     def is_private(self) -> bool:
         """Whether the thread is a private thread.
 

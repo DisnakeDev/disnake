@@ -2011,6 +2011,15 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         """:class:`datetime.datetime`: Returns the direct message channel's creation time in UTC."""
         return utils.snowflake_time(self.id)
 
+    @property
+    def jump_url(self) -> str:
+        """
+        A URL that can be used to jump to this channel.
+
+        .. versionadded:: 2.4
+        """
+        return f"https://discord.com/channels/@me/{self.id}"
+
     def permissions_for(
         self,
         obj: Any = None,
