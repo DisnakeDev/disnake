@@ -12,6 +12,90 @@ This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
 
+.. _vp2p4p0:
+
+v2.4.0
+------
+
+This version contains many new features, including attachment options, modals,
+and the ability to directly send message components without views,
+as well as several fixes and other general improvements.
+
+Breaking Changes
+~~~~~~~~~~~~~~~~~
+
+- The constructor of :class:`ApplicationCommand` and its subtypes no longer accepts ``**kwargs`` for setting internal values (:issue:`249`)
+    - This shouldn't affect anyone, as ``**kwargs`` was only used for setting fields returned by the API and had no effect if the user set them
+- :attr:`Interaction.permissions` now returns proper permission values in DMs (:issue:`321`)
+
+
+Deprecations
+~~~~~~~~~~~~~
+
+- :attr:`Thread.archiver_id` is not being provided by the API anymore and will be removed in a future version (:issue:`295`)
+- :attr:`Invite.revoked` is not being provided by the API anymore and will be removed in a future version (:issue:`309`)
+
+
+New Features
+~~~~~~~~~~~~~
+
+- Add :attr:`Interaction.locale` and :attr:`Interaction.guild_locale` properties to interactions (:issue:`225`)
+- Add :class:`ui.ActionRow` and ``components`` kwarg to send methods (:issue:`224`)
+    - TODO
+- Add :attr:`MessageFlags.failed_to_mention_roles_in_thread` (:issue:`238`)
+- Use logger for application command sync debug (:issue:`230`)
+- |commands| Improve application command sync algorithm (:issue:`240`)
+- Use HTTP API v9 (:issue:`250`)
+- |commands| Add :class:`commands.Range <disnake.ext.commands.Range>`, see :ref:`param_ranges` (:issue:`237`, :issue:`276`, :issue:`316`)
+- |commands| Add :func:`Bot.load_extensions <disnake.ext.commands.Bot.load_extensions>` and :func:`utils.search_directory` (:issue:`245`)
+- |commands| Add :class:`commands.LargeInt <disnake.ext.commands.LargeInt>` (:issue:`264`)
+- Add ``with_message`` parameter to :func:`InteractionResponse.defer` to support deferring component interaction responses with messages (:issue:`248`)
+- Add :func:`Widget.edit` (:issue:`266`)
+- Add the ability to specify a default color for embeds (:issue:`203`)
+- Add :attr:`Invite.nsfw_level` and :attr:`Invite.vanity_url_code` (:issue:`297`)
+- Add :attr:`Thread.create_timestamp` (:issue:`285`)
+- Add :attr:`Message.thread` (:issue:`291`)
+- Add :attr:`Permissions.events` and :attr:`Permissions.private_channel`, improve existing factory methods (:issue:`286`, :issue:`321`)
+- Support images in :class:`GuildScheduledEvent` (:issue:`280`)
+- Add :attr:`PartyType.sketch_heads` and :attr:`PartyType.ocho` (:issue:`306`)
+- Support :class:`Thread` annotations in slash commands (:issue:`305`)
+- :attr:`Interaction.bot`, :attr:`Interaction.client`, :attr:`Interaction.channel` and :attr:`Interaction.channel_id` are no longer optional (:issue:`279`)
+- Support timeouts in :func:`GuildChannel.permissions_for` and other channel types (:issue:`289`)
+- Support :class:`disnake.Attachment` options in slash commands (:issue:`226`)
+- Implement modals and text inputs
+    - TODO
+- Add ``attachments`` parameter to :func:`InteractionResponse.edit_message` (:issue:`335`)
+
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fix missing support for ``reason`` parameter in some methods (:issue:`266`)
+- Improve validation of slash command and option names (:issue:`267`)
+- |commands| Fix typing of ``ctx`` parameter in :class:`~disnake.ext.commands.Converter` (:issue:`292`)
+- Fix :func:`Guild.get_command` never returning any commands (:issue:`333`)
+- Return list of members from :func:`Guild.chunk` (:issue:`334`)
+- Fix handling of uppercase slash command names (:issue:`346`)
+
+
+Documentation
+~~~~~~~~~~~~~~
+
+- Show tooltips when hovering over links (:issue:`236`, :issue:`242`)
+
+
+Miscellaneous
+~~~~~~~~~~~~~~
+
+- Improve examples (:issue:`209`, :issue:`262`, :issue:`270`, :issue:`307`, :issue:`332`, :issue:`341`)
+- Improve typing/annotations of several parts of the library (:issue:`249`, :issue:`256`, :issue:`263`, :issue:`279`, :issue:`292`, :issue:`299`, :issue:`308`)
+- Add additional pre-commit hooks for development (:issue:`233`)
+- Add taskipy for development (:issue:`234`)
+- Improve member deserialization (:issue:`304`)
+- Split application command objects into separate types for data returned by the API (:issue:`299`)
+- Update README banner (:issue:`343`)
+
+
 .. _vp2p3p2:
 
 v2.3.2

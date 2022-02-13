@@ -380,12 +380,13 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def private_channel(cls: Type[P]) -> P:
-        """A factor method that creates a :class:`Permissions` with the
+        """A factory method that creates a :class:`Permissions` with the
         best representation of a PrivateChannel's permissions.
 
         This exists to maintain compatibility with other channel types.
 
         This is equivalent to :meth:`Permissions.text` with :attr:`~Permissions.view_channel` with the following set to False:
+
         - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
         - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
         - :attr:`~Permissions.manage_threads`: You cannot manage threads in a DM.
