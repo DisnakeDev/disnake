@@ -71,6 +71,7 @@ New Features
 - Support timeouts in :func:`abc.GuildChannel.permissions_for` and other channel types (:issue:`289`)
 - Support :class:`disnake.Attachment` options in slash commands (:issue:`226`)
 - Add ``attachments`` parameter to :func:`InteractionResponse.edit_message` (:issue:`335`)
+- Add :meth:`Guild.get_or_fetch_members` with an alias :meth:`Guild.getch_members` (:issue:`322`).
 
 
 Bug Fixes
