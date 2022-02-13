@@ -52,7 +52,7 @@ New Features
 - Add ``with_message`` parameter to :func:`InteractionResponse.defer` to support deferring component interaction responses with messages (:issue:`248`)
 - Add :func:`Widget.edit` (:issue:`266`)
 - Add the ability to specify a default color for embeds (:issue:`203`)
-- Add :attr:`Invite.nsfw_level` and :attr:`Invite.vanity_url_code` (:issue:`297`)
+- Add :attr:`PartialInviteGuild.nsfw_level` and :attr:`PartialInviteGuild.vanity_url_code` (:issue:`297`)
 - Add :attr:`Thread.create_timestamp` (:issue:`285`)
 - Add :attr:`Message.thread` (:issue:`291`)
 - Add :attr:`Permissions.events` and :attr:`Permissions.private_channel`, improve existing factory methods (:issue:`286`, :issue:`321`)
@@ -60,7 +60,7 @@ New Features
 - Add :attr:`PartyType.sketch_heads` and :attr:`PartyType.ocho` (:issue:`306`)
 - Support :class:`Thread` annotations in slash commands (:issue:`305`)
 - :attr:`Interaction.bot`, :attr:`Interaction.client`, :attr:`Interaction.channel` and :attr:`Interaction.channel_id` are no longer optional (:issue:`279`)
-- Support timeouts in :func:`GuildChannel.permissions_for` and other channel types (:issue:`289`)
+- Support timeouts in :func:`abc.GuildChannel.permissions_for` and other channel types (:issue:`289`)
 - Support :class:`disnake.Attachment` options in slash commands (:issue:`226`)
 - Implement modals and text inputs
     - TODO
@@ -76,7 +76,7 @@ Bug Fixes
 - Fix :func:`Guild.get_command` never returning any commands (:issue:`333`)
 - Return list of members from :func:`Guild.chunk` (:issue:`334`)
 - Fix handling of uppercase slash command names (:issue:`346`)
-- Fix ``permissions`` annotation of :func:`GuildChannel.set_permissions` (:issue:`349`)
+- Fix ``permissions`` annotation of :func:`abc.GuildChannel.set_permissions` (:issue:`349`)
 
 
 Documentation

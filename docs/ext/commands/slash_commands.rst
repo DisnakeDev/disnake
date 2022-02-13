@@ -147,6 +147,8 @@ All the other types may be converted implicitly, similarly to :ref:`ext_commands
   \*\* Role and Member may be used together to create a "mentionable" (:class:`Union[Role, Member]`)
 
 
+.. _param_ranges:
+
 Number Ranges
 +++++++++++++
 
