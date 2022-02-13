@@ -539,6 +539,19 @@ class GuildChannel(ABC):
         category = self.guild.get_channel(self.category_id)
         return bool(category and category.overwrites == self.overwrites)
 
+    @property
+    def jump_url(self) -> str:
+        """
+        A URL that can be used to jump to this channel.
+
+        .. versionadded:: 2.4
+
+        .. note::
+
+            This exists for all guild channels but may not be usable by the client for all guild channel types.
+        """
+        return f"https://discord.com/channels/{self.guild.id}/{self.id}"
+
     def permissions_for(
         self,
         obj: Union[Member, Role],
@@ -748,7 +761,7 @@ class GuildChannel(ABC):
         target: Union[Member, Role],
         *,
         reason: Optional[str] = ...,
-        **permissions: bool,
+        **permissions: Optional[bool],
     ) -> None:
         ...
 
