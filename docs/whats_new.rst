@@ -84,12 +84,15 @@ Bug Fixes
 - Return list of members from :func:`Guild.chunk` (:issue:`334`)
 - Fix handling of uppercase slash command names (:issue:`346`)
 - Fix ``permissions`` annotation of :func:`abc.GuildChannel.set_permissions` (:issue:`349`)
+- Fix :func:`tasks.loop <disnake.ext.tasks.loop>` usage with fixed times (:issue:`337`)
 
 
 Documentation
 ~~~~~~~~~~~~~~
 
 - Show tooltips when hovering over links (:issue:`236`, :issue:`242`)
+- General content improvements/adjustments (:issue:`275`)
+- Slight redesign and general layout improvements (:issue:`278`)
 
 
 Miscellaneous
