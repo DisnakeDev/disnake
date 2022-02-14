@@ -312,7 +312,7 @@ class HeartbeatWebSocket(Protocol):
 
 
 class DiscordWebSocket:
-    """Implements a WebSocket for Discord's gateway v9.
+    """Implements a WebSocket for Discord's gateway v10.
 
     Attributes
     ----------
