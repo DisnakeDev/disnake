@@ -30,12 +30,10 @@ import os
 from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Type, TypeVar, Union
 
 from ..components import SelectMenu, SelectOption
-from ..emoji import Emoji
 from ..enums import ComponentType
-from ..interactions import MessageInteraction
 from ..partial_emoji import PartialEmoji
 from ..utils import MISSING
-from .item import DecoratedItem, Item, ItemCallbackType
+from .item import DecoratedItem, Item
 
 __all__ = (
     "Select",
@@ -43,7 +41,9 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from ..types.components import SelectMenu as SelectMenuPayload
+    from ..emoji import Emoji
+    from ..interactions import MessageInteraction
+    from .item import ItemCallbackType
     from .view import View
 
 S = TypeVar("S", bound="Select")
@@ -60,7 +60,7 @@ class Select(Item[V]):
     .. versionadded:: 2.0
 
     Parameters
-    ------------
+    ----------
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
         If not given then one is generated for you.
@@ -75,7 +75,7 @@ class Select(Item[V]):
     options: List[:class:`disnake.SelectOption`]
         A list of options that can be selected in this menu.
     disabled: :class:`bool`
-        Whether the select is disabled or not.
+        Whether the select is disabled.
     row: Optional[:class:`int`]
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -84,13 +84,15 @@ class Select(Item[V]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __item_repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: Tuple[str, ...] = (
         "placeholder",
         "min_values",
         "max_values",
         "options",
         "disabled",
     )
+    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    _underlying: SelectMenu = MISSING
 
     def __init__(
         self,
@@ -163,7 +165,7 @@ class Select(Item[V]):
 
     @property
     def options(self) -> List[SelectOption]:
-        """List[:class:`disnake.SelectOption`]: A list of options that can be selected in this menu."""
+        """List[:class:`disnake.SelectOption`]: A list of options that can be selected in this select menu."""
         return self._underlying.options
 
     @options.setter
@@ -186,11 +188,11 @@ class Select(Item[V]):
     ):
         """Adds an option to the select menu.
 
-        To append a pre-existing :class:`disnake.SelectOption` use the
+        To append a pre-existing :class:`.SelectOption` use the
         :meth:`append_option` method instead.
 
         Parameters
-        -----------
+        ----------
         label: :class:`str`
             The label of the option. This is displayed to users.
             Can only be up to 100 characters.
@@ -207,11 +209,10 @@ class Select(Item[V]):
             Whether this option is selected by default.
 
         Raises
-        -------
+        ------
         ValueError
             The number of options exceeds 25.
         """
-
         option = SelectOption(
             label=label,
             value=value,
@@ -226,16 +227,15 @@ class Select(Item[V]):
         """Appends an option to the select menu.
 
         Parameters
-        -----------
+        ----------
         option: :class:`disnake.SelectOption`
             The option to append to the select menu.
 
         Raises
-        -------
+        ------
         ValueError
             The number of options exceeds 25.
         """
-
         if len(self._underlying.options) >= 25:
             raise ValueError("maximum number of options already provided")
 
@@ -243,7 +243,7 @@ class Select(Item[V]):
 
     @property
     def disabled(self) -> bool:
-        """:class:`bool`: Whether the select is disabled or not."""
+        """:class:`bool`: Whether the select menu is disabled."""
         return self._underlying.disabled
 
     @disabled.setter
@@ -258,9 +258,6 @@ class Select(Item[V]):
     @property
     def width(self) -> int:
         return 5
-
-    def to_component_dict(self) -> SelectMenuPayload:
-        return self._underlying.to_dict()
 
     def refresh_component(self, component: SelectMenu) -> None:
         self._underlying = component
@@ -280,11 +277,11 @@ class Select(Item[V]):
             row=None,
         )
 
-    @property
-    def type(self) -> ComponentType:
-        return self._underlying.type
-
     def is_dispatchable(self) -> bool:
+        """Whether the select menu is dispatchable. This will always return ``True``.
+
+        :return type: :class:`bool`
+        """
         return True
 
 
@@ -308,7 +305,7 @@ def select(
     use :attr:`Select.values`.
 
     Parameters
-    ------------
+    ----------
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
@@ -327,9 +324,9 @@ def select(
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
     options: List[:class:`disnake.SelectOption`]
-        A list of options that can be selected in this menu.
+        A list of options that can be selected in this select menu.
     disabled: :class:`bool`
-        Whether the select is disabled or not. Defaults to ``False``.
+        Whether the select is disabled. Defaults to ``False``.
     """
 
     def decorator(func: ItemCallbackType) -> DecoratedItem[Select]:

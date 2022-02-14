@@ -52,6 +52,7 @@ __all__ = (
     "VideoQualityMode",
     "ComponentType",
     "ButtonStyle",
+    "TextInputStyle",
     "StagePrivacyLevel",
     "InteractionType",
     "InteractionResponseType",
@@ -255,6 +256,8 @@ class PartyType(Enum):
     awkword = 879863881349087252
     sketchy_artist = 879864070101172255
     watch_together = 880218394199220334
+    sketch_heads = 902271654783242291
+    ocho = 832025144389533716
 
 
 class VoiceRegion(Enum):
@@ -583,6 +586,7 @@ class InteractionType(Enum):
     application_command = 2
     component = 3
     application_command_autocomplete = 4
+    modal_submit = 5
 
 
 class InteractionResponseType(Enum):
@@ -594,6 +598,7 @@ class InteractionResponseType(Enum):
     deferred_message_update = 6  # for components
     message_update = 7  # for components
     application_command_autocomplete_result = 8  # for autocomplete
+    modal = 9  # for modals
 
 
 class VideoQualityMode(Enum):
@@ -608,6 +613,7 @@ class ComponentType(Enum):
     action_row = 1
     button = 2
     select = 3
+    text_input = 4
 
     def __int__(self):
         return self.value
@@ -629,6 +635,18 @@ class ButtonStyle(Enum):
     url = 5
 
     def __int__(self):
+        return self.value
+
+
+class TextInputStyle(Enum):
+    short = 1
+    paragraph = 2
+    # Aliases
+    single_line = 1
+    multi_line = 2
+    long = 2
+
+    def __int__(self) -> int:
         return self.value
 
 

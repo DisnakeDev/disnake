@@ -25,6 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+from functools import wraps
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -59,6 +60,19 @@ def make_permission_alias(alias: str) -> Callable[[Callable[[Any], int]], permis
         return ret
 
     return decorator
+
+
+def cached_creation(func):
+    @wraps(func)
+    def wrapped(cls):
+        try:
+            value = func.__stored_value__
+        except AttributeError:
+            value = func(cls).value
+            func.__stored_value__ = value
+        return cls(value)
+
+    return wrapped
 
 
 P = TypeVar("P", bound="Permissions")
@@ -106,7 +120,7 @@ class Permissions(BaseFlags):
                Note that aliases are not shown.
 
     Attributes
-    -----------
+    ----------
     value: :class:`int`
         The raw value. This value is a bit array field of a 53-bit integer
         representing the currently available permissions. You should query
@@ -159,19 +173,22 @@ class Permissions(BaseFlags):
     __gt__ = is_strict_superset
 
     @classmethod
+    @cached_creation
     def none(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``False``."""
         return cls(0)
 
     @classmethod
+    @cached_creation
     def all(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
-        return cls(0b11111111111111111111111111111111111111111)
+        return cls(**dict.fromkeys(cls.VALID_FLAGS.keys(), True))
 
     @classmethod
+    @cached_creation
     def all_channel(cls: Type[P]) -> P:
         """A :class:`Permissions` with all channel-specific permissions set to
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
@@ -198,9 +215,24 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`start_embedded_activities` permission.
         """
-        return cls(0b1111110110110011111101111111111101010001)
+        guild_specific_perms = {
+            "administrator",
+            "ban_members",
+            "change_nickname",
+            "kick_members",
+            "manage_emojis",
+            "manage_guild",
+            "manage_nicknames",
+            "moderate_members",
+            "view_audit_log",
+            "view_guild_insights",
+        }
+        instance = cls.all()
+        instance.update(**dict.fromkeys(guild_specific_perms, False))
+        return instance
 
     @classmethod
+    @cached_creation
     def general(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "General" permissions from the official Discord UI set to ``True``.
@@ -211,9 +243,19 @@ class Permissions(BaseFlags):
            :attr:`ban_members`, :attr:`change_nickname` and :attr:`manage_nicknames` are
            no longer part of the general permissions.
         """
-        return cls(0b01110000000010000000010010110000)
+        return cls(
+            view_channel=True,
+            manage_channels=True,
+            manage_roles=True,
+            manage_emojis_and_stickers=True,
+            view_audit_log=True,
+            view_guild_insights=True,
+            manage_webhooks=True,
+            manage_guild=True,
+        )
 
     @classmethod
+    @cached_creation
     def membership(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Membership" permissions from the official Discord UI set to ``True``.
@@ -223,9 +265,17 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`moderate_members` permission.
         """
-        return cls(0b10000000000001100000000000000000000000111)
+        return cls(
+            create_instant_invite=True,
+            change_nickname=True,
+            manage_nicknames=True,
+            kick_members=True,
+            ban_members=True,
+            moderate_members=True,
+        )
 
     @classmethod
+    @cached_creation
     def text(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Text" permissions from the official Discord UI set to ``True``.
@@ -238,9 +288,26 @@ class Permissions(BaseFlags):
            Added :attr:`create_public_threads`, :attr:`create_private_threads`, :attr:`manage_threads`,
            :attr:`send_messages_in_threads` and :attr:`use_external_stickers` permissions.
         """
-        return cls(0b111110010000000000001111111100001000000)
+        return cls(
+            send_messages=True,
+            send_messages_in_threads=True,
+            create_public_threads=True,
+            create_private_threads=True,
+            embed_links=True,
+            attach_files=True,
+            add_reactions=True,
+            use_external_emojis=True,
+            use_external_stickers=True,
+            mention_everyone=True,
+            manage_messages=True,
+            manage_threads=True,
+            read_message_history=True,
+            send_tts_messages=True,
+            use_slash_commands=True,
+        )
 
     @classmethod
+    @cached_creation
     def voice(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Voice" permissions from the official Discord UI set to ``True``.
@@ -248,44 +315,107 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`start_embedded_activities` permission.
         """
-        return cls(0b1000000000000011111100000000001100000000)
+        return cls(
+            connect=True,
+            speak=True,
+            stream=True,
+            start_embedded_activities=True,
+            use_voice_activation=True,
+            priority_speaker=True,
+            mute_members=True,
+            deafen_members=True,
+            move_members=True,
+        )
 
     @classmethod
+    @cached_creation
     def stage(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Channel" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        return cls(1 << 32)
+        return cls(
+            request_to_speak=True,
+        )
 
     @classmethod
+    @cached_creation
     def stage_moderator(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Moderator" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        return cls(0b100000001010000000000000000000000)
+        return cls(
+            manage_channels=True,
+            mute_members=True,
+            move_members=True,
+        )
 
     @classmethod
+    @cached_creation
+    def events(cls: Type[P]) -> P:
+        """A factory method that creates a :class:`Permissions` with all
+        "Events" permissions from the official Discord UI set to ``True``.
+
+        .. versionadded:: 2.4
+        """
+        return cls(
+            manage_events=True,
+        )
+
+    @classmethod
+    @cached_creation
     def advanced(cls: Type[P]) -> P:
         """A factory method that creates a :class:`Permissions` with all
         "Advanced" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        return cls(1 << 3)
+        return cls(
+            administrator=True,
+        )
+
+    @classmethod
+    @cached_creation
+    def private_channel(cls: Type[P]) -> P:
+        """A factory method that creates a :class:`Permissions` with the
+        best representation of a PrivateChannel's permissions.
+
+        This exists to maintain compatibility with other channel types.
+
+        This is equivalent to :meth:`Permissions.text` with :attr:`~Permissions.view_channel` with the following set to False:
+
+        - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
+        - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        - :attr:`~Permissions.manage_threads`: You cannot manage threads in a DM.
+        - :attr:`~Permissions.send_messages_in_threads`: You cannot make threads in a DM.
+        - :attr:`~Permissions.create_public_threads`: You cannot make public threads in a DM.
+        - :attr:`~Permissions.create_private_threads`: You cannot make private threads in a DM.
+
+        .. versionadded:: 2.4
+        """
+        base = cls.text()
+        base.read_messages = True
+        base.send_tts_messages = False
+        base.manage_messages = False
+        base.manage_threads = False
+        base.send_messages_in_threads = False
+        base.create_private_threads = False
+        base.create_private_threads = False
+        return base
 
     def update(self, **kwargs: bool) -> None:
-        r"""Bulk updates this permission object.
+        """
+        Bulk updates this permission object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties
         listed. Extraneous key/value pairs will be silently ignored.
 
         Parameters
-        ------------
+        ----------
         \*\*kwargs
             A list of key/value pairs to bulk update permissions with.
         """
@@ -364,16 +494,19 @@ class Permissions(BaseFlags):
         return 1 << 9
 
     @flag_value
-    def read_messages(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can read messages from all or specific text channels."""
-        return 1 << 10
-
-    @make_permission_alias("read_messages")
     def view_channel(self) -> int:
-        """:class:`bool`: An alias for :attr:`read_messages`.
+        """:class:`bool`: Returns ``True`` if a user can view all or specific channels.
 
         .. versionadded:: 1.3
+
+        .. versionchanged:: 2.4
+            :attr:`~Permissions.read_messages` is now an alias of :attr:`~Permissions.view_channel`.
         """
+        return 1 << 10
+
+    @make_permission_alias("view_channel")
+    def read_messages(self) -> int:
+        """:class:`bool`: An alias for :attr:`view_channel`."""
         return 1 << 10
 
     @flag_value
@@ -634,7 +767,8 @@ def _augment_from_permissions(cls):
 
 @_augment_from_permissions
 class PermissionOverwrite:
-    r"""A type that is used to represent a channel specific permission.
+    """
+    A type that is used to represent a channel specific permission.
 
     Unlike a regular :class:`Permissions`\, the default value of a
     permission is equivalent to ``None`` and not ``False``. Setting
@@ -660,7 +794,7 @@ class PermissionOverwrite:
            Note that aliases are not shown.
 
     Parameters
-    -----------
+    ----------
     \*\*kwargs
         Set the value of permissions by their name.
     """
@@ -781,14 +915,15 @@ class PermissionOverwrite:
         return len(self._values) == 0
 
     def update(self, **kwargs: bool) -> None:
-        r"""Bulk updates this permission overwrite object.
+        """
+        Bulk updates this permission overwrite object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties
         listed. Extraneous key/value pairs will be silently ignored.
 
         Parameters
-        ------------
+        ----------
         \*\*kwargs
             A list of key/value pairs to bulk update with.
         """

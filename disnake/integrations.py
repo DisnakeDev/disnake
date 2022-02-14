@@ -60,7 +60,7 @@ class IntegrationAccount:
     .. versionadded:: 1.4
 
     Attributes
-    -----------
+    ----------
     id: :class:`str`
         The account ID.
     name: :class:`str`
@@ -83,7 +83,7 @@ class Integration:
     .. versionadded:: 1.4
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The integration ID.
     name: :class:`str`
@@ -134,18 +134,18 @@ class Integration:
 
         Deletes the integration.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         Parameters
-        -----------
+        ----------
         reason: :class:`str`
             The reason the integration was deleted. Shows up on the audit log.
 
             .. versionadded:: 2.0
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permission to delete the integration.
         HTTPException
@@ -172,7 +172,7 @@ class StreamIntegration(Integration):
     enabled: :class:`bool`
         Whether the integration is currently enabled.
     syncing: :class:`bool`
-        Where the integration is currently syncing.
+        Whether the integration is currently syncing.
     enable_emoticons: Optional[:class:`bool`]
         Whether emoticons should be synced for this integration (currently twitch only).
     expire_behaviour: :class:`ExpireBehaviour`
@@ -230,11 +230,11 @@ class StreamIntegration(Integration):
 
         Edits the integration.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         Parameters
-        -----------
+        ----------
         expire_behaviour: :class:`ExpireBehaviour`
             The behaviour when an integration subscription lapses. Aliased to ``expire_behavior`` as well.
         expire_grace_period: :class:`int`
@@ -243,7 +243,7 @@ class StreamIntegration(Integration):
             Where emoticons should be synced for this integration (currently twitch only).
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permission to edit the integration.
         HTTPException
@@ -273,11 +273,11 @@ class StreamIntegration(Integration):
 
         Syncs the integration.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permission to sync the integration.
         HTTPException
@@ -295,7 +295,7 @@ class IntegrationApplication:
     Attributes
     ----------
     id: :class:`int`
-        The ID for this application.
+        The application's ID.
     name: :class:`str`
         The application's name.
     icon: Optional[:class:`str`]
@@ -303,9 +303,9 @@ class IntegrationApplication:
     description: :class:`str`
         The application's description. Can be an empty string.
     summary: :class:`str`
-        The summary of the application. Can be an empty string.
+        The application's summary. Can be an empty string.
     user: Optional[:class:`User`]
-        The bot user on this application.
+        The bot user associated with this application.
     """
 
     __slots__ = (
@@ -360,7 +360,7 @@ class BotIntegration(Integration):
 
 
 def _integration_factory(value: str) -> Tuple[Type[Integration], str]:
-    if value == "disnake":
+    if value == "discord":
         return BotIntegration, value
     elif value in ("twitch", "youtube"):
         return StreamIntegration, value

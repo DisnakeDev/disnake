@@ -39,7 +39,9 @@ This code sample shows how to set the registration to be local:
 For global registration, don't specify this parameter.
 
 Another useful parameter is ``sync_commands_debug``. If set to ``True``, you receive debug messages related to the
-app command registration. This is useful if you want to figure out some registration details:
+app command registration by default, without having to change the log level of any loggers
+(see :class:`Bot.sync_commands_debug <ext.commands.Bot.sync_commands_debug>` for more info).
+This is useful if you want to figure out some registration details:
 
 .. code-block:: python3
 
@@ -121,6 +123,7 @@ Discord itself supports only a few built-in types which are guaranteed to be enf
 - :class:`disnake.User` or :class:`disnake.Member`
 - :class:`disnake.abc.GuildChannel`\*
 - :class:`disnake.Role`\*\*
+- :class:`disnake.Attachment`
 
 All the other types may be converted implicitly, similarly to :ref:`ext_commands_basic_converters`
 
@@ -139,9 +142,63 @@ All the other types may be converted implicitly, similarly to :ref:`ext_commands
         ...
 
 .. note::
-  \* All channel subclasses and unions are also supported, see :attr:`Option.channel_types <Option>`
+  \* All channel subclasses and unions are also supported. See :attr:`.ParamInfo.channel_types` for more fine-grained control
 
-  \*\* Role and Member may be used together to create a "mentionable" (:class:`Union[Role, Member]`)
+  \*\* Role and Member may be used together to create a "mentionable" (``Union[Role, Member]``)
+
+
+.. _param_ranges:
+
+Number Ranges
++++++++++++++
+
+:class:`int` and :class:`float` parameters support minimum and maximum allowed
+values using the ``lt``, ``le``, ``gt``, ``ge`` parameters on :func:`Param <ext.commands.Param>`.
+For instance, you could restrict an option to only accept positive integers:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def command(
+        inter: disnake.ApplicationCommandInteraction,
+        amount: int = commands.Param(gt=0),
+    ):
+        ...
+
+
+Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`Range` annotation.
+The range bounds are both inclusive; using ``...`` as a bound indicates that this end of the range is unbounded.
+The type of the option is determined by the range bounds, with the option being a
+:class:`float` if at least one of the bounds is a :class:`float`, and :class:`int` otherwise.
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def ranges(
+        inter: disnake.ApplicationCommandInteraction,
+        a: commands.Range[0, 10],       # 0 - 10 int
+        b: commands.Range[0, 10.0],     # 0 - 10 float
+        c: commands.Range[1, ...],      # positive int
+    ):
+        ...
+
+.. note::
+
+    Type checker support for :class:`Range` is limited. Pylance/Pyright seem to handle it correctly;
+    MyPy currently needs a plugin for it to understand :class:`Range` semantics, which can be added in
+    the configuration file (``setup.cfg``, ``mypy.ini``):
+
+    .. code-block:: ini
+
+        [mypy]
+        plugins = disnake.ext.mypy_plugin
+
+    For ``pyproject.toml`` configs, use this instead:
+
+    .. code-block:: toml
+
+        [tool.mypy]
+        plugins = "disnake.ext.mypy_plugin"
 
 
 Docstrings
@@ -200,9 +257,9 @@ Parameter Descriptors
 +++++++++++++++++++++
 
 Python has no truly *clean* way to provide metadata for parameters, so disnake uses the same approach as fastapi using
-parameter defaults. At the current time there's only :class:`Param`.
+parameter defaults. At the current time there's only :class:`~disnake.ext.commands.Param`.
 
-With this you may set the name, description, custom converters and :ref:`autocompleters`.
+With this you may set the name, description, custom converters, :ref:`autocompleters`, and more.
 
 .. code-block:: python3
 

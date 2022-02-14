@@ -52,20 +52,20 @@ class AppInfo:
 
 
     Attributes
-    -------------
+    ----------
     id: :class:`int`
-        The application ID.
+        The application's ID.
     name: :class:`str`
-        The application name.
+        The application's name.
     owner: :class:`User`
-        The application owner.
+        The application's owner.
     team: Optional[:class:`Team`]
         The application's team.
 
         .. versionadded:: 1.3
 
     description: :class:`str`
-        The application description.
+        The application's description.
     bot_public: :class:`bool`
         Whether the bot can be invited by anyone or if it is locked
         to the application owner.
@@ -94,7 +94,7 @@ class AppInfo:
 
     primary_sku_id: Optional[:class:`int`]
         If this application is a game sold on Discord,
-        this field will be the id of the "Game SKU" that is created,
+        this field will be the ID of the "Game SKU" that is created,
         if it exists.
 
         .. versionadded:: 1.3
@@ -215,13 +215,13 @@ class PartialAppInfo:
     .. versionadded:: 2.0
 
     Attributes
-    -------------
+    ----------
     id: :class:`int`
-        The application ID.
+        The application's ID.
     name: :class:`str`
-        The application name.
+        The application's name.
     description: :class:`str`
-        The application description.
+        The application's description.
     rpc_origins: Optional[List[:class:`str`]]
         A list of RPC origin URLs, if RPC is enabled.
     summary: :class:`str`

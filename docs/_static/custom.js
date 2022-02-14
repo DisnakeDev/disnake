@@ -54,6 +54,8 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+let showHideSidebar;
+
 document.addEventListener('DOMContentLoaded', () => {
   mobileSearch = new SearchBar();
 
@@ -64,16 +66,28 @@ document.addEventListener('DOMContentLoaded', () => {
   toTop = document.getElementById('to-top');
   toTop.hidden = !(window.scrollY > 0);
 
+  showHideSidebar = (e) => {
+    sidebar.element.parentElement.classList.toggle('sidebar-toggle');
+    let button = hamburgerToggle.firstElementChild;
+    button.parentElement.classList.toggle("opened");
+    if (button.textContent == 'menu') {
+      button.textContent = 'close';
+    }
+    else {
+      button.textContent = 'menu';
+    }
+  };
+
   if (hamburgerToggle) {
-    hamburgerToggle.addEventListener('click', (e) => {
-      sidebar.element.classList.toggle('sidebar-toggle');
-      let button = hamburgerToggle.firstElementChild;
-      if (button.textContent == 'menu') {
-        button.textContent = 'close';
-      }
-      else {
-        button.textContent = 'menu';
-      }
+    hamburgerToggle.addEventListener('click', showHideSidebar);
+    // close panel when clicking a jump link
+    const jump_links = document.querySelectorAll("aside a.reference");
+    jump_links.forEach(element => {
+      element.addEventListener('click', showHideSidebar);
+    });
+    const extension_links = document.querySelectorAll("aside a.extension-nav[href='#']");
+    extension_links.forEach(element => {
+      element.addEventListener('click', showHideSidebar);
     });
   }
 
@@ -88,6 +102,95 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', () => {
     toTop.hidden = !(window.scrollY > 0);
   });
+
+
+  // dark mode toggle
+
+  var dark_mode_rule;
+  for (const sheet of document.styleSheets) {
+    if (sheet.href && !sheet.href.endsWith("style.css")) {
+      continue;
+    }
+    for (const rule of sheet.cssRules) {
+      if (rule.type == CSSRule.MEDIA_RULE) {
+        if (rule.media.mediaText.includes("prefers-color-scheme: dark")) {
+           dark_mode_rule = rule;
+        }
+      }
+    }
+  }
+
+  function toggleDarkMode(on) {
+    // set data-theme to control code blocks
+    if (on) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+
+    localStorage.setItem("dark-mode", on);
+
+    // edit media query to manually override prefers-color-scheme
+    if (on) {
+      dark_mode_rule.media.mediaText = "screen";
+    } else {
+      dark_mode_rule.media.mediaText = "screen and disabled";
+    }
+  }
+
+  function switchToggle(event) {
+    let switchToggle = document.querySelector("#dark-mode-switch");
+    let knob = document.querySelector("#dark-mode-switch .knob");
+
+    if (knob.classList.contains("dark")) {
+      knob.classList.remove("dark");
+      knob.classList.add("light");
+
+      toggleDarkMode(false);
+
+      // After 100ms, switch the icons
+      setTimeout(function() {
+        switchToggle.classList.remove("dark");
+        switchToggle.classList.add("light");
+      }, 100);
+    } else {
+      knob.classList.remove("light");
+      knob.classList.add("dark");
+
+      toggleDarkMode(true);
+
+      // After 100ms, switch the icons
+      setTimeout(function() {
+        switchToggle.classList.remove("light");
+        switchToggle.classList.add("dark");
+      }, 100);
+    }
+  }
+
+  document.getElementById("dark-mode-switch").addEventListener('click', switchToggle);
+
+  // Set toggle state and default color scheme according to local storage and user preferences
+  let toggle_set = JSON.parse(localStorage.getItem("dark-mode"));
+  var color_scheme = "light";
+  console.log("Loading dark mode setting:", toggle_set);
+  if (toggle_set === null) {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      color_scheme = "dark";
+    } else {
+      color_scheme = "light";
+    }
+    document.documentElement.setAttribute('data-theme', color_scheme);
+  } else {
+    if (toggle_set) {
+      color_scheme = "dark";
+      toggleDarkMode(true);
+    } else {
+      color_scheme = "light";
+      toggleDarkMode(false);
+    }
+  }
+  document.getElementById("dark-mode-switch").classList.add(color_scheme);
+  document.querySelector("#dark-mode-switch .knob").classList.add(color_scheme);
 });
 
 document.addEventListener('keydown', (event) => {

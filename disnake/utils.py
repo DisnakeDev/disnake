@@ -30,6 +30,8 @@ import collections.abc
 import datetime
 import functools
 import json
+import os
+import pkgutil
 import re
 import sys
 import types
@@ -57,6 +59,7 @@ from typing import (
     Sequence,
     Tuple,
     Type,
+    TypedDict,
     TypeVar,
     Union,
     overload,
@@ -87,6 +90,7 @@ __all__ = (
     "escape_mentions",
     "as_chunks",
     "format_dt",
+    "search_directory",
 )
 
 DISCORD_EPOCH = 1420070400000
@@ -141,6 +145,7 @@ else:
 
 
 T = TypeVar("T")
+V = TypeVar("V")
 T_co = TypeVar("T_co", covariant=True)
 _Iter = Union[Iterator[T], AsyncIterator[T]]
 
@@ -286,7 +291,7 @@ def oauth_url(
     into guilds.
 
     Parameters
-    -----------
+    ----------
     client_id: Union[:class:`int`, :class:`str`]
         The client ID for your bot.
     permissions: :class:`~disnake.Permissions`
@@ -300,13 +305,14 @@ def oauth_url(
         An optional valid list of scopes. Defaults to ``('bot',)``.
 
         .. versionadded:: 1.7
+
     disable_guild_select: :class:`bool`
         Whether to disallow the user from changing the guild dropdown.
 
         .. versionadded:: 2.0
 
     Returns
-    --------
+    -------
     :class:`str`
         The OAuth2 URL for inviting the bot into guilds.
     """
@@ -329,14 +335,14 @@ def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
     Returns
 
     Parameters
-    -----------
+    ----------
     token: :class:`str`
         The bot token
 
     Returns
-    --------
+    -------
     Tuple[:class:`int`, :class:`datetime.datetime`, :class:`bytes`]
-        the bot's id, the time when the token was generated and the hmac.
+        The bot's ID, the time when the token was generated and the hmac.
     """
     parts = token.split(".")
 
@@ -353,12 +359,12 @@ def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
 def snowflake_time(id: int) -> datetime.datetime:
     """
     Parameters
-    -----------
+    ----------
     id: :class:`int`
         The snowflake ID.
 
     Returns
-    --------
+    -------
     :class:`datetime.datetime`
         An aware datetime in UTC representing the creation time of the snowflake.
     """
@@ -376,7 +382,7 @@ def time_snowflake(dt: datetime.datetime, high: bool = False) -> int:
     to be inclusive, ``high=False`` to be exclusive
 
     Parameters
-    -----------
+    ----------
     dt: :class:`datetime.datetime`
         A datetime object to convert to a snowflake.
         If naive, the timezone is assumed to be local time.
@@ -384,7 +390,7 @@ def time_snowflake(dt: datetime.datetime, high: bool = False) -> int:
         Whether or not to set the lower 22 bit to high or low.
 
     Returns
-    --------
+    -------
     :class:`int`
         The snowflake representing the time given.
     """
@@ -405,7 +411,7 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
     a valid entry.
 
     Parameters
-    -----------
+    ----------
     predicate
         A function that returns a boolean-like result.
     seq: :class:`collections.abc.Iterable`
@@ -419,7 +425,8 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
 
 
 def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
-    r"""A helper that returns the first element in the iterable that meets
+    """
+    A helper that returns the first element in the iterable that meets
     all the traits passed in ``attrs``. This is an alternative for
     :func:`~disnake.utils.find`.
 
@@ -434,7 +441,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     ``None`` is returned.
 
     Examples
-    ---------
+    --------
 
     Basic usage:
 
@@ -455,7 +462,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
         channel = disnake.utils.get(client.get_all_channels(), guild__name='Cool', name='general')
 
     Parameters
-    -----------
+    ----------
     iterable
         An iterable to search through.
     \*\*attrs
@@ -496,11 +503,10 @@ def _get_as_snowflake(data: Any, key: str) -> Optional[int]:
         return value and int(value)
 
 
-def _get_and_cast(data: dict, key: Any, converter: Callable, default: Any = None) -> Any:
-    try:
-        return converter(data[key])
-    except KeyError:
+def _maybe_cast(value: V, converter: Callable[[V], T], default: T = None) -> Optional[T]:
+    if value is MISSING:
         return default
+    return converter(value)
 
 
 def _get_mime_type_for_image(data: bytes):
@@ -601,12 +607,12 @@ async def sleep_until(when: datetime.datetime, result: Optional[T] = None) -> Op
     .. versionadded:: 1.3
 
     Parameters
-    -----------
+    ----------
     when: :class:`datetime.datetime`
         The timestamp in which to sleep until. If the datetime is naive then
         it is assumed to be local time.
     result: Any
-        If provided is returned to the caller when the coroutine completes.
+        If provided, is returned to the caller when the coroutine completes.
     """
     delta = compute_timedelta(when)
     return await asyncio.sleep(delta, result)
@@ -621,7 +627,7 @@ def utcnow() -> datetime.datetime:
     .. versionadded:: 2.0
 
     Returns
-    --------
+    -------
     :class:`datetime.datetime`
         The current aware datetime in UTC.
     """
@@ -701,17 +707,16 @@ def resolve_invite(
     Resolves an invite from a :class:`~disnake.Invite`, URL or code.
 
     Parameters
-    -----------
+    ----------
     invite: Union[:class:`~disnake.Invite`, :class:`str`]
-        The invite.
-
+        The invite to resolve.
     with_params: :class:`bool`
         Whether to also return the query parameters of the invite, if it's a url.
 
         .. versionadded:: 2.3
 
     Returns
-    --------
+    -------
     Union[:class:`str`, Tuple[:class:`str`, Dict[:class:`str`, :class:`str`]]]
         The invite code if ``with_params`` is ``False``, otherwise a tuple containing the
         invite code and the url's query parameters, if applicable.
@@ -741,12 +746,12 @@ def resolve_template(code: Union[Template, str]) -> str:
     .. versionadded:: 1.4
 
     Parameters
-    -----------
+    ----------
     code: Union[:class:`~disnake.Template`, :class:`str`]
         The code.
 
     Returns
-    --------
+    -------
     :class:`str`
         The template code.
     """
@@ -787,7 +792,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
             if the input contains ``10 * 5`` then it will be converted into ``10  5``.
 
     Parameters
-    -----------
+    ----------
     text: :class:`str`
         The text to remove markdown from.
     ignore_links: :class:`bool`
@@ -796,7 +801,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
         be left alone. Defaults to ``True``.
 
     Returns
-    --------
+    -------
     :class:`str`
         The text with the markdown special characters removed.
     """
@@ -812,10 +817,11 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
 
 
 def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = True) -> str:
-    r"""A helper function that escapes Discord's markdown.
+    """
+    A helper function that escapes Discord's markdown.
 
     Parameters
-    -----------
+    ----------
     text: :class:`str`
         The text to escape markdown from.
     as_needed: :class:`bool`
@@ -831,7 +837,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
         Defaults to ``True``.
 
     Returns
-    --------
+    -------
     :class:`str`
         The text with the markdown special characters escaped with a slash.
     """
@@ -868,12 +874,12 @@ def escape_mentions(text: str) -> str:
         class.
 
     Parameters
-    -----------
+    ----------
     text: :class:`str`
         The text to escape mentions from.
 
     Returns
-    --------
+    -------
     :class:`str`
         The text with the mentions removed.
     """
@@ -881,6 +887,17 @@ def escape_mentions(text: str) -> str:
 
 
 # Custom docstring parser
+
+
+class _DocstringParam(TypedDict):
+    name: str
+    type: None
+    description: str
+
+
+class _ParsedDocstring(TypedDict):
+    description: str
+    params: Dict[str, _DocstringParam]
 
 
 def _count_left_spaces(string: str) -> int:
@@ -892,7 +909,7 @@ def _count_left_spaces(string: str) -> int:
     return res
 
 
-def _get_header_line(lines: List[str], header: str, underline: str):
+def _get_header_line(lines: List[str], header: str, underline: str) -> int:
     underlining = len(header) * underline
     for i, line in enumerate(lines):
         if line.rstrip() == header and i + 1 < len(lines) and lines[i + 1].startswith(underlining):
@@ -919,18 +936,18 @@ def _get_description(lines: List[str]) -> str:
     return "\n".join(lines[:end]).strip()
 
 
-def _get_option_desc(lines: List[str]) -> Dict[str, Any]:
+def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
     start = _get_header_line(lines, "Parameters", "-") + 2
     end = _get_next_header_line(lines, "-", start)
     if start >= len(lines):
         return {}
     # Read option descriptions
-    options = {}
+    options: Dict[str, _DocstringParam] = {}
 
-    def add_param(param, desc_lines, maybe_type):
+    def add_param(param: Optional[str], desc_lines: List[str], maybe_type: Optional[str]) -> None:
         if param is None:
             return
-        desc = None
+        desc: Optional[str] = None
         if desc_lines:
             desc = "\n".join(desc_lines)
         elif maybe_type:
@@ -939,9 +956,9 @@ def _get_option_desc(lines: List[str]) -> Dict[str, Any]:
             # TODO: maybe parse types in the future
             options[param] = {"name": param, "type": None, "description": desc}
 
-    desc_lines = []
-    param = None
-    maybe_type = None
+    desc_lines: List[str] = []
+    param: Optional[str] = None
+    maybe_type: Optional[str] = None
     for line in lines[start:end]:
         spaces = _count_left_spaces(line)
         if spaces == 0:
@@ -963,7 +980,7 @@ def _get_option_desc(lines: List[str]) -> Dict[str, Any]:
     return options
 
 
-def parse_docstring(func: Callable) -> Dict[str, Any]:
+def parse_docstring(func: Callable) -> _ParsedDocstring:
     doc = _getdoc(func)
     if doc is None:
         return {"description": "", "params": {}}
@@ -1030,7 +1047,7 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
         The last chunk collected may not be as large as ``max_size``.
 
     Returns
-    --------
+    -------
     Union[:class:`Iterator`, :class:`AsyncIterator`]
         A new iterator which yields chunks of a given size.
     """
@@ -1173,17 +1190,49 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
     .. versionadded:: 2.0
 
     Parameters
-    -----------
+    ----------
     dt: Union[:class:`datetime.datetime`, :class:`int`, :class:`float`]
         The datetime to format.
     style: :class:`str`
         The style to format the datetime with. Defaults to ``f``
 
     Returns
-    --------
+    -------
     :class:`str`
         The formatted string.
     """
     if isinstance(dt, datetime.datetime):
         dt = dt.timestamp()
     return f"<t:{int(dt)}:{style}>"
+
+
+def search_directory(path: str) -> Iterator[str]:
+    """Walk through a directory and yield all modules.
+
+    Parameters
+    ----------
+    path: :class:`str`
+        The path to search for modules
+
+    Yields
+    -------
+    :class:`str`
+        The name of the found module. (usable in load_extension)
+    """
+    relpath = os.path.relpath(path)  # relative and normalized
+    if ".." in relpath:
+        raise ValueError("Modules outside the cwd require a package to be specified")
+
+    abspath = os.path.abspath(path)
+    if not os.path.exists(relpath):
+        raise ValueError(f"Provided path '{abspath}' does not exist")
+    if not os.path.isdir(relpath):
+        raise ValueError(f"Provided path '{abspath}' is not a directory")
+
+    prefix = relpath.replace(os.sep, ".")
+
+    for finder, name, ispkg in pkgutil.iter_modules([path]):
+        if ispkg:
+            yield from search_directory(os.path.join(path, name))
+        else:
+            yield prefix + "." + name

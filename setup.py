@@ -40,9 +40,10 @@ with open("README.md", encoding="utf-8") as f:
 extras_require = {
     "voice": ["PyNaCl>=1.3.0,<1.5"],
     "docs": [
-        "sphinx==4.0.2",
+        "sphinx~=4.4.0",
         "sphinxcontrib_trio==1.1.2",
-        "sphinxcontrib-websupport",
+        "sphinx-hoverxref~=1.0.0",
+        "sphinx-autobuild==2021.3.14",
     ],
     "speed": [
         "orjson>=3.5.4",
@@ -61,6 +62,7 @@ packages = [
     "disnake.interactions",
     "disnake.ext.commands",
     "disnake.ext.tasks",
+    "disnake.ext.mypy_plugin",
 ]
 
 setup(

@@ -23,7 +23,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 from .snowflake import SnowflakeList
 from .user import User
@@ -33,33 +33,29 @@ class Nickname(TypedDict):
     nick: str
 
 
-class PartialMember(TypedDict):
+class _OptionalMember(TypedDict, total=False):
+    avatar: Optional[str]
+    nick: Optional[str]
+    premium_since: str
+    pending: bool
+    permissions: str
+    communication_disabled_until: Optional[str]
+
+
+class BaseMember(_OptionalMember):
     roles: SnowflakeList
     joined_at: str
-    deaf: str
-    mute: str
+    deaf: bool
+    mute: bool
 
 
-class Member(PartialMember, total=False):
-    avatar: str
+class Member(BaseMember, total=False):
     user: User
-    nick: str
-    premium_since: str
-    pending: bool
-    permissions: str
 
 
-class _OptionalMemberWithUser(PartialMember, total=False):
-    avatar: str
-    nick: str
-    premium_since: str
-    pending: bool
-    permissions: str
-
-
-class MemberWithUser(_OptionalMemberWithUser):
+class MemberWithUser(BaseMember):
     user: User
 
 
 class UserWithMember(User, total=False):
-    member: _OptionalMemberWithUser
+    member: BaseMember
