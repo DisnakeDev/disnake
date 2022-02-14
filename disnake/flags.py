@@ -543,11 +543,12 @@ class Intents(BaseFlags):
     @classmethod
     def default(cls: Type[Intents]) -> Intents:
         """A factory method that creates a :class:`Intents` with everything enabled
-        except :attr:`presences` and :attr:`members`.
+        except :attr:`presences`, :attr:`members`, and :attr:`message_content`.
         """
         self = cls.all()
         self.presences = False
         self.members = False
+        self.message_content = False
         return self
 
     @flag_value
@@ -766,6 +767,10 @@ class Intents(BaseFlags):
         - :func:`on_reaction_add` (both guilds and DMs)
         - :func:`on_reaction_remove` (both guilds and DMs)
         - :func:`on_reaction_clear` (both guilds and DMs)
+
+        .. note::
+
+            :attr:`.Intents.message_content` is required to receive the content of messages.
         """
         return (1 << 9) | (1 << 12)
 
@@ -822,6 +827,31 @@ class Intents(BaseFlags):
         - :func:`on_reaction_clear` (only for DMs)
         """
         return 1 << 12
+
+    @flag_value
+    def message_content(self):
+        """:class:`bool`: Whether messages will have access to message content.
+
+        This applies to the following fields on :class:`~disnake.Message` instances:
+
+        - :attr:`~disnake.Message.content`
+        - :attr:`~disnake.Message.embeds`
+        - :attr:`~disnake.Message.attachments`
+        - :attr:`~disnake.Message.components`
+
+        The following cases will always have the above fields:
+
+        - Messages the bot sends
+        - Messages the bot receives in :class:`~disnake.DMChannel` instances
+        - Messages in which the bot is mentioned
+        - Messages received from an interaction payload, these will typically be attributes on :class:`~disnake.MessageInteraction` instances
+
+        .. note::
+
+            Currently, this requires opting in explicitly via the developer portal as well.
+            Bots in over 100 guilds will need to apply to Discord for verification.
+        """
+        return 1 << 15
 
     @alias_flag_value
     def reactions(self):
