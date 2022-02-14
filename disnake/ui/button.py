@@ -301,7 +301,7 @@ def custom_button(
     """A decorator that attaches a custom button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
-    the :class:`disnake.ui.View`, the cls being pressed and
+    the :class:`disnake.ui.View`, the cls being passed and
     the :class:`disnake.MessageInteraction` you receive.
 
     .. note::
