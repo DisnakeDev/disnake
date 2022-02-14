@@ -27,6 +27,7 @@ Breaking Changes
 - The constructor of :class:`ApplicationCommand` and its subtypes no longer accepts ``**kwargs`` for setting internal values (:issue:`249`)
     - This shouldn't affect anyone, as ``**kwargs`` was only used for setting fields returned by the API and had no effect if the user set them
 - :attr:`Interaction.permissions` now returns proper permission values in DMs (:issue:`321`)
+- The ``reason`` parameter for sticker endpoints in :class:`HTTPClient` is now kwarg-only
 
 
 Deprecations
