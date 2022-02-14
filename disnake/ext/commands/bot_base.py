@@ -135,6 +135,8 @@ _default: Any = _DefaultRepr()
 
 
 class BotBase(CommonBotBase, GroupMixin):
+    _warn_prefix = True
+
     def __init__(
         self,
         command_prefix: Optional[Union[str, List[str], Callable]] = None,
@@ -143,7 +145,13 @@ class BotBase(CommonBotBase, GroupMixin):
         **options: Any,
     ):
         super().__init__(**options)
-        if command_prefix is not None and command_prefix is not when_mentioned and not self.intents.message_content:  # type: ignore
+        if (
+            command_prefix is not None
+            and command_prefix is not when_mentioned
+            and not self.intents.message_content  # type: ignore
+            and BotBase._warn_prefix
+        ):
+            BotBase._warn_prefix = False
             _log.warning(
                 "Message Content intent is not enabled and a prefix is configured. "
                 "This may cause limited functionality for prefix commands. "
