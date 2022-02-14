@@ -155,7 +155,9 @@ class BotBase(CommonBotBase, GroupMixin):
             _log.warning(
                 "Message Content intent is not enabled and a prefix is configured. "
                 "This may cause limited functionality for prefix commands. "
-                "Consider using InteractionBot instead."
+                "If you want prefix commands, pass an intents object with message_content set to True. "
+                "If you don't need any prefix functionality, "
+                "consider using InteractionBot instead."
             )
 
         self._checks: List[Check] = []
