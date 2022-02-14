@@ -315,7 +315,7 @@ class DiscordWebSocket:
     """Implements a WebSocket for Discord's gateway v9.
 
     Attributes
-    -----------
+    ----------
     DISPATCH
         Receive only. Denotes an event to be sent to Discord, such as READY.
     HEARTBEAT
@@ -471,7 +471,7 @@ class DiscordWebSocket:
         """Waits for a DISPATCH'd event that meets the predicate.
 
         Parameters
-        -----------
+        ----------
         event: :class:`str`
             The event name in all upper case to wait for.
         predicate: Callable[[Dict[:class:`str`, Any]], :class:`bool`]
@@ -482,7 +482,7 @@ class DiscordWebSocket:
             the result to the future. If ``None``, returns the data.
 
         Returns
-        --------
+        -------
         asyncio.Future
             A future to wait for.
         """
@@ -839,7 +839,7 @@ class DiscordVoiceWebSocket:
     """Implements the websocket protocol for handling voice connections.
 
     Attributes
-    -----------
+    ----------
     IDENTIFY
         Send only. Starts a new voice session.
     SELECT_PROTOCOL

@@ -28,7 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, TypedDict, Union
 
 from .channel import ChannelType
-from .components import Component, ComponentType
+from .components import ActionRow, Component, ComponentType
 from .embed import Embed
 from .member import Member, MemberWithUser
 from .role import Role
@@ -36,7 +36,8 @@ from .snowflake import Snowflake
 from .user import User
 
 if TYPE_CHECKING:
-    from .message import AllowedMentions, Message
+    from .components import Modal
+    from .message import AllowedMentions, Attachment, Message
 
 
 ApplicationCommandType = Literal[1, 2, 3]
@@ -67,7 +68,7 @@ class _ApplicationCommandOptionOptional(TypedDict, total=False):
     autocomplete: bool
 
 
-ApplicationCommandOptionType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+ApplicationCommandOptionType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 
 class ApplicationCommandOption(_ApplicationCommandOptionOptional):
@@ -134,7 +135,7 @@ class _ApplicationCommandInteractionDataOptionBoolean(_ApplicationCommandInterac
 
 
 class _ApplicationCommandInteractionDataOptionSnowflake(_ApplicationCommandInteractionDataOption):
-    type: Literal[6, 7, 8, 9]
+    type: Literal[6, 7, 8, 9, 11]
     value: Snowflake
 
 
@@ -166,6 +167,7 @@ class ApplicationCommandInteractionDataResolved(TypedDict, total=False):
     roles: Dict[Snowflake, Role]
     channels: Dict[Snowflake, ApplicationCommandResolvedPartialChannel]
     messages: Dict[Snowflake, Message]
+    attachments: Dict[Snowflake, Attachment]
 
 
 class _ApplicationCommandInteractionDataOptional(TypedDict, total=False):
@@ -189,7 +191,14 @@ class ComponentInteractionData(_ComponentInteractionDataOptional):
     component_type: ComponentType
 
 
-InteractionData = Union[ApplicationCommandInteractionData, ComponentInteractionData]
+class ModalInteractionData(TypedDict):
+    custom_id: str
+    components: List[ActionRow]
+
+
+InteractionData = Union[
+    ApplicationCommandInteractionData, ComponentInteractionData, ModalInteractionData
+]
 
 
 class BaseInteraction(TypedDict):
@@ -241,7 +250,9 @@ class InteractionAutocompleteCallbackData(TypedDict):
 InteractionResponseType = Literal[1, 4, 5, 6, 7]
 
 InteractionCallbackData = Union[
-    InteractionApplicationCommandCallbackData, InteractionAutocompleteCallbackData
+    InteractionApplicationCommandCallbackData,
+    InteractionAutocompleteCallbackData,
+    Modal,
 ]
 
 

@@ -94,7 +94,7 @@ class Template:
     .. versionadded:: 1.4
 
     Attributes
-    -----------
+    ----------
     code: :class:`str`
         The template code.
     uses: :class:`int`
@@ -214,7 +214,7 @@ class Template:
     async def sync(self) -> Template:
         """|coro|
 
-        Sync the template to the guild's current state.
+        Syncs the template to the guild's current state.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.
@@ -225,7 +225,7 @@ class Template:
             The template is no longer edited in-place, instead it is returned.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden
@@ -234,7 +234,7 @@ class Template:
             This template does not exist.
 
         Returns
-        --------
+        -------
         :class:`Template`
             The newly edited template.
         """
@@ -250,7 +250,7 @@ class Template:
     ) -> Template:
         """|coro|
 
-        Edit the template metadata.
+        Edits the template metadata.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.
@@ -261,14 +261,14 @@ class Template:
             The template is no longer edited in-place, instead it is returned.
 
         Parameters
-        ------------
+        ----------
         name: :class:`str`
             The template's new name.
         description: Optional[:class:`str`]
             The template's new description.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden
@@ -277,7 +277,7 @@ class Template:
             This template does not exist.
 
         Returns
-        --------
+        -------
         :class:`Template`
             The newly edited template.
         """
@@ -294,7 +294,7 @@ class Template:
     async def delete(self) -> None:
         """|coro|
 
-        Delete the template.
+        Deletes the template.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.
@@ -302,7 +302,7 @@ class Template:
         .. versionadded:: 1.7
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden

@@ -53,9 +53,11 @@ autodoc_typehints = "none"
 # napoleon_attr_annotations = False
 
 github_repo = "https://github.com/DisnakeDev/disnake"
+dpy_github_repo = "https://github.com/Rapptz/discord.py"
 
 extlinks = {
     "issue": (f"{github_repo}/issues/%s", "#"),
+    "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#"),
 }
 
 # Links used for cross-referencing stuff in other documentation
@@ -69,7 +71,7 @@ rst_prolog = """
 .. |coro| replace:: This function is a |coroutine_link|_.
 .. |maybecoro| replace:: This function *could be a* |coroutine_link|_.
 .. |coroutine_link| replace:: *coroutine*
-.. |components_type| replace:: Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.Item`, List[Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.Item`, List[:class:`disnake.ui.Item`]]]]
+.. |components_type| replace:: Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[:class:`disnake.ui.WrappedComponent`]]]]
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
 """
 
@@ -87,7 +89,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "disnake"
-copyright = "2015-2021, Rapptz, 2021-present, EQUENOS"
+copyright = "2015-2021, Rapptz, 2021-present, Disnake Development"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
