@@ -523,7 +523,15 @@ GroupMixin
 LargeInt
 ~~~~~~~~
 
-This is a class which inherits from :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
+.. autoclass:: disnake.ext.commands.LargeInt
+
+    This is a class which inherits from :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
+
+Range
+~~~~~
+
+.. autoclass:: disnake.ext.commands.Range
+
 
 .. _ext_commands_api_cogs:
 

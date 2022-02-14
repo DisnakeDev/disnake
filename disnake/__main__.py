@@ -42,10 +42,8 @@ def show_version():
     )
     version_info = disnake.version_info
     entries.append("- disnake v{0.major}.{0.minor}.{0.micro}-{0.releaselevel}".format(version_info))
-    if version_info.releaselevel != "final":
-        pkg = pkg_resources.get_distribution("disnake")
-        if pkg:
-            entries.append(f"    - disnake pkg_resources: v{pkg.version}")
+    if pkg := pkg_resources.get_distribution("disnake"):
+        entries.append(f"    - disnake pkg_resources: v{pkg.version}")
 
     entries.append(f"- aiohttp v{aiohttp.__version__}")
     uname = platform.uname()
