@@ -29,6 +29,7 @@ import asyncio
 import collections
 import collections.abc
 import inspect
+import logging
 import sys
 import traceback
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Type, TypeVar, Union
@@ -70,6 +71,8 @@ MISSING: Any = disnake.utils.MISSING
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
 CXT = TypeVar("CXT", bound="Context")
+
+_log = logging.getLogger(__name__)
 
 
 def when_mentioned(bot: BotBase, msg: Message) -> List[str]:
@@ -140,7 +143,12 @@ class BotBase(CommonBotBase, GroupMixin):
         **options: Any,
     ):
         super().__init__(**options)
-        self.command_prefix = command_prefix
+        if command_prefix is not None and command_prefix is not when_mentioned and not self.intents.message_content:  # type: ignore
+            _log.warning(
+                "Message Content intent is not enabled and a prefix is configured. "
+                "This may cause limited functionality for prefix commands. "
+                "Consider using InteractionBot instead."
+            )
 
         self._checks: List[Check] = []
         self._check_once = []
