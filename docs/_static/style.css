@@ -525,7 +525,7 @@ header form.search {
   }
 
   main > * {
-    margin-left: calc(calc(calc(100vw - 1500px) / 2) + 395px) !important;
+    margin-left: calc(calc(calc(calc(100vw - 1500px) / 2) + 395px) + 12px) !important;
     max-width: calc(1500px - 395px);
     padding-right: 12px;
   }
