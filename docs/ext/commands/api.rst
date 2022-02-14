@@ -18,12 +18,30 @@ Bot
 .. autoclass:: disnake.ext.commands.Bot
     :members:
     :inherited-members:
-    :exclude-members: after_invoke, before_invoke, check, check_once, command, event, group, listen, slash_command, user_command, message_command
+    :exclude-members: after_invoke, before_invoke, check, check_once, command, event, group, listen, slash_command, user_command, message_command, after_slash_command_invoke, after_user_command_invoke, after_message_command_invoke, before_slash_command_invoke, before_user_command_invoke, before_message_command_invoke
 
     .. automethod:: Bot.after_invoke()
         :decorator:
 
+    .. automethod:: Bot.after_slash_command_invoke()
+        :decorator:
+
+    .. automethod:: Bot.after_user_command_invoke()
+        :decorator:
+
+    .. automethod:: Bot.after_message_command_invoke()
+        :decorator:
+
     .. automethod:: Bot.before_invoke()
+        :decorator:
+
+    .. automethod:: Bot.before_slash_command_invoke()
+        :decorator:
+
+    .. automethod:: Bot.before_user_command_invoke()
+        :decorator:
+
+    .. automethod:: Bot.before_message_command_invoke()
         :decorator:
 
     .. automethod:: Bot.check()
@@ -311,8 +329,10 @@ Helper Functions
 .. autofunction:: disnake.ext.commands.inject
 
 .. autofunction:: disnake.ext.commands.register_injection
+    :decorator:
 
 .. autofunction:: disnake.ext.commands.converter_method
+    :decorator:
 
 Application Command
 ~~~~~~~~~~~~~~~~~~~
@@ -660,7 +680,7 @@ Checks
 .. autofunction:: disnake.ext.commands.is_nsfw(,)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.guild_permissions(guild_id, roles, users, owner)
+.. autofunction:: disnake.ext.commands.guild_permissions(guild_id, *, roles=None, users=None, owner=None)
     :decorator:
 
 .. _ext_commands_api_context:
