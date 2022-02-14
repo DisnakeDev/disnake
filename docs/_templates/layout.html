@@ -52,74 +52,80 @@
   {%- endif %}
   {%- endblock %}
 </head>
-<body>
+<body{% if not display_toc %} class="small-toc"{% endif %}>
 {%- block header %}{% endblock %}
-  <div class="main-grid">
+  <div class="main">
     {#- The main navigation header #}
-    <header class="grid-item">
+    <a id="hamburger-toggle" title="mobile-toc"><span class="material-icons">menu</span></a>
+    <header class="top-header mobile">
       <nav>
-        <a href="{{ pathto(master_doc)|e }}" class="main-heading">disnake</a>
-        <a href="https://github.com/DisnakeDev/disnake" title="GitHub"><span class="material-icons custom-icons">github</span></a>
-        <a href="{{ discord_invite }}" title="{{ _('Discord') }}"><span class="material-icons custom-icons">discord</span></a>
-        <a href="{{ pathto('faq') }}" title="FAQ"><span class="material-icons">help_center</span></a>
-        {#- If we have more links we can put them here #}
-        <a onclick="mobileSearch.open();" title="{{ _('Search') }}" id="open-search" class="mobile-only"><span class="material-icons">search</span></a>
-        <a onclick="mobileSearch.close();" title="{{ _('Close') }}" id="close-search" class="mobile-only" hidden><span class="material-icons">close</span></a>
-      </nav>
-      <nav class="mobile-only">
-        <form role="search" class="search" action="{{ pathto('search') }}" method="get">
-          <div class="search-wrapper">
-            <input type="search" name="q" placeholder="{{ _('Search documentation') }}" />
-            <button type="submit">
-              <span class="material-icons">search</span>
-            </button>
-          </div>
-        </form>
+          <div class="header-breakpoint">
+        <a href="{{ pathto('api')|e }}" class="extension-nav">API Reference</a>
+        {%- for ext, p in discord_extensions %}
+          {% set ext_name = ext.split('.') %}
+        <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename is prefixedwith p %}current-page{% endif %}">{{ ext_name[-1] }}</a>
+        {%- endfor %}
+        </div>
       </nav>
     </header>
-    {#- The sub-header with search and extension related selection #}
-    <div class="sub-header grid-item">
-      <label for="documentation_select">{{ _('View Documentation For') }}</label>
-      <select id="documentation_select" onchange="window.location = this.value;">
-        {%- if pagename is prefixedwith 'ext/' %}
-        <option value="{{ pathto(master_doc)|e }}">disnake</option>
-        {%- else %}
-        <option value="{{ pathto(pagename) }}" selected>disnake</option>
-        {%- endif %}
-        {%- for ext, p in discord_extensions %}
-        <option value="{{ pathto(p + '/index')|e }}" {% if pagename is prefixedwith p %}selected{% endif %}>{{ ext }}</option>
-        {%- endfor %}
-      </select>
-      <form role="search" class="search" action="{{ pathto('search') }}" method="get">
-        <div class="search-wrapper">
-          <input type="search" name="q" placeholder="{{ _('Search documentation') }}" />
-          <button type="submit">
-            <span class="material-icons">search</span>
-          </button>
+    <header class="sticky-header">
+      <nav>
+        <a href="{{ pathto(master_doc)|e }}" class="main-heading desktop">
+          <img class="disnake-main-logo" src="{{ pathto('_images/' + 'disnake.svg', 1)|e }}" alt="disnake">
+        </a>
+        <div class="header-breakpoint desktop extension-breakpoint desktop">
+          <a href="{{ pathto('api')|e }}" class="extension-nav">API Reference</a>
+          {%- for ext, p in discord_extensions %}
+          {% set ext_name = ext.split('.') %}
+          <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename is prefixedwith p %}current-page{% endif %}">{{ ext_name[-1] }}</a>
+          {%- endfor %}
         </div>
-      </form>
-      <a accesskey="S" class="settings" onclick="settingsModal.open();"><span class="material-icons">settings</span></a>
-    </div>
+        <div class="header-breakpoint search-breakpoint">
+          <form role="search" class="search" action="{{ pathto('search') }}" method="get">
+            <div class="search-wrapper">
+              <input type="search" name="q" placeholder="{{ _('Search documentation') }}" />
+              <button type="submit">
+                <span class="material-icons">search</span>
+              </button>
+            </div>
+          </form>
+          <a href="https://github.com/DisnakeDev/disnake" title="GitHub"><span class="material-icons custom-icons">github</span></a>
+          <a href="{{ discord_invite }}" title="{{ _('Discord') }}"><span class="material-icons custom-icons">discord</span></a>
+          <a href="{{ pathto('faq') }}" title="FAQ"><span class="material-icons">help_center</span></a>
+          <div id="dark-mode-switch" class="">
+              <div class="switch-outer"></div>
+              <div class="switch-inner"></div>
+              <span class="material-icons theme-icon light">light_mode</span>
+              <div class="knob"></div>
+              <span class="material-icons theme-icon dark">dark_mode</span>
+          </div>
+          {#- If we have more links we can put them here #}
+        </div>
+      </nav>
+    </header>
     {#- The sidebar component #}
-    <aside class="grid-item">
-      {%- if display_toc %}
-      <span id="hamburger-toggle">
-        <span class="material-icons">menu</span>
-      </span>
-      {%- endif %}
-      <span id="settings-toggle" class="settings" onclick="settingsModal.open();">
-        <span class="material-icons">settings</span>
-      </span>
-      <div id="sidebar">
-        {%- include "localtoc.html" %}
-      </div>
-    </aside>
+<aside>
+  <a href="{{ pathto(master_doc)|e }}" class="mobile-heading">
+    <img class="disnake-mobile-logo" src="{{ pathto('_images/' + 'disnake.svg', 1)|e }}" alt="disnake">
+  </a>
+  <div class="sidebar-extension-list mobile-heading">
+    <a href="{{ pathto('api')|e }}" class="extension-nav">API Reference</a>
+    {%- for ext, p in discord_extensions %}
+    {% set ext_name = ext.split('.') %}
+    <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename is prefixedwith p %}current-page{% endif %}">{{ ext_name[-1] }}</a>
+    {%- endfor %}
+  </div>
+  <div id="sidebar">
+    {%- include "localtoc.html" %}
+  </div>
+</aside>
+
     {#- The actual body of the contents #}
-    <main class="grid-item" role="main">
+    <main role="main">
       {% block body %} {% endblock %}
     </main>
 {%- block footer %}
-    <footer class="grid-item">
+    <footer>
     {%- if show_copyright %}
       {%- if hasdoc('copyright') %}
         {% trans path=pathto('copyright'), copyright=copyright|e %}&#169; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
@@ -146,49 +152,6 @@
       }
   </script>
   {%- endif %}
-
-  <div id="settings" class="modal" onclick="if (event.target == this){ settingsModal.close(); }" hidden>
-    <div class="modal-content">
-      <span class="close" onclick="settingsModal.close();" title="Close">
-        <span class="material-icons">close</span>
-      </span>
-      <h1>{{ _('Settings') }}</h1>
-
-      <h2>{{ _('Font') }}</h2>
-      <div class="setting">
-        <h3>{{ _('Use a serif font:') }}
-          <label class="toggle"
-            title="{{ _('Use a serif font? Your system font will be used, falling back to serif.')}}">
-            <input type="checkbox" name="useSerifFont" onclick="updateSetting(this);">
-            <span class="toggle-slider"></span>
-          </label>
-        </h3>
-      </div>
-
-      <h2>{{ _('Theme') }}</h2>
-      <div class="setting">
-        <h3>
-          <label class="toggle" title="{{ _('Set your theme based on your system preferences') }}">
-            <input type="radio" name="setTheme" onclick="updateSetting(this);" value="automatic" checked>
-          </label>
-          {{ _('Automatic') }}
-        </h3>
-        <h3>
-          <label class="toggle" title="{{ _('Set your theme to light theme') }}">
-            <input type="radio" name="setTheme" onclick="updateSetting(this);" value="light">
-          </label>
-          {{ _('Light') }}
-        </h3>
-        <h3>
-          <label class="toggle" title="{{ _('Set your theme to dark theme') }}">
-            <input type="radio" name="setTheme" onclick="updateSetting(this);" value="dark">
-          </label>
-          {{ _('Dark') }}
-        </h3>
-      </div>
-
-    </div>
-  </div>
 
   <div id="to-top" onclick="scrollToTop()"{%- if READTHEDOCS %} class="is-rtd"{%- endif %} hidden>
     <span><span class="material-icons">arrow_upward</span> to top</span>
