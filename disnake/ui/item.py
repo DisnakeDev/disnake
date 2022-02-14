@@ -162,7 +162,7 @@ class Item(WrappedComponent, Generic[V]):
         This can be overriden by subclasses.
 
         Parameters
-        -----------
+        ----------
         interaction: :class:`.MessageInteraction`
             The interaction that triggered this UI item.
         """

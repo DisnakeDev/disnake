@@ -120,7 +120,7 @@ class Permissions(BaseFlags):
                Note that aliases are not shown.
 
     Attributes
-    -----------
+    ----------
     value: :class:`int`
         The raw value. This value is a bit array field of a 53-bit integer
         representing the currently available permissions. You should query
@@ -407,14 +407,15 @@ class Permissions(BaseFlags):
         return base
 
     def update(self, **kwargs: bool) -> None:
-        r"""Bulk updates this permission object.
+        """
+        Bulk updates this permission object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties
         listed. Extraneous key/value pairs will be silently ignored.
 
         Parameters
-        ------------
+        ----------
         \*\*kwargs
             A list of key/value pairs to bulk update permissions with.
         """
@@ -766,7 +767,8 @@ def _augment_from_permissions(cls):
 
 @_augment_from_permissions
 class PermissionOverwrite:
-    r"""A type that is used to represent a channel specific permission.
+    """
+    A type that is used to represent a channel specific permission.
 
     Unlike a regular :class:`Permissions`\, the default value of a
     permission is equivalent to ``None`` and not ``False``. Setting
@@ -792,7 +794,7 @@ class PermissionOverwrite:
            Note that aliases are not shown.
 
     Parameters
-    -----------
+    ----------
     \*\*kwargs
         Set the value of permissions by their name.
     """
@@ -913,14 +915,15 @@ class PermissionOverwrite:
         return len(self._values) == 0
 
     def update(self, **kwargs: bool) -> None:
-        r"""Bulk updates this permission overwrite object.
+        """
+        Bulk updates this permission overwrite object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties
         listed. Extraneous key/value pairs will be silently ignored.
 
         Parameters
-        ------------
+        ----------
         \*\*kwargs
             A list of key/value pairs to bulk update with.
         """

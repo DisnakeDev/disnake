@@ -164,6 +164,8 @@ class BotBase(CommonBotBase, GroupMixin):
 
         The default command error handler provided by the bot.
 
+        This is for text commands only, and doesn't apply to application commands.
+
         By default this prints to :data:`sys.stderr` however it could be
         overridden to have a different implementation.
 
@@ -195,14 +197,12 @@ class BotBase(CommonBotBase, GroupMixin):
     ) -> None:
         """Adds a global check to the bot.
 
-        This is the non-decorator interface to :meth:`.check`,
-        :meth:`.check_once`, :meth:`.slash_command_check` and etc.
+        This is for text commands only, and doesn't apply to application commands.
 
-        If none of bool params are specified, the check is for
-        text commands only.
+        This is the non-decorator interface to :meth:`.check` and :meth:`.check_once`.
 
         Parameters
-        -----------
+        ----------
         func
             The function that was used as a global check.
         call_once: :class:`bool`
@@ -222,14 +222,13 @@ class BotBase(CommonBotBase, GroupMixin):
     ) -> None:
         """Removes a global check from the bot.
 
+        This is for text commands only, and doesn't apply to application commands.
+
         This function is idempotent and will not raise an exception
         if the function is not in the global checks.
 
-        If none of bool params are specified, the check is for
-        text commands only.
-
         Parameters
-        -----------
+        ----------
         func
             The function to remove from the global checks.
         call_once: :class:`bool`
@@ -243,7 +242,10 @@ class BotBase(CommonBotBase, GroupMixin):
             pass
 
     def check(self, func: T) -> T:
-        r"""A decorator that adds a global check to the bot.
+        """
+        A decorator that adds a global check to the bot.
+
+        This is for text commands only, and doesn't apply to application commands.
 
         A global check is similar to a :func:`.check` that is applied
         on a per command basis except it is run before any command checks
@@ -272,7 +274,10 @@ class BotBase(CommonBotBase, GroupMixin):
         return func
 
     def check_once(self, func: CFT) -> CFT:
-        r"""A decorator that adds a "call once" global check to the bot.
+        """
+        A decorator that adds a "call once" global check to the bot.
+
+        This is for text commands only, and doesn't apply to application commands.
 
         Unlike regular global checks, this one is called only once
         per :meth:`.invoke` call.
@@ -321,6 +326,8 @@ class BotBase(CommonBotBase, GroupMixin):
     def before_invoke(self, coro: CFT) -> CFT:
         """A decorator that registers a coroutine as a pre-invoke hook.
 
+        This is for text commands only, and doesn't apply to application commands.
+
         A pre-invoke hook is called directly before the command is
         called. This makes it a useful function to set up database
         connections or any type of set up required.
@@ -335,12 +342,12 @@ class BotBase(CommonBotBase, GroupMixin):
             then the hooks are not called.
 
         Parameters
-        -----------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register as the pre-invoke hook.
 
         Raises
-        -------
+        ------
         TypeError
             The coroutine passed is not actually a coroutine.
         """
@@ -351,7 +358,10 @@ class BotBase(CommonBotBase, GroupMixin):
         return coro
 
     def after_invoke(self, coro: CFT) -> CFT:
-        r"""A decorator that registers a coroutine as a post-invoke hook.
+        """
+        A decorator that registers a coroutine as a post-invoke hook.
+
+        This is for text commands only, and doesn't apply to application commands.
 
         A post-invoke hook is called directly after the command is
         called. This makes it a useful function to clean-up database
@@ -368,12 +378,12 @@ class BotBase(CommonBotBase, GroupMixin):
             This makes it ideal for clean-up scenarios.
 
         Parameters
-        -----------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register as the post-invoke hook.
 
         Raises
-        -------
+        ------
         TypeError
             The coroutine passed is not actually a coroutine.
         """
@@ -424,12 +434,12 @@ class BotBase(CommonBotBase, GroupMixin):
         with the message as a context.
 
         Parameters
-        -----------
+        ----------
         message: :class:`disnake.Message`
             The message context to get the prefix of.
 
         Returns
-        --------
+        -------
         Optional[Union[List[:class:`str`], :class:`str`]]
             A list of prefixes or a single prefix that the bot is
             listening for. None if the bot isn't listening for prefixes.
@@ -461,7 +471,8 @@ class BotBase(CommonBotBase, GroupMixin):
         return ret
 
     async def get_context(self, message: Message, *, cls: Type[CXT] = Context) -> CXT:
-        r"""|coro|
+        """
+        |coro|
 
         Returns the invocation context from the message.
 
@@ -474,7 +485,7 @@ class BotBase(CommonBotBase, GroupMixin):
         invoked under :meth:`~.Bot.invoke`.
 
         Parameters
-        -----------
+        ----------
         message: :class:`disnake.Message`
             The message to get the invocation context from.
         cls
@@ -484,7 +495,7 @@ class BotBase(CommonBotBase, GroupMixin):
             interface.
 
         Returns
-        --------
+        -------
         :class:`.Context`
             The invocation context. The type of this can change via the
             ``cls`` parameter.
@@ -548,7 +559,7 @@ class BotBase(CommonBotBase, GroupMixin):
         handles all the internal event dispatch mechanisms.
 
         Parameters
-        -----------
+        ----------
         ctx: :class:`.Context`
             The invocation context to invoke.
         """
@@ -585,7 +596,7 @@ class BotBase(CommonBotBase, GroupMixin):
         call :meth:`~.Bot.get_context` or :meth:`~.Bot.invoke` if so.
 
         Parameters
-        -----------
+        ----------
         message: :class:`disnake.Message`
             The message to process commands for.
         """

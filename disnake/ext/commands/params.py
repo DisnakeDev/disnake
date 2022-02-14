@@ -148,7 +148,6 @@ def signature(func: Callable) -> inspect.Signature:
 def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) -> Optional[float]:
     """Function for combining xt and xe
 
-
     * x > xt && x >= xe ; x >= f(xt, xe, 1)
     * x < xt && x <= xe ; x <= f(xt, xe, -1)
     """
@@ -265,8 +264,7 @@ class LargeInt(int):
 
 
 class ParamInfo:
-    """
-    A class that basically connects function params with slash command options.
+    """A class that basically connects function params with slash command options.
     The instances of this class are not created manually, but via the functional interface instead.
     See :func:`Param`.
 
@@ -286,11 +284,11 @@ class ParamInfo:
         The greatest allowed value for this option.
     type: Any
         The type of the parameter.
-    channel_types: List[:class:`ChannelType`]
+    channel_types: List[:class:`.ChannelType`]
         The list of channel types supported by this slash command option.
-    autocomplete: Callable[[:class:`ApplicationCommandInteraction`, :class:`str`], Any]
+    autocomplete: Callable[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
         The function that will suggest possible autocomplete options while typing.
-    converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
+    converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         The function that will convert the original input to a desired format.
     """
 
@@ -826,8 +824,7 @@ def Param(
     large: bool = False,
     **kwargs: Any,
 ) -> Any:
-    """
-    A special function that creates an instance of :class:`ParamInfo` that contains some information about a
+    """A special function that creates an instance of :class:`ParamInfo` that contains some information about a
     slash command option. This instance should be assigned to a parameter of a function representing your slash command.
 
     See :ref:`param_syntax` for more info.
@@ -843,7 +840,7 @@ def Param(
         Kwarg aliases: ``desc``.
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.
-    converter: Callable[[:class:`ApplicationCommandInteraction`, Any], Any]
+    converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.
         Kwarg aliases: ``conv``.
     convert_defaults: :class:`bool`
@@ -851,10 +848,10 @@ def Param(
         Defaults to ``False``.
 
         .. versionadded: 2.3
-    autocomplete: Callable[[:class:`ApplicationCommandInteraction`, :class:`str`], Any]
+    autocomplete: Callable[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
         A function that will suggest possible autocomplete options while typing.
         See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
-    channel_types: Iterable[:class:`ChannelType`]
+    channel_types: Iterable[:class:`.ChannelType`]
         A list of channel types that should be allowed.
         By default these are discerned from the annotation.
     lt: :class:`float`
@@ -870,6 +867,11 @@ def Param(
         values in the range ``(-2^53, 2^53)`` would be accepted due to an API limitation).
 
         .. versionadded: 2.3
+
+    Raises
+    ------
+    TypeError
+        Unexpected keyword arguments were provided.
 
     Returns
     -------
@@ -907,9 +909,8 @@ param = Param
 
 
 def inject(function: Callable[..., Any]) -> Any:
-    """
-    A special function to use the provided function for injections.
-    This should be assigned to a parameter of a function representing your application command.
+    """A special function to use the provided function for injections.
+    This should be assigned to a parameter of a function representing your slash command.
 
     .. versionadded:: 2.3
     """
@@ -928,9 +929,7 @@ def option_enum(
 
 
 class ConverterMethod(classmethod):
-    """
-    A decorator to register a method as the converter method
-    """
+    """A class to help register a method as a converter method."""
 
     def __set_name__(self, owner: Any, name: str):
         # this feels wrong
@@ -945,7 +944,7 @@ if TYPE_CHECKING:
 else:
 
     def converter_method(function: Any) -> ConverterMethod:
-        """A decorator to register a method as the converter method
+        """A decorator to register a method as the converter method.
 
         .. versionadded:: 2.3
         """
