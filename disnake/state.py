@@ -70,6 +70,7 @@ from .mentions import AllowedMentions
 from .message import Message
 from .object import Object
 from .partial_emoji import PartialEmoji
+from .permissions import Permissions
 from .raw_models import *
 from .role import Role
 from .stage_instance import StageInstance
@@ -970,18 +971,36 @@ class ConnectionState:
 
         guild_id = utils._get_as_snowflake(data, "guild_id")
         guild = self._get_guild(guild_id)
-        if guild is not None:
-            channel = guild.get_channel(channel_id)
-            if channel is not None:
-                old_channel = copy.copy(channel)
-                channel._update(guild, data)
-                self.dispatch("guild_channel_update", old_channel, channel)
-            else:
-                _log.debug(
-                    "CHANNEL_UPDATE referencing an unknown channel ID: %s. Discarding.", channel_id
-                )
-        else:
+        if guild is None:
             _log.debug("CHANNEL_UPDATE referencing an unknown guild ID: %s. Discarding.", guild_id)
+            return
+
+        channel = guild.get_channel(channel_id)
+        if channel is None:
+            _log.debug(
+                "CHANNEL_UPDATE referencing an unknown channel ID: %s. Discarding.", channel_id
+            )
+            return
+
+        old_channel = copy.copy(channel)
+        channel._update(guild, data)
+        self.dispatch("guild_channel_update", old_channel, channel)
+
+        threads: List[Thread] = getattr(channel, "threads", [])
+        if not threads:
+            return
+
+        me = guild.me
+        # calculate old and new permission values in that channel
+        old_perm_value = old_channel.permissions_for(me).value
+        new_perm_value = channel.permissions_for(me).value
+        # get the bits that were filpped from 1 to 0
+        diff_perm_value = old_perm_value ^ new_perm_value & old_perm_value
+
+        if diff_perm_value and Permissions(diff_perm_value).view_channel:
+            for thread in threads:
+                if me.id in thread._members:
+                    self.dispatch("thread_remove", thread)
 
     def parse_channel_create(self, data) -> None:
         factory, ch_type = _channel_factory(data["type"])
@@ -1108,13 +1127,16 @@ class ConnectionState:
             else:
                 thread._add_member(ThreadMember(thread, member))
 
+        self_id = self.self_id
+
         for thread in threads.values():
             old = previous_threads.pop(thread.id, None)
-            if old is None:
+            if old is None and self_id in thread._members:
                 self.dispatch("thread_join", thread)
 
         for thread in previous_threads.values():
-            self.dispatch("thread_remove", thread)
+            if self_id in thread._members:
+                self.dispatch("thread_remove", thread)
 
     def parse_thread_member_update(self, data) -> None:
         guild_id = int(data["guild_id"])
@@ -1165,12 +1187,11 @@ class ConnectionState:
                 self.dispatch("thread_join", thread)
 
         for member_id in removed_member_ids:
-            if member_id != self_id:
-                member = thread._pop_member(member_id)
-                if member is not None:
-                    self.dispatch("thread_member_remove", member)
-            else:
+            member = thread._pop_member(member_id)
+            if member_id == self_id:
                 self.dispatch("thread_remove", thread)
+            elif member is not None:
+                self.dispatch("thread_member_remove", member)
 
     def parse_guild_member_add(self, data) -> None:
         guild = self._get_guild(int(data["guild_id"]))
@@ -1231,6 +1252,23 @@ class ConnectionState:
                 self.dispatch("user_update", user_update[0], user_update[1])
 
             self.dispatch("member_update", old_member, member)
+
+            if member.id != self.self_id:
+                return
+            # figure out which threads are no longer available
+            for thread in guild.threads:
+                # calculate old and new permissions
+                old_perm_value = thread.permissions_for(old_member).value
+                new_perm_value = thread.permissions_for(member).value
+                # get bits that were flipped from 1 to 0
+                diff_perm_value = old_perm_value ^ new_perm_value & old_perm_value
+                if (
+                    diff_perm_value
+                    and Permissions(diff_perm_value).view_channel
+                    and member.id in thread._members
+                ):
+                    self.dispatch("thread_remove", thread)
+
         else:
             if self.member_cache_flags.joined:
                 member = Member(data=data, guild=guild, state=self)
