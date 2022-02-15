@@ -25,6 +25,8 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+import functools
+import operator
 from typing import (
     Any,
     Callable,
@@ -528,10 +530,7 @@ class Intents(BaseFlags):
     def all(cls: Type[Intents]) -> Intents:
         """A factory method that creates a :class:`Intents` with everything enabled."""
         self = cls.__new__(cls)
-        # this takes all of the defined values, and ensures that there's no ghost intents set
-        # given we have aliases that alias several flags at the same time, its important to
-        # make sure that we don't set any flags that are not defined
-        self.value = sum({v for v in cls.VALID_FLAGS.values() if bin(v)[2:].count("1") == 1})
+        self.value = functools.reduce(operator.or_, cls.VALID_FLAGS.values())
         return self
 
     @classmethod
