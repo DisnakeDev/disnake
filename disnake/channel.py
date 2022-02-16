@@ -826,8 +826,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             )
 
         if message is None:
-            if type is None:
-                raise TypeError("type is a required argument when message is None.")
             data = await self._state.http.start_thread_without_message(
                 self.id,
                 name=name,
@@ -838,10 +836,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 reason=reason,
             )
         else:
-            if type is ChannelType.private_thread:
-                raise TypeError(
-                    "type must not be ChannelType.private_thread when creating a thread from a message."
-                )
             data = await self._state.http.start_thread_with_message(
                 self.id,
                 message.id,
