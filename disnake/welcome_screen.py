@@ -25,10 +25,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from .partial_emoji import PartialEmoji
+from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, _get_as_snowflake
 
 if TYPE_CHECKING:
+    from .emoji import Emoji
     from .guild import Guild
     from .invite import PartialInviteGuild
     from .state import ConnectionState
@@ -60,10 +61,26 @@ class WelcomeScreenChannel:
         "emoji",
     )
 
-    def __init__(self, *, id: int, description: str, emoji: Optional[PartialEmoji] = None):
-        self.id = id
-        self.description = description
-        self.emoji = emoji
+    def __init__(
+        self,
+        *,
+        id: int,
+        description: str,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+    ):
+        self.id: int = id
+        self.description: str = description
+        self.emoji: Optional[Union[PartialEmoji, str]]
+        if emoji is None:
+            self.emoji = None
+        if isinstance(emoji, str):
+            self.emoji = PartialEmoji.from_str(emoji)
+        elif isinstance(emoji, _EmojiTag):
+            self.emoji = emoji._to_partial()
+        elif isinstance(emoji, PartialEmoji):
+            self.emoji = emoji
+        else:
+            raise TypeError("emoji must be a string, PartialEmoji, or Emoji instance.")
 
     def __repr__(self):
         return f"<WelcomeScreenChannel id={self.id!r} emoji={self.emoji!r} description={self.description!r}>"
@@ -87,8 +104,11 @@ class WelcomeScreenChannel:
             "description": self.description,
         }
         if self.emoji is not None:
-            result["emoji_id"] = self.emoji.id
-            result["emoji_name"] = self.emoji.name
+            if isinstance(self.emoji, str):
+                result["emoji_name"] = self.emoji
+            else:
+                result["emoji_id"] = self.emoji.id
+                result["emoji_name"] = self.emoji.name
 
         return result  # type: ignore
 
