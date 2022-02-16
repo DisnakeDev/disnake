@@ -3291,6 +3291,8 @@ class Guild(Hashable):
 
         This is a websocket operation and can be slow.
 
+        See also :attr:`search_members`.
+
         .. versionadded:: 1.3
 
         Parameters
@@ -3349,6 +3351,57 @@ class Guild(Hashable):
         return await self._state.query_members(
             self, query=query, limit=limit, user_ids=user_ids, presences=presences, cache=cache
         )
+
+    async def search_members(
+        self,
+        *,
+        query: str,
+        limit: int = 1,
+        cache: bool = True,
+    ):
+        """|coro|
+
+        Request members that belong to this guild whose username starts with
+        the query given.
+
+        Note that unlike :attr:`query_members`, this is not a websocket operation.
+
+        See also :attr:`query_members`.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        -----------
+        query: Optional[:class:`str`]
+            The string that the username's start with.
+        limit: :class:`int`
+            The maximum number of members to send back. This must be
+            a number between 5 and 100.
+        cache: :class:`bool`
+            Whether to cache the members internally. This makes operations
+            such as :meth:`get_member` work for those that matched.
+
+        Raises
+        -------
+        ValueError
+            Invalid parameters were passed to the function
+
+        Returns
+        --------
+        List[:class:`Member`]
+            The list of members that have matched the query.
+        """
+        if query == "":
+            raise ValueError("Cannot pass empty query string.")
+        limit = min(1000, limit or 1)
+        members = await self._state.http.search_guild_members(self.id, query=query, limit=limit)
+        resp = []
+        for member in members:
+            member = Member(state=self._state, data=member, guild=self)
+            if cache:
+                self._add_member(member)
+            resp.append(member)
+        return resp
 
     async def get_or_fetch_members(
         self,

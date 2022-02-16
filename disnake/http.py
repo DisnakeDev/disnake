@@ -839,6 +839,13 @@ class HTTPClient:
 
     # Member management
 
+    def search_guild_members(
+        self, guild_id: Snowflake, query: str, limit: int = 1
+    ) -> Response[List[member.MemberWithUser]]:
+        r = Route("GET", "/guilds/{guild_id}/members/search", guild_id=guild_id)
+
+        return self.request(r, params={"query": query, "limit": limit})
+
     def kick(
         self, user_id: Snowflake, guild_id: Snowflake, reason: Optional[str] = None
     ) -> Response[None]:
