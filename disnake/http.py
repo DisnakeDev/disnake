@@ -923,7 +923,7 @@ class HTTPClient:
         *,
         reason: Optional[str] = None,
         **fields: Any,
-    ) -> Response[member.Nickname]:
+    ) -> Response[member.MemberWithUser]:
         r = Route("PATCH", "/guilds/{guild_id}/members/@me", guild_id=guild_id)
         return self.request(r, json=fields, reason=reason)
 
