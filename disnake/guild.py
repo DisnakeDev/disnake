@@ -1585,6 +1585,11 @@ class Guild(Hashable):
             and ``public_updates_channel`` parameters are required.
         region: Union[:class:`str`, :class:`VoiceRegion`]
             The new region for the guild's voice communication.
+
+            .. deprecated:: 2.5
+
+                Use :attr:`VoiceChannel.region` or :attr:`StageChannel.region` instead.
+
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`
@@ -1717,6 +1722,9 @@ class Guild(Hashable):
             fields["owner_id"] = owner.id
 
         if region is not MISSING:
+            utils.warn_deprecated(
+                "Guild.region is deprecated and will be removed in version 2.6.", stacklevel=2
+            )
             fields["region"] = str(region)
 
         if verification_level is not MISSING:
