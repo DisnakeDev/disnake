@@ -156,9 +156,6 @@ class Guild(Hashable):
 
         .. versionadded:: 2.0
 
-    region: :class:`VoiceRegion`
-        The region the guild belongs on. There is a chance that the region
-        will be a :class:`str` if the value is not recognised by the enumerator.
     afk_timeout: :class:`int`
         The timeout to get sent to the AFK channel.
     afk_channel: Optional[:class:`VoiceChannel`]
@@ -269,7 +266,6 @@ class Guild(Hashable):
         "name",
         "id",
         "unavailable",
-        "region",
         "owner_id",
         "mfa_level",
         "emojis",
@@ -307,6 +303,7 @@ class Guild(Hashable):
         "_stage_instances",
         "_scheduled_events",
         "_threads",
+        "_region",
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
@@ -489,7 +486,7 @@ class Guild(Hashable):
             self._member_count: int = member_count
 
         self.name: str = guild.get("name")
-        self.region: VoiceRegion = try_enum(VoiceRegion, guild.get("region"))
+        self._region: VoiceRegion = try_enum(VoiceRegion, guild.get("region"))
         self.verification_level: VerificationLevel = try_enum(
             VerificationLevel, guild.get("verification_level")
         )
@@ -1013,6 +1010,21 @@ class Guild(Hashable):
             return self._member_count
         except AttributeError:
             return len(self._members)
+
+    @property
+    def region(self) -> VoiceRegion:
+        """Optional[:class:`VoiceRegion`]: The region the guild belongs on. There is a chance that the region
+        will be a :class:`str` if the value is not recognised by the enumerator.
+
+        .. deprecated:: 2.5
+
+            VoiceRegion is no longer set on the guild, and is set on the individual voice channels instead.
+            See :attr:`VoiceChannel.region` instead.
+        """
+        utils.warn_deprecated(
+            "Guild.region is deprecated and will be removed in version 2.6.", stacklevel=2
+        )
+        return self._region
 
     @property
     def chunked(self) -> bool:
