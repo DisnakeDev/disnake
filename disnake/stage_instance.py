@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Optional
 from .enums import StagePrivacyLevel, try_enum
 from .errors import InvalidArgument
 from .mixins import Hashable
-from .utils import MISSING, cached_slot_property
+from .utils import MISSING, cached_slot_property, warn_deprecated
 
 __all__ = ("StageInstance",)
 
@@ -70,10 +70,6 @@ class StageInstance(Hashable):
         The ID of the channel that the stage instance is running in.
     topic: :class:`str`
         The topic of the stage instance.
-    privacy_level: :class:`StagePrivacyLevel`
-        The privacy level of the stage instance.
-    discoverable_disabled: :class:`bool`
-        Whether discoverability for the stage instance is disabled.
     """
 
     __slots__ = (
@@ -82,8 +78,8 @@ class StageInstance(Hashable):
         "guild",
         "channel_id",
         "topic",
-        "privacy_level",
-        "discoverable_disabled",
+        "_privacy_level",
+        "_discoverable_disabled",
         "_cs_channel",
     )
 
@@ -96,10 +92,11 @@ class StageInstance(Hashable):
         self.id: int = int(data["id"])
         self.channel_id: int = int(data["channel_id"])
         self.topic: str = data["topic"]
-        self.privacy_level: StagePrivacyLevel = try_enum(
-            StagePrivacyLevel, data.get("privacy_level", 2)
-        )
-        self.discoverable_disabled: bool = data.get("discoverable_disabled", False)
+        if privacy_level := data.get("privacy_level"):
+            self._privacy_level: StagePrivacyLevel = try_enum(StagePrivacyLevel, privacy_level)
+        else:
+            self._privacy_level = StagePrivacyLevel.guild_only
+        self._discoverable_disabled: bool = data.get("discoverable_disabled", False)
 
     def __repr__(self) -> str:
         return f"<StageInstance id={self.id} guild={self.guild!r} channel_id={self.channel_id} topic={self.topic!r}>"
@@ -109,6 +106,31 @@ class StageInstance(Hashable):
         """Optional[:class:`StageChannel`]: The channel that stage instance is running in."""
         # the returned channel will always be a StageChannel or None
         return self._state.get_channel(self.channel_id)  # type: ignore
+
+    @property
+    def privacy_level(self) -> StagePrivacyLevel:
+        """:class:`StagePrivacyLevel`: The privacy level of the stage instance.
+
+        .. deprecated:: 2.5
+
+            To be removed in a later version.
+            Discord no longer supports public stages.
+        """
+        warn_deprecated(
+            "StageInstance.privacy_level is deprecated and will be removed in a future version.",
+            stacklevel=2,
+        )
+        return self._privacy_level
+
+    @property
+    def discoverable_disabled(self) -> bool:
+        """discoverable_disabled: :class:`bool`
+        Whether discoverability for the stage instance is disabled."""
+        warn_deprecated(
+            "StageInstance.discoverable_disabled is deprecated and will be removed in a future version",
+            stacklevel=2,
+        )
+        return self._discoverable_disabled
 
     def is_public(self) -> bool:
         return self.privacy_level is StagePrivacyLevel.public
@@ -134,7 +156,9 @@ class StageInstance(Hashable):
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's new privacy level.
 
-            .. deprecated:: 2.4
+            .. deprecated:: 2.5
+
+
 
         reason: :class:`str`
             The reason the stage instance was edited. Shows up on the audit log.
@@ -157,6 +181,9 @@ class StageInstance(Hashable):
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
                 raise InvalidArgument("privacy_level field must be of type PrivacyLevel")
+            warn_deprecated(
+                "privacy_level is deprecated and will be removed in a future version.", stacklevel=2
+            )
 
             payload["privacy_level"] = privacy_level.value
 

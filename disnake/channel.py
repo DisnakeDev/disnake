@@ -1363,7 +1363,9 @@ class StageChannel(VocalGuildChannel):
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's privacy level. Defaults to :attr:`StagePrivacyLevel.guild_only`.
 
-            .. deprecated:: 2.4
+            .. deprecated:: 2.5
+
+                Public Stages no longer exist. This parameter will be removed in a future version.
 
         reason: :class:`str`
             The reason the stage instance was created. Shows up on the audit log.
@@ -1388,6 +1390,9 @@ class StageChannel(VocalGuildChannel):
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
                 raise InvalidArgument("privacy_level field must be of type PrivacyLevel")
+            utils.warn_deprecated(
+                "privacy_level is deprecated and will be removed in a future version.", stacklevel=2
+            )
 
             payload["privacy_level"] = privacy_level.value
 
