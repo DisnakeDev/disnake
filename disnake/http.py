@@ -1082,7 +1082,7 @@ class HTTPClient:
 
     def join_thread(self, channel_id: Snowflake) -> Response[None]:
         return self.request(
-            Route("POST", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
+            Route("PUT", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
         )
 
     def add_user_to_thread(self, channel_id: Snowflake, user_id: Snowflake) -> Response[None]:
