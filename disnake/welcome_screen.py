@@ -23,13 +23,14 @@ DEALINGS IN THE SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, overload
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from .partial_emoji import PartialEmoji
 from .utils import MISSING, _get_as_snowflake
 
 if TYPE_CHECKING:
     from .guild import Guild
+    from .invite import PartialInviteGuild
     from .state import ConnectionState
     from .types.welcome_screen import (
         WelcomeScreen as WelcomeScreenPayload,
@@ -112,7 +113,13 @@ class WelcomeScreen:
         "welcome_channels",
     )
 
-    def __init__(self, *, data: WelcomeScreenPayload, state: ConnectionState, guild: Guild):
+    def __init__(
+        self,
+        *,
+        data: WelcomeScreenPayload,
+        state: ConnectionState,
+        guild: Union[Guild, PartialInviteGuild],
+    ):
         self._state = state
         self._guild = guild
         self.description: Optional[str] = data.get("description")
