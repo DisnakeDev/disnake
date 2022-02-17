@@ -33,6 +33,7 @@ include = [
     "*.py",
 ]
 
+reportInvalidStringEscapeSequence = false
 reportPropertyTypeMismatch = true
 reportDuplicateImport = true
 reportUntypedFunctionDecorator = true
