@@ -3231,7 +3231,7 @@ class Guild(Hashable):
 
         Retrieves the widget settings of the guild.
 
-        To edit the widget settings, you may also use :func:`.edit_widget`.
+        To edit the widget settings, you may also use :func:`~Guild.edit_widget`.
 
         .. versionadded:: 2.5
 
