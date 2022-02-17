@@ -35,6 +35,7 @@ from typing import (
     Dict,
     Iterable,
     List,
+    Literal,
     Mapping,
     Optional,
     Tuple,
@@ -724,7 +725,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: str,
-        type: ChannelType = None,
+        type: Literal[
+            ChannelType.public_thread, ChannelType.private_thread, ChannelType.news_thread
+        ] = None,
         auto_archive_duration: AnyThreadArchiveDuration = None,
         invitable: bool = None,
         slowmode_delay: int = None,
@@ -817,7 +820,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         :class:`Thread`
             The newly created thread
         """
-        if (not bool(message)) ^ bool(type):
+        if not ((message is None) ^ (type is None)):
             raise ValueError("Exactly one of message and type must be provided.")
 
         if auto_archive_duration is not None:
@@ -830,7 +833,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 self.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                type=type.value,
+                type=type.value,  # type:ignore
                 invitable=invitable if invitable is not None else True,
                 rate_limit_per_user=slowmode_delay or 0,
                 reason=reason,
