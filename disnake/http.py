@@ -48,6 +48,7 @@ from typing import (
 from urllib.parse import quote as _uriquote
 
 import aiohttp
+import yarl
 
 from . import __version__, utils
 from .errors import (
@@ -1640,6 +1641,9 @@ class HTTPClient:
     def get_widget(self, guild_id: Snowflake) -> Response[widget.Widget]:
         return self.request(Route("GET", "/guilds/{guild_id}/widget.json", guild_id=guild_id))
 
+    def get_widget_settings(self, guild_id: Snowflake) -> Response[widget.WidgetSettings]:
+        return self.request(Route("GET", "/guilds/{guild_id}/widget", guild_id=guild_id))
+
     def edit_widget(
         self, guild_id: Snowflake, payload: Dict[str, Any], *, reason: Optional[str] = None
     ) -> Response[widget.WidgetSettings]:
@@ -1648,6 +1652,11 @@ class HTTPClient:
             json=payload,
             reason=reason,
         )
+
+    def widget_image_url(self, guild_id: Snowflake, *, style: str) -> str:
+        # constructing a route for api coverage reasons
+        base = Route("GET", "/guilds/{guild_id}/widget.png", guild_id=guild_id).url
+        return str(yarl.URL(base).with_query(style=style))
 
     # Invite management
 

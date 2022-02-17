@@ -64,6 +64,7 @@ __all__ = (
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
     "ThreadArchiveDuration",
+    "WidgetStyle",
 )
 
 
@@ -705,6 +706,17 @@ class ThreadArchiveDuration(Enum):
     day = 1440
     three_days = 4320
     week = 10080
+
+
+class WidgetStyle(Enum):
+    shield = "shield"
+    banner1 = "banner1"
+    banner2 = "banner2"
+    banner3 = "banner3"
+    banner4 = "banner4"
+
+    def __str__(self):
+        return self.value
 
 
 T = TypeVar("T")
