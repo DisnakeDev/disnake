@@ -106,7 +106,8 @@ function getCurrentSection() {
     if (sections) {
       sections.forEach(section => {
         let rect = section.getBoundingClientRect();
-        if (rect.top + document.body.offsetTop < 1) {
+        // offset to give space for the sticky header
+        if (rect.top - 90 + document.body.offsetTop < 1) {
           currentSection = section;
         }
       });

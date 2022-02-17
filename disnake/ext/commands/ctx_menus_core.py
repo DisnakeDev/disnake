@@ -46,7 +46,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
     decorator or functional interface.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the user command.
     body: :class:`.UserCommand`
@@ -65,7 +65,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
     guild_ids: Optional[List[:class:`int`]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
-        Whether to sync the command in the API with ``body`` or not.
+        Whether to automatically register the command.
     """
 
     def __init__(
@@ -117,7 +117,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     decorator or functional interface.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the message command.
     body: :class:`.MessageCommand`
@@ -136,7 +136,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     guild_ids: Optional[List[:class:`int`]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
-        Whether to sync the command in the API with ``body`` or not.
+        Whether to automatically register the command.
     """
 
     def __init__(
@@ -189,25 +189,25 @@ def user_command(
     auto_sync: bool = True,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
-    """
-    A shortcut decorator that builds a user command.
+    """A shortcut decorator that builds a user command.
 
     Parameters
     ----------
     name: :class:`str`
-        name of the user command you want to respond to (equals to function name by default).
+        The name of the user command (defaults to the function name).
     default_permission: :class:`bool`
-        whether the command is enabled by default when the app is added to a guild.
+        Whether the command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     auto_sync: :class:`bool`
-        whether to automatically register / edit the command or not. Defaults to ``True``.
+        Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
-        if specified, the client will register the command in these guilds.
+        If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
 
     Returns
-    --------
+    -------
     Callable[..., :class:`InvokableUserCommand`]
-        A decorator that converts the provided method into a InvokableUserCommand and returns it.
+        A decorator that converts the provided method into an InvokableUserCommand and returns it.
     """
 
     def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
@@ -237,25 +237,25 @@ def message_command(
     auto_sync: bool = True,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
-    """
-    A decorator that builds a message command.
+    """A shortcut decorator that builds a message command.
 
     Parameters
     ----------
     name: :class:`str`
-        name of the message command you want to respond to (equals to function name by default).
+        The name of the message command (defaults to the function name).
     default_permission: :class:`bool`
-        whether the command is enabled by default when the app is added to a guild.
+        Whether the command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     auto_sync: :class:`bool`
-        whether to automatically register / edit the command or not. Defaults to ``True``.
+        Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
-        if specified, the client will register the command in these guilds.
+        If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
 
     Returns
-    --------
+    -------
     Callable[..., :class:`InvokableMessageCommand`]
-        A decorator that converts the provided method into a InvokableMessageCommand and then returns it.
+        A decorator that converts the provided method into an InvokableMessageCommand and then returns it.
     """
 
     def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:

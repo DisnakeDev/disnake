@@ -79,7 +79,7 @@ class Flag:
     do so. These cannot be constructed manually.
 
     Attributes
-    ------------
+    ----------
     name: :class:`str`
         The name of the flag.
     aliases: List[:class:`str`]
@@ -127,7 +127,7 @@ def flag(
     class attributes.
 
     Parameters
-    ------------
+    ----------
     name: :class:`str`
         The flag name. If not given, defaults to the attribute name.
     aliases: List[:class:`str`]
@@ -472,7 +472,7 @@ class FlagConverter(metaclass=FlagsMeta):
     .. versionadded:: 2.0
 
     Parameters
-    -----------
+    ----------
     case_insensitive: :class:`bool`
         A class parameter to toggle case insensitivity of the flag parsing.
         If ``True`` then flags are parsed in a case insensitive manner.
@@ -585,14 +585,14 @@ class FlagConverter(metaclass=FlagsMeta):
             The argument to convert from.
 
         Raises
-        --------
+        ------
         FlagError
             A flag related parsing error.
         CommandError
             A command related error.
 
         Returns
-        --------
+        -------
         :class:`FlagConverter`
             The flag converter instance with all flags parsed.
         """

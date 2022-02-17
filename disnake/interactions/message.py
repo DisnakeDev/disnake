@@ -51,7 +51,7 @@ class MessageInteraction(Interaction):
     .. versionadded:: 2.1
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The interaction's ID.
     type: :class:`InteractionType`
@@ -70,22 +70,16 @@ class MessageInteraction(Interaction):
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
+
     guild_locale: Optional[:class:`str`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
-    message: :class:`Message`
+
+    message: Optional[:class:`Message`]
         The message that sent this interaction.
-    me: Union[:class:`.Member`, :class:`.ClientUser`]
-        Similar to :attr:`.Guild.me`
-    permissions: :class:`Permissions`
-        The resolved permissions of the member in the channel, including overwrites.
-    response: :class:`InteractionResponse`
-        Returns an object responsible for handling responding to the interaction.
-    followup: :class:`Webhook`
-        Returns the follow up webhook for follow up interactions.
     data: :class:`MessageInteractionData`
         The wrapped interaction data.
     client: :class:`Client`
@@ -99,7 +93,7 @@ class MessageInteraction(Interaction):
 
     @property
     def values(self) -> Optional[List[str]]:
-        """Optional[List[:class:`str`]]: The values the user selected"""
+        """Optional[List[:class:`str`]]: The values the user selected."""
         return self.data.values
 
     @cached_slot_property("_cs_component")

@@ -41,7 +41,6 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinxcontrib_trio",
     "hoverxref.extension",
-    "details",
     "exception_hierarchy",
     "attributetable",
     "resourcelinks",
@@ -54,9 +53,11 @@ autodoc_typehints = "none"
 # napoleon_attr_annotations = False
 
 github_repo = "https://github.com/DisnakeDev/disnake"
+dpy_github_repo = "https://github.com/Rapptz/discord.py"
 
 extlinks = {
     "issue": (f"{github_repo}/issues/%s", "#"),
+    "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#"),
 }
 
 # Links used for cross-referencing stuff in other documentation
@@ -88,7 +89,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "disnake"
-copyright = "2015-2021, Rapptz, 2021-present, EQUENOS"
+copyright = "2015-2021, Rapptz, 2021-present, Disnake Development"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -179,6 +180,7 @@ nitpick_ignore_files = [
 # unreferenced static images to copy
 copy_static_images = [
     "images/drop_down_icon.svg",
+    "images/disnake.svg",
 ]
 
 
@@ -333,7 +335,7 @@ html_static_path = ["_static"]
 # implements a search results scorer. If empty, the default will be used.
 html_search_scorer = "_static/scorer.js"
 
-html_js_files = ["custom.js", "settings.js", "copy.js", "sidebar.js"]
+html_js_files = ["custom.js", "copy.js", "sidebar.js", "touch.js"]
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "disnake.pydoc"

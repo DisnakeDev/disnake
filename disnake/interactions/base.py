@@ -114,15 +114,13 @@ class Interaction:
     .. versionadded:: 2.0
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The interaction's ID.
     type: :class:`InteractionType`
-        The interaction type.
+        The interaction's type.
     application_id: :class:`int`
         The application ID that the interaction was for.
-    token: :class:`str`
-        The token to continue the interaction. These are valid for 15 minutes.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
     guild_locale: Optional[:class:`str`]
@@ -139,6 +137,9 @@ class Interaction:
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
+
+    token: :class:`str`
+        The token to continue the interaction. These are valid for 15 minutes.
     client: :class:`Client`
         The interaction client.
     """
@@ -208,10 +209,13 @@ class Interaction:
 
     @property
     def created_at(self) -> datetime:
+        """:class:`datetime.datetime`: Returns the interaction's creation time in UTC."""
         return utils.snowflake_time(self.id)
 
     @property
     def user(self) -> Union[User, Member]:
+        """Union[:class:`.User`, :class:`.Member`]: The user or member that sent the interaction.
+        There is an alias for this named :attr:`author`."""
         return self.author
 
     @property
@@ -292,16 +296,15 @@ class Interaction:
         Repeated calls to this will return a cached value.
 
         Raises
-        -------
+        ------
         HTTPException
             Fetching the original response message failed.
 
         Returns
-        --------
+        -------
         InteractionMessage
             The original interaction response message.
         """
-
         if self._original_message is not None:
             return self._original_message
 
@@ -346,7 +349,7 @@ class Interaction:
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
-        ------------
+        ----------
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
@@ -358,7 +361,7 @@ class Interaction:
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
         files: List[:class:`File`]
@@ -371,20 +374,22 @@ class Interaction:
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. If ``None`` is passed then
-            the view is removed. This can not be mixed with ``components``.
+            The updated view to update this message with. This cannot be mixed with ``components``.
+            If ``None`` is passed then the view is removed.
         components: Optional[|components_type|]
-            A list of components to update this message with. This can not be mixed with ``view``.
+            A list of components to update this message with. This cannot be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the message failed.
         Forbidden
@@ -395,11 +400,10 @@ class Interaction:
             The length of ``embeds`` was invalid.
 
         Returns
-        --------
+        -------
         :class:`InteractionMessage`
             The newly edited message.
         """
-
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
@@ -460,7 +464,7 @@ class Interaction:
             then it is silently ignored.
 
         Raises
-        -------
+        ------
         HTTPException
             Deleting the message failed.
         Forbidden
@@ -521,17 +525,17 @@ class Interaction:
             directly instead of this method if you're sending a followup message.
 
         Parameters
-        -----------
+        ----------
         content: Optional[:class:`str`]
             The content of the message to send.
         embed: :class:`Embed`
-            The rich embed for the content to send. This cannot be mixed with
+            The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
         embeds: List[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
@@ -543,15 +547,16 @@ class Interaction:
             If no object is passed at all then the defaults given by :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`
             are used instead.
         tts: :class:`bool`
-            Indicates if the message should be sent using text-to-speech.
+            Whether the message should be sent using text-to-speech.
         view: :class:`disnake.ui.View`
-            The view to send with the message. This can not be mixed with ``components``.
+            The view to send with the message. This cannot be mixed with ``components``.
         components: |components_type|
-            A list of components to send with the message. This can not be mixed with ``view``.
+            A list of components to send with the message. This cannot be mixed with ``view``.
 
             .. versionadded:: 2.4
+
         ephemeral: :class:`bool`
-            Indicates if the message should only be visible to the user who started the interaction.
+            Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
             is set to 15 minutes.
         delete_after: :class:`float`
@@ -560,7 +565,7 @@ class Interaction:
             then it is silently ignored.
 
         Raises
-        -------
+        ------
         HTTPException
             Sending the message failed.
         TypeError
@@ -605,7 +610,7 @@ class InteractionResponse:
         self._responded: bool = False
 
     def is_done(self) -> bool:
-        """Indicates whether an interaction response has been done before.
+        """Whether an interaction response has been done before.
 
         An interaction can only be responded to once.
 
@@ -622,19 +627,19 @@ class InteractionResponse:
         and a secondary action will be done later.
 
         Parameters
-        -----------
+        ----------
         ephemeral: :class:`bool`
-            Indicates whether the deferred message will eventually be ephemeral.
+            Whether the deferred message will eventually be ephemeral.
             This applies to interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
             or when the ``with_message`` parameter is ``True``.
         with_message: :class:`bool`
-            Indicates whether the response will be a message with thinking state (bot is thinking...).
+            Whether the response will be a message with thinking state (bot is thinking...).
             This only applies to interactions of type :attr:`InteractionType.component`.
 
             .. versionadded:: 2.4
 
         Raises
-        -------
+        ------
         HTTPException
             Deferring the interaction failed.
         InteractionResponded
@@ -671,7 +676,7 @@ class InteractionResponse:
         This should rarely be used.
 
         Raises
-        -------
+        ------
         HTTPException
             Ponging the interaction failed.
         InteractionResponded
@@ -711,32 +716,33 @@ class InteractionResponse:
         Responds to this interaction by sending a message.
 
         Parameters
-        -----------
+        ----------
         content: Optional[:class:`str`]
             The content of the message to send.
         embed: :class:`Embed`
-            The rich embed for the content to send. This cannot be mixed with
+            The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
         embeds: List[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: :class:`disnake.ui.View`
-            The view to send with the message. This can not be mixed with ``components``.
+            The view to send with the message. This cannot be mixed with ``components``.
         components: |components_type|
-            A list of components to send with the message. This can not be mixed with ``view``.
+            A list of components to send with the message. This cannot be mixed with ``view``.
 
             .. versionadded:: 2.4
+
         tts: :class:`bool`
-            Indicates if the message should be sent using text-to-speech.
+            Whether the message should be sent using text-to-speech.
         ephemeral: :class:`bool`
-            Indicates if the message should only be visible to the user who started the interaction.
+            Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
             is set to 15 minutes.
         delete_after: :class:`float`
@@ -745,7 +751,7 @@ class InteractionResponse:
             then it is silently ignored.
 
         Raises
-        -------
+        ------
         HTTPException
             Sending the message failed.
         TypeError
@@ -871,7 +877,7 @@ class InteractionResponse:
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
-        -----------
+        ----------
         content: Optional[:class:`str`]
             The new content to replace the message with. ``None`` removes the content.
         embed: Optional[:class:`Embed`]
@@ -883,34 +889,37 @@ class InteractionResponse:
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message.
 
             .. versionadded:: 2.2
+
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message.
 
             .. versionadded:: 2.2
+
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.4
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. This can not be mixed with ``components``.
+            The updated view to update this message with. This cannot be mixed with ``components``.
             If ``None`` is passed then the view is removed.
         components: Optional[|components_type|]
-            A list of components to update this message with. This can not be mixed with ``view``.
+            A list of components to update this message with. This cannot be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the message failed.
         TypeError
@@ -1010,12 +1019,12 @@ class InteractionResponse:
         Only works for autocomplete interactions.
 
         Parameters
-        -----------
+        ----------
         choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
             The list of choices to suggest.
 
         Raises
-        -------
+        ------
         HTTPException
             Autocomplete response has failed.
         InteractionResponded
@@ -1213,7 +1222,7 @@ class InteractionMessage(Message):
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
-        ------------
+        ----------
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
@@ -1225,7 +1234,7 @@ class InteractionMessage(Message):
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
         files: List[:class:`File`]
@@ -1238,20 +1247,22 @@ class InteractionMessage(Message):
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. This can not be mixed with ``components``.
+            The updated view to update this message with. This cannot be mixed with ``components``.
             If ``None`` is passed then the view is removed.
         components: Optional[|components_type|]
-            A list of components to update this message with. This can not be mixed with ``view``.
+            A list of components to update this message with. This cannot be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the message failed.
         Forbidden
@@ -1262,11 +1273,10 @@ class InteractionMessage(Message):
             The length of ``embeds`` was invalid.
 
         Returns
-        ---------
+        -------
         :class:`InteractionMessage`
             The newly edited message.
         """
-
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
@@ -1290,7 +1300,7 @@ class InteractionMessage(Message):
         Deletes the message.
 
         Parameters
-        -----------
+        ----------
         delay: Optional[:class:`float`]
             If provided, the number of seconds to wait before deleting the message.
             The waiting is done in the background and deletion failures are ignored.
@@ -1304,7 +1314,6 @@ class InteractionMessage(Message):
         HTTPException
             Deleting the message failed.
         """
-
         if delay is not None:
 
             async def inner_call(delay: float = delay):
