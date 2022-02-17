@@ -89,6 +89,7 @@ if TYPE_CHECKING:
         template,
         threads,
         user,
+        voice,
         webhook,
         widget,
     )
@@ -867,6 +868,9 @@ class HTTPClient:
     ) -> Response[None]:
         r = Route("DELETE", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
         return self.request(r, reason=reason)
+
+    def get_guild_voice_regions(self, guild_id: Snowflake) -> Response[List[voice.VoiceRegion]]:
+        return self.request(Route("GET", "/guilds/{guild_id}/regions", guild_id=guild_id))
 
     def guild_voice_state(
         self,
@@ -2380,6 +2384,9 @@ class HTTPClient:
         return self.request(r, json=payload)
 
     # Misc
+
+    def get_voice_regions(self) -> Response[List[voice.VoiceRegion]]:
+        return self.request(Route("GET", "/voice/regions"))
 
     def application_info(self) -> Response[appinfo.AppInfo]:
         return self.request(Route("GET", "/oauth2/applications/@me"))
