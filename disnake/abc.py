@@ -1386,12 +1386,12 @@ class Messageable:
             .. versionadded:: 1.6
 
         view: :class:`.ui.View`
-            A Discord UI View to add to the message. This can not be mixed with ``components``.
+            A Discord UI View to add to the message. This cannot be mixed with ``components``.
 
             .. versionadded:: 2.0
 
         components: |components_type|
-            A list of components to include in the message. This can not be mixed with ``view``.
+            A list of components to include in the message. This cannot be mixed with ``view``.
 
             .. versionadded:: 2.4
 

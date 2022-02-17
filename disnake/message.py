@@ -1524,13 +1524,13 @@ class Message(Hashable):
             .. versionadded:: 1.4
 
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. This can not be mixed with ``components``.
+            The updated view to update this message with. This cannot be mixed with ``components``.
             If ``None`` is passed then the view is removed.
 
             .. versionadded:: 2.0
 
         components: |components_type|
-            The updated components to update this message with. This can not be mixed with ``view``.
+            The updated components to update this message with. This cannot be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
@@ -2086,13 +2086,13 @@ class PartialMessage(Hashable):
                 Unlike :meth:`Message.edit`, this does not default to
                 :attr:`Client.allowed_mentions` if no object is passed.
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. This can not be mixed with ``components``.
+            The updated view to update this message with. This cannot be mixed with ``components``.
             If ``None`` is passed then the view is removed.
 
             .. versionadded:: 2.0
 
         components: |components_type|
-            The updated components to update this message with. This can not be mixed with ``view``.
+            The updated components to update this message with. This cannot be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4

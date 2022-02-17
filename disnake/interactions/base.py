@@ -376,10 +376,10 @@ class Interaction:
             .. versionadded:: 2.2
 
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. If ``None`` is passed then
-            the view is removed. This can not be mixed with ``components``.
+            The updated view to update this message with. This cannot be mixed with ``components``.
+            If ``None`` is passed then the view is removed.
         components: Optional[|components_type|]
-            A list of components to update this message with. This can not be mixed with ``view``.
+            A list of components to update this message with. This cannot be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
@@ -549,9 +549,9 @@ class Interaction:
         tts: :class:`bool`
             Whether the message should be sent using text-to-speech.
         view: :class:`disnake.ui.View`
-            The view to send with the message. This can not be mixed with ``components``.
+            The view to send with the message. This cannot be mixed with ``components``.
         components: |components_type|
-            A list of components to send with the message. This can not be mixed with ``view``.
+            A list of components to send with the message. This cannot be mixed with ``view``.
 
             .. versionadded:: 2.4
 
@@ -733,9 +733,9 @@ class InteractionResponse:
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: :class:`disnake.ui.View`
-            The view to send with the message. This can not be mixed with ``components``.
+            The view to send with the message. This cannot be mixed with ``components``.
         components: |components_type|
-            A list of components to send with the message. This can not be mixed with ``view``.
+            A list of components to send with the message. This cannot be mixed with ``view``.
 
             .. versionadded:: 2.4
 
@@ -910,10 +910,10 @@ class InteractionResponse:
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. This can not be mixed with ``components``.
+            The updated view to update this message with. This cannot be mixed with ``components``.
             If ``None`` is passed then the view is removed.
         components: Optional[|components_type|]
-            A list of components to update this message with. This can not be mixed with ``view``.
+            A list of components to update this message with. This cannot be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
@@ -1249,10 +1249,10 @@ class InteractionMessage(Message):
             .. versionadded:: 2.2
 
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. This can not be mixed with ``components``.
+            The updated view to update this message with. This cannot be mixed with ``components``.
             If ``None`` is passed then the view is removed.
         components: Optional[|components_type|]
-            A list of components to update this message with. This can not be mixed with ``view``.
+            A list of components to update this message with. This cannot be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
