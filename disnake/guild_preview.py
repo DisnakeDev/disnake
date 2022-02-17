@@ -58,9 +58,9 @@ class GuildPreview:
         subject to arbitrary change by Discord.
 
         See :attr:`Guild.features` for a list of features.
-    approximate_member_count: Optional[:class:`int`]
+    approximate_member_count: :class:`int`
         The approximate number of members in the guild.
-    approximate_presence_count: Optional[:class:`int`]
+    approximate_presence_count: :class:`int`
         The approximate number of members currently active in the guild.
         This includes idle, dnd, online, and invisible members. Offline members are excluded.
     """
