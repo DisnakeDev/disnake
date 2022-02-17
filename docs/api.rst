@@ -4131,6 +4131,15 @@ Guild
 
         :type: :class:`User`
 
+GuildPreview
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildPreview
+
+.. autoclass:: GuildPreview()
+    :members:
+
+
 GuildScheduledEvent
 ~~~~~~~~~~~~~~~~~~~~
 

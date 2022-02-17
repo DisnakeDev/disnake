@@ -1329,6 +1329,9 @@ class HTTPClient:
             payload["icon"] = icon
         return self.request(Route("POST", "/guilds/templates/{code}", code=code), json=payload)
 
+    def get_guild_preview(self, guild_id: Snowflake) -> Response[guild.GuildPreview]:
+        return self.request(Route("GET", "/guilds/{guild_id}/preview", guild_id=guild_id))
+
     def get_bans(self, guild_id: Snowflake) -> Response[List[guild.Ban]]:
         return self.request(Route("GET", "/guilds/{guild_id}/bans", guild_id=guild_id))
 

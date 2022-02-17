@@ -69,6 +69,7 @@ from .errors import *
 from .flags import ApplicationFlags, Intents
 from .gateway import *
 from .guild import Guild
+from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .invite import Invite
 from .iterators import GuildIterator
@@ -1567,6 +1568,40 @@ class Client:
         """
         data = await self.http.get_guild(guild_id)
         return Guild(data=data, state=self._connection)
+
+    async def fetch_guild_preview(
+        self,
+        guild_id: int,
+        /,
+    ) -> GuildPreview:
+        """|coro|
+
+         Retrieves a :class:`.GuildPreview` from the given ID. Your bot does not have to be in this guild.
+
+        .. note::
+
+            This method may fetch any guild that has ``DISCOVERABLE`` in :attr:`Guild.features`,
+            but this information can not be known ahead of time.
+
+            This will work for any guild that you are in.
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The ID of the guild to to retrieve a preview object.
+
+        Raises
+        ------
+        NotFound
+            Retrieving the guild preview failed.
+
+        Returns
+        -------
+        :class:`.GuildPreview`
+            The guild preview from the given ID.
+        """
+        data = await self.http.get_guild_preview(guild_id)
+        return GuildPreview(data=data, state=self._connection)
 
     async def create_guild(
         self,
