@@ -2368,8 +2368,12 @@ class Guild(Hashable):
 
         return Template(state=self._state, data=data)
 
+    @utils.deprecated()
     async def create_integration(self, *, type: IntegrationType, id: int) -> None:
         """|coro|
+
+        .. deprecated:: 2.5
+            No longer supported, bots cannot use this endpoint anymore.
 
         Attaches an integration to the guild.
 
