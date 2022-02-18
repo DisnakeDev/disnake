@@ -67,6 +67,7 @@ from .enums import (
     VerificationLevel,
     VideoQualityMode,
     VoiceRegion,
+    WidgetStyle,
     try_enum,
 )
 from .errors import ClientException, HTTPException, InvalidArgument, InvalidData
@@ -84,7 +85,7 @@ from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
 from .user import User
-from .widget import Widget
+from .widget import Widget, WidgetSettings
 
 __all__ = ("Guild",)
 
@@ -261,6 +262,26 @@ class Guild(Hashable):
         Only available for manually fetched guilds.
 
         .. versionadded:: 2.3
+
+    widget_enabled: Optional[:class:`bool`]
+        Whether the widget is enabled.
+
+        .. versionadded:: 2.5
+
+        .. note::
+
+            This value is unreliable and will only be set after the guild was updated at least once.
+            Avoid using this and use :func:`widget_settings` instead.
+
+    widget_channel_id: Optional[:class:`int`]
+        The widget channel ID, if set.
+
+        .. versionadded:: 2.5
+
+        .. note::
+
+            This value is unreliable and will only be set after the guild was updated at least once.
+            Avoid using this and use :func:`widget_settings` instead.
     """
 
     __slots__ = (
@@ -289,6 +310,8 @@ class Guild(Hashable):
         "nsfw_level",
         "approximate_member_count",
         "approximate_presence_count",
+        "widget_enabled",
+        "widget_channel_id",
         "_members",
         "_channels",
         "_icon",
@@ -537,6 +560,8 @@ class Guild(Hashable):
         self.premium_progress_bar_enabled: bool = guild.get("premium_progress_bar_enabled", False)
         self.approximate_presence_count: Optional[int] = guild.get("approximate_presence_count")
         self.approximate_member_count: Optional[int] = guild.get("approximate_member_count")
+        self.widget_enabled: Optional[bool] = guild.get("widget_enabled")
+        self.widget_channel_id: Optional[int] = utils._get_as_snowflake(guild, "widget_channel_id")
 
         self._stage_instances: Dict[int, StageInstance] = {}
         for s in guild.get("stage_instances", []):
@@ -3182,7 +3207,8 @@ class Guild(Hashable):
 
     async def widget(self) -> Widget:
         """|coro|
-        Returns the widget of the guild.
+
+        Retrieves the widget of the guild.
 
         .. note::
 
@@ -3204,21 +3230,49 @@ class Guild(Hashable):
 
         return Widget(state=self._state, data=data)
 
+    async def widget_settings(self) -> WidgetSettings:
+        """|coro|
+
+        Retrieves the widget settings of the guild.
+
+        To edit the widget settings, you may also use :func:`~Guild.edit_widget`.
+
+        .. versionadded:: 2.5
+
+        Raises
+        ------
+        Forbidden
+            You do not have permission to view the widget settings.
+        HTTPException
+            Retrieving the widget settings failed.
+
+        Returns
+        -------
+        :class:`WidgetSettings`
+            The guild's widget settings.
+        """
+        data = await self._state.http.get_widget_settings(self.id)
+        return WidgetSettings(state=self._state, guild=self, data=data)
+
     async def edit_widget(
         self,
         *,
         enabled: bool = MISSING,
         channel: Optional[Snowflake] = MISSING,
         reason: Optional[str] = None,
-    ) -> None:
+    ) -> WidgetSettings:
         """|coro|
 
         Edits the widget of the guild.
 
         You must have :attr:`~Permissions.manage_guild` permission to
-        use this
+        use this.
 
         .. versionadded:: 2.0
+
+        .. versionchanged:: 2.5
+
+            Returns the new widget settings.
 
         Parameters
         ----------
@@ -3226,6 +3280,8 @@ class Guild(Hashable):
             Whether to enable the widget for the guild.
         channel: Optional[:class:`~disnake.abc.Snowflake`]
             The new widget channel. ``None`` removes the widget channel.
+            If set, an invite link for this channel will be generated,
+            which allows users to join the guild from the widget.
         reason: Optional[:class:`str`]
             The reason for editing the widget. Shows up on the audit log.
 
@@ -3237,6 +3293,11 @@ class Guild(Hashable):
             You do not have permission to edit the widget.
         HTTPException
             Editing the widget failed.
+
+        Returns
+        -------
+        :class:`WidgetSettings`
+            The new widget settings.
         """
         payload = {}
         if channel is not MISSING:
@@ -3244,7 +3305,25 @@ class Guild(Hashable):
         if enabled is not MISSING:
             payload["enabled"] = enabled
 
-        await self._state.http.edit_widget(self.id, payload=payload, reason=reason)
+        data = await self._state.http.edit_widget(self.id, payload=payload, reason=reason)
+        return WidgetSettings(state=self._state, guild=self, data=data)
+
+    def widget_image_url(self, style: WidgetStyle = WidgetStyle.shield) -> str:
+        """Returns an URL to the widget's .png image.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        style: :class:`WidgetStyle`
+            The widget style.
+
+        Returns
+        -------
+        :class:`str`
+            The widget image URL.
+        """
+        return self._state.http.widget_image_url(self.id, style=str(style))
 
     async def chunk(self, *, cache: bool = True) -> Optional[List[Member]]:
         """|coro|
