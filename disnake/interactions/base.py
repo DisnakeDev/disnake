@@ -36,6 +36,7 @@ from ..channel import ChannelType, PartialMessageable
 from ..enums import InteractionResponseType, InteractionType, WebhookType, try_enum
 from ..errors import (
     HTTPException,
+    InteractionNotEditable,
     InteractionNotResponded,
     InteractionResponded,
     InteractionTimedOut,
@@ -934,12 +935,12 @@ class InteractionResponse:
         state = parent._state
 
         if parent.type not in (InteractionType.component, InteractionType.modal_submit):
-            return
+            raise InteractionNotEditable(parent)
         parent = cast("Union[MessageInteraction, ModalInteraction]", parent)
         message = parent.message
         # message in modal interactions only exists if modal was sent from component interaction
         if not message:
-            return
+            raise InteractionNotEditable(parent)
 
         payload = {}
         if content is not MISSING:
