@@ -234,6 +234,14 @@ class MessageInteraction(Interaction):
     message: Message
 
 
+class _ModalInteractionOptional(TypedDict, total=False):
+    message: Message
+
+
+class ModalInteraction(_ModalInteractionOptional, Interaction):
+    data: ModalInteractionData
+
+
 class InteractionApplicationCommandCallbackData(TypedDict, total=False):
     tts: bool
     content: str
