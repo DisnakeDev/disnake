@@ -233,10 +233,10 @@ class WidgetSettings:
     def __init__(
         self, *, state: ConnectionState, guild: Guild, data: WidgetSettingsPayload
     ) -> None:
-        self._state = state
-        self.guild = guild
-        self.enabled = data["enabled"]
-        self.channel_id = _get_as_snowflake(data, "channel_id")
+        self._state: ConnectionState = state
+        self.guild: Guild = guild
+        self.enabled: bool = data["enabled"]
+        self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
 
     def __repr__(self) -> str:
         return f"<WidgetSettings enabled={self.enabled!r} channel_id={self.channel_id!r} guild={self.guild!r}>"
