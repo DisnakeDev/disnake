@@ -74,6 +74,7 @@ __all__ = (
     "GuildStickerNotFound",
     "PartialEmojiConversionFailure",
     "BadBoolArgument",
+    "LargeIntConversionFailure",
     "MissingRole",
     "BotMissingRole",
     "MissingAnyRole",
@@ -534,6 +535,24 @@ class BadBoolArgument(BadArgument):
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
         super().__init__(f"{argument} is not a recognised boolean option")
+
+
+class LargeIntConversionFailure(BadArgument):
+    """Exception raised when a large integer argument was not convertable.
+
+    This inherits from :exc:`BadArgument`
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    argument: :class:`str`
+        The argument that could not be cocereted to a large integer.
+    """
+
+    def __init__(self, argument: str) -> None:
+        self.argument: str = argument
+        super().__init__(f"{argument} is not able to be coerced to an integer")
 
 
 class DisabledCommand(CommandError):
