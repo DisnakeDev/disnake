@@ -444,8 +444,14 @@ class Interaction:
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
         message = InteractionMessage(state=state, channel=self.channel, data=data)  # type: ignore
+
         if view and not view.is_finished():
-            self._state.store_view(view, message.id)
+            if message.interaction is None:
+                key_id = message.id
+            else:
+                key_id = message.interaction.id
+            self._state.store_view(view, key_id)
+
         return message
 
     async def delete_original_message(self, *, delay: float = None) -> None:
@@ -847,7 +853,16 @@ class InteractionResponse:
             if ephemeral and view.timeout is None:
                 view.timeout = 15 * 60.0
 
-            self._parent._state.store_view(view)
+            key_id = None
+            if self._parent.type is InteractionType.component:
+                try:
+                    key_id = (await self._parent.original_message()).id
+                except HTTPException:
+                    pass
+            else:
+                key_id = self._parent.id
+
+            self._parent._state.store_view(view, key_id)
 
         if delete_after is not MISSING:
             await self._parent.delete_original_message(delay=delete_after)
@@ -933,7 +948,15 @@ class InteractionResponse:
         parent = self._parent
         msg: Optional[Message] = getattr(parent, "message", None)
         state = parent._state
-        message_id = msg.id if msg else None
+
+        key_id: Optional[int]
+        if msg is None:
+            key_id = None
+        elif msg.interaction is None:
+            key_id = msg.id
+        else:
+            key_id = msg.interaction.id
+
         if parent.type is not InteractionType.component:
             return
         parent = cast(MessageInteraction, parent)
@@ -985,8 +1008,8 @@ class InteractionResponse:
             raise TypeError("cannot mix view and components keyword arguments")
 
         if view is not MISSING:
-            if message_id:
-                state.prevent_view_updates_for(message_id)
+            if key_id:
+                state.prevent_view_updates_for(key_id)
             payload["components"] = [] if view is None else view.to_components()
 
         if components is not MISSING:
@@ -1008,7 +1031,7 @@ class InteractionResponse:
                     f.close()
 
         if view and not view.is_finished():
-            state.store_view(view, message_id)
+            state.store_view(view, key_id)
 
         self._responded = True
 
