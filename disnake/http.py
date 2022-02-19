@@ -1655,7 +1655,9 @@ class HTTPClient:
 
     def widget_image_url(self, guild_id: Snowflake, *, style: str) -> str:
         return str(
-            yarl.URL(Route.BASE).with_path(f"/api/guilds/{guild_id}/widget.png").with_query(style=style)
+            yarl.URL(Route.BASE)
+            .with_path(f"/api/guilds/{guild_id}/widget.png")
+            .with_query(style=style)
         )
 
     # Invite management
