@@ -829,7 +829,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         if nick is not MISSING:
             nick = nick or ""
             if me:
-                await http.change_my_nickname(guild_id, nick, reason=reason)
+                await http.edit_my_member(guild_id, nick=nick, reason=reason)
             else:
                 payload["nick"] = nick
 

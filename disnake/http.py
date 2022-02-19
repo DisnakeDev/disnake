@@ -497,9 +497,6 @@ class HTTPClient:
             reason=reason,
         )
 
-    def logout(self) -> Response[None]:
-        return self.request(Route("POST", "/auth/logout"))
-
     # Group functionality
 
     def start_group(
@@ -893,19 +890,6 @@ class HTTPClient:
     def edit_profile(self, payload: Dict[str, Any]) -> Response[user.User]:
         return self.request(Route("PATCH", "/users/@me"), json=payload)
 
-    def change_my_nickname(
-        self,
-        guild_id: Snowflake,
-        nickname: str,
-        *,
-        reason: Optional[str] = None,
-    ) -> Response[member.Nickname]:
-        r = Route("PATCH", "/guilds/{guild_id}/members/@me/nick", guild_id=guild_id)
-        payload = {
-            "nick": nickname,
-        }
-        return self.request(r, json=payload, reason=reason)
-
     def change_nickname(
         self,
         guild_id: Snowflake,
@@ -933,6 +917,16 @@ class HTTPClient:
             "PATCH", "/guilds/{guild_id}/voice-states/{user_id}", guild_id=guild_id, user_id=user_id
         )
         return self.request(r, json=payload)
+
+    def edit_my_member(
+        self,
+        guild_id: Snowflake,
+        *,
+        reason: Optional[str] = None,
+        **fields: Any,
+    ) -> Response[member.MemberWithUser]:
+        r = Route("PATCH", "/guilds/{guild_id}/members/@me", guild_id=guild_id)
+        return self.request(r, json=fields, reason=reason)
 
     def edit_member(
         self,
@@ -1083,7 +1077,7 @@ class HTTPClient:
 
     def join_thread(self, channel_id: Snowflake) -> Response[None]:
         return self.request(
-            Route("POST", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
+            Route("PUT", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
         )
 
     def add_user_to_thread(self, channel_id: Snowflake, user_id: Snowflake) -> Response[None]:
