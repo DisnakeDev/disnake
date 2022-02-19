@@ -989,8 +989,7 @@ class InteractionResponse:
             raise TypeError("cannot mix view and components keyword arguments")
 
         if view is not MISSING:
-            if message.id:
-                state.prevent_view_updates_for(message.id)
+            state.prevent_view_updates_for(message.id)
             payload["components"] = [] if view is None else view.to_components()
 
         if components is not MISSING:
