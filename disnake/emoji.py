@@ -102,7 +102,6 @@ class Emoji(_EmojiTag, AssetMixin):
         "name",
         "_roles",
         "guild_id",
-        "_state",
         "user",
         "available",
     )
