@@ -316,7 +316,7 @@ class InteractionResponded(InteractionException):
     """Exception that's raised when sending another interaction response using
     :class:`InteractionResponse` when one has already been done before.
 
-    An interaction can only responded to once.
+    An interaction can only be responded to once.
 
     .. versionadded:: 2.0
 
