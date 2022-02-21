@@ -1607,7 +1607,7 @@ class Client:
         self,
         *,
         name: str,
-        region: Union[VoiceRegion, str] = VoiceRegion.us_west,
+        region: Union[VoiceRegion, str] = None,
         icon: bytes = MISSING,
         code: str = MISSING,
     ) -> Guild:
@@ -1623,7 +1623,10 @@ class Client:
             The name of the guild.
         region: :class:`.VoiceRegion`
             The region for the voice communication server.
-            Defaults to :attr:`.VoiceRegion.us_west`.
+
+            .. deprecated:: 2.5
+
+                This no longer has any effect.
         icon: Optional[:class:`bytes`]
             The :term:`py:bytes-like object` representing the icon. See :meth:`.ClientUser.edit`
             for more details on what is expected.
@@ -1650,12 +1653,15 @@ class Client:
         else:
             icon_base64 = None
 
-        region_value = str(region)
+        if region is not None:
+            utils.warn_deprecated(
+                "region is deprecated and will be removed in a future version.", stacklevel=2
+            )
 
         if code:
-            data = await self.http.create_from_template(code, name, region_value, icon_base64)
+            data = await self.http.create_from_template(code, name, icon_base64)
         else:
-            data = await self.http.create_guild(name, region_value, icon_base64)
+            data = await self.http.create_guild(name, icon_base64)
         return Guild(data=data, state=self._connection)
 
     async def fetch_stage_instance(self, channel_id: int, /) -> StageInstance:
