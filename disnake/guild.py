@@ -3291,7 +3291,7 @@ class Guild(Hashable):
 
         This is a websocket operation and can be slow.
 
-        See also :attr:`search_members`.
+        See also :func:`search_members`.
 
         .. versionadded:: 1.3
 
@@ -3361,22 +3361,22 @@ class Guild(Hashable):
     ):
         """|coro|
 
-        Request members that belong to this guild whose username starts with
+        Retrieves members that belong to this guild whose username or nickname starts with
         the query given.
 
-        Note that unlike :attr:`query_members`, this is not a websocket operation.
+        Note that unlike :func:`query_members`, this is not a websocket operation.
 
-        See also :attr:`query_members`.
+        See also :func:`query_members`.
 
         .. versionadded:: 2.5
 
         Parameters
         -----------
         query: Optional[:class:`str`]
-            The string that the username's start with.
+            The string that the usernames or nicknames start with.
         limit: :class:`int`
             The maximum number of members to send back. This must be
-            a number between 5 and 100.
+            a number between 1 and 1000.
         cache: :class:`bool`
             Whether to cache the members internally. This makes operations
             such as :meth:`get_member` work for those that matched.
