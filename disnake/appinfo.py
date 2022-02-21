@@ -80,6 +80,10 @@ class AppInfo:
 
         .. versionadded:: 1.3
 
+        .. deprecated:: 2.5
+
+            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
+
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
         GameSDK's `GetTicket <https://discord.com/developers/docs/game-sdk/applications#getticket>`_.
@@ -131,7 +135,7 @@ class AppInfo:
         "bot_require_code_grant",
         "owner",
         "_icon",
-        "summary",
+        "_summary",
         "verify_key",
         "team",
         "guild_id",
@@ -159,7 +163,7 @@ class AppInfo:
         team: Optional[TeamPayload] = data.get("team")
         self.team: Optional[Team] = Team(state, team) if team else None
 
-        self.summary: str = data["summary"]
+        self._summary: str = data.get("summary", "")
         self.verify_key: str = data["verify_key"]
 
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
@@ -208,6 +212,15 @@ class AppInfo:
         """
         return self._state._get_guild(self.guild_id)
 
+    @property
+    def summary(self) -> str:
+        # there is no docstring here due to how sphinx autodoc works
+        utils.warn_deprecated(
+            "summary is deprecated and will be removed in a future version. Consider using description instead.",
+            stacklevel=2,
+        )
+        return self._summary
+
 
 class PartialAppInfo:
     """Represents a partial AppInfo given by :func:`~disnake.abc.GuildChannel.create_invite`
@@ -227,7 +240,12 @@ class PartialAppInfo:
     summary: :class:`str`
         If this application is a game sold on Discord,
         this field will be the summary field for the store page of its primary SKU.
-    verify_key: :class:`str`
+
+        .. deprecated:: 2.5
+
+            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
+
+        verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
         GameSDK's `GetTicket <https://discord.com/developers/docs/game-sdk/applications#getticket>`_.
     terms_of_service_url: Optional[:class:`str`]
@@ -242,7 +260,7 @@ class PartialAppInfo:
         "name",
         "description",
         "rpc_origins",
-        "summary",
+        "_summary",
         "verify_key",
         "terms_of_service_url",
         "privacy_policy_url",
@@ -256,7 +274,7 @@ class PartialAppInfo:
         self._icon: Optional[str] = data.get("icon")
         self.description: str = data["description"]
         self.rpc_origins: Optional[List[str]] = data.get("rpc_origins")
-        self.summary: str = data["summary"]
+        self._summary: str = data.get("summary", "")
         self.verify_key: str = data["verify_key"]
         self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")
         self.privacy_policy_url: Optional[str] = data.get("privacy_policy_url")
@@ -270,3 +288,12 @@ class PartialAppInfo:
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="app")
+
+    @property
+    def summary(self) -> str:
+        # there is no docstring here due to how sphinx autodoc works
+        utils.warn_deprecated(
+            "summary is deprecated and will be removed in a future version. Consider using description instead.",
+            stacklevel=2,
+        )
+        return self._summary
