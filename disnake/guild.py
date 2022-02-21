@@ -1021,7 +1021,7 @@ class Guild(Hashable):
             See :attr:`VoiceChannel.region` instead.
         """
         utils.warn_deprecated(
-            "Guild.region is deprecated and will be removed in version 2.6.", stacklevel=2
+            "Guild.region is deprecated and will be removed in a future version.", stacklevel=2
         )
         return self._region
 
@@ -1722,7 +1722,7 @@ class Guild(Hashable):
 
         if region is not MISSING:
             utils.warn_deprecated(
-                "Guild.region is deprecated and will be removed in version 2.6.", stacklevel=2
+                "Guild.region is deprecated and will be removed in a future version", stacklevel=2
             )
 
         if verification_level is not MISSING:
