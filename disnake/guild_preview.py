@@ -110,12 +110,7 @@ class GuildPreview:
             self.stickers: Tuple[GuildSticker, ...] = ()
 
     def __repr__(self) -> str:
-        attrs = (
-            ("id", self.id),
-            ("name", self.name),
-        )
-        inner = " ".join("%s=%r" % t for t in attrs)
-        return f"<GuildPreview {inner}>"
+        return f"<GuildPreview id={self.id!r} name={self.name!r}>"
 
     @property
     def icon(self) -> Optional[Asset]:
