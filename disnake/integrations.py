@@ -315,13 +315,6 @@ class IntegrationApplication:
         The application's icon hash.
     description: :class:`str`
         The application's description. Can be an empty string.
-    summary: :class:`str`
-        The application's summary. Can be an empty string.
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-
     user: Optional[:class:`User`]
         The bot user associated with this application.
     """
@@ -346,9 +339,14 @@ class IntegrationApplication:
 
     @property
     def summary(self) -> str:
-        # there is no docstring here due to how sphinx autodoc works
+        """:class:`str`: The application's summary. Can be an empty string.
+
+        .. deprecated:: 2.5
+
+            This field is deprecated by discord and is now always blank. Replaced with :attr:`.description`.
+        """
         warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using :attr:`.description` instead.",
+            "summary is deprecated and will be removed in a future version. Replaced with :attr:`.description`.",
             stacklevel=2,
         )
         return self._summary

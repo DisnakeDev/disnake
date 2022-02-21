@@ -74,16 +74,6 @@ class AppInfo:
         grant flow to join.
     rpc_origins: Optional[List[:class:`str`]]
         A list of RPC origin URLs, if RPC is enabled.
-    summary: :class:`str`
-        If this application is a game sold on Discord,
-        this field will be the summary field for the store page of its primary SKU.
-
-        .. versionadded:: 1.3
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
         GameSDK's `GetTicket <https://discord.com/developers/docs/game-sdk/applications#getticket>`_.
@@ -214,9 +204,17 @@ class AppInfo:
 
     @property
     def summary(self) -> str:
-        # there is no docstring here due to how sphinx autodoc works
+        """:class:`str`: If this application is a game sold on Discord,
+        this field will be the summary field for the store page of its primary SKU.
+
+        .. versionadded:: 1.3
+
+        .. deprecated:: 2.5
+
+            This field is deprecated by discord and is now always blank. Replaced with :attr:`.description`.
+        """
         utils.warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
+            "summary is deprecated and will be removed in a future version. Replaced with description.",
             stacklevel=2,
         )
         return self._summary
@@ -237,15 +235,7 @@ class PartialAppInfo:
         The application's description.
     rpc_origins: Optional[List[:class:`str`]]
         A list of RPC origin URLs, if RPC is enabled.
-    summary: :class:`str`
-        If this application is a game sold on Discord,
-        this field will be the summary field for the store page of its primary SKU.
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-
-        verify_key: :class:`str`
+    verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
         GameSDK's `GetTicket <https://discord.com/developers/docs/game-sdk/applications#getticket>`_.
     terms_of_service_url: Optional[:class:`str`]
@@ -291,9 +281,15 @@ class PartialAppInfo:
 
     @property
     def summary(self) -> str:
-        # there is no docstring here due to how sphinx autodoc works
+        """:class:`str`: If this application is a game sold on Discord,
+        this field will be the summary field for the store page of its primary SKU.
+
+        .. deprecated:: 2.5
+
+            This field is deprecated by discord and is now always blank. Replaced with :attr:`.description`.
+        """
         utils.warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
+            "summary is deprecated and will be removed in a future version. Replaced with description.",
             stacklevel=2,
         )
         return self._summary
