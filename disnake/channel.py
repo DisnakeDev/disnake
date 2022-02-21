@@ -35,6 +35,7 @@ from typing import (
     Dict,
     Iterable,
     List,
+    Literal,
     Mapping,
     Optional,
     Tuple,
@@ -706,6 +707,33 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         """
         return self.guild.get_thread(thread_id)
 
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        message: Snowflake = None,
+        auto_archive_duration: AnyThreadArchiveDuration = None,
+        slowmode_delay: int = None,
+        reason: Optional[str] = None,
+    ) -> Thread:
+        ...
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        type: Literal[
+            ChannelType.public_thread, ChannelType.private_thread, ChannelType.news_thread
+        ] = None,
+        auto_archive_duration: AnyThreadArchiveDuration = None,
+        invitable: bool = None,
+        slowmode_delay: int = None,
+        reason: Optional[str] = None,
+    ) -> Thread:
+        ...
+
     async def create_thread(
         self,
         *,
@@ -723,25 +751,41 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         To create a public thread, you must have :attr:`~disnake.Permissions.create_public_threads` permission.
         For a private thread, :attr:`~disnake.Permissions.create_private_threads` permission is needed instead.
+        Additionally, the guild must have ``PRIVATE_THREADS`` in :attr:`Guild.features` to create private threads.
 
         .. versionadded:: 2.0
+
+        .. versionchanged:: 2.5
+
+            - Only one of ``message`` and ``type`` may be provided.
+            - ``type`` is now required if ``message`` is not provided.
+
 
         Parameters
         ----------
         name: :class:`str`
             The name of the thread.
-        message: Optional[:class:`abc.Snowflake`]
+        message: :class:`abc.Snowflake`
             A snowflake representing the message to create the thread with.
             If ``None`` is passed then a private thread is created.
             Defaults to ``None``.
+
+            .. versionchanged:: 2.5
+
+                Cannot be provided with ``type``.
+
+        type: :class:`ChannelType`
+            The type of thread to create.
+
+            .. versionchanged:: 2.5
+
+                Cannot be provided with ``message``.
+                Now required if message is not provided.
+
         auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
-        type: Optional[:class:`ChannelType`]
-            The type of thread to create. If a ``message`` is passed then this parameter
-            is ignored, as a thread created with a message is always a public thread.
-            By default this creates a private thread if this is ``None``.
         invitable: :class:`bool`
             Whether non-moderators can add other non-moderators to this thread.
             Only available for private threads.
@@ -773,8 +817,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         :class:`Thread`
             The newly created thread
         """
-        if type is None:
-            type = ChannelType.private_thread
+        if not ((message is None) ^ (type is None)):
+            raise ValueError("Exactly one of message and type must be provided.")
 
         if auto_archive_duration is not None:
             auto_archive_duration: ThreadArchiveDurationLiteral = try_enum_to_int(
@@ -786,7 +830,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 self.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                type=type.value,
+                type=type.value,  # type:ignore
                 invitable=invitable if invitable is not None else True,
                 rate_limit_per_user=slowmode_delay or 0,
                 reason=reason,
