@@ -1013,8 +1013,7 @@ class Guild(Hashable):
 
     @property
     def region(self) -> VoiceRegion:
-        """Optional[:class:`VoiceRegion`]: The region the guild belongs on. There is a chance that the region
-        will be a :class:`str` if the value is not recognised by the enumerator.
+        """:class:`VoiceRegion`: The region the guild belongs on.
 
         .. deprecated:: 2.5
 
