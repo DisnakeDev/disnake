@@ -1258,7 +1258,6 @@ class HTTPClient:
     ) -> Response[guild.Guild]:
         valid_keys = (
             "name",
-            "region",
             "icon",
             "afk_timeout",
             "owner_id",

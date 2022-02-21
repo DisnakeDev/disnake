@@ -1724,7 +1724,6 @@ class Guild(Hashable):
             utils.warn_deprecated(
                 "Guild.region is deprecated and will be removed in version 2.6.", stacklevel=2
             )
-            fields["region"] = str(region)
 
         if verification_level is not MISSING:
             if not isinstance(verification_level, VerificationLevel):
