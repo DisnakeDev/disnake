@@ -3398,7 +3398,7 @@ class Guild(Hashable):
         resp = []
         for member in members:
             member = Member(state=self._state, data=member, guild=self)
-            if cache:
+            if cache and member.id not in self._members:
                 self._add_member(member)
             resp.append(member)
         return resp
