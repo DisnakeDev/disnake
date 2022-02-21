@@ -714,7 +714,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         name: str,
         message: Snowflake = None,
         auto_archive_duration: AnyThreadArchiveDuration = None,
-        invitable: bool = None,
         slowmode_delay: int = None,
         reason: Optional[str] = None,
     ) -> Thread:
