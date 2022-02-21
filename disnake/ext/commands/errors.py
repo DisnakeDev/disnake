@@ -538,7 +538,7 @@ class BadBoolArgument(BadArgument):
 
 
 class LargeIntConversionFailure(BadArgument):
-    """Exception raised when a large integer argument was not convertible.
+    """Exception raised when a large integer argument was not able to be converted.
 
     This inherits from :exc:`BadArgument`
 
@@ -547,12 +547,12 @@ class LargeIntConversionFailure(BadArgument):
     Attributes
     ----------
     argument: :class:`str`
-        The argument that could not be coerced to an integer.
+        The argument that could not be converted to an integer.
     """
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f"{argument} is not able to be coerced to an integer")
+        super().__init__(f"{argument} is not able to be converted to an integer")
 
 
 class DisabledCommand(CommandError):
