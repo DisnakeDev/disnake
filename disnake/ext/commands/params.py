@@ -425,8 +425,8 @@ class ParamInfo:
         if self.large:
             try:
                 argument = int(argument)
-            except Exception as e:
-                raise errors.ConversionError(int, e) from e
+            except ValueError as e:
+                raise errors.LargeIntConversionFailure(argument) from None
 
         if self.converter is None:
             # TODO: Custom validators
@@ -438,6 +438,8 @@ class ParamInfo:
                 return await argument
 
             return argument
+        except errors.CommandError:
+            raise
         except Exception as e:
             raise errors.ConversionError(self.converter, e) from e
 
