@@ -25,7 +25,18 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, Set, TypeVar, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    TypeVar,
+    Union,
+    overload,
+)
 
 import disnake
 
@@ -35,9 +46,9 @@ from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
 
-    import aiohttp
     import asyncio
 
+    import aiohttp
     from typing_extensions import ParamSpec
 
     from disnake.activity import BaseActivity
@@ -46,8 +57,8 @@ if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction
     from disnake.mentions import AllowedMentions
 
-    from .help import HelpCommand
     from ._types import CoroFunc
+    from .help import HelpCommand
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
@@ -187,6 +198,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
     """
 
     if TYPE_CHECKING:
+
         def __init__(
             self,
             command_prefix: Optional[Union[str, List[str], Callable]] = None,
@@ -233,6 +245,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
     """
 
     if TYPE_CHECKING:
+
         def __init__(
             self,
             command_prefix: Optional[Union[str, List[str], Callable]] = None,
@@ -340,6 +353,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     """
 
     if TYPE_CHECKING:
+
         def __init__(
             self,
             *,
@@ -382,6 +396,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
     """
 
     if TYPE_CHECKING:
+
         def __init__(
             self,
             *,

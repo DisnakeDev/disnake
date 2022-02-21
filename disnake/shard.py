@@ -363,6 +363,7 @@ class AutoShardedClient(Client):
             ...
 
     else:
+
         def __init__(self, *, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
             kwargs.pop("shard_id", None)
             self.shard_ids = shard_ids
@@ -602,5 +603,3 @@ class AutoShardedClient(Client):
         :return type: :class:`bool`
         """
         return any(shard.ws.is_ratelimited() for shard in self.__shards.values())
-
-AutoShardedClient()
