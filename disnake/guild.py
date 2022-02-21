@@ -3354,8 +3354,8 @@ class Guild(Hashable):
 
     async def search_members(
         self,
-        *,
         query: str,
+        *,
         limit: int = 1,
         cache: bool = True,
     ):
