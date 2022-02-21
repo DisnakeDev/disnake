@@ -36,6 +36,7 @@ from ..channel import ChannelType, PartialMessageable
 from ..enums import InteractionResponseType, InteractionType, WebhookType, try_enum
 from ..errors import (
     HTTPException,
+    InteractionNotEditable,
     InteractionNotResponded,
     InteractionResponded,
     InteractionTimedOut,
@@ -87,6 +88,7 @@ if TYPE_CHECKING:
     from ..ui.modal import Modal
     from ..ui.view import View
     from .message import MessageInteraction
+    from .modal import ModalInteraction
 
     InteractionChannel = Union[
         VoiceChannel,
@@ -99,8 +101,6 @@ if TYPE_CHECKING:
     ]
 
     AnyBot = Union[Bot, AutoShardedBot]
-else:
-    MessageInteraction = ...  # only used for typecasting
 
 MISSING: Any = utils.MISSING
 
@@ -868,7 +868,8 @@ class InteractionResponse:
         """|coro|
 
         Responds to this interaction by editing the original message of
-        a component interaction.
+        a component interaction or modal interaction (if the modal was sent in
+        response to a component interaction).
 
         .. note::
             If the original message has embeds with images that were created from local files
@@ -931,12 +932,15 @@ class InteractionResponse:
             raise InteractionResponded(self._parent)
 
         parent = self._parent
-        msg: Optional[Message] = getattr(parent, "message", None)
         state = parent._state
-        message_id = msg.id if msg else None
-        if parent.type is not InteractionType.component:
-            return
-        parent = cast(MessageInteraction, parent)
+
+        if parent.type not in (InteractionType.component, InteractionType.modal_submit):
+            raise InteractionNotEditable(parent)
+        parent = cast("Union[MessageInteraction, ModalInteraction]", parent)
+        message = parent.message
+        # message in modal interactions only exists if modal was sent from component interaction
+        if not message:
+            raise InteractionNotEditable(parent)
 
         payload = {}
         if content is not MISSING:
@@ -977,7 +981,7 @@ class InteractionResponse:
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
-            attachments = parent.message.attachments
+            attachments = message.attachments
         if attachments is not MISSING:
             payload["attachments"] = [a.to_dict() for a in attachments]
 
@@ -985,8 +989,7 @@ class InteractionResponse:
             raise TypeError("cannot mix view and components keyword arguments")
 
         if view is not MISSING:
-            if message_id:
-                state.prevent_view_updates_for(message_id)
+            state.prevent_view_updates_for(message.id)
             payload["components"] = [] if view is None else view.to_components()
 
         if components is not MISSING:
@@ -1008,7 +1011,7 @@ class InteractionResponse:
                     f.close()
 
         if view and not view.is_finished():
-            state.store_view(view, message_id)
+            state.store_view(view, message.id)
 
         self._responded = True
 
