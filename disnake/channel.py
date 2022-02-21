@@ -775,9 +775,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 Cannot be provided with ``type``.
 
         type: :class:`ChannelType`
-            The type of thread to create. If a ``message`` is passed then this parameter
-            is ignored, as a thread created with a message is always a public thread.
-            By default this creates a private thread if this is ``None``.
+            The type of thread to create.
 
             .. versionchanged:: 2.5
 
