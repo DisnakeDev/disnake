@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, Set, TypeVar, Union, overload
 
 import disnake
 
@@ -35,10 +35,18 @@ from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
 
+    import aiohttp
+    import asyncio
+
     from typing_extensions import ParamSpec
 
+    from disnake.activity import BaseActivity
+    from disnake.enums import Status
+    from disnake.flags import Intents, MemberCacheFlags
     from disnake.interactions import ApplicationCommandInteraction
+    from disnake.mentions import AllowedMentions
 
+    from .help import HelpCommand
     from ._types import CoroFunc
 
     ApplicationCommandInteractionT = TypeVar(
@@ -178,7 +186,45 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         .. versionadded:: 2.1
     """
 
-    pass
+    if TYPE_CHECKING:
+        def __init__(
+            self,
+            command_prefix: Optional[Union[str, List[str], Callable]] = None,
+            help_command: HelpCommand = ...,
+            description: str = None,
+            *,
+            strip_after_prefix: bool = False,
+            owner_id: Optional[int] = None,
+            owner_ids: Set[int] = ...,
+            reload: bool = False,
+            case_insensitive: bool = False,
+            sync_commands: bool = True,
+            sync_commands_debug: bool = False,
+            sync_commands_on_cog_unload: bool = True,
+            sync_permissions: bool = False,
+            test_guilds: Sequence[int] = None,
+            asyncio_debug: bool = False,
+            loop: Optional[asyncio.AbstractEventLoop] = None,
+            shard_id: Optional[int] = None,
+            shard_count: Optional[int] = None,
+            enable_debug_events: bool = False,
+            connector: Optional[aiohttp.BaseConnector] = None,
+            proxy: Optional[str] = None,
+            proxy_auth: Optional[aiohttp.BasicAuth] = None,
+            assume_unsync_clock: bool = True,
+            max_messages: Optional[int] = 1000,
+            application_id: Optional[int] = None,
+            heartbeat_timeout: float = 60.0,
+            guild_ready_timeout: float = 2.0,
+            allowed_mentions: Optional[AllowedMentions] = None,
+            activity: Optional[BaseActivity] = None,
+            status: Optional[Union[Status, str]] = None,
+            intents: Intents = ...,
+            chunk_guilds_at_startup: Optional[bool] = None,
+            member_cache_flags: MemberCacheFlags = None,
+            cache_application_command_permissions: bool = True,
+        ):
+            ...
 
 
 class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
@@ -186,7 +232,45 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
     :class:`disnake.AutoShardedClient` instead.
     """
 
-    pass
+    if TYPE_CHECKING:
+        def __init__(
+            self,
+            command_prefix: Optional[Union[str, List[str], Callable]] = None,
+            help_command: HelpCommand = ...,
+            description: str = None,
+            *,
+            strip_after_prefix: bool = False,
+            owner_id: Optional[int] = None,
+            owner_ids: Set[int] = ...,
+            reload: bool = False,
+            case_insensitive: bool = False,
+            sync_commands: bool = True,
+            sync_commands_debug: bool = False,
+            sync_commands_on_cog_unload: bool = True,
+            sync_permissions: bool = False,
+            test_guilds: Sequence[int] = None,
+            asyncio_debug: bool = False,
+            loop: Optional[asyncio.AbstractEventLoop] = None,
+            shard_ids: Optional[List[int]] = None,  # instead of shard_id
+            shard_count: Optional[int] = None,
+            enable_debug_events: bool = False,
+            connector: Optional[aiohttp.BaseConnector] = None,
+            proxy: Optional[str] = None,
+            proxy_auth: Optional[aiohttp.BasicAuth] = None,
+            assume_unsync_clock: bool = True,
+            max_messages: Optional[int] = 1000,
+            application_id: Optional[int] = None,
+            heartbeat_timeout: float = 60.0,
+            guild_ready_timeout: float = 2.0,
+            allowed_mentions: Optional[AllowedMentions] = None,
+            activity: Optional[BaseActivity] = None,
+            status: Optional[Union[Status, str]] = None,
+            intents: Intents = ...,
+            chunk_guilds_at_startup: Optional[bool] = None,
+            member_cache_flags: MemberCacheFlags = None,
+            cache_application_command_permissions: bool = True,
+        ):
+            ...
 
 
 class InteractionBot(InteractionBotBase, disnake.Client):
@@ -255,7 +339,41 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         .. versionadded:: 2.1
     """
 
-    pass
+    if TYPE_CHECKING:
+        def __init__(
+            self,
+            *,
+            owner_id: Optional[int] = None,
+            owner_ids: Set[int] = ...,
+            reload: bool = False,
+            case_insensitive: bool = False,
+            sync_commands: bool = True,
+            sync_commands_debug: bool = False,
+            sync_commands_on_cog_unload: bool = True,
+            sync_permissions: bool = False,
+            test_guilds: Sequence[int] = None,
+            asyncio_debug: bool = False,
+            loop: Optional[asyncio.AbstractEventLoop] = None,
+            shard_id: Optional[int] = None,
+            shard_count: Optional[int] = None,
+            enable_debug_events: bool = False,
+            connector: Optional[aiohttp.BaseConnector] = None,
+            proxy: Optional[str] = None,
+            proxy_auth: Optional[aiohttp.BasicAuth] = None,
+            assume_unsync_clock: bool = True,
+            max_messages: Optional[int] = 1000,
+            application_id: Optional[int] = None,
+            heartbeat_timeout: float = 60.0,
+            guild_ready_timeout: float = 2.0,
+            allowed_mentions: Optional[AllowedMentions] = None,
+            activity: Optional[BaseActivity] = None,
+            status: Optional[Union[Status, str]] = None,
+            intents: Intents = ...,
+            chunk_guilds_at_startup: Optional[bool] = None,
+            member_cache_flags: MemberCacheFlags = None,
+            cache_application_command_permissions: bool = True,
+        ):
+            ...
 
 
 class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
@@ -263,4 +381,38 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
     :class:`disnake.AutoShardedClient` instead.
     """
 
-    pass
+    if TYPE_CHECKING:
+        def __init__(
+            self,
+            *,
+            owner_id: Optional[int] = None,
+            owner_ids: Set[int] = ...,
+            reload: bool = False,
+            case_insensitive: bool = False,
+            sync_commands: bool = True,
+            sync_commands_debug: bool = False,
+            sync_commands_on_cog_unload: bool = True,
+            sync_permissions: bool = False,
+            test_guilds: Sequence[int] = None,
+            asyncio_debug: bool = False,
+            loop: Optional[asyncio.AbstractEventLoop] = None,
+            shard_ids: Optional[List[int]] = None,  # instead of shard_id
+            shard_count: Optional[int] = None,
+            enable_debug_events: bool = False,
+            connector: Optional[aiohttp.BaseConnector] = None,
+            proxy: Optional[str] = None,
+            proxy_auth: Optional[aiohttp.BasicAuth] = None,
+            assume_unsync_clock: bool = True,
+            max_messages: Optional[int] = 1000,
+            application_id: Optional[int] = None,
+            heartbeat_timeout: float = 60.0,
+            guild_ready_timeout: float = 2.0,
+            allowed_mentions: Optional[AllowedMentions] = None,
+            activity: Optional[BaseActivity] = None,
+            status: Optional[Union[Status, str]] = None,
+            intents: Intents = ...,
+            chunk_guilds_at_startup: Optional[bool] = None,
+            member_cache_flags: MemberCacheFlags = None,
+            cache_application_command_permissions: bool = True,
+        ):
+            ...
