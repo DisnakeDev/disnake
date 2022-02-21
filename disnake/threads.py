@@ -777,12 +777,19 @@ class Thread(Messageable, Hashable):
         members = await self._state.http.get_thread_members(self.id)
         return [ThreadMember(parent=self, data=data) for data in members]
 
-    async def delete(self):
+    async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
 
         Deletes this thread.
 
         You must have :attr:`~Permissions.manage_threads` to delete threads.
+
+        Parameters
+        ----------
+        reason: Optional[:class:`str`]
+            The reason for deleting this thread. Shows up on the audit log.
+
+            .. versionadded:: 2.5
 
         Raises
         ------
@@ -791,7 +798,7 @@ class Thread(Messageable, Hashable):
         HTTPException
             Deleting the thread failed.
         """
-        await self._state.http.delete_channel(self.id)
+        await self._state.http.delete_channel(self.id, reason=reason)
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
         """Creates a :class:`PartialMessage` from the message ID.
