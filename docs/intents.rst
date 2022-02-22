@@ -178,7 +178,7 @@ For example:
     # client = disnake.Client(intents=intents)
     # or
     # from disnake.ext import commands
-    # bot = commands.Bot(command_prefix='!', intents=intents)
+    # bot = commands.Bot(command_prefix=commands.when_mentioned, intents=intents)
 
 Why do most messages have no content?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
