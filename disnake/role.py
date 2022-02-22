@@ -62,7 +62,7 @@ class RoleTags:
     .. versionadded:: 1.6
 
     Attributes
-    ------------
+    ----------
     bot_id: Optional[:class:`int`]
         The bot's user ID that manages this role.
     integration_id: Optional[:class:`int`]
@@ -155,7 +155,7 @@ class Role(Hashable):
     Attributes
     ----------
     id: :class:`int`
-        The ID for the role.
+        The ID of the role.
     name: :class:`str`
         The name of the role.
     guild: :class:`Guild`
@@ -173,7 +173,6 @@ class Role(Hashable):
             checking for role hierarchy. The recommended and correct way to
             compare for roles in the hierarchy is using the comparison
             operators on the role objects themselves.
-
     managed: :class:`bool`
         Indicates if the role is managed by the guild through some form of
         integrations such as Twitch.
@@ -426,13 +425,13 @@ class Role(Hashable):
             Edits are no longer in-place, the newly edited role is returned instead.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The new role name to change to.
         permissions: :class:`Permissions`
             The new permissions to change to.
         colour: Union[:class:`Colour`, :class:`int`]
-            The new colour to change to. (aliased to color as well)
+            The new colour to change to. (aliased to ``color`` as well)
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
         icon: :class:`bytes`
@@ -448,7 +447,7 @@ class Role(Hashable):
             The reason for editing this role. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to change the role.
         HTTPException
@@ -458,7 +457,7 @@ class Role(Hashable):
             role was asked to be moved.
 
         Returns
-        --------
+        -------
         :class:`Role`
             The newly edited role.
         """
@@ -508,16 +507,15 @@ class Role(Hashable):
         use this.
 
         Parameters
-        -----------
+        ----------
         reason: Optional[:class:`str`]
             The reason for deleting this role. Shows up on the audit log.
 
         Raises
-        --------
+        ------
         Forbidden
             You do not have permissions to delete the role.
         HTTPException
             Deleting the role failed.
         """
-
         await self._state.http.delete_role(self.guild.id, self.id, reason=reason)

@@ -61,7 +61,7 @@ class StageInstance(Hashable):
             Returns the stage instance's hash.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The stage instance's ID.
     guild: :class:`Guild`
@@ -117,6 +117,7 @@ class StageInstance(Hashable):
         return self._discoverable_disabled
 
     def is_public(self) -> bool:
+        """:class:`bool`: Whether the stage instance is public."""
         warn_deprecated(
             "StageInstance.is_public is deprecated and will be removed in a future version",
             stacklevel=2,
@@ -138,7 +139,7 @@ class StageInstance(Hashable):
         use this.
 
         Parameters
-        -----------
+        ----------
         topic: :class:`str`
             The stage instance's new topic.
         privacy_level: :class:`StagePrivacyLevel`
@@ -160,7 +161,6 @@ class StageInstance(Hashable):
         HTTPException
             Editing a stage instance failed.
         """
-
         payload = {}
 
         if topic is not MISSING:
@@ -189,7 +189,7 @@ class StageInstance(Hashable):
         use this.
 
         Parameters
-        -----------
+        ----------
         reason: :class:`str`
             The reason the stage instance was deleted. Shows up on the audit log.
 
