@@ -11,7 +11,7 @@ In version 1.5 comes the introduction of :class:`Intents`. This is a radical cha
 
 These intents are passed to the constructor of :class:`Client` or its subclasses (:class:`AutoShardedClient`, :class:`~.AutoShardedBot`, :class:`~.Bot`) with the ``intents`` argument.
 
-If intents are not passed, then the library defaults to every intent being enabled except the privileged intents, currently :attr:`Intents.members` and :attr:`Intents.presences`.
+If intents are not passed, then the library defaults to every intent being enabled except the privileged intents, currently :attr:`Intents.members`, :attr:`Intents.presences`, and :attr:`Intents.message_content`.
 
 What intents are needed?
 --------------------------
@@ -32,7 +32,7 @@ For example, if you want a bot that functions without spammy events like presenc
     # client = disnake.Client(intents=intents)
     # or
     # from disnake.ext import commands
-    # bot = commands.Bot(command_prefix='!', intents=intents)
+    # bot = commands.Bot(command_prefix=commands.when_mentioned, intents=intents)
 
 Note that this doesn't enable :attr:`Intents.members` since it's a privileged intent.
 
@@ -50,7 +50,7 @@ Another example showing a bot that only deals with messages and guild informatio
     # client = disnake.Client(intents=intents)
     # or
     # from disnake.ext import commands
-    # bot = commands.Bot(command_prefix='!', intents=intents)
+    # bot = commands.Bot(command_prefix=commands.when_mentioned, intents=intents)
 
 .. _privileged_intents:
 
@@ -87,6 +87,14 @@ Do I need privileged intents?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is a quick checklist to see if you need specific privileged intents.
+
+.. _need_message_content_intent:
+
+Message Content Intent
+++++++++++++++++++++++++
+
+- Whether you want a prefix that isn't the bot mention.
+- Whether you want to see what the content of a message was. This includes content, embeds, attachments, and
 
 .. _need_presence_intent:
 
@@ -171,6 +179,27 @@ For example:
     # or
     # from disnake.ext import commands
     # bot = commands.Bot(command_prefix='!', intents=intents)
+
+Why do most messages have no content?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As of April 30th 2022, Discord has blocked message content from being sent to bots that do not declare the :attr:`Intents.message_content` intent when connecting to discord.
+
+If you are on version 2.4 or before, your bot will be able to access message content without the intent enabled in the code. However, as of version 2.5, it is required to enable :attr:`Intents.message_content` to receive message content over the gateway.
+
+Message content refers to four attributes on the :class:`.Message` object:
+
+- :attr:`~.Message.content`
+- :attr:`~.Message.embeds`
+- :attr:`~.Message.attachments`
+- :attr:`~.Message.components`
+
+You will always receive message content in the following cases even without the message content intent:
+
+- Messages the bot sends
+- Messages the bot receives in :class:`DMChannel` instances
+- Messages in which the bot is mentioned
+- Messages received as part of an interaction (for example, a message command)
 
 Why does ``on_ready`` take so long to fire?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
