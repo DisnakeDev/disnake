@@ -94,7 +94,7 @@ Message Content Intent
 ++++++++++++++++++++++++
 
 - Whether you want a prefix that isn't the bot mention.
-- Whether you want to see what the content of a message was. This includes content, embeds, attachments, and
+- Whether you want to see what the content of a message was. This includes content, embeds, attachments, and components.
 
 .. _need_presence_intent:
 
