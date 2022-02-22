@@ -1773,6 +1773,7 @@ class Message(Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = None,
         slowmode_delay: int = None,
+        reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
 
@@ -1799,6 +1800,11 @@ class Message(Hashable):
             If not provided, slowmode is disabled.
 
             .. versionadded:: 2.3
+
+        reason: Optional[:class:`str`]
+            The reason for creating the thread. Shows up on the audit log.
+
+            .. versionadded:: 2.5
 
         Raises
         ------
@@ -1831,6 +1837,7 @@ class Message(Hashable):
             name=name,
             auto_archive_duration=auto_archive_duration or default_auto_archive_duration,
             rate_limit_per_user=slowmode_delay or 0,
+            reason=reason,
         )
         return Thread(guild=self.guild, state=self._state, data=data)
 

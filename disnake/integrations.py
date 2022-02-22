@@ -31,7 +31,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type
 from .enums import ExpireBehaviour, try_enum
 from .errors import InvalidArgument
 from .user import User
-from .utils import MISSING, _get_as_snowflake, parse_time
+from .utils import MISSING, _get_as_snowflake, deprecated, parse_time
 
 __all__ = (
     "IntegrationAccount",
@@ -129,8 +129,13 @@ class Integration:
         self.user = User(state=self._state, data=user) if user else None
         self.enabled: bool = data["enabled"]
 
+    @deprecated("Guild.leave")
     async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
+
+        .. deprecated:: 2.5
+            Can only be used on the application's own integration and is therefore
+            equivalent to leaving the guild.
 
         Deletes the integration.
 
@@ -219,6 +224,7 @@ class StreamIntegration(Integration):
         """Optional[:class:`Role`] The role which the integration uses for subscribers."""
         return self.guild.get_role(self._role_id)  # type: ignore
 
+    @deprecated()
     async def edit(
         self,
         *,
@@ -227,6 +233,9 @@ class StreamIntegration(Integration):
         enable_emoticons: bool = MISSING,
     ) -> None:
         """|coro|
+
+        .. deprecated:: 2.5
+            No longer supported, bots cannot use this endpoint anymore.
 
         Edits the integration.
 
@@ -268,8 +277,12 @@ class StreamIntegration(Integration):
         # Unsure if it returns the data or not as a result
         await self._state.http.edit_integration(self.guild.id, self.id, **payload)
 
+    @deprecated()
     async def sync(self) -> None:
         """|coro|
+
+        .. deprecated:: 2.5
+            No longer supported, bots cannot use this endpoint anymore.
 
         Syncs the integration.
 

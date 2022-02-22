@@ -260,7 +260,7 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
             else:
                 msg = f"{func.__name__} is deprecated."
 
-            warn_deprecated(msg, stacklevel=3)
+            warn_deprecated(msg, stacklevel=2)
             return func(*args, **kwargs)
 
         return decorated
