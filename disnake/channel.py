@@ -1451,9 +1451,11 @@ class StageChannel(VocalGuildChannel):
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
                 raise InvalidArgument("privacy_level field must be of type PrivacyLevel")
-            utils.warn_deprecated(
-                "privacy_level is deprecated and will be removed in a future version.", stacklevel=2
-            )
+            if privacy_level is StagePrivacyLevel.public:
+                utils.warn_deprecated(
+                    "Setting privacy_level to public is deprecated and will be removed in a future version.",
+                    stacklevel=2,
+                )
 
             payload["privacy_level"] = privacy_level.value
 
