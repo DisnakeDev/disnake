@@ -70,6 +70,8 @@ class StageInstance(Hashable):
         The ID of the channel that the stage instance is running in.
     topic: :class:`str`
         The topic of the stage instance.
+    privacy_level: :class:`StagePrivacyLevel`
+        The privacy level of the stage instance.
     """
 
     __slots__ = (
@@ -78,7 +80,7 @@ class StageInstance(Hashable):
         "guild",
         "channel_id",
         "topic",
-        "_privacy_level",
+        "privacy_level",
         "_discoverable_disabled",
         "_cs_channel",
     )
@@ -92,10 +94,7 @@ class StageInstance(Hashable):
         self.id: int = int(data["id"])
         self.channel_id: int = int(data["channel_id"])
         self.topic: str = data["topic"]
-        if privacy_level := data.get("privacy_level"):
-            self._privacy_level: StagePrivacyLevel = try_enum(StagePrivacyLevel, privacy_level)
-        else:
-            self._privacy_level = StagePrivacyLevel.guild_only
+        self.privacy_level: StagePrivacyLevel = try_enum(StagePrivacyLevel, data["privacy_level"])
         self._discoverable_disabled: bool = data.get("discoverable_disabled", False)
 
     def __repr__(self) -> str:
@@ -108,21 +107,6 @@ class StageInstance(Hashable):
         return self._state.get_channel(self.channel_id)  # type: ignore
 
     @property
-    def privacy_level(self) -> StagePrivacyLevel:
-        """:class:`StagePrivacyLevel`: The privacy level of the stage instance.
-
-        .. deprecated:: 2.5
-
-            To be removed in a later version.
-            Discord no longer supports public stages.
-        """
-        warn_deprecated(
-            "StageInstance.privacy_level is deprecated and will be removed in a future version.",
-            stacklevel=2,
-        )
-        return self._privacy_level
-
-    @property
     def discoverable_disabled(self) -> bool:
         """discoverable_disabled: :class:`bool`
         Whether discoverability for the stage instance is disabled."""
@@ -133,6 +117,10 @@ class StageInstance(Hashable):
         return self._discoverable_disabled
 
     def is_public(self) -> bool:
+        warn_deprecated(
+            "StageInstance.is_public is deprecated and will be removed in a future version",
+            stacklevel=2,
+        )
         return self.privacy_level is StagePrivacyLevel.public
 
     async def edit(
@@ -181,9 +169,11 @@ class StageInstance(Hashable):
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
                 raise InvalidArgument("privacy_level field must be of type PrivacyLevel")
-            warn_deprecated(
-                "privacy_level is deprecated and will be removed in a future version.", stacklevel=2
-            )
+            if privacy_level is StagePrivacyLevel.public:
+                warn_deprecated(
+                    "Setting privacy_level to public is deprecated and will be removed in a future version.",
+                    stacklevel=2,
+                )
 
             payload["privacy_level"] = privacy_level.value
 
