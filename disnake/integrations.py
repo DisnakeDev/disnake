@@ -343,10 +343,10 @@ class IntegrationApplication:
 
         .. deprecated:: 2.5
 
-            This field is deprecated by discord and is now always blank. Replaced with :attr:`.description`.
+            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
         """
         warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Replaced with :attr:`.description`.",
+            "summary is deprecated and will be removed in a future version. Consider using description instead.",
             stacklevel=2,
         )
         return self._summary
