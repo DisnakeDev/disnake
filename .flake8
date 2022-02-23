@@ -28,11 +28,18 @@ ignore =
     # may be undefined, or defined from star imports
     F403,F405,
     # ignore try-except-pass. Bare excepts are caught with B001 and E722
-    S110
+    S110,
+    # ignore using setattr and getattr with constants
+    B009,B010
+    # ignore escaping in docstrings: temporary
+    W605
 per-file-ignores =
     # unused imports, star imports
     */__init__.py: F401, F403
     # ignore whitespacing on flags
-    disnake/audit_logs.py:E241
+    # ignore setattr constants
+    disnake/audit_logs.py:E241,B010
     # ignore whitespacing on flags
     disnake/enums.py:E221,E241
+    # ignore whitespacing after `:`
+    disnake/ext/commands/params.py:E241
