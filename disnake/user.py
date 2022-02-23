@@ -459,7 +459,7 @@ class User(BaseUser, disnake.abc.Messageable):
         try:
             if self._stored:
                 self._state.deref_user(self.id)
-        except Exception:
+        except KeyError:
             pass
 
     @classmethod

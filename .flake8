@@ -27,6 +27,8 @@ ignore =
     E741,
     # may be undefined, or defined from star imports
     F403,F405,
+    # ignore try-except-pass. Bare excepts are caught with B001 and E722
+    S110
 per-file-ignores =
     # unused imports, star imports
     */__init__.py: F401, F403

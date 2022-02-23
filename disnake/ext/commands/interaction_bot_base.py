@@ -678,7 +678,7 @@ class InteractionBotBase(CommonBotBase):
 
         _, guilds = self._ordered_unsynced_commands(self._test_guilds)
 
-        # Here we only cache global commands and commands from guilds that are spcified in the code.
+        # Here we only cache global commands and commands from guilds that are specified in the code.
         # They're collected from the "test_guilds" kwarg of commands.InteractionBotBase
         # and the "guild_ids" kwarg of the decorators. This is the only way to avoid rate limits.
         # If we cache guild commands from everywhere, the limit of invalid requests gets exhausted.
@@ -691,7 +691,7 @@ class InteractionBotBase(CommonBotBase):
             self._connection._global_application_commands = {
                 command.id: command for command in commands
             }
-        except Exception:
+        except disnake.HTTPException:
             pass
         for guild_id in guilds:
             try:
@@ -700,7 +700,7 @@ class InteractionBotBase(CommonBotBase):
                     self._connection._guild_application_commands[guild_id] = {
                         command.id: command for command in commands
                     }
-            except Exception:
+            except disnake.HTTPException:
                 pass
 
     async def _sync_application_commands(self) -> None:
