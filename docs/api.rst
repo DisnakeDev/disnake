@@ -1853,33 +1853,9 @@ of :class:`enum.Enum`.
 
     Specifies the region a voice server belongs to.
 
-    .. attribute:: amsterdam
-
-        The Amsterdam region.
     .. attribute:: brazil
 
         The Brazil region.
-    .. attribute:: dubai
-
-        The Dubai region.
-
-        .. versionadded:: 1.3
-
-    .. attribute:: eu_central
-
-        The EU Central region.
-    .. attribute:: eu_west
-
-        The EU West region.
-    .. attribute:: europe
-
-        The Europe region.
-
-        .. versionadded:: 1.3
-
-    .. attribute:: frankfurt
-
-        The Frankfurt region.
     .. attribute:: hongkong
 
         The Hong Kong region.
@@ -1892,9 +1868,11 @@ of :class:`enum.Enum`.
     .. attribute:: japan
 
         The Japan region.
-    .. attribute:: london
+    .. attribute:: rotterdam
 
-        The London region.
+        The Rotterdam region.
+
+        .. versionadded:: 2.5
     .. attribute:: russia
 
         The Russia region.
@@ -1904,9 +1882,6 @@ of :class:`enum.Enum`.
     .. attribute:: southafrica
 
         The South Africa region.
-    .. attribute:: south_korea
-
-        The South Korea region.
     .. attribute:: sydney
 
         The Sydney region.
@@ -1922,15 +1897,6 @@ of :class:`enum.Enum`.
     .. attribute:: us_west
 
         The US West region.
-    .. attribute:: vip_amsterdam
-
-        The Amsterdam region for VIP guilds.
-    .. attribute:: vip_us_east
-
-        The US East region for VIP guilds.
-    .. attribute:: vip_us_west
-
-        The US West region for VIP guilds.
 
 .. class:: VerificationLevel
 
@@ -4220,6 +4186,21 @@ ApplicationCommandInteraction
 .. autoclass:: ApplicationCommandInteraction()
     :members:
     :inherited-members:
+
+GuildCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: GuildCommandInteraction()
+
+UserCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: UserCommandInteraction()
+
+MessageCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: MessageCommandInteraction()
 
 MessageInteraction
 ~~~~~~~~~~~~~~~~~~
