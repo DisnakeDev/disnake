@@ -76,9 +76,10 @@ if TYPE_CHECKING:
     TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
 
 if sys.version_info >= (3, 10):
-    from types import UnionType
+    from types import EllipsisType, UnionType
 else:
     UnionType = object()
+    EllipsisType = type(Ellipsis)
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
@@ -192,12 +193,14 @@ class RangeMeta(type):
     """Custom Generic implementation for Range"""
 
     @overload
-    def __getitem__(self, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]) -> Type[int]:
+    def __getitem__(
+        self, args: Tuple[Union[int, EllipsisType], Union[int, EllipsisType]]
+    ) -> Type[int]:
         ...
 
     @overload
     def __getitem__(
-        self, args: Tuple[Union[float, ellipsis], Union[float, ellipsis]]
+        self, args: Tuple[Union[float, EllipsisType], Union[float, EllipsisType]]
     ) -> Type[float]:
         ...
 
