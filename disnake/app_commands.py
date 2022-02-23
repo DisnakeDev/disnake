@@ -424,6 +424,10 @@ class ApplicationCommand(ABC):
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        Localizations for ``name``.
+
+        .. versionadded:: 2.4
     """
 
     __repr_info__: ClassVar[Tuple[str, ...]] = ("type", "name")
@@ -490,6 +494,10 @@ class UserCommand(ApplicationCommand):
     default_permission: :class:`bool`
         Whether the user command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        Localizations for ``name``.
+
+        .. versionadded:: 2.4
     """
 
     __repr_info__ = ("name", "default_permission")
@@ -521,6 +529,10 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     default_permission: :class:`bool`
         Whether the user command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        Localizations for ``name``.
+
+        .. versionadded:: 2.4
     id: :class:`int`
         The user command's ID.
     application_id: :class:`int`
@@ -559,6 +571,10 @@ class MessageCommand(ApplicationCommand):
     default_permission: :class:`bool`
         Whether the message command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        Localizations for ``name``.
+
+        .. versionadded:: 2.4
     """
 
     __repr_info__ = ("name", "default_permission")
@@ -590,6 +606,10 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     default_permission: :class:`bool`
         Whether the message command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        Localizations for ``name``.
+
+        .. versionadded:: 2.4
     id: :class:`int`
         The message command's ID.
     application_id: :class:`int`
@@ -753,6 +773,14 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         The slash command's description.
     options: List[:class:`Option`]
         The list of options the slash command has.
+    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        Localizations for ``name``.
+
+        .. versionadded:: 2.4
+    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        Localizations for ``description``.
+
+        .. versionadded:: 2.4
     application_id: :class:`int`
         The application ID this command belongs to.
     guild_id: Optional[:class:`int`]
