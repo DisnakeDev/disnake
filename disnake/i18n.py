@@ -53,7 +53,7 @@ __all__ = (
 _log = logging.getLogger(__name__)
 
 
-# see https://discord.com/developers/docs/dispatch/field-values#predefined-field-values-accepted-locales
+# see https://discord.com/developers/docs/reference#locales
 VALID_LOCALES: FrozenSet[ApplicationCommandLocale] = frozenset(
     (
         "bg",

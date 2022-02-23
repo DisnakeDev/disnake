@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from .message import AllowedMentions, Attachment, Message
 
 
-# see https://discord.com/developers/docs/dispatch/field-values#predefined-field-values-accepted-locales
+# see https://discord.com/developers/docs/reference#locales
 ApplicationCommandLocale = Literal[
     "bg",
     "cs",
