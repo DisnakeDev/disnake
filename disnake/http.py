@@ -48,6 +48,7 @@ from typing import (
 from urllib.parse import quote as _uriquote
 
 import aiohttp
+import yarl
 
 from . import __version__, utils
 from .errors import (
@@ -89,6 +90,7 @@ if TYPE_CHECKING:
         template,
         threads,
         user,
+        voice,
         webhook,
         widget,
     )
@@ -112,20 +114,15 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
     return text
 
 
-def to_multipart(payload: Dict[str, Any], files: Iterable[File]) -> List[Dict[str, Any]]:
-    # NOTE: this method modifies the provided `payload` and `payload["attachments"]` collections
+def set_attachments(payload: Dict[str, Any], files: Sequence[File]) -> None:
+    """
+    Updates the payload's attachments list based on the provided files
+
+    note: this method modifies the provided ``payload`` and ``payload["attachments"]`` collections
+    """
 
     attachments = payload.get("attachments", [])
-    multipart: List[Dict[str, Any]] = []
     for index, file in enumerate(files):
-        multipart.append(
-            {
-                "name": f"files[{index}]",
-                "value": file.fp,
-                "filename": file.filename,
-                "content_type": "application/octet-stream",
-            }
-        )
         attachments.append(
             {
                 "id": index,
@@ -137,8 +134,40 @@ def to_multipart(payload: Dict[str, Any], files: Iterable[File]) -> List[Dict[st
     # didn't add any new ones, don't add the list to the payload.
     if attachments:
         payload["attachments"] = attachments
+
+
+def to_multipart(payload: Dict[str, Any], files: Sequence[File]) -> List[Dict[str, Any]]:
+    """
+    Converts the payload and list of files to a multipart payload,
+    as specified by https://discord.com/developers/docs/reference#uploading-files
+    """
+
+    multipart: List[Dict[str, Any]] = []
+    for index, file in enumerate(files):
+        multipart.append(
+            {
+                "name": f"files[{index}]",
+                "value": file.fp,
+                "filename": file.filename,
+                "content_type": "application/octet-stream",
+            }
+        )
+
     multipart.append({"name": "payload_json", "value": utils._to_json(payload)})
     return multipart
+
+
+def to_multipart_with_attachments(
+    payload: Dict[str, Any], files: Sequence[File]
+) -> List[Dict[str, Any]]:
+    """
+    Updates the payload's attachments and converts it to a multipart payload
+
+    Shorthand for ``set_attachments`` + ``to_multipart``
+    """
+
+    set_attachments(payload, files)
+    return to_multipart(payload, files)
 
 
 class Route:
@@ -225,7 +254,7 @@ class HTTPClient:
                 connector=self.connector, ws_response_class=DiscordClientWebSocketResponse
             )
 
-    async def ws_connect(self, url: str, *, compress: int = 0) -> Any:
+    async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
         kwargs = {
             "proxy_auth": self.proxy_auth,
             "proxy": self.proxy,
@@ -238,7 +267,7 @@ class HTTPClient:
             "compress": compress,
         }
 
-        return await self.__session.ws_connect(url, **kwargs)  # type: ignore
+        return await self.__session.ws_connect(url, **kwargs)
 
     async def request(
         self,
@@ -469,9 +498,6 @@ class HTTPClient:
             reason=reason,
         )
 
-    def logout(self) -> Response[None]:
-        return self.request(Route("POST", "/auth/logout"))
-
     # Group functionality
 
     def start_group(
@@ -579,7 +605,7 @@ class HTTPClient:
         if stickers:
             payload["sticker_ids"] = stickers
 
-        multipart = to_multipart(payload, files)
+        multipart = to_multipart_with_attachments(payload, files)
 
         return self.request(route, form=multipart, files=files)
 
@@ -649,7 +675,7 @@ class HTTPClient:
             message_id=message_id,
         )
         if files:
-            multipart = to_multipart(fields, files)
+            multipart = to_multipart_with_attachments(fields, files)
             return self.request(r, form=multipart, files=files)
         return self.request(r, json=fields)
 
@@ -841,6 +867,9 @@ class HTTPClient:
         r = Route("DELETE", "/guilds/{guild_id}/bans/{user_id}", guild_id=guild_id, user_id=user_id)
         return self.request(r, reason=reason)
 
+    def get_guild_voice_regions(self, guild_id: Snowflake) -> Response[List[voice.VoiceRegion]]:
+        return self.request(Route("GET", "/guilds/{guild_id}/regions", guild_id=guild_id))
+
     def guild_voice_state(
         self,
         user_id: Snowflake,
@@ -864,19 +893,6 @@ class HTTPClient:
 
     def edit_profile(self, payload: Dict[str, Any]) -> Response[user.User]:
         return self.request(Route("PATCH", "/users/@me"), json=payload)
-
-    def change_my_nickname(
-        self,
-        guild_id: Snowflake,
-        nickname: str,
-        *,
-        reason: Optional[str] = None,
-    ) -> Response[member.Nickname]:
-        r = Route("PATCH", "/guilds/{guild_id}/members/@me/nick", guild_id=guild_id)
-        payload = {
-            "nick": nickname,
-        }
-        return self.request(r, json=payload, reason=reason)
 
     def change_nickname(
         self,
@@ -905,6 +921,16 @@ class HTTPClient:
             "PATCH", "/guilds/{guild_id}/voice-states/{user_id}", guild_id=guild_id, user_id=user_id
         )
         return self.request(r, json=payload)
+
+    def edit_my_member(
+        self,
+        guild_id: Snowflake,
+        *,
+        reason: Optional[str] = None,
+        **fields: Any,
+    ) -> Response[member.MemberWithUser]:
+        r = Route("PATCH", "/guilds/{guild_id}/members/@me", guild_id=guild_id)
+        return self.request(r, json=fields, reason=reason)
 
     def edit_member(
         self,
@@ -1055,7 +1081,7 @@ class HTTPClient:
 
     def join_thread(self, channel_id: Snowflake) -> Response[None]:
         return self.request(
-            Route("POST", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
+            Route("PUT", "/channels/{channel_id}/thread-members/@me", channel_id=channel_id)
         )
 
     def add_user_to_thread(self, channel_id: Snowflake, user_id: Snowflake) -> Response[None]:
@@ -1213,10 +1239,9 @@ class HTTPClient:
     def delete_guild(self, guild_id: Snowflake) -> Response[None]:
         return self.request(Route("DELETE", "/guilds/{guild_id}", guild_id=guild_id))
 
-    def create_guild(self, name: str, region: str, icon: Optional[str]) -> Response[guild.Guild]:
+    def create_guild(self, name: str, icon: Optional[str]) -> Response[guild.Guild]:
         payload = {
             "name": name,
-            "region": region,
         }
         if icon:
             payload["icon"] = icon
@@ -1228,7 +1253,6 @@ class HTTPClient:
     ) -> Response[guild.Guild]:
         valid_keys = (
             "name",
-            "region",
             "icon",
             "afk_timeout",
             "owner_id",
@@ -1292,15 +1316,17 @@ class HTTPClient:
         )
 
     def create_from_template(
-        self, code: str, name: str, region: str, icon: Optional[str]
+        self, code: str, name: str, icon: Optional[str]
     ) -> Response[guild.Guild]:
         payload = {
             "name": name,
-            "region": region,
         }
         if icon:
             payload["icon"] = icon
         return self.request(Route("POST", "/guilds/templates/{code}", code=code), json=payload)
+
+    def get_guild_preview(self, guild_id: Snowflake) -> Response[guild.GuildPreview]:
+        return self.request(Route("GET", "/guilds/{guild_id}/preview", guild_id=guild_id))
 
     def get_bans(self, guild_id: Snowflake) -> Response[List[guild.Ban]]:
         return self.request(Route("GET", "/guilds/{guild_id}/bans", guild_id=guild_id))
@@ -1613,6 +1639,9 @@ class HTTPClient:
     def get_widget(self, guild_id: Snowflake) -> Response[widget.Widget]:
         return self.request(Route("GET", "/guilds/{guild_id}/widget.json", guild_id=guild_id))
 
+    def get_widget_settings(self, guild_id: Snowflake) -> Response[widget.WidgetSettings]:
+        return self.request(Route("GET", "/guilds/{guild_id}/widget", guild_id=guild_id))
+
     def edit_widget(
         self, guild_id: Snowflake, payload: Dict[str, Any], *, reason: Optional[str] = None
     ) -> Response[widget.WidgetSettings]:
@@ -1620,6 +1649,13 @@ class HTTPClient:
             Route("PATCH", "/guilds/{guild_id}/widget", guild_id=guild_id),
             json=payload,
             reason=reason,
+        )
+
+    def widget_image_url(self, guild_id: Snowflake, *, style: str) -> str:
+        return str(
+            yarl.URL(Route.BASE)
+            .with_path(f"/api/guilds/{guild_id}/widget.png")
+            .with_query(style=style)
         )
 
     # Invite management
@@ -1876,6 +1912,7 @@ class HTTPClient:
         entity_metadata: Optional[Dict[str, Any]] = None,
         scheduled_end_time: Optional[str] = None,
         description: Optional[str] = None,
+        image: Optional[str] = None,
         reason: Optional[str] = None,
     ) -> Response[guild_scheduled_event.GuildScheduledEvent]:
         r = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
@@ -1897,6 +1934,9 @@ class HTTPClient:
 
         if description is not None:
             payload["description"] = description
+
+        if image is not None:
+            payload["image"] = image
 
         return self.request(r, json=payload, reason=reason)
 
@@ -2152,7 +2192,7 @@ class HTTPClient:
             payload["attachments"] = attachments
 
         if file:
-            multipart = to_multipart(payload, [file])
+            multipart = to_multipart_with_attachments(payload, [file])
             return self.request(route, form=multipart, files=[file])
         return self.request(route, json=payload)
 
@@ -2351,6 +2391,9 @@ class HTTPClient:
         return self.request(r, json=payload)
 
     # Misc
+
+    def get_voice_regions(self) -> Response[List[voice.VoiceRegion]]:
+        return self.request(Route("GET", "/voice/regions"))
 
     def application_info(self) -> Response[appinfo.AppInfo]:
         return self.request(Route("GET", "/oauth2/applications/@me"))

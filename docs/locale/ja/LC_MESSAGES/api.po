@@ -19683,4 +19683,3 @@ msgstr ":class:`~disnake.User`"
 
 #~ msgid ":class:`int` -- The error code returned."
 #~ msgstr ""
-

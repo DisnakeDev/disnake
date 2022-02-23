@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple, Union
 
 from .asset import Asset, AssetMixin
 from .partial_emoji import PartialEmoji, _EmojiTag
@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 
     from .abc import Snowflake
     from .guild import Guild
+    from .guild_preview import GuildPreview
     from .role import Role
     from .state import ConnectionState
     from .types.emoji import Emoji as EmojiPayload
@@ -74,24 +75,24 @@ class Emoji(_EmojiTag, AssetMixin):
             Returns the emoji rendered for disnake.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
-        The name of the emoji.
+        The emoji's name.
     id: :class:`int`
         The emoji's ID.
     require_colons: :class:`bool`
-        If colons are required to use this emoji in the client (:PJSalt: vs PJSalt).
+        Whether colons are required to use this emoji in the client (:PJSalt: vs PJSalt).
     animated: :class:`bool`
-        Whether an emoji is animated or not.
+        Whether the emoji is animated or not.
     managed: :class:`bool`
-        If this emoji is managed by a Twitch integration.
+        Whether the emoji is managed by a Twitch integration.
     guild_id: :class:`int`
         The guild ID the emoji belongs to.
     available: :class:`bool`
         Whether the emoji is available for use.
     user: Optional[:class:`User`]
         The user that created the emoji. This can only be retrieved using :meth:`Guild.fetch_emoji` and
-        having the :attr:`~Permissions.manage_emojis` permission.
+        having :attr:`~Permissions.manage_emojis` permission.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -107,7 +108,9 @@ class Emoji(_EmojiTag, AssetMixin):
         "available",
     )
 
-    def __init__(self, *, guild: Guild, state: ConnectionState, data: EmojiPayload):
+    def __init__(
+        self, *, guild: Union[Guild, GuildPreview], state: ConnectionState, data: EmojiPayload
+    ):
         self.guild_id: int = guild.id
         self._state: ConnectionState = state
         self._from_data(data)
@@ -163,7 +166,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def roles(self) -> List[Role]:
-        """List[:class:`Role`]: A :class:`list` of roles that is allowed to use this emoji.
+        """List[:class:`Role`]: A :class:`list` of roles that are allowed to use this emoji.
 
         If roles is empty, the emoji is unrestricted.
         """
@@ -202,24 +205,24 @@ class Emoji(_EmojiTag, AssetMixin):
         do this.
 
         Parameters
-        -----------
+        ----------
         reason: Optional[:class:`str`]
             The reason for deleting this emoji. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You are not allowed to delete emojis.
         HTTPException
             An error occurred deleting the emoji.
         """
-
         await self._state.http.delete_custom_emoji(self.guild.id, self.id, reason=reason)
 
     async def edit(
         self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
     ) -> Emoji:
-        r"""|coro|
+        """
+        |coro|
 
         Edits the custom emoji.
 
@@ -230,7 +233,7 @@ class Emoji(_EmojiTag, AssetMixin):
             The newly updated emoji is returned.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The new emoji name.
         roles: Optional[List[:class:`~disnake.abc.Snowflake`]]
@@ -239,18 +242,17 @@ class Emoji(_EmojiTag, AssetMixin):
             The reason for editing this emoji. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You are not allowed to edit emojis.
         HTTPException
             An error occurred editing the emoji.
 
         Returns
-        --------
+        -------
         :class:`Emoji`
             The newly updated emoji.
         """
-
         payload = {}
         if name is not MISSING:
             payload["name"] = name

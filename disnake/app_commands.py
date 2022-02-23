@@ -26,7 +26,7 @@ import math
 import re
 import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
 from .abc import User
 from .custom_warnings import ConfigWarning
@@ -64,12 +64,18 @@ if TYPE_CHECKING:
         Dict[str, ApplicationCommandOptionChoiceValue],
     ]
 
+    APIApplicationCommand = Union["APIUserCommand", "APIMessageCommand", "APISlashCommand"]
+
+
 __all__ = (
     "application_command_factory",
     "ApplicationCommand",
     "SlashCommand",
+    "APISlashCommand",
     "UserCommand",
+    "APIUserCommand",
     "MessageCommand",
+    "APIMessageCommand",
     "OptionChoice",
     "Option",
     "ApplicationCommandPermissions",
@@ -80,14 +86,14 @@ __all__ = (
 )
 
 
-def application_command_factory(data: ApplicationCommandPayload) -> ApplicationCommand:
+def application_command_factory(data: ApplicationCommandPayload) -> APIApplicationCommand:
     cmd_type = try_enum(ApplicationCommandType, data.get("type", 1))
     if cmd_type is ApplicationCommandType.chat_input:
-        return SlashCommand.from_dict(data)
+        return APISlashCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.user:
-        return UserCommand.from_dict(data)
+        return APIUserCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.message:
-        return MessageCommand.from_dict(data)
+        return APIMessageCommand.from_dict(data)
 
     raise TypeError(f"Application command of type {cmd_type} is not valid")
 
@@ -104,17 +110,16 @@ def _validate_name(name: str) -> None:
 
 
 class OptionChoice:
-    """
-    Represents an option choice.
+    """Represents an option choice.
 
     Parameters
     ----------
     name: :class:`str`
-        the name of the option choice (visible to users)
+        The name of the option choice (visible to users).
     value: Union[:class:`str`, :class:`int`]
-        the value of the option choice
+        The value of the option choice.
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
-        localizations for ``name``
+        Localizations for ``name``.
 
         .. versionadded:: 2.4
     """
@@ -162,41 +167,40 @@ class OptionChoice:
 
 
 class Option:
-    """
-    Represents a slash command option.
+    """Represents a slash command option.
 
     Parameters
     ----------
     name: :class:`str`
-        option's name
+        The option's name.
     description: :class:`str`
-        option's description
+        The option's description.
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
-        localizations for ``name``
+        Localizations for ``name``.
 
         .. versionadded:: 2.4
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
-        localizations for ``description``
+        Localizations for ``description``.
 
         .. versionadded:: 2.4
     type: :class:`OptionType`
-        the option type, e.g. :class:`OptionType.user`
+        The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
-        whether this option is required or not
+        Whether this option is required.
     choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
-        the list of option choices
+        The list of option choices.
     options: List[:class:`Option`]
-        the list of sub options. Normally you don't have to specify it directly,
+        The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
     channel_types: List[:class:`ChannelType`]
-        the list of channel types that your option supports, if the type is :class:`OptionType.channel`.
+        The list of channel types that your option supports, if the type is :class:`OptionType.channel`.
         By default, it supports all channel types.
     autocomplete: :class:`bool`
-        whether this option can be autocompleted.
+        Whether this option can be autocompleted.
     min_value: Union[:class:`int`, :class:`float`]
-        the minimum value permitted
+        The minimum value permitted.
     max_value: Union[:class:`int`, :class:`float`]
-        the maximum value permitted
+        The maximum value permitted.
     """
 
     __slots__ = (
@@ -231,7 +235,7 @@ class Option:
     ):
         self.name: str = name.lower()
         _validate_name(self.name)
-        self.description: str = description or "\u200b"
+        self.description: str = description or "-"
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
         self.options: List[Option] = options or []
@@ -321,9 +325,8 @@ class Option:
         value: Union[str, int],
         name_localizations: Localizations = None,
     ) -> None:
-        """
-        Adds an OptionChoice to the list of current choices
-        Parameters are the same as for :class:`OptionChoice`
+        """Adds an OptionChoice to the list of current choices,
+        parameters are the same as for :class:`OptionChoice`.
         """
         self.choices.append(
             OptionChoice(
@@ -348,10 +351,8 @@ class Option:
         name_localizations: Localizations = None,
         description_localizations: Localizations = None,
     ) -> None:
-        """
-        Adds an option to the current list of options
-        Parameters are the same as for :class:`Option`
-        """
+        """Adds an option to the current list of options,
+        parameters are the same as for :class:`Option`."""
         type = type or OptionType.string
         self.options.append(
             Option(
@@ -413,19 +414,19 @@ class Option:
 class ApplicationCommand(ABC):
     """
     The base class for application commands
+
+    Attributes
+    ----------
+    type: :class:`ApplicationCommandType`
+        The command type
+    name: :class:`str`
+        The command name
+    default_permission: :class:`bool`
+        Whether the command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     """
 
-    __slots__ = (
-        "type",
-        "name",
-        "default_permission",
-        "name_localizations",
-        "id",
-        "application_id",
-        "guild_id",
-        "version",
-        "_always_synced",
-    )
+    __repr_info__: ClassVar[Tuple[str, ...]] = ("type", "name")
 
     def __init__(
         self,
@@ -439,21 +440,11 @@ class ApplicationCommand(ABC):
         self.default_permission: bool = default_permission
         self.name_localizations: LocalizationValue = LocalizationValue(name_localizations)
 
-        self.id: Optional[int] = None
-        self.application_id: Optional[int] = None
-        self.guild_id: Optional[int] = None
-        self.version: Optional[int] = None
-
         self._always_synced: bool = False
 
-    def _update_common(self, data: ApplicationCommandPayload) -> None:
-        self.id = _get_as_snowflake(data, "id")
-        self.application_id = _get_as_snowflake(data, "application_id")
-        self.guild_id = _get_as_snowflake(data, "guild_id")
-        self.version = _get_as_snowflake(data, "version")
-
     def __repr__(self) -> str:
-        return f"<ApplicationCommand type={self.type!r} name={self.name!r}>"
+        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
+        return f"<{type(self).__name__} {attrs}>"
 
     def __eq__(self, other) -> bool:
         return (
@@ -478,8 +469,30 @@ class ApplicationCommand(ABC):
         self.name_localizations._link(store)
 
 
+class _APIApplicationCommandMixin:
+    __repr_info__ = ("id",)
+
+    def _update_common(self, data: ApplicationCommandPayload) -> None:
+        self.id: int = int(data["id"])
+        self.application_id: int = int(data["application_id"])
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.version: int = int(data["version"])
+
+
 class UserCommand(ApplicationCommand):
-    __slots__ = ()
+    """
+    A user context menu command
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The user command's name.
+    default_permission: :class:`bool`
+        Whether the user command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    """
+
+    __repr_info__ = ("name", "default_permission")
 
     def __init__(
         self,
@@ -494,16 +507,39 @@ class UserCommand(ApplicationCommand):
             name_localizations=name_localizations,
         )
 
-    def __repr__(self) -> str:
-        return f"<UserCommand name={self.name!r}>"
+
+class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
+    """
+    A user context menu command returned by the API
+
+    .. versionadded:: 2.4
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The user command's name.
+    default_permission: :class:`bool`
+        Whether the user command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    id: :class:`int`
+        The user command's ID.
+    application_id: :class:`int`
+        The application ID this command belongs to.
+    guild_id: Optional[:class:`int`]
+        The ID of the guild this user command is enabled in, or ``None`` if it's global.
+    version: :class:`int`
+        Autoincrementing version identifier updated during substantial record changes.
+    """
+
+    __repr_info__ = UserCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> UserCommand:
+    def from_dict(cls, data: ApplicationCommandPayload) -> APIUserCommand:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.user.value:
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
-        self = UserCommand(
+        self = cls(
             name=data["name"],
             default_permission=data.get("default_permission", True),
             name_localizations=data.get("name_localizations"),
@@ -513,7 +549,19 @@ class UserCommand(ApplicationCommand):
 
 
 class MessageCommand(ApplicationCommand):
-    __slots__ = ()
+    """
+    A message context menu command
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The message command's name.
+    default_permission: :class:`bool`
+        Whether the message command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    """
+
+    __repr_info__ = ("name", "default_permission")
 
     def __init__(
         self,
@@ -528,16 +576,39 @@ class MessageCommand(ApplicationCommand):
             name_localizations=name_localizations,
         )
 
-    def __repr__(self) -> str:
-        return f"<MessageCommand name={self.name!r}>"
+
+class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
+    """
+    A message context menu command returned by the API
+
+    .. versionadded:: 2.4
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The message command's name.
+    default_permission: :class:`bool`
+        Whether the message command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    id: :class:`int`
+        The message command's ID.
+    application_id: :class:`int`
+        The application ID this command belongs to.
+    guild_id: Optional[:class:`int`]
+        The ID of the guild this message command is enabled in, or ``None`` if it's global.
+    version: :class:`int`
+        Autoincrementing version identifier updated during substantial record changes.
+    """
+
+    __repr_info__ = MessageCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> MessageCommand:
+    def from_dict(cls, data: ApplicationCommandPayload) -> APIMessageCommand:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.message.value:
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
-        self = MessageCommand(
+        self = cls(
             name=data["name"],
             default_permission=data.get("default_permission", True),
             name_localizations=data.get("name_localizations"),
@@ -552,25 +623,26 @@ class SlashCommand(ApplicationCommand):
 
     Parameters
     ----------
-    name : :class:`str`
-        The command name
-    description : :class:`str`
-        The command description (it'll be displayed by Discord)
+    name: :class:`str`
+        The slash command's name.
+    default_permission: :class:`bool`
+        Whether the slash command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    description: :class:`str`
+        The slash command's description.
+    options: List[:class:`Option`]
+        The list of options the slash command has.
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
-        localizations for ``name``
+        Localizations for ``name``.
 
         .. versionadded:: 2.4
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
-        localizations for ``description``
+        Localizations for ``description``.
 
         .. versionadded:: 2.4
-    options : List[:class:`Option`]
-        The options of the command
-    default_permission : :class:`bool`
-        Whether the command is enabled by default when the app is added to a guild
     """
 
-    __slots__ = ("description", "options", "description_localizations")
+    __repr_info__ = ("name", "description", "options", "default_permission")
 
     def __init__(
         self,
@@ -596,12 +668,6 @@ class SlashCommand(ApplicationCommand):
             description_localizations
         )
 
-    def __repr__(self) -> str:
-        return (
-            f"<SlashCommand name={self.name!r} description={self.description!r} "
-            f"default_permission={self.default_permission!r} options={self.options!r}>"
-        )
-
     def __str__(self) -> str:
         return f"<SlashCommand name={self.name!r}>"
 
@@ -612,25 +678,6 @@ class SlashCommand(ApplicationCommand):
             and self.options == other.options
             and self.description_localizations == other.description_localizations
         )
-
-    @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> SlashCommand:
-        cmd_type = data.get("type", 0)
-        if cmd_type != ApplicationCommandType.chat_input.value:
-            raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
-
-        self = SlashCommand(
-            name=data["name"],
-            description=data["description"],
-            default_permission=data.get("default_permission", True),
-            options=_maybe_cast(
-                data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
-            ),
-            name_localizations=data.get("name_localizations"),
-            description_localizations=data.get("description_localizations"),
-        )
-        self._update_common(data)
-        return self
 
     def add_option(
         self,
@@ -647,9 +694,8 @@ class SlashCommand(ApplicationCommand):
         name_localizations: Localizations = None,
         description_localizations: Localizations = None,
     ) -> None:
-        """
-        Adds an option to the current list of options
-        Parameters are the same as for :class:`Option`
+        """Adds an option to the current list of options,
+        parameters are the same as for :class:`Option`
         """
         self.options.append(
             Option(
@@ -688,18 +734,67 @@ class SlashCommand(ApplicationCommand):
             o.localize(store)
 
 
-class ApplicationCommandPermissions:
+class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     """
-    Represents application command permissions for a role or a user.
+    A slash command returned by the API
+
+    .. versionadded:: 2.4
 
     Attributes
     ----------
-    id : :class:`int`
-        ID of a target
-    type : :class:`int`
-        1 if target is a role; 2 if target is a user
-    permission : :class:`bool`
-        Allow or deny the access to the command
+    name: :class:`str`
+        The slash command's name.
+    default_permission: :class:`bool`
+        Whether the slash command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    id: :class:`int`
+        The slash command's ID.
+    description: :class:`str`
+        The slash command's description.
+    options: List[:class:`Option`]
+        The list of options the slash command has.
+    application_id: :class:`int`
+        The application ID this command belongs to.
+    guild_id: Optional[:class:`int`]
+        The ID of the guild this slash command is enabled in, or ``None`` if it's global.
+    version: :class:`int`
+        Autoincrementing version identifier updated during substantial record changes.
+    """
+
+    __repr_info__ = SlashCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+
+    @classmethod
+    def from_dict(cls, data: ApplicationCommandPayload) -> APISlashCommand:
+        cmd_type = data.get("type", 0)
+        if cmd_type != ApplicationCommandType.chat_input.value:
+            raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
+
+        self = cls(
+            name=data["name"],
+            description=data["description"],
+            default_permission=data.get("default_permission", True),
+            options=_maybe_cast(
+                data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
+            ),
+            name_localizations=data.get("name_localizations"),
+            description_localizations=data.get("description_localizations"),
+        )
+        self._update_common(data)
+        return self
+
+
+class ApplicationCommandPermissions:
+    """Represents application command permissions for a role or a user.
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The ID of the role or user.
+    type: :class:`int`
+        The type of the target.
+        1 if target is a role; 2 if target is a user.
+    permission: :class:`bool`
+        Whether to allow or deny the access to the application command.
     """
 
     __slots__ = ("id", "type", "permission")
@@ -722,15 +817,14 @@ class ApplicationCommandPermissions:
 
 
 class GuildApplicationCommandPermissions:
-    """
-    Represents application command permissions in a guild.
+    """Represents application command permissions in a guild.
 
     Attributes
     ----------
     id: :class:`int`
-        The ID of the corresponding command.
+        The application command's ID.
     application_id: :class:`int`
-        The ID of your application.
+        The application ID this command belongs to.
     guild_id: :class:`int`
         The ID of the guild where these permissions are applied.
     permissions: List[:class:`ApplicationCommandPermissions`]
@@ -770,8 +864,7 @@ class GuildApplicationCommandPermissions:
         role_ids: Dict[int, bool] = None,
         user_ids: Dict[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
-        """
-        Replaces current permissions with specified ones.
+        """Replaces the current permissions with the specified ones.
 
         Parameters
         ----------
@@ -781,8 +874,12 @@ class GuildApplicationCommandPermissions:
             Role IDs to booleans.
         user_ids: Mapping[:class:`int`, :class:`bool`]
             User IDs to booleans.
-        """
 
+        Returns
+        -------
+        :class:`GuildApplicationCommandPermissions`
+            The newly updated permissions.
+        """
         data: List[ApplicationCommandPermissionsPayload] = []
 
         if permissions is not None:
@@ -811,13 +908,12 @@ class GuildApplicationCommandPermissions:
 
 
 class PartialGuildApplicationCommandPermissions:
-    """
-    Creates an object representing permissions of the application command.
+    """Creates a partial object representing permissions of the application command.
 
     Parameters
     ----------
     command_id: :class:`int`
-        The ID of the app command you want to apply these permissions to.
+        The ID of the application command you want to apply these permissions to.
     permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
         Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
     role_ids: Mapping[:class:`int`, :class:`bool`]
@@ -881,8 +977,7 @@ PartialGuildAppCmdPerms = PartialGuildApplicationCommandPermissions
 
 
 class UnresolvedGuildApplicationCommandPermissions:
-    """
-    Creates an object representing permissions of an application command,
+    """Creates an object representing permissions of an application command,
     without a specific command ID.
 
     Parameters
@@ -894,7 +989,7 @@ class UnresolvedGuildApplicationCommandPermissions:
     user_ids: Mapping[:class:`int`, :class:`bool`]
         User IDs to booleans.
     owner: :class:`bool`
-        Allow/deny the bot owner(s).
+        Whether to allow or deny the bot owner(s).
     """
 
     def __init__(
@@ -921,18 +1016,17 @@ class UnresolvedGuildApplicationCommandPermissions:
         Parameters
         ----------
         command_id: :class:`int`
-            the command ID to be used
+            The command ID to use.
         owners: Iterable[:class:`int`]
-            the owner IDs, used for extending the user ID mapping
+            The owner IDs, used for extending the user ID mapping
             based on the previously set ``owner`` permission if applicable
 
         Returns
-        --------
+        -------
         :class:`PartialGuildApplicationCommandPermissions`
             A new permissions object based on this instance
             and the provided command ID and owner IDs.
         """
-
         resolved_users: Optional[Mapping[int, bool]]
         if self.owner is not None:
             owner_ids = dict.fromkeys(owners, self.owner)

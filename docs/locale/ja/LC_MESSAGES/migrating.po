@@ -2545,4 +2545,3 @@ msgstr ":class:`TextChannel` 用の :class:`~ext.commands.TextChannelConverter` 
 #: ../../migrating.rst:1172
 msgid ":class:`~ext.commands.VoiceChannelConverter` for :class:`VoiceChannel`."
 msgstr ":class:`VoiceChannel` 用の :class:`~ext.commands.VoiceChannelConverter` 。"
-

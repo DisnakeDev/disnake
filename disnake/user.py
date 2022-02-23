@@ -136,7 +136,7 @@ class BaseUser(_UserTag):
 
         return self
 
-    def _to_minimal_user_json(self) -> Dict[str, Any]:
+    def _to_minimal_user_json(self) -> UserPayload:
         return {
             "username": self.name,
             "id": self.id,
@@ -181,7 +181,6 @@ class BaseUser(_UserTag):
         """Optional[:class:`Asset`]: Returns the user's banner asset, if available.
 
         .. versionadded:: 2.0
-
 
         .. note::
             This information is only available via :meth:`Client.fetch_user`.
@@ -265,9 +264,9 @@ class BaseUser(_UserTag):
         """Checks if the user is mentioned in the specified message.
 
         Parameters
-        -----------
+        ----------
         message: :class:`Message`
-            The message to check if you're mentioned in.
+            The message to check.
 
         Returns
         -------
@@ -303,7 +302,7 @@ class ClientUser(BaseUser):
             Returns the user's name with discriminator.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The user's username.
     id: :class:`int`
@@ -368,7 +367,7 @@ class ClientUser(BaseUser):
             The edit is no longer in-place, instead the newly edited client user is returned.
 
         Parameters
-        -----------
+        ----------
         username: :class:`str`
             The new username you wish to change to.
         avatar: :class:`bytes`
@@ -383,7 +382,7 @@ class ClientUser(BaseUser):
             Wrong image format passed for ``avatar``.
 
         Returns
-        ---------
+        -------
         :class:`ClientUser`
             The newly edited client user.
         """
@@ -420,7 +419,7 @@ class User(BaseUser, disnake.abc.Messageable):
             Returns the user's name with discriminator.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The user's username.
     id: :class:`int`
