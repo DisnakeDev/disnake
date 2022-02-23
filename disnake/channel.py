@@ -1424,11 +1424,6 @@ class StageChannel(VocalGuildChannel):
             The stage instance's topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's privacy level. Defaults to :attr:`StagePrivacyLevel.guild_only`.
-
-            .. deprecated:: 2.5
-
-                Public Stages no longer exist. This parameter will be removed in a future version.
-
         reason: :class:`str`
             The reason the stage instance was created. Shows up on the audit log.
 
