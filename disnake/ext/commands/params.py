@@ -280,11 +280,11 @@ class ParamInfo:
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``description``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of choices of this slash command option.
     ge: :class:`float`
@@ -864,11 +864,11 @@ def Param(
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``description``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.
     converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]

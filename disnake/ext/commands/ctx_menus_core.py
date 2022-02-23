@@ -225,7 +225,7 @@ def user_command(
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -292,7 +292,7 @@ def message_command(
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.

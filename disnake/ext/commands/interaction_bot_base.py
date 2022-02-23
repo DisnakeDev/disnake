@@ -476,11 +476,11 @@ class InteractionBotBase(CommonBotBase):
         name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
             Localizations for ``name``.
 
-            .. versionadded:: 2.4
+            .. versionadded:: 2.5
         description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
             Localizations for ``description``.
 
-            .. versionadded:: 2.4
+            .. versionadded:: 2.5
         options: List[:class:`.Option`]
             The list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
@@ -556,7 +556,7 @@ class InteractionBotBase(CommonBotBase):
         name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
             Localizations for ``name``.
 
-            .. versionadded:: 2.4
+            .. versionadded:: 2.5
         default_permission: :class:`bool`
             Whether the command is enabled by default. If set to ``False``, this command
             cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -619,7 +619,7 @@ class InteractionBotBase(CommonBotBase):
         name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
             Localizations for ``name``.
 
-            .. versionadded:: 2.4
+            .. versionadded:: 2.5
         default_permission: :class:`bool`
             Whether the command is enabled by default. If set to ``False``, this command
             cannot be used in guilds (unless explicit command permissions are set), or in DMs.

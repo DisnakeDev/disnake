@@ -121,7 +121,7 @@ class OptionChoice:
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     """
 
     def __init__(
@@ -178,11 +178,11 @@ class Option:
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``description``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     type: :class:`OptionType`
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
@@ -427,7 +427,7 @@ class ApplicationCommand(ABC):
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     """
 
     __repr_info__: ClassVar[Tuple[str, ...]] = ("type", "name")
@@ -497,7 +497,7 @@ class UserCommand(ApplicationCommand):
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     """
 
     __repr_info__ = ("name", "default_permission")
@@ -532,7 +532,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     id: :class:`int`
         The user command's ID.
     application_id: :class:`int`
@@ -574,7 +574,7 @@ class MessageCommand(ApplicationCommand):
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     """
 
     __repr_info__ = ("name", "default_permission")
@@ -609,7 +609,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     id: :class:`int`
         The message command's ID.
     application_id: :class:`int`
@@ -655,11 +655,11 @@ class SlashCommand(ApplicationCommand):
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``description``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     """
 
     __repr_info__ = ("name", "description", "options", "default_permission")
@@ -776,11 +776,11 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``name``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
         Localizations for ``description``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
     application_id: :class:`int`
         The application ID this command belongs to.
     guild_id: Optional[:class:`int`]

@@ -260,7 +260,7 @@ class Client:
         Whether to raise an exception when localizations for a specific key couldn't be found.
         Defaults to ``False``.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
 
     Attributes
     ----------
