@@ -108,8 +108,7 @@ class StageInstance(Hashable):
 
     @property
     def discoverable_disabled(self) -> bool:
-        """discoverable_disabled: :class:`bool`
-        Whether discoverability for the stage instance is disabled."""
+        """:class:`bool`: Whether discoverability for the stage instance is disabled."""
         warn_deprecated(
             "StageInstance.discoverable_disabled is deprecated and will be removed in a future version",
             stacklevel=2,
