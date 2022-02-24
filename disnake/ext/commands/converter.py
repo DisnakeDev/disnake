@@ -60,29 +60,30 @@ if TYPE_CHECKING:
 
 __all__ = (
     "Converter",
+    "IDConverter",
     "ObjectConverter",
     "MemberConverter",
     "UserConverter",
-    "MessageConverter",
     "PartialMessageConverter",
+    "MessageConverter",
+    "GuildChannelConverter",
     "TextChannelConverter",
-    "InviteConverter",
-    "GuildConverter",
-    "RoleConverter",
-    "GameConverter",
-    "ColourConverter",
-    "ColorConverter",
     "VoiceChannelConverter",
     "StageChannelConverter",
-    "EmojiConverter",
-    "PartialEmojiConverter",
     "CategoryChannelConverter",
-    "IDConverter",
     "StoreChannelConverter",
     "ThreadConverter",
-    "GuildChannelConverter",
+    "ColourConverter",
+    "ColorConverter",
+    "RoleConverter",
+    "GameConverter",
+    "InviteConverter",
+    "GuildConverter",
+    "EmojiConverter",
+    "PartialEmojiConverter",
     "GuildStickerConverter",
     "PermissionsConverter",
+    "GuildScheduledEventConverter",
     "clean_content",
     "Greedy",
     "run_converters",
@@ -865,8 +866,8 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
 
     The lookup strategy is as follows (in order):
 
-    1. Lookup by ID.
-    3. Lookup by name
+    1. Lookup by ID
+    2. Lookup by name
 
     .. versionadded:: 2.0
     """
