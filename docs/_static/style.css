@@ -705,6 +705,12 @@ aside::-webkit-scrollbar-thumb:hover {
   flex: 9;
 }
 
+.search-wrapper > button[type=submit] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .search-wrapper {
   border: 2px solid var(--search-border);
   border-radius: 8px;
