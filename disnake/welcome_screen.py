@@ -164,7 +164,7 @@ class WelcomeScreen:
         enabled: bool = MISSING,
         description: str = MISSING,
         welcome_channels: List[WelcomeScreenChannel] = MISSING,
-        reason: str = None,
+        reason: Optional[str] = None,
     ) -> WelcomeScreen:
         """Edits the welcome screen.
 

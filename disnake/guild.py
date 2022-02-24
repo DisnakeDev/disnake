@@ -1971,12 +1971,23 @@ class Guild(Hashable):
         enabled: bool = MISSING,
         welcome_channels: List[WelcomeScreenChannel] = MISSING,
         description: str = MISSING,
-        reason: str = None,
+        reason: Optional[str] = None,
     ) -> WelcomeScreen:
         """This is a lower level method to :meth:`WelcomeScreen.edit` that allows you
         to edit the welcome screen without fetching it and save an api request.
 
         .. versionadded:: 2.4
+
+        Parameters
+        ----------
+        enabled: :class:`bool`
+            Whether the welcome screen is enabled.
+        description: :class:`str`
+            The new guild description.
+        welcome_channels: List[:class:`WelcomeScreenChannel`]
+            The new welcome channels.
+        reason: Optional[:class:`str`]
+            The reason for editing the welcome screen. Shows up on the audit log.
 
         Raises
         ------
