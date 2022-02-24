@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import inspect
 import os
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
@@ -54,19 +54,11 @@ V = TypeVar("V", bound="View", covariant=True)
 def _parse_select_options(
     options: Union[List[SelectOption], List[str], Dict[str, str]]
 ) -> List[SelectOption]:
-    is_opt = (isinstance(opt, SelectOption) for opt in options)
-    if any(is_opt):
-        if all(is_opt):
-            return options
-        raise TypeError("options must either all be SelectOptions or all be str")
-
-    if isinstance(options, list):
-        return [SelectOption(label=opt) for opt in options]
 
     if isinstance(options, dict):
         return [SelectOption(label=key, value=val) for key, val in options.items()]
 
-    raise TypeError("options must be a list of SelectOption or str, or a dict mapping str to str")
+    return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
 
 
 class Select(Item[V]):
