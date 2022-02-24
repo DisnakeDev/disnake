@@ -79,7 +79,7 @@ class StickerPack(Hashable):
            Checks if the sticker pack is not equal to another sticker pack.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the sticker pack.
     description: :class:`str`
@@ -191,11 +191,11 @@ class StickerItem(_StickerTag):
            Checks if the sticker item is not equal to another sticker item.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The sticker's name.
     id: :class:`int`
-        The id of the sticker.
+        The ID of the sticker.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
     url: :class:`str`
@@ -223,12 +223,12 @@ class StickerItem(_StickerTag):
         Attempts to retrieve the full sticker data of the sticker item.
 
         Raises
-        --------
+        ------
         HTTPException
             Retrieving the sticker failed.
 
         Returns
-        --------
+        -------
         Union[:class:`StandardSticker`, :class:`GuildSticker`]
             The retrieved sticker.
         """
@@ -261,11 +261,11 @@ class Sticker(_StickerTag):
     name: :class:`str`
         The sticker's name.
     id: :class:`int`
-        The id of the sticker.
+        The ID of the sticker.
     description: :class:`str`
         The description of the sticker.
     pack_id: :class:`int`
-        The id of the sticker's pack.
+        The ID of the sticker's pack.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
     url: :class:`str`
@@ -321,11 +321,11 @@ class StandardSticker(Sticker):
     name: :class:`str`
         The sticker's name.
     id: :class:`int`
-        The id of the sticker.
+        The ID of the sticker.
     description: :class:`str`
         The description of the sticker.
     pack_id: :class:`int`
-        The id of the sticker's pack.
+        The ID of the sticker's pack.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
     tags: List[:class:`str`]
@@ -356,14 +356,14 @@ class StandardSticker(Sticker):
         Retrieves the sticker pack that this sticker belongs to.
 
         Raises
-        --------
+        ------
         InvalidData
             The corresponding sticker pack was not found.
         HTTPException
             Retrieving the sticker pack failed.
 
         Returns
-        --------
+        -------
         :class:`StickerPack`
             The retrieved sticker pack.
         """
@@ -400,7 +400,7 @@ class GuildSticker(Sticker):
     name: :class:`str`
         The sticker's name.
     id: :class:`int`
-        The id of the sticker.
+        The ID of the sticker.
     description: :class:`str`
         The description of the sticker.
     format: :class:`StickerFormatType`
@@ -452,7 +452,7 @@ class GuildSticker(Sticker):
         Edits a :class:`GuildSticker` for the guild.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The sticker's new name. Must be at least 2 characters.
         description: Optional[:class:`str`]
@@ -463,14 +463,14 @@ class GuildSticker(Sticker):
             The reason for editing this sticker. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You are not allowed to edit stickers.
         HTTPException
             An error occurred editing the sticker.
 
         Returns
-        --------
+        -------
         :class:`GuildSticker`
             The newly modified sticker.
         """
@@ -506,12 +506,12 @@ class GuildSticker(Sticker):
         do this.
 
         Parameters
-        -----------
+        ----------
         reason: Optional[:class:`str`]
             The reason for deleting this sticker. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You are not allowed to delete stickers.
         HTTPException

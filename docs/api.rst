@@ -694,12 +694,37 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_application_command(interaction)
 
-    Called when an application_command is invoked.
+    Called when an application command is invoked.
 
     .. warning::
 
         This is a low level function that is not generally meant to be used.
         Consider using :class:`~ext.commands.Bot` or :class:`~ext.commands.InteractionBot` instead.
+
+    .. warning::
+
+        If you decide to override this event and are using :class:`~disnake.ext.commands.Bot` or related types,
+        make sure to call :func:`Bot.process_application_commands <disnake.ext.commands.Bot.process_application_commands>`
+        to ensure that the application commands are processed.
+
+    .. versionadded:: 2.0
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`ApplicationCommandInteraction`
+
+.. function:: on_application_command_autocomplete(interaction)
+
+    Called when an application command autocomplete is called.
+
+    .. warning::
+
+        This is a low level function that is not generally meant to be used.
+        Consider using :class:`~ext.commands.Bot` or :class:`~ext.commands.InteractionBot` instead.
+
+    .. warning::
+        If you decide to override this event and are using :class:`~disnake.ext.commands.Bot` or related types,
+        make sure to call :func:`Bot.process_app_command_autocompletion <disnake.ext.commands.Bot.process_app_command_autocompletion>`
+        to ensure that the application command autocompletion is processed.
 
     .. versionadded:: 2.0
 
@@ -3049,6 +3074,34 @@ of :class:`enum.Enum`.
 
         The thread will archive after a week of inactivity.
 
+.. class:: WidgetStyle
+
+    Represents the supported widget image styles.
+
+    .. versionadded:: 2.5
+
+    .. attribute:: shield
+
+        A shield style image with a Discord icon and the online member count.
+
+    .. attribute:: banner1
+
+        A large image with guild icon, name and online member count and a footer.
+
+    .. attribute:: banner2
+
+        A small image with guild icon, name and online member count.
+
+    .. attribute:: banner3
+
+        A large image with guild icon, name and online member count and a footer,
+        with a "Chat Now" label on the right.
+
+    .. attribute:: banner4
+
+        A large image with a large Discord logo, guild icon, name and online member count,
+        with a "Join My Server" label at the bottom.
+
 
 Async Iterator
 ----------------
@@ -4106,6 +4159,15 @@ Guild
 
         :type: :class:`User`
 
+GuildPreview
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildPreview
+
+.. autoclass:: GuildPreview()
+    :members:
+
+
 GuildScheduledEvent
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -4158,7 +4220,6 @@ ApplicationCommandInteraction
 .. autoclass:: ApplicationCommandInteraction()
     :members:
     :inherited-members:
-    :exclude-members: channel, followup, guild, me, permissions, response
 
 MessageInteraction
 ~~~~~~~~~~~~~~~~~~
@@ -4168,7 +4229,6 @@ MessageInteraction
 .. autoclass:: MessageInteraction()
     :members:
     :inherited-members:
-    :exclude-members: channel, followup, guild, me, permissions, response
 
 ModalInteraction
 ~~~~~~~~~~~~~~~~
@@ -4476,6 +4536,14 @@ WidgetMember
 .. autoclass:: WidgetMember()
     :members:
     :inherited-members:
+
+WidgetSettings
+~~~~~~~~~~~~~~
+
+.. attributetable:: WidgetSettings
+
+.. autoclass:: WidgetSettings()
+    :members:
 
 Widget
 ~~~~~~~

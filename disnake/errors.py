@@ -58,6 +58,7 @@ __all__ = (
     "InteractionResponded",
     "InteractionNotResponded",
     "ModalChainNotSupported",
+    "InteractionNotEditable",
 )
 
 
@@ -115,7 +116,7 @@ class HTTPException(DiscordException):
     """Exception that's raised when an HTTP request operation fails.
 
     Attributes
-    ------------
+    ----------
     response: :class:`aiohttp.ClientResponse`
         The response of the failed HTTP request. This is an
         instance of :class:`aiohttp.ClientResponse`. In some cases
@@ -218,7 +219,7 @@ class ConnectionClosed(ClientException):
     closed for reasons that could not be handled internally.
 
     Attributes
-    -----------
+    ----------
     code: :class:`int`
         The close code of the websocket.
     reason: :class:`str`
@@ -254,7 +255,7 @@ class PrivilegedIntentsRequired(ClientException):
     - :attr:`Intents.presences`
 
     Attributes
-    -----------
+    ----------
     shard_id: Optional[:class:`int`]
         The shard ID that got closed if applicable.
     """
@@ -276,7 +277,7 @@ class InteractionException(ClientException):
     .. versionadded:: 2.0
 
     Attributes
-    -----------
+    ----------
     interaction: :class:`Interaction`
         The interaction that was responded to
     """
@@ -291,7 +292,7 @@ class InteractionTimedOut(InteractionException):
     .. versionadded:: 2.0
 
     Attributes
-    -----------
+    ----------
     interaction: :class:`Interaction`
         The interaction that was responded to
     """
@@ -315,12 +316,12 @@ class InteractionResponded(InteractionException):
     """Exception that's raised when sending another interaction response using
     :class:`InteractionResponse` when one has already been done before.
 
-    An interaction can only respond once.
+    An interaction can only be responded to once.
 
     .. versionadded:: 2.0
 
     Attributes
-    -----------
+    ----------
     interaction: :class:`Interaction`
         The interaction that's already been responded to.
     """
@@ -334,14 +335,14 @@ class InteractionNotResponded(InteractionException):
     """Exception that's raised when editing an interaction response without
     sending a response message first.
 
-    An interaction can only respond once.
+    An interaction must be responded to exactly once.
 
     .. versionadded:: 2.0
 
     Attributes
-    -----------
+    ----------
     interaction: :class:`Interaction`
-        The interaction that's already been responded to.
+        The interaction that hasn't been responded to.
     """
 
     def __init__(self, interaction: Interaction):
@@ -363,3 +364,20 @@ class ModalChainNotSupported(InteractionException):
     def __init__(self, interaction: ModalInteraction):
         self.interaction: ModalInteraction = interaction
         super().__init__("You cannot respond to a modal with another modal.")
+
+
+class InteractionNotEditable(InteractionException):
+    """Exception that's raised when trying to use :func:`InteractionResponse.edit_message`
+    on an interaction without an associated message (which is thus non-editable).
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    interaction: :class:`Interaction`
+        The interaction that was responded to.
+    """
+
+    def __init__(self, interaction: Interaction):
+        self.interaction: Interaction = interaction
+        super().__init__("This interaction does not have a message to edit.")

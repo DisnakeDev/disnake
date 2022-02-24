@@ -25,6 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+from functools import wraps
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -62,6 +63,7 @@ def make_permission_alias(alias: str) -> Callable[[Callable[[Any], int]], permis
 
 
 def cached_creation(func):
+    @wraps(func)
     def wrapped(cls):
         try:
             value = func.__stored_value__
@@ -118,7 +120,7 @@ class Permissions(BaseFlags):
                Note that aliases are not shown.
 
     Attributes
-    -----------
+    ----------
     value: :class:`int`
         The raw value. This value is a bit array field of a 53-bit integer
         representing the currently available permissions. You should query
@@ -375,15 +377,45 @@ class Permissions(BaseFlags):
             administrator=True,
         )
 
+    @classmethod
+    @cached_creation
+    def private_channel(cls: Type[P]) -> P:
+        """A factory method that creates a :class:`Permissions` with the
+        best representation of a PrivateChannel's permissions.
+
+        This exists to maintain compatibility with other channel types.
+
+        This is equivalent to :meth:`Permissions.text` with :attr:`~Permissions.view_channel` with the following set to False:
+
+        - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
+        - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        - :attr:`~Permissions.manage_threads`: You cannot manage threads in a DM.
+        - :attr:`~Permissions.send_messages_in_threads`: You cannot make threads in a DM.
+        - :attr:`~Permissions.create_public_threads`: You cannot make public threads in a DM.
+        - :attr:`~Permissions.create_private_threads`: You cannot make private threads in a DM.
+
+        .. versionadded:: 2.4
+        """
+        base = cls.text()
+        base.read_messages = True
+        base.send_tts_messages = False
+        base.manage_messages = False
+        base.manage_threads = False
+        base.send_messages_in_threads = False
+        base.create_public_threads = False
+        base.create_private_threads = False
+        return base
+
     def update(self, **kwargs: bool) -> None:
-        r"""Bulk updates this permission object.
+        """
+        Bulk updates this permission object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties
         listed. Extraneous key/value pairs will be silently ignored.
 
         Parameters
-        ------------
+        ----------
         \*\*kwargs
             A list of key/value pairs to bulk update permissions with.
         """
@@ -462,16 +494,19 @@ class Permissions(BaseFlags):
         return 1 << 9
 
     @flag_value
-    def read_messages(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can read messages from all or specific text channels."""
-        return 1 << 10
-
-    @make_permission_alias("read_messages")
     def view_channel(self) -> int:
-        """:class:`bool`: An alias for :attr:`read_messages`.
+        """:class:`bool`: Returns ``True`` if a user can view all or specific channels.
 
         .. versionadded:: 1.3
+
+        .. versionchanged:: 2.4
+            :attr:`~Permissions.read_messages` is now an alias of :attr:`~Permissions.view_channel`.
         """
+        return 1 << 10
+
+    @make_permission_alias("view_channel")
+    def read_messages(self) -> int:
+        """:class:`bool`: An alias for :attr:`view_channel`."""
         return 1 << 10
 
     @flag_value
@@ -732,7 +767,8 @@ def _augment_from_permissions(cls):
 
 @_augment_from_permissions
 class PermissionOverwrite:
-    r"""A type that is used to represent a channel specific permission.
+    """
+    A type that is used to represent a channel specific permission.
 
     Unlike a regular :class:`Permissions`\, the default value of a
     permission is equivalent to ``None`` and not ``False``. Setting
@@ -758,7 +794,7 @@ class PermissionOverwrite:
            Note that aliases are not shown.
 
     Parameters
-    -----------
+    ----------
     \*\*kwargs
         Set the value of permissions by their name.
     """
@@ -879,14 +915,15 @@ class PermissionOverwrite:
         return len(self._values) == 0
 
     def update(self, **kwargs: bool) -> None:
-        r"""Bulk updates this permission overwrite object.
+        """
+        Bulk updates this permission overwrite object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties
         listed. Extraneous key/value pairs will be silently ignored.
 
         Parameters
-        ------------
+        ----------
         \*\*kwargs
             A list of key/value pairs to bulk update with.
         """

@@ -59,7 +59,6 @@ class VoiceState(_VoiceState, total=False):
 class VoiceRegion(TypedDict):
     id: str
     name: str
-    vip: bool
     optimal: bool
     deprecated: bool
     custom: bool

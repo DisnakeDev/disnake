@@ -91,24 +91,24 @@ class VoiceState:
     """Represents a Discord user's voice state.
 
     Attributes
-    ------------
+    ----------
     deaf: :class:`bool`
-        Indicates if the user is currently deafened by the guild.
+        Whether the user is currently deafened by the guild.
     mute: :class:`bool`
-        Indicates if the user is currently muted by the guild.
+        Whether the user is currently muted by the guild.
     self_mute: :class:`bool`
-        Indicates if the user is currently muted by their own accord.
+        Whether the user is currently muted by their own accord.
     self_deaf: :class:`bool`
-        Indicates if the user is currently deafened by their own accord.
+        Whether the user is currently deafened by their own accord.
     self_stream: :class:`bool`
-        Indicates if the user is currently streaming via 'Go Live' feature.
+        Whether the user is currently streaming via 'Go Live' feature.
 
         .. versionadded:: 1.3
 
     self_video: :class:`bool`
-        Indicates if the user is currently broadcasting video.
+        Whether the user is currently broadcasting video.
     suppress: :class:`bool`
-        Indicates if the user is suppressed from speaking.
+        Whether the user is suppressed from speaking.
 
         Only applies to stage channels.
 
@@ -119,12 +119,12 @@ class VoiceState:
         requested to speak. It will be ``None`` if they are not requesting to speak
         anymore or have been accepted to speak.
 
-        Only applicable to stage channels.
+        Only applies to stage channels.
 
         .. versionadded:: 1.7
 
     afk: :class:`bool`
-        Indicates if the user is currently in the AFK channel in the guild.
+        Whether the user is currently in the AFK channel in the guild.
     channel: Optional[Union[:class:`VoiceChannel`, :class:`StageChannel`]]
         The voice channel that the user is currently connected to. ``None`` if the user
         is not currently in a voice channel.
@@ -267,8 +267,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
             Due to a Discord API limitation, a user's Spotify activity may not appear
             if they are listening to a song with a title longer
-            than 128 characters. See :issue:`1738` for more information.
-
+            than 128 characters. See :issue-dpy:`1738` for more information.
     guild: :class:`Guild`
         The guild that the member belongs to.
     nick: Optional[:class:`str`]
@@ -277,6 +276,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         Whether the member is pending member verification.
 
         .. versionadded:: 1.6
+
     premium_since: Optional[:class:`datetime.datetime`]
         An aware datetime object that specifies the date and time in UTC when the member used their
         "Nitro boost" on the guild, if available. This could be ``None``.
@@ -523,7 +523,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         return try_enum(Status, self._client_status.get("web", "offline"))
 
     def is_on_mobile(self) -> bool:
-        """A helper function that determines if a member is active on a mobile device.
+        """Whether the member is active on a mobile device.
 
         :return type: :class:`bool`
         """
@@ -537,7 +537,6 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         There is an alias for this named :attr:`color`.
         """
-
         roles = self.roles[1:]  # remove @everyone
 
         # highest order of the colour is the one that gets rendered.
@@ -625,7 +624,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
             Due to a Discord API limitation, this may be ``None`` if
             the user is listening to a song on Spotify with a title longer
-            than 128 characters. See :issue:`1738` for more information.
+            than 128 characters. See :issue-dpy:`1738` for more information.
 
         .. note::
 
@@ -635,12 +634,12 @@ class Member(disnake.abc.Messageable, _UserTag):
             return self.activities[0]
 
     def mentioned_in(self, message: Message) -> bool:
-        """Checks if the member is mentioned in the specified message.
+        """Whether the member is mentioned in the specified message.
 
         Parameters
-        -----------
+        ----------
         message: :class:`Message`
-            The message to check if you're mentioned in.
+            The message to check.
 
         Returns
         -------
@@ -680,7 +679,6 @@ class Member(disnake.abc.Messageable, _UserTag):
         This does take into consideration guild ownership and the
         administrator implication.
         """
-
         if self.guild.owner_id == self.id:
             return Permissions.all()
 
@@ -783,17 +781,18 @@ class Member(disnake.abc.Messageable, _UserTag):
             The newly member is now optionally returned, if applicable.
 
         Parameters
-        -----------
+        ----------
         nick: Optional[:class:`str`]
             The member's new nickname. Use ``None`` to remove the nickname.
         mute: :class:`bool`
-            Indicates if the member should be guild muted or un-muted.
+            Whether the member should be guild muted or un-muted.
         deafen: :class:`bool`
-            Indicates if the member should be guild deafened or un-deafened.
+            Whether the member should be guild deafened or un-deafened.
         suppress: :class:`bool`
-            Indicates if the member should be suppressed in stage channels.
+            Whether the member should be suppressed in stage channels.
 
             .. versionadded:: 1.7
+
         roles: List[:class:`Role`]
             The member's new list of roles. This *replaces* the roles.
         voice_channel: Optional[:class:`VoiceChannel`]
@@ -805,18 +804,19 @@ class Member(disnake.abc.Messageable, _UserTag):
             Set to ``None`` to remove the timeout. Supports up to 28 days in the future.
 
             .. versionadded:: 2.3
+
         reason: Optional[:class:`str`]
             The reason for editing this member. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have the proper permissions to the action requested.
         HTTPException
             The operation failed.
 
         Returns
-        --------
+        -------
         Optional[:class:`.Member`]
             The newly updated member, if applicable. This is only returned
             when certain fields are updated.
@@ -829,7 +829,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         if nick is not MISSING:
             nick = nick or ""
             if me:
-                await http.change_my_nickname(guild_id, nick, reason=reason)
+                await http.edit_my_member(guild_id, nick=nick, reason=reason)
             else:
                 payload["nick"] = nick
 
@@ -885,7 +885,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def request_to_speak(self) -> None:
         """|coro|
 
-        Request to speak in the connected channel.
+        Requests to speak in the connected channel.
 
         Only applies to stage channels.
 
@@ -897,7 +897,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         .. versionadded:: 1.7
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have the proper permissions to the action requested.
         HTTPException
@@ -922,7 +922,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Moves a member to a new voice channel (they must be connected first).
 
-        You must have the :attr:`~Permissions.move_members` permission to
+        You must have :attr:`~Permissions.move_members` permission to
         use this.
 
         This raises the same exceptions as :meth:`edit`.
@@ -931,7 +931,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             Can now pass ``None`` to kick a member from voice.
 
         Parameters
-        -----------
+        ----------
         channel: Optional[:class:`VoiceChannel`]
             The new voice channel to move the member to.
             Pass ``None`` to kick them from voice.
@@ -943,16 +943,17 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def add_roles(
         self, *roles: Snowflake, reason: Optional[str] = None, atomic: bool = True
     ) -> None:
-        r"""|coro|
+        """
+        |coro|
 
         Gives the member a number of :class:`Role`\s.
 
-        You must have the :attr:`~Permissions.manage_roles` permission to
+        You must have :attr:`~Permissions.manage_roles` permission to
         use this, and the added :class:`Role`\s must appear lower in the list
         of roles than the highest role of the member.
 
         Parameters
-        -----------
+        ----------
         \*roles: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing a :class:`Role`
             to give to the member.
@@ -964,13 +965,12 @@ class Member(disnake.abc.Messageable, _UserTag):
             state of the cache.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to add these roles.
         HTTPException
             Adding roles failed.
         """
-
         if not atomic:
             new_roles = utils._unique(Object(id=r.id) for s in (self.roles[1:], roles) for r in s)
             await self.edit(roles=new_roles, reason=reason)
@@ -984,16 +984,17 @@ class Member(disnake.abc.Messageable, _UserTag):
     async def remove_roles(
         self, *roles: Snowflake, reason: Optional[str] = None, atomic: bool = True
     ) -> None:
-        r"""|coro|
+        """
+        |coro|
 
         Removes :class:`Role`\s from this member.
 
-        You must have the :attr:`~Permissions.manage_roles` permission to
+        You must have :attr:`~Permissions.manage_roles` permission to
         use this, and the removed :class:`Role`\s must appear lower in the list
         of roles than the highest role of the member.
 
         Parameters
-        -----------
+        ----------
         \*roles: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing a :class:`Role`
             to remove from the member.
@@ -1005,13 +1006,12 @@ class Member(disnake.abc.Messageable, _UserTag):
             state of the cache.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to remove these roles.
         HTTPException
             Removing the roles failed.
         """
-
         if not atomic:
             new_roles = [Object(id=r.id) for r in self.roles[1:]]  # remove @everyone
             for role in roles:
@@ -1034,12 +1034,12 @@ class Member(disnake.abc.Messageable, _UserTag):
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         role_id: :class:`int`
-            The ID to search for.
+            The role ID to search for.
 
         Returns
-        --------
+        -------
         Optional[:class:`Role`]
             The role or ``None`` if not found in the member's roles.
         """
@@ -1094,7 +1094,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             The reason for this timeout. Appears on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to timeout this member.
         HTTPException

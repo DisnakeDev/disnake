@@ -293,13 +293,14 @@ def components_to_rows(components: Components) -> List[ActionRow]:
             if isinstance(component, ActionRow):
                 action_rows.append(component)
 
-            elif isinstance(component, list):
+            elif isinstance(component, Sequence):
                 action_rows.append(ActionRow(*component))
 
             else:
                 raise ValueError(
-                    "components must be a WrappedComponent, a list of ActionRow "
-                    "or a list of WrappedComponent"
+                    "`components` must be a `WrappedComponent` or `ActionRow`, "
+                    "a sequence/list of `WrappedComponent`s or `ActionRow`s, "
+                    "or a nested sequence/list of `WrappedComponent`s"
                 )
 
     if auto_row.width > 0:

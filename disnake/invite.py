@@ -86,7 +86,7 @@ class PartialInviteChannel:
             Returns the partial channel's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The partial channel's name.
     id: :class:`int`
@@ -144,7 +144,7 @@ class PartialInviteGuild:
             Returns the partial guild's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The partial guild's name.
     id: :class:`int`
@@ -242,7 +242,8 @@ I = TypeVar("I", bound="Invite")
 
 
 class Invite(Hashable):
-    r"""Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
+    """
+    Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
 
     Depending on the way this object was created, some of the attributes can
     have a value of ``None``.
@@ -293,7 +294,7 @@ class Invite(Hashable):
     If it's not in the table above then it is available by all methods.
 
     Attributes
-    -----------
+    ----------
     max_age: :class:`int`
         How long before the invite expires in seconds.
         A value of ``0`` indicates that it doesn't expire.
@@ -304,7 +305,7 @@ class Invite(Hashable):
     created_at: :class:`datetime.datetime`
         An aware UTC datetime object denoting the time the invite was created.
     temporary: :class:`bool`
-        Indicates that the invite grants temporary membership.
+        Whether the invite grants temporary membership.
         If ``True``, members who joined via this invite will be kicked upon disconnect.
     uses: :class:`int`
         How many times the invite has been used.
@@ -546,15 +547,15 @@ class Invite(Hashable):
 
         Revokes the instant invite.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to do this.
+        You must have :attr:`~Permissions.manage_channels` permission to do this.
 
         Parameters
-        -----------
+        ----------
         reason: Optional[:class:`str`]
             The reason for deleting this invite. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to revoke invites.
         NotFound
@@ -562,5 +563,4 @@ class Invite(Hashable):
         HTTPException
             Revoking the invite failed.
         """
-
         await self._state.http.delete_invite(self.code, reason=reason)
