@@ -306,7 +306,8 @@ aside {
   padding: 12px;
   overflow: auto;
   z-index: 3;
-  max-height: 100vh;
+  top: 50px; /* Space for sticky header */
+  bottom: 0;
   width: 385px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
