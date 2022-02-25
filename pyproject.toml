@@ -25,3 +25,8 @@ exclude-modules = '''
     ^disnake\.types\.
 )
 '''
+exclude-classes = '''
+(
+    ^disnake\.enums:  # see slotscheck#65
+)
+'''

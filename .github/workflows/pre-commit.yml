@@ -37,4 +37,5 @@ jobs:
       run: python -m pip install -r requirements.txt -r requirements_dev.txt
 
     - name: Run slotscheck
-      run: python -m slotscheck --verbose -m disnake
+      # TODO: consider re-enabling the --verbose flag once slotscheck#65 is fixed
+      run: python -m slotscheck -m disnake
