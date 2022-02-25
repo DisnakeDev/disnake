@@ -31,7 +31,7 @@ import collections.abc
 import inspect
 import sys
 import traceback
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Type, TypeVar, Union, cast
 
 import disnake
 
@@ -490,7 +490,7 @@ class BotBase(CommonBotBase, GroupMixin):
         """
 
         view = StringView(message.content)
-        ctx = cls(prefix=None, view=view, bot=self, message=message)
+        ctx = cast("CXT", cls(prefix=None, view=view, bot=self, message=message))
 
         if message.author.id == self.user.id:  # type: ignore
             return ctx
