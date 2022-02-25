@@ -15,3 +15,13 @@ docs = { cmd = "cd docs && sphinx-autobuild . _build/html --ignore _build --watc
 isort = { cmd = "task lint isort", help = "Run isort" }
 lint = { cmd = "pre-commit run --all-files", help = "Checks all files for linting errors" }
 precommit = { cmd = "pre-commit install --install-hooks", help = "Installs the precommit hook" }
+
+[tool.slotscheck]
+strict-imports = true
+require-superclass = true
+require-subclass = false
+exclude-modules = '''
+(
+    ^disnake\.types\.
+)
+'''
