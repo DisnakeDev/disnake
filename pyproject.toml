@@ -32,6 +32,7 @@ include = [
     "*.py",
 ]
 
+strictParameterNoneValue = false
 reportInvalidStringEscapeSequence = false
 reportPropertyTypeMismatch = true
 reportDuplicateImport = true
