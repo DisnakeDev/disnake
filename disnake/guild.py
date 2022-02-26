@@ -3372,7 +3372,7 @@ class Guild(Hashable):
 
         Parameters
         -----------
-        query: Optional[:class:`str`]
+        query: :class:`str`
             The string that the usernames or nicknames start with.
         limit: :class:`int`
             The maximum number of members to send back. This must be
