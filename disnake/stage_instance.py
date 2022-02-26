@@ -108,7 +108,12 @@ class StageInstance(Hashable):
 
     @property
     def discoverable_disabled(self) -> bool:
-        """:class:`bool`: Whether discoverability for the stage instance is disabled."""
+        """:class:`bool`: Whether discoverability for the stage instance is disabled.
+
+        .. deprecated:: 2.5
+
+            Stages can no longer be discoverable.
+        """
         warn_deprecated(
             "StageInstance.discoverable_disabled is deprecated and will be removed in a future version",
             stacklevel=2,
@@ -117,6 +122,10 @@ class StageInstance(Hashable):
 
     def is_public(self) -> bool:
         """Whether the stage instance is public.
+
+        .. deprecated:: 2.5
+
+            Stages can no longer be public.
 
         :return type: :class:`bool`
         """
