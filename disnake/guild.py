@@ -197,6 +197,7 @@ class Guild(Hashable):
         - ``COMMUNITY``: Guild is a community server.
         - ``DEVELOPER_SUPPORT_SERVER``: Guild is set as a support server in the app directory.
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
+        - ``DISCOVERABLE_DISABLED``: Guild cannot enable discovery.
         - ``ENABLED_DISCOVERABLE_BEFORE``: Guild had Server Discovery enabled at least once.
         - ``FEATURABLE``: Guild is able to be featured in Server Discovery.
         - ``HAS_DIRECTORY_ENTRY``: Guild is listed in a student hub.

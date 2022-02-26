@@ -43,6 +43,7 @@ GuildFeature = Literal[
     "CREATOR_MONETIZABLE",  # not yet documented/finalised
     "DEVELOPER_SUPPORT_SERVER",
     "DISCOVERABLE",
+    "DISCOVERABLE_DISABLED",
     "ENABLED_DISCOVERABLE_BEFORE",
     "FEATURABLE",
     "GUILD_HOME_TEST",  # not yet documented/finalised
