@@ -3364,7 +3364,7 @@ class Guild(Hashable):
         Retrieves members that belong to this guild whose username or nickname starts with
         the query given.
 
-        Note that unlike :func:`query_members`, this is not a websocket operation.
+        Note that unlike :func:`query_members`, this is not a websocket operation, but an HTTP operation.
 
         See also :func:`query_members`.
 
