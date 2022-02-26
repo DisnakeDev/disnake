@@ -24,8 +24,7 @@ DEALINGS IN THE SOFTWARE.
 """
 
 import types
-from functools import total_ordering
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, NamedTuple, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Iterator, Mapping, Optional, Sequence, Tuple, Type, TypeVar, Union
 
 __all__ = (
     "Enum",
@@ -68,121 +67,135 @@ __all__ = (
 )
 
 
-class _EnumValueBase(NamedTuple):
-    if TYPE_CHECKING:
-        _cls_name: str
-
-    name: str
-    value: Any
-
-    def __repr__(self) -> str:
-        return f"<{self._cls_name}.{self.name}: {self.value!r}>"
-
-    def __str__(self) -> str:
-        return f"{self._cls_name}.{self.name}"
-
-
-@total_ordering
-class _EnumValueComparable(_EnumValueBase):
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, self.__class__) and self.value == other.value
-
-    def __lt__(self, other: object) -> bool:
-        return isinstance(other, self.__class__) and self.value < other.value
-
-
-def _create_value_cls(name, comparable):
-    parent = _EnumValueComparable if comparable else _EnumValueBase
-    return type(parent.__name__ + "_" + name, (parent,), {"_cls_name": name})
+_T = TypeVar("_T", bound="EnumMeta")
 
 
 def _is_descriptor(obj):
     return hasattr(obj, "__get__") or hasattr(obj, "__set__") or hasattr(obj, "__delete__")
 
 
+class _EnumDict(Dict[str, Any]):
+
+    def __init__(self, base: Type[Any]):
+        # We explicitly take a base in __init__, unlike default Enums, to more easily
+        # enforce proper value typing. This should ensure better performance, as e.g.
+        # `Enum[int].one + 3 == 4` is more performant than `Enum[Any].one.value + 3 == 4`,
+        # as this saves a lookup. We do lose some functionality here, but it's probably
+        # worth the cost; especially considering all current enums have monotyped values.
+        super().__init__()
+        self.base = base
+        self.member_map: Dict[str, Any] = {}
+        self.value_map: Dict[Any, str] = {}
+
+    def __getitem__(self, name: str) -> Any:
+        try:
+            return super().__getitem__(name)
+        except KeyError:
+            return self.value_map[name]
+
+    def __setitem__(self, name: str, value: Any) -> None:
+        if name in {"mro", ""}:  # illegal names defined in original python enums
+            raise ValueError(f"Invalid Enum member name: {name}")
+
+        if name.startswith("_") or _is_descriptor(value):
+            super().__setitem__(name, value)
+            return
+
+        if not isinstance(value, self.base):
+            raise TypeError(
+                f"Member {name} must be of type {self.base.__name__}, got {type(value).__name__}"
+            )
+
+        if name in self.member_map:
+            raise TypeError(f"Attempted to reuse key: '{name!r}'")
+        if value in self.value_map:
+            # We'll have to settle for slower value lookup in case of a dupe
+            self.member_map[name] = value
+            return
+
+        self.member_map[name] = value
+        self.value_map[value] = name
+
+
 class EnumMeta(type):
-    if TYPE_CHECKING:
-        __name__: ClassVar[str]
-        _enum_member_names_: ClassVar[List[str]]
-        _enum_member_map_: ClassVar[Dict[str, Any]]
-        _enum_value_map_: ClassVar[Dict[Any, Any]]
+    __is_enum_instantiated: ClassVar[bool] = False
 
-    def __new__(cls, name, bases, attrs, *, comparable: bool = False):
-        value_mapping = {}
-        member_mapping = {}
-        member_names = []
+    _name_map_: ClassVar[Mapping[str, Enum]]
+    _value_map_: ClassVar[Mapping[Any, Enum]]
 
-        value_cls = _create_value_cls(name, comparable)
-        for key, value in list(attrs.items()):
-            is_descriptor = _is_descriptor(value)
-            if key[0] == "_" and not is_descriptor:
-                continue
+    def __new__(
+        metacls: Type[_T],
+        name: str,
+        bases: Tuple[Type[Any], Type[Any]],
+        namespace: _EnumDict
+    ) -> _T:
+        
+        if not EnumMeta.__is_enum_instantiated:
+            EnumMeta.__is_enum_instantiated = True
+            return super().__new__(metacls, name, bases, namespace)
 
-            # Special case classmethod to just pass through
-            if isinstance(value, classmethod):
-                continue
+        base, _ = bases  # ensured possible in __prepare__
 
-            if is_descriptor:
-                setattr(value_cls, key, value)
-                del attrs[key]
-                continue
+        ns: Dict[str, Any] = {
+            "_name_map_" : (name_map := {}),
+            "_value_map_": (value_map := {}),
+            **{
+                name_: value_
+                for name_, value_ in Enum.__dict__.items()
+                if name_ not in ("__class__", "__module__", "__doc__")
+            }
+        }
 
-            try:
-                new_value = value_mapping[value]
-            except KeyError:
-                new_value = value_cls(name=key, value=value)
-                value_mapping[value] = new_value
-                member_names.append(key)
+        ns.update(namespace)
 
-            member_mapping[key] = new_value
-            attrs[key] = new_value
+        cls = super().__new__(metacls, name, bases, ns)
 
-        attrs["_enum_value_map_"] = value_mapping
-        attrs["_enum_member_map_"] = member_mapping
-        attrs["_enum_member_names_"] = member_names
-        attrs["_enum_value_cls_"] = value_cls
-        actual_cls = super().__new__(cls, name, bases, attrs)
-        value_cls._actual_enum_cls_ = actual_cls  # type: ignore
-        return actual_cls
+        for name_, value_ in namespace.member_map.items():
+            member = cls.__new__(cls, value_)  # type: ignore
+            member._name_ = name_
+            member._value_ = value_
+            name_map[name_] = value_map[value_] = member
+            setattr(cls, name_, member)
 
-    def __iter__(cls):
-        return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
+        return cls
 
-    def __reversed__(cls):
-        return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
+    @classmethod
+    def __prepare__(
+        mcs, name: str, bases: Tuple[Type[Any], ...] = (), /, **kwds: Any
+    ) -> Union[Dict[str, Any], _EnumDict]:
+        # with this we get to ensure the new class' namespace is an _EnumDict
 
-    def __len__(cls):
-        return len(cls._enum_member_names_)
+        if not EnumMeta.__is_enum_instantiated:
+            return _EnumDict(object)
 
-    def __repr__(cls):
+        try:
+            base, _ = bases  # 'loss' of functionality: only (type, Enum) enums are allowed
+        except ValueError:
+            raise TypeError("Expected exactly two base classes for an enum") from None
+
+        if isinstance(base, EnumMeta):
+            raise TypeError("An Enum's first base class must be its values' type")
+
+        return _EnumDict(base)
+
+    def __repr__(cls) -> str:
         return f"<enum {cls.__name__}>"
 
-    @property
-    def __members__(cls):
-        return types.MappingProxyType(cls._enum_member_map_)
-
-    def __call__(cls, value):
+    def __call__(cls, value: Any) -> Any:  # type: ignore
+        # Enums use different call signature than standard types, mypy be damned
         try:
-            return cls._enum_value_map_[value]
-        except (KeyError, TypeError):
-            raise ValueError(f"{value!r} is not a valid {cls.__name__}")
+            return cls._value_map_[value]
+        except KeyError:
+            raise KeyError(f"{value} is not a valid {cls.__name__}") from None
 
-    def __getitem__(cls, key):
-        return cls._enum_member_map_[key]
+    def __getitem__(cls, name: str) -> Any:
+        return cls._name_map_[name]
 
-    def __setattr__(cls, name, value):
-        raise TypeError("Enums are immutable.")
+    def __contains__(cls, value: Any) -> bool:
+        return value in cls._value_map_
 
-    def __delattr__(cls, attr):
-        raise TypeError("Enums are immutable")
-
-    def __instancecheck__(self, instance):
-        # isinstance(x, Y)
-        # -> __instancecheck__(Y, x)
-        try:
-            return instance._actual_enum_cls_ is self
-        except AttributeError:
-            return False
+    def __iter__(cls) -> Iterator[Any]:
+        yield from cls._name_map_.values()
 
 
 if TYPE_CHECKING:
@@ -190,15 +203,44 @@ if TYPE_CHECKING:
 else:
 
     class Enum(metaclass=EnumMeta):
+        _name_map_: ClassVar[Mapping[str, Enum]]
+        _value_map_: ClassVar[Mapping[Any, Enum]]
+        _name_: str
+        _value_: Any
+
+        @property
+        def name(self) -> str:
+            """Return the name of the enum member as a `builtins.str`."""
+            return self._name_
+
+        @property
+        def value(self):
+            """Return the value of the enum member."""
+            return self._value_
+
+        # The rest is just to remain compatible with vanilla Enum API
+
         @classmethod
-        def try_value(cls, value):
-            try:
-                return cls._enum_value_map_[value]
-            except (KeyError, TypeError):
-                return value
+        @property
+        def __members__(cls) -> types.MappingProxyType[str, Enum]:
+            return types.MappingProxyType(cls._name_map_)
+
+        @classmethod
+        @property
+        def _member_names_(cls) -> Sequence[str]:
+            # I _think_ this should be fine as a property?
+            # Hardly ever gets used so I don't really see the value in pre-computing it like
+            # vanilla Enums do. I decided to save memory but we can always just revert this.
+            return list(cls._name_map_)
+
+        def __repr__(self) -> str:
+            return f"<{type(self).__name__}.{self._name_}: {self._value_!r}>"
+
+        def __str__(self) -> str:
+            return self._name_
 
 
-class ChannelType(Enum):
+class ChannelType(int, Enum):
     text = 0
     private = 1
     voice = 2
@@ -212,11 +254,8 @@ class ChannelType(Enum):
     stage_voice = 13
     guild_directory = 14
 
-    def __str__(self):
-        return self.name
 
-
-class MessageType(Enum):
+class MessageType(int, Enum):
     default = 0
     recipient_add = 1
     recipient_remove = 2
@@ -243,7 +282,7 @@ class MessageType(Enum):
     context_menu_command = 23
 
 
-class PartyType(Enum):
+class PartyType(int, Enum):
     youtube = 755600276941176913
     poker = 755827207812677713
     betrayal = 773336526917861400
@@ -261,7 +300,7 @@ class PartyType(Enum):
     ocho = 832025144389533716
 
 
-class VoiceRegion(Enum):
+class VoiceRegion(str, Enum):
     us_west = "us-west"
     us_east = "us-east"
     us_south = "us-south"
@@ -276,44 +315,29 @@ class VoiceRegion(Enum):
     southafrica = "southafrica"
     india = "india"
 
-    def __str__(self):
-        return self.value
 
-
-class SpeakingState(Enum):
+class SpeakingState(int, Enum):
     none = 0
     voice = 1
     soundshare = 2
     priority = 4
 
-    def __str__(self):
-        return self.name
 
-    def __int__(self):
-        return self.value
-
-
-class VerificationLevel(Enum, comparable=True):
+class VerificationLevel(int, Enum):
     none = 0
     low = 1
     medium = 2
     high = 3
     highest = 4
 
-    def __str__(self):
-        return self.name
 
-
-class ContentFilter(Enum, comparable=True):
+class ContentFilter(int, Enum):
     disabled = 0
     no_role = 1
     all_members = 2
 
-    def __str__(self):
-        return self.name
 
-
-class Status(Enum):
+class Status(str, Enum):
     online = "online"
     offline = "offline"
     idle = "idle"
@@ -322,11 +346,8 @@ class Status(Enum):
     invisible = "invisible"
     streaming = "streaming"
 
-    def __str__(self):
-        return self.value
 
-
-class DefaultAvatar(Enum):
+class DefaultAvatar(int, Enum):
     blurple = 0
     grey = 1
     gray = 1
@@ -334,22 +355,19 @@ class DefaultAvatar(Enum):
     orange = 3
     red = 4
 
-    def __str__(self):
-        return self.name
 
-
-class NotificationLevel(Enum, comparable=True):
+class NotificationLevel(int, Enum):
     all_messages = 0
     only_mentions = 1
 
 
-class AuditLogActionCategory(Enum):
+class AuditLogActionCategory(int, Enum):
     create = 1
     delete = 2
     update = 3
 
 
-class AuditLogAction(Enum):
+class AuditLogAction(int, Enum):
     # fmt: off
     guild_update                     = 1
     channel_create                   = 10
@@ -492,7 +510,7 @@ class AuditLogAction(Enum):
             return None
 
 
-class UserFlags(Enum):
+class UserFlags(int, Enum):
     staff = 1
     partner = 2
     hypesquad = 4
@@ -514,7 +532,7 @@ class UserFlags(Enum):
     spammer = 1048576
 
 
-class ActivityType(Enum):
+class ActivityType(int, Enum):
     unknown = -1
     playing = 0
     streaming = 1
@@ -523,22 +541,19 @@ class ActivityType(Enum):
     custom = 4
     competing = 5
 
-    def __int__(self):
-        return self.value
 
-
-class TeamMembershipState(Enum):
+class TeamMembershipState(int, Enum):
     invited = 1
     accepted = 2
 
 
-class WebhookType(Enum):
+class WebhookType(int, Enum):
     incoming = 1
     channel_follower = 2
     application = 3
 
 
-class ExpireBehaviour(Enum):
+class ExpireBehaviour(int, Enum):
     remove_role = 0
     kick = 1
 
@@ -546,12 +561,12 @@ class ExpireBehaviour(Enum):
 ExpireBehavior = ExpireBehaviour
 
 
-class StickerType(Enum):
+class StickerType(int, Enum):
     standard = 1
     guild = 2
 
 
-class StickerFormatType(Enum):
+class StickerFormatType(int, Enum):
     png = 1
     apng = 2
     lottie = 3
@@ -566,13 +581,13 @@ class StickerFormatType(Enum):
         return lookup[self]
 
 
-class InviteTarget(Enum):
+class InviteTarget(int, Enum):
     unknown = 0
     stream = 1
     embedded_application = 2
 
 
-class InteractionType(Enum):
+class InteractionType(int, Enum):
     ping = 1
     application_command = 2
     component = 3
@@ -580,7 +595,7 @@ class InteractionType(Enum):
     modal_submit = 5
 
 
-class InteractionResponseType(Enum):
+class InteractionResponseType(int, Enum):
     pong = 1
     # ack = 2 (deprecated)
     # channel_message = 3 (deprecated)
@@ -592,25 +607,19 @@ class InteractionResponseType(Enum):
     modal = 9  # for modals
 
 
-class VideoQualityMode(Enum):
+class VideoQualityMode(int, Enum):
     auto = 1
     full = 2
 
-    def __int__(self):
-        return self.value
 
-
-class ComponentType(Enum):
+class ComponentType(int, Enum):
     action_row = 1
     button = 2
     select = 3
     text_input = 4
 
-    def __int__(self):
-        return self.value
 
-
-class ButtonStyle(Enum):
+class ButtonStyle(int, Enum):
     primary = 1
     secondary = 2
     success = 3
@@ -625,11 +634,8 @@ class ButtonStyle(Enum):
     red = 4
     url = 5
 
-    def __int__(self):
-        return self.value
 
-
-class TextInputStyle(Enum):
+class TextInputStyle(int, Enum):
     short = 1
     paragraph = 2
     # Aliases
@@ -637,11 +643,8 @@ class TextInputStyle(Enum):
     multi_line = 2
     long = 2
 
-    def __int__(self) -> int:
-        return self.value
 
-
-class ApplicationCommandType(Enum):
+class ApplicationCommandType(int, Enum):
     chat_input = 1
     user = 2
     message = 3
@@ -661,76 +664,76 @@ class OptionType(Enum):
     attachment = 11
 
 
-class StagePrivacyLevel(Enum):
+class StagePrivacyLevel(int, Enum):
     public = 1
     closed = 2
     guild_only = 2
 
 
-class NSFWLevel(Enum, comparable=True):
+class NSFWLevel(int, Enum):
     default = 0
     explicit = 1
     safe = 2
     age_restricted = 3
 
 
-class GuildScheduledEventEntityType(Enum):
+class GuildScheduledEventEntityType(int, Enum):
     stage_instance = 1
     voice = 2
     external = 3
 
 
-class GuildScheduledEventStatus(Enum):
+class GuildScheduledEventStatus(int, Enum):
     scheduled = 1
     active = 2
     completed = 3
     canceled = 4
 
 
-class GuildScheduledEventPrivacyLevel(Enum):
+class GuildScheduledEventPrivacyLevel(int, Enum):
     guild_only = 2
 
 
-class ThreadArchiveDuration(Enum):
+class ThreadArchiveDuration(int, Enum):
     hour = 60
     day = 1440
     three_days = 4320
     week = 10080
 
 
-class WidgetStyle(Enum):
+class WidgetStyle(str, Enum):
     shield = "shield"
     banner1 = "banner1"
     banner2 = "banner2"
     banner3 = "banner3"
     banner4 = "banner4"
 
-    def __str__(self):
-        return self.value
+
+EnumT = TypeVar("EnumT", bound=Enum)
 
 
-T = TypeVar("T")
+def create_unknown_value(cls: Type[EnumT], val: Any) -> EnumT:
+    unknown = cls.__new__(cls)  # type: ignore  # skip Enum type validation
+    unknown._name_ = f"unknown_{val}"
+    unknown._value_ = val
+    return unknown
 
 
-def create_unknown_value(cls: Type[T], val: Any) -> T:
-    value_cls = cls._enum_value_cls_  # type: ignore
-    name = f"unknown_{val}"
-    return value_cls(name=name, value=val)
-
-
-def try_enum(cls: Type[T], val: Any) -> T:
+def try_enum(cls: Type[EnumT], val: Any) -> EnumT:
     """A function that tries to turn the value into enum ``cls``.
-
     If it fails it returns a proxy invalid value instead.
     """
-
     try:
-        return cls._enum_value_map_[val]  # type: ignore
-    except (KeyError, TypeError, AttributeError):
+        return cls._value_map_[val]  # type: ignore
+        # incompatibility w/ default enum, will probably fix but hate the name _value2member_map_ :^)
+    except KeyError:
         return create_unknown_value(cls, val)
 
 
-def enum_if_int(cls: Type[T], val: Any) -> T:
+# These can probably be deprecated:
+
+
+def enum_if_int(cls: Type[EnumT], val: Any) -> EnumT:
     """A function that tries to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.
