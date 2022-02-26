@@ -42,9 +42,12 @@ class PermissionOverwrite(TypedDict):
 ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14]
 
 
-class _BaseChannel(TypedDict):
+class _BaseChannelOptional(TypedDict, total=False):
+    name: Optional[str]
+
+
+class _BaseChannel(_BaseChannelOptional):
     id: Snowflake
-    name: str
 
 
 class _BaseGuildChannel(_BaseChannel):
