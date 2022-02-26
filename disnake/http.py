@@ -56,6 +56,7 @@ if TYPE_CHECKING:
         automod,
         channel,
         components,
+        discovery,
         embed,
         emoji,
         gateway,
@@ -2109,6 +2110,71 @@ class HTTPClient:
             event_id=event_id,
         )
         return self.request(route, params=params)
+
+    # Discovery
+
+    def get_guild_discovery_metadata(
+        self, guild_id: Snowflake
+    ) -> Response[discovery.DiscoveryMetadata]:
+        r = Route("GET", "/guilds/{guild_id}/discovery-metadata", guild_id=guild_id)
+        return self.request(r)
+
+    def modify_guild_discovery_metadata(
+        self, guild_id: Snowflake, **params: Any
+    ) -> Response[discovery.DiscoveryMetadata]:
+        r = Route("PATCH", "/guilds/{guild_id}/discovery-metadata", guild_id=guild_id)
+        valid_keys = (
+            "primary_category_id",
+            "keywords",
+            "emoji_discoverability_enabled",
+        )
+        payload = {k: v for k, v in params.items() if k in valid_keys}  # type: ignore
+        return self.request(r, json=payload)
+
+    def add_guild_discovery_subcategory(
+        self,
+        guild_id: Snowflake,
+        category_id: int,
+    ) -> Response[None]:
+        r = Route(
+            "PUT",
+            "/guilds/{guild_id}/discovery-categories/{category_id}",
+            guild_id=guild_id,
+            category_id=category_id,
+        )
+        return self.request(r)
+
+    def remove_guild_discovery_subcategory(
+        self,
+        guild_id: Snowflake,
+        category_id: int,
+    ) -> Response[None]:
+        r = Route(
+            "DELETE",
+            "/guilds/{guild_id}/discovery-categories/{category_id}",
+            guild_id=guild_id,
+            category_id=category_id,
+        )
+        return self.request(r)
+
+    def get_discovery_categories(
+        self, **params: Any
+    ) -> Response[List[discovery.DiscoveryCategory]]:
+        r = Route("GET", "/discovery/categories")
+        valid_keys = (
+            "locale",
+            "primary_only",
+        )
+        params = {k: v for k, v in params.items() if k in valid_keys}  # type: ignore
+        return self.request(r, params=params)
+
+    def validate_discovery_search_term(
+        self,
+        term: str,
+    ) -> Response[discovery.ValidateDiscoveryTerm]:
+        r = Route("GET", "/discovery/categories")
+        params = {"term": term}
+        return self.request(r, params=params)
 
     # Welcome screens
 
