@@ -116,7 +116,10 @@ class StageInstance(Hashable):
         return self._discoverable_disabled
 
     def is_public(self) -> bool:
-        """:class:`bool`: Whether the stage instance is public."""
+        """Whether the stage instance is public.
+
+        :return type: :class:`bool`
+        """
         warn_deprecated(
             "StageInstance.is_public is deprecated and will be removed in a future version",
             stacklevel=2,
