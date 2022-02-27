@@ -578,7 +578,7 @@ class Interaction:
         else:
             sender = self.response.send_message
         await sender(
-            content=content,
+            content=content,  # type: ignore
             embed=embed,
             embeds=embeds,
             file=file,
