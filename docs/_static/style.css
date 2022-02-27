@@ -306,7 +306,8 @@ aside {
   padding: 12px;
   overflow: auto;
   z-index: 3;
-  max-height: 100vh;
+  top: 50px; /* Space for sticky header */
+  bottom: 0;
   width: 385px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -689,6 +690,12 @@ aside::-webkit-scrollbar-thumb:hover {
   font-size: 1em;
 }
 
+.search-wrapper > input[type=search]::-webkit-search-cancel-button {
+  /* As of 2022, the search cancel button ignores all sorts of properties and looks bad by default in this theme so we hide it */
+  -webkit-appearance: none;
+  display: none;
+}
+
 .search-wrapper > input[type=search],
 .search-wrapper > button[type=submit] {
   background-color: var(--sub-header-background);
@@ -696,6 +703,12 @@ aside::-webkit-scrollbar-thumb:hover {
   color: var(--search-text);
   padding: 0.25em 0.5em;
   flex: 9;
+}
+
+.search-wrapper > button[type=submit] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .search-wrapper {

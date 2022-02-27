@@ -157,9 +157,6 @@ class Guild(Hashable):
 
         .. versionadded:: 2.0
 
-    region: :class:`VoiceRegion`
-        The region the guild belongs on. There is a chance that the region
-        will be a :class:`str` if the value is not recognised by the enumerator.
     afk_timeout: :class:`int`
         The timeout to get sent to the AFK channel.
     afk_channel: Optional[:class:`VoiceChannel`]
@@ -290,7 +287,6 @@ class Guild(Hashable):
         "name",
         "id",
         "unavailable",
-        "region",
         "owner_id",
         "mfa_level",
         "emojis",
@@ -330,6 +326,7 @@ class Guild(Hashable):
         "_stage_instances",
         "_scheduled_events",
         "_threads",
+        "_region",
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
@@ -511,8 +508,8 @@ class Guild(Hashable):
         if member_count is not None:
             self._member_count: int = member_count
 
-        self.name: str = guild.get("name")
-        self.region: VoiceRegion = try_enum(VoiceRegion, guild.get("region"))
+        self.name: str = guild.get("name", "")
+        self._region: VoiceRegion = try_enum(VoiceRegion, guild.get("region"))
         self.verification_level: VerificationLevel = try_enum(
             VerificationLevel, guild.get("verification_level")
         )
@@ -522,7 +519,7 @@ class Guild(Hashable):
         self.explicit_content_filter: ContentFilter = try_enum(
             ContentFilter, guild.get("explicit_content_filter", 0)
         )
-        self.afk_timeout: int = guild.get("afk_timeout")
+        self.afk_timeout: int = guild.get("afk_timeout", 0)
         self._icon: Optional[str] = guild.get("icon")
         self._banner: Optional[str] = guild.get("banner")
         self.unavailable: bool = guild.get("unavailable", False)
@@ -533,7 +530,7 @@ class Guild(Hashable):
             role = Role(guild=self, data=r, state=state)
             self._roles[role.id] = role
 
-        self.mfa_level: MFALevel = guild.get("mfa_level")
+        self.mfa_level: MFALevel = guild.get("mfa_level", 0)
         self.emojis: Tuple[Emoji, ...] = tuple(
             map(lambda d: state.store_emoji(self, d), guild.get("emojis", []))
         )
@@ -1038,6 +1035,20 @@ class Guild(Hashable):
             return self._member_count
         except AttributeError:
             return len(self._members)
+
+    @property
+    def region(self) -> VoiceRegion:
+        """:class:`VoiceRegion`: The region the guild belongs on.
+
+        .. deprecated:: 2.5
+
+            VoiceRegion is no longer set on the guild, and is set on the individual voice channels instead.
+            See :attr:`VoiceChannel.region` instead.
+        """
+        utils.warn_deprecated(
+            "Guild.region is deprecated and will be removed in a future version.", stacklevel=2
+        )
+        return self._region
 
     @property
     def chunked(self) -> bool:
@@ -1598,6 +1609,11 @@ class Guild(Hashable):
             and ``public_updates_channel`` parameters are required.
         region: Union[:class:`str`, :class:`VoiceRegion`]
             The new region for the guild's voice communication.
+
+            .. deprecated:: 2.5
+
+                Use :attr:`VoiceChannel.region` or :attr:`StageChannel.region` instead.
+
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`
@@ -1730,7 +1746,9 @@ class Guild(Hashable):
             fields["owner_id"] = owner.id
 
         if region is not MISSING:
-            fields["region"] = str(region)
+            utils.warn_deprecated(
+                "Guild.region is deprecated and will be removed in a future version", stacklevel=2
+            )
 
         if verification_level is not MISSING:
             if not isinstance(verification_level, VerificationLevel):
@@ -2381,6 +2399,11 @@ class Guild(Hashable):
             The name of the template.
         description: :class:`str`
             The description of the template.
+
+        Returns
+        -------
+        :class:`Template`
+            The created template.
         """
         from .template import Template
 

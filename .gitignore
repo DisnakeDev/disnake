@@ -23,3 +23,5 @@ secrets/
 *.env
 venvs/
 .idea
+
+!/task.env

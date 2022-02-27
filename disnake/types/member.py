@@ -29,10 +29,6 @@ from .snowflake import SnowflakeList
 from .user import User
 
 
-class Nickname(TypedDict):
-    nick: str
-
-
 class _OptionalMember(TypedDict, total=False):
     avatar: Optional[str]
     nick: Optional[str]
