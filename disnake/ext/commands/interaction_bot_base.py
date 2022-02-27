@@ -32,7 +32,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Coroutine,
     Dict,
     Iterable,
     List,
@@ -55,7 +54,6 @@ from disnake.enums import ApplicationCommandType
 
 from . import errors
 from .base_core import InvokableApplicationCommand
-from .cog import Cog
 from .common_bot_base import CommonBotBase
 from .context import Context
 from .ctx_menus_core import (

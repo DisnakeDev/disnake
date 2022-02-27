@@ -1,6 +1,5 @@
 import importlib
 import inspect
-import os
 import re
 from collections import OrderedDict, namedtuple
 

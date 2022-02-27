@@ -55,3 +55,4 @@ reportInvalidTypeVarUse = true
 reportUnnecessaryCast = true
 reportSelfClsParameterName = true
 reportUnsupportedDunderAll = true
+reportUnusedImport = true
