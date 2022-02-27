@@ -68,21 +68,12 @@ from .errors import CommandRegistrationError
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
-
-    from typing_extensions import Concatenate, ParamSpec
-
     from disnake.i18n import Localizations
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import Check, CoroFunc
+    from .base_core import CommandCallback, InteractionCommandCallback
 
-    ApplicationCommandInteractionT = TypeVar(
-        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
-    )
-    AnyMessageCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
-    AnyUserCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
-
-    P = ParamSpec("P")
 
 __all__ = ("InteractionBotBase",)
 
@@ -455,15 +446,7 @@ class InteractionBotBase(CommonBotBase):
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
         **kwargs,
-    ) -> Callable[
-        [
-            Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-            ]
-        ],
-        InvokableSlashCommand,
-    ]:
+    ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         """A shortcut decorator that invokes :func:`.slash_command` and adds it to
         the internal command list.
 
@@ -505,12 +488,7 @@ class InteractionBotBase(CommonBotBase):
             A decorator that converts the provided method into an InvokableSlashCommand, adds it to the bot, then returns it.
         """
 
-        def decorator(
-            func: Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-            ]
-        ) -> InvokableSlashCommand:
+        def decorator(func: CommandCallback) -> InvokableSlashCommand:
             result = slash_command(
                 name=name,
                 description=description,
@@ -537,15 +515,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
-    ) -> Callable[
-        [
-            Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-            ]
-        ],
-        InvokableUserCommand,
-    ]:
+    ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
         """A shortcut decorator that invokes :func:`.user_command` and adds it to
         the internal command list.
 
@@ -572,12 +542,7 @@ class InteractionBotBase(CommonBotBase):
             A decorator that converts the provided method into an InvokableUserCommand, adds it to the bot, then returns it.
         """
 
-        def decorator(
-            func: Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-            ]
-        ) -> InvokableUserCommand:
+        def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
             result = user_command(
                 name=name,
                 name_localizations=name_localizations,
@@ -600,15 +565,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
-    ) -> Callable[
-        [
-            Union[
-                Callable[Concatenate[Cog, AnyMessageCommandInter, P], Coroutine],
-                Callable[Concatenate[AnyMessageCommandInter, P], Coroutine],
-            ]
-        ],
-        InvokableMessageCommand,
-    ]:
+    ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
         """A shortcut decorator that invokes :func:`.message_command` and adds it to
         the internal command list.
 
@@ -635,12 +592,7 @@ class InteractionBotBase(CommonBotBase):
             A decorator that converts the provided method into an InvokableMessageCommand, adds it to the bot, then returns it.
         """
 
-        def decorator(
-            func: Union[
-                Callable[Concatenate[Cog, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-            ]
-        ) -> InvokableMessageCommand:
+        def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
                 name_localizations=name_localizations,

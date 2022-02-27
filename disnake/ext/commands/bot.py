@@ -34,20 +34,8 @@ from .context import Context
 from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
-
-    from typing_extensions import ParamSpec
-
-    from disnake.interactions import ApplicationCommandInteraction
-
     from ._types import CoroFunc
 
-    ApplicationCommandInteractionT = TypeVar(
-        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
-    )
-    AnyMessageCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
-    AnyUserCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
-
-    P = ParamSpec("P")
 
 __all__ = (
     "when_mentioned",

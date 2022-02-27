@@ -1,2 +1,6 @@
 pre-commit~=2.16.0
-taskipy>=1.9.0
+taskipy~=1.9.0
+mypy~=0.910
+python-dotenv[cli]~=0.19.2
+# this is not pyright itself, but the python wrapper
+pyright==1.1.225

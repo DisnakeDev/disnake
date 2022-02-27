@@ -24,18 +24,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Coroutine,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Union
 
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
@@ -47,18 +36,10 @@ from .errors import *
 from .params import call_param_func, expand_params
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
-
     from disnake.app_commands import Choices
     from disnake.i18n import Localizations
 
-    from .cog import CogT
-
-    ApplicationCommandInteractionT = TypeVar(
-        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
-    )
-
-    P = ParamSpec("P")
+    from .base_core import CommandCallback
 
 __all__ = ("InvokableSlashCommand", "SubCommandGroup", "SubCommand", "slash_command")
 
@@ -146,7 +127,7 @@ class SubCommandGroup(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func,
+        func: CommandCallback,
         *,
         name: str = None,
         name_localizations: Localizations = None,
@@ -177,15 +158,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         name_localizations: Localizations = None,
         description_localizations: Localizations = None,
         **kwargs,
-    ) -> Callable[
-        [
-            Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-            ]
-        ],
-        SubCommand,
-    ]:
+    ) -> Callable[[CommandCallback], SubCommand]:
         """
         A decorator that creates a subcommand in the subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
@@ -196,12 +169,7 @@ class SubCommandGroup(InvokableApplicationCommand):
             A decorator that converts the provided method into a SubCommand, adds it to the bot, then returns it.
         """
 
-        def decorator(
-            func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-            ]
-        ) -> SubCommand:
+        def decorator(func: CommandCallback) -> SubCommand:
             new_func = SubCommand(
                 func,
                 name=name,
@@ -250,7 +218,7 @@ class SubCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func,
+        func: CommandCallback,
         *,
         name: str = None,
         description: str = None,
@@ -364,7 +332,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func,
+        func: CommandCallback,
         *,
         name: str = None,
         description: str = None,
@@ -424,15 +392,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name_localizations: Localizations = None,
         description_localizations: Localizations = None,
         **kwargs,
-    ) -> Callable[
-        [
-            Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-            ]
-        ],
-        SubCommand,
-    ]:
+    ) -> Callable[[CommandCallback], SubCommand]:
         """
         A decorator that creates a subcommand under the base command.
 
@@ -464,12 +424,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             A decorator that converts the provided method into a :class:`SubCommand`, adds it to the bot, then returns it.
         """
 
-        def decorator(
-            func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-            ]
-        ) -> SubCommand:
+        def decorator(func: CommandCallback) -> SubCommand:
             if len(self.children) == 0 and len(self.body.options) > 0:
                 self.body.options = []
             new_func = SubCommand(
@@ -494,15 +449,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name: str = None,
         name_localizations: Localizations = None,
         **kwargs,
-    ) -> Callable[
-        [
-            Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-            ]
-        ],
-        SubCommandGroup,
-    ]:
+    ) -> Callable[[CommandCallback], SubCommandGroup]:
         """
         A decorator that creates a subcommand group under the base command.
 
@@ -521,12 +468,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             A decorator that converts the provided method into a :class:`SubCommandGroup`, adds it to the bot, then returns it.
         """
 
-        def decorator(
-            func: Union[
-                Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-                Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-            ]
-        ) -> SubCommandGroup:
+        def decorator(func: CommandCallback) -> SubCommandGroup:
             if len(self.children) == 0 and len(self.body.options) > 0:
                 self.body.options = []
             new_func = SubCommandGroup(
@@ -675,15 +617,7 @@ def slash_command(
     connectors: Dict[str, str] = None,
     auto_sync: bool = True,
     **kwargs,
-) -> Callable[
-    [
-        Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-        ]
-    ],
-    InvokableSlashCommand,
-]:
+) -> Callable[[CommandCallback], InvokableSlashCommand]:
     """A decorator that builds a slash command.
 
     Parameters
@@ -724,12 +658,7 @@ def slash_command(
         A decorator that converts the provided method into an InvokableSlashCommand and returns it.
     """
 
-    def decorator(
-        func: Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-        ]
-    ) -> InvokableSlashCommand:
+    def decorator(func: CommandCallback) -> InvokableSlashCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):

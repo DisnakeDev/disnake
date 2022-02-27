@@ -11,3 +11,7 @@ Webhook support
 
 from .async_ import *
 from .sync import *
+
+__all__ = []
+__all__.extend(async_.__all__)
+__all__.extend(sync.__all__)

@@ -31,7 +31,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type
 from .enums import ExpireBehaviour, try_enum
 from .errors import InvalidArgument
 from .user import User
-from .utils import MISSING, _get_as_snowflake, deprecated, parse_time
+from .utils import MISSING, _get_as_snowflake, deprecated, parse_time, warn_deprecated
 
 __all__ = (
     "IntegrationAccount",
@@ -315,8 +315,6 @@ class IntegrationApplication:
         The application's icon hash.
     description: :class:`str`
         The application's description. Can be an empty string.
-    summary: :class:`str`
-        The application's summary. Can be an empty string.
     user: Optional[:class:`User`]
         The bot user associated with this application.
     """
@@ -326,7 +324,7 @@ class IntegrationApplication:
         "name",
         "icon",
         "description",
-        "summary",
+        "_summary",
         "user",
     )
 
@@ -335,9 +333,23 @@ class IntegrationApplication:
         self.name: str = data["name"]
         self.icon: Optional[str] = data["icon"]
         self.description: str = data["description"]
-        self.summary: str = data["summary"]
+        self._summary: str = data.get("summary", "")
         user = data.get("bot")
         self.user: Optional[User] = User(state=state, data=user) if user else None
+
+    @property
+    def summary(self) -> str:
+        """:class:`str`: The application's summary. Can be an empty string.
+
+        .. deprecated:: 2.5
+
+            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
+        """
+        warn_deprecated(
+            "summary is deprecated and will be removed in a future version. Consider using description instead.",
+            stacklevel=2,
+        )
+        return self._summary
 
 
 class BotIntegration(Integration):
