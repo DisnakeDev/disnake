@@ -58,3 +58,4 @@ reportUnsupportedDunderAll = true
 reportUnusedImport = true
 reportUnusedVariable = true
 reportUntypedNamedTuple = true
+reportUnnecessaryComparison = true
