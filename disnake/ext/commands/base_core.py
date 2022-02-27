@@ -26,7 +26,18 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
@@ -36,12 +47,24 @@ from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import *
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec
+    from typing_extensions import Concatenate, ParamSpec
 
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import Check, Error, Hook
-    from .cog import Cog
+    from .cog import Cog, CogT
+
+    ApplicationCommandInteractionT = TypeVar(
+        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
+    )
+
+    P = ParamSpec("P")
+
+    CommandCallback = Callable[..., Coroutine]
+    InteractionCommandCallback = Union[
+        Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+        Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
+    ]
 
 
 __all__ = ("InvokableApplicationCommand", "guild_permissions")
@@ -52,11 +75,6 @@ AppCommandT = TypeVar("AppCommandT", bound="InvokableApplicationCommand")
 CogT = TypeVar("CogT", bound="Cog")
 HookT = TypeVar("HookT", bound="Hook")
 ErrorT = TypeVar("ErrorT", bound="Error")
-
-if TYPE_CHECKING:
-    P = ParamSpec("P")
-else:
-    P = TypeVar("P")
 
 
 def _get_overridden_method(method):
@@ -88,9 +106,9 @@ class InvokableApplicationCommand(ABC):
 
     body: ApplicationCommand
 
-    def __init__(self, func, *, name: str = None, **kwargs):
+    def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
         self.__command_flag__ = None
-        self._callback: Callable[..., Any] = func
+        self._callback: CommandCallback = func
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
         # only an internal feature for now
@@ -141,8 +159,8 @@ class InvokableApplicationCommand(ABC):
         self._after_invoke: Optional[Hook] = None
 
     @property
-    def callback(self) -> Callable[..., Any]:
-        """Callable[..., Any]: The callback associated with the interaction."""
+    def callback(self) -> CommandCallback:
+        """Callable[..., Coroutine]: The callback associated with the interaction."""
         return self._callback
 
     def add_check(self, func: Check) -> None:

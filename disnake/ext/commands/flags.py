@@ -43,6 +43,8 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    get_args,
+    get_origin,
 )
 
 from disnake.utils import MISSING, maybe_coroutine, resolve_annotation
@@ -418,30 +420,27 @@ async def tuple_convert_flag(
     return tuple(results)
 
 
-async def convert_flag(ctx, argument: str, flag: Flag, annotation: Any = None) -> Any:
+async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any = None) -> Any:
     param: inspect.Parameter = ctx.current_parameter  # type: ignore
     annotation = annotation or flag.annotation
-    try:
-        origin = annotation.__origin__
-    except AttributeError:
-        pass
-    else:
+    if origin := get_origin(annotation):
+        args = get_args(annotation)
         if origin is tuple:
-            if annotation.__args__[-1] is Ellipsis:
-                return await tuple_convert_all(ctx, argument, flag, annotation.__args__[0])
+            if args[-1] is Ellipsis:
+                return await tuple_convert_all(ctx, argument, flag, args[0])
             else:
-                return await tuple_convert_flag(ctx, argument, flag, annotation.__args__)
+                return await tuple_convert_flag(ctx, argument, flag, args)
         elif origin is list:
             # typing.List[x]
-            annotation = annotation.__args__[0]
+            annotation = args[0]
             return await convert_flag(ctx, argument, flag, annotation)
-        elif origin is Union and annotation.__args__[-1] is type(None):
+        elif origin is Union and args[-1] is type(None):
             # typing.Optional[x]
-            annotation.__args__ = annotation.__args__[:-1]
+            annotation = Union[args[:-1]]  # type: ignore
             return await run_converters(ctx, annotation, argument, param)
         elif origin is dict:
             # typing.Dict[K, V] -> typing.Tuple[K, V]
-            return await tuple_convert_flag(ctx, argument, flag, annotation.__args__)
+            return await tuple_convert_flag(ctx, argument, flag, args)
 
     try:
         return await run_converters(ctx, annotation, argument, param)

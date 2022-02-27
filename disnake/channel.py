@@ -42,6 +42,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
     overload,
 )
 
@@ -821,8 +822,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             raise ValueError("Exactly one of message and type must be provided.")
 
         if auto_archive_duration is not None:
-            auto_archive_duration: ThreadArchiveDurationLiteral = try_enum_to_int(
-                auto_archive_duration
+            auto_archive_duration = cast(
+                ThreadArchiveDurationLiteral, try_enum_to_int(auto_archive_duration)
             )
 
         if message is None:
@@ -937,8 +938,9 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         )
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.position: int = data["position"]
-        self.bitrate: int = data.get("bitrate")
-        self.user_limit: int = data.get("user_limit")
+        # these don't exist in partial channel objects of slash command options
+        self.bitrate: int = data.get("bitrate", 0)
+        self.user_limit: int = data.get("user_limit", 0)
         self._fill_overwrites(data)
 
     @property

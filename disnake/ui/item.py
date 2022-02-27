@@ -82,7 +82,7 @@ class WrappedComponent(ABC):
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
-        return f"<{self.__class__.__name__} {attrs}>"
+        return f"<{type(self).__name__} {attrs}>"
 
     @property
     def type(self) -> ComponentType:
@@ -154,7 +154,7 @@ class Item(WrappedComponent, Generic[V]):
         """Optional[:class:`View`]: The underlying view for this item."""
         return self._view
 
-    async def callback(self, interaction: MessageInteraction):
+    async def callback(self, interaction: MessageInteraction, /):
         """|coro|
 
         The callback associated with this UI item.
