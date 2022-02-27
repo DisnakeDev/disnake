@@ -1231,7 +1231,7 @@ def search_directory(path: str) -> Iterator[str]:
 
     prefix = relpath.replace(os.sep, ".")
 
-    for finder, name, ispkg in pkgutil.iter_modules([path]):
+    for _, name, ispkg in pkgutil.iter_modules([path]):
         if ispkg:
             yield from search_directory(os.path.join(path, name))
         else:
