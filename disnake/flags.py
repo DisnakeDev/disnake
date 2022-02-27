@@ -41,7 +41,7 @@ from typing import (
     overload,
 )
 
-from .enums import UserFlags
+from .enums import MessageFlags as MessageFlagsEnum, UserFlags
 
 __all__ = (
     "SystemChannelFlags",
@@ -281,22 +281,22 @@ class MessageFlags(BaseFlags):
     @flag_value
     def crossposted(self):
         """:class:`bool`: Returns ``True`` if the message is the original crossposted message."""
-        return 1
+        return MessageFlagsEnum.crossposted.value
 
     @flag_value
     def is_crossposted(self):
         """:class:`bool`: Returns ``True`` if the message was crossposted from another channel."""
-        return 2
+        return MessageFlagsEnum.is_crosspost.value
 
     @flag_value
     def suppress_embeds(self):
         """:class:`bool`: Returns ``True`` if the message's embeds have been suppressed."""
-        return 4
+        return MessageFlagsEnum.suppress_embeds.value
 
     @flag_value
     def source_message_deleted(self):
         """:class:`bool`: Returns ``True`` if the source message for this crosspost has been deleted."""
-        return 8
+        return MessageFlagsEnum.source_message_deleted.value
 
     @flag_value
     def urgent(self):
@@ -304,7 +304,7 @@ class MessageFlags(BaseFlags):
 
         An urgent message is one sent by Discord Trust and Safety.
         """
-        return 16
+        return MessageFlagsEnum.urgent.value
 
     @flag_value
     def has_thread(self):
@@ -312,7 +312,7 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.0
         """
-        return 32
+        return MessageFlagsEnum.has_thread.value
 
     @flag_value
     def ephemeral(self):
@@ -320,7 +320,7 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.0
         """
-        return 64
+        return MessageFlagsEnum.ephemeral.value
 
     @flag_value
     def loading(self):
@@ -329,7 +329,7 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.3
         """
-        return 128
+        return MessageFlagsEnum.loading.value
 
     @flag_value
     def failed_to_mention_roles_in_thread(self):
@@ -338,7 +338,7 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.4
         """
-        return 256
+        return MessageFlagsEnum.failed_to_mention_some_roles_in_thread.value
 
 
 @fill_with_flags()

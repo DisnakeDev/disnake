@@ -48,7 +48,7 @@ from typing import (
 
 from . import utils
 from .context_managers import Typing
-from .enums import ChannelType, PartyType, try_enum_to_int
+from .enums import ChannelType, MessageFlags as MessageFlagsEnum, PartyType, try_enum_to_int
 from .errors import ClientException, InvalidArgument
 from .file import File
 from .invite import Invite
@@ -1232,6 +1232,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1251,6 +1252,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1270,6 +1272,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1289,6 +1292,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1307,6 +1311,7 @@ class Messageable:
         file: File = None,
         files: List[File] = None,
         stickers: Sequence[Union[GuildSticker, StickerItem]] = None,
+        suppress_embeds: bool = False,
         delete_after: float = None,
         nonce: Union[str, int] = None,
         allowed_mentions: AllowedMentions = None,
@@ -1399,6 +1404,11 @@ class Messageable:
 
             .. versionadded:: 2.4
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds.
+
+            .. versionadded:: 2.5
+
         Raises
         ------
         HTTPException
@@ -1485,6 +1495,11 @@ class Messageable:
         else:
             components_payload = None
 
+        if suppress_embeds:
+            flags = MessageFlagsEnum.suppress_embeds.value
+        else:
+            flags = 0
+
         if files is not None:
             if len(files) > 10:
                 raise InvalidArgument("files parameter must be a list of up to 10 elements")
@@ -1503,6 +1518,7 @@ class Messageable:
                     message_reference=reference_payload,
                     stickers=stickers_payload,
                     components=components_payload,  # type: ignore
+                    flags=flags,
                 )
             finally:
                 for f in files:
@@ -1518,6 +1534,7 @@ class Messageable:
                 message_reference=reference_payload,
                 stickers=stickers_payload,
                 components=components_payload,  # type: ignore
+                flags=flags,
             )
 
         ret = state.create_message(channel=channel, data=data)

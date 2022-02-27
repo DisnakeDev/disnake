@@ -34,7 +34,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Uni
 from .. import utils
 from ..app_commands import OptionChoice
 from ..channel import ChannelType, PartialMessageable
-from ..enums import InteractionResponseType, InteractionType, Locale, WebhookType, try_enum
+from ..enums import (
+    InteractionResponseType,
+    InteractionType,
+    Locale,
+    MessageFlags as MessageFlagsEnum,
+    WebhookType,
+    try_enum,
+)
 from ..errors import (
     HTTPException,
     InteractionNotEditable,
@@ -685,7 +692,7 @@ class InteractionResponse:
         ):
             defer_type = InteractionResponseType.deferred_channel_message.value
             if ephemeral:
-                data = {"flags": 64}
+                data = {"flags": MessageFlagsEnum.ephemeral.value}
         elif parent.type is InteractionType.component:
             defer_type = InteractionResponseType.deferred_message_update.value
 
@@ -737,6 +744,7 @@ class InteractionResponse:
         components: Components = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        suppress_embeds: bool = False,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -777,6 +785,11 @@ class InteractionResponse:
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
             then it is silently ignored.
+
+         suppress_embeds: :class:`bool`
+            Whether to suppress embeds.
+
+            .. versionadded:: 2.5
 
         Raises
         ------
@@ -840,8 +853,11 @@ class InteractionResponse:
         if content is not None:
             payload["content"] = str(content)
 
+        payload["flags"] = 0
+        if suppress_embeds:
+            payload["flags"] += MessageFlagsEnum.suppress_embeds.value
         if ephemeral:
-            payload["flags"] = 64
+            payload["flags"] += MessageFlagsEnum.ephemeral.value
 
         if view is not MISSING:
             payload["components"] = view.to_components()

@@ -51,7 +51,7 @@ import aiohttp
 from .. import utils
 from ..asset import Asset
 from ..channel import PartialMessageable
-from ..enums import WebhookType, try_enum
+from ..enums import MessageFlags as MessageFlagsEnum, WebhookType, try_enum
 from ..errors import DiscordServerError, Forbidden, HTTPException, InvalidArgument, NotFound
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
@@ -490,6 +490,7 @@ def handle_message_parameters_dict(
     avatar_url: Any = MISSING,
     tts: bool = False,
     ephemeral: bool = False,
+    suppress_embeds: Optional[bool] = None,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: List[Attachment] = MISSING,
@@ -538,8 +539,12 @@ def handle_message_parameters_dict(
         payload["avatar_url"] = str(avatar_url)
     if username:
         payload["username"] = username
+
+    payload["flags"] = 0
+    if suppress_embeds:
+        payload["flags"] += MessageFlagsEnum.suppress_embeds.value
     if ephemeral:
-        payload["flags"] = 64
+        payload["flags"] += MessageFlagsEnum.ephemeral.value
 
     if allowed_mentions:
         if previous_allowed_mentions is not None:
@@ -1428,6 +1433,7 @@ class Webhook(BaseWebhook):
         avatar_url: Any = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        suppress_embeds: bool = False,
         file: File = MISSING,
         files: List[File] = MISSING,
         embed: Embed = MISSING,
@@ -1523,6 +1529,11 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.1
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds.
+
+            .. versionadded:: 2.5
+
         Raises
         ------
         HTTPException
@@ -1580,6 +1591,7 @@ class Webhook(BaseWebhook):
             embed=embed,
             embeds=embeds,
             ephemeral=ephemeral,
+            suppress_embeds=suppress_embeds,
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,

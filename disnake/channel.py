@@ -2155,6 +2155,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
+        suppress_embeds: bool = MISSING,
         stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
@@ -2251,6 +2252,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             raise InvalidArgument("files parameter must be a list of up to 10 elements")
         elif params.files and not all(isinstance(file, File) for file in params.files):
             raise InvalidArgument("files parameter must be a list of File")
+
+        if suppress_embeds:
+            flags = 1 << 2
+        else:
+            flags = 0
 
         try:
             thread_data = await self._state.http.start_thread_in_forum_channel(
