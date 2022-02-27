@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
-from typing import List, Optional, TypedDict
+from typing import Dict, List, Optional, TypedDict
 
 from .snowflake import Snowflake
 
@@ -44,3 +44,46 @@ class DiscoveryCategory(TypedDict):
 
 class ValidateDiscoveryTerm(TypedDict):
     valid: bool
+
+
+class _DiscoveryRequirementsNSFWPropertiesOptional(TypedDict, total=False):
+    channels: List[Snowflake]
+    channel_banned_keywords: Dict[Snowflake, List[str]]
+    name: str
+    name_banned_keywords: List[str]
+    description: str
+    description_banned_keywords: List[str]
+
+
+class DiscoveryRequirementsNSFWProperties(_DiscoveryRequirementsNSFWPropertiesOptional):
+    pass
+
+
+class DiscoveryRequirementsHealthScore(TypedDict):
+    avg_nonnew_communicators: Optional[str]
+    avg_nonnew_participators: Optional[str]
+    num_intentful_joiners: Optional[str]
+    perc_ret_w1_intentful: Optional[float]
+
+
+class _DiscoveryRequirementsOptional(TypedDict, total=False):
+    guild_id: Snowflake
+    safe_environment: bool
+    healty: Optional[bool]
+    health_score_pending: bool
+    size: bool
+    nsfw_properties: DiscoveryRequirementsNSFWProperties
+    protected: bool
+    valid_rules_channel: bool
+    retention_healthy: Optional[bool]
+    engagement_healthy: Optional[bool]
+    age: bool
+    minimum_age: int
+    health_score: DiscoveryRequirementsHealthScore
+    minimum_size: int
+    grace_period_end_date: str
+
+
+class DiscoveryRequirements(_DiscoveryRequirementsOptional):
+    sufficient: Optional[bool]
+    sufficient_without_grace_period: Optional[bool]

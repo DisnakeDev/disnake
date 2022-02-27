@@ -2157,6 +2157,12 @@ class HTTPClient:
         )
         return self.request(r)
 
+    def get_guild_discovery_requirements(
+        self, guild_id: Snowflake
+    ) -> Response[discovery.DiscoveryRequirements]:
+        r = Route("GET", "/guilds/{guild_id}/discovery-requirements", guild_id=guild_id)
+        return self.request(r)
+
     def get_discovery_categories(
         self, **params: Any
     ) -> Response[List[discovery.DiscoveryCategory]]:
