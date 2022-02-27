@@ -40,6 +40,7 @@ from .app_commands import (
 from .appinfo import AppInfo
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
+from .discovery import DiscoveryCategory
 from .emoji import Emoji
 from .enums import ApplicationCommandType, ChannelType, Status
 from .errors import (
@@ -1706,6 +1707,44 @@ class Client:
                 me.activities = ()
 
             me.status = status
+
+    # Discovery
+
+    async def fetch_discovery_categories(
+        self,
+        locale: str = MISSING,
+        primary: bool = False,
+    ) -> List[DiscoveryCategory]:
+        """|coro|
+
+        Retrieves a list of all discovery category instances.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        locale: Optional[:class:`str`]
+            The locale for category names.
+        primary: :class:`bool`
+            Whether to only return the primary categories.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the discovery categories failed.
+
+        Returns
+        -------
+        List[:class:`.DiscoveryCategory`]
+            A list of all discovery categories.
+        """
+        payload = {"is_primary": primary}
+
+        if locale is not MISSING:
+            payload["locale"] = locale  # type: ignore
+
+        data = await self.http.get_discovery_categories(**payload)
+        return [DiscoveryCategory(data=cat) for cat in data]
 
     # Guild stuff
 
