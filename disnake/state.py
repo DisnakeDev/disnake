@@ -586,7 +586,7 @@ class ConnectionState:
 
     def add_dm_channel(self, data: DMChannelPayload) -> DMChannel:
         # self.user is *always* cached when this is called
-        channel = DMChannel(me=self.user, state=self, data=data)  # type: ignore
+        channel = DMChannel(me=self.user, state=self, data=data)
         self._add_private_channel(channel)
         return channel
 
@@ -761,7 +761,7 @@ class ConnectionState:
             else:
                 self.application_id = utils._get_as_snowflake(application, "id")
                 # flags will always be present here
-                self.application_flags = ApplicationFlags._from_value(application["flags"])  # type: ignore
+                self.application_flags = ApplicationFlags._from_value(application["flags"])
 
         for guild_data in data["guilds"]:
             self._add_guild_from_data(guild_data)
@@ -965,7 +965,7 @@ class ConnectionState:
 
     def parse_user_update(self, data) -> None:
         # self.user is *always* cached when this is called
-        user: ClientUser = self.user  # type: ignore
+        user: ClientUser = self.user
         user._update(data)
         ref = self._users.get(user.id)
         if ref:
@@ -1099,7 +1099,7 @@ class ConnectionState:
         thread_id = int(data["id"])
         thread = guild.get_thread(thread_id)
         if thread is not None:
-            guild._remove_thread(thread)  # type: ignore
+            guild._remove_thread(thread)
             self.dispatch("thread_delete", thread)
 
     def parse_thread_list_sync(self, data) -> None:
@@ -1225,7 +1225,7 @@ class ConnectionState:
             user_id = int(data["user"]["id"])
             member = guild.get_member(user_id)
             if member is not None:
-                guild._remove_member(member)  # type: ignore
+                guild._remove_member(member)
                 self.dispatch("member_remove", member)
         else:
             _log.debug(
@@ -1280,7 +1280,7 @@ class ConnectionState:
         for emoji in before_emojis:
             self._emojis.pop(emoji.id, None)
         # guild won't be None here
-        guild.emojis = tuple(map(lambda d: self.store_emoji(guild, d), data["emojis"]))  # type: ignore
+        guild.emojis = tuple(map(lambda d: self.store_emoji(guild, d), data["emojis"]))
         self.dispatch("guild_emojis_update", guild, before_emojis, guild.emojis)
 
     def parse_guild_stickers_update(self, data) -> None:
@@ -1296,7 +1296,7 @@ class ConnectionState:
         for emoji in before_stickers:
             self._stickers.pop(emoji.id, None)
         # guild won't be None here
-        guild.stickers = tuple(map(lambda d: self.store_sticker(guild, d), data["stickers"]))  # type: ignore
+        guild.stickers = tuple(map(lambda d: self.store_sticker(guild, d), data["stickers"]))
         self.dispatch("guild_stickers_update", guild, before_stickers, guild.stickers)
 
     def _get_create_guild(self, data):
@@ -1685,7 +1685,7 @@ class ConnectionState:
         channel_id = utils._get_as_snowflake(data, "channel_id")
         flags = self.member_cache_flags
         # self.user is *always* cached when this is called
-        self_id = self.user.id  # type: ignore
+        self_id = self.user.id
         if guild is not None:
             if int(data["user_id"]) == self_id:
                 voice = self._get_voice_client(guild.id)
@@ -1701,7 +1701,7 @@ class ConnectionState:
                     if channel_id is None and flags._voice_only and member.id != self_id:
                         # Only remove from cache if we only have the voice flag enabled
                         # Member doesn't meet the Snowflake protocol currently
-                        guild._remove_member(member)  # type: ignore
+                        guild._remove_member(member)
                     elif channel_id is not None:
                         guild._add_member(member)
 

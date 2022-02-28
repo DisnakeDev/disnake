@@ -68,7 +68,7 @@ from urllib.parse import parse_qs, urlencode
 from .errors import InvalidArgument
 
 try:
-    import orjson  # type: ignore
+    import orjson
 except ModuleNotFoundError:
     HAS_ORJSON = False
 else:
@@ -530,7 +530,7 @@ def _bytes_to_base64_data(data: bytes) -> str:
 
 if HAS_ORJSON:
 
-    def _to_json(obj: Any) -> str:  # type: ignore
+    def _to_json(obj: Any) -> str:
         return orjson.dumps(obj).decode("utf-8")
 
     _from_json = orjson.loads  # type: ignore

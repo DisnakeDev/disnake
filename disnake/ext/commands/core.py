@@ -1449,7 +1449,7 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
         ret = super().copy()
         for cmd in self.commands:
             ret.add_command(cmd.copy())
-        return ret  # type: ignore
+        return ret
 
     async def invoke(self, ctx: Context) -> None:
         ctx.invoked_subcommand = None

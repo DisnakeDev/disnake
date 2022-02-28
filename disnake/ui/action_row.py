@@ -113,7 +113,7 @@ class ActionRow:
             raise ValueError("Too many components in this row, can not append a new one.")
 
         self.width += item.width
-        self._underlying.children.append(item._underlying)  # type: ignore
+        self._underlying.children.append(item._underlying)
 
     def add_button(
         self,

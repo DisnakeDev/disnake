@@ -293,7 +293,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
         self.after = after or OLDEST_OBJECT
         self.around = around
 
-        self._filter = None  # message dict -> bool
+        self._filter: Optional[Callable[[MessagePayload], bool]] = None
 
         self.state = self.messageable._state
         self.logs_from = self.state.http.logs_from
@@ -313,7 +313,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
             elif self.before:
                 self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
             elif self.after:
-                self._filter = lambda m: self.after.id < int(m["id"])  # type: ignore
+                self._filter = lambda m: self.after.id < int(m["id"])
         else:
             if self.reverse:
                 self._retrieve_messages = self._retrieve_messages_after_strategy  # type: ignore

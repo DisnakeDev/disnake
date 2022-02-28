@@ -319,7 +319,7 @@ class AuditLogChanges:
             setattr(first, "roles", [])
 
         data = []
-        g: Guild = entry.guild  # type: ignore
+        g: Guild = entry.guild
 
         for e in elem:
             role_id = int(e["id"])
@@ -549,7 +549,7 @@ class AuditLogEntry(Hashable):
         return self.guild
 
     def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
-        return self.guild.get_channel(target_id) or Object(id=target_id)  # type: ignore
+        return self.guild.get_channel(target_id) or Object(id=target_id)
 
     def _convert_target_user(self, target_id: int) -> Union[Member, User, None]:
         return self._get_member(target_id)
