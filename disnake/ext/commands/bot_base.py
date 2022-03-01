@@ -151,14 +151,19 @@ class BotBase(CommonBotBase, GroupMixin):
             and not self.intents.message_content  # type: ignore
             and BotBase._warn_prefix
         ):
+            import warnings
+
+            from .custom_warnings import MessageContentPrefixWarning
+
             BotBase._warn_prefix = False
-            _log.warning(
+            warnings.warn(
                 "Message Content intent is not enabled and a prefix is configured. "
                 "This may cause limited functionality for prefix commands. "
                 "If you want prefix commands, pass an intents object with message_content set to True. "
                 "If you don't need any prefix functionality, "
                 "consider using InteractionBot instead. "
-                "Additionally, set prefix to disnake.ext.commands.when_mentioned to silence this warning."
+                "Additionally, set prefix to disnake.ext.commands.when_mentioned to silence this warning.",
+                MessageContentPrefixWarning,
             )
 
         self._checks: List[Check] = []
