@@ -2010,7 +2010,7 @@ class Guild(Hashable):
     async def welcome_screen(self):
         """|coro|
 
-        Fetches the guild's :class:`WelcomeScreen`.
+        Retrieves the guild's :class:`WelcomeScreen`.
 
         Requires the :attr:`~Permissions.manage_guild` permission if the welcome screen is not enabled.
 
@@ -2030,7 +2030,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        WelcomeScreen
+        :class:`WelcomeScreen`
             The guild's welcome screen.
         """
         data = await self._state.http.get_guild_welcome_screen(self.id)
@@ -2045,7 +2045,7 @@ class Guild(Hashable):
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
         """This is a lower level method to :meth:`WelcomeScreen.edit` that allows you
-        to edit the welcome screen without fetching it and save an api request.
+        to edit the welcome screen without fetching it and save an API request.
 
         .. versionadded:: 2.4
 
