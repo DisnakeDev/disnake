@@ -21,6 +21,18 @@ isort = { cmd = "task lint isort", help = "Run isort" }
 lint = { cmd = "pre-commit run --all-files", help = "Check all files for linting errors" }
 precommit = { cmd = "pre-commit install --install-hooks", help = "Install the precommit hook" }
 pyright = { cmd = "pyright", help = "Run pyright" }
+slotscheck = { cmd = "python -m slotscheck --verbose -m disnake", help = "Run slotscheck" }
+
+
+[tool.slotscheck]
+strict-imports = true
+require-superclass = true
+require-subclass = false
+exclude-modules = '''
+(
+    ^disnake\.types\.
+)
+'''
 
 
 [tool.pyright]
