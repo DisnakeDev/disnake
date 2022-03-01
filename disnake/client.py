@@ -1738,7 +1738,7 @@ class Client:
         List[:class:`.DiscoveryCategory`]
             A list of all discovery categories.
         """
-        payload = {"is_primary": primary}
+        payload = {"primary_only": primary}
 
         if locale is not MISSING:
             payload["locale"] = locale  # type: ignore
