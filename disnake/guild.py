@@ -2019,7 +2019,7 @@ class Guild(Hashable):
             To know if the welcome screen is enabled check for the
             presence of ``WELCOME_SCREEN_ENABLED`` in :attr:`Guild.features`
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
 
         Raises
         ------
