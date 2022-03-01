@@ -294,7 +294,7 @@ def select(
     options: List[SelectOption] = MISSING,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], DecoratedItem[Select]]:
+) -> Callable[[ItemCallbackType[Select]], DecoratedItem[Select]]:
     """A decorator that attaches a select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -329,7 +329,7 @@ def select(
         Whether the select is disabled. Defaults to ``False``.
     """
 
-    def decorator(func: ItemCallbackType) -> DecoratedItem[Select]:
+    def decorator(func: ItemCallbackType[Select]) -> DecoratedItem[Select]:
         if not inspect.iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 

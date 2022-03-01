@@ -41,11 +41,14 @@ from typing import (
     Deque,
     Dict,
     List,
+    Literal,
     Optional,
     Sequence,
     Tuple,
     TypeVar,
     Union,
+    cast,
+    overload,
 )
 
 from . import utils
@@ -93,7 +96,11 @@ if TYPE_CHECKING:
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
-    from .types.raw_models import GuildScheduledEventUserActionEvent, TypingEvent
+    from .types.raw_models import (
+        GuildScheduledEventUserActionEvent,
+        ReactionActionEvent,
+        TypingEvent,
+    )
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
     from .voice_client import VoiceProtocol
@@ -622,6 +629,7 @@ class ConnectionState:
             if channel is None:
                 if "author" in data:
                     # MessagePayload
+                    data = cast(MessagePayload, data)
                     user_id = int(data["author"]["id"])
                 else:
                     # TypingEvent
@@ -819,11 +827,14 @@ class ConnectionState:
         if "components" in data and self._view_store.is_message_tracked(raw.message_id):
             self._view_store.update_from_message(raw.message_id, data["components"])
 
-    def parse_message_reaction_add(self, data) -> None:
+    def parse_message_reaction_add(self, data: ReactionActionEvent) -> None:
         emoji = data["emoji"]
         emoji_id = utils._get_as_snowflake(emoji, "id")
         emoji = PartialEmoji.with_state(
-            self, id=emoji_id, animated=emoji.get("animated", False), name=emoji["name"]
+            self,
+            id=emoji_id,
+            animated=emoji.get("animated", False),
+            name=emoji["name"],  # type: ignore
         )
         raw = RawReactionActionEvent(data, emoji, "REACTION_ADD")
 
@@ -1304,7 +1315,21 @@ class ConnectionState:
     def is_guild_evicted(self, guild) -> bool:
         return guild.id not in self._guilds
 
-    async def chunk_guild(self, guild, *, wait=True, cache=None):
+    @overload
+    async def chunk_guild(
+        self, guild: Guild, *, wait: Literal[False], cache: Optional[bool] = None
+    ) -> asyncio.Future[List[Member]]:
+        ...
+
+    @overload
+    async def chunk_guild(
+        self, guild: Guild, *, wait: Literal[True] = True, cache: Optional[bool] = None
+    ) -> List[Member]:
+        ...
+
+    async def chunk_guild(
+        self, guild: Guild, *, wait: bool = True, cache: Optional[bool] = None
+    ) -> Union[List[Member], asyncio.Future[List[Member]]]:
         cache = cache or self.member_cache_flags.joined
         request = self._chunk_requests.get(guild.id)
         if request is None:
@@ -1727,7 +1752,7 @@ class ConnectionState:
 
             if member is not None:
                 timestamp = datetime.datetime.fromtimestamp(
-                    data.get("timestamp"), tz=datetime.timezone.utc
+                    data["timestamp"], tz=datetime.timezone.utc
                 )
                 self.dispatch("typing", channel, member, timestamp)
 

@@ -498,7 +498,7 @@ class Interaction:
 
     async def send(
         self,
-        content: Optional[Any] = None,
+        content: Any = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -698,7 +698,7 @@ class InteractionResponse:
 
     async def send_message(
         self,
-        content: Optional[Any] = None,
+        content: Any = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -855,7 +855,7 @@ class InteractionResponse:
     async def edit_message(
         self,
         *,
-        content: Optional[Any] = MISSING,
+        content: Any = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,

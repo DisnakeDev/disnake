@@ -655,6 +655,8 @@ class Client:
             passing status code.
         """
         _log.info("logging in using static token")
+        if not isinstance(token, str):
+            raise TypeError(f"token must be of type str, got {type(token).__name__} instead")
 
         data = await self.http.static_login(token.strip())
         self._connection.user = ClientUser(state=self._connection, data=data)

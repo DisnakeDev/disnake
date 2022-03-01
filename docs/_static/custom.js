@@ -59,6 +59,26 @@ let showHideSidebar;
 document.addEventListener('DOMContentLoaded', () => {
   mobileSearch = new SearchBar();
 
+
+  const search_box = document.querySelector(".search input[type='search']");
+  const updateSearchPlaceholder = function() {
+    if (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) {
+      if (!search_box.classList.contains("mobile-search")) {
+        search_box.classList.add("mobile-search");
+        search_box.placeholder = search_box.getAttribute("placeholder-mobile");
+      }
+    } else {
+      if (search_box.classList.contains("mobile-search")) {
+        search_box.classList.remove("mobile-search");
+        search_box.placeholder = search_box.getAttribute("placeholder-desktop");
+      }
+    }
+  }
+  // Alter search box text for small screen sizes to reduce clipping
+  window.addEventListener("resize", updateSearchPlaceholder);
+  updateSearchPlaceholder();
+
+
   bottomHeightThreshold = document.documentElement.scrollHeight - 30;
   sections = document.querySelectorAll('section');
   hamburgerToggle = document.getElementById('hamburger-toggle');
