@@ -735,13 +735,11 @@ class Embed:
         """Converts this embed object into a dict."""
 
         # add in the raw data into the dict
-        # fmt: off
         result = {
             key[1:]: getattr(self, key)
             for key in self.__slots__
-            if key[0] == '_' and hasattr(self, key) and key not in ("_colour", "_files")
+            if key[0] == "_" and hasattr(self, key) and key not in ("_colour", "_files")
         }
-        # fmt: on
 
         # deal with basic convenience wrappers
 

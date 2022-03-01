@@ -494,13 +494,7 @@ class ViewStore:
 
     @property
     def persistent_views(self) -> Sequence[View]:
-        # fmt: off
-        views = {
-            view.id: view
-            for (_, (view, _)) in self._views.items()
-            if view.is_persistent()
-        }
-        # fmt: on
+        views = {view.id: view for view, _ in self._views.values() if view.is_persistent()}
         return list(views.values())
 
     def __verify_integrity(self):

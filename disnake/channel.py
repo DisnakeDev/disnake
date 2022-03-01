@@ -995,13 +995,11 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         Mapping[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
-        # fmt: off
         return {
             key: value
             for key, value in self.guild._voice_states.items()
             if value.channel and value.channel.id == self.id
         }
-        # fmt: on
 
 
 class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
