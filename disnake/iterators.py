@@ -59,7 +59,7 @@ if TYPE_CHECKING:
     from .member import Member
     from .message import Message
     from .threads import Thread
-    from .types.audit_log import AuditLog as AuditLogPayload
+    from .types.audit_log import AuditLog as AuditLogPayload, AuditLogEntry as AuditLogEntryPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
     from .types.threads import Thread as ThreadPayload
@@ -430,7 +430,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         self._users = {}
         self._state = guild._state
 
-        self._filter = None  # entry dict -> bool
+        self._filter: Optional[Callable[[AuditLogEntryPayload], bool]] = None
 
         self.entries = asyncio.Queue()
 

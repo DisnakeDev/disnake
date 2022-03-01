@@ -60,3 +60,4 @@ reportUnusedVariable = true
 reportUntypedNamedTuple = true
 reportUnnecessaryComparison = true
 reportUnnecessaryTypeIgnoreComment = true
+reportUnknownLambdaType = true

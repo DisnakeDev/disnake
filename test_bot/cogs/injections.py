@@ -1,3 +1,5 @@
+# pyright: reportUnknownLambdaType=false
+
 from __future__ import annotations
 
 from pprint import pformat
