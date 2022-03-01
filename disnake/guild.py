@@ -2007,7 +2007,7 @@ class Guild(Hashable):
         data = await self._state.http.create_guild_scheduled_event(self.id, reason=reason, **fields)
         return GuildScheduledEvent(state=self._state, data=data)
 
-    async def welcome_screen(self):
+    async def welcome_screen(self) -> WelcomeScreen:
         """|coro|
 
         Retrieves the guild's :class:`WelcomeScreen`.
