@@ -42,15 +42,12 @@ class PermissionOverwrite(TypedDict):
 ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14]
 
 
-class _BaseChannelOptional(TypedDict, total=False):
-    name: Optional[str]
-
-
-class _BaseChannel(_BaseChannelOptional):
+class _BaseChannel(TypedDict):
     id: Snowflake
 
 
 class _BaseGuildChannel(_BaseChannel):
+    name: str
     guild_id: Snowflake
     position: int
     permission_overwrites: List[PermissionOverwrite]
@@ -152,6 +149,7 @@ class DMChannel(_BaseChannel):
 
 
 class GroupDMChannel(_BaseChannel):
+    name: Optional[str]
     type: Literal[3]
     icon: Optional[str]
     owner_id: Snowflake
