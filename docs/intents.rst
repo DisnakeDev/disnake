@@ -94,7 +94,7 @@ Message Content Intent
 ++++++++++++++++++++++++
 
 - Whether you want a prefix that isn't the bot mention.
-- Whether you want to see what the content of a message was. This includes content, embeds, attachments, and components.
+- Whether you want to access the contents of messages. This includes content (text), embeds, attachments, and components.
 
 .. _need_presence_intent:
 
@@ -197,7 +197,7 @@ Message content refers to four attributes on the :class:`.Message` object:
 You will always receive message content in the following cases even without the message content intent:
 
 - Messages the bot sends
-- Messages the bot receives in :class:`DMChannel` instances
+- Messages the bot receives as a direct message
 - Messages in which the bot is mentioned
 - Messages received as part of an interaction (for example, a message command)
 

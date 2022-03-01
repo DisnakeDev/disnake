@@ -842,7 +842,7 @@ class Intents(BaseFlags):
         The following cases will always have the above fields:
 
         - Messages the bot sends
-        - Messages the bot receives in :class:`~disnake.DMChannel` instances
+        - Messages the bot receives as a direct message
         - Messages in which the bot is mentioned
         - Messages received from an interaction payload, these will typically be attributes on :class:`~disnake.MessageInteraction` instances
 
