@@ -8,7 +8,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v3
 
     - name: Set up python 3.8
       uses: actions/setup-python@v2
@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
     steps:
     - name: Checkout code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v3
 
     - name: Set up python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -69,12 +69,13 @@ jobs:
         no-comments: true  # only add comments for one platform (see above)
         warnings: true
 
+
   slotscheck:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v3
 
     - name: Set up python 3.8
       uses: actions/setup-python@v2
