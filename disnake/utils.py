@@ -33,7 +33,6 @@ import os
 import pkgutil
 import re
 import sys
-import types
 import unicodedata
 import warnings
 from base64 import b64encode, urlsafe_b64decode as b64decode
@@ -1059,7 +1058,12 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
     return _chunk(iterator, max_size)
 
 
-PY_310 = sys.version_info >= (3, 10)
+if sys.version_info >= (3, 10):
+    PY_310 = True
+    from types import UnionType
+else:
+    PY_310 = False
+    UnionType = object()
 
 
 def flatten_literal_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
@@ -1103,7 +1107,7 @@ def evaluate_annotation(
         is_literal = False
         args = tp.__args__
         if not hasattr(tp, "__origin__"):
-            if PY_310 and tp.__class__ is types.UnionType:  # type: ignore
+            if tp.__class__ is UnionType:
                 converted = Union[args]  # type: ignore
                 return evaluate_annotation(converted, globals, locals, cache)
 
