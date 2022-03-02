@@ -92,9 +92,9 @@ class _EnumValueComparable(_EnumValueBase):
         return isinstance(other, self.__class__) and self.value < other.value
 
 
-def _create_value_cls(name, comparable):
+def _create_value_cls(name: str, comparable: bool) -> Type[_EnumValueBase]:
     parent = _EnumValueComparable if comparable else _EnumValueBase
-    return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})
+    return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # type: ignore
 
 
 def _is_descriptor(obj):
