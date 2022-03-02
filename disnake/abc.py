@@ -101,14 +101,6 @@ if TYPE_CHECKING:
 MISSING = utils.MISSING
 
 
-class _Undefined:
-    def __repr__(self) -> str:
-        return "see-below"
-
-
-_undefined: Any = _Undefined()
-
-
 @runtime_checkable
 class Snowflake(Protocol):
     """An ABC that details the common operations on a Discord model.
@@ -308,7 +300,7 @@ class GuildChannel(ABC):
         payload = []
         for index, c in enumerate(channels):
             d: Dict[str, Any] = {"id": c.id, "position": index}
-            if parent_id is not _undefined and c.id == self.id:
+            if parent_id is not MISSING and c.id == self.id:
                 d.update(parent_id=parent_id, lock_permissions=lock_permissions)
             payload.append(d)
 
@@ -320,7 +312,7 @@ class GuildChannel(ABC):
         try:
             parent = options.pop("category")
         except KeyError:
-            parent_id = _undefined
+            parent_id = MISSING
         else:
             parent_id = parent and parent.id
 
@@ -348,7 +340,7 @@ class GuildChannel(ABC):
         try:
             position = options.pop("position")
         except KeyError:
-            if parent_id is not _undefined:
+            if parent_id is not MISSING:
                 if lock_permissions:
                     category = self.guild.get_channel(parent_id)
                     if category:
@@ -758,7 +750,7 @@ class GuildChannel(ABC):
         self,
         target: Union[Member, Role],
         *,
-        overwrite: Optional[Union[PermissionOverwrite, _Undefined]] = ...,
+        overwrite: Optional[PermissionOverwrite] = ...,
         reason: Optional[str] = ...,
     ) -> None:
         ...
@@ -773,7 +765,7 @@ class GuildChannel(ABC):
     ) -> None:
         ...
 
-    async def set_permissions(self, target, *, overwrite=_undefined, reason=None, **permissions):
+    async def set_permissions(self, target, *, overwrite=MISSING, reason=None, **permissions):
         """
         |coro|
 
@@ -856,7 +848,7 @@ class GuildChannel(ABC):
         else:
             raise TypeError("target parameter must be either Member or Role")
 
-        if overwrite is _undefined:
+        if overwrite is MISSING:
             if len(permissions) == 0:
                 raise TypeError("No overwrite provided.")
             try:
