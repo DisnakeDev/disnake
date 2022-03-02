@@ -349,9 +349,12 @@ class GuildChannel(ABC):
 
         lock_permissions: bool = sync_permissions if sync_permissions is not MISSING else False
 
-        try:
-            position = options.pop("position")
-        except KeyError:
+        if position is not MISSING:
+            await self._move(
+                position, parent_id=parent_id, lock_permissions=lock_permissions, reason=reason
+            )
+            parent_id = MISSING  # no need to change it again in the edit request below
+        else:
             if parent_id is not MISSING:
                 if lock_permissions:
                     category = self.guild.get_channel(parent_id)
@@ -365,11 +368,6 @@ class GuildChannel(ABC):
                 category = self.guild.get_channel(self.category_id)
                 if category:
                     options["permission_overwrites"] = [c._asdict() for c in category._overwrites]
-        else:
-            await self._move(
-                position, parent_id=parent_id, lock_permissions=lock_permissions, reason=reason
-            )
-            parent_id = MISSING  # no need to change it again in the edit request below
 
         overwrites = options.get("overwrites", None)
         if overwrites is not None:
