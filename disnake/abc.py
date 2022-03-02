@@ -390,6 +390,23 @@ class GuildChannel(ABC):
         else:
             type_payload = MISSING
 
+        options: Dict[str, Any] = dict(
+            name=name,
+            parent_id=parent_id,
+            topic=topic,
+            bitrate=bitrate,
+            nsfw=nsfw,
+            user_limit=user_limit,
+            # note: not passing `position` as it already got updated before, if passed
+            permission_overwrites=overwrites_payload,
+            rate_limit_per_user=slowmode_delay,
+            type=type_payload,
+            rtc_region=rtc_region_payload,
+            video_quality_mode=video_quality_mode_payload,
+            default_auto_archive_duration=default_auto_archive_duration,
+        )
+        options = {k: v for k, v in options.items() if v is not MISSING}
+
         if options:
             return await self._state.http.edit_channel(self.id, reason=reason, **options)
 
