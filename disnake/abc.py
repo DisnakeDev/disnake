@@ -335,24 +335,17 @@ class GuildChannel(ABC):
             # if it's not given, don't change the category
             parent_id = MISSING
 
-        try:
-            options["rate_limit_per_user"] = options.pop("slowmode_delay")
-        except KeyError:
-            pass
-
-        try:
-            rtc_region = options.pop("rtc_region")
-        except KeyError:
-            pass
+        rtc_region_payload: Optional[str]
+        if rtc_region is not MISSING:
+            rtc_region_payload = str(rtc_region) if rtc_region is not None else None
         else:
-            options["rtc_region"] = None if rtc_region is None else str(rtc_region)
+            rtc_region_payload = MISSING
 
-        try:
-            video_quality_mode = options.pop("video_quality_mode")
-        except KeyError:
-            pass
+        video_quality_mode_payload: Optional[int]
+        if video_quality_mode is not MISSING:
+            video_quality_mode_payload = int(video_quality_mode)
         else:
-            options["video_quality_mode"] = int(video_quality_mode)
+            video_quality_mode_payload = MISSING
 
         lock_permissions = options.pop("sync_permissions", False)
 
