@@ -327,12 +327,13 @@ class GuildChannel(ABC):
         video_quality_mode: VideoQualityMode = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
-        try:
-            parent = options.pop("category")
-        except KeyError:
-            parent_id = MISSING
+        parent_id: Optional[int]
+        if category is not MISSING:
+            # if category is given, it's either `None` (no parent) or a category channel
+            parent_id = category and category.id
         else:
-            parent_id = parent and parent.id
+            # if it's not given, don't change the category
+            parent_id = MISSING
 
         try:
             options["rate_limit_per_user"] = options.pop("slowmode_delay")
@@ -365,7 +366,6 @@ class GuildChannel(ABC):
                         options["permission_overwrites"] = [
                             c._asdict() for c in category._overwrites
                         ]
-                options["parent_id"] = parent_id
             elif lock_permissions and self.category_id is not None:
                 # if we're syncing permissions on a pre-existing channel category without changing it
                 # we need to update the permissions to point to the pre-existing category
@@ -376,6 +376,7 @@ class GuildChannel(ABC):
             await self._move(
                 position, parent_id=parent_id, lock_permissions=lock_permissions, reason=reason
             )
+            parent_id = MISSING  # no need to change it again in the edit request below
 
         overwrites = options.get("overwrites", None)
         if overwrites is not None:
