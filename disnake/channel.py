@@ -1220,7 +1220,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         bitrate: int = MISSING,
         user_limit: int = MISSING,
         position: int = MISSING,
-        sync_permissions: int = MISSING,
+        sync_permissions: bool = MISSING,
         category: Optional[CategoryChannel] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
@@ -1811,9 +1811,8 @@ class StageChannel(VocalGuildChannel):
         self,
         *,
         name: str = MISSING,
-        topic: Optional[str] = MISSING,
         position: int = MISSING,
-        sync_permissions: int = MISSING,
+        sync_permissions: bool = MISSING,
         category: Optional[CategoryChannel] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
@@ -1881,7 +1880,6 @@ class StageChannel(VocalGuildChannel):
         """
         payload = await self._edit(
             name=name,
-            topic=topic,
             position=position,
             sync_permissions=sync_permissions,
             category=category,
