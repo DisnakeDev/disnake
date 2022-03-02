@@ -1258,4 +1258,4 @@ def search_directory(path: str) -> Iterator[str]:
         if ispkg:
             yield from search_directory(os.path.join(path, name))
         else:
-            yield prefix + "." + name
+            yield f"{prefix}.{name}"

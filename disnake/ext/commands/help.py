@@ -419,7 +419,7 @@ class HelpCommand:
             if not parent.signature or parent.invoke_without_command:
                 entries.append(parent.name)
             else:
-                entries.append(parent.name + " " + parent.signature)
+                entries.append(f"{parent.name} {parent.signature}")
             parent = parent.parent
         parent_sig = " ".join(reversed(entries))
 
@@ -427,10 +427,10 @@ class HelpCommand:
             aliases = "|".join(command.aliases)
             fmt = f"[{command.name}|{aliases}]"
             if parent_sig:
-                fmt = parent_sig + " " + fmt
+                fmt = f"{parent_sig} {fmt}"
             alias = fmt
         else:
-            alias = command.name if not parent_sig else parent_sig + " " + command.name
+            alias = command.name if not parent_sig else f"{parent_sig} {command.name}"
 
         return f"{self.context.clean_prefix}{alias} {command.signature}"
 
@@ -1033,7 +1033,7 @@ class DefaultHelpCommand(HelpCommand):
 
         def get_category(command, *, no_category=no_category):
             cog = command.cog
-            return cog.qualified_name + ":" if cog is not None else no_category
+            return f"{cog.qualified_name}:" if cog is not None else no_category
 
         filtered = await self.filter_commands(bot.commands, sort=True, key=get_category)
         max_size = self.get_max_size(filtered)

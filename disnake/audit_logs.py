@@ -527,7 +527,7 @@ class AuditLogEntry(Hashable):
             return Object(id=self._target_id) if self._target_id else None
 
         try:
-            converter = getattr(self, "_convert_target_" + self.action.target_type)
+            converter = getattr(self, f"_convert_target_{self.action.target_type}")
         except AttributeError:
             return Object(id=self._target_id) if self._target_id else None
         else:

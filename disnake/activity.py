@@ -305,7 +305,7 @@ class Activity(BaseActivity):
         except KeyError:
             return None
         else:
-            return Asset.BASE + f"/app-assets/{self.application_id}/{large_image}.png"
+            return f"{Asset.BASE}/app-assets/{self.application_id}/{large_image}.png"
 
     @property
     def small_image_url(self) -> Optional[str]:
@@ -318,7 +318,7 @@ class Activity(BaseActivity):
         except KeyError:
             return None
         else:
-            return Asset.BASE + f"/app-assets/{self.application_id}/{small_image}.png"
+            return f"{Asset.BASE}/app-assets/{self.application_id}/{small_image}.png"
 
     @property
     def large_image_text(self) -> Optional[str]:
@@ -683,7 +683,7 @@ class Spotify:
         if large_image[:8] != "spotify:":
             return ""
         album_image_id = large_image[8:]
-        return "https://i.scdn.co/image/" + album_image_id
+        return f"https://i.scdn.co/image/{album_image_id}"
 
     @property
     def track_id(self) -> str:

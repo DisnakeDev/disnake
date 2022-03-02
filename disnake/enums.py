@@ -94,7 +94,7 @@ class _EnumValueComparable(_EnumValueBase):
 
 def _create_value_cls(name, comparable):
     parent = _EnumValueComparable if comparable else _EnumValueBase
-    return type(parent.__name__ + "_" + name, (parent,), {"_cls_name": name})
+    return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})
 
 
 def _is_descriptor(obj):
