@@ -349,29 +349,24 @@ class GuildChannel(ABC):
 
         lock_permissions: bool = sync_permissions if sync_permissions is not MISSING else False
 
+        overwrites_payload: List[PermissionOverwritePayload] = MISSING
+
         if position is not MISSING:
             await self._move(
                 position, parent_id=parent_id, lock_permissions=lock_permissions, reason=reason
             )
             parent_id = MISSING  # no need to change it again in the edit request below
-        else:
+        elif lock_permissions:
             if parent_id is not MISSING:
-                if lock_permissions:
-                    category = self.guild.get_channel(parent_id)
-                    if category:
-                        options["permission_overwrites"] = [
-                            c._asdict() for c in category._overwrites
-                        ]
-            elif lock_permissions and self.category_id is not None:
-                # if we're syncing permissions on a pre-existing channel category without changing it
-                # we need to update the permissions to point to the pre-existing category
-                category = self.guild.get_channel(self.category_id)
-                if category:
-                    options["permission_overwrites"] = [c._asdict() for c in category._overwrites]
+                p_id = parent_id
+            else:
+                p_id = self.category_id
 
-        overwrites = options.get("overwrites", None)
-        if overwrites is not None:
-            perms = []
+            if p_id is not None and (parent := self.guild.get_channel(p_id)):
+                overwrites_payload = [c._asdict() for c in parent._overwrites]
+
+        if overwrites:
+            overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
                     raise TypeError(
@@ -379,19 +374,13 @@ class GuildChannel(ABC):
                     )
 
                 allow, deny = perm.pair()
-                payload = {
-                    "allow": allow.value,
-                    "deny": deny.value,
+                payload: PermissionOverwritePayload = {
+                    "allow": str(allow.value),
+                    "deny": str(deny.value),
                     "id": target.id,
+                    "type": _Overwrites.ROLE if isinstance(target, Role) else _Overwrites.MEMBER,
                 }
-
-                if isinstance(target, Role):
-                    payload["type"] = _Overwrites.ROLE
-                else:
-                    payload["type"] = _Overwrites.MEMBER
-
-                perms.append(payload)
-            options["permission_overwrites"] = perms
+                overwrites_payload.append(payload)
 
         try:
             ch_type = options["type"]
