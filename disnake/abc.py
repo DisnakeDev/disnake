@@ -347,7 +347,7 @@ class GuildChannel(ABC):
         else:
             video_quality_mode_payload = MISSING
 
-        lock_permissions = options.pop("sync_permissions", False)
+        lock_permissions: bool = sync_permissions if sync_permissions is not MISSING else False
 
         try:
             position = options.pop("position")
