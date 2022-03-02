@@ -382,14 +382,13 @@ class GuildChannel(ABC):
                 }
                 overwrites_payload.append(payload)
 
-        try:
-            ch_type = options["type"]
-        except KeyError:
-            pass
-        else:
-            if not isinstance(ch_type, ChannelType):
+        type_payload: int
+        if type is not MISSING:
+            if not isinstance(type, ChannelType):
                 raise TypeError("type field must be of type ChannelType")
-            options["type"] = ch_type.value
+            type_payload = type.value
+        else:
+            type_payload = MISSING
 
         if options:
             return await self._state.http.edit_channel(self.id, reason=reason, **options)
