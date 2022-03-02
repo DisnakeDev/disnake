@@ -48,7 +48,7 @@ from typing import (
 
 from . import utils
 from .context_managers import Typing
-from .enums import ChannelType, PartyType, try_enum_to_int
+from .enums import ChannelType, PartyType, VideoQualityMode, try_enum_to_int
 from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags, MessageFlags
@@ -78,6 +78,7 @@ if TYPE_CHECKING:
     from .channel import CategoryChannel, DMChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
+    from .voice_region import VoiceRegion
     from .enums import InviteTarget
     from .guild import Guild, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
@@ -85,6 +86,7 @@ if TYPE_CHECKING:
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .state import ConnectionState
+    from .threads import AnyThreadArchiveDuration
     from .types.channel import (
         Channel as ChannelPayload,
         GuildChannel as GuildChannelPayload,
@@ -307,7 +309,23 @@ class GuildChannel(ABC):
         await http.bulk_channel_update(self.guild.id, payload, reason=reason)
 
     async def _edit(
-        self, options: Dict[str, Any], reason: Optional[str]
+        self,
+        *,
+        name: str = MISSING,
+        topic: Optional[str] = MISSING,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        sync_permissions: bool = MISSING,
+        category: Optional[CategoryChannel] = MISSING,
+        slowmode_delay: int = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        type: ChannelType = MISSING,
+        overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = MISSING,
+        bitrate: int = MISSING,
+        user_limit: int = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
+        reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
         try:
             parent = options.pop("category")
