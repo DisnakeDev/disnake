@@ -2016,6 +2016,7 @@ class AutoShardedConnectionState(ConnectionState):
 
         guilds = sorted(processed, key=lambda g: g[0].shard_id)
         for shard_id, info in itertools.groupby(guilds, key=lambda g: g[0].shard_id):
+            # this is equivalent to `children, futures = zip(*info)`, but typed properly
             children: List[Guild] = []
             futures: List[asyncio.Future[List[Member]]] = []
             for c, f in info:

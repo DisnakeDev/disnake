@@ -423,7 +423,6 @@ class Encoder(_OpusStruct):
 
         ret = _lib.opus_encode(self._state, pcm_ptr, frame_size, data, max_data_bytes)
 
-        # array can be initialized with bytes but mypy doesn't know
         return array.array("b", data[:ret]).tobytes()
 
 
