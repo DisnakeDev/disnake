@@ -3499,7 +3499,9 @@ class Guild(Hashable):
         """
         if query == "":
             raise ValueError("Cannot pass empty query string.")
-        limit = min(1000, limit or 1)
+        if limit < 1:
+            raise ValueError("limit must be at least 1")
+        limit = min(1000, limit)
         members = await self._state.http.search_guild_members(self.id, query=query, limit=limit)
         resp = []
         for member in members:
