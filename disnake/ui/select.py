@@ -362,7 +362,7 @@ def select(
             "row": row,
             "min_values": min_values,
             "max_values": max_values,
-            "options": _parse_select_options(options),
+            "options": options,
             "disabled": disabled,
         }
         return func  # type: ignore
