@@ -27,7 +27,6 @@ from __future__ import annotations
 import asyncio
 import audioop
 import io
-import json
 import logging
 import re
 import shlex
@@ -96,7 +95,7 @@ class AudioSource:
         per frame (20ms worth of audio).
 
         Returns
-        --------
+        -------
         :class:`bytes`
             A bytes like object that represents the PCM or Opus data.
         """
@@ -122,7 +121,7 @@ class PCMAudio(AudioSource):
     """Represents raw 16-bit 48KHz stereo PCM audio source.
 
     Attributes
-    -----------
+    ----------
     stream: :term:`py:file object`
         A file-like object that reads byte data representing raw PCM.
     """
@@ -164,9 +163,9 @@ class FFmpegAudio(AudioSource):
         kwargs = {"stdout": subprocess.PIPE}
         kwargs.update(subprocess_kwargs)
 
-        self._process: subprocess.Popen = self._spawn_process(args, **kwargs)
+        self._process: subprocess.Popen[bytes] = self._spawn_process(args, **kwargs)
         self._stdout: IO[bytes] = self._process.stdout  # type: ignore
-        self._stdin: Optional[IO[Bytes]] = None
+        self._stdin: Optional[IO[bytes]] = None
         self._pipe_thread: Optional[threading.Thread] = None
 
         if piping:
@@ -177,17 +176,14 @@ class FFmpegAudio(AudioSource):
             )
             self._pipe_thread.start()
 
-    def _spawn_process(self, args: Any, **subprocess_kwargs: Any) -> subprocess.Popen:
-        process = None
+    def _spawn_process(self, args: Any, **subprocess_kwargs: Any) -> subprocess.Popen[bytes]:
         try:
-            process = subprocess.Popen(args, creationflags=CREATE_NO_WINDOW, **subprocess_kwargs)
+            return subprocess.Popen(args, creationflags=CREATE_NO_WINDOW, **subprocess_kwargs)  # type: ignore
         except FileNotFoundError:
             executable = args.partition(" ")[0] if isinstance(args, str) else args[0]
             raise ClientException(executable + " was not found.") from None
         except subprocess.SubprocessError as exc:
             raise ClientException(f"Popen failed: {exc.__class__.__name__}: {exc}") from exc
-        else:
-            return process
 
     def _kill_process(self) -> None:
         proc = self._process
@@ -217,6 +213,7 @@ class FFmpegAudio(AudioSource):
             )
 
     def _pipe_writer(self, source: io.BufferedIOBase) -> None:
+        assert self._stdin
         while self._process:
             # arbitrarily large read size
             data = source.read(8192)
@@ -253,7 +250,7 @@ class FFmpegPCMAudio(FFmpegAudio):
         variable in order for this to work.
 
     Parameters
-    ------------
+    ----------
     source: Union[:class:`str`, :class:`io.BufferedIOBase`]
         The input that ffmpeg will take and convert to PCM bytes.
         If ``pipe`` is ``True`` then this is a file-like object that is
@@ -272,7 +269,7 @@ class FFmpegPCMAudio(FFmpegAudio):
         Extra command line arguments to pass to ffmpeg after the ``-i`` flag.
 
     Raises
-    --------
+    ------
     ClientException
         The subprocess failed to be created.
     """
@@ -340,7 +337,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         variable in order for this to work.
 
     Parameters
-    ------------
+    ----------
     source: Union[:class:`str`, :class:`io.BufferedIOBase`]
         The input that ffmpeg will take and convert to Opus bytes.
         If ``pipe`` is ``True`` then this is a file-like object that is
@@ -374,7 +371,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         Extra command line arguments to pass to ffmpeg after the ``-i`` flag.
 
     Raises
-    --------
+    ------
     ClientException
         The subprocess failed to be created.
     """
@@ -449,7 +446,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         the input source for audio codec and bitrate information.
 
         Examples
-        ----------
+        --------
 
         Use this function to create an :class:`FFmpegOpusAudio` instance instead of the constructor: ::
 
@@ -472,7 +469,7 @@ class FFmpegOpusAudio(FFmpegAudio):
             voice_client.play(source)
 
         Parameters
-        ------------
+        ----------
         source
             Identical to the ``source`` parameter for the constructor.
         method: Optional[Union[:class:`str`, Callable[:class:`str`, :class:`str`]]]
@@ -486,14 +483,14 @@ class FFmpegOpusAudio(FFmpegAudio):
             excluding ``bitrate`` and ``codec``.
 
         Raises
-        --------
+        ------
         AttributeError
             Invalid probe method, must be ``'native'`` or ``'fallback'``.
         TypeError
             Invalid value for ``probe`` parameter, must be :class:`str` or a callable.
 
         Returns
-        --------
+        -------
         :class:`FFmpegOpusAudio`
             An instance of this class.
         """
@@ -517,7 +514,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         Probes the input source for bitrate and codec information.
 
         Parameters
-        ------------
+        ----------
         source
             Identical to the ``source`` parameter for :class:`FFmpegOpusAudio`.
         method
@@ -526,14 +523,14 @@ class FFmpegOpusAudio(FFmpegAudio):
             Identical to the ``executable`` parameter for :class:`FFmpegOpusAudio`.
 
         Raises
-        --------
+        ------
         AttributeError
             Invalid probe method, must be ``'native'`` or ``'fallback'``.
         TypeError
             Invalid value for ``probe`` parameter, must be :class:`str` or a callable.
 
         Returns
-        ---------
+        -------
         Optional[Tuple[Optional[:class:`str`], Optional[:class:`int`]]]
             A 2-tuple with the codec and bitrate of the input source.
         """
@@ -645,7 +642,7 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
     set to ``True``.
 
     Parameters
-    ------------
+    ----------
     original: :class:`AudioSource`
         The original AudioSource to transform.
     volume: :class:`float`
@@ -653,7 +650,7 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
         See :attr:`volume` for more info.
 
     Raises
-    -------
+    ------
     TypeError
         Not an audio source.
     ClientException

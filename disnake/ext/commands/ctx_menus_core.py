@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Coroutine, Optional, Sequence, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
 from disnake.app_commands import MessageCommand, UserCommand
 
@@ -32,16 +32,9 @@ from .errors import *
 from .params import safe_call
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
-
     from disnake.interactions import ApplicationCommandInteraction
 
-    ApplicationCommandInteractionT = TypeVar(
-        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
-    )
-    from .cog import CogT
-
-    P = ParamSpec("P")
+    from .base_core import InteractionCommandCallback
 
 __all__ = ("InvokableUserCommand", "InvokableMessageCommand", "user_command", "message_command")
 
@@ -53,7 +46,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
     decorator or functional interface.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the user command.
     body: :class:`.UserCommand`
@@ -72,12 +65,12 @@ class InvokableUserCommand(InvokableApplicationCommand):
     guild_ids: Optional[List[:class:`int`]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
-        Whether to sync the command in the API with ``body`` or not.
+        Whether to automatically register the command.
     """
 
     def __init__(
         self,
-        func,
+        func: InteractionCommandCallback,
         *,
         name: str = None,
         default_permission: bool = True,
@@ -124,7 +117,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     decorator or functional interface.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the message command.
     body: :class:`.MessageCommand`
@@ -143,12 +136,12 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     guild_ids: Optional[List[:class:`int`]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
-        Whether to sync the command in the API with ``body`` or not.
+        Whether to automatically register the command.
     """
 
     def __init__(
         self,
-        func,
+        func: InteractionCommandCallback,
         *,
         name: str = None,
         default_permission: bool = True,
@@ -195,46 +188,35 @@ def user_command(
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     **kwargs,
-) -> Callable[
-    [
-        Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-        ]
-    ],
-    InvokableUserCommand,
-]:
-    """
-    A shortcut decorator that builds a user command.
+) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
+    """A shortcut decorator that builds a user command.
 
     Parameters
     ----------
     name: :class:`str`
-        name of the user command you want to respond to (equals to function name by default).
+        The name of the user command (defaults to the function name).
     default_permission: :class:`bool`
-        whether the command is enabled by default when the app is added to a guild.
+        Whether the command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     auto_sync: :class:`bool`
-        whether to automatically register / edit the command or not. Defaults to ``True``.
+        Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
-        if specified, the client will register the command in these guilds.
+        If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
 
     Returns
-    --------
+    -------
     Callable[..., :class:`InvokableUserCommand`]
-        A decorator that converts the provided method into a InvokableUserCommand and returns it.
+        A decorator that converts the provided method into an InvokableUserCommand and returns it.
     """
 
-    def decorator(
-        func: Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-        ]
-    ) -> InvokableUserCommand:
+    def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
+        if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
+            raise ValueError("guild_ids must be a sequence of int.")
         return InvokableUserCommand(
             func,
             name=name,
@@ -254,46 +236,35 @@ def message_command(
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     **kwargs,
-) -> Callable[
-    [
-        Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-        ]
-    ],
-    InvokableMessageCommand,
-]:
-    """
-    A decorator that builds a message command.
+) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
+    """A shortcut decorator that builds a message command.
 
     Parameters
     ----------
     name: :class:`str`
-        name of the message command you want to respond to (equals to function name by default).
+        The name of the message command (defaults to the function name).
     default_permission: :class:`bool`
-        whether the command is enabled by default when the app is added to a guild.
+        Whether the command is enabled by default. If set to ``False``, this command
+        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     auto_sync: :class:`bool`
-        whether to automatically register / edit the command or not. Defaults to ``True``.
+        Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
-        if specified, the client will register the command in these guilds.
+        If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
 
     Returns
-    --------
+    -------
     Callable[..., :class:`InvokableMessageCommand`]
-        A decorator that converts the provided method into a InvokableMessageCommand and then returns it.
+        A decorator that converts the provided method into an InvokableMessageCommand and then returns it.
     """
 
-    def decorator(
-        func: Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-        ]
-    ) -> InvokableMessageCommand:
+    def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
+        if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
+            raise ValueError("guild_ids must be a sequence of int.")
         return InvokableMessageCommand(
             func,
             name=name,

@@ -44,12 +44,14 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    cast,
 )
 
 from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
     Component,
+    NestedComponent,
     SelectMenu as SelectComponent,
     _component_factory,
 )
@@ -70,15 +72,15 @@ if TYPE_CHECKING:
     from .item import ItemCallbackType
 
 
-def _walk_all_components(components: List[Component]) -> Iterator[Component]:
+def _walk_all_components(components: List[Component]) -> Iterator[NestedComponent]:
     for item in components:
         if isinstance(item, ActionRowComponent):
             yield from item.children
         else:
-            yield item
+            yield cast(NestedComponent, item)
 
 
-def _component_to_item(component: Component) -> Item:
+def _component_to_item(component: NestedComponent) -> Item:
     if isinstance(component, ButtonComponent):
         from .button import Button
 
@@ -138,13 +140,13 @@ class View:
     .. versionadded:: 2.0
 
     Parameters
-    -----------
+    ----------
     timeout: Optional[:class:`float`]
         Timeout in seconds from last interaction with the UI before no longer accepting input.
         If ``None`` then there is no timeout.
 
     Attributes
-    ------------
+    ----------
     timeout: Optional[:class:`float`]
         Timeout from last interaction with the UI before no longer accepting input.
         If ``None`` then there is no timeout.
@@ -153,10 +155,10 @@ class View:
     """
 
     __discord_ui_view__: ClassVar[bool] = True
-    __view_children_items__: ClassVar[List[ItemCallbackType]] = []
+    __view_children_items__: ClassVar[List[ItemCallbackType[Item]]] = []
 
     def __init_subclass__(cls) -> None:
-        children: List[ItemCallbackType] = []
+        children: List[ItemCallbackType[Item]] = []
         for base in reversed(cls.__mro__):
             for member in base.__dict__.values():
                 if hasattr(member, "__discord_ui_model_type__"):
@@ -235,14 +237,14 @@ class View:
         converted into a :class:`View` first.
 
         Parameters
-        -----------
+        ----------
         message: :class:`disnake.Message`
             The message with components to convert into a view.
         timeout: Optional[:class:`float`]
             The timeout of the converted view.
 
         Returns
-        --------
+        -------
         :class:`View`
             The converted view. This always returns a :class:`View` and not
             one of its subclasses.
@@ -262,12 +264,12 @@ class View:
         """Adds an item to the view.
 
         Parameters
-        -----------
+        ----------
         item: :class:`Item`
             The item to add to the view.
 
         Raises
-        --------
+        ------
         TypeError
             An :class:`Item` was not passed.
         ValueError
@@ -278,7 +280,6 @@ class View:
         ---------
         `Self`
         """
-
         if len(self.children) > 25:
             raise ValueError("maximum number of children exceeded")
 
@@ -295,7 +296,7 @@ class View:
         """Removes an item from the view.
 
         Parameters
-        -----------
+        ----------
         item: :class:`Item`
             The item to remove from the view.
 
@@ -303,7 +304,6 @@ class View:
         ---------
         `Self`
         """
-
         try:
             self.children.remove(item)
         except ValueError:
@@ -341,12 +341,12 @@ class View:
             is considered a failure and :meth:`on_error` is called.
 
         Parameters
-        -----------
-        interaction: :class:`~disnake.MessageInteraction`
+        ----------
+        interaction: :class:`.MessageInteraction`
             The interaction that occurred.
 
         Returns
-        ---------
+        -------
         :class:`bool`
             Whether the view children's callbacks should be called.
         """
@@ -368,12 +368,12 @@ class View:
         The default implementation prints the traceback to stderr.
 
         Parameters
-        -----------
+        ----------
         error: :class:`Exception`
             The exception that was raised.
         item: :class:`Item`
             The item that failed the dispatch.
-        interaction: :class:`~disnake.MessageInteraction`
+        interaction: :class:`.MessageInteraction`
             The interaction that led to the failure.
         """
         print(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)
@@ -497,7 +497,7 @@ class View:
         or it times out.
 
         Returns
-        --------
+        -------
         :class:`bool`
             If ``True``, then the view timed out. If ``False`` then
             the view finished normally.

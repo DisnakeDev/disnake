@@ -33,7 +33,7 @@ from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .mixins import Hashable
-from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
+from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time, warn_deprecated
 
 __all__ = (
     "Thread",
@@ -86,7 +86,7 @@ class Thread(Messageable, Hashable):
     .. versionadded:: 2.0
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The thread name.
     guild: :class:`Guild`
@@ -119,8 +119,6 @@ class Thread(Messageable, Hashable):
     invitable: :class:`bool`
         Whether non-moderators can add other non-moderators to this thread.
         This is always ``True`` for public threads.
-    archiver_id: Optional[:class:`int`]
-        The user's ID that archived this thread.
     auto_archive_duration: :class:`int`
         The duration in minutes until the thread is automatically archived due to inactivity.
         Usually a value of 60, 1440, 4320 and 10080.
@@ -137,9 +135,6 @@ class Thread(Messageable, Hashable):
         "name",
         "id",
         "guild",
-        "_type",
-        "_state",
-        "_members",
         "owner_id",
         "parent_id",
         "last_message_id",
@@ -150,10 +145,13 @@ class Thread(Messageable, Hashable):
         "locked",
         "archived",
         "invitable",
-        "archiver_id",
         "auto_archive_duration",
         "archive_timestamp",
         "create_timestamp",
+        "_type",
+        "_state",
+        "_members",
+        "_archiver_id",
     )
 
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload):
@@ -195,7 +193,7 @@ class Thread(Messageable, Hashable):
 
     def _unroll_metadata(self, data: ThreadMetadata):
         self.archived = data["archived"]
-        self.archiver_id = _get_as_snowflake(data, "archiver_id")
+        self._archiver_id = _get_as_snowflake(data, "archiver_id")
         self.auto_archive_duration = data["auto_archive_duration"]
         self.archive_timestamp = parse_time(data["archive_timestamp"])
         self.locked = data.get("locked", False)
@@ -249,7 +247,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def last_message(self) -> Optional[Message]:
-        """Fetches the last message from this channel in cache.
+        """Gets the last message in this channel from the cache.
 
         The message might not be valid or point to an existing message.
 
@@ -262,7 +260,7 @@ class Thread(Messageable, Hashable):
             attribute.
 
         Returns
-        ---------
+        -------
         Optional[:class:`Message`]
             The last message in this channel or ``None`` if not found.
         """
@@ -273,7 +271,7 @@ class Thread(Messageable, Hashable):
         """The category channel the parent channel belongs to, if applicable.
 
         Raises
-        -------
+        ------
         ClientException
             The parent channel was not cached and returned ``None``.
 
@@ -282,7 +280,6 @@ class Thread(Messageable, Hashable):
         Optional[:class:`CategoryChannel`]
             The parent channel's category.
         """
-
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
@@ -293,7 +290,7 @@ class Thread(Messageable, Hashable):
         """The category channel ID the parent channel belongs to, if applicable.
 
         Raises
-        -------
+        ------
         ClientException
             The parent channel was not cached and returned ``None``.
 
@@ -317,6 +314,31 @@ class Thread(Messageable, Hashable):
             If create_timestamp is provided by discord, that will be used instead of the time in the ID.
         """
         return self.create_timestamp or snowflake_time(self.id)
+
+    @property
+    def archiver_id(self) -> Optional[int]:
+        """Optional[:class:`int`]: The user's ID that archived this thread.
+
+        As of June 10th, 2021, this value will always be ``None`` since Discord
+        doesn't provide this information anymore.
+
+        .. warning::
+
+            This property will be removed in a future version.
+        """
+        warn_deprecated(
+            "archiver_id is deprecated and will be removed in a future version.", stacklevel=2
+        )
+        return self._archiver_id
+
+    @property
+    def jump_url(self) -> str:
+        """
+        A URL that can be used to jump to this thread.
+
+        .. versionadded:: 2.4
+        """
+        return f"https://discord.com/channels/{self.guild.id}/{self.id}"
 
     def is_private(self) -> bool:
         """Whether the thread is a private thread.
@@ -349,7 +371,13 @@ class Thread(Messageable, Hashable):
         parent = self.parent
         return parent is not None and parent.is_nsfw()
 
-    def permissions_for(self, obj: Union[Member, Role], /) -> Permissions:
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
         """Handles permission resolution for the :class:`~disnake.Member`
         or :class:`~disnake.Role`.
 
@@ -364,9 +392,16 @@ class Thread(Messageable, Hashable):
             The object to resolve permissions for. This could be either
             a member or a role. If it's a role then member overwrites
             are not computed.
+        ignore_timeout: :class:`bool`
+            Whether or not to ignore the user's timeout.
+            Defaults to ``True`` for backwards compatibility.
+
+            .. versionadded:: 2.4
+
+            .. note:: This only applies to :class:`~disnake.Member` objects.
 
         Raises
-        -------
+        ------
         ClientException
             The parent channel was not cached and returned ``None``
 
@@ -379,7 +414,7 @@ class Thread(Messageable, Hashable):
         parent = self.parent
         if parent is None:
             raise ClientException("Parent channel not found")
-        return parent.permissions_for(obj)
+        return parent.permissions_for(obj, ignore_timeout=ignore_timeout)
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
         """|coro|
@@ -400,7 +435,7 @@ class Thread(Messageable, Hashable):
         Usable only by bot accounts.
 
         Parameters
-        -----------
+        ----------
         messages: Iterable[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
@@ -456,7 +491,7 @@ class Thread(Messageable, Hashable):
         also needed to retrieve message history.
 
         Examples
-        ---------
+        --------
 
         Deleting bot's messages ::
 
@@ -467,7 +502,7 @@ class Thread(Messageable, Hashable):
             await thread.send(f'Deleted {len(deleted)} message(s)')
 
         Parameters
-        -----------
+        ----------
         limit: Optional[:class:`int`]
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
@@ -488,14 +523,14 @@ class Thread(Messageable, Hashable):
             fall back to single delete if messages are older than two weeks.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have proper permissions to do the actions required.
         HTTPException
             Purging the messages failed.
 
         Returns
-        --------
+        -------
         List[:class:`.Message`]
             The list of messages that were deleted.
         """
@@ -574,7 +609,7 @@ class Thread(Messageable, Hashable):
         The thread must be unarchived to be edited.
 
         Parameters
-        ------------
+        ----------
         name: :class:`str`
             The new name of the thread.
         archived: :class:`bool`
@@ -592,14 +627,14 @@ class Thread(Messageable, Hashable):
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to edit the thread.
         HTTPException
             Editing the thread failed.
 
         Returns
-        --------
+        -------
         :class:`Thread`
             The newly edited thread.
         """
@@ -630,7 +665,7 @@ class Thread(Messageable, Hashable):
         If the thread is private, :attr:`~Permissions.manage_threads` is also needed.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to join the thread.
         HTTPException
@@ -644,7 +679,7 @@ class Thread(Messageable, Hashable):
         Leaves this thread.
 
         Raises
-        -------
+        ------
         HTTPException
             Leaving the thread failed.
         """
@@ -655,18 +690,18 @@ class Thread(Messageable, Hashable):
 
         Adds a user to this thread.
 
-        You must have :attr:`~Permissions.send_messages` and :attr:`~Permissions.use_threads`
-        to add a user to a public thread. If the thread is private then :attr:`~Permissions.send_messages`
-        and either :attr:`~Permissions.use_private_threads` or :attr:`~Permissions.manage_messages`
+        You must have :attr:`~.Permissions.send_messages` permission to add a user to a public thread.
+        If the thread is private then :attr:`~.Permissions.send_messages` and either :attr:`~.Permissions.create_private_threads`
+        or :attr:`~.Permissions.manage_messages` permissions
         is required to add a user to the thread.
 
         Parameters
-        -----------
+        ----------
         user: :class:`abc.Snowflake`
             The user to add to the thread.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to add the user to the thread.
         HTTPException
@@ -682,12 +717,12 @@ class Thread(Messageable, Hashable):
         You must have :attr:`~Permissions.manage_threads` or be the creator of the thread to remove a user.
 
         Parameters
-        -----------
+        ----------
         user: :class:`abc.Snowflake`
             The user to add to the thread.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to remove the user from the thread.
         HTTPException
@@ -698,22 +733,22 @@ class Thread(Messageable, Hashable):
     async def fetch_member(self, member_id: int, /) -> ThreadMember:
         """|coro|
 
-        Retrieve a single :class:`ThreadMember` from this thread.
+        Retrieves a single :class:`ThreadMember` from this thread.
 
         Parameters
-        -----------
+        ----------
         member_id: :class:`int`
             The ID of the member to fetch.
 
         Raises
-        -------
+        ------
         NotFound
             The specified member was not found.
         HTTPException
             Retrieving the member failed.
 
         Returns
-        --------
+        -------
         :class:`ThreadMember`
             The thread member asked for.
         """
@@ -729,12 +764,12 @@ class Thread(Messageable, Hashable):
         other than yourself.
 
         Raises
-        -------
+        ------
         HTTPException
             Retrieving the members failed.
 
         Returns
-        --------
+        -------
         List[:class:`ThreadMember`]
             All thread members in the thread.
         """
@@ -742,21 +777,28 @@ class Thread(Messageable, Hashable):
         members = await self._state.http.get_thread_members(self.id)
         return [ThreadMember(parent=self, data=data) for data in members]
 
-    async def delete(self):
+    async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
 
         Deletes this thread.
 
         You must have :attr:`~Permissions.manage_threads` to delete threads.
 
+        Parameters
+        ----------
+        reason: Optional[:class:`str`]
+            The reason for deleting this thread. Shows up on the audit log.
+
+            .. versionadded:: 2.5
+
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to delete this thread.
         HTTPException
             Deleting the thread failed.
         """
-        await self._state.http.delete_channel(self.id)
+        await self._state.http.delete_channel(self.id, reason=reason)
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
         """Creates a :class:`PartialMessage` from the message ID.
@@ -767,12 +809,12 @@ class Thread(Messageable, Hashable):
         .. versionadded:: 2.0
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
             The message ID to create a partial message for.
 
         Returns
-        ---------
+        -------
         :class:`PartialMessage`
             The partial message.
         """
@@ -812,7 +854,7 @@ class ThreadMember(Hashable):
     .. versionadded:: 2.0
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The thread member's ID.
     thread_id: :class:`int`

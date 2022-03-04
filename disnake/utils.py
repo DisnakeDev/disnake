@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import array
 import asyncio
-import collections.abc
 import datetime
 import functools
 import json
@@ -194,7 +193,7 @@ def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlo
     return decorator
 
 
-class SequenceProxy(Generic[T_co], collections.abc.Sequence):
+class SequenceProxy(Sequence[T_co]):
     """Read-only proxy of a Sequence."""
 
     def __init__(self, proxied: Sequence[T_co]):
@@ -261,7 +260,7 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
             else:
                 msg = f"{func.__name__} is deprecated."
 
-            warn_deprecated(msg, stacklevel=3)
+            warn_deprecated(msg, stacklevel=2)
             return func(*args, **kwargs)
 
         return decorated
@@ -291,7 +290,7 @@ def oauth_url(
     into guilds.
 
     Parameters
-    -----------
+    ----------
     client_id: Union[:class:`int`, :class:`str`]
         The client ID for your bot.
     permissions: :class:`~disnake.Permissions`
@@ -305,13 +304,14 @@ def oauth_url(
         An optional valid list of scopes. Defaults to ``('bot',)``.
 
         .. versionadded:: 1.7
+
     disable_guild_select: :class:`bool`
         Whether to disallow the user from changing the guild dropdown.
 
         .. versionadded:: 2.0
 
     Returns
-    --------
+    -------
     :class:`str`
         The OAuth2 URL for inviting the bot into guilds.
     """
@@ -334,14 +334,14 @@ def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
     Returns
 
     Parameters
-    -----------
+    ----------
     token: :class:`str`
         The bot token
 
     Returns
-    --------
+    -------
     Tuple[:class:`int`, :class:`datetime.datetime`, :class:`bytes`]
-        the bot's id, the time when the token was generated and the hmac.
+        The bot's ID, the time when the token was generated and the hmac.
     """
     parts = token.split(".")
 
@@ -358,12 +358,12 @@ def parse_token(token: str) -> Tuple[int, datetime.datetime, bytes]:
 def snowflake_time(id: int) -> datetime.datetime:
     """
     Parameters
-    -----------
+    ----------
     id: :class:`int`
         The snowflake ID.
 
     Returns
-    --------
+    -------
     :class:`datetime.datetime`
         An aware datetime in UTC representing the creation time of the snowflake.
     """
@@ -381,7 +381,7 @@ def time_snowflake(dt: datetime.datetime, high: bool = False) -> int:
     to be inclusive, ``high=False`` to be exclusive
 
     Parameters
-    -----------
+    ----------
     dt: :class:`datetime.datetime`
         A datetime object to convert to a snowflake.
         If naive, the timezone is assumed to be local time.
@@ -389,12 +389,12 @@ def time_snowflake(dt: datetime.datetime, high: bool = False) -> int:
         Whether or not to set the lower 22 bit to high or low.
 
     Returns
-    --------
+    -------
     :class:`int`
         The snowflake representing the time given.
     """
     discord_millis = int(dt.timestamp() * 1000 - DISCORD_EPOCH)
-    return (discord_millis << 22) + (2 ** 22 - 1 if high else 0)
+    return (discord_millis << 22) + (2**22 - 1 if high else 0)
 
 
 def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
@@ -410,7 +410,7 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
     a valid entry.
 
     Parameters
-    -----------
+    ----------
     predicate
         A function that returns a boolean-like result.
     seq: :class:`collections.abc.Iterable`
@@ -424,7 +424,8 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
 
 
 def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
-    r"""A helper that returns the first element in the iterable that meets
+    """
+    A helper that returns the first element in the iterable that meets
     all the traits passed in ``attrs``. This is an alternative for
     :func:`~disnake.utils.find`.
 
@@ -439,7 +440,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     ``None`` is returned.
 
     Examples
-    ---------
+    --------
 
     Basic usage:
 
@@ -460,7 +461,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
         channel = disnake.utils.get(client.get_all_channels(), guild__name='Cool', name='general')
 
     Parameters
-    -----------
+    ----------
     iterable
         An iterable to search through.
     \*\*attrs
@@ -582,10 +583,11 @@ async def sane_wait_for(futures, *, timeout):
 
 def get_slots(cls: Type[Any]) -> Iterator[str]:
     for mro in reversed(cls.__mro__):
-        try:
-            yield from mro.__slots__
-        except AttributeError:
-            continue
+        slots = getattr(mro, "__slots__", [])
+        if isinstance(slots, str):
+            yield slots
+        else:
+            yield from slots
 
 
 def compute_timedelta(dt: datetime.datetime):
@@ -605,12 +607,12 @@ async def sleep_until(when: datetime.datetime, result: Optional[T] = None) -> Op
     .. versionadded:: 1.3
 
     Parameters
-    -----------
+    ----------
     when: :class:`datetime.datetime`
         The timestamp in which to sleep until. If the datetime is naive then
         it is assumed to be local time.
     result: Any
-        If provided is returned to the caller when the coroutine completes.
+        If provided, is returned to the caller when the coroutine completes.
     """
     delta = compute_timedelta(when)
     return await asyncio.sleep(delta, result)
@@ -625,7 +627,7 @@ def utcnow() -> datetime.datetime:
     .. versionadded:: 2.0
 
     Returns
-    --------
+    -------
     :class:`datetime.datetime`
         The current aware datetime in UTC.
     """
@@ -705,17 +707,16 @@ def resolve_invite(
     Resolves an invite from a :class:`~disnake.Invite`, URL or code.
 
     Parameters
-    -----------
+    ----------
     invite: Union[:class:`~disnake.Invite`, :class:`str`]
-        The invite.
-
+        The invite to resolve.
     with_params: :class:`bool`
         Whether to also return the query parameters of the invite, if it's a url.
 
         .. versionadded:: 2.3
 
     Returns
-    --------
+    -------
     Union[:class:`str`, Tuple[:class:`str`, Dict[:class:`str`, :class:`str`]]]
         The invite code if ``with_params`` is ``False``, otherwise a tuple containing the
         invite code and the url's query parameters, if applicable.
@@ -745,12 +746,12 @@ def resolve_template(code: Union[Template, str]) -> str:
     .. versionadded:: 1.4
 
     Parameters
-    -----------
+    ----------
     code: Union[:class:`~disnake.Template`, :class:`str`]
         The code.
 
     Returns
-    --------
+    -------
     :class:`str`
         The template code.
     """
@@ -773,12 +774,12 @@ _MARKDOWN_ESCAPE_SUBREGEX = "|".join(
 _MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)"
 
 _MARKDOWN_ESCAPE_REGEX = re.compile(
-    fr"(?P<markdown>{_MARKDOWN_ESCAPE_SUBREGEX}|{_MARKDOWN_ESCAPE_COMMON})", re.MULTILINE
+    rf"(?P<markdown>{_MARKDOWN_ESCAPE_SUBREGEX}|{_MARKDOWN_ESCAPE_COMMON})", re.MULTILINE
 )
 
 _URL_REGEX = r"(?P<url><[^: >]+:\/[^ >]+>|(?:https?|steam):\/\/[^\s<]+[^<.,:;\"\'\]\s])"
 
-_MARKDOWN_STOCK_REGEX = fr"(?P<markdown>[_\\~|\*`]|{_MARKDOWN_ESCAPE_COMMON})"
+_MARKDOWN_STOCK_REGEX = rf"(?P<markdown>[_\\~|\*`]|{_MARKDOWN_ESCAPE_COMMON})"
 
 
 def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
@@ -791,7 +792,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
             if the input contains ``10 * 5`` then it will be converted into ``10  5``.
 
     Parameters
-    -----------
+    ----------
     text: :class:`str`
         The text to remove markdown from.
     ignore_links: :class:`bool`
@@ -800,7 +801,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
         be left alone. Defaults to ``True``.
 
     Returns
-    --------
+    -------
     :class:`str`
         The text with the markdown special characters removed.
     """
@@ -816,10 +817,11 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
 
 
 def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = True) -> str:
-    r"""A helper function that escapes Discord's markdown.
+    """
+    A helper function that escapes Discord's markdown.
 
     Parameters
-    -----------
+    ----------
     text: :class:`str`
         The text to escape markdown from.
     as_needed: :class:`bool`
@@ -835,7 +837,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
         Defaults to ``True``.
 
     Returns
-    --------
+    -------
     :class:`str`
         The text with the markdown special characters escaped with a slash.
     """
@@ -872,12 +874,12 @@ def escape_mentions(text: str) -> str:
         class.
 
     Parameters
-    -----------
+    ----------
     text: :class:`str`
         The text to escape mentions from.
 
     Returns
-    --------
+    -------
     :class:`str`
         The text with the mentions removed.
     """
@@ -1045,7 +1047,7 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
         The last chunk collected may not be as large as ``max_size``.
 
     Returns
-    --------
+    -------
     Union[:class:`Iterator`, :class:`AsyncIterator`]
         A new iterator which yields chunks of a given size.
     """
@@ -1188,14 +1190,14 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
     .. versionadded:: 2.0
 
     Parameters
-    -----------
+    ----------
     dt: Union[:class:`datetime.datetime`, :class:`int`, :class:`float`]
         The datetime to format.
     style: :class:`str`
         The style to format the datetime with. Defaults to ``f``
 
     Returns
-    --------
+    -------
     :class:`str`
         The formatted string.
     """
@@ -1208,7 +1210,7 @@ def search_directory(path: str) -> Iterator[str]:
     """Walk through a directory and yield all modules.
 
     Parameters
-    -----------
+    ----------
     path: :class:`str`
         The path to search for modules
 

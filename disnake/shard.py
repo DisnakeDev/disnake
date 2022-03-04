@@ -230,7 +230,7 @@ class ShardInfo:
     .. versionadded:: 1.4
 
     Attributes
-    ------------
+    ----------
     id: :class:`int`
         The shard ID for this shard.
     shard_count: Optional[:class:`int`]
@@ -323,7 +323,7 @@ class AutoShardedClient(Client):
     0 to ``shard_count - 1``.
 
     Attributes
-    ------------
+    ----------
     shard_ids: Optional[List[:class:`int`]]
         An optional list of shard_ids to launch the shards with.
     """
@@ -392,7 +392,10 @@ class AutoShardedClient(Client):
         return [(shard_id, shard.ws.latency) for shard_id, shard in self.__shards.items()]
 
     def get_shard(self, shard_id: int) -> Optional[ShardInfo]:
-        """Optional[:class:`ShardInfo`]: Gets the shard information at a given shard ID or ``None`` if not found."""
+        """Gets the shard information of a given shard ID, or ``None`` if not found.
+
+        :return type: Optional[:class:`ShardInfo`]
+        """
         try:
             parent = self.__shards[shard_id]
         except KeyError:
@@ -525,7 +528,6 @@ class AutoShardedClient(Client):
         InvalidArgument
             If the ``activity`` parameter is not of proper type.
         """
-
         if status is None:
             status_value = "online"
             status_enum = Status.online

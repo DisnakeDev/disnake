@@ -248,7 +248,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
     messages endpoint.
 
     Parameters
-    -----------
+    ----------
     messageable: :class:`abc.Messageable`
         Messageable class to retrieve message history from.
     limit: :class:`int`
@@ -539,7 +539,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
     guilds endpoint.
 
     Parameters
-    -----------
+    ----------
     bot: :class:`disnake.Client`
         The client to retrieve the guilds from.
     limit: :class:`int`

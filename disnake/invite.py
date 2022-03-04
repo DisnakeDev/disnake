@@ -32,7 +32,7 @@ from .asset import Asset
 from .enums import ChannelType, InviteTarget, NSFWLevel, VerificationLevel, try_enum
 from .mixins import Hashable
 from .object import Object
-from .utils import _get_as_snowflake, parse_time, snowflake_time
+from .utils import _get_as_snowflake, parse_time, snowflake_time, warn_deprecated
 
 __all__ = (
     "PartialInviteChannel",
@@ -84,7 +84,7 @@ class PartialInviteChannel:
             Returns the partial channel's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The partial channel's name.
     id: :class:`int`
@@ -142,7 +142,7 @@ class PartialInviteGuild:
             Returns the partial guild's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The partial guild's name.
     id: :class:`int`
@@ -234,7 +234,8 @@ I = TypeVar("I", bound="Invite")
 
 
 class Invite(Hashable):
-    r"""Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
+    """
+    Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
 
     Depending on the way this object was created, some of the attributes can
     have a value of ``None``.
@@ -285,7 +286,7 @@ class Invite(Hashable):
     If it's not in the table above then it is available by all methods.
 
     Attributes
-    -----------
+    ----------
     max_age: :class:`int`
         How long before the invite expires in seconds.
         A value of ``0`` indicates that it doesn't expire.
@@ -293,12 +294,10 @@ class Invite(Hashable):
         The URL fragment used for the invite.
     guild: Optional[Union[:class:`Guild`, :class:`Object`, :class:`PartialInviteGuild`]]
         The guild the invite is for. Can be ``None`` if it's from a group direct message.
-    revoked: :class:`bool`
-        Indicates if the invite has been revoked.
     created_at: :class:`datetime.datetime`
         An aware UTC datetime object denoting the time the invite was created.
     temporary: :class:`bool`
-        Indicates that the invite grants temporary membership.
+        Whether the invite grants temporary membership.
         If ``True``, members who joined via this invite will be kicked upon disconnect.
     uses: :class:`int`
         How many times the invite has been used.
@@ -345,7 +344,6 @@ class Invite(Hashable):
         "max_age",
         "code",
         "guild",
-        "revoked",
         "created_at",
         "uses",
         "temporary",
@@ -354,12 +352,13 @@ class Invite(Hashable):
         "channel",
         "target_user",
         "target_type",
-        "_state",
         "approximate_member_count",
         "approximate_presence_count",
         "target_application",
         "expires_at",
         "guild_scheduled_event",
+        "_revoked",
+        "_state",
     )
 
     BASE = "https://discord.gg"
@@ -376,13 +375,13 @@ class Invite(Hashable):
         self.max_age: Optional[int] = data.get("max_age")
         self.code: str = data["code"]
         self.guild: Optional[InviteGuildType] = self._resolve_guild(data.get("guild"), guild)
-        self.revoked: Optional[bool] = data.get("revoked")
         self.created_at: Optional[datetime.datetime] = parse_time(data.get("created_at"))
         self.temporary: Optional[bool] = data.get("temporary")
         self.uses: Optional[int] = data.get("uses")
         self.max_uses: Optional[int] = data.get("max_uses")
         self.approximate_presence_count: Optional[int] = data.get("approximate_presence_count")
         self.approximate_member_count: Optional[int] = data.get("approximate_member_count")
+        self._revoked: Optional[bool] = data.get("revoked")
 
         expires_at = data.get("expires_at", None)
         self.expires_at: Optional[datetime.datetime] = (
@@ -503,20 +502,36 @@ class Invite(Hashable):
             url += f"?event={self.guild_scheduled_event.id}"
         return url
 
+    @property
+    def revoked(self) -> Optional[bool]:
+        """Optional[:class:`bool`]: Whether the invite has been revoked.
+
+        As of September 16th, 2019, this value will always be ``None`` since Discord
+        doesn't provide this information anymore.
+
+        .. warning::
+
+            This property will be removed in a future version.
+        """
+        warn_deprecated(
+            "revoked is deprecated and will be removed in a future version.", stacklevel=2
+        )
+        return self._revoked
+
     async def delete(self, *, reason: Optional[str] = None):
         """|coro|
 
         Revokes the instant invite.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to do this.
+        You must have :attr:`~Permissions.manage_channels` permission to do this.
 
         Parameters
-        -----------
+        ----------
         reason: Optional[:class:`str`]
             The reason for deleting this invite. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to revoke invites.
         NotFound
@@ -524,5 +539,4 @@ class Invite(Hashable):
         HTTPException
             Revoking the invite failed.
         """
-
         await self._state.http.delete_invite(self.code, reason=reason)

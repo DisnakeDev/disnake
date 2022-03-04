@@ -579,4 +579,3 @@ msgstr ""
 #: ../../faq.rst:403
 msgid "This could then be used as ``?git push origin master``."
 msgstr "これは ``?git push origin master`` のように使うことができます。"
-

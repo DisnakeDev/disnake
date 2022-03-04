@@ -41,11 +41,14 @@ from typing import (
     Deque,
     Dict,
     List,
+    Literal,
     Optional,
     Sequence,
     Tuple,
     TypeVar,
     Union,
+    cast,
+    overload,
 )
 
 from . import utils
@@ -63,7 +66,7 @@ from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import _integration_factory
-from .interactions import ApplicationCommandInteraction, Interaction, MessageInteraction
+from .interactions import ApplicationCommandInteraction, MessageInteraction, ModalInteraction
 from .invite import Invite
 from .member import Member
 from .mentions import AllowedMentions
@@ -75,13 +78,14 @@ from .role import Role
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
+from .ui.modal import Modal, ModalStore
 from .ui.view import View, ViewStore
 from .user import ClientUser, User
 from .utils import MISSING
 
 if TYPE_CHECKING:
     from .abc import PrivateChannel
-    from .app_commands import ApplicationCommand
+    from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
     from .gateway import DiscordWebSocket
     from .guild import GuildChannel, VocalGuildChannel
@@ -92,7 +96,11 @@ if TYPE_CHECKING:
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
-    from .types.raw_models import GuildScheduledEventUserActionEvent, TypingEvent
+    from .types.raw_models import (
+        GuildScheduledEventUserActionEvent,
+        ReactionActionEvent,
+        TypingEvent,
+    )
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
     from .voice_client import VoiceProtocol
@@ -263,7 +271,9 @@ class ConnectionState:
 
         self.clear()
 
-    def clear(self, *, views: bool = True, application_commands: bool = True) -> None:
+    def clear(
+        self, *, views: bool = True, application_commands: bool = True, modals: bool = True
+    ) -> None:
         self.user: ClientUser = MISSING
         # Originally, this code used WeakValueDictionary to maintain references to the
         # global user mapping.
@@ -283,14 +293,17 @@ class ConnectionState:
         self._guilds: Dict[int, Guild] = {}
 
         if application_commands:
-            self._global_application_commands: Dict[int, ApplicationCommand] = {}
-            self._guild_application_commands: Dict[int, Dict[int, ApplicationCommand]] = {}
+            self._global_application_commands: Dict[int, APIApplicationCommand] = {}
+            self._guild_application_commands: Dict[int, Dict[int, APIApplicationCommand]] = {}
             self._application_command_permissions: Dict[
                 int, Dict[int, GuildApplicationCommandPermissions]
             ] = {}
 
         if views:
             self._view_store: ViewStore = ViewStore(self)
+
+        if modals:
+            self._modal_store: ModalStore = ModalStore(self)
 
         self._voice_clients: Dict[int, VoiceProtocol] = {}
 
@@ -400,6 +413,9 @@ class ConnectionState:
     def store_view(self, view: View, message_id: Optional[int] = None) -> None:
         self._view_store.add_view(view, message_id)
 
+    def store_modal(self, user_id: int, modal: Modal) -> None:
+        self._modal_store.add_modal(user_id, modal)
+
     def prevent_view_updates_for(self, message_id: int) -> Optional[View]:
         return self._view_store.remove_message_tracking(message_id)
 
@@ -433,10 +449,12 @@ class ConnectionState:
 
     def _get_global_application_command(
         self, application_command_id: int
-    ) -> Optional[ApplicationCommand]:
+    ) -> Optional[APIApplicationCommand]:
         return self._global_application_commands.get(application_command_id)
 
-    def _add_global_application_command(self, application_command: ApplicationCommand, /) -> None:
+    def _add_global_application_command(
+        self, application_command: APIApplicationCommand, /
+    ) -> None:
         assert application_command.id
         self._global_application_commands[application_command.id] = application_command
 
@@ -449,13 +467,13 @@ class ConnectionState:
 
     def _get_guild_application_command(
         self, guild_id: int, application_command_id: int
-    ) -> Optional[ApplicationCommand]:
+    ) -> Optional[APIApplicationCommand]:
         granula = self._guild_application_commands.get(guild_id)
         if granula is not None:
             return granula.get(application_command_id)
 
     def _add_guild_application_command(
-        self, guild_id: int, application_command: ApplicationCommand
+        self, guild_id: int, application_command: APIApplicationCommand
     ) -> None:
         assert application_command.id
         try:
@@ -479,14 +497,14 @@ class ConnectionState:
 
     def _get_global_command_named(
         self, name: str, cmd_type: ApplicationCommandType = None
-    ) -> Optional[ApplicationCommand]:
+    ) -> Optional[APIApplicationCommand]:
         for cmd in self._global_application_commands.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
 
     def _get_guild_command_named(
         self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None
-    ) -> Optional[ApplicationCommand]:
+    ) -> Optional[APIApplicationCommand]:
         granula = self._guild_application_commands.get(guild_id, {})
         for cmd in granula.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
@@ -611,6 +629,7 @@ class ConnectionState:
             if channel is None:
                 if "author" in data:
                     # MessagePayload
+                    data = cast(MessagePayload, data)
                     user_id = int(data["author"]["id"])
                 else:
                     # TypingEvent
@@ -730,7 +749,7 @@ class ConnectionState:
             self._ready_task.cancel()
 
         self._ready_state = asyncio.Queue()
-        self.clear(views=False, application_commands=False)
+        self.clear(views=False, application_commands=False, modals=False)
         self.user = ClientUser(state=self, data=data["user"])
         self.store_user(data["user"])
 
@@ -808,11 +827,14 @@ class ConnectionState:
         if "components" in data and self._view_store.is_message_tracked(raw.message_id):
             self._view_store.update_from_message(raw.message_id, data["components"])
 
-    def parse_message_reaction_add(self, data) -> None:
+    def parse_message_reaction_add(self, data: ReactionActionEvent) -> None:
         emoji = data["emoji"]
         emoji_id = utils._get_as_snowflake(emoji, "id")
         emoji = PartialEmoji.with_state(
-            self, id=emoji_id, animated=emoji.get("animated", False), name=emoji["name"]
+            self,
+            id=emoji_id,
+            animated=emoji.get("animated", False),
+            name=emoji["name"],  # type: ignore
         )
         raw = RawReactionActionEvent(data, emoji, "REACTION_ADD")
 
@@ -884,12 +906,17 @@ class ConnectionState:
                     self.dispatch("reaction_clear_emoji", reaction)
 
     def parse_interaction_create(self, data) -> None:
-        if data["type"] == 1:
-            interaction = Interaction(data=data, state=self)
-        elif data["type"] == 2:
+        interaction_type = data["type"]
+
+        if interaction_type == 1:
+            # PING interaction should never be received
+            return
+
+        elif interaction_type == 2:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch("application_command", interaction)
-        elif data["type"] == 3:
+
+        elif interaction_type == 3:
             interaction = MessageInteraction(data=data, state=self)
             self._view_store.dispatch(interaction)
             self.dispatch("message_interaction", interaction)
@@ -897,9 +924,16 @@ class ConnectionState:
                 self.dispatch("button_click", interaction)
             elif interaction.data.component_type is ComponentType.select:
                 self.dispatch("dropdown", interaction)
-        elif data["type"] == 4:
+
+        elif interaction_type == 4:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch("application_command_autocomplete", interaction)
+
+        elif interaction_type == 5:
+            interaction = ModalInteraction(data=data, state=self)
+            self._modal_store.dispatch(interaction)
+            self.dispatch("modal_submit", interaction)
+
         else:
             return
 
@@ -1281,7 +1315,21 @@ class ConnectionState:
     def is_guild_evicted(self, guild) -> bool:
         return guild.id not in self._guilds
 
-    async def chunk_guild(self, guild, *, wait=True, cache=None):
+    @overload
+    async def chunk_guild(
+        self, guild: Guild, *, wait: Literal[False], cache: Optional[bool] = None
+    ) -> asyncio.Future[List[Member]]:
+        ...
+
+    @overload
+    async def chunk_guild(
+        self, guild: Guild, *, wait: Literal[True] = True, cache: Optional[bool] = None
+    ) -> List[Member]:
+        ...
+
+    async def chunk_guild(
+        self, guild: Guild, *, wait: bool = True, cache: Optional[bool] = None
+    ) -> Union[List[Member], asyncio.Future[List[Member]]]:
         cache = cache or self.member_cache_flags.joined
         request = self._chunk_requests.get(guild.id)
         if request is None:
@@ -1704,7 +1752,7 @@ class ConnectionState:
 
             if member is not None:
                 timestamp = datetime.datetime.fromtimestamp(
-                    data.get("timestamp"), tz=datetime.timezone.utc
+                    data["timestamp"], tz=datetime.timezone.utc
                 )
                 self.dispatch("typing", channel, member, timestamp)
 
@@ -1762,17 +1810,17 @@ class ConnectionState:
     # All these methods (except fetchers) update the application command cache as well,
     # since there're no events related to application command updates
 
-    async def fetch_global_commands(self) -> List[ApplicationCommand]:
+    async def fetch_global_commands(self) -> List[APIApplicationCommand]:
         results = await self.http.get_global_commands(self.application_id)  # type: ignore
         return [application_command_factory(data) for data in results]
 
-    async def fetch_global_command(self, command_id: int) -> ApplicationCommand:
+    async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
         result = await self.http.get_global_command(self.application_id, command_id)  # type: ignore
         return application_command_factory(result)
 
     async def create_global_command(
         self, application_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         result = await self.http.upsert_global_command(
             self.application_id, application_command.to_dict()  # type: ignore
         )
@@ -1782,7 +1830,7 @@ class ConnectionState:
 
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         result = await self.http.edit_global_command(
             self.application_id, command_id, new_command.to_dict()  # type: ignore
         )
@@ -1796,7 +1844,7 @@ class ConnectionState:
 
     async def bulk_overwrite_global_commands(
         self, application_commands: List[ApplicationCommand]
-    ) -> List[ApplicationCommand]:
+    ) -> List[APIApplicationCommand]:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_global_commands(self.application_id, payload)  # type: ignore
         commands = [application_command_factory(data) for data in results]
@@ -1805,17 +1853,17 @@ class ConnectionState:
 
     # Application commands (guild)
 
-    async def fetch_guild_commands(self, guild_id: int) -> List[ApplicationCommand]:
+    async def fetch_guild_commands(self, guild_id: int) -> List[APIApplicationCommand]:
         results = await self.http.get_guild_commands(self.application_id, guild_id)  # type: ignore
         return [application_command_factory(data) for data in results]
 
-    async def fetch_guild_command(self, guild_id: int, command_id: int) -> ApplicationCommand:
+    async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
         result = await self.http.get_guild_command(self.application_id, guild_id, command_id)  # type: ignore
         return application_command_factory(result)
 
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         result = await self.http.upsert_guild_command(
             self.application_id, guild_id, application_command.to_dict()  # type: ignore
         )
@@ -1825,7 +1873,7 @@ class ConnectionState:
 
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         result = await self.http.edit_guild_command(
             self.application_id, guild_id, command_id, new_command.to_dict()  # type: ignore
         )
@@ -1841,13 +1889,13 @@ class ConnectionState:
 
     async def bulk_overwrite_guild_commands(
         self, guild_id: int, application_commands: List[ApplicationCommand]
-    ) -> List[ApplicationCommand]:
+    ) -> List[APIApplicationCommand]:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_guild_commands(
             self.application_id, guild_id, payload  # type: ignore
         )
         commands = [application_command_factory(data) for data in results]
-        self._guild_application_commands[guild_id] = {cmd.id: cmd for cmd in commands}  # type: ignore
+        self._guild_application_commands[guild_id] = {cmd.id: cmd for cmd in commands}
         return commands
 
     # Application command permissions
