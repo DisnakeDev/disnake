@@ -72,6 +72,7 @@ __all__ = (
     "BadInviteArgument",
     "EmojiNotFound",
     "GuildStickerNotFound",
+    "GuildScheduledEventNotFound",
     "PartialEmojiConversionFailure",
     "BadBoolArgument",
     "LargeIntConversionFailure",
@@ -517,6 +518,24 @@ class GuildStickerNotFound(BadArgument):
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
         super().__init__(f'Sticker "{argument}" not found.')
+
+
+class GuildScheduledEventNotFound(BadArgument):
+    """Exception raised when the bot cannot find the scheduled event.
+
+    This inherits from :exc:`BadArgument`
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    argument: :class:`str`
+        The scheduled event ID/URL/name supplied by the caller that was not found.
+    """
+
+    def __init__(self, argument: str) -> None:
+        self.argument: str = argument
+        super().__init__(f'Scheduled event "{argument}" not found.')
 
 
 class BadBoolArgument(BadArgument):
