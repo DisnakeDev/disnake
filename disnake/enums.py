@@ -52,6 +52,7 @@ __all__ = (
     "VideoQualityMode",
     "ComponentType",
     "ButtonStyle",
+    "TextInputStyle",
     "StagePrivacyLevel",
     "InteractionType",
     "InteractionResponseType",
@@ -63,6 +64,7 @@ __all__ = (
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
     "ThreadArchiveDuration",
+    "WidgetStyle",
 )
 
 
@@ -264,25 +266,15 @@ class VoiceRegion(Enum):
     us_east = "us-east"
     us_south = "us-south"
     us_central = "us-central"
-    eu_west = "eu-west"
-    eu_central = "eu-central"
     singapore = "singapore"
-    london = "london"
     sydney = "sydney"
-    amsterdam = "amsterdam"
-    frankfurt = "frankfurt"
+    rotterdam = "rotterdam"
     brazil = "brazil"
     hongkong = "hongkong"
     russia = "russia"
     japan = "japan"
     southafrica = "southafrica"
-    south_korea = "south-korea"
     india = "india"
-    europe = "europe"
-    dubai = "dubai"
-    vip_us_east = "vip-us-east"
-    vip_us_west = "vip-us-west"
-    vip_amsterdam = "vip-amsterdam"
 
     def __str__(self):
         return self.value
@@ -585,6 +577,7 @@ class InteractionType(Enum):
     application_command = 2
     component = 3
     application_command_autocomplete = 4
+    modal_submit = 5
 
 
 class InteractionResponseType(Enum):
@@ -596,6 +589,7 @@ class InteractionResponseType(Enum):
     deferred_message_update = 6  # for components
     message_update = 7  # for components
     application_command_autocomplete_result = 8  # for autocomplete
+    modal = 9  # for modals
 
 
 class VideoQualityMode(Enum):
@@ -610,6 +604,7 @@ class ComponentType(Enum):
     action_row = 1
     button = 2
     select = 3
+    text_input = 4
 
     def __int__(self):
         return self.value
@@ -631,6 +626,18 @@ class ButtonStyle(Enum):
     url = 5
 
     def __int__(self):
+        return self.value
+
+
+class TextInputStyle(Enum):
+    short = 1
+    paragraph = 2
+    # Aliases
+    single_line = 1
+    multi_line = 2
+    long = 2
+
+    def __int__(self) -> int:
         return self.value
 
 
@@ -689,6 +696,17 @@ class ThreadArchiveDuration(Enum):
     day = 1440
     three_days = 4320
     week = 10080
+
+
+class WidgetStyle(Enum):
+    shield = "shield"
+    banner1 = "banner1"
+    banner2 = "banner2"
+    banner3 = "banner3"
+    banner4 = "banner4"
+
+    def __str__(self):
+        return self.value
 
 
 T = TypeVar("T")

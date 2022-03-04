@@ -29,7 +29,7 @@ from ..channel import _threaded_channel_factory
 from ..enums import ApplicationCommandType, OptionType, try_enum
 from ..guild import Guild
 from ..member import Member
-from ..message import Message
+from ..message import Attachment, Message
 from ..role import Role
 from ..user import User
 from .base import Interaction
@@ -95,15 +95,13 @@ class ApplicationCommandInteraction(Interaction):
     .. versionadded:: 2.1
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The interaction's ID.
     type: :class:`InteractionType`
-        The interaction type.
+        The interaction's type.
     application_id: :class:`int`
         The application ID that the interaction was for.
-    token: :class:`str`
-        The token to continue the interaction. These are valid for 15 minutes.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
     channel_id: :class:`int`
@@ -114,20 +112,16 @@ class ApplicationCommandInteraction(Interaction):
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
+
     guild_locale: Optional[:class:`str`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
-    me: Union[:class:`.Member`, :class:`.ClientUser`]
-        Similar to :attr:`.Guild.me`
-    permissions: :class:`Permissions`
-        The resolved permissions of the member in the channel, including overwrites.
-    response: :class:`InteractionResponse`
-        Returns an object responsible for handling responding to the interaction.
-    followup: :class:`Webhook`
-        Returns the follow up webhook for follow up interactions.
+
+    token: :class:`str`
+        The token to continue the interaction. These are valid for 15 minutes.
     data: :class:`ApplicationCommandInteractionData`
         The wrapped interaction data.
     client: :class:`Client`
@@ -160,8 +154,7 @@ class ApplicationCommandInteraction(Interaction):
 
 
 class GuildCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation
-
+    """An ApplicationCommandInteraction Context subclass meant for annotation.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction can only ever be invoked in guilds.
@@ -173,7 +166,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation
+    """An ApplicationCommandInteraction Context subclass meant for annotation.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a user command.
@@ -183,7 +176,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation
+    """An ApplicationCommandInteraction Context subclass meant for annotation.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a message command.
@@ -280,22 +273,21 @@ class ApplicationCommandInteractionData:
 
 
 class ApplicationCommandInteractionDataOption:
-    """
-    This class represents the structure of an interaction data option from the API.
+    """This class represents the structure of an interaction data option from the API.
 
     Attributes
     ----------
     name: :class:`str`
-        The name of the option.
+        The option's name.
     type: :class:`OptionType`
-        The type of the option.
+        The option's type.
     value: :class:`Any`
-        The value of the option.
+        The option's value.
     options: List[:class:`ApplicationCommandInteractionDataOption`]
         The list of options of this option. Only exists for subcommands and groups.
     focused: :class:`bool`
         Whether this option is focused by the user. May be ``True`` in
-        case of :class:`ApplicationCommandAutocompleteInteraction`.
+        autocomplete interactions.
     """
 
     __slots__ = ("name", "type", "value", "options", "focused")
@@ -343,27 +335,30 @@ class ApplicationCommandInteractionDataOption:
 
 
 class ApplicationCommandInteractionDataResolved:
-    """Represents the resolved data related to
-    an interaction with an application command.
+    """Represents the resolved data related to an interaction with an application command.
 
     .. versionadded:: 2.1
 
     Attributes
     ----------
     members: Dict[:class:`int`, :class:`Member`]
-        IDs and partial members (missing ``deaf`` and ``mute``)
+        A mapping of IDs to partial members (``deaf`` and ``mute`` attributes are missing).
     users: Dict[:class:`int`, :class:`User`]
-        IDs and users
+        A mapping of IDs to users.
     roles: Dict[:class:`int`, :class:`Role`]
-        IDs and roles
-    channels: Dict[:class:`int`, :class:`Channel`]
-        IDs and partial channels (only ``id``, ``name`` and ``permissions`` are included,
+        A mapping of IDs to roles.
+    channels: Dict[:class:`int`, Channel]
+        A mapping of IDs to partial channels (only ``id``, ``name`` and ``permissions`` are included,
         threads also have ``thread_metadata`` and ``parent_id``).
     messages: Dict[:class:`int`, :class:`Message`]
-        IDs and messages
+        A mapping of IDs to messages.
+    attachments: Dict[:class:`int`, :class:`Attachment`]
+        A mapping of IDs to attachments.
+
+        .. versionadded:: 2.4
     """
 
-    __slots__ = ("members", "users", "roles", "channels", "messages")
+    __slots__ = ("members", "users", "roles", "channels", "messages", "attachments")
 
     def __init__(
         self,
@@ -379,12 +374,14 @@ class ApplicationCommandInteractionDataResolved:
         self.roles: Dict[int, Role] = {}
         self.channels: Dict[int, InteractionChannel] = {}
         self.messages: Dict[int, Message] = {}
+        self.attachments: Dict[int, Attachment] = {}
 
         users = data.get("users", {})
         members = data.get("members", {})
         roles = data.get("roles", {})
         channels = data.get("channels", {})
         messages = data.get("messages", {})
+        attachments = data.get("attachments", {})
 
         for str_id, user in users.items():
             user_id = int(str_id)
@@ -423,6 +420,9 @@ class ApplicationCommandInteractionDataResolved:
                 channel = state.get_channel(channel_id)
             self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)  # type: ignore
 
+        for str_id, attachment in attachments.items():
+            self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
+
     def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
         if isinstance(option_type, int):
             option_type = try_enum(OptionType, option_type)
@@ -449,11 +449,15 @@ class ApplicationCommandInteractionDataResolved:
         if option_type is OptionType.role:
             return self.roles.get(int(key), default)
 
+        if option_type is OptionType.attachment:
+            return self.attachments.get(int(key), default)
+
         return default
 
     def get(self, key: int):
         if key is None:
             return None
+
         res = self.members.get(key)
         if res is not None:
             return res
@@ -466,7 +470,14 @@ class ApplicationCommandInteractionDataResolved:
         res = self.channels.get(key)
         if res is not None:
             return res
-        return self.messages.get(key)
+        res = self.messages.get(key)
+        if res is not None:
+            return res
+        res = self.attachments.get(key)
+        if res is not None:
+            return res
+
+        return None
 
 
 # People asked about shorter aliases, let's see which one catches on the most

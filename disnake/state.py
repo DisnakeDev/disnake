@@ -41,11 +41,14 @@ from typing import (
     Deque,
     Dict,
     List,
+    Literal,
     Optional,
     Sequence,
     Tuple,
     TypeVar,
     Union,
+    cast,
+    overload,
 )
 
 from . import utils
@@ -63,7 +66,7 @@ from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import _integration_factory
-from .interactions import ApplicationCommandInteraction, MessageInteraction
+from .interactions import ApplicationCommandInteraction, MessageInteraction, ModalInteraction
 from .invite import Invite
 from .member import Member
 from .mentions import AllowedMentions
@@ -75,6 +78,7 @@ from .role import Role
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
+from .ui.modal import Modal, ModalStore
 from .ui.view import View, ViewStore
 from .user import ClientUser, User
 from .utils import MISSING
@@ -92,7 +96,11 @@ if TYPE_CHECKING:
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
-    from .types.raw_models import GuildScheduledEventUserActionEvent, TypingEvent
+    from .types.raw_models import (
+        GuildScheduledEventUserActionEvent,
+        ReactionActionEvent,
+        TypingEvent,
+    )
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
     from .voice_client import VoiceProtocol
@@ -263,7 +271,9 @@ class ConnectionState:
 
         self.clear()
 
-    def clear(self, *, views: bool = True, application_commands: bool = True) -> None:
+    def clear(
+        self, *, views: bool = True, application_commands: bool = True, modals: bool = True
+    ) -> None:
         self.user: ClientUser = MISSING
         # Originally, this code used WeakValueDictionary to maintain references to the
         # global user mapping.
@@ -291,6 +301,9 @@ class ConnectionState:
 
         if views:
             self._view_store: ViewStore = ViewStore(self)
+
+        if modals:
+            self._modal_store: ModalStore = ModalStore(self)
 
         self._voice_clients: Dict[int, VoiceProtocol] = {}
 
@@ -399,6 +412,9 @@ class ConnectionState:
 
     def store_view(self, view: View, message_id: Optional[int] = None) -> None:
         self._view_store.add_view(view, message_id)
+
+    def store_modal(self, user_id: int, modal: Modal) -> None:
+        self._modal_store.add_modal(user_id, modal)
 
     def prevent_view_updates_for(self, message_id: int) -> Optional[View]:
         return self._view_store.remove_message_tracking(message_id)
@@ -613,6 +629,7 @@ class ConnectionState:
             if channel is None:
                 if "author" in data:
                     # MessagePayload
+                    data = cast(MessagePayload, data)
                     user_id = int(data["author"]["id"])
                 else:
                     # TypingEvent
@@ -732,7 +749,7 @@ class ConnectionState:
             self._ready_task.cancel()
 
         self._ready_state = asyncio.Queue()
-        self.clear(views=False, application_commands=False)
+        self.clear(views=False, application_commands=False, modals=False)
         self.user = ClientUser(state=self, data=data["user"])
         self.store_user(data["user"])
 
@@ -810,11 +827,14 @@ class ConnectionState:
         if "components" in data and self._view_store.is_message_tracked(raw.message_id):
             self._view_store.update_from_message(raw.message_id, data["components"])
 
-    def parse_message_reaction_add(self, data) -> None:
+    def parse_message_reaction_add(self, data: ReactionActionEvent) -> None:
         emoji = data["emoji"]
         emoji_id = utils._get_as_snowflake(emoji, "id")
         emoji = PartialEmoji.with_state(
-            self, id=emoji_id, animated=emoji.get("animated", False), name=emoji["name"]
+            self,
+            id=emoji_id,
+            animated=emoji.get("animated", False),
+            name=emoji["name"],  # type: ignore
         )
         raw = RawReactionActionEvent(data, emoji, "REACTION_ADD")
 
@@ -886,13 +906,17 @@ class ConnectionState:
                     self.dispatch("reaction_clear_emoji", reaction)
 
     def parse_interaction_create(self, data) -> None:
-        if data["type"] == 1:
+        interaction_type = data["type"]
+
+        if interaction_type == 1:
             # PING interaction should never be received
             return
-        elif data["type"] == 2:
+
+        elif interaction_type == 2:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch("application_command", interaction)
-        elif data["type"] == 3:
+
+        elif interaction_type == 3:
             interaction = MessageInteraction(data=data, state=self)
             self._view_store.dispatch(interaction)
             self.dispatch("message_interaction", interaction)
@@ -900,9 +924,16 @@ class ConnectionState:
                 self.dispatch("button_click", interaction)
             elif interaction.data.component_type is ComponentType.select:
                 self.dispatch("dropdown", interaction)
-        elif data["type"] == 4:
+
+        elif interaction_type == 4:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch("application_command_autocomplete", interaction)
+
+        elif interaction_type == 5:
+            interaction = ModalInteraction(data=data, state=self)
+            self._modal_store.dispatch(interaction)
+            self.dispatch("modal_submit", interaction)
+
         else:
             return
 
@@ -1284,7 +1315,21 @@ class ConnectionState:
     def is_guild_evicted(self, guild) -> bool:
         return guild.id not in self._guilds
 
-    async def chunk_guild(self, guild, *, wait=True, cache=None):
+    @overload
+    async def chunk_guild(
+        self, guild: Guild, *, wait: Literal[False], cache: Optional[bool] = None
+    ) -> asyncio.Future[List[Member]]:
+        ...
+
+    @overload
+    async def chunk_guild(
+        self, guild: Guild, *, wait: Literal[True] = True, cache: Optional[bool] = None
+    ) -> List[Member]:
+        ...
+
+    async def chunk_guild(
+        self, guild: Guild, *, wait: bool = True, cache: Optional[bool] = None
+    ) -> Union[List[Member], asyncio.Future[List[Member]]]:
         cache = cache or self.member_cache_flags.joined
         request = self._chunk_requests.get(guild.id)
         if request is None:
@@ -1707,7 +1752,7 @@ class ConnectionState:
 
             if member is not None:
                 timestamp = datetime.datetime.fromtimestamp(
-                    data.get("timestamp"), tz=datetime.timezone.utc
+                    data["timestamp"], tz=datetime.timezone.utc
                 )
                 self.dispatch("typing", channel, member, timestamp)
 

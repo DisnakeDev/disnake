@@ -80,7 +80,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             Returns the emoji rendered for disnake.
 
     Attributes
-    -----------
+    ----------
     name: Optional[:class:`str`]
         The custom emoji name, if applicable, or the unicode codepoint
         of the non-custom emoji. This can be ``None`` if the emoji
@@ -91,7 +91,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         The ID of the custom emoji, if applicable.
     """
 
-    __slots__ = ("animated", "name", "id", "_state")
+    __slots__ = ("animated", "name", "id")
 
     _CUSTOM_EMOJI_RE = re.compile(
         r"<?(?P<animated>a)?:?(?P<name>[A-Za-z0-9\_]+):(?P<id>[0-9]{13,20})>?"
@@ -130,12 +130,12 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         .. versionadded:: 2.0
 
         Parameters
-        ------------
+        ----------
         value: :class:`str`
             The string representation of an emoji.
 
         Returns
-        --------
+        -------
         :class:`PartialEmoji`
             The partial emoji from this string.
         """
@@ -200,14 +200,14 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         return hash((self.id, self.name))
 
     def is_custom_emoji(self) -> bool:
-        """Checks if this is a custom non-Unicode emoji.
+        """Whether the partial emoji is a custom non-Unicode emoji.
 
         :return type: :class:`bool`
         """
         return self.id is not None
 
     def is_unicode_emoji(self) -> bool:
-        """Checks if this is a Unicode emoji.
+        """Whether the partial emoji is a Unicode emoji.
 
         :return type: :class:`bool`
         """
@@ -220,7 +220,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
     @property
     def created_at(self) -> Optional[datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the emoji's creation time in UTC, or None if Unicode emoji.
+        """Optional[:class:`datetime.datetime`]: Returns the emoji's creation time in UTC, or None if it's a Unicode emoji.
 
         .. versionadded:: 1.6
         """
@@ -242,6 +242,26 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         return f"{Asset.BASE}/emojis/{self.id}.{fmt}"
 
     async def read(self) -> bytes:
+        """|coro|
+
+        Retrieves the data of this emoji as a :class:`bytes` object.
+
+        Raises
+        ------
+        InvalidArgument
+            The emoji is not a custom emoji.
+        DiscordException
+            There was no internal connection state.
+        HTTPException
+            Downloading the asset failed.
+        NotFound
+            The asset was deleted.
+
+        Returns
+        -------
+        :class:`bytes`
+            The content of the asset.
+        """
         if self.is_unicode_emoji():
             raise InvalidArgument("PartialEmoji is not a custom emoji")
 

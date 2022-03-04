@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from .enums import VoiceRegion
 from .guild import Guild
-from .utils import MISSING, _bytes_to_base64_data, parse_time
+from .utils import MISSING, _bytes_to_base64_data, parse_time, warn_deprecated
 
 __all__ = ("Template",)
 
@@ -94,7 +94,7 @@ class Template:
     .. versionadded:: 1.4
 
     Attributes
-    -----------
+    ----------
     code: :class:`str`
         The template code.
     uses: :class:`int`
@@ -184,7 +184,10 @@ class Template:
             The name of the guild.
         region: :class:`.VoiceRegion`
             The region for the voice communication server.
-            Defaults to :attr:`.VoiceRegion.us_west`.
+
+            .. deprecated:: 2.5
+
+                This no longer has any effect.
         icon: :class:`bytes`
             The :term:`py:bytes-like object` representing the icon. See :meth:`.ClientUser.edit`
             for more details on what is expected.
@@ -205,16 +208,18 @@ class Template:
         if icon is not None:
             icon = _bytes_to_base64_data(icon)
 
-        region = region or VoiceRegion.us_west
-        region_value = region.value
+        if region is not None:
+            warn_deprecated(
+                "region is deprecated and will be removed in a future version", stacklevel=2
+            )
 
-        data = await self._state.http.create_from_template(self.code, name, region_value, icon)
+        data = await self._state.http.create_from_template(self.code, name, icon)
         return Guild(data=data, state=self._state)
 
     async def sync(self) -> Template:
         """|coro|
 
-        Sync the template to the guild's current state.
+        Syncs the template to the guild's current state.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.
@@ -225,7 +230,7 @@ class Template:
             The template is no longer edited in-place, instead it is returned.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden
@@ -234,7 +239,7 @@ class Template:
             This template does not exist.
 
         Returns
-        --------
+        -------
         :class:`Template`
             The newly edited template.
         """
@@ -250,7 +255,7 @@ class Template:
     ) -> Template:
         """|coro|
 
-        Edit the template metadata.
+        Edits the template metadata.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.
@@ -261,14 +266,14 @@ class Template:
             The template is no longer edited in-place, instead it is returned.
 
         Parameters
-        ------------
+        ----------
         name: :class:`str`
             The template's new name.
         description: Optional[:class:`str`]
             The template's new description.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden
@@ -277,7 +282,7 @@ class Template:
             This template does not exist.
 
         Returns
-        --------
+        -------
         :class:`Template`
             The newly edited template.
         """
@@ -294,7 +299,7 @@ class Template:
     async def delete(self) -> None:
         """|coro|
 
-        Delete the template.
+        Deletes the template.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.
@@ -302,7 +307,7 @@ class Template:
         .. versionadded:: 1.7
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden

@@ -26,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from typing import List, TypedDict
 
 from .emoji import PartialEmoji
-from .member import Member
+from .member import MemberWithUser
 from .snowflake import Snowflake
 
 
@@ -46,7 +46,7 @@ class BulkMessageDeleteEvent(_MessageEventOptional):
 
 class _ReactionActionEventOptional(TypedDict, total=False):
     guild_id: Snowflake
-    member: Member
+    member: MemberWithUser
 
 
 class MessageUpdateEvent(_MessageEventOptional):
@@ -91,7 +91,7 @@ class IntegrationDeleteEvent(_IntegrationDeleteEventOptional):
 
 class _TypingEventOptional(TypedDict, total=False):
     guild_id: Snowflake
-    member: Member
+    member: MemberWithUser
 
 
 class TypingEvent(_TypingEventOptional):

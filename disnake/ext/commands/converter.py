@@ -60,29 +60,30 @@ if TYPE_CHECKING:
 
 __all__ = (
     "Converter",
+    "IDConverter",
     "ObjectConverter",
     "MemberConverter",
     "UserConverter",
-    "MessageConverter",
     "PartialMessageConverter",
+    "MessageConverter",
+    "GuildChannelConverter",
     "TextChannelConverter",
-    "InviteConverter",
-    "GuildConverter",
-    "RoleConverter",
-    "GameConverter",
-    "ColourConverter",
-    "ColorConverter",
     "VoiceChannelConverter",
     "StageChannelConverter",
-    "EmojiConverter",
-    "PartialEmojiConverter",
     "CategoryChannelConverter",
-    "IDConverter",
     "StoreChannelConverter",
     "ThreadConverter",
-    "GuildChannelConverter",
+    "ColourConverter",
+    "ColorConverter",
+    "RoleConverter",
+    "GameConverter",
+    "InviteConverter",
+    "GuildConverter",
+    "EmojiConverter",
+    "PartialEmojiConverter",
     "GuildStickerConverter",
     "PermissionsConverter",
+    "GuildScheduledEventConverter",
     "clean_content",
     "Greedy",
     "run_converters",
@@ -134,10 +135,10 @@ class Converter(Protocol[T_co]):
             The argument that is being converted.
 
         Raises
-        -------
-        :exc:`.CommandError`
+        ------
+        CommandError
             A generic exception occurred when converting the argument.
-        :exc:`.BadArgument`
+        BadArgument
             The converter failed to convert the argument.
         """
         raise NotImplementedError("Derived classes need to implement this.")
@@ -193,7 +194,7 @@ class MemberConverter(IDConverter[disnake.Member]):
     5. Lookup by nickname
 
     .. versionchanged:: 1.5
-         Raise :exc:`.MemberNotFound` instead of generic :exc:`.BadArgument`
+        Raise :exc:`.MemberNotFound` instead of generic :exc:`.BadArgument`
 
     .. versionchanged:: 1.5.1
         This converter now lazily fetches members from the gateway and HTTP APIs,
@@ -287,7 +288,7 @@ class UserConverter(IDConverter[disnake.User]):
     4. Lookup by name
 
     .. versionchanged:: 1.5
-         Raise :exc:`.UserNotFound` instead of generic :exc:`.BadArgument`
+        Raise :exc:`.UserNotFound` instead of generic :exc:`.BadArgument`
 
     .. versionchanged:: 1.6
         This converter now lazily fetches users from the HTTP APIs if an ID is passed
@@ -339,7 +340,7 @@ class UserConverter(IDConverter[disnake.User]):
 
 
 class PartialMessageConverter(Converter[disnake.PartialMessage]):
-    """Converts to a :class:`disnake.PartialMessage`.
+    """Converts to a :class:`~disnake.PartialMessage`.
 
     .. versionadded:: 1.7
 
@@ -395,7 +396,7 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
 
 
 class MessageConverter(IDConverter[disnake.Message]):
-    """Converts to a :class:`disnake.Message`.
+    """Converts to a :class:`~disnake.Message`.
 
     .. versionadded:: 1.1
 
@@ -406,7 +407,7 @@ class MessageConverter(IDConverter[disnake.Message]):
     3. Lookup by message URL
 
     .. versionchanged:: 1.5
-         Raise :exc:`.ChannelNotFound`, :exc:`.MessageNotFound` or :exc:`.ChannelNotReadable` instead of generic :exc:`.BadArgument`
+        Raise :exc:`.ChannelNotFound`, :exc:`.MessageNotFound` or :exc:`.ChannelNotReadable` instead of generic :exc:`.BadArgument`
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Message:
@@ -427,7 +428,7 @@ class MessageConverter(IDConverter[disnake.Message]):
 
 
 class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
-    """Converts to a :class:`~disnake.abc.GuildChannel`.
+    """Converts to a :class:`.abc.GuildChannel`.
 
     All lookups are via the local guild. If in a DM context, then the lookup
     is done by the global cache.
@@ -508,7 +509,7 @@ class TextChannelConverter(IDConverter[disnake.TextChannel]):
     3. Lookup by name
 
     .. versionchanged:: 1.5
-         Raise :exc:`.ChannelNotFound` instead of generic :exc:`.BadArgument`
+        Raise :exc:`.ChannelNotFound` instead of generic :exc:`.BadArgument`
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.TextChannel:
@@ -530,7 +531,7 @@ class VoiceChannelConverter(IDConverter[disnake.VoiceChannel]):
     3. Lookup by name
 
     .. versionchanged:: 1.5
-         Raise :exc:`.ChannelNotFound` instead of generic :exc:`.BadArgument`
+        Raise :exc:`.ChannelNotFound` instead of generic :exc:`.BadArgument`
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.VoiceChannel:
@@ -573,7 +574,7 @@ class CategoryChannelConverter(IDConverter[disnake.CategoryChannel]):
     3. Lookup by name
 
     .. versionchanged:: 1.5
-         Raise :exc:`.ChannelNotFound` instead of generic :exc:`.BadArgument`
+        Raise :exc:`.ChannelNotFound` instead of generic :exc:`.BadArgument`
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.CategoryChannel:
@@ -641,7 +642,7 @@ class ColourConverter(Converter[disnake.Colour]):
     either a 6 digit hex number or a 3 digit hex shortcut (e.g. #fff).
 
     .. versionchanged:: 1.5
-         Raise :exc:`.BadColourArgument` instead of generic :exc:`.BadArgument`
+        Raise :exc:`.BadColourArgument` instead of generic :exc:`.BadArgument`
 
     .. versionchanged:: 1.7
         Added support for ``rgb`` function and 3-digit hex shortcuts
@@ -722,7 +723,7 @@ class RoleConverter(IDConverter[disnake.Role]):
     3. Lookup by name
 
     .. versionchanged:: 1.5
-         Raise :exc:`.RoleNotFound` instead of generic :exc:`.BadArgument`
+        Raise :exc:`.RoleNotFound` instead of generic :exc:`.BadArgument`
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Role:
@@ -754,7 +755,7 @@ class InviteConverter(Converter[disnake.Invite]):
     This is done via an HTTP request using :meth:`.Bot.fetch_invite`.
 
     .. versionchanged:: 1.5
-         Raise :exc:`.BadInviteArgument` instead of generic :exc:`.BadArgument`
+        Raise :exc:`.BadInviteArgument` instead of generic :exc:`.BadArgument`
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Invite:
@@ -805,7 +806,7 @@ class EmojiConverter(IDConverter[disnake.Emoji]):
     3. Lookup by name
 
     .. versionchanged:: 1.5
-         Raise :exc:`.EmojiNotFound` instead of generic :exc:`.BadArgument`
+        Raise :exc:`.EmojiNotFound` instead of generic :exc:`.BadArgument`
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Emoji:
@@ -839,7 +840,7 @@ class PartialEmojiConverter(Converter[disnake.PartialEmoji]):
     This is done by extracting the animated flag, name and ID from the emoji.
 
     .. versionchanged:: 1.5
-         Raise :exc:`.PartialEmojiConversionFailure` instead of generic :exc:`.BadArgument`
+        Raise :exc:`.PartialEmojiConversionFailure` instead of generic :exc:`.BadArgument`
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.PartialEmoji:
@@ -865,8 +866,8 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
 
     The lookup strategy is as follows (in order):
 
-    1. Lookup by ID.
-    3. Lookup by name
+    1. Lookup by ID
+    2. Lookup by name
 
     .. versionadded:: 2.0
     """
@@ -939,6 +940,46 @@ class PermissionsConverter(Converter[disnake.Permissions]):
             return disnake.Permissions(**{name: True})
 
 
+class GuildScheduledEventConverter(IDConverter[disnake.GuildScheduledEvent]):
+    """Converts to a :class:`~disnake.GuildScheduledEvent`.
+
+    The lookup strategy is as follows (in order):
+
+    1. Lookup by ID (in current guild)
+    2. Lookup as event URL
+    3. Lookup by name (in current guild; there is no disambiguation for scheduled events with multiple matching names)
+
+    .. versionadded:: 2.5
+    """
+
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.GuildScheduledEvent:
+        event_regex = re.compile(
+            r"https?://(?:(?:ptb|canary|www)\.)?discord(?:app)?\.com/events/"
+            r"([0-9]{15,20})/([0-9]{15,20})/?$"
+        )
+        bot: disnake.Client = ctx.bot
+        result: Optional[disnake.GuildScheduledEvent] = None
+        guild = ctx.guild
+
+        # 1.
+        if guild and (match := self._get_id_match(argument)):
+            result = guild.get_scheduled_event(int(match.group(1)))
+
+        # 2.
+        if not result and (match := event_regex.match(argument)):
+            event_guild = bot.get_guild(int(match.group(1)))
+            if event_guild:
+                result = event_guild.get_scheduled_event(int(match.group(2)))
+
+        # 3.
+        if not result and guild:
+            result = disnake.utils.get(guild.scheduled_events, name=argument)
+
+        if not result:
+            raise GuildScheduledEventNotFound(argument)
+        return result
+
+
 class clean_content(Converter[str]):
     """Converts the argument to mention scrubbed version of
     said content.
@@ -946,7 +987,7 @@ class clean_content(Converter[str]):
     This behaves similarly to :attr:`~disnake.Message.clean_content`.
 
     Attributes
-    ------------
+    ----------
     fix_channel_mentions: :class:`bool`
         Whether to clean channel mentions.
     use_nicknames: :class:`bool`
@@ -1017,7 +1058,8 @@ class clean_content(Converter[str]):
 
 
 class Greedy(List[T]):
-    r"""A special converter that greedily consumes arguments until it can't.
+    """
+    A special converter that greedily consumes arguments until it can't.
     As a consequence of this behaviour, most input errors are silently discarded,
     since it is used as an indicator of when to stop parsing.
 
@@ -1096,7 +1138,7 @@ def is_generic_type(tp: Any, *, _GenericAlias: Type = _GenericAlias) -> bool:
     return isinstance(tp, type) and issubclass(tp, Generic) or isinstance(tp, _GenericAlias)  # type: ignore
 
 
-CONVERTER_MAPPING: Dict[Type[Any], Any] = {
+CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
     disnake.Object: ObjectConverter,
     disnake.Member: MemberConverter,
     disnake.User: UserConverter,
@@ -1118,25 +1160,26 @@ CONVERTER_MAPPING: Dict[Type[Any], Any] = {
     disnake.abc.GuildChannel: GuildChannelConverter,
     disnake.GuildSticker: GuildStickerConverter,
     disnake.Permissions: PermissionsConverter,
+    disnake.GuildScheduledEvent: GuildScheduledEventConverter,
 }
 
 
-async def _actual_conversion(ctx: Context, converter, argument: str, param: inspect.Parameter):
+async def _actual_conversion(
+    ctx: Context,
+    converter: Union[Type[T], Converter[T], Callable[[str], T]],
+    argument: str,
+    param: inspect.Parameter,
+) -> T:
     if converter is bool:
-        return _convert_to_bool(argument)
+        return _convert_to_bool(argument)  # type: ignore
 
-    try:
+    if isinstance(converter, type):
         module = converter.__module__
-    except AttributeError:
-        pass
-    else:
-        if module is not None and (
-            module.startswith("disnake.") and not module.endswith("converter")
-        ):
+        if module.startswith("disnake.") and not module.endswith("converter"):
             converter = CONVERTER_MAPPING.get(converter, converter)
 
     try:
-        if inspect.isclass(converter) and issubclass(converter, Converter):
+        if isinstance(converter, type) and issubclass(converter, Converter):
             if inspect.ismethod(converter.convert):
                 return await converter.convert(ctx, argument)
             else:
@@ -1156,7 +1199,7 @@ async def _actual_conversion(ctx: Context, converter, argument: str, param: insp
         try:
             name = converter.__name__
         except AttributeError:
-            name = converter.__class__.__name__
+            name = converter.__class__.__name__  # type: ignore
 
         raise BadArgument(f'Converting to "{name}" failed for parameter "{param.name}".') from exc
 
@@ -1171,7 +1214,7 @@ async def run_converters(ctx: Context, converter, argument: str, param: inspect.
     .. versionadded:: 2.0
 
     Parameters
-    ------------
+    ----------
     ctx: :class:`Context`
         The invocation context to run the converters under.
     converter: Any
@@ -1182,12 +1225,12 @@ async def run_converters(ctx: Context, converter, argument: str, param: inspect.
         The parameter being converted. This is mainly for error reporting.
 
     Raises
-    -------
+    ------
     CommandError
         The converter failed to convert.
 
     Returns
-    --------
+    -------
     Any
         The resulting conversion.
     """

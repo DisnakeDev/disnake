@@ -694,17 +694,51 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_application_command(interaction)
 
-    Called when an application_command is invoked.
+    Called when an application command is invoked.
 
     .. warning::
 
         This is a low level function that is not generally meant to be used.
         Consider using :class:`~ext.commands.Bot` or :class:`~ext.commands.InteractionBot` instead.
 
+    .. warning::
+
+        If you decide to override this event and are using :class:`~disnake.ext.commands.Bot` or related types,
+        make sure to call :func:`Bot.process_application_commands <disnake.ext.commands.Bot.process_application_commands>`
+        to ensure that the application commands are processed.
+
     .. versionadded:: 2.0
 
     :param interaction: The interaction object.
     :type interaction: :class:`ApplicationCommandInteraction`
+
+.. function:: on_application_command_autocomplete(interaction)
+
+    Called when an application command autocomplete is called.
+
+    .. warning::
+
+        This is a low level function that is not generally meant to be used.
+        Consider using :class:`~ext.commands.Bot` or :class:`~ext.commands.InteractionBot` instead.
+
+    .. warning::
+        If you decide to override this event and are using :class:`~disnake.ext.commands.Bot` or related types,
+        make sure to call :func:`Bot.process_app_command_autocompletion <disnake.ext.commands.Bot.process_app_command_autocompletion>`
+        to ensure that the application command autocompletion is processed.
+
+    .. versionadded:: 2.0
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`ApplicationCommandInteraction`
+
+.. function:: on_modal_submit(interaction)
+
+    Called when a modal is submitted.
+
+    .. versionadded:: 2.4
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`ModalInteraction`
 
 .. function:: on_private_channel_update(before, after)
 
@@ -1635,10 +1669,16 @@ of :class:`enum.Enum`.
         Represents Discord pinging to see if the interaction response server is alive.
     .. attribute:: application_command
 
-        Represents a slash command interaction.
+        Represents an application command interaction.
     .. attribute:: component
 
         Represents a component based interaction, i.e. using the Discord Bot UI Kit.
+    .. attribute:: application_command_autocomplete
+
+        Represents an application command autocomplete interaction.
+    .. attribute:: modal_submit
+
+        Represents a modal submit interaction.
 
 .. class:: InteractionResponseType
 
@@ -1672,6 +1712,16 @@ of :class:`enum.Enum`.
         Responds to the interaction by editing the message.
 
         See also :meth:`InteractionResponse.edit_message`
+    .. attribute:: application_command_autocomplete_result
+
+        Responds to the autocomplete interaction with suggested choices.
+
+        See also :meth:`InteractionResponse.autocomplete`
+    .. attribute:: modal
+
+        Responds to the interaction by displaying a modal.
+
+        See also :meth:`InteractionResponse.send_modal`
 
 .. class:: ComponentType
 
@@ -1688,6 +1738,9 @@ of :class:`enum.Enum`.
     .. attribute:: select
 
         Represents a select component.
+    .. attribute:: text_input
+
+        Represents a text input component.
 
 .. class:: OptionType
 
@@ -1725,6 +1778,11 @@ of :class:`enum.Enum`.
     .. attribute:: number
 
         Represents a float option.
+    .. attribute:: attachment
+
+        Represents an attachment option.
+
+        .. versionadded:: 2.4
 
 
 .. class:: ButtonStyle
@@ -1767,6 +1825,29 @@ of :class:`enum.Enum`.
     .. attribute:: url
 
         An alias for :attr:`link`.
+
+.. class:: TextInputStyle
+
+    Represents a style of the text input component.
+
+    .. versionadded:: 2.4
+
+    .. attribute:: short
+
+        Represents a single-line text input component.
+    .. attribute:: paragraph
+
+        Represents a multi-line text input component.
+    .. attribute:: single_line
+
+        An alias for :attr:`short`.
+    .. attribute:: multi_line
+
+        An alias for :attr:`paragraph`.
+    .. attribute:: long
+
+        An alias for :attr:`paragraph`.
+
 
 .. class:: VoiceRegion
 
@@ -2870,6 +2951,10 @@ of :class:`enum.Enum`.
 
         The stage instance can be joined by external users.
 
+        .. deprecated:: 2.5
+
+            Public stages are no longer supported by discord.
+
     .. attribute:: closed
 
         The stage instance can only be joined by members of the guild.
@@ -2992,6 +3077,34 @@ of :class:`enum.Enum`.
     .. attribute:: week
 
         The thread will archive after a week of inactivity.
+
+.. class:: WidgetStyle
+
+    Represents the supported widget image styles.
+
+    .. versionadded:: 2.5
+
+    .. attribute:: shield
+
+        A shield style image with a Discord icon and the online member count.
+
+    .. attribute:: banner1
+
+        A large image with guild icon, name and online member count and a footer.
+
+    .. attribute:: banner2
+
+        A small image with guild icon, name and online member count.
+
+    .. attribute:: banner3
+
+        A large image with guild icon, name and online member count and a footer,
+        with a "Chat Now" label on the right.
+
+    .. attribute:: banner4
+
+        A large image with a large Discord logo, guild icon, name and online member count,
+        with a "Join My Server" label at the bottom.
 
 
 Async Iterator
@@ -3989,6 +4102,15 @@ SelectMenu
     :members:
     :inherited-members:
 
+TextInput
+~~~~~~~~~
+
+.. attributetable:: TextInput
+
+.. autoclass:: TextInput()
+    :members:
+    :inherited-members:
+
 
 DeletedReferencedMessage
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4040,6 +4162,15 @@ Guild
         The :class:`User` that was banned.
 
         :type: :class:`User`
+
+GuildPreview
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildPreview
+
+.. autoclass:: GuildPreview()
+    :members:
+
 
 GuildScheduledEvent
 ~~~~~~~~~~~~~~~~~~~~
@@ -4093,7 +4224,6 @@ ApplicationCommandInteraction
 .. autoclass:: ApplicationCommandInteraction()
     :members:
     :inherited-members:
-    :exclude-members: channel, followup, guild, me, permissions, response
 
 MessageInteraction
 ~~~~~~~~~~~~~~~~~~
@@ -4101,6 +4231,15 @@ MessageInteraction
 .. attributetable:: MessageInteraction
 
 .. autoclass:: MessageInteraction()
+    :members:
+    :inherited-members:
+
+ModalInteraction
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: ModalInteraction
+
+.. autoclass:: ModalInteraction()
     :members:
     :inherited-members:
     :exclude-members: channel, followup, guild, me, permissions, response
@@ -4151,6 +4290,14 @@ MessageInteractionData
 .. attributetable:: MessageInteractionData
 
 .. autoclass:: MessageInteractionData()
+    :members:
+
+ModalInteractionData
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ModalInteractionData
+
+.. autoclass:: ModalInteractionData()
     :members:
 
 Member
@@ -4393,6 +4540,14 @@ WidgetMember
 .. autoclass:: WidgetMember()
     :members:
     :inherited-members:
+
+WidgetSettings
+~~~~~~~~~~~~~~
+
+.. attributetable:: WidgetSettings
+
+.. autoclass:: WidgetSettings()
+    :members:
 
 Widget
 ~~~~~~~
@@ -4762,6 +4917,14 @@ Item
 .. autoclass:: disnake.ui.Item
     :members:
 
+WrappedComponent
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.WrappedComponent
+
+.. autoclass:: disnake.ui.WrappedComponent
+    :members:
+
 Button
 ~~~~~~~
 
@@ -4783,6 +4946,22 @@ Select
     :inherited-members:
 
 .. autofunction:: disnake.ui.select
+
+Modal
+~~~~~
+
+.. attributetable:: disnake.ui.Modal
+
+.. autoclass:: disnake.ui.Modal
+    :members:
+
+TextInput
+~~~~~~~~~
+
+.. attributetable:: disnake.ui.TextInput
+
+.. autoclass:: disnake.ui.TextInput
+    :members:
 
 
 Exceptions
@@ -4825,6 +5004,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: InteractionTimedOut
 
+.. autoexception:: ModalChainNotSupported
+
 .. autoexception:: disnake.opus.OpusError
 
 .. autoexception:: disnake.opus.OpusNotLoaded
@@ -4846,6 +5027,7 @@ Exception Hierarchy
                     - :exc:`InteractionResponded`
                     - :exc:`InteractionNotResponded`
                     - :exc:`InteractionTimedOut`
+                    - :exc:`ModalChainNotSupported`
             - :exc:`NoMoreItems`
             - :exc:`GatewayNotFound`
             - :exc:`HTTPException`

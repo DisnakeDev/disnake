@@ -35,12 +35,14 @@ from typing import (
     Dict,
     Iterable,
     List,
+    Literal,
     Mapping,
     Optional,
     Tuple,
     Type,
     TypeVar,
     Union,
+    cast,
     overload,
 )
 
@@ -127,13 +129,13 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Returns the channel's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
-        The channel name.
+        The channel's name.
     guild: :class:`Guild`
         The guild the channel belongs to.
     id: :class:`int`
-        The channel ID.
+        The channel's ID.
     category_id: Optional[:class:`int`]
         The category channel ID this channel belongs to, if applicable.
     topic: Optional[:class:`str`]
@@ -148,9 +150,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         The number of seconds a member must wait between sending messages
         in this channel. A value of `0` denotes that it is disabled.
         Bots and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages` bypass slowmode.
+        :attr:`~Permissions.manage_messages` permissions bypass slowmode.
     nsfw: :class:`bool`
-        If the channel is marked as "not safe for work".
+        Whether the channel is marked as "not safe for work".
 
         .. note::
 
@@ -242,7 +244,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
-        return [m for m in self.guild.members if self.permissions_for(m).read_messages]
+        return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
     def threads(self) -> List[Thread]:
@@ -253,14 +255,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
-        """Checks if the channel is NSFW.
+        """Whether the channel is marked as NSFW.
 
         :return type: :class:`bool`
         """
         return self.nsfw
 
     def is_news(self) -> bool:
-        """Checks if the channel is a news channel.
+        """Whether the channel is a news channel.
 
         :return type: :class:`bool`
         """
@@ -268,7 +270,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
     @property
     def last_message(self) -> Optional[Message]:
-        """Fetches the last message from this channel in cache.
+        """Gets the last message in this channel from the cache.
 
         The message might not be valid or point to an existing message.
 
@@ -281,7 +283,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             attribute.
 
         Returns
-        ---------
+        -------
         Optional[:class:`Message`]
             The last message in this channel or ``None`` if not found.
         """
@@ -314,8 +316,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` permission to
+        do this.
 
         .. versionchanged:: 1.3
             The ``overwrites`` keyword-only parameter was added.
@@ -329,13 +331,13 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         Parameters
         ----------
         name: :class:`str`
-            The new channel name.
+            The new channel's name.
         topic: :class:`str`
             The new channel's topic.
         position: :class:`int`
             The new channel's position.
         nsfw: :class:`bool`
-            To mark the channel as NSFW or not.
+            Whether to mark the channel as NSFW.
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
@@ -346,17 +348,17 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         type: :class:`ChannelType`
-            Change the type of this text channel. Currently, only conversion between
+            The new type of this text channel. Currently, only conversion between
             :attr:`ChannelType.text` and :attr:`ChannelType.news` is supported. This
             is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`.
-        reason: Optional[:class:`str`]
-            The reason for editing this channel. Shows up on the audit log.
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
         default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+        reason: Optional[:class:`str`]
+            The reason for editing this channel. Shows up on the audit log.
 
         Raises
         ------
@@ -369,12 +371,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Editing the channel failed.
 
         Returns
-        --------
+        -------
         Optional[:class:`.TextChannel`]
             The newly edited text channel. If the edit was only positional
             then ``None`` is returned instead.
         """
-
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -401,13 +402,13 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         delete is done. If it's more than two, then bulk delete is used.
 
         You cannot bulk delete more than 100 messages or messages that
-        are older than 14 days old.
+        are older than 14 days.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_messages` permission to
+        do this.
 
         Parameters
-        -----------
+        ----------
         messages: Iterable[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
@@ -456,13 +457,13 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ``check``. If a ``check`` is not provided then all messages are deleted
         without discrimination.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to
+        You must have :attr:`~Permissions.manage_messages` permission to
         delete messages even if they are your own.
-        The :attr:`~Permissions.read_message_history` permission is
+        :attr:`~Permissions.read_message_history` permission is
         also needed to retrieve message history.
 
         Examples
-        ---------
+        --------
 
         Deleting bot's messages ::
 
@@ -473,7 +474,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             await channel.send(f'Deleted {len(deleted)} message(s)')
 
         Parameters
-        -----------
+        ----------
         limit: Optional[:class:`int`]
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
@@ -494,18 +495,17 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             fall back to single delete if messages are older than two weeks.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have proper permissions to do the actions required.
         HTTPException
             Purging the messages failed.
 
         Returns
-        --------
+        -------
         List[:class:`.Message`]
-            The list of messages that were deleted.
+            A list of messages that were deleted.
         """
-
         if check is MISSING:
             check = lambda m: True
 
@@ -556,21 +556,21 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     async def webhooks(self) -> List[Webhook]:
         """|coro|
 
-        Gets the list of webhooks from this channel.
+        Retrieves the list of webhooks this channel has.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        use this.
 
         Raises
-        -------
+        ------
         Forbidden
             You don't have permissions to get the webhooks.
 
         Returns
-        --------
+        -------
         List[:class:`Webhook`]
-            The webhooks for this channel.
+            The list of webhooks this channel has.
         """
-
         from .webhook import Webhook
 
         data = await self._state.http.channel_webhooks(self.id)
@@ -583,13 +583,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Creates a webhook for this channel.
 
-        Requires :attr:`~.Permissions.manage_webhooks` permissions.
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        do this.
 
         .. versionchanged:: 1.1
-            Added the ``reason`` keyword-only parameter.
+            The ``reason`` keyword-only parameter was added.
 
         Parameters
-        -------------
+        ----------
         name: :class:`str`
             The webhook's name.
         avatar: Optional[:class:`bytes`]
@@ -599,18 +600,17 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The reason for creating this webhook. Shows up in the audit logs.
 
         Raises
-        -------
+        ------
         HTTPException
             Creating the webhook failed.
         Forbidden
             You do not have permissions to create a webhook.
 
         Returns
-        --------
+        -------
         :class:`Webhook`
-            The created webhook.
+            The newly created webhook.
         """
-
         from .webhook import Webhook
 
         if avatar is not None:
@@ -622,7 +622,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return Webhook.from_state(data, state=self._state)
 
     async def follow(self, *, destination: TextChannel, reason: Optional[str] = None) -> Webhook:
-        """
+        """|coro|
+
         Follows a channel using a webhook.
 
         Only news channels can be followed.
@@ -635,7 +636,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 1.3
 
         Parameters
-        -----------
+        ----------
         destination: :class:`TextChannel`
             The channel you would like to follow from.
         reason: Optional[:class:`str`]
@@ -644,18 +645,17 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             .. versionadded:: 1.4
 
         Raises
-        -------
+        ------
         HTTPException
             Following the channel failed.
         Forbidden
             You do not have the permissions to create a webhook.
 
         Returns
-        --------
+        -------
         :class:`Webhook`
-            The created webhook.
+            The newly created webhook.
         """
-
         if not self.is_news():
             raise ClientException("The channel must be a news channel.")
 
@@ -670,7 +670,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return Webhook._as_follower(data, channel=destination, user=self._state.user)
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
-        """Creates a :class:`PartialMessage` from the message ID.
+        """Creates a :class:`PartialMessage` from the given message ID.
 
         This is useful if you want to work with a message and only have its ID without
         doing an unnecessary API call.
@@ -678,16 +678,15 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 1.6
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
             The message ID to create a partial message for.
 
         Returns
-        ---------
+        -------
         :class:`PartialMessage`
-            The partial message.
+            The partial message object.
         """
-
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
@@ -698,16 +697,43 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         thread_id: :class:`int`
             The ID to search for.
 
         Returns
-        --------
+        -------
         Optional[:class:`Thread`]
             The returned thread or ``None`` if not found.
         """
         return self.guild.get_thread(thread_id)
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        message: Snowflake = None,
+        auto_archive_duration: AnyThreadArchiveDuration = None,
+        slowmode_delay: int = None,
+        reason: Optional[str] = None,
+    ) -> Thread:
+        ...
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        type: Literal[
+            ChannelType.public_thread, ChannelType.private_thread, ChannelType.news_thread
+        ] = None,
+        auto_archive_duration: AnyThreadArchiveDuration = None,
+        invitable: bool = None,
+        slowmode_delay: int = None,
+        reason: Optional[str] = None,
+    ) -> Thread:
+        ...
 
     async def create_thread(
         self,
@@ -724,27 +750,43 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Creates a thread in this text channel.
 
-        To create a public thread, you must have :attr:`~disnake.Permissions.create_public_threads`.
-        For a private thread, :attr:`~disnake.Permissions.create_private_threads` is needed instead.
+        To create a public thread, you must have :attr:`~disnake.Permissions.create_public_threads` permission.
+        For a private thread, :attr:`~disnake.Permissions.create_private_threads` permission is needed instead.
+        Additionally, the guild must have ``PRIVATE_THREADS`` in :attr:`Guild.features` to create private threads.
 
         .. versionadded:: 2.0
 
+        .. versionchanged:: 2.5
+
+            - Only one of ``message`` and ``type`` may be provided.
+            - ``type`` is now required if ``message`` is not provided.
+
+
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The name of the thread.
-        message: Optional[:class:`abc.Snowflake`]
+        message: :class:`abc.Snowflake`
             A snowflake representing the message to create the thread with.
             If ``None`` is passed then a private thread is created.
             Defaults to ``None``.
+
+            .. versionchanged:: 2.5
+
+                Cannot be provided with ``type``.
+
+        type: :class:`ChannelType`
+            The type of thread to create.
+
+            .. versionchanged:: 2.5
+
+                Cannot be provided with ``message``.
+                Now required if message is not provided.
+
         auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
-        type: Optional[:class:`ChannelType`]
-            The type of thread to create. If a ``message`` is passed then this parameter
-            is ignored, as a thread created with a message is always a public thread.
-            By default this creates a private thread if this is ``None``.
         invitable: :class:`bool`
             Whether non-moderators can add other non-moderators to this thread.
             Only available for private threads.
@@ -753,34 +795,35 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Defaults to ``True``.
 
             .. versionadded:: 2.3
+
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
 
             .. versionadded:: 2.3
+
         reason: :class:`str`
-            The reason for creating a new thread. Shows up on the audit log.
+            The reason for creating the thread. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to create a thread.
         HTTPException
             Starting the thread failed.
 
         Returns
-        --------
+        -------
         :class:`Thread`
-            The created thread
+            The newly created thread
         """
-
-        if type is None:
-            type = ChannelType.private_thread
+        if not ((message is None) ^ (type is None)):
+            raise ValueError("Exactly one of message and type must be provided.")
 
         if auto_archive_duration is not None:
-            auto_archive_duration: ThreadArchiveDurationLiteral = try_enum_to_int(
-                auto_archive_duration
+            auto_archive_duration = cast(
+                ThreadArchiveDurationLiteral, try_enum_to_int(auto_archive_duration)
             )
 
         if message is None:
@@ -788,7 +831,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 self.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                type=type.value,
+                type=type.value,  # type:ignore
                 invitable=invitable if invitable is not None else True,
                 rate_limit_per_user=slowmode_delay or 0,
                 reason=reason,
@@ -815,13 +858,13 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     ) -> ArchivedThreadIterator:
         """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the guild.
 
-        You must have :attr:`~Permissions.read_message_history` to use this. If iterating over private threads
-        then :attr:`~Permissions.manage_threads` is also required.
+        You must have :attr:`~Permissions.read_message_history` permission to use this. If iterating over private threads
+        then :attr:`~Permissions.manage_threads` permission is also required.
 
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         limit: Optional[:class:`bool`]
             The number of threads to retrieve.
             If ``None``, retrieves every archived thread in the channel. Note, however,
@@ -895,8 +938,9 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         )
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.position: int = data["position"]
-        self.bitrate: int = data.get("bitrate")
-        self.user_limit: int = data.get("user_limit")
+        # these don't exist in partial channel objects of slash command options
+        self.bitrate: int = data.get("bitrate", 0)
+        self.user_limit: int = data.get("user_limit", 0)
         self._fill_overwrites(data)
 
     @property
@@ -926,7 +970,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
             when the member cache is unavailable.
 
         Returns
-        --------
+        -------
         Mapping[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
@@ -979,13 +1023,13 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             Returns the channel's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
-        The channel name.
+        The channel's name.
     guild: :class:`Guild`
         The guild the channel belongs to.
     id: :class:`int`
-        The channel ID.
+        The channel's ID.
     category_id: Optional[:class:`int`]
         The category channel ID this channel belongs to, if applicable.
     position: :class:`int`
@@ -1000,16 +1044,18 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         A value of ``None`` indicates automatic voice region detection.
 
         .. versionadded:: 1.7
+
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
     nsfw: :class:`bool`
-        If the channel is marked as "not safe for work".
+        Whether the channel is marked as "not safe for work".
 
         .. note::
 
             To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
 
         .. versionadded:: 2.3
+
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
         in this channel. A value of `0` denotes that it is disabled.
@@ -1017,6 +1063,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         :attr:`~Permissions.manage_messages` bypass slowmode.
 
         .. versionadded:: 2.3
+
     last_message_id: Optional[:class:`int`]
         The last message ID of the message sent to this channel. It may
         *not* point to an existing or valid message.
@@ -1068,7 +1115,9 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         )
 
     def is_nsfw(self) -> bool:
-        """Checks if the channel is NSFW.
+        """Whether the channel is marked as NSFW.
+
+        .. versionadded:: 2.3
 
         :return type: :class:`bool`
         """
@@ -1076,7 +1125,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     @property
     def last_message(self) -> Optional[Message]:
-        """Fetches the last message from this channel in cache.
+        """Gets the last message in this channel from the cache.
 
         The message might not be valid or point to an existing message.
 
@@ -1088,15 +1137,17 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             or :meth:`fetch_message` with the :attr:`last_message_id`
             attribute.
 
+        .. versionadded:: 2.3
+
         Returns
-        ---------
+        -------
         Optional[:class:`Message`]
             The last message in this channel or ``None`` if not found.
         """
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
-        """Creates a :class:`PartialMessage` from the message ID.
+        """Creates a :class:`PartialMessage` from the given message ID.
 
         This is useful if you want to work with a message and only have its ID without
         doing an unnecessary API call.
@@ -1104,16 +1155,15 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         .. versionadded:: 2.3
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
             The message ID to create a partial message for.
 
         Returns
-        ---------
+        -------
         :class:`PartialMessage`
-            The partial message.
+            The partial message object.
         """
-
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
@@ -1146,8 +1196,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` permission to
+        do this.
 
         .. versionchanged:: 1.3
             The ``overwrites`` keyword-only parameter was added.
@@ -1181,14 +1231,17 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             A value of ``None`` indicates automatic voice region detection.
 
             .. versionadded:: 1.7
+
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the voice channel's participants.
 
             .. versionadded:: 2.0
+
         nsfw: :class:`bool`
-            To mark the channel as NSFW or not.
+            Whether to mark the channel as NSFW.
 
             .. versionadded:: 2.3
+
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
@@ -1205,12 +1258,11 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             Editing the channel failed.
 
         Returns
-        --------
+        -------
         Optional[:class:`.VoiceChannel`]
             The newly edited voice channel. If the edit was only positional
             then ``None`` is returned instead.
         """
-
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1241,13 +1293,13 @@ class StageChannel(VocalGuildChannel):
             Returns the channel's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
-        The channel name.
+        The channel's name.
     guild: :class:`Guild`
         The guild the channel belongs to.
     id: :class:`int`
-        The channel ID.
+        The channel's ID.
     topic: Optional[:class:`str`]
         The channel's topic. ``None`` if it isn't set.
     category_id: Optional[:class:`int`]
@@ -1361,15 +1413,15 @@ class StageChannel(VocalGuildChannel):
     ) -> StageInstance:
         """|coro|
 
-        Create a stage instance.
+        Creates a stage instance.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` permission to
+        do this.
 
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         topic: :class:`str`
             The stage instance's topic.
         privacy_level: :class:`StagePrivacyLevel`
@@ -1387,16 +1439,20 @@ class StageChannel(VocalGuildChannel):
             Creating a stage instance failed.
 
         Returns
-        --------
+        -------
         :class:`StageInstance`
             The newly created stage instance.
         """
-
         payload: Dict[str, Any] = {"channel_id": self.id, "topic": topic}
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
                 raise InvalidArgument("privacy_level field must be of type PrivacyLevel")
+            if privacy_level is StagePrivacyLevel.public:
+                utils.warn_deprecated(
+                    "Setting privacy_level to public is deprecated and will be removed in a future version.",
+                    stacklevel=2,
+                )
 
             payload["privacy_level"] = privacy_level.value
 
@@ -1406,19 +1462,19 @@ class StageChannel(VocalGuildChannel):
     async def fetch_instance(self) -> StageInstance:
         """|coro|
 
-        Gets the running :class:`StageInstance`.
+        Retrieves the running :class:`StageInstance`.
 
         .. versionadded:: 2.0
 
         Raises
-        -------
-        :exc:`.NotFound`
+        ------
+        NotFound
             The stage instance or channel could not be found.
-        :exc:`.HTTPException`
-            Getting the stage instance failed.
+        HTTPException
+            Retrieving the stage instance failed.
 
         Returns
-        --------
+        -------
         :class:`StageInstance`
             The stage instance.
         """
@@ -1450,8 +1506,8 @@ class StageChannel(VocalGuildChannel):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` permission to
+        do this.
 
         .. versionchanged:: 2.0
             The ``topic`` parameter must now be set via :attr:`create_instance`.
@@ -1471,8 +1527,6 @@ class StageChannel(VocalGuildChannel):
         category: Optional[:class:`CategoryChannel`]
             The new category for this channel. Can be ``None`` to remove the
             category.
-        reason: Optional[:class:`str`]
-            The reason for editing this channel. Shows up on the audit log.
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
@@ -1484,6 +1538,9 @@ class StageChannel(VocalGuildChannel):
 
             .. versionadded:: 2.0
 
+        reason: Optional[:class:`str`]
+            The reason for editing this channel. Shows up on the audit log.
+
         Raises
         ------
         InvalidArgument
@@ -1494,12 +1551,11 @@ class StageChannel(VocalGuildChannel):
             Editing the channel failed.
 
         Returns
-        --------
+        -------
         Optional[:class:`.StageChannel`]
             The newly edited stage channel. If the edit was only positional
             then ``None`` is returned instead.
         """
-
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1530,7 +1586,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             Returns the category's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The category name.
     guild: :class:`Guild`
@@ -1576,7 +1632,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ChannelType.category
 
     def is_nsfw(self) -> bool:
-        """Checks if the category is NSFW.
+        """Whether the category is marked as NSFW.
 
         :return type: :class:`bool`
         """
@@ -1607,10 +1663,10 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     async def edit(self, *, reason=None, **options):
         """|coro|
 
-        Edits the channel.
+        Edits the category.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` permission to
+        do this.
 
         .. versionchanged:: 1.3
             The ``overwrites`` keyword-only parameter was added.
@@ -1625,12 +1681,12 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         position: :class:`int`
             The new category's position.
         nsfw: :class:`bool`
-            To mark the category as NSFW or not.
-        reason: Optional[:class:`str`]
-            The reason for editing this category. Shows up on the audit log.
+            Whether to mark the category as NSFW.
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
-            :class:`PermissionOverwrite` to apply to the channel.
+            :class:`PermissionOverwrite` to apply to the category.
+        reason: Optional[:class:`str`]
+            The reason for editing this category. Shows up on the audit log.
 
         Raises
         ------
@@ -1642,12 +1698,11 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             Editing the category failed.
 
         Returns
-        --------
+        -------
         Optional[:class:`.CategoryChannel`]
             The newly edited category channel. If the edit was only positional
             then ``None`` is returned instead.
         """
-
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1716,7 +1771,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         Returns
         -------
         :class:`TextChannel`
-            The channel that was just created.
+            The newly created text channel.
         """
         return await self.guild.create_text_channel(name, category=self, **options)
 
@@ -1728,7 +1783,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         Returns
         -------
         :class:`VoiceChannel`
-            The channel that was just created.
+            The newly created voice channel.
         """
         return await self.guild.create_voice_channel(name, category=self, **options)
 
@@ -1742,7 +1797,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         Returns
         -------
         :class:`StageChannel`
-            The channel that was just created.
+            The newly created stage channel.
         """
         return await self.guild.create_stage_channel(name, category=self, **options)
 
@@ -1758,6 +1813,11 @@ class NewsChannel(TextChannel):
 
 class StoreChannel(disnake.abc.GuildChannel, Hashable):
     """Represents a Discord guild store channel.
+
+    .. warning::
+
+        Store channels will be discontinued on March 1, 2022.
+        For more information read `here <https://support-dev.discord.com/hc/en-us/articles/4414590563479>`_.
 
     .. container:: operations
 
@@ -1778,20 +1838,20 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
             Returns the channel's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
-        The channel name.
+        The channel's name.
     guild: :class:`Guild`
         The guild the channel belongs to.
     id: :class:`int`
-        The channel ID.
+        The channel's ID.
     category_id: :class:`int`
         The category channel ID this channel belongs to.
     position: :class:`int`
         The position in the channel list. This is a number that starts at 0. e.g. the
         top channel is position 0.
     nsfw: :class:`bool`
-        If the channel is marked as "not safe for work".
+        Whether the channel is marked as "not safe for work".
 
         .. note::
 
@@ -1850,7 +1910,7 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
         return base
 
     def is_nsfw(self) -> bool:
-        """Checks if the channel is NSFW.
+        """Whether the channel is marked as NSFW.
 
         :return type: :class:`bool`
         """
@@ -1885,8 +1945,8 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
 
         Edits the channel.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_channels` permission to
+        do this.
 
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
@@ -1894,24 +1954,25 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
         Parameters
         ----------
         name: :class:`str`
-            The new channel name.
+            The new channel's name.
         position: :class:`int`
             The new channel's position.
         nsfw: :class:`bool`
-            To mark the channel as NSFW or not.
+            Whether to mark the channel as NSFW.
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
         category: Optional[:class:`CategoryChannel`]
             The new category for this channel. Can be ``None`` to remove the
             category.
-        reason: Optional[:class:`str`]
-            The reason for editing this channel. Shows up on the audit log.
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
 
             .. versionadded:: 1.3
+
+        reason: Optional[:class:`str`]
+            The reason for editing this channel. Shows up on the audit log.
 
         Raises
         ------
@@ -1924,12 +1985,11 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
             Editing the channel failed.
 
         Returns
-        --------
+        -------
         Optional[:class:`.StoreChannel`]
             The newly edited store channel. If the edit was only positional
             then ``None`` is returned instead.
         """
-
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -2011,6 +2071,15 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         """:class:`datetime.datetime`: Returns the direct message channel's creation time in UTC."""
         return utils.snowflake_time(self.id)
 
+    @property
+    def jump_url(self) -> str:
+        """
+        A URL that can be used to jump to this channel.
+
+        .. versionadded:: 2.4
+        """
+        return f"https://discord.com/channels/@me/{self.id}"
+
     def permissions_for(
         self,
         obj: Any = None,
@@ -2024,13 +2093,10 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
         Actual direct messages do not really have the concept of permissions.
 
-        This returns all the Text related permissions set to ``True`` except:
-
-        - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
-        - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        This returns all the :meth:`Permissions.private_channel` permissions set to ``True``.
 
         Parameters
-        -----------
+        ----------
         obj: :class:`User`
             The user to check permissions for. This parameter is ignored
             but kept for compatibility with other ``permissions_for`` methods.
@@ -2040,19 +2106,14 @@ class DMChannel(disnake.abc.Messageable, Hashable):
             This parameter is ignored but kept for compatibility with other ``permissions_for`` methods.
 
         Returns
-        --------
+        -------
         :class:`Permissions`
             The resolved permissions.
         """
-
-        base = Permissions.text()
-        base.read_messages = True
-        base.send_tts_messages = False
-        base.manage_messages = False
-        return base
+        return Permissions.private_channel()
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
-        """Creates a :class:`PartialMessage` from the message ID.
+        """Creates a :class:`PartialMessage` from the given message ID.
 
         This is useful if you want to work with a message and only have its ID without
         doing an unnecessary API call.
@@ -2060,16 +2121,15 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         .. versionadded:: 1.6
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
             The message ID to create a partial message for.
 
         Returns
-        ---------
+        -------
         :class:`PartialMessage`
-            The partial message.
+            The partial message object.
         """
-
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
@@ -2110,6 +2170,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         The owner ID that owns the group channel.
 
         .. versionadded:: 2.0
+
     name: Optional[:class:`str`]
         The group channel's name if provided.
     """
@@ -2181,15 +2242,12 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
 
         Actual direct messages do not really have the concept of permissions.
 
-        This returns all the Text related permissions set to ``True`` except:
-
-        - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
-        - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        This returns all the :meth:`Permissions.private_channel` permissions set to ``True``.
 
         This also checks the kick_members permission if the user is the owner.
 
         Parameters
-        -----------
+        ----------
         obj: :class:`~disnake.abc.Snowflake`
             The user to check permissions for.
 
@@ -2198,16 +2256,11 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
             This parameter is ignored but kept for compatibility with other ``permissions_for`` methods.
 
         Returns
-        --------
+        -------
         :class:`Permissions`
             The resolved permissions for the user.
         """
-
-        base = Permissions.text()
-        base.read_messages = True
-        base.send_tts_messages = False
-        base.manage_messages = False
-        base.mention_everyone = True
+        base = Permissions.private_channel()
 
         if obj.id == self.owner_id:
             base.kick_members = True
@@ -2217,22 +2270,21 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
     async def leave(self) -> None:
         """|coro|
 
-        Leave the group.
+        Leaves the group.
 
         If you are the only one in the group, this deletes it as well.
 
         Raises
-        -------
+        ------
         HTTPException
             Leaving the group failed.
         """
-
         await self._state.http.leave_group(self.id)
 
 
 class PartialMessageable(disnake.abc.Messageable, Hashable):
     """Represents a partial messageable to aid with working messageable channels when
-    only a channel ID are present.
+    only a channel ID is present.
 
     The only way to construct this class is through :meth:`Client.get_partial_messageable`.
 
@@ -2255,7 +2307,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
             Returns the partial messageable's hash.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The channel ID associated with this partial messageable.
     type: Optional[:class:`ChannelType`]
@@ -2272,22 +2324,21 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         return self._channel
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
-        """Creates a :class:`PartialMessage` from the message ID.
+        """Creates a :class:`PartialMessage` from the given message ID.
 
         This is useful if you want to work with a message and only have its ID without
         doing an unnecessary API call.
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
             The message ID to create a partial message for.
 
         Returns
-        ---------
+        -------
         :class:`PartialMessage`
-            The partial message.
+            The partial message object.
         """
-
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)

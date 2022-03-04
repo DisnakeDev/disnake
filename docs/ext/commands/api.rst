@@ -18,12 +18,30 @@ Bot
 .. autoclass:: disnake.ext.commands.Bot
     :members:
     :inherited-members:
-    :exclude-members: after_invoke, before_invoke, check, check_once, command, event, group, listen, slash_command, user_command, message_command
+    :exclude-members: after_invoke, before_invoke, check, check_once, command, event, group, listen, slash_command, user_command, message_command, after_slash_command_invoke, after_user_command_invoke, after_message_command_invoke, before_slash_command_invoke, before_user_command_invoke, before_message_command_invoke
 
     .. automethod:: Bot.after_invoke()
         :decorator:
 
+    .. automethod:: Bot.after_slash_command_invoke()
+        :decorator:
+
+    .. automethod:: Bot.after_user_command_invoke()
+        :decorator:
+
+    .. automethod:: Bot.after_message_command_invoke()
+        :decorator:
+
     .. automethod:: Bot.before_invoke()
+        :decorator:
+
+    .. automethod:: Bot.before_slash_command_invoke()
+        :decorator:
+
+    .. automethod:: Bot.before_user_command_invoke()
+        :decorator:
+
+    .. automethod:: Bot.before_message_command_invoke()
         :decorator:
 
     .. automethod:: Bot.check()
@@ -311,8 +329,10 @@ Helper Functions
 .. autofunction:: disnake.ext.commands.inject
 
 .. autofunction:: disnake.ext.commands.register_injection
+    :decorator:
 
 .. autofunction:: disnake.ext.commands.converter_method
+    :decorator:
 
 Application Command
 ~~~~~~~~~~~~~~~~~~~
@@ -503,7 +523,15 @@ GroupMixin
 LargeInt
 ~~~~~~~~
 
-This is a class which inherits from :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
+.. autoclass:: disnake.ext.commands.LargeInt
+
+    This is a class which inherits from :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
+
+Range
+~~~~~
+
+.. autoclass:: disnake.ext.commands.Range
+
 
 .. _ext_commands_api_cogs:
 
@@ -660,7 +688,7 @@ Checks
 .. autofunction:: disnake.ext.commands.is_nsfw(,)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.guild_permissions(guild_id, roles, users, owner)
+.. autofunction:: disnake.ext.commands.guild_permissions(guild_id, *, roles=None, users=None, owner=None)
     :decorator:
 
 .. _ext_commands_api_context:
@@ -721,19 +749,19 @@ Converters
 .. autoclass:: disnake.ext.commands.VoiceChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.StoreChannelConverter
-    :members:
-
 .. autoclass:: disnake.ext.commands.StageChannelConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.CategoryChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.InviteConverter
+.. autoclass:: disnake.ext.commands.StoreChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.GuildConverter
+.. autoclass:: disnake.ext.commands.ThreadConverter
+    :members:
+
+.. autoclass:: disnake.ext.commands.ColourConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.RoleConverter
@@ -742,7 +770,10 @@ Converters
 .. autoclass:: disnake.ext.commands.GameConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.ColourConverter
+.. autoclass:: disnake.ext.commands.InviteConverter
+    :members:
+
+.. autoclass:: disnake.ext.commands.GuildConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.EmojiConverter
@@ -751,13 +782,13 @@ Converters
 .. autoclass:: disnake.ext.commands.PartialEmojiConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.ThreadConverter
-    :members:
-
 .. autoclass:: disnake.ext.commands.GuildStickerConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.PermissionsConverter
+    :members:
+
+.. autoclass:: disnake.ext.commands.GuildScheduledEventConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.clean_content
@@ -849,6 +880,9 @@ Exceptions
 .. autoexception:: disnake.ext.commands.NotOwner
     :members:
 
+.. autoexception:: disnake.ext.commands.ObjectNotFound
+    :members:
+
 .. autoexception:: disnake.ext.commands.MessageNotFound
     :members:
 
@@ -886,6 +920,9 @@ Exceptions
     :members:
 
 .. autoexception:: disnake.ext.commands.GuildStickerNotFound
+    :members:
+
+.. autoexception:: disnake.ext.commands.GuildScheduledEventNotFound
     :members:
 
 .. autoexception:: disnake.ext.commands.BadBoolArgument
@@ -961,20 +998,22 @@ Exception Hierarchy
                 - :exc:`~.commands.MissingRequiredArgument`
                 - :exc:`~.commands.TooManyArguments`
                 - :exc:`~.commands.BadArgument`
-                    - :exc:`~.commands.MessageNotFound`
+                    - :exc:`~.commands.ObjectNotFound`
                     - :exc:`~.commands.MemberNotFound`
                     - :exc:`~.commands.GuildNotFound`
                     - :exc:`~.commands.UserNotFound`
-                    - :exc:`~.commands.ChannelNotFound`
+                    - :exc:`~.commands.MessageNotFound`
                     - :exc:`~.commands.ChannelNotReadable`
+                    - :exc:`~.commands.ChannelNotFound`
+                    - :exc:`~.commands.ThreadNotFound`
                     - :exc:`~.commands.BadColourArgument`
                     - :exc:`~.commands.RoleNotFound`
                     - :exc:`~.commands.BadInviteArgument`
                     - :exc:`~.commands.EmojiNotFound`
-                    - :exc:`~.commands.GuildStickerNotFound`
                     - :exc:`~.commands.PartialEmojiConversionFailure`
+                    - :exc:`~.commands.GuildStickerNotFound`
+                    - :exc:`~.commands.GuildScheduledEventNotFound`
                     - :exc:`~.commands.BadBoolArgument`
-                    - :exc:`~.commands.ThreadNotFound`
                     - :exc:`~.commands.FlagError`
                         - :exc:`~.commands.BadFlagArgument`
                         - :exc:`~.commands.MissingFlagArgument`
