@@ -2951,6 +2951,10 @@ of :class:`enum.Enum`.
 
         The stage instance can be joined by external users.
 
+        .. deprecated:: 2.5
+
+            Public stages are no longer supported by discord.
+
     .. attribute:: closed
 
         The stage instance can only be joined by members of the guild.
@@ -3073,6 +3077,34 @@ of :class:`enum.Enum`.
     .. attribute:: week
 
         The thread will archive after a week of inactivity.
+
+.. class:: WidgetStyle
+
+    Represents the supported widget image styles.
+
+    .. versionadded:: 2.5
+
+    .. attribute:: shield
+
+        A shield style image with a Discord icon and the online member count.
+
+    .. attribute:: banner1
+
+        A large image with guild icon, name and online member count and a footer.
+
+    .. attribute:: banner2
+
+        A small image with guild icon, name and online member count.
+
+    .. attribute:: banner3
+
+        A large image with guild icon, name and online member count and a footer,
+        with a "Chat Now" label on the right.
+
+    .. attribute:: banner4
+
+        A large image with a large Discord logo, guild icon, name and online member count,
+        with a "Join My Server" label at the bottom.
 
 
 Async Iterator
@@ -4131,6 +4163,15 @@ Guild
 
         :type: :class:`User`
 
+GuildPreview
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildPreview
+
+.. autoclass:: GuildPreview()
+    :members:
+
+
 GuildScheduledEvent
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -4499,6 +4540,14 @@ WidgetMember
 .. autoclass:: WidgetMember()
     :members:
     :inherited-members:
+
+WidgetSettings
+~~~~~~~~~~~~~~
+
+.. attributetable:: WidgetSettings
+
+.. autoclass:: WidgetSettings()
+    :members:
 
 Widget
 ~~~~~~~

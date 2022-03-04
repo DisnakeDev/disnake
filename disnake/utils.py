@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import array
 import asyncio
-import collections.abc
 import datetime
 import functools
 import json
@@ -194,7 +193,7 @@ def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlo
     return decorator
 
 
-class SequenceProxy(Generic[T_co], collections.abc.Sequence):
+class SequenceProxy(Sequence[T_co]):
     """Read-only proxy of a Sequence."""
 
     def __init__(self, proxied: Sequence[T_co]):
@@ -261,7 +260,7 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
             else:
                 msg = f"{func.__name__} is deprecated."
 
-            warn_deprecated(msg, stacklevel=3)
+            warn_deprecated(msg, stacklevel=2)
             return func(*args, **kwargs)
 
         return decorated
@@ -395,7 +394,7 @@ def time_snowflake(dt: datetime.datetime, high: bool = False) -> int:
         The snowflake representing the time given.
     """
     discord_millis = int(dt.timestamp() * 1000 - DISCORD_EPOCH)
-    return (discord_millis << 22) + (2 ** 22 - 1 if high else 0)
+    return (discord_millis << 22) + (2**22 - 1 if high else 0)
 
 
 def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
@@ -584,10 +583,11 @@ async def sane_wait_for(futures, *, timeout):
 
 def get_slots(cls: Type[Any]) -> Iterator[str]:
     for mro in reversed(cls.__mro__):
-        try:
-            yield from mro.__slots__
-        except AttributeError:
-            continue
+        slots = getattr(mro, "__slots__", [])
+        if isinstance(slots, str):
+            yield slots
+        else:
+            yield from slots
 
 
 def compute_timedelta(dt: datetime.datetime):
@@ -774,12 +774,12 @@ _MARKDOWN_ESCAPE_SUBREGEX = "|".join(
 _MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)"
 
 _MARKDOWN_ESCAPE_REGEX = re.compile(
-    fr"(?P<markdown>{_MARKDOWN_ESCAPE_SUBREGEX}|{_MARKDOWN_ESCAPE_COMMON})", re.MULTILINE
+    rf"(?P<markdown>{_MARKDOWN_ESCAPE_SUBREGEX}|{_MARKDOWN_ESCAPE_COMMON})", re.MULTILINE
 )
 
 _URL_REGEX = r"(?P<url><[^: >]+:\/[^ >]+>|(?:https?|steam):\/\/[^\s<]+[^<.,:;\"\'\]\s])"
 
-_MARKDOWN_STOCK_REGEX = fr"(?P<markdown>[_\\~|\*`]|{_MARKDOWN_ESCAPE_COMMON})"
+_MARKDOWN_STOCK_REGEX = rf"(?P<markdown>[_\\~|\*`]|{_MARKDOWN_ESCAPE_COMMON})"
 
 
 def remove_markdown(text: str, *, ignore_links: bool = True) -> str:

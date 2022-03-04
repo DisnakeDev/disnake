@@ -42,6 +42,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
     overload,
 )
 
@@ -86,6 +87,7 @@ if TYPE_CHECKING:
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
     )
+    from .types.raw_models import ReactionActionEvent
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
     from .ui.action_row import Components
@@ -291,8 +293,8 @@ class Attachment(Hashable):
         self.height: Optional[int] = data.get("height")
         self.width: Optional[int] = data.get("width")
         self.filename: str = data["filename"]
-        self.url: str = data.get("url")
-        self.proxy_url: str = data.get("proxy_url")
+        self.url: str = data["url"]
+        self.proxy_url: str = data["proxy_url"]
         self._http = state.http
         self.content_type: Optional[str] = data.get("content_type")
         self.ephemeral: bool = data.get("ephemeral", False)
@@ -950,12 +952,19 @@ class Message(Hashable):
             else:
                 setattr(self, key, transform(value))
 
-    def _add_reaction(self, data, emoji, user_id) -> Reaction:
+    def _add_reaction(
+        self, data: ReactionActionEvent, emoji: EmojiInputType, user_id: int
+    ) -> Reaction:
         reaction = utils.find(lambda r: r.emoji == emoji, self.reactions)
-        is_me = data["me"] = user_id == self._state.self_id
+        is_me = user_id == self._state.self_id
 
         if reaction is None:
-            reaction = Reaction(message=self, data=data, emoji=emoji)
+            reaction_data: ReactionPayload = {
+                "count": 1,
+                "me": is_me,
+                "emoji": data["emoji"],
+            }
+            reaction = Reaction(message=self, data=reaction_data, emoji=emoji)
             self.reactions.append(reaction)
         else:
             reaction.count += 1
@@ -1524,13 +1533,13 @@ class Message(Hashable):
             .. versionadded:: 1.4
 
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. This can not be mixed with ``components``.
+            The updated view to update this message with. This cannot be mixed with ``components``.
             If ``None`` is passed then the view is removed.
 
             .. versionadded:: 2.0
 
         components: |components_type|
-            The updated components to update this message with. This can not be mixed with ``view``.
+            The updated components to update this message with. This cannot be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
@@ -1764,6 +1773,7 @@ class Message(Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = None,
         slowmode_delay: int = None,
+        reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
 
@@ -1791,6 +1801,11 @@ class Message(Hashable):
 
             .. versionadded:: 2.3
 
+        reason: Optional[:class:`str`]
+            The reason for creating the thread. Shows up on the audit log.
+
+            .. versionadded:: 2.5
+
         Raises
         ------
         Forbidden
@@ -1809,8 +1824,8 @@ class Message(Hashable):
             raise InvalidArgument("This message does not have guild info attached.")
 
         if auto_archive_duration is not None:
-            auto_archive_duration: ThreadArchiveDurationLiteral = try_enum_to_int(
-                auto_archive_duration
+            auto_archive_duration = cast(
+                ThreadArchiveDurationLiteral, try_enum_to_int(auto_archive_duration)
             )
 
         default_auto_archive_duration: ThreadArchiveDurationLiteral = getattr(
@@ -1822,6 +1837,7 @@ class Message(Hashable):
             name=name,
             auto_archive_duration=auto_archive_duration or default_auto_archive_duration,
             rate_limit_per_user=slowmode_delay or 0,
+            reason=reason,
         )
         return Thread(guild=self.guild, state=self._state, data=data)
 
@@ -2086,13 +2102,13 @@ class PartialMessage(Hashable):
                 Unlike :meth:`Message.edit`, this does not default to
                 :attr:`Client.allowed_mentions` if no object is passed.
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. This can not be mixed with ``components``.
+            The updated view to update this message with. This cannot be mixed with ``components``.
             If ``None`` is passed then the view is removed.
 
             .. versionadded:: 2.0
 
         components: |components_type|
-            The updated components to update this message with. This can not be mixed with ``view``.
+            The updated components to update this message with. This cannot be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4

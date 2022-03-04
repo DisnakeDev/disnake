@@ -64,6 +64,7 @@ __all__ = (
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
     "ThreadArchiveDuration",
+    "WidgetStyle",
 )
 
 
@@ -265,25 +266,15 @@ class VoiceRegion(Enum):
     us_east = "us-east"
     us_south = "us-south"
     us_central = "us-central"
-    eu_west = "eu-west"
-    eu_central = "eu-central"
     singapore = "singapore"
-    london = "london"
     sydney = "sydney"
-    amsterdam = "amsterdam"
-    frankfurt = "frankfurt"
+    rotterdam = "rotterdam"
     brazil = "brazil"
     hongkong = "hongkong"
     russia = "russia"
     japan = "japan"
     southafrica = "southafrica"
-    south_korea = "south-korea"
     india = "india"
-    europe = "europe"
-    dubai = "dubai"
-    vip_us_east = "vip-us-east"
-    vip_us_west = "vip-us-west"
-    vip_amsterdam = "vip-amsterdam"
 
     def __str__(self):
         return self.value
@@ -705,6 +696,17 @@ class ThreadArchiveDuration(Enum):
     day = 1440
     three_days = 4320
     week = 10080
+
+
+class WidgetStyle(Enum):
+    shield = "shield"
+    banner1 = "banner1"
+    banner2 = "banner2"
+    banner3 = "banner3"
+    banner4 = "banner4"
+
+    def __str__(self):
+        return self.value
 
 
 T = TypeVar("T")

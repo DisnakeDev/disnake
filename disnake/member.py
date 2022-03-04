@@ -150,7 +150,7 @@ class VoiceState:
         data: Union[VoiceStatePayload, GuildVoiceStatePayload],
         channel: Optional[VocalGuildChannel] = None,
     ):
-        self.session_id: str = data.get("session_id")
+        self.session_id: str = data["session_id"]
         self._update(data, channel)
 
     def _update(
@@ -829,7 +829,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         if nick is not MISSING:
             nick = nick or ""
             if me:
-                await http.change_my_nickname(guild_id, nick, reason=reason)
+                await http.edit_my_member(guild_id, nick=nick, reason=reason)
             else:
                 payload["nick"] = nick
 

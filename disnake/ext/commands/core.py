@@ -106,6 +106,11 @@ ErrorT = TypeVar("ErrorT", bound="Error")
 
 if TYPE_CHECKING:
     P = ParamSpec("P")
+
+    CommandCallback = Union[
+        Callable[Concatenate[CogT, ContextT, P], Coro[T]],
+        Callable[Concatenate[ContextT, P], Coro[T]],
+    ]
 else:
     P = TypeVar("P")
 
@@ -300,10 +305,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     def __init__(
         self,
-        func: Union[
-            Callable[Concatenate[CogT, ContextT, P], Coro[T]],
-            Callable[Concatenate[ContextT, P], Coro[T]],
-        ],
+        func: CommandCallback[CogT, ContextT, P, T],
         **kwargs: Any,
     ):
         if not asyncio.iscoroutinefunction(func):
@@ -397,19 +399,13 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
     @property
     def callback(
         self,
-    ) -> Union[
-        Callable[Concatenate[CogT, Context, P], Coro[T]],
-        Callable[Concatenate[Context, P], Coro[T]],
-    ]:
+    ) -> CommandCallback[CogT, ContextT, P, T]:
         return self._callback
 
     @callback.setter
     def callback(
         self,
-        function: Union[
-            Callable[Concatenate[CogT, Context, P], Coro[T]],
-            Callable[Concatenate[Context, P], Coro[T]],
-        ],
+        function: CommandCallback[CogT, ContextT, P, T],
     ) -> None:
         self._callback = function
         unwrap = unwrap_function(function)
@@ -1329,15 +1325,7 @@ class GroupMixin(Generic[CogT]):
         cls: Type[Command[CogT, P, T]] = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[
-        [
-            Union[
-                Callable[Concatenate[CogT, ContextT, P], Coro[T]],
-                Callable[Concatenate[ContextT, P], Coro[T]],
-            ]
-        ],
-        Command[CogT, P, T],
-    ]:
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]:
         ...
 
     @overload
@@ -1347,16 +1335,16 @@ class GroupMixin(Generic[CogT]):
         cls: Type[CommandT] = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[Callable[Concatenate[ContextT, P], Coro[Any]]], CommandT]:
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
         ...
 
-    def command(
+    def command(  # type: ignore
         self,
         name: str = MISSING,
-        cls: Type[CommandT] = MISSING,
+        cls: Union[Type[Command[CogT, P, T]], Type[CommandT]] = MISSING,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[Callable[Concatenate[ContextT, P], Coro[Any]]], CommandT]:
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Union[Command[CogT, P, T], CommandT]]:
         """A shortcut decorator that invokes :func:`.command` and adds it to
         the internal command list via :meth:`~.GroupMixin.add_command`.
 
@@ -1366,12 +1354,13 @@ class GroupMixin(Generic[CogT]):
             A decorator that converts the provided method into a Command, adds it to the bot, then returns it.
         """
 
-        def decorator(func: Callable[Concatenate[ContextT, P], Coro[Any]]) -> CommandT:
+        def decorator(
+            func: CommandCallback[CogT, ContextT, P, T]
+        ) -> Union[Command[CogT, P, T], CommandT]:
             kwargs.setdefault("parent", self)
             result = command(name=name, cls=cls, *args, **kwargs)(func)
             self.add_command(result)
-            # TODO: Fix Command and CommandT not being compatible (wtf?)
-            return result  # type: ignore
+            return result
 
         return decorator
 
@@ -1382,15 +1371,7 @@ class GroupMixin(Generic[CogT]):
         cls: Type[Group[CogT, P, T]] = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[
-        [
-            Union[
-                Callable[Concatenate[CogT, ContextT, P], Coro[T]],
-                Callable[Concatenate[ContextT, P], Coro[T]],
-            ]
-        ],
-        Group[CogT, P, T],
-    ]:
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]:
         ...
 
     @overload
@@ -1400,16 +1381,16 @@ class GroupMixin(Generic[CogT]):
         cls: Type[GroupT] = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[Callable[Concatenate[ContextT, P], Coro[Any]]], GroupT]:
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
         ...
 
-    def group(
+    def group(  # type: ignore
         self,
         name: str = MISSING,
-        cls: Type[GroupT] = MISSING,
+        cls: Union[Type[Group[CogT, P, T]], Type[GroupT]] = MISSING,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[Callable[Concatenate[ContextT, P], Coro[Any]]], GroupT]:
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Union[Group[CogT, P, T], GroupT]]:
         """A shortcut decorator that invokes :func:`.group` and adds it to
         the internal command list via :meth:`~.GroupMixin.add_command`.
 
@@ -1419,12 +1400,13 @@ class GroupMixin(Generic[CogT]):
             A decorator that converts the provided method into a Group, adds it to the bot, then returns it.
         """
 
-        def decorator(func: Callable[Concatenate[ContextT, P], Coro[Any]]) -> GroupT:
+        def decorator(
+            func: CommandCallback[CogT, ContextT, P, T]
+        ) -> Union[Group[CogT, P, T], GroupT]:
             kwargs.setdefault("parent", self)
             result = group(name=name, cls=cls, *args, **kwargs)(func)
             self.add_command(result)
-            # TODO: Fix Group and GroupT not being compatible (wtf?)
-            return result  # type: ignore
+            return result
 
         return decorator
 
@@ -1549,15 +1531,7 @@ def command(
     name: str = ...,
     cls: Type[Command[CogT, P, T]] = ...,
     **attrs: Any,
-) -> Callable[
-    [
-        Union[
-            Callable[Concatenate[CogT, ContextT, P], Coro[T]],
-            Callable[Concatenate[ContextT, P], Coro[T]],
-        ]
-    ],
-    Command[CogT, P, T],
-]:
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]:
     ...
 
 
@@ -1566,29 +1540,16 @@ def command(
     name: str = ...,
     cls: Type[CommandT] = ...,
     **attrs: Any,
-) -> Callable[
-    [
-        Union[
-            Callable[Concatenate[CogT, ContextT, P], Coro[Any]],
-            Callable[Concatenate[ContextT, P], Coro[Any]],
-        ]
-    ],
-    CommandT,
-]:
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
     ...
 
 
-def command(
-    name: str = MISSING, cls: Type[CommandT] = MISSING, **attrs: Any
-) -> Callable[
-    [
-        Union[
-            Callable[Concatenate[ContextT, P], Coro[Any]],
-            Callable[Concatenate[CogT, ContextT, P], Coro[T]],
-        ]
-    ],
-    Union[Command[CogT, P, T], CommandT],
-]:
+# ignored since the order in the Union in CommandCallback matters here for some reason
+def command(  # type: ignore
+    name: str = MISSING,
+    cls: Union[Type[Command[CogT, P, T]], Type[CommandT]] = MISSING,
+    **attrs: Any,
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Union[Command[CogT, P, T], CommandT]]:
     """A decorator that transforms a function into a :class:`.Command`
     or if called with :func:`.group`, :class:`.Group`.
 
@@ -1619,14 +1580,11 @@ def command(
         If the function is not a coroutine or is already a command.
     """
     if cls is MISSING:
-        cls = Command  # type: ignore
+        cls = Command
 
     def decorator(
-        func: Union[
-            Callable[Concatenate[ContextT, P], Coro[Any]],
-            Callable[Concatenate[CogT, ContextT, P], Coro[Any]],
-        ]
-    ) -> CommandT:
+        func: CommandCallback[CogT, ContextT, P, T]
+    ) -> Union[Command[CogT, P, T], CommandT]:
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
         return cls(func, name=name, **attrs)
@@ -1639,15 +1597,7 @@ def group(
     name: str = ...,
     cls: Type[Group[CogT, P, T]] = ...,
     **attrs: Any,
-) -> Callable[
-    [
-        Union[
-            Callable[Concatenate[CogT, ContextT, P], Coro[T]],
-            Callable[Concatenate[ContextT, P], Coro[T]],
-        ]
-    ],
-    Group[CogT, P, T],
-]:
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]:
     ...
 
 
@@ -1656,31 +1606,15 @@ def group(
     name: str = ...,
     cls: Type[GroupT] = ...,
     **attrs: Any,
-) -> Callable[
-    [
-        Union[
-            Callable[Concatenate[CogT, ContextT, P], Coro[Any]],
-            Callable[Concatenate[ContextT, P], Coro[Any]],
-        ]
-    ],
-    GroupT,
-]:
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
     ...
 
 
-def group(
+def group(  # type: ignore  # see command above
     name: str = MISSING,
-    cls: Type[GroupT] = MISSING,
+    cls: Union[Type[Group[CogT, P, T]], Type[GroupT]] = MISSING,
     **attrs: Any,
-) -> Callable[
-    [
-        Union[
-            Callable[Concatenate[ContextT, P], Coro[Any]],
-            Callable[Concatenate[CogT, ContextT, P], Coro[T]],
-        ]
-    ],
-    Union[Group[CogT, P, T], GroupT],
-]:
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Union[Group[CogT, P, T], GroupT]]:
     """A decorator that transforms a function into a :class:`.Group`.
 
     This is similar to the :func:`.command` decorator but the ``cls``
@@ -1690,8 +1624,8 @@ def group(
         The ``cls`` parameter can now be passed.
     """
     if cls is MISSING:
-        cls = Group  # type: ignore
-    return command(name=name, cls=cls, **attrs)  # type: ignore
+        cls = Group
+    return command(name=name, cls=cls, **attrs)
 
 
 def check(predicate: Check) -> Callable[[T], T]:
