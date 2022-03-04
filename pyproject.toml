@@ -11,16 +11,25 @@ combine_as_imports = true
 filter_files = true
 
 
-[tool.taskipy.settings]
-runner = "dotenv -f task.env run --"
-
 [tool.taskipy.tasks]
 black = { cmd = "task lint black", help = "Run black" }
 docs = { cmd = "cd docs && sphinx-autobuild . _build/html --ignore _build --watch ../disnake --port 8009", help = "Build the documentation on an autoreloading server."}
 isort = { cmd = "task lint isort", help = "Run isort" }
 lint = { cmd = "pre-commit run --all-files", help = "Check all files for linting errors" }
 precommit = { cmd = "pre-commit install --install-hooks", help = "Install the precommit hook" }
-pyright = { cmd = "pyright", help = "Run pyright" }
+pyright = { cmd = "dotenv -f task.env run -- pyright", help = "Run pyright" }
+slotscheck = { cmd = "python -m slotscheck --verbose -m disnake", help = "Run slotscheck" }
+
+
+[tool.slotscheck]
+strict-imports = true
+require-superclass = true
+require-subclass = false
+exclude-modules = '''
+(
+    ^disnake\.types\.
+)
+'''
 
 
 [tool.pyright]
