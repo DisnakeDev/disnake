@@ -20,7 +20,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 import logging
 from typing import Literal, NamedTuple
 
-from . import abc as abc, opus as opus, ui as ui, utils as utils
+from . import abc as abc, opus as opus, ui as ui, utils as utils  # explicitly re-export modules
 from .activity import *
 from .app_commands import *
 from .appinfo import *
