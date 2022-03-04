@@ -70,7 +70,7 @@ class Select(Item[V]):
 
     .. versionadded:: 2.0
 
-    .. versionchanged:: 2.4
+    .. versionchanged:: 2.5
         Parameter ``options`` now also accepts a list of str or a dict of str to str,
         which are then appropriately parsed as :class:`SelectOption` labels and values.
 
@@ -324,7 +324,7 @@ def select(
     In order to get the selected items that the user has chosen within the callback
     use :attr:`Select.values`.
 
-    .. versionchanged:: 2.4
+    .. versionchanged:: 2.5
         Parameter ``options`` now also accepts a list of str or a dict of str to str,
         which are then appropriately parsed as :class:`SelectOption` labels and values.
 
