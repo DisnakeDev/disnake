@@ -83,13 +83,13 @@ class Select(Item[V]):
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
     options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
-        A list of options that can be selected in this menu. Use explicit :class:`SelectOption`\s
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.
 
         .. versionchanged:: 2.5
             Now also accepts a list of str or a dict of str to str, which are then appropriately parsed as
-            :class:`SelectOption` labels and values.
+            :class:`.SelectOption` labels and values.
 
     disabled: :class:`bool`
         Whether the select is disabled.
@@ -341,13 +341,13 @@ def select(
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
     options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
-        A list of options that can be selected in this menu. Use explicit :class:`SelectOption`\s
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.
 
         .. versionchanged:: 2.5
             Now also accepts a list of str or a dict of str to str, which are then appropriately parsed as
-            :class:`SelectOption` labels and values.
+            :class:`.SelectOption` labels and values.
 
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
