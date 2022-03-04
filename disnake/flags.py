@@ -72,7 +72,7 @@ class flag_value:
             return self
         return instance._has_flag(self.flag)
 
-    def __set__(self, instance: BF, value: bool) -> None:
+    def __set__(self, instance: BaseFlags, value: bool) -> None:
         instance._set_flag(self.flag, value)
 
     def __repr__(self):
@@ -95,7 +95,7 @@ def fill_with_flags(*, inverted: bool = False):
 
         if inverted:
             max_bits = max(cls.VALID_FLAGS.values()).bit_length()
-            cls.DEFAULT_VALUE = -1 + (2 ** max_bits)
+            cls.DEFAULT_VALUE = -1 + (2**max_bits)
         else:
             cls.DEFAULT_VALUE = 0
 
@@ -160,7 +160,8 @@ class BaseFlags:
 
 @fill_with_flags(inverted=True)
 class SystemChannelFlags(BaseFlags):
-    r"""Wraps up a Discord system channel flag value.
+    """
+    Wraps up a Discord system channel flag value.
 
     Similar to :class:`Permissions`\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -186,7 +187,7 @@ class SystemChannelFlags(BaseFlags):
                to be, for example, constructed as a dict or a list of pairs.
 
     Attributes
-    -----------
+    ----------
     value: :class:`int`
         The raw value. This value is a bit array field of a 53-bit integer
         representing the currently available flags. You should query
@@ -241,7 +242,8 @@ class SystemChannelFlags(BaseFlags):
 
 @fill_with_flags()
 class MessageFlags(BaseFlags):
-    r"""Wraps up a Discord Message flag value.
+    """
+    Wraps up a Discord Message flag value.
 
     See :class:`SystemChannelFlags`.
 
@@ -264,7 +266,7 @@ class MessageFlags(BaseFlags):
     .. versionadded:: 1.3
 
     Attributes
-    -----------
+    ----------
     value: :class:`int`
         The raw value. This value is a bit array field of a 53-bit integer
         representing the currently available flags. You should query
@@ -338,7 +340,8 @@ class MessageFlags(BaseFlags):
 
 @fill_with_flags()
 class PublicUserFlags(BaseFlags):
-    r"""Wraps up the Discord User Public flags.
+    """
+    Wraps up the Discord User Public flags.
 
     .. container:: operations
 
@@ -360,7 +363,7 @@ class PublicUserFlags(BaseFlags):
     .. versionadded:: 1.4
 
     Attributes
-    -----------
+    ----------
     value: :class:`int`
         The raw value. This value is a bit array field of a 53-bit integer
         representing the currently available flags. You should query
@@ -473,7 +476,8 @@ class PublicUserFlags(BaseFlags):
 
 @fill_with_flags()
 class Intents(BaseFlags):
-    r"""Wraps up a Discord gateway intent flag.
+    """
+    Wraps up a Discord gateway intent flag.
 
     Similar to :class:`Permissions`\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
@@ -505,7 +509,7 @@ class Intents(BaseFlags):
                to be, for example, constructed as a dict or a list of pairs.
 
     Attributes
-    -----------
+    ----------
     value: :class:`int`
         The raw value. You should query flags via the properties
         rather than using this raw value.
@@ -983,7 +987,7 @@ class MemberCacheFlags(BaseFlags):
                to be, for example, constructed as a dict or a list of pairs.
 
     Attributes
-    -----------
+    ----------
     value: :class:`int`
         The raw value. You should query flags via the properties
         rather than using this raw value.
@@ -1046,16 +1050,15 @@ class MemberCacheFlags(BaseFlags):
         the currently selected :class:`Intents`.
 
         Parameters
-        ------------
+        ----------
         intents: :class:`Intents`
             The intents to select from.
 
         Returns
-        ---------
+        -------
         :class:`MemberCacheFlags`
             The resulting member cache flags.
         """
-
         self = cls.none()
         if intents.members:
             self.joined = True
@@ -1078,7 +1081,8 @@ class MemberCacheFlags(BaseFlags):
 
 @fill_with_flags()
 class ApplicationFlags(BaseFlags):
-    r"""Wraps up the Discord Application flags.
+    """
+    Wraps up the Discord Application flags.
 
     .. container:: operations
 
@@ -1100,7 +1104,7 @@ class ApplicationFlags(BaseFlags):
     .. versionadded:: 2.0
 
     Attributes
-    -----------
+    ----------
     value: :class:`int`
         The raw value. You should query flags via the properties
         rather than using this raw value.

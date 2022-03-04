@@ -27,6 +27,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+from .asset import Asset
 from .enums import (
     GuildScheduledEventEntityType,
     GuildScheduledEventPrivacyLevel,
@@ -36,12 +37,22 @@ from .enums import (
 from .member import Member
 from .mixins import Hashable
 from .user import User
-from .utils import MISSING, _get_as_snowflake, cached_slot_property, parse_time
+from .utils import (
+    MISSING,
+    _bytes_to_base64_data,
+    _get_as_snowflake,
+    cached_slot_property,
+    parse_time,
+)
 
 if TYPE_CHECKING:
     from .abc import GuildChannel
     from .guild import Guild
     from .state import ConnectionState
+    from .types.guild_scheduled_event import (
+        GuildScheduledEvent as GuildScheduledEventPayload,
+        GuildScheduledEventEntityMetadata as GuildScheduledEventEntityMetadataPayload,
+    )
 
 
 __all__ = ("GuildScheduledEventMetadata", "GuildScheduledEvent")
@@ -49,7 +60,7 @@ __all__ = ("GuildScheduledEventMetadata", "GuildScheduledEvent")
 
 class GuildScheduledEventMetadata:
     """
-    Represents guild scheduled event entity metadata.
+    Represents a guild scheduled event entity metadata.
 
     .. versionadded:: 2.3
 
@@ -62,23 +73,27 @@ class GuildScheduledEventMetadata:
 
     __slots__ = ("location",)
 
-    def __init__(self, *, location: str = None):
+    def __init__(self, *, location: Optional[str] = None):
         self.location: Optional[str] = location
 
     def __repr__(self) -> str:
         return f"<GuildScheduledEventMetadata location={self.location!r}>"
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {"location": self.location}
+    def to_dict(self) -> GuildScheduledEventEntityMetadataPayload:
+        if self.location is not None:
+            return {"location": self.location}
+        return {}
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(
+        cls, data: GuildScheduledEventEntityMetadataPayload
+    ) -> GuildScheduledEventMetadata:
         return GuildScheduledEventMetadata(location=data.get("location"))
 
 
 class GuildScheduledEvent(Hashable):
     """
-    Represents guild scheduled event.
+    Represents a guild scheduled event.
 
     .. versionadded:: 2.3
 
@@ -108,6 +123,9 @@ class GuildScheduledEvent(Hashable):
     creator_id: Optional[:class:`int`]
         The ID of the user that created the guild scheduled event.
         This field is ``None`` for events created before October 25th, 2021.
+    creator: Optional[:class:`User`]
+        The user that created the guild scheduled event.
+        This field is ``None`` for events created before October 25th, 2021.
     name: :class:`str`
         The name of the guild scheduled event (1-100 characters).
     description: :class:`str`
@@ -126,9 +144,6 @@ class GuildScheduledEvent(Hashable):
         The ID of an entity associated with the guild scheduled event.
     entity_metadata: :class:`GuildScheduledEventMetadata`
         Additional metadata for the guild scheduled event.
-    creator: Optional[:class:`User`]
-        The user that created the guild scheduled event.
-        This field is ``None`` for events created before October 25th, 2021.
     user_count: Optional[:class:`int`]
         The number of users subscribed to the guild scheduled event.
         If the guild scheduled event was fetched with ``with_user_count`` set to ``False``, this field is ``None``.
@@ -151,24 +166,23 @@ class GuildScheduledEvent(Hashable):
         "entity_metadata",
         "creator",
         "user_count",
+        "_image",
         "_cs_guild",
         "_cs_channel",
     )
 
-    def __init__(self, *, state: ConnectionState, data: Dict[str, Any]):
+    def __init__(self, *, state: ConnectionState, data: GuildScheduledEventPayload):
         self._state: ConnectionState = state
         self._update(data)
 
-    def _update(self, data: Dict[str, Any]):
+    def _update(self, data: GuildScheduledEventPayload) -> None:
         self.id: int = int(data["id"])
         self.guild_id: int = int(data["guild_id"])
         self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
         self.creator_id: Optional[int] = _get_as_snowflake(data, "creator_id")
         self.name: str = data["name"]
         self.description: Optional[str] = data.get("description")
-        self.scheduled_start_time: datetime = parse_time(  # type: ignore
-            data["scheduled_start_time"]
-        )
+        self.scheduled_start_time: datetime = parse_time(data["scheduled_start_time"])
         self.scheduled_end_time: Optional[datetime] = parse_time(data["scheduled_end_time"])
         self.privacy_level: GuildScheduledEventPrivacyLevel = try_enum(
             GuildScheduledEventPrivacyLevel, data["privacy_level"]
@@ -194,6 +208,7 @@ class GuildScheduledEvent(Hashable):
             self.creator = None
 
         self.user_count: Optional[int] = data.get("user_count")
+        self._image: Optional[str] = data.get("image")
 
     def __repr__(self) -> str:
         return (
@@ -211,24 +226,25 @@ class GuildScheduledEvent(Hashable):
 
     @cached_slot_property("_cs_guild")
     def guild(self) -> Optional[Guild]:
-        """The guild which the guild scheduled event belongs to.
-
-        :return type: Optional[:class:`Guild`]
-        """
+        """Optional[:class:`Guild`]: The guild which the guild scheduled event belongs to."""
         return self._state._get_guild(self.guild_id)
 
     @cached_slot_property("_cs_channel")
     def channel(self) -> Optional[GuildChannel]:
-        """The channel in which the guild scheduled event will be hosted.
-
-        :return type: Optional[:class:`abc.GuildChannel`]
-        """
+        """Optional[:class:`abc.GuildChannel`]: The channel in which the guild scheduled event will be hosted."""
         if self.channel_id is None:
             return None
         guild = self.guild
         return None if guild is None else guild.get_channel(self.channel_id)
 
-    async def delete(self):
+    @property
+    def image(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: The cover image asset of the guild scheduled event, if available."""
+        if self._image is None:
+            return None
+        return Asset._from_guild_scheduled_event_image(self._state, self.id, self._image)
+
+    async def delete(self) -> None:
         """|coro|
 
         Deletes the guild scheduled event.
@@ -249,6 +265,7 @@ class GuildScheduledEvent(Hashable):
         *,
         name: str = MISSING,
         description: str = MISSING,
+        image: Optional[bytes] = MISSING,
         channel_id: Optional[int] = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         scheduled_start_time: datetime = MISSING,
@@ -257,7 +274,7 @@ class GuildScheduledEvent(Hashable):
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         status: GuildScheduledEventStatus = MISSING,
         reason: Optional[str] = None,
-    ):
+    ) -> GuildScheduledEvent:
         """|coro|
 
         Edits the guild scheduled event.
@@ -274,6 +291,11 @@ class GuildScheduledEvent(Hashable):
             The name of the guild scheduled event.
         description: :class:`str`
             The description of the guild scheduled event.
+        image: Optional[:class:`bytes`]
+            The cover image of the guild scheduled event. Set to ``None`` to remove the image.
+
+            .. versionadded:: 2.4
+
         channel_id: Optional[:class:`int`]
             The channel ID in which the guild scheduled event will be hosted.
             Set to ``None`` if changing ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
@@ -292,11 +314,6 @@ class GuildScheduledEvent(Hashable):
         reason: Optional[:class:`str`]
             The reason for editing the guild scheduled event. Shows up on the audit log.
 
-        Returns
-        -------
-        :class:`GuildScheduledEvent`
-            The updated guild scheduled event instance.
-
         Raises
         ------
         Forbidden
@@ -305,8 +322,12 @@ class GuildScheduledEvent(Hashable):
             The event does not exist.
         HTTPException
             Editing the event failed.
-        """
 
+        Returns
+        -------
+        :class:`GuildScheduledEvent`
+            The newly updated guild scheduled event instance.
+        """
         fields: Dict[str, Any] = {}
         is_external = entity_type is GuildScheduledEventEntityType.external
         error_for_external_entity = (
@@ -354,9 +375,17 @@ class GuildScheduledEvent(Hashable):
         if description is not MISSING:
             fields["description"] = description
 
+        if image is not MISSING:
+            if image is None:
+                fields["image"] = None
+            else:
+                fields["image"] = _bytes_to_base64_data(image)
+
         if channel_id is not MISSING:
             if channel_id is not None and is_external:
-                raise ValueError(error_for_external_entity.format("channel_id", "None or MISSING"))
+                raise ValueError(
+                    error_for_external_entity.format("channel_id", "None or not provided")
+                )
             fields["channel_id"] = channel_id
         elif channel_id is None and is_external:
             fields["channel_id"] = None
@@ -377,10 +406,10 @@ class GuildScheduledEvent(Hashable):
     async def fetch_users(
         self,
         *,
-        limit: int = None,
+        limit: Optional[int] = None,
         with_members: bool = True,
-        before_id: int = None,
-        after_id: int = None,
+        before_id: Optional[int] = None,
+        after_id: Optional[int] = None,
     ) -> List[Union[Member, User]]:
         """|coro|
 
@@ -388,19 +417,14 @@ class GuildScheduledEvent(Hashable):
 
         Parameters
         ----------
-        limit: :class:`int`
+        limit: Optional[:class:`int`]
             The number of users to retrieve.
         with_members: :class:`bool`
             Whether to include some users as members. Defaults to ``True``.
-        before_id: :class:`int`
+        before_id: Optional[:class:`int`]
             Consider only users before given user ID.
-        after_id: :class:`int`
+        after_id: Optional[:class:`int`]
             Consider only users after given user ID.
-
-        Returns
-        -------
-        List[Union[:class:`Member`, :class:`User`]]
-            A list of users subscribed to the guild scheduled event.
 
         Raises
         ------
@@ -409,9 +433,13 @@ class GuildScheduledEvent(Hashable):
         NotFound
             The event does not exist.
         HTTPException
-            The request failed.
-        """
+            Retrieving the users failed.
 
+        Returns
+        -------
+        List[Union[:class:`Member`, :class:`User`]]
+            A list of users subscribed to the guild scheduled event.
+        """
         raw_users = await self._state.http.get_guild_scheduled_event_users(
             guild_id=self.guild_id,
             event_id=self.id,
@@ -421,13 +449,17 @@ class GuildScheduledEvent(Hashable):
             after=after_id,
         )
         users = []
+        user: Union[User, Member]
 
         for data in raw_users:
+            user_data = data["user"]
             member_data = data.get("member")
             if member_data is not None and self.guild is not None:
-                user = Member(data=member_data, guild=self.guild, state=self._state)
+                user = self.guild.get_member(int(user_data["id"])) or Member(
+                    data=member_data, user_data=user_data, guild=self.guild, state=self._state
+                )
             else:
-                user = User(data=data["user"], state=self._state)
+                user = self._state.store_user(data["user"])
             users.append(user)
 
         return users
