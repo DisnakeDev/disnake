@@ -70,17 +70,17 @@ class WelcomeScreenChannel:
     ):
         self.id: int = id
         self.description: str = description
-        self.emoji: Optional[Union[PartialEmoji, str]]
+        self.emoji: Optional[PartialEmoji] = None
         if emoji is None:
             self.emoji = None
-        if isinstance(emoji, str):
+        elif isinstance(emoji, str):
             self.emoji = PartialEmoji.from_str(emoji)
-        elif isinstance(emoji, _EmojiTag):
-            self.emoji = emoji._to_partial()
         elif isinstance(emoji, PartialEmoji):
             self.emoji = emoji
+        elif isinstance(emoji, _EmojiTag):
+            self.emoji = emoji._to_partial()
         else:
-            raise TypeError("emoji must be a string, PartialEmoji, or Emoji instance.")
+            raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
 
     def __repr__(self):
         return f"<WelcomeScreenChannel id={self.id!r} emoji={self.emoji!r} description={self.description!r}>"
@@ -104,11 +104,9 @@ class WelcomeScreenChannel:
             "description": self.description,
         }
         if self.emoji is not None:
-            if isinstance(self.emoji, str):
-                result["emoji_name"] = self.emoji
-            else:
+            if self.emoji.id:
                 result["emoji_id"] = self.emoji.id
-                result["emoji_name"] = self.emoji.name
+            result["emoji_name"] = self.emoji.name
 
         return result  # type: ignore
 
