@@ -44,10 +44,10 @@ ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14]
 
 class _BaseChannel(TypedDict):
     id: Snowflake
-    name: str
 
 
 class _BaseGuildChannel(_BaseChannel):
+    name: str
     guild_id: Snowflake
     position: int
     permission_overwrites: List[PermissionOverwrite]
@@ -120,6 +120,7 @@ class _ThreadChannelOptional(TypedDict, total=False):
 
 class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
     type: Literal[10, 11, 12]
+    name: str
     guild_id: Snowflake
     parent_id: Snowflake
     owner_id: Snowflake
@@ -149,6 +150,7 @@ class DMChannel(_BaseChannel):
 
 
 class GroupDMChannel(_BaseChannel):
+    name: Optional[str]
     type: Literal[3]
     icon: Optional[str]
     owner_id: Snowflake
@@ -170,3 +172,4 @@ class StageInstance(TypedDict):
 
 class GuildDirectory(_BaseChannel):
     type: Literal[14]
+    name: str
