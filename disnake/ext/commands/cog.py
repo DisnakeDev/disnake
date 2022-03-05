@@ -244,11 +244,11 @@ class Cog(metaclass=CogMeta):
         # r.e type ignore, type-checker complains about overriding a ClassVar
         self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore
 
-        lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}  # type: ignore
+        lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}
 
         # Update the Command instances dynamically as well
         for command in self.__cog_commands__:
-            setattr(self, command.callback.__name__, command)  # type: ignore
+            setattr(self, command.callback.__name__, command)
             parent = command.parent
             if parent is not None:
                 # Get the latest parent reference

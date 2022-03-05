@@ -635,10 +635,6 @@ def isolate_self(
     function: Callable,
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
     """Create parameters without self and the first interaction"""
-    is_interaction = (
-        lambda annot: issubclass_(annot, CommandInteraction) or annot is inspect.Parameter.empty
-    )
-
     sig = signature(function)
 
     parameters = dict(sig.parameters)
@@ -653,8 +649,10 @@ def isolate_self(
     if parametersl[0].name == "self":
         cog_param = parameters.pop(parametersl[0].name)
         parametersl.pop(0)
-    if parametersl and is_interaction(parametersl[0].annotation):
-        inter_param = parameters.pop(parametersl[0].name)
+    if parametersl:
+        annot = parametersl[0].annotation
+        if issubclass_(annot, CommandInteraction) or annot is inspect.Parameter.empty:
+            inter_param = parameters.pop(parametersl[0].name)
 
     return (cog_param, inter_param), parameters
 

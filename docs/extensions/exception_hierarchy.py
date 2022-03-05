@@ -1,6 +1,5 @@
 from docutils import nodes
-from docutils.parsers.rst import Directive, directives, states  # type: ignore
-from docutils.parsers.rst.roles import set_classes
+from docutils.parsers.rst import Directive
 from sphinx.locale import _
 
 

@@ -106,7 +106,7 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
     text = await response.text(encoding="utf-8")
     try:
         if response.headers["content-type"] == "application/json":
-            return utils._from_json(text)  # type: ignore
+            return utils._from_json(text)
     except KeyError:
         # Thanks Cloudflare
         pass
@@ -837,6 +837,13 @@ class HTTPClient:
         return self.request(Route("GET", "/channels/{channel_id}/pins", channel_id=channel_id))
 
     # Member management
+
+    def search_guild_members(
+        self, guild_id: Snowflake, query: str, limit: int = 1
+    ) -> Response[List[member.MemberWithUser]]:
+        r = Route("GET", "/guilds/{guild_id}/members/search", guild_id=guild_id)
+
+        return self.request(r, params={"query": query, "limit": limit})
 
     def kick(
         self, user_id: Snowflake, guild_id: Snowflake, reason: Optional[str] = None
