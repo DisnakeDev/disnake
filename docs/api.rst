@@ -406,6 +406,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
         checking the user IDs. Note that :class:`~ext.commands.Bot` does not
         have this problem.
 
+    .. note::
+
+        Not all messages may have content. This is a discord limitation.
+        See the docs of :attr:`Intents.messages_content` for more information.
+
     :param message: The current message.
     :type message: :class:`Message`
 
@@ -476,6 +481,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     If this occurs increase the :class:`max_messages <Client>` parameter
     or use the :func:`on_raw_message_edit` event instead.
+
+    .. note::
+
+        Not all messages may have content. This is a discord limitation.
+        See the docs of :attr:`Intents.messages_content` for more information.
 
     The following non-exhaustive cases trigger this event:
 
