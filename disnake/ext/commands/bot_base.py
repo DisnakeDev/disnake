@@ -148,6 +148,7 @@ class BotBase(CommonBotBase, GroupMixin):
                 "consider using InteractionBot instead. "
                 "Alternatively, set prefix to disnake.ext.commands.when_mentioned to silence this warning.",
                 MessageContentPrefixWarning,
+                stacklevel=2,
             )
 
         self._checks: List[Check] = []
