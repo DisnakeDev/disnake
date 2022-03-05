@@ -32,6 +32,7 @@ import inspect
 import logging
 import sys
 import traceback
+import warnings
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Type, TypeVar, Union, cast
 
 import disnake
@@ -40,6 +41,7 @@ from . import errors
 from .common_bot_base import CommonBotBase
 from .context import Context
 from .core import GroupMixin
+from .custom_warnings import MessageContentPrefixWarning
 from .help import DefaultHelpCommand, HelpCommand
 from .view import StringView
 
@@ -136,9 +138,6 @@ class BotBase(CommonBotBase, GroupMixin):
             command_prefix is not when_mentioned
             and not self.intents.message_content  # type: ignore
         ):
-            import warnings
-
-            from .custom_warnings import MessageContentPrefixWarning
 
             warnings.warn(
                 "Message Content intent is not enabled and a prefix is configured. "
