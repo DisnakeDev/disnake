@@ -231,7 +231,7 @@ class InvokableApplicationCommand(ABC):
 
         try:
             self._prepare_cooldowns(inter)
-            await self.call_before_hooks(inter)  # type: ignore
+            await self.call_before_hooks(inter)
         except:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)  # type: ignore

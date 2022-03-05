@@ -212,7 +212,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         )
         self._type: int = data.get("type", self._type)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
-        self._fill_overwrites(data)  # type: ignore
+        self._fill_overwrites(data)
 
     async def _get_channel(self):
         return self
@@ -2057,7 +2057,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         self._state = state
         self.id = channel_id
         # state.user won't be None here
-        self.me = state.user  # type: ignore
+        self.me = state.user
         self.recipient = state.get_user(user_id) if user_id != self.me.id else None
         return self
 

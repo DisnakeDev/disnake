@@ -466,6 +466,7 @@ class GuildChannel(ABC):
         :class:`~disnake.PermissionOverwrite`
             The permission overwrites for this object.
         """
+        predicate: Callable[[_Overwrites], bool]
         if isinstance(obj, User):
             predicate = lambda p: p.is_member()
         elif isinstance(obj, Role):

@@ -1338,7 +1338,7 @@ class GroupMixin(Generic[CogT]):
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
         ...
 
-    def command(  # type: ignore
+    def command(
         self,
         name: str = MISSING,
         cls: Union[Type[Command[CogT, P, T]], Type[CommandT]] = MISSING,
@@ -1384,7 +1384,7 @@ class GroupMixin(Generic[CogT]):
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
         ...
 
-    def group(  # type: ignore
+    def group(
         self,
         name: str = MISSING,
         cls: Union[Type[Group[CogT, P, T]], Type[GroupT]] = MISSING,
@@ -1449,7 +1449,7 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
         ret = super().copy()
         for cmd in self.commands:
             ret.add_command(cmd.copy())
-        return ret  # type: ignore
+        return ret
 
     async def invoke(self, ctx: Context) -> None:
         ctx.invoked_subcommand = None
@@ -1544,8 +1544,7 @@ def command(
     ...
 
 
-# ignored since the order in the Union in CommandCallback matters here for some reason
-def command(  # type: ignore
+def command(
     name: str = MISSING,
     cls: Union[Type[Command[CogT, P, T]], Type[CommandT]] = MISSING,
     **attrs: Any,
@@ -1610,7 +1609,7 @@ def group(
     ...
 
 
-def group(  # type: ignore  # see command above
+def group(
     name: str = MISSING,
     cls: Union[Type[Group[CogT, P, T]], Type[GroupT]] = MISSING,
     **attrs: Any,

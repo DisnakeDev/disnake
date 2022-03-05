@@ -25,7 +25,19 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from .enums import ButtonStyle, ComponentType, TextInputStyle, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
@@ -441,8 +453,8 @@ class TextInput(Component):
     def to_dict(self) -> TextInputPayload:
         payload: TextInputPayload = {
             "type": self.type.value,
-            "style": self.style.value,  # type: ignore
-            "label": self.label,  # type: ignore
+            "style": self.style.value,
+            "label": cast(str, self.label),
             "custom_id": self.custom_id,
             "required": self.required,
         }
