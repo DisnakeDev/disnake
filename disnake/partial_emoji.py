@@ -78,7 +78,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
         .. describe:: str(x)
 
-            Returns the emoji rendered for disnake.
+            Returns the emoji rendered for Discord.
 
     Attributes
     ----------
