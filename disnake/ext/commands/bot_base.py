@@ -146,7 +146,7 @@ class BotBase(CommonBotBase, GroupMixin):
                 "If you want prefix commands, pass an intents object with message_content set to True. "
                 "If you don't need any prefix functionality, "
                 "consider using InteractionBot instead. "
-                "Additionally, set prefix to disnake.ext.commands.when_mentioned to silence this warning.",
+                "Alternatively, set prefix to disnake.ext.commands.when_mentioned to silence this warning.",
                 MessageContentPrefixWarning,
             )
 
