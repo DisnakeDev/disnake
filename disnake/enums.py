@@ -143,7 +143,7 @@ class EnumMeta(type):
         attrs["_enum_member_names_"] = member_names
         attrs["_enum_value_cls_"] = value_cls
         actual_cls = super().__new__(cls, name, bases, attrs)
-        value_cls._actual_enum_cls_ = actual_cls
+        value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
     def __iter__(cls):
