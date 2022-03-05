@@ -120,6 +120,7 @@ class _ThreadChannelOptional(TypedDict, total=False):
 
 class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
     type: Literal[10, 11, 12]
+    name: str
     guild_id: Snowflake
     parent_id: Snowflake
     owner_id: Snowflake
@@ -171,3 +172,4 @@ class StageInstance(TypedDict):
 
 class GuildDirectory(_BaseChannel):
     type: Literal[14]
+    name: str
