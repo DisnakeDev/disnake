@@ -634,7 +634,7 @@ class FlagConverter(metaclass=FlagsMeta):
             values = [await convert_flag(ctx, value, flag) for value in values]
 
             if flag.cast_to_dict:
-                values = dict(values)  # type: ignore
+                values = dict(values)
 
             setattr(self, flag.attribute, values)
 

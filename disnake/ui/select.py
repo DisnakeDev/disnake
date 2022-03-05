@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import inspect
 import os
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType

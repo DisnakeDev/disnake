@@ -37,7 +37,6 @@ if TYPE_CHECKING:
     from disnake.types.snowflake import Snowflake, SnowflakeList
 
     from .context import Context
-    from .converter import Converter
     from .cooldowns import BucketType, Cooldown
     from .flags import Flag
 
