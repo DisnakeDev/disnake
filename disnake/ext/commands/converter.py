@@ -60,29 +60,30 @@ if TYPE_CHECKING:
 
 __all__ = (
     "Converter",
+    "IDConverter",
     "ObjectConverter",
     "MemberConverter",
     "UserConverter",
-    "MessageConverter",
     "PartialMessageConverter",
+    "MessageConverter",
+    "GuildChannelConverter",
     "TextChannelConverter",
-    "InviteConverter",
-    "GuildConverter",
-    "RoleConverter",
-    "GameConverter",
-    "ColourConverter",
-    "ColorConverter",
     "VoiceChannelConverter",
     "StageChannelConverter",
-    "EmojiConverter",
-    "PartialEmojiConverter",
     "CategoryChannelConverter",
-    "IDConverter",
     "StoreChannelConverter",
     "ThreadConverter",
-    "GuildChannelConverter",
+    "ColourConverter",
+    "ColorConverter",
+    "RoleConverter",
+    "GameConverter",
+    "InviteConverter",
+    "GuildConverter",
+    "EmojiConverter",
+    "PartialEmojiConverter",
     "GuildStickerConverter",
     "PermissionsConverter",
+    "GuildScheduledEventConverter",
     "clean_content",
     "Greedy",
     "run_converters",
@@ -865,8 +866,8 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
 
     The lookup strategy is as follows (in order):
 
-    1. Lookup by ID.
-    3. Lookup by name
+    1. Lookup by ID
+    2. Lookup by name
 
     .. versionadded:: 2.0
     """
@@ -937,6 +938,46 @@ class PermissionsConverter(Converter[disnake.Permissions]):
             return attr()
         else:
             return disnake.Permissions(**{name: True})
+
+
+class GuildScheduledEventConverter(IDConverter[disnake.GuildScheduledEvent]):
+    """Converts to a :class:`~disnake.GuildScheduledEvent`.
+
+    The lookup strategy is as follows (in order):
+
+    1. Lookup by ID (in current guild)
+    2. Lookup as event URL
+    3. Lookup by name (in current guild; there is no disambiguation for scheduled events with multiple matching names)
+
+    .. versionadded:: 2.5
+    """
+
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.GuildScheduledEvent:
+        event_regex = re.compile(
+            r"https?://(?:(?:ptb|canary|www)\.)?discord(?:app)?\.com/events/"
+            r"([0-9]{15,20})/([0-9]{15,20})/?$"
+        )
+        bot: disnake.Client = ctx.bot
+        result: Optional[disnake.GuildScheduledEvent] = None
+        guild = ctx.guild
+
+        # 1.
+        if guild and (match := self._get_id_match(argument)):
+            result = guild.get_scheduled_event(int(match.group(1)))
+
+        # 2.
+        if not result and (match := event_regex.match(argument)):
+            event_guild = bot.get_guild(int(match.group(1)))
+            if event_guild:
+                result = event_guild.get_scheduled_event(int(match.group(2)))
+
+        # 3.
+        if not result and guild:
+            result = disnake.utils.get(guild.scheduled_events, name=argument)
+
+        if not result:
+            raise GuildScheduledEventNotFound(argument)
+        return result
 
 
 class clean_content(Converter[str]):
@@ -1119,6 +1160,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
     disnake.abc.GuildChannel: GuildChannelConverter,
     disnake.GuildSticker: GuildStickerConverter,
     disnake.Permissions: PermissionsConverter,
+    disnake.GuildScheduledEvent: GuildScheduledEventConverter,
 }
 
 
