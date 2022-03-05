@@ -457,7 +457,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         finally:
             if stop_propagation:
                 return
-            inter.bot.dispatch("slash_command_error", inter, error)  # type: ignore
+            inter.bot.dispatch("slash_command_error", inter, error)
 
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str

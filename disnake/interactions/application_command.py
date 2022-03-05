@@ -404,7 +404,7 @@ class ApplicationCommandInteractionDataResolved:
             self.roles[int(str_id)] = Role(guild=guild, state=state, data=role)  # type: ignore
 
         for str_id, channel in channels.items():
-            factory, ch_type = _threaded_channel_factory(channel["type"])
+            factory, _ = _threaded_channel_factory(channel["type"])
             if factory:
                 channel["position"] = 0  # type: ignore
                 self.channels[int(str_id)] = (  # type: ignore
