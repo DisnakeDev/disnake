@@ -508,7 +508,7 @@ class Guild(Hashable):
         if member_count is not None:
             self._member_count: int = member_count
 
-        self.name: str = guild.get("name")
+        self.name: str = guild.get("name", "")
         self._region: VoiceRegion = try_enum(VoiceRegion, guild.get("region"))
         self.verification_level: VerificationLevel = try_enum(
             VerificationLevel, guild.get("verification_level")
@@ -519,7 +519,7 @@ class Guild(Hashable):
         self.explicit_content_filter: ContentFilter = try_enum(
             ContentFilter, guild.get("explicit_content_filter", 0)
         )
-        self.afk_timeout: int = guild.get("afk_timeout")
+        self.afk_timeout: int = guild.get("afk_timeout", 0)
         self._icon: Optional[str] = guild.get("icon")
         self._banner: Optional[str] = guild.get("banner")
         self.unavailable: bool = guild.get("unavailable", False)
@@ -530,7 +530,7 @@ class Guild(Hashable):
             role = Role(guild=self, data=r, state=state)
             self._roles[role.id] = role
 
-        self.mfa_level: MFALevel = guild.get("mfa_level")
+        self.mfa_level: MFALevel = guild.get("mfa_level", 0)
         self.emojis: Tuple[Emoji, ...] = tuple(
             map(lambda d: state.store_emoji(self, d), guild.get("emojis", []))
         )
@@ -604,7 +604,7 @@ class Guild(Hashable):
         if "channels" in data:
             channels = data["channels"]
             for c in channels:
-                factory, ch_type = _guild_channel_factory(c["type"])
+                factory, _ = _guild_channel_factory(c["type"])
                 if factory:
                     self._add_channel(factory(guild=self, data=c, state=self._state))  # type: ignore
 
@@ -1814,7 +1814,7 @@ class Guild(Hashable):
         data = await self._state.http.get_all_guild_channels(self.id)
 
         def convert(d):
-            factory, ch_type = _guild_channel_factory(d["type"])
+            factory, _ = _guild_channel_factory(d["type"])
             if factory is None:
                 raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(d))
 
@@ -2399,6 +2399,11 @@ class Guild(Hashable):
             The name of the template.
         description: :class:`str`
             The description of the template.
+
+        Returns
+        -------
+        :class:`Template`
+            The created template.
         """
         from .template import Template
 
@@ -3392,6 +3397,8 @@ class Guild(Hashable):
 
         This is a websocket operation and can be slow.
 
+        See also :func:`search_members`.
+
         .. versionadded:: 1.3
 
         Parameters
@@ -3450,6 +3457,59 @@ class Guild(Hashable):
         return await self._state.query_members(
             self, query=query, limit=limit, user_ids=user_ids, presences=presences, cache=cache
         )
+
+    async def search_members(
+        self,
+        query: str,
+        *,
+        limit: int = 1,
+        cache: bool = True,
+    ):
+        """|coro|
+
+        Retrieves members that belong to this guild whose username or nickname starts with
+        the query given.
+
+        Note that unlike :func:`query_members`, this is not a websocket operation, but an HTTP operation.
+
+        See also :func:`query_members`.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        -----------
+        query: :class:`str`
+            The string that the usernames or nicknames start with.
+        limit: :class:`int`
+            The maximum number of members to send back. This must be
+            a number between 1 and 1000.
+        cache: :class:`bool`
+            Whether to cache the members internally. This makes operations
+            such as :meth:`get_member` work for those that matched.
+
+        Raises
+        -------
+        ValueError
+            Invalid parameters were passed to the function
+
+        Returns
+        --------
+        List[:class:`Member`]
+            The list of members that have matched the query.
+        """
+        if query == "":
+            raise ValueError("Cannot pass empty query string.")
+        if limit < 1:
+            raise ValueError("limit must be at least 1")
+        limit = min(1000, limit)
+        members = await self._state.http.search_guild_members(self.id, query=query, limit=limit)
+        resp = []
+        for member in members:
+            member = Member(state=self._state, data=member, guild=self)
+            if cache and member.id not in self._members:
+                self._add_member(member)
+            resp.append(member)
+        return resp
 
     async def get_or_fetch_members(
         self,

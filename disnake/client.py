@@ -361,7 +361,7 @@ class Client:
     @property
     def user(self) -> ClientUser:
         """Optional[:class:`.ClientUser`]: Represents the connected client. ``None`` if not logged in."""
-        return self._connection.user  # type: ignore
+        return self._connection.user
 
     @property
     def guilds(self) -> List[Guild]:
@@ -426,7 +426,7 @@ class Client:
 
         .. versionadded:: 2.0
         """
-        return self._connection.application_flags  # type: ignore
+        return self._connection.application_flags
 
     @property
     def global_application_commands(self) -> List[APIApplicationCommand]:
@@ -655,6 +655,8 @@ class Client:
             passing status code.
         """
         _log.info("logging in using static token")
+        if not isinstance(token, str):
+            raise TypeError(f"token must be of type str, got {type(token).__name__} instead")
 
         data = await self.http.static_login(token.strip())
         self._connection.user = ClientUser(state=self._connection, data=data)
@@ -1533,7 +1535,7 @@ class Client:
         """
         code = utils.resolve_template(code)
         data = await self.http.get_template(code)
-        return Template(data=data, state=self._connection)  # type: ignore
+        return Template(data=data, state=self._connection)
 
     async def fetch_guild(self, guild_id: int, /) -> Guild:
         """|coro|

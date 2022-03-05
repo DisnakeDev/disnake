@@ -106,7 +106,7 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any]
     text = await response.text(encoding="utf-8")
     try:
         if response.headers["content-type"] == "application/json":
-            return utils._from_json(text)  # type: ignore
+            return utils._from_json(text)
     except KeyError:
         # Thanks Cloudflare
         pass
@@ -531,10 +531,10 @@ class HTTPClient:
         tts: bool = False,
         embed: Optional[embed.Embed] = None,
         embeds: Optional[List[embed.Embed]] = None,
-        nonce: Optional[str] = None,
+        nonce: Optional[Union[str, int]] = None,
         allowed_mentions: Optional[message.AllowedMentions] = None,
         message_reference: Optional[message.MessageReference] = None,
-        stickers: Optional[List[sticker.StickerItem]] = None,
+        stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[List[components.Component]] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -580,11 +580,11 @@ class HTTPClient:
         content: Optional[str] = None,
         tts: bool = False,
         embed: Optional[embed.Embed] = None,
-        embeds: Optional[Iterable[Optional[embed.Embed]]] = None,
-        nonce: Optional[str] = None,
+        embeds: Optional[List[embed.Embed]] = None,
+        nonce: Optional[Union[str, int]] = None,
         allowed_mentions: Optional[message.AllowedMentions] = None,
         message_reference: Optional[message.MessageReference] = None,
-        stickers: Optional[List[sticker.StickerItem]] = None,
+        stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[List[components.Component]] = None,
     ) -> Response[message.Message]:
         payload: Dict[str, Any] = {"tts": tts}
@@ -618,10 +618,10 @@ class HTTPClient:
         tts: bool = False,
         embed: Optional[embed.Embed] = None,
         embeds: Optional[List[embed.Embed]] = None,
-        nonce: Optional[str] = None,
+        nonce: Optional[Union[str, int]] = None,
         allowed_mentions: Optional[message.AllowedMentions] = None,
         message_reference: Optional[message.MessageReference] = None,
-        stickers: Optional[List[sticker.StickerItem]] = None,
+        stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[List[components.Component]] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -837,6 +837,13 @@ class HTTPClient:
         return self.request(Route("GET", "/channels/{channel_id}/pins", channel_id=channel_id))
 
     # Member management
+
+    def search_guild_members(
+        self, guild_id: Snowflake, query: str, limit: int = 1
+    ) -> Response[List[member.MemberWithUser]]:
+        r = Route("GET", "/guilds/{guild_id}/members/search", guild_id=guild_id)
+
+        return self.request(r, params={"query": query, "limit": limit})
 
     def kick(
         self, user_id: Snowflake, guild_id: Snowflake, reason: Optional[str] = None

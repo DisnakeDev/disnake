@@ -74,7 +74,7 @@ class flag_value:
             return self
         return instance._has_flag(self.flag)
 
-    def __set__(self, instance: BF, value: bool) -> None:
+    def __set__(self, instance: BaseFlags, value: bool) -> None:
         instance._set_flag(self.flag, value)
 
     def __repr__(self):
@@ -97,7 +97,7 @@ def fill_with_flags(*, inverted: bool = False):
 
         if inverted:
             max_bits = max(cls.VALID_FLAGS.values()).bit_length()
-            cls.DEFAULT_VALUE = -1 + (2 ** max_bits)
+            cls.DEFAULT_VALUE = -1 + (2**max_bits)
         else:
             cls.DEFAULT_VALUE = 0
 

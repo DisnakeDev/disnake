@@ -60,29 +60,30 @@ if TYPE_CHECKING:
 
 __all__ = (
     "Converter",
+    "IDConverter",
     "ObjectConverter",
     "MemberConverter",
     "UserConverter",
-    "MessageConverter",
     "PartialMessageConverter",
+    "MessageConverter",
+    "GuildChannelConverter",
     "TextChannelConverter",
-    "InviteConverter",
-    "GuildConverter",
-    "RoleConverter",
-    "GameConverter",
-    "ColourConverter",
-    "ColorConverter",
     "VoiceChannelConverter",
     "StageChannelConverter",
-    "EmojiConverter",
-    "PartialEmojiConverter",
     "CategoryChannelConverter",
-    "IDConverter",
     "StoreChannelConverter",
     "ThreadConverter",
-    "GuildChannelConverter",
+    "ColourConverter",
+    "ColorConverter",
+    "RoleConverter",
+    "GameConverter",
+    "InviteConverter",
+    "GuildConverter",
+    "EmojiConverter",
+    "PartialEmojiConverter",
     "GuildStickerConverter",
     "PermissionsConverter",
+    "GuildScheduledEventConverter",
     "clean_content",
     "Greedy",
     "run_converters",
@@ -865,8 +866,8 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
 
     The lookup strategy is as follows (in order):
 
-    1. Lookup by ID.
-    3. Lookup by name
+    1. Lookup by ID
+    2. Lookup by name
 
     .. versionadded:: 2.0
     """
@@ -937,6 +938,46 @@ class PermissionsConverter(Converter[disnake.Permissions]):
             return attr()
         else:
             return disnake.Permissions(**{name: True})
+
+
+class GuildScheduledEventConverter(IDConverter[disnake.GuildScheduledEvent]):
+    """Converts to a :class:`~disnake.GuildScheduledEvent`.
+
+    The lookup strategy is as follows (in order):
+
+    1. Lookup by ID (in current guild)
+    2. Lookup as event URL
+    3. Lookup by name (in current guild; there is no disambiguation for scheduled events with multiple matching names)
+
+    .. versionadded:: 2.5
+    """
+
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.GuildScheduledEvent:
+        event_regex = re.compile(
+            r"https?://(?:(?:ptb|canary|www)\.)?discord(?:app)?\.com/events/"
+            r"([0-9]{15,20})/([0-9]{15,20})/?$"
+        )
+        bot: disnake.Client = ctx.bot
+        result: Optional[disnake.GuildScheduledEvent] = None
+        guild = ctx.guild
+
+        # 1.
+        if guild and (match := self._get_id_match(argument)):
+            result = guild.get_scheduled_event(int(match.group(1)))
+
+        # 2.
+        if not result and (match := event_regex.match(argument)):
+            event_guild = bot.get_guild(int(match.group(1)))
+            if event_guild:
+                result = event_guild.get_scheduled_event(int(match.group(2)))
+
+        # 3.
+        if not result and guild:
+            result = disnake.utils.get(guild.scheduled_events, name=argument)
+
+        if not result:
+            raise GuildScheduledEventNotFound(argument)
+        return result
 
 
 class clean_content(Converter[str]):
@@ -1094,10 +1135,10 @@ _GenericAlias = type(List[T])
 
 
 def is_generic_type(tp: Any, *, _GenericAlias: Type = _GenericAlias) -> bool:
-    return isinstance(tp, type) and issubclass(tp, Generic) or isinstance(tp, _GenericAlias)  # type: ignore
+    return isinstance(tp, type) and issubclass(tp, Generic) or isinstance(tp, _GenericAlias)
 
 
-CONVERTER_MAPPING: Dict[Type[Any], Any] = {
+CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
     disnake.Object: ObjectConverter,
     disnake.Member: MemberConverter,
     disnake.User: UserConverter,
@@ -1119,25 +1160,26 @@ CONVERTER_MAPPING: Dict[Type[Any], Any] = {
     disnake.abc.GuildChannel: GuildChannelConverter,
     disnake.GuildSticker: GuildStickerConverter,
     disnake.Permissions: PermissionsConverter,
+    disnake.GuildScheduledEvent: GuildScheduledEventConverter,
 }
 
 
-async def _actual_conversion(ctx: Context, converter, argument: str, param: inspect.Parameter):
+async def _actual_conversion(
+    ctx: Context,
+    converter: Union[Type[T], Converter[T], Callable[[str], T]],
+    argument: str,
+    param: inspect.Parameter,
+) -> T:
     if converter is bool:
-        return _convert_to_bool(argument)
+        return _convert_to_bool(argument)  # type: ignore
 
-    try:
+    if isinstance(converter, type):
         module = converter.__module__
-    except AttributeError:
-        pass
-    else:
-        if module is not None and (
-            module.startswith("disnake.") and not module.endswith("converter")
-        ):
+        if module.startswith("disnake.") and not module.endswith("converter"):
             converter = CONVERTER_MAPPING.get(converter, converter)
 
     try:
-        if inspect.isclass(converter) and issubclass(converter, Converter):
+        if isinstance(converter, type) and issubclass(converter, Converter):
             if inspect.ismethod(converter.convert):
                 return await converter.convert(ctx, argument)
             else:
@@ -1157,7 +1199,7 @@ async def _actual_conversion(ctx: Context, converter, argument: str, param: insp
         try:
             name = converter.__name__
         except AttributeError:
-            name = converter.__class__.__name__
+            name = converter.__class__.__name__  # type: ignore
 
         raise BadArgument(f'Converting to "{name}" failed for parameter "{param.name}".') from exc
 

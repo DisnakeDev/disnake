@@ -41,11 +41,14 @@ from typing import (
     Deque,
     Dict,
     List,
+    Literal,
     Optional,
     Sequence,
     Tuple,
     TypeVar,
     Union,
+    cast,
+    overload,
 )
 
 from . import utils
@@ -93,7 +96,11 @@ if TYPE_CHECKING:
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
-    from .types.raw_models import GuildScheduledEventUserActionEvent, TypingEvent
+    from .types.raw_models import (
+        GuildScheduledEventUserActionEvent,
+        ReactionActionEvent,
+        TypingEvent,
+    )
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
     from .voice_client import VoiceProtocol
@@ -579,7 +586,7 @@ class ConnectionState:
 
     def add_dm_channel(self, data: DMChannelPayload) -> DMChannel:
         # self.user is *always* cached when this is called
-        channel = DMChannel(me=self.user, state=self, data=data)  # type: ignore
+        channel = DMChannel(me=self.user, state=self, data=data)
         self._add_private_channel(channel)
         return channel
 
@@ -622,6 +629,7 @@ class ConnectionState:
             if channel is None:
                 if "author" in data:
                     # MessagePayload
+                    data = cast(MessagePayload, data)
                     user_id = int(data["author"]["id"])
                 else:
                     # TypingEvent
@@ -740,7 +748,7 @@ class ConnectionState:
         if self._ready_task is not None:
             self._ready_task.cancel()
 
-        self._ready_state = asyncio.Queue()
+        self._ready_state: asyncio.Queue[Guild] = asyncio.Queue()
         self.clear(views=False, application_commands=False, modals=False)
         self.user = ClientUser(state=self, data=data["user"])
         self.store_user(data["user"])
@@ -753,7 +761,7 @@ class ConnectionState:
             else:
                 self.application_id = utils._get_as_snowflake(application, "id")
                 # flags will always be present here
-                self.application_flags = ApplicationFlags._from_value(application["flags"])  # type: ignore
+                self.application_flags = ApplicationFlags._from_value(application["flags"])
 
         for guild_data in data["guilds"]:
             self._add_guild_from_data(guild_data)
@@ -819,11 +827,14 @@ class ConnectionState:
         if "components" in data and self._view_store.is_message_tracked(raw.message_id):
             self._view_store.update_from_message(raw.message_id, data["components"])
 
-    def parse_message_reaction_add(self, data) -> None:
+    def parse_message_reaction_add(self, data: ReactionActionEvent) -> None:
         emoji = data["emoji"]
         emoji_id = utils._get_as_snowflake(emoji, "id")
         emoji = PartialEmoji.with_state(
-            self, id=emoji_id, animated=emoji.get("animated", False), name=emoji["name"]
+            self,
+            id=emoji_id,
+            animated=emoji.get("animated", False),
+            name=emoji["name"],  # type: ignore
         )
         raw = RawReactionActionEvent(data, emoji, "REACTION_ADD")
 
@@ -954,7 +965,7 @@ class ConnectionState:
 
     def parse_user_update(self, data) -> None:
         # self.user is *always* cached when this is called
-        user: ClientUser = self.user  # type: ignore
+        user: ClientUser = self.user
         user._update(data)
         ref = self._users.get(user.id)
         if ref:
@@ -1004,7 +1015,7 @@ class ConnectionState:
             _log.debug("CHANNEL_UPDATE referencing an unknown guild ID: %s. Discarding.", guild_id)
 
     def parse_channel_create(self, data) -> None:
-        factory, ch_type = _channel_factory(data["type"])
+        factory, _ = _channel_factory(data["type"])
         if factory is None:
             _log.debug(
                 "CHANNEL_CREATE referencing an unknown channel type %s. Discarding.", data["type"]
@@ -1088,7 +1099,7 @@ class ConnectionState:
         thread_id = int(data["id"])
         thread = guild.get_thread(thread_id)
         if thread is not None:
-            guild._remove_thread(thread)  # type: ignore
+            guild._remove_thread(thread)
             self.dispatch("thread_delete", thread)
 
     def parse_thread_list_sync(self, data) -> None:
@@ -1214,7 +1225,7 @@ class ConnectionState:
             user_id = int(data["user"]["id"])
             member = guild.get_member(user_id)
             if member is not None:
-                guild._remove_member(member)  # type: ignore
+                guild._remove_member(member)
                 self.dispatch("member_remove", member)
         else:
             _log.debug(
@@ -1268,8 +1279,7 @@ class ConnectionState:
         before_emojis = guild.emojis
         for emoji in before_emojis:
             self._emojis.pop(emoji.id, None)
-        # guild won't be None here
-        guild.emojis = tuple(map(lambda d: self.store_emoji(guild, d), data["emojis"]))  # type: ignore
+        guild.emojis = tuple(self.store_emoji(guild, d) for d in data["emojis"])
         self.dispatch("guild_emojis_update", guild, before_emojis, guild.emojis)
 
     def parse_guild_stickers_update(self, data) -> None:
@@ -1285,7 +1295,7 @@ class ConnectionState:
         for emoji in before_stickers:
             self._stickers.pop(emoji.id, None)
         # guild won't be None here
-        guild.stickers = tuple(map(lambda d: self.store_sticker(guild, d), data["stickers"]))  # type: ignore
+        guild.stickers = tuple(self.store_sticker(guild, d) for d in data["stickers"])
         self.dispatch("guild_stickers_update", guild, before_stickers, guild.stickers)
 
     def _get_create_guild(self, data):
@@ -1304,7 +1314,21 @@ class ConnectionState:
     def is_guild_evicted(self, guild) -> bool:
         return guild.id not in self._guilds
 
-    async def chunk_guild(self, guild, *, wait=True, cache=None):
+    @overload
+    async def chunk_guild(
+        self, guild: Guild, *, wait: Literal[False], cache: Optional[bool] = None
+    ) -> asyncio.Future[List[Member]]:
+        ...
+
+    @overload
+    async def chunk_guild(
+        self, guild: Guild, *, wait: Literal[True] = True, cache: Optional[bool] = None
+    ) -> List[Member]:
+        ...
+
+    async def chunk_guild(
+        self, guild: Guild, *, wait: bool = True, cache: Optional[bool] = None
+    ) -> Union[List[Member], asyncio.Future[List[Member]]]:
         cache = cache or self.member_cache_flags.joined
         request = self._chunk_requests.get(guild.id)
         if request is None:
@@ -1660,7 +1684,7 @@ class ConnectionState:
         channel_id = utils._get_as_snowflake(data, "channel_id")
         flags = self.member_cache_flags
         # self.user is *always* cached when this is called
-        self_id = self.user.id  # type: ignore
+        self_id = self.user.id
         if guild is not None:
             if int(data["user_id"]) == self_id:
                 voice = self._get_voice_client(guild.id)
@@ -1676,7 +1700,7 @@ class ConnectionState:
                     if channel_id is None and flags._voice_only and member.id != self_id:
                         # Only remove from cache if we only have the voice flag enabled
                         # Member doesn't meet the Snowflake protocol currently
-                        guild._remove_member(member)  # type: ignore
+                        guild._remove_member(member)
                     elif channel_id is not None:
                         guild._add_member(member)
 
@@ -1727,7 +1751,7 @@ class ConnectionState:
 
             if member is not None:
                 timestamp = datetime.datetime.fromtimestamp(
-                    data.get("timestamp"), tz=datetime.timezone.utc
+                    data["timestamp"], tz=datetime.timezone.utc
                 )
                 self.dispatch("typing", channel, member, timestamp)
 
@@ -1952,7 +1976,7 @@ class AutoShardedConnectionState(ConnectionState):
 
     async def _delay_ready(self) -> None:
         await self.shards_launched.wait()
-        processed = []
+        processed: List[Tuple[Guild, asyncio.Future[List[Member]]]] = []
         max_concurrency = len(self.shard_ids) * 2
         current_bucket = []
         while True:
@@ -1965,6 +1989,7 @@ class AutoShardedConnectionState(ConnectionState):
             except asyncio.TimeoutError:
                 break
             else:
+                future: asyncio.Future[List[Member]]
                 if self._guild_needs_chunking(guild):
                     _log.debug(
                         "Guild ID %d requires chunking, will be done in the background.", guild.id
@@ -1991,7 +2016,13 @@ class AutoShardedConnectionState(ConnectionState):
 
         guilds = sorted(processed, key=lambda g: g[0].shard_id)
         for shard_id, info in itertools.groupby(guilds, key=lambda g: g[0].shard_id):
-            children, futures = zip(*info)
+            # this is equivalent to `children, futures = zip(*info)`, but typed properly
+            children: List[Guild] = []
+            futures: List[asyncio.Future[List[Member]]] = []
+            for c, f in info:
+                children.append(c)
+                futures.append(f)
+
             # 110 reqs/minute w/ 1 req/guild plus some buffer
             timeout = 61 * (len(children) / 110)
             try:
