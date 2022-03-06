@@ -208,7 +208,7 @@ class MemberConverter(IDConverter[disnake.Member]):
         if len(argument) > 5 and argument[-5] == "#":
             username, _, discriminator = argument.rpartition("#")
             members = await guild.query_members(username, limit=100, cache=cache)
-            return disnake.utils.get(members, name=username, discriminator=discriminator)
+            return _utils_get(members, name=username, discriminator=discriminator)
         else:
             members = await guild.query_members(argument, limit=100, cache=cache)
             return disnake.utils.find(lambda m: m.name == argument or m.nick == argument, members)
@@ -457,7 +457,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
             # not a mention
             if guild:
                 iterable: Iterable[CT] = getattr(guild, attribute)
-                result = disnake.utils.get(iterable, name=argument)
+                result = _utils_get(iterable, name=argument)
             else:
                 result = disnake.utils.find(
                     lambda c: isinstance(c, type) and c.name == argument, bot.get_all_channels()
@@ -484,7 +484,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
             # not a mention
             if guild:
                 iterable: Iterable[TT] = getattr(guild, attribute)
-                result = disnake.utils.get(iterable, name=argument)
+                result = _utils_get(iterable, name=argument)
         else:
             thread_id = int(match.group(1))
             if guild:
@@ -735,7 +735,7 @@ class RoleConverter(IDConverter[disnake.Role]):
         if match:
             result = guild.get_role(int(match.group(1)))
         else:
-            result = disnake.utils.get(guild._roles.values(), name=argument)
+            result = _utils_get(guild._roles.values(), name=argument)
 
         if result is None:
             raise RoleNotFound(argument)
@@ -786,7 +786,7 @@ class GuildConverter(IDConverter[disnake.Guild]):
             result = bot.get_guild(guild_id)
 
         if result is None:
-            result = disnake.utils.get(bot.guilds, name=argument)
+            result = _utils_get(bot.guilds, name=argument)
 
             if result is None:
                 raise GuildNotFound(argument)
@@ -820,10 +820,10 @@ class EmojiConverter(IDConverter[disnake.Emoji]):
         if match is None:
             # Try to get the emoji by name. Try local guild first.
             if guild:
-                result = disnake.utils.get(guild.emojis, name=argument)
+                result = _utils_get(guild.emojis, name=argument)
 
             if result is None:
-                result = disnake.utils.get(bot.emojis, name=argument)
+                result = _utils_get(bot.emojis, name=argument)
         else:
             # Try to look up emoji by id.
             result = bot.get_emoji(int(match.group(1)))
@@ -881,10 +881,10 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
         if match is None:
             # Try to get the sticker by name. Try local guild first.
             if guild:
-                result = disnake.utils.get(guild.stickers, name=argument)
+                result = _utils_get(guild.stickers, name=argument)
 
             if result is None:
-                result = disnake.utils.get(bot.stickers, name=argument)
+                result = _utils_get(bot.stickers, name=argument)
         else:
             # Try to look up sticker by id.
             result = bot.get_sticker(int(match.group(1)))
@@ -973,7 +973,7 @@ class GuildScheduledEventConverter(IDConverter[disnake.GuildScheduledEvent]):
 
         # 3.
         if not result and guild:
-            result = disnake.utils.get(guild.scheduled_events, name=argument)
+            result = _utils_get(guild.scheduled_events, name=argument)
 
         if not result:
             raise GuildScheduledEventNotFound(argument)
