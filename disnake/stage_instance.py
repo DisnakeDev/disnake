@@ -30,13 +30,14 @@ from typing import TYPE_CHECKING, Optional
 from .enums import StagePrivacyLevel, try_enum
 from .errors import InvalidArgument
 from .mixins import Hashable
-from .utils import MISSING, cached_slot_property, warn_deprecated
+from .utils import MISSING, _get_as_snowflake, cached_slot_property, warn_deprecated
 
 __all__ = ("StageInstance",)
 
 if TYPE_CHECKING:
     from .channel import StageChannel
     from .guild import Guild
+    from .guild_scheduled_event import GuildScheduledEvent
     from .state import ConnectionState
     from .types.channel import StageInstance as StageInstancePayload
 
@@ -72,6 +73,9 @@ class StageInstance(Hashable):
         The topic of the stage instance.
     privacy_level: :class:`StagePrivacyLevel`
         The privacy level of the stage instance.
+    guild_scheduled_event_id: Optional[:class:`int`]
+        The ID of the stage instance's associated scheduled event, if applicable.
+        See also :attr:`.guild_scheduled_event`.
     """
 
     __slots__ = (
@@ -82,6 +86,7 @@ class StageInstance(Hashable):
         "topic",
         "privacy_level",
         "_discoverable_disabled",
+        "guild_scheduled_event_id",
         "_cs_channel",
     )
 
@@ -96,6 +101,9 @@ class StageInstance(Hashable):
         self.topic: str = data["topic"]
         self.privacy_level: StagePrivacyLevel = try_enum(StagePrivacyLevel, data["privacy_level"])
         self._discoverable_disabled: bool = data.get("discoverable_disabled", False)
+        self.guild_scheduled_event_id: Optional[int] = _get_as_snowflake(
+            data, "guild_scheduled_event_id"
+        )
 
     def __repr__(self) -> str:
         return f"<StageInstance id={self.id} guild={self.guild!r} channel_id={self.channel_id} topic={self.topic!r}>"
@@ -134,6 +142,17 @@ class StageInstance(Hashable):
             stacklevel=2,
         )
         return self.privacy_level is StagePrivacyLevel.public
+
+    @property
+    def guild_scheduled_event(self) -> Optional[GuildScheduledEvent]:
+        """Optional[:class:`GuildScheduledEvent`]: The stage instance's scheduled event.
+
+        This is only set if this stage instance has an associated scheduled event,
+        and requires that event to be cached.
+        """
+        if self.guild_scheduled_event_id is None:
+            return None
+        return self.guild.get_scheduled_event(self.guild_scheduled_event_id)
 
     async def edit(
         self,
