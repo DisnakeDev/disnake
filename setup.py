@@ -42,7 +42,8 @@ extras_require = {
     "docs": [
         "sphinx~=4.4.0",
         "sphinxcontrib_trio==1.1.2",
-        "sphinx-hoverxref~=1.0.0",
+        # "sphinx-hoverxref~=1.0.0",
+        "sphinx-hoverxref @ git+https://github.com/bast0006/sphinx-hoverxref@8c36803a3da891182543f599ac3799cbc1ef8a3c",
         "sphinx-autobuild==2021.3.14",
     ],
     "speed": [
