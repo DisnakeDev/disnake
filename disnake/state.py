@@ -629,7 +629,7 @@ class ConnectionState:
             if channel is None:
                 if "author" in data:
                     # MessagePayload
-                    data = cast(MessagePayload, data)
+                    data = cast("MessagePayload", data)
                     user_id = int(data["author"]["id"])
                 else:
                     # TypingEvent

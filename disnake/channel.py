@@ -823,7 +823,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         if auto_archive_duration is not None:
             auto_archive_duration = cast(
-                ThreadArchiveDurationLiteral, try_enum_to_int(auto_archive_duration)
+                "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
         if message is None:
