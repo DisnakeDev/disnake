@@ -54,6 +54,7 @@ from .errors import *
 if TYPE_CHECKING:
     from disnake.message import MessageableChannel
 
+    # TODO: don't use unbound generic `Context`
     from .core import AnyContext
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES
@@ -1015,9 +1016,10 @@ class clean_content(Converter[str]):
 
     async def convert(self, ctx: AnyContext, argument: str) -> str:
         msg = ctx.message if isinstance(ctx, Context) else None
+        bot: disnake.Client = ctx.bot
 
         def resolve_user(id: int) -> str:
-            m = (msg and _utils_get(msg.mentions, id=id)) or ctx.bot.get_user(id)
+            m = (msg and _utils_get(msg.mentions, id=id)) or bot.get_user(id)
             if m is None and ctx.guild:
                 m = ctx.guild.get_member(id)
             return f"@{m.display_name if self.use_nicknames else m.name}" if m else "@deleted-user"
