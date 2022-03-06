@@ -398,7 +398,7 @@ class SyncWebhookMessage(Message):
     .. versionadded:: 2.0
     """
 
-    _state: _WebhookState
+    _state: _WebhookState[SyncWebhook]
 
     def edit(
         self,
