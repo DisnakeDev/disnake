@@ -641,6 +641,9 @@ class DiscordWebSocket:
             try:
                 func(data)
             except BaseException as e:
+                if event in {"READY", "RESUMED"}:  # exceptions in these events are fatal
+                    raise
+
                 self.loop.call_exception_handler(
                     {
                         "task": asyncio.current_task(self.loop),
