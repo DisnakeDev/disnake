@@ -71,7 +71,7 @@ async def cool(ctx):
 
 
 @cool.command(name="bot")
-async def _bot(ctx):
+async def bot_(ctx):
     """Is the bot cool?"""
     await ctx.send("Yes, the bot is cool.")
 
