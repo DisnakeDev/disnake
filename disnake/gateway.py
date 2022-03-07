@@ -638,7 +638,16 @@ class DiscordWebSocket:
         except KeyError:
             _log.debug("Unknown event %s.", event)
         else:
-            func(data)
+            try:
+                func(data)
+            except BaseException as e:
+                self.loop.call_exception_handler(
+                    {
+                        "task": asyncio.current_task(self.loop),
+                        "message": f"Exception occurred in Shard ID {self.shard_id}, {event} gateway event handler",
+                        "exception": e,
+                    }
+                )
 
         # remove the dispatched listeners
         removed: List[int] = []
