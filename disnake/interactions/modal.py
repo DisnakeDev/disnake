@@ -72,6 +72,9 @@ class ModalInteraction(Interaction):
     message: Optional[:class:`Message`]
         The message that this interaction's modal originated from,
         if the modal was sent in response to a component interaction.
+
+        .. versionadded:: 2.5
+
     data: :class:`ModalInteractionData`
         The wrapped interaction data.
     client: :class:`Client`

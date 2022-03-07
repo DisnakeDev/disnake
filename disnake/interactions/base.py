@@ -871,6 +871,9 @@ class InteractionResponse:
         a component interaction or modal interaction (if the modal was sent in
         response to a component interaction).
 
+        .. versionchanged:: 2.5
+            Now supports editing the original message of modal interactions.
+
         .. note::
             If the original message has embeds with images that were created from local files
             (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
