@@ -32,6 +32,8 @@ import disnake.abc
 import disnake.utils
 from disnake.message import Message
 
+from ... import ApplicationCommandInteraction
+
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
@@ -409,3 +411,6 @@ class GuildContext(Context):
     channel: Union[TextChannel, Thread, VoiceChannel]
     author: Member
     me: Member
+
+
+AnyContext = Union[Context, ApplicationCommandInteraction]
