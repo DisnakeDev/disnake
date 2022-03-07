@@ -44,6 +44,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    get_args,
     get_origin,
     get_type_hints,
     overload,
@@ -95,7 +96,15 @@ __all__ = (
 
 
 def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
-    if not isinstance(obj, type) or not isinstance(tp, (type, tuple)):
+    if not isinstance(obj, type):
+        # Assume we have a type hint
+        if get_origin(obj) in (Union, UnionType, Optional):
+            obj = get_args(obj)
+            return any(issubclass(o, tp) for o in obj)
+        else:
+            # Other type hint specializations are not supported
+            return False
+    elif not isinstance(tp, (type, tuple)):
         return False
     return issubclass(obj, tp)
 
