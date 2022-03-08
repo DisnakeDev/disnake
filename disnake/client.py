@@ -94,6 +94,7 @@ if TYPE_CHECKING:
     from .member import Member
     from .message import Message
     from .role import Role
+    from .shard import SessionStartLimit
     from .voice_client import VoiceProtocol
 
 
@@ -265,6 +266,11 @@ class Client:
     asyncio_debug: :class:`bool`
         Whether to enable asyncio debugging when the client starts.
         Defaults to False.
+    session_start_limit: Optional[:class:`SessionStartLimit`]
+        Information about the current session start limit,
+        only set in sharded clients/bots.
+
+        .. versionadded:: 2.5
     """
 
     def __init__(
@@ -281,6 +287,7 @@ class Client:
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.shard_id: Optional[int] = options.get("shard_id")
         self.shard_count: Optional[int] = options.get("shard_count")
+        self.session_start_limit: Optional[SessionStartLimit] = None
 
         connector: Optional[aiohttp.BaseConnector] = options.pop("connector", None)
         proxy: Optional[str] = options.pop("proxy", None)
