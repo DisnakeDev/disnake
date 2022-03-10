@@ -33,6 +33,7 @@ from typing import (
     Coroutine,
     Dict,
     List,
+    Literal,
     Mapping,
     Optional,
     TypeVar,
@@ -41,6 +42,7 @@ from typing import (
 
 from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
+from disnake.permissions import Permissions
 from disnake.utils import async_all, maybe_coroutine, warn_deprecated
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
@@ -67,7 +69,7 @@ if TYPE_CHECKING:
     ]
 
 
-__all__ = ("InvokableApplicationCommand", "guild_permissions")
+__all__ = ("InvokableApplicationCommand", "guild_permissions", "require_permissions")
 
 
 T = TypeVar("T")
@@ -111,8 +113,6 @@ class InvokableApplicationCommand(ABC):
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
-        # only an internal feature for now
-        self.guild_only: bool = kwargs.get("guild_only", False)
 
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
@@ -157,6 +157,21 @@ class InvokableApplicationCommand(ABC):
 
         self._before_invoke: Optional[Hook] = None
         self._after_invoke: Optional[Hook] = None
+
+    @property
+    def default_permission(self) -> bool:
+        """:class:`bool`: Whether this command is usable be default. Deprecated in 2.5."""
+        return self.body.default_permission
+
+    @property
+    def dm_permission(self) -> bool:
+        """:class:`bool`: Whether this command can be used in DMs."""
+        return self.body.dm_permission
+
+    @property
+    def default_member_permissions(self) -> Permissions:
+        """:class:`Permissions`: The default member permissions for this command."""
+        return self.body.default_member_permissions
 
     @property
     def callback(self) -> CommandCallback:
@@ -296,10 +311,6 @@ class InvokableApplicationCommand(ABC):
         """
         This method isn't really usable in this class, but it's usable in subclasses.
         """
-        if self.guild_only and inter.guild_id is None:
-            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
-            return
-
         await self.prepare(inter)
 
         try:
@@ -591,6 +602,29 @@ def guild_permissions(
             if not hasattr(func, "__app_command_permissions__"):
                 func.__app_command_permissions__ = {}  # type: ignore
             func.__app_command_permissions__[guild_id] = perms  # type: ignore
+        return func
+
+    return decorator
+
+
+def require_permissions(**permissions: Literal[True]) -> Callable[[T], T]:
+    """
+    A decorator that sets default required member permissions in all guilds.
+    Unlike :func:`~.ext.commands.has_permissions`, this decorator does not add any checks.
+    Instead, it greys out the command for members without the requested permissions.
+
+    Parameters
+    ----------
+    permissions: Literal[True]
+        Set required permissions for a command.
+    """
+    perms_value = Permissions(**permissions).value
+
+    def decorator(func: T) -> T:
+        if isinstance(func, InvokableApplicationCommand):
+            func.body._default_member_permissions = perms_value
+        else:
+            func.__default_member_permissions__ = perms_value  # type: ignore
         return func
 
     return decorator

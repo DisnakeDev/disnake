@@ -39,6 +39,7 @@ from .enums import (
     try_enum_to_int,
 )
 from .errors import InvalidArgument
+from .permissions import Permissions
 from .role import Role
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
@@ -338,19 +339,57 @@ class ApplicationCommand(ABC):
         The command type
     name: :class:`str`
         The command name
-    default_permission: :class:`bool`
-        Whether the command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
     """
 
     __repr_info__: ClassVar[Tuple[str, ...]] = ("type", "name")
 
-    def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        type: ApplicationCommandType,
+        name: str,
+        default_permission: bool = MISSING,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
+    ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
-        self.default_permission: bool = default_permission
+        self.dm_permission: bool = dm_permission
+
+        self._default_member_permissions: int
+        if default_member_permissions is None:
+            self._default_member_permissions = 0
+        else:
+            self._default_member_permissions = default_member_permissions.value
+
+        self._default_permission: bool
+        if default_permission is not MISSING:
+            warnings.warn(
+                "default_permission is deprecated. "
+                "Please use dm_permission and default_member_permissions instead",
+                DeprecationWarning,
+            )
+            self._default_permission = default_permission
+        else:
+            self._default_permission = True
 
         self._always_synced: bool = False
+
+    @property
+    def default_permission(self) -> bool:
+        """:class:`bool`: Whether this command is usable be default. Deprecated in 2.5."""
+        warnings.warn(
+            "default_permission is deprecated. "
+            "Please use dm_permission and default_member_permissions instead",
+            DeprecationWarning,
+        )
+        return self._default_permission
+
+    @property
+    def default_member_permissions(self) -> Permissions:
+        """:class:`Permissions`: The default member permissions for this command."""
+        return Permissions(self._default_member_permissions)
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
@@ -360,7 +399,8 @@ class ApplicationCommand(ABC):
         return (
             self.type == other.type
             and self.name == other.name
-            and self.default_permission == other.default_permission
+            and self.dm_permission == other.dm_permission
+            and self._default_member_permissions == other._default_member_permissions
         )
 
     def to_dict(self) -> EditApplicationCommandPayload:
@@ -368,8 +408,12 @@ class ApplicationCommand(ABC):
             "type": try_enum_to_int(self.type),
             "name": self.name,
         }
-        if not self.default_permission:
-            data["default_permission"] = False
+
+        if not self.dm_permission:
+            data["dm_permission"] = False
+        if self._default_member_permissions:
+            data["default_member_permissions"] = str(self._default_member_permissions)
+
         return data
 
 
@@ -381,6 +425,9 @@ class _APIApplicationCommandMixin:
         self.application_id: int = int(data["application_id"])
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.version: int = int(data["version"])
+        self.default_permission: bool = data.get("default_permission", True)
+        self.dm_permission: bool = data.get("dm_permission", True)
+        self._default_member_permissions: int = int(data.get("default_member_permissions", 0))
 
 
 class UserCommand(ApplicationCommand):
@@ -391,18 +438,25 @@ class UserCommand(ApplicationCommand):
     ----------
     name: :class:`str`
         The user command's name.
-    default_permission: :class:`bool`
-        Whether the user command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
     """
 
-    __repr_info__ = ("name", "default_permission")
+    __repr_info__ = ("name", "dm_permission", "default_member_permissions")
 
-    def __init__(self, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        name: str,
+        default_permission: bool = MISSING,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
+    ):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
         )
 
 
@@ -416,9 +470,8 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     ----------
     name: :class:`str`
         The user command's name.
-    default_permission: :class:`bool`
-        Whether the user command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
     id: :class:`int`
         The user command's ID.
     application_id: :class:`int`
@@ -437,10 +490,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         if cmd_type != ApplicationCommandType.user.value:
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
-        self = cls(
-            name=data["name"],
-            default_permission=data.get("default_permission", True),
-        )
+        self = cls(name=data["name"])
         self._update_common(data)
         return self
 
@@ -453,18 +503,25 @@ class MessageCommand(ApplicationCommand):
     ----------
     name: :class:`str`
         The message command's name.
-    default_permission: :class:`bool`
-        Whether the message command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
     """
 
-    __repr_info__ = ("name", "default_permission")
+    __repr_info__ = ("name", "dm_permission", "default_member_permissions")
 
-    def __init__(self, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        name: str,
+        default_permission: bool = MISSING,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
+    ):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
         )
 
 
@@ -478,9 +535,8 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     ----------
     name: :class:`str`
         The message command's name.
-    default_permission: :class:`bool`
-        Whether the message command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
     id: :class:`int`
         The message command's ID.
     application_id: :class:`int`
@@ -499,10 +555,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         if cmd_type != ApplicationCommandType.message.value:
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
-        self = cls(
-            name=data["name"],
-            default_permission=data.get("default_permission", True),
-        )
+        self = cls(name=data["name"])
         self._update_common(data)
         return self
 
@@ -515,23 +568,30 @@ class SlashCommand(ApplicationCommand):
     ----------
     name: :class:`str`
         The slash command's name.
-    default_permission: :class:`bool`
-        Whether the slash command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
     description: :class:`str`
         The slash command's description.
     options: List[:class:`Option`]
         The list of options the slash command has.
     """
 
-    __repr_info__ = ("name", "description", "options", "default_permission")
+    __repr_info__ = (
+        "name",
+        "description",
+        "options",
+        "dm_permission",
+        "default_member_permissions",
+    )
 
     def __init__(
         self,
         name: str,
         description: str,
         options: List[Option] = None,
-        default_permission: bool = True,
+        default_permission: bool = MISSING,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
     ):
         name = name.lower()
         _validate_name(name)
@@ -540,6 +600,8 @@ class SlashCommand(ApplicationCommand):
             type=ApplicationCommandType.chat_input,
             name=name,
             default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
         )
         self.description: str = description
         self.options: List[Option] = options or []
@@ -602,9 +664,8 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     ----------
     name: :class:`str`
         The slash command's name.
-    default_permission: :class:`bool`
-        Whether the slash command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
     id: :class:`int`
         The slash command's ID.
     description: :class:`str`
@@ -630,7 +691,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         self = cls(
             name=data["name"],
             description=data["description"],
-            default_permission=data.get("default_permission", True),
             options=_maybe_cast(
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
             ),

@@ -48,6 +48,8 @@ class _ApplicationCommandOptional(TypedDict, total=False):
     guild_id: Snowflake
     options: List[ApplicationCommandOption]
     default_permission: bool
+    default_member_permissions: str
+    dm_permission: bool
 
 
 class ApplicationCommand(_ApplicationCommandOptional):
@@ -283,6 +285,8 @@ class _EditApplicationCommandOptional(TypedDict, total=False):
     description: str
     options: Optional[List[ApplicationCommandOption]]
     default_permission: bool
+    default_member_permissions: str
+    dm_permission: bool
     type: ApplicationCommandType
 
 

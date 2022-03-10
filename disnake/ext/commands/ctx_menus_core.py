@@ -26,6 +26,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.utils import MISSING
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -33,6 +34,7 @@ from .params import safe_call
 
 if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction
+    from disnake.permissions import Permissions
 
     from .base_core import InteractionCommandCallback
 
@@ -73,7 +75,9 @@ class InvokableUserCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback,
         *,
         name: str = None,
-        default_permission: bool = True,
+        default_permission: bool = MISSING,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -81,7 +85,13 @@ class InvokableUserCommand(InvokableApplicationCommand):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = UserCommand(name=self.name, default_permission=default_permission)
+        self.body = UserCommand(
+            name=self.name,
+            default_permission=default_permission,
+            dm_permission=dm_permission and not kwargs.get("guild_only", False),
+            default_member_permissions=default_member_permissions
+            or Permissions(getattr(func, "__default_member_permissions__", 0)),
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -144,7 +154,9 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback,
         *,
         name: str = None,
-        default_permission: bool = True,
+        default_permission: bool = MISSING,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -152,7 +164,13 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = MessageCommand(name=self.name, default_permission=default_permission)
+        self.body = MessageCommand(
+            name=self.name,
+            default_permission=default_permission,
+            dm_permission=dm_permission and not kwargs.get("guild_only", False),
+            default_member_permissions=default_member_permissions
+            or Permissions(getattr(func, "__default_member_permissions__", 0)),
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -184,9 +202,11 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: str = None,
-    default_permission: bool = True,
+    dm_permission: bool = True,
+    default_member_permissions: Permissions = None,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
+    default_permission: bool = MISSING,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
@@ -195,9 +215,10 @@ def user_command(
     ----------
     name: :class:`str`
         The name of the user command (defaults to the function name).
-    default_permission: :class:`bool`
-        Whether the command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+    default_member_permissions: :class:`Permissions`
+        The default required permissions for this command.
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
@@ -221,6 +242,8 @@ def user_command(
             func,
             name=name,
             default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             **kwargs,
@@ -232,9 +255,11 @@ def user_command(
 def message_command(
     *,
     name: str = None,
-    default_permission: bool = True,
+    dm_permission: bool = True,
+    default_member_permissions: Permissions = None,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
+    default_permission: bool = MISSING,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
     """A shortcut decorator that builds a message command.
@@ -243,9 +268,10 @@ def message_command(
     ----------
     name: :class:`str`
         The name of the message command (defaults to the function name).
-    default_permission: :class:`bool`
-        Whether the command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+    default_member_permissions: :class:`Permissions`
+        The default required permissions for this command.
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
@@ -269,6 +295,8 @@ def message_command(
             func,
             name=name,
             default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             **kwargs,

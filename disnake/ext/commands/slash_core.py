@@ -37,6 +37,7 @@ from .params import call_param_func, expand_params
 
 if TYPE_CHECKING:
     from disnake.app_commands import Choices
+    from disnake.permissions import Permissions
 
     from .base_core import CommandCallback
 
@@ -239,10 +240,6 @@ class SubCommand(InvokableApplicationCommand):
         return await _call_autocompleter(self, param, inter, user_input)
 
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
-        if self.guild_only and inter.guild_id is None:
-            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
-            return
-
         for k, v in self.connectors.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
@@ -315,7 +312,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name: str = None,
         description: str = None,
         options: List[Option] = None,
-        default_permission: bool = True,
+        default_permission: bool = utils.MISSING,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
@@ -339,6 +338,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             description=description or "-",
             options=options or [],
             default_permission=default_permission,
+            dm_permission=dm_permission and not kwargs.get("guild_only", False),
+            default_member_permissions=default_member_permissions
+            or Permissions(getattr(func, "__default_member_permissions__", 0)),
         )
         # `SlashCommand.__init__` converts names to lowercase, need to use that name here as well
         self.qualified_name = self.name = self.body.name
@@ -350,10 +352,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     @property
     def options(self) -> List[Option]:
         return self.body.options
-
-    @property
-    def default_permission(self) -> bool:
-        return self.body.default_permission
 
     def sub_command(
         self,
@@ -521,10 +519,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                     raise
 
     async def invoke(self, inter: ApplicationCommandInteraction):
-        if self.guild_only and inter.guild_id is None:
-            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
-            return
-
         await self.prepare(inter)
 
         try:
