@@ -872,6 +872,7 @@ class InteractionResponse:
         response to a component interaction).
 
         .. versionchanged:: 2.5
+
             Now supports editing the original message of modal interactions.
 
         .. note::
