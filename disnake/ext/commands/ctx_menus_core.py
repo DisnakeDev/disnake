@@ -26,6 +26,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.permissions import Permissions
 from disnake.utils import MISSING
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
@@ -34,7 +35,6 @@ from .params import safe_call
 
 if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction
-    from disnake.permissions import Permissions
 
     from .base_core import InteractionCommandCallback
 
