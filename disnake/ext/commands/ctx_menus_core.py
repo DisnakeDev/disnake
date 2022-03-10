@@ -88,7 +88,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self.body = UserCommand(
             name=self.name,
             default_permission=default_permission,
-            dm_permission=dm_permission and not kwargs.get("guild_only", False),
+            dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions
             or Permissions(getattr(func, "__default_member_permissions__", 0)),
         )
@@ -167,7 +167,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         self.body = MessageCommand(
             name=self.name,
             default_permission=default_permission,
-            dm_permission=dm_permission and not kwargs.get("guild_only", False),
+            dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions
             or Permissions(getattr(func, "__default_member_permissions__", 0)),
         )

@@ -113,6 +113,9 @@ class InvokableApplicationCommand(ABC):
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
+        # Annotation parser needs this attribute because body doesn't exist at this moment.
+        # We will use this attribute later in order to set the dm_permission.
+        self._guild_only: bool = kwargs.get("guild_only", False)
 
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
