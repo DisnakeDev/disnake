@@ -3651,9 +3651,10 @@ class Guild(Hashable):
         self,
         command_id: int,
         *,
-        permissions: Mapping[Union[Role, ABCUser], bool] = None,
+        permissions: Mapping[Union[Role, ABCUser, abc.GuildChannel], bool] = None,
         role_ids: Mapping[int, bool] = None,
         user_ids: Mapping[int, bool] = None,
+        channel_ids: Mapping[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
         """
         Edits guild permissions of a single command.
@@ -3662,12 +3663,14 @@ class Guild(Hashable):
         ----------
         command_id: :class:`int`
             The ID of the application command you want to apply these permissions to.
-        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
-            Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
+        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`, :class:`disnake.abc.GuildChannel`], :class:`bool`]
+            Roles or users or channels to booleans. ``True`` means "allow", ``False`` means "deny".
         role_ids: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.
         user_ids: Mapping[:class:`int`, :class:`bool`]
             User IDs to booleans.
+        channel_ids: Mapping[:class:`int`, :class:`bool`]
+            Channel IDs to booleans.
 
         Returns
         -------
@@ -3679,6 +3682,7 @@ class Guild(Hashable):
             permissions=permissions,
             role_ids=role_ids,
             user_ids=user_ids,
+            channel_ids=channel_ids,
         )
         return await self._state.edit_command_permissions(self.id, perms)
 

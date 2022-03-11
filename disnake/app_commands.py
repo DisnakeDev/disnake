@@ -28,7 +28,7 @@ import warnings
 from abc import ABC
 from typing import TYPE_CHECKING, ClassVar, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
-from .abc import User
+from .abc import User, GuildChannel
 from .custom_warnings import ConfigWarning
 from .enums import (
     ApplicationCommandType,
@@ -95,6 +95,52 @@ def application_command_factory(data: ApplicationCommandPayload) -> APIApplicati
         return APIMessageCommand.from_dict(data)
 
     raise TypeError(f"Application command of type {cmd_type} is not valid")
+
+
+def kwargs_to_application_command_permissions(
+    *,
+    permissions: Mapping[Union[Role, User, GuildChannel], bool] = None,
+    role_ids: Mapping[int, bool] = None,
+    user_ids: Mapping[int, bool] = None,
+    channel_ids: Mapping[int, bool] = None,
+) -> List[ApplicationCommandPermissions]:
+    perms: List[ApplicationCommandPermissions] = []
+
+    if permissions is not None:
+        for obj, value in permissions.items():
+            if isinstance(obj, Role):
+                target_type = 1
+            elif isinstance(obj, User):
+                target_type = 2
+            elif isinstance(obj, GuildChannel):
+                target_type = 3
+            else:
+                raise ValueError("Permission target should be an instance of Role or abc.User")
+            perms.append(
+                ApplicationCommandPermissions.from_attributes(
+                    id=obj.id, type=target_type, permission=value
+                )
+            )
+
+    if role_ids is not None:
+        for item_id, value in role_ids.items():
+            perms.append(
+                ApplicationCommandPermissions.from_attributes(id=item_id, type=1, permission=value)
+            )
+
+    if user_ids is not None:
+        for item_id, value in user_ids.items():
+            perms.append(
+                ApplicationCommandPermissions.from_attributes(id=item_id, type=2, permission=value)
+            )
+
+    if channel_ids is not None:
+        for item_id, value in channel_ids.items():
+            perms.append(
+                ApplicationCommandPermissions.from_attributes(id=item_id, type=3, permission=value)
+            )
+
+    return perms
 
 
 def _validate_name(name: str) -> None:
@@ -425,9 +471,10 @@ class _APIApplicationCommandMixin:
         self.application_id: int = int(data["application_id"])
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.version: int = int(data["version"])
-        self.default_permission: bool = data.get("default_permission", True)
         self.dm_permission: bool = data.get("dm_permission", True)
-        self._default_member_permissions: int = int(data.get("default_member_permissions", 0))
+        self._default_permission: bool = data.get("default_permission", True)
+        # here we're using "or 0" instead of .get(..., 0) because the field can be literally None
+        self._default_member_permissions: int = int(data.get("default_member_permissions") or 0)
 
 
 class UserCommand(ApplicationCommand):
@@ -708,7 +755,7 @@ class ApplicationCommandPermissions:
         The ID of the role or user.
     type: :class:`int`
         The type of the target.
-        1 if target is a role; 2 if target is a user.
+        1 if target is a role; 2 if target is a user; 3 if target is a channel.
     permission: :class:`bool`
         Whether to allow or deny the access to the application command.
     """
@@ -727,6 +774,14 @@ class ApplicationCommandPermissions:
         return (
             self.id == other.id and self.type == other.type and self.permission == other.permission
         )
+
+    @classmethod
+    def from_attributes(cls, *, id: int, type: ApplicationCommandPermissionType, permission: bool):
+        self = cls.__new__(cls)
+        self.id = id
+        self.type = type
+        self.permission = permission
+        return self
 
     def to_dict(self) -> ApplicationCommandPermissionsPayload:
         return {"id": self.id, "type": self.type, "permission": self.permission}
@@ -776,45 +831,38 @@ class GuildApplicationCommandPermissions:
     async def edit(
         self,
         *,
-        permissions: Dict[Union[Role, User], bool] = None,
-        role_ids: Dict[int, bool] = None,
-        user_ids: Dict[int, bool] = None,
+        permissions: Mapping[Union[Role, User, GuildChannel], bool] = None,
+        role_ids: Mapping[int, bool] = None,
+        user_ids: Mapping[int, bool] = None,
+        channel_ids: Mapping[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
         """Replaces the current permissions with the specified ones.
 
         Parameters
         ----------
-        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
-            Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
+        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`, :class:`disnake.abc.GuildChannel`], :class:`bool`]
+            Roles or users or channels to booleans. ``True`` means "allow", ``False`` means "deny".
         role_ids: Mapping[:class:`int`, :class:`bool`]
             Role IDs to booleans.
         user_ids: Mapping[:class:`int`, :class:`bool`]
             User IDs to booleans.
+        channel_ids: Mapping[:class:`int`, :class:`bool`]
+            Channel IDs to booleans.
 
         Returns
         -------
         :class:`GuildApplicationCommandPermissions`
             The newly updated permissions.
         """
-        data: List[ApplicationCommandPermissionsPayload] = []
-
-        if permissions is not None:
-            for obj, value in permissions.items():
-                if isinstance(obj, Role):
-                    target_type = 1
-                elif isinstance(obj, User):
-                    target_type = 2
-                else:
-                    raise ValueError("Permission target should be an instance of Role or abc.User")
-                data.append({"id": obj.id, "type": target_type, "permission": value})
-
-        if role_ids is not None:
-            for role_id, value in role_ids.items():
-                data.append({"id": role_id, "type": 1, "permission": value})
-
-        if user_ids is not None:
-            for user_id, value in user_ids.items():
-                data.append({"id": user_id, "type": 2, "permission": value})
+        data: List[ApplicationCommandPermissionsPayload] = [
+            permission.to_dict()
+            for permission in kwargs_to_application_command_permissions(
+                permissions=permissions,
+                role_ids=role_ids,
+                user_ids=user_ids,
+                channel_ids=channel_ids,
+            )
+        ]
 
         res = await self._state.http.edit_application_command_permissions(
             self.application_id, self.guild_id, self.id, {"permissions": data}
@@ -830,57 +878,33 @@ class PartialGuildApplicationCommandPermissions:
     ----------
     command_id: :class:`int`
         The ID of the application command you want to apply these permissions to.
-    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
-        Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
+    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`, :class:`disnake.abc.GuildChannel`], :class:`bool`]
+        Roles or users or channels to booleans. ``True`` means "allow", ``False`` means "deny".
     role_ids: Mapping[:class:`int`, :class:`bool`]
         Role IDs to booleans.
     user_ids: Mapping[:class:`int`, :class:`bool`]
         User IDs to booleans.
+    channel_ids: Mapping[:class:`int`, :class:`bool`]
+        Channel IDs to booleans.
     """
 
     def __init__(
         self,
         command_id: int,
         *,
-        permissions: Mapping[Union[Role, User], bool] = None,
+        permissions: Mapping[Union[Role, User, GuildChannel], bool] = None,
         role_ids: Mapping[int, bool] = None,
         user_ids: Mapping[int, bool] = None,
+        channel_ids: Mapping[int, bool] = None,
     ):
         self.id: int = command_id
-        self.permissions: List[ApplicationCommandPermissions] = []
-
-        if permissions is not None:
-            for obj, value in permissions.items():
-                if isinstance(obj, Role):
-                    target_type = 1
-                elif isinstance(obj, User):
-                    target_type = 2
-                else:
-                    raise ValueError("Permission target should be an instance of Role or abc.User")
-                data: ApplicationCommandPermissionsPayload = {
-                    "id": obj.id,
-                    "type": target_type,
-                    "permission": value,
-                }
-                self.permissions.append(ApplicationCommandPermissions(data=data))
-
-        if role_ids is not None:
-            for role_id, value in role_ids.items():
-                data: ApplicationCommandPermissionsPayload = {
-                    "id": role_id,
-                    "type": 1,
-                    "permission": value,
-                }
-                self.permissions.append(ApplicationCommandPermissions(data=data))
-
-        if user_ids is not None:
-            for user_id, value in user_ids.items():
-                data: ApplicationCommandPermissionsPayload = {
-                    "id": user_id,
-                    "type": 2,
-                    "permission": value,
-                }
-                self.permissions.append(ApplicationCommandPermissions(data=data))
+        self.permissions: List[ApplicationCommandPermissions]
+        self.permissions = kwargs_to_application_command_permissions(
+            permissions=permissions,
+            role_ids=role_ids,
+            user_ids=user_ids,
+            channel_ids=channel_ids,
+        )
 
     def to_dict(self) -> PartialGuildApplicationCommandPermissionsPayload:
         return {
@@ -898,12 +922,14 @@ class UnresolvedGuildApplicationCommandPermissions:
 
     Parameters
     ----------
-    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
-        Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
+    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`, :class:`disnake.abc.GuildChannel`], :class:`bool`]
+        Roles or users or channels to booleans. ``True`` means "allow", ``False`` means "deny".
     role_ids: Mapping[:class:`int`, :class:`bool`]
         Role IDs to booleans.
     user_ids: Mapping[:class:`int`, :class:`bool`]
         User IDs to booleans.
+    channel_ids: Mapping[:class:`int`, :class:`bool`]
+        Channel IDs to booleans.
     owner: :class:`bool`
         Whether to allow or deny the bot owner(s).
     """
@@ -911,14 +937,16 @@ class UnresolvedGuildApplicationCommandPermissions:
     def __init__(
         self,
         *,
-        permissions: Mapping[Union[Role, User], bool] = None,
+        permissions: Mapping[Union[Role, User, GuildChannel], bool] = None,
         role_ids: Mapping[int, bool] = None,
         user_ids: Mapping[int, bool] = None,
+        channel_ids: Mapping[int, bool] = None,
         owner: bool = None,
     ):
-        self.permissions: Optional[Mapping[Union[Role, User], bool]] = permissions
+        self.permissions: Optional[Mapping[Union[Role, User, GuildChannel], bool]] = permissions
         self.role_ids: Optional[Mapping[int, bool]] = role_ids
         self.user_ids: Optional[Mapping[int, bool]] = user_ids
+        self.channel_ids: Optional[Mapping[int, bool]] = channel_ids
         self.owner: Optional[bool] = owner
 
     def resolve(
@@ -965,4 +993,5 @@ class UnresolvedGuildApplicationCommandPermissions:
             permissions=self.permissions,
             role_ids=self.role_ids,
             user_ids=resolved_users,
+            channel_ids=self.channel_ids,
         )
