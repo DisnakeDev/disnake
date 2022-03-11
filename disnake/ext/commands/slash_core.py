@@ -338,7 +338,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             description=description or "-",
             options=options or [],
             default_permission=default_permission,
-            dm_permission=dm_permission and not kwargs.get("guild_only", False),
+            dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions
             or Permissions(getattr(func, "__default_member_permissions__", 0)),
         )
