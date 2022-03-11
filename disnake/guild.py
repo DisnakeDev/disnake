@@ -1930,6 +1930,12 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
+        If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
+
+        - ``channel_id`` should be not be set
+        - ``entity_metadata`` with a location field must be provided
+        - ``scheduled_end_time`` must be provided
+
         .. versionadded:: 2.3
 
         Parameters
@@ -2864,8 +2870,8 @@ class Guild(Hashable):
         color: Union[Colour, int] = MISSING,
         colour: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
-        icon: bytes = MISSING,
-        emoji: str = MISSING,
+        icon: Optional[bytes] = MISSING,
+        emoji: Optional[str] = MISSING,
         mentionable: bool = MISSING,
         reason: Optional[str] = None,
     ) -> Role:
