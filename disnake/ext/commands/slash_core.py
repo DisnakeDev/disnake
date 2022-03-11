@@ -551,10 +551,12 @@ def slash_command(
     *,
     name: str = None,
     description: str = None,
+    dm_permission: bool = True,
+    default_member_permissions: Permissions = None,
     options: List[Option] = None,
-    default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
+    default_permission: bool = utils.MISSING,
     auto_sync: bool = True,
     **kwargs,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
@@ -571,9 +573,10 @@ def slash_command(
     options: List[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
-    default_permission: :class:`bool`
-        Whether the command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+    default_member_permissions: :class:`Permissions`
+        The default required permissions for this command.
     guild_ids: List[:class:`int`]
         If specified, the client will register a command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
@@ -603,6 +606,8 @@ def slash_command(
             description=description,
             options=options,
             default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,

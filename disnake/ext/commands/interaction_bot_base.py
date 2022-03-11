@@ -67,6 +67,7 @@ from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slas
 
 if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction
+    from disnake.permissions import Permissions
 
     from ._types import Check, CoroFunc
     from .base_core import CommandCallback, InteractionCommandCallback
@@ -423,11 +424,13 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: str = None,
         description: str = None,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
         options: List[Option] = None,
-        default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
+        default_permission: bool = MISSING,
         **kwargs,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         """A shortcut decorator that invokes :func:`.slash_command` and adds it to
@@ -442,9 +445,10 @@ class InteractionBotBase(CommonBotBase):
         options: List[:class:`.Option`]
             The list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
-        default_permission: :class:`bool`
-            Whether the command is enabled by default. If set to ``False``, this command
-            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+        dm_permission: :class:`bool`
+            Whether this command can be used in DMs.
+        default_member_permissions: :class:`Permissions`
+            The default required permissions for this command.
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: List[:class:`int`]
@@ -469,6 +473,8 @@ class InteractionBotBase(CommonBotBase):
                 description=description,
                 options=options,
                 default_permission=default_permission,
+                dm_permission=dm_permission,
+                default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
@@ -483,9 +489,11 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: str = None,
-        default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
+        default_permission: bool = MISSING,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
         """A shortcut decorator that invokes :func:`.user_command` and adds it to
@@ -495,9 +503,10 @@ class InteractionBotBase(CommonBotBase):
         ----------
         name: :class:`str`
             The name of the user command (defaults to function name).
-        default_permission: :class:`bool`
-            Whether the command is enabled by default. If set to ``False``, this command
-            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+        dm_permission: :class:`bool`
+            Whether this command can be used in DMs.
+        default_member_permissions: :class:`Permissions`
+            The default required permissions for this command.
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
         guild_ids: List[:class:`int`]
@@ -514,6 +523,8 @@ class InteractionBotBase(CommonBotBase):
             result = user_command(
                 name=name,
                 default_permission=default_permission,
+                dm_permission=dm_permission,
+                default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 **kwargs,
@@ -527,9 +538,11 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: str = None,
-        default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Permissions = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
+        default_permission: bool = MISSING,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
         """A shortcut decorator that invokes :func:`.message_command` and adds it to
@@ -539,9 +552,10 @@ class InteractionBotBase(CommonBotBase):
         ----------
         name: :class:`str`
             The name of the message command (defaults to function name).
-        default_permission: :class:`bool`
-            Whether the command is enabled by default. If set to ``False``, this command
-            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+        dm_permission: :class:`bool`
+            Whether this command can be used in DMs.
+        default_member_permissions: :class:`Permissions`
+            The default required permissions for this command.
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: List[:class:`int`]
@@ -558,6 +572,8 @@ class InteractionBotBase(CommonBotBase):
             result = message_command(
                 name=name,
                 default_permission=default_permission,
+                dm_permission=dm_permission,
+                default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 **kwargs,
