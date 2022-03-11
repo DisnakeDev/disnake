@@ -981,12 +981,22 @@ class ConnectionState:
 
     def parse_channel_delete(self, data) -> None:
         guild = self._get_guild(utils._get_as_snowflake(data, "guild_id"))
+        if guild is None:
+            return
+
         channel_id = int(data["id"])
-        if guild is not None:
-            channel = guild.get_channel(channel_id)
-            if channel is not None:
-                guild._remove_channel(channel)
-                self.dispatch("guild_channel_delete", channel)
+        channel = guild.get_channel(channel_id)
+        if channel is None:
+            return
+
+        guild._remove_channel(channel)
+        self.dispatch("guild_channel_delete", channel)
+
+        if channel.type in (ChannelType.voice, ChannelType.stage_voice):
+            for event_id, scheduled_event in list(guild._scheduled_events.items()):
+                if scheduled_event.channel_id == channel_id:
+                    guild._scheduled_events.pop(event_id)
+                    self.dispatch("guild_scheduled_event_delete", scheduled_event)
 
     def parse_channel_update(self, data) -> None:
         channel_type = try_enum(ChannelType, data.get("type"))
