@@ -28,7 +28,7 @@ import warnings
 from abc import ABC
 from typing import TYPE_CHECKING, ClassVar, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
-from .abc import User, GuildChannel
+from .abc import GuildChannel, User
 from .custom_warnings import ConfigWarning
 from .enums import (
     ApplicationCommandType,
