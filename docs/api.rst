@@ -1582,6 +1582,8 @@ of :class:`enum.Enum`.
 
     Represents the type of a voice channel activity/application.
 
+    .. attribute:: poker
+
         The "Poker Night" activity.
     .. attribute:: betrayal
 
