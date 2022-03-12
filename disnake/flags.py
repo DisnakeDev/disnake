@@ -846,6 +846,8 @@ class Intents(BaseFlags):
         - Messages in which the bot is mentioned
         - Messages received from an interaction payload, these will typically be attributes on :class:`~disnake.MessageInteraction` instances
 
+        For more information go to the :ref:`message content intent documentation <need_message_content_intent>`.
+
         .. note::
 
             Currently, this requires opting in explicitly via the developer portal as well.
