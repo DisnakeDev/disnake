@@ -436,6 +436,7 @@ class ApplicationCommand(ABC):
         return (
             self.type == other.type
             and self.name == other.name
+            and self.default_permission == other.default_permission
             and self.dm_permission == other.dm_permission
             and self._default_member_permissions == other._default_member_permissions
         )
