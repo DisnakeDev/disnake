@@ -409,28 +409,19 @@ class ApplicationCommand(ABC):
         else:
             self._default_member_permissions = default_member_permissions.value
 
-        self._default_permission: bool
+        self.default_permission: bool
         if default_permission is not MISSING:
             warnings.warn(
                 "default_permission is deprecated. "
                 "Please use dm_permission and default_member_permissions instead",
                 DeprecationWarning,
+                stacklevel=2,
             )
-            self._default_permission = default_permission
+            self.default_permission = default_permission
         else:
-            self._default_permission = True
+            self.default_permission = True
 
         self._always_synced: bool = False
-
-    @property
-    def default_permission(self) -> bool:
-        """:class:`bool`: Whether this command is usable be default. Deprecated in 2.5."""
-        warnings.warn(
-            "default_permission is deprecated. "
-            "Please use dm_permission and default_member_permissions instead",
-            DeprecationWarning,
-        )
-        return self._default_permission
 
     @property
     def default_member_permissions(self) -> Permissions:
@@ -455,6 +446,8 @@ class ApplicationCommand(ABC):
             "name": self.name,
         }
 
+        if not self.default_permission:
+            data["default_permission"] = False
         if not self.dm_permission:
             data["dm_permission"] = False
         if self._default_member_permissions:
@@ -472,7 +465,7 @@ class _APIApplicationCommandMixin:
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.version: int = int(data["version"])
         self.dm_permission: bool = data.get("dm_permission", True)
-        self._default_permission: bool = data.get("default_permission", True)
+        self.default_permission: bool = data.get("default_permission", True)
         # here we're using "or 0" instead of .get(..., 0) because the field can be literally None
         self._default_member_permissions: int = int(data.get("default_member_permissions") or 0)
 

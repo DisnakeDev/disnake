@@ -612,7 +612,7 @@ def guild_permissions(
 
 def require_permissions(**permissions: Literal[True]) -> Callable[[T], T]:
     """
-    A decorator that sets default required member permissions in all guilds.
+    A decorator that sets default required member permissions for the command.
     Unlike :func:`~.ext.commands.has_permissions`, this decorator does not add any checks.
     Instead, it greys out the command for members without the requested permissions.
 
