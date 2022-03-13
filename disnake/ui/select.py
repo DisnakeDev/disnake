@@ -127,9 +127,9 @@ class Select(Item[V]):
         self._provided_custom_id = custom_id is not MISSING
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
         options = [] if options is MISSING else _parse_select_options(options)
-        self._underlying = SelectMenu._raw_construct(
+        self._underlying = SelectMenu._raw_construct(ComponentType.select)
+        self._underlying._update(
             custom_id=custom_id,
-            type=ComponentType.select,
             placeholder=placeholder,
             min_values=min_values,
             max_values=max_values,

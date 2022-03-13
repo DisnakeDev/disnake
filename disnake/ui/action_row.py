@@ -75,10 +75,8 @@ class ActionRow:
 
             raw_components.append(component._underlying)
 
-        self._underlying = ActionRowComponent._raw_construct(
-            type=ComponentType.action_row,
-            children=raw_components,
-        )
+        self._underlying = ActionRowComponent._raw_construct(type=ComponentType.action_row)
+        self._underlying._update(children=raw_components)
 
     def __repr__(self) -> str:
         return f"<ActionRow children={self.children!r}>"

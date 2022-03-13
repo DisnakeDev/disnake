@@ -25,25 +25,15 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, TypeVar, Union, cast
 
 from .enums import ButtonStyle, ComponentType, TextInputStyle, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, get_slots
+from .utils import MISSING
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .emoji import Emoji
     from .types.components import (
         ActionRow as ActionRowPayload,
@@ -71,14 +61,15 @@ NestedComponent = Union["Button", "SelectMenu", "TextInput"]
 class Component:
     """Represents a Discord Bot UI Kit Component.
 
+    This type isn't meant to be constructed manually; use one of the
+    concrete components instead.
+
     Currently, the only components supported by Discord are:
 
     - :class:`ActionRow`
     - :class:`Button`
     - :class:`SelectMenu`
     - :class:`TextInput`
-
-    This class is abstract and cannot be instantiated.
 
     .. versionadded:: 2.0
 
@@ -91,26 +82,19 @@ class Component:
     __slots__: Tuple[str, ...] = ("type",)
 
     __repr_info__: ClassVar[Tuple[str, ...]]
-    type: ComponentType
+
+    def __init__(self, data: ComponentPayload):
+        self.type: ComponentType = try_enum(ComponentType, data["type"])
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
         return f"<{self.__class__.__name__} {attrs}>"
 
     @classmethod
-    def _raw_construct(cls: Type[C], **kwargs) -> C:
-        self: C = cls.__new__(cls)
-        for slot in get_slots(cls):
-            try:
-                value = kwargs[slot]
-            except KeyError:
-                pass
-            else:
-                setattr(self, slot, value)
-        return self
-
-    def to_dict(self) -> Dict[str, Any]:
-        raise NotImplementedError
+    def _raw_construct(cls, type: ComponentType) -> Self:
+        c = cls.__new__(cls)
+        c.type = type
+        return c
 
 
 class ActionRow(Component):
@@ -135,10 +119,15 @@ class ActionRow(Component):
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: ComponentPayload):
-        self.type: ComponentType = try_enum(ComponentType, data["type"])
-        self.children: List[NestedComponent] = [  # type: ignore
-            _component_factory(d) for d in data.get("components", [])
-        ]
+        super().__init__(data)
+        self._update(
+            children=[
+                cast("NestedComponent", _component_factory(d)) for d in data.get("components", [])
+            ]
+        )
+
+    def _update(self, *, children: List[NestedComponent]) -> None:
+        self.children: List[NestedComponent] = children
 
     def to_dict(self) -> ActionRowPayload:
         return {
@@ -188,17 +177,32 @@ class Button(Component):
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: ButtonComponentPayload):
-        self.type: ComponentType = try_enum(ComponentType, data["type"])
-        self.style: ButtonStyle = try_enum(ButtonStyle, data["style"])
-        self.custom_id: Optional[str] = data.get("custom_id")
-        self.url: Optional[str] = data.get("url")
-        self.disabled: bool = data.get("disabled", False)
-        self.label: Optional[str] = data.get("label")
-        self.emoji: Optional[PartialEmoji]
-        try:
-            self.emoji = PartialEmoji.from_dict(data["emoji"])
-        except KeyError:
-            self.emoji = None
+        super().__init__(data)
+        self._update(
+            style=try_enum(ButtonStyle, data["style"]),
+            custom_id=data.get("custom_id"),
+            url=data.get("url"),
+            disabled=data.get("disabled", False),
+            label=data.get("label"),
+            emoji=PartialEmoji.from_dict(data["emoji"]) if "emoji" in data else None,
+        )
+
+    def _update(
+        self,
+        *,
+        style: ButtonStyle,
+        custom_id: Optional[str],
+        url: Optional[str],
+        disabled: bool,
+        label: Optional[str],
+        emoji: Optional[PartialEmoji],
+    ) -> None:
+        self.style: ButtonStyle = style
+        self.custom_id: Optional[str] = custom_id
+        self.url: Optional[str] = url
+        self.disabled: bool = disabled
+        self.label: Optional[str] = label
+        self.emoji: Optional[PartialEmoji] = emoji
 
     def to_dict(self) -> ButtonComponentPayload:
         payload = {
@@ -262,15 +266,32 @@ class SelectMenu(Component):
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: SelectMenuPayload):
-        self.type = ComponentType.select
-        self.custom_id: str = data["custom_id"]
-        self.placeholder: Optional[str] = data.get("placeholder")
-        self.min_values: int = data.get("min_values", 1)
-        self.max_values: int = data.get("max_values", 1)
-        self.options: List[SelectOption] = [
-            SelectOption.from_dict(option) for option in data.get("options", [])
-        ]
-        self.disabled: bool = data.get("disabled", False)
+        super().__init__(data)
+        self._update(
+            custom_id=data["custom_id"],
+            placeholder=data.get("placeholder"),
+            min_values=data.get("min_values", 1),
+            max_values=data.get("max_values", 1),
+            options=[SelectOption.from_dict(option) for option in data.get("options", [])],
+            disabled=data.get("disabled", False),
+        )
+
+    def _update(
+        self,
+        *,
+        custom_id: str,
+        placeholder: Optional[str],
+        min_values: int,
+        max_values: int,
+        options: List[SelectOption],
+        disabled: bool,
+    ) -> None:
+        self.custom_id: str = custom_id
+        self.placeholder: Optional[str] = placeholder
+        self.min_values: int = min_values
+        self.max_values: int = max_values
+        self.options: List[SelectOption] = options
+        self.disabled: bool = disabled
 
     def to_dict(self) -> SelectMenuPayload:
         payload: SelectMenuPayload = {
@@ -438,17 +459,38 @@ class TextInput(Component):
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: TextInputPayload) -> None:
-        style = data.get("style", TextInputStyle.short.value)
+        super().__init__(data)
+        self._update(
+            custom_id=data["custom_id"],
+            style=try_enum(TextInputStyle, data.get("style", TextInputStyle.short.value)),
+            label=data.get("label"),
+            placeholder=data.get("placeholder"),
+            value=data.get("value"),
+            required=data.get("required", True),
+            min_length=data.get("min_length"),
+            max_length=data.get("max_length"),
+        )
 
-        self.type: ComponentType = try_enum(ComponentType, data["type"])
-        self.custom_id: str = data["custom_id"]
-        self.style: TextInputStyle = try_enum(TextInputStyle, style)
-        self.label: Optional[str] = data.get("label")
-        self.placeholder: Optional[str] = data.get("placeholder")
-        self.value: Optional[str] = data.get("value")
-        self.required: bool = data.get("required", True)
-        self.min_length: Optional[int] = data.get("min_length")
-        self.max_length: Optional[int] = data.get("max_length")
+    def _update(
+        self,
+        *,
+        custom_id: str,
+        style: TextInputStyle,
+        label: Optional[str],
+        placeholder: Optional[str],
+        value: Optional[str],
+        required: bool,
+        min_length: Optional[int],
+        max_length: Optional[int],
+    ) -> None:
+        self.custom_id: str = custom_id
+        self.style: TextInputStyle = style
+        self.label: Optional[str] = label
+        self.placeholder: Optional[str] = placeholder
+        self.value: Optional[str] = value
+        self.required: bool = required
+        self.min_length: Optional[int] = min_length
+        self.max_length: Optional[int] = max_length
 
     def to_dict(self) -> TextInputPayload:
         payload: TextInputPayload = {
@@ -487,5 +529,4 @@ def _component_factory(data: ComponentPayload) -> Component:
     elif component_type == 4:
         return TextInput(data)  # type: ignore
     else:
-        as_enum = try_enum(ComponentType, component_type)
-        return Component._raw_construct(type=as_enum)
+        return Component._raw_construct(try_enum(ComponentType, component_type))

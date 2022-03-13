@@ -85,8 +85,8 @@ class TextInput(WrappedComponent):
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
-        self._underlying = TextInputComponent._raw_construct(
-            type=ComponentType.text_input,
+        self._underlying = TextInputComponent._raw_construct(ComponentType.text_input)
+        self._underlying._update(
             style=style,
             label=label,
             custom_id=custom_id,
