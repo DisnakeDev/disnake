@@ -120,7 +120,7 @@ class Button(Item[V]):
                     f"expected emoji to be str, Emoji, or PartialEmoji not {emoji.__class__}"
                 )
 
-        self._underlying = ButtonComponent._raw_construct(type=ComponentType.button)
+        self._underlying = ButtonComponent._raw_construct(ComponentType.button)
         self._underlying._update(
             custom_id=custom_id,
             url=url,

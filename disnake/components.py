@@ -131,9 +131,9 @@ class ActionRow(Component):
 
     def to_dict(self) -> ActionRowPayload:
         return {
-            "type": int(self.type),
+            "type": self.type.value,
             "components": [child.to_dict() for child in self.children],
-        }  # type: ignore
+        }
 
 
 class Button(Component):
@@ -206,8 +206,8 @@ class Button(Component):
 
     def to_dict(self) -> ButtonComponentPayload:
         payload = {
-            "type": 2,
-            "style": int(self.style),
+            "type": self.type.value,
+            "style": self.style.value,
             "label": self.label,
             "disabled": self.disabled,
         }
