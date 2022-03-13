@@ -321,8 +321,8 @@ class Interaction:
 
     async def edit_original_message(
         self,
+        content: Any = MISSING,
         *,
-        content: Optional[str] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -578,7 +578,7 @@ class Interaction:
         else:
             sender = self.response.send_message
         await sender(
-            content=content,  # type: ignore
+            content=content,
             embed=embed,
             embeds=embeds,
             file=file,
@@ -854,8 +854,8 @@ class InteractionResponse:
 
     async def edit_message(
         self,
-        *,
         content: Any = MISSING,
+        *,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -1208,7 +1208,7 @@ class InteractionMessage(Message):
 
     async def edit(
         self,
-        content: Optional[str] = MISSING,
+        content: Any = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,

@@ -402,7 +402,7 @@ class SyncWebhookMessage(Message):
 
     def edit(
         self,
-        content: Optional[str] = MISSING,
+        content: Any = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -839,7 +839,7 @@ class SyncWebhook(BaseWebhook):
     @overload
     def send(
         self,
-        content: str = MISSING,
+        content: Any = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -856,7 +856,7 @@ class SyncWebhook(BaseWebhook):
     @overload
     def send(
         self,
-        content: str = MISSING,
+        content: Any = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -872,7 +872,7 @@ class SyncWebhook(BaseWebhook):
 
     def send(
         self,
-        content: str = MISSING,
+        content: Any = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1040,7 +1040,7 @@ class SyncWebhook(BaseWebhook):
         self,
         message_id: int,
         *,
-        content: Optional[str] = MISSING,
+        content: Any = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,

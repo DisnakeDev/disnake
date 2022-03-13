@@ -477,7 +477,7 @@ class ExecuteWebhookParameters(NamedTuple):
 
 
 def handle_message_parameters(
-    content: Optional[str] = MISSING,
+    content: Any = MISSING,
     *,
     username: str = MISSING,
     avatar_url: Any = MISSING,
@@ -685,7 +685,7 @@ class WebhookMessage(Message):
 
     async def edit(
         self,
-        content: Optional[str] = MISSING,
+        content: Any = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -1331,7 +1331,7 @@ class Webhook(BaseWebhook):
     @overload
     async def send(
         self,
-        content: str = MISSING,
+        content: Any = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1353,7 +1353,7 @@ class Webhook(BaseWebhook):
     @overload
     async def send(
         self,
-        content: str = MISSING,
+        content: Any = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1374,7 +1374,7 @@ class Webhook(BaseWebhook):
 
     async def send(
         self,
-        content: str = MISSING,
+        content: Any = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1614,7 +1614,7 @@ class Webhook(BaseWebhook):
         self,
         message_id: int,
         *,
-        content: Optional[str] = MISSING,
+        content: Any = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
