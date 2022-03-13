@@ -1481,7 +1481,7 @@ class Message(Hashable):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
+        content: :class:`Any`
             The new content to replace the message with.
             Could be ``None`` to remove the content.
         embed: Optional[:class:`Embed`]
@@ -2049,7 +2049,7 @@ class PartialMessage(Hashable):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
+        content: :class:`Any`
             The new content to replace the message with.
             Could be ``None`` to remove the content.
         embed: Optional[:class:`Embed`]

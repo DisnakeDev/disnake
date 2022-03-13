@@ -420,7 +420,7 @@ class SyncWebhookMessage(Message):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
+        content: :class:`Any`
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
@@ -898,7 +898,7 @@ class SyncWebhook(BaseWebhook):
 
         Parameters
         ----------
-        content: :class:`str`
+        content: :class:`Any`
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1065,8 +1065,8 @@ class SyncWebhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to edit.
-        content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+        content: :class:`Any`
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
