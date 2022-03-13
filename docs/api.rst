@@ -2020,9 +2020,9 @@ of :class:`enum.Enum`.
     .. attribute:: button
 
         Represents a button component.
-    .. attribute:: select
+    .. attribute:: string_select
 
-        Represents a select component.
+        Represents a string select component.
     .. attribute:: text_input
 
         Represents a text input component.

@@ -952,7 +952,7 @@ class ConnectionState:
             self.dispatch("message_interaction", interaction)
             if interaction.data.component_type is ComponentType.button:
                 self.dispatch("button_click", interaction)
-            elif interaction.data.component_type is ComponentType.select:
+            elif interaction.data.component_type in (ComponentType.string_select,):
                 self.dispatch("dropdown", interaction)
 
         elif data["type"] == 4:

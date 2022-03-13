@@ -134,7 +134,7 @@ class Select(BaseSelect[SelectMenu, str, V_co]):
     ) -> None:
         super().__init__(
             SelectMenu,
-            ComponentType.select,
+            ComponentType.string_select,
             custom_id=custom_id,
             placeholder=placeholder,
             min_values=min_values,
