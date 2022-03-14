@@ -342,6 +342,8 @@ class Guild(Hashable):
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
         self._threads: Dict[int, Thread] = {}
+        self._stage_instances: Dict[int, StageInstance] = {}
+        self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
         self._state: ConnectionState = state
         self._from_data(data)
 
@@ -560,12 +562,10 @@ class Guild(Hashable):
         self.widget_enabled: Optional[bool] = guild.get("widget_enabled")
         self.widget_channel_id: Optional[int] = utils._get_as_snowflake(guild, "widget_channel_id")
 
-        self._stage_instances: Dict[int, StageInstance] = {}
         for s in guild.get("stage_instances", []):
             stage_instance = StageInstance(guild=self, data=s, state=state)
             self._stage_instances[stage_instance.id] = stage_instance
 
-        self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
         for e in guild.get("guild_scheduled_events", []):
             scheduled_event = GuildScheduledEvent(state=state, data=e)
             self._scheduled_events[scheduled_event.id] = scheduled_event
