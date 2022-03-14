@@ -1704,38 +1704,16 @@ class Guild(Hashable):
             fields["afk_timeout"] = afk_timeout
 
         if icon is not MISSING:
-            if icon is None:
-                fields["icon"] = icon
-            else:
-                fields["icon"] = utils._bytes_to_base64_data(
-                    icon if isinstance(icon, bytes) else await icon.read()
-                )
+            fields["icon"] = await utils._assetbytes_to_base64_data(icon)
 
         if banner is not MISSING:
-            if banner is None:
-                fields["banner"] = banner
-            else:
-                fields["banner"] = utils._bytes_to_base64_data(
-                    banner if isinstance(banner, bytes) else await banner.read()
-                )
+            fields["banner"] = await utils._assetbytes_to_base64_data(banner)
 
         if splash is not MISSING:
-            if splash is None:
-                fields["splash"] = splash
-            else:
-                fields["splash"] = utils._bytes_to_base64_data(
-                    splash if isinstance(splash, bytes) else await splash.read()
-                )
+            fields["splash"] = await utils._assetbytes_to_base64_data(splash)
 
         if discovery_splash is not MISSING:
-            if discovery_splash is None:
-                fields["discovery_splash"] = discovery_splash
-            else:
-                fields["discovery_splash"] = utils._bytes_to_base64_data(
-                    discovery_splash
-                    if isinstance(discovery_splash, bytes)
-                    else await discovery_splash.read()
-                )
+            fields["discovery_splash"] = await utils._assetbytes_to_base64_data(discovery_splash)
 
         if default_notifications is not MISSING:
             if not isinstance(default_notifications, NotificationLevel):
@@ -2029,9 +2007,7 @@ class Guild(Hashable):
             fields["description"] = description
 
         if image is not MISSING:
-            fields["image"] = utils._bytes_to_base64_data(
-                image if isinstance(image, bytes) else await image.read()
-            )
+            fields["image"] = await utils._assetbytes_to_base64_data(image)
 
         if channel_id is not MISSING:
             fields["channel_id"] = channel_id
@@ -2765,7 +2741,7 @@ class Guild(Hashable):
         :class:`Emoji`
             The newly created emoji.
         """
-        img = utils._bytes_to_base64_data(image if isinstance(image, bytes) else await image.read())
+        img = await utils._assetbytes_to_base64_data(image)
         if roles:
             role_ids = [role.id for role in roles]
         else:
@@ -2987,12 +2963,7 @@ class Guild(Hashable):
             fields["name"] = name
 
         if icon is not MISSING:
-            if icon is None:
-                fields["icon"] = icon
-            else:
-                fields["icon"] = utils._bytes_to_base64_data(
-                    icon if isinstance(icon, bytes) else await icon.read()
-                )
+            fields["icon"] = await utils._assetbytes_to_base64_data(icon)
 
         if emoji is not MISSING:
             fields["unicode_emoji"] = emoji

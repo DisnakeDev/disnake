@@ -620,12 +620,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         """
         from .webhook import Webhook
 
-        if avatar is None:
-            avatar_data = None
-        else:
-            avatar_data = utils._bytes_to_base64_data(
-                avatar if isinstance(avatar, bytes) else await avatar.read()
-            )
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
 
         data = await self._state.http.create_webhook(
             self.id, name=str(name), avatar=avatar_data, reason=reason

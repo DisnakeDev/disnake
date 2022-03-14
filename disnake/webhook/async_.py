@@ -1297,12 +1297,7 @@ class Webhook(BaseWebhook):
             payload["name"] = str(name) if name is not None else None
 
         if avatar is not MISSING:
-            if avatar is None:
-                payload["avatar"] = None
-            else:
-                payload["avatar"] = utils._bytes_to_base64_data(
-                    avatar if isinstance(avatar, bytes) else await avatar.read()
-                )
+            payload["avatar"] = await utils._assetbytes_to_base64_data(avatar)
 
         adapter = async_context.get()
 

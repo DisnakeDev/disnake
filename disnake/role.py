@@ -33,7 +33,7 @@ from .errors import InvalidArgument
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .permissions import Permissions
-from .utils import MISSING, _bytes_to_base64_data, _get_as_snowflake, snowflake_time
+from .utils import MISSING, _assetbytes_to_base64_data, _get_as_snowflake, snowflake_time
 
 __all__ = (
     "RoleTags",
@@ -494,12 +494,7 @@ class Role(Hashable):
             payload["mentionable"] = mentionable
 
         if icon is not MISSING:
-            if icon is None:
-                payload["icon"] = icon
-            else:
-                payload["icon"] = _bytes_to_base64_data(
-                    icon if isinstance(icon, bytes) else await icon.read()
-                )
+            payload["icon"] = await _assetbytes_to_base64_data(icon)
 
         if emoji is not MISSING:
             payload["unicode_emoji"] = emoji

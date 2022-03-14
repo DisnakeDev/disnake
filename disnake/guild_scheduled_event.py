@@ -39,7 +39,7 @@ from .mixins import Hashable
 from .user import User
 from .utils import (
     MISSING,
-    _bytes_to_base64_data,
+    _assetbytes_to_base64_data,
     _get_as_snowflake,
     cached_slot_property,
     parse_time,
@@ -380,12 +380,7 @@ class GuildScheduledEvent(Hashable):
             fields["description"] = description
 
         if image is not MISSING:
-            if image is None:
-                fields["image"] = None
-            else:
-                fields["image"] = _bytes_to_base64_data(
-                    image if isinstance(image, bytes) else await image.read()
-                )
+            fields["image"] = await _assetbytes_to_base64_data(image)
 
         if channel_id is not MISSING:
             if channel_id is not None and is_external:

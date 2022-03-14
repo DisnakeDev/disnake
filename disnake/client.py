@@ -1658,9 +1658,7 @@ class Client:
             added to cache.
         """
         if icon is not MISSING:
-            icon_base64 = utils._bytes_to_base64_data(
-                icon if isinstance(icon, bytes) else await icon.read()
-            )
+            icon_base64 = await utils._assetbytes_to_base64_data(icon)
         else:
             icon_base64 = None
 
