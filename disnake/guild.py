@@ -1944,6 +1944,9 @@ class Guild(Hashable):
 
             .. versionadded:: 2.4
 
+            .. versionchanged:: 2.5
+                Now accepts :class:`AssetMixin` as well.
+
         channel_id: :class:`int`
             The channel ID in which the guild scheduled event will be hosted.
         privacy_level: :class:`GuildScheduledEventPrivacyLevel`
@@ -2711,6 +2714,10 @@ class Guild(Hashable):
         image: Union[:class:`bytes`, :class:`AssetMixin`]
             The image data of the emoji.
             Only JPG, PNG and GIF images are supported.
+
+            .. versionchanged:: 2.5
+                Now accepts :class:`AssetMixin` as well.
+
         roles: List[:class:`Role`]
             A :class:`list` of :class:`Role`\s that can use this emoji. Leave empty to make it available to everyone.
         reason: Optional[:class:`str`]
@@ -2902,6 +2909,10 @@ class Guild(Hashable):
             Defaults to ``False``.
         icon: Union[:class:`bytes`, :class:`AssetMixin`]
             The role's icon image (if the guild has the ``ROLE_ICONS`` feature).
+
+            .. versionchanged:: 2.5
+                Now accepts :class:`AssetMixin` as well.
+
         emoji: :class:`str`
             The role's unicode emoji.
         mentionable: :class:`bool`

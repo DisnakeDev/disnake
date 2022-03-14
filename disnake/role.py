@@ -437,6 +437,10 @@ class Role(Hashable):
             Indicates if the role should be shown separately in the member list.
         icon: Union[:class:`bytes`, :class:`AssetMixin`]
             The role's new icon image (if the guild has the ``ROLE_ICONS`` feature).
+
+            .. versionchanged:: 2.5
+                Now accepts :class:`AssetMixin` as well.
+
         emoji: :class:`str`
             The role's new unicode emoji.
         mentionable: :class:`bool`

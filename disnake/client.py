@@ -1633,6 +1633,10 @@ class Client:
         icon: Union[:class:`bytes`, :class:`AssetMixin`]
             The icon of the guild.
             See :meth:`.ClientUser.edit` for more details on what is expected.
+
+            .. versionchanged:: 2.5
+                Now accepts :class:`AssetMixin` as well.
+
         code: :class:`str`
             The code for a template to create the guild with.
 

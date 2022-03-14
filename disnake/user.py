@@ -375,6 +375,9 @@ class ClientUser(BaseUser):
             A :term:`py:bytes-like object` or asset representing the image to upload.
             Could be ``None`` to denote no avatar.
 
+            .. versionchanged:: 2.5
+                Now accepts :class:`AssetMixin` as well.
+
         Raises
         ------
         NotFound
