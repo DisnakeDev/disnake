@@ -3911,7 +3911,7 @@ Attachment
     :members:
 
 AssetMixin
-~~~~~
+~~~~~~~~~~
 
 .. autoclass:: AssetMixin()
 
