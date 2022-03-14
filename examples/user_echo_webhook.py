@@ -10,7 +10,9 @@ intents = (
     disnake.Intents.all()
 )  # Not limiting the permissions, since this is an example - set this accordingly.
 
-client = commands.Bot(command_prefix="!", description=description, intents=intents)
+client = commands.Bot(
+    command_prefix=commands.when_mentioned_or("!"), description=description, intents=intents
+)
 
 
 @client.event
