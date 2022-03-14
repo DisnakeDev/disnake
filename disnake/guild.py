@@ -1542,10 +1542,10 @@ class Guild(Hashable):
         reason: Optional[str] = MISSING,
         name: str = MISSING,
         description: Optional[str] = MISSING,
-        icon: Optional[bytes] = MISSING,
-        banner: Optional[bytes] = MISSING,
-        splash: Optional[bytes] = MISSING,
-        discovery_splash: Optional[bytes] = MISSING,
+        icon: Optional[AssetBytes] = MISSING,
+        banner: Optional[AssetBytes] = MISSING,
+        splash: Optional[AssetBytes] = MISSING,
+        discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
         region: Optional[Union[str, VoiceRegion]] = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
@@ -1586,25 +1586,41 @@ class Guild(Hashable):
         description: Optional[:class:`str`]
             The new description of the guild. Could be ``None`` for no description.
             This is only available to guilds that contain ``PUBLIC`` in :attr:`Guild.features`.
-        icon: :class:`bytes`
-            A :term:`py:bytes-like object` representing the icon. Only PNG/JPEG is supported.
+        icon: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+            The new guild icon. Only PNG/JPG is supported.
             GIF is only available to guilds that contain ``ANIMATED_ICON`` in :attr:`Guild.features`.
             Could be ``None`` to denote removal of the icon.
-        banner: :class:`bytes`
-            A :term:`py:bytes-like object` representing the banner.
+
+            .. versionchanged:: 2.5
+                Now accepts :class:`AssetMixin` as well.
+
+        banner: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+            The new guild banner.
             GIF is only available to guilds that contain ``ANIMATED_BANNER`` in :attr:`Guild.features`.
             Could be ``None`` to denote removal of the banner. This is only available to guilds that contain
             ``BANNER`` in :attr:`Guild.features`.
-        splash: :class:`bytes`
-            A :term:`py:bytes-like object` representing the invite splash.
-            Only PNG/JPEG supported. Could be ``None`` to denote removing the
+
+            .. versionchanged:: 2.5
+                Now accepts :class:`AssetMixin` as well.
+
+        splash: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+            The new guild invite splash.
+            Only PNG/JPG is supported. Could be ``None`` to denote removing the
             splash. This is only available to guilds that contain ``INVITE_SPLASH``
             in :attr:`Guild.features`.
-        discovery_splash: :class:`bytes`
-            A :term:`py:bytes-like object` representing the discovery splash.
-            Only PNG/JPEG supported. Could be ``None`` to denote removing the
+
+            .. versionchanged:: 2.5
+                Now accepts :class:`AssetMixin` as well.
+
+        discovery_splash: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+            The new guild discovery splash.
+            Only PNG/JPG is supported. Could be ``None`` to denote removing the
             splash. This is only available to guilds that contain ``DISCOVERABLE``
             in :attr:`Guild.features`.
+
+            .. versionchanged:: 2.5
+                Now accepts :class:`AssetMixin` as well.
+
         community: :class:`bool`
             Whether the guild should be a Community guild. If set to ``True``\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
@@ -1652,6 +1668,8 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            One of the assets (``icon``, ``banner``, ``splash`` or ``discovery_splash``) couldn't be found.
         Forbidden
             You do not have permissions to edit the guild.
         HTTPException
@@ -1689,25 +1707,35 @@ class Guild(Hashable):
             if icon is None:
                 fields["icon"] = icon
             else:
-                fields["icon"] = utils._bytes_to_base64_data(icon)
+                fields["icon"] = utils._bytes_to_base64_data(
+                    icon if isinstance(icon, bytes) else await icon.read()
+                )
 
         if banner is not MISSING:
             if banner is None:
                 fields["banner"] = banner
             else:
-                fields["banner"] = utils._bytes_to_base64_data(banner)
+                fields["banner"] = utils._bytes_to_base64_data(
+                    banner if isinstance(banner, bytes) else await banner.read()
+                )
 
         if splash is not MISSING:
             if splash is None:
                 fields["splash"] = splash
             else:
-                fields["splash"] = utils._bytes_to_base64_data(splash)
+                fields["splash"] = utils._bytes_to_base64_data(
+                    splash if isinstance(splash, bytes) else await splash.read()
+                )
 
         if discovery_splash is not MISSING:
             if discovery_splash is None:
                 fields["discovery_splash"] = discovery_splash
             else:
-                fields["discovery_splash"] = utils._bytes_to_base64_data(discovery_splash)
+                fields["discovery_splash"] = utils._bytes_to_base64_data(
+                    discovery_splash
+                    if isinstance(discovery_splash, bytes)
+                    else await discovery_splash.read()
+                )
 
         if default_notifications is not MISSING:
             if not isinstance(default_notifications, NotificationLevel):

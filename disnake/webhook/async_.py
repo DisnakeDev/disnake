@@ -71,6 +71,7 @@ if TYPE_CHECKING:
     import datetime
 
     from ..abc import Snowflake
+    from ..asset import AssetBytes
     from ..channel import TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
@@ -1239,7 +1240,7 @@ class Webhook(BaseWebhook):
         *,
         reason: Optional[str] = None,
         name: Optional[str] = MISSING,
-        avatar: Optional[bytes] = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
         channel: Optional[Snowflake] = None,
         prefer_auth: bool = True,
     ) -> Webhook:
@@ -1251,8 +1252,12 @@ class Webhook(BaseWebhook):
         ----------
         name: Optional[:class:`str`]
             The webhook's new default name.
-        avatar: Optional[:class:`bytes`]
-            A :term:`py:bytes-like object` representing the webhook's new default avatar.
+        avatar: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+            The webhook's new default avatar.
+
+            .. versionchanged:: 2.5
+                Now accepts :class:`AssetMixin` as well.
+
         channel: Optional[:class:`abc.Snowflake`]
             The webhook's new channel. This requires an authenticated webhook.
 
@@ -1271,10 +1276,10 @@ class Webhook(BaseWebhook):
 
         Raises
         ------
+        NotFound
+            This webhook does not exist or the ``avatar`` asset couldn't be found.
         HTTPException
             Editing the webhook failed.
-        NotFound
-            This webhook does not exist.
         InvalidArgument
             This webhook does not have a token associated with it
             or it tried editing a channel without authentication.
@@ -1292,7 +1297,12 @@ class Webhook(BaseWebhook):
             payload["name"] = str(name) if name is not None else None
 
         if avatar is not MISSING:
-            payload["avatar"] = utils._bytes_to_base64_data(avatar) if avatar is not None else None
+            if avatar is None:
+                payload["avatar"] = None
+            else:
+                payload["avatar"] = utils._bytes_to_base64_data(
+                    avatar if isinstance(avatar, bytes) else await avatar.read()
+                )
 
         adapter = async_context.get()
 
