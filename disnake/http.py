@@ -1743,7 +1743,15 @@ class HTTPClient:
         **fields: Any,
     ) -> Response[role.Role]:
         r = Route("PATCH", "/guilds/{guild_id}/roles/{role_id}", guild_id=guild_id, role_id=role_id)
-        valid_keys = ("name", "permissions", "color", "hoist", "mentionable")
+        valid_keys = (
+            "name",
+            "permissions",
+            "color",
+            "hoist",
+            "mentionable",
+            "icon",
+            "unicode_emoji",
+        )
         payload = {k: v for k, v in fields.items() if k in valid_keys}
         return self.request(r, json=payload, reason=reason)
 

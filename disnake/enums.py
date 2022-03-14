@@ -244,7 +244,6 @@ class MessageType(Enum):
 
 
 class PartyType(Enum):
-    youtube = 755600276941176913
     poker = 755827207812677713
     betrayal = 773336526917861400
     fishing = 814288819477020702
