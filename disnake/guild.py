@@ -95,6 +95,7 @@ MISSING = utils.MISSING
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime, User as ABCUser
     from .app_commands import APIApplicationCommand
+    from .asset import AssetBytes
     from .channel import CategoryChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
@@ -1923,7 +1924,7 @@ class Guild(Hashable):
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         scheduled_end_time: datetime.datetime = MISSING,
         description: str = MISSING,
-        image: bytes = MISSING,
+        image: AssetBytes = MISSING,
         reason: Optional[str] = None,
     ) -> GuildScheduledEvent:
         """|coro|
@@ -1938,7 +1939,7 @@ class Guild(Hashable):
             The name of the guild scheduled event.
         description: :class:`str`
             The description of the guild scheduled event.
-        image: :class:`bytes`
+        image: Union[:class:`bytes`, :class:`AssetMixin`]
             The cover image of the guild scheduled event.
 
             .. versionadded:: 2.4
@@ -1960,6 +1961,8 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            The ``image`` asset couldn't be found.
         HTTPException
             The request failed.
 
@@ -1995,7 +1998,9 @@ class Guild(Hashable):
             fields["description"] = description
 
         if image is not MISSING:
-            fields["image"] = utils._bytes_to_base64_data(image)
+            fields["image"] = utils._bytes_to_base64_data(
+                image if isinstance(image, bytes) else await image.read()
+            )
 
         if channel_id is not MISSING:
             fields["channel_id"] = channel_id
@@ -2676,7 +2681,7 @@ class Guild(Hashable):
         self,
         *,
         name: str,
-        image: bytes,
+        image: AssetBytes,
         roles: Sequence[Role] = MISSING,
         reason: Optional[str] = None,
     ) -> Emoji:
@@ -2703,8 +2708,8 @@ class Guild(Hashable):
         ----------
         name: :class:`str`
             The emoji name. Must be at least 2 characters.
-        image: :class:`bytes`
-            The :term:`py:bytes-like object` representing the image data to use.
+        image: Union[:class:`bytes`, :class:`AssetMixin`]
+            The image data of the emoji.
             Only JPG, PNG and GIF images are supported.
         roles: List[:class:`Role`]
             A :class:`list` of :class:`Role`\s that can use this emoji. Leave empty to make it available to everyone.
@@ -2713,6 +2718,8 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            The ``image`` asset couldn't be found.
         Forbidden
             You are not allowed to create emojis.
         HTTPException
@@ -2723,7 +2730,7 @@ class Guild(Hashable):
         :class:`Emoji`
             The newly created emoji.
         """
-        img = utils._bytes_to_base64_data(image)
+        img = utils._bytes_to_base64_data(image if isinstance(image, bytes) else await image.read())
         if roles:
             role_ids = [role.id for role in roles]
         else:
@@ -2835,7 +2842,7 @@ class Guild(Hashable):
         permissions: Permissions = ...,
         colour: Union[Colour, int] = ...,
         hoist: bool = ...,
-        icon: bytes = ...,
+        icon: AssetBytes = ...,
         emoji: str = ...,
         mentionable: bool = ...,
     ) -> Role:
@@ -2850,7 +2857,7 @@ class Guild(Hashable):
         permissions: Permissions = ...,
         color: Union[Colour, int] = ...,
         hoist: bool = ...,
-        icon: bytes = ...,
+        icon: AssetBytes = ...,
         emoji: str = ...,
         mentionable: bool = ...,
     ) -> Role:
@@ -2864,7 +2871,7 @@ class Guild(Hashable):
         color: Union[Colour, int] = MISSING,
         colour: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
-        icon: bytes = MISSING,
+        icon: AssetBytes = MISSING,
         emoji: str = MISSING,
         mentionable: bool = MISSING,
         reason: Optional[str] = None,
@@ -2893,7 +2900,7 @@ class Guild(Hashable):
         hoist: :class:`bool`
             Whether the role should be shown separately in the member list.
             Defaults to ``False``.
-        icon: :class:`bytes`
+        icon: Union[:class:`bytes`, :class:`AssetMixin`]
             The role's icon image (if the guild has the ``ROLE_ICONS`` feature).
         emoji: :class:`str`
             The role's unicode emoji.
@@ -2905,6 +2912,8 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            The ``icon`` asset couldn't be found.
         Forbidden
             You do not have permissions to create the role.
         HTTPException
@@ -2942,7 +2951,9 @@ class Guild(Hashable):
             if icon is None:
                 fields["icon"] = icon
             else:
-                fields["icon"] = utils._bytes_to_base64_data(icon)
+                fields["icon"] = utils._bytes_to_base64_data(
+                    icon if isinstance(icon, bytes) else await icon.read()
+                )
 
         if emoji is not MISSING:
             fields["unicode_emoji"] = emoji

@@ -43,6 +43,7 @@ __all__ = (
 if TYPE_CHECKING:
     import datetime
 
+    from .asset import AssetBytes
     from .guild import Guild
     from .member import Member
     from .state import ConnectionState
@@ -403,7 +404,7 @@ class Role(Hashable):
         colour: Union[Colour, int] = MISSING,
         color: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
-        icon: bytes = MISSING,
+        icon: AssetBytes = MISSING,
         emoji: str = MISSING,
         mentionable: bool = MISSING,
         position: int = MISSING,
@@ -434,7 +435,7 @@ class Role(Hashable):
             The new colour to change to. (aliased to ``color`` as well)
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
-        icon: :class:`bytes`
+        icon: Union[:class:`bytes`, :class:`AssetMixin`]
             The role's new icon image (if the guild has the ``ROLE_ICONS`` feature).
         emoji: :class:`str`
             The role's new unicode emoji.
@@ -448,6 +449,8 @@ class Role(Hashable):
 
         Raises
         ------
+        NotFound
+            The ``icon`` asset couldn't be found.
         Forbidden
             You do not have permissions to change the role.
         HTTPException
@@ -490,7 +493,9 @@ class Role(Hashable):
             if icon is None:
                 payload["icon"] = icon
             else:
-                payload["icon"] = _bytes_to_base64_data(icon)
+                payload["icon"] = _bytes_to_base64_data(
+                    icon if isinstance(icon, bytes) else await icon.read()
+                )
 
         if emoji is not MISSING:
             payload["unicode_emoji"] = emoji

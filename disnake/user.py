@@ -38,6 +38,7 @@ from .utils import MISSING, _bytes_to_base64_data, snowflake_time
 if TYPE_CHECKING:
     from datetime import datetime
 
+    from .asset import AssetBytes
     from .channel import DMChannel
     from .guild import Guild
     from .message import Message
@@ -349,19 +350,17 @@ class ClientUser(BaseUser):
         self._flags = data.get("flags", 0)
         self.mfa_enabled = data.get("mfa_enabled", False)
 
-    async def edit(self, *, username: str = MISSING, avatar: bytes = MISSING) -> ClientUser:
+    async def edit(self, *, username: str = MISSING, avatar: AssetBytes = MISSING) -> ClientUser:
         """|coro|
 
         Edits the current profile of the client.
 
         .. note::
 
-            To upload an avatar, a :term:`py:bytes-like object` must be passed in that
-            represents the image being uploaded. If this is done through a file
-            then the file must be opened via ``open('some_filename', 'rb')`` and
-            the :term:`py:bytes-like object` is given through the use of ``fp.read()``.
+            To upload an avatar, an :class:`AssetMixin` or a :term:`py:bytes-like object`
+            must be passed in that represents the image being uploaded.
 
-            The only image formats supported for uploading is JPEG and PNG.
+            The only image formats supported for uploading are JPG and PNG.
 
         .. versionchanged:: 2.0
             The edit is no longer in-place, instead the newly edited client user is returned.
@@ -370,12 +369,14 @@ class ClientUser(BaseUser):
         ----------
         username: :class:`str`
             The new username you wish to change to.
-        avatar: :class:`bytes`
-            A :term:`py:bytes-like object` representing the image to upload.
+        avatar: Union[:class:`bytes`, :class:`AssetMixin`]
+            A :term:`py:bytes-like object` or asset representing the image to upload.
             Could be ``None`` to denote no avatar.
 
         Raises
         ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
         HTTPException
             Editing your profile failed.
         InvalidArgument
@@ -391,7 +392,9 @@ class ClientUser(BaseUser):
             payload["username"] = username
 
         if avatar is not MISSING:
-            payload["avatar"] = _bytes_to_base64_data(avatar)
+            payload["avatar"] = _bytes_to_base64_data(
+                avatar if isinstance(avatar, bytes) else await avatar.read()
+            )
 
         data: UserPayload = await self._state.http.edit_profile(payload)
         return ClientUser(state=self._state, data=data)
