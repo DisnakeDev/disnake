@@ -28,9 +28,11 @@ from __future__ import annotations
 import asyncio
 import copy
 from abc import ABC
+from contextlib import asynccontextmanager
 from typing import (
     TYPE_CHECKING,
     Any,
+    AsyncGenerator,
     Callable,
     Dict,
     List,
@@ -47,7 +49,6 @@ from typing import (
 )
 
 from . import utils
-from .context_managers import Typing
 from .enums import ChannelType, PartyType, try_enum_to_int
 from .errors import ClientException, InvalidArgument
 from .file import File
@@ -1536,15 +1537,11 @@ class Messageable:
         channel = await self._get_channel()
         await self._state.http.send_typing(channel.id)
 
-    def typing(self) -> Typing:
+    @asynccontextmanager
+    async def typing(self) -> AsyncGenerator[None, None]:
         """Returns a context manager that allows you to type for an indefinite period of time.
 
         This is useful for denoting long computations in your bot.
-
-        .. note::
-
-            This is both a regular context manager and an async context manager.
-            This means that both ``with`` and ``async with`` work with this.
 
         Example Usage: ::
 
@@ -1555,7 +1552,20 @@ class Messageable:
             await channel.send('done!')
 
         """
-        return Typing(self)
+        channel = await self._get_channel()
+
+        async def do_typing() -> None:
+            typing = channel._state.http.send_typing
+
+            while True:
+                await typing(channel.id)
+                await asyncio.sleep(7)
+
+        task: asyncio.Task = self._state.loop.create_task(do_typing())
+        try:
+            yield
+        finally:
+            task.cancel()
 
     async def fetch_message(self, id: int, /) -> Message:
         """|coro|
