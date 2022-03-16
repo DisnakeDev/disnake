@@ -38,6 +38,7 @@ from typing import (
     Literal,
     Mapping,
     NamedTuple,
+    NoReturn,
     Optional,
     Sequence,
     Tuple,
@@ -323,6 +324,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         type: ChannelType = MISSING,
         overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
+        **kwargs: NoReturn,
     ) -> Optional[TextChannel]:
         """|coro|
 
@@ -404,6 +406,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             type=type,
             overwrites=overwrites,
             reason=reason,
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1228,6 +1231,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         nsfw: bool = MISSING,
         slowmode_delay: int = MISSING,
         reason: Optional[str] = None,
+        **kwargs: NoReturn,
     ) -> Optional[VoiceChannel]:
         """|coro|
 
@@ -1318,6 +1322,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             nsfw=nsfw,
             slowmode_delay=slowmode_delay,
             reason=reason,
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1818,6 +1823,7 @@ class StageChannel(VocalGuildChannel):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         reason: Optional[str] = None,
+        **kwargs: NoReturn,
     ) -> Optional[StageChannel]:
         """|coro|
 
@@ -1887,6 +1893,7 @@ class StageChannel(VocalGuildChannel):
             rtc_region=rtc_region,
             video_quality_mode=video_quality_mode,
             reason=reason,
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1997,6 +2004,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         nsfw: bool = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
+        **kwargs: NoReturn,
     ) -> Optional[CategoryChannel]:
         """|coro|
 
@@ -2051,6 +2059,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             nsfw=nsfw,
             overwrites=overwrites,
             reason=reason,
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -2445,6 +2454,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
+        **kwargs: NoReturn,
     ) -> Optional[ForumChannel]:
         """|coro|
 
@@ -2512,6 +2522,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             default_auto_archive_duration=default_auto_archive_duration,
             overwrites=overwrites,
             reason=reason,
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
