@@ -925,6 +925,9 @@ Exceptions
 .. autoexception:: disnake.ext.commands.GuildScheduledEventNotFound
     :members:
 
+.. autoexception:: disnake.ext.commands.LargeIntConversionFailure
+    :members:
+
 .. autoexception:: disnake.ext.commands.BadBoolArgument
     :members:
 
