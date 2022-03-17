@@ -1043,7 +1043,7 @@ class Guild(Hashable):
         .. deprecated:: 2.5
 
             VoiceRegion is no longer set on the guild, and is set on the individual voice channels instead.
-            See :attr:`VoiceChannel.region` instead.
+            See :attr:`VoiceChannel.rtc_region` and :attr:`StageChannel.rtc_region` instead.
         """
         utils.warn_deprecated(
             "Guild.region is deprecated and will be removed in a future version.", stacklevel=2
@@ -1612,7 +1612,7 @@ class Guild(Hashable):
 
             .. deprecated:: 2.5
 
-                Use :attr:`VoiceChannel.region` or :attr:`StageChannel.region` instead.
+                Use :func:`VoiceChannel.edit` or :func:`StageChannel.edit` with ``rtc_region`` instead.
 
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.

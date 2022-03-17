@@ -409,7 +409,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. note::
 
         Not all messages will have ``content``. This is a Discord limitation.
-        See the docs of :attr:`Intents.messages_content` for more information.
+        See the docs of :attr:`Intents.message_content` for more information.
 
     :param message: The current message.
     :type message: :class:`Message`
@@ -429,7 +429,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. note::
 
         Not all messages will have ``content``. This is a Discord limitation.
-        See the docs of :attr:`Intents.messages_content` for more information.
+        See the docs of :attr:`Intents.message_content` for more information.
 
 
     :param message: The deleted message.
@@ -491,7 +491,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. note::
 
         Not all messages will have ``content``. This is a Discord limitation.
-        See the docs of :attr:`Intents.messages_content` for more information.
+        See the docs of :attr:`Intents.message_content` for more information.
 
     The following non-exhaustive cases trigger this event:
 
