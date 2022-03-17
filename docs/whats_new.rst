@@ -12,6 +12,102 @@ This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
 
+.. _vp2p5p0:
+
+v2.5.0b1
+---------
+
+This version adds support for API v10, improves API coverage by adding support for previously missing features,
+and contains several miscellaneous enhancements and bugfixes.
+
+Regarding the message content intent:
+Note that earlier versions will continue working as before after the message content intent deadline (April 30th 2022),
+as long as the intent is enabled in the developer portal. However, from this version (``2.5.0``) onward, the intent needs to be
+enabled in the developer portal *and* your code.
+See `this page <https://guide.disnake.dev/popular-topics/intents#why-do-most-messages-have-no-content>`_ of the guide for more information.
+
+
+Breaking Changes
+~~~~~~~~~~~~~~~~~
+
+- The :attr:`~Intents.message_content` intent is now required to receive to receive message content and related fields, see above (:issue:`353`)
+- :func:`TextChannel.create_thread` now requires either a ``message`` or a ``type`` parameter (:issue:`355`)
+- |commands| Failure to convert an input parameter annotated as :class:`~ext.commands.LargeInt` now
+  raises a :exc:`~ext.commands.LargeIntConversionFailure` (:issue:`362`)
+- Invalid voice regions were removed from :class:`VoiceRegion` (:issue:`357`)
+    - removed: ``eu_west``, ``eu_central``, ``london``, ``amsterdam``, ``frankfurt``, ``south_korea``, ``europe``, ``vip_us_east``, ``vip_us_west``, ``vip_amsterdam``
+    - added: ``rotterdam``
+- The ``youtube`` :class:`PartyType` no longer works and was removed (:issue:`408`)
+
+
+Deprecations
+~~~~~~~~~~~~~
+
+- :func:`Guild.create_integration`, :func:`Integration.delete`, :func:`StreamIntegration.edit` and :func:`StreamIntegration.sync`
+  can't be used by bots anymore and will be removed in a future version (:issue:`361`)
+- Voice regions on guild level are deprecated and no longer have any effect;
+  they should be set on a per-channel basis instead (:issue:`357`, :issue:`374`)
+- :attr:`AppInfo.summary`, :attr:`PartialAppInfo.summary` and :attr:`IntegrationApplication.summary` are deprecated, use ``.description`` instead (:issue:`369`)
+- Public stages and stage discoverability are deprecated and no longer supported (:issue:`287`)
+
+
+New Features
+~~~~~~~~~~~~~
+
+- Support API v10 (:issue:`353`)
+    - New intent: :attr:`Intents.message_content`
+    - |commands| New warning: :class:`~ext.commands.MessageContentPrefixWarning`
+- Add guild previews (:issue:`359`)
+    - Add :class:`GuildPreview`
+    - Add :func:`Client.fetch_guild_preview`
+- Add guild widget settings and widget url (:issue:`360`, :issue:`365`)
+    - Add :class:`WidgetSettings`, :class:`WidgetStyle`
+    - Add :func:`Guild.widget_settings`, :func:`Guild.widget_image_url`
+    - Add :func:`Widget.image_url`
+    - Change :func:`Guild.edit_widget` return type
+- Add :attr:`ModalInteraction.message` (:issue:`363`, :issue:`400`)
+- Support :func:`InteractionResponse.edit_message` for modal interactions, if modal was sent in response to component interaction (:issue:`364`, :issue:`400`)
+- Add :func:`Guild.search_members` (:issue:`358`, :issue:`388`)
+- Support ``List[str]`` and ``Dict[str, str]`` in ``option`` parameter of :class:`disnake.ui.Select` (:issue:`326`)
+- Support ``reason`` parameter in :func:`Message.create_thread` and :func:`Thread.delete` (:issue:`366`)
+- |commands| Add :class:`GuildScheduledEventConverter` and :exc:`GuildScheduledEventNotFound` (:issue:`376`)
+
+
+Bug Fixes
+~~~~~~~~~~
+
+- Ensure token is of type :class:`str` (:issue:`375`)
+- Fix role icon/emoji editing (:issue:`403`)
+- Fix gateway ratelimiter being too strict (:issue:`413`)
+- Fix missing ``create_public_threads`` permission in :attr:`Permissions.private_channel` (:issue:`373`)
+- Fix shadowed ``disnake.message`` module (:issue:`380`)
+- Fix missing/incorrect ``__slots__`` (:issue:`381`)
+- Improve components exception message (:issue:`352`)
+- Fix :attr:`PartialInviteChannel.__str__` (:issue:`383`)
+- Use proper HTTP method for joining threads, remove unused methods (:issue:`356`)
+- Improve :func:`Messageable.send` typing and fix annotations of HTTP methods (:issue:`378`)
+- |commands| Fix :class:`~ext.commands.clean_content` converter (:issue:`396`)
+- |commands| Make conversion exceptions in slash commands propagate cleanly as documented (:issue:`362`)
+
+
+Documentation
+~~~~~~~~~~~~~~
+
+- Fix several bugs of redesign (:issue:`377`)
+- Disable mathjax in documentation to improve loading times (:issue:`370`)
+- Update return type of :func:`Guild.create_template` (:issue:`372`)
+- Add documentation for :class:`GuildCommandInteraction`, :class:`UserCommandInteraction`, and :class:`MessageCommandInteraction` (:issue:`374`)
+
+
+Miscellaneous
+~~~~~~~~~~~~~~
+
+- Fix remaining pyright issues, add pyright CI (:issue:`311`, :issue:`387`)
+- Update dev dependencies and CI (:issue:`345`, :issue:`386`)
+- Improve ``_WebhookState`` typing (:issue:`391`)
+- Improve ``basic_bot.py`` example (:issue:`399`)
+
+
 .. _vp2p4p0:
 
 v2.4.0
