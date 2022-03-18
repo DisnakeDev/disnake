@@ -85,7 +85,7 @@ class PartialInviteChannel:
 
     Attributes
     ----------
-    name: :class:`str`
+    name: Optional[:class:`str`]
         The partial channel's name.
     id: :class:`int`
         The partial channel's ID.
@@ -97,11 +97,13 @@ class PartialInviteChannel:
 
     def __init__(self, data: InviteChannelPayload):
         self.id: int = int(data["id"])
-        self.name: str = data["name"]
+        self.name: Optional[str] = data.get("name")
         self.type: ChannelType = try_enum(ChannelType, data["type"])
 
     def __str__(self) -> str:
-        return self.name
+        if self.type is ChannelType.group:
+            return self.name or "Unnamed"
+        return self.name or ""
 
     def __repr__(self) -> str:
         return f"<PartialInviteChannel id={self.id} name={self.name} type={self.type!r}>"
@@ -442,7 +444,7 @@ class Invite(Hashable):
         guild: Optional[Union[Guild, Object]] = state._get_guild(guild_id)
         channel_id = int(data["channel_id"])
         if guild is not None:
-            channel = guild.get_channel(channel_id) or Object(id=channel_id)  # type: ignore
+            channel = guild.get_channel(channel_id) or Object(id=channel_id)
         else:
             guild = Object(id=guild_id) if guild_id is not None else None
             channel = Object(id=channel_id)

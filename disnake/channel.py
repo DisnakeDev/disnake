@@ -212,7 +212,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         )
         self._type: int = data.get("type", self._type)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
-        self._fill_overwrites(data)  # type: ignore
+        self._fill_overwrites(data)
 
     async def _get_channel(self):
         return self
@@ -823,7 +823,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         if auto_archive_duration is not None:
             auto_archive_duration = cast(
-                ThreadArchiveDurationLiteral, try_enum_to_int(auto_archive_duration)
+                "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
         if message is None:
@@ -1448,6 +1448,11 @@ class StageChannel(VocalGuildChannel):
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
                 raise InvalidArgument("privacy_level field must be of type PrivacyLevel")
+            if privacy_level is StagePrivacyLevel.public:
+                utils.warn_deprecated(
+                    "Setting privacy_level to public is deprecated and will be removed in a future version.",
+                    stacklevel=2,
+                )
 
             payload["privacy_level"] = privacy_level.value
 
@@ -2052,7 +2057,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         self._state = state
         self.id = channel_id
         # state.user won't be None here
-        self.me = state.user  # type: ignore
+        self.me = state.user
         self.recipient = state.get_user(user_id) if user_id != self.me.id else None
         return self
 

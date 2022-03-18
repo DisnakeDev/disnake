@@ -202,7 +202,7 @@ class StickerItem(_StickerTag):
         The URL for the sticker's image.
     """
 
-    __slots__ = ("_state", "name", "id", "format", "url")
+    __slots__ = ("name", "id", "format", "url")
 
     def __init__(self, *, state: ConnectionState, data: StickerItemPayload):
         self._state: ConnectionState = state
@@ -272,7 +272,7 @@ class Sticker(_StickerTag):
         The URL for the sticker's image.
     """
 
-    __slots__ = ("_state", "id", "name", "description", "format", "url")
+    __slots__ = ("id", "name", "description", "format", "url")
 
     def __init__(self, *, state: ConnectionState, data: StickerPayload) -> None:
         self._state: ConnectionState = state

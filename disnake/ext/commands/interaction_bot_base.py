@@ -32,7 +32,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Coroutine,
     Dict,
     Iterable,
     List,
@@ -55,7 +54,6 @@ from disnake.enums import ApplicationCommandType
 
 from . import errors
 from .base_core import InvokableApplicationCommand
-from .cog import Cog
 from .common_bot_base import CommonBotBase
 from .context import Context
 from .ctx_menus_core import (
@@ -1168,8 +1166,7 @@ class InteractionBotBase(CommonBotBase):
         if len(checks) == 0:
             return True
 
-        # type-checker doesn't distinguish between functions and methods
-        return await disnake.utils.async_all(f(inter) for f in checks)  # type: ignore
+        return await disnake.utils.async_all(f(inter) for f in checks)
 
     def before_slash_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_invoke` but for slash commands,
