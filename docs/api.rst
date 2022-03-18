@@ -406,6 +406,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
         checking the user IDs. Note that :class:`~ext.commands.Bot` does not
         have this problem.
 
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.messages_content` for more information.
+
     :param message: The current message.
     :type message: :class:`Message`
 
@@ -420,6 +425,12 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     or use the :func:`on_raw_message_delete` event instead.
 
     This requires :attr:`Intents.messages` to be enabled.
+
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.messages_content` for more information.
+
 
     :param message: The deleted message.
     :type message: :class:`Message`
@@ -476,6 +487,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     If this occurs increase the :class:`max_messages <Client>` parameter
     or use the :func:`on_raw_message_edit` event instead.
+
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.messages_content` for more information.
 
     The following non-exhaustive cases trigger this event:
 
@@ -1582,9 +1598,6 @@ of :class:`enum.Enum`.
 
     Represents the type of a voice channel activity/application.
 
-    .. attribute:: youtube
-
-        The (old) "Youtube Together" activity.
     .. attribute:: poker
 
         The "Poker Night" activity.
