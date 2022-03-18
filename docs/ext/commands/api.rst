@@ -1050,3 +1050,16 @@ Exception Hierarchy
             - :exc:`~.commands.ExtensionNotFound`
     - :exc:`~.ClientException`
         - :exc:`~.commands.CommandRegistrationError`
+
+Warnings
+----------
+
+.. autoclass:: disnake.ext.commands.MessageContentPrefixWarning
+
+Warning Hierarchy
+~~~~~~~~~~~~~~~~~~~
+
+.. exception_hierarchy::
+
+    - :class:`DiscordWarning`
+        - :class:`~.commands.MessageContentPrefixWarning`
