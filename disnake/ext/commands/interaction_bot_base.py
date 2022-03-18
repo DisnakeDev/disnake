@@ -645,7 +645,7 @@ class InteractionBotBase(CommonBotBase):
         # However, our approach has blind spots. We deal with them in :meth:`process_application_commands`.
 
         try:
-            commands = await self.fetch_global_commands()
+            commands = await self.fetch_global_commands(with_localizations=True)
             self._connection._global_application_commands = {
                 command.id: command for command in commands
             }
@@ -653,7 +653,7 @@ class InteractionBotBase(CommonBotBase):
             pass
         for guild_id in guilds:
             try:
-                commands = await self.fetch_guild_commands(guild_id)
+                commands = await self.fetch_guild_commands(guild_id, with_localizations=True)
                 if commands:
                     self._connection._guild_application_commands[guild_id] = {
                         command.id: command for command in commands
