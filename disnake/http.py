@@ -2029,10 +2029,18 @@ class HTTPClient:
     # Application commands (global)
 
     def get_global_commands(
-        self, application_id: Snowflake
+        self,
+        application_id: Snowflake,
+        *,
+        with_localizations: bool = False,
     ) -> Response[List[interactions.ApplicationCommand]]:
+        params: Dict[str, Any] = {}
+        if with_localizations:
+            params["with_localizations"] = int(with_localizations)
+
         return self.request(
-            Route("GET", "/applications/{application_id}/commands", application_id=application_id)
+            Route("GET", "/applications/{application_id}/commands", application_id=application_id),
+            params=params,
         )
 
     def get_global_command(
@@ -2092,15 +2100,23 @@ class HTTPClient:
     # Application commands (guild)
 
     def get_guild_commands(
-        self, application_id: Snowflake, guild_id: Snowflake
+        self,
+        application_id: Snowflake,
+        guild_id: Snowflake,
+        *,
+        with_localizations: bool = False,
     ) -> Response[List[interactions.ApplicationCommand]]:
+        params: Dict[str, Any] = {}
+        if with_localizations:
+            params["with_localizations"] = int(with_localizations)
+
         r = Route(
             "GET",
             "/applications/{application_id}/guilds/{guild_id}/commands",
             application_id=application_id,
             guild_id=guild_id,
         )
-        return self.request(r)
+        return self.request(r, params=params)
 
     def get_guild_command(
         self,

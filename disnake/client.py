@@ -2083,19 +2083,28 @@ class Client:
 
     # Application commands (global)
 
-    async def fetch_global_commands(self) -> List[APIApplicationCommand]:
+    async def fetch_global_commands(
+        self, *, with_localizations: bool = False
+    ) -> List[APIApplicationCommand]:
         """|coro|
 
         Retrieves a list of global application commands.
 
         .. versionadded:: 2.1
 
+        Parameters
+        ----------
+        with_localizations: :class:`bool`
+            Whether to include localizations in the response. Defaults to ``False``.
+
+            .. versionadded:: 2.5
+
         Returns
         -------
         List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of application commands.
         """
-        return await self._connection.fetch_global_commands()
+        return await self._connection.fetch_global_commands(with_localizations=with_localizations)
 
     async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
         """|coro|
@@ -2201,7 +2210,9 @@ class Client:
 
     # Application commands (guild)
 
-    async def fetch_guild_commands(self, guild_id: int) -> List[APIApplicationCommand]:
+    async def fetch_guild_commands(
+        self, guild_id: int, *, with_localizations: bool = False
+    ) -> List[APIApplicationCommand]:
         """|coro|
 
         Retrieves a list of guild application commands.
@@ -2212,13 +2223,19 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID of the guild to fetch commands from.
+        with_localizations: :class:`bool`
+            Whether to include localizations in the response. Defaults to ``False``.
+
+            .. versionadded:: 2.5
 
         Returns
         -------
         List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of application commands.
         """
-        return await self._connection.fetch_guild_commands(guild_id)
+        return await self._connection.fetch_guild_commands(
+            guild_id, with_localizations=with_localizations
+        )
 
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
         """|coro|

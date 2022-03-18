@@ -84,7 +84,7 @@ class _ApplicationCommandOptional(TypedDict, total=False):
     guild_id: Snowflake
     options: List[ApplicationCommandOption]
     default_permission: bool
-    # TODO: are these really optional/nullable?
+    # contrary to the API docs, these are actually nullable
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
 
@@ -105,7 +105,6 @@ class _ApplicationCommandOptionOptional(TypedDict, total=False):
     min_value: float
     max_value: float
     autocomplete: bool
-    # TODO: are these really optional/nullable?
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
 
@@ -123,7 +122,6 @@ ApplicationCommandOptionChoiceValue = Union[str, int, float]
 
 
 class _ApplicationCommandOptionChoiceOptional(TypedDict, total=False):
-    # TODO: is this really optional/nullable?
     name_localizations: Optional[ApplicationCommandLocalizations]
 
 
@@ -331,7 +329,6 @@ class _EditApplicationCommandOptional(TypedDict, total=False):
     options: Optional[List[ApplicationCommandOption]]
     default_permission: bool
     type: ApplicationCommandType
-    # TODO: are these really optional/nullable?
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
 
