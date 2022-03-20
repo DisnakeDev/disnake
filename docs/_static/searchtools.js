@@ -245,7 +245,7 @@ var Search = {
     // reverse before and after to keep the highest-scored result in case of duplicates
     results.reverse();
     // deduplicate based on result data, excluding the score value (r[4])
-    results = $u.uniq(results, false, function (r) { return [].concat(r.slice(0, 4), r.slice(5)).join(","); })
+    results = $u.uniq(results, false, function (r) { return [].concat(r.slice(0, 4), r.slice(5)).join(","); });
     results.reverse();
     // - PATCH END
 
