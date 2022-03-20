@@ -4,6 +4,9 @@
  *
  * Sphinx JavaScript utilities for the full-text search.
  *
+ * Modified to fix duplicate search results, see `// - PATCH START`
+ * (https://github.com/sphinx-doc/sphinx/issues/10227)
+ *
  * :copyright: Copyright 2007-2022 by the Sphinx team, see AUTHORS.
  * :license: BSD, see LICENSE for details.
  *
@@ -237,6 +240,14 @@ var Search = {
         return (left > right) ? -1 : ((left < right) ? 1 : 0);
       }
     });
+
+    // - PATCH START
+    // reverse before and after to keep the highest-scored result in case of duplicates
+    results.reverse();
+    // deduplicate based on result data, excluding the score value (r[4])
+    results = $u.uniq(results, false, function (r) { return [].concat(r.slice(0, 4), r.slice(5)).join(","); })
+    results.reverse();
+    // - PATCH END
 
     // for debugging
     //Search.lastresults = results.slice();  // a copy
