@@ -8,10 +8,6 @@ function escapeRegex(e) {
     return e.replace(escapedRegex, '\\$&');
 }
 
-// for some reason Sphinx shows some entries twice
-// if something has been scored already I'd rather sort it to the bottom
-const beenScored = new Set();
-
 function __score(haystack, regex) {
     let match = regex.exec(haystack);
     if (match == null) {
@@ -41,10 +37,6 @@ Scorer = {
             if (_score === Number.MAX_VALUE) {
                 return score;
             }
-            if (beenScored.has(title)) {
-                return 0;
-            }
-            beenScored.add(title);
             let newScore = 100 + queryBeingDone.length - _score;
             // console.log(`${title}: ${score} -> ${newScore} (${_score})`);
             return newScore;
