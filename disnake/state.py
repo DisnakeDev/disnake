@@ -1969,6 +1969,21 @@ class AutoShardedConnectionState(ConnectionState):
                 # channel will either be a TextChannel, Thread or Object
                 msg._rebind_cached_references(new_guild, channel)  # type: ignore
 
+        # these generally get deallocated once the voice reconnect times out
+        # (it never succeeds after gateway reconnects)
+        # but we rebind the channel reference just in case
+        for vc in self._voice_clients.values():
+            if not getattr(vc.channel, "guild", None):
+                continue
+
+            new_guild = self._get_guild(vc.channel.guild.id)
+            if new_guild is None:
+                continue
+
+            new_channel = new_guild._resolve_channel(vc.channel.id) or Object(id=vc.channel.id)
+            if new_channel is not vc.channel:
+                vc.channel = new_channel  # type: ignore
+
     async def chunker(
         self,
         guild_id: int,
