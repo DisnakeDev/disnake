@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     queryBeingDone = params.get('q');
     if (queryBeingDone) {
-        let pattern = Array.from(queryBeingDone).map(escapeRegex).join('.*?');
-        pattern = new RegExp(pattern, 'i');
+        let _pattern = Array.from(queryBeingDone).map(escapeRegex).join('.*?');
+        pattern = new RegExp(_pattern, 'i');
     }
 });
