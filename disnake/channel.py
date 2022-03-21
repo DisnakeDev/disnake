@@ -28,6 +28,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import time
+import unicodedata
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -50,6 +51,7 @@ import disnake.abc
 
 from . import utils
 from .asset import Asset
+from .emoji import Emoji
 from .enums import (
     ChannelType,
     StagePrivacyLevel,
@@ -64,7 +66,7 @@ from .mixins import Hashable
 from .object import Object
 from .permissions import PermissionOverwrite, Permissions
 from .stage_instance import StageInstance
-from .threads import Thread
+from .threads import Tag, Thread
 from .utils import MISSING
 
 __all__ = (
@@ -75,6 +77,7 @@ __all__ = (
     "CategoryChannel",
     "NewsChannel",
     "StoreChannel",
+    "ForumChannel",
     "GroupChannel",
     "PartialMessageable",
 )
@@ -90,6 +93,7 @@ if TYPE_CHECKING:
     from .types.channel import (
         CategoryChannel as CategoryChannelPayload,
         DMChannel as DMChannelPayload,
+        ForumChannel as ForumChannelPayload,
         GroupDMChannel as GroupChannelPayload,
         StageChannel as StageChannelPayload,
         StoreChannel as StoreChannelPayload,
@@ -1996,6 +2000,323 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
 
 
+class ForumChannel(disnake.abc.GuildChannel, Hashable):
+    """Represents a Discord guild forum channel.
+
+    .. versionadded:: 2.5
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two channels are equal.
+
+        .. describe:: x != y
+
+            Checks if two channels are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the channel's hash.
+
+        .. describe:: str(x)
+
+            Returns the channel's name.
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The channel's ID.
+    name: :class:`str`
+        The channel's name.
+    guild: :class:`Guild`
+        The guild the channel belongs to.
+    topic: Optional[:class:`str`]
+        The channel's topic. ``None`` if it isn't set.
+    category_id: Optional[:class:`int`]
+        The category channel ID this channel belongs to, if applicable.
+    position: :class:`int`
+        The position in the channel list. This is a number that starts at 0. e.g. the
+        top channel is position 0.
+    nsfw: :class:`bool`
+        Whether the channel is marked as "not safe for work".
+
+        .. note::
+
+            To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
+    last_message_id: Optional[:class:`int`]
+        The last message ID of the message sent to this channel. It may
+        *not* point to an existing or valid message.
+    default_auto_archive_duration: Optional[:class:`int`]
+        The default auto archive duration in minutes for threads created in this channel.
+    available_tags: Optional[List[:class:`Tag`]]
+        The available tags for this channel. Or ``None`` if the channel doesn't have any tags.
+    """
+
+    # TODO: Refer threads as posts?
+
+    __slots__ = (
+        "id",
+        "name",
+        "category_id",
+        "topic",
+        "position",
+        "nsfw",
+        "last_message_id",
+        "default_auto_archive_duration",
+        "guild",
+        "available_tags",
+        "_state",
+        "_type",
+        "_overwrites",
+    )
+
+    def __init__(self, *, state: ConnectionState, guild: Guild, data: ForumChannelPayload) -> None:
+        self._state: ConnectionState = state
+        self.id: int = int(data["id"])
+        self._type: int = data["type"]
+        self._update(guild, data)
+
+    def __repr__(self) -> str:
+        atts = [
+            ("id", self.id),
+            ("name", self.name),
+            ("topic", self.topic),
+            ("position", self.position),
+            ("nsfw", self.nsfw),
+            ("category_id", self.category_id),
+            ("default_auto_archive_duration", self.default_auto_archive_duration),
+        ]
+        joined = " ".join("%s=%r" % t for t in atts)
+        return f"<{type(self).__name__} {joined}>"
+
+    def _update(self, guild: Guild, data: ForumChannelPayload) -> None:
+        self.guild: Guild = guild
+        self.name: str = data["name"]
+        self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
+        self.topic: Optional[str] = data.get("topic")
+        self.position: int = data["position"]
+        self.nsfw: bool = data.get("nsfw", False)
+        self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
+        self.default_auto_archive_duration: Optional[ThreadArchiveDurationLiteral] = data.get(
+            "default_auto_archive_duration"
+        )
+        self.available_tags: Optional[List[Tag]] = [
+            Tag(data=tag, channel=self, state=self._state) for tag in data.get("available_tags", [])
+        ] or None
+        self._fill_overwrites(data)
+
+    async def _get_channel(self) -> ForumChannel:  # I wonder why this exists
+        return self
+
+    @property
+    def type(self) -> ChannelType:
+        return try_enum(ChannelType, self._type)
+
+    @property
+    def _sorting_bucket(self) -> int:
+        return ChannelType.text.value
+
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+
+        # text channels do not have voice related permissions
+        denied = Permissions.voice()
+        base.value &= ~denied.value
+        return base
+
+    @property
+    def threads(self) -> List[Thread]:
+        """List[:class:`Thread`]: Returns all the threads that you can see."""
+        return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
+
+    def is_nsfw(self) -> bool:
+        """Whether the channel is marked as NSFW
+
+        :return type: :class:`bool`
+        """
+        return self.nsfw
+
+    @property
+    def last_message(self) -> Optional[Message]:
+        """Gets the last message in this channel from the cache.
+
+        The message might not be valid or point to an existing message.
+
+        .. admonition:: Reliable Fetching
+            :class: helpful
+
+            For a slightly more reliable method of fetching the
+            last message, :meth:`fetch_message` with the :attr:`last_message_id`
+            attribute.
+
+        Returns
+        -------
+        Optional[:class:`Message`]
+            The last message in this channel or ``None`` if not found.
+        """
+        return self._state._get_message(self.last_message_id) if self.last_message_id else None
+
+    async def edit(
+        self,
+        *,
+        name: str = MISSING,
+        topic: Optional[str] = MISSING,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        sync_permissions: bool = MISSING,  # test this
+        category: Optional[CategoryChannel] = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = MISSING,
+        reason: Optional[str] = None,
+    ) -> Optional[ForumChannel]:
+        # TODO: docstring jaja ~~and implementation duh~~
+        ...
+
+    @utils.copy_doc(disnake.abc.GuildChannel.clone)
+    async def clone(
+        self, *, name: Optional[str] = None, reason: Optional[str] = None
+    ) -> ForumChannel:
+        return await self._clone_impl(
+            {
+                "topic": self.topic,
+                "nsfw": self.nsfw,
+                "default_auto_archive_duration": self.default_auto_archive_duration,
+            },
+            name=name,
+            reason=reason,
+        )
+
+    def get_thread(self, thread_id: int, /) -> Optional[Thread]:
+        """Returns a thread with the given ID.
+
+        Parameters
+        ----------
+        thread_id: :class:`int`
+            The ID to search for.
+
+        Returns
+        -------
+        Optional[:class:`Thread`]
+            The returned thread of ``None`` if not found.
+        """
+        return self.guild.get_thread(thread_id)
+
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = None,
+        # invitable: bool = None, # check this
+        slowmode_delay: int = None,
+        reason: Optional[str] = None,
+    ):
+        """|coro|
+
+        Creates a thread in this forum channel.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name of the thread.
+        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+            The duration in minutes before the thread is automatically archived for inactivity.
+            If not provided, the channel's default auto archive duration is used.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this thread, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+        reason: Optional[:class:`str`]
+            The reason for creating the thread. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to create a thread.
+        HTTPException
+            Starting the thread failed.
+
+        Returns
+        -------
+        :class:`Thread`
+            The newly created thread.
+        """
+        if auto_archive_duration is not None:
+            auto_archive_duration = cast(
+                "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
+            )
+
+        data = await self._state.http.start_thread_without_message(
+            self.id,
+            name=name,
+            auto_archive_duration=auto_archive_duration
+            or self.default_auto_archive_duration
+            or 60,  # the third or is unnecessary?
+            type=ChannelType.public_thread.value,
+            rate_limit_per_user=slowmode_delay or 0,
+            reason=reason,
+        )
+
+        return Thread(guild=self.guild, data=data, state=self._state)
+
+    async def create_tag(
+        self,
+        *,
+        name: Optional[str] = MISSING,
+        emoji: Union[str, Emoji] = MISSING,
+        reason: Optional[str] = None,
+    ) -> Tag:
+        """|coro|
+
+        Creates a tag for this channel.
+
+        Parameters
+        ----------
+        name: Optional[:class:`str`]
+            The name of the tag. Or ``None`` to not set a name.
+        emoji: Union[:class:`str`, :class:`Emoji`]
+            The emoji to use for the tag.
+
+        Returns
+        -------
+        :class:`Tag`
+            The newly created tag.
+        """
+        # TODO: properly test this.
+        if name is MISSING and emoji is MISSING:
+            raise ValueError("you must provide either a name or an emoji")
+
+        payload: Dict[str, Any] = {"name": name or ""}
+
+        if emoji is not MISSING:
+
+            if isinstance(emoji, Emoji):
+                payload["emoji_id"] = emoji.id
+            else:
+                try:
+                    emoji_name = unicodedata.name(emoji)
+                except TypeError:
+                    pass
+                else:
+                    emoji_name = emoji.replace(" ", "_")
+                    payload["emoji_name"] = emoji_name
+
+        data = await self._state.http.create_tag(self.id, **payload, reason=reason)
+        return Tag(data=data, channel=self, state=self._state)
+
+    # TODO: `archived_threads` and `create_tag` method.
+
+
 DMC = TypeVar("DMC", bound="DMChannel")
 
 
@@ -2358,6 +2679,8 @@ def _guild_channel_factory(channel_type: int):
         return StoreChannel, value
     elif value is ChannelType.stage_voice:
         return StageChannel, value
+    elif value is ChannelType.forum:
+        return ForumChannel, value
     else:
         return None, value
 
@@ -2402,4 +2725,5 @@ def _channel_type_factory(
         NewsChannel: [ChannelType.news],
         Thread: [ChannelType.news_thread, ChannelType.public_thread, ChannelType.private_thread],
         StageChannel: [ChannelType.stage_voice],
+        ForumChannel: [ChannelType.forum],
     }.get(cls, [])

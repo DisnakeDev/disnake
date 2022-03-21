@@ -1174,6 +1174,52 @@ class HTTPClient:
         route = Route("GET", "/channels/{channel_id}/thread-members", channel_id=channel_id)
         return self.request(route)
 
+    def create_tag(
+        self,
+        channel_id: Snowflake,
+        name: str,
+        emoji_id: Optional[Snowflake] = None,
+        emoji_name: Optional[str] = None,
+        reason: Optional[str] = None,
+    ) -> Response[threads.Tag]:
+        payload: Dict[str, Any] = {"name": name}
+
+        if emoji_id is not None:
+            payload["emoji_id"] = emoji_id
+
+        if emoji_name is not None:
+            payload["emoji_name"] = emoji_name
+
+        route = Route("POST", "/channels/{channel_id}/tags", channel_id=channel_id)
+        return self.request(route, json=payload, reason=reason)
+
+    def edit_tag(
+        self,
+        channel_id: Snowflake,
+        tag_id: Snowflake,
+        name: str,
+        emoji_id: Snowflake,
+        emoji_name: Optional[str],
+        reason: Optional[str] = None,  # check this
+    ) -> Response[threads.Tag]:
+        payload = {
+            "name": name,
+            "emoji_id": emoji_id,
+            "emoji_name": emoji_name,
+        }
+        route = Route(
+            "PUT", "/channels/{channel_id}/tags/{tag_id}", channel_id=channel_id, tag_id=tag_id
+        )
+        return self.request(route, json=payload, reason=reason)
+
+    def delete_tag(
+        self, channel_id: Snowflake, tag_id: Snowflake, reason: Optional[str] = None
+    ) -> Response[None]:
+        route = Route(
+            "DELETE", "/channels/{channel_id}/tags/{tag_id}", channel_id=channel_id, tag_id=tag_id
+        )
+        return self.request(route, reason=reason)
+
     # Webhook management
 
     def create_webhook(

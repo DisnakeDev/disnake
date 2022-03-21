@@ -26,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from typing import List, Literal, Optional, TypedDict, Union
 
 from .snowflake import Snowflake
-from .threads import ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
+from .threads import Tag, ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
 from .user import PartialUser
 
 OverwriteType = Literal[0, 1]
@@ -39,7 +39,7 @@ class PermissionOverwrite(TypedDict):
     deny: str
 
 
-ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14]
+ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15]
 
 
 class _BaseChannel(TypedDict):
@@ -132,6 +132,17 @@ class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
     thread_metadata: ThreadMetadata
 
 
+class _ForumChannelOptional(TypedDict, total=False):
+    default_auto_archive_duration: ThreadArchiveDurationLiteral
+    available_tags: List[Tag]
+
+
+class ForumChannel(_BaseGuildChannel, _ForumChannelOptional):
+    type: Literal[15]
+    topic: Optional[str]
+    last_message_id: Optional[Snowflake]
+
+
 GuildChannel = Union[
     TextChannel,
     NewsChannel,
@@ -140,6 +151,7 @@ GuildChannel = Union[
     StoreChannel,
     StageChannel,
     ThreadChannel,
+    ForumChannel,
 ]
 
 
