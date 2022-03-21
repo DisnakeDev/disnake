@@ -1984,6 +1984,19 @@ class AutoShardedConnectionState(ConnectionState):
             if new_channel is not vc.channel:
                 vc.channel = new_channel  # type: ignore
 
+    def _update_member_references(self) -> None:
+        messages: Sequence[Message] = self._messages or []
+        for msg in messages:
+            if not msg.guild:
+                continue
+
+            # note that unlike with channels, this doesn't fall back to `Object` in case
+            # guild chunking is disabled, but still shouldn't lead to old references being
+            # kept as `msg.author.guild` was already rebound (see above) at this point.
+            new_author = msg.guild.get_member(msg.author.id)
+            if new_author is not None and new_author is not msg.author:
+                msg.author = new_author
+
     async def chunker(
         self,
         guild_id: int,
@@ -2073,10 +2086,13 @@ class AutoShardedConnectionState(ConnectionState):
         except AttributeError:
             pass  # already been deleted somehow
 
-        # regular users cannot shard so we won't worry about it here.
-
         # clear the current task
         self._ready_task = None
+
+        # update member references once guilds are chunked
+        # (if we're not chunking guilds, there's no use in trying to update member references)
+        if self._chunk_guilds:
+            self._update_member_references()
 
         # dispatch the event
         self.call_handlers("ready")
