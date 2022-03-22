@@ -2032,7 +2032,7 @@ class HTTPClient:
         self,
         application_id: Snowflake,
         *,
-        with_localizations: bool = False,
+        with_localizations: bool = True,
     ) -> Response[List[interactions.ApplicationCommand]]:
         params: Dict[str, Any] = {}
         if with_localizations:
@@ -2104,7 +2104,7 @@ class HTTPClient:
         application_id: Snowflake,
         guild_id: Snowflake,
         *,
-        with_localizations: bool = False,
+        with_localizations: bool = True,
     ) -> Response[List[interactions.ApplicationCommand]]:
         params: Dict[str, Any] = {}
         if with_localizations:

@@ -2084,7 +2084,7 @@ class Client:
     # Application commands (global)
 
     async def fetch_global_commands(
-        self, *, with_localizations: bool = False
+        self, *, with_localizations: bool = True
     ) -> List[APIApplicationCommand]:
         """|coro|
 
@@ -2095,7 +2095,7 @@ class Client:
         Parameters
         ----------
         with_localizations: :class:`bool`
-            Whether to include localizations in the response. Defaults to ``False``.
+            Whether to include localizations in the response. Defaults to ``True``.
 
             .. versionadded:: 2.5
 
@@ -2211,7 +2211,7 @@ class Client:
     # Application commands (guild)
 
     async def fetch_guild_commands(
-        self, guild_id: int, *, with_localizations: bool = False
+        self, guild_id: int, *, with_localizations: bool = True
     ) -> List[APIApplicationCommand]:
         """|coro|
 
@@ -2224,7 +2224,7 @@ class Client:
         guild_id: :class:`int`
             The ID of the guild to fetch commands from.
         with_localizations: :class:`bool`
-            Whether to include localizations in the response. Defaults to ``False``.
+            Whether to include localizations in the response. Defaults to ``True``.
 
             .. versionadded:: 2.5
 
