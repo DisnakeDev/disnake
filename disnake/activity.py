@@ -244,7 +244,7 @@ class Activity(BaseActivity):
         self.emoji: Optional[PartialEmoji] = (
             PartialEmoji.from_dict(emoji) if emoji is not None else None
         )
-        if self.emoji:
+        if self.emoji and _state:
             self.emoji._state = _state
 
     def __repr__(self) -> str:
@@ -790,7 +790,7 @@ class CustomActivity(BaseActivity):
                 f"Expected dict, str, PartialEmoji, or None, received {type(emoji)!r} instead."
             )
 
-        if self.emoji:
+        if self.emoji and _state:
             self.emoji._state = _state
 
     @property
