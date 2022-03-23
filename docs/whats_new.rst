@@ -37,7 +37,7 @@ Breaking Changes
 - Invalid voice regions were removed from :class:`VoiceRegion` (:issue:`357`)
     - removed: ``eu_west``, ``eu_central``, ``london``, ``amsterdam``, ``frankfurt``, ``south_korea``, ``europe``, ``vip_us_east``, ``vip_us_west``, ``vip_amsterdam``
     - added: ``rotterdam``
-- The ``youtube`` :class:`PartyType` no longer works and was removed (:issue:`408`)
+- The ``youtube``, ``awkword`` and ``sketchy_artist`` :class:`PartyType`\s no longer work and were removed (:issue:`408`, :issue:`409`)
 
 
 Deprecations
@@ -68,6 +68,7 @@ New Features
 - Add :attr:`ModalInteraction.message` (:issue:`363`, :issue:`400`)
 - Support :func:`InteractionResponse.edit_message` for modal interactions, if modal was sent in response to component interaction (:issue:`364`, :issue:`400`)
 - Add :func:`Guild.search_members` (:issue:`358`, :issue:`388`)
+- Add :attr:`PartialInviteGuild.premium_subscription_count` (:issue:`410`)
 - Support ``List[str]`` and ``Dict[str, str]`` in ``option`` parameter of :class:`disnake.ui.Select` (:issue:`326`)
 - Support ``reason`` parameter in :func:`Message.create_thread` and :func:`Thread.delete` (:issue:`366`)
 - |commands| Add :class:`GuildScheduledEventConverter` and :exc:`GuildScheduledEventNotFound` (:issue:`376`)
@@ -83,9 +84,12 @@ Bug Fixes
 - Fix shadowed ``disnake.message`` module (:issue:`380`)
 - Fix missing/incorrect ``__slots__`` (:issue:`381`)
 - Improve components exception message (:issue:`352`)
-- Fix :attr:`PartialInviteChannel.__str__` (:issue:`383`)
+- Fix :attr:`PartialInviteChannel.__str__ <PartialInviteChannel>` (:issue:`383`)
 - Use proper HTTP method for joining threads, remove unused methods (:issue:`356`)
-- Improve :func:`Messageable.send` typing and fix annotations of HTTP methods (:issue:`378`)
+- Improve :func:`abc.Messageable.send` typing and fix annotations of HTTP methods (:issue:`378`)
+- Remove cached scheduled events if associated channel was deleted (:issue:`406`)
+- Update some types/parameters of roles, scheduled events and voice states (:issue:`407`)
+- Use :func:`asyncio.iscoroutinefunction` instead of :func:`inspect.iscoroutinefunction` (:issue:`427`)
 - |commands| Fix :class:`~ext.commands.clean_content` converter (:issue:`396`)
 - |commands| Make conversion exceptions in slash commands propagate cleanly as documented (:issue:`362`)
 
@@ -95,8 +99,10 @@ Documentation
 
 - Fix several bugs of redesign (:issue:`377`)
 - Disable mathjax in documentation to improve loading times (:issue:`370`)
+- Fix duplicate search results, improve scoring (:issue:`423`)
 - Update return type of :func:`Guild.create_template` (:issue:`372`)
 - Add documentation for :class:`GuildCommandInteraction`, :class:`UserCommandInteraction`, and :class:`MessageCommandInteraction` (:issue:`374`)
+- Update broken references (:issue:`419`)
 
 
 Miscellaneous
