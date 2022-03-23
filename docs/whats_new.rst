@@ -21,7 +21,7 @@ This version adds support for API v10, improves API coverage by adding support f
 and contains several miscellaneous enhancements and bugfixes.
 
 Regarding the message content intent:
-Note that earlier versions will continue working as before after the message content intent deadline (April 30th 2022),
+Note that earlier versions will continue working fine after the message content intent deadline (April 30th 2022),
 as long as the intent is enabled in the developer portal. However, from this version (``2.5.0``) onward, the intent needs to be
 enabled in the developer portal *and* your code.
 See `this page <https://guide.disnake.dev/popular-topics/intents#why-do-most-messages-have-no-content>`_ of the guide for more information.
@@ -32,12 +32,13 @@ Breaking Changes
 
 - The :attr:`~Intents.message_content` intent is now required to receive to receive message content and related fields, see above (:issue:`353`)
 - :func:`TextChannel.create_thread` now requires either a ``message`` or a ``type`` parameter (:issue:`355`)
-- |commands| Failure to convert an input parameter annotated as :class:`~ext.commands.LargeInt` now
-  raises a :exc:`~ext.commands.LargeIntConversionFailure` (:issue:`362`)
+- The ``interaction`` parameter of :func:`ui.Item.callback` is now positional-only (:issue:`311`)
 - Invalid voice regions were removed from :class:`VoiceRegion` (:issue:`357`)
     - removed: ``eu_west``, ``eu_central``, ``london``, ``amsterdam``, ``frankfurt``, ``south_korea``, ``europe``, ``vip_us_east``, ``vip_us_west``, ``vip_amsterdam``
     - added: ``rotterdam``
 - The ``youtube``, ``awkword`` and ``sketchy_artist`` :class:`PartyType`\s no longer work and were removed (:issue:`408`, :issue:`409`)
+- |commands| Failure to convert an input parameter annotated as :class:`~ext.commands.LargeInt` now
+  raises a :exc:`~ext.commands.LargeIntConversionFailure` (:issue:`362`)
 
 
 Deprecations
