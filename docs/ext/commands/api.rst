@@ -925,10 +925,10 @@ Exceptions
 .. autoexception:: disnake.ext.commands.GuildScheduledEventNotFound
     :members:
 
-.. autoexception:: disnake.ext.commands.LargeIntConversionFailure
+.. autoexception:: disnake.ext.commands.BadBoolArgument
     :members:
 
-.. autoexception:: disnake.ext.commands.BadBoolArgument
+.. autoexception:: disnake.ext.commands.LargeIntConversionFailure
     :members:
 
 .. autoexception:: disnake.ext.commands.MissingPermissions
@@ -1016,8 +1016,8 @@ Exception Hierarchy
                     - :exc:`~.commands.PartialEmojiConversionFailure`
                     - :exc:`~.commands.GuildStickerNotFound`
                     - :exc:`~.commands.GuildScheduledEventNotFound`
-                    - :exc:`~.commands.LargeIntConversionFailure`
                     - :exc:`~.commands.BadBoolArgument`
+                    - :exc:`~.commands.LargeIntConversionFailure`
                     - :exc:`~.commands.FlagError`
                         - :exc:`~.commands.BadFlagArgument`
                         - :exc:`~.commands.MissingFlagArgument`
