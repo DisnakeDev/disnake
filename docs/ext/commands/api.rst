@@ -1016,6 +1016,7 @@ Exception Hierarchy
                     - :exc:`~.commands.PartialEmojiConversionFailure`
                     - :exc:`~.commands.GuildStickerNotFound`
                     - :exc:`~.commands.GuildScheduledEventNotFound`
+                    - :exc:`~.commands.LargeIntConversionFailure`
                     - :exc:`~.commands.BadBoolArgument`
                     - :exc:`~.commands.FlagError`
                         - :exc:`~.commands.BadFlagArgument`
