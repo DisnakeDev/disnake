@@ -165,6 +165,10 @@ class PartialInviteGuild:
 
     verification_level: :class:`VerificationLevel`
         The partial guild's verification level.
+    premium_subscription_count: :class:`int`
+        The number of "boosts" this guild currently has.
+
+        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -179,6 +183,7 @@ class PartialInviteGuild:
         "nsfw_level",
         "vanity_url_code",
         "verification_level",
+        "premium_subscription_count",
     )
 
     def __init__(self, state: ConnectionState, data: InviteGuildPayload, id: int):
@@ -195,6 +200,7 @@ class PartialInviteGuild:
             VerificationLevel, data.get("verification_level")
         )
         self.description: Optional[str] = data.get("description")
+        self.premium_subscription_count: int = data.get("premium_subscription_count") or 0
 
     def __str__(self) -> str:
         return self.name

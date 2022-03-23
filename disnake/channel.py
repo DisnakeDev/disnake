@@ -713,7 +713,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: str,
-        message: Snowflake = None,
+        message: Snowflake,
         auto_archive_duration: AnyThreadArchiveDuration = None,
         slowmode_delay: int = None,
         reason: Optional[str] = None,
@@ -727,7 +727,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         name: str,
         type: Literal[
             ChannelType.public_thread, ChannelType.private_thread, ChannelType.news_thread
-        ] = None,
+        ],
         auto_archive_duration: AnyThreadArchiveDuration = None,
         invitable: bool = None,
         slowmode_delay: int = None,
@@ -768,8 +768,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The name of the thread.
         message: :class:`abc.Snowflake`
             A snowflake representing the message to create the thread with.
-            If ``None`` is passed then a private thread is created.
-            Defaults to ``None``.
 
             .. versionchanged:: 2.5
 
@@ -1339,7 +1337,7 @@ class StageChannel(VocalGuildChannel):
 
     def _update(self, guild: Guild, data: StageChannelPayload) -> None:
         super()._update(guild, data)
-        self.topic = data.get("topic")
+        self.topic: Optional[str] = data.get("topic")
 
     @property
     def requesting_to_speak(self) -> List[Member]:
