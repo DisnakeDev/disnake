@@ -1629,16 +1629,6 @@ of :class:`enum.Enum`.
         The "SpellCast" activity.
 
         .. versionadded:: 2.3
-    .. attribute:: awkword
-
-        The "Awkword" activity.
-
-        .. versionadded:: 2.3
-    .. attribute:: sketchy_artist
-
-        The "Sketchy Artist" activity.
-
-        .. versionadded:: 2.3
     .. attribute:: watch_together
 
         The "Watch Together" activity, a Youtube application.
