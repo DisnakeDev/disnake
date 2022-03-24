@@ -194,7 +194,7 @@ def _transform_guild_scheduled_event_image(
 ) -> Optional[Asset]:
     if data is None:
         return None
-    return Asset._from_guild_scheduled_event_image(entry._state, entry._target_id, data)
+    return Asset._from_guild_scheduled_event_image(entry._state, entry._target_id, data)  # type: ignore
 
 
 class AuditLogDiff:
