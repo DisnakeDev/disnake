@@ -373,7 +373,7 @@ class AutoShardedClient(Client):
         ...
 
     @overload
-    def __init__(self):  # type: ignore
+    def __init__(self):
         ...
 
     def __init__(self, *, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
