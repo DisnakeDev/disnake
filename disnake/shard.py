@@ -27,7 +27,19 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 import aiohttp
 
@@ -331,58 +343,57 @@ class AutoShardedClient(Client):
     """
 
     if TYPE_CHECKING:
-        shard_ids: Optional[List[int]]
         _connection: AutoShardedConnectionState
-        __shards: Dict[int, Shard]
-        __queue: asyncio.PriorityQueue
 
-        def __init__(
-            self,
-            *,
-            asyncio_debug: bool = False,
-            loop: Optional[asyncio.AbstractEventLoop] = None,
-            shard_ids: List[int] = None,  # instead of Client's shard_id: Optional[int]
-            shard_count: Optional[int] = None,
-            enable_debug_events: bool = False,
-            connector: Optional[aiohttp.BaseConnector] = None,
-            proxy: Optional[str] = None,
-            proxy_auth: Optional[aiohttp.BasicAuth] = None,
-            assume_unsync_clock: bool = True,
-            max_messages: Optional[int] = 1000,
-            application_id: Optional[int] = None,
-            heartbeat_timeout: float = 60.0,
-            guild_ready_timeout: float = 2.0,
-            allowed_mentions: Optional[AllowedMentions] = None,
-            activity: Optional[BaseActivity] = None,
-            status: Optional[Union[Status, str]] = None,
-            intents: Intents = ...,
-            chunk_guilds_at_startup: Optional[bool] = None,
-            member_cache_flags: MemberCacheFlags = None,
-            cache_application_command_permissions: bool = True,
-        ):
-            ...
+    @overload
+    def __init__(
+        self,
+        *,
+        asyncio_debug: bool = False,
+        loop: Optional[asyncio.AbstractEventLoop] = None,
+        shard_ids: List[int] = None,  # instead of Client's shard_id: Optional[int]
+        shard_count: Optional[int] = None,
+        enable_debug_events: bool = False,
+        connector: Optional[aiohttp.BaseConnector] = None,
+        proxy: Optional[str] = None,
+        proxy_auth: Optional[aiohttp.BasicAuth] = None,
+        assume_unsync_clock: bool = True,
+        max_messages: Optional[int] = 1000,
+        application_id: Optional[int] = None,
+        heartbeat_timeout: float = 60.0,
+        guild_ready_timeout: float = 2.0,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        activity: Optional[BaseActivity] = None,
+        status: Optional[Union[Status, str]] = None,
+        intents: Intents = None,
+        chunk_guilds_at_startup: Optional[bool] = None,
+        member_cache_flags: MemberCacheFlags = None,
+        cache_application_command_permissions: bool = True,
+    ):
+        ...
 
-    else:
+    @overload
+    def __init__(self):  # type: ignore
+        ...
 
-        def __init__(self, *, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
-            kwargs.pop("shard_id", None)
-            self.shard_ids = shard_ids
-            super().__init__(**kwargs)
+    def __init__(self, *, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
+        self.shard_ids = shard_ids
+        super().__init__(**kwargs)
 
-            if self.shard_ids is not None:
-                if self.shard_count is None:
-                    raise ClientException(
-                        "When passing manual shard_ids, you must provide a shard_count."
-                    )
-                elif not isinstance(self.shard_ids, (list, tuple)):
-                    raise ClientException("shard_ids parameter must be a list or a tuple.")
+        if self.shard_ids is not None:
+            if self.shard_count is None:
+                raise ClientException(
+                    "When passing manual shard_ids, you must provide a shard_count."
+                )
+            elif not isinstance(self.shard_ids, (list, tuple)):
+                raise ClientException("shard_ids parameter must be a list or a tuple.")
 
-            # instead of a single websocket, we have multiple
-            # the key is the shard_id
-            self.__shards = {}
-            self._connection._get_websocket = self._get_websocket
-            self._connection._get_client = lambda: self
-            self.__queue = asyncio.PriorityQueue()
+        # instead of a single websocket, we have multiple
+        # the key is the shard_id
+        self.__shards = {}
+        self._connection._get_websocket = self._get_websocket
+        self._connection._get_client = lambda: self
+        self.__queue = asyncio.PriorityQueue()
 
     def _get_websocket(
         self, guild_id: Optional[int] = None, *, shard_id: Optional[int] = None

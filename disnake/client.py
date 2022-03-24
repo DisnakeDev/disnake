@@ -285,7 +285,7 @@ class Client:
         allowed_mentions: Optional[AllowedMentions] = None,
         activity: Optional[BaseActivity] = None,
         status: Optional[Union[Status, str]] = None,
-        intents: Intents = Intents.default(),
+        intents: Intents = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: MemberCacheFlags = None,
         cache_application_command_permissions: bool = True,

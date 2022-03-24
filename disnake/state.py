@@ -227,7 +227,8 @@ class ConnectionState:
         if not intents.guilds:
             _log.warning("Guilds intent seems to be disabled. This may cause state related issues.")
 
-        self._chunk_guilds: bool = options.get("chunk_guilds_at_startup", intents.members)
+        chunk_guilds = options.get("chunk_guilds_at_startup")
+        self._chunk_guilds: bool = intents.members if chunk_guilds is None else chunk_guilds
 
         # Ensure these two are set properly
         if not intents.members and self._chunk_guilds:
