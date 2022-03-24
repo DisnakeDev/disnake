@@ -2584,6 +2584,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.description`
         - :attr:`~AuditLogDiff.privacy_level`
         - :attr:`~AuditLogDiff.status`
+        - :attr:`~AuditLogDiff.image`
 
         .. versionadded:: 2.3
 
@@ -3747,6 +3748,12 @@ AuditLogDiff
         The status of a guild scheduled event being changed.
 
         :type: :class:`GuildScheduledEventStatus`
+
+    .. attribute:: image
+
+        The image of a guild scheduled event being changed.
+
+        :type: :class:`Asset`
 
 .. this is currently missing the following keys: reason and application_id
    I'm not sure how to about porting these
