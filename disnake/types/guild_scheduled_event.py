@@ -66,4 +66,3 @@ class GuildScheduledEvent(_GuildScheduledEventOptional):
     entity_type: GuildScheduledEventEntityType
     entity_id: Optional[Snowflake]
     entity_metadata: Optional[GuildScheduledEventEntityMetadata]
-    image: Optional[str]
