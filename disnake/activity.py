@@ -153,7 +153,7 @@ class Activity(BaseActivity):
     - :class:`Streaming`
 
     Attributes
-    ------------
+    ----------
     application_id: Optional[:class:`int`]
         The application ID of the game.
     name: Optional[:class:`str`]
@@ -173,7 +173,6 @@ class Activity(BaseActivity):
           activity in milliseconds since Unix epoch.
         - ``end``: Corresponds to when the user will finish doing the
           activity in milliseconds since Unix epoch.
-
     assets: :class:`dict`
         A dictionary representing the images and their hover text of an activity.
         It contains the following optional keys:
@@ -182,14 +181,13 @@ class Activity(BaseActivity):
         - ``large_text``: A string representing the text when hovering over the large image asset.
         - ``small_image``: A string representing the ID for the small image asset.
         - ``small_text``: A string representing the text when hovering over the small image asset.
-
     party: :class:`dict`
         A dictionary representing the activity party. It contains the following optional keys:
 
         - ``id``: A string representing the party ID.
         - ``size``: A list of up to two integer elements denoting (current_size, maximum_size).
     buttons: List[:class:`dict`]
-        An list of dictionaries representing custom buttons shown in a rich presence.
+        A list of dictionaries representing custom buttons shown in a rich presence.
         Each dictionary contains the following keys:
 
         - ``label``: A string representing the text shown on the button.
@@ -204,7 +202,6 @@ class Activity(BaseActivity):
     __slots__ = (
         "state",
         "details",
-        "_created_at",
         "timestamps",
         "assets",
         "party",
@@ -297,7 +294,7 @@ class Activity(BaseActivity):
 
     @property
     def large_image_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns a URL pointing to the large image asset of this activity if applicable."""
+        """Optional[:class:`str`]: Returns a URL pointing to the large image asset of this activity, if applicable."""
         if self.application_id is None:
             return None
 
@@ -310,7 +307,7 @@ class Activity(BaseActivity):
 
     @property
     def small_image_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns a URL pointing to the small image asset of this activity if applicable."""
+        """Optional[:class:`str`]: Returns a URL pointing to the small image asset of this activity, if applicable."""
         if self.application_id is None:
             return None
 
@@ -323,12 +320,12 @@ class Activity(BaseActivity):
 
     @property
     def large_image_text(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the large image asset hover text of this activity if applicable."""
+        """Optional[:class:`str`]: Returns the large image asset hover text of this activity, if applicable."""
         return self.assets.get("large_text", None)
 
     @property
     def small_image_text(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the small image asset hover text of this activity if applicable."""
+        """Optional[:class:`str`]: Returns the small image asset hover text of this activity, if applicable."""
         return self.assets.get("small_text", None)
 
 
@@ -356,12 +353,12 @@ class Game(BaseActivity):
             Returns the game's name.
 
     Parameters
-    -----------
+    ----------
     name: :class:`str`
         The game's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The game's name.
     """
@@ -459,7 +456,7 @@ class Streaming(BaseActivity):
             Returns the stream's name.
 
     Attributes
-    -----------
+    ----------
     platform: Optional[:class:`str`]
         Where the user is streaming from (ie. YouTube, Twitch).
 
@@ -512,7 +509,6 @@ class Streaming(BaseActivity):
         This corresponds to the ``large_image`` key of the :attr:`Streaming.assets`
         dictionary if it starts with ``twitch:``. Typically set by the Discord client.
         """
-
         try:
             name = self.assets["large_image"]
         except KeyError:
@@ -753,7 +749,7 @@ class CustomActivity(BaseActivity):
     .. versionadded:: 1.3
 
     Attributes
-    -----------
+    ----------
     name: Optional[:class:`str`]
         The custom activity's name.
     emoji: Optional[:class:`PartialEmoji`]

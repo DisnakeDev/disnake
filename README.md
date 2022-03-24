@@ -37,7 +37,7 @@ python3 -m pip install -U disnake
 py -3 -m pip install -U disnake
 ```
 
-Installing `disnake` with full voice support requires you to replace `disnake` here, with `disnake[voice]`. To learn more about voice support (or installing the development version), please visit [this section of our guide](https://guide.disnake.dev/prerequisites/installing-disnake/). 
+Installing `disnake` with full voice support requires you to replace `disnake` here, with `disnake[voice]`. To learn more about voice support (or installing the development version), please visit [this section of our guide](https://guide.disnake.dev/prerequisites/installing-disnake/).
 
 (You can optionally install [PyNaCl](https://pypi.org/project/PyNaCl/) for voice support.)
 
@@ -59,7 +59,7 @@ Quick Example
 import disnake
 from disnake.ext import commands
 
-bot = commands.Bot(command_prefix=">", test_guilds=[12345])
+bot = commands.InteractionBot(test_guilds=[12345])
 
 @bot.slash_command()
 async def ping(inter):
@@ -74,7 +74,7 @@ bot.run("BOT_TOKEN")
 import disnake
 from disnake.ext import commands
 
-bot = commands.Bot(command_prefix=">", test_guilds=[12345])
+bot = commands.InteractionBot(test_guilds=[12345])
 
 @bot.user_command()
 async def avatar(inter, user):
@@ -91,7 +91,7 @@ bot.run("BOT_TOKEN")
 import disnake
 from disnake.ext import commands
 
-bot = commands.Bot(command_prefix=">")
+bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 @bot.command()
 async def ping(ctx):

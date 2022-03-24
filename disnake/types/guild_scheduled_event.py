@@ -47,9 +47,10 @@ class GuildScheduledEventEntityMetadata(TypedDict, total=False):
 
 
 class _GuildScheduledEventOptional(TypedDict, total=False):
-    description: str
+    description: Optional[str]
     creator: User
     user_count: int
+    image: Optional[str]
 
 
 class GuildScheduledEvent(_GuildScheduledEventOptional):

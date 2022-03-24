@@ -398,7 +398,7 @@ class SyncWebhookMessage(Message):
     .. versionadded:: 2.0
     """
 
-    _state: _WebhookState
+    _state: _WebhookState[SyncWebhook]
 
     def edit(
         self,
@@ -419,7 +419,7 @@ class SyncWebhookMessage(Message):
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
-        ------------
+        ----------
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
@@ -431,7 +431,7 @@ class SyncWebhookMessage(Message):
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
         files: List[:class:`File`]
@@ -444,12 +444,13 @@ class SyncWebhookMessage(Message):
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the message failed.
         Forbidden
@@ -462,11 +463,10 @@ class SyncWebhookMessage(Message):
             There was no token associated with this webhook.
 
         Returns
-        --------
+        -------
         :class:`SyncWebhookMessage`
             The newly edited message.
         """
-
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
@@ -487,7 +487,7 @@ class SyncWebhookMessage(Message):
         """Deletes the message.
 
         Parameters
-        -----------
+        ----------
         delay: Optional[:class:`float`]
             If provided, the number of seconds to wait before deleting the message.
             This blocks the thread.
@@ -501,7 +501,6 @@ class SyncWebhookMessage(Message):
         HTTPException
             Deleting the message failed.
         """
-
         if delay is not None:
             time.sleep(delay)
         self._state._webhook.delete_message(self.id)
@@ -530,11 +529,11 @@ class SyncWebhook(BaseWebhook):
         Webhooks are now comparable and hashable.
 
     Attributes
-    ------------
+    ----------
     id: :class:`int`
         The webhook's ID
     type: :class:`WebhookType`
-        The type of the webhook.
+        The webhook's type.
 
         .. versionadded:: 1.3
 
@@ -542,9 +541,9 @@ class SyncWebhook(BaseWebhook):
         The authentication token of the webhook. If this is ``None``
         then the webhook cannot be used to make requests.
     guild_id: Optional[:class:`int`]
-        The guild ID this webhook is for.
+        The guild ID this webhook belongs to.
     channel_id: Optional[:class:`int`]
-        The channel ID this webhook is for.
+        The channel ID this webhook belongs to.
     user: Optional[:class:`abc.User`]
         The user this webhook was created by. If the webhook was
         received without authentication then this will be ``None``.
@@ -586,11 +585,11 @@ class SyncWebhook(BaseWebhook):
         """Creates a partial :class:`Webhook`.
 
         Parameters
-        -----------
+        ----------
         id: :class:`int`
-            The ID of the webhook.
+            The webhook's ID.
         token: :class:`str`
-            The authentication token of the webhook.
+            The webhook's authentication token.
         session: :class:`requests.Session`
             The session to use to send requests with. Note
             that the library does not manage the session and
@@ -601,7 +600,7 @@ class SyncWebhook(BaseWebhook):
             involving the webhook.
 
         Returns
-        --------
+        -------
         :class:`Webhook`
             A partial :class:`Webhook`.
             A partial webhook is just a webhook object with an ID and a token.
@@ -627,9 +626,9 @@ class SyncWebhook(BaseWebhook):
         """Creates a partial :class:`Webhook` from a webhook URL.
 
         Parameters
-        ------------
+        ----------
         url: :class:`str`
-            The URL of the webhook.
+            The webhook's URL.
         session: :class:`requests.Session`
             The session to use to send requests with. Note
             that the library does not manage the session and
@@ -640,12 +639,12 @@ class SyncWebhook(BaseWebhook):
             involving the webhook.
 
         Raises
-        -------
+        ------
         InvalidArgument
             The URL is invalid.
 
         Returns
-        --------
+        -------
         :class:`Webhook`
             A partial :class:`Webhook`.
             A partial webhook is just a webhook object with an ID and a token.
@@ -680,13 +679,13 @@ class SyncWebhook(BaseWebhook):
             returned webhook does not contain any user information.
 
         Parameters
-        -----------
+        ----------
         prefer_auth: :class:`bool`
-            Whether to use the bot token over the webhook token
+            Whether to use the bot token over the webhook token,
             if available. Defaults to ``True``.
 
         Raises
-        -------
+        ------
         HTTPException
             Could not fetch the webhook
         NotFound
@@ -695,7 +694,7 @@ class SyncWebhook(BaseWebhook):
             This webhook does not have a token associated with it.
 
         Returns
-        --------
+        -------
         :class:`SyncWebhook`
             The fetched webhook.
         """
@@ -714,17 +713,18 @@ class SyncWebhook(BaseWebhook):
         """Deletes this Webhook.
 
         Parameters
-        ------------
+        ----------
         reason: Optional[:class:`str`]
             The reason for deleting this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
+
         prefer_auth: :class:`bool`
-            Whether to use the bot token over the webhook token
+            Whether to use the bot token over the webhook token,
             if available. Defaults to ``True``.
 
         Raises
-        -------
+        ------
         HTTPException
             Deleting the webhook failed.
         NotFound
@@ -760,23 +760,23 @@ class SyncWebhook(BaseWebhook):
         """Edits this Webhook.
 
         Parameters
-        ------------
+        ----------
         name: Optional[:class:`str`]
             The webhook's new default name.
         avatar: Optional[:class:`bytes`]
             A :term:`py:bytes-like object` representing the webhook's new default avatar.
         channel: Optional[:class:`abc.Snowflake`]
             The webhook's new channel. This requires an authenticated webhook.
+        prefer_auth: :class:`bool`
+            Whether to use the bot token over the webhook token
+            if available. Defaults to ``True``.
         reason: Optional[:class:`str`]
             The reason for editing this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
-        prefer_auth: :class:`bool`
-            Whether to use the bot token over the webhook token
-            if available. Defaults to ``True``.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the webhook failed.
         NotFound
@@ -786,7 +786,7 @@ class SyncWebhook(BaseWebhook):
             or it tried editing a channel without authentication.
 
         Returns
-        --------
+        -------
         :class:`SyncWebhook`
             The newly edited webhook.
         """
@@ -897,7 +897,7 @@ class SyncWebhook(BaseWebhook):
         ``embeds`` parameter, which must be a :class:`list` of :class:`Embed` objects to send.
 
         Parameters
-        ------------
+        ----------
         content: :class:`str`
             The content of the message to send.
         username: :class:`str`
@@ -908,15 +908,14 @@ class SyncWebhook(BaseWebhook):
             then the default avatar for the webhook is used. If this is not a
             string then it is explicitly cast using ``str``.
         tts: :class:`bool`
-            Indicates if the message should be sent using text-to-speech.
+            Whether the message should be sent using text-to-speech.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         embed: :class:`Embed`
-            The rich embed for the content to send. This cannot be mixed with
-            ``embeds`` parameter.
+            The rich embed for the content to send. This cannot be mixed with the ``embeds`` parameter.
         embeds: List[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
@@ -924,17 +923,19 @@ class SyncWebhook(BaseWebhook):
             Controls the mentions being processed in this message.
 
             .. versionadded:: 1.4
+
         thread: :class:`~disnake.abc.Snowflake`
             The thread to send this message to.
 
             .. versionadded:: 2.0
+
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
             means that the return type of this function changes from ``None`` to
             a :class:`WebhookMessage` if set to ``True``.
 
         Raises
-        --------
+        ------
         HTTPException
             Sending the message failed.
         NotFound
@@ -949,11 +950,10 @@ class SyncWebhook(BaseWebhook):
             There was no token associated with this webhook.
 
         Returns
-        ---------
+        -------
         Optional[:class:`SyncWebhookMessage`]
             If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
         """
-
         if self.token is None:
             raise InvalidArgument("This webhook does not have a token associated with it")
 
@@ -999,32 +999,31 @@ class SyncWebhook(BaseWebhook):
             return self._create_message(data)
 
     def fetch_message(self, id: int, /) -> SyncWebhookMessage:
-        """Retrieves a single :class:`~disnake.SyncWebhookMessage` owned by this webhook.
+        """Retrieves a single :class:`SyncWebhookMessage` owned by this webhook.
 
         .. versionadded:: 2.0
 
         Parameters
-        ------------
+        ----------
         id: :class:`int`
             The message ID to look for.
 
         Raises
-        --------
-        ~disnake.NotFound
+        ------
+        NotFound
             The specified message was not found.
-        ~disnake.Forbidden
+        Forbidden
             You do not have the permissions required to get a message.
-        ~disnake.HTTPException
+        HTTPException
             Retrieving the message failed.
         InvalidArgument
             There was no token associated with this webhook.
 
         Returns
-        --------
-        :class:`~disnake.SyncWebhookMessage`
+        -------
+        :class:`SyncWebhookMessage`
             The message asked for.
         """
-
         if self.token is None:
             raise InvalidArgument("This webhook does not have a token associated with it")
 
@@ -1063,9 +1062,9 @@ class SyncWebhook(BaseWebhook):
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
-            The message ID to edit.
+            The ID of the message to edit.
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
@@ -1077,7 +1076,7 @@ class SyncWebhook(BaseWebhook):
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
         files: List[:class:`File`]
@@ -1090,12 +1089,13 @@ class SyncWebhook(BaseWebhook):
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the message failed.
         Forbidden
@@ -1107,7 +1107,6 @@ class SyncWebhook(BaseWebhook):
         InvalidArgument
             There was no token associated with this webhook.
         """
-
         if self.token is None:
             raise InvalidArgument("This webhook does not have a token associated with it")
 
@@ -1155,12 +1154,12 @@ class SyncWebhook(BaseWebhook):
         .. versionadded:: 1.6
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
-            The message ID to delete.
+            The ID of the message to delete.
 
         Raises
-        -------
+        ------
         HTTPException
             Deleting the message failed.
         Forbidden

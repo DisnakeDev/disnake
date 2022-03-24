@@ -25,13 +25,14 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import inspect
+import asyncio
 import os
 from typing import TYPE_CHECKING, Callable, Optional, Tuple, Type, TypeVar, Union
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
+from ..utils import MISSING
 from .item import DecoratedItem, Item
 
 __all__ = (
@@ -54,7 +55,7 @@ class Button(Item[V]):
     .. versionadded:: 2.0
 
     Parameters
-    ------------
+    ----------
     style: :class:`disnake.ButtonStyle`
         The style of the button.
     custom_id: Optional[:class:`str`]
@@ -63,7 +64,7 @@ class Button(Item[V]):
     url: Optional[:class:`str`]
         The URL this button sends you to.
     disabled: :class:`bool`
-        Whether the button is disabled or not.
+        Whether the button is disabled.
     label: Optional[:class:`str`]
         The label of the button, if any.
     emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
@@ -76,7 +77,7 @@ class Button(Item[V]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __item_repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: Tuple[str, ...] = (
         "style",
         "url",
         "disabled",
@@ -84,6 +85,8 @@ class Button(Item[V]):
         "emoji",
         "row",
     )
+    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    _underlying: ButtonComponent = MISSING
 
     def __init__(
         self,
@@ -129,6 +132,10 @@ class Button(Item[V]):
         self.row = row
 
     @property
+    def width(self) -> int:
+        return 1
+
+    @property
     def style(self) -> ButtonStyle:
         """:class:`disnake.ButtonStyle`: The style of the button."""
         return self._underlying.style
@@ -165,7 +172,7 @@ class Button(Item[V]):
 
     @property
     def disabled(self) -> bool:
-        """:class:`bool`: Whether the button is disabled or not."""
+        """:class:`bool`: Whether the button is disabled."""
         return self._underlying.disabled
 
     @disabled.setter
@@ -212,13 +219,6 @@ class Button(Item[V]):
             row=None,
         )
 
-    @property
-    def type(self) -> ComponentType:
-        return self._underlying.type
-
-    def to_component_dict(self):
-        return self._underlying.to_dict()
-
     def is_dispatchable(self) -> bool:
         return self.custom_id is not None
 
@@ -239,7 +239,7 @@ def button(
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], DecoratedItem[Button]]:
+) -> Callable[[ItemCallbackType[Button]], DecoratedItem[Button]]:
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -255,7 +255,7 @@ def button(
         with it.
 
     Parameters
-    ------------
+    ----------
     label: Optional[:class:`str`]
         The label of the button, if any.
     custom_id: Optional[:class:`str`]
@@ -264,7 +264,7 @@ def button(
     style: :class:`.ButtonStyle`
         The style of the button. Defaults to :attr:`.ButtonStyle.grey`.
     disabled: :class:`bool`
-        Whether the button is disabled or not. Defaults to ``False``.
+        Whether the button is disabled. Defaults to ``False``.
     emoji: Optional[Union[:class:`str`, :class:`.Emoji`, :class:`.PartialEmoji`]]
         The emoji of the button. This can be in string form or a :class:`.PartialEmoji`
         or a full :class:`.Emoji`.
@@ -276,8 +276,8 @@ def button(
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    def decorator(func: ItemCallbackType) -> DecoratedItem[Button]:
-        if not inspect.iscoroutinefunction(func):
+    def decorator(func: ItemCallbackType[Button]) -> DecoratedItem[Button]:
+        if not asyncio.iscoroutinefunction(func):
             raise TypeError("button function must be a coroutine function")
 
         func.__discord_ui_model_type__ = Button

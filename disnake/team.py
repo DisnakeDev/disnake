@@ -46,15 +46,15 @@ class Team:
     """Represents an application team for a bot provided by Discord.
 
     Attributes
-    -------------
+    ----------
     id: :class:`int`
         The team ID.
     name: :class:`str`
-        The team name
+        The team name.
     owner_id: :class:`int`
         The team's owner ID.
     members: List[:class:`TeamMember`]
-        A list of the members in the team
+        A list of the members in the team.
 
         .. versionadded:: 1.3
     """
@@ -112,7 +112,7 @@ class TeamMember(BaseUser):
     .. versionadded:: 1.3
 
     Attributes
-    -------------
+    ----------
     name: :class:`str`
         The team member's username.
     id: :class:`int`

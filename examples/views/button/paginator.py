@@ -3,58 +3,71 @@ from typing import List
 import disnake
 from disnake.ext import commands
 
-bot = commands.Bot(command_prefix="-")
+bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 # Defines a simple paginator of buttons for the embed.
 class Menu(disnake.ui.View):
     def __init__(self, embeds: List[disnake.Embed]):
         super().__init__(timeout=None)
-
-        # Sets the embed list variable.
         self.embeds = embeds
-
-        # Current embed number.
         self.embed_count = 0
 
-        # Disables previous page button by default.
+        self.first_page.disabled = True
         self.prev_page.disabled = True
 
         # Sets the footer of the embeds with their respective page numbers.
         for i, embed in enumerate(self.embeds):
             embed.set_footer(text=f"Page {i + 1} of {len(self.embeds)}")
 
-    @disnake.ui.button(label="Previous page", emoji="◀️", style=disnake.ButtonStyle.red)
-    async def prev_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        # Decrements the embed count.
-        self.embed_count -= 1
-
-        # Gets the embed object.
+    @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.blurple)
+    async def first_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+        self.embed_count = 0
         embed = self.embeds[self.embed_count]
+        embed.set_footer(text=f"Page 1 of {len(self.embeds)}")
 
-        # Enables the next page button and disables the previous page button if we're on the first embed.
+        self.first_page.disabled = True
+        self.prev_page.disabled = True
         self.next_page.disabled = False
-        if self.embed_count == 0:
-            self.prev_page.disabled = True
-
+        self.last_page.disabled = False
         await interaction.response.edit_message(embed=embed, view=self)
 
-    @disnake.ui.button(label="Quit", emoji="❌", style=disnake.ButtonStyle.red)
+    @disnake.ui.button(emoji="◀", style=disnake.ButtonStyle.secondary)
+    async def prev_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+        self.embed_count -= 1
+        embed = self.embeds[self.embed_count]
+
+        self.next_page.disabled = False
+        self.last_page.disabled = False
+        if self.embed_count == 0:
+            self.first_page.disabled = True
+            self.prev_page.disabled = True
+        await interaction.response.edit_message(embed=embed, view=self)
+
+    @disnake.ui.button(emoji="❌", style=disnake.ButtonStyle.red)
     async def remove(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
         await interaction.response.edit_message(view=None)
 
-    @disnake.ui.button(label="Next page", emoji="▶️", style=disnake.ButtonStyle.green)
+    @disnake.ui.button(emoji="▶", style=disnake.ButtonStyle.secondary)
     async def next_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
-        # Increments the embed count.
         self.embed_count += 1
-
-        # Gets the embed object.
         embed = self.embeds[self.embed_count]
 
-        # Enables the previous page button and disables the next page button if we're on the last embed.
+        self.first_page.disabled = False
         self.prev_page.disabled = False
         if self.embed_count == len(self.embeds) - 1:
             self.next_page.disabled = True
+            self.last_page.disabled = True
+        await interaction.response.edit_message(embed=embed, view=self)
 
+    @disnake.ui.button(emoji="⏩", style=disnake.ButtonStyle.blurple)
+    async def last_page(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+        self.embed_count = len(self.embeds) - 1
+        embed = self.embeds[self.embed_count]
+
+        self.first_page.disabled = False
+        self.prev_page.disabled = False
+        self.next_page.disabled = True
+        self.last_page.disabled = True
         await interaction.response.edit_message(embed=embed, view=self)
 
 
@@ -79,9 +92,6 @@ async def paginator(ctx: commands.Context):
             colour=disnake.Color.random(),
         ),
     ]
-
-    # Sets the footer of the first embed.
-    embeds[0].set_footer(text=f"Page 1 of {len(embeds)}")
 
     # Sends first embed with the buttons, it also passes the embeds list into the View class.
     await ctx.send(embed=embeds[0], view=Menu(embeds))

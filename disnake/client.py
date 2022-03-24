@@ -53,12 +53,12 @@ import aiohttp
 from . import utils
 from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
+    APIMessageCommand,
+    APISlashCommand,
+    APIUserCommand,
     ApplicationCommand,
     GuildApplicationCommandPermissions,
-    MessageCommand,
     PartialGuildApplicationCommandPermissions,
-    SlashCommand,
-    UserCommand,
 )
 from .appinfo import AppInfo
 from .backoff import ExponentialBackoff
@@ -69,6 +69,7 @@ from .errors import *
 from .flags import ApplicationFlags, Intents
 from .gateway import *
 from .guild import Guild
+from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .invite import Invite
 from .iterators import GuildIterator
@@ -88,6 +89,7 @@ from .widget import Widget
 
 if TYPE_CHECKING:
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime, User as ABCUser
+    from .app_commands import APIApplicationCommand
     from .channel import DMChannel
     from .member import Member
     from .message import Message
@@ -139,13 +141,14 @@ def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
 
 
 class Client:
-    r"""Represents a client connection that connects to Discord.
+    """
+    Represents a client connection that connects to Discord.
     This class is used to interact with the Discord WebSocket and API.
 
     A number of options can be passed to the :class:`Client`.
 
     Parameters
-    -----------
+    ----------
     max_messages: Optional[:class:`int`]
         The maximum number of messages to store in the internal message cache.
         This defaults to ``1000``. Passing in ``None`` disables the message cache.
@@ -174,12 +177,14 @@ class Client:
         If not given, defaults to a regularly constructed :class:`Intents` class.
 
         .. versionadded:: 1.5
+
     member_cache_flags: :class:`MemberCacheFlags`
         Allows for finer control over how the library caches members.
         If not given, defaults to cache as much as possible with the
         currently selected intents.
 
         .. versionadded:: 1.5
+
     chunk_guilds_at_startup: :class:`bool`
         Indicates if :func:`.on_ready` should be delayed to chunk all guilds
         at start-up if necessary. This operation is incredibly slow for large
@@ -187,6 +192,7 @@ class Client:
         is ``True``.
 
         .. versionadded:: 1.5
+
     status: Optional[:class:`.Status`]
         A status to start your presence with upon logging on to Discord.
     activity: Optional[:class:`.BaseActivity`]
@@ -195,6 +201,7 @@ class Client:
         Control how the client handles mentions by default on every message sent.
 
         .. versionadded:: 1.4
+
     heartbeat_timeout: :class:`float`
         The maximum numbers of seconds before timing out and restarting the
         WebSocket in the case of not receiving a HEARTBEAT_ACK. Useful if
@@ -205,6 +212,7 @@ class Client:
         preparing the member cache and firing READY. The default timeout is 2 seconds.
 
         .. versionadded:: 1.4
+
     assume_unsync_clock: :class:`bool`
         Whether to assume the system clock is unsynced. This applies to the ratelimit handling
         code. If this is set to ``True``, the default, then the library uses the time to reset
@@ -213,6 +221,7 @@ class Client:
         sync your system clock to Google's NTP server.
 
         .. versionadded:: 1.3
+
     enable_debug_events: :class:`bool`
         Whether to enable events that are useful only for debugging gateway related information.
 
@@ -221,18 +230,21 @@ class Client:
         To enable these events, this must be set to ``True``. Defaults to ``False``.
 
         .. versionadded:: 2.0
+
     test_guilds: List[:class:`int`]
-        The list of IDs of the guilds where you're going to test your app commands.
+        The list of IDs of the guilds where you're going to test your application commands.
         Defaults to ``None``, which means global registration of commands across
         all guilds.
 
         .. versionadded:: 2.1
+
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
         with the commands specified in your code.
 
         .. versionadded:: 2.1
+
     sync_commands_debug: :class:`bool`
         Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
         If disabled, uses the default ``DEBUG`` log level which isn't shown unless the log level is changed manually.
@@ -245,7 +257,7 @@ class Client:
             instead of controlling whether they are enabled at all.
 
     Attributes
-    -----------
+    ----------
     ws
         The websocket gateway the client is currently connected to. Could be ``None``.
     loop: :class:`asyncio.AbstractEventLoop`
@@ -349,7 +361,7 @@ class Client:
     @property
     def user(self) -> ClientUser:
         """Optional[:class:`.ClientUser`]: Represents the connected client. ``None`` if not logged in."""
-        return self._connection.user  # type: ignore
+        return self._connection.user
 
     @property
     def guilds(self) -> List[Guild]:
@@ -414,50 +426,50 @@ class Client:
 
         .. versionadded:: 2.0
         """
-        return self._connection.application_flags  # type: ignore
+        return self._connection.application_flags
 
     @property
-    def global_application_commands(self) -> List[ApplicationCommand]:
-        """List[:class:`.ApplicationCommand`]: The client's global application commands."""
+    def global_application_commands(self) -> List[APIApplicationCommand]:
+        """List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]: The client's global application commands."""
         return list(self._connection._global_application_commands.values())
 
     @property
-    def global_slash_commands(self) -> List[SlashCommand]:
-        """List[:class:`.SlashCommand`]: The client's global slash commands."""
+    def global_slash_commands(self) -> List[APISlashCommand]:
+        """List[:class:`.APISlashCommand`]: The client's global slash commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
-            if isinstance(cmd, SlashCommand)
+            if isinstance(cmd, APISlashCommand)
         ]
 
     @property
-    def global_user_commands(self) -> List[UserCommand]:
-        """List[:class:`.UserCommand`]: The client's global user commands."""
+    def global_user_commands(self) -> List[APIUserCommand]:
+        """List[:class:`.APIUserCommand`]: The client's global user commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
-            if isinstance(cmd, UserCommand)
+            if isinstance(cmd, APIUserCommand)
         ]
 
     @property
-    def global_message_commands(self) -> List[MessageCommand]:
-        """List[:class:`.MessageCommand`]: The client's global message commands."""
+    def global_message_commands(self) -> List[APIMessageCommand]:
+        """List[:class:`.APIMessageCommand`]: The client's global message commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
-            if isinstance(cmd, MessageCommand)
+            if isinstance(cmd, APIMessageCommand)
         ]
 
     def get_message(self, id: int) -> Optional[Message]:
-        """Gets the message with the ID from the bot's message cache.
+        """Gets the message with the given ID from the bot's message cache.
 
         Parameters
-        -----------
+        ----------
         id: :class:`int`
             The ID of the message to look for.
 
         Returns
-        --------
+        -------
         Optional[:class:`.Message`]
             The corresponding message.
         """
@@ -480,12 +492,12 @@ class Client:
         fetch the user from the API.
 
         Parameters
-        -----------
+        ----------
         user_id: :class:`int`
             The ID to search for.
 
         Returns
-        --------
+        -------
         :class:`~disnake.User`
             The user with the given ID
         """
@@ -503,7 +515,7 @@ class Client:
     getch_user = get_or_fetch_user
 
     def is_ready(self) -> bool:
-        """Specifies if the client's internal cache is ready for use.
+        """Whether the client's internal cache is ready for use.
 
         :return type: :class:`bool`
         """
@@ -611,13 +623,12 @@ class Client:
         .. versionadded:: 1.4
 
         Parameters
-        ------------
+        ----------
         shard_id: :class:`int`
             The shard ID that requested being IDENTIFY'd
         initial: :class:`bool`
             Whether this IDENTIFY is the first initial IDENTIFY.
         """
-
         if not initial:
             await asyncio.sleep(5.0)
 
@@ -629,22 +640,23 @@ class Client:
         Logs in the client with the specified credentials.
 
         Parameters
-        -----------
+        ----------
         token: :class:`str`
             The authentication token. Do not prefix this token with
             anything as the library will do it for you.
 
         Raises
         ------
-        :exc:`.LoginFailure`
+        LoginFailure
             The wrong credentials are passed.
-        :exc:`.HTTPException`
+        HTTPException
             An unknown HTTP related error occurred,
             usually when it isn't 200 or the known incorrect credentials
             passing status code.
         """
-
         _log.info("logging in using static token")
+        if not isinstance(token, str):
+            raise TypeError(f"token must be of type str, got {type(token).__name__} instead")
 
         data = await self.http.static_login(token.strip())
         self._connection.user = ClientUser(state=self._connection, data=data)
@@ -658,7 +670,7 @@ class Client:
         is not resumed until the WebSocket connection is terminated.
 
         Parameters
-        -----------
+        ----------
         reconnect: :class:`bool`
             If we should attempt reconnecting, either due to internet
             failure or a specific failure on Discord's part. Certain
@@ -666,14 +678,13 @@ class Client:
             invalid sharding payloads or bad tokens).
 
         Raises
-        -------
-        :exc:`.GatewayNotFound`
+        ------
+        GatewayNotFound
             If the gateway to connect to Discord is not found. Usually if this
             is thrown then there is a Discord API outage.
-        :exc:`.ConnectionClosed`
+        ConnectionClosed
             The websocket connection has been terminated.
         """
-
         backoff = ExponentialBackoff()
         ws_params = {
             "initial": True,
@@ -783,7 +794,7 @@ class Client:
         A shorthand coroutine for :meth:`login` + :meth:`connect`.
 
         Raises
-        -------
+        ------
         TypeError
             An unexpected keyword argument was received.
         """
@@ -853,7 +864,7 @@ class Client:
     # properties
 
     def is_closed(self) -> bool:
-        """Indicates if the websocket connection is closed.
+        """Whether the websocket connection is closed.
 
         :return type: :class:`bool`
         """
@@ -861,9 +872,7 @@ class Client:
 
     @property
     def activity(self) -> Optional[ActivityTypes]:
-        """Optional[:class:`.BaseActivity`]: The activity being used upon
-        logging in.
-        """
+        """Optional[:class:`.BaseActivity`]: The activity being used upon logging in."""
         return create_activity(self._connection._activity)
 
     @activity.setter
@@ -929,12 +938,12 @@ class Client:
         """Returns a channel or thread with the given ID.
 
         Parameters
-        -----------
+        ----------
         id: :class:`int`
             The ID to search for.
 
         Returns
-        --------
+        -------
         Optional[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.abc.PrivateChannel`]]
             The returned channel or ``None`` if not found.
         """
@@ -951,14 +960,14 @@ class Client:
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         id: :class:`int`
             The channel ID to create a partial messageable for.
         type: Optional[:class:`.ChannelType`]
             The underlying channel type for the partial messageable.
 
         Returns
-        --------
+        -------
         :class:`.PartialMessageable`
             The partial messageable
         """
@@ -970,12 +979,12 @@ class Client:
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         id: :class:`int`
             The ID to search for.
 
         Returns
-        --------
+        -------
         Optional[:class:`.StageInstance`]
             The returns stage instance or ``None`` if not found.
         """
@@ -990,12 +999,12 @@ class Client:
         """Returns a guild with the given ID.
 
         Parameters
-        -----------
+        ----------
         id: :class:`int`
             The ID to search for.
 
         Returns
-        --------
+        -------
         Optional[:class:`.Guild`]
             The guild or ``None`` if not found.
         """
@@ -1005,12 +1014,12 @@ class Client:
         """Returns a user with the given ID.
 
         Parameters
-        -----------
+        ----------
         id: :class:`int`
             The ID to search for.
 
         Returns
-        --------
+        -------
         Optional[:class:`~disnake.User`]
             The user or ``None`` if not found.
         """
@@ -1020,12 +1029,12 @@ class Client:
         """Returns an emoji with the given ID.
 
         Parameters
-        -----------
+        ----------
         id: :class:`int`
             The ID to search for.
 
         Returns
-        --------
+        -------
         Optional[:class:`.Emoji`]
             The custom emoji or ``None`` if not found.
         """
@@ -1042,7 +1051,7 @@ class Client:
             or :meth:`.fetch_premium_sticker_packs`.
 
         Returns
-        --------
+        -------
         Optional[:class:`.GuildSticker`]
             The sticker or ``None`` if not found.
         """
@@ -1068,7 +1077,6 @@ class Client:
         :class:`.abc.GuildChannel`
             A channel the client can 'access'.
         """
-
         for guild in self.guilds:
             yield from guild.channels
 
@@ -1089,9 +1097,8 @@ class Client:
         for guild in self.guilds:
             yield from guild.members
 
-    def get_guild_application_commands(self, guild_id: int) -> List[ApplicationCommand]:
-        """
-        Returns a list of all application commands in the guild.
+    def get_guild_application_commands(self, guild_id: int) -> List[APIApplicationCommand]:
+        """Returns a list of all application commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1100,15 +1107,15 @@ class Client:
 
         Returns
         -------
-        List[:class:`.ApplicationCommand`]
+        List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             The list of application commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
         return list(data.values())
 
-    def get_guild_slash_commands(self, guild_id: int) -> List[SlashCommand]:
+    def get_guild_slash_commands(self, guild_id: int) -> List[APISlashCommand]:
         """
-        Returns a list of all slash commands in the guild.
+        Returns a list of all slash commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1117,15 +1124,15 @@ class Client:
 
         Returns
         -------
-        List[:class:`.SlashCommand`]
+        List[:class:`.APISlashCommand`]
             The list of slash commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
-        return [cmd for cmd in data.values() if isinstance(cmd, SlashCommand)]
+        return [cmd for cmd in data.values() if isinstance(cmd, APISlashCommand)]
 
-    def get_guild_user_commands(self, guild_id: int) -> List[UserCommand]:
+    def get_guild_user_commands(self, guild_id: int) -> List[APIUserCommand]:
         """
-        Returns a list of all user commands in the guild.
+        Returns a list of all user commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1134,15 +1141,15 @@ class Client:
 
         Returns
         -------
-        List[:class:`.UserCommand`]
+        List[:class:`.APIUserCommand`]
             The list of user commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
-        return [cmd for cmd in data.values() if isinstance(cmd, UserCommand)]
+        return [cmd for cmd in data.values() if isinstance(cmd, APIUserCommand)]
 
-    def get_guild_message_commands(self, guild_id: int) -> List[MessageCommand]:
+    def get_guild_message_commands(self, guild_id: int) -> List[APIMessageCommand]:
         """
-        Returns a list of all message commands in the guild.
+        Returns a list of all message commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1151,15 +1158,15 @@ class Client:
 
         Returns
         -------
-        List[:class:`.MessageCommand`]
+        List[:class:`.APIMessageCommand`]
             The list of message commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
-        return [cmd for cmd in data.values() if isinstance(cmd, MessageCommand)]
+        return [cmd for cmd in data.values() if isinstance(cmd, APIMessageCommand)]
 
-    def get_global_command(self, id: int) -> Optional[ApplicationCommand]:
+    def get_global_command(self, id: int) -> Optional[APIApplicationCommand]:
         """
-        Returns a global application command.
+        Returns a global application command with the given ID.
 
         Parameters
         ----------
@@ -1168,14 +1175,14 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`.ApplicationCommand`]
+        Optional[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             The application command.
         """
         return self._connection._get_global_application_command(id)
 
-    def get_guild_command(self, guild_id: int, id: int) -> Optional[ApplicationCommand]:
+    def get_guild_command(self, guild_id: int, id: int) -> Optional[APIApplicationCommand]:
         """
-        Returns a guild application command.
+        Returns a guild application command with the given guild ID and application command ID.
 
         Parameters
         ----------
@@ -1186,16 +1193,16 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`.ApplicationCommand`]
+        Optional[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             The application command.
         """
         return self._connection._get_guild_application_command(guild_id, id)
 
     def get_global_command_named(
         self, name: str, cmd_type: ApplicationCommandType = None
-    ) -> Optional[ApplicationCommand]:
+    ) -> Optional[APIApplicationCommand]:
         """
-        Returns a global application command matching the specified name.
+        Returns a global application command matching the given name.
 
         Parameters
         ----------
@@ -1206,16 +1213,16 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`.ApplicationCommand`]
+        Optional[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             The application command.
         """
         return self._connection._get_global_command_named(name, cmd_type)
 
     def get_guild_command_named(
         self, guild_id: int, name: str, cmd_type: ApplicationCommandType = None
-    ) -> Optional[ApplicationCommand]:
+    ) -> Optional[APIApplicationCommand]:
         """
-        Returns a guild application command matching the name.
+        Returns a guild application command matching the given name.
 
         Parameters
         ----------
@@ -1228,7 +1235,7 @@ class Client:
 
         Returns
         -------
-        Optional[:class:`.ApplicationCommand`]
+        Optional[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             The application command.
         """
         return self._connection._get_guild_command_named(guild_id, name, cmd_type)
@@ -1277,7 +1284,7 @@ class Client:
         This function returns the **first event that meets the requirements**.
 
         Examples
-        ---------
+        --------
 
         Waiting for a user reply: ::
 
@@ -1313,7 +1320,7 @@ class Client:
 
 
         Parameters
-        ------------
+        ----------
         event: :class:`str`
             The event name, similar to the :ref:`event reference <discord-api-events>`,
             but without the ``on_`` prefix, to wait for.
@@ -1325,18 +1332,17 @@ class Client:
             :exc:`asyncio.TimeoutError`.
 
         Raises
-        -------
+        ------
         asyncio.TimeoutError
             If a timeout is provided and it was reached.
 
         Returns
-        --------
+        -------
         Any
             Returns no arguments, a single argument, or a :class:`tuple` of multiple
             arguments that mirrors the parameters passed in the
             :ref:`event reference <discord-api-events>`.
         """
-
         future = self.loop.create_future()
         if check is None:
 
@@ -1374,11 +1380,10 @@ class Client:
                 print('Ready!')
 
         Raises
-        --------
+        ------
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-
         if not asyncio.iscoroutinefunction(coro):
             raise TypeError("event registered must be a coroutine function")
 
@@ -1417,10 +1422,9 @@ class Client:
 
         Raises
         ------
-        :exc:`.InvalidArgument`
+        InvalidArgument
             If the ``activity`` parameter is not the proper type.
         """
-
         if status is None:
             status_str = "online"
             status = Status.online
@@ -1465,7 +1469,7 @@ class Client:
             This method is an API call. For general usage, consider :attr:`guilds` instead.
 
         Examples
-        ---------
+        --------
 
         Usage ::
 
@@ -1480,7 +1484,7 @@ class Client:
         All parameters are optional.
 
         Parameters
-        -----------
+        ----------
         limit: Optional[:class:`int`]
             The number of guilds to retrieve.
             If ``None``, it retrieves every guild you have access to. Note, however,
@@ -1497,8 +1501,8 @@ class Client:
 
         Raises
         ------
-        :exc:`.HTTPException`
-            Getting the guilds failed.
+        HTTPException
+            Retrieving the guilds failed.
 
         Yields
         --------
@@ -1510,33 +1514,33 @@ class Client:
     async def fetch_template(self, code: Union[Template, str]) -> Template:
         """|coro|
 
-        Gets a :class:`.Template` from a disnake.new URL or code.
+        Retrieves a :class:`.Template` from a discord.new URL or code.
 
         Parameters
-        -----------
+        ----------
         code: Union[:class:`.Template`, :class:`str`]
-            The Discord Template Code or URL (must be a disnake.new URL).
+            The Discord Template Code or URL (must be a discord.new URL).
 
         Raises
-        -------
-        :exc:`.NotFound`
+        ------
+        NotFound
             The template is invalid.
-        :exc:`.HTTPException`
-            Getting the template failed.
+        HTTPException
+            Retrieving the template failed.
 
         Returns
-        --------
+        -------
         :class:`.Template`
             The template from the URL/code.
         """
         code = utils.resolve_template(code)
         data = await self.http.get_template(code)
-        return Template(data=data, state=self._connection)  # type: ignore
+        return Template(data=data, state=self._connection)
 
     async def fetch_guild(self, guild_id: int, /) -> Guild:
         """|coro|
 
-        Retrieves a :class:`.Guild` from an ID.
+        Retrieves a :class:`.Guild` from the given ID.
 
         .. note::
 
@@ -1548,30 +1552,64 @@ class Client:
             This method is an API call. For general usage, consider :meth:`get_guild` instead.
 
         Parameters
-        -----------
+        ----------
         guild_id: :class:`int`
-            The guild's ID to fetch from.
+            The ID of the guild to retrieve.
 
         Raises
         ------
-        :exc:`.Forbidden`
+        Forbidden
             You do not have access to the guild.
-        :exc:`.HTTPException`
-            Getting the guild failed.
+        HTTPException
+            Retrieving the guild failed.
 
         Returns
-        --------
+        -------
         :class:`.Guild`
-            The guild from the ID.
+            The guild from the given ID.
         """
         data = await self.http.get_guild(guild_id)
         return Guild(data=data, state=self._connection)
+
+    async def fetch_guild_preview(
+        self,
+        guild_id: int,
+        /,
+    ) -> GuildPreview:
+        """|coro|
+
+         Retrieves a :class:`.GuildPreview` from the given ID. Your bot does not have to be in this guild.
+
+        .. note::
+
+            This method may fetch any guild that has ``DISCOVERABLE`` in :attr:`.Guild.features`,
+            but this information can not be known ahead of time.
+
+            This will work for any guild that you are in.
+
+        Parameters
+        ----------
+        guild_id: :class:`int`
+            The ID of the guild to to retrieve a preview object.
+
+        Raises
+        ------
+        NotFound
+            Retrieving the guild preview failed.
+
+        Returns
+        -------
+        :class:`.GuildPreview`
+            The guild preview from the given ID.
+        """
+        data = await self.http.get_guild_preview(guild_id)
+        return GuildPreview(data=data, state=self._connection)
 
     async def create_guild(
         self,
         *,
         name: str,
-        region: Union[VoiceRegion, str] = VoiceRegion.us_west,
+        region: Union[VoiceRegion, str] = None,
         icon: bytes = MISSING,
         code: str = MISSING,
     ) -> Guild:
@@ -1587,7 +1625,10 @@ class Client:
             The name of the guild.
         region: :class:`.VoiceRegion`
             The region for the voice communication server.
-            Defaults to :attr:`.VoiceRegion.us_west`.
+
+            .. deprecated:: 2.5
+
+                This no longer has any effect.
         icon: Optional[:class:`bytes`]
             The :term:`py:bytes-like object` representing the icon. See :meth:`.ClientUser.edit`
             for more details on what is expected.
@@ -1598,15 +1639,15 @@ class Client:
 
         Raises
         ------
-        :exc:`.HTTPException`
+        HTTPException
             Guild creation failed.
-        :exc:`.InvalidArgument`
+        InvalidArgument
             Invalid icon image format given. Must be PNG or JPG.
 
         Returns
         -------
         :class:`.Guild`
-            The guild created. This is not the same guild that is
+            The created guild. This is not the same guild that is
             added to cache.
         """
         if icon is not MISSING:
@@ -1614,37 +1655,44 @@ class Client:
         else:
             icon_base64 = None
 
-        region_value = str(region)
+        if region is not None:
+            utils.warn_deprecated(
+                "region is deprecated and will be removed in a future version.", stacklevel=2
+            )
 
         if code:
-            data = await self.http.create_from_template(code, name, region_value, icon_base64)
+            data = await self.http.create_from_template(code, name, icon_base64)
         else:
-            data = await self.http.create_guild(name, region_value, icon_base64)
+            data = await self.http.create_guild(name, icon_base64)
         return Guild(data=data, state=self._connection)
 
     async def fetch_stage_instance(self, channel_id: int, /) -> StageInstance:
         """|coro|
 
-        Gets a :class:`.StageInstance` for a stage channel id.
+        Retrieves a :class:`.StageInstance` with the given ID.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :meth:`get_stage_instance` instead.
 
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         channel_id: :class:`int`
             The stage channel ID.
 
         Raises
-        -------
-        :exc:`.NotFound`
+        ------
+        NotFound
             The stage instance or channel could not be found.
-        :exc:`.HTTPException`
-            Getting the stage instance failed.
+        HTTPException
+            Retrieving the stage instance failed.
 
         Returns
-        --------
+        -------
         :class:`.StageInstance`
-            The stage instance from the stage channel ID.
+            The stage instance from the given ID.
         """
         data = await self.http.get_stage_instance(channel_id)
         guild = self.get_guild(int(data["guild_id"]))
@@ -1662,7 +1710,7 @@ class Client:
     ) -> Invite:
         """|coro|
 
-        Gets an :class:`.Invite` from a discord.gg URL or ID.
+        Retrieves an :class:`.Invite` from a discord.gg URL or ID.
 
         .. note::
 
@@ -1671,7 +1719,7 @@ class Client:
             :class:`.PartialInviteChannel` respectively.
 
         Parameters
-        -----------
+        ----------
         url: Union[:class:`.Invite`, :class:`str`]
             The Discord invite ID or URL (must be a discord.gg URL).
         with_counts: :class:`bool`
@@ -1683,6 +1731,7 @@ class Client:
             :attr:`.Invite.expires_at` field.
 
             .. versionadded:: 2.0
+
         guild_scheduled_event_id: :class:`int`
             The ID of the scheduled event to include in the invite.
             If not provided, defaults to the ``event`` parameter in the URL if it exists,
@@ -1691,18 +1740,17 @@ class Client:
             .. versionadded:: 2.3
 
         Raises
-        -------
-        :exc:`.NotFound`
+        ------
+        NotFound
             The invite has expired or is invalid.
-        :exc:`.HTTPException`
-            Getting the invite failed.
+        HTTPException
+            Retrieving the invite failed.
 
         Returns
-        --------
+        -------
         :class:`.Invite`
             The invite from the URL/ID.
         """
-
         invite_id, params = utils.resolve_invite(url, with_params=True)
 
         if not guild_scheduled_event_id:
@@ -1725,7 +1773,7 @@ class Client:
 
         Revokes an :class:`.Invite`, URL, or ID to an invite.
 
-        You must have the :attr:`~.Permissions.manage_channels` permission in
+        You must have :attr:`~.Permissions.manage_channels` permission in
         the associated guild to do this.
 
         Parameters
@@ -1734,15 +1782,14 @@ class Client:
             The invite to revoke.
 
         Raises
-        -------
-        :exc:`.Forbidden`
+        ------
+        Forbidden
             You do not have permissions to revoke invites.
-        :exc:`.NotFound`
+        NotFound
             The invite is invalid or expired.
-        :exc:`.HTTPException`
+        HTTPException
             Revoking the invite failed.
         """
-
         invite_id = utils.resolve_invite(invite)
         await self.http.delete_invite(invite_id)
 
@@ -1751,31 +1798,30 @@ class Client:
     async def fetch_widget(self, guild_id: int, /) -> Widget:
         """|coro|
 
-        Gets a :class:`.Widget` from a guild ID.
+        Retrieves a :class:`.Widget` for the given guild ID.
 
         .. note::
 
             The guild must have the widget enabled to get this information.
 
         Parameters
-        -----------
+        ----------
         guild_id: :class:`int`
             The ID of the guild.
 
         Raises
-        -------
-        :exc:`.Forbidden`
+        ------
+        Forbidden
             The widget for this guild is disabled.
-        :exc:`.HTTPException`
+        HTTPException
             Retrieving the widget failed.
 
         Returns
-        --------
+        -------
         :class:`.Widget`
             The guild's widget.
         """
         data = await self.http.get_widget(guild_id)
-
         return Widget(state=self._connection, data=data)
 
     async def application_info(self) -> AppInfo:
@@ -1784,12 +1830,12 @@ class Client:
         Retrieves the bot's application information.
 
         Raises
-        -------
-        :exc:`.HTTPException`
+        ------
+        HTTPException
             Retrieving the information failed somehow.
 
         Returns
-        --------
+        -------
         :class:`.AppInfo`
             The bot's application information.
         """
@@ -1810,19 +1856,19 @@ class Client:
             This method is an API call. If you have :attr:`disnake.Intents.members` and member cache enabled, consider :meth:`get_user` instead.
 
         Parameters
-        -----------
+        ----------
         user_id: :class:`int`
-            The user's ID to fetch from.
+            The ID of the user to retrieve.
 
         Raises
-        -------
-        :exc:`.NotFound`
+        ------
+        NotFound
             A user with this ID does not exist.
-        :exc:`.HTTPException`
-            Fetching the user failed.
+        HTTPException
+            Retrieving the user failed.
 
         Returns
-        --------
+        -------
         :class:`~disnake.User`
             The user you requested.
         """
@@ -1842,19 +1888,24 @@ class Client:
 
         .. versionadded:: 1.2
 
+        Parameters
+        ----------
+        channel_id: :class:`int`
+            The ID of the channel to retrieve.
+
         Raises
-        -------
-        :exc:`.InvalidData`
+        ------
+        InvalidData
             An unknown channel type was received from Discord.
-        :exc:`.HTTPException`
+        HTTPException
             Retrieving the channel failed.
-        :exc:`.NotFound`
+        NotFound
             Invalid Channel ID.
-        :exc:`.Forbidden`
+        Forbidden
             You do not have permission to fetch this channel.
 
         Returns
-        --------
+        -------
         Union[:class:`.abc.GuildChannel`, :class:`.abc.PrivateChannel`, :class:`.Thread`]
             The channel from the ID.
         """
@@ -1879,19 +1930,24 @@ class Client:
     async def fetch_webhook(self, webhook_id: int, /) -> Webhook:
         """|coro|
 
-        Retrieves a :class:`.Webhook` with the specified ID.
+        Retrieves a :class:`.Webhook` with the given ID.
+
+        Parameters
+        ----------
+        webhook_id: :class:`int`
+            The ID of the webhook to retrieve.
 
         Raises
-        --------
-        :exc:`.HTTPException`
+        ------
+        HTTPException
             Retrieving the webhook failed.
-        :exc:`.NotFound`
+        NotFound
             Invalid webhook ID.
-        :exc:`.Forbidden`
+        Forbidden
             You do not have permission to fetch this webhook.
 
         Returns
-        ---------
+        -------
         :class:`.Webhook`
             The webhook you requested.
         """
@@ -1901,19 +1957,24 @@ class Client:
     async def fetch_sticker(self, sticker_id: int, /) -> Union[StandardSticker, GuildSticker]:
         """|coro|
 
-        Retrieves a :class:`.Sticker` with the specified ID.
+        Retrieves a :class:`.Sticker` with the given ID.
 
         .. versionadded:: 2.0
 
+        Parameters
+        ----------
+        sticker_id: :class:`int`
+            The ID of the sticker to retrieve.
+
         Raises
-        --------
-        :exc:`.HTTPException`
+        ------
+        HTTPException
             Retrieving the sticker failed.
-        :exc:`.NotFound`
+        NotFound
             Invalid sticker ID.
 
         Returns
-        --------
+        -------
         Union[:class:`.StandardSticker`, :class:`.GuildSticker`]
             The sticker you requested.
         """
@@ -1929,12 +1990,12 @@ class Client:
         .. versionadded:: 2.0
 
         Raises
-        -------
-        :exc:`.HTTPException`
+        ------
+        HTTPException
             Retrieving the sticker packs failed.
 
         Returns
-        ---------
+        -------
         List[:class:`.StickerPack`]
             All available premium sticker packs.
         """
@@ -1944,7 +2005,7 @@ class Client:
     async def create_dm(self, user: Snowflake) -> DMChannel:
         """|coro|
 
-        Creates a :class:`.DMChannel` with this user.
+        Creates a :class:`.DMChannel` with the given user.
 
         This should be rarely called, as this is done transparently for most
         people.
@@ -1952,7 +2013,7 @@ class Client:
         .. versionadded:: 2.0
 
         Parameters
-        -----------
+        ----------
         user: :class:`~disnake.abc.Snowflake`
             The user to create a DM with.
 
@@ -1978,7 +2039,7 @@ class Client:
         .. versionadded:: 2.0
 
         Parameters
-        ------------
+        ----------
         view: :class:`disnake.ui.View`
             The view to register for dispatching.
         message_id: Optional[:class:`int`]
@@ -1987,14 +2048,13 @@ class Client:
             then message update events are not propagated for the view.
 
         Raises
-        -------
+        ------
         TypeError
             A view was not passed.
         ValueError
             The view is not persistent. A persistent view has no timeout
             and all their components have an explicitly provided custom_id.
         """
-
         if not isinstance(view, View):
             raise TypeError(f"expected an instance of View not {view.__class__!r}")
 
@@ -2015,42 +2075,42 @@ class Client:
 
     # Application commands (global)
 
-    async def fetch_global_commands(self) -> List[ApplicationCommand]:
+    async def fetch_global_commands(self) -> List[APIApplicationCommand]:
         """|coro|
 
-        Requests a list of global application commands.
+        Retrieves a list of global application commands.
 
         .. versionadded:: 2.1
 
         Returns
         -------
-        List[:class:`.ApplicationCommand`]
+        List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of application commands.
         """
         return await self._connection.fetch_global_commands()
 
-    async def fetch_global_command(self, command_id: int) -> ApplicationCommand:
+    async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
         """|coro|
 
-        Requests a global application command.
+        Retrieves a global application command.
 
         .. versionadded:: 2.1
 
         Parameters
         ----------
         command_id: :class:`int`
-            The ID of the command to request.
+            The ID of the command to retrieve.
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The requested application command.
         """
         return await self._connection.fetch_global_command(command_id)
 
     async def create_global_command(
         self, application_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         """|coro|
 
         Creates a global application command.
@@ -2060,18 +2120,18 @@ class Client:
         Parameters
         ----------
         application_command: :class:`.ApplicationCommand`
-            An object representing the application command.
+            An object representing the application command to create.
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The application command that was created.
         """
         return await self._connection.create_global_command(application_command)
 
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         """|coro|
 
         Edits a global application command.
@@ -2081,13 +2141,13 @@ class Client:
         Parameters
         ----------
         command_id: :class:`int`
-            The ID of the command to edit.
+            The ID of the application command to edit.
         new_command: :class:`.ApplicationCommand`
-            An object representing the edited command.
+            An object representing the edited application command.
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The edited application command.
         """
         return await self._connection.edit_global_command(command_id, new_command)
@@ -2102,13 +2162,13 @@ class Client:
         Parameters
         ----------
         command_id: :class:`int`
-            The ID of the command to delete.
+            The ID of the application command to delete.
         """
         return await self._connection.delete_global_command(command_id)
 
     async def bulk_overwrite_global_commands(
         self, application_commands: List[ApplicationCommand]
-    ) -> List[ApplicationCommand]:
+    ) -> List[APIApplicationCommand]:
         """|coro|
 
         Overwrites several global application commands in one API request.
@@ -2122,17 +2182,17 @@ class Client:
 
         Returns
         -------
-        List[:class:`.ApplicationCommand`]
+        List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of registered application commands.
         """
         return await self._connection.bulk_overwrite_global_commands(application_commands)
 
     # Application commands (guild)
 
-    async def fetch_guild_commands(self, guild_id: int) -> List[ApplicationCommand]:
+    async def fetch_guild_commands(self, guild_id: int) -> List[APIApplicationCommand]:
         """|coro|
 
-        Requests a list of guild application commands.
+        Retrieves a list of guild application commands.
 
         .. versionadded:: 2.1
 
@@ -2143,15 +2203,15 @@ class Client:
 
         Returns
         -------
-        List[:class:`.ApplicationCommand`]
+        List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of application commands.
         """
         return await self._connection.fetch_guild_commands(guild_id)
 
-    async def fetch_guild_command(self, guild_id: int, command_id: int) -> ApplicationCommand:
+    async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
         """|coro|
 
-        Requests a guild application command.
+        Retrieves a guild application command.
 
         .. versionadded:: 2.1
 
@@ -2160,18 +2220,18 @@ class Client:
         guild_id: :class:`int`
             The ID of the guild to fetch command from.
         command_id: :class:`int`
-            The ID of the command to request.
+            The ID of the application command to retrieve.
 
         Returns
         -------
-        :class:`.ApplicationCommand`
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The requested application command.
         """
         return await self._connection.fetch_guild_command(guild_id, command_id)
 
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         """|coro|
 
         Creates a guild application command.
@@ -2181,20 +2241,20 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            The ID of the guild where the command should be inserted.
+            The ID of the guild where the application command should be created.
         application_command: :class:`.ApplicationCommand`
-            An object representing the application command.
+            The application command.
 
         Returns
         -------
-        :class:`.ApplicationCommand`
-            The application command that was created.
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
+            The newly created application command.
         """
         return await self._connection.create_guild_command(guild_id, application_command)
 
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
-    ) -> ApplicationCommand:
+    ) -> APIApplicationCommand:
         """|coro|
 
         Edits a guild application command.
@@ -2204,16 +2264,16 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            The ID of the guild where the command should be edited.
+            The ID of the guild where the application command should be edited.
         command_id: :class:`int`
-            The ID of the command to edit.
+            The ID of the application command to edit.
         new_command: :class:`.ApplicationCommand`
-            An object representing the edited command.
+            An object representing the edited application command.
 
         Returns
         -------
-        :class:`.ApplicationCommand`
-            The edited application command.
+        Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
+            The newly edited application command.
         """
         return await self._connection.edit_guild_command(guild_id, command_id, new_command)
 
@@ -2227,15 +2287,15 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            The ID of the guild where the command should be deleted.
+            The ID of the guild where the applcation command should be deleted.
         command_id: :class:`int`
-            The ID of the command to delete.
+            The ID of the application command to delete.
         """
         await self.http.delete_guild_command(self.application_id, guild_id, command_id)
 
     async def bulk_overwrite_guild_commands(
         self, guild_id: int, application_commands: List[ApplicationCommand]
-    ) -> List[ApplicationCommand]:
+    ) -> List[APIApplicationCommand]:
         """|coro|
 
         Overwrites several guild application commands in one API request.
@@ -2245,13 +2305,13 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            The ID of the guild where the commands should be overwritten.
+            The ID of the guild where the application commands should be overwritten.
         application_commands: List[:class:`.ApplicationCommand`]
             A list of application commands to insert instead of the existing commands.
 
         Returns
         -------
-        List[:class:`.ApplicationCommand`]
+        List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of registered application commands.
         """
         return await self._connection.bulk_overwrite_guild_commands(guild_id, application_commands)
@@ -2263,7 +2323,7 @@ class Client:
     ) -> List[GuildApplicationCommandPermissions]:
         """|coro|
 
-        Requests a list of :class:`.GuildApplicationCommandPermissions` configured for this guild.
+        Retrieves a list of :class:`.GuildApplicationCommandPermissions` configured for the guild with the given ID.
 
         .. versionadded:: 2.1
 
@@ -2279,7 +2339,7 @@ class Client:
     ) -> GuildApplicationCommandPermissions:
         """|coro|
 
-        Requests :class:`.GuildApplicationCommandPermissions` for a specific command.
+        Retrieves :class:`.GuildApplicationCommandPermissions` for a specific application command.
 
         .. versionadded:: 2.1
 
@@ -2288,12 +2348,12 @@ class Client:
         guild_id: :class:`int`
             The ID of the guild to inspect.
         command_id: :class:`int`
-            The ID of the application command
+            The ID of the application command.
 
         Returns
         -------
         :class:`.GuildApplicationCommandPermissions`
-            The edited app command permissions.
+            The newly edited application command permissions.
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
 
@@ -2306,7 +2366,8 @@ class Client:
         role_ids: Mapping[int, bool] = None,
         user_ids: Mapping[int, bool] = None,
     ) -> GuildApplicationCommandPermissions:
-        """
+        """|coro|
+
         Edits guild permissions of a single command.
 
         Parameters
@@ -2314,7 +2375,7 @@ class Client:
         guild_id: :class:`int`
             The ID of the guild where the permissions should be applied.
         command_id: :class:`int`
-            The ID of the app command you want to apply these permissions to.
+            The ID of the application command you want to apply these permissions to.
         permissions: Mapping[Union[:class:`~disnake.Role`, :class:`disnake.abc.User`], :class:`bool`]
             Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
         role_ids: Mapping[:class:`int`, :class:`bool`]
@@ -2325,7 +2386,7 @@ class Client:
         Returns
         -------
         :class:`.GuildApplicationCommandPermissions`
-            The object representing the edited app command permissions.
+            The newly edited application command permissions.
         """
         perms = PartialGuildApplicationCommandPermissions(
             command_id=command_id,
@@ -2340,7 +2401,7 @@ class Client:
     ) -> List[GuildApplicationCommandPermissions]:
         """|coro|
 
-        Edits guild permissions of multiple application commands at once.
+        Edits guild permissions of multiple application commands in one API request.
 
         .. versionadded:: 2.1
 
@@ -2349,7 +2410,7 @@ class Client:
         guild_id: :class:`int`
             The ID of the guild where the permissions should be applied.
         permissions: List[:class:`.PartialGuildApplicationCommandPermissions`]
-            A list of partial permissions for each app command you want to edit.
+            A list of partial permissions for each application command you want to edit.
 
         Returns
         -------

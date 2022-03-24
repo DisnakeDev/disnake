@@ -33,11 +33,13 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Generic,
     List,
     Literal,
     NamedTuple,
     Optional,
     Tuple,
+    TypeVar,
     Union,
     overload,
 )
@@ -50,7 +52,7 @@ from ..asset import Asset
 from ..channel import PartialMessageable
 from ..enums import WebhookType, try_enum
 from ..errors import DiscordServerError, Forbidden, HTTPException, InvalidArgument, NotFound
-from ..http import Route, to_multipart
+from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
 from ..mixins import Hashable
 from ..ui.action_row import components_to_dict
@@ -410,6 +412,8 @@ class AsyncWebhookAdapter:
         }
 
         if data is not None:
+            if files:
+                set_attachments(data, files)
             payload["data"] = data
 
         if files:
@@ -542,7 +546,7 @@ def handle_message_parameters(
     multipart = []
 
     if files:
-        multipart = to_multipart(payload, files)
+        multipart = to_multipart_with_attachments(payload, files)
         payload = None
 
     return ExecuteWebhookParameters(payload=payload, multipart=multipart, files=files)
@@ -561,7 +565,7 @@ class PartialWebhookChannel(Hashable):
     .. versionadded:: 2.0
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The partial channel's ID.
     name: :class:`str`
@@ -586,7 +590,7 @@ class PartialWebhookGuild(Hashable):
     .. versionadded:: 2.0
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The partial guild's ID.
     name: :class:`str`
@@ -619,11 +623,14 @@ class _FriendlyHttpAttributeErrorHelper:
         raise AttributeError("PartialWebhookState does not support http methods.")
 
 
-class _WebhookState:
+WebhookT = TypeVar("WebhookT", bound="BaseWebhook")
+
+
+class _WebhookState(Generic[WebhookT]):
     __slots__ = ("_parent", "_webhook")
 
-    def __init__(self, webhook: Any, parent: Optional[Union[ConnectionState, _WebhookState]]):
-        self._webhook: Any = webhook
+    def __init__(self, webhook: WebhookT, parent: Optional[Union[ConnectionState, _WebhookState]]):
+        self._webhook: WebhookT = webhook
 
         self._parent: Optional[ConnectionState]
         if isinstance(parent, _WebhookState):
@@ -674,7 +681,7 @@ class WebhookMessage(Message):
     .. versionadded:: 1.6
     """
 
-    _state: _WebhookState
+    _state: _WebhookState[Webhook]
 
     async def edit(
         self,
@@ -704,51 +711,55 @@ class WebhookMessage(Message):
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
-        ------------
+        ----------
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
-            The new embed to replace the original with. This cannot be mixed with the
-            ``embeds`` parameter.
+            The new embed to replace the original with. This cannot be mixed with the ``embeds`` parameter.
             Could be ``None`` to remove the embed.
         embeds: List[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
+
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
+
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. If ``None`` is passed then
-            the view is removed. This can not be mixed with ``components``.
+            The view to update this message with. This cannot be mixed with ``components``.
+            If ``None`` is passed then the view is removed.
 
             .. versionadded:: 2.0
+
         components: Optional[|components_type|]
-            A list of components to update the message with. This can not be mixed with ``view``.
+            A list of components to update the message with. This cannot be mixed with ``view``.
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the message failed.
         Forbidden
@@ -761,11 +772,10 @@ class WebhookMessage(Message):
             There was no token associated with this webhook.
 
         Returns
-        --------
+        -------
         :class:`WebhookMessage`
             The newly edited message.
         """
-
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
@@ -790,7 +800,7 @@ class WebhookMessage(Message):
         Deletes the message.
 
         Parameters
-        -----------
+        ----------
         delay: Optional[:class:`float`]
             If provided, the number of seconds to wait before deleting the message.
             The waiting is done in the background and deletion failures are ignored.
@@ -804,7 +814,6 @@ class WebhookMessage(Message):
         HTTPException
             Deleting the message failed.
         """
-
         if delay is not None:
 
             async def inner_call(delay: float = delay):
@@ -973,11 +982,11 @@ class Webhook(BaseWebhook):
         Webhooks are now comparable and hashable.
 
     Attributes
-    ------------
+    ----------
     id: :class:`int`
         The webhook's ID
     type: :class:`WebhookType`
-        The type of the webhook.
+        The webhook's type.
 
         .. versionadded:: 1.3
 
@@ -985,9 +994,9 @@ class Webhook(BaseWebhook):
         The authentication token of the webhook. If this is ``None``
         then the webhook cannot be used to make requests.
     guild_id: Optional[:class:`int`]
-        The guild ID this webhook is for.
+        The guild ID this webhook belongs to.
     channel_id: Optional[:class:`int`]
-        The channel ID this webhook is for.
+        The channel ID this webhook belongs to.
     user: Optional[:class:`abc.User`]
         The user this webhook was created by. If the webhook was
         received without authentication then this will be ``None``.
@@ -1033,17 +1042,18 @@ class Webhook(BaseWebhook):
         """Creates a partial :class:`Webhook`.
 
         Parameters
-        -----------
+        ----------
         id: :class:`int`
-            The ID of the webhook.
+            The webhook's ID.
         token: :class:`str`
-            The authentication token of the webhook.
+            The webhook's authentication token.
         session: :class:`aiohttp.ClientSession`
             The session to use to send requests with. Note
             that the library does not manage the session and
             will not close it.
 
             .. versionadded:: 2.0
+
         bot_token: Optional[:class:`str`]
             The bot authentication token for authenticated requests
             involving the webhook.
@@ -1051,7 +1061,7 @@ class Webhook(BaseWebhook):
             .. versionadded:: 2.0
 
         Returns
-        --------
+        -------
         :class:`Webhook`
             A partial :class:`Webhook`.
             A partial webhook is just a webhook object with an ID and a token.
@@ -1071,15 +1081,16 @@ class Webhook(BaseWebhook):
         """Creates a partial :class:`Webhook` from a webhook URL.
 
         Parameters
-        ------------
+        ----------
         url: :class:`str`
-            The URL of the webhook.
+            The webhook's URL.
         session: :class:`aiohttp.ClientSession`
             The session to use to send requests with. Note
             that the library does not manage the session and
             will not close it.
 
             .. versionadded:: 2.0
+
         bot_token: Optional[:class:`str`]
             The bot authentication token for authenticated requests
             involving the webhook.
@@ -1087,12 +1098,12 @@ class Webhook(BaseWebhook):
             .. versionadded:: 2.0
 
         Raises
-        -------
+        ------
         InvalidArgument
             The URL is invalid.
 
         Returns
-        --------
+        -------
         :class:`Webhook`
             A partial :class:`Webhook`.
             A partial webhook is just a webhook object with an ID and a token.
@@ -1150,13 +1161,13 @@ class Webhook(BaseWebhook):
             returned webhook does not contain any user information.
 
         Parameters
-        -----------
+        ----------
         prefer_auth: :class:`bool`
-            Whether to use the bot token over the webhook token
+            Whether to use the bot token over the webhook token,
             if available. Defaults to ``True``.
 
         Raises
-        -------
+        ------
         HTTPException
             Could not fetch the webhook
         NotFound
@@ -1165,7 +1176,7 @@ class Webhook(BaseWebhook):
             This webhook does not have a token associated with it.
 
         Returns
-        --------
+        -------
         :class:`Webhook`
             The fetched webhook.
         """
@@ -1186,18 +1197,20 @@ class Webhook(BaseWebhook):
         Deletes this Webhook.
 
         Parameters
-        ------------
+        ----------
         reason: Optional[:class:`str`]
             The reason for deleting this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
+
         prefer_auth: :class:`bool`
-            Whether to use the bot token over the webhook token
+            Whether to use the bot token over the webhook token,
             if available. Defaults to ``True``.
 
             .. versionadded:: 2.0
+
         Raises
-        -------
+        ------
         HTTPException
             Deleting the webhook failed.
         NotFound
@@ -1235,7 +1248,7 @@ class Webhook(BaseWebhook):
         Edits this Webhook.
 
         Parameters
-        ------------
+        ----------
         name: Optional[:class:`str`]
             The webhook's new default name.
         avatar: Optional[:class:`bytes`]
@@ -1244,18 +1257,20 @@ class Webhook(BaseWebhook):
             The webhook's new channel. This requires an authenticated webhook.
 
             .. versionadded:: 2.0
-        reason: Optional[:class:`str`]
-            The reason for editing this webhook. Shows up on the audit log.
 
-            .. versionadded:: 1.4
         prefer_auth: :class:`bool`
             Whether to use the bot token over the webhook token
             if available. Defaults to ``True``.
 
             .. versionadded:: 2.0
 
+        reason: Optional[:class:`str`]
+            The reason for editing this webhook. Shows up on the audit log.
+
+            .. versionadded:: 1.4
+
         Raises
-        -------
+        ------
         HTTPException
             Editing the webhook failed.
         NotFound
@@ -1263,6 +1278,11 @@ class Webhook(BaseWebhook):
         InvalidArgument
             This webhook does not have a token associated with it
             or it tried editing a channel without authentication.
+
+        Returns
+        -------
+        :class:`Webhook`
+            The newly edited webhook.
         """
         if self.token is None and self.auth_token is None:
             raise InvalidArgument("This webhook does not have a token associated with it")
@@ -1385,7 +1405,7 @@ class Webhook(BaseWebhook):
         ``embeds`` parameter, which must be a :class:`list` of :class:`Embed` objects to send.
 
         Parameters
-        ------------
+        ----------
         content: :class:`str`
             The content of the message to send.
         username: :class:`str`
@@ -1396,50 +1416,53 @@ class Webhook(BaseWebhook):
             then the default avatar for the webhook is used. If this is not a
             string then it is explicitly cast using ``str``.
         tts: :class:`bool`
-            Indicates if the message should be sent using text-to-speech.
+            Whether the message should be sent using text-to-speech.
         ephemeral: :class:`bool`
-            Indicates if the message should only be visible to the user.
+            Whether the message should only be visible to the user.
             This is only available to :attr:`WebhookType.application` webhooks.
             If a view is sent with an ephemeral message and it has no timeout set
             then the timeout is set to 15 minutes.
 
             .. versionadded:: 2.0
+
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         embed: :class:`Embed`
-            The rich embed for the content to send. This cannot be mixed with
-            ``embeds`` parameter.
+            The rich embed for the content to send. This cannot be mixed with the ``embeds`` parameter.
         embeds: List[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message. If this is
-            passed, then the object is merged with :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`,
-            if applicable.
+            passed, then the object is merged with :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`, if applicable.
             The merging behaviour only overrides attributes that have been explicitly passed
             to the object, otherwise it uses the attributes set in :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`.
             If no object is passed at all then the defaults given by :attr:`Client.allowed_mentions <disnake.Client.allowed_mentions>`
             are used instead.
 
             .. versionadded:: 1.4
+
         view: :class:`disnake.ui.View`
             The view to send with the message. You can only send a view
             if this webhook is not partial and has state attached. A
             webhook has state attached if the webhook is managed by the
-            library. This can not be mixed with ``components``.
+            library. This cannot be mixed with ``components``.
 
             .. versionadded:: 2.0
+
         components: |components_type|
-            A list of components to include in the message. This can not be mixed with ``view``.
+            A list of components to include in the message. This cannot be mixed with ``view``.
 
             .. versionadded:: 2.4
+
         thread: :class:`~disnake.abc.Snowflake`
             The thread to send this webhook to.
 
             .. versionadded:: 2.0
+
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
             means that the return type of this function changes from ``None`` to
@@ -1453,7 +1476,7 @@ class Webhook(BaseWebhook):
             .. versionadded:: 2.1
 
         Raises
-        --------
+        ------
         HTTPException
             Sending the message failed.
         NotFound
@@ -1470,11 +1493,10 @@ class Webhook(BaseWebhook):
             attached with this webhook when giving it a view.
 
         Returns
-        ---------
+        -------
         Optional[:class:`WebhookMessage`]
             If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
         """
-
         if self.token is None:
             raise InvalidArgument("This webhook does not have a token associated with it")
 
@@ -1551,32 +1573,31 @@ class Webhook(BaseWebhook):
     async def fetch_message(self, id: int) -> WebhookMessage:
         """|coro|
 
-        Retrieves a single :class:`~disnake.WebhookMessage` owned by this webhook.
+        Retrieves a single :class:`WebhookMessage` owned by this webhook.
 
         .. versionadded:: 2.0
 
         Parameters
-        ------------
+        ----------
         id: :class:`int`
             The message ID to look for.
 
         Raises
-        --------
-        ~disnake.NotFound
+        ------
+        NotFound
             The specified message was not found.
-        ~disnake.Forbidden
+        Forbidden
             You do not have the permissions required to get a message.
-        ~disnake.HTTPException
+        HTTPException
             Retrieving the message failed.
         InvalidArgument
             There was no token associated with this webhook.
 
         Returns
-        --------
-        :class:`~disnake.WebhookMessage`
+        -------
+        :class:`WebhookMessage`
             The message asked for.
         """
-
         if self.token is None:
             raise InvalidArgument("This webhook does not have a token associated with it")
 
@@ -1622,9 +1643,9 @@ class Webhook(BaseWebhook):
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
-            The message ID to edit.
+            The ID of the message to edit.
         content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
@@ -1636,39 +1657,44 @@ class Webhook(BaseWebhook):
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
         file: :class:`File`
-            The file to upload. This cannot be mixed with ``files`` parameter.
+            The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
+
         files: List[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
+
         attachments: List[:class:`Attachment`]
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
             the view is removed. The webhook must have state attached, similar to
-            :meth:`send`. This can not be mixed with ``components``.
+            :meth:`send`. This cannot be mixed with ``components``.
 
             .. versionadded:: 2.0
+
         components: |components_type|
-            A list of components to update this message with. This can not be mixed with ``view``.
+            A list of components to update this message with. This cannot be mixed with ``view``.
 
             .. versionadded:: 2.4
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the message failed.
         Forbidden
@@ -1682,11 +1708,10 @@ class Webhook(BaseWebhook):
             no state.
 
         Returns
-        --------
+        -------
         :class:`WebhookMessage`
             The newly edited webhook message.
         """
-
         if self.token is None:
             raise InvalidArgument("This webhook does not have a token associated with it")
 
@@ -1748,12 +1773,12 @@ class Webhook(BaseWebhook):
         .. versionadded:: 1.6
 
         Parameters
-        ------------
+        ----------
         message_id: :class:`int`
-            The message ID to delete.
+            The ID of the message to delete.
 
         Raises
-        -------
+        ------
         HTTPException
             Deleting the message failed.
         Forbidden

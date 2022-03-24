@@ -25,12 +25,12 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     Coroutine,
-    Dict,
     Generic,
     Optional,
     Protocol,
@@ -40,22 +40,62 @@ from typing import (
     overload,
 )
 
-__all__ = ("Item",)
+__all__ = ("Item", "WrappedComponent")
 
 I = TypeVar("I", bound="Item")
 V = TypeVar("V", bound="View", covariant=True)
 
 if TYPE_CHECKING:
-    from ..components import Component
+    from ..components import NestedComponent
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
+    from ..types.components import Component as ComponentPayload
     from .view import View
 
     ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 
-class Item(Generic[V]):
-    """Represents the base UI item that all UI components inherit from.
+class WrappedComponent(ABC):
+    """Represents the base UI component that all UI components inherit from.
+
+    The current UI components supported are:
+
+    - :class:`disnake.ui.Button`
+    - :class:`disnake.ui.Select`
+    - :class:`disnake.ui.TextInput`
+
+    .. versionadded:: 2.4
+    """
+
+    __repr_attributes__: Tuple[str, ...]
+
+    @property
+    @abstractmethod
+    def _underlying(self) -> NestedComponent:
+        ...
+
+    @property
+    @abstractmethod
+    def width(self) -> int:
+        ...
+
+    def __repr__(self) -> str:
+        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
+        return f"<{type(self).__name__} {attrs}>"
+
+    @property
+    def type(self) -> ComponentType:
+        return self._underlying.type
+
+    def to_component_dict(self) -> ComponentPayload:
+        return self._underlying.to_dict()
+
+
+class Item(WrappedComponent, Generic[V]):
+    """Represents the base UI item that all UI items inherit from.
+
+    This class adds more functionality on top of the :class:`WrappedComponent` base class.
+    This functionality mostly relates to :class:`disnake.ui.View`.
 
     The current UI items supported are:
 
@@ -65,7 +105,7 @@ class Item(Generic[V]):
     .. versionadded:: 2.0
     """
 
-    __item_repr_attributes__: Tuple[str, ...] = ("row",)
+    __repr_attributes__: Tuple[str, ...] = ("row",)
 
     def __init__(self):
         self._view: Optional[V] = None
@@ -79,32 +119,21 @@ class Item(Generic[V]):
         # only called upon edit and we're mainly interested during initial creation time.
         self._provided_custom_id: bool = False
 
-    def to_component_dict(self) -> Dict[str, Any]:
-        raise NotImplementedError
-
-    def refresh_component(self, component: Component) -> None:
+    def refresh_component(self, component: NestedComponent) -> None:
         return None
 
     def refresh_state(self, interaction: MessageInteraction) -> None:
         return None
 
     @classmethod
-    def from_component(cls: Type[I], component: Component) -> I:
+    def from_component(cls: Type[I], component: NestedComponent) -> I:
         return cls()
-
-    @property
-    def type(self) -> ComponentType:
-        raise NotImplementedError
 
     def is_dispatchable(self) -> bool:
         return False
 
     def is_persistent(self) -> bool:
         return self._provided_custom_id
-
-    def __repr__(self) -> str:
-        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__item_repr_attributes__)
-        return f"<{self.__class__.__name__} {attrs}>"
 
     @property
     def row(self) -> Optional[int]:
@@ -120,15 +149,11 @@ class Item(Generic[V]):
             raise ValueError("row cannot be negative or greater than or equal to 5")
 
     @property
-    def width(self) -> int:
-        return 1
-
-    @property
     def view(self) -> Optional[V]:
         """Optional[:class:`View`]: The underlying view for this item."""
         return self._view
 
-    async def callback(self, interaction: MessageInteraction):
+    async def callback(self, interaction: MessageInteraction, /):
         """|coro|
 
         The callback associated with this UI item.
@@ -136,7 +161,7 @@ class Item(Generic[V]):
         This can be overriden by subclasses.
 
         Parameters
-        -----------
+        ----------
         interaction: :class:`.MessageInteraction`
             The interaction that triggered this UI item.
         """

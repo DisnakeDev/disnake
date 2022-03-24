@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Literal, Optional, TypedDict, Union
+from typing import Literal, Optional, TypedDict, Union
 
 from .appinfo import PartialAppInfo
 from .channel import PartialChannel

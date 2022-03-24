@@ -406,6 +406,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
         checking the user IDs. Note that :class:`~ext.commands.Bot` does not
         have this problem.
 
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.message_content` for more information.
+
     :param message: The current message.
     :type message: :class:`Message`
 
@@ -420,6 +425,12 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     or use the :func:`on_raw_message_delete` event instead.
 
     This requires :attr:`Intents.messages` to be enabled.
+
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.message_content` for more information.
+
 
     :param message: The deleted message.
     :type message: :class:`Message`
@@ -476,6 +487,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     If this occurs increase the :class:`max_messages <Client>` parameter
     or use the :func:`on_raw_message_edit` event instead.
+
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.message_content` for more information.
 
     The following non-exhaustive cases trigger this event:
 
@@ -694,17 +710,51 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_application_command(interaction)
 
-    Called when an application_command is invoked.
+    Called when an application command is invoked.
 
     .. warning::
 
         This is a low level function that is not generally meant to be used.
         Consider using :class:`~ext.commands.Bot` or :class:`~ext.commands.InteractionBot` instead.
 
+    .. warning::
+
+        If you decide to override this event and are using :class:`~disnake.ext.commands.Bot` or related types,
+        make sure to call :func:`Bot.process_application_commands <disnake.ext.commands.Bot.process_application_commands>`
+        to ensure that the application commands are processed.
+
     .. versionadded:: 2.0
 
     :param interaction: The interaction object.
     :type interaction: :class:`ApplicationCommandInteraction`
+
+.. function:: on_application_command_autocomplete(interaction)
+
+    Called when an application command autocomplete is called.
+
+    .. warning::
+
+        This is a low level function that is not generally meant to be used.
+        Consider using :class:`~ext.commands.Bot` or :class:`~ext.commands.InteractionBot` instead.
+
+    .. warning::
+        If you decide to override this event and are using :class:`~disnake.ext.commands.Bot` or related types,
+        make sure to call :func:`Bot.process_app_command_autocompletion <disnake.ext.commands.Bot.process_app_command_autocompletion>`
+        to ensure that the application command autocompletion is processed.
+
+    .. versionadded:: 2.0
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`ApplicationCommandInteraction`
+
+.. function:: on_modal_submit(interaction)
+
+    Called when a modal is submitted.
+
+    .. versionadded:: 2.4
+
+    :param interaction: The interaction object.
+    :type interaction: :class:`ModalInteraction`
 
 .. function:: on_private_channel_update(before, after)
 
@@ -1548,9 +1598,6 @@ of :class:`enum.Enum`.
 
     Represents the type of a voice channel activity/application.
 
-    .. attribute:: youtube
-
-        The (old) "Youtube Together" activity.
     .. attribute:: poker
 
         The "Poker Night" activity.
@@ -1582,21 +1629,21 @@ of :class:`enum.Enum`.
         The "SpellCast" activity.
 
         .. versionadded:: 2.3
-    .. attribute:: awkword
-
-        The "Awkword" activity.
-
-        .. versionadded:: 2.3
-    .. attribute:: sketchy_artist
-
-        The "Sketchy Artist" activity.
-
-        .. versionadded:: 2.3
     .. attribute:: watch_together
 
         The "Watch Together" activity, a Youtube application.
 
         .. versionadded:: 2.3
+    .. attribute:: sketch_heads
+
+        The "Sketch Heads" activity.
+
+        .. versionadded:: 2.4
+    .. attribute:: ocho
+
+        The "Ocho" activity.
+
+        .. versionadded:: 2.4
 
 .. class:: ApplicationCommandType
 
@@ -1625,10 +1672,16 @@ of :class:`enum.Enum`.
         Represents Discord pinging to see if the interaction response server is alive.
     .. attribute:: application_command
 
-        Represents a slash command interaction.
+        Represents an application command interaction.
     .. attribute:: component
 
         Represents a component based interaction, i.e. using the Discord Bot UI Kit.
+    .. attribute:: application_command_autocomplete
+
+        Represents an application command autocomplete interaction.
+    .. attribute:: modal_submit
+
+        Represents a modal submit interaction.
 
 .. class:: InteractionResponseType
 
@@ -1662,6 +1715,16 @@ of :class:`enum.Enum`.
         Responds to the interaction by editing the message.
 
         See also :meth:`InteractionResponse.edit_message`
+    .. attribute:: application_command_autocomplete_result
+
+        Responds to the autocomplete interaction with suggested choices.
+
+        See also :meth:`InteractionResponse.autocomplete`
+    .. attribute:: modal
+
+        Responds to the interaction by displaying a modal.
+
+        See also :meth:`InteractionResponse.send_modal`
 
 .. class:: ComponentType
 
@@ -1678,6 +1741,9 @@ of :class:`enum.Enum`.
     .. attribute:: select
 
         Represents a select component.
+    .. attribute:: text_input
+
+        Represents a text input component.
 
 .. class:: OptionType
 
@@ -1715,6 +1781,11 @@ of :class:`enum.Enum`.
     .. attribute:: number
 
         Represents a float option.
+    .. attribute:: attachment
+
+        Represents an attachment option.
+
+        .. versionadded:: 2.4
 
 
 .. class:: ButtonStyle
@@ -1758,37 +1829,36 @@ of :class:`enum.Enum`.
 
         An alias for :attr:`link`.
 
+.. class:: TextInputStyle
+
+    Represents a style of the text input component.
+
+    .. versionadded:: 2.4
+
+    .. attribute:: short
+
+        Represents a single-line text input component.
+    .. attribute:: paragraph
+
+        Represents a multi-line text input component.
+    .. attribute:: single_line
+
+        An alias for :attr:`short`.
+    .. attribute:: multi_line
+
+        An alias for :attr:`paragraph`.
+    .. attribute:: long
+
+        An alias for :attr:`paragraph`.
+
+
 .. class:: VoiceRegion
 
     Specifies the region a voice server belongs to.
 
-    .. attribute:: amsterdam
-
-        The Amsterdam region.
     .. attribute:: brazil
 
         The Brazil region.
-    .. attribute:: dubai
-
-        The Dubai region.
-
-        .. versionadded:: 1.3
-
-    .. attribute:: eu_central
-
-        The EU Central region.
-    .. attribute:: eu_west
-
-        The EU West region.
-    .. attribute:: europe
-
-        The Europe region.
-
-        .. versionadded:: 1.3
-
-    .. attribute:: frankfurt
-
-        The Frankfurt region.
     .. attribute:: hongkong
 
         The Hong Kong region.
@@ -1801,9 +1871,11 @@ of :class:`enum.Enum`.
     .. attribute:: japan
 
         The Japan region.
-    .. attribute:: london
+    .. attribute:: rotterdam
 
-        The London region.
+        The Rotterdam region.
+
+        .. versionadded:: 2.5
     .. attribute:: russia
 
         The Russia region.
@@ -1813,9 +1885,6 @@ of :class:`enum.Enum`.
     .. attribute:: southafrica
 
         The South Africa region.
-    .. attribute:: south_korea
-
-        The South Korea region.
     .. attribute:: sydney
 
         The Sydney region.
@@ -1831,15 +1900,6 @@ of :class:`enum.Enum`.
     .. attribute:: us_west
 
         The US West region.
-    .. attribute:: vip_amsterdam
-
-        The Amsterdam region for VIP guilds.
-    .. attribute:: vip_us_east
-
-        The US East region for VIP guilds.
-    .. attribute:: vip_us_west
-
-        The US West region for VIP guilds.
 
 .. class:: VerificationLevel
 
@@ -2860,6 +2920,10 @@ of :class:`enum.Enum`.
 
         The stage instance can be joined by external users.
 
+        .. deprecated:: 2.5
+
+            Public stages are no longer supported by discord.
+
     .. attribute:: closed
 
         The stage instance can only be joined by members of the guild.
@@ -2982,6 +3046,34 @@ of :class:`enum.Enum`.
     .. attribute:: week
 
         The thread will archive after a week of inactivity.
+
+.. class:: WidgetStyle
+
+    Represents the supported widget image styles.
+
+    .. versionadded:: 2.5
+
+    .. attribute:: shield
+
+        A shield style image with a Discord icon and the online member count.
+
+    .. attribute:: banner1
+
+        A large image with guild icon, name and online member count and a footer.
+
+    .. attribute:: banner2
+
+        A small image with guild icon, name and online member count.
+
+    .. attribute:: banner3
+
+        A large image with guild icon, name and online member count and a footer,
+        with a "Chat Now" label on the right.
+
+    .. attribute:: banner4
+
+        A large image with a large Discord logo, guild icon, name and online member count,
+        with a "Join My Server" label at the bottom.
 
 
 Async Iterator
@@ -3873,6 +3965,30 @@ MessageCommand
 .. autoclass:: MessageCommand()
     :members:
 
+APISlashCommand
+~~~~~~~~~~~~~~~
+
+.. attributetable:: APISlashCommand
+
+.. autoclass:: APISlashCommand()
+    :members:
+
+APIUserCommand
+~~~~~~~~~~~~~~
+
+.. attributetable:: APIUserCommand
+
+.. autoclass:: APIUserCommand()
+    :members:
+
+APIMessageCommand
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: APIMessageCommand
+
+.. autoclass:: APIMessageCommand()
+    :members:
+
 Option
 ~~~~~~
 
@@ -3955,6 +4071,15 @@ SelectMenu
     :members:
     :inherited-members:
 
+TextInput
+~~~~~~~~~
+
+.. attributetable:: TextInput
+
+.. autoclass:: TextInput()
+    :members:
+    :inherited-members:
+
 
 DeletedReferencedMessage
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4007,6 +4132,15 @@ Guild
 
         :type: :class:`User`
 
+GuildPreview
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildPreview
+
+.. autoclass:: GuildPreview()
+    :members:
+
+
 GuildScheduledEvent
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -4049,6 +4183,7 @@ Interaction
 
 .. autoclass:: Interaction()
     :members:
+    :inherited-members:
 
 ApplicationCommandInteraction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4058,7 +4193,21 @@ ApplicationCommandInteraction
 .. autoclass:: ApplicationCommandInteraction()
     :members:
     :inherited-members:
-    :exclude-members: channel, followup, guild, me, permissions, response
+
+GuildCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: GuildCommandInteraction()
+
+UserCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: UserCommandInteraction()
+
+MessageCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: MessageCommandInteraction()
 
 MessageInteraction
 ~~~~~~~~~~~~~~~~~~
@@ -4066,6 +4215,15 @@ MessageInteraction
 .. attributetable:: MessageInteraction
 
 .. autoclass:: MessageInteraction()
+    :members:
+    :inherited-members:
+
+ModalInteraction
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: ModalInteraction
+
+.. autoclass:: ModalInteraction()
     :members:
     :inherited-members:
     :exclude-members: channel, followup, guild, me, permissions, response
@@ -4116,6 +4274,14 @@ MessageInteractionData
 .. attributetable:: MessageInteractionData
 
 .. autoclass:: MessageInteractionData()
+    :members:
+
+ModalInteractionData
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ModalInteractionData
+
+.. autoclass:: ModalInteractionData()
     :members:
 
 Member
@@ -4358,6 +4524,14 @@ WidgetMember
 .. autoclass:: WidgetMember()
     :members:
     :inherited-members:
+
+WidgetSettings
+~~~~~~~~~~~~~~
+
+.. attributetable:: WidgetSettings
+
+.. autoclass:: WidgetSettings()
+    :members:
 
 Widget
 ~~~~~~~
@@ -4727,6 +4901,14 @@ Item
 .. autoclass:: disnake.ui.Item
     :members:
 
+WrappedComponent
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.WrappedComponent
+
+.. autoclass:: disnake.ui.WrappedComponent
+    :members:
+
 Button
 ~~~~~~~
 
@@ -4748,6 +4930,22 @@ Select
     :inherited-members:
 
 .. autofunction:: disnake.ui.select
+
+Modal
+~~~~~
+
+.. attributetable:: disnake.ui.Modal
+
+.. autoclass:: disnake.ui.Modal
+    :members:
+
+TextInput
+~~~~~~~~~
+
+.. attributetable:: disnake.ui.TextInput
+
+.. autoclass:: disnake.ui.TextInput
+    :members:
 
 
 Exceptions
@@ -4790,6 +4988,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: InteractionTimedOut
 
+.. autoexception:: ModalChainNotSupported
+
 .. autoexception:: disnake.opus.OpusError
 
 .. autoexception:: disnake.opus.OpusNotLoaded
@@ -4811,6 +5011,7 @@ Exception Hierarchy
                     - :exc:`InteractionResponded`
                     - :exc:`InteractionNotResponded`
                     - :exc:`InteractionTimedOut`
+                    - :exc:`ModalChainNotSupported`
             - :exc:`NoMoreItems`
             - :exc:`GatewayNotFound`
             - :exc:`HTTPException`

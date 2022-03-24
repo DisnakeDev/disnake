@@ -59,7 +59,7 @@ if TYPE_CHECKING:
     from .member import Member
     from .message import Message
     from .threads import Thread
-    from .types.audit_log import AuditLog as AuditLogPayload
+    from .types.audit_log import AuditLog as AuditLogPayload, AuditLogEntry as AuditLogEntryPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
     from .types.threads import Thread as ThreadPayload
@@ -248,7 +248,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
     messages endpoint.
 
     Parameters
-    -----------
+    ----------
     messageable: :class:`abc.Messageable`
         Messageable class to retrieve message history from.
     limit: :class:`int`
@@ -293,7 +293,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
         self.after = after or OLDEST_OBJECT
         self.around = around
 
-        self._filter = None  # message dict -> bool
+        self._filter: Optional[Callable[[MessagePayload], bool]] = None
 
         self.state = self.messageable._state
         self.logs_from = self.state.http.logs_from
@@ -313,7 +313,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
             elif self.before:
                 self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
             elif self.after:
-                self._filter = lambda m: self.after.id < int(m["id"])  # type: ignore
+                self._filter = lambda m: self.after.id < int(m["id"])
         else:
             if self.reverse:
                 self._retrieve_messages = self._retrieve_messages_after_strategy  # type: ignore
@@ -430,7 +430,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         self._users = {}
         self._state = guild._state
 
-        self._filter = None  # entry dict -> bool
+        self._filter: Optional[Callable[[AuditLogEntryPayload], bool]] = None
 
         self.entries = asyncio.Queue()
 
@@ -539,7 +539,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
     guilds endpoint.
 
     Parameters
-    -----------
+    ----------
     bot: :class:`disnake.Client`
         The client to retrieve the guilds from.
     limit: :class:`int`

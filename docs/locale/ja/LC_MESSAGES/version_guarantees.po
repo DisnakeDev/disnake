@@ -76,4 +76,3 @@ msgstr "内部HTTP処理の変更。"
 #: ../../version_guarantees.rst:29
 msgid "Upgrading the dependencies to a new version, major or otherwise."
 msgstr "依存関係をメジャー、またはそれ以外の新しいバージョンへアップグレード。"
-
