@@ -749,19 +749,19 @@ Converters
 .. autoclass:: disnake.ext.commands.VoiceChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.StoreChannelConverter
-    :members:
-
 .. autoclass:: disnake.ext.commands.StageChannelConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.CategoryChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.InviteConverter
+.. autoclass:: disnake.ext.commands.StoreChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.GuildConverter
+.. autoclass:: disnake.ext.commands.ThreadConverter
+    :members:
+
+.. autoclass:: disnake.ext.commands.ColourConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.RoleConverter
@@ -770,7 +770,10 @@ Converters
 .. autoclass:: disnake.ext.commands.GameConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.ColourConverter
+.. autoclass:: disnake.ext.commands.InviteConverter
+    :members:
+
+.. autoclass:: disnake.ext.commands.GuildConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.EmojiConverter
@@ -779,13 +782,13 @@ Converters
 .. autoclass:: disnake.ext.commands.PartialEmojiConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.ThreadConverter
-    :members:
-
 .. autoclass:: disnake.ext.commands.GuildStickerConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.PermissionsConverter
+    :members:
+
+.. autoclass:: disnake.ext.commands.GuildScheduledEventConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.clean_content
@@ -877,6 +880,9 @@ Exceptions
 .. autoexception:: disnake.ext.commands.NotOwner
     :members:
 
+.. autoexception:: disnake.ext.commands.ObjectNotFound
+    :members:
+
 .. autoexception:: disnake.ext.commands.MessageNotFound
     :members:
 
@@ -916,7 +922,13 @@ Exceptions
 .. autoexception:: disnake.ext.commands.GuildStickerNotFound
     :members:
 
+.. autoexception:: disnake.ext.commands.GuildScheduledEventNotFound
+    :members:
+
 .. autoexception:: disnake.ext.commands.BadBoolArgument
+    :members:
+
+.. autoexception:: disnake.ext.commands.LargeIntConversionFailure
     :members:
 
 .. autoexception:: disnake.ext.commands.MissingPermissions
@@ -989,20 +1001,23 @@ Exception Hierarchy
                 - :exc:`~.commands.MissingRequiredArgument`
                 - :exc:`~.commands.TooManyArguments`
                 - :exc:`~.commands.BadArgument`
-                    - :exc:`~.commands.MessageNotFound`
+                    - :exc:`~.commands.ObjectNotFound`
                     - :exc:`~.commands.MemberNotFound`
                     - :exc:`~.commands.GuildNotFound`
                     - :exc:`~.commands.UserNotFound`
-                    - :exc:`~.commands.ChannelNotFound`
+                    - :exc:`~.commands.MessageNotFound`
                     - :exc:`~.commands.ChannelNotReadable`
+                    - :exc:`~.commands.ChannelNotFound`
+                    - :exc:`~.commands.ThreadNotFound`
                     - :exc:`~.commands.BadColourArgument`
                     - :exc:`~.commands.RoleNotFound`
                     - :exc:`~.commands.BadInviteArgument`
                     - :exc:`~.commands.EmojiNotFound`
-                    - :exc:`~.commands.GuildStickerNotFound`
                     - :exc:`~.commands.PartialEmojiConversionFailure`
+                    - :exc:`~.commands.GuildStickerNotFound`
+                    - :exc:`~.commands.GuildScheduledEventNotFound`
                     - :exc:`~.commands.BadBoolArgument`
-                    - :exc:`~.commands.ThreadNotFound`
+                    - :exc:`~.commands.LargeIntConversionFailure`
                     - :exc:`~.commands.FlagError`
                         - :exc:`~.commands.BadFlagArgument`
                         - :exc:`~.commands.MissingFlagArgument`
@@ -1039,3 +1054,16 @@ Exception Hierarchy
             - :exc:`~.commands.ExtensionNotFound`
     - :exc:`~.ClientException`
         - :exc:`~.commands.CommandRegistrationError`
+
+Warnings
+----------
+
+.. autoclass:: disnake.ext.commands.MessageContentPrefixWarning
+
+Warning Hierarchy
+~~~~~~~~~~~~~~~~~~~
+
+.. exception_hierarchy::
+
+    - :class:`DiscordWarning`
+        - :class:`~.commands.MessageContentPrefixWarning`

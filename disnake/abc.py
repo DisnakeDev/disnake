@@ -466,6 +466,7 @@ class GuildChannel(ABC):
         :class:`~disnake.PermissionOverwrite`
             The permission overwrites for this object.
         """
+        predicate: Callable[[_Overwrites], bool]
         if isinstance(obj, User):
             predicate = lambda p: p.is_member()
         elif isinstance(obj, Role):
@@ -1221,7 +1222,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[Any] = ...,
+        content: Any = ...,
         *,
         tts: bool = ...,
         embed: Embed = ...,
@@ -1240,7 +1241,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[Any] = ...,
+        content: Any = ...,
         *,
         tts: bool = ...,
         embed: Embed = ...,
@@ -1259,7 +1260,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[Any] = ...,
+        content: Any = ...,
         *,
         tts: bool = ...,
         embeds: List[Embed] = ...,
@@ -1278,7 +1279,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[Any] = ...,
+        content: Any = ...,
         *,
         tts: bool = ...,
         embeds: List[Embed] = ...,
@@ -1296,21 +1297,21 @@ class Messageable:
 
     async def send(
         self,
-        content=None,
+        content: Any = None,
         *,
-        tts=None,
-        embed=None,
-        embeds=None,
-        file=None,
-        files=None,
-        stickers=None,
-        delete_after=None,
-        nonce=None,
-        allowed_mentions=None,
-        reference=None,
-        mention_author=None,
-        view=None,
-        components=None,
+        tts: bool = False,
+        embed: Embed = None,
+        embeds: List[Embed] = None,
+        file: File = None,
+        files: List[File] = None,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = None,
+        delete_after: float = None,
+        nonce: Union[str, int] = None,
+        allowed_mentions: AllowedMentions = None,
+        reference: Union[Message, MessageReference, PartialMessage] = None,
+        mention_author: bool = None,
+        view: View = None,
+        components: Components = None,
     ):
         """|coro|
 
@@ -1355,7 +1356,7 @@ class Messageable:
 
             .. versionadded:: 2.0
 
-        nonce: :class:`int`
+        nonce: Union[:class:`str`, :class:`int`]
             The nonce to use for sending this message. If the message was successfully sent,
             then the message will have a nonce with this value.
         delete_after: :class:`float`
@@ -1431,6 +1432,7 @@ class Messageable:
         if embed is not None:
             embeds = [embed]
 
+        embeds_payload = None
         if embeds is not None:
             if len(embeds) > 10:
                 raise InvalidArgument("embeds parameter must be a list of up to 10 elements")
@@ -1438,25 +1440,28 @@ class Messageable:
                 if embed._files:
                     files = files or []
                     files += embed._files
-            embeds = [embed.to_dict() for embed in embeds]
+            embeds_payload = [embed.to_dict() for embed in embeds]
 
+        stickers_payload = None
         if stickers is not None:
-            stickers = [sticker.id for sticker in stickers]
+            stickers_payload = [sticker.id for sticker in stickers]
 
+        allowed_mentions_payload = None
         if allowed_mentions is None:
-            allowed_mentions = state.allowed_mentions and state.allowed_mentions.to_dict()
+            allowed_mentions_payload = state.allowed_mentions and state.allowed_mentions.to_dict()
         elif state.allowed_mentions is not None:
-            allowed_mentions = state.allowed_mentions.merge(allowed_mentions).to_dict()
+            allowed_mentions_payload = state.allowed_mentions.merge(allowed_mentions).to_dict()
         else:
-            allowed_mentions = allowed_mentions.to_dict()
+            allowed_mentions_payload = allowed_mentions.to_dict()
 
         if mention_author is not None:
-            allowed_mentions = allowed_mentions or AllowedMentions().to_dict()
-            allowed_mentions["replied_user"] = bool(mention_author)
+            allowed_mentions_payload = allowed_mentions_payload or AllowedMentions().to_dict()
+            allowed_mentions_payload["replied_user"] = bool(mention_author)
 
+        reference_payload = None
         if reference is not None:
             try:
-                reference = reference.to_message_reference_dict()
+                reference_payload = reference.to_message_reference_dict()
             except AttributeError:
                 raise InvalidArgument(
                     "reference parameter must be Message, MessageReference, or PartialMessage"
@@ -1489,12 +1494,11 @@ class Messageable:
                     files=files,
                     content=content,
                     tts=tts,
-                    embed=embed,
-                    embeds=embeds,
+                    embeds=embeds_payload,
                     nonce=nonce,
-                    allowed_mentions=allowed_mentions,
-                    message_reference=reference,
-                    stickers=stickers,
+                    allowed_mentions=allowed_mentions_payload,
+                    message_reference=reference_payload,
+                    stickers=stickers_payload,
                     components=components_payload,  # type: ignore
                 )
             finally:
@@ -1505,12 +1509,11 @@ class Messageable:
                 channel.id,
                 content,
                 tts=tts,
-                embed=embed,
-                embeds=embeds,
+                embeds=embeds_payload,
                 nonce=nonce,
-                allowed_mentions=allowed_mentions,
-                message_reference=reference,
-                stickers=stickers,
+                allowed_mentions=allowed_mentions_payload,
+                message_reference=reference_payload,
+                stickers=stickers_payload,
                 components=components_payload,  # type: ignore
             )
 

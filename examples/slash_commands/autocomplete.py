@@ -3,7 +3,7 @@ from typing import List
 import disnake
 from disnake.ext import commands
 
-bot = commands.Bot("!")
+bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 # You may even add autocompletion for your commands.
 # This requires the type to be a string and for you to not use enumeration.

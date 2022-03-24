@@ -402,7 +402,7 @@ class Permissions(BaseFlags):
         base.manage_messages = False
         base.manage_threads = False
         base.send_messages_in_threads = False
-        base.create_private_threads = False
+        base.create_public_threads = False
         base.create_private_threads = False
         return base
 

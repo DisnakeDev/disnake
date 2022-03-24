@@ -42,7 +42,6 @@ from typing import (
     Set,
     Tuple,
     Union,
-    cast,
     overload,
 )
 
@@ -67,6 +66,7 @@ from .enums import (
     VerificationLevel,
     VideoQualityMode,
     VoiceRegion,
+    WidgetStyle,
     try_enum,
 )
 from .errors import ClientException, HTTPException, InvalidArgument, InvalidData
@@ -84,7 +84,7 @@ from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
 from .user import User
-from .widget import Widget
+from .widget import Widget, WidgetSettings
 
 __all__ = ("Guild",)
 
@@ -156,9 +156,6 @@ class Guild(Hashable):
 
         .. versionadded:: 2.0
 
-    region: :class:`VoiceRegion`
-        The region the guild belongs on. There is a chance that the region
-        will be a :class:`str` if the value is not recognised by the enumerator.
     afk_timeout: :class:`int`
         The timeout to get sent to the AFK channel.
     afk_channel: Optional[:class:`VoiceChannel`]
@@ -261,6 +258,26 @@ class Guild(Hashable):
         Only available for manually fetched guilds.
 
         .. versionadded:: 2.3
+
+    widget_enabled: Optional[:class:`bool`]
+        Whether the widget is enabled.
+
+        .. versionadded:: 2.5
+
+        .. note::
+
+            This value is unreliable and will only be set after the guild was updated at least once.
+            Avoid using this and use :func:`widget_settings` instead.
+
+    widget_channel_id: Optional[:class:`int`]
+        The widget channel ID, if set.
+
+        .. versionadded:: 2.5
+
+        .. note::
+
+            This value is unreliable and will only be set after the guild was updated at least once.
+            Avoid using this and use :func:`widget_settings` instead.
     """
 
     __slots__ = (
@@ -269,7 +286,6 @@ class Guild(Hashable):
         "name",
         "id",
         "unavailable",
-        "region",
         "owner_id",
         "mfa_level",
         "emojis",
@@ -289,6 +305,8 @@ class Guild(Hashable):
         "nsfw_level",
         "approximate_member_count",
         "approximate_presence_count",
+        "widget_enabled",
+        "widget_channel_id",
         "_members",
         "_channels",
         "_icon",
@@ -307,6 +325,7 @@ class Guild(Hashable):
         "_stage_instances",
         "_scheduled_events",
         "_threads",
+        "_region",
     )
 
     _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
@@ -382,11 +401,10 @@ class Guild(Hashable):
         return f"<Guild {inner}>"
 
     def _update_voice_state(
-        self, data: GuildVoiceState, channel_id: int
+        self, data: GuildVoiceState, channel_id: Optional[int]
     ) -> Tuple[Optional[Member], VoiceState, VoiceState]:
         user_id = int(data["user_id"])
-        channel = self.get_channel(channel_id)
-        channel = cast(Optional[VocalGuildChannel], channel)
+        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # type: ignore
         try:
             # check if we should remove the voice state from cache
             if channel is None:
@@ -488,8 +506,8 @@ class Guild(Hashable):
         if member_count is not None:
             self._member_count: int = member_count
 
-        self.name: str = guild.get("name")
-        self.region: VoiceRegion = try_enum(VoiceRegion, guild.get("region"))
+        self.name: str = guild.get("name", "")
+        self._region: VoiceRegion = try_enum(VoiceRegion, guild.get("region"))
         self.verification_level: VerificationLevel = try_enum(
             VerificationLevel, guild.get("verification_level")
         )
@@ -499,7 +517,7 @@ class Guild(Hashable):
         self.explicit_content_filter: ContentFilter = try_enum(
             ContentFilter, guild.get("explicit_content_filter", 0)
         )
-        self.afk_timeout: int = guild.get("afk_timeout")
+        self.afk_timeout: int = guild.get("afk_timeout", 0)
         self._icon: Optional[str] = guild.get("icon")
         self._banner: Optional[str] = guild.get("banner")
         self.unavailable: bool = guild.get("unavailable", False)
@@ -510,7 +528,7 @@ class Guild(Hashable):
             role = Role(guild=self, data=r, state=state)
             self._roles[role.id] = role
 
-        self.mfa_level: MFALevel = guild.get("mfa_level")
+        self.mfa_level: MFALevel = guild.get("mfa_level", 0)
         self.emojis: Tuple[Emoji, ...] = tuple(
             map(lambda d: state.store_emoji(self, d), guild.get("emojis", []))
         )
@@ -537,6 +555,8 @@ class Guild(Hashable):
         self.premium_progress_bar_enabled: bool = guild.get("premium_progress_bar_enabled", False)
         self.approximate_presence_count: Optional[int] = guild.get("approximate_presence_count")
         self.approximate_member_count: Optional[int] = guild.get("approximate_member_count")
+        self.widget_enabled: Optional[bool] = guild.get("widget_enabled")
+        self.widget_channel_id: Optional[int] = utils._get_as_snowflake(guild, "widget_channel_id")
 
         self._stage_instances: Dict[int, StageInstance] = {}
         for s in guild.get("stage_instances", []):
@@ -563,7 +583,7 @@ class Guild(Hashable):
         self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(utils._get_as_snowflake(guild, "afk_channel_id"))  # type: ignore
 
         for obj in guild.get("voice_states", []):
-            self._update_voice_state(obj, int(obj["channel_id"]))
+            self._update_voice_state(obj, utils._get_as_snowflake(obj, "channel_id"))
 
     # TODO: refactor/remove?
     def _sync(self, data: GuildPayload) -> None:
@@ -582,7 +602,7 @@ class Guild(Hashable):
         if "channels" in data:
             channels = data["channels"]
             for c in channels:
-                factory, ch_type = _guild_channel_factory(c["type"])
+                factory, _ = _guild_channel_factory(c["type"])
                 if factory:
                     self._add_channel(factory(guild=self, data=c, state=self._state))  # type: ignore
 
@@ -1013,6 +1033,20 @@ class Guild(Hashable):
             return self._member_count
         except AttributeError:
             return len(self._members)
+
+    @property
+    def region(self) -> VoiceRegion:
+        """:class:`VoiceRegion`: The region the guild belongs on.
+
+        .. deprecated:: 2.5
+
+            VoiceRegion is no longer set on the guild, and is set on the individual voice channels instead.
+            See :attr:`VoiceChannel.rtc_region` and :attr:`StageChannel.rtc_region` instead.
+        """
+        utils.warn_deprecated(
+            "Guild.region is deprecated and will be removed in a future version.", stacklevel=2
+        )
+        return self._region
 
     @property
     def chunked(self) -> bool:
@@ -1573,6 +1607,11 @@ class Guild(Hashable):
             and ``public_updates_channel`` parameters are required.
         region: Union[:class:`str`, :class:`VoiceRegion`]
             The new region for the guild's voice communication.
+
+            .. deprecated:: 2.5
+
+                Use :func:`VoiceChannel.edit` or :func:`StageChannel.edit` with ``rtc_region`` instead.
+
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`
@@ -1705,7 +1744,9 @@ class Guild(Hashable):
             fields["owner_id"] = owner.id
 
         if region is not MISSING:
-            fields["region"] = str(region)
+            utils.warn_deprecated(
+                "Guild.region is deprecated and will be removed in a future version", stacklevel=2
+            )
 
         if verification_level is not MISSING:
             if not isinstance(verification_level, VerificationLevel):
@@ -1771,7 +1812,7 @@ class Guild(Hashable):
         data = await self._state.http.get_all_guild_channels(self.id)
 
         def convert(d):
-            factory, ch_type = _guild_channel_factory(d["type"])
+            factory, _ = _guild_channel_factory(d["type"])
             if factory is None:
                 raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(d))
 
@@ -1886,6 +1927,12 @@ class Guild(Hashable):
         """|coro|
 
         Creates a :class:`GuildScheduledEvent`.
+
+        If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
+
+        - ``channel_id`` should be not be set
+        - ``entity_metadata`` with a location field must be provided
+        - ``scheduled_end_time`` must be provided
 
         .. versionadded:: 2.3
 
@@ -2356,6 +2403,11 @@ class Guild(Hashable):
             The name of the template.
         description: :class:`str`
             The description of the template.
+
+        Returns
+        -------
+        :class:`Template`
+            The created template.
         """
         from .template import Template
 
@@ -2368,8 +2420,12 @@ class Guild(Hashable):
 
         return Template(state=self._state, data=data)
 
+    @utils.deprecated()
     async def create_integration(self, *, type: IntegrationType, id: int) -> None:
         """|coro|
+
+        .. deprecated:: 2.5
+            No longer supported, bots cannot use this endpoint anymore.
 
         Attaches an integration to the guild.
 
@@ -2812,8 +2868,8 @@ class Guild(Hashable):
         color: Union[Colour, int] = MISSING,
         colour: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
-        icon: bytes = MISSING,
-        emoji: str = MISSING,
+        icon: Optional[bytes] = MISSING,
+        emoji: Optional[str] = MISSING,
         mentionable: bool = MISSING,
         reason: Optional[str] = None,
     ) -> Role:
@@ -3178,7 +3234,8 @@ class Guild(Hashable):
 
     async def widget(self) -> Widget:
         """|coro|
-        Returns the widget of the guild.
+
+        Retrieves the widget of the guild.
 
         .. note::
 
@@ -3200,21 +3257,49 @@ class Guild(Hashable):
 
         return Widget(state=self._state, data=data)
 
+    async def widget_settings(self) -> WidgetSettings:
+        """|coro|
+
+        Retrieves the widget settings of the guild.
+
+        To edit the widget settings, you may also use :func:`~Guild.edit_widget`.
+
+        .. versionadded:: 2.5
+
+        Raises
+        ------
+        Forbidden
+            You do not have permission to view the widget settings.
+        HTTPException
+            Retrieving the widget settings failed.
+
+        Returns
+        -------
+        :class:`WidgetSettings`
+            The guild's widget settings.
+        """
+        data = await self._state.http.get_widget_settings(self.id)
+        return WidgetSettings(state=self._state, guild=self, data=data)
+
     async def edit_widget(
         self,
         *,
         enabled: bool = MISSING,
         channel: Optional[Snowflake] = MISSING,
         reason: Optional[str] = None,
-    ) -> None:
+    ) -> WidgetSettings:
         """|coro|
 
         Edits the widget of the guild.
 
         You must have :attr:`~Permissions.manage_guild` permission to
-        use this
+        use this.
 
         .. versionadded:: 2.0
+
+        .. versionchanged:: 2.5
+
+            Returns the new widget settings.
 
         Parameters
         ----------
@@ -3222,6 +3307,8 @@ class Guild(Hashable):
             Whether to enable the widget for the guild.
         channel: Optional[:class:`~disnake.abc.Snowflake`]
             The new widget channel. ``None`` removes the widget channel.
+            If set, an invite link for this channel will be generated,
+            which allows users to join the guild from the widget.
         reason: Optional[:class:`str`]
             The reason for editing the widget. Shows up on the audit log.
 
@@ -3233,6 +3320,11 @@ class Guild(Hashable):
             You do not have permission to edit the widget.
         HTTPException
             Editing the widget failed.
+
+        Returns
+        -------
+        :class:`WidgetSettings`
+            The new widget settings.
         """
         payload = {}
         if channel is not MISSING:
@@ -3240,7 +3332,25 @@ class Guild(Hashable):
         if enabled is not MISSING:
             payload["enabled"] = enabled
 
-        await self._state.http.edit_widget(self.id, payload=payload, reason=reason)
+        data = await self._state.http.edit_widget(self.id, payload=payload, reason=reason)
+        return WidgetSettings(state=self._state, guild=self, data=data)
+
+    def widget_image_url(self, style: WidgetStyle = WidgetStyle.shield) -> str:
+        """Returns an URL to the widget's .png image.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        style: :class:`WidgetStyle`
+            The widget style.
+
+        Returns
+        -------
+        :class:`str`
+            The widget image URL.
+        """
+        return self._state.http.widget_image_url(self.id, style=str(style))
 
     async def chunk(self, *, cache: bool = True) -> Optional[List[Member]]:
         """|coro|
@@ -3290,6 +3400,8 @@ class Guild(Hashable):
         the query given.
 
         This is a websocket operation and can be slow.
+
+        See also :func:`search_members`.
 
         .. versionadded:: 1.3
 
@@ -3349,6 +3461,59 @@ class Guild(Hashable):
         return await self._state.query_members(
             self, query=query, limit=limit, user_ids=user_ids, presences=presences, cache=cache
         )
+
+    async def search_members(
+        self,
+        query: str,
+        *,
+        limit: int = 1,
+        cache: bool = True,
+    ):
+        """|coro|
+
+        Retrieves members that belong to this guild whose username or nickname starts with
+        the query given.
+
+        Note that unlike :func:`query_members`, this is not a websocket operation, but an HTTP operation.
+
+        See also :func:`query_members`.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        -----------
+        query: :class:`str`
+            The string that the usernames or nicknames start with.
+        limit: :class:`int`
+            The maximum number of members to send back. This must be
+            a number between 1 and 1000.
+        cache: :class:`bool`
+            Whether to cache the members internally. This makes operations
+            such as :meth:`get_member` work for those that matched.
+
+        Raises
+        -------
+        ValueError
+            Invalid parameters were passed to the function
+
+        Returns
+        --------
+        List[:class:`Member`]
+            The list of members that have matched the query.
+        """
+        if query == "":
+            raise ValueError("Cannot pass empty query string.")
+        if limit < 1:
+            raise ValueError("limit must be at least 1")
+        limit = min(1000, limit)
+        members = await self._state.http.search_guild_members(self.id, query=query, limit=limit)
+        resp = []
+        for member in members:
+            member = Member(state=self._state, data=member, guild=self)
+            if cache and member.id not in self._members:
+                self._add_member(member)
+            resp.append(member)
+        return resp
 
     async def get_or_fetch_members(
         self,

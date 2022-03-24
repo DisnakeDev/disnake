@@ -28,7 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from .activity import BaseActivity, Spotify, create_activity
-from .enums import Status, try_enum
+from .enums import Status, WidgetStyle, try_enum
 from .invite import Invite
 from .user import BaseUser
 from .utils import MISSING, _get_as_snowflake, resolve_invite, snowflake_time
@@ -36,13 +36,19 @@ from .utils import MISSING, _get_as_snowflake, resolve_invite, snowflake_time
 if TYPE_CHECKING:
     import datetime
 
-    from .abc import Snowflake
+    from .abc import GuildChannel, Snowflake
+    from .guild import Guild
     from .state import ConnectionState
-    from .types.widget import Widget as WidgetPayload, WidgetMember as WidgetMemberPayload
+    from .types.widget import (
+        Widget as WidgetPayload,
+        WidgetMember as WidgetMemberPayload,
+        WidgetSettings as WidgetSettingsPayload,
+    )
 
 __all__ = (
     "WidgetChannel",
     "WidgetMember",
+    "WidgetSettings",
     "Widget",
 )
 
@@ -152,13 +158,9 @@ class WidgetMember(BaseUser):
     """
 
     __slots__ = (
-        "name",
         "status",
         "nick",
         "avatar",
-        "discriminator",
-        "id",
-        "bot",
         "activity",
         "deafened",
         "suppress",
@@ -204,6 +206,81 @@ class WidgetMember(BaseUser):
     def display_name(self) -> str:
         """:class:`str`: Returns the member's display name."""
         return self.nick or self.name
+
+
+class WidgetSettings:
+    """Represents a :class:`Guild`'s widget settings.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    guild: :class:`Guild`
+        The widget's guild.
+    enabled: :class:`bool`
+        Whether the widget is enabled.
+    channel_id: Optional[:class:`int`]
+        The widget channel ID. If set, an invite link for this channel will be generated,
+        which allows users to join the guild from the widget.
+    """
+
+    __slots__ = ("_state", "guild", "enabled", "channel_id")
+
+    def __init__(
+        self, *, state: ConnectionState, guild: Guild, data: WidgetSettingsPayload
+    ) -> None:
+        self._state: ConnectionState = state
+        self.guild: Guild = guild
+        self.enabled: bool = data["enabled"]
+        self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
+
+    def __repr__(self) -> str:
+        return f"<WidgetSettings enabled={self.enabled!r} channel_id={self.channel_id!r} guild={self.guild!r}>"
+
+    @property
+    def channel(self) -> Optional[GuildChannel]:
+        """Optional[:class:`abc.GuildChannel`]: The widget channel, if set."""
+        return self.guild.get_channel(self.channel_id) if self.channel_id is not None else None
+
+    async def edit(
+        self,
+        *,
+        enabled: bool = MISSING,
+        channel: Optional[Snowflake] = MISSING,
+        reason: Optional[str] = None,
+    ) -> WidgetSettings:
+        """|coro|
+
+        Edits the widget.
+
+        You must have :attr:`~Permissions.manage_guild` permission to
+        do this.
+
+        Parameters
+        ----------
+        enabled: :class:`bool`
+            Whether to enable the widget.
+        channel: Optional[:class:`~disnake.abc.Snowflake`]
+            The new widget channel. Pass ``None`` to remove the widget channel.
+            If set, an invite link for this channel will be generated,
+            which allows users to join the guild from the widget.
+        reason: Optional[:class:`str`]
+            The reason for editing the widget. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permission to edit the widget.
+        HTTPException
+            Editing the widget failed.
+
+        Returns
+        -------
+        :class:`WidgetSettings`
+            The new widget settings.
+        """
+
+        return await self.guild.edit_widget(enabled=enabled, channel=channel, reason=reason)
 
 
 class Widget:
@@ -358,3 +435,21 @@ class Widget:
             payload["channel_id"] = None if channel is None else channel.id
 
         await self._state.http.edit_widget(self.id, payload, reason=reason)
+
+    def image_url(self, style: WidgetStyle = WidgetStyle.shield) -> str:
+        """Returns an URL to the widget's .png image.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        style: :class:`WidgetStyle`
+            The widget style.
+
+        Returns
+        -------
+        :class:`str`
+            The widget image URL.
+
+        """
+        return self._state.http.widget_image_url(self.id, style=str(style))

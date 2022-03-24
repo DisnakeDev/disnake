@@ -154,9 +154,9 @@ class ApplicationCommandInteraction(Interaction):
 
 
 class GuildCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation.
+    """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
-    No runtime behavior is changed but annotations are modified
+    This prevents the command from being invoked in DMs, and annotations are modified
     to seem like the interaction can only ever be invoked in guilds.
     """
 
@@ -166,7 +166,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation.
+    """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a user command.
@@ -176,7 +176,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation.
+    """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a message command.
@@ -404,7 +404,7 @@ class ApplicationCommandInteractionDataResolved:
             self.roles[int(str_id)] = Role(guild=guild, state=state, data=role)  # type: ignore
 
         for str_id, channel in channels.items():
-            factory, ch_type = _threaded_channel_factory(channel["type"])
+            factory, _ = _threaded_channel_factory(channel["type"])
             if factory:
                 channel["position"] = 0  # type: ignore
                 self.channels[int(str_id)] = (  # type: ignore

@@ -1,7 +1,6 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2021 Rapptz
 Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,36 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+from disnake import DiscordWarning
 
-from typing import Optional, TypedDict
-
-from .snowflake import SnowflakeList
-from .user import User
+__all__ = ("MessageContentPrefixWarning",)
 
 
-class _OptionalMember(TypedDict, total=False):
-    avatar: Optional[str]
-    nick: Optional[str]
-    premium_since: str
-    pending: bool
-    permissions: str
-    communication_disabled_until: Optional[str]
+class MessageContentPrefixWarning(DiscordWarning):
+    """
+    Warning for invalid prefixes without message content.
+    """
 
-
-class BaseMember(_OptionalMember):
-    roles: SnowflakeList
-    joined_at: str
-    deaf: bool
-    mute: bool
-
-
-class Member(BaseMember, total=False):
-    user: User
-
-
-class MemberWithUser(BaseMember):
-    user: User
-
-
-class UserWithMember(User, total=False):
-    member: BaseMember
+    pass

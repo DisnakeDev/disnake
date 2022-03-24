@@ -33,11 +33,13 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Generic,
     List,
     Literal,
     NamedTuple,
     Optional,
     Tuple,
+    TypeVar,
     Union,
     overload,
 )
@@ -621,11 +623,14 @@ class _FriendlyHttpAttributeErrorHelper:
         raise AttributeError("PartialWebhookState does not support http methods.")
 
 
-class _WebhookState:
+WebhookT = TypeVar("WebhookT", bound="BaseWebhook")
+
+
+class _WebhookState(Generic[WebhookT]):
     __slots__ = ("_parent", "_webhook")
 
-    def __init__(self, webhook: Any, parent: Optional[Union[ConnectionState, _WebhookState]]):
-        self._webhook: Any = webhook
+    def __init__(self, webhook: WebhookT, parent: Optional[Union[ConnectionState, _WebhookState]]):
+        self._webhook: WebhookT = webhook
 
         self._parent: Optional[ConnectionState]
         if isinstance(parent, _WebhookState):
@@ -676,7 +681,7 @@ class WebhookMessage(Message):
     .. versionadded:: 1.6
     """
 
-    _state: _WebhookState
+    _state: _WebhookState[Webhook]
 
     async def edit(
         self,

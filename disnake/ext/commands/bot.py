@@ -23,20 +23,9 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-from __future__ import annotations
+# from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, Set, TypeVar, Union
 
 import disnake
 
@@ -49,24 +38,15 @@ if TYPE_CHECKING:
     import asyncio
 
     import aiohttp
-    from typing_extensions import ParamSpec
 
     from disnake.activity import BaseActivity
     from disnake.enums import Status
     from disnake.flags import Intents, MemberCacheFlags
-    from disnake.interactions import ApplicationCommandInteraction
     from disnake.mentions import AllowedMentions
 
     from ._types import CoroFunc
     from .help import HelpCommand
 
-    ApplicationCommandInteractionT = TypeVar(
-        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
-    )
-    AnyMessageCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
-    AnyUserCommandInter = Any  # Union[ApplicationCommandInteraction, UserCommandInteraction]
-
-    P = ParamSpec("P")
 
 __all__ = (
     "when_mentioned",

@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
 
 from .channel import ChannelType
 from .components import ActionRow, Component, ComponentType
@@ -232,6 +232,14 @@ class ApplicationCommandInteraction(Interaction):
 class MessageInteraction(Interaction):
     data: ComponentInteractionData
     message: Message
+
+
+class _ModalInteractionOptional(TypedDict, total=False):
+    message: Message
+
+
+class ModalInteraction(_ModalInteractionOptional, Interaction):
+    data: ModalInteractionData
 
 
 class InteractionApplicationCommandCallbackData(TypedDict, total=False):
