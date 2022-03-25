@@ -43,7 +43,6 @@ include = [
 
 strictParameterNoneValue = false
 reportInvalidStringEscapeSequence = false
-reportPropertyTypeMismatch = true
 reportDuplicateImport = true
 reportUntypedFunctionDecorator = true
 reportUntypedClassDecorator = true

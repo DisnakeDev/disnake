@@ -248,7 +248,7 @@ class Embed:
     def copy(self: E) -> E:
         """Returns a shallow copy of the embed."""
         embed = type(self).from_dict(self.to_dict())
-        embed.colour = getattr(self, "_colour", None)
+        embed.colour = getattr(self, "_colour", None)  # type: ignore
         embed._files = self._files  # TODO: Maybe copy these too?
         return embed
 
@@ -296,7 +296,7 @@ class Embed:
         return getattr(self, "_colour", type(self)._default_colour)
 
     @colour.setter
-    def colour(self, value: Optional[Union[int, Colour]]):  # type: ignore
+    def colour(self, value: Optional[Union[int, Colour]]):
         if value is None or isinstance(value, Colour):
             self._colour = value
         elif isinstance(value, int):
