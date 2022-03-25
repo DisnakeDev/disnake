@@ -162,8 +162,8 @@ class Embed:
         description: Optional[Any] = None,
         url: Optional[Any] = None,
         timestamp: Optional[datetime.datetime] = None,
-        colour: Optional[Union[int, Colour]] = None,
-        color: Optional[Union[int, Colour]] = None,
+        colour: Optional[Union[int, Colour]] = MISSING,
+        color: Optional[Union[int, Colour]] = MISSING,
     ):
         self.title: Optional[str] = str(title) if title is not None else title
         self.type = type
@@ -175,9 +175,13 @@ class Embed:
         if timestamp:
             self.timestamp = timestamp
 
-        if colour is not None:
+        # possible values:
+        # - MISSING: embed color will be _default_color
+        # - None: embed color will not be set
+        # - Color: embed color will be set to specified color
+        if colour is not MISSING:
             color = colour
-        if color is not None:
+        if color is not MISSING:
             self.colour = color
 
         self._files: List[File] = []
@@ -244,7 +248,10 @@ class Embed:
     def copy(self) -> Self:
         """Returns a shallow copy of the embed."""
         embed = type(self).from_dict(self.to_dict())
-        embed.colour = getattr(self, "_colour", None)  # type: ignore
+        if hasattr(self, "_colour"):
+            embed._colour = self._colour
+        else:
+            del embed._colour
         embed._files = self._files  # TODO: Maybe copy these too?
         return embed
 
@@ -275,7 +282,8 @@ class Embed:
                 self.title,
                 self.url,
                 self.description,
-                hasattr(self, "_colour") and self.colour,
+                # checking `is not None` as `0` is a valid color value
+                getattr(self, "_colour", None) is not None,
                 self.fields,
                 self.timestamp,
                 self.author,
