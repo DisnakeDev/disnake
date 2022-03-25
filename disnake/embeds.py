@@ -26,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Protocol, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Mapping, Optional, Protocol, Union
 
 from . import utils
 from .colour import Colour
@@ -152,7 +152,7 @@ class Embed:
         "_files",
     )
 
-    _default_colour: Optional[Colour] = None
+    _default_colour: ClassVar[Optional[Colour]] = None
 
     def __init__(
         self,
