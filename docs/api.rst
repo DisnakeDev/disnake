@@ -3751,7 +3751,7 @@ AuditLogDiff
 
     .. attribute:: image
 
-        The image of a guild scheduled event being changed.
+        The cover image of a guild scheduled event being changed.
 
         :type: :class:`Asset`
 
