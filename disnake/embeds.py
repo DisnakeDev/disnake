@@ -59,11 +59,13 @@ if TYPE_CHECKING:
     class _EmbedFooterProxy(Protocol):
         text: Optional[str]
         icon_url: Optional[str]
+        proxy_icon_url: Optional[str]
 
     class _EmbedFieldProxy(Protocol):
         name: Optional[str]
         value: Optional[str]
-        inline: bool
+        # TODO: make this non-optional again by setting a default in from_dict?
+        inline: Optional[bool]
 
     class _EmbedMediaProxy(Protocol):
         url: Optional[str]
@@ -73,6 +75,7 @@ if TYPE_CHECKING:
 
     class _EmbedVideoProxy(Protocol):
         url: Optional[str]
+        proxy_url: Optional[str]
         height: Optional[int]
         width: Optional[int]
 
@@ -333,7 +336,11 @@ class Embed:
     def footer(self) -> _EmbedFooterProxy:
         """Returns an ``EmbedProxy`` denoting the footer contents.
 
-        See :meth:`set_footer` for possible values you can access.
+        Possible attributes you can access are:
+
+        - ``text``
+        - ``icon_url``
+        - ``proxy_icon_url``
 
         If the attribute has no value then :attr:`Empty` is returned.
         """
@@ -487,6 +494,7 @@ class Embed:
         Possible attributes include:
 
         - ``url`` for the video URL.
+        - ``proxy_url`` for the proxied video URL.
         - ``height`` for the video height.
         - ``width`` for the video width.
 
