@@ -157,32 +157,28 @@ class Embed:
     def __init__(
         self,
         *,
-        colour: Optional[Union[int, Colour]] = None,
-        color: Optional[Union[int, Colour]] = None,
         title: Optional[Any] = None,
         type: EmbedType = "rich",
-        url: Optional[Any] = None,
         description: Optional[Any] = None,
+        url: Optional[Any] = None,
         timestamp: Optional[datetime.datetime] = None,
+        colour: Optional[Union[int, Colour]] = None,
+        color: Optional[Union[int, Colour]] = None,
     ):
-        if colour or color:
-            self.colour = colour if colour is not None else color
-        self.title = title
+        self.title: Optional[str] = str(title) if title is not None else title
         self.type = type
-        self.url = url
-        self.description = description
-
-        if self.title is not None:
-            self.title = str(self.title)
-
-        if self.description is not None:
-            self.description = str(self.description)
-
-        if self.url is not None:
-            self.url = str(self.url)
+        self.description: Optional[str] = (
+            str(description) if description is not None else description
+        )
+        self.url: Optional[str] = str(url) if url is not None else url
 
         if timestamp:
             self.timestamp = timestamp
+
+        if colour is not None:
+            color = colour
+        if color is not None:
+            self.colour = color
 
         self._files: List[File] = []
 
