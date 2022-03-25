@@ -115,27 +115,24 @@ class Embed:
 
     Attributes
     ----------
-    title: :class:`str`
+    title: Optional[:class:`str`]
         The title of the embed.
-        This can be set during initialisation.
     type: :class:`str`
         The type of embed. Usually "rich".
-        This can be set during initialisation.
         Possible strings for embed types can be found on discord's
         `api docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-types>`_
-    description: :class:`str`
+    description: Optional[:class:`str`]
         The description of the embed.
-        This can be set during initialisation.
-    url: :class:`str`
+    url: Optional[:class:`str`]
         The URL of the embed.
-        This can be set during initialisation.
-    timestamp: :class:`datetime.datetime`
+    timestamp: Optional[:class:`datetime.datetime`]
         The timestamp of the embed content. This is an aware datetime.
         If a naive datetime is passed, it is converted to an aware
         datetime with the local timezone.
-    colour: Union[:class:`Colour`, :class:`int`]
+    colour: Optional[:class:`Colour`]
         The colour code of the embed. Aliased to ``color`` as well.
-        This can be set during initialisation.
+        In addition to :class:`Colour`, :class:`int` can also be assigned to it,
+        in which case the value will be converted to a :class:`Colour` object.
     """
 
     __slots__ = (
@@ -354,9 +351,9 @@ class Embed:
 
         Parameters
         ----------
-        text: :class:`str`
+        text: Optional[:class:`str`]
             The footer text.
-        icon_url: :class:`str`
+        icon_url: Optional[:class:`str`]
             The URL of the footer icon. Only HTTP(S) is supported.
         """
         self._footer = {}
@@ -409,7 +406,7 @@ class Embed:
 
         Parameters
         ----------
-        url: :class:`str`
+        url: Optional[:class:`str`]
             The source URL for the image. Only HTTP(S) is supported.
         file: :class:`File`
             The file to use as the image.
@@ -461,7 +458,7 @@ class Embed:
 
         Parameters
         ----------
-        url: :class:`str`
+        url: Optional[:class:`str`]
             The source URL for the thumbnail. Only HTTP(S) is supported.
         file: :class:`File`
             The file to use as the image.
@@ -538,9 +535,9 @@ class Embed:
         ----------
         name: :class:`str`
             The name of the author.
-        url: :class:`str`
+        url: Optional[:class:`str`]
             The URL for the author.
-        icon_url: :class:`str`
+        icon_url: Optional[:class:`str`]
             The URL of the author icon. Only HTTP(S) is supported.
         """
         self._author = {
@@ -594,6 +591,7 @@ class Embed:
             The value of the field.
         inline: :class:`bool`
             Whether the field should be displayed inline.
+            Defaults to ``True``.
         """
         field = {
             "inline": inline,
@@ -626,6 +624,7 @@ class Embed:
             The value of the field.
         inline: :class:`bool`
             Whether the field should be displayed inline.
+            Defaults to ``True``.
         """
         field = {
             "inline": inline,
@@ -686,6 +685,7 @@ class Embed:
             The value of the field.
         inline: :class:`bool`
             Whether the field should be displayed inline.
+            Defaults to ``True``.
 
         Raises
         ------
@@ -751,9 +751,8 @@ class Embed:
 
         Returns
         -------
-        :class:`Colour`
+        Optional[:class:`Colour`]
             The colour that was set.
-
         """
         if value is None or isinstance(value, Colour):
             cls._default_colour = value
@@ -776,7 +775,7 @@ class Embed:
 
         Returns
         -------
-        :class:`Colour`
+        Optional[:class:`Colour`]
             The default colour.
 
         """
