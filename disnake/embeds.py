@@ -166,12 +166,10 @@ class Embed:
         colour: Optional[Union[int, Colour]] = MISSING,
         color: Optional[Union[int, Colour]] = MISSING,
     ):
-        self.title: Optional[str] = str(title) if title is not None else title
+        self.title: Optional[str] = str(title) if title is not None else None
         self.type: EmbedType = type
-        self.description: Optional[str] = (
-            str(description) if description is not None else description
-        )
-        self.url: Optional[str] = str(url) if url is not None else url
+        self.description: Optional[str] = str(description) if description is not None else None
+        self.url: Optional[str] = str(url) if url is not None else None
 
         self.timestamp = timestamp
 
