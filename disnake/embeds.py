@@ -713,15 +713,21 @@ class Embed:
         """Converts this embed object into a dict."""
 
         # add in the raw data into the dict
-        result: EmbedData = {
-            key[1:]: getattr(self, key)
-            for key in self.__slots__
-            if (
-                key[0] == "_"
-                and key not in ("_colour", "_timestamp", "_files")
-                and getattr(self, key) is not None
-            )
-        }  # type: ignore
+        result: EmbedData = {}
+        if self._footer is not None:
+            result["footer"] = self._footer
+        if self._image is not None:
+            result["image"] = self._image
+        if self._thumbnail is not None:
+            result["thumbnail"] = self._thumbnail
+        if self._video is not None:
+            result["video"] = self._video
+        if self._provider is not None:
+            result["provider"] = self._provider
+        if self._author is not None:
+            result["author"] = self._author
+        if self._fields is not None:
+            result["fields"] = self._fields
 
         # deal with basic convenience wrappers
         if isinstance(self.colour, Colour):
