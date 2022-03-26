@@ -213,9 +213,36 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector("#dark-mode-switch .knob").classList.add(color_scheme);
 });
 
-document.addEventListener('keydown', (event) => {
-  if (event.code == "Escape" && activeModal) {
-    activeModal.close();
+
+function focusSearch() {
+  $('input[name=q]').first().focus();
+}
+
+
+$(document).keydown((event) => {
+  if (event.altKey || event.metaKey)
+    return;
+
+  if (!event.ctrlKey) {
+    const activeElementType = document.activeElement.tagName;
+    if (["TEXTAREA", "INPUT", "SELECT", "BUTTON"].includes(activeElementType))
+      return;
+
+    if (!event.shiftKey && event.key === "Escape" && activeModal) {
+      activeModal.close();
+      return false;
+    }
+
+    // not checking `shiftKey` for `/` since some keyboards need it
+    if (event.key === "/" || (!event.shiftKey && event.key === "s")) {
+      focusSearch();
+      return false;
+    }
+  }
+
+  if (!event.shiftKey && event.ctrlKey && event.key == "k") {
+    focusSearch();
+    return false;
   }
 });
 
