@@ -251,10 +251,8 @@ class Embed:
     def copy(self) -> Self:
         """Returns a shallow copy of the embed."""
         embed = type(self).from_dict(self.to_dict())
-        if hasattr(self, "_colour"):
-            embed._colour = self._colour
-        else:
-            del embed._colour
+        if not hasattr(self, "_colour"):
+            del embed.colour
         embed._files = self._files  # TODO: Maybe copy these too?
         return embed
 
