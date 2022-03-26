@@ -223,11 +223,10 @@ $(document).keydown((event) => {
   if (event.altKey || event.metaKey)
     return;
 
-  if (!event.ctrlKey) {
-    const activeElementType = document.activeElement.tagName;
-    if (["TEXTAREA", "INPUT", "SELECT", "BUTTON"].includes(activeElementType))
-      return;
+  if (["TEXTAREA", "INPUT", "SELECT", "BUTTON"].includes(document.activeElement.tagName))
+    return;
 
+  if (!event.ctrlKey) {
     if (!event.shiftKey && event.key === "Escape" && activeModal) {
       activeModal.close();
       return false;
