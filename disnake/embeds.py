@@ -26,7 +26,18 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Mapping, Optional, Protocol, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Protocol,
+    Union,
+    cast,
+)
 
 from . import utils
 from .colour import Colour
@@ -337,7 +348,7 @@ class Embed:
 
         If an attribute is not set, it will be ``None``.
         """
-        return EmbedProxy(self._footer)  # type: ignore
+        return cast("_EmbedFooterProxy", EmbedProxy(self._footer))
 
     def set_footer(self, *, text: Optional[Any] = None, icon_url: Optional[Any] = None) -> Self:
         """Sets the footer for the embed content.
@@ -385,7 +396,7 @@ class Embed:
 
         If an attribute is not set, it will be ``None``.
         """
-        return EmbedProxy(self._image)  # type: ignore
+        return cast("_EmbedMediaProxy", EmbedProxy(self._image))
 
     def set_image(self, url: Optional[Any] = MISSING, *, file: File = MISSING) -> Self:
         """Sets the image for the embed content.
@@ -434,7 +445,7 @@ class Embed:
 
         If an attribute is not set, it will be ``None``.
         """
-        return EmbedProxy(self._thumbnail)  # type: ignore
+        return cast("_EmbedMediaProxy", EmbedProxy(self._thumbnail))
 
     def set_thumbnail(self, url: Optional[Any] = MISSING, *, file: File = MISSING) -> Self:
         """Sets the thumbnail for the embed content.
@@ -483,7 +494,7 @@ class Embed:
 
         If an attribute is not set, it will be ``None``.
         """
-        return EmbedProxy(self._video)  # type: ignore
+        return cast("_EmbedVideoProxy", EmbedProxy(self._video))
 
     @property
     def provider(self) -> _EmbedProviderProxy:
@@ -493,7 +504,7 @@ class Embed:
 
         If an attribute is not set, it will be ``None``.
         """
-        return EmbedProxy(self._provider)  # type: ignore
+        return cast("_EmbedProviderProxy", EmbedProxy(self._provider))
 
     @property
     def author(self) -> _EmbedAuthorProxy:
@@ -503,7 +514,7 @@ class Embed:
 
         If an attribute is not set, it will be ``None``.
         """
-        return EmbedProxy(self._author)  # type: ignore
+        return cast("_EmbedAuthorProxy", EmbedProxy(self._author))
 
     def set_author(
         self,
@@ -557,7 +568,7 @@ class Embed:
 
         If an attribute is not set, it will be ``None``.
         """
-        return [EmbedProxy(d) for d in (self._fields or [])]  # type: ignore
+        return cast("List[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
 
     def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
         """Adds a field to the embed object.
