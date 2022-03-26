@@ -30,7 +30,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
     List,
     Mapping,
     Optional,
@@ -49,7 +48,7 @@ __all__ = ("Embed",)
 
 
 class EmbedProxy:
-    def __init__(self, layer: Optional[Dict[str, Any]]):
+    def __init__(self, layer: Optional[Mapping[str, Any]]):
         if layer is not None:
             self.__dict__.update(layer)
 
@@ -67,7 +66,17 @@ class EmbedProxy:
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from disnake.types.embed import Embed as EmbedData, EmbedType
+    from disnake.types.embed import (
+        Embed as EmbedData,
+        EmbedAuthor as EmbedAuthorPayload,
+        EmbedField as EmbedFieldPayload,
+        EmbedFooter as EmbedFooterPayload,
+        EmbedImage as EmbedImagePayload,
+        EmbedProvider as EmbedProviderPayload,
+        EmbedThumbnail as EmbedThumbnailPayload,
+        EmbedType,
+        EmbedVideo as EmbedVideoPayload,
+    )
 
     class _EmbedFooterProxy(Sized, Protocol):
         text: Optional[str]
@@ -194,18 +203,18 @@ class Embed:
         if color is not MISSING:
             self.colour = color
 
-        self._thumbnail: Optional[Dict[str, Any]] = None
-        self._video: Optional[Dict[str, Any]] = None
-        self._provider: Optional[Dict[str, Any]] = None
-        self._author: Optional[Dict[str, Any]] = None
-        self._image: Optional[Dict[str, Any]] = None
-        self._footer: Optional[Dict[str, Any]] = None
-        self._fields: Optional[List[Dict[str, Any]]] = None
+        self._thumbnail: Optional[EmbedThumbnailPayload] = None
+        self._video: Optional[EmbedVideoPayload] = None
+        self._provider: Optional[EmbedProviderPayload] = None
+        self._author: Optional[EmbedAuthorPayload] = None
+        self._image: Optional[EmbedImagePayload] = None
+        self._footer: Optional[EmbedFooterPayload] = None
+        self._fields: Optional[List[EmbedFieldPayload]] = None
 
         self._files: List[File] = []
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> Self:
+    def from_dict(cls, data: EmbedData) -> Self:
         """Converts a :class:`dict` to a :class:`Embed` provided it is in the
         format that Discord expects it to be in.
 
@@ -226,7 +235,7 @@ class Embed:
         # fill in the basic fields
 
         self.title = data.get("title", None)
-        self.type = data.get("type", None)
+        self.type = data.get("type", "rich")
         self.description = data.get("description", None)
         self.url = data.get("url", None)
 
@@ -246,7 +255,8 @@ class Embed:
         color_value: Optional[int] = data.get("color", None)
         self.colour = color_value
 
-        self.timestamp = utils.parse_time(data.get("timestamp", None))
+        ts_value = data.get("timestamp", None)
+        self.timestamp = utils.parse_time(ts_value)
 
         self._thumbnail = data.get("thumbnail", None)
         self._video = data.get("video", None)
@@ -587,7 +597,7 @@ class Embed:
             Whether the field should be displayed inline.
             Defaults to ``True``.
         """
-        field = {
+        field: EmbedFieldPayload = {
             "inline": inline,
             "name": str(name),
             "value": str(value),
@@ -620,7 +630,7 @@ class Embed:
             Whether the field should be displayed inline.
             Defaults to ``True``.
         """
-        field = {
+        field: EmbedFieldPayload = {
             "inline": inline,
             "name": str(name),
             "value": str(value),
@@ -687,11 +697,12 @@ class Embed:
         if not self._fields or not (0 <= index < len(self._fields)):
             raise IndexError("field index out of range")
 
-        self._fields[index] = {
+        field: EmbedFieldPayload = {
             "inline": inline,
             "name": str(name),
             "value": str(value),
         }
+        self._fields[index] = field
         return self
 
     def to_dict(self) -> EmbedData:
