@@ -361,7 +361,7 @@ class Embed:
         """
         return cast("_EmbedFooterProxy", EmbedProxy(self._footer))
 
-    def set_footer(self, *, text: Optional[Any] = None, icon_url: Optional[Any] = None) -> Self:
+    def set_footer(self, *, text: Any, icon_url: Optional[Any] = None) -> Self:
         """Sets the footer for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -369,14 +369,18 @@ class Embed:
 
         Parameters
         ----------
-        text: Optional[:class:`str`]
+        text: :class:`str`
             The footer text.
+
+            .. versionchanged:: 2.5
+                No longer optional, must be set to a valid string.
+
         icon_url: Optional[:class:`str`]
             The URL of the footer icon. Only HTTP(S) is supported.
         """
-        self._footer = {}
-        if text is not None:
-            self._footer["text"] = str(text)
+        self._footer = {
+            "text": str(text),
+        }
 
         if icon_url is not None:
             self._footer["icon_url"] = str(icon_url)
