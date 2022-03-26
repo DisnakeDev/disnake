@@ -262,11 +262,11 @@ class Embed:
             for field in self._fields:
                 total += len(field["name"]) + len(field["value"])
 
-        if self._footer:
-            total += len(self._footer["text"])
+        if self._footer and (footer_text := self._footer.get("text")):
+            total += len(footer_text)
 
-        if self._author:
-            total += len(self._author["name"])
+        if self._author and (author_name := self._author.get("name")):
+            total += len(author_name)
 
         return total
 
