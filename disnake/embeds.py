@@ -35,6 +35,7 @@ from typing import (
     Mapping,
     Optional,
     Protocol,
+    Sized,
     Union,
     cast,
 )
@@ -68,34 +69,34 @@ if TYPE_CHECKING:
 
     from disnake.types.embed import Embed as EmbedData, EmbedType
 
-    class _EmbedFooterProxy(Protocol):
+    class _EmbedFooterProxy(Sized, Protocol):
         text: Optional[str]
         icon_url: Optional[str]
         proxy_icon_url: Optional[str]
 
-    class _EmbedFieldProxy(Protocol):
+    class _EmbedFieldProxy(Sized, Protocol):
         name: Optional[str]
         value: Optional[str]
         # TODO: make this non-optional again by setting a default in from_dict?
         inline: Optional[bool]
 
-    class _EmbedMediaProxy(Protocol):
+    class _EmbedMediaProxy(Sized, Protocol):
         url: Optional[str]
         proxy_url: Optional[str]
         height: Optional[int]
         width: Optional[int]
 
-    class _EmbedVideoProxy(Protocol):
+    class _EmbedVideoProxy(Sized, Protocol):
         url: Optional[str]
         proxy_url: Optional[str]
         height: Optional[int]
         width: Optional[int]
 
-    class _EmbedProviderProxy(Protocol):
+    class _EmbedProviderProxy(Sized, Protocol):
         name: Optional[str]
         url: Optional[str]
 
-    class _EmbedAuthorProxy(Protocol):
+    class _EmbedAuthorProxy(Sized, Protocol):
         name: Optional[str]
         url: Optional[str]
         icon_url: Optional[str]
