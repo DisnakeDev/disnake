@@ -335,7 +335,7 @@ class Embed:
         - ``icon_url``
         - ``proxy_icon_url``
 
-        If the attribute has no value then :attr:`Empty` is returned.
+        If an attribute is not set, it will be ``None``.
         """
         return EmbedProxy(self._footer)  # type: ignore
 
@@ -383,7 +383,7 @@ class Embed:
         - ``width``
         - ``height``
 
-        If the attribute has no value then :attr:`Empty` is returned.
+        If an attribute is not set, it will be ``None``.
         """
         return EmbedProxy(self._image)  # type: ignore
 
@@ -432,7 +432,7 @@ class Embed:
         - ``width``
         - ``height``
 
-        If the attribute has no value then :attr:`Empty` is returned.
+        If an attribute is not set, it will be ``None``.
         """
         return EmbedProxy(self._thumbnail)  # type: ignore
 
@@ -481,7 +481,7 @@ class Embed:
         - ``height`` for the video height.
         - ``width`` for the video width.
 
-        If the attribute has no value then :attr:`Empty` is returned.
+        If an attribute is not set, it will be ``None``.
         """
         return EmbedProxy(self._video)  # type: ignore
 
@@ -491,7 +491,7 @@ class Embed:
 
         The only attributes that might be accessed are ``name`` and ``url``.
 
-        If the attribute has no value then :attr:`Empty` is returned.
+        If an attribute is not set, it will be ``None``.
         """
         return EmbedProxy(self._provider)  # type: ignore
 
@@ -501,7 +501,7 @@ class Embed:
 
         See :meth:`set_author` for possible values you can access.
 
-        If the attribute has no value then :attr:`Empty` is returned.
+        If an attribute is not set, it will be ``None``.
         """
         return EmbedProxy(self._author)  # type: ignore
 
@@ -555,7 +555,7 @@ class Embed:
 
         See :meth:`add_field` for possible values you can access.
 
-        If the attribute has no value then :attr:`Empty` is returned.
+        If an attribute is not set, it will be ``None``.
         """
         return [EmbedProxy(d) for d in (self._fields or [])]  # type: ignore
 
