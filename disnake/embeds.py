@@ -37,8 +37,9 @@ __all__ = ("Embed",)
 
 
 class EmbedProxy:
-    def __init__(self, layer: Dict[str, Any]):
-        self.__dict__.update(layer)
+    def __init__(self, layer: Optional[Dict[str, Any]]):
+        if layer is not None:
+            self.__dict__.update(layer)
 
     def __len__(self) -> int:
         return len(self.__dict__)
@@ -166,14 +167,13 @@ class Embed:
         color: Optional[Union[int, Colour]] = MISSING,
     ):
         self.title: Optional[str] = str(title) if title is not None else title
-        self.type = type
+        self.type: EmbedType = type
         self.description: Optional[str] = (
             str(description) if description is not None else description
         )
         self.url: Optional[str] = str(url) if url is not None else url
 
-        if timestamp:
-            self.timestamp = timestamp
+        self.timestamp = timestamp
 
         # possible values:
         # - MISSING: embed color will be _default_color
@@ -183,6 +183,14 @@ class Embed:
             color = colour
         if color is not MISSING:
             self.colour = color
+
+        self._thumbnail: Optional[Dict[str, Any]] = None
+        self._video: Optional[Dict[str, Any]] = None
+        self._provider: Optional[Dict[str, Any]] = None
+        self._author: Optional[Dict[str, Any]] = None
+        self._image: Optional[Dict[str, Any]] = None
+        self._footer: Optional[Dict[str, Any]] = None
+        self._fields: Optional[List[Dict[str, Any]]] = None
 
         self._files: List[File] = []
 
@@ -225,23 +233,18 @@ class Embed:
 
         # try to fill in the more rich fields
 
-        try:
-            self._colour = Colour(value=data["color"])
-        except KeyError:
-            self._colour = None
+        color_value: Optional[int] = data.get("color", None)
+        self.colour = color_value
 
-        try:
-            self._timestamp = utils.parse_time(data["timestamp"])
-        except KeyError:
-            pass
+        self.timestamp = utils.parse_time(data.get("timestamp", None))
 
-        for attr in ("thumbnail", "video", "provider", "author", "fields", "image", "footer"):
-            try:
-                value = data[attr]
-            except KeyError:
-                continue
-            else:
-                setattr(self, "_" + attr, value)
+        self._thumbnail = data.get("thumbnail", None)
+        self._video = data.get("video", None)
+        self._provider = data.get("provider", None)
+        self._author = data.get("author", None)
+        self._image = data.get("image", None)
+        self._footer = data.get("footer", None)
+        self._fields = data.get("fields", None)
 
         return self
 
@@ -257,22 +260,15 @@ class Embed:
 
     def __len__(self) -> int:
         total = len(self.title or "") + len(self.description or "")
-        for field in getattr(self, "_fields", []):
-            total += len(field["name"]) + len(field["value"])
+        if self._fields:
+            for field in self._fields:
+                total += len(field["name"]) + len(field["value"])
 
-        try:
-            footer_text = self._footer["text"]
-        except (AttributeError, KeyError):
-            pass
-        else:
-            total += len(footer_text)
+        if self._footer:
+            total += len(self._footer["text"])
 
-        try:
-            author = self._author
-        except AttributeError:
-            pass
-        else:
-            total += len(author["name"])
+        if self._author:
+            total += len(self._author["name"])
 
         return total
 
@@ -284,14 +280,14 @@ class Embed:
                 self.description,
                 # checking `is not None` as `0` is a valid color value
                 getattr(self, "_colour", None) is not None,
-                self.fields,
-                self.timestamp,
-                self.author,
-                self.thumbnail,
-                self.footer,
-                self.image,
-                self.provider,
-                self.video,
+                self._fields,
+                self._timestamp,
+                self._author,
+                self._thumbnail,
+                self._footer,
+                self._image,
+                self._provider,
+                self._video,
             )
         )
 
@@ -318,7 +314,7 @@ class Embed:
 
     @property
     def timestamp(self) -> Optional[datetime.datetime]:
-        return getattr(self, "_timestamp", None)
+        return self._timestamp
 
     @timestamp.setter
     def timestamp(self, value: Optional[datetime.datetime]):
@@ -345,7 +341,7 @@ class Embed:
 
         If the attribute has no value then :attr:`Empty` is returned.
         """
-        return EmbedProxy(getattr(self, "_footer", {}))  # type: ignore
+        return EmbedProxy(self._footer)  # type: ignore
 
     def set_footer(self, *, text: Optional[Any] = None, icon_url: Optional[Any] = None) -> Self:
         """Sets the footer for the embed content.
@@ -377,11 +373,7 @@ class Embed:
 
         .. versionadded:: 2.0
         """
-        try:
-            del self._footer
-        except AttributeError:
-            pass
-
+        self._footer = None
         return self
 
     @property
@@ -397,7 +389,7 @@ class Embed:
 
         If the attribute has no value then :attr:`Empty` is returned.
         """
-        return EmbedProxy(getattr(self, "_image", {}))  # type: ignore
+        return EmbedProxy(self._image)  # type: ignore
 
     def set_image(self, url: Optional[Any] = MISSING, *, file: File = MISSING) -> Self:
         """Sets the image for the embed content.
@@ -425,10 +417,7 @@ class Embed:
             self._image = {"url": f"attachment://{file.filename}"}
             self._files.append(file)
         elif url is None:
-            try:
-                del self._image
-            except AttributeError:
-                pass
+            self._image = None
         elif url is MISSING:
             raise TypeError("Neither a url nor a file have been provided")
         else:
@@ -449,7 +438,7 @@ class Embed:
 
         If the attribute has no value then :attr:`Empty` is returned.
         """
-        return EmbedProxy(getattr(self, "_thumbnail", {}))  # type: ignore
+        return EmbedProxy(self._thumbnail)  # type: ignore
 
     def set_thumbnail(self, url: Optional[Any] = MISSING, *, file: File = MISSING) -> Self:
         """Sets the thumbnail for the embed content.
@@ -477,10 +466,7 @@ class Embed:
             self._thumbnail = {"url": f"attachment://{file.filename}"}
             self._files.append(file)
         elif url is None:
-            try:
-                del self._thumbnail
-            except AttributeError:
-                pass
+            self._thumbnail = None
         elif url is MISSING:
             raise TypeError("Neither a url nor a file have been provided")
         else:
@@ -501,7 +487,7 @@ class Embed:
 
         If the attribute has no value then :attr:`Empty` is returned.
         """
-        return EmbedProxy(getattr(self, "_video", {}))  # type: ignore
+        return EmbedProxy(self._video)  # type: ignore
 
     @property
     def provider(self) -> _EmbedProviderProxy:
@@ -511,7 +497,7 @@ class Embed:
 
         If the attribute has no value then :attr:`Empty` is returned.
         """
-        return EmbedProxy(getattr(self, "_provider", {}))  # type: ignore
+        return EmbedProxy(self._provider)  # type: ignore
 
     @property
     def author(self) -> _EmbedAuthorProxy:
@@ -521,7 +507,7 @@ class Embed:
 
         If the attribute has no value then :attr:`Empty` is returned.
         """
-        return EmbedProxy(getattr(self, "_author", {}))  # type: ignore
+        return EmbedProxy(self._author)  # type: ignore
 
     def set_author(
         self,
@@ -564,11 +550,7 @@ class Embed:
 
         .. versionadded:: 1.4
         """
-        try:
-            del self._author
-        except AttributeError:
-            pass
-
+        self._author = None
         return self
 
     @property
@@ -579,7 +561,7 @@ class Embed:
 
         If the attribute has no value then :attr:`Empty` is returned.
         """
-        return [EmbedProxy(d) for d in getattr(self, "_fields", [])]  # type: ignore
+        return [EmbedProxy(d) for d in (self._fields or [])]  # type: ignore
 
     def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
         """Adds a field to the embed object.
@@ -603,9 +585,9 @@ class Embed:
             "value": str(value),
         }
 
-        try:
+        if self._fields is not None:
             self._fields.append(field)
-        except AttributeError:
+        else:
             self._fields = [field]
 
         return self
@@ -636,19 +618,16 @@ class Embed:
             "value": str(value),
         }
 
-        try:
+        if self._fields is not None:
             self._fields.insert(index, field)
-        except AttributeError:
+        else:
             self._fields = [field]
 
         return self
 
     def clear_fields(self) -> None:
         """Removes all fields from this embed."""
-        try:
-            self._fields.clear()
-        except AttributeError:
-            self._fields = []
+        self._fields = None
 
     def remove_field(self, index: int) -> None:
         """Removes a field at a specified index.
@@ -666,10 +645,11 @@ class Embed:
         index: :class:`int`
             The index of the field to remove.
         """
-        try:
-            del self._fields[index]
-        except (AttributeError, IndexError):
-            pass
+        if self._fields is not None:
+            try:
+                del self._fields[index]
+            except IndexError:
+                pass
 
     def set_field_at(self, index: int, name: Any, value: Any, *, inline: bool = True) -> Self:
         """Modifies a field to the embed object.
@@ -696,40 +676,36 @@ class Embed:
         IndexError
             An invalid index was provided.
         """
-        try:
-            field = self._fields[index]
-        except (TypeError, IndexError, AttributeError):
+        if not self._fields or not (0 <= index < len(self._fields)):
             raise IndexError("field index out of range")
 
-        field["name"] = str(name)
-        field["value"] = str(value)
-        field["inline"] = inline
+        self._fields[index] = {
+            "inline": inline,
+            "name": str(name),
+            "value": str(value),
+        }
         return self
 
     def to_dict(self) -> EmbedData:
         """Converts this embed object into a dict."""
 
         # add in the raw data into the dict
-        # fmt: off
-        result = {
+        result: EmbedData = {
             key[1:]: getattr(self, key)
             for key in self.__slots__
-            if key[0] == '_' and hasattr(self, key) and key not in ("_colour", "_files")
-        }
-        # fmt: on
+            if (
+                key[0] == "_"
+                and key not in ("_colour", "_timestamp", "_files")
+                and getattr(self, key) is not None
+            )
+        }  # type: ignore
 
         # deal with basic convenience wrappers
-
         if isinstance(self.colour, Colour):
             result["color"] = self.colour.value
 
-        try:
-            timestamp = result.pop("timestamp")
-        except KeyError:
-            pass
-        else:
-            if timestamp:
-                result["timestamp"] = timestamp.astimezone(tz=datetime.timezone.utc).isoformat()
+        if self._timestamp:
+            result["timestamp"] = self._timestamp.astimezone(tz=datetime.timezone.utc).isoformat()
 
         # add in the non raw attribute ones
         if self.type:
@@ -744,7 +720,7 @@ class Embed:
         if self.title:
             result["title"] = self.title
 
-        return result  # type: ignore
+        return result
 
     @classmethod
     def set_default_colour(cls, value: Optional[Union[int, Colour]]):
