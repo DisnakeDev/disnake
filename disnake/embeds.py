@@ -789,7 +789,7 @@ class Embed:
     get_default_color = get_default_colour
 
     def _handle_resource(self, url: Optional[Any], file: File) -> Optional[str]:
-        if not bool(url) ^ bool(file):
+        if not (url is MISSING) ^ (file is MISSING):
             raise TypeError("Exactly one of url or file must be provided")
 
         if file:
