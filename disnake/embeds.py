@@ -30,7 +30,9 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
+    Dict,
     List,
+    Literal,
     Mapping,
     Optional,
     Protocol,
@@ -110,6 +112,8 @@ if TYPE_CHECKING:
         url: Optional[str]
         icon_url: Optional[str]
         proxy_icon_url: Optional[str]
+
+    _FileKey = Literal["image", "thumbnail"]
 
 
 class Embed:
@@ -211,7 +215,7 @@ class Embed:
         self._footer: Optional[EmbedFooterPayload] = None
         self._fields: Optional[List[EmbedFieldPayload]] = None
 
-        self._files: List[File] = []
+        self._files: Dict[_FileKey, File] = {}
 
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:
@@ -248,7 +252,7 @@ class Embed:
         if self.url is not None:
             self.url = str(self.url)
 
-        self._files = []
+        self._files = {}
 
         # try to fill in the more rich fields
 
@@ -441,7 +445,7 @@ class Embed:
 
             .. versionadded:: 2.2
         """
-        result = self._handle_resource(url, file)
+        result = self._handle_resource(url, file, key="image")
         self._image = {"url": result} if result is not None else None
         return self
 
@@ -488,7 +492,7 @@ class Embed:
 
             .. versionadded:: 2.2
         """
-        result = self._handle_resource(url, file)
+        result = self._handle_resource(url, file, key="thumbnail")
         self._thumbnail = {"url": result} if result is not None else None
         return self
 
@@ -789,14 +793,15 @@ class Embed:
 
     get_default_color = get_default_colour
 
-    def _handle_resource(self, url: Optional[Any], file: File) -> Optional[str]:
+    def _handle_resource(self, url: Optional[Any], file: File, *, key: _FileKey) -> Optional[str]:
         if not (url is MISSING) ^ (file is MISSING):
             raise TypeError("Exactly one of url or file must be provided")
 
         if file:
             if file.filename is None:
                 raise TypeError("File must have a filename")
-            self._files.append(file)
+            self._files[key] = file
             return f"attachment://{file.filename}"
         else:
+            self._files.pop(key, None)
             return str(url) if url is not None else None

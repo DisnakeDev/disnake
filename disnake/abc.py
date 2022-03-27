@@ -1439,7 +1439,7 @@ class Messageable:
             for embed in embeds:
                 if embed._files:
                     files = files or []
-                    files += embed._files
+                    files.extend(embed._files.values())
             embeds_payload = [embed.to_dict() for embed in embeds]
 
         stickers_payload = None

@@ -165,7 +165,7 @@ async def _edit_handler(
         for embed in embeds:
             if embed._files:
                 files = files or []
-                files += embed._files
+                files.extend(embed._files.values())
 
     if suppress is not MISSING:
         flags = MessageFlags._from_value(default_flags)
