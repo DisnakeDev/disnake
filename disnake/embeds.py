@@ -176,6 +176,7 @@ class Embed:
     )
 
     _default_colour: ClassVar[Optional[Colour]] = None
+    _colour: Optional[Colour]
 
     def __init__(
         self,
@@ -201,8 +202,7 @@ class Embed:
         # - Color: embed color will be set to specified color
         if colour is not MISSING:
             color = colour
-        if color is not MISSING:
-            self.colour = color
+        self.colour = color
 
         self._thumbnail: Optional[EmbedThumbnailPayload] = None
         self._video: Optional[EmbedVideoPayload] = None
@@ -272,8 +272,7 @@ class Embed:
     def copy(self) -> Self:
         """Returns a shallow copy of the embed."""
         embed = type(self).from_dict(self.to_dict())
-        if not hasattr(self, "_colour"):
-            del embed.colour
+        embed._colour = self._colour
         embed._files = self._files  # TODO: Maybe copy these too?
         return embed
 
@@ -297,8 +296,8 @@ class Embed:
                 self.title,
                 self.url,
                 self.description,
-                # checking `is not None` as `0` is a valid color value
-                getattr(self, "_colour", None) is not None,
+                # not checking for falsy value as `0` is a valid color
+                self._colour not in (MISSING, None),
                 self._fields,
                 self._timestamp,
                 self._author,
@@ -312,14 +311,15 @@ class Embed:
 
     @property
     def colour(self) -> Optional[Colour]:
-        return getattr(self, "_colour", type(self)._default_colour)
+        col = self._colour
+        return col if col is not MISSING else type(self)._default_colour
 
     @colour.setter
     def colour(self, value: Optional[Union[int, Colour]]):
-        if value is None or isinstance(value, Colour):
-            self._colour = value
-        elif isinstance(value, int):
+        if isinstance(value, int):
             self._colour = Colour(value=value)
+        elif value is MISSING or value is None or isinstance(value, Colour):
+            self._colour = value
         else:
             raise TypeError(
                 f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
@@ -327,7 +327,7 @@ class Embed:
 
     @colour.deleter
     def colour(self):
-        del self._colour
+        self._colour = MISSING
 
     color = colour
 
