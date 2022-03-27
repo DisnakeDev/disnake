@@ -19,6 +19,7 @@ lint = { cmd = "pre-commit run --all-files", help = "Check all files for linting
 precommit = { cmd = "pre-commit install --install-hooks", help = "Install the precommit hook" }
 pyright = { cmd = "dotenv -f task.env run -- pyright", help = "Run pyright" }
 slotscheck = { cmd = "python -m slotscheck --verbose -m disnake", help = "Run slotscheck" }
+test = { cmd = "pytest -v", help = "Run pytest" }
 
 
 [tool.slotscheck]
@@ -57,3 +58,9 @@ reportUntypedNamedTuple = true
 reportUnnecessaryComparison = true
 reportUnnecessaryTypeIgnoreComment = true
 reportUnknownLambdaType = true
+
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+addopts = "--strict-markers"
+xfail_strict = true

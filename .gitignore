@@ -23,5 +23,7 @@ secrets/
 *.env
 venvs/
 .idea
+.coverage*
+coverage.xml
 
 !/task.env
