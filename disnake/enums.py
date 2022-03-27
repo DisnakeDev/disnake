@@ -65,6 +65,7 @@ __all__ = (
     "GuildScheduledEventPrivacyLevel",
     "ThreadArchiveDuration",
     "WidgetStyle",
+    "Locale",
 )
 
 
@@ -704,6 +705,38 @@ class WidgetStyle(Enum):
 
     def __str__(self):
         return self.value
+
+
+class Locale(Enum):
+    danish = "da"
+    german = "de"
+    english_uk = "en-GB"
+    english_us = "en-US"
+    spanish = "es-ES"
+    french = "fr"
+    croatian = "hr"
+    italian = "it"
+    lithuanian = "lt"
+    hungarian = "hu"
+    dutch = "nl"
+    norwegian = "no"
+    polish = "pl"
+    portuguese_brazil = "pt-BR"
+    romanian = "ro"
+    finnish = "fi"
+    swedish = "sv-SE"
+    vietnamese = "vi"
+    turkish = "tr"
+    czech = "cz"
+    greek = "el"
+    bulgarian = "bg"
+    russian = "ru"
+    ukranian = "uk"
+    hindi = "hi"
+    thai = "th"
+    chinese = "zh-CN"
+    japanese = "ja"
+    chinese_taiwan = "zh-TW"
 
 
 T = TypeVar("T")
