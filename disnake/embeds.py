@@ -694,15 +694,16 @@ class Embed:
         IndexError
             An invalid index was provided.
         """
-        if not self._fields or not (0 <= index < len(self._fields)):
+        if not self._fields:
+            raise IndexError("field index out of range")
+        try:
+            field = self._fields[index]
+        except IndexError:
             raise IndexError("field index out of range")
 
-        field: EmbedFieldPayload = {
-            "inline": inline,
-            "name": str(name),
-            "value": str(value),
-        }
-        self._fields[index] = field
+        field["name"] = str(name)
+        field["value"] = str(value)
+        field["inline"] = inline
         return self
 
     def to_dict(self) -> EmbedData:
