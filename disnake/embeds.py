@@ -87,7 +87,6 @@ if TYPE_CHECKING:
     class _EmbedFieldProxy(Sized, Protocol):
         name: Optional[str]
         value: Optional[str]
-        # TODO: make this non-optional again by setting a default in from_dict?
         inline: Optional[bool]
 
     class _EmbedMediaProxy(Sized, Protocol):
