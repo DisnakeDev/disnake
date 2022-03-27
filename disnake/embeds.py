@@ -431,20 +431,8 @@ class Embed:
 
             .. versionadded:: 2.2
         """
-        if file:
-            if url:
-                raise TypeError("Cannot use both a url and a file at the same time")
-            if file.filename is None:
-                raise TypeError("File doesn't have a filename")
-            self._image = {"url": f"attachment://{file.filename}"}
-            self._files.append(file)
-        elif url is None:
-            self._image = None
-        elif url is MISSING:
-            raise TypeError("Neither a url nor a file have been provided")
-        else:
-            self._image = {"url": str(url)}
-
+        result = self._handle_resource(url, file)
+        self._image = {"url": result} if result is not None else None
         return self
 
     @property
@@ -480,20 +468,8 @@ class Embed:
 
             .. versionadded:: 2.2
         """
-        if file:
-            if url:
-                raise TypeError("Cannot use both a url and a file at the same time")
-            if file.filename is None:
-                raise TypeError("File doesn't have a filename")
-            self._thumbnail = {"url": f"attachment://{file.filename}"}
-            self._files.append(file)
-        elif url is None:
-            self._thumbnail = None
-        elif url is MISSING:
-            raise TypeError("Neither a url nor a file have been provided")
-        else:
-            self._thumbnail = {"url": str(url)}
-
+        result = self._handle_resource(url, file)
+        self._thumbnail = {"url": result} if result is not None else None
         return self
 
     @property
@@ -791,3 +767,15 @@ class Embed:
         return cls._default_colour
 
     get_default_color = get_default_colour
+
+    def _handle_resource(self, url: Optional[Any], file: File) -> Optional[str]:
+        if not bool(url) ^ bool(file):
+            raise TypeError("Exactly one of url or file must be provided")
+
+        if file:
+            if file.filename is None:
+                raise TypeError("File must have a filename")
+            self._files.append(file)
+            return f"attachment://{file.filename}"
+        else:
+            return str(url) if url is not None else None
