@@ -275,8 +275,10 @@ class Embed:
     def copy(self) -> Self:
         """Returns a shallow copy of the embed."""
         embed = type(self).from_dict(self.to_dict())
+        # assign manually to keep behavior of default colors
         embed._colour = self._colour
-        embed._files = self._files  # TODO: Maybe copy these too?
+        # shallow copy of files
+        embed._files = self._files.copy()
         return embed
 
     def __len__(self) -> int:
