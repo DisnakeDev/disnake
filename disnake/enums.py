@@ -725,6 +725,7 @@ class Locale(Enum):
     hungarian = "hu"
     italian = "it"
     japanese = "ja"
+    korean = "ko"
     lithuanian = "lt"
     norwegian = "no"
     polish = "pl"
