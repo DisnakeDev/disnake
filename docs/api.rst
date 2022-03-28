@@ -2087,6 +2087,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.icon`
         - :attr:`~AuditLogDiff.banner`
         - :attr:`~AuditLogDiff.vanity_url_code`
+        - :attr:`~AuditLogDiff.preferred_locale`
 
     .. attribute:: channel_create
 
@@ -3576,6 +3577,12 @@ AuditLogDiff
         See also :meth:`Guild.vanity_invite` and :meth:`Guild.edit`.
 
         :type: :class:`str`
+
+    .. attribute:: preferred_locale
+
+        The guild's preferred locale.
+
+        :type: :class:`Locale`
 
     .. attribute:: position
 
