@@ -409,7 +409,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. note::
 
         Not all messages will have ``content``. This is a Discord limitation.
-        See the docs of :attr:`Intents.messages_content` for more information.
+        See the docs of :attr:`Intents.message_content` for more information.
 
     :param message: The current message.
     :type message: :class:`Message`
@@ -429,7 +429,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. note::
 
         Not all messages will have ``content``. This is a Discord limitation.
-        See the docs of :attr:`Intents.messages_content` for more information.
+        See the docs of :attr:`Intents.message_content` for more information.
 
 
     :param message: The deleted message.
@@ -491,7 +491,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. note::
 
         Not all messages will have ``content``. This is a Discord limitation.
-        See the docs of :attr:`Intents.messages_content` for more information.
+        See the docs of :attr:`Intents.message_content` for more information.
 
     The following non-exhaustive cases trigger this event:
 
@@ -2584,6 +2584,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.description`
         - :attr:`~AuditLogDiff.privacy_level`
         - :attr:`~AuditLogDiff.status`
+        - :attr:`~AuditLogDiff.image`
 
         .. versionadded:: 2.3
 
@@ -3747,6 +3748,12 @@ AuditLogDiff
         The status of a guild scheduled event being changed.
 
         :type: :class:`GuildScheduledEventStatus`
+
+    .. attribute:: image
+
+        The cover image of a guild scheduled event being changed.
+
+        :type: :class:`Asset`
 
 .. this is currently missing the following keys: reason and application_id
    I'm not sure how to about porting these

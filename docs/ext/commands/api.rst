@@ -928,6 +928,9 @@ Exceptions
 .. autoexception:: disnake.ext.commands.BadBoolArgument
     :members:
 
+.. autoexception:: disnake.ext.commands.LargeIntConversionFailure
+    :members:
+
 .. autoexception:: disnake.ext.commands.MissingPermissions
     :members:
 
@@ -1014,6 +1017,7 @@ Exception Hierarchy
                     - :exc:`~.commands.GuildStickerNotFound`
                     - :exc:`~.commands.GuildScheduledEventNotFound`
                     - :exc:`~.commands.BadBoolArgument`
+                    - :exc:`~.commands.LargeIntConversionFailure`
                     - :exc:`~.commands.FlagError`
                         - :exc:`~.commands.BadFlagArgument`
                         - :exc:`~.commands.MissingFlagArgument`
