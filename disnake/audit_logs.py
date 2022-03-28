@@ -394,7 +394,7 @@ class AuditLogEntry(Hashable):
     action: :class:`AuditLogAction`
         The action that was done.
     user: :class:`abc.User`
-        The user who initiated this action. Usually a :class:`Member`\, unless gone
+        The user who initiated this action. Usually a :class:`Member`\\, unless gone
         then it's a :class:`User`.
     id: :class:`int`
         The entry ID.

@@ -814,7 +814,7 @@ class GuildChannel(ABC):
         overwrite: Optional[:class:`.PermissionOverwrite`]
             The permissions to allow and deny to the target, or ``None`` to
             delete the overwrite.
-        \*\*permissions
+        **permissions
             A keyword argument list of permissions to set for ease of use.
             Cannot be mixed with ``overwrite``.
         reason: Optional[:class:`str`]
