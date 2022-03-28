@@ -707,6 +707,7 @@ class WidgetStyle(Enum):
         return self.value
 
 
+# reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
     bulgarian = "bg"
     chinese = "zh-CN"
@@ -738,6 +739,9 @@ class Locale(Enum):
     turkish = "tr"
     ukranian = "uk"
     vietnamese = "vi"
+
+    def __str__(self):
+        return self.value
 
 
 T = TypeVar("T")
