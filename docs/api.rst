@@ -3076,6 +3076,133 @@ of :class:`enum.Enum`.
         A large image with a large Discord logo, guild icon, name and online member count,
         with a "Join My Server" label at the bottom.
 
+.. class:: Locale
+
+    Represents supported locales by Discord.
+
+    .. versionadded:: 2.5
+
+    .. attribute:: bulgarian
+
+        The ``bg`` locale.
+
+    .. attribute:: chinese
+
+        The ``zh-CN`` locale.
+
+    .. attribute:: chinese_taiwan
+
+        The ``zh-TW`` locale.
+
+    .. attribute:: croatian
+
+        The ``hr`` locale.
+
+    .. attribute:: czech
+
+        The ``cz`` locale.
+
+    .. attribute:: danish
+
+        The ``da`` locale.
+
+    .. attribute:: dutch
+
+        The ``nl`` locale.
+
+    .. attribute:: english_uk
+
+        The ``en-GB`` locale.
+
+    .. attribute:: english_us
+
+        The ``en-US`` locale.
+
+    .. attribute:: german
+
+        The ``de`` locale.
+
+    .. attribute:: finnish
+
+        The ``fi`` locale.
+
+    .. attribute:: french
+
+        The ``fr`` locale.
+
+    .. attribute:: greek
+
+        The ``el`` locale.
+
+    .. attribute:: hindi
+
+        The ``hi`` locale.
+
+    .. attribute:: hungarian
+
+        The ``hu`` locale.
+
+    .. attribute:: italian
+
+        The ``it`` locale.
+
+    .. attribute:: japanese
+
+        The ``ja`` locale.
+
+    .. attribute:: korean
+
+        The ``ko`` locale.
+
+    .. attribute:: lithuanian
+
+        The ``lt`` locale.
+
+    .. attribute:: norwegian
+
+        The ``no`` locale.
+
+    .. attribute:: polish
+
+        The ``pl`` locale.
+
+    .. attribute:: portuguese_brazil
+
+        The ``pt-BR`` locale.
+
+    .. attribute:: romanian
+
+        The ``ro`` locale.
+
+    .. attribute:: russian
+
+        The ``ru`` locale.
+
+    .. attribute:: spanish
+
+        The ``es-ES`` locale.
+
+    .. attribute:: swedish
+
+        The ``sv-SE`` locale.
+
+    .. attribute:: thai
+
+        The ``th`` locale.
+
+    .. attribute:: turkish
+
+        The ``tr`` locale.
+
+    .. attribute:: ukranian
+
+        The ``uk`` locale.
+
+    .. attribute:: vietnamese
+
+        The ``vi`` locale.
+
+
 
 Async Iterator
 ----------------
