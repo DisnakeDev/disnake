@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Uni
 from .. import utils
 from ..app_commands import OptionChoice
 from ..channel import ChannelType, PartialMessageable
-from ..enums import InteractionResponseType, InteractionType, WebhookType, try_enum
+from ..enums import InteractionResponseType, InteractionType, Locale, WebhookType, try_enum
 from ..errors import (
     HTTPException,
     InteractionNotEditable,
@@ -123,20 +123,27 @@ class Interaction:
         The application ID that the interaction was for.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
-    guild_locale: Optional[:class:`str`]
+    guild_locale: Optional[:class:`Locale`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
     channel_id: :class:`int`
         The channel ID the interaction was sent from.
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
-    locale: :class:`str`
+    locale: :class:`Locale`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
 
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
@@ -181,8 +188,8 @@ class Interaction:
 
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
-        self.locale: str = data["locale"]
-        self.guild_locale: Optional[str] = data.get("guild_locale")
+        self.locale: Locale = try_enum(Locale, data["locale"])
+        self.guild_locale: Optional[Locale] = try_enum(Locale, data.get("guild_locale"))
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
         self._permissions = None
