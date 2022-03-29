@@ -148,7 +148,8 @@ class StageInstance(Hashable):
         """Optional[:class:`GuildScheduledEvent`]: The stage instance's scheduled event.
 
         This is only set if this stage instance has an associated scheduled event,
-        and requires that event to be cached.
+        and requires that event to be cached
+        (which requires the :attr:`~Intents.guild_scheduled_events` intent).
         """
         if self.guild_scheduled_event_id is None:
             return None
