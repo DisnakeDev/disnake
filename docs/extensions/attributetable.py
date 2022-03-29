@@ -1,3 +1,4 @@
+import asyncio
 import importlib
 import inspect
 import re
@@ -230,7 +231,7 @@ def get_class_results(
 
         if value is not None:
             doc = value.__doc__ or ""
-            if inspect.iscoroutinefunction(value) or doc.startswith("|coro|"):
+            if asyncio.iscoroutinefunction(value) or doc.startswith("|coro|"):
                 key = _("Methods")
                 badge = attributetablebadge("async", "async")
                 badge["badge-type"] = _("coroutine")
