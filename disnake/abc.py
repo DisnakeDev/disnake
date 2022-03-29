@@ -1210,6 +1210,7 @@ class Messageable:
     - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.Thread`
     - :class:`~disnake.VoiceChannel`
+    - :class:`~disnake.PartialMessageable`
     """
 
     __slots__ = ()
