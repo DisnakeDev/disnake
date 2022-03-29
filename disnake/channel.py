@@ -61,7 +61,6 @@ from .enums import (
 from .errors import ClientException, InvalidArgument
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
-from .object import Object
 from .permissions import PermissionOverwrite, Permissions
 from .stage_instance import StageInstance
 from .threads import Thread
@@ -2314,12 +2313,11 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
 
     def __init__(self, state: ConnectionState, id: int, type: Optional[ChannelType] = None):
         self._state: ConnectionState = state
-        self._channel: Object = Object(id=id)
         self.id: int = id
         self.type: Optional[ChannelType] = type
 
-    async def _get_channel(self) -> Object:
-        return self._channel
+    async def _get_channel(self) -> PartialMessageable:
+        return self
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
         """Creates a :class:`PartialMessage` from the given message ID.
