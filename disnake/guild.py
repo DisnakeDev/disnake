@@ -94,7 +94,7 @@ MISSING = utils.MISSING
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime, User as ABCUser
     from .app_commands import APIApplicationCommand
-    from .channel import CategoryChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel
+    from .channel import CategoryChannel, StageChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
@@ -106,7 +106,7 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
 
-    GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel]
+    GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
 
 

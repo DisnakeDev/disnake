@@ -74,7 +74,6 @@ __all__ = (
     "DMChannel",
     "CategoryChannel",
     "NewsChannel",
-    "StoreChannel",
     "GroupChannel",
     "PartialMessageable",
 )
@@ -92,7 +91,6 @@ if TYPE_CHECKING:
         DMChannel as DMChannelPayload,
         GroupDMChannel as GroupChannelPayload,
         StageChannel as StageChannelPayload,
-        StoreChannel as StoreChannelPayload,
         TextChannel as TextChannelPayload,
         VoiceChannel as VoiceChannelPayload,
     )
@@ -1809,8 +1807,6 @@ class NewsChannel(TextChannel):
     type: ChannelType = ChannelType.news
 
 
-
-
 DMC = TypeVar("DMC", bound="DMChannel")
 
 
@@ -2169,8 +2165,6 @@ def _guild_channel_factory(channel_type: int):
         return CategoryChannel, value
     elif value is ChannelType.news:
         return TextChannel, value
-    elif value is ChannelType.store:
-        return StoreChannel, value
     elif value is ChannelType.stage_voice:
         return StageChannel, value
     else:
@@ -2213,7 +2207,6 @@ def _channel_type_factory(
         VoiceChannel: [ChannelType.voice],
         GroupChannel: [ChannelType.group],
         CategoryChannel: [ChannelType.category],
-        StoreChannel: [ChannelType.store],
         NewsChannel: [ChannelType.news],
         Thread: [ChannelType.news_thread, ChannelType.public_thread, ChannelType.private_thread],
         StageChannel: [ChannelType.stage_voice],
