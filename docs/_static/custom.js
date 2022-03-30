@@ -230,26 +230,31 @@ $(document).keydown((event) => {
 
   const focusedElement = document.activeElement;
   if (["TEXTAREA", "INPUT", "SELECT", "BUTTON"].includes(focusedElement.tagName)) {
+    // handle `escape` in search field
     if (!event.ctrlKey && !event.shiftKey && event.key === "Escape" && $('input[name=q]').first().is(focusedElement)) {
       unfocusSearch();
       return false;
     }
+    // otherwise, ignore all key presses in inputs
     return;
   }
 
   if (!event.ctrlKey) {
+    // close modal using `escape`, if modal exists
     if (!event.shiftKey && event.key === "Escape" && activeModal) {
       activeModal.close();
       return false;
     }
 
-    // not checking `shiftKey` for `/` since some keyboards need it
+    // focus search using `/` or `s`
+    // (not checking `shiftKey` for `/` since some keyboards need it)
     if (event.key === "/" || (!event.shiftKey && event.key === "s")) {
       focusSearch();
       return false;
     }
   }
 
+  // focus search using `ctrl+k`
   if (!event.shiftKey && event.ctrlKey && event.key == "k") {
     focusSearch();
     return false;
