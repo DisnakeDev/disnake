@@ -219,12 +219,23 @@ function focusSearch() {
 }
 
 
+function unfocusSearch() {
+  $('input[name=q]').first().blur();
+}
+
+
 $(document).keydown((event) => {
   if (event.altKey || event.metaKey)
     return;
 
-  if (["TEXTAREA", "INPUT", "SELECT", "BUTTON"].includes(document.activeElement.tagName))
+  const focusedElement = document.activeElement;
+  if (["TEXTAREA", "INPUT", "SELECT", "BUTTON"].includes(focusedElement.tagName)) {
+    if (!event.ctrlKey && !event.shiftKey && event.key === "Escape" && $('input[name=q]').first().is(focusedElement)) {
+      unfocusSearch();
+      return false;
+    }
     return;
+  }
 
   if (!event.ctrlKey) {
     if (!event.shiftKey && event.key === "Escape" && activeModal) {
