@@ -321,7 +321,7 @@ class Interaction:
 
     async def edit_original_message(
         self,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         *,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
@@ -350,7 +350,7 @@ class Interaction:
 
         Parameters
         ----------
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
@@ -498,7 +498,7 @@ class Interaction:
 
     async def send(
         self,
-        content: Any = None,
+        content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -526,7 +526,7 @@ class Interaction:
 
         Parameters
         ----------
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The content of the message to send.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the
@@ -698,7 +698,7 @@ class InteractionResponse:
 
     async def send_message(
         self,
-        content: Any = None,
+        content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -717,7 +717,7 @@ class InteractionResponse:
 
         Parameters
         ----------
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The content of the message to send.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the
@@ -854,7 +854,7 @@ class InteractionResponse:
 
     async def edit_message(
         self,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         *,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
@@ -883,7 +883,7 @@ class InteractionResponse:
 
         Parameters
         ----------
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The new content to replace the message with. ``None`` removes the content.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
@@ -1208,7 +1208,7 @@ class InteractionMessage(Message):
 
     async def edit(
         self,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -1230,7 +1230,7 @@ class InteractionMessage(Message):
 
         Parameters
         ----------
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the

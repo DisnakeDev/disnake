@@ -402,7 +402,7 @@ class SyncWebhookMessage(Message):
 
     def edit(
         self,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -420,7 +420,7 @@ class SyncWebhookMessage(Message):
 
         Parameters
         ----------
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The content to edit the message with or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
@@ -839,7 +839,7 @@ class SyncWebhook(BaseWebhook):
     @overload
     def send(
         self,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -856,7 +856,7 @@ class SyncWebhook(BaseWebhook):
     @overload
     def send(
         self,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -872,7 +872,7 @@ class SyncWebhook(BaseWebhook):
 
     def send(
         self,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -898,7 +898,7 @@ class SyncWebhook(BaseWebhook):
 
         Parameters
         ----------
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1040,7 +1040,7 @@ class SyncWebhook(BaseWebhook):
         self,
         message_id: int,
         *,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -1065,7 +1065,7 @@ class SyncWebhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to edit.
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the

@@ -129,7 +129,7 @@ async def _edit_handler(
     *,
     default_flags: int,
     previous_allowed_mentions: Optional[AllowedMentions],
-    content: Any = MISSING,
+    content: Optional[str] = MISSING,
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     file: File = MISSING,
@@ -1402,7 +1402,7 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         embed: Optional[Embed] = ...,
         file: File = ...,
@@ -1418,7 +1418,7 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
@@ -1434,7 +1434,7 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         embeds: List[Embed] = ...,
         file: File = ...,
@@ -1450,7 +1450,7 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
@@ -1463,7 +1463,7 @@ class Message(Hashable):
     ) -> Message:
         ...
 
-    async def edit(self, content: Any = MISSING, **fields: Any) -> Message:
+    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
 
         Edits the message.
@@ -1481,7 +1481,7 @@ class Message(Hashable):
 
         Parameters
         ----------
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The new content to replace the message with.
             Could be ``None`` to remove the content.
         embed: Optional[:class:`Embed`]
@@ -2031,7 +2031,7 @@ class PartialMessage(Hashable):
         data = await self._state.http.get_message(self.channel.id, self.id)
         return self._state.create_message(channel=self.channel, data=data)
 
-    async def edit(self, content: Any = MISSING, **fields: Any) -> Message:
+    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
 
         Edits the message.
@@ -2049,7 +2049,7 @@ class PartialMessage(Hashable):
 
         Parameters
         ----------
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The new content to replace the message with.
             Could be ``None`` to remove the content.
         embed: Optional[:class:`Embed`]

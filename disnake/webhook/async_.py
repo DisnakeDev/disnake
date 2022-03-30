@@ -477,7 +477,7 @@ class ExecuteWebhookParameters(NamedTuple):
 
 
 def handle_message_parameters(
-    content: Any = MISSING,
+    content: Optional[str] = MISSING,
     *,
     username: str = MISSING,
     avatar_url: Any = MISSING,
@@ -685,7 +685,7 @@ class WebhookMessage(Message):
 
     async def edit(
         self,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -712,7 +712,7 @@ class WebhookMessage(Message):
 
         Parameters
         ----------
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the ``embeds`` parameter.
@@ -1331,7 +1331,7 @@ class Webhook(BaseWebhook):
     @overload
     async def send(
         self,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1353,7 +1353,7 @@ class Webhook(BaseWebhook):
     @overload
     async def send(
         self,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1374,7 +1374,7 @@ class Webhook(BaseWebhook):
 
     async def send(
         self,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1406,7 +1406,7 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1614,7 +1614,7 @@ class Webhook(BaseWebhook):
         self,
         message_id: int,
         *,
-        content: Any = MISSING,
+        content: Optional[str] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -1646,7 +1646,7 @@ class Webhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to edit.
-        content: :class:`Any`
+        content: Optional[:class:`str`]
             The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
