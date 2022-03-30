@@ -616,10 +616,6 @@ class CommonBotBase(Generic[CogT]):
             await self.wait_until_ready()
 
         reload_log = logging.getLogger(__name__)
-        # ensure the message actually shows up
-        if logging.root.level > logging.INFO:
-            logging.basicConfig()
-            reload_log.setLevel(logging.INFO)
 
         if isinstance(self, disnake.Client):
             is_closed = self.is_closed

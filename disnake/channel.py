@@ -61,7 +61,6 @@ from .enums import (
 from .errors import ClientException, InvalidArgument
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
-from .object import Object
 from .permissions import PermissionOverwrite, Permissions
 from .stage_instance import StageInstance
 from .threads import Thread
@@ -713,7 +712,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: str,
-        message: Snowflake = None,
+        message: Snowflake,
         auto_archive_duration: AnyThreadArchiveDuration = None,
         slowmode_delay: int = None,
         reason: Optional[str] = None,
@@ -727,7 +726,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         name: str,
         type: Literal[
             ChannelType.public_thread, ChannelType.private_thread, ChannelType.news_thread
-        ] = None,
+        ],
         auto_archive_duration: AnyThreadArchiveDuration = None,
         invitable: bool = None,
         slowmode_delay: int = None,
@@ -768,8 +767,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The name of the thread.
         message: :class:`abc.Snowflake`
             A snowflake representing the message to create the thread with.
-            If ``None`` is passed then a private thread is created.
-            Defaults to ``None``.
 
             .. versionchanged:: 2.5
 
@@ -1339,7 +1336,7 @@ class StageChannel(VocalGuildChannel):
 
     def _update(self, guild: Guild, data: StageChannelPayload) -> None:
         super()._update(guild, data)
-        self.topic = data.get("topic")
+        self.topic: Optional[str] = data.get("topic")
 
     @property
     def requesting_to_speak(self) -> List[Member]:
@@ -2316,12 +2313,11 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
 
     def __init__(self, state: ConnectionState, id: int, type: Optional[ChannelType] = None):
         self._state: ConnectionState = state
-        self._channel: Object = Object(id=id)
         self.id: int = id
         self.type: Optional[ChannelType] = type
 
-    async def _get_channel(self) -> Object:
-        return self._channel
+    async def _get_channel(self) -> PartialMessageable:
+        return self
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
         """Creates a :class:`PartialMessage` from the given message ID.
