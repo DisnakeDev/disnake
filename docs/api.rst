@@ -3083,126 +3083,125 @@ of :class:`enum.Enum`.
 
     .. versionadded:: 2.5
 
-    .. attribute:: bulgarian
+    .. attribute:: bg
 
-        The ``bg`` locale.
+        The ``bg`` (Bulgarian) locale.
 
-    .. attribute:: chinese
+    .. attribute:: cs
 
-        The ``zh-CN`` locale.
+        The ``cs`` (Czech) locale.
 
-    .. attribute:: chinese_taiwan
+    .. attribute:: da
 
-        The ``zh-TW`` locale.
+        The ``da`` (Danish) locale.
 
-    .. attribute:: croatian
+    .. attribute:: de
 
-        The ``hr`` locale.
+        The ``de`` (German) locale.
 
-    .. attribute:: czech
+    .. attribute:: el
 
-        The ``cz`` locale.
+        The ``el`` (Greek) locale.
 
-    .. attribute:: danish
+    .. attribute:: en_GB
 
-        The ``da`` locale.
+        The ``en_GB`` (English, UK) locale.
 
-    .. attribute:: dutch
+    .. attribute:: en_US
 
-        The ``nl`` locale.
+        The ``en_US`` (English, US) locale.
 
-    .. attribute:: english_uk
+    .. attribute:: es_ES
 
-        The ``en-GB`` locale.
+        The ``es_ES`` (Spanish) locale.
 
-    .. attribute:: english_us
+    .. attribute:: fi
 
-        The ``en-US`` locale.
+        The ``fi`` (Finnish) locale.
 
-    .. attribute:: german
+    .. attribute:: fr
 
-        The ``de`` locale.
+        The ``fr`` (French) locale.
 
-    .. attribute:: finnish
+    .. attribute:: hi
 
-        The ``fi`` locale.
+        The ``hi`` (Hindi) locale.
 
-    .. attribute:: french
+    .. attribute:: hr
 
-        The ``fr`` locale.
+        The ``hr`` (Croatian) locale.
 
-    .. attribute:: greek
+    .. attribute:: it
 
-        The ``el`` locale.
+        The ``it`` (Italian) locale.
 
-    .. attribute:: hindi
+    .. attribute:: ja
 
-        The ``hi`` locale.
+        The ``ja`` (Japanese) locale.
 
-    .. attribute:: hungarian
+    .. attribute:: ko
 
-        The ``hu`` locale.
+        The ``ko`` (Korean) locale.
 
-    .. attribute:: italian
+    .. attribute:: lt
 
-        The ``it`` locale.
+        The ``lt`` (Lithuanian) locale.
 
-    .. attribute:: japanese
+    .. attribute:: hu
 
-        The ``ja`` locale.
+        The ``hu`` (Hungarian) locale.
 
-    .. attribute:: korean
+    .. attribute:: nl
 
-        The ``ko`` locale.
+        The ``nl`` (Dutch) locale.
 
-    .. attribute:: lithuanian
+    .. attribute:: no
 
-        The ``lt`` locale.
+        The ``no`` (Norwegian) locale.
 
-    .. attribute:: norwegian
+    .. attribute:: pl
 
-        The ``no`` locale.
+        The ``pl`` (Polish) locale.
 
-    .. attribute:: polish
+    .. attribute:: pt_BR
 
-        The ``pl`` locale.
+        The ``pt_BR`` (Portuguese) locale.
 
-    .. attribute:: portuguese_brazil
+    .. attribute:: ro
 
-        The ``pt-BR`` locale.
+        The ``ro`` (Romanian) locale.
 
-    .. attribute:: romanian
+    .. attribute:: ru
 
-        The ``ro`` locale.
+        The ``ru`` (Russian) locale.
 
-    .. attribute:: russian
+    .. attribute:: sv_SE
 
-        The ``ru`` locale.
+        The ``sv_SE`` (Swedish) locale.
 
-    .. attribute:: spanish
+    .. attribute:: th
 
-        The ``es-ES`` locale.
+        The ``th`` (Thai) locale.
 
-    .. attribute:: swedish
+    .. attribute:: tr
 
-        The ``sv-SE`` locale.
+        The ``tr`` (Turkish) locale.
 
-    .. attribute:: thai
+    .. attribute:: uk
 
-        The ``th`` locale.
+        The ``uk`` (Ukrainian) locale.
 
-    .. attribute:: turkish
+    .. attribute:: vi
 
-        The ``tr`` locale.
+        The ``vi`` (Vietnamese) locale.
 
-    .. attribute:: ukranian
+    .. attribute:: zh_CN
 
-        The ``uk`` locale.
+        The ``zh_CN`` (Chinese, China) locale.
 
-    .. attribute:: vietnamese
+    .. attribute:: zh_TW
 
-        The ``vi`` locale.
-
+        The ``zh_TW`` (Chinese, Taiwan) locale.
 
 
 Async Iterator
