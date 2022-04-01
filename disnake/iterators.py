@@ -62,7 +62,7 @@ if TYPE_CHECKING:
     from .message import Message
     from .threads import Thread
     from .types.audit_log import AuditLog as AuditLogPayload, AuditLogEntry as AuditLogEntryPayload
-    from .types.guild import Guild as GuildPayload, Ban as BanPayload
+    from .types.guild import Ban as BanPayload, Guild as GuildPayload
     from .types.message import Message as MessagePayload
     from .types.threads import Thread as ThreadPayload
     from .types.user import PartialUser as PartialUserPayload

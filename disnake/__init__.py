@@ -24,9 +24,9 @@ from . import abc as abc, opus as opus, ui as ui, utils as utils  # explicitly r
 from .activity import *
 from .app_commands import *
 from .appinfo import *
-from .bans import *
 from .asset import *
 from .audit_logs import *
+from .bans import *
 from .channel import *
 from .client import *
 from .colour import *
