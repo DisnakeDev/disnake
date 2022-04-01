@@ -402,6 +402,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
 
 class BanIterator(_AsyncIterator["BanEntry"]):
     """Iterator for receiving a guild's bans.
+
     The bans endpoint has two behaviours we care about here:
     If ``before`` is specified, the bans endpoint returns the ``limit``
     bans with user ids before ``before``, sorted with smallest first. For filling over
@@ -409,17 +410,19 @@ class BanIterator(_AsyncIterator["BanEntry"]):
     If ``after`` is specified, it returns the ``limit`` bans with user ids after
     ``after``, sorted with smallest first. For filling over 1000 bans, update the
     ``after`` parameter to the smallest user id received.
+
     A note that if both ``before`` and ``after`` are specified, ``after`` is ignored by the
     bans endpoint.
+
     Parameters
     -----------
     guild: :class:`~disnake.Guild`
         The guild to get bans from.
     limit: Optional[:class:`int`]
         Maximum number of bans to retrieve.
-    before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    before: Optional[:class:`abc.Snowflake`]
         Date or user id before which all bans must be.
-    after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    after: Optional[:class:`abc.Snowflake`]
         Date or user id after which all bans must be.
     """
 
@@ -427,27 +430,22 @@ class BanIterator(_AsyncIterator["BanEntry"]):
         self,
         guild: Guild,
         limit: Optional[int] = None,
-        before: Optional[Union[Snowflake, datetime.datetime]] = None,
-        after: Optional[Union[Snowflake, datetime.datetime]] = None,
+        before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
     ):
-        if isinstance(before, datetime.datetime):
-            before = Object(id=time_snowflake(before, high=False))
-        if isinstance(after, datetime.datetime):
-            after = Object(id=time_snowflake(after, high=True))
-
         self.guild = guild
         self.limit = limit
         self.before = before
         self.after = after or OLDEST_OBJECT
 
-        self._filter: Optional[Callable[[BanPayload], bool]] = None
-
         self.state = self.guild._state
         self.get_bans = self.state.http.get_bans
         self.bans = asyncio.Queue()
 
-        if self.after and self.after != OLDEST_OBJECT:
-            self._filter = lambda b: int(b["user"]["id"]) > self.after.id
+        if self.before:
+            self._retrieve_bans = self._retrieve_bans_before_strategy
+        else:
+            self._retrieve_bans = self._retrieve_bans_after_strategy
 
     async def next(self) -> BanEntry:
         if self.bans.empty():
@@ -459,8 +457,8 @@ class BanIterator(_AsyncIterator["BanEntry"]):
             raise NoMoreItems()
 
     def _get_retrieve(self) -> bool:
-        self.retrieve = min(self.limit, 1000) if self.limit is not None else None
-        return self.retrieve is None or self.retrieve > 0
+        self.retrieve = min(self.limit, 1000) if self.limit is not None else 1000
+        return self.retrieve > 0
 
     async def fill_bans(self):
         from .user import User
@@ -470,9 +468,6 @@ class BanIterator(_AsyncIterator["BanEntry"]):
             if len(data) < 1000:
                 self.limit = 0  # terminate the infinite loop
 
-            if self._filter:
-                data: List[BanPayload] = list(filter(self._filter, data))
-
             for element in data:
                 await self.bans.put(
                     BanEntry(
@@ -481,16 +476,24 @@ class BanIterator(_AsyncIterator["BanEntry"]):
                     )
                 )
 
-    async def _retrieve_bans(self, retrieve: Optional[int]) -> List[BanPayload]:
+    async def _retrieve_bans_before_strategy(self, retrieve: int) -> List[BanPayload]:
         """Retrieve bans using before parameter."""
-        if retrieve == 0:
-            return []
         before = self.before.id if self.before else None
         data: List[BanPayload] = await self.get_bans(self.guild.id, retrieve, before=before)
         if len(data):
             if self.limit is not None:
-                self.limit -= retrieve if retrieve is not None else 1000
-            self.before = Object(id=int(data[-1]["user"]["id"]))
+                self.limit -= len(data)
+            self.before = Object(id=int(data[0]["user"]["id"]))
+        return data
+
+    async def _retrieve_bans_after_strategy(self, retrieve: int) -> List[BanPayload]:
+        """Retrieve bans using after parameter."""
+        after = self.after.id if self.after else None
+        data: List[BanPayload] = await self.get_bans(self.guild.id, retrieve, after=after)
+        if len(data):
+            if self.limit is not None:
+                self.limit -= len(data)
+            self.after = Object(id=int(data[-1]["user"]["id"]))
         return data
 
 
