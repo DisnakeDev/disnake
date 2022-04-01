@@ -51,6 +51,7 @@ from .app_commands import (
     PartialGuildApplicationCommandPermissions,
 )
 from .asset import Asset
+from .bans import BanEntry
 from .channel import *
 from .channel import _guild_channel_factory, _threaded_guild_channel_factory
 from .colour import Colour
@@ -75,7 +76,7 @@ from .flags import SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
 from .integrations import Integration, _integration_factory
 from .invite import Invite
-from .iterators import AuditLogIterator, MemberIterator
+from .iterators import AuditLogIterator, MemberIterator, BanIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
 from .permissions import PermissionOverwrite
@@ -108,11 +109,6 @@ if TYPE_CHECKING:
 
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
-
-
-class BanEntry(NamedTuple):
-    reason: Optional[str]
-    user: User
 
 
 class _GuildLimit(NamedTuple):
@@ -2169,31 +2165,62 @@ class Guild(Hashable):
         channel: GuildChannel = factory(guild=self, state=self._state, data=data)  # type: ignore
         return channel
 
-    async def bans(self) -> List[BanEntry]:
-        """|coro|
+    def bans(
+        self,
+        *,
+        limit: Optional[int] = None,
+        before: Optional[SnowflakeTime] = None,
+        after: Optional[SnowflakeTime] = None,
+    ) -> BanIterator:
+        """Returns an :class:`~disnake.AsyncIterator` that enables receiving the destination's bans.
 
-        Retrieves all the users that are banned from the guild as a :class:`list` of :class:`BanEntry`.
+        You must have the :attr:`~Permissions.ban_members` permission to get this information.
 
-        You must have :attr:`~Permissions.ban_members` permission
-        to use this.
+        Examples
+        ---------
+
+        Usage ::
+
+            counter = 0
+            async for ban in guild.bans(limit=200):
+                if not ban.user.bot:
+                    counter += 1
+
+        Flattening into a list: ::
+
+            bans = await guild.bans(limit=123).flatten()
+            # bans is now a list of BanEntry...
+
+        All parameters are optional.
+
+        Parameters
+        -----------
+
+        limit: Optional[:class:`int`]
+            The number of bans to retrieve (up to maximum 1000). Defaults to 1000.
+        before: Optional[Union[:class:`~disnake.abc.Snowflake`, :class:`datetime.datetime`]]
+            Retrieve bans before this date or user (by id).
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        after: Optional[Union[:class:`~disnake.abc.Snowflake`, :class:`datetime.datetime`]]
+            Retrieve bans after this date or user (by id).
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
 
         Raises
         ------
-        Forbidden
-            You do not have proper permissions to get the information.
-        HTTPException
-            An error occurred while fetching the information.
+        ~disnake.Forbidden
+            You do not have permissions to get the bans.
+        ~disnake.HTTPException
+            An error occurred while fetching the bans.
 
-        Returns
+        Yields
         -------
-        List[:class:`BanEntry`]
-            A list of :class:`BanEntry` objects.
+        :class:`~disnake.BanEntry`
+            The ban with the ban data parsed.
         """
 
-        data: List[BanPayload] = await self._state.http.get_bans(self.id)
-        return [
-            BanEntry(user=User(state=self._state, data=e["user"]), reason=e["reason"]) for e in data
-        ]
+        return BanIterator(self, limit=limit, before=before, after=after)
 
     async def prune_members(
         self,
