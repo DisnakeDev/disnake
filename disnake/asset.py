@@ -33,6 +33,7 @@ import yarl
 
 from . import utils
 from .errors import DiscordException, InvalidArgument
+from .file import File
 
 __all__ = ("Asset",)
 
@@ -87,7 +88,7 @@ class AssetMixin:
         Parameters
         ----------
         fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
-            The file-like object to save this attachment to or the filename
+            The file-like object to save this asset to or the filename
             to use. If a filename is passed then a file is created with that
             filename and used instead.
         seek_begin: :class:`bool`
@@ -117,6 +118,43 @@ class AssetMixin:
         else:
             with open(fp, "wb") as f:
                 return f.write(data)
+
+    async def to_file(self, *, spoiler: bool = False) -> File:
+        """|coro|
+
+        Converts the asset into a :class:`File` suitable for sending via
+        :meth:`abc.Messageable.send`.
+
+        .. versionadded:: 2.0
+
+        Parameters
+        -----------
+        spoiler: :class:`bool`
+            Whether the file is a spoiler.
+
+        Raises
+        ------
+        DiscordException
+            The asset does not have an associated state.
+        TypeError
+            The asset is a sticker with lottie type.
+        HTTPException
+            Downloading the asset failed.
+        Forbidden
+            You do not have permissions to access this asset
+        NotFound
+            The asset was deleted.
+
+        Returns
+        -------
+        :class:`File`
+            The asset as a file suitable for sending.
+        """
+
+        data = await self.read()
+        url = yarl.URL(self.url)
+        _, _, filename = url.path.rpartition("/")
+        return File(io.BytesIO(data), filename=filename, spoiler=spoiler)
 
 
 class Asset(AssetMixin):
