@@ -72,6 +72,8 @@ New Features
 - Add :attr:`PartialInviteGuild.premium_subscription_count` (:issue:`410`)
 - Support ``List[str]`` and ``Dict[str, str]`` in ``option`` parameter of :class:`disnake.ui.Select` (:issue:`326`)
 - Support ``reason`` parameter in :func:`Message.create_thread` and :func:`Thread.delete` (:issue:`366`)
+- Add :attr:`AuditLogDiff.image` for scheduled event images (:issue:`432`)
+- Add :attr:`StageInstance.guild_scheduled_event` and :attr:`StageInstance.guild_scheduled_event_id` (:issue:`394`)
 - |commands| Add :class:`GuildScheduledEventConverter` and :exc:`GuildScheduledEventNotFound` (:issue:`376`)
 
 
@@ -91,6 +93,8 @@ Bug Fixes
 - Remove cached scheduled events if associated channel was deleted (:issue:`406`)
 - Update some types/parameters of roles, scheduled events and voice states (:issue:`407`)
 - Use :func:`asyncio.iscoroutinefunction` instead of :func:`inspect.iscoroutinefunction` (:issue:`427`)
+- Don't automatically enable logging if autoreload is enabled (:issue:`431`)
+- Improve :class:`PartialMessageable` channel handling (:issue:`426`)
 - |commands| Fix :class:`~ext.commands.clean_content` converter (:issue:`396`)
 - |commands| Make conversion exceptions in slash commands propagate cleanly as documented (:issue:`362`)
 
@@ -104,6 +108,7 @@ Documentation
 - Update return type of :func:`Guild.create_template` (:issue:`372`)
 - Add documentation for :class:`GuildCommandInteraction`, :class:`UserCommandInteraction`, and :class:`MessageCommandInteraction` (:issue:`374`)
 - Update broken references (:issue:`419`)
+- Add search hotkeys ``ctrl+k``, ``/``, ``s`` (:issue:`434`)
 
 
 Miscellaneous
