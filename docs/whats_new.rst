@@ -74,7 +74,7 @@ New Features
 - Support ``reason`` parameter in :func:`Message.create_thread` and :func:`Thread.delete` (:issue:`366`)
 - Add :attr:`AuditLogDiff.image` for scheduled event images (:issue:`432`)
 - Add :attr:`StageInstance.guild_scheduled_event` and :attr:`StageInstance.guild_scheduled_event_id` (:issue:`394`)
-- |commands| Add :class:`GuildScheduledEventConverter` and :exc:`GuildScheduledEventNotFound` (:issue:`376`)
+- |commands| Add :class:`~ext.commands.GuildScheduledEventConverter` and :exc:`~ext.commands.GuildScheduledEventNotFound` (:issue:`376`)
 
 
 Bug Fixes
