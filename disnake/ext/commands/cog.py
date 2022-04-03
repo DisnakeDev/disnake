@@ -811,8 +811,8 @@ class Cog(metaclass=CogMeta):
                 elif isinstance(app_command, InvokableMessageCommand):
                     bot.remove_message_command(app_command.name)
 
-            for _, method_name in self.__cog_listeners__:
-                bot.remove_listener(getattr(self, method_name))
+            for name, method_name in self.__cog_listeners__:
+                bot.remove_listener(getattr(self, method_name), name)
 
             if cls.bot_check is not Cog.bot_check:
                 bot.remove_check(self.bot_check)  # type: ignore
