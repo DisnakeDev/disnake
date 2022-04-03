@@ -978,6 +978,7 @@ class Intents(BaseFlags):
 
         - :attr:`Guild.scheduled_events`
         - :meth:`Guild.get_scheduled_event`
+        - :attr:`StageInstance.guild_scheduled_event`
         """
         return 1 << 16
 
