@@ -30,9 +30,8 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, TypeVar, U
 
 import disnake.abc
 import disnake.utils
+from disnake import ApplicationCommandInteraction
 from disnake.message import Message
-
-from ... import ApplicationCommandInteraction
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec

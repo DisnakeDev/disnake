@@ -54,7 +54,6 @@ from .errors import *
 if TYPE_CHECKING:
     from disnake.message import MessageableChannel
 
-    # TODO: don't use unbound generic `Context`
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES
 
