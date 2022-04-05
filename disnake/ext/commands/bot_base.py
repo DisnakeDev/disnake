@@ -29,8 +29,10 @@ import asyncio
 import collections
 import collections.abc
 import inspect
+import logging
 import sys
 import traceback
+import warnings
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Type, TypeVar, Union, cast
 
 import disnake
@@ -39,6 +41,7 @@ from . import errors
 from .common_bot_base import CommonBotBase
 from .context import Context
 from .core import GroupMixin
+from .custom_warnings import MessageContentPrefixWarning
 from .help import DefaultHelpCommand, HelpCommand
 from .view import StringView
 
@@ -58,6 +61,8 @@ MISSING: Any = disnake.utils.MISSING
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
 CXT = TypeVar("CXT", bound="Context")
+
+_log = logging.getLogger(__name__)
 
 
 def when_mentioned(bot: BotBase, msg: Message) -> List[str]:
@@ -129,6 +134,21 @@ class BotBase(CommonBotBase, GroupMixin):
     ):
         super().__init__(**options)
         self.command_prefix = command_prefix
+        if (
+            command_prefix is not when_mentioned
+            and not self.intents.message_content  # type: ignore
+        ):
+
+            warnings.warn(
+                "Message Content intent is not enabled and a prefix is configured. "
+                "This may cause limited functionality for prefix commands. "
+                "If you want prefix commands, pass an intents object with message_content set to True. "
+                "If you don't need any prefix functionality, "
+                "consider using InteractionBot instead. "
+                "Alternatively, set prefix to disnake.ext.commands.when_mentioned to silence this warning.",
+                MessageContentPrefixWarning,
+                stacklevel=2,
+            )
 
         self._checks: List[Check] = []
         self._check_once = []

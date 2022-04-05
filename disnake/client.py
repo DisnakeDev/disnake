@@ -1582,7 +1582,7 @@ class Client:
 
         .. note::
 
-            This method may fetch any guild that has ``DISCOVERABLE`` in :attr:`Guild.features`,
+            This method may fetch any guild that has ``DISCOVERABLE`` in :attr:`.Guild.features`,
             but this information can not be known ahead of time.
 
             This will work for any guild that you are in.
