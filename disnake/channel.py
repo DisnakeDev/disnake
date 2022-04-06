@@ -39,6 +39,7 @@ from typing import (
     Literal,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
@@ -51,7 +52,6 @@ import disnake.abc
 
 from . import utils
 from .asset import Asset
-from .emoji import Emoji
 from .enums import (
     ChannelType,
     StagePrivacyLevel,
@@ -66,7 +66,8 @@ from .mixins import Hashable
 from .object import Object
 from .permissions import PermissionOverwrite, Permissions
 from .stage_instance import StageInstance
-from .threads import Tag, Thread
+from .threads import Thread
+from .ui.action_row import components_to_dict
 from .utils import MISSING
 
 __all__ = (
@@ -84,11 +85,14 @@ __all__ = (
 
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
+    from .embeds import Embed
+    from .file import File
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
-    from .message import Message, PartialMessage
+    from .message import AllowedMentions, Message, PartialMessage
     from .role import Role
     from .state import ConnectionState
+    from .sticker import GuildSticker, StickerItem
     from .threads import AnyThreadArchiveDuration
     from .types.channel import (
         CategoryChannel as CategoryChannelPayload,
@@ -102,6 +106,8 @@ if TYPE_CHECKING:
     )
     from .types.snowflake import SnowflakeList
     from .types.threads import ThreadArchiveDurationLiteral
+    from .ui.action_row import Components
+    from .ui.view import View
     from .user import BaseUser, ClientUser, User
     from .webhook import Webhook
 
@@ -2049,8 +2055,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         *not* point to an existing or valid message.
     default_auto_archive_duration: Optional[:class:`int`]
         The default auto archive duration in minutes for threads created in this channel.
-    available_tags: Optional[List[:class:`Tag`]]
-        The available tags for this channel. Or ``None`` if the channel doesn't have any tags.
     """
 
     # TODO: Refer threads as posts?
@@ -2065,7 +2069,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "last_message_id",
         "default_auto_archive_duration",
         "guild",
-        "available_tags",
         "_state",
         "_type",
         "_overwrites",
@@ -2101,9 +2104,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.default_auto_archive_duration: Optional[ThreadArchiveDurationLiteral] = data.get(
             "default_auto_archive_duration"
         )
-        self.available_tags: Optional[List[Tag]] = [
-            Tag(data=tag, channel=self, state=self._state) for tag in data.get("available_tags", [])
-        ] or None
         self._fill_overwrites(data)
 
     async def _get_channel(self) -> ForumChannel:  # I wonder why this exists
@@ -2214,13 +2214,25 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = None,
-        # invitable: bool = None, # check this
         slowmode_delay: int = None,
+        content: Any,
+        embed: Embed = None,
+        embeds: List[Embed] = None,
+        file: File = None,
+        files: List[File] = None,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = None,
+        allowed_mentions: AllowedMentions = None,
+        view: View = None,
+        components: Components = None,
         reason: Optional[str] = None,
     ):
         """|coro|
 
         Creates a thread in this forum channel.
+
+        You must have the :attr:`~Permissions.send_messages` permission to do this.
+
+        All the things that are in :meth:`TextChannel.send` are also valid here.
 
         .. versionadded:: 2.5
 
@@ -2236,6 +2248,32 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
+        content: Optional[:class:`str`]
+            The content of the message to send.
+        embed: :class:`.Embed`
+            The rich embed for the content to send. This cannot be mixed with the
+            ``embeds`` parameter.
+        embeds: List[:class:`.Embed`]
+            A list of embeds to send with the content. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
+        file: :class:`.File`
+            The file to upload. This cannot be mixed with the ``files`` parameter.
+        files: List[:class:`.File`]
+            A list of files to upload. Must be a maximum of 10.
+            This cannot be mixed with the ``file`` parameter.
+        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StickerItem`]]
+            A list of stickers to upload. Must be a maximum of 3.
+        allowed_mentions: :class:`.AllowedMentions`
+            Controls the mentions being processed in this message. If this is
+            passed, then the object is merged with :attr:`.Client.allowed_mentions`.
+            The merging behaviour only overrides attributes that have been explicitly passed
+            to the object, otherwise it uses the attributes set in :attr:`.Client.allowed_mentions`.
+            If no object is passed at all then the defaults given by :attr:`.Client.allowed_mentions`
+            are used instead.
+        view: :class:`.ui.View`
+            A Discord UI View to add to the message. This cannot be mixed with ``components``.
+        components: |components_type|
+            A list of components to include in the message. This cannot be mixed with ``view``.
         reason: Optional[:class:`str`]
             The reason for creating the thread. Shows up on the audit log.
 
@@ -2251,70 +2289,129 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         :class:`Thread`
             The newly created thread.
         """
+        # TODO: this can probably be simplified to a global function
         if auto_archive_duration is not None:
             auto_archive_duration = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
-        data = await self._state.http.start_thread_without_message(
+        state = self._state
+        content = str(content) if content is not None else None
+
+        if file is not None and files is not None:
+            raise InvalidArgument("cannot pass both file and files parameter to send()")
+
+        if file is not None:
+            if not isinstance(file, File):
+                raise InvalidArgument("file parameter must be File")
+            files = [file]
+
+        if embed is not None and embeds is not None:
+            raise InvalidArgument("cannot pass both embed and embeds parameter to send()")
+
+        if embed is not None:
+            embeds = [embed]
+
+        embeds_payload = None
+        if embeds is not None:
+            if len(embeds) > 10:
+                raise InvalidArgument("embeds parameter must be a list of up to 10 elements")
+            for embed in embeds:
+                if embed._files:
+                    files = files or []
+                    files += embed._files
+            embeds_payload = [embed.to_dict() for embed in embeds]
+
+        stickers_payload = None
+        if stickers is not None:
+            stickers_payload = [sticker.id for sticker in stickers]
+
+        allowed_mentions_payload = None
+        if allowed_mentions is None:
+            allowed_mentions_payload = state.allowed_mentions and state.allowed_mentions.to_dict()
+        elif state.allowed_mentions is not None:
+            allowed_mentions_payload = state.allowed_mentions.merge(allowed_mentions).to_dict()
+        else:
+            allowed_mentions_payload = allowed_mentions.to_dict()
+
+        if view is not None and components is not None:
+            raise InvalidArgument("cannot pass both view and components parameter to send()")
+
+        elif view:
+            if not hasattr(view, "__discord_ui_view__"):
+                raise InvalidArgument(f"view parameter must be View not {view.__class__!r}")
+
+            components_payload = view.to_components()
+
+        elif components:
+            components_payload = components_to_dict(components)
+
+        else:
+            components_payload = None
+
+        data = await self._state.http.create_forum_post(
             self.id,
             name=name,
-            auto_archive_duration=auto_archive_duration
-            or self.default_auto_archive_duration
-            or 60,  # the third or is unnecessary?
-            type=ChannelType.public_thread.value,
+            auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
             rate_limit_per_user=slowmode_delay or 0,
+            content=content,
+            embeds=embeds_payload,
+            allowed_mentions=allowed_mentions_payload,
+            components=components_payload,
+            stickers=stickers_payload,
+            files=files,
             reason=reason,
         )
 
+        if view:
+            state.store_view(view, int(data["id"]))
+
         return Thread(guild=self.guild, data=data, state=self._state)
 
-    async def create_tag(
+    def archived_threads(
         self,
         *,
-        name: Optional[str] = MISSING,
-        emoji: Union[str, Emoji] = MISSING,
-        reason: Optional[str] = None,
-    ) -> Tag:
-        """|coro|
+        private: bool = False,
+        joined: bool = False,
+        limit: Optional[int] = 50,
+        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+    ) -> ArchivedThreadIterator:
+        """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the guild.
 
-        Creates a tag for this channel.
+        You must have :attr:`~Permissions.read_message_history` permission to use this. If iterating over private threads
+        then :attr:`~Permissions.manage_threads` permission is also required.
+
+        .. versionadded:: 2.5
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
-            The name of the tag. Or ``None`` to not set a name.
-        emoji: Union[:class:`str`, :class:`Emoji`]
-            The emoji to use for the tag.
+        limit: Optional[:class:`bool`]
+            The number of threads to retrieve.
+            If ``None``, retrieves every archived thread in the channel. Note, however,
+            that this would make it a slow operation.
+        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Retrieve archived channels before the given date or ID.
+        private: :class:`bool`
+            Whether to retrieve private archived threads.
+        joined: :class:`bool`
+            Whether to retrieve private archived threads that you've joined.
+            You cannot set ``joined`` to ``True`` and ``private`` to ``False``.
 
-        Returns
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to get archived threads.
+        HTTPException
+            The request to get the archived threads failed.
+
+        Yields
         -------
-        :class:`Tag`
-            The newly created tag.
+        :class:`Thread`
+            The archived threads.
         """
-        # TODO: properly test this.
-        if name is MISSING and emoji is MISSING:
-            raise ValueError("you must provide either a name or an emoji")
-
-        payload: Dict[str, Any] = {"name": name or ""}
-
-        if emoji is not MISSING:
-
-            if isinstance(emoji, Emoji):
-                payload["emoji_id"] = emoji.id
-            else:
-                try:
-                    emoji_name = unicodedata.name(emoji)
-                except TypeError:
-                    pass
-                else:
-                    emoji_name = emoji.replace(" ", "_")
-                    payload["emoji_name"] = emoji_name
-
-        data = await self._state.http.create_tag(self.id, **payload, reason=reason)
-        return Tag(data=data, channel=self, state=self._state)
-
-    # TODO: `archived_threads` and `create_tag` method.
+        return ArchivedThreadIterator(
+            self.id, self.guild, limit=limit, joined=joined, private=private, before=before
+        )
 
 
 DMC = TypeVar("DMC", bound="DMChannel")

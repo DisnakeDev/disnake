@@ -45,8 +45,7 @@ if TYPE_CHECKING:
     import datetime
 
     from .abc import Snowflake, SnowflakeTime
-    from .channel import CategoryChannel, ForumChannel, TextChannel
-    from .emoji import Emoji
+    from .channel import CategoryChannel, TextChannel
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage
@@ -55,7 +54,6 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .types.snowflake import SnowflakeList
     from .types.threads import (
-        Tag as TagPayload,
         Thread as ThreadPayload,
         ThreadArchiveDurationLiteral,
         ThreadMember as ThreadMemberPayload,
@@ -138,8 +136,6 @@ class Thread(Messageable, Hashable):
 
         .. versionadded:: 2.5
 
-    applied_tags: List[:class:`int`]
-        The IDs of the tags applied to this thread. (Only applies to threads in a Forum  Channel)
     """
 
     __slots__ = (
@@ -160,7 +156,6 @@ class Thread(Messageable, Hashable):
         "archive_timestamp",
         "create_timestamp",
         "flags",
-        "applied_tags",
         "_type",
         "_state",
         "_members",
@@ -196,7 +191,6 @@ class Thread(Messageable, Hashable):
         self.message_count = data.get("message_count")
         self.member_count = data.get("member_count")
         self.flags = ChannelFlags._from_value(data.get("flags", 0))
-        self.applied_tags: SnowflakeList = data.get("applied_tags", [])
         self._unroll_metadata(data["thread_metadata"])
 
         try:
@@ -843,86 +837,6 @@ class Thread(Messageable, Hashable):
 
     def _pop_member(self, member_id: int) -> Optional[ThreadMember]:
         return self._members.pop(member_id, None)
-
-
-class Tag:
-    """Represents a tag in a thread. (aka post)
-
-    .. versionadded:: 2.5
-
-    Attributes
-    ----------
-    id: :class:`int`
-        The ID of the tag.
-    name: :class:`str`
-        The name of the tag.
-    emoji_id: :class:`int`
-        The ID of the emoji associated with the tag. Or ``0`` if there is none.
-    emoji_name: Optional[:class:`str`]
-        The name of the emoji associated with the tag.
-    channel: :class:`ForumChannel`
-        The channel the tag belongs to.
-    """
-
-    __slots__ = ("id", "name", "emoji_id", "emoji_name", "channel", "_state")
-
-    def __init__(self, *, data: TagPayload, channel: ForumChannel, state: ConnectionState) -> None:
-        self.channel = channel
-        self.name = data["name"]
-        self.id = data["id"]
-        self.emoji_id = data["emoji_id"]
-        self.emoji_name = data.get("emoji_name")
-        self._state = state
-
-    def __repr__(self) -> str:
-        return f"<Tag id={self.id!r} name={self.name!r} emoji_id={self.emoji_id!r}> emoji_name={self.emoji_name!r}>"
-
-    async def edit(
-        self, *, name: str = None, emoji: Optional[Emoji] = None, reason: Optional[str]
-    ) -> Tag:
-        """|coro|
-
-        Edits the tag.
-
-        .. versionadded:: 2.5
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The new name of the tag.
-        emoji: Optional[:class:`Emoji`]
-            The new emoji associated with the tag. Or ``None`` to remove the emoji.
-
-        Returns
-        -------
-        :class:`Tag`
-            The newly edited tag.
-        """
-        payload = {}
-
-        if name is not None:
-            payload["name"] = name
-
-        if emoji is not None:
-            payload["emoji_id"] = emoji.id
-            payload["emoji_name"] = emoji.name
-
-        data = await self._state.http.edit_tag(
-            self.channel.id,
-            self.id,
-            **payload,
-            reason=reason,
-        )
-        return Tag(data, self.channel, self._state)
-
-    async def delete(self) -> None:
-        """|coro|
-
-        Deletes the tag.
-
-        .. versionadded:: 2.5
-        """
-        await self._state.http.delete_tag(self.channel.id, self.id)
 
 
 class ThreadMember(Hashable):
