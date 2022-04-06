@@ -29,7 +29,7 @@ class MyBot(commands.Bot):
         return await super().get_context(message, cls=cls)
 
 
-bot = MyBot(command_prefix="!")
+bot = MyBot(command_prefix=commands.when_mentioned)
 
 
 @bot.command()

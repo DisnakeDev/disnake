@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import inspect
+import asyncio
 import os
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
@@ -354,7 +354,7 @@ def select(
     """
 
     def decorator(func: ItemCallbackType[Select]) -> DecoratedItem[Select]:
-        if not inspect.iscoroutinefunction(func):
+        if not asyncio.iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 
         func.__discord_ui_model_type__ = Select
