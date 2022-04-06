@@ -140,8 +140,6 @@ class AssetMixin:
             The asset is a sticker with lottie type.
         HTTPException
             Downloading the asset failed.
-        Forbidden
-            You do not have permissions to access this asset
         NotFound
             The asset was deleted.
 
