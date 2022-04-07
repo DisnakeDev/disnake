@@ -421,9 +421,9 @@ class BanIterator(_AsyncIterator["BanEntry"]):
     limit: Optional[:class:`int`]
         Maximum number of bans to retrieve.
     before: Optional[:class:`abc.Snowflake`]
-        Date or user id before which all bans must be.
+        Object before which all bans must be.
     after: Optional[:class:`abc.Snowflake`]
-        Date or user id after which all bans must be.
+        Object after which all bans must be.
     """
 
     def __init__(
