@@ -2176,7 +2176,7 @@ class Guild(Hashable):
 
         You must have the :attr:`~Permissions.ban_members` permission to get this information.
 
-        .. versionchanged:: 2.0
+        .. versionchanged:: 2.5
             Due to a breaking change in Discord's API, this now returns an :class:`~disnake.AsyncIterator` instead of a :class:`list`.
 
         Examples
