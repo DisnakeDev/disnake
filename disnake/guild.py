@@ -2201,7 +2201,7 @@ class Guild(Hashable):
         limit: Optional[:class:`int`]
             The number of bans to retrieve.
             If ``None``, it retrieves every ban in the guild. Note, however,
-            that this would make a slow operation.
+            that this would make it a slow operation.
             Defaults to 1000.
         before: Optional[:class:`~disnake.abc.Snowflake`]
             Retrieve bans before this user.
