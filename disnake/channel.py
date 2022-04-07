@@ -2123,7 +2123,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     ) -> Permissions:
         base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
 
-        # text channels do not have voice related permissions
+        # forum channels do not have voice related permissions
         denied = Permissions.voice()
         base.value &= ~denied.value
         return base
@@ -2250,7 +2250,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         view: View = None,
         components: Components = None,
         reason: Optional[str] = None,
-    ):
+    ) -> Thread:
         """|coro|
 
         Creates a thread in this forum channel.
