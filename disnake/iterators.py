@@ -402,11 +402,11 @@ class BanIterator(_AsyncIterator["BanEntry"]):
 
     The bans endpoint has two behaviours we care about here:
     If ``before`` is specified, the bans endpoint returns the ``limit``
-    bans with user ids before ``before``, sorted with smallest first. For filling over
-    1000 bans, update the ``before`` parameter to the largest user id received.
+    bans with user ids before ``before``, sorted with the oldest first. For filling over
+    1000 bans, update the ``before`` parameter to the newest user received.
     If ``after`` is specified, it returns the ``limit`` bans with user ids after
-    ``after``, sorted with smallest first. For filling over 1000 bans, update the
-    ``after`` parameter to the smallest user id received.
+    ``after``, sorted with the oldest first. For filling over 1000 bans, update the
+    ``after`` parameter to the oldest user received.
 
     A note that if both ``before`` and ``after`` are specified, ``after`` is ignored by the
     bans endpoint.
