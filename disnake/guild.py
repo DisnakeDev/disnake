@@ -2197,8 +2197,7 @@ class Guild(Hashable):
         All parameters are optional.
 
         Parameters
-        -----------
-
+        ----------
         limit: Optional[:class:`int`]
             The number of bans to retrieve.
             If ``None``, it retrieves every ban in the guild. Note, however,
