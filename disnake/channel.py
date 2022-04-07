@@ -28,7 +28,6 @@ from __future__ import annotations
 import asyncio
 import datetime
 import time
-import unicodedata
 from typing import (
     TYPE_CHECKING,
     Any,
