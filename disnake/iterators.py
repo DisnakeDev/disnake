@@ -439,8 +439,12 @@ class BanIterator(_AsyncIterator["BanEntry"]):
         self.get_bans = self.state.http.get_bans
         self.bans = asyncio.Queue()
 
+        self._filter: Optional[Callable[[BanPayload], bool]] = None
+
         if self.before:
             self._retrieve_bans = self._retrieve_bans_before_strategy
+            if self.after != OLDEST_OBJECT:
+                self._filter = lambda b: int(b["user"]["id"]) > self.after.id
         else:
             self._retrieve_bans = self._retrieve_bans_after_strategy
 
@@ -462,6 +466,9 @@ class BanIterator(_AsyncIterator["BanEntry"]):
             data = await self._retrieve_bans(self.retrieve)
             if len(data) < 1000:
                 self.limit = 0  # terminate the infinite loop
+
+            if self._filter:
+                data = filter(self._filter, data)
 
             for element in data:
                 await self.bans.put(
