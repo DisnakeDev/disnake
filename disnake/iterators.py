@@ -206,9 +206,6 @@ class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
             raise NoMoreItems()
 
     async def fill_users(self):
-        # this is a hack because >circular imports<
-        from .user import User
-
         if self.limit > 0:
             retrieve = min(self.limit, 100)
 
@@ -223,14 +220,14 @@ class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
 
             for element in reversed(data):
                 if self.guild is None or isinstance(self.guild, Object):
-                    await self.users.put(User(state=self.state, data=element))
+                    await self.users.put(self.state.create_user(data=element))
                 else:
                     member_id = int(element["id"])
                     member = self.guild.get_member(member_id)
                     if member is not None:
                         await self.users.put(member)
                     else:
-                        await self.users.put(User(state=self.state, data=element))
+                        await self.users.put(self.state.create_user(data=element))
 
 
 class HistoryIterator(_AsyncIterator["Message"]):
@@ -461,8 +458,6 @@ class BanIterator(_AsyncIterator["BanEntry"]):
         return self.retrieve > 0
 
     async def fill_bans(self):
-        from .user import User
-
         if self._get_retrieve():
             data = await self._retrieve_bans(self.retrieve)
             if len(data) < 1000:
@@ -471,7 +466,7 @@ class BanIterator(_AsyncIterator["BanEntry"]):
             for element in data:
                 await self.bans.put(
                     BanEntry(
-                        user=User(state=self.guild._state, data=element["user"]),
+                        user=self.state.create_user(data=element["user"]),
                         reason=element["reason"],
                     )
                 )
@@ -594,8 +589,6 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         return r > 0
 
     async def _fill(self):
-        from .user import User
-
         if self._get_retrieve():
             users, data = await self._strategy(self.retrieve)
             if len(data) < 100:
@@ -607,7 +600,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
                 data = filter(self._filter, data)
 
             for user in users:
-                u = User(data=user, state=self._state)
+                u = self._state.create_user(data=user)
                 self._users[u.id] = u
 
             for element in data:
