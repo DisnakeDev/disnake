@@ -2046,9 +2046,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         .. note::
 
             To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
-    last_message_id: Optional[:class:`int`]
-        The last message ID of the message sent to this channel. It may
-        *not* point to an existing or valid message.
+    last_thread_id: Optional[:class:`int`]
+        The ID of the last created thread in this channel. It may
+        *not* point to an existing or valid thread.
     default_auto_archive_duration: Optional[:class:`int`]
         The default auto archive duration in minutes for threads created in this channel.
     """
@@ -2062,7 +2062,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "topic",
         "position",
         "nsfw",
-        "last_message_id",
+        "last_thread_id",
         "default_auto_archive_duration",
         "guild",
         "_state",
@@ -2096,7 +2096,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
         self.nsfw: bool = data.get("nsfw", False)
-        self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
+        self.last_thread_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
         self.default_auto_archive_duration: Optional[ThreadArchiveDurationLiteral] = data.get(
             "default_auto_archive_duration"
         )
@@ -2141,24 +2141,24 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         return self.nsfw
 
     @property
-    def last_message(self) -> Optional[Message]:
-        """Gets the last message in this channel from the cache.
+    def last_thread(self) -> Optional[Thread]:
+        """Gets the last created thread in this channel from the cache.
 
-        The message might not be valid or point to an existing message.
+        The thread might not be valid or point to an existing thread.
 
         .. admonition:: Reliable Fetching
             :class: helpful
 
             For a slightly more reliable method of fetching the
-            last message, :meth:`fetch_message` with the :attr:`last_message_id`
+            last thread, use :meth:`fetch_thread` with the :attr:`last_thread_id`
             attribute.
 
         Returns
         -------
-        Optional[:class:`Message`]
-            The last message in this channel or ``None`` if not found.
+        Optional[:class:`Thread`]
+            The last created thread in this channel or ``None`` if not found.
         """
-        return self._state._get_message(self.last_message_id) if self.last_message_id else None
+        return self._state.get_channel(self.last_thread_id) if self.last_thread_id else None  # type: ignore
 
     async def edit(
         self,
@@ -2204,6 +2204,35 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The returned thread of ``None`` if not found.
         """
         return self.guild.get_thread(thread_id)
+
+    async def fetch_thread(self, thread_id: int, /) -> Thread:
+        """|coro|
+
+        Retrieves a :class:`.Thread` with the given ID.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :meth:`get_thread` instead.
+
+        Raises
+        ------
+        InvalidData
+            An unknown channel type was received from Discord
+            or the guild the channel belongs to is not the same
+            as the one in this object points to.
+        HTTPException
+            Retrieving the channel failed.
+        NotFound
+            Invalid Channel ID.
+        Forbidden
+            You do not have permission to fetch this channel.#
+
+        Returns
+        -------
+        :class:`.Thread`
+            The channel from the ID.
+        """
+        return await self.guild.fetch_channel(thread_id)  # type: ignore
 
     async def create_thread(
         self,
