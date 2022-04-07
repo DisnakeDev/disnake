@@ -380,6 +380,15 @@ class Thread(Messageable, Hashable):
         parent = self.parent
         return parent is not None and parent.is_nsfw()
 
+    def is_pinned(self) -> bool:
+        """Whether the thread is pinned in a :class:`ForumChannel`
+
+        Pinned threads do not get affected by the auto archive duration.
+
+        :return type: :class:`bool`
+        """
+        return self.flags.pinned
+
     def permissions_for(
         self,
         obj: Union[Member, Role],
@@ -605,6 +614,7 @@ class Thread(Messageable, Hashable):
         invitable: bool = MISSING,
         slowmode_delay: int = MISSING,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        pinned: bool = MISSING,
     ) -> Thread:
         """|coro|
 
@@ -634,6 +644,8 @@ class Thread(Messageable, Hashable):
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+        pinned: :class:`bool`
+            Whether to pin the thread or not. This is only available for threads created in a :class:`ForumChannel`.
 
         Raises
         ------
@@ -660,6 +672,8 @@ class Thread(Messageable, Hashable):
             payload["invitable"] = invitable
         if slowmode_delay is not MISSING:
             payload["rate_limit_per_user"] = slowmode_delay
+        if pinned is not MISSING:
+            payload["flags"] = 2 if pinned else 0
 
         data = await self._state.http.edit_channel(self.id, **payload)
         # The data payload will always be a Thread payload
