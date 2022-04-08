@@ -400,6 +400,7 @@ class Client:
         intents: Optional[Intents] = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: Optional[MemberCacheFlags] = None,
+        max_ratelimit_wait: Optional[float] = None,
     ):
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
@@ -413,7 +414,7 @@ class Client:
             proxy=proxy,
             proxy_auth=proxy_auth,
             unsync_clock=assume_unsync_clock,
-            loop=self.loop,
+            max_ratelimit_wait=max_ratelimit_wait,
         )
 
         self._handlers: Dict[str, Callable] = {
