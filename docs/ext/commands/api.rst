@@ -755,9 +755,6 @@ Converters
 .. autoclass:: disnake.ext.commands.CategoryChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.StoreChannelConverter
-    :members:
-
 .. autoclass:: disnake.ext.commands.ThreadConverter
     :members:
 
