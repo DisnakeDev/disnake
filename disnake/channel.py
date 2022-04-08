@@ -2387,6 +2387,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             content,
             embed=embed,
             embeds=embeds,
+            file=file,
+            files=files,
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,
@@ -2398,8 +2400,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
-        if file is not MISSING:
-            files = [file]
+        files = cast("List[File]", params.files)
 
         # TODO: This currently does two API calls, use HTTPClient.create_forum_post when it's available
         thread_data = await self._state.http.start_thread_without_message(
