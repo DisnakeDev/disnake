@@ -2390,7 +2390,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,
-            stickers=stickers,  # type: ignore
+            stickers=stickers,
         )
 
         if auto_archive_duration is not None:
@@ -2417,19 +2417,21 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 raise InvalidArgument("files parameter must be a list of File")
 
             try:
-                del params.payload["attachments"]
+                if params.payload and "attachments" in params.payload:
+                    # We delete it since `send_files` already handles it
+                    del params.payload["attachments"]
                 message_data = await self._state.http.send_files(
-                    thread_data["id"], files=files, **params.payload
+                    thread_data["id"], files=files, **params.payload  # type: ignore
                 )
             finally:
                 for f in files:
                     f.close()
         else:
-            content = params.payload.pop("content")
+            content = params.payload.pop("content") if params.payload else content
             message_data = await self._state.http.send_message(
                 thread_data["id"],
                 content=content,
-                **params.payload,
+                **params.payload,  # type: ignore
             )
 
         if view:
