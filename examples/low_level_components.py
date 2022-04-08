@@ -1,6 +1,9 @@
+"""
+An example on how to send and process components without using views.
+"""
+
 import disnake
 from disnake.ext import commands
-
 
 bot = commands.Bot(command_prefix=commands.when_mentioned)
 
