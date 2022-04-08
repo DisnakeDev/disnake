@@ -95,7 +95,7 @@ MISSING = utils.MISSING
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime, User as ABCUser
     from .app_commands import APIApplicationCommand
-    from .channel import CategoryChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel
+    from .channel import CategoryChannel, StageChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
@@ -107,7 +107,7 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
 
-    GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel]
+    GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
 
 
@@ -200,7 +200,6 @@ class Guild(Hashable):
         - ``ANIMATED_BANNER``: Guild can upload an animated banner.
         - ``ANIMATED_ICON``: Guild can upload an animated icon.
         - ``BANNER``: Guild can upload and use a banner. (i.e. :attr:`.banner`)
-        - ``COMMERCE``: Guild can sell things using store channels.
         - ``COMMUNITY``: Guild is a community server.
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
         - ``ENABLED_DISCOVERABLE_BEFORE``: Guild had Server Discovery enabled at least once.
