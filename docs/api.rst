@@ -4233,7 +4233,6 @@ ModalInteraction
 .. autoclass:: ModalInteraction()
     :members:
     :inherited-members:
-    :exclude-members: channel, followup, guild, me, permissions, response
 
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
