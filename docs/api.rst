@@ -819,6 +819,10 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     This requires :attr:`Intents.guilds` to be enabled.
 
+    .. note::
+        This event will not be called for threads created by the bot or
+        threads created on one of the bot's messages.
+
     .. versionadded:: 2.0
 
     .. versionchanged:: 2.5
