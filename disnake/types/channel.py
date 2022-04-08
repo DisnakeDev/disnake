@@ -163,6 +163,7 @@ class StageInstance(TypedDict):
     topic: str
     privacy_level: PrivacyLevel
     discoverable_disabled: bool
+    guild_scheduled_event_id: Optional[Snowflake]
 
 
 class GuildDirectory(_BaseChannel):

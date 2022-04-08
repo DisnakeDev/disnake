@@ -48,14 +48,12 @@ from typing import (
 
 import disnake
 
-from .context import Context
+from .context import AnyContext, Context
 from .errors import *
 
 if TYPE_CHECKING:
     from disnake.message import MessageableChannel
 
-    # TODO: don't use unbound generic `Context`
-    from .core import AnyContext
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES
 
