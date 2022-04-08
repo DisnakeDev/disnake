@@ -827,23 +827,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param thread: The thread that got joined.
     :type thread: :class:`Thread`
 
-.. function:: on_thread_create(thread)
-
-    Called whenever a thread is created.
-
-    Note that you can get the guild from :attr:`Thread.guild`.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    .. note::
-        This only works for threads created in channels the bot already has access to,
-        and only for public threads unless the bot has the :attr:`~Permissions.manage_threads` permission.
-
-    .. versionadded:: 2.5
-
-    :param thread: The thread that got created.
-    :type thread: :class:`Thread`
-
 .. function:: on_thread_remove(thread)
 
     Called whenever a thread is removed. This is different from a thread being deleted.
@@ -862,6 +845,23 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. versionadded:: 2.0
 
     :param thread: The thread that got removed.
+    :type thread: :class:`Thread`
+
+.. function:: on_thread_create(thread)
+
+    Called whenever a thread is created.
+
+    Note that you can get the guild from :attr:`Thread.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. note::
+        This only works for threads created in channels the bot already has access to,
+        and only for public threads unless the bot has the :attr:`~Permissions.manage_threads` permission.
+
+    .. versionadded:: 2.5
+
+    :param thread: The thread that got created.
     :type thread: :class:`Thread`
 
 .. function:: on_thread_delete(thread)
