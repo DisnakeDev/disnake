@@ -385,6 +385,8 @@ class Thread(Messageable, Hashable):
 
         Pinned threads do not get affected by the auto archive duration.
 
+        .. versionadded:: 2.5
+
         :return type: :class:`bool`
         """
         return self.flags.pinned
@@ -646,6 +648,8 @@ class Thread(Messageable, Hashable):
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         pinned: :class:`bool`
             Whether to pin the thread or not. This is only available for threads created in a :class:`ForumChannel`.
+
+            .. versionadded:: 2.5
 
         Raises
         ------

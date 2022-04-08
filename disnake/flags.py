@@ -1200,7 +1200,7 @@ class ApplicationFlags(BaseFlags):
 
 
 @fill_with_flags()
-class ChannelFlags(BaseFlags):  # Or ThreadFlags?
+class ChannelFlags(BaseFlags):
     """Wraps up the Discord Channel flags.
 
     .. container:: operations

@@ -2002,7 +2002,7 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
 
 
 class ForumChannel(disnake.abc.GuildChannel, Hashable):
-    """Represents a Discord guild forum channel.
+    """Represents a Discord Forum channel.
 
     .. versionadded:: 2.5
 
