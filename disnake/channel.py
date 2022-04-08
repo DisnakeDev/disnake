@@ -2159,21 +2159,83 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         """
         return self._state.get_channel(self.last_thread_id) if self.last_thread_id else None  # type: ignore
 
+    @overload
     async def edit(
         self,
         *,
-        name: str = MISSING,
-        topic: Optional[str] = MISSING,
-        position: int = MISSING,
-        nsfw: bool = MISSING,
-        sync_permissions: bool = MISSING,  # test this
-        category: Optional[CategoryChannel] = MISSING,
-        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
-        overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = MISSING,
-        reason: Optional[str] = None,
+        name: str = ...,
+        topic: Optional[str] = ...,
+        position: int = ...,
+        nsfw: bool = ...,
+        sync_permissions: bool = ...,  # test this
+        category: Optional[CategoryChannel] = ...,
+        slowmode_delay: Optional[int] = ...,
+        default_auto_archive_duration: AnyThreadArchiveDuration = ...,
+        overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = ...,
+        reason: Optional[str] = ...,
     ) -> Optional[ForumChannel]:
-        # TODO: docstring jaja ~~and implementation duh~~
         ...
+
+    @overload
+    async def edit(self) -> Optional[ForumChannel]:
+        ...
+
+    async def edit(self, *, reason: Optional[str] = None, **options):
+        """|coro|
+
+        Edits the channel.
+
+        You must have :attr:`~Permissions.manage_channels` permission to
+        do this.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The new channel's name.
+        topic: Optional[:class:`str`]
+            The new channel's topic.
+        position: :class:`int`
+            The new channel's position.
+        nsfw: :class:`bool`
+            Whether to mark the channel as NSFW.
+        sync_permissions: :class:`bool`
+            Whether to sync permissions with the channel's new or pre-existing
+            category. Defaults to ``False``.
+        category: Optional[:class:`CategoryChannel`]
+            The new category for this channel. Can be ``None`` to remove the
+            category.
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+        overwrites: :class:`Mapping`
+            A :class:`Mapping` of target (either a role or a member) to
+            :class:`PermissionOverwrite` to apply to the channel.
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+            The new default auto archive duration in minutes for threads created in this channel.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+        reason: Optional[:class:`str`]
+            The reason for editing this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        InvalidArgument
+            If position is less than 0 or greater than the number of channels, or if
+            the permission overwrite information is not in proper form.
+        Forbidden
+            You do not have permissions to edit the channel.
+        HTTPException
+            Editing the channel failed.
+
+        Returns
+        -------
+        Optional[:class:`ForumChannel`]
+            The newly edited forum channel. If the edit was only positional
+            then ``None`` is returned instead.
+        """
+        payload = await self._edit(options, reason=reason)
+        if payload is not None:
+            # the payload will always be the proper channel payload
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
     async def clone(
