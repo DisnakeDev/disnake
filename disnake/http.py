@@ -1240,6 +1240,7 @@ class HTTPClient:
             "flags",
         )
         payload = {k: v for k, v in fields.items() if k in valid_keys}
+        payload["type"] = 11
         route = Route("POST", "/channels/{channel_id}/threads", channel_id=channel_id)
 
         if files is not None:

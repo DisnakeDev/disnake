@@ -38,6 +38,7 @@ from typing import (
     Literal,
     NamedTuple,
     Optional,
+    Sequence,
     Tuple,
     TypeVar,
     Union,
@@ -79,6 +80,7 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..state import ConnectionState
+    from ..sticker import GuildSticker, StickerItem
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui.action_row import Components
@@ -492,6 +494,7 @@ def handle_message_parameters(
     components: Optional[Components] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
+    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
 ) -> ExecuteWebhookParameters:
     if files is not MISSING and file is not MISSING:
         raise TypeError("Cannot mix file and files keyword arguments.")
@@ -543,11 +546,13 @@ def handle_message_parameters(
     elif previous_allowed_mentions is not None:
         payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
 
+    if stickers is not MISSING:
+        payload["stickers"] = [s.id for s in stickers]
+
     multipart = []
 
     if files:
         multipart = to_multipart_with_attachments(payload, files)
-        payload = None
 
     return ExecuteWebhookParameters(payload=payload, multipart=multipart, files=files)
 

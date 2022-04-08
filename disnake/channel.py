@@ -60,12 +60,12 @@ from .enums import (
     try_enum_to_int,
 )
 from .errors import ClientException, InvalidArgument
+from .file import File
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .permissions import PermissionOverwrite, Permissions
 from .stage_instance import StageInstance
 from .threads import Thread
-from .ui.action_row import components_to_dict
 from .utils import MISSING
 
 __all__ = (
@@ -84,7 +84,6 @@ __all__ = (
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .embeds import Embed
-    from .file import File
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
     from .message import AllowedMentions, Message, PartialMessage
@@ -2097,8 +2096,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.position: int = data["position"]
         self.nsfw: bool = data.get("nsfw", False)
         self.last_thread_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
-        self.default_auto_archive_duration: Optional[ThreadArchiveDurationLiteral] = data.get(
-            "default_auto_archive_duration"
+        self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
+            "default_auto_archive_duration", 1440
         )
         self._fill_overwrites(data)
 
@@ -2238,17 +2237,17 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: str,
-        auto_archive_duration: AnyThreadArchiveDuration = None,
-        slowmode_delay: int = None,
+        auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        slowmode_delay: int = MISSING,
         content: Any,
-        embed: Embed = None,
-        embeds: List[Embed] = None,
-        file: File = None,
-        files: List[File] = None,
-        stickers: Sequence[Union[GuildSticker, StickerItem]] = None,
-        allowed_mentions: AllowedMentions = None,
-        view: View = None,
-        components: Components = None,
+        embed: Embed = MISSING,
+        embeds: List[Embed] = MISSING,
+        file: File = MISSING,
+        files: List[File] = MISSING,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
+        view: View = MISSING,
+        components: Components = MISSING,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
@@ -2258,6 +2257,12 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         You must have the :attr:`~Permissions.send_messages` permission to do this.
 
         All the things that are in :meth:`TextChannel.send` are also valid here.
+
+        .. danger::
+
+            This method does two API calls, one for creating the thread and one for
+            sending the message. Please be aware of this to avoid doing a lot of
+            API calls.
 
         .. versionadded:: 2.5
 
@@ -2314,84 +2319,61 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         :class:`Thread`
             The newly created thread.
         """
-        # TODO: this can probably be simplified to a global function
+        from .webhook.async_ import handle_message_parameters
+
+        params = handle_message_parameters(
+            content,
+            embed=embed,
+            embeds=embeds,
+            view=view,
+            components=components,
+            allowed_mentions=allowed_mentions,
+            stickers=stickers,  # type: ignore
+        )
+
         if auto_archive_duration is not None:
             auto_archive_duration = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
-        state = self._state
-        content = str(content) if content is not None else None
-
-        if file is not None and files is not None:
-            raise InvalidArgument("cannot pass both file and files parameter to send()")
-
-        if file is not None:
-            if not isinstance(file, File):
-                raise InvalidArgument("file parameter must be File")
+        if file is not MISSING:
             files = [file]
 
-        if embed is not None and embeds is not None:
-            raise InvalidArgument("cannot pass both embed and embeds parameter to send()")
-
-        if embed is not None:
-            embeds = [embed]
-
-        embeds_payload = None
-        if embeds is not None:
-            if len(embeds) > 10:
-                raise InvalidArgument("embeds parameter must be a list of up to 10 elements")
-            for embed in embeds:
-                if embed._files:
-                    files = files or []
-                    files += embed._files
-            embeds_payload = [embed.to_dict() for embed in embeds]
-
-        stickers_payload = None
-        if stickers is not None:
-            stickers_payload = [sticker.id for sticker in stickers]
-
-        allowed_mentions_payload = None
-        if allowed_mentions is None:
-            allowed_mentions_payload = state.allowed_mentions and state.allowed_mentions.to_dict()
-        elif state.allowed_mentions is not None:
-            allowed_mentions_payload = state.allowed_mentions.merge(allowed_mentions).to_dict()
-        else:
-            allowed_mentions_payload = allowed_mentions.to_dict()
-
-        if view is not None and components is not None:
-            raise InvalidArgument("cannot pass both view and components parameter to send()")
-
-        elif view:
-            if not hasattr(view, "__discord_ui_view__"):
-                raise InvalidArgument(f"view parameter must be View not {view.__class__!r}")
-
-            components_payload = view.to_components()
-
-        elif components:
-            components_payload = components_to_dict(components)
-
-        else:
-            components_payload = None
-
-        data = await self._state.http.create_forum_post(
+        # TODO: This currently does two API calls, use HTTPClient.create_forum_post when it's available
+        thread_data = await self._state.http.start_thread_without_message(
             self.id,
+            type=ChannelType.public_thread.value,
             name=name,
             auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
             rate_limit_per_user=slowmode_delay or 0,
-            content=content,
-            embeds=embeds_payload,
-            allowed_mentions=allowed_mentions_payload,
-            components=components_payload,
-            stickers=stickers_payload,
-            files=files,
             reason=reason,
         )
+        if files is not MISSING:
+            if len(files) > 10:
+                raise InvalidArgument("files parameter must be a list of up to 10 elements")
+            elif not all(isinstance(file, File) for file in files):
+                raise InvalidArgument("files parameter must be a list of File")
+
+            try:
+                del params.payload["attachments"]
+                message_data = await self._state.http.send_files(
+                    thread_data["id"], files=files, **params.payload
+                )
+            finally:
+                for f in files:
+                    f.close()
+        else:
+            content = params.payload.pop("content")
+            message_data = await self._state.http.send_message(
+                thread_data["id"],
+                content=content,
+                **params.payload,
+            )
 
         if view:
-            state.store_view(view, int(data["id"]))
+            self._state.store_view(view, int(message_data["id"]))
 
-        return Thread(guild=self.guild, data=data, state=self._state)
+        return Thread(guild=self.guild, data=thread_data, state=self._state)
 
     def archived_threads(
         self,
