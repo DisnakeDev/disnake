@@ -265,14 +265,14 @@ class GuildScheduledEvent(Hashable):
         self,
         *,
         name: str = MISSING,
-        description: str = MISSING,
+        description: Optional[str] = MISSING,
         image: Optional[AssetBytes] = MISSING,
         channel_id: Optional[int] = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         scheduled_start_time: datetime = MISSING,
         scheduled_end_time: datetime = MISSING,
         entity_type: GuildScheduledEventEntityType = MISSING,
-        entity_metadata: GuildScheduledEventMetadata = MISSING,
+        entity_metadata: Optional[GuildScheduledEventMetadata] = MISSING,
         status: GuildScheduledEventStatus = MISSING,
         reason: Optional[str] = None,
     ) -> GuildScheduledEvent:
@@ -290,7 +290,7 @@ class GuildScheduledEvent(Hashable):
         ----------
         name: :class:`str`
             The name of the guild scheduled event.
-        description: :class:`str`
+        description: Optional[:class:`str`]
             The description of the guild scheduled event.
         image: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
             The cover image of the guild scheduled event. Set to ``None`` to remove the image.
@@ -311,7 +311,7 @@ class GuildScheduledEvent(Hashable):
             The time when the guild scheduled event is scheduled to end.
         entity_type: :class:`GuildScheduledEventEntityType`
             The entity type of the guild scheduled event.
-        entity_metadata: :class:`GuildScheduledEventMetadata`
+        entity_metadata: Optional[:class:`GuildScheduledEventMetadata`]
             The entity metadata of the guild scheduled event.
         status: :class:`GuildScheduledEventStatus`
             The status of the guild scheduled event.

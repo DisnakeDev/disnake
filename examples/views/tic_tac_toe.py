@@ -122,7 +122,7 @@ class TicTacToe(disnake.ui.View):
 
 class TicTacToeBot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or("$"))
+        super().__init__(command_prefix=commands.when_mentioned)
 
     async def on_ready(self):
         print(f"Logged in as {self.user} (ID: {self.user.id})")

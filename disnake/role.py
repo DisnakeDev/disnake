@@ -404,8 +404,8 @@ class Role(Hashable):
         colour: Union[Colour, int] = MISSING,
         color: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
-        icon: AssetBytes = MISSING,
-        emoji: str = MISSING,
+        icon: Optional[AssetBytes] = MISSING,
+        emoji: Optional[str] = MISSING,
         mentionable: bool = MISSING,
         position: int = MISSING,
         reason: Optional[str] = MISSING,
@@ -435,13 +435,13 @@ class Role(Hashable):
             The new colour to change to. (aliased to ``color`` as well)
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
-        icon: Union[:class:`bytes`, :class:`AssetMixin`]
+        icon: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
             The role's new icon image (if the guild has the ``ROLE_ICONS`` feature).
 
             .. versionchanged:: 2.5
                 Now accepts :class:`AssetMixin` as well.
 
-        emoji: :class:`str`
+        emoji: Optional[:class:`str`]
             The role's new unicode emoji.
         mentionable: :class:`bool`
             Indicates if the role should be mentionable by others.

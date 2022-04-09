@@ -981,12 +981,22 @@ class ConnectionState:
 
     def parse_channel_delete(self, data) -> None:
         guild = self._get_guild(utils._get_as_snowflake(data, "guild_id"))
+        if guild is None:
+            return
+
         channel_id = int(data["id"])
-        if guild is not None:
-            channel = guild.get_channel(channel_id)
-            if channel is not None:
-                guild._remove_channel(channel)
-                self.dispatch("guild_channel_delete", channel)
+        channel = guild.get_channel(channel_id)
+        if channel is None:
+            return
+
+        guild._remove_channel(channel)
+        self.dispatch("guild_channel_delete", channel)
+
+        if channel.type in (ChannelType.voice, ChannelType.stage_voice):
+            for event_id, scheduled_event in list(guild._scheduled_events.items()):
+                if scheduled_event.channel_id == channel_id:
+                    guild._scheduled_events.pop(event_id)
+                    self.dispatch("guild_scheduled_event_delete", scheduled_event)
 
     def parse_channel_update(self, data) -> None:
         channel_type = try_enum(ChannelType, data.get("type"))
@@ -1069,7 +1079,10 @@ class ConnectionState:
         has_thread = guild.get_thread(thread.id)
         guild._add_thread(thread)
         if not has_thread:
-            self.dispatch("thread_join", thread)
+            if data.get("newly_created"):
+                self.dispatch("thread_create", thread)
+            else:
+                self.dispatch("thread_join", thread)
 
     def parse_thread_update(self, data) -> None:
         guild_id = int(data["guild_id"])
@@ -1694,7 +1707,7 @@ class ConnectionState:
                         logging_coroutine(coro, info="Voice Protocol voice state update handler")
                     )
 
-            member, before, after = guild._update_voice_state(data, channel_id)  # type: ignore
+            member, before, after = guild._update_voice_state(data, channel_id)
             if member is not None:
                 if flags.voice:
                     if channel_id is None and flags._voice_only and member.id != self_id:

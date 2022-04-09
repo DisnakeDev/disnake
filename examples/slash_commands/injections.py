@@ -7,7 +7,7 @@ import disnake
 import pytz
 from disnake.ext import commands
 
-bot = commands.Bot("!")
+bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 # Instead of repeating boiler-plate code you may use injections
 # Here we give each command a config and a few options in case they're not set
