@@ -1896,6 +1896,7 @@ class HTTPClient:
             "channel_id",
             "topic",
             "privacy_level",
+            "send_start_notification",
         )
         payload = {k: v for k, v in payload.items() if k in valid_keys}
 
