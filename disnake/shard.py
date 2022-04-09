@@ -131,6 +131,12 @@ class SessionStartLimit:
 
         self.reset_time: datetime = utils.utcnow() + timedelta(milliseconds=self.reset_after)
 
+    def __repr__(self):
+        return (
+            f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
+            f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time}"
+        )
+
 
 class Shard:
     def __init__(
