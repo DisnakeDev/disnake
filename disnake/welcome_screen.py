@@ -119,7 +119,7 @@ class WelcomeScreen:
     Attributes
     ----------
     description: Optional[:class:`str`]
-        The welcome screen description.
+        The guild description in the welcome screen.
     channels: List[:class:`WelcomeScreenChannel`]
         The welcome screen's channels.
     """

@@ -2048,6 +2048,8 @@ class Guild(Hashable):
         This is a lower level method to :meth:`WelcomeScreen.edit` that allows you
         to edit the welcome screen without fetching it and save an API request.
 
+        All parameters are optional.
+
         .. versionadded:: 2.5
 
         Parameters
@@ -2055,7 +2057,7 @@ class Guild(Hashable):
         enabled: :class:`bool`
             Whether the welcome screen is enabled.
         description: :class:`str`
-            The new guild description.
+            The new guild description in the welcome screen.
         welcome_channels: List[:class:`WelcomeScreenChannel`]
             The new welcome channels.
         reason: Optional[:class:`str`]
