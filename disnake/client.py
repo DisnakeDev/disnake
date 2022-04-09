@@ -99,7 +99,7 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
 
 
-__all__ = ("Client",)
+__all__ = ("Client", "SessionStartLimit")
 
 Coro = TypeVar("Coro", bound=Callable[..., Coroutine[Any, Any, Any]])
 
