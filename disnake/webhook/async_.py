@@ -708,7 +708,7 @@ class WebhookMessage(Message):
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the ``embeds`` parameter.
             Could be ``None`` to remove the embed.
@@ -1326,7 +1326,7 @@ class Webhook(BaseWebhook):
     @overload
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1348,7 +1348,7 @@ class Webhook(BaseWebhook):
     @overload
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1369,7 +1369,7 @@ class Webhook(BaseWebhook):
 
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1401,7 +1401,7 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        content: :class:`str`
+        content: Optional[:class:`str`]
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1642,7 +1642,7 @@ class Webhook(BaseWebhook):
         message_id: :class:`int`
             The ID of the message to edit.
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
