@@ -136,4 +136,6 @@ class ModalInteractionData:
         self._components: List[ActionRow] = [ActionRow(d) for d in data["components"]]
 
     def __repr__(self):
-        return f"<ModalInteractionData custom_id={self.custom_id!r} _components={self._components!r}>"
+        return (
+            f"<ModalInteractionData custom_id={self.custom_id!r} _components={self._components!r}>"
+        )
