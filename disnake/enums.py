@@ -205,7 +205,6 @@ class ChannelType(Enum):
     group = 3
     category = 4
     news = 5
-    store = 6
     news_thread = 10
     public_thread = 11
     private_thread = 12
@@ -244,7 +243,6 @@ class MessageType(Enum):
 
 
 class PartyType(Enum):
-    youtube = 755600276941176913
     poker = 755827207812677713
     betrayal = 773336526917861400
     fishing = 814288819477020702
@@ -254,8 +252,6 @@ class PartyType(Enum):
     doodle_crew = 878067389634314250
     checkers = 832013003968348200
     spellcast = 852509694341283871
-    awkword = 879863881349087252
-    sketchy_artist = 879864070101172255
     watch_together = 880218394199220334
     sketch_heads = 902271654783242291
     ocho = 832025144389533716

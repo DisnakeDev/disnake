@@ -403,8 +403,8 @@ class Role(Hashable):
         colour: Union[Colour, int] = MISSING,
         color: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
-        icon: bytes = MISSING,
-        emoji: str = MISSING,
+        icon: Optional[bytes] = MISSING,
+        emoji: Optional[str] = MISSING,
         mentionable: bool = MISSING,
         position: int = MISSING,
         reason: Optional[str] = MISSING,
@@ -434,9 +434,9 @@ class Role(Hashable):
             The new colour to change to. (aliased to ``color`` as well)
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
-        icon: :class:`bytes`
+        icon: Optional[:class:`bytes`]
             The role's new icon image (if the guild has the ``ROLE_ICONS`` feature).
-        emoji: :class:`str`
+        emoji: Optional[:class:`str`]
             The role's new unicode emoji.
         mentionable: :class:`bool`
             Indicates if the role should be mentionable by others.
