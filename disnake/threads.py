@@ -34,7 +34,7 @@ from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
-from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time, warn_deprecated
+from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
     "Thread",
@@ -159,7 +159,6 @@ class Thread(Messageable, Hashable):
         "_type",
         "_state",
         "_members",
-        "_archiver_id",
     )
 
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload):
@@ -202,7 +201,6 @@ class Thread(Messageable, Hashable):
 
     def _unroll_metadata(self, data: ThreadMetadata):
         self.archived = data["archived"]
-        self._archiver_id = _get_as_snowflake(data, "archiver_id")
         self.auto_archive_duration = data["auto_archive_duration"]
         self.archive_timestamp = parse_time(data["archive_timestamp"])
         self.locked = data.get("locked", False)
@@ -323,22 +321,6 @@ class Thread(Messageable, Hashable):
             If create_timestamp is provided by discord, that will be used instead of the time in the ID.
         """
         return self.create_timestamp or snowflake_time(self.id)
-
-    @property
-    def archiver_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: The user's ID that archived this thread.
-
-        As of June 10th, 2021, this value will always be ``None`` since Discord
-        doesn't provide this information anymore.
-
-        .. warning::
-
-            This property will be removed in a future version.
-        """
-        warn_deprecated(
-            "archiver_id is deprecated and will be removed in a future version.", stacklevel=2
-        )
-        return self._archiver_id
 
     @property
     def jump_url(self) -> str:
@@ -617,6 +599,7 @@ class Thread(Messageable, Hashable):
         slowmode_delay: int = MISSING,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         pinned: bool = MISSING,
+        reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
 
@@ -651,6 +634,11 @@ class Thread(Messageable, Hashable):
 
             .. versionadded:: 2.5
 
+        reason: Optional[:class:`str`]
+            The reason for editing this thread. Shows up on the audit log.
+
+            .. versionadded:: 2.5
+
         Raises
         ------
         Forbidden
@@ -679,7 +667,7 @@ class Thread(Messageable, Hashable):
         if pinned is not MISSING:
             payload["flags"] = 2 if pinned else 0
 
-        data = await self._state.http.edit_channel(self.id, **payload)
+        data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
         # The data payload will always be a Thread payload
         return Thread(data=data, state=self._state, guild=self.guild)  # type: ignore
 
