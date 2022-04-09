@@ -27,14 +27,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar
 
 import aiohttp
 
-from . import utils
 from .backoff import ExponentialBackoff
-from .client import Client
+from .client import Client, SessionStartLimit
 from .enums import Status
 from .errors import (
     ClientException,
@@ -50,13 +48,11 @@ if TYPE_CHECKING:
     from .activity import BaseActivity
     from .enums import Status
     from .gateway import DiscordWebSocket
-    from .types.gateway import SessionStartLimit as SessionStartLimitPayload
 
     EI = TypeVar("EI", bound="EventItem")
 
 __all__ = (
     "AutoShardedClient",
-    "SessionStartLimit",
     "ShardInfo",
 )
 
@@ -92,50 +88,6 @@ class EventItem:
 
     def __hash__(self) -> int:
         return hash(self.type)
-
-
-class SessionStartLimit:
-    """A class that contains information about the current session start limit.
-
-    .. versionadded:: 2.5
-
-    Attributes
-    ----------
-    total: :class:`int`
-        The total number of allowed session starts.
-    remaining: :class:`int`
-        The remaining number of allowed session starts.
-    reset_after: :class:`int`
-        The number of milliseconds after which the :attr:`.remaining` limit resets,
-        relative to when the client connected.
-        See also :attr:`reset_time`.
-    max_concurrency: :class:`int`
-        The number of allowed ``IDENTIFY`` requests per 5 seconds.
-    reset_time: :class:`datetime.datetime`
-        The approximate time at which which the :attr:`.remaining` limit resets.
-    """
-
-    __slots__: Tuple[str, ...] = (
-        "total",
-        "remaining",
-        "reset_after",
-        "max_concurrency",
-        "reset_time",
-    )
-
-    def __init__(self, data: SessionStartLimitPayload):
-        self.total: int = data["total"]
-        self.remaining: int = data["remaining"]
-        self.reset_after: int = data["reset_after"]
-        self.max_concurrency: int = data["max_concurrency"]
-
-        self.reset_time: datetime = utils.utcnow() + timedelta(milliseconds=self.reset_after)
-
-    def __repr__(self):
-        return (
-            f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
-            f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time}"
-        )
 
 
 class Shard:
