@@ -2156,7 +2156,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         slowmode_delay: int = MISSING,
-        content: Any,
+        content: str,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
