@@ -1688,12 +1688,12 @@ class Client:
             .. deprecated:: 2.5
 
                 This no longer has any effect.
-        icon: Union[:class:`bytes`, :class:`.AssetMixin`]
+        icon: |resource_type|
             The icon of the guild.
             See :meth:`.ClientUser.edit` for more details on what is expected.
 
             .. versionchanged:: 2.5
-                Now accepts :class:`.AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
         code: :class:`str`
             The code for a template to create the guild with.

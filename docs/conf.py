@@ -72,6 +72,7 @@ rst_prolog = """
 .. |maybecoro| replace:: This function *could be a* |coroutine_link|_.
 .. |coroutine_link| replace:: *coroutine*
 .. |components_type| replace:: Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[:class:`disnake.ui.WrappedComponent`]]]]
+.. |resource_type| replace:: Union[:class:`bytes`, :class:`.Asset`, :class:`.Emoji`, :class:`.PartialEmoji`, :class:`.StickerItem`, :class:`.Sticker`]
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
 """
 

@@ -3943,11 +3943,6 @@ Attachment
 .. autoclass:: Attachment()
     :members:
 
-AssetMixin
-~~~~~~~~~~
-
-.. autoclass:: AssetMixin()
-
 Asset
 ~~~~~
 

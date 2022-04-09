@@ -292,13 +292,13 @@ class GuildScheduledEvent(Hashable):
             The name of the guild scheduled event.
         description: Optional[:class:`str`]
             The description of the guild scheduled event.
-        image: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+        image: Optional[|resource_type|]
             The cover image of the guild scheduled event. Set to ``None`` to remove the image.
 
             .. versionadded:: 2.4
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
         channel_id: Optional[:class:`int`]
             The channel ID in which the guild scheduled event will be hosted.

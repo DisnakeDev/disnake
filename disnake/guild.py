@@ -1579,40 +1579,40 @@ class Guild(Hashable):
         description: Optional[:class:`str`]
             The new description of the guild. Could be ``None`` for no description.
             This is only available to guilds that contain ``PUBLIC`` in :attr:`Guild.features`.
-        icon: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+        icon: Optional[|resource_type|]
             The new guild icon. Only PNG/JPG is supported.
             GIF is only available to guilds that contain ``ANIMATED_ICON`` in :attr:`Guild.features`.
             Could be ``None`` to denote removal of the icon.
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
-        banner: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+        banner: Optional[|resource_type|]
             The new guild banner.
             GIF is only available to guilds that contain ``ANIMATED_BANNER`` in :attr:`Guild.features`.
             Could be ``None`` to denote removal of the banner. This is only available to guilds that contain
             ``BANNER`` in :attr:`Guild.features`.
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
-        splash: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+        splash: Optional[|resource_type|]
             The new guild invite splash.
             Only PNG/JPG is supported. Could be ``None`` to denote removing the
             splash. This is only available to guilds that contain ``INVITE_SPLASH``
             in :attr:`Guild.features`.
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
-        discovery_splash: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+        discovery_splash: Optional[|resource_type|]
             The new guild discovery splash.
             Only PNG/JPG is supported. Could be ``None`` to denote removing the
             splash. This is only available to guilds that contain ``DISCOVERABLE``
             in :attr:`Guild.features`.
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
         community: :class:`bool`
             Whether the guild should be a Community guild. If set to ``True``\, both ``rules_channel``
@@ -1944,13 +1944,13 @@ class Guild(Hashable):
             The name of the guild scheduled event.
         description: :class:`str`
             The description of the guild scheduled event.
-        image: Union[:class:`bytes`, :class:`AssetMixin`]
+        image: |resource_type|
             The cover image of the guild scheduled event.
 
             .. versionadded:: 2.4
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
         channel_id: :class:`int`
             The channel ID in which the guild scheduled event will be hosted.
@@ -2746,12 +2746,12 @@ class Guild(Hashable):
         ----------
         name: :class:`str`
             The emoji name. Must be at least 2 characters.
-        image: Union[:class:`bytes`, :class:`AssetMixin`]
+        image: |resource_type|
             The image data of the emoji.
             Only JPG, PNG and GIF images are supported.
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
         roles: List[:class:`Role`]
             A :class:`list` of :class:`Role`\s that can use this emoji. Leave empty to make it available to everyone.
@@ -2942,11 +2942,11 @@ class Guild(Hashable):
         hoist: :class:`bool`
             Whether the role should be shown separately in the member list.
             Defaults to ``False``.
-        icon: Union[:class:`bytes`, :class:`AssetMixin`]
+        icon: |resource_type|
             The role's icon image (if the guild has the ``ROLE_ICONS`` feature).
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
         emoji: :class:`str`
             The role's unicode emoji.

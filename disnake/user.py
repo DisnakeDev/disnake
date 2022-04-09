@@ -359,7 +359,7 @@ class ClientUser(BaseUser):
 
         .. note::
 
-            To upload an avatar, an :class:`AssetMixin` or a :term:`py:bytes-like object`
+            To upload an avatar, a resource (see below) or a :term:`py:bytes-like object`
             must be passed in that represents the image being uploaded.
 
             The only image formats supported for uploading are JPG and PNG.
@@ -371,12 +371,12 @@ class ClientUser(BaseUser):
         ----------
         username: :class:`str`
             The new username you wish to change to.
-        avatar: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+        avatar: Optional[|resource_type|]
             A :term:`py:bytes-like object` or asset representing the image to upload.
             Could be ``None`` to denote no avatar.
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
         Raises
         ------

@@ -591,12 +591,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ----------
         name: :class:`str`
             The webhook's name.
-        avatar: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+        avatar: Optional[|resource_type|]
             The webhook's default avatar.
             This operates similarly to :meth:`~ClientUser.edit`.
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
         reason: Optional[:class:`str`]
             The reason for creating this webhook. Shows up in the audit logs.

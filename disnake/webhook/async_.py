@@ -1252,11 +1252,11 @@ class Webhook(BaseWebhook):
         ----------
         name: Optional[:class:`str`]
             The webhook's new default name.
-        avatar: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+        avatar: Optional[|resource_type|]
             The webhook's new default avatar.
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
         channel: Optional[:class:`abc.Snowflake`]
             The webhook's new channel. This requires an authenticated webhook.

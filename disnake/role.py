@@ -435,11 +435,11 @@ class Role(Hashable):
             The new colour to change to. (aliased to ``color`` as well)
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
-        icon: Optional[Union[:class:`bytes`, :class:`AssetMixin`]]
+        icon: Optional[|resource_type|]
             The role's new icon image (if the guild has the ``ROLE_ICONS`` feature).
 
             .. versionchanged:: 2.5
-                Now accepts :class:`AssetMixin` as well.
+                Now accepts various resource types in addition to :class:`bytes`.
 
         emoji: Optional[:class:`str`]
             The role's new unicode emoji.
