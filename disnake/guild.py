@@ -1662,7 +1662,7 @@ class Guild(Hashable):
         Raises
         ------
         NotFound
-            One of the assets (``icon``, ``banner``, ``splash`` or ``discovery_splash``) couldn't be found.
+            At least one of the assets (``icon``, ``banner``, ``splash`` or ``discovery_splash``) couldn't be found.
         Forbidden
             You do not have permissions to edit the guild.
         HTTPException
