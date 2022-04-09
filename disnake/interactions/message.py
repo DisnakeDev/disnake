@@ -135,4 +135,7 @@ class MessageInteractionData:
         self.values: Optional[List[str]] = data.get("values")
 
     def __repr__(self):
-        return f"<MessageInteractionData custom_id={self.custom_id!r} component_type={self.component_type!r}>"
+        return (
+            f"<MessageInteractionData custom_id={self.custom_id!r} "
+            f"component_type={self.component_type!r} values={self.values!r}>"
+        )
