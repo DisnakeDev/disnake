@@ -784,7 +784,7 @@ class CustomActivity(BaseActivity):
             self.emoji = emoji
         else:
             raise TypeError(
-                f"Expected dict, str, PartialEmoji, or None, received {type(emoji)!r} instead."
+                f"Expected str, PartialEmoji, or None, received {type(emoji)!r} instead."
             )
 
     @property
