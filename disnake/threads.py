@@ -596,6 +596,7 @@ class Thread(Messageable, Hashable):
         invitable: bool = MISSING,
         slowmode_delay: int = MISSING,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
 
@@ -625,6 +626,10 @@ class Thread(Messageable, Hashable):
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+        reason: Optional[:class:`str`]
+            The reason for editing this thread. Shows up on the audit log.
+
+            .. versionadded:: 2.5
 
         Raises
         ------
@@ -652,7 +657,7 @@ class Thread(Messageable, Hashable):
         if slowmode_delay is not MISSING:
             payload["rate_limit_per_user"] = slowmode_delay
 
-        data = await self._state.http.edit_channel(self.id, **payload)
+        data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
         # The data payload will always be a Thread payload
         return Thread(data=data, state=self._state, guild=self.guild)  # type: ignore
 
