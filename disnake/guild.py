@@ -1191,6 +1191,7 @@ class Guild(Hashable):
         position: int = MISSING,
         topic: str = MISSING,
         slowmode_delay: int = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> TextChannel:
@@ -1253,6 +1254,11 @@ class Guild(Hashable):
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+            The default auto archive duration in minutes for threads created in this channel.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+
+            .. versionadded:: 2.5
         nsfw: :class:`bool`
             Whether mark the channel as NSFW or not.
         reason: Optional[:class:`str`]
@@ -1285,6 +1291,11 @@ class Guild(Hashable):
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
 
+        if default_auto_archive_duration is not MISSING:
+            options["default_auto_archive_duration"] = cast(
+                "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
+            )
+
         data = await self._create_channel(
             name,
             overwrites=overwrites,
@@ -1310,6 +1321,7 @@ class Guild(Hashable):
         user_limit: int = MISSING,
         rtc_region: Optional[VoiceRegion] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
+        nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> VoiceChannel:
         """|coro|
@@ -1346,6 +1358,10 @@ class Guild(Hashable):
 
             .. versionadded:: 2.0
 
+        nsfw: :class:`bool`
+            Whether to mark the channel as NSFW or not.
+
+            .. versionadded:: 2.5
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1378,6 +1394,9 @@ class Guild(Hashable):
 
         if video_quality_mode is not MISSING:
             options["video_quality_mode"] = video_quality_mode.value
+
+        if nsfw is not MISSING:
+            options["nsfw"] = nsfw
 
         data = await self._create_channel(
             name,
