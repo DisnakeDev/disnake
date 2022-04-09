@@ -2226,7 +2226,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             rate_limit_per_user=slowmode_delay or 0,
             files=files or None,
             reason=reason,
-            **params.payload,
+            **params.payload,  # type: ignore
         )
 
         if files is not MISSING:
