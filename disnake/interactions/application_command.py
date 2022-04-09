@@ -314,7 +314,7 @@ class ApplicationCommandInteractionDataOption:
 
     def __repr__(self):
         return (
-            f"<ApplicationCommandInteractionDataOption name={self.name!r} type{self.type!r} "
+            f"<ApplicationCommandInteractionDataOption name={self.name!r} type={self.type!r}>"
             f"value={self.value!r} focused={self.focused!r} options={self.options!r}>"
         )
 
