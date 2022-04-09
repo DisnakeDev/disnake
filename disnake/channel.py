@@ -1429,6 +1429,8 @@ class StageChannel(VocalGuildChannel):
             Requires the :attr:`~Permissions.mention_everyone` permission on the stage channel.
             Defaults to ``False``.
 
+            .. versionadded:: 2.5
+
         Raises
         ------
         InvalidArgument
