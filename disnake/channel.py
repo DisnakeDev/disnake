@@ -1861,7 +1861,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     last_thread_id: Optional[:class:`int`]
         The ID of the last created thread in this channel. It may
         *not* point to an existing or valid thread.
-    default_auto_archive_duration: Optional[:class:`int`]
+    default_auto_archive_duration: :class:`int`
         The default auto archive duration in minutes for threads created in this channel.
     """
 
