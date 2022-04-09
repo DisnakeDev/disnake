@@ -167,11 +167,11 @@ class PartialInviteGuild:
 
     verification_level: :class:`VerificationLevel`
         The partial guild's verification level.
-
     welcome_screen: Optional[:class:`WelcomeScreen`]
         The partial guild's welcome screen, if any.
 
         .. versionadded:: 2.5
+
     premium_subscription_count: :class:`int`
         The number of "boosts" this guild currently has.
 
