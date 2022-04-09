@@ -1943,6 +1943,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     async def _get_channel(self) -> ForumChannel:  # I wonder why this exists
         return self
 
+    typing = disnake.abc.Messageable.typing
+    trigger_typing = disnake.abc.Messageable.trigger_typing
+
     @property
     def type(self) -> ChannelType:
         return try_enum(ChannelType, self._type)
