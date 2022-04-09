@@ -1766,6 +1766,20 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         ret.sort(key=lambda c: (c.position, c.id))
         return ret
 
+    @property
+    def forum_channels(self) -> List[ForumChannel]:
+        """List[:class:`ForumChannel`]: Returns the forum channels that are under this category.
+
+        .. versionadded:: 2.5
+        """
+        ret = [
+            c
+            for c in self.guild.channels
+            if c.category_id == self.id and isinstance(c, ForumChannel)
+        ]
+        ret.sort(key=lambda c: (c.position, c.id))
+        return ret
+
     async def create_text_channel(self, name: str, **options: Any) -> TextChannel:
         """|coro|
 
@@ -1803,6 +1817,18 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created stage channel.
         """
         return await self.guild.create_stage_channel(name, category=self, **options)
+
+    async def create_forum_channel(self, name: str, **options: Any) -> ForumChannel:
+        """|coro|
+
+        A shortcut method to :meth:`Guild.create_forum_channel` to create a :class:`ForumChannel` in the category.
+
+        Returns
+        -------
+        :class:`ForumChannel`
+            The newly created forum channel.
+        """
+        return await self.guild.create_forum_channel(name, category=self, **options)
 
 
 class NewsChannel(TextChannel):
