@@ -1109,6 +1109,24 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             {"bitrate": self.bitrate, "user_limit": self.user_limit}, name=name, reason=reason
         )
 
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+
+        # voice channels cannot be edited by people who can't connect to them
+        # It also implicitly denies all other voice perms
+        if not base.connect:
+            denied = Permissions.voice()
+            denied.update(manage_channels=True, manage_roles=True)
+            base.value &= ~denied.value
+        return base
+
     def is_nsfw(self) -> bool:
         """Whether the channel is marked as NSFW.
 
