@@ -42,6 +42,7 @@ from typing import (
     Set,
     Tuple,
     Union,
+    cast,
     overload,
 )
 
@@ -69,6 +70,7 @@ from .enums import (
     VoiceRegion,
     WidgetStyle,
     try_enum,
+    try_enum_to_int,
 )
 from .errors import ClientException, HTTPException, InvalidArgument, InvalidData
 from .file import File
@@ -99,10 +101,11 @@ if TYPE_CHECKING:
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
+    from .threads import AnyThreadArchiveDuration
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
     from .types.integration import IntegrationType
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
-    from .types.threads import Thread as ThreadPayload
+    from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
     from .types.voice import GuildVoiceState
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
@@ -1458,6 +1461,7 @@ class Guild(Hashable):
         category: Optional[CategoryChannel] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> ForumChannel:
@@ -1489,8 +1493,11 @@ class Guild(Hashable):
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+            The default auto archive duration in minutes for threads created in this channel.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         nsfw: :class:`bool`
-            Whether mark the channel as NSFW or not.
+            Whether to mark the channel as NSFW or not.
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1520,6 +1527,11 @@ class Guild(Hashable):
 
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
+
+        if default_auto_archive_duration is not None:
+            options["default_auto_archive_duration"] = cast(
+                "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
+            )
 
         data = await self._create_channel(
             name,
