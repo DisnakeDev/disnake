@@ -33,7 +33,7 @@ from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .mixins import Hashable
-from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time, warn_deprecated
+from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
     "Thread",
@@ -151,7 +151,6 @@ class Thread(Messageable, Hashable):
         "_type",
         "_state",
         "_members",
-        "_archiver_id",
     )
 
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload):
@@ -193,7 +192,6 @@ class Thread(Messageable, Hashable):
 
     def _unroll_metadata(self, data: ThreadMetadata):
         self.archived = data["archived"]
-        self._archiver_id = _get_as_snowflake(data, "archiver_id")
         self.auto_archive_duration = data["auto_archive_duration"]
         self.archive_timestamp = parse_time(data["archive_timestamp"])
         self.locked = data.get("locked", False)
@@ -314,22 +312,6 @@ class Thread(Messageable, Hashable):
             If create_timestamp is provided by discord, that will be used instead of the time in the ID.
         """
         return self.create_timestamp or snowflake_time(self.id)
-
-    @property
-    def archiver_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: The user's ID that archived this thread.
-
-        As of June 10th, 2021, this value will always be ``None`` since Discord
-        doesn't provide this information anymore.
-
-        .. warning::
-
-            This property will be removed in a future version.
-        """
-        warn_deprecated(
-            "archiver_id is deprecated and will be removed in a future version.", stacklevel=2
-        )
-        return self._archiver_id
 
     @property
     def jump_url(self) -> str:
