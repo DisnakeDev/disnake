@@ -3169,7 +3169,6 @@ class Guild(Hashable):
         data = await self._state.http.get_invite(payload["code"])
 
         channel = self.get_channel(int(data["channel"]["id"]))
-        payload["revoked"] = False
         payload["temporary"] = False
         payload["max_uses"] = 0
         payload["max_age"] = 0
