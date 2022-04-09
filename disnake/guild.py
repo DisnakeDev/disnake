@@ -660,11 +660,11 @@ class Guild(Hashable):
 
     @property
     def forum_channels(self) -> List[ForumChannel]:
-        """List[:class:`StageChannel`]: A list of forum channels that belongs to this guild.
-
-        .. versionadded:: 2.5
+        """List[:class:`ForumChannel`]: A list of forum channels that belongs to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
+
+        .. versionadded:: 2.5
         """
         r = [ch for ch in self._channels.values() if isinstance(ch, ForumChannel)]
         r.sort(key=lambda c: (c.position, c.id))

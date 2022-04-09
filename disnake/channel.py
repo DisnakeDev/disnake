@@ -1770,6 +1770,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     def forum_channels(self) -> List[ForumChannel]:
         """List[:class:`ForumChannel`]: Returns the forum channels that are under this category.
 
+        This is sorted by the position and are in UI order from top to bottom.
+
         .. versionadded:: 2.5
         """
         ret = [
