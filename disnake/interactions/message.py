@@ -133,3 +133,6 @@ class MessageInteractionData:
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
         self.values: Optional[List[str]] = data.get("values")
+
+    def __repr__(self):
+        return f"<MessageInteractionData custom_id={self.custom_id!r} component_type={self.component_type!r}>"
