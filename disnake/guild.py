@@ -1456,14 +1456,14 @@ class Guild(Hashable):
         self,
         name: str,
         *,
-        topic: str = None,
-        reason: Optional[str] = None,
+        topic: Optional[str] = None,
         category: Optional[CategoryChannel] = None,
         position: int = MISSING,
         slowmode_delay: int = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        reason: Optional[str] = None,
     ) -> ForumChannel:
 
         """|coro|
@@ -1476,10 +1476,8 @@ class Guild(Hashable):
         ----------
         name: :class:`str`
             The channel's name.
-        overwrites: Dict[Union[:class:`Role`, :class:`Member`], :class:`PermissionOverwrite`]
-            A :class:`dict` of target (either a role or a member) to
-            :class:`PermissionOverwrite` to apply upon creation of a channel.
-            Useful for creating secret channels.
+        topic: Optional[:class:`str`]
+            The channel's topic.
         category: Optional[:class:`CategoryChannel`]
             The category to place the newly created channel under.
             The permissions will be automatically synced to category if no
@@ -1487,8 +1485,6 @@ class Guild(Hashable):
         position: :class:`int`
             The position in the channel list. This is a number that starts
             at 0. e.g. the top channel is position 0.
-        topic: :class:`str`
-            The channel's topic.
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
@@ -1498,6 +1494,10 @@ class Guild(Hashable):
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW or not.
+        overwrites: Dict[Union[:class:`Role`, :class:`Member`], :class:`PermissionOverwrite`]
+            A :class:`dict` of target (either a role or a member) to
+            :class:`PermissionOverwrite` to apply upon creation of a channel.
+            Useful for creating secret channels.
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
