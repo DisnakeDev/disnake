@@ -95,10 +95,6 @@ class CategoryChannel(_BaseGuildChannel):
     type: Literal[4]
 
 
-class StoreChannel(_BaseGuildChannel):
-    type: Literal[6]
-
-
 class _StageChannelOptional(TypedDict, total=False):
     rtc_region: Optional[str]
     topic: Optional[str]
@@ -137,7 +133,6 @@ GuildChannel = Union[
     NewsChannel,
     VoiceChannel,
     CategoryChannel,
-    StoreChannel,
     StageChannel,
     ThreadChannel,
 ]

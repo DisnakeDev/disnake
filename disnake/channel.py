@@ -73,7 +73,6 @@ __all__ = (
     "DMChannel",
     "CategoryChannel",
     "NewsChannel",
-    "StoreChannel",
     "GroupChannel",
     "PartialMessageable",
 )
@@ -91,7 +90,6 @@ if TYPE_CHECKING:
         DMChannel as DMChannelPayload,
         GroupDMChannel as GroupChannelPayload,
         StageChannel as StageChannelPayload,
-        StoreChannel as StoreChannelPayload,
         TextChannel as TextChannelPayload,
         VoiceChannel as VoiceChannelPayload,
     )
@@ -1817,191 +1815,6 @@ class NewsChannel(TextChannel):
     type: ChannelType = ChannelType.news
 
 
-class StoreChannel(disnake.abc.GuildChannel, Hashable):
-    """Represents a Discord guild store channel.
-
-    .. warning::
-
-        Store channels will be discontinued on March 1, 2022.
-        For more information read `here <https://support-dev.discord.com/hc/en-us/articles/4414590563479>`_.
-
-    .. container:: operations
-
-        .. describe:: x == y
-
-            Checks if two channels are equal.
-
-        .. describe:: x != y
-
-            Checks if two channels are not equal.
-
-        .. describe:: hash(x)
-
-            Returns the channel's hash.
-
-        .. describe:: str(x)
-
-            Returns the channel's name.
-
-    Attributes
-    ----------
-    name: :class:`str`
-        The channel's name.
-    guild: :class:`Guild`
-        The guild the channel belongs to.
-    id: :class:`int`
-        The channel's ID.
-    category_id: :class:`int`
-        The category channel ID this channel belongs to.
-    position: :class:`int`
-        The position in the channel list. This is a number that starts at 0. e.g. the
-        top channel is position 0.
-    nsfw: :class:`bool`
-        Whether the channel is marked as "not safe for work".
-
-        .. note::
-
-            To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
-    """
-
-    __slots__ = (
-        "name",
-        "id",
-        "guild",
-        "_state",
-        "nsfw",
-        "category_id",
-        "position",
-        "_overwrites",
-    )
-
-    def __init__(self, *, state: ConnectionState, guild: Guild, data: StoreChannelPayload):
-        self._state: ConnectionState = state
-        self.id: int = int(data["id"])
-        self._update(guild, data)
-
-    def __repr__(self) -> str:
-        return f"<StoreChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw}>"
-
-    def _update(self, guild: Guild, data: StoreChannelPayload) -> None:
-        self.guild: Guild = guild
-        self.name: str = data["name"]
-        self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
-        self.position: int = data["position"]
-        self.nsfw: bool = data.get("nsfw", False)
-        self._fill_overwrites(data)
-
-    @property
-    def _sorting_bucket(self) -> int:
-        return ChannelType.text.value
-
-    @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
-        return ChannelType.store
-
-    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(
-        self,
-        obj: Union[Member, Role],
-        /,
-        *,
-        ignore_timeout: bool = MISSING,
-    ) -> Permissions:
-        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
-
-        # store channels do not have voice related permissions
-        denied = Permissions.voice()
-        base.value &= ~denied.value
-        return base
-
-    def is_nsfw(self) -> bool:
-        """Whether the channel is marked as NSFW.
-
-        :return type: :class:`bool`
-        """
-        return self.nsfw
-
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
-    async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
-    ) -> StoreChannel:
-        return await self._clone_impl({"nsfw": self.nsfw}, name=name, reason=reason)
-
-    @overload
-    async def edit(
-        self,
-        *,
-        name: str = ...,
-        position: int = ...,
-        nsfw: bool = ...,
-        sync_permissions: bool = ...,
-        category: Optional[CategoryChannel],
-        reason: Optional[str],
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite],
-    ) -> Optional[StoreChannel]:
-        ...
-
-    @overload
-    async def edit(self) -> Optional[StoreChannel]:
-        ...
-
-    async def edit(self, *, reason=None, **options):
-        """|coro|
-
-        Edits the channel.
-
-        You must have :attr:`~Permissions.manage_channels` permission to
-        do this.
-
-        .. versionchanged:: 2.0
-            Edits are no longer in-place, the newly edited channel is returned instead.
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The new channel's name.
-        position: :class:`int`
-            The new channel's position.
-        nsfw: :class:`bool`
-            Whether to mark the channel as NSFW.
-        sync_permissions: :class:`bool`
-            Whether to sync permissions with the channel's new or pre-existing
-            category. Defaults to ``False``.
-        category: Optional[:class:`CategoryChannel`]
-            The new category for this channel. Can be ``None`` to remove the
-            category.
-        overwrites: :class:`Mapping`
-            A :class:`Mapping` of target (either a role or a member) to
-            :class:`PermissionOverwrite` to apply to the channel.
-
-            .. versionadded:: 1.3
-
-        reason: Optional[:class:`str`]
-            The reason for editing this channel. Shows up on the audit log.
-
-        Raises
-        ------
-        InvalidArgument
-            If position is less than 0 or greater than the number of channels, or if
-            the permission overwrite information is not in proper form.
-        Forbidden
-            You do not have permissions to edit the channel.
-        HTTPException
-            Editing the channel failed.
-
-        Returns
-        -------
-        Optional[:class:`.StoreChannel`]
-            The newly edited store channel. If the edit was only positional
-            then ``None`` is returned instead.
-        """
-        payload = await self._edit(options, reason=reason)
-        if payload is not None:
-            # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
-
-
 DMC = TypeVar("DMC", bound="DMChannel")
 
 
@@ -2359,8 +2172,6 @@ def _guild_channel_factory(channel_type: int):
         return CategoryChannel, value
     elif value is ChannelType.news:
         return TextChannel, value
-    elif value is ChannelType.store:
-        return StoreChannel, value
     elif value is ChannelType.stage_voice:
         return StageChannel, value
     else:
@@ -2403,7 +2214,6 @@ def _channel_type_factory(
         VoiceChannel: [ChannelType.voice],
         GroupChannel: [ChannelType.group],
         CategoryChannel: [ChannelType.category],
-        StoreChannel: [ChannelType.store],
         NewsChannel: [ChannelType.news],
         Thread: [ChannelType.news_thread, ChannelType.public_thread, ChannelType.private_thread],
         StageChannel: [ChannelType.stage_voice],
