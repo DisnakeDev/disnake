@@ -985,7 +985,9 @@ class InteractionResponse:
         if attachments is MISSING and (file or files):
             attachments = message.attachments
         if attachments is not MISSING:
-            payload["attachments"] = [a.to_dict() for a in attachments]
+            payload["attachments"] = (
+                [] if attachments is None else [a.to_dict() for a in attachments]
+            )
 
         if view is not MISSING and components is not MISSING:
             raise TypeError("cannot mix view and components keyword arguments")

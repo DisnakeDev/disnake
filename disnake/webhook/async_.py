@@ -523,7 +523,7 @@ def handle_message_parameters(
         payload["components"] = [] if components is None else components_to_dict(components)
 
     if attachments is not MISSING:
-        payload["attachments"] = [a.to_dict() for a in attachments]
+        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
 
     payload["tts"] = tts
     if avatar_url:
