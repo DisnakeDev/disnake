@@ -151,7 +151,7 @@ class WelcomeScreen:
 
     @property
     def enabled(self) -> bool:
-        """bool: Whether the welcome screen is displayed to users.
+        """:class:`bool`: Whether the welcome screen is displayed to users.
         This is equivalent to checking if ``WELCOME_SCREEN_ENABLED`` is present in :attr:`Guild.features`.
         """
         return "WELCOME_SCREEN_ENABLED" in self._guild.features
@@ -164,7 +164,9 @@ class WelcomeScreen:
         welcome_channels: List[WelcomeScreenChannel] = MISSING,
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
-        """Edits the welcome screen.
+        """|coro|
+
+        Edits the welcome screen.
 
         You must have the :attr:`~Permissions.manage_guild` permission to
         use this.
@@ -172,7 +174,7 @@ class WelcomeScreen:
         All fields are optional and nullable.
 
         Parameters
-        -----------
+        ----------
         enabled: :class:`bool`
             Whether the welcome screen is enabled.
         description: :class:`str`
@@ -183,14 +185,14 @@ class WelcomeScreen:
             The reason for editing the welcome screen. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to change the welcome screen.
         HTTPException
             Editing the welcome screen failed.
 
         Returns
-        --------
+        -------
         :class:`WelcomeScreen`
             The newly edited welcome screen.
         """

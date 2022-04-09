@@ -2043,10 +2043,12 @@ class Guild(Hashable):
         description: str = MISSING,
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
-        """This is a lower level method to :meth:`WelcomeScreen.edit` that allows you
+        """|coro|
+
+        This is a lower level method to :meth:`WelcomeScreen.edit` that allows you
         to edit the welcome screen without fetching it and save an API request.
 
-        .. versionadded:: 2.4
+        .. versionadded:: 2.5
 
         Parameters
         ----------
@@ -2069,7 +2071,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        WelcomeScreen
+        :class:`WelcomeScreen`
             The newly edited welcome screen.
         """
         payload = {}
