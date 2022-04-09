@@ -12,9 +12,9 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 # Firstly, components do not have to be sent as part of a view. Instead, they can be sent as-is.
 # Take special note of the fact that `custom_id`s have been explicitly set on these components.
 
-# The main advantage of this is that listeners are, by nature, persistent. Listeners also do not
-# suffer views' problem of causing a memory leak, where view instances will keep piling up.
+# The main advantage of this is that listeners are, by nature, persistent.
 # Each listener is stored on the bot strictly once, and are shared by all components.
+# Because of this, their memory footprint will generally be smaller than that of an equivalent view.
 
 
 @bot.command()
