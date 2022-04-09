@@ -383,16 +383,18 @@ A lot of disnake models work out of the gate as a parameter:
 - :class:`TextChannel`
 - :class:`VoiceChannel`
 - :class:`StageChannel` (since v1.7)
-- :class:`StoreChannel` (since v1.7)
 - :class:`CategoryChannel`
-- :class:`Invite`
-- :class:`Guild` (since v1.7)
+- :class:`Thread` (since v2.0)
+- :class:`Colour`
 - :class:`Role`
 - :class:`Game`
-- :class:`Colour`
+- :class:`Invite`
+- :class:`Guild` (since v1.7)
 - :class:`Emoji`
 - :class:`PartialEmoji`
-- :class:`Thread` (since v2.0)
+- :class:`GuildSticker` (since v2.0)
+- :class:`Permissions` (since v2.3)
+- :class:`GuildScheduledEvent` (since v2.5)
 
 Having any of these set as the converter will intelligently convert the argument to the appropriate target type you
 specify.
@@ -400,47 +402,51 @@ specify.
 Under the hood, these are implemented by the :ref:`ext_commands_adv_converters` interface. A table of the equivalent
 converter is given below:
 
-+--------------------------+-------------------------------------------------+
-|     Discord Class        |                    Converter                    |
-+--------------------------+-------------------------------------------------+
-| :class:`Object`          | :class:`~ext.commands.ObjectConverter`          |
-+--------------------------+-------------------------------------------------+
-| :class:`Member`          | :class:`~ext.commands.MemberConverter`          |
-+--------------------------+-------------------------------------------------+
-| :class:`User`            | :class:`~ext.commands.UserConverter`            |
-+--------------------------+-------------------------------------------------+
-| :class:`Message`         | :class:`~ext.commands.MessageConverter`         |
-+--------------------------+-------------------------------------------------+
-| :class:`PartialMessage`  | :class:`~ext.commands.PartialMessageConverter`  |
-+--------------------------+-------------------------------------------------+
-| :class:`.GuildChannel`   | :class:`~ext.commands.GuildChannelConverter`    |
-+--------------------------+-------------------------------------------------+
-| :class:`TextChannel`     | :class:`~ext.commands.TextChannelConverter`     |
-+--------------------------+-------------------------------------------------+
-| :class:`VoiceChannel`    | :class:`~ext.commands.VoiceChannelConverter`    |
-+--------------------------+-------------------------------------------------+
-| :class:`StageChannel`    | :class:`~ext.commands.StageChannelConverter`    |
-+--------------------------+-------------------------------------------------+
-| :class:`StoreChannel`    | :class:`~ext.commands.StoreChannelConverter`    |
-+--------------------------+-------------------------------------------------+
-| :class:`CategoryChannel` | :class:`~ext.commands.CategoryChannelConverter` |
-+--------------------------+-------------------------------------------------+
-| :class:`Invite`          | :class:`~ext.commands.InviteConverter`          |
-+--------------------------+-------------------------------------------------+
-| :class:`Guild`           | :class:`~ext.commands.GuildConverter`           |
-+--------------------------+-------------------------------------------------+
-| :class:`Role`            | :class:`~ext.commands.RoleConverter`            |
-+--------------------------+-------------------------------------------------+
-| :class:`Game`            | :class:`~ext.commands.GameConverter`            |
-+--------------------------+-------------------------------------------------+
-| :class:`Colour`          | :class:`~ext.commands.ColourConverter`          |
-+--------------------------+-------------------------------------------------+
-| :class:`Emoji`           | :class:`~ext.commands.EmojiConverter`           |
-+--------------------------+-------------------------------------------------+
-| :class:`PartialEmoji`    | :class:`~ext.commands.PartialEmojiConverter`    |
-+--------------------------+-------------------------------------------------+
-| :class:`Thread`          | :class:`~ext.commands.ThreadConverter`          |
-+--------------------------+-------------------------------------------------+
++------------------------------+--------------------------------------------------------+
+|     Discord Class            |                    Converter                           |
++------------------------------+--------------------------------------------------------+
+| :class:`Object`              | :class:`~ext.commands.ObjectConverter`                 |
++------------------------------+--------------------------------------------------------+
+| :class:`Member`              | :class:`~ext.commands.MemberConverter`                 |
++------------------------------+--------------------------------------------------------+
+| :class:`User`                | :class:`~ext.commands.UserConverter`                   |
++------------------------------+--------------------------------------------------------+
+| :class:`Message`             | :class:`~ext.commands.MessageConverter`                |
++------------------------------+--------------------------------------------------------+
+| :class:`PartialMessage`      | :class:`~ext.commands.PartialMessageConverter`         |
++------------------------------+--------------------------------------------------------+
+| :class:`.GuildChannel`       | :class:`~ext.commands.GuildChannelConverter`           |
++------------------------------+--------------------------------------------------------+
+| :class:`TextChannel`         | :class:`~ext.commands.TextChannelConverter`            |
++------------------------------+--------------------------------------------------------+
+| :class:`VoiceChannel`        | :class:`~ext.commands.VoiceChannelConverter`           |
++------------------------------+--------------------------------------------------------+
+| :class:`StageChannel`        | :class:`~ext.commands.StageChannelConverter`           |
++------------------------------+--------------------------------------------------------+
+| :class:`CategoryChannel`     | :class:`~ext.commands.CategoryChannelConverter`        |
++------------------------------+--------------------------------------------------------+
+| :class:`Thread`              | :class:`~ext.commands.ThreadConverter`                 |
++------------------------------+--------------------------------------------------------+
+| :class:`Colour`              | :class:`~ext.commands.ColourConverter`                 |
++------------------------------+--------------------------------------------------------+
+| :class:`Role`                | :class:`~ext.commands.RoleConverter`                   |
++------------------------------+--------------------------------------------------------+
+| :class:`Game`                | :class:`~ext.commands.GameConverter`                   |
++------------------------------+--------------------------------------------------------+
+| :class:`Invite`              | :class:`~ext.commands.InviteConverter`                 |
++------------------------------+--------------------------------------------------------+
+| :class:`Guild`               | :class:`~ext.commands.GuildConverter`                  |
++------------------------------+--------------------------------------------------------+
+| :class:`Emoji`               | :class:`~ext.commands.EmojiConverter`                  |
++------------------------------+--------------------------------------------------------+
+| :class:`PartialEmoji`        | :class:`~ext.commands.PartialEmojiConverter`           |
++------------------------------+--------------------------------------------------------+
+| :class:`GuildSticker`        | :class:`~ext.commands.GuildStickerConverter`           |
++------------------------------+--------------------------------------------------------+
+| :class:`Permissions`         | :class:`~ext.commands.PermissionsConverter`            |
++------------------------------+--------------------------------------------------------+
+| :class:`GuildScheduledEvent` | :class:`~ext.commands.GuildScheduledEventConverter`    |
++------------------------------+--------------------------------------------------------+
 
 By providing the converter it allows us to use them as building blocks for another converter:
 

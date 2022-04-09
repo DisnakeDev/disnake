@@ -40,6 +40,7 @@ from typing import (
 )
 
 from .audit_logs import AuditLogEntry
+from .bans import BanEntry
 from .errors import NoMoreItems
 from .object import Object
 from .utils import maybe_coroutine, snowflake_time, time_snowflake
@@ -47,6 +48,7 @@ from .utils import maybe_coroutine, snowflake_time, time_snowflake
 __all__ = (
     "ReactionIterator",
     "HistoryIterator",
+    "BanIterator",
     "AuditLogIterator",
     "GuildIterator",
     "MemberIterator",
@@ -59,8 +61,8 @@ if TYPE_CHECKING:
     from .member import Member
     from .message import Message
     from .threads import Thread
-    from .types.audit_log import AuditLog as AuditLogPayload
-    from .types.guild import Guild as GuildPayload
+    from .types.audit_log import AuditLog as AuditLogPayload, AuditLogEntry as AuditLogEntryPayload
+    from .types.guild import Ban as BanPayload, Guild as GuildPayload
     from .types.message import Message as MessagePayload
     from .types.threads import Thread as ThreadPayload
     from .types.user import PartialUser as PartialUserPayload
@@ -204,9 +206,6 @@ class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
             raise NoMoreItems()
 
     async def fill_users(self):
-        # this is a hack because >circular imports<
-        from .user import User
-
         if self.limit > 0:
             retrieve = min(self.limit, 100)
 
@@ -221,14 +220,14 @@ class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
 
             for element in reversed(data):
                 if self.guild is None or isinstance(self.guild, Object):
-                    await self.users.put(User(state=self.state, data=element))
+                    await self.users.put(self.state.create_user(data=element))
                 else:
                     member_id = int(element["id"])
                     member = self.guild.get_member(member_id)
                     if member is not None:
                         await self.users.put(member)
                     else:
-                        await self.users.put(User(state=self.state, data=element))
+                        await self.users.put(self.state.create_user(data=element))
 
 
 class HistoryIterator(_AsyncIterator["Message"]):
@@ -293,7 +292,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
         self.after = after or OLDEST_OBJECT
         self.around = around
 
-        self._filter = None  # message dict -> bool
+        self._filter: Optional[Callable[[MessagePayload], bool]] = None
 
         self.state = self.messageable._state
         self.logs_from = self.state.http.logs_from
@@ -313,7 +312,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
             elif self.before:
                 self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
             elif self.after:
-                self._filter = lambda m: self.after.id < int(m["id"])  # type: ignore
+                self._filter = lambda m: self.after.id < int(m["id"])
         else:
             if self.reverse:
                 self._retrieve_messages = self._retrieve_messages_after_strategy  # type: ignore
@@ -398,6 +397,108 @@ class HistoryIterator(_AsyncIterator["Message"]):
         return []
 
 
+class BanIterator(_AsyncIterator["BanEntry"]):
+    """Iterator for receiving a guild's bans.
+
+    The bans endpoint has two behaviours we care about here:
+    If ``before`` is specified, the bans endpoint returns the ``limit``
+    bans with user ids before ``before``, sorted with the oldest first. For filling over
+    1000 bans, update the ``before`` parameter to the newest user received.
+    If ``after`` is specified, it returns the ``limit`` bans with user ids after
+    ``after``, sorted with the oldest first. For filling over 1000 bans, update the
+    ``after`` parameter to the oldest user received.
+
+    A note that if both ``before`` and ``after`` are specified, ``after`` is ignored by the
+    bans endpoint.
+
+    Parameters
+    -----------
+    guild: :class:`~disnake.Guild`
+        The guild to get bans from.
+    limit: Optional[:class:`int`]
+        Maximum number of bans to retrieve.
+    before: Optional[:class:`abc.Snowflake`]
+        Object before which all bans must be.
+    after: Optional[:class:`abc.Snowflake`]
+        Object after which all bans must be.
+    """
+
+    def __init__(
+        self,
+        guild: Guild,
+        limit: Optional[int] = None,
+        before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
+    ):
+        self.guild = guild
+        self.limit = limit
+        self.before = before
+        self.after = after or OLDEST_OBJECT
+
+        self.state = self.guild._state
+        self.get_bans = self.state.http.get_bans
+        self.bans = asyncio.Queue()
+
+        self._filter: Optional[Callable[[BanPayload], bool]] = None
+
+        if self.before:
+            self._retrieve_bans = self._retrieve_bans_before_strategy
+            if self.after != OLDEST_OBJECT:
+                self._filter = lambda b: int(b["user"]["id"]) > self.after.id
+        else:
+            self._retrieve_bans = self._retrieve_bans_after_strategy
+
+    async def next(self) -> BanEntry:
+        if self.bans.empty():
+            await self.fill_bans()
+
+        try:
+            return self.bans.get_nowait()
+        except asyncio.QueueEmpty:
+            raise NoMoreItems()
+
+    def _get_retrieve(self) -> bool:
+        self.retrieve = min(self.limit, 1000) if self.limit is not None else 1000
+        return self.retrieve > 0
+
+    async def fill_bans(self):
+        if self._get_retrieve():
+            data = await self._retrieve_bans(self.retrieve)
+            if len(data) < 1000:
+                self.limit = 0  # terminate the infinite loop
+
+            if self._filter:
+                data = filter(self._filter, data)
+
+            for element in data:
+                await self.bans.put(
+                    BanEntry(
+                        user=self.state.create_user(data=element["user"]),
+                        reason=element["reason"],
+                    )
+                )
+
+    async def _retrieve_bans_before_strategy(self, retrieve: int) -> List[BanPayload]:
+        """Retrieve bans using before parameter."""
+        before = self.before.id if self.before else None
+        data: List[BanPayload] = await self.get_bans(self.guild.id, retrieve, before=before)
+        if len(data):
+            if self.limit is not None:
+                self.limit -= len(data)
+            self.before = Object(id=int(data[0]["user"]["id"]))
+        return data
+
+    async def _retrieve_bans_after_strategy(self, retrieve: int) -> List[BanPayload]:
+        """Retrieve bans using after parameter."""
+        after = self.after.id if self.after else None
+        data: List[BanPayload] = await self.get_bans(self.guild.id, retrieve, after=after)
+        if len(data):
+            if self.limit is not None:
+                self.limit -= len(data)
+            self.after = Object(id=int(data[-1]["user"]["id"]))
+        return data
+
+
 class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
     def __init__(
         self,
@@ -430,7 +531,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         self._users = {}
         self._state = guild._state
 
-        self._filter = None  # entry dict -> bool
+        self._filter: Optional[Callable[[AuditLogEntryPayload], bool]] = None
 
         self.entries = asyncio.Queue()
 
@@ -495,8 +596,6 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         return r > 0
 
     async def _fill(self):
-        from .user import User
-
         if self._get_retrieve():
             users, data = await self._strategy(self.retrieve)
             if len(data) < 100:
@@ -508,7 +607,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
                 data = filter(self._filter, data)
 
             for user in users:
-                u = User(data=user, state=self._state)
+                u = self._state.create_user(data=user)
                 self._users[u.id] = u
 
             for element in data:

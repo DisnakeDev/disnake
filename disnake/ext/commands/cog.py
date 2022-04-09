@@ -24,6 +24,7 @@ DEALINGS IN THE SOFTWARE.
 """
 from __future__ import annotations
 
+import asyncio
 import inspect
 from typing import (
     TYPE_CHECKING,
@@ -185,7 +186,7 @@ class CogMeta(type):
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
-                elif inspect.iscoroutinefunction(value):
+                elif asyncio.iscoroutinefunction(value):
                     try:
                         getattr(value, "__cog_listener__")
                     except AttributeError:
@@ -244,11 +245,11 @@ class Cog(metaclass=CogMeta):
         # r.e type ignore, type-checker complains about overriding a ClassVar
         self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore
 
-        lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}  # type: ignore
+        lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}
 
         # Update the Command instances dynamically as well
         for command in self.__cog_commands__:
-            setattr(self, command.callback.__name__, command)  # type: ignore
+            setattr(self, command.callback.__name__, command)
             parent = command.parent
             if parent is not None:
                 # Get the latest parent reference
@@ -404,7 +405,7 @@ class Cog(metaclass=CogMeta):
             actual = func
             if isinstance(actual, staticmethod):
                 actual = actual.__func__
-            if not inspect.iscoroutinefunction(actual):
+            if not asyncio.iscoroutinefunction(actual):
                 raise TypeError("Listener function must be a coroutine function.")
             actual.__cog_listener__ = True
             to_assign = name or actual.__name__
@@ -810,8 +811,8 @@ class Cog(metaclass=CogMeta):
                 elif isinstance(app_command, InvokableMessageCommand):
                     bot.remove_message_command(app_command.name)
 
-            for _, method_name in self.__cog_listeners__:
-                bot.remove_listener(getattr(self, method_name))
+            for name, method_name in self.__cog_listeners__:
+                bot.remove_listener(getattr(self, method_name), name)
 
             if cls.bot_check is not Cog.bot_check:
                 bot.remove_check(self.bot_check)  # type: ignore

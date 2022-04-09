@@ -33,11 +33,13 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
+    Generic,
     List,
     Literal,
     NamedTuple,
     Optional,
     Tuple,
+    TypeVar,
     Union,
     overload,
 )
@@ -621,11 +623,14 @@ class _FriendlyHttpAttributeErrorHelper:
         raise AttributeError("PartialWebhookState does not support http methods.")
 
 
-class _WebhookState:
+WebhookT = TypeVar("WebhookT", bound="BaseWebhook")
+
+
+class _WebhookState(Generic[WebhookT]):
     __slots__ = ("_parent", "_webhook")
 
-    def __init__(self, webhook: Any, parent: Optional[Union[ConnectionState, _WebhookState]]):
-        self._webhook: Any = webhook
+    def __init__(self, webhook: WebhookT, parent: Optional[Union[ConnectionState, _WebhookState]]):
+        self._webhook: WebhookT = webhook
 
         self._parent: Optional[ConnectionState]
         if isinstance(parent, _WebhookState):
@@ -676,7 +681,7 @@ class WebhookMessage(Message):
     .. versionadded:: 1.6
     """
 
-    _state: _WebhookState
+    _state: _WebhookState[Webhook]
 
     async def edit(
         self,
@@ -708,7 +713,7 @@ class WebhookMessage(Message):
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the ``embeds`` parameter.
             Could be ``None`` to remove the embed.
@@ -1326,7 +1331,7 @@ class Webhook(BaseWebhook):
     @overload
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1348,7 +1353,7 @@ class Webhook(BaseWebhook):
     @overload
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1369,7 +1374,7 @@ class Webhook(BaseWebhook):
 
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1401,7 +1406,7 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        content: :class:`str`
+        content: Optional[:class:`str`]
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1642,7 +1647,7 @@ class Webhook(BaseWebhook):
         message_id: :class:`int`
             The ID of the message to edit.
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.

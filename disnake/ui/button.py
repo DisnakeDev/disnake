@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import inspect
+import asyncio
 import os
 from typing import TYPE_CHECKING, Callable, Optional, Tuple, Type, TypeVar, Union
 
@@ -239,7 +239,7 @@ def button(
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], DecoratedItem[Button]]:
+) -> Callable[[ItemCallbackType[Button]], DecoratedItem[Button]]:
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -276,8 +276,8 @@ def button(
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    def decorator(func: ItemCallbackType) -> DecoratedItem[Button]:
-        if not inspect.iscoroutinefunction(func):
+    def decorator(func: ItemCallbackType[Button]) -> DecoratedItem[Button]:
+        if not asyncio.iscoroutinefunction(func):
             raise TypeError("button function must be a coroutine function")
 
         func.__discord_ui_model_type__ = Button

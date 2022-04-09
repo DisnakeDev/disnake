@@ -59,6 +59,26 @@ let showHideSidebar;
 document.addEventListener('DOMContentLoaded', () => {
   mobileSearch = new SearchBar();
 
+
+  const search_box = document.querySelector(".search input[type='search']");
+  const updateSearchPlaceholder = function() {
+    if (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) {
+      if (!search_box.classList.contains("mobile-search")) {
+        search_box.classList.add("mobile-search");
+        search_box.placeholder = search_box.getAttribute("placeholder-mobile");
+      }
+    } else {
+      if (search_box.classList.contains("mobile-search")) {
+        search_box.classList.remove("mobile-search");
+        search_box.placeholder = search_box.getAttribute("placeholder-desktop");
+      }
+    }
+  }
+  // Alter search box text for small screen sizes to reduce clipping
+  window.addEventListener("resize", updateSearchPlaceholder);
+  updateSearchPlaceholder();
+
+
   bottomHeightThreshold = document.documentElement.scrollHeight - 30;
   sections = document.querySelectorAll('section');
   hamburgerToggle = document.getElementById('hamburger-toggle');
@@ -193,9 +213,51 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector("#dark-mode-switch .knob").classList.add(color_scheme);
 });
 
-document.addEventListener('keydown', (event) => {
-  if (event.code == "Escape" && activeModal) {
-    activeModal.close();
+
+function focusSearch() {
+  $('input[name=q]').first().focus();
+}
+
+
+function unfocusSearch() {
+  $('input[name=q]').first().blur();
+}
+
+
+$(document).keydown((event) => {
+  if (event.altKey || event.metaKey)
+    return;
+
+  const focusedElement = document.activeElement;
+  if (["TEXTAREA", "INPUT", "SELECT", "BUTTON"].includes(focusedElement.tagName)) {
+    // handle `escape` in search field
+    if (!event.ctrlKey && !event.shiftKey && event.key === "Escape" && $('input[name=q]').first().is(focusedElement)) {
+      unfocusSearch();
+      return false;
+    }
+    // otherwise, ignore all key presses in inputs
+    return;
+  }
+
+  if (!event.ctrlKey) {
+    // close modal using `escape`, if modal exists
+    if (!event.shiftKey && event.key === "Escape" && activeModal) {
+      activeModal.close();
+      return false;
+    }
+
+    // focus search using `/` or `s`
+    // (not checking `shiftKey` for `/` since some keyboards need it)
+    if (event.key === "/" || (!event.shiftKey && event.key === "s")) {
+      focusSearch();
+      return false;
+    }
+  }
+
+  // focus search using `ctrl+k`
+  if (!event.shiftKey && event.ctrlKey && event.key == "k") {
+    focusSearch();
+    return false;
   }
 });
 

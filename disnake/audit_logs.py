@@ -124,9 +124,9 @@ def _transform_overwrites(
         ow_type = elem["type"]
         ow_id = int(elem["id"])
         target = None
-        if ow_type == "0":
+        if ow_type == 0:
             target = entry.guild.get_role(ow_id)
-        elif ow_type == "1":
+        elif ow_type == 1:
             target = entry._get_member(ow_id)
 
         if target is None:
@@ -189,6 +189,14 @@ def _transform_privacy_level(
     return enums.try_enum(enums.StagePrivacyLevel, data)
 
 
+def _transform_guild_scheduled_event_image(
+    entry: AuditLogEntry, data: Optional[str]
+) -> Optional[Asset]:
+    if data is None:
+        return None
+    return Asset._from_guild_scheduled_event_image(entry._state, entry._target_id, data)  # type: ignore
+
+
 class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
@@ -241,6 +249,7 @@ class AuditLogChanges:
         'tags':                          ('emoji', None),
         'default_message_notifications': ('default_notifications', _enum_transformer(enums.NotificationLevel)),
         'communication_disabled_until':  ('timeout', _transform_datetime),
+        'image_hash':                    ('image', _transform_guild_scheduled_event_image),
         'region':                        (None, _enum_transformer(enums.VoiceRegion)),
         'rtc_region':                    (None, _enum_transformer(enums.VoiceRegion)),
         'video_quality_mode':            (None, _enum_transformer(enums.VideoQualityMode)),
@@ -319,7 +328,7 @@ class AuditLogChanges:
             setattr(first, "roles", [])
 
         data = []
-        g: Guild = entry.guild  # type: ignore
+        g: Guild = entry.guild
 
         for e in elem:
             role_id = int(e["id"])
@@ -549,7 +558,7 @@ class AuditLogEntry(Hashable):
         return self.guild
 
     def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
-        return self.guild.get_channel(target_id) or Object(id=target_id)  # type: ignore
+        return self.guild.get_channel(target_id) or Object(id=target_id)
 
     def _convert_target_user(self, target_id: int) -> Union[Member, User, None]:
         return self._get_member(target_id)

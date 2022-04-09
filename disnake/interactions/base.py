@@ -68,7 +68,6 @@ if TYPE_CHECKING:
         CategoryChannel,
         PartialMessageable,
         StageChannel,
-        StoreChannel,
         TextChannel,
         VoiceChannel,
     )
@@ -95,7 +94,6 @@ if TYPE_CHECKING:
         StageChannel,
         TextChannel,
         CategoryChannel,
-        StoreChannel,
         Thread,
         PartialMessageable,
     ]
@@ -321,8 +319,8 @@ class Interaction:
 
     async def edit_original_message(
         self,
-        *,
         content: Optional[str] = MISSING,
+        *,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -351,7 +349,7 @@ class Interaction:
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
@@ -498,7 +496,7 @@ class Interaction:
 
     async def send(
         self,
-        content: Optional[Any] = None,
+        content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -578,7 +576,7 @@ class Interaction:
         else:
             sender = self.response.send_message
         await sender(
-            content=content,  # type: ignore
+            content=content,
             embed=embed,
             embeds=embeds,
             file=file,
@@ -698,7 +696,7 @@ class InteractionResponse:
 
     async def send_message(
         self,
-        content: Optional[Any] = None,
+        content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -854,8 +852,8 @@ class InteractionResponse:
 
     async def edit_message(
         self,
+        content: Optional[str] = MISSING,
         *,
-        content: Optional[Any] = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -870,6 +868,10 @@ class InteractionResponse:
         Responds to this interaction by editing the original message of
         a component interaction or modal interaction (if the modal was sent in
         response to a component interaction).
+
+        .. versionchanged:: 2.5
+
+            Now supports editing the original message of modal interactions.
 
         .. note::
             If the original message has embeds with images that were created from local files
@@ -1227,7 +1229,7 @@ class InteractionMessage(Message):
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.

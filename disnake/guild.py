@@ -42,7 +42,6 @@ from typing import (
     Set,
     Tuple,
     Union,
-    cast,
     overload,
 )
 
@@ -52,6 +51,7 @@ from .app_commands import (
     PartialGuildApplicationCommandPermissions,
 )
 from .asset import Asset
+from .bans import BanEntry
 from .channel import *
 from .channel import _guild_channel_factory, _threaded_guild_channel_factory
 from .colour import Colour
@@ -76,7 +76,7 @@ from .flags import SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
 from .integrations import Integration, _integration_factory
 from .invite import Invite
-from .iterators import AuditLogIterator, MemberIterator
+from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
 from .permissions import PermissionOverwrite
@@ -96,7 +96,7 @@ MISSING = utils.MISSING
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime, User as ABCUser
     from .app_commands import APIApplicationCommand
-    from .channel import CategoryChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel
+    from .channel import CategoryChannel, StageChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
@@ -108,13 +108,8 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
 
-    GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel]
+    GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
-
-
-class BanEntry(NamedTuple):
-    reason: Optional[str]
-    user: User
 
 
 class _GuildLimit(NamedTuple):
@@ -206,7 +201,6 @@ class Guild(Hashable):
         - ``ANIMATED_BANNER``: Guild can upload an animated banner.
         - ``ANIMATED_ICON``: Guild can upload an animated icon.
         - ``BANNER``: Guild can upload and use a banner. (i.e. :attr:`.banner`)
-        - ``COMMERCE``: Guild can sell things using store channels.
         - ``COMMUNITY``: Guild is a community server.
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
         - ``ENABLED_DISCOVERABLE_BEFORE``: Guild had Server Discovery enabled at least once.
@@ -403,11 +397,10 @@ class Guild(Hashable):
         return f"<Guild {inner}>"
 
     def _update_voice_state(
-        self, data: GuildVoiceState, channel_id: int
+        self, data: GuildVoiceState, channel_id: Optional[int]
     ) -> Tuple[Optional[Member], VoiceState, VoiceState]:
         user_id = int(data["user_id"])
-        channel = self.get_channel(channel_id)
-        channel = cast(Optional[VocalGuildChannel], channel)
+        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # type: ignore
         try:
             # check if we should remove the voice state from cache
             if channel is None:
@@ -509,7 +502,7 @@ class Guild(Hashable):
         if member_count is not None:
             self._member_count: int = member_count
 
-        self.name: str = guild.get("name")
+        self.name: str = guild.get("name", "")
         self._region: VoiceRegion = try_enum(VoiceRegion, guild.get("region"))
         self.verification_level: VerificationLevel = try_enum(
             VerificationLevel, guild.get("verification_level")
@@ -520,7 +513,7 @@ class Guild(Hashable):
         self.explicit_content_filter: ContentFilter = try_enum(
             ContentFilter, guild.get("explicit_content_filter", 0)
         )
-        self.afk_timeout: int = guild.get("afk_timeout")
+        self.afk_timeout: int = guild.get("afk_timeout", 0)
         self._icon: Optional[str] = guild.get("icon")
         self._banner: Optional[str] = guild.get("banner")
         self.unavailable: bool = guild.get("unavailable", False)
@@ -531,7 +524,7 @@ class Guild(Hashable):
             role = Role(guild=self, data=r, state=state)
             self._roles[role.id] = role
 
-        self.mfa_level: MFALevel = guild.get("mfa_level")
+        self.mfa_level: MFALevel = guild.get("mfa_level", 0)
         self.emojis: Tuple[Emoji, ...] = tuple(
             map(lambda d: state.store_emoji(self, d), guild.get("emojis", []))
         )
@@ -586,7 +579,7 @@ class Guild(Hashable):
         self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(utils._get_as_snowflake(guild, "afk_channel_id"))  # type: ignore
 
         for obj in guild.get("voice_states", []):
-            self._update_voice_state(obj, int(obj["channel_id"]))
+            self._update_voice_state(obj, utils._get_as_snowflake(obj, "channel_id"))
 
     # TODO: refactor/remove?
     def _sync(self, data: GuildPayload) -> None:
@@ -605,7 +598,7 @@ class Guild(Hashable):
         if "channels" in data:
             channels = data["channels"]
             for c in channels:
-                factory, ch_type = _guild_channel_factory(c["type"])
+                factory, _ = _guild_channel_factory(c["type"])
                 if factory:
                     self._add_channel(factory(guild=self, data=c, state=self._state))  # type: ignore
 
@@ -1044,7 +1037,7 @@ class Guild(Hashable):
         .. deprecated:: 2.5
 
             VoiceRegion is no longer set on the guild, and is set on the individual voice channels instead.
-            See :attr:`VoiceChannel.region` instead.
+            See :attr:`VoiceChannel.rtc_region` and :attr:`StageChannel.rtc_region` instead.
         """
         utils.warn_deprecated(
             "Guild.region is deprecated and will be removed in a future version.", stacklevel=2
@@ -1613,7 +1606,7 @@ class Guild(Hashable):
 
             .. deprecated:: 2.5
 
-                Use :attr:`VoiceChannel.region` or :attr:`StageChannel.region` instead.
+                Use :func:`VoiceChannel.edit` or :func:`StageChannel.edit` with ``rtc_region`` instead.
 
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
@@ -1815,7 +1808,7 @@ class Guild(Hashable):
         data = await self._state.http.get_all_guild_channels(self.id)
 
         def convert(d):
-            factory, ch_type = _guild_channel_factory(d["type"])
+            factory, _ = _guild_channel_factory(d["type"])
             if factory is None:
                 raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(d))
 
@@ -1930,6 +1923,12 @@ class Guild(Hashable):
         """|coro|
 
         Creates a :class:`GuildScheduledEvent`.
+
+        If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
+
+        - ``channel_id`` should be not be set
+        - ``entity_metadata`` with a location field must be provided
+        - ``scheduled_end_time`` must be provided
 
         .. versionadded:: 2.3
 
@@ -2256,31 +2255,63 @@ class Guild(Hashable):
         channel: GuildChannel = factory(guild=self, state=self._state, data=data)  # type: ignore
         return channel
 
-    async def bans(self) -> List[BanEntry]:
-        """|coro|
+    def bans(
+        self,
+        *,
+        limit: Optional[int] = 1000,
+        before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
+    ) -> BanIterator:
+        """Returns an :class:`~disnake.AsyncIterator` that enables receiving the destination's bans.
 
-        Retrieves all the users that are banned from the guild as a :class:`list` of :class:`BanEntry`.
+        You must have the :attr:`~Permissions.ban_members` permission to get this information.
 
-        You must have :attr:`~Permissions.ban_members` permission
-        to use this.
+        .. versionchanged:: 2.5
+            Due to a breaking change in Discord's API, this now returns an :class:`~disnake.AsyncIterator` instead of a :class:`list`.
+
+        Examples
+        ---------
+
+        Usage ::
+
+            counter = 0
+            async for ban in guild.bans(limit=200):
+                if not ban.user.bot:
+                    counter += 1
+
+        Flattening into a list: ::
+
+            bans = await guild.bans(limit=123).flatten()
+            # bans is now a list of BanEntry...
+
+        All parameters are optional.
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of bans to retrieve.
+            If ``None``, it retrieves every ban in the guild. Note, however,
+            that this would make it a slow operation.
+            Defaults to 1000.
+        before: Optional[:class:`~disnake.abc.Snowflake`]
+            Retrieve bans before this user.
+        after: Optional[:class:`~disnake.abc.Snowflake`]
+            Retrieve bans after this user.
 
         Raises
         ------
-        Forbidden
-            You do not have proper permissions to get the information.
-        HTTPException
-            An error occurred while fetching the information.
+        ~disnake.Forbidden
+            You do not have permissions to get the bans.
+        ~disnake.HTTPException
+            An error occurred while fetching the bans.
 
-        Returns
+        Yields
         -------
-        List[:class:`BanEntry`]
-            A list of :class:`BanEntry` objects.
+        :class:`~disnake.BanEntry`
+            The ban with the ban data parsed.
         """
 
-        data: List[BanPayload] = await self._state.http.get_bans(self.id)
-        return [
-            BanEntry(user=User(state=self._state, data=e["user"]), reason=e["reason"]) for e in data
-        ]
+        return BanIterator(self, limit=limit, before=before, after=after)
 
     async def prune_members(
         self,
@@ -2955,8 +2986,8 @@ class Guild(Hashable):
         color: Union[Colour, int] = MISSING,
         colour: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
-        icon: bytes = MISSING,
-        emoji: str = MISSING,
+        icon: Optional[bytes] = MISSING,
+        emoji: Optional[str] = MISSING,
         mentionable: bool = MISSING,
         reason: Optional[str] = None,
     ) -> Role:
@@ -3229,7 +3260,6 @@ class Guild(Hashable):
         data = await self._state.http.get_invite(payload["code"])
 
         channel = self.get_channel(int(data["channel"]["id"]))
-        payload["revoked"] = False
         payload["temporary"] = False
         payload["max_uses"] = 0
         payload["max_age"] = 0
@@ -3488,6 +3518,8 @@ class Guild(Hashable):
 
         This is a websocket operation and can be slow.
 
+        See also :func:`search_members`.
+
         .. versionadded:: 1.3
 
         Parameters
@@ -3546,6 +3578,59 @@ class Guild(Hashable):
         return await self._state.query_members(
             self, query=query, limit=limit, user_ids=user_ids, presences=presences, cache=cache
         )
+
+    async def search_members(
+        self,
+        query: str,
+        *,
+        limit: int = 1,
+        cache: bool = True,
+    ):
+        """|coro|
+
+        Retrieves members that belong to this guild whose username or nickname starts with
+        the query given.
+
+        Note that unlike :func:`query_members`, this is not a websocket operation, but an HTTP operation.
+
+        See also :func:`query_members`.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        -----------
+        query: :class:`str`
+            The string that the usernames or nicknames start with.
+        limit: :class:`int`
+            The maximum number of members to send back. This must be
+            a number between 1 and 1000.
+        cache: :class:`bool`
+            Whether to cache the members internally. This makes operations
+            such as :meth:`get_member` work for those that matched.
+
+        Raises
+        -------
+        ValueError
+            Invalid parameters were passed to the function
+
+        Returns
+        --------
+        List[:class:`Member`]
+            The list of members that have matched the query.
+        """
+        if query == "":
+            raise ValueError("Cannot pass empty query string.")
+        if limit < 1:
+            raise ValueError("limit must be at least 1")
+        limit = min(1000, limit)
+        members = await self._state.http.search_guild_members(self.id, query=query, limit=limit)
+        resp = []
+        for member in members:
+            member = Member(state=self._state, data=member, guild=self)
+            if cache and member.id not in self._members:
+                self._add_member(member)
+            resp.append(member)
+        return resp
 
     async def get_or_fetch_members(
         self,

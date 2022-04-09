@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import array
 import asyncio
-import collections.abc
 import datetime
 import functools
 import json
@@ -34,7 +33,6 @@ import os
 import pkgutil
 import re
 import sys
-import types
 import unicodedata
 import warnings
 from base64 import b64encode, urlsafe_b64decode as b64decode
@@ -69,7 +67,7 @@ from urllib.parse import parse_qs, urlencode
 from .errors import InvalidArgument
 
 try:
-    import orjson  # type: ignore
+    import orjson
 except ModuleNotFoundError:
     HAS_ORJSON = False
 else:
@@ -194,7 +192,7 @@ def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlo
     return decorator
 
 
-class SequenceProxy(Generic[T_co], collections.abc.Sequence):
+class SequenceProxy(Sequence[T_co]):
     """Read-only proxy of a Sequence."""
 
     def __init__(self, proxied: Sequence[T_co]):
@@ -395,7 +393,7 @@ def time_snowflake(dt: datetime.datetime, high: bool = False) -> int:
         The snowflake representing the time given.
     """
     discord_millis = int(dt.timestamp() * 1000 - DISCORD_EPOCH)
-    return (discord_millis << 22) + (2 ** 22 - 1 if high else 0)
+    return (discord_millis << 22) + (2**22 - 1 if high else 0)
 
 
 def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
@@ -531,7 +529,7 @@ def _bytes_to_base64_data(data: bytes) -> str:
 
 if HAS_ORJSON:
 
-    def _to_json(obj: Any) -> str:  # type: ignore
+    def _to_json(obj: Any) -> str:
         return orjson.dumps(obj).decode("utf-8")
 
     _from_json = orjson.loads  # type: ignore
@@ -584,10 +582,11 @@ async def sane_wait_for(futures, *, timeout):
 
 def get_slots(cls: Type[Any]) -> Iterator[str]:
     for mro in reversed(cls.__mro__):
-        try:
-            yield from mro.__slots__
-        except AttributeError:
-            continue
+        slots = getattr(mro, "__slots__", [])
+        if isinstance(slots, str):
+            yield slots
+        else:
+            yield from slots
 
 
 def compute_timedelta(dt: datetime.datetime):
@@ -774,12 +773,12 @@ _MARKDOWN_ESCAPE_SUBREGEX = "|".join(
 _MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)"
 
 _MARKDOWN_ESCAPE_REGEX = re.compile(
-    fr"(?P<markdown>{_MARKDOWN_ESCAPE_SUBREGEX}|{_MARKDOWN_ESCAPE_COMMON})", re.MULTILINE
+    rf"(?P<markdown>{_MARKDOWN_ESCAPE_SUBREGEX}|{_MARKDOWN_ESCAPE_COMMON})", re.MULTILINE
 )
 
 _URL_REGEX = r"(?P<url><[^: >]+:\/[^ >]+>|(?:https?|steam):\/\/[^\s<]+[^<.,:;\"\'\]\s])"
 
-_MARKDOWN_STOCK_REGEX = fr"(?P<markdown>[_\\~|\*`]|{_MARKDOWN_ESCAPE_COMMON})"
+_MARKDOWN_STOCK_REGEX = rf"(?P<markdown>[_\\~|\*`]|{_MARKDOWN_ESCAPE_COMMON})"
 
 
 def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
@@ -1059,7 +1058,12 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
     return _chunk(iterator, max_size)
 
 
-PY_310 = sys.version_info >= (3, 10)
+if sys.version_info >= (3, 10):
+    PY_310 = True
+    from types import UnionType
+else:
+    PY_310 = False
+    UnionType = object()
 
 
 def flatten_literal_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
@@ -1103,7 +1107,7 @@ def evaluate_annotation(
         is_literal = False
         args = tp.__args__
         if not hasattr(tp, "__origin__"):
-            if PY_310 and tp.__class__ is types.UnionType:  # type: ignore
+            if tp.__class__ is UnionType:
                 converted = Union[args]  # type: ignore
                 return evaluate_annotation(converted, globals, locals, cache)
 
@@ -1231,7 +1235,7 @@ def search_directory(path: str) -> Iterator[str]:
 
     prefix = relpath.replace(os.sep, ".")
 
-    for finder, name, ispkg in pkgutil.iter_modules([path]):
+    for _, name, ispkg in pkgutil.iter_modules([path]):
         if ispkg:
             yield from search_directory(os.path.join(path, name))
         else:

@@ -126,7 +126,7 @@ class Music(commands.Cog):
 
 
 bot = commands.Bot(
-    command_prefix=commands.when_mentioned_or("!"),
+    command_prefix=commands.when_mentioned,
     description="Relatively simple music bot example",
 )
 

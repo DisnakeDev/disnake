@@ -44,6 +44,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    get_args,
     get_origin,
     get_type_hints,
     overload,
@@ -95,8 +96,16 @@ __all__ = (
 
 
 def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
-    if not isinstance(obj, type) or not isinstance(tp, (type, tuple)):
+    if not isinstance(tp, (type, tuple)):
         return False
+    elif not isinstance(obj, type):
+        # Assume we have a type hint
+        if get_origin(obj) in (Union, UnionType, Optional):
+            obj = get_args(obj)
+            return any(issubclass(o, tp) for o in obj)
+        else:
+            # Other type hint specializations are not supported
+            return False
     return issubclass(obj, tp)
 
 
@@ -635,10 +644,6 @@ def isolate_self(
     function: Callable,
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
     """Create parameters without self and the first interaction"""
-    is_interaction = (
-        lambda annot: issubclass_(annot, CommandInteraction) or annot is inspect.Parameter.empty
-    )
-
     sig = signature(function)
 
     parameters = dict(sig.parameters)
@@ -653,8 +658,10 @@ def isolate_self(
     if parametersl[0].name == "self":
         cog_param = parameters.pop(parametersl[0].name)
         parametersl.pop(0)
-    if parametersl and is_interaction(parametersl[0].annotation):
-        inter_param = parameters.pop(parametersl[0].name)
+    if parametersl:
+        annot = parametersl[0].annotation
+        if issubclass_(annot, CommandInteraction) or annot is inspect.Parameter.empty:
+            inter_param = parameters.pop(parametersl[0].name)
 
     return (cog_param, inter_param), parameters
 

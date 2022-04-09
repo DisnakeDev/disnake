@@ -406,6 +406,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
         checking the user IDs. Note that :class:`~ext.commands.Bot` does not
         have this problem.
 
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.message_content` for more information.
+
     :param message: The current message.
     :type message: :class:`Message`
 
@@ -420,6 +425,12 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     or use the :func:`on_raw_message_delete` event instead.
 
     This requires :attr:`Intents.messages` to be enabled.
+
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.message_content` for more information.
+
 
     :param message: The deleted message.
     :type message: :class:`Message`
@@ -476,6 +487,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     If this occurs increase the :class:`max_messages <Client>` parameter
     or use the :func:`on_raw_message_edit` event instead.
+
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.message_content` for more information.
 
     The following non-exhaustive cases trigger this event:
 
@@ -796,14 +812,21 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_thread_join(thread)
 
-    Called whenever a thread is joined or created. Note that from the API's perspective there is no way to
-    differentiate between a thread being created or the bot joining a thread.
+    Called whenever the bot joins a thread or gets access to a thread
+    (for example, by gaining access to the parent channel).
 
     Note that you can get the guild from :attr:`Thread.guild`.
 
     This requires :attr:`Intents.guilds` to be enabled.
 
+    .. note::
+        This event will not be called for threads created by the bot or
+        threads created on one of the bot's messages.
+
     .. versionadded:: 2.0
+
+    .. versionchanged:: 2.5
+        This is no longer being called when a thread is created, see :func:`on_thread_create` instead.
 
     :param thread: The thread that got joined.
     :type thread: :class:`Thread`
@@ -826,6 +849,23 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. versionadded:: 2.0
 
     :param thread: The thread that got removed.
+    :type thread: :class:`Thread`
+
+.. function:: on_thread_create(thread)
+
+    Called whenever a thread is created.
+
+    Note that you can get the guild from :attr:`Thread.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. note::
+        This only works for threads created in channels the bot already has access to,
+        and only for public threads unless the bot has the :attr:`~Permissions.manage_threads` permission.
+
+    .. versionadded:: 2.5
+
+    :param thread: The thread that got created.
     :type thread: :class:`Thread`
 
 .. function:: on_thread_delete(thread)
@@ -1323,10 +1363,6 @@ of :class:`enum.Enum`.
 
         A guild news channel.
 
-    .. attribute:: store
-
-        A guild store channel.
-
     .. attribute:: stage_voice
 
         A guild stage voice channel.
@@ -1582,9 +1618,6 @@ of :class:`enum.Enum`.
 
     Represents the type of a voice channel activity/application.
 
-    .. attribute:: youtube
-
-        The (old) "Youtube Together" activity.
     .. attribute:: poker
 
         The "Poker Night" activity.
@@ -1614,16 +1647,6 @@ of :class:`enum.Enum`.
     .. attribute:: spellcast
 
         The "SpellCast" activity.
-
-        .. versionadded:: 2.3
-    .. attribute:: awkword
-
-        The "Awkword" activity.
-
-        .. versionadded:: 2.3
-    .. attribute:: sketchy_artist
-
-        The "Sketchy Artist" activity.
 
         .. versionadded:: 2.3
     .. attribute:: watch_together
@@ -1853,33 +1876,9 @@ of :class:`enum.Enum`.
 
     Specifies the region a voice server belongs to.
 
-    .. attribute:: amsterdam
-
-        The Amsterdam region.
     .. attribute:: brazil
 
         The Brazil region.
-    .. attribute:: dubai
-
-        The Dubai region.
-
-        .. versionadded:: 1.3
-
-    .. attribute:: eu_central
-
-        The EU Central region.
-    .. attribute:: eu_west
-
-        The EU West region.
-    .. attribute:: europe
-
-        The Europe region.
-
-        .. versionadded:: 1.3
-
-    .. attribute:: frankfurt
-
-        The Frankfurt region.
     .. attribute:: hongkong
 
         The Hong Kong region.
@@ -1892,9 +1891,11 @@ of :class:`enum.Enum`.
     .. attribute:: japan
 
         The Japan region.
-    .. attribute:: london
+    .. attribute:: rotterdam
 
-        The London region.
+        The Rotterdam region.
+
+        .. versionadded:: 2.5
     .. attribute:: russia
 
         The Russia region.
@@ -1904,9 +1905,6 @@ of :class:`enum.Enum`.
     .. attribute:: southafrica
 
         The South Africa region.
-    .. attribute:: south_korea
-
-        The South Korea region.
     .. attribute:: sydney
 
         The Sydney region.
@@ -1922,15 +1920,6 @@ of :class:`enum.Enum`.
     .. attribute:: us_west
 
         The US West region.
-    .. attribute:: vip_amsterdam
-
-        The Amsterdam region for VIP guilds.
-    .. attribute:: vip_us_east
-
-        The US East region for VIP guilds.
-    .. attribute:: vip_us_west
-
-        The US West region for VIP guilds.
 
 .. class:: VerificationLevel
 
@@ -2615,6 +2604,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.description`
         - :attr:`~AuditLogDiff.privacy_level`
         - :attr:`~AuditLogDiff.status`
+        - :attr:`~AuditLogDiff.image`
 
         .. versionadded:: 2.3
 
@@ -2950,6 +2940,10 @@ of :class:`enum.Enum`.
     .. attribute:: public
 
         The stage instance can be joined by external users.
+
+        .. deprecated:: 2.5
+
+            Public stages are no longer supported by discord.
 
     .. attribute:: closed
 
@@ -3775,6 +3769,12 @@ AuditLogDiff
 
         :type: :class:`GuildScheduledEventStatus`
 
+    .. attribute:: image
+
+        The cover image of a guild scheduled event being changed.
+
+        :type: :class:`Asset`
+
 .. this is currently missing the following keys: reason and application_id
    I'm not sure how to about porting these
 
@@ -4221,6 +4221,21 @@ ApplicationCommandInteraction
     :members:
     :inherited-members:
 
+GuildCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: GuildCommandInteraction()
+
+UserCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: UserCommandInteraction()
+
+MessageCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: MessageCommandInteraction()
+
 MessageInteraction
 ~~~~~~~~~~~~~~~~~~
 
@@ -4238,7 +4253,6 @@ ModalInteraction
 .. autoclass:: ModalInteraction()
     :members:
     :inherited-members:
-    :exclude-members: channel, followup, guild, me, permissions, response
 
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
@@ -4410,15 +4424,6 @@ ThreadMember
 
 .. autoclass:: ThreadMember()
     :members:
-
-StoreChannel
-~~~~~~~~~~~~~
-
-.. attributetable:: StoreChannel
-
-.. autoclass:: StoreChannel()
-    :members:
-    :inherited-members:
 
 VoiceChannel
 ~~~~~~~~~~~~~
@@ -4872,6 +4877,14 @@ ShardInfo
 .. attributetable:: ShardInfo
 
 .. autoclass:: ShardInfo()
+    :members:
+
+SessionStartLimit
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: SessionStartLimit
+
+.. autoclass:: SessionStartLimit()
     :members:
 
 SystemChannelFlags
