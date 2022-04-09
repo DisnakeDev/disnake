@@ -319,8 +319,8 @@ class Interaction:
 
     async def edit_original_message(
         self,
-        *,
         content: Optional[str] = MISSING,
+        *,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -349,7 +349,7 @@ class Interaction:
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
@@ -496,7 +496,7 @@ class Interaction:
 
     async def send(
         self,
-        content: Any = None,
+        content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -576,7 +576,7 @@ class Interaction:
         else:
             sender = self.response.send_message
         await sender(
-            content=content,  # type: ignore
+            content=content,
             embed=embed,
             embeds=embeds,
             file=file,
@@ -696,7 +696,7 @@ class InteractionResponse:
 
     async def send_message(
         self,
-        content: Any = None,
+        content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -852,8 +852,8 @@ class InteractionResponse:
 
     async def edit_message(
         self,
+        content: Optional[str] = MISSING,
         *,
-        content: Any = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -1229,7 +1229,7 @@ class InteractionMessage(Message):
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
