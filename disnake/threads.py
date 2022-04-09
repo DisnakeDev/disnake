@@ -383,7 +383,7 @@ class Thread(Messageable, Hashable):
     def is_pinned(self) -> bool:
         """Whether the thread is pinned in a :class:`ForumChannel`
 
-        Pinned threads do not get affected by the auto archive duration.
+        Pinned threads are not affected by the auto archive duration.
 
         .. versionadded:: 2.5
 
