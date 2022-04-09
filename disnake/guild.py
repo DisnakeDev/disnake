@@ -1449,6 +1449,92 @@ class Guild(Hashable):
         self._channels[channel.id] = channel
         return channel
 
+    async def create_forum_channel(
+        self,
+        name: str,
+        *,
+        reason: Optional[str] = None,
+        category: Optional[CategoryChannel] = None,
+        position: int = MISSING,
+        topic: str,
+        slowmode_delay: int = MISSING,
+        nsfw: bool = MISSING,
+        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+    ) -> ForumChannel:
+
+        """|coro|
+
+        This is similar to :meth:`create_text_channel` except makes a :class:`ForumChannel` instead.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The channel's name.
+        overwrites: Dict[Union[:class:`Role`, :class:`Member`], :class:`PermissionOverwrite`]
+            A :class:`dict` of target (either a role or a member) to
+            :class:`PermissionOverwrite` to apply upon creation of a channel.
+            Useful for creating secret channels.
+        category: Optional[:class:`CategoryChannel`]
+            The category to place the newly created channel under.
+            The permissions will be automatically synced to category if no
+            overwrites are provided.
+        position: :class:`int`
+            The position in the channel list. This is a number that starts
+            at 0. e.g. the top channel is position 0.
+        topic: :class:`str`
+            The channel's topic.
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+        nsfw: :class:`bool`
+            Whether mark the channel as NSFW or not.
+        reason: Optional[:class:`str`]
+            The reason for creating this channel. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have the proper permissions to create this channel.
+        HTTPException
+            Creating the channel failed.
+        InvalidArgument
+            The permission overwrite information is not in proper form.
+
+        Returns
+        -------
+        :class:`ForumChannel`
+            The channel that was just created.
+        """
+        options = {}
+        if position is not MISSING:
+            options["position"] = position
+
+        if topic is not MISSING:
+            options["topic"] = topic
+
+        if slowmode_delay is not MISSING:
+            options["rate_limit_per_user"] = slowmode_delay
+
+        if nsfw is not MISSING:
+            options["nsfw"] = nsfw
+
+        data = await self._create_channel(
+            name,
+            overwrites=overwrites,
+            channel_type=ChannelType.forum,
+            category=category,
+            reason=reason,
+            **options,
+        )
+        channel = ForumChannel(state=self._state, guild=self, data=data)
+
+        # temporarily add to the cache
+        self._channels[channel.id] = channel
+        return channel
+
     async def create_category(
         self,
         name: str,
