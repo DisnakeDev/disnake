@@ -33,7 +33,7 @@ from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .mixins import Hashable
-from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time, warn_deprecated
+from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
     "Thread",
