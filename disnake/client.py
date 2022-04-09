@@ -182,7 +182,7 @@ class SessionStartLimit:
     def __repr__(self):
         return (
             f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
-            f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time}"
+            f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}"
         )
 
 
