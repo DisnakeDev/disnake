@@ -2164,12 +2164,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         All the things that are in :meth:`TextChannel.send` are also valid here.
 
-        .. danger::
-
-            This method does two API calls, one for creating the thread and one for
-            sending the message. Please be aware of this to avoid doing a lot of
-            API calls.
-
         .. versionadded:: 2.5
 
         Parameters
