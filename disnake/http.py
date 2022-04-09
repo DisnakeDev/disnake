@@ -1217,7 +1217,7 @@ class HTTPClient:
         )
         return self.request(route)
 
-    def create_forum_post(
+    def create_forum_thread(
         self,
         channel_id: Snowflake,
         files: Optional[Sequence[File]] = None,
@@ -1225,14 +1225,13 @@ class HTTPClient:
         **fields: Any,
     ) -> Response[threads.Thread]:
         valid_keys = (
-            # Post fields
+            # Thread fields
             "name",
             "auto_archive_duration",
             "rate_limit_per_user",
             # Message fields
             "content",
             "embeds",
-            "embed",
             "allowed_mentions",
             "components",
             "sticker_ids",
@@ -1242,12 +1241,16 @@ class HTTPClient:
         payload = {k: v for k, v in fields.items() if k in valid_keys}
         payload["type"] = 11
         route = Route("POST", "/channels/{channel_id}/threads", channel_id=channel_id)
+        query_params = {"has_message": "true"}
 
         if files is not None:
             multipart = to_multipart_with_attachments(payload, files)
-            return self.request(route, form=multipart, files=files, reason=reason)
 
-        return self.request(route, json=payload, reason=reason)
+            return self.request(
+                route, form=multipart, params=query_params, files=files, reason=reason
+            )
+
+        return self.request(route, json=payload, params=query_params, reason=reason)
 
     # Webhook management
 

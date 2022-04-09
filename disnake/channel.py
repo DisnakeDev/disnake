@@ -2402,41 +2402,26 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         files = cast("List[File]", params.files)
 
-        # TODO: This currently does two API calls, use HTTPClient.create_forum_post when it's available
-        thread_data = await self._state.http.start_thread_without_message(
+        if params.payload and "attachments" in params.payload:
+            # We delete it since `create_forum_thread` already handles it
+            del params.payload["attachments"]
+
+        thread_data = await self._state.http.create_forum_thread(
             self.id,
-            type=ChannelType.public_thread.value,
             name=name,
             auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
             rate_limit_per_user=slowmode_delay or 0,
+            files=files or None,
             reason=reason,
+            **params.payload,
         )
-        if files is not MISSING:
-            if len(files) > 10:
-                raise InvalidArgument("files parameter must be a list of up to 10 elements")
-            elif not all(isinstance(file, File) for file in files):
-                raise InvalidArgument("files parameter must be a list of File")
 
-            try:
-                if params.payload and "attachments" in params.payload:
-                    # We delete it since `send_files` already handles it
-                    del params.payload["attachments"]
-                message_data = await self._state.http.send_files(
-                    thread_data["id"], files=files, **params.payload  # type: ignore
-                )
-            finally:
-                for f in files:
-                    f.close()
-        else:
-            content = params.payload.pop("content") if params.payload else content
-            message_data = await self._state.http.send_message(
-                thread_data["id"],
-                content=content,
-                **params.payload,  # type: ignore
-            )
+        if files is not MISSING:
+            for f in files:
+                f.close()
 
         if view:
-            self._state.store_view(view, int(message_data["id"]))
+            self._state.store_view(view, int(thread_data["id"]))
 
         return Thread(guild=self.guild, data=thread_data, state=self._state)
 
@@ -2448,7 +2433,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         limit: Optional[int] = 50,
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
     ) -> ArchivedThreadIterator:
-        """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the guild.
+        """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the channel.
 
         You must have :attr:`~Permissions.read_message_history` permission to use this. If iterating over private threads
         then :attr:`~Permissions.manage_threads` permission is also required.
