@@ -4863,6 +4863,14 @@ ShardInfo
 .. autoclass:: ShardInfo()
     :members:
 
+SessionStartLimit
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: SessionStartLimit
+
+.. autoclass:: SessionStartLimit()
+    :members:
+
 SystemChannelFlags
 ~~~~~~~~~~~~~~~~~~~~
 
