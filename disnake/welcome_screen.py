@@ -125,10 +125,10 @@ class WelcomeScreen:
     """
 
     __slots__ = (
-        "_state",
-        "_guild",
         "description",
         "welcome_channels",
+        "_guild",
+        "_state",
     )
 
     def __init__(
@@ -178,7 +178,7 @@ class WelcomeScreen:
         enabled: :class:`bool`
             Whether the welcome screen is enabled.
         description: :class:`str`
-            The new guild description.
+            The new guild description in the welcome screen.
         welcome_channels: List[:class:`WelcomeScreenChannel`]
             The new welcome channels.
         reason: Optional[:class:`str`]
