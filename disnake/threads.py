@@ -229,7 +229,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def parent(self) -> Optional[Union[TextChannel, ForumChannel]]:
-        """Optional[:class:`TextChannel`]: The parent channel this thread belongs to."""
+        """Optional[Union[:class:`TextChannel`, :class:`ForumChannel`]]: The parent channel this thread belongs to."""
         return self.guild.get_channel(self.parent_id)  # type: ignore
 
     @property
