@@ -2260,15 +2260,13 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
-        files = cast("List[File]", params.files)
-
         if params.payload and "attachments" in params.payload:
             # We delete it since `start_thread_in_forum_channel` already handles it
             del params.payload["attachments"]
 
-        if files and len(files) > 10:
+        if params.files and len(params.files) > 10:
             raise InvalidArgument("files parameter must be a list of up to 10 elements")
-        elif files and not all(isinstance(file, File) for file in files):
+        elif params.files and not all(isinstance(file, File) for file in params.files):
             raise InvalidArgument("files parameter must be a list of File")
 
         try:
@@ -2277,13 +2275,13 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
                 rate_limit_per_user=slowmode_delay or 0,
-                files=files or None,
+                files=params.files,
                 reason=reason,
                 **params.payload,  # type: ignore
             )
         finally:
-            if files is not MISSING:
-                for f in files:
+            if params.files:
+                for f in params.files:
                     f.close()
 
         if view:
