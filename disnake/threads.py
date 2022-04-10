@@ -665,7 +665,9 @@ class Thread(Messageable, Hashable):
         if slowmode_delay is not MISSING:
             payload["rate_limit_per_user"] = slowmode_delay
         if pinned is not MISSING:
-            payload["flags"] = 2 if pinned else 0
+            flags = ChannelFlags._from_value(self.flags.value)
+            flags.pinned = pinned
+            payload["flags"] = flags.value
 
         data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
         # The data payload will always be a Thread payload
