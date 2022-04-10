@@ -553,7 +553,7 @@ def handle_message_parameters(
         payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
 
     if stickers is not MISSING:
-        payload["stickers"] = [s.id for s in stickers]
+        payload["sticker_ids"] = [s.id for s in stickers]
 
     multipart = []
 
