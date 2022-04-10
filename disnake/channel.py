@@ -1984,6 +1984,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         return base
 
     @property
+    def members(self) -> List[Member]:
+        """List[:class:`Member`]: Returns all members that can see this channel."""
+        return [m for m in self.guild.members if self.permissions_for(m).view_channel]
+
+    @property
     def threads(self) -> List[Thread]:
         """List[:class:`Thread`]: Returns all the threads that you can see."""
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
