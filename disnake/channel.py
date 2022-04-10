@@ -1993,7 +1993,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
-        """Whether the channel is marked as NSFW
+        """Whether the channel is marked as NSFW.
 
         :return type: :class:`bool`
         """
