@@ -353,11 +353,14 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when someone begins typing a message.
 
-    The ``channel`` parameter can be a :class:`abc.Messageable` instance.
-    Which could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`GroupChannel`,
+    The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel`.
+    If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`GroupChannel`,
     or :class:`DMChannel`.
 
-    If the ``channel`` is a :class:`TextChannel` or :class:`VoiceChannel` then the
+    .. versionchanged:: 2.5
+        ``channel`` may be a type :class:`ForumChannel`
+
+    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, or :class:`VoiceChannel` then the
     ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
 
     If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,
@@ -376,7 +379,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
         to enable the members intent.
 
     :param channel: The location where the typing originated from.
-    :type channel: :class:`abc.Messageable`
+    :type channel: Union[:class:`abc.Messageable`, :class:`ForumChannel`]
     :param user: The user that started typing.
     :type user: Union[:class:`User`, :class:`Member`]
     :param when: When the typing started as an aware datetime in UTC.
