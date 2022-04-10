@@ -2222,6 +2222,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             You do not have permissions to create a thread.
         HTTPException
             Starting the thread failed.
+        TypeError
+            Specified both ``file`` and ``files``,
+            or you specified both ``embed`` and ``embeds``,
+            or you specified both ``view`` and ``components``.
+        InvalidArgument
+            Specified more than 10 embeds,
+            or more than 10 files,
+            or you have passed an object that is not :class:`File`.
 
         Returns
         -------
@@ -2252,6 +2260,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         if params.payload and "attachments" in params.payload:
             # We delete it since `start_thread_in_forum_channel` already handles it
             del params.payload["attachments"]
+
+        if files and len(files) > 10:
+            raise InvalidArgument("files parameter must be a list of up to 10 elements")
+        elif files and not all(isinstance(file, File) for file in files):
+            raise InvalidArgument("files parameter must be a list of File")
 
         thread_data = await self._state.http.start_thread_in_forum_channel(
             self.id,
