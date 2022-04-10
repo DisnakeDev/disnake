@@ -1200,7 +1200,7 @@ class HTTPClient:
         )
         payload = {k: v for k, v in fields.items() if k in valid_keys}
         route = Route("POST", "/channels/{channel_id}/threads", channel_id=channel_id)
-        query_params = {"has_message": "true"}
+        query_params = {"has_message": 1}
 
         if files:
             multipart = to_multipart_with_attachments(payload, files)
