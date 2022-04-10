@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
     ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
 
-    AssetBytes = Union[bytes, "AssetMixin"]
+AssetBytes = Union[bytes, "AssetMixin"]
 
 VALID_STATIC_FORMATS = frozenset({"jpeg", "jpg", "webp", "png"})
 VALID_ASSET_FORMATS = VALID_STATIC_FORMATS | {"gif"}
