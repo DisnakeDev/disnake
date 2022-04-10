@@ -2175,10 +2175,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         You must have the :attr:`~Permissions.send_messages` permission to do this.
 
-        All the things that are in :meth:`TextChannel.send` are also valid here.
-
-        .. versionadded:: 2.5
-
         Parameters
         ----------
         name: :class:`str`
@@ -2288,8 +2284,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         You must have :attr:`~Permissions.read_message_history` permission to use this. If iterating over private threads
         then :attr:`~Permissions.manage_threads` permission is also required.
-
-        .. versionadded:: 2.5
 
         Parameters
         ----------
