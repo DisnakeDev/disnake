@@ -1207,10 +1207,10 @@ class ChannelFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two ApplicationFlags are equal.
+            Checks if two flags are equal.
         .. describe:: x != y
 
-            Checks if two ApplicationFlags are not equal.
+            Checks if two flags are not equal.
         .. describe:: hash(x)
 
             Return the flag's hash.

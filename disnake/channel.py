@@ -1781,8 +1781,6 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     def forum_channels(self) -> List[ForumChannel]:
         """List[:class:`ForumChannel`]: Returns the forum channels that are under this category.
 
-        This is sorted by the position and are in UI order from top to bottom.
-
         .. versionadded:: 2.5
         """
         ret = [
@@ -1956,7 +1954,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self._fill_overwrites(data)
 
-    async def _get_channel(self) -> ForumChannel:  # I wonder why this exists
+    async def _get_channel(self) -> ForumChannel:
         return self
 
     typing = disnake.abc.Messageable.typing
@@ -2025,7 +2023,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         topic: Optional[str] = ...,
         position: int = ...,
         nsfw: bool = ...,
-        sync_permissions: bool = ...,  # test this
+        sync_permissions: bool = ...,
         category: Optional[CategoryChannel] = ...,
         slowmode_delay: Optional[int] = ...,
         default_auto_archive_duration: AnyThreadArchiveDuration = ...,
@@ -2103,6 +2101,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             {
                 "topic": self.topic,
                 "nsfw": self.nsfw,
+                "rate_limit_per_user": self.slowmode_delay,
                 "default_auto_archive_duration": self.default_auto_archive_duration,
             },
             name=name,
