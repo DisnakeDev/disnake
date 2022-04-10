@@ -361,5 +361,5 @@ def components_to_rows(components: Components[ActionRow[Any]]) -> List[ActionRow
     return action_rows
 
 
-def components_to_dict(components: Components) -> List[ActionRowPayload]:
+def components_to_dict(components: Components[ActionRow[Any]]) -> List[ActionRowPayload]:
     return [row.to_component_dict() for row in components_to_rows(components)]

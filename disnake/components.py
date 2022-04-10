@@ -32,7 +32,6 @@ from typing import (
     Dict,
     Generic,
     List,
-    NewType,
     Optional,
     Tuple,
     Type,
@@ -72,7 +71,7 @@ C = TypeVar("C", bound="Component")
 NestedComponent = Union["Button", "SelectMenu", "TextInput"]
 MessageComponent = Union["Button", "SelectMenu"]
 ModalComponent: TypeAlias = "TextInput"
-ComponentT = TypeVar("ComponentT", MessageComponent, ModalComponent)
+ComponentT = TypeVar("ComponentT", bound=NestedComponent)
 
 
 class Component:
