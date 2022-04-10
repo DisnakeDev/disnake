@@ -129,14 +129,14 @@ class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
 
 
 class _ForumChannelOptional(TypedDict, total=False):
+    topic: Optional[str]
+    last_message_id: Optional[Snowflake]
     default_auto_archive_duration: ThreadArchiveDurationLiteral
     available_tags: List[Tag]
 
 
 class ForumChannel(_BaseGuildChannel, _ForumChannelOptional):
     type: Literal[15]
-    topic: Optional[str]
-    last_message_id: Optional[Snowflake]
 
 
 GuildChannel = Union[

@@ -57,6 +57,7 @@ class _ThreadOptional(TypedDict, total=False):
     owner_id: Snowflake
     last_message_id: Optional[Snowflake]
     last_pin_timestamp: Optional[Snowflake]
+    flags: int
 
 
 class Thread(_ThreadOptional):
@@ -69,7 +70,6 @@ class Thread(_ThreadOptional):
     message_count: int
     rate_limit_per_user: int
     thread_metadata: ThreadMetadata
-    flags: int
     applied_tags: SnowflakeList
 
 
