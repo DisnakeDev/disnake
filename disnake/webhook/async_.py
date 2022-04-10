@@ -460,7 +460,6 @@ class AsyncWebhookAdapter:
         )
         if multipart is not None and files is not None:
             payload = None
-
         return self.request(r, session, payload=payload, multipart=multipart, files=files)
 
     def delete_original_interaction_response(
