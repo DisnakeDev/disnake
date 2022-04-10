@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     import datetime
 
     from .abc import Snowflake, SnowflakeTime
-    from .channel import CategoryChannel, TextChannel
+    from .channel import CategoryChannel, ForumChannel, TextChannel
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage
@@ -227,7 +227,7 @@ class Thread(Messageable, Hashable):
         return self._type
 
     @property
-    def parent(self) -> Optional[TextChannel]:
+    def parent(self) -> Optional[Union[TextChannel, ForumChannel]]:
         """Optional[:class:`TextChannel`]: The parent channel this thread belongs to."""
         return self.guild.get_channel(self.parent_id)  # type: ignore
 
