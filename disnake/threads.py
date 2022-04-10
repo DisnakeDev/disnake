@@ -214,6 +214,7 @@ class Thread(Messageable, Hashable):
             pass
 
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
+        self.flags = ChannelFlags._from_value(data.get("flags", 0))
 
         try:
             self._unroll_metadata(data["thread_metadata"])
