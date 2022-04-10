@@ -2292,15 +2292,12 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     def archived_threads(
         self,
         *,
-        private: bool = False,
-        joined: bool = False,
         limit: Optional[int] = 50,
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
     ) -> ArchivedThreadIterator:
         """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the channel.
 
-        You must have :attr:`~Permissions.read_message_history` permission to use this. If iterating over private threads
-        then :attr:`~Permissions.manage_threads` permission is also required.
+        You must have :attr:`~Permissions.read_message_history` permission to use this.
 
         Parameters
         ----------
@@ -2310,11 +2307,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             that this would make it a slow operation.
         before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
             Retrieve archived channels before the given date or ID.
-        private: :class:`bool`
-            Whether to retrieve private archived threads.
-        joined: :class:`bool`
-            Whether to retrieve private archived threads that you've joined.
-            You cannot set ``joined`` to ``True`` and ``private`` to ``False``.
 
         Raises
         ------
@@ -2329,7 +2321,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The archived threads.
         """
         return ArchivedThreadIterator(
-            self.id, self.guild, limit=limit, joined=joined, private=private, before=before
+            self.id, self.guild, limit=limit, joined=False, private=False, before=before
         )
 
 
