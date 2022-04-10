@@ -888,7 +888,7 @@ class Message(Hashable):
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
         self.components: List[ActionRow[MessageComponent]] = [
-            cast(ActionRow[MessageComponent], _component_factory(d))
+            _component_factory(d, type=ActionRow[MessageComponent])
             for d in data.get("components", [])
         ]
 
@@ -1110,7 +1110,9 @@ class Message(Hashable):
                     self.role_mentions.append(role)
 
     def _handle_components(self, components: List[ComponentPayload]):
-        self.components = [_component_factory(d) for d in components]
+        self.components = [
+            _component_factory(d, type=ActionRow[MessageComponent]) for d in components
+        ]
 
     def _rebind_cached_references(
         self, new_guild: Guild, new_channel: Union[TextChannel, Thread, VoiceChannel]
