@@ -1532,7 +1532,7 @@ class Messageable:
 
         Triggers a *typing* indicator to the destination.
 
-        *Typing* indicator will go away after 10 seconds, or after a message is sent.
+        *Typing* indicator will go away after 10 seconds, after a message is sent, or a thread is created.
         """
         channel = await self._get_channel()
         await self._state.http.send_typing(channel.id)

@@ -51,6 +51,7 @@ import disnake.abc
 
 from . import utils
 from .asset import Asset
+from .context_managers import Typing
 from .enums import (
     ChannelType,
     StagePrivacyLevel,
@@ -1957,9 +1958,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     async def _get_channel(self) -> ForumChannel:
         return self
 
-    typing = disnake.abc.Messageable.typing
-    trigger_typing = disnake.abc.Messageable.trigger_typing
-
     @property
     def type(self) -> ChannelType:
         return try_enum(ChannelType, self._type)
@@ -2019,6 +2017,21 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The last created thread in this channel or ``None`` if not found.
         """
         return self._state.get_channel(self.last_thread_id) if self.last_thread_id else None  # type: ignore
+
+    # both of these are re-implemented due to forum channels not being messageables
+    async def trigger_typing(self) -> None:
+        """|coro|
+
+        Triggers a *typing* indicator to the desination.
+
+        *Typing* indicator will go away after 10 seconds.
+        """
+        channel = await self._get_channel()
+        await self._state.http.send_typing(channel.id)
+
+    @utils.copy_doc(disnake.abc.Messageable.typing)
+    def typing(self) -> Typing:
+        return Typing(self)
 
     @overload
     async def edit(
