@@ -134,3 +134,8 @@ class ModalInteractionData:
         self.custom_id: str = data["custom_id"]
         # this attribute is not meant to be used since it lacks most of the component data
         self._components: List[ActionRow] = [ActionRow(d) for d in data["components"]]
+
+    def __repr__(self):
+        return (
+            f"<ModalInteractionData custom_id={self.custom_id!r} _components={self._components!r}>"
+        )

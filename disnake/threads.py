@@ -95,7 +95,7 @@ class Thread(Messageable, Hashable):
     id: :class:`int`
         The thread ID.
     parent_id: :class:`int`
-        The parent :class:`TextChannel` ID this thread belongs to.
+        The parent Union[:class:`TextChannel`, :class:`ForumChannel`] ID this thread belongs to.
     owner_id: Optional[:class:`int`]
         The user's ID that created this thread.
     last_message_id: Optional[:class:`int`]
