@@ -289,6 +289,8 @@ class WebhookAdapter:
             webhook_id=webhook_id,
             webhook_token=token,
         )
+        if multipart is not None and files is not None:
+            payload = None
         return self.request(
             route, session, payload=payload, multipart=multipart, files=files, params=params
         )
@@ -328,6 +330,8 @@ class WebhookAdapter:
             webhook_token=token,
             message_id=message_id,
         )
+        if multipart is not None and files is not None:
+            payload = None
         return self.request(route, session, payload=payload, multipart=multipart, files=files)
 
     def delete_webhook_message(

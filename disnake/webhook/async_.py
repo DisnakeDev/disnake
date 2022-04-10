@@ -309,6 +309,8 @@ class AsyncWebhookAdapter:
             webhook_id=webhook_id,
             webhook_token=token,
         )
+        if multipart is not None and files is not None:
+            payload = None
         return self.request(
             route, session, payload=payload, multipart=multipart, files=files, params=params
         )
@@ -348,6 +350,8 @@ class AsyncWebhookAdapter:
             webhook_token=token,
             message_id=message_id,
         )
+        if multipart is not None and files is not None:
+            payload = None
         return self.request(route, session, payload=payload, multipart=multipart, files=files)
 
     def delete_webhook_message(
@@ -454,6 +458,9 @@ class AsyncWebhookAdapter:
             webhook_id=application_id,
             webhook_token=token,
         )
+        if multipart is not None and files is not None:
+            payload = None
+
         return self.request(r, session, payload=payload, multipart=multipart, files=files)
 
     def delete_original_interaction_response(
