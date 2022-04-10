@@ -1402,8 +1402,8 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        *,
         content: Optional[str] = ...,
+        *,
         embed: Optional[Embed] = ...,
         file: File = ...,
         attachments: List[Attachment] = ...,
@@ -1418,8 +1418,8 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        *,
         content: Optional[str] = ...,
+        *,
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
         attachments: List[Attachment] = ...,
@@ -1434,8 +1434,8 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        *,
         content: Optional[str] = ...,
+        *,
         embeds: List[Embed] = ...,
         file: File = ...,
         attachments: List[Attachment] = ...,
@@ -1450,8 +1450,8 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        *,
         content: Optional[str] = ...,
+        *,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         attachments: List[Attachment] = ...,
@@ -1463,7 +1463,7 @@ class Message(Hashable):
     ) -> Message:
         ...
 
-    async def edit(self, **fields: Any) -> Message:
+    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
 
         Edits the message.
@@ -1574,6 +1574,7 @@ class Message(Hashable):
             self,
             default_flags=self.flags.value,
             previous_allowed_mentions=previous_allowed_mentions,
+            content=content,
             **fields,
         )
 
@@ -2032,7 +2033,7 @@ class PartialMessage(Hashable):
         data = await self._state.http.get_message(self.channel.id, self.id)
         return self._state.create_message(channel=self.channel, data=data)
 
-    async def edit(self, **fields: Any) -> Message:
+    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
 
         Edits the message.
@@ -2141,5 +2142,6 @@ class PartialMessage(Hashable):
             self,
             default_flags=0,
             previous_allowed_mentions=None,
+            content=content,
             **fields,
         )
