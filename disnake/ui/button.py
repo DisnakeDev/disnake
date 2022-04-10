@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import inspect
 import os
-from typing import TYPE_CHECKING, Callable, Optional, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, Type, TypeVar, Union, overload
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from .view import View
 
 B = TypeVar("B", bound="Button")
-V = TypeVar("V", bound="View", covariant=True)
+V = TypeVar("V", "View", None, covariant=True)
 
 
 class Button(Item[V]):
@@ -87,6 +87,17 @@ class Button(Item[V]):
     )
     # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
     _underlying: ButtonComponent = MISSING
+
+    @overload
+    def __new__(cls: Type[Button[None]], **kwargs) -> Button[None]:
+        ...
+
+    @overload
+    def __new__(cls: Type[Button[V]], **kwargs) -> Button[V]:
+        ...
+
+    def __new__(cls: Type[Button[Any]], **kwargs) -> Any:
+        return super().__new__(cls)
 
     def __init__(
         self,

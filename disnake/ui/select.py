@@ -27,7 +27,19 @@ from __future__ import annotations
 
 import inspect
 import os
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
@@ -47,7 +59,7 @@ if TYPE_CHECKING:
     from .view import View
 
 S = TypeVar("S", bound="Select")
-V = TypeVar("V", bound="View", covariant=True)
+V = TypeVar("V", "View", None, covariant=True)
 
 
 def _parse_select_options(
@@ -110,6 +122,17 @@ class Select(Item[V]):
     )
     # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
     _underlying: SelectMenu = MISSING
+
+    @overload
+    def __new__(cls: Type[Select[None]], **kwargs) -> Select[None]:
+        ...
+
+    @overload
+    def __new__(cls: Type[Select[V]], **kwargs) -> Select[V]:
+        ...
+
+    def __new__(cls: Type[Select[Any]], **kwargs) -> Any:
+        return super().__new__(cls)
 
     def __init__(
         self,

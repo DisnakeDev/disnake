@@ -24,9 +24,26 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Sequence, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    TypeVar,
+    Union,
+    overload,
+)
 
-from ..components import ActionRow as ActionRowComponent, NestedComponent, SelectOption
+from ..components import (
+    ActionRow as ActionRowComponent,
+    Button as ButtonComponent,
+    SelectMenu as SelectComponent,
+    SelectOption,
+)
 from ..enums import ButtonStyle, ComponentType, TextInputStyle
 from ..utils import MISSING
 from .button import Button
@@ -36,67 +53,58 @@ from .text_input import TextInput
 
 __all__ = ("ActionRow",)
 
+
+MessageComponent = Union[Button[Any], Select[Any]]
+ModalComponent = TextInput
+
+ComponentT = TypeVar("ComponentT", bound=WrappedComponent)
+
 if TYPE_CHECKING:
     from ..emoji import Emoji
+    from ..message import Message
     from ..partial_emoji import PartialEmoji
     from ..types.components import ActionRow as ActionRowPayload
 
-    ActionRowT = TypeVar("ActionRowT", bound="ActionRow")
-    Components = Union[
-        ActionRowT,
-        WrappedComponent,
-        Sequence[Union[ActionRowT, WrappedComponent, Sequence[WrappedComponent]]],
-    ]
 
+class ActionRow(Generic[ComponentT]):
 
-class ActionRow:
-    """Represents a UI action row. Useful for lower level component manipulation.
+    type: ClassVar[Literal[ComponentType.action_row]] = ComponentType.action_row
 
-    .. versionadded:: 2.4
+    @overload
+    def __new__(cls: Any, *args: MessageComponent) -> ActionRow[MessageComponent]:
+        ...
 
-    Parameters
-    ----------
-    *components: :class:`WrappedComponent`
-        The components of this action row.
-    """
+    @overload
+    def __new__(cls: Any, *args: ModalComponent) -> ActionRow[ModalComponent]:
+        ...
 
-    def __init__(self, *components: WrappedComponent):
+    @overload
+    def __new__(cls: Any, *args: WrappedComponent) -> ActionRow[WrappedComponent]:
+        ...
+
+    def __new__(cls, *args: Any) -> ActionRow[Any]:
+        return super().__new__(cls)
+
+    def __init__(self, *components: ComponentT):
         self.width: int = 0
-        raw_components: List[NestedComponent] = []
+        self._components: List[ComponentT] = []
+
         # Validate the components
         for component in components:
             if not isinstance(component, WrappedComponent):
-                raise ValueError("ActionRow must contain only WrappedComponent instances")
+                raise ValueError("ActionRow must contain only WrappedComponent instances.")
 
             self.width += component.width
-
-            if self.width > 5:
+            if self.width >= 5:
                 raise ValueError("Too many components in one row.")
 
-            raw_components.append(component._underlying)
-
-        self._underlying = ActionRowComponent._raw_construct(
-            type=ComponentType.action_row,
-            children=raw_components,
-        )
-
-    def __repr__(self) -> str:
-        return f"<ActionRow children={self.children!r}>"
+            self._components.append(component)
 
     @property
-    def children(self) -> List[NestedComponent]:
-        """List[Union[:class:`~disnake.Button`, :class:`~disnake.SelectMenu`, :class:`~disnake.TextInput`]]: The components of this row."""
-        return self._underlying.children
+    def components(self) -> List[ComponentT]:
+        return self._components
 
-    @children.setter
-    def children(self, value: List[NestedComponent]):
-        self._underlying.children = value
-
-    @property
-    def type(self) -> ComponentType:
-        return self._underlying.type
-
-    def append_item(self, item: WrappedComponent) -> None:
+    def append_item(self, item: ComponentT) -> None:
         """Appends a component to the action row.
 
         Parameters
@@ -113,10 +121,13 @@ class ActionRow:
             raise ValueError("Too many components in this row, can not append a new one.")
 
         self.width += item.width
-        self._underlying.children.append(item._underlying)
+        self._components.append(item)
+
+    # Maybe this can be overloaded with NoReturn for `self: ActionRow[ModalComponent]`,
+    # same thing for the other add_<component> methods.
 
     def add_button(
-        self,
+        self: Union[ActionRow[MessageComponent], ActionRow[WrappedComponent]],
         *,
         style: ButtonStyle = ButtonStyle.secondary,
         label: Optional[str] = None,
@@ -124,7 +135,7 @@ class ActionRow:
         custom_id: Optional[str] = None,
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-    ):
+    ) -> None:
         """Adds a button to the action row.
 
         To append a pre-existing :class:`~disnake.ui.Button` use the
@@ -163,7 +174,7 @@ class ActionRow:
         )
 
     def add_select(
-        self,
+        self: Union[ActionRow[MessageComponent], ActionRow[WrappedComponent]],
         *,
         custom_id: str = MISSING,
         placeholder: Optional[str] = None,
@@ -171,7 +182,7 @@ class ActionRow:
         max_values: int = 1,
         options: List[SelectOption] = MISSING,
         disabled: bool = False,
-    ):
+    ) -> None:
         """Adds a select menu to the action row.
 
         To append a pre-existing :class:`~disnake.ui.Select` use the
@@ -212,7 +223,7 @@ class ActionRow:
         )
 
     def add_text_input(
-        self,
+        self: Union[ActionRow[ModalComponent], ActionRow[WrappedComponent]],
         *,
         label: str,
         custom_id: str,
@@ -222,7 +233,7 @@ class ActionRow:
         required: bool = True,
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
-    ):
+    ) -> None:
         """Adds a text input to the action row.
 
         To append a pre-existing :class:`~disnake.ui.TextInput` use the
@@ -267,16 +278,57 @@ class ActionRow:
             )
         )
 
+    @property
+    def _underlying(self) -> ActionRowComponent:
+        return ActionRowComponent._raw_construct(
+            type=self.type,
+            children=[comp._underlying for comp in self.components],
+        )
+
     def to_component_dict(self) -> ActionRowPayload:
         return self._underlying.to_dict()
 
+    def __getitem__(self, index: int) -> ComponentT:
+        # Do we support indexing a select at 0/1/2/3/4 or only at 0?
+        # As I implemented it now, indexing at e.g. 3 for a 5-width component would
+        # return that component instead of erroring out.
+        aggregate = 0
+        for component in self.components:
+            aggregate += component.width
+            if aggregate >= index:
+                return component
+        raise IndexError("ActionRow index out of range")
 
-def components_to_rows(components: Components) -> List[ActionRow]:
+    @classmethod
+    def from_message(cls, message: Message) -> List[ActionRow[MessageComponent]]:
+        # :prayge: this actually typechecks without cast/whatever now
+        rows: List[ActionRow[MessageComponent]] = []
+        for row in message.components:
+            rows.append(current_row := ActionRow[MessageComponent]())
+            for component in row.children:
+                if isinstance(component, ButtonComponent):
+                    current_row.append_item(Button.from_component(component))
+                elif isinstance(component, SelectComponent):
+                    current_row.append_item(Select.from_component(component))
+
+        return rows
+
+
+ActionRowT = TypeVar("ActionRowT", bound=ActionRow)
+Components = Union[
+    ActionRowT,
+    WrappedComponent,
+    Sequence[Union[ActionRowT, WrappedComponent, Sequence[WrappedComponent]]],
+]
+
+
+def components_to_rows(components: Components[ActionRow[Any]]) -> List[ActionRow[WrappedComponent]]:
     if not isinstance(components, Sequence):
         components = [components]
 
-    action_rows: List[ActionRow] = []
-    auto_row = ActionRow()
+    action_rows: List[ActionRow[Any]] = []
+    auto_row: ActionRow[Any] = ActionRow()
+    # ^ Any to politely tell typechecking to stfu, maybe fix if deemed important.
 
     for component in components:
         if isinstance(component, WrappedComponent):

@@ -47,7 +47,7 @@ from typing import (
 )
 
 from . import utils
-from .components import _component_factory
+from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
@@ -68,7 +68,6 @@ from .utils import MISSING, escape_mentions
 if TYPE_CHECKING:
     from .abc import GuildChannel, MessageableChannel, Snowflake
     from .channel import DMChannel, TextChannel, VoiceChannel
-    from .components import Component
     from .mentions import AllowedMentions
     from .role import Role
     from .state import ConnectionState
@@ -888,8 +887,9 @@ class Message(Hashable):
         self.stickers: List[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components: List[Component] = [
-            _component_factory(d) for d in data.get("components", [])
+        self.components: List[ActionRow[MessageComponent]] = [
+            cast(ActionRow[MessageComponent], _component_factory(d))
+            for d in data.get("components", [])
         ]
 
         inter_payload = data.get("interaction")

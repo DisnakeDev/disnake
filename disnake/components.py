@@ -30,7 +30,9 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Generic,
     List,
+    NewType,
     Optional,
     Tuple,
     Type,
@@ -38,6 +40,8 @@ from typing import (
     Union,
     cast,
 )
+
+from typing_extensions import TypeAlias
 
 from .enums import ButtonStyle, ComponentType, TextInputStyle, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
@@ -66,6 +70,9 @@ __all__ = (
 
 C = TypeVar("C", bound="Component")
 NestedComponent = Union["Button", "SelectMenu", "TextInput"]
+MessageComponent = Union["Button", "SelectMenu"]
+ModalComponent: TypeAlias = "TextInput"
+ComponentT = TypeVar("ComponentT", MessageComponent, ModalComponent)
 
 
 class Component:
@@ -113,7 +120,7 @@ class Component:
         raise NotImplementedError
 
 
-class ActionRow(Component):
+class ActionRow(Component, Generic[ComponentT]):
     """Represents an action row.
 
     This is a component that holds up to 5 children components in a row.
@@ -136,7 +143,7 @@ class ActionRow(Component):
 
     def __init__(self, data: ComponentPayload):
         self.type: ComponentType = try_enum(ComponentType, data["type"])
-        self.children: List[NestedComponent] = [  # type: ignore
+        self.children: List[ComponentT] = [  # type: ignore
             _component_factory(d) for d in data.get("components", [])
         ]
 
@@ -474,12 +481,15 @@ class TextInput(Component):
         return payload
 
 
-def _component_factory(data: ComponentPayload) -> Component:
+T = TypeVar("T", bound=Component)
+
+
+def _component_factory(data: ComponentPayload, *, type: Type[T] = Component) -> T:
     # NOTE: due to speed, this method does not use the ComponentType enum
     #       as this runs every single time a component is received from the api
     component_type = data["type"]
     if component_type == 1:
-        return ActionRow(data)
+        return ActionRow(data)  # type: ignore
     elif component_type == 2:
         return Button(data)  # type: ignore
     elif component_type == 3:
@@ -488,4 +498,4 @@ def _component_factory(data: ComponentPayload) -> Component:
         return TextInput(data)  # type: ignore
     else:
         as_enum = try_enum(ComponentType, component_type)
-        return Component._raw_construct(type=as_enum)
+        return Component._raw_construct(type=as_enum)  # type: ignore

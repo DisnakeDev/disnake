@@ -43,13 +43,12 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
-    cast,
 )
 
 from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
-    Component,
+    MessageComponent,
     NestedComponent,
     SelectMenu as SelectComponent,
     _component_factory,
@@ -68,12 +67,11 @@ if TYPE_CHECKING:
     from .item import ItemCallbackType
 
 
-def _walk_all_components(components: List[Component]) -> Iterator[NestedComponent]:
+def _walk_all_components(
+    components: List[ActionRowComponent[MessageComponent]],
+) -> Iterator[NestedComponent]:
     for item in components:
-        if isinstance(item, ActionRowComponent):
-            yield from item.children
-        else:
-            yield cast(NestedComponent, item)
+        yield from item.children
 
 
 def _component_to_item(component: NestedComponent) -> Item:
@@ -396,7 +394,7 @@ class View:
             self._scheduled_task(item, interaction), name=f"disnake-ui-view-dispatch-{self.id}"
         )
 
-    def refresh(self, components: List[Component]):
+    def refresh(self, components: List[ActionRowComponent[MessageComponent]]):
         # TODO: this is pretty hacky at the moment
         old_state: Dict[Tuple[int, str], Item] = {
             (item.type.value, item.custom_id): item  # type: ignore

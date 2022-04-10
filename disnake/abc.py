@@ -57,7 +57,7 @@ from .mentions import AllowedMentions
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
 from .sticker import GuildSticker, StickerItem
-from .ui.action_row import components_to_dict
+from .ui.action_row import ActionRow, MessageComponent, components_to_dict
 from .voice_client import VoiceClient, VoiceProtocol
 
 __all__ = (
@@ -1234,7 +1234,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[ActionRow[MessageComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1253,7 +1253,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[ActionRow[MessageComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1272,7 +1272,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[ActionRow[MessageComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1291,7 +1291,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[ActionRow[MessageComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1311,7 +1311,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = None,
         mention_author: bool = None,
         view: View = None,
-        components: Components = None,
+        components: Components[ActionRow[MessageComponent]] = None,
     ):
         """|coro|
 
