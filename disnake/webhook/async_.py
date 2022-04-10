@@ -309,8 +309,6 @@ class AsyncWebhookAdapter:
             webhook_id=webhook_id,
             webhook_token=token,
         )
-        if multipart is not None and files is not None:
-            payload = None
         return self.request(
             route, session, payload=payload, multipart=multipart, files=files, params=params
         )
@@ -350,8 +348,6 @@ class AsyncWebhookAdapter:
             webhook_token=token,
             message_id=message_id,
         )
-        if multipart is not None and files is not None:
-            payload = None
         return self.request(route, session, payload=payload, multipart=multipart, files=files)
 
     def delete_webhook_message(
@@ -458,8 +454,6 @@ class AsyncWebhookAdapter:
             webhook_id=application_id,
             webhook_token=token,
         )
-        if multipart is not None and files is not None:
-            payload = None
         return self.request(r, session, payload=payload, multipart=multipart, files=files)
 
     def delete_original_interaction_response(
@@ -478,13 +472,18 @@ class AsyncWebhookAdapter:
         return self.request(r, session=session)
 
 
-class ExecuteWebhookParameters(NamedTuple):
+class DictPayloadParameters(NamedTuple):
+    payload: Dict[str, Any]
+    files: Optional[List[File]]
+
+
+class PayloadParameters(NamedTuple):
     payload: Optional[Dict[str, Any]]
     multipart: Optional[List[Dict[str, Any]]]
     files: Optional[List[File]]
 
 
-def handle_message_parameters(
+def handle_message_parameters_dict(
     content: Optional[str] = MISSING,
     *,
     username: str = MISSING,
@@ -501,7 +500,7 @@ def handle_message_parameters(
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
-) -> ExecuteWebhookParameters:
+) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
         raise TypeError("Cannot mix file and files keyword arguments.")
     if embeds is not MISSING and embed is not MISSING:
@@ -555,12 +554,50 @@ def handle_message_parameters(
     if stickers is not MISSING:
         payload["sticker_ids"] = [s.id for s in stickers]
 
-    multipart = []
+    return DictPayloadParameters(payload=payload, files=files)
 
-    if files:
-        multipart = to_multipart_with_attachments(payload, files)
 
-    return ExecuteWebhookParameters(payload=payload, multipart=multipart, files=files)
+def handle_message_parameters(
+    content: Optional[str] = MISSING,
+    *,
+    username: str = MISSING,
+    avatar_url: Any = MISSING,
+    tts: bool = False,
+    ephemeral: bool = False,
+    file: File = MISSING,
+    files: List[File] = MISSING,
+    attachments: List[Attachment] = MISSING,
+    embed: Optional[Embed] = MISSING,
+    embeds: List[Embed] = MISSING,
+    view: Optional[View] = MISSING,
+    components: Optional[Components] = MISSING,
+    allowed_mentions: Optional[AllowedMentions] = MISSING,
+    previous_allowed_mentions: Optional[AllowedMentions] = None,
+    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+) -> PayloadParameters:
+    params = handle_message_parameters_dict(
+        content=content,
+        username=username,
+        avatar_url=avatar_url,
+        tts=tts,
+        ephemeral=ephemeral,
+        file=file,
+        files=files,
+        attachments=attachments,
+        embed=embed,
+        embeds=embeds,
+        view=view,
+        components=components,
+        allowed_mentions=allowed_mentions,
+        previous_allowed_mentions=previous_allowed_mentions,
+        stickers=stickers,
+    )
+
+    if params.files:
+        multipart = to_multipart_with_attachments(params.payload, params.files)
+        return PayloadParameters(payload=None, multipart=multipart, files=params.files)
+
+    return PayloadParameters(payload=params.payload, multipart=None, files=params.files)
 
 
 async_context: ContextVar[AsyncWebhookAdapter] = ContextVar(

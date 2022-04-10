@@ -2255,9 +2255,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         :class:`Thread`
             The newly created thread.
         """
-        from .webhook.async_ import handle_message_parameters
+        from .webhook.async_ import handle_message_parameters_dict
 
-        params = handle_message_parameters(
+        params = handle_message_parameters_dict(
             content,
             embed=embed,
             embeds=embeds,
@@ -2274,10 +2274,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
-        if params.payload and "attachments" in params.payload:
-            # We delete it since `start_thread_in_forum_channel` already handles it
-            del params.payload["attachments"]
-
         if params.files and len(params.files) > 10:
             raise InvalidArgument("files parameter must be a list of up to 10 elements")
         elif params.files and not all(isinstance(file, File) for file in params.files):
@@ -2291,7 +2287,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 rate_limit_per_user=slowmode_delay or 0,
                 files=params.files or None,
                 reason=reason,
-                **params.payload,  # type: ignore
+                **params.payload,
             )
         finally:
             if params.files:
