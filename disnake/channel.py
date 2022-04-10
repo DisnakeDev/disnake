@@ -1960,7 +1960,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def type(self) -> ChannelType:
-        return try_enum(ChannelType, self._type)
+        """:class:`ChannelType`: The channel's Discord type."""
+        return ChannelType.forum
 
     @property
     def _sorting_bucket(self) -> int:
