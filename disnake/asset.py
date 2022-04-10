@@ -125,7 +125,7 @@ class AssetMixin:
         Converts the asset into a :class:`File` suitable for sending via
         :meth:`abc.Messageable.send`.
 
-        .. versionadded:: 2.0
+        .. versionadded:: 2.5
 
         Parameters
         -----------
