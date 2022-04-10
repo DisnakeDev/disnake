@@ -53,6 +53,7 @@ __all__ = (
 class InstallParams:
     """Represents the installation parameters for the bot provided by Discord.
 
+    .. versionadded:: 2.5
 
     Attributes
     ----------
