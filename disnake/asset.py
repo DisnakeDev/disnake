@@ -34,10 +34,7 @@ import yarl
 from . import utils
 from .errors import DiscordException, InvalidArgument
 
-__all__ = (
-    "AssetMixin",
-    "Asset",
-)
+__all__ = ("Asset",)
 
 if TYPE_CHECKING:
     ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
@@ -53,17 +50,6 @@ MISSING = utils.MISSING
 
 
 class AssetMixin:
-    """
-    Base type for all asset-like types.
-    This currently includes:
-
-    - :class:`Asset`
-    - :class:`Emoji`
-    - :class:`PartialEmoji`
-    - :class:`StickerItem`
-    - :class:`Sticker`
-    """
-
     url: str
     _state: Optional[Any]
 
