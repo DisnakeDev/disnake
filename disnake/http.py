@@ -1202,7 +1202,7 @@ class HTTPClient:
         route = Route("POST", "/channels/{channel_id}/threads", channel_id=channel_id)
         query_params = {"has_message": "true"}
 
-        if files is not None:
+        if files:
             multipart = to_multipart_with_attachments(payload, files)
 
             return self.request(

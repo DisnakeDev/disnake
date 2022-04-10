@@ -2286,7 +2286,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
                 rate_limit_per_user=slowmode_delay or 0,
                 type=ChannelType.public_thread.value,
-                files=params.files or None,
+                files=params.files,
                 reason=reason,
                 **params.payload,
             )
