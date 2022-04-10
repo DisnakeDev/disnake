@@ -1219,7 +1219,7 @@ class HTTPClient:
         )
         return self.request(route)
 
-    def create_forum_thread(
+    def start_thread_in_forum_channel(
         self,
         channel_id: Snowflake,
         files: Optional[Sequence[File]] = None,

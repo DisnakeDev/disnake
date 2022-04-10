@@ -2250,10 +2250,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         files = cast("List[File]", params.files)
 
         if params.payload and "attachments" in params.payload:
-            # We delete it since `create_forum_thread` already handles it
+            # We delete it since `start_thread_in_forum_channel` already handles it
             del params.payload["attachments"]
 
-        thread_data = await self._state.http.create_forum_thread(
+        thread_data = await self._state.http.start_thread_in_forum_channel(
             self.id,
             name=name,
             auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
