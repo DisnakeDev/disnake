@@ -1902,9 +1902,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         *not* point to an existing or valid thread.
     default_auto_archive_duration: :class:`int`
         The default auto archive duration in minutes for threads created in this channel.
+    slowmode_delay: :class:`int`
+        The number of seconds a member must wait between creating threads
+        in this channel. A value of `0` denotes that it is disabled.
     """
-
-    # TODO: Refer threads as posts?
 
     __slots__ = (
         "id",
@@ -1916,6 +1917,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "last_thread_id",
         "default_auto_archive_duration",
         "guild",
+        "slowmode_delay",
         "_state",
         "_type",
         "_overwrites",
@@ -1951,6 +1953,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
             "default_auto_archive_duration", 1440
         )
+        self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self._fill_overwrites(data)
 
     async def _get_channel(self) -> ForumChannel:  # I wonder why this exists
