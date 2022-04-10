@@ -2271,19 +2271,20 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         elif files and not all(isinstance(file, File) for file in files):
             raise InvalidArgument("files parameter must be a list of File")
 
-        thread_data = await self._state.http.start_thread_in_forum_channel(
-            self.id,
-            name=name,
-            auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-            rate_limit_per_user=slowmode_delay or 0,
-            files=files or None,
-            reason=reason,
-            **params.payload,  # type: ignore
-        )
-
-        if files is not MISSING:
-            for f in files:
-                f.close()
+        try:
+            thread_data = await self._state.http.start_thread_in_forum_channel(
+                self.id,
+                name=name,
+                auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
+                rate_limit_per_user=slowmode_delay or 0,
+                files=files or None,
+                reason=reason,
+                **params.payload,  # type: ignore
+            )
+        finally:
+            if files is not MISSING:
+                for f in files:
+                    f.close()
 
         if view:
             self._state.store_view(view, int(thread_data["id"]))
