@@ -1237,7 +1237,6 @@ class HTTPClient:
             "allowed_mentions",
             "components",
             "sticker_ids",
-            "attachments",
             "flags",
         )
         payload = {k: v for k, v in fields.items() if k in valid_keys}
