@@ -1835,6 +1835,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         A shortcut method to :meth:`Guild.create_forum_channel` to create a :class:`ForumChannel` in the category.
 
+        .. versionadded:: 2.5
+
         Returns
         -------
         :class:`ForumChannel`
