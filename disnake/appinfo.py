@@ -228,9 +228,7 @@ class AppInfo:
         )
         self.tags: Optional[List[str]] = data.get("tags")
         self.install_params: Optional[InstallParams] = (
-            InstallParams(data["install_params"], parent=self)
-            if "install_params" in data and data["install_params"]
-            else None
+            InstallParams(data["install_params"], parent=self) if "install_params" in data else None
         )
         self.custom_install_url: Optional[str] = data.get("custom_install_url")
 
