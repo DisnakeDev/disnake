@@ -1051,8 +1051,7 @@ class InteractionResponse:
         else:
             choices_data = []
             value: ApplicationCommandOptionChoicePayload
-            # TODO: fix this once `Interaction.client` is no longer optional
-            i18n = self._parent._state._get_client().i18n
+            i18n = self._parent.client.i18n
             for c in choices:
                 if isinstance(c, OptionChoice):
                     c.localize(i18n)
