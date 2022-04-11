@@ -447,8 +447,7 @@ Localizations
 The names and descriptions of commands and options, as well as the names of choices
 (for use with fixed choices or autocompletion), support localization for a fixed set of locales.
 
-Currently supported locales are:
-bg, cs, da, de, el, en-GB, en-US, es-ES, fi, fr, hi, hr, hu, it, ja, ko, lt, nl, no, pl, pt-BR, ro, ru, sv-SE, th, tr, uk, vi, zh-CN, zh-TW
+For currently supported locales, see :class:`Locale`.
 
 The preferred way of adding localizations is to use ``<locale>.json`` files,
 containing mappings from user-defined keys to localized/translated strings,
