@@ -129,6 +129,11 @@ class Thread(Messageable, Hashable):
         This is only available for threads created after 2022-01-09.
 
         .. versionadded:: 2.4
+
+    last_pin_timestamp: Optional[:class:`datetime.datetime`]
+        The datetime of the last pinned message or ``None`` if no message has been pinned.
+
+        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -148,6 +153,7 @@ class Thread(Messageable, Hashable):
         "auto_archive_duration",
         "archive_timestamp",
         "create_timestamp",
+        "last_pin_timestamp",
         "_type",
         "_state",
         "_members",
@@ -181,6 +187,9 @@ class Thread(Messageable, Hashable):
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self.message_count = data.get("message_count")
         self.member_count = data.get("member_count")
+        self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
+            data.get("last_pin_timestamp")
+        )
         self._unroll_metadata(data["thread_metadata"])
 
         try:

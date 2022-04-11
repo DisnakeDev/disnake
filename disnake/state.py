@@ -1063,6 +1063,12 @@ class ConnectionState:
             utils.parse_time(data["last_pin_timestamp"]) if data["last_pin_timestamp"] else None
         )
 
+        try:
+            channel.last_pin_timestamp = last_pin  # type: ignore
+        except AttributeError:
+            # The channel doesn't support it.
+            pass
+
         if guild is None:
             self.dispatch("private_channel_pins_update", channel, last_pin)
         else:
