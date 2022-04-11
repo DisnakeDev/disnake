@@ -92,10 +92,12 @@ t.ActivityFlags = {
 """
 
 if TYPE_CHECKING:
+    from .state import ConnectionState
     from .types.activity import (
         Activity as ActivityPayload,
         ActivityAssets,
         ActivityButton,
+        ActivityEmoji as ActivityEmojiPayload,
         ActivityParty,
         ActivityTimestamps,
     )
@@ -758,7 +760,13 @@ class CustomActivity(BaseActivity):
 
     __slots__ = ("name", "emoji", "state")
 
-    def __init__(self, name: Optional[str], *, emoji: Optional[PartialEmoji] = None, **extra: Any):
+    def __init__(
+        self,
+        name: Optional[str],
+        *,
+        emoji: Optional[Union[ActivityEmojiPayload, str, PartialEmoji]] = None,
+        **extra: Any,
+    ):
         super().__init__(**extra)
         self.name: Optional[str] = name
         self.state: Optional[str] = extra.pop("state", None)
@@ -833,37 +841,38 @@ ActivityTypes = Union[Activity, Game, CustomActivity, Streaming, Spotify]
 
 
 @overload
-def create_activity(data: ActivityPayload) -> ActivityTypes:
+def create_activity(
+    data: ActivityPayload, *, state: Optional[ConnectionState] = None
+) -> ActivityTypes:
     ...
 
 
 @overload
-def create_activity(data: None) -> None:
+def create_activity(data: None, *, state: Optional[ConnectionState] = None) -> None:
     ...
 
 
-def create_activity(data: Optional[ActivityPayload]) -> Optional[ActivityTypes]:
+def create_activity(
+    data: Optional[ActivityPayload], *, state: Optional[ConnectionState] = None
+) -> Optional[ActivityTypes]:
     if not data:
         return None
 
+    activity: ActivityTypes
     game_type = try_enum(ActivityType, data.get("type", -1))
-    if game_type is ActivityType.playing:
-        if "application_id" in data or "session_id" in data:
-            return Activity(**data)
-        return Game(**data)
-    elif game_type is ActivityType.custom:
-        try:
-            name = data.pop("name")
-        except KeyError:
-            return Activity(**data)
-        else:
-            # we removed the name key from data already
-            return CustomActivity(name=name, **data)  # type: ignore
-    elif game_type is ActivityType.streaming:
-        if "url" in data:
-            # the url won't be None here
-            return Streaming(**data)  # type: ignore
-        return Activity(**data)
+    if game_type is ActivityType.playing and not ("application_id" in data or "session_id" in data):
+        activity = Game(**data)
+    elif game_type is ActivityType.custom and "name" in data:
+        activity = CustomActivity(**data)
+    elif game_type is ActivityType.streaming and "url" in data:
+        # url won't be None here
+        activity = Streaming(**data)  # type: ignore
     elif game_type is ActivityType.listening and "sync_id" in data and "session_id" in data:
-        return Spotify(**data)
-    return Activity(**data)
+        activity = Spotify(**data)
+    else:
+        activity = Activity(**data)
+
+    if isinstance(activity, (Activity, CustomActivity)) and activity.emoji and state:
+        activity.emoji._state = state
+
+    return activity
