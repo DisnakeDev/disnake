@@ -198,7 +198,7 @@ class LocalizationStore:
         """
         Clears localizations and reloads all previously loaded files/directories again.
         If an exception occurs, the previous data gets restored.
-        See :func:`.load` for possible raised exceptions.
+        See :func:`~LocalizationStore.load` for possible raised exceptions.
         """
 
         old = self._loc
