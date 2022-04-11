@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Uni
 from .. import utils
 from ..app_commands import OptionChoice
 from ..channel import ChannelType, PartialMessageable
-from ..enums import InteractionResponseType, InteractionType, WebhookType, try_enum
+from ..enums import InteractionResponseType, InteractionType, Locale, WebhookType, try_enum
 from ..errors import (
     HTTPException,
     InteractionNotEditable,
@@ -68,7 +68,6 @@ if TYPE_CHECKING:
         CategoryChannel,
         PartialMessageable,
         StageChannel,
-        StoreChannel,
         TextChannel,
         VoiceChannel,
     )
@@ -95,7 +94,6 @@ if TYPE_CHECKING:
         StageChannel,
         TextChannel,
         CategoryChannel,
-        StoreChannel,
         Thread,
         PartialMessageable,
     ]
@@ -123,20 +121,27 @@ class Interaction:
         The application ID that the interaction was for.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
-    guild_locale: Optional[:class:`str`]
+    guild_locale: Optional[:class:`Locale`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
     channel_id: :class:`int`
         The channel ID the interaction was sent from.
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
-    locale: :class:`str`
+    locale: :class:`Locale`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
 
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
@@ -181,8 +186,8 @@ class Interaction:
 
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
-        self.locale: str = data["locale"]
-        self.guild_locale: Optional[str] = data.get("guild_locale")
+        self.locale: Locale = try_enum(Locale, data["locale"])
+        self.guild_locale: Optional[Locale] = try_enum(Locale, data.get("guild_locale"))
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
         self._permissions = None
@@ -321,8 +326,8 @@ class Interaction:
 
     async def edit_original_message(
         self,
-        *,
         content: Optional[str] = MISSING,
+        *,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -351,7 +356,7 @@ class Interaction:
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
@@ -498,7 +503,7 @@ class Interaction:
 
     async def send(
         self,
-        content: Any = None,
+        content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -578,7 +583,7 @@ class Interaction:
         else:
             sender = self.response.send_message
         await sender(
-            content=content,  # type: ignore
+            content=content,
             embed=embed,
             embeds=embeds,
             file=file,
@@ -698,7 +703,7 @@ class InteractionResponse:
 
     async def send_message(
         self,
-        content: Any = None,
+        content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -854,8 +859,8 @@ class InteractionResponse:
 
     async def edit_message(
         self,
+        content: Optional[str] = MISSING,
         *,
-        content: Any = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -1231,7 +1236,7 @@ class InteractionMessage(Message):
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.

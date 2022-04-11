@@ -25,8 +25,8 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+import asyncio
 import datetime
-import inspect
 import itertools
 import sys
 from operator import attrgetter
@@ -206,7 +206,7 @@ def flatten_user(cls):
             # probably a member function by now
             def generate_function(x):
                 # We want sphinx to properly show coroutine functions as coroutines
-                if inspect.iscoroutinefunction(value):
+                if asyncio.iscoroutinefunction(value):
 
                     async def general(self, *args, **kwargs):  # type: ignore
                         return await getattr(self._user, x)(*args, **kwargs)
@@ -455,7 +455,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     def _presence_update(
         self, data: PartialPresenceUpdate, user: UserPayload
     ) -> Optional[Tuple[User, User]]:
-        self.activities = tuple(map(create_activity, data["activities"]))
+        self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
             sys.intern(key): sys.intern(value) for key, value in data.get("client_status", {}).items()  # type: ignore
         }
