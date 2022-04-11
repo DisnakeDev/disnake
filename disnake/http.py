@@ -78,6 +78,7 @@ if TYPE_CHECKING:
         components,
         embed,
         emoji,
+        gateway,
         guild,
         guild_scheduled_event,
         integration,
@@ -665,7 +666,7 @@ class HTTPClient:
         channel_id: Snowflake,
         message_id: Snowflake,
         *,
-        files: Optional[List[File]],
+        files: Optional[List[File]] = None,
         **fields: Any,
     ) -> Response[message.Message]:
         r = Route(
@@ -1335,8 +1336,25 @@ class HTTPClient:
     def get_guild_preview(self, guild_id: Snowflake) -> Response[guild.GuildPreview]:
         return self.request(Route("GET", "/guilds/{guild_id}/preview", guild_id=guild_id))
 
-    def get_bans(self, guild_id: Snowflake) -> Response[List[guild.Ban]]:
-        return self.request(Route("GET", "/guilds/{guild_id}/bans", guild_id=guild_id))
+    def get_bans(
+        self,
+        guild_id: Snowflake,
+        limit: Optional[int] = None,
+        before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
+    ) -> Response[List[guild.Ban]]:
+        params: Dict[str, Any] = {}
+
+        if limit is not None:
+            params["limit"] = limit
+        if before is not None:
+            params["before"] = before
+        if after is not None:
+            params["after"] = after
+
+        return self.request(
+            Route("GET", "/guilds/{guild_id}/bans", guild_id=guild_id), params=params
+        )
 
     def get_ban(self, user_id: Snowflake, guild_id: Snowflake) -> Response[guild.Ban]:
         return self.request(
@@ -1879,6 +1897,7 @@ class HTTPClient:
             "channel_id",
             "topic",
             "privacy_level",
+            "send_start_notification",
         )
         payload = {k: v for k, v in payload.items() if k in valid_keys}
 
@@ -2431,7 +2450,7 @@ class HTTPClient:
 
     async def get_gateway(self, *, encoding: str = "json", zlib: bool = True) -> str:
         try:
-            data = await self.request(Route("GET", "/gateway"))
+            data: gateway.Gateway = await self.request(Route("GET", "/gateway"))
         except HTTPException as exc:
             raise GatewayNotFound() from exc
         if zlib:
@@ -2442,9 +2461,9 @@ class HTTPClient:
 
     async def get_bot_gateway(
         self, *, encoding: str = "json", zlib: bool = True
-    ) -> Tuple[int, str]:
+    ) -> Tuple[int, str, gateway.SessionStartLimit]:
         try:
-            data = await self.request(Route("GET", "/gateway/bot"))
+            data: gateway.GatewayBot = await self.request(Route("GET", "/gateway/bot"))
         except HTTPException as exc:
             raise GatewayNotFound() from exc
 
@@ -2452,7 +2471,7 @@ class HTTPClient:
             value = "{0}?encoding={1}&v=10&compress=zlib-stream"
         else:
             value = "{0}?encoding={1}&v=10"
-        return data["shards"], value.format(data["url"], encoding)
+        return data["shards"], value.format(data["url"], encoding), data["session_start_limit"]
 
     def get_user(self, user_id: Snowflake) -> Response[user.User]:
         return self.request(Route("GET", "/users/{user_id}", user_id=user_id))
