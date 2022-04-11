@@ -23,7 +23,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-from typing import List, TypedDict, Optional
+from typing import List, Optional, TypedDict
 
 from .emoji import PartialEmoji
 from .member import MemberWithUser

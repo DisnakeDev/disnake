@@ -97,10 +97,10 @@ if TYPE_CHECKING:
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
     from .types.raw_models import (
+        ChannelPinsUpdate,
         GuildScheduledEventUserActionEvent,
         ReactionActionEvent,
         TypingEvent,
-        ChannelPinsUpdate,
     )
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
