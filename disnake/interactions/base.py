@@ -1055,7 +1055,7 @@ class InteractionResponse:
             for c in choices:
                 if isinstance(c, OptionChoice):
                     c.localize(i18n)
-                    value = c.to_dict()
+                    value = c.to_dict(locale=self._parent.locale)
                 else:
                     value = {"name": str(c), "value": c}
                 choices_data.append(value)

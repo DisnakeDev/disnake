@@ -33,6 +33,7 @@ from .custom_warnings import ConfigWarning
 from .enums import (
     ApplicationCommandType,
     ChannelType,
+    Locale,
     OptionType,
     enum_if_int,
     try_enum,
@@ -145,13 +146,25 @@ class OptionChoice:
             and self.name_localizations == other.name_localizations
         )
 
-    def to_dict(self) -> ApplicationCommandOptionChoicePayload:
+    def to_dict(self, *, locale: Optional[Locale] = None) -> ApplicationCommandOptionChoicePayload:
+        localizations = self.name_localizations.to_dict()
+
+        name: Optional[str] = None
+        # if `locale` provided, get localized name from dict
+        if locale is not None and localizations:
+            name = localizations.get(str(locale))
+
+        # fall back to default name if no locale or no localized name
+        if name is None:
+            name = self.name
+
         payload: ApplicationCommandOptionChoicePayload = {
-            "name": self.name,
+            "name": name,
             "value": self.value,
         }
-        if (loc := self.name_localizations.to_dict()) is not None:
-            payload["name_localizations"] = loc
+        # if no `locale` provided, include all localizations in payload
+        if locale is None and localizations:
+            payload["name_localizations"] = localizations
         return payload
 
     @classmethod
