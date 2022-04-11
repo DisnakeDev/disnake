@@ -51,6 +51,7 @@ from .app_commands import (
     PartialGuildApplicationCommandPermissions,
 )
 from .asset import Asset
+from .bans import BanEntry
 from .channel import *
 from .channel import _guild_channel_factory, _threaded_guild_channel_factory
 from .colour import Colour
@@ -61,6 +62,7 @@ from .enums import (
     ContentFilter,
     GuildScheduledEventEntityType,
     GuildScheduledEventPrivacyLevel,
+    Locale,
     NotificationLevel,
     NSFWLevel,
     VerificationLevel,
@@ -75,7 +77,7 @@ from .flags import SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
 from .integrations import Integration, _integration_factory
 from .invite import Invite
-from .iterators import AuditLogIterator, MemberIterator
+from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
 from .permissions import PermissionOverwrite
@@ -94,7 +96,7 @@ MISSING = utils.MISSING
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime, User as ABCUser
     from .app_commands import APIApplicationCommand
-    from .channel import CategoryChannel, StageChannel, StoreChannel, TextChannel, VoiceChannel
+    from .channel import CategoryChannel, StageChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
@@ -106,13 +108,8 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
 
-    GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, StoreChannel]
+    GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
-
-
-class BanEntry(NamedTuple):
-    reason: Optional[str]
-    user: User
 
 
 class _GuildLimit(NamedTuple):
@@ -204,7 +201,6 @@ class Guild(Hashable):
         - ``ANIMATED_BANNER``: Guild can upload an animated banner.
         - ``ANIMATED_ICON``: Guild can upload an animated icon.
         - ``BANNER``: Guild can upload and use a banner. (i.e. :attr:`.banner`)
-        - ``COMMERCE``: Guild can sell things using store channels.
         - ``COMMUNITY``: Guild is a community server.
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
         - ``ENABLED_DISCOVERABLE_BEFORE``: Guild had Server Discovery enabled at least once.
@@ -238,9 +234,13 @@ class Guild(Hashable):
         The number goes from 0 to 3 inclusive.
     premium_subscription_count: :class:`int`
         The number of "boosts" this guild currently has.
-    preferred_locale: Optional[:class:`str`]
+    preferred_locale: Optional[:class:`Locale`]
         The preferred locale for the guild. Used when filtering Server Discovery
         results to a specific language.
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
     nsfw_level: :class:`NSFWLevel`
         The guild's NSFW level.
 
@@ -545,7 +545,7 @@ class Guild(Hashable):
         self.premium_tier: int = guild.get("premium_tier", 0)
         self.premium_subscription_count: int = guild.get("premium_subscription_count") or 0
         self._system_channel_flags: int = guild.get("system_channel_flags", 0)
-        self.preferred_locale: Optional[str] = guild.get("preferred_locale")
+        self.preferred_locale: Optional[Locale] = try_enum(Locale, guild.get("preferred_locale"))
         self._discovery_splash: Optional[str] = guild.get("discovery_splash")
         self._rules_channel_id: Optional[int] = utils._get_as_snowflake(guild, "rules_channel_id")
         self._public_updates_channel_id: Optional[int] = utils._get_as_snowflake(
@@ -1041,7 +1041,7 @@ class Guild(Hashable):
         .. deprecated:: 2.5
 
             VoiceRegion is no longer set on the guild, and is set on the individual voice channels instead.
-            See :attr:`VoiceChannel.region` instead.
+            See :attr:`VoiceChannel.rtc_region` and :attr:`StageChannel.rtc_region` instead.
         """
         utils.warn_deprecated(
             "Guild.region is deprecated and will be removed in a future version.", stacklevel=2
@@ -1554,7 +1554,7 @@ class Guild(Hashable):
         vanity_code: str = MISSING,
         system_channel: Optional[TextChannel] = MISSING,
         system_channel_flags: SystemChannelFlags = MISSING,
-        preferred_locale: str = MISSING,
+        preferred_locale: Locale = MISSING,
         rules_channel: Optional[TextChannel] = MISSING,
         public_updates_channel: Optional[TextChannel] = MISSING,
         premium_progress_bar_enabled: bool = MISSING,
@@ -1610,7 +1610,7 @@ class Guild(Hashable):
 
             .. deprecated:: 2.5
 
-                Use :attr:`VoiceChannel.region` or :attr:`StageChannel.region` instead.
+                Use :func:`VoiceChannel.edit` or :func:`StageChannel.edit` with ``rtc_region`` instead.
 
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
@@ -1631,9 +1631,12 @@ class Guild(Hashable):
             The new channel that is used for the system channel. Could be ``None`` for no system channel.
         system_channel_flags: :class:`SystemChannelFlags`
             The new system channel settings to use with the new system channel.
-        preferred_locale: :class:`str`
+        preferred_locale: :class:`Locale`
             The new preferred locale for the guild. Used as the primary language in the guild.
-            If set, this must be an ISO 639 code, e.g. ``en-US`` or ``ja`` or ``zh-CN``.
+
+            .. versionchanged:: 2.5
+                Changed to :class:`Locale` instead of :class:`str`.
+
         rules_channel: Optional[:class:`TextChannel`]
             The new channel that is used for rules. This is only available to
             guilds that contain ``PUBLIC`` in :attr:`Guild.features`. Could be ``None`` for no rules
@@ -1677,7 +1680,7 @@ class Guild(Hashable):
             fields["description"] = description
 
         if preferred_locale is not MISSING:
-            fields["preferred_locale"] = preferred_locale
+            fields["preferred_locale"] = str(preferred_locale)
 
         if afk_timeout is not MISSING:
             fields["afk_timeout"] = afk_timeout
@@ -2169,31 +2172,63 @@ class Guild(Hashable):
         channel: GuildChannel = factory(guild=self, state=self._state, data=data)  # type: ignore
         return channel
 
-    async def bans(self) -> List[BanEntry]:
-        """|coro|
+    def bans(
+        self,
+        *,
+        limit: Optional[int] = 1000,
+        before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
+    ) -> BanIterator:
+        """Returns an :class:`~disnake.AsyncIterator` that enables receiving the destination's bans.
 
-        Retrieves all the users that are banned from the guild as a :class:`list` of :class:`BanEntry`.
+        You must have the :attr:`~Permissions.ban_members` permission to get this information.
 
-        You must have :attr:`~Permissions.ban_members` permission
-        to use this.
+        .. versionchanged:: 2.5
+            Due to a breaking change in Discord's API, this now returns an :class:`~disnake.AsyncIterator` instead of a :class:`list`.
+
+        Examples
+        ---------
+
+        Usage ::
+
+            counter = 0
+            async for ban in guild.bans(limit=200):
+                if not ban.user.bot:
+                    counter += 1
+
+        Flattening into a list: ::
+
+            bans = await guild.bans(limit=123).flatten()
+            # bans is now a list of BanEntry...
+
+        All parameters are optional.
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of bans to retrieve.
+            If ``None``, it retrieves every ban in the guild. Note, however,
+            that this would make it a slow operation.
+            Defaults to 1000.
+        before: Optional[:class:`~disnake.abc.Snowflake`]
+            Retrieve bans before this user.
+        after: Optional[:class:`~disnake.abc.Snowflake`]
+            Retrieve bans after this user.
 
         Raises
         ------
-        Forbidden
-            You do not have proper permissions to get the information.
-        HTTPException
-            An error occurred while fetching the information.
+        ~disnake.Forbidden
+            You do not have permissions to get the bans.
+        ~disnake.HTTPException
+            An error occurred while fetching the bans.
 
-        Returns
+        Yields
         -------
-        List[:class:`BanEntry`]
-            A list of :class:`BanEntry` objects.
+        :class:`~disnake.BanEntry`
+            The ban with the ban data parsed.
         """
 
-        data: List[BanPayload] = await self._state.http.get_bans(self.id)
-        return [
-            BanEntry(user=User(state=self._state, data=e["user"]), reason=e["reason"]) for e in data
-        ]
+        return BanIterator(self, limit=limit, before=before, after=after)
 
     async def prune_members(
         self,
@@ -3142,7 +3177,6 @@ class Guild(Hashable):
         data = await self._state.http.get_invite(payload["code"])
 
         channel = self.get_channel(int(data["channel"]["id"]))
-        payload["revoked"] = False
         payload["temporary"] = False
         payload["max_uses"] = 0
         payload["max_age"] = 0

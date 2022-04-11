@@ -409,7 +409,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. note::
 
         Not all messages will have ``content``. This is a Discord limitation.
-        See the docs of :attr:`Intents.messages_content` for more information.
+        See the docs of :attr:`Intents.message_content` for more information.
 
     :param message: The current message.
     :type message: :class:`Message`
@@ -429,7 +429,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. note::
 
         Not all messages will have ``content``. This is a Discord limitation.
-        See the docs of :attr:`Intents.messages_content` for more information.
+        See the docs of :attr:`Intents.message_content` for more information.
 
 
     :param message: The deleted message.
@@ -491,7 +491,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. note::
 
         Not all messages will have ``content``. This is a Discord limitation.
-        See the docs of :attr:`Intents.messages_content` for more information.
+        See the docs of :attr:`Intents.message_content` for more information.
 
     The following non-exhaustive cases trigger this event:
 
@@ -812,14 +812,21 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_thread_join(thread)
 
-    Called whenever a thread is joined or created. Note that from the API's perspective there is no way to
-    differentiate between a thread being created or the bot joining a thread.
+    Called whenever the bot joins a thread or gets access to a thread
+    (for example, by gaining access to the parent channel).
 
     Note that you can get the guild from :attr:`Thread.guild`.
 
     This requires :attr:`Intents.guilds` to be enabled.
 
+    .. note::
+        This event will not be called for threads created by the bot or
+        threads created on one of the bot's messages.
+
     .. versionadded:: 2.0
+
+    .. versionchanged:: 2.5
+        This is no longer being called when a thread is created, see :func:`on_thread_create` instead.
 
     :param thread: The thread that got joined.
     :type thread: :class:`Thread`
@@ -842,6 +849,23 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. versionadded:: 2.0
 
     :param thread: The thread that got removed.
+    :type thread: :class:`Thread`
+
+.. function:: on_thread_create(thread)
+
+    Called whenever a thread is created.
+
+    Note that you can get the guild from :attr:`Thread.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. note::
+        This only works for threads created in channels the bot already has access to,
+        and only for public threads unless the bot has the :attr:`~Permissions.manage_threads` permission.
+
+    .. versionadded:: 2.5
+
+    :param thread: The thread that got created.
     :type thread: :class:`Thread`
 
 .. function:: on_thread_delete(thread)
@@ -1338,10 +1362,6 @@ of :class:`enum.Enum`.
     .. attribute:: news
 
         A guild news channel.
-
-    .. attribute:: store
-
-        A guild store channel.
 
     .. attribute:: stage_voice
 
@@ -2087,6 +2107,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.icon`
         - :attr:`~AuditLogDiff.banner`
         - :attr:`~AuditLogDiff.vanity_url_code`
+        - :attr:`~AuditLogDiff.preferred_locale`
 
     .. attribute:: channel_create
 
@@ -2584,6 +2605,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.description`
         - :attr:`~AuditLogDiff.privacy_level`
         - :attr:`~AuditLogDiff.status`
+        - :attr:`~AuditLogDiff.image`
 
         .. versionadded:: 2.3
 
@@ -3075,6 +3097,132 @@ of :class:`enum.Enum`.
         A large image with a large Discord logo, guild icon, name and online member count,
         with a "Join My Server" label at the bottom.
 
+.. class:: Locale
+
+    Represents supported locales by Discord.
+
+    .. versionadded:: 2.5
+
+    .. attribute:: bg
+
+        The ``bg`` (Bulgarian) locale.
+
+    .. attribute:: cs
+
+        The ``cs`` (Czech) locale.
+
+    .. attribute:: da
+
+        The ``da`` (Danish) locale.
+
+    .. attribute:: de
+
+        The ``de`` (German) locale.
+
+    .. attribute:: el
+
+        The ``el`` (Greek) locale.
+
+    .. attribute:: en_GB
+
+        The ``en_GB`` (English, UK) locale.
+
+    .. attribute:: en_US
+
+        The ``en_US`` (English, US) locale.
+
+    .. attribute:: es_ES
+
+        The ``es_ES`` (Spanish) locale.
+
+    .. attribute:: fi
+
+        The ``fi`` (Finnish) locale.
+
+    .. attribute:: fr
+
+        The ``fr`` (French) locale.
+
+    .. attribute:: hi
+
+        The ``hi`` (Hindi) locale.
+
+    .. attribute:: hr
+
+        The ``hr`` (Croatian) locale.
+
+    .. attribute:: it
+
+        The ``it`` (Italian) locale.
+
+    .. attribute:: ja
+
+        The ``ja`` (Japanese) locale.
+
+    .. attribute:: ko
+
+        The ``ko`` (Korean) locale.
+
+    .. attribute:: lt
+
+        The ``lt`` (Lithuanian) locale.
+
+    .. attribute:: hu
+
+        The ``hu`` (Hungarian) locale.
+
+    .. attribute:: nl
+
+        The ``nl`` (Dutch) locale.
+
+    .. attribute:: no
+
+        The ``no`` (Norwegian) locale.
+
+    .. attribute:: pl
+
+        The ``pl`` (Polish) locale.
+
+    .. attribute:: pt_BR
+
+        The ``pt_BR`` (Portuguese) locale.
+
+    .. attribute:: ro
+
+        The ``ro`` (Romanian) locale.
+
+    .. attribute:: ru
+
+        The ``ru`` (Russian) locale.
+
+    .. attribute:: sv_SE
+
+        The ``sv_SE`` (Swedish) locale.
+
+    .. attribute:: th
+
+        The ``th`` (Thai) locale.
+
+    .. attribute:: tr
+
+        The ``tr`` (Turkish) locale.
+
+    .. attribute:: uk
+
+        The ``uk`` (Ukrainian) locale.
+
+    .. attribute:: vi
+
+        The ``vi`` (Vietnamese) locale.
+
+    .. attribute:: zh_CN
+
+        The ``zh_CN`` (Chinese, China) locale.
+
+    .. attribute:: zh_TW
+
+        The ``zh_TW`` (Chinese, Taiwan) locale.
+
 
 Async Iterator
 ----------------
@@ -3449,6 +3597,12 @@ AuditLogDiff
 
         :type: :class:`str`
 
+    .. attribute:: preferred_locale
+
+        The guild's preferred locale.
+
+        :type: :class:`Locale`
+
     .. attribute:: position
 
         The position of a :class:`Role` or :class:`abc.GuildChannel`.
@@ -3747,6 +3901,12 @@ AuditLogDiff
         The status of a guild scheduled event being changed.
 
         :type: :class:`GuildScheduledEventStatus`
+
+    .. attribute:: image
+
+        The cover image of a guild scheduled event being changed.
+
+        :type: :class:`Asset`
 
 .. this is currently missing the following keys: reason and application_id
    I'm not sure how to about porting these
@@ -4226,7 +4386,6 @@ ModalInteraction
 .. autoclass:: ModalInteraction()
     :members:
     :inherited-members:
-    :exclude-members: channel, followup, guild, me, permissions, response
 
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
@@ -4398,15 +4557,6 @@ ThreadMember
 
 .. autoclass:: ThreadMember()
     :members:
-
-StoreChannel
-~~~~~~~~~~~~~
-
-.. attributetable:: StoreChannel
-
-.. autoclass:: StoreChannel()
-    :members:
-    :inherited-members:
 
 VoiceChannel
 ~~~~~~~~~~~~~
@@ -4844,6 +4994,14 @@ ShardInfo
 .. attributetable:: ShardInfo
 
 .. autoclass:: ShardInfo()
+    :members:
+
+SessionStartLimit
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: SessionStartLimit
+
+.. autoclass:: SessionStartLimit()
     :members:
 
 SystemChannelFlags
