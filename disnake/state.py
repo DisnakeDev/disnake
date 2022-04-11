@@ -100,6 +100,7 @@ if TYPE_CHECKING:
         GuildScheduledEventUserActionEvent,
         ReactionActionEvent,
         TypingEvent,
+        ChannelPinsUpdate,
     )
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
@@ -1043,7 +1044,7 @@ class ConnectionState:
             _log.debug("CHANNEL_CREATE referencing an unknown guild ID: %s. Discarding.", guild_id)
             return
 
-    def parse_channel_pins_update(self, data) -> None:
+    def parse_channel_pins_update(self, data: ChannelPinsUpdate) -> None:
         channel_id = int(data["channel_id"])
         try:
             guild = self._get_guild(int(data["guild_id"]))
@@ -1059,9 +1060,9 @@ class ConnectionState:
             )
             return
 
-        last_pin = (
-            utils.parse_time(data["last_pin_timestamp"]) if data["last_pin_timestamp"] else None
-        )
+        last_pin = None
+        if "last_pin_timestamp" in data:
+            last_pin = utils.parse_time(data["last_pin_timestamp"])
 
         if isinstance(channel, (DMChannel, TextChannel, Thread)):
             channel.last_pin_timestamp = last_pin
