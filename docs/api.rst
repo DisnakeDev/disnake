@@ -1518,6 +1518,11 @@ of :class:`enum.Enum`.
         The system message denoting that a context menu command was executed.
 
         .. versionadded:: 2.3
+    .. attribute:: auto_moderation_action
+
+        The system message denoting that Auto Moderation has taken an action on a message.
+
+        .. versionadded:: 2.5
 
 .. class:: UserFlags
 
