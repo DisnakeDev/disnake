@@ -134,7 +134,7 @@ async def _edit_handler(
     embeds: List[Embed] = MISSING,
     file: File = MISSING,
     files: List[File] = MISSING,
-    attachments: List[Attachment] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
     suppress: bool = MISSING,
     delete_after: Optional[float] = None,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
@@ -1406,7 +1406,7 @@ class Message(Hashable):
         *,
         embed: Optional[Embed] = ...,
         file: File = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         suppress: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1422,7 +1422,7 @@ class Message(Hashable):
         *,
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         suppress: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1438,7 +1438,7 @@ class Message(Hashable):
         *,
         embeds: List[Embed] = ...,
         file: File = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         suppress: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1454,7 +1454,7 @@ class Message(Hashable):
         *,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         suppress: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1513,6 +1513,11 @@ class Message(Hashable):
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
+            Can also pass ``None`` to clear all attachments.
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
+
         suppress: :class:`bool`
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
@@ -2083,8 +2088,12 @@ class PartialMessage(Hashable):
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
+            Can also pass ``None`` to clear all attachments.
 
             .. versionadded:: 2.1
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         suppress: :class:`bool`
             Whether to suppress embeds for the message. This removes

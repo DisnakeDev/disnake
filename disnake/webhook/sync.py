@@ -442,6 +442,11 @@ class SyncWebhookMessage(Message):
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
+            Can also pass ``None`` to clear all attachments.
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
+
 
             .. versionadded:: 2.2
 
@@ -1045,7 +1050,7 @@ class SyncWebhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> SyncWebhookMessage:
         """Edits a message owned by this webhook.
@@ -1087,8 +1092,12 @@ class SyncWebhook(BaseWebhook):
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
+            Can also pass ``None`` to clear all attachments.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.

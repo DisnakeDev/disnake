@@ -485,7 +485,7 @@ def handle_message_parameters(
     ephemeral: bool = False,
     file: File = MISSING,
     files: List[File] = MISSING,
-    attachments: List[Attachment] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
@@ -739,6 +739,11 @@ class WebhookMessage(Message):
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
+            Can also pass ``None`` to clear all attachments.
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
+
 
             .. versionadded:: 2.2
 
@@ -1674,8 +1679,12 @@ class Webhook(BaseWebhook):
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
+            Can also pass ``None`` to clear all attachments.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
