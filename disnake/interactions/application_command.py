@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Typ
 
 from .. import utils
 from ..channel import _threaded_channel_factory
-from ..enums import ApplicationCommandType, OptionType, try_enum
+from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
 from ..guild import Guild
 from ..member import Member
 from ..message import Attachment, Message
@@ -106,17 +106,23 @@ class ApplicationCommandInteraction(Interaction):
         The channel ID the interaction was sent from.
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
-    locale: :class:`str`
+    locale: :class:`Locale`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
 
-    guild_locale: Optional[:class:`str`]
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
+    guild_locale: Optional[:class:`Locale`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
 
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
@@ -160,7 +166,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
 
     guild: Guild
     me: Member
-    guild_locale: str
+    guild_locale: Locale
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
