@@ -207,7 +207,7 @@ def user_command(
     ----------
     name: :class:`str`
         The name of the user command (defaults to the function name).
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
@@ -261,7 +261,7 @@ def message_command(
     ----------
     name: :class:`str`
         The name of the message command (defaults to the function name).
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5

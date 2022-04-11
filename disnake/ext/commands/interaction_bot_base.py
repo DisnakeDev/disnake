@@ -454,11 +454,11 @@ class InteractionBotBase(CommonBotBase):
             The name of the slash command (defaults to function name).
         description: :class:`str`
             The description of the slash command. It will be visible in Discord.
-        name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
             Localizations for ``name``.
 
             .. versionadded:: 2.5
-        description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
             Localizations for ``description``.
 
             .. versionadded:: 2.5
@@ -521,7 +521,7 @@ class InteractionBotBase(CommonBotBase):
         ----------
         name: :class:`str`
             The name of the user command (defaults to function name).
-        name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
             Localizations for ``name``.
 
             .. versionadded:: 2.5
@@ -571,7 +571,7 @@ class InteractionBotBase(CommonBotBase):
         ----------
         name: :class:`str`
             The name of the message command (defaults to function name).
-        name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
             Localizations for ``name``.
 
             .. versionadded:: 2.5

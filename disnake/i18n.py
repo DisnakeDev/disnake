@@ -29,19 +29,16 @@ import os
 import warnings
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, DefaultDict, Dict, FrozenSet, Optional, Set, Union
+from typing import DefaultDict, Dict, Optional, Set, Union
 
 from . import utils
 from .custom_warnings import LocalizationWarning
+from .enums import Locale
 
 MISSING = utils.MISSING
 
-if TYPE_CHECKING:
-    from typing_extensions import TypeGuard
 
-    from .types.interactions import ApplicationCommandLocale, ApplicationCommandLocalizations
-
-    Localizations = Union[str, ApplicationCommandLocalizations]
+Localizations = Union[str, Dict[Locale, str], Dict[str, str]]
 
 
 __all__ = (
@@ -53,50 +50,13 @@ __all__ = (
 _log = logging.getLogger(__name__)
 
 
-# see https://discord.com/developers/docs/reference#locales
-VALID_LOCALES: FrozenSet[ApplicationCommandLocale] = frozenset(
-    (
-        "bg",
-        "cs",
-        "da",
-        "de",
-        "el",
-        "en-GB",
-        "en-US",
-        "es-ES",
-        "fi",
-        "fr",
-        "hi",
-        "hr",
-        "hu",
-        "it",
-        "ja",
-        "ko",
-        "lt",
-        "nl",
-        "no",
-        "pl",
-        "pt-BR",
-        "ro",
-        "ru",
-        "sv-SE",
-        "th",
-        "tr",
-        "uk",
-        "vi",
-        "zh-CN",
-        "zh-TW",
-    )
-)
-
-
-def is_valid_locale(locale: str) -> TypeGuard[ApplicationCommandLocale]:
+def is_valid_locale(locale: str) -> bool:
     """
     Returns ``True`` if the locale is valid for use with the API, ``False`` otherwise.
 
     .. versionadded:: 2.5
     """
-    return locale in VALID_LOCALES
+    return locale in Locale._enum_value_map_  # type: ignore
 
 
 class LocalizationValue:
@@ -110,7 +70,7 @@ class LocalizationValue:
 
     def __init__(self, localizations: Optional[Localizations]):
         self._key: Optional[str]
-        self._data: Optional[ApplicationCommandLocalizations]
+        self._data: Optional[Dict[str, str]]
 
         if localizations is None:
             # no localization
@@ -123,7 +83,7 @@ class LocalizationValue:
         elif isinstance(localizations, dict):
             # got localization data
             self._key = None
-            self._data = localizations
+            self._data = {str(k): v for k, v in localizations.items()}
         else:
             raise TypeError(f"Invalid localizations type: {type(localizations).__name__}")
 
@@ -132,7 +92,7 @@ class LocalizationValue:
         if self._key is not None:
             self._data = store.get(self._key)
 
-    def to_dict(self) -> Optional[ApplicationCommandLocalizations]:
+    def to_dict(self) -> Optional[Dict[str, str]]:
         """Returns a dict with a locale -> localization mapping"""
         if self._data is MISSING:
             warnings.warn(
@@ -166,10 +126,10 @@ class LocalizationStore:
     def __init__(self, *, strict: bool):
         self.strict = strict
 
-        self._loc: DefaultDict[str, ApplicationCommandLocalizations] = defaultdict(dict)
+        self._loc: DefaultDict[str, Dict[str, str]] = defaultdict(dict)
         self._paths: Set[Path] = set()
 
-    def get(self, key: str) -> Optional[ApplicationCommandLocalizations]:
+    def get(self, key: str) -> Optional[Dict[str, str]]:
         """
         Returns localizations for the specified key.
 
@@ -186,7 +146,7 @@ class LocalizationStore:
 
         Returns
         -------
-        Optional[Dict[ApplicationCommandLocale, :class:`str`]]
+        Optional[Dict[:class:`str`, :class:`str`]]
             The localizations for the provided key.
             May return ``None`` if no localizations could be found and :attr:`strict` is disabled.
         """
@@ -265,7 +225,7 @@ class LocalizationStore:
         except Exception as e:
             raise RuntimeError(f"Unable to load '{path}': {e}") from e
 
-    def _load_dict(self, data: Dict[str, str], locale: ApplicationCommandLocale) -> None:
+    def _load_dict(self, data: Dict[str, str], locale: str) -> None:
         if not isinstance(data, dict) or not all(isinstance(o, str) for o in data.values()):
             raise TypeError("data must be a flat dict with string values")
         for key, value in data.items():

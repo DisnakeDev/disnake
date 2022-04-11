@@ -40,40 +40,7 @@ if TYPE_CHECKING:
     from .message import AllowedMentions, Attachment, Message
 
 
-# see https://discord.com/developers/docs/reference#locales
-ApplicationCommandLocale = Literal[
-    "bg",
-    "cs",
-    "da",
-    "de",
-    "el",
-    "en-GB",
-    "en-US",
-    "es-ES",
-    "fi",
-    "fr",
-    "hi",
-    "hr",
-    "hu",
-    "it",
-    "ja",
-    "ko",
-    "lt",
-    "nl",
-    "no",
-    "pl",
-    "pt-BR",
-    "ro",
-    "ru",
-    "sv-SE",
-    "th",
-    "tr",
-    "uk",
-    "vi",
-    "zh-CN",
-    "zh-TW",
-]
-ApplicationCommandLocalizations = Dict[ApplicationCommandLocale, str]
+ApplicationCommandLocalizations = Dict[str, str]
 
 
 ApplicationCommandType = Literal[1, 2, 3]

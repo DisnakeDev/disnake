@@ -3,6 +3,7 @@ from pprint import pformat
 from typing import List
 
 import disnake
+from disnake.enums import Locale
 from disnake.ext import commands
 
 
@@ -27,7 +28,7 @@ class Localizations(commands.Cog):
             # by lookup key
             name_localizations="OTHER_NAME",
             # specify localizations directly
-            description_localizations={"en-GB": "insert bri'ish description here"},
+            description_localizations={Locale.en_GB: "insert bri'ish description here"},
         ),
     ) -> None:
         """
@@ -57,7 +58,7 @@ class Localizations(commands.Cog):
         pass
 
     @second.sub_command(
-        name_localizations={"en-GB": "british_subcommand"},
+        name_localizations={Locale.en_GB: "british_subcommand"},
         description_localizations="MY_SUBCMD_DESC",
     )
     async def third(

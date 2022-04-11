@@ -532,14 +532,14 @@ While not recommended, it is also possible to not use ``.json`` files at all and
 .. code-block:: python3
 
     @bot.slash_command(
-        name_localizations={"de": "addiere_5"},
-        description_localizations={"de": "Addiere 5 zu einer anderen Zahl."},
+        name_localizations={Locale.de: "addiere_5"},
+        description_localizations={Locale.de: "Addiere 5 zu einer anderen Zahl."},
     )
     async def add_5(
         inter: disnake.ApplicationCommandInteraction,
         num: int = commands.Param(
-            name_localizations={"de": "zahl"},
-            description_localizations={"de": "Eine Zahl"},
+            name_localizations={Locale.de: "zahl"},
+            description_localizations={Locale.de: "Eine Zahl"},
         ),
     ):
         ...

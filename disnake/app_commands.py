@@ -118,7 +118,7 @@ class OptionChoice:
         The name of the option choice (visible to users).
     value: Union[:class:`str`, :class:`int`]
         The value of the option choice.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
@@ -175,11 +175,11 @@ class Option:
         The option's name.
     description: :class:`str`
         The option's description.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
-    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``description``.
 
         .. versionadded:: 2.5
@@ -424,7 +424,7 @@ class ApplicationCommand(ABC):
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
@@ -494,7 +494,7 @@ class UserCommand(ApplicationCommand):
     default_permission: :class:`bool`
         Whether the user command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
@@ -529,7 +529,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     default_permission: :class:`bool`
         Whether the user command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
@@ -571,7 +571,7 @@ class MessageCommand(ApplicationCommand):
     default_permission: :class:`bool`
         Whether the message command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
@@ -606,7 +606,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     default_permission: :class:`bool`
         Whether the message command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
@@ -652,11 +652,11 @@ class SlashCommand(ApplicationCommand):
         The slash command's description.
     options: List[:class:`Option`]
         The list of options the slash command has.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
-    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``description``.
 
         .. versionadded:: 2.5
@@ -773,11 +773,11 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         The slash command's description.
     options: List[:class:`Option`]
         The list of options the slash command has.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
-    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``description``.
 
         .. versionadded:: 2.5

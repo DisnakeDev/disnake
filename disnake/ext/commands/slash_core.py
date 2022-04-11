@@ -402,11 +402,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             the name of the subcommand. Defaults to the function name
         description: :class:`str`
             the description of the subcommand
-        name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
             Localizations for ``name``.
 
             .. versionadded:: 2.5
-        description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
             Localizations for ``description``.
 
             .. versionadded:: 2.5
@@ -457,7 +457,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         ----------
         name : :class:`str`
             the name of the subcommand group. Defaults to the function name
-        name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+        name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
             Localizations for ``name``.
 
             .. versionadded:: 2.5
@@ -628,11 +628,11 @@ def slash_command(
         The name of the slash command. (equals to function name by default).
     description: :class:`str`
         The description of the slash command. It will be visible in Discord.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
-    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``description``.
 
         .. versionadded:: 2.5

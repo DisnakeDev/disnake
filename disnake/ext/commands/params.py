@@ -286,11 +286,11 @@ class ParamInfo:
         The name of this slash command option.
     description: :class:`str`
         The description of this slash command option.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
-    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``description``.
 
         .. versionadded:: 2.5
@@ -868,11 +868,11 @@ def Param(
     description: :class:`str`
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
-    name_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``name``.
 
         .. versionadded:: 2.5
-    description_localizations: Union[:class:`str`, Dict[ApplicationCommandLocale, :class:`str`]]
+    description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
         Localizations for ``description``.
 
         .. versionadded:: 2.5
