@@ -51,14 +51,14 @@ __all__ = (
 
 
 class InstallParams:
-    """Represents the installation parameters for the bot provided by Discord.
+    """Represents the installation parameters for the application, provided by Discord.
 
     .. versionadded:: 2.5
 
     Attributes
     ----------
     scopes: List[:class:`str`]
-        The scopes requested by the bot.
+        The scopes requested by the application.
     permissions: :class:`Permissions`
         The permissions requested for the bot role.
     """
