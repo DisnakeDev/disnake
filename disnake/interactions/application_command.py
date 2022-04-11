@@ -59,7 +59,6 @@ if TYPE_CHECKING:
         CategoryChannel,
         PartialMessageable,
         StageChannel,
-        StoreChannel,
         TextChannel,
         VoiceChannel,
     )
@@ -77,7 +76,6 @@ if TYPE_CHECKING:
         StageChannel,
         TextChannel,
         CategoryChannel,
-        StoreChannel,
         Thread,
         PartialMessageable,
         VoiceChannel,
@@ -244,6 +242,12 @@ class ApplicationCommandInteractionData:
             for d in data.get("options", [])
         ]
 
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionData id={self.id!r} name={self.name!r} type={self.type!r} "
+            f"target_id={self.target_id!r} target={self.target!r} resolved={self.resolved!r} options={self.options!r}>"
+        )
+
     def _get_chain_and_kwargs(
         self, chain: Tuple[str, ...] = None
     ) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
@@ -313,6 +317,12 @@ class ApplicationCommandInteractionDataOption:
             for d in data.get("options", [])
         ]
         self.focused: bool = data.get("focused", False)
+
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionDataOption name={self.name!r} type={self.type!r}>"
+            f"value={self.value!r} focused={self.focused!r} options={self.options!r}>"
+        )
 
     def _simplified_value(self) -> Any:
         if self.value is not None:
@@ -428,6 +438,12 @@ class ApplicationCommandInteractionDataResolved:
 
         for str_id, attachment in attachments.items():
             self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
+
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionDataResolved members={self.members!r} users={self.users!r} "
+            f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
+        )
 
     def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
         if isinstance(option_type, int):
