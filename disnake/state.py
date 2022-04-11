@@ -1957,8 +1957,9 @@ class AutoShardedConnectionState(ConnectionState):
         self.shards_launched: asyncio.Event = asyncio.Event()
 
     def _update_guild_channel_references(self) -> None:
-        messages: Sequence[Message] = self._messages or []
-        for msg in messages:
+        if not self._messages:
+            return
+        for msg in self._messages:
             if not msg.guild:
                 continue
 
