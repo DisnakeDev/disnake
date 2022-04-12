@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
+from datetime import timedelta
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast, overload
 
 from .. import utils
@@ -169,6 +170,7 @@ class Interaction:
         "_cs_followup",
         "_cs_channel",
         "_cs_me",
+        "_cs_expires_at",
     )
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
@@ -282,6 +284,27 @@ class Interaction:
             "token": self.token,
         }
         return Webhook.from_state(data=payload, state=self._state)
+
+    @utils.cached_slot_property("_cs_expires_at")
+    def expires_at(self) -> datetime:
+        """:class:`datetime.datetime`: Returns the interaction's expiration time in UTC.
+
+        This is exactly 15 minutes after the interaction was created.
+
+        .. versionadded:: 2.5
+        """
+        return self.created_at + timedelta(minutes=15)
+
+    def is_expired(self) -> bool:
+        """Whether the interaction is older than 15 minutes.
+
+        This does not take into account if the interaction was responded to within the 3 second limit.
+
+        .. versionadded :: 2.5
+
+        :return type: :class:`bool`
+        """
+        return self.expires_at <= utils.utcnow()
 
     async def original_message(self) -> InteractionMessage:
         """|coro|
