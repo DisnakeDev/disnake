@@ -107,6 +107,9 @@ class InvokableApplicationCommand(ABC):
     ----------
     name: :class:`str`
         The name of the command.
+    qualified_name: :class:`str`
+        The full command name, including parent names in the case of slash subcommands or groups.
+        For example, the qualified name for ``/one two three`` would be ``one two three``.
     body: :class:`.ApplicationCommand`
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
