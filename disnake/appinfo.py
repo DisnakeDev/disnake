@@ -157,7 +157,7 @@ class AppInfo:
     tags: Optional[List[:class:`str`]]
         The application's tags.
 
-        .. verisonadded:: 2.5
+        .. versionadded:: 2.5
 
     install_params: Optional[:class:`InstallParams`]
         The installation parameters for this application.
