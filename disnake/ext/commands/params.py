@@ -929,6 +929,7 @@ def inject(function: Callable[..., Any]) -> Any:
 def option_enum(
     choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
 ) -> Type[TChoice]:
+    """A utility function to create an enum type with the provided values."""
     if isinstance(choices, list):
         choices = {str(i): i for i in choices}
 
