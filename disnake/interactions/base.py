@@ -1234,18 +1234,63 @@ class InteractionMessage(Message):
     __slots__ = ()
     _state: _InteractionMessageState
 
+    @overload
     async def edit(
         self,
         content: Optional[str] = MISSING,
+        *,
         embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
         file: File = MISSING,
+        attachments: List[Attachment] = MISSING,
+        view: Optional[View] = MISSING,
+        components: Optional[Components] = MISSING,
+        allowed_mentions: Optional[AllowedMentions] = MISSING,
+    ) -> InteractionMessage:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = MISSING,
+        *,
+        embed: Optional[Embed] = MISSING,
         files: List[File] = MISSING,
         attachments: List[Attachment] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components] = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = None,
+        allowed_mentions: Optional[AllowedMentions] = MISSING,
     ) -> InteractionMessage:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = MISSING,
+        *,
+        embeds: List[Embed] = MISSING,
+        file: File = MISSING,
+        attachments: List[Attachment] = MISSING,
+        view: Optional[View] = MISSING,
+        components: Optional[Components] = MISSING,
+        allowed_mentions: Optional[AllowedMentions] = MISSING,
+    ) -> InteractionMessage:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = MISSING,
+        *,
+        embeds: List[Embed] = MISSING,
+        files: List[File] = MISSING,
+        attachments: List[Attachment] = MISSING,
+        view: Optional[View] = MISSING,
+        components: Optional[Components] = MISSING,
+        allowed_mentions: Optional[AllowedMentions] = MISSING,
+    ) -> InteractionMessage:
+        ...
+
+    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
 
         Edits the message.
@@ -1312,22 +1357,9 @@ class InteractionMessage(Message):
         :class:`InteractionMessage`
             The newly edited message.
         """
-        # if no attachment list was provided but we're uploading new files,
-        # use current attachments as the base
-        if attachments is MISSING and (file or files):
-            attachments = self.attachments
-
-        return await self._state._interaction.edit_original_message(
-            content=content,
-            embeds=embeds,
-            embed=embed,
-            file=file,
-            files=files,
-            attachments=attachments,
-            view=view,
-            components=components,
-            allowed_mentions=allowed_mentions,
-        )
+        if self._state._interaction.is_expired():
+            return await super().edit(content=content, **fields)
+        return await self._state._interaction.edit_original_message(content=content, **fields)
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
         """|coro|
@@ -1349,6 +1381,8 @@ class InteractionMessage(Message):
         HTTPException
             Deleting the message failed.
         """
+        if self._state._interaction.is_expired():
+            return await super().delete(delay=delay)
         if delay is not None:
 
             async def inner_call(delay: float = delay):
