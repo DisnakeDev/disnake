@@ -130,6 +130,10 @@ class ApplicationCommandInteraction(Interaction):
         The wrapped interaction data.
     client: :class:`Client`
         The interaction client.
+    application_command: :class:`InvokableApplicationCommand`
+        The command invoked by the interaction.
+    command_failed: :class:`bool`
+        Whether the command failed to be checked or invoked.
     """
 
     def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
