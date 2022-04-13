@@ -3487,9 +3487,9 @@ AuditLogDiff
 
     .. attribute:: topic
 
-        The topic of a :class:`TextChannel` or :class:`StageChannel`.
+        The topic of a :class:`TextChannel`, :class:`StageChannel` or :class:`ForumChannel`.
 
-        See also :attr:`TextChannel.topic` or :attr:`StageChannel.topic`.
+        See also :attr:`TextChannel.topic`, :attr:`StageChannel.topic` or :attr:`ForumChannel.topic`.
 
         :type: :class:`str`
 
@@ -3667,9 +3667,9 @@ AuditLogDiff
     .. attribute:: slowmode_delay
 
         The number of seconds members have to wait before
-        sending another message in the channel.
+        sending another message or creating another thread in the channel.
 
-        See also :attr:`TextChannel.slowmode_delay`.
+        See also :attr:`TextChannel.slowmode_delay` or :attr:`ForumChannel.slowmode_delay`.
 
         :type: :class:`int`
 
@@ -4454,6 +4454,10 @@ ForumChannel
 .. autoclass:: ForumChannel()
     :members:
     :inherited-members:
+    :exclude-members: typing
+
+    .. automethod:: typing
+        :async-with:
 
 StageInstance
 ~~~~~~~~~~~~~~
