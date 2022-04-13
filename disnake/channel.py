@@ -1736,7 +1736,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         """
 
         def comparator(channel):
-            return (not isinstance(channel, TextChannel), channel.position)
+            return (not isinstance(channel, (TextChannel, ForumChannel)), channel.position)
 
         ret = [c for c in self.guild.channels if c.category_id == self.id]
         ret.sort(key=comparator)
