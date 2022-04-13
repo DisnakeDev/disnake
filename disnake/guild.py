@@ -1465,7 +1465,6 @@ class Guild(Hashable):
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> ForumChannel:
-
         """|coro|
 
         This is similar to :meth:`create_text_channel` except makes a :class:`ForumChannel` instead.
