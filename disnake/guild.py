@@ -3253,9 +3253,6 @@ class Guild(Hashable):
         else:
             user_id = None
 
-        if action:
-            action = action.value
-
         return AuditLogIterator(
             self,
             before=before,
@@ -3263,7 +3260,7 @@ class Guild(Hashable):
             limit=limit,
             oldest_first=oldest_first,
             user_id=user_id,
-            action_type=action,
+            action_type=action.value if action is not None else None,
         )
 
     async def widget(self) -> Widget:
