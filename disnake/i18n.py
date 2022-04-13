@@ -201,25 +201,18 @@ class LocalizationStore(LocalizationProtocol):
         ------
         RuntimeError
             No localizations for the provided key were found.
-            Raised only if :attr:`strict` is enabled, warns and returns ``None`` otherwise.
+            Raised only if :attr:`strict` is enabled, returns ``None`` otherwise.
 
         Returns
         -------
         Optional[Dict[:class:`str`, :class:`str`]]
             The localizations for the provided key.
-            May return ``None`` if no localizations could be found and :attr:`strict` is disabled.
+            Returns ``None`` if no localizations could be found and :attr:`strict` is disabled.
         """
 
         data = self._loc.get(key)
-        if data is None:
-            msg = f"no localizations found for key '{key}'"
-            if self.strict:
-                raise RuntimeError(msg)
-            warnings.warn(
-                msg,
-                LocalizationWarning,
-                stacklevel=2,
-            )
+        if data is None and self.strict:
+            raise RuntimeError(f"no localizations found for key '{key}'")
         return data
 
     def load(self, path: Union[str, os.PathLike]) -> None:
