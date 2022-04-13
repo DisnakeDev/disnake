@@ -151,6 +151,7 @@ class LocalizationProtocol(ABC):
         RuntimeError
             The provided path is invalid or couldn't be loaded
         """
+        raise NotImplementedError
 
     # subtypes don't have to implement this
     def reload(self) -> None:
@@ -158,6 +159,7 @@ class LocalizationProtocol(ABC):
         Clears localizations and reloads all previously loaded sources again.
         If an exception occurs, the previous data gets restored and the exception is re-raised.
         """
+        pass
 
 
 class LocalizationStore(LocalizationProtocol):
