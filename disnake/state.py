@@ -2097,9 +2097,7 @@ class AutoShardedConnectionState(ConnectionState):
         self._ready_task = None
 
         # update member references once guilds are chunked
-        # (if we're not chunking guilds, there's no use in trying to update member references)
-        if self._chunk_guilds:
-            self._update_member_references()
+        self._update_member_references()
 
         # dispatch the event
         self.call_handlers("ready")
