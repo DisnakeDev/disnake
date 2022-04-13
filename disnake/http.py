@@ -68,7 +68,7 @@ _log = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from types import TracebackType
 
-    from .enums import AuditLogAction, InteractionResponseType
+    from .enums import InteractionResponseType
     from .file import File
     from .message import Attachment
     from .types import (
@@ -1646,7 +1646,7 @@ class HTTPClient:
         before: Optional[Snowflake] = None,
         after: Optional[Snowflake] = None,
         user_id: Optional[Snowflake] = None,
-        action_type: Optional[AuditLogAction] = None,
+        action_type: Optional[audit_log.AuditLogEvent] = None,
     ) -> Response[audit_log.AuditLog]:
         params: Dict[str, Any] = {"limit": limit}
         if before:
