@@ -441,6 +441,8 @@ Injections
 We have them, look at `this example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_ for more information ✨
 
 
+.. _localizations:
+
 Localizations
 -------------
 
@@ -448,6 +450,12 @@ The names and descriptions of commands and options, as well as the names of choi
 (for use with fixed choices or autocompletion), support localization for a fixed set of locales.
 
 For currently supported locales, see :class:`Locale`.
+
+.. note::
+    You can supply your own custom localization provider by implementing :class:`.LocalizationProtocol`
+    and using the client's/bot's :attr:`localization_provider <ext.commands.Bot.localization_provider>` parameter.
+    The ``.json`` handling mentioned in this section, as well as the :ref:`localizations_strict` section below only
+    apply to the default implementation, :class:`.LocalizationStore`.
 
 The preferred way of adding localizations is to use ``<locale>.json`` files,
 containing mappings from user-defined keys to localized/translated strings,
@@ -467,12 +475,12 @@ As an example, consider this command:
         """
         await inter.response.send_message(f"{num} + 5 = {num + 5}")
 
-The keys (e.g. ``{{XYZ}}``) are automatically extracted from the docstrings
-(whitespace is ignored, the positioning inside the line doesn't matter),
-and used for looking up names (``XYZ_NAME``) and descriptions (``XYZ_DESCRIPTION``).
+The keys ``{{XYZ}}`` are automatically extracted from the docstrings,
+and used for looking up names ``XYZ_NAME`` and descriptions ``XYZ_DESCRIPTION``.
+Note that whitespace is ignored, and the positioning inside the line doesn't matter.
 
-For instance, to add German localizations, create a ``locale/de.json`` file
-(the directory name/path can be changed arbitrarily, ``locale`` is just the one used here):
+For instance, to add German localizations, create a ``locale/de.json`` file;
+the directory name/path can be changed arbitrarily, ``locale`` is just the one used here:
 
 .. code-block:: json
 
@@ -483,7 +491,7 @@ For instance, to add German localizations, create a ``locale/de.json`` file
         "COOL_NUMBER_DESCRIPTION": "Eine Zahl",
     }
 
-To load a directory (or file) containing localizations, use :func:`bot.i18n.load(path) <i18n.LocalizationStore.load>`:
+To load a directory or file containing localizations, use :func:`bot.i18n.load(path) <i18n.LocalizationStore.load>`:
 
 .. code-block:: python3
 
@@ -496,11 +504,13 @@ To load a directory (or file) containing localizations, use :func:`bot.i18n.load
     are reloaded when an extension gets automatically reloaded.
 
 
+.. _localizations_strict:
+
 Strict Localization
 +++++++++++++++++++
 
-By default, missing keys that couldn't be found in any ``.json`` files only result in runtime warnings (:class:`~disnake.LocalizationWarning`).
-To instead raise an exception when a key is missing, pass the ``strict_localization=True`` parameter to the bot constructor
+By default, missing keys that couldn't be found are silently ignored.
+To instead raise an exception when a key is missing, pass the ``strict_localization=True`` parameter to the client/bot constructor
 (see :attr:`Bot.strict_localization <ext.commands.Bot.strict_localization>`).
 
 
