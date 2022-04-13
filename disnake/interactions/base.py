@@ -1237,56 +1237,56 @@ class InteractionMessage(Message):
     @overload
     async def edit(
         self,
-        content: Optional[str] = MISSING,
+        content: Optional[str] = ...,
         *,
-        embed: Optional[Embed] = MISSING,
-        file: File = MISSING,
-        attachments: List[Attachment] = MISSING,
-        view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = MISSING,
+        embed: Optional[Embed] = ...,
+        file: File = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
     @overload
     async def edit(
         self,
-        content: Optional[str] = MISSING,
+        content: Optional[str] = ...,
         *,
-        embed: Optional[Embed] = MISSING,
-        files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
-        view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = MISSING,
+        embed: Optional[Embed] = ...,
+        files: List[File] = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
     @overload
     async def edit(
         self,
-        content: Optional[str] = MISSING,
+        content: Optional[str] = ...,
         *,
-        embeds: List[Embed] = MISSING,
-        file: File = MISSING,
-        attachments: List[Attachment] = MISSING,
-        view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = MISSING,
+        embeds: List[Embed] = ...,
+        file: File = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
     @overload
     async def edit(
         self,
-        content: Optional[str] = MISSING,
+        content: Optional[str] = ...,
         *,
-        embeds: List[Embed] = MISSING,
-        files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
-        view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = MISSING,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
