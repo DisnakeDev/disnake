@@ -5118,6 +5118,13 @@ LocalizationStore
 
 .. autoclass:: disnake.i18n.LocalizationStore
     :members:
+    :inherited-members:
+
+LocalizationProtocol
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: disnake.i18n.LocalizationProtocol
+    :members:
 
 
 Exceptions

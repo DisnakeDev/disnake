@@ -27,6 +27,7 @@ from __future__ import annotations
 import logging
 import os
 import warnings
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
 from typing import DefaultDict, Dict, Optional, Set, Union
@@ -43,6 +44,7 @@ Localizations = Union[str, Dict[Locale, str], Dict[str, str]]
 
 __all__ = (
     "is_valid_locale",
+    "LocalizationProtocol",
     "LocalizationStore",
 )
 
@@ -87,7 +89,7 @@ class LocalizationValue:
         else:
             raise TypeError(f"Invalid localizations type: {type(localizations).__name__}")
 
-    def _link(self, store: LocalizationStore) -> None:
+    def _link(self, store: LocalizationProtocol) -> None:
         """Loads localizations from the specified store if this object has a key"""
         if self._key is not None:
             self._data = store.get(self._key)
@@ -111,9 +113,66 @@ class LocalizationValue:
         return (not d1 and not d2) or d1 == d2
 
 
-class LocalizationStore:
+class LocalizationProtocol(ABC):
     """
-    Manages a key-value mapping of localizations
+    Manages a key-value mapping of localizations.
+
+    This is an abstract class, a concrete implementation is provided as :class:`LocalizationStore`.
+
+    .. versionadded:: 2.5
+    """
+
+    @abstractmethod
+    def get(self, key: str) -> Optional[Dict[str, str]]:
+        """
+        Returns localizations for the specified key.
+
+        Parameters
+        ----------
+        key: :class:`str`
+            The lookup key.
+
+        Raises
+        ------
+        RuntimeError
+            May be raised if no localizations for the provided key were found,
+            depending on the implementation.
+
+        Returns
+        -------
+        Optional[Dict[:class:`str`, :class:`str`]]
+            The localizations for the provided key.
+            May return ``None`` if no localizations could be found.
+        """
+        raise NotImplementedError
+
+    # subtypes don't have to implement this
+    def load(self, path: Union[str, os.PathLike]) -> None:
+        """
+        Adds localizations from the provided path.
+
+        Parameters
+        ----------
+        path: Union[:class:`str`, :class:`os.PathLike`]
+            The path to the file/directory to load.
+
+        Raises
+        ------
+        RuntimeError
+            The provided path is invalid or couldn't be loaded
+        """
+
+    # subtypes don't have to implement this
+    def reload(self) -> None:
+        """
+        Clears localizations and reloads all previously loaded sources again.
+        If an exception occurs, the previous data gets restored and the exception is re-raised.
+        """
+
+
+class LocalizationStore(LocalizationProtocol):
+    """
+    Manages a key-value mapping of localizations.
 
     .. versionadded:: 2.5
 
@@ -197,7 +256,7 @@ class LocalizationStore:
     def reload(self) -> None:
         """
         Clears localizations and reloads all previously loaded files/directories again.
-        If an exception occurs, the previous data gets restored.
+        If an exception occurs, the previous data gets restored and the exception is re-raised.
         See :func:`~LocalizationStore.load` for possible raised exceptions.
         """
 

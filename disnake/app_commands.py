@@ -45,7 +45,7 @@ from .role import Role
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:
-    from .i18n import Localizations, LocalizationStore
+    from .i18n import LocalizationProtocol, Localizations
     from .state import ConnectionState
     from .types.interactions import (
         ApplicationCommand as ApplicationCommandPayload,
@@ -175,7 +175,7 @@ class OptionChoice:
             name_localizations=data.get("name_localizations"),
         )
 
-    def localize(self, store: LocalizationStore) -> None:
+    def localize(self, store: LocalizationProtocol) -> None:
         self.name_localizations._link(store)
 
 
@@ -410,7 +410,7 @@ class Option:
             payload["description_localizations"] = loc
         return payload
 
-    def localize(self, store: LocalizationStore) -> None:
+    def localize(self, store: LocalizationProtocol) -> None:
         self.name_localizations._link(store)
         self.description_localizations._link(store)
 
@@ -482,7 +482,7 @@ class ApplicationCommand(ABC):
             data["name_localizations"] = loc
         return data
 
-    def localize(self, store: LocalizationStore) -> None:
+    def localize(self, store: LocalizationProtocol) -> None:
         self.name_localizations._link(store)
 
 
@@ -755,7 +755,7 @@ class SlashCommand(ApplicationCommand):
             res["description_localizations"] = loc
         return res
 
-    def localize(self, store: LocalizationStore) -> None:
+    def localize(self, store: LocalizationProtocol) -> None:
         super().localize(store)
         if (name_loc := self.name_localizations.to_dict()) is not None:
             for value in name_loc.values():
