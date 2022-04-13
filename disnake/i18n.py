@@ -268,7 +268,11 @@ class LocalizationStore(LocalizationProtocol):
             raise RuntimeError(f"Unable to load '{path}': {e}") from e
 
     def _load_dict(self, data: Dict[str, str], locale: str) -> None:
-        if not isinstance(data, dict) or not all(isinstance(o, str) for o in data.values()):
-            raise TypeError("data must be a flat dict with string values")
+        if not isinstance(data, dict) or not all(
+            o is None or isinstance(o, str) for o in data.values()
+        ):
+            raise TypeError("data must be a flat dict with string/null values")
         for key, value in data.items():
-            self._loc[key][locale] = value
+            d = self._loc[key]  # always create dict, regardless of value
+            if value is not None:
+                d[locale] = value
