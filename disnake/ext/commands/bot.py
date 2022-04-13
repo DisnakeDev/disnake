@@ -164,8 +164,16 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
         .. versionadded:: 2.1
+    localization_provider: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` to use for localization of
+        application commands.
+        If not provided, the default :class:`.LocalizationStore` implementation is used.
+
+        .. versionadded:: 2.5
+
     strict_localization: :class:`bool`
         Whether to raise an exception when localizations for a specific key couldn't be found.
+        Only applicable if the ``localization_provider`` parameter is not provided.
         Defaults to ``False``.
 
         .. versionadded:: 2.5
@@ -246,8 +254,16 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
         .. versionadded:: 2.1
+    localization_provider: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` to use for localization of
+        application commands.
+        If not provided, the default :class:`.LocalizationStore` implementation is used.
+
+        .. versionadded:: 2.5
+
     strict_localization: :class:`bool`
         Whether to raise an exception when localizations for a specific key couldn't be found.
+        Only applicable if the ``localization_provider`` parameter is not provided.
         Defaults to ``False``.
 
         .. versionadded:: 2.5
