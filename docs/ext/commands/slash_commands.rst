@@ -383,6 +383,23 @@ For example:
     ):
         ...
 
+
+In case you need don't want to use Param or need to use self in a cog you may
+create autocomplete options with the decorator @slash_command.autocomplete()
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def languages(inter: disnake.CommandInteraction, language: str):
+        pass
+
+
+    @languages.autocomplete("language")
+    async def language_autocomp(inter: disnake.CommandInteraction, string: str):
+        string = string.lower()
+        return [lang for lang in LANGUAGES if string in lang.lower()]
+        ...
+
 Subcommands And Groups
 ----------------------
 
