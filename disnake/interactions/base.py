@@ -300,7 +300,7 @@ class Interaction:
 
         This does not take into account the 3 second limit for the initial response.
 
-        .. versionadded :: 2.5
+        .. versionadded:: 2.5
 
         :return type: :class:`bool`
         """
