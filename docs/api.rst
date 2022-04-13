@@ -4402,6 +4402,7 @@ InteractionMessage
 
 .. autoclass:: InteractionMessage()
     :members:
+    :inherited-members:
 
 ApplicationCommandInteractionData
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
