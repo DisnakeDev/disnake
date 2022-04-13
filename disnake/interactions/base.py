@@ -1359,6 +1359,13 @@ class InteractionMessage(Message):
         """
         if self._state._interaction.is_expired():
             return await super().edit(content=content, **fields)
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        # this isn't necessary when using the superclass, as the implementation there takes care of attachments
+        if "attachments" not in fields and fields.get("file") or fields.get("files"):
+            fields["attachments"] = self.attachments
+
         return await self._state._interaction.edit_original_message(content=content, **fields)
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
