@@ -179,6 +179,9 @@ class Template:
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -197,7 +200,7 @@ class Template:
             The ``icon`` asset couldn't be found.
         HTTPException
             Guild creation failed.
-        InvalidArgument
+        TypeError
             Invalid icon image format given. Must be PNG or JPG.
         TypeError
             The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
