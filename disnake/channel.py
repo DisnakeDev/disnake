@@ -2011,7 +2011,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             :class: helpful
 
             For a slightly more reliable method of fetching the
-            last thread, use :meth:`fetch_thread` with the :attr:`last_thread_id`
+            last thread, use :meth:`Guild.fetch_channel` with the :attr:`last_thread_id`
             attribute.
 
         Returns
@@ -2143,35 +2143,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The returned thread of ``None`` if not found.
         """
         return self.guild.get_thread(thread_id)
-
-    async def fetch_thread(self, thread_id: int, /) -> Thread:
-        """|coro|
-
-        Retrieves a :class:`.Thread` with the given ID.
-
-        .. note::
-
-            This method is an API call. For general usage, consider :meth:`get_thread` instead.
-
-        Raises
-        ------
-        InvalidData
-            An unknown channel type was received from Discord
-            or the guild the channel belongs to is not the same
-            as the one in this object points to.
-        HTTPException
-            Retrieving the channel failed.
-        NotFound
-            Invalid Channel ID.
-        Forbidden
-            You do not have permission to fetch this channel.#
-
-        Returns
-        -------
-        :class:`.Thread`
-            The channel from the ID.
-        """
-        return await self.guild.fetch_channel(thread_id)  # type: ignore
 
     async def create_thread(
         self,
