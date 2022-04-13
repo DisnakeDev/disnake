@@ -64,6 +64,7 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
+from .enums import Locale
 from .errors import InvalidArgument
 
 try:
@@ -89,6 +90,7 @@ __all__ = (
     "as_chunks",
     "format_dt",
     "search_directory",
+    "is_valid_locale",
 )
 
 DISCORD_EPOCH = 1420070400000
@@ -1272,3 +1274,17 @@ def search_directory(path: str) -> Iterator[str]:
             yield from search_directory(os.path.join(path, name))
         else:
             yield prefix + "." + name
+
+
+def is_valid_locale(locale: str) -> bool:
+    """
+    Returns ``True`` if the locale is valid for use with the API, ``False`` otherwise.
+
+    .. versionadded:: 2.5
+
+    Parameters
+    ----------
+    locale: :class:`str`
+        The locale string to check.
+    """
+    return locale in Locale._enum_value_map_  # type: ignore

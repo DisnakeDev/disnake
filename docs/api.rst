@@ -1329,6 +1329,8 @@ Utility Functions
 
 .. autofunction:: disnake.utils.search_directory
 
+.. autofunction:: disnake.utils.is_valid_locale
+
 .. _discord-api-enums:
 
 Enumerations
@@ -5110,8 +5112,6 @@ Localization
 ------------
 
 The library uses the following types/methods to support localization.
-
-.. autofunction:: disnake.i18n.is_valid_locale
 
 LocalizationStore
 ~~~~~~~~~~~~~~~~~~

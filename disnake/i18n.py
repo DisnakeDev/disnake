@@ -43,22 +43,12 @@ Localizations = Union[str, Dict[Locale, str], Dict[str, str]]
 
 
 __all__ = (
-    "is_valid_locale",
     "LocalizationProtocol",
     "LocalizationStore",
 )
 
 
 _log = logging.getLogger(__name__)
-
-
-def is_valid_locale(locale: str) -> bool:
-    """
-    Returns ``True`` if the locale is valid for use with the API, ``False`` otherwise.
-
-    .. versionadded:: 2.5
-    """
-    return locale in Locale._enum_value_map_  # type: ignore
 
 
 class LocalizationValue:
@@ -268,7 +258,7 @@ class LocalizationStore(LocalizationProtocol):
             if path.suffix != ".json":
                 raise ValueError(f"not a .json file")
             locale = path.stem
-            if not is_valid_locale(locale):
+            if not utils.is_valid_locale(locale):
                 raise ValueError(f"invalid locale '{locale}'")
 
             data = utils._from_json(path.read_text("utf-8"))
