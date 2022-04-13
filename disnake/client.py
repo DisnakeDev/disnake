@@ -304,7 +304,7 @@ class Client:
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
 
-    localization_store: :class:`.LocalizationProtocol`
+    localization_provider: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` to use for localization of
         application commands.
         If not provided, the default :class:`.LocalizationStore` implementation is used.
@@ -313,7 +313,7 @@ class Client:
 
     strict_localization: :class:`bool`
         Whether to raise an exception when localizations for a specific key couldn't be found.
-        Only applicable if the ``localization_store`` parameter is not provided.
+        Only applicable if the ``localization_provider`` parameter is not provided.
         Defaults to ``False``.
 
         .. versionadded:: 2.5
@@ -379,7 +379,7 @@ class Client:
             _log.warning("PyNaCl is not installed, voice will NOT be supported")
 
         i18n_strict: bool = options.pop("strict_localization", False)
-        i18n = options.pop("localization_store", None)
+        i18n = options.pop("localization_provider", None)
         if i18n is None:
             i18n = LocalizationStore(strict=i18n_strict)
         self.i18n: LocalizationProtocol = i18n
