@@ -57,6 +57,7 @@ MISSING = utils.MISSING
 if TYPE_CHECKING:
     from ..channel import (
         CategoryChannel,
+        ForumChannel,
         PartialMessageable,
         StageChannel,
         TextChannel,
@@ -79,6 +80,7 @@ if TYPE_CHECKING:
         Thread,
         PartialMessageable,
         VoiceChannel,
+        ForumChannel,
     ]
 
 
