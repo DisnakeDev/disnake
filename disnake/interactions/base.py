@@ -296,9 +296,9 @@ class Interaction:
         return self.created_at + timedelta(minutes=15)
 
     def is_expired(self) -> bool:
-        """Whether the interaction is older than 15 minutes.
+        """Whether the interaction can still be used to make requests to Discord.
 
-        This does not take into account if the interaction was responded to within the 3 second limit.
+        This does not take into account the 3 second limit for the initial response.
 
         .. versionadded :: 2.5
 
