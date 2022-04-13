@@ -135,7 +135,6 @@ class Thread(Messageable, Hashable):
         The flags the thread has.
 
         .. versionadded:: 2.5
-
     """
 
     __slots__ = (
