@@ -2184,7 +2184,7 @@ class Guild(Hashable):
         *,
         enabled: bool = MISSING,
         welcome_channels: List[WelcomeScreenChannel] = MISSING,
-        description: str = MISSING,
+        description: Optional[str] = MISSING,
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
         """|coro|
@@ -2200,7 +2200,7 @@ class Guild(Hashable):
         ----------
         enabled: :class:`bool`
             Whether the welcome screen is enabled.
-        description: :class:`str`
+        description: Optional[:class:`str`]
             The new guild description in the welcome screen.
         welcome_channels: List[:class:`WelcomeScreenChannel`]
             The new welcome channels.
@@ -2214,6 +2214,8 @@ class Guild(Hashable):
             guild is not allowed to create welcome screens.
         HTTPException
             Editing the welcome screen failed.
+        TypeError
+            ``welcome_channels`` is not a list of :class:`~disnake.WelcomeScreenChannel` instances
 
         Returns
         -------
@@ -2231,7 +2233,7 @@ class Guild(Hashable):
         if welcome_channels is not MISSING:
             if welcome_channels is None:
                 payload["welcome_channels"] = None
-            elif isinstance(welcome_channels, list):
+            else:
                 welcome_channel_payload = []
                 for channel in welcome_channels:
                     if not isinstance(channel, WelcomeScreenChannel):

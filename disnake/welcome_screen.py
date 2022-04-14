@@ -37,6 +37,8 @@ if TYPE_CHECKING:
         WelcomeScreen as WelcomeScreenPayload,
         WelcomeScreenChannel as WelcomeScreenChannelPayload,
     )
+
+
 __all__ = ("WelcomeScreen", "WelcomeScreenChannel")
 
 
@@ -99,16 +101,16 @@ class WelcomeScreenChannel:
 
     def to_dict(self) -> WelcomeScreenChannelPayload:
 
-        result = {
-            "channel_id": self.id,
-            "description": self.description,
-        }
+        result: WelcomeScreenChannelPayload = {}  # type: ignore
+        result["channel_id"] = self.id
+        result["description"] = self.description
+
         if self.emoji is not None:
             if self.emoji.id:
                 result["emoji_id"] = self.emoji.id
             result["emoji_name"] = self.emoji.name
 
-        return result  # type: ignore
+        return result
 
 
 class WelcomeScreen:
@@ -190,34 +192,22 @@ class WelcomeScreen:
             You do not have permissions to change the welcome screen.
         HTTPException
             Editing the welcome screen failed.
+        TypeError
+            ``welcome_channels`` is not a list of :class:`~disnake.WelcomeScreenChannel` instances
 
         Returns
         -------
         :class:`WelcomeScreen`
             The newly edited welcome screen.
         """
-        payload = {}
+        from .guild import Guild
 
-        if enabled is not MISSING:
-            payload["enabled"] = enabled
+        if not isinstance(self._guild, Guild):
+            raise TypeError("May not edit a WelcomeScreen from a PartialInviteGuild.")
 
-        if description is not MISSING:
-            payload["description"] = description
-
-        if welcome_channels is not MISSING:
-            if welcome_channels is None:
-                payload["welcome_channels"] = None
-            elif isinstance(welcome_channels, list):
-                welcome_channel_payload = []
-                for channel in welcome_channels:
-                    if not isinstance(channel, WelcomeScreenChannel):
-                        raise TypeError(
-                            "'welcome_channels' must be a list of 'WelcomeScreenChannel' objects"
-                        )
-                    welcome_channel_payload.append(channel.to_dict())
-                payload["welcome_channels"] = welcome_channel_payload
-
-        data = await self._state.http.edit_guild_welcome_screen(
-            self._guild.id, reason=reason, **payload
+        return await self._guild.edit_welcome_screen(
+            enabled=enabled,
+            welcome_channels=welcome_channels,
+            description=description,
+            reason=reason,
         )
-        return WelcomeScreen(state=self._state, data=data, guild=self._guild)

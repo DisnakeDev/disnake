@@ -2111,6 +2111,7 @@ class HTTPClient:
     def edit_guild_welcome_screen(
         self,
         guild_id: Snowflake,
+        *,
         reason: Optional[str] = None,
         **kwargs,
     ) -> Response[welcome_screen.WelcomeScreen]:
