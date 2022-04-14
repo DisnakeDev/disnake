@@ -1259,6 +1259,7 @@ class Guild(Hashable):
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
 
             .. versionadded:: 2.5
+
         nsfw: :class:`bool`
             Whether mark the channel as NSFW or not.
         reason: Optional[:class:`str`]
@@ -1362,6 +1363,7 @@ class Guild(Hashable):
             Whether to mark the channel as NSFW or not.
 
             .. versionadded:: 2.5
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
