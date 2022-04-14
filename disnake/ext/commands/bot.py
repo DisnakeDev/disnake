@@ -173,6 +173,8 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
     strict_localization: :class:`bool`
         Whether to raise an exception when localizations for a specific key couldn't be found.
+        This is mainly useful for testing/debugging, consider disabling this eventually
+        as missing localized names will automatically fall back to the default/base name without it.
         Only applicable if the ``localization_provider`` parameter is not provided.
         Defaults to ``False``.
 
@@ -263,6 +265,8 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
     strict_localization: :class:`bool`
         Whether to raise an exception when localizations for a specific key couldn't be found.
+        This is mainly useful for testing/debugging, consider disabling this eventually
+        as missing localized names will automatically fall back to the default/base name without it.
         Only applicable if the ``localization_provider`` parameter is not provided.
         Defaults to ``False``.
 
