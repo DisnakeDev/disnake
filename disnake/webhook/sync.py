@@ -439,10 +439,9 @@ class SyncWebhookMessage(Message):
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
         attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
-            Can also pass ``None`` to clear all attachments.
 
             .. versionchanged:: 2.5
                 Supports passing ``None`` to clear attachments.
@@ -1089,10 +1088,9 @@ class SyncWebhook(BaseWebhook):
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
         attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
-            Can also pass ``None`` to clear all attachments.
 
             .. versionadded:: 2.2
 
