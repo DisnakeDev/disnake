@@ -940,7 +940,7 @@ def option_enum(
     choices: Union[Dict[:class:`str`, :class:`Any`], List[:class:`Any`]]
         A name/value mapping of choices, or a list of values whose stringified representations
         will be used as the names.
-    \\*\\*kwargs
+    **kwargs
         Name/value pairs to use instead of the ``choices`` parameter.
     """
     if isinstance(choices, list):
