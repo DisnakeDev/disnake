@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Literal, Optional, Tuple, Union
 
 import yarl
 
@@ -38,6 +38,8 @@ from .file import File
 __all__ = ("Asset",)
 
 if TYPE_CHECKING:
+    from .state import ConnectionState
+
     ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
     ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
 
@@ -52,7 +54,7 @@ MISSING = utils.MISSING
 
 class AssetMixin:
     url: str
-    _state: Optional[Any]
+    _state: Optional[ConnectionState]
 
     __slots__: Tuple[str, ...] = ("_state",)
 

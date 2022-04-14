@@ -49,6 +49,8 @@ class InvokableUserCommand(InvokableApplicationCommand):
     ----------
     name: :class:`str`
         The name of the user command.
+    qualified_name: :class:`str`
+        The full command name, equivalent to :attr:`.name` for this type of command.
     body: :class:`.UserCommand`
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
@@ -120,6 +122,8 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     ----------
     name: :class:`str`
         The name of the message command.
+    qualified_name: :class:`str`
+        The full command name, equivalent to :attr:`.name` for this type of command.
     body: :class:`.MessageCommand`
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`

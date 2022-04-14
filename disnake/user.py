@@ -31,7 +31,7 @@ import disnake.abc
 
 from .asset import Asset
 from .colour import Colour
-from .enums import DefaultAvatar
+from .enums import DefaultAvatar, Locale, try_enum
 from .flags import PublicUserFlags
 from .utils import MISSING, _assetbytes_to_base64_data, snowflake_time
 
@@ -319,8 +319,12 @@ class ClientUser(BaseUser):
 
     verified: :class:`bool`
         Specifies if the user's email is verified.
-    locale: Optional[:class:`str`]
+    locale: Optional[:class:`Locale`]
         The IETF language tag used to identify the language the user is using.
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
     mfa_enabled: :class:`bool`
         Specifies if the user has MFA turned on and working.
     """
@@ -329,7 +333,7 @@ class ClientUser(BaseUser):
 
     if TYPE_CHECKING:
         verified: bool
-        locale: Optional[str]
+        locale: Optional[Locale]
         mfa_enabled: bool
         _flags: int
 
@@ -346,7 +350,7 @@ class ClientUser(BaseUser):
         super()._update(data)
         # There's actually an Optional[str] phone field as well but I won't use it
         self.verified = data.get("verified", False)
-        self.locale = data.get("locale")
+        self.locale = try_enum(Locale, data.get("locale"))
         self._flags = data.get("flags", 0)
         self.mfa_enabled = data.get("mfa_enabled", False)
 
