@@ -54,6 +54,7 @@ from .asset import Asset
 from .context_managers import Typing
 from .enums import (
     ChannelType,
+    MessageFlags as MessageFlagsEnum,
     StagePrivacyLevel,
     VideoQualityMode,
     VoiceRegion,
@@ -2254,7 +2255,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             raise InvalidArgument("files parameter must be a list of File")
 
         if suppress_embeds:
-            flags = 1 << 2
+            flags = MessageFlagsEnum.suppress_embeds.value
         else:
             flags = 0
 
@@ -2266,6 +2267,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 rate_limit_per_user=slowmode_delay or 0,
                 type=ChannelType.public_thread.value,
                 files=params.files,
+                flags=flags,
                 reason=reason,
                 **params.payload,
             )
