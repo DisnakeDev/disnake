@@ -1108,6 +1108,8 @@ class Message(Hashable):
     ) -> None:
         self.guild = new_guild
         self.channel = new_channel
+        if isinstance(self.author, Member):
+            self.author.guild = new_guild
 
     @utils.cached_slot_property("_cs_raw_mentions")
     def raw_mentions(self) -> List[int]:
