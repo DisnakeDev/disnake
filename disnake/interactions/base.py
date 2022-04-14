@@ -1229,6 +1229,66 @@ class InteractionMessage(Message):
     :meth:`edit` and :meth:`delete` to work.
 
     .. versionadded:: 2.0
+
+    Attributes
+    ----------
+    type: :class:`MessageType`
+        The type of message.
+    author: Union[:class:`Member`, :class:`abc.User`]
+        A :class:`Member` that sent the message. If :attr:`channel` is a
+        private channel, then it is a :class:`User` instead.
+    content: :class:`str`
+        The actual contents of the message.
+    embeds: List[:class:`Embed`]
+        A list of embeds the message has.
+    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+        The :class:`TextChannel` or :class:`Thread` that the message was sent from.
+        Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
+    reference: Optional[:class:`~disnake.MessageReference`]
+        The message that this message references. This is only applicable to message replies.
+    interaction: Optional[:class:`~disnake.InteractionReference`]
+        The interaction that this message references.
+        This exists only when the message is a response to an interaction without an existing message.
+
+        .. versionadded:: 2.1
+
+    mention_everyone: :class:`bool`
+        Specifies if the message mentions everyone.
+
+        .. note::
+
+            This does not check if the ``@everyone`` or the ``@here`` text is in the message itself.
+            Rather this boolean indicates if either the ``@everyone`` or the ``@here`` text is in the message
+            **and** it did end up mentioning.
+    mentions: List[:class:`abc.User`]
+        A list of :class:`Member` that were mentioned. If the message is in a private message
+        then the list will be of :class:`User` instead.
+
+        .. warning::
+
+            The order of the mentions list is not in any particular order so you should
+            not rely on it. This is a Discord limitation, not one with the library.
+    role_mentions: List[:class:`Role`]
+        A list of :class:`Role` that were mentioned. If the message is in a private message
+        then the list is always empty.
+    id: :class:`int`
+        The message ID.
+    webhook_id: Optional[:class:`int`]
+        The ID of the application that sent this message.
+    attachments: List[:class:`Attachment`]
+        A list of attachments given to a message.
+    pinned: :class:`bool`
+        Specifies if the message is currently pinned.
+    flags: :class:`MessageFlags`
+        Extra features of the message.
+    reactions : List[:class:`Reaction`]
+        Reactions to a message. Reactions can be either custom emoji or standard unicode emoji.
+    stickers: List[:class:`StickerItem`]
+        A list of sticker items given to the message.
+    components: List[:class:`Component`]
+        A list of components in the message.
+    guild: Optional[:class:`Guild`]
+        The guild that the message belongs to, if applicable.
     """
 
     __slots__ = ()
