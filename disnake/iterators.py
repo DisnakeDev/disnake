@@ -585,6 +585,8 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
                 data = filter(self._filter, data)
 
             for user in users:
+                if int(user["id"]) in self._users:
+                    continue
                 u = self._state.create_user(data=user)
                 self._users[u.id] = u
 
