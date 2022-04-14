@@ -133,7 +133,6 @@ class SubCommandGroup(InvokableApplicationCommand):
         self.option = Option(
             name=self.name, description="-", type=OptionType.sub_command_group, options=[]
         )
-        self.name = self.option.name
         self.qualified_name: str = ""
 
     @property
@@ -232,7 +231,6 @@ class SubCommand(InvokableApplicationCommand):
             type=OptionType.sub_command,
             options=options,
         )
-        self.name = self.option.name
         self.qualified_name = ""
 
     @property
@@ -349,8 +347,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             options=options or [],
             default_permission=default_permission,
         )
-        # `SlashCommand.__init__` converts names to lowercase, need to use that name here as well
-        self.qualified_name = self.name = self.body.name
 
     @property
     def description(self) -> str:
