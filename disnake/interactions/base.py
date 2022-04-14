@@ -28,12 +28,13 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
+from datetime import timedelta
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast, overload
 
 from .. import utils
 from ..app_commands import OptionChoice
 from ..channel import ChannelType, PartialMessageable
-from ..enums import InteractionResponseType, InteractionType, WebhookType, try_enum
+from ..enums import InteractionResponseType, InteractionType, Locale, WebhookType, try_enum
 from ..errors import (
     HTTPException,
     InteractionNotEditable,
@@ -121,20 +122,27 @@ class Interaction:
         The application ID that the interaction was for.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
-    guild_locale: Optional[:class:`str`]
+    guild_locale: Optional[:class:`Locale`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
     channel_id: :class:`int`
         The channel ID the interaction was sent from.
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
-    locale: :class:`str`
+    locale: :class:`Locale`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
 
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
@@ -162,6 +170,7 @@ class Interaction:
         "_cs_followup",
         "_cs_channel",
         "_cs_me",
+        "_cs_expires_at",
     )
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
@@ -179,8 +188,8 @@ class Interaction:
 
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
-        self.locale: str = data["locale"]
-        self.guild_locale: Optional[str] = data.get("guild_locale")
+        self.locale: Locale = try_enum(Locale, data["locale"])
+        self.guild_locale: Optional[Locale] = try_enum(Locale, data.get("guild_locale"))
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
         self._permissions = None
@@ -275,6 +284,27 @@ class Interaction:
             "token": self.token,
         }
         return Webhook.from_state(data=payload, state=self._state)
+
+    @utils.cached_slot_property("_cs_expires_at")
+    def expires_at(self) -> datetime:
+        """:class:`datetime.datetime`: Returns the interaction's expiration time in UTC.
+
+        This is exactly 15 minutes after the interaction was created.
+
+        .. versionadded:: 2.5
+        """
+        return self.created_at + timedelta(minutes=15)
+
+    def is_expired(self) -> bool:
+        """Whether the interaction can still be used to make requests to Discord.
+
+        This does not take into account the 3 second limit for the initial response.
+
+        .. versionadded:: 2.5
+
+        :return type: :class:`bool`
+        """
+        return self.expires_at <= utils.utcnow()
 
     async def original_message(self) -> InteractionMessage:
         """|coro|
@@ -1204,18 +1234,63 @@ class InteractionMessage(Message):
     __slots__ = ()
     _state: _InteractionMessageState
 
+    @overload
     async def edit(
         self,
-        content: Optional[str] = MISSING,
-        embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
-        file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
-        view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = None,
+        content: Optional[str] = ...,
+        *,
+        embed: Optional[Embed] = ...,
+        file: File = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embed: Optional[Embed] = ...,
+        files: List[File] = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+    ) -> InteractionMessage:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embeds: List[Embed] = ...,
+        file: File = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+    ) -> InteractionMessage:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+    ) -> InteractionMessage:
+        ...
+
+    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
 
         Edits the message.
@@ -1282,22 +1357,16 @@ class InteractionMessage(Message):
         :class:`InteractionMessage`
             The newly edited message.
         """
+        if self._state._interaction.is_expired():
+            return await super().edit(content=content, **fields)
+
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
-        if attachments is MISSING and (file or files):
-            attachments = self.attachments
+        # this isn't necessary when using the superclass, as the implementation there takes care of attachments
+        if "attachments" not in fields and (fields.get("file") or fields.get("files")):
+            fields["attachments"] = self.attachments
 
-        return await self._state._interaction.edit_original_message(
-            content=content,
-            embeds=embeds,
-            embed=embed,
-            file=file,
-            files=files,
-            attachments=attachments,
-            view=view,
-            components=components,
-            allowed_mentions=allowed_mentions,
-        )
+        return await self._state._interaction.edit_original_message(content=content, **fields)
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
         """|coro|
@@ -1319,6 +1388,8 @@ class InteractionMessage(Message):
         HTTPException
             Deleting the message failed.
         """
+        if self._state._interaction.is_expired():
+            return await super().delete(delay=delay)
         if delay is not None:
 
             async def inner_call(delay: float = delay):
