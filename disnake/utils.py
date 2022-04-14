@@ -465,7 +465,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     ----------
     iterable
         An iterable to search through.
-    \*\*attrs
+    **attrs
         Keyword arguments that denote attributes to search with.
     """
 
@@ -828,8 +828,8 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     as_needed: :class:`bool`
         Whether to escape the markdown characters as needed. This
         means that it does not escape extraneous characters if it's
-        not necessary, e.g. ``**hello**`` is escaped into ``\*\*hello**``
-        instead of ``\*\*hello\*\*``. Note however that this can open
+        not necessary, e.g. ``**hello**`` is escaped into ``\\*\\*hello**``
+        instead of ``\\*\\*hello\\*\\*``. Note however that this can open
         you up to some clever syntax abuse. Defaults to ``False``.
     ignore_links: :class:`bool`
         Whether to leave links alone when escaping markdown. For example,

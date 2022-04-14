@@ -30,12 +30,14 @@ from typing import TYPE_CHECKING, List, Optional
 from . import utils
 from .asset import Asset
 from .flags import ApplicationFlags
+from .permissions import Permissions
 
 if TYPE_CHECKING:
     from .guild import Guild
     from .state import ConnectionState
     from .types.appinfo import (
         AppInfo as AppInfoPayload,
+        InstallParams as InstallParamsPayload,
         PartialAppInfo as PartialAppInfoPayload,
         Team as TeamPayload,
     )
@@ -44,12 +46,50 @@ if TYPE_CHECKING:
 __all__ = (
     "AppInfo",
     "PartialAppInfo",
+    "InstallParams",
 )
+
+
+class InstallParams:
+    """Represents the installation parameters for the application, provided by Discord.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    scopes: List[:class:`str`]
+        The scopes requested by the application.
+    permissions: :class:`Permissions`
+        The permissions requested for the bot role.
+    """
+
+    __slots__ = (
+        "_app_id",
+        "scopes",
+        "permissions",
+    )
+
+    def __init__(self, data: InstallParamsPayload, parent: AppInfo):
+        self._app_id = parent.id
+        self.scopes = data["scopes"]
+        self.permissions = Permissions(int(data["permissions"]))
+
+    def __repr__(self):
+        return f"<InstallParams scopes={self.scopes!r} permissions={self.permissions!r}>"
+
+    def to_url(self) -> str:
+        """Return a string that can be used to add this application to a server.
+
+        Returns
+        -------
+        :class:`str`
+            The invite url.
+        """
+        return utils.oauth_url(self._app_id, scopes=self.scopes, permissions=self.permissions)
 
 
 class AppInfo:
     """Represents the application info for the bot provided by Discord.
-
 
     Attributes
     ----------
@@ -113,6 +153,21 @@ class AppInfo:
         The application's public flags.
 
         .. versionadded:: 2.3
+
+    tags: Optional[List[:class:`str`]]
+        The application's tags.
+
+        .. versionadded:: 2.5
+
+    install_params: Optional[:class:`InstallParams`]
+        The installation parameters for this application.
+
+        .. versionadded:: 2.5
+
+    custom_install_url: Optional[:class:`str`]
+        The custom installation url for this application.
+
+        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -135,6 +190,9 @@ class AppInfo:
         "terms_of_service_url",
         "privacy_policy_url",
         "flags",
+        "tags",
+        "install_params",
+        "custom_install_url",
     )
 
     def __init__(self, state: ConnectionState, data: AppInfoPayload):
@@ -168,6 +226,11 @@ class AppInfo:
         self.flags: Optional[ApplicationFlags] = (
             ApplicationFlags._from_value(flags) if flags is not None else None
         )
+        self.tags: Optional[List[str]] = data.get("tags")
+        self.install_params: Optional[InstallParams] = (
+            InstallParams(data["install_params"], parent=self) if "install_params" in data else None
+        )
+        self.custom_install_url: Optional[str] = data.get("custom_install_url")
 
     def __repr__(self) -> str:
         return (
