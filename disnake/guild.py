@@ -1815,6 +1815,8 @@ class Guild(Hashable):
             The image format passed in to ``icon`` is invalid. It must be
             PNG or JPG. This is also raised if you are not the owner of the
             guild and request an ownership transfer.
+        TypeError
+            At least one of the assets (``icon``, ``banner``, ``splash`` or ``discovery_splash``) is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -2117,6 +2119,8 @@ class Guild(Hashable):
             The ``image`` asset couldn't be found.
         HTTPException
             The request failed.
+        TypeError
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -2910,6 +2914,8 @@ class Guild(Hashable):
             You are not allowed to create emojis.
         HTTPException
             An error occurred creating an emoji.
+        TypeError
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -3110,6 +3116,8 @@ class Guild(Hashable):
             Creating the role failed.
         InvalidArgument
             An invalid keyword argument was given.
+        TypeError
+            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------

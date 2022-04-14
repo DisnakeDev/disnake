@@ -1331,6 +1331,8 @@ class Webhook(BaseWebhook):
         InvalidArgument
             This webhook does not have a token associated with it
             or it tried editing a channel without authentication.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------

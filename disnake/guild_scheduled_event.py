@@ -326,6 +326,8 @@ class GuildScheduledEvent(Hashable):
             The event does not exist or the ``image`` asset couldn't be found.
         HTTPException
             Editing the event failed.
+        TypeError
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------

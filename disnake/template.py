@@ -205,6 +205,8 @@ class Template:
             Guild creation failed.
         InvalidArgument
             Invalid icon image format given. Must be PNG or JPG.
+        TypeError
+            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------

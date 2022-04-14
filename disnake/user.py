@@ -390,6 +390,8 @@ class ClientUser(BaseUser):
             Editing your profile failed.
         InvalidArgument
             Wrong image format passed for ``avatar``.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------

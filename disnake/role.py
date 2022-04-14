@@ -462,6 +462,8 @@ class Role(Hashable):
         InvalidArgument
             An invalid position was given or the default
             role was asked to be moved.
+        TypeError
+            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
