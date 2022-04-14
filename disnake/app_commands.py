@@ -147,7 +147,7 @@ class OptionChoice:
         )
 
     def to_dict(self, *, locale: Optional[Locale] = None) -> ApplicationCommandOptionChoicePayload:
-        localizations = self.name_localizations.to_dict()
+        localizations = self.name_localizations.data
 
         name: Optional[str] = None
         # if `locale` provided, get localized name from dict
@@ -404,9 +404,9 @@ class Option:
             payload["min_value"] = self.min_value
         if self.max_value is not None:
             payload["max_value"] = self.max_value
-        if (loc := self.name_localizations.to_dict()) is not None:
+        if (loc := self.name_localizations.data) is not None:
             payload["name_localizations"] = loc
-        if (loc := self.description_localizations.to_dict()) is not None:
+        if (loc := self.description_localizations.data) is not None:
             payload["description_localizations"] = loc
         return payload
 
@@ -414,7 +414,7 @@ class Option:
         self.name_localizations._link(store)
         self.description_localizations._link(store)
 
-        if (name_loc := self.name_localizations.to_dict()) is not None:
+        if (name_loc := self.name_localizations.data) is not None:
             for value in name_loc.values():
                 _validate_name(value)
 
@@ -478,7 +478,7 @@ class ApplicationCommand(ABC):
         }
         if not self.default_permission:
             data["default_permission"] = False
-        if (loc := self.name_localizations.to_dict()) is not None:
+        if (loc := self.name_localizations.data) is not None:
             data["name_localizations"] = loc
         return data
 
@@ -751,13 +751,13 @@ class SlashCommand(ApplicationCommand):
         res = super().to_dict()
         res["description"] = self.description
         res["options"] = [o.to_dict() for o in self.options]
-        if (loc := self.description_localizations.to_dict()) is not None:
+        if (loc := self.description_localizations.data) is not None:
             res["description_localizations"] = loc
         return res
 
     def localize(self, store: LocalizationProtocol) -> None:
         super().localize(store)
-        if (name_loc := self.name_localizations.to_dict()) is not None:
+        if (name_loc := self.name_localizations.data) is not None:
             for value in name_loc.values():
                 _validate_name(value)
 

@@ -84,7 +84,8 @@ class LocalizationValue:
         if self._key is not None:
             self._data = store.get(self._key)
 
-    def to_dict(self) -> Optional[Dict[str, str]]:
+    @property
+    def data(self) -> Optional[Dict[str, str]]:
         """Returns a dict with a locale -> localization mapping"""
         if self._data is MISSING:
             warnings.warn(
@@ -96,8 +97,8 @@ class LocalizationValue:
         return self._data
 
     def __eq__(self, other) -> bool:
-        d1 = self.to_dict()
-        d2 = other.to_dict()
+        d1 = self.data
+        d2 = other.data
         # consider values equal if they're both falsy, or actually equal
         # (it doesn't matter if localizations are `None` or `{}`)
         return (not d1 and not d2) or d1 == d2
