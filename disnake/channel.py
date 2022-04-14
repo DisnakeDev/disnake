@@ -83,6 +83,7 @@ __all__ = (
 
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
+    from .asset import AssetBytes
     from .embeds import Embed
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
@@ -592,7 +593,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return [Webhook.from_state(d, state=self._state) for d in data]
 
     async def create_webhook(
-        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+        self, *, name: str, avatar: Optional[AssetBytes] = None, reason: Optional[str] = None
     ) -> Webhook:
         """|coro|
 
@@ -608,18 +609,26 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ----------
         name: :class:`str`
             The webhook's name.
-        avatar: Optional[:class:`bytes`]
-            A :term:`py:bytes-like object` representing the webhook's default avatar.
+        avatar: Optional[|resource_type|]
+            The webhook's default avatar.
             This operates similarly to :meth:`~ClientUser.edit`.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         reason: Optional[:class:`str`]
             The reason for creating this webhook. Shows up in the audit logs.
 
         Raises
         ------
-        HTTPException
-            Creating the webhook failed.
+        NotFound
+            The ``avatar`` asset couldn't be found.
         Forbidden
             You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -628,11 +637,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         """
         from .webhook import Webhook
 
-        if avatar is not None:
-            avatar = utils._bytes_to_base64_data(avatar)  # type: ignore
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
 
         data = await self._state.http.create_webhook(
-            self.id, name=str(name), avatar=avatar, reason=reason
+            self.id, name=str(name), avatar=avatar_data, reason=reason
         )
         return Webhook.from_state(data, state=self._state)
 
