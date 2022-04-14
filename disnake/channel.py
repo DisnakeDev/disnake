@@ -160,7 +160,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 2.0
 
     last_pin_timestamp: Optional[:class:`datetime.datetime`]
-        The datetime of the last pinned message or ``None`` if no message has been pinned.
+        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
 
         .. versionadded:: 2.5
     """
@@ -1861,7 +1861,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
     id: :class:`int`
         The direct message channel ID.
     last_pin_timestamp: Optional[:class:`datetime.datetime`]
-        The datetime of the last pinned message or ``None`` if no message has been pinned.
+        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
 
         .. versionadded:: 2.5
     """

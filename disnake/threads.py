@@ -131,7 +131,7 @@ class Thread(Messageable, Hashable):
         .. versionadded:: 2.4
 
     last_pin_timestamp: Optional[:class:`datetime.datetime`]
-        The datetime of the last pinned message or ``None`` if no message has been pinned.
+        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
 
         .. versionadded:: 2.5
     """
