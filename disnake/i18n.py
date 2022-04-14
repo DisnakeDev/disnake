@@ -261,8 +261,10 @@ class LocalizationStore(LocalizationProtocol):
             if path.suffix != ".json":
                 raise ValueError(f"not a .json file")
             locale = path.stem
-            if not utils.is_valid_locale(locale):
+
+            if not (api_locale := utils.as_valid_locale(locale)):
                 raise ValueError(f"invalid locale '{locale}'")
+            locale = api_locale
 
             data = utils._from_json(path.read_text("utf-8"))
             self._load_dict(data, locale)

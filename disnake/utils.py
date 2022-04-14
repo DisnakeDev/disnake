@@ -90,7 +90,7 @@ __all__ = (
     "as_chunks",
     "format_dt",
     "search_directory",
-    "is_valid_locale",
+    "as_valid_locale",
 )
 
 DISCORD_EPOCH = 1420070400000
@@ -1276,15 +1276,27 @@ def search_directory(path: str) -> Iterator[str]:
             yield prefix + "." + name
 
 
-def is_valid_locale(locale: str) -> bool:
+def as_valid_locale(locale: str) -> Optional[str]:
     """
-    Returns ``True`` if the locale is valid for use with the API, ``False`` otherwise.
+    Converts the provided locale name to a name that is valid for use with the API,
+    for example by returning ``en-US`` for ``en_US``.
+    Returns ``None`` for invalid names.
 
     .. versionadded:: 2.5
 
     Parameters
     ----------
     locale: :class:`str`
-        The locale string to check.
+        The input locale name.
     """
-    return locale in Locale._enum_value_map_  # type: ignore
+    # check for key first (e.g. `en_US`)
+    if locale_type := Locale.__members__.get(locale):
+        return locale_type.value
+
+    # check for value (e.g. `en-US`)
+    try:
+        Locale(locale)
+    except ValueError:
+        return None
+    else:
+        return locale
