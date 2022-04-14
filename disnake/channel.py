@@ -977,24 +977,6 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         }
         # fmt: on
 
-    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(
-        self,
-        obj: Union[Member, Role],
-        /,
-        *,
-        ignore_timeout: bool = MISSING,
-    ) -> Permissions:
-        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
-
-        # voice channels cannot be edited by people who can't connect to them
-        # It also implicitly denies all other voice perms
-        if not base.connect:
-            denied = Permissions.voice()
-            denied.update(manage_channels=True, manage_roles=True)
-            base.value &= ~denied.value
-        return base
-
 
 class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild voice channel.
@@ -1162,6 +1144,26 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
+
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+
+        # voice channels cannot be edited by people who can't connect to them
+        # It also implicitly denies all other voice perms
+        if not base.connect:
+            denied = Permissions.voice()
+            # voice channels also deny all text related permissions
+            denied.value |= Permissions.text().value
+            denied.update(manage_channels=True, manage_roles=True)
+            base.value &= ~denied.value
+        return base
 
     @overload
     async def edit(
@@ -1626,6 +1628,24 @@ class StageChannel(VocalGuildChannel):
         .. versionadded:: 2.0
         """
         return utils.get(self.guild.stage_instances, channel_id=self.id)
+
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+
+        # voice channels cannot be edited by people who can't connect to them
+        # It also implicitly denies all other voice perms
+        if not base.connect:
+            denied = Permissions.voice()
+            denied.update(manage_channels=True, manage_roles=True)
+            base.value &= ~denied.value
+        return base
 
     async def create_instance(
         self,
