@@ -167,13 +167,13 @@ class PartialInviteGuild:
 
     verification_level: :class:`VerificationLevel`
         The partial guild's verification level.
-    premium_subscription_count: :class:`int`
-        The number of "boosts" this guild currently has.
+    welcome_screen: Optional[:class:`WelcomeScreen`]
+        The partial guild's welcome screen, if any.
 
         .. versionadded:: 2.5
 
-    welcome_screen: Optional[:class:`WelcomeScreen`]
-        The partial guild's welcome screen, if any.
+    premium_subscription_count: :class:`int`
+        The number of "boosts" this guild currently has.
 
         .. versionadded:: 2.5
     """
@@ -209,13 +209,6 @@ class PartialInviteGuild:
         )
         self.description: Optional[str] = data.get("description")
         self.premium_subscription_count: int = data.get("premium_subscription_count") or 0
-        welcome_screen = data.get("welcome_screen")
-        if welcome_screen:
-            self.welcome_screen: Optional[WelcomeScreen] = WelcomeScreen(
-                state=self._state, data=welcome_screen, guild=self
-            )
-        else:
-            self.welcome_screen: Optional[WelcomeScreen] = None
 
     def __str__(self) -> str:
         return self.name
@@ -380,6 +373,7 @@ class Invite(Hashable):
         "target_application",
         "expires_at",
         "guild_scheduled_event",
+        "guild_welcome_screen",
         "_state",
     )
 
@@ -415,6 +409,19 @@ class Invite(Hashable):
         self.channel: Optional[InviteChannelType] = self._resolve_channel(
             data.get("channel"), channel
         )
+
+        if (
+            self.guild is not None
+            and (guild_data := data.get("guild"))
+            and "welcome_screen" in guild_data
+        ):
+            self.guild_welcome_screen: Optional[WelcomeScreen] = WelcomeScreen(
+                state=self._state,
+                data=guild_data["welcome_screen"],
+                guild=self.guild,  # type: ignore
+            )
+        else:
+            self.guild_welcome_screen: Optional[WelcomeScreen] = None
 
         target_user_data = data.get("target_user")
         self.target_user: Optional[User] = None if target_user_data is None else self._state.create_user(target_user_data)  # type: ignore
