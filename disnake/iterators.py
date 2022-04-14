@@ -520,21 +520,21 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         if isinstance(after, datetime.datetime):
             after = Object(id=time_snowflake(after, high=True))
 
-        self.guild = guild
-        self.loop = guild._state.loop
-        self.request = guild._state.http.get_audit_logs
         self.limit: Optional[int] = limit
         self.before: Optional[Snowflake] = before
+        self.after: Snowflake = after or OLDEST_OBJECT
         self.user_id: Optional[int] = user_id
         self.action_type: Optional[AuditLogEvent] = action_type
-        self.after: Snowflake = after or OLDEST_OBJECT
-        self._users: Dict[int, User] = {}
-        self._state = guild._state
 
-        self._filter: Optional[Callable[[AuditLogEntryPayload], bool]] = None
+        self.guild = guild
+        self._state = guild._state
+        self.request = guild._state.http.get_audit_logs
+
+        self._users: Dict[int, User] = {}
 
         self.entries: asyncio.Queue[AuditLogEntry] = asyncio.Queue()
 
+        self._filter: Optional[Callable[[AuditLogEntryPayload], bool]] = None
         if self.after and self.after != OLDEST_OBJECT:
             self._filter = lambda e: int(e["id"]) > self.after.id
 
