@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Typ
 
 from .. import utils
 from ..channel import _threaded_channel_factory
-from ..enums import ApplicationCommandType, OptionType, try_enum
+from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
 from ..guild import Guild
 from ..member import Member
 from ..message import Attachment, Message
@@ -57,6 +57,7 @@ MISSING = utils.MISSING
 if TYPE_CHECKING:
     from ..channel import (
         CategoryChannel,
+        ForumChannel,
         PartialMessageable,
         StageChannel,
         TextChannel,
@@ -79,6 +80,7 @@ if TYPE_CHECKING:
         Thread,
         PartialMessageable,
         VoiceChannel,
+        ForumChannel,
     ]
 
 
@@ -106,17 +108,23 @@ class ApplicationCommandInteraction(Interaction):
         The channel ID the interaction was sent from.
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
-    locale: :class:`str`
+    locale: :class:`Locale`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
 
-    guild_locale: Optional[:class:`str`]
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
+    guild_locale: Optional[:class:`Locale`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
 
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
@@ -124,6 +132,10 @@ class ApplicationCommandInteraction(Interaction):
         The wrapped interaction data.
     client: :class:`Client`
         The interaction client.
+    application_command: :class:`.InvokableApplicationCommand`
+        The command invoked by the interaction.
+    command_failed: :class:`bool`
+        Whether the command failed to be checked or invoked.
     """
 
     def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
@@ -160,7 +172,7 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
 
     guild: Guild
     me: Member
-    guild_locale: str
+    guild_locale: Locale
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
@@ -236,6 +248,12 @@ class ApplicationCommandInteractionData:
             for d in data.get("options", [])
         ]
 
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionData id={self.id!r} name={self.name!r} type={self.type!r} "
+            f"target_id={self.target_id!r} target={self.target!r} resolved={self.resolved!r} options={self.options!r}>"
+        )
+
     def _get_chain_and_kwargs(
         self, chain: Tuple[str, ...] = None
     ) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
@@ -305,6 +323,12 @@ class ApplicationCommandInteractionDataOption:
             for d in data.get("options", [])
         ]
         self.focused: bool = data.get("focused", False)
+
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionDataOption name={self.name!r} type={self.type!r}>"
+            f"value={self.value!r} focused={self.focused!r} options={self.options!r}>"
+        )
 
     def _simplified_value(self) -> Any:
         if self.value is not None:
@@ -420,6 +444,12 @@ class ApplicationCommandInteractionDataResolved:
 
         for str_id, attachment in attachments.items():
             self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
+
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionDataResolved members={self.members!r} users={self.users!r} "
+            f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
+        )
 
     def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
         if isinstance(option_type, int):

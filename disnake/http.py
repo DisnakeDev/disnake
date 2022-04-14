@@ -38,6 +38,7 @@ from typing import (
     Dict,
     Iterable,
     List,
+    Literal,
     Optional,
     Sequence,
     Tuple,
@@ -102,6 +103,23 @@ if TYPE_CHECKING:
     BE = TypeVar("BE", bound=BaseException)
     MU = TypeVar("MU", bound="MaybeUnlock")
     Response = Coroutine[Any, Any, T]
+
+_API_VERSION = 10
+
+
+def _workaround_set_api_version(version: Literal[9, 10]):
+    """Stopgap measure for verified bots without message content intent while intent is not enforced on api v9.
+
+
+    .. note::
+        This must be ran **before** connecting to the gateway.
+    """
+    if version not in (9, 10):
+        raise TypeError("version must be either 9 or 10")
+
+    global _API_VERSION
+    _API_VERSION = version
+    Route.BASE = f"https://discord.com/api/v{_API_VERSION}"
 
 
 async def json_or_text(response: aiohttp.ClientResponse) -> Union[Dict[str, Any], str]:
@@ -982,6 +1000,7 @@ class HTTPClient:
             "locked",
             "invitable",
             "default_auto_archive_duration",
+            "flags",
         )
         payload = {k: v for k, v in options.items() if k in valid_keys}
         return self.request(r, reason=reason, json=payload)
@@ -1021,6 +1040,7 @@ class HTTPClient:
             "rtc_region",
             "video_quality_mode",
             "auto_archive_duration",
+            "default_auto_archive_duration",
         )
         payload.update({k: v for k, v in options.items() if k in valid_keys and v is not None})
 
@@ -1175,6 +1195,40 @@ class HTTPClient:
     def get_thread_members(self, channel_id: Snowflake) -> Response[List[threads.ThreadMember]]:
         route = Route("GET", "/channels/{channel_id}/thread-members", channel_id=channel_id)
         return self.request(route)
+
+    def start_thread_in_forum_channel(
+        self,
+        channel_id: Snowflake,
+        files: Optional[Sequence[File]] = None,
+        reason: Optional[str] = None,
+        **fields: Any,
+    ) -> Response[threads.Thread]:
+        valid_keys = (
+            # Thread fields
+            "name",
+            "auto_archive_duration",
+            "rate_limit_per_user",
+            "type",
+            # Message fields
+            "content",
+            "embeds",
+            "allowed_mentions",
+            "components",
+            "sticker_ids",
+            "flags",
+        )
+        payload = {k: v for k, v in fields.items() if k in valid_keys}
+        route = Route("POST", "/channels/{channel_id}/threads", channel_id=channel_id)
+        query_params = {"has_message": 1}
+
+        if files:
+            multipart = to_multipart_with_attachments(payload, files)
+
+            return self.request(
+                route, form=multipart, params=query_params, files=files, reason=reason
+            )
+
+        return self.request(route, json=payload, params=query_params, reason=reason)
 
     # Webhook management
 
@@ -2463,10 +2517,10 @@ class HTTPClient:
         except HTTPException as exc:
             raise GatewayNotFound() from exc
         if zlib:
-            value = "{0}?encoding={1}&v=10&compress=zlib-stream"
+            value = "{url}?encoding={encoding}&v={version}&compress=zlib-stream"
         else:
-            value = "{0}?encoding={1}&v=10"
-        return value.format(data["url"], encoding)
+            value = "{url}?encoding={encoding}&v={version}"
+        return value.format(url=data["url"], encoding=encoding, version=_API_VERSION)
 
     async def get_bot_gateway(
         self, *, encoding: str = "json", zlib: bool = True
@@ -2477,10 +2531,14 @@ class HTTPClient:
             raise GatewayNotFound() from exc
 
         if zlib:
-            value = "{0}?encoding={1}&v=10&compress=zlib-stream"
+            value = "{url}?encoding={encoding}&v={version}&compress=zlib-stream"
         else:
-            value = "{0}?encoding={1}&v=10"
-        return data["shards"], value.format(data["url"], encoding), data["session_start_limit"]
+            value = "{url}?encoding={encoding}&v={version}"
+        return (
+            data["shards"],
+            value.format(url=data["url"], encoding=encoding, version=_API_VERSION),
+            data["session_start_limit"],
+        )
 
     def get_user(self, user_id: Snowflake) -> Response[user.User]:
         return self.request(Route("GET", "/users/{user_id}", user_id=user_id))
