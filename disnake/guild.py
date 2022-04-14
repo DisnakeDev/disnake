@@ -3190,13 +3190,15 @@ class Guild(Hashable):
         limit: int = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
-        oldest_first: Optional[bool] = None,
         user: Snowflake = None,
         action: AuditLogAction = None,
     ) -> AuditLogIterator:
         """Returns an :class:`AsyncIterator` that enables receiving the guild's audit logs.
 
         You must have :attr:`~Permissions.view_audit_log` permission to use this.
+
+        Entries are always returned in order from newest to oldest, regardless of the
+        ``before`` and ``after`` parameters.
 
         Examples
         --------
@@ -3228,9 +3230,6 @@ class Guild(Hashable):
             Retrieve entries after this date or entry.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        oldest_first: :class:`bool`
-            If set to ``True``, return entries in oldest->newest order. Defaults to ``True`` if
-            ``after`` is specified, otherwise ``False``.
         user: :class:`abc.Snowflake`
             The moderator to filter entries from.
         action: :class:`AuditLogAction`
@@ -3258,7 +3257,6 @@ class Guild(Hashable):
             before=before,
             after=after,
             limit=limit,
-            oldest_first=oldest_first,
             user_id=user_id,
             action_type=action.value if action is not None else None,
         )

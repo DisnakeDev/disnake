@@ -36,6 +36,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Tuple,
     TypeVar,
     Union,
 )
@@ -70,7 +71,7 @@ if TYPE_CHECKING:
     from .types.guild import Ban as BanPayload, Guild as GuildPayload
     from .types.message import Message as MessagePayload
     from .types.threads import Thread as ThreadPayload
-    from .types.user import PartialUser as PartialUserPayload
+    from .types.user import PartialUser as PartialUserPayload, User as UserPayload
     from .user import User
 
 T = TypeVar("T")
@@ -511,7 +512,6 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         limit: int = None,
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
-        oldest_first: Optional[bool] = None,
         user_id: Optional[int] = None,
         action_type: Optional[AuditLogEvent] = None,
     ):
@@ -520,11 +520,6 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         if isinstance(after, datetime.datetime):
             after = Object(id=time_snowflake(after, high=True))
 
-        if oldest_first is None:
-            self.reverse = after is not None
-        else:
-            self.reverse = oldest_first
-
         self.guild = guild
         self.loop = guild._state.loop
         self.request = guild._state.http.get_audit_logs
@@ -532,7 +527,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         self.before: Optional[Snowflake] = before
         self.user_id: Optional[int] = user_id
         self.action_type: Optional[AuditLogEvent] = action_type
-        self.after: Optional[Snowflake] = OLDEST_OBJECT
+        self.after: Snowflake = after or OLDEST_OBJECT
         self._users: Dict[int, User] = {}
         self._state = guild._state
 
@@ -540,16 +535,12 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
         self.entries: asyncio.Queue[AuditLogEntry] = asyncio.Queue()
 
-        if self.reverse:
-            self._strategy = self._after_strategy
-            if self.before:
-                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
-        else:
-            self._strategy = self._before_strategy
-            if self.after and self.after != OLDEST_OBJECT:
-                self._filter = lambda m: int(m["id"]) > self.after.id  # type: ignore
+        if self.after and self.after != OLDEST_OBJECT:
+            self._filter = lambda e: int(e["id"]) > self.after.id
 
-    async def _before_strategy(self, retrieve):
+    async def _retrieve_data(
+        self, retrieve: int
+    ) -> Tuple[List[UserPayload], List[AuditLogEntryPayload]]:
         before = self.before.id if self.before else None
         data: AuditLogPayload = await self.request(
             self.guild.id,
@@ -560,26 +551,10 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         )
 
         entries = data.get("audit_log_entries", [])
-        if len(data) and entries:
+        if entries:
             if self.limit is not None:
                 self.limit -= retrieve
             self.before = Object(id=int(entries[-1]["id"]))
-        return data.get("users", []), entries
-
-    async def _after_strategy(self, retrieve):
-        after = self.after.id if self.after else None
-        data: AuditLogPayload = await self.request(
-            self.guild.id,
-            limit=retrieve,
-            user_id=self.user_id,
-            action_type=self.action_type,
-            after=after,
-        )
-        entries = data.get("audit_log_entries", [])
-        if len(data) and entries:
-            if self.limit is not None:
-                self.limit -= retrieve
-            self.after = Object(id=int(entries[0]["id"]))
         return data.get("users", []), entries
 
     async def next(self) -> AuditLogEntry:
@@ -602,12 +577,10 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
     async def _fill(self):
         if self._get_retrieve():
-            users, data = await self._strategy(self.retrieve)
+            users, data = await self._retrieve_data(self.retrieve)
             if len(data) < 100:
                 self.limit = 0  # terminate the infinite loop
 
-            if self.reverse:
-                data = reversed(data)
             if self._filter:
                 data = filter(self._filter, data)
 
