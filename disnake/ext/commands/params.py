@@ -44,6 +44,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    get_args,
     get_origin,
     get_type_hints,
     overload,
@@ -95,8 +96,16 @@ __all__ = (
 
 
 def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
-    if not isinstance(obj, type) or not isinstance(tp, (type, tuple)):
+    if not isinstance(tp, (type, tuple)):
         return False
+    elif not isinstance(obj, type):
+        # Assume we have a type hint
+        if get_origin(obj) in (Union, UnionType, Optional):
+            obj = get_args(obj)
+            return any(issubclass(o, tp) for o in obj)
+        else:
+            # Other type hint specializations are not supported
+            return False
     return issubclass(obj, tp)
 
 
@@ -920,6 +929,20 @@ def inject(function: Callable[..., Any]) -> Any:
 def option_enum(
     choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
 ) -> Type[TChoice]:
+    """
+    A utility function to create an enum type.
+    Returns a new :class:`~enum.Enum` based on the provided parameters.
+
+    .. versionadded:: 2.1
+
+    Parameters
+    ----------
+    choices: Union[Dict[:class:`str`, :class:`Any`], List[:class:`Any`]]
+        A name/value mapping of choices, or a list of values whose stringified representations
+        will be used as the names.
+    **kwargs
+        Name/value pairs to use instead of the ``choices`` parameter.
+    """
     if isinstance(choices, list):
         choices = {str(i): i for i in choices}
 

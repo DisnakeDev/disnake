@@ -32,7 +32,7 @@ from .asset import Asset
 from .enums import ChannelType, InviteTarget, NSFWLevel, VerificationLevel, try_enum
 from .mixins import Hashable
 from .object import Object
-from .utils import _get_as_snowflake, parse_time, snowflake_time, warn_deprecated
+from .utils import _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
     "PartialInviteChannel",
@@ -165,6 +165,10 @@ class PartialInviteGuild:
 
     verification_level: :class:`VerificationLevel`
         The partial guild's verification level.
+    premium_subscription_count: :class:`int`
+        The number of "boosts" this guild currently has.
+
+        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -179,6 +183,7 @@ class PartialInviteGuild:
         "nsfw_level",
         "vanity_url_code",
         "verification_level",
+        "premium_subscription_count",
     )
 
     def __init__(self, state: ConnectionState, data: InviteGuildPayload, id: int):
@@ -195,6 +200,7 @@ class PartialInviteGuild:
             VerificationLevel, data.get("verification_level")
         )
         self.description: Optional[str] = data.get("description")
+        self.premium_subscription_count: int = data.get("premium_subscription_count") or 0
 
     def __str__(self) -> str:
         return self.name
@@ -265,15 +271,15 @@ class Invite(Hashable):
     +------------------------------------+-------------------------------------------------------------------+
     |             Attribute              |                          Method                                   |
     +====================================+===================================================================+
-    | :attr:`max_age`                    | :meth:`abc.GuildChannel.invites`\, :meth:`Guild.invites`          |
+    | :attr:`max_age`                    | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`          |
     +------------------------------------+-------------------------------------------------------------------+
-    | :attr:`max_uses`                   | :meth:`abc.GuildChannel.invites`\, :meth:`Guild.invites`          |
+    | :attr:`max_uses`                   | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`          |
     +------------------------------------+-------------------------------------------------------------------+
-    | :attr:`created_at`                 | :meth:`abc.GuildChannel.invites`\, :meth:`Guild.invites`          |
+    | :attr:`created_at`                 | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`          |
     +------------------------------------+-------------------------------------------------------------------+
-    | :attr:`temporary`                  | :meth:`abc.GuildChannel.invites`\, :meth:`Guild.invites`          |
+    | :attr:`temporary`                  | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`          |
     +------------------------------------+-------------------------------------------------------------------+
-    | :attr:`uses`                       | :meth:`abc.GuildChannel.invites`\, :meth:`Guild.invites`          |
+    | :attr:`uses`                       | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`          |
     +------------------------------------+-------------------------------------------------------------------+
     | :attr:`approximate_member_count`   | :meth:`Client.fetch_invite` with `with_counts` enabled            |
     +------------------------------------+-------------------------------------------------------------------+
@@ -359,7 +365,6 @@ class Invite(Hashable):
         "target_application",
         "expires_at",
         "guild_scheduled_event",
-        "_revoked",
         "_state",
     )
 
@@ -383,7 +388,6 @@ class Invite(Hashable):
         self.max_uses: Optional[int] = data.get("max_uses")
         self.approximate_presence_count: Optional[int] = data.get("approximate_presence_count")
         self.approximate_member_count: Optional[int] = data.get("approximate_member_count")
-        self._revoked: Optional[bool] = data.get("revoked")
 
         expires_at = data.get("expires_at", None)
         self.expires_at: Optional[datetime.datetime] = (
@@ -503,22 +507,6 @@ class Invite(Hashable):
         if self.guild_scheduled_event:
             url += f"?event={self.guild_scheduled_event.id}"
         return url
-
-    @property
-    def revoked(self) -> Optional[bool]:
-        """Optional[:class:`bool`]: Whether the invite has been revoked.
-
-        As of September 16th, 2019, this value will always be ``None`` since Discord
-        doesn't provide this information anymore.
-
-        .. warning::
-
-            This property will be removed in a future version.
-        """
-        warn_deprecated(
-            "revoked is deprecated and will be removed in a future version.", stacklevel=2
-        )
-        return self._revoked
 
     async def delete(self, *, reason: Optional[str] = None):
         """|coro|

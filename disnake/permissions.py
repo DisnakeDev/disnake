@@ -416,7 +416,7 @@ class Permissions(BaseFlags):
 
         Parameters
         ----------
-        \*\*kwargs
+        **kwargs
             A list of key/value pairs to bulk update permissions with.
         """
         for key, value in kwargs.items():
@@ -511,7 +511,8 @@ class Permissions(BaseFlags):
 
     @flag_value
     def send_messages(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels."""
+        """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels
+        and create threads in forum channels."""
         return 1 << 11
 
     @flag_value
@@ -770,7 +771,7 @@ class PermissionOverwrite:
     """
     A type that is used to represent a channel specific permission.
 
-    Unlike a regular :class:`Permissions`\, the default value of a
+    Unlike a regular :class:`Permissions`\\, the default value of a
     permission is equivalent to ``None`` and not ``False``. Setting
     a value to ``False`` is **explicitly** denying that permission,
     while setting a value to ``True`` is **explicitly** allowing
@@ -795,7 +796,7 @@ class PermissionOverwrite:
 
     Parameters
     ----------
-    \*\*kwargs
+    **kwargs
         Set the value of permissions by their name.
     """
 
@@ -924,7 +925,7 @@ class PermissionOverwrite:
 
         Parameters
         ----------
-        \*\*kwargs
+        **kwargs
             A list of key/value pairs to bulk update with.
         """
         for key, value in kwargs.items():
