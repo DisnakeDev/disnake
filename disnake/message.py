@@ -1511,7 +1511,7 @@ class Message(Hashable):
 
             .. versionadded:: 2.1
 
-        attachments: List[:class:`Attachment`]
+        attachments: Optional[List[:class:`Attachment`]]
             A list of attachments to keep in the message.
             If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
@@ -2085,7 +2085,7 @@ class PartialMessage(Hashable):
 
             .. versionadded:: 2.1
 
-        attachments: List[:class:`Attachment`]
+        attachments: Optional[List[:class:`Attachment`]]
             A list of attachments to keep in the message.
             If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.

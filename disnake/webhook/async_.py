@@ -783,7 +783,7 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.0
 
-        attachments: List[:class:`Attachment`]
+        attachments: Optional[List[:class:`Attachment`]]
             A list of attachments to keep in the message.
             If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
@@ -1722,7 +1722,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        attachments: List[:class:`Attachment`]
+        attachments: Optional[List[:class:`Attachment`]]
             A list of attachments to keep in the message.
             If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
