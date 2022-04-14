@@ -344,6 +344,8 @@ class Guild(Hashable):
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
         self._threads: Dict[int, Thread] = {}
+        self._stage_instances: Dict[int, StageInstance] = {}
+        self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
         self._state: ConnectionState = state
         self._from_data(data)
 
@@ -561,15 +563,19 @@ class Guild(Hashable):
         self.widget_enabled: Optional[bool] = guild.get("widget_enabled")
         self.widget_channel_id: Optional[int] = utils._get_as_snowflake(guild, "widget_channel_id")
 
-        self._stage_instances: Dict[int, StageInstance] = {}
-        for s in guild.get("stage_instances", []):
-            stage_instance = StageInstance(guild=self, data=s, state=state)
-            self._stage_instances[stage_instance.id] = stage_instance
+        stage_instances = guild.get("stage_instances")
+        if stage_instances is not None:
+            self._stage_instances = {}
+            for s in stage_instances:
+                stage_instance = StageInstance(guild=self, data=s, state=state)
+                self._stage_instances[stage_instance.id] = stage_instance
 
-        self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
-        for e in guild.get("guild_scheduled_events", []):
-            scheduled_event = GuildScheduledEvent(state=state, data=e)
-            self._scheduled_events[scheduled_event.id] = scheduled_event
+        scheduled_events = guild.get("guild_scheduled_events")
+        if scheduled_events is not None:
+            self._scheduled_events = {}
+            for e in scheduled_events:
+                scheduled_event = GuildScheduledEvent(state=state, data=e)
+                self._scheduled_events[scheduled_event.id] = scheduled_event
 
         cache_joined = self._state.member_cache_flags.joined
         self_id = self._state.self_id
@@ -1185,6 +1191,7 @@ class Guild(Hashable):
         position: int = MISSING,
         topic: str = MISSING,
         slowmode_delay: int = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> TextChannel:
@@ -1247,6 +1254,12 @@ class Guild(Hashable):
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+            The default auto archive duration in minutes for threads created in this channel.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+
+            .. versionadded:: 2.5
+
         nsfw: :class:`bool`
             Whether mark the channel as NSFW or not.
         reason: Optional[:class:`str`]
@@ -1279,6 +1292,11 @@ class Guild(Hashable):
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
 
+        if default_auto_archive_duration is not MISSING:
+            options["default_auto_archive_duration"] = cast(
+                "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
+            )
+
         data = await self._create_channel(
             name,
             overwrites=overwrites,
@@ -1304,6 +1322,7 @@ class Guild(Hashable):
         user_limit: int = MISSING,
         rtc_region: Optional[VoiceRegion] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
+        nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> VoiceChannel:
         """|coro|
@@ -1340,6 +1359,11 @@ class Guild(Hashable):
 
             .. versionadded:: 2.0
 
+        nsfw: :class:`bool`
+            Whether to mark the channel as NSFW or not.
+
+            .. versionadded:: 2.5
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1372,6 +1396,9 @@ class Guild(Hashable):
 
         if video_quality_mode is not MISSING:
             options["video_quality_mode"] = video_quality_mode.value
+
+        if nsfw is not MISSING:
+            options["nsfw"] = nsfw
 
         data = await self._create_channel(
             name,
@@ -1712,7 +1739,7 @@ class Guild(Hashable):
             splash. This is only available to guilds that contain ``DISCOVERABLE``
             in :attr:`Guild.features`.
         community: :class:`bool`
-            Whether the guild should be a Community guild. If set to ``True``\, both ``rules_channel``
+            Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
         region: Union[:class:`str`, :class:`VoiceRegion`]
             The new region for the guild's voice communication.
@@ -2374,7 +2401,7 @@ class Guild(Hashable):
             Whether to compute the prune count. This defaults to ``True``
             which makes it prone to timeouts in very large guilds. In order
             to prevent timeouts, you must set this to ``False``. If this is
-            set to ``False``\, then this function will always return ``None``.
+            set to ``False``\\, then this function will always return ``None``.
         roles: List[:class:`abc.Snowflake`]
             A list of :class:`abc.Snowflake` that represent roles to include in the pruning process. If a member
             has a role that is not specified, they'll be excluded.
@@ -2631,7 +2658,7 @@ class Guild(Hashable):
     async def fetch_stickers(self) -> List[GuildSticker]:
         """|coro|
 
-        Retrieves a list of all :class:`Sticker`\s that the guild has.
+        Retrieves a list of all :class:`Sticker`\\s that the guild has.
 
         .. versionadded:: 2.0
 
@@ -2771,7 +2798,7 @@ class Guild(Hashable):
     async def fetch_emojis(self) -> List[Emoji]:
         """|coro|
 
-        Retrieves all custom :class:`Emoji`\s that the guild has.
+        Retrieves all custom :class:`Emoji`\\s that the guild has.
 
         .. note::
 
@@ -2855,7 +2882,7 @@ class Guild(Hashable):
             The :term:`py:bytes-like object` representing the image data to use.
             Only JPG, PNG and GIF images are supported.
         roles: List[:class:`Role`]
-            A :class:`list` of :class:`Role`\s that can use this emoji. Leave empty to make it available to everyone.
+            A :class:`list` of :class:`Role`\\s that can use this emoji. Leave empty to make it available to everyone.
         reason: Optional[:class:`str`]
             The reason for creating this emoji. Shows up on the audit log.
 

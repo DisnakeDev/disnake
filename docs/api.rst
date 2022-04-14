@@ -91,6 +91,14 @@ TeamMember
 .. autoclass:: TeamMember()
     :members:
 
+InstallParams
+~~~~~~~~~~~~~
+
+.. attributetable:: InstallParams
+
+.. autoclass:: InstallParams()
+    :members:
+
 Voice Related
 ---------------
 

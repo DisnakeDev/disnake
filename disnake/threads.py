@@ -131,6 +131,11 @@ class Thread(Messageable, Hashable):
 
         .. versionadded:: 2.4
 
+    last_pin_timestamp: Optional[:class:`datetime.datetime`]
+        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
+
+        .. versionadded:: 2.5
+
     flags: :class:`ChannelFlags`
         The flags the thread has.
 
@@ -154,6 +159,7 @@ class Thread(Messageable, Hashable):
         "auto_archive_duration",
         "archive_timestamp",
         "create_timestamp",
+        "last_pin_timestamp",
         "flags",
         "_type",
         "_state",
@@ -189,6 +195,9 @@ class Thread(Messageable, Hashable):
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self.message_count = data.get("message_count")
         self.member_count = data.get("member_count")
+        self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
+            data.get("last_pin_timestamp")
+        )
         self.flags = ChannelFlags._from_value(data.get("flags", 0))
         self._unroll_metadata(data["thread_metadata"])
 
