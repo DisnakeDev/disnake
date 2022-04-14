@@ -97,6 +97,7 @@ if TYPE_CHECKING:
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
     from .types.raw_models import (
+        ChannelPinsUpdate,
         GuildScheduledEventUserActionEvent,
         ReactionActionEvent,
         TypingEvent,
@@ -1043,7 +1044,7 @@ class ConnectionState:
             _log.debug("CHANNEL_CREATE referencing an unknown guild ID: %s. Discarding.", guild_id)
             return
 
-    def parse_channel_pins_update(self, data) -> None:
+    def parse_channel_pins_update(self, data: ChannelPinsUpdate) -> None:
         channel_id = int(data["channel_id"])
         try:
             guild = self._get_guild(int(data["guild_id"]))
@@ -1059,9 +1060,12 @@ class ConnectionState:
             )
             return
 
-        last_pin = (
-            utils.parse_time(data["last_pin_timestamp"]) if data["last_pin_timestamp"] else None
-        )
+        last_pin = None
+        if "last_pin_timestamp" in data:
+            last_pin = utils.parse_time(data["last_pin_timestamp"])
+
+        if isinstance(channel, (DMChannel, TextChannel, Thread)):
+            channel.last_pin_timestamp = last_pin
 
         if guild is None:
             self.dispatch("private_channel_pins_update", channel, last_pin)

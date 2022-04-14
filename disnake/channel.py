@@ -167,6 +167,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         The default auto archive duration in minutes for threads created in this channel.
 
         .. versionadded:: 2.0
+
+    last_pin_timestamp: Optional[:class:`datetime.datetime`]
+        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
+
+        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -179,10 +184,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         "category_id",
         "position",
         "slowmode_delay",
-        "_overwrites",
-        "_type",
         "last_message_id",
         "default_auto_archive_duration",
+        "last_pin_timestamp",
+        "_overwrites",
+        "_type",
     )
 
     def __init__(self, *, state: ConnectionState, guild: Guild, data: TextChannelPayload):
@@ -218,6 +224,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         )
         self._type: int = data.get("type", self._type)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
+        self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
+            data.get("last_pin_timestamp")
+        )
         self._fill_overwrites(data)
 
     async def _get_channel(self):
@@ -2343,15 +2352,22 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         The user presenting yourself.
     id: :class:`int`
         The direct message channel ID.
+    last_pin_timestamp: Optional[:class:`datetime.datetime`]
+        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
+
+        .. versionadded:: 2.5
     """
 
-    __slots__ = ("id", "recipient", "me", "_state")
+    __slots__ = ("id", "recipient", "me", "last_pin_timestamp", "_state")
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload):
         self._state: ConnectionState = state
         self.recipient: Optional[User] = state.store_user(data["recipients"][0])  # type: ignore
         self.me: ClientUser = me
         self.id: int = int(data["id"])
+        self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
+            data.get("last_pin_timestamp")
+        )
 
     async def _get_channel(self):
         return self
@@ -2372,6 +2388,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         # state.user won't be None here
         self.me = state.user
         self.recipient = state.get_user(user_id) if user_id != self.me.id else None
+        self.last_pin_timestamp = None
         return self
 
     @property
