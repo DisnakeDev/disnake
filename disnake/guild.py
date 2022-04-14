@@ -2159,15 +2159,15 @@ class Guild(Hashable):
 
         .. note::
 
-            To know if the welcome screen is enabled check for the
-            presence of ``WELCOME_SCREEN_ENABLED`` in :attr:`Guild.features`
+            To determine whether the welcome screen is enabled, check for the
+            presence of ``WELCOME_SCREEN_ENABLED`` in :attr:`Guild.features`.
 
         .. versionadded:: 2.5
 
         Raises
         ------
         NotFound
-            The welcome screen is not set up, or you do not have permissions to view it.
+            The welcome screen is not set up, or you do not have permission to view it.
         HTTPException
             Editing the welcome screen failed.
 
