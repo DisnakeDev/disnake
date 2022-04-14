@@ -236,8 +236,7 @@ class MemberConverter(IDConverter[disnake.Member]):
             return None
         return members[0]
 
-    # note: this uses `Context` instead of `AnyContext`, as it's not used by application commands
-    async def convert(self, ctx: Context, argument: str) -> disnake.Member:
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.Member:
         bot: disnake.Client = ctx.bot
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{15,20})>$", argument)
         guild = ctx.guild
@@ -253,9 +252,13 @@ class MemberConverter(IDConverter[disnake.Member]):
         else:
             user_id = int(match.group(1))
             if guild:
-                mentions = (
-                    user for user in ctx.message.mentions if isinstance(user, disnake.Member)
-                )
+                mentions: Iterable[disnake.Member]
+                if isinstance(ctx, Context):
+                    mentions = (
+                        user for user in ctx.message.mentions if isinstance(user, disnake.Member)
+                    )
+                else:
+                    mentions = []
                 result = guild.get_member(user_id) or _utils_get(mentions, id=user_id)
             else:
                 result = _get_from_guilds(bot, lambda g: g.get_member(user_id))
@@ -295,15 +298,22 @@ class UserConverter(IDConverter[disnake.User]):
         and it's not available in cache.
     """
 
-    # note: this uses `Context` instead of `AnyContext`, as it's not used by application commands
-    async def convert(self, ctx: Context, argument: str) -> disnake.User:
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.User:
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{15,20})>$", argument)
         state = ctx._state
         bot: disnake.Client = ctx.bot
+        result: Optional[Union[disnake.User, disnake.Member]] = None
 
         if match is not None:
             user_id = int(match.group(1))
-            result = bot.get_user(user_id) or _utils_get(ctx.message.mentions, id=user_id)
+
+            mentions: Iterable[Union[disnake.User, disnake.Member]]
+            if isinstance(ctx, Context):
+                mentions = ctx.message.mentions
+            else:
+                mentions = []
+            result = bot.get_user(user_id) or _utils_get(mentions, id=user_id)
+
             if result is None:
                 try:
                     result = await bot.fetch_user(user_id)
