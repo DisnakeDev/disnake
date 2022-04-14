@@ -48,14 +48,12 @@ from typing import (
 
 import disnake
 
-from .context import Context
+from .context import AnyContext, Context
 from .errors import *
 
 if TYPE_CHECKING:
     from disnake.message import MessageableChannel
 
-    # TODO: don't use unbound generic `Context`
-    from .core import AnyContext
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES
 
@@ -72,7 +70,7 @@ __all__ = (
     "VoiceChannelConverter",
     "StageChannelConverter",
     "CategoryChannelConverter",
-    "StoreChannelConverter",
+    "ForumChannelConverter",
     "ThreadConverter",
     "ColourConverter",
     "ColorConverter",
@@ -594,8 +592,10 @@ class CategoryChannelConverter(IDConverter[disnake.CategoryChannel]):
         )
 
 
-class StoreChannelConverter(IDConverter[disnake.StoreChannel]):
-    """Converts to a :class:`~disnake.StoreChannel`.
+class ForumChannelConverter(IDConverter[disnake.ForumChannel]):
+    """Converts to a :class:`~disnake.ForumChannel`.
+
+    .. versionadded:: 2.5
 
     All lookups are via the local guild. If in a DM context, then the lookup
     is done by the global cache.
@@ -604,14 +604,12 @@ class StoreChannelConverter(IDConverter[disnake.StoreChannel]):
 
     1. Lookup by ID.
     2. Lookup by mention.
-    3. Lookup by name.
-
-    .. versionadded:: 1.7
+    3. Lookup by name
     """
 
-    async def convert(self, ctx: AnyContext, argument: str) -> disnake.StoreChannel:
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.ForumChannel:
         return GuildChannelConverter._resolve_channel(
-            ctx, argument, "channels", disnake.StoreChannel
+            ctx, argument, "forum_channels", disnake.ForumChannel
         )
 
 
@@ -1167,7 +1165,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
     disnake.Emoji: EmojiConverter,
     disnake.PartialEmoji: PartialEmojiConverter,
     disnake.CategoryChannel: CategoryChannelConverter,
-    disnake.StoreChannel: StoreChannelConverter,
+    disnake.ForumChannel: ForumChannelConverter,
     disnake.Thread: ThreadConverter,
     disnake.abc.GuildChannel: GuildChannelConverter,
     disnake.GuildSticker: GuildStickerConverter,

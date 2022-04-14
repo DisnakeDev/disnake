@@ -41,7 +41,7 @@ async def get_config(
     """
     # if a locale is not provided use the guild's locale
     if locale is None:
-        locale = inter.guild and inter.guild.preferred_locale or "en-US"
+        locale = inter.guild and str(inter.guild.preferred_locale) or "en-US"
 
     # parse a timezone from a string using pytz (maybe even use the locale if you feel like it)
     tzinfo = pytz.timezone(timezone)
