@@ -167,11 +167,6 @@ class PartialInviteGuild:
 
     verification_level: :class:`VerificationLevel`
         The partial guild's verification level.
-    welcome_screen: Optional[:class:`WelcomeScreen`]
-        The partial guild's welcome screen, if any.
-
-        .. versionadded:: 2.5
-
     premium_subscription_count: :class:`int`
         The number of "boosts" this guild currently has.
 
@@ -190,7 +185,6 @@ class PartialInviteGuild:
         "nsfw_level",
         "vanity_url_code",
         "verification_level",
-        "welcome_screen",
         "premium_subscription_count",
     )
 
@@ -354,6 +348,11 @@ class Invite(Hashable):
         The guild scheduled event included in the invite, if any.
 
         .. versionadded:: 2.3
+
+    guild_welcome_screen: Optional[:class:`WelcomeScreen`]
+        The partial guild's welcome screen, if any.
+
+        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -410,6 +409,8 @@ class Invite(Hashable):
             data.get("channel"), channel
         )
 
+        # this is stored here due to disnake.Guild not storing a welcome screen
+        # if it was stored on the Guild object, we would be throwing away this data from the api request
         if (
             self.guild is not None
             and (guild_data := data.get("guild"))
