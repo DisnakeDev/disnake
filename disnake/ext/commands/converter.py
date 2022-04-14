@@ -70,6 +70,7 @@ __all__ = (
     "VoiceChannelConverter",
     "StageChannelConverter",
     "CategoryChannelConverter",
+    "ForumChannelConverter",
     "ThreadConverter",
     "ColourConverter",
     "ColorConverter",
@@ -578,6 +579,27 @@ class CategoryChannelConverter(IDConverter[disnake.CategoryChannel]):
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.CategoryChannel:
         return GuildChannelConverter._resolve_channel(
             ctx, argument, "categories", disnake.CategoryChannel
+        )
+
+
+class ForumChannelConverter(IDConverter[disnake.ForumChannel]):
+    """Converts to a :class:`~disnake.ForumChannel`.
+
+    .. versionadded:: 2.5
+
+    All lookups are via the local guild. If in a DM context, then the lookup
+    is done by the global cache.
+
+    The lookup strategy is as follows (in order):
+
+    1. Lookup by ID.
+    2. Lookup by mention.
+    3. Lookup by name
+    """
+
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.ForumChannel:
+        return GuildChannelConverter._resolve_channel(
+            ctx, argument, "forum_channels", disnake.ForumChannel
         )
 
 
@@ -1133,6 +1155,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
     disnake.Emoji: EmojiConverter,
     disnake.PartialEmoji: PartialEmojiConverter,
     disnake.CategoryChannel: CategoryChannelConverter,
+    disnake.ForumChannel: ForumChannelConverter,
     disnake.Thread: ThreadConverter,
     disnake.abc.GuildChannel: GuildChannelConverter,
     disnake.GuildSticker: GuildStickerConverter,

@@ -755,6 +755,9 @@ Converters
 .. autoclass:: disnake.ext.commands.CategoryChannelConverter
     :members:
 
+.. autoclass:: disnake.ext.commands.ForumChannelConverter
+    :members:
+
 .. autoclass:: disnake.ext.commands.ThreadConverter
     :members:
 
