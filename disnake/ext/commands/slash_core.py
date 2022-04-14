@@ -109,6 +109,9 @@ class SubCommandGroup(InvokableApplicationCommand):
     ----------
     name: :class:`str`
         The name of the group.
+    qualified_name: :class:`str`
+        The full command name, including parent names in the case of slash subcommands or groups.
+        For example, the qualified name for ``/one two three`` would be ``one two three``.
     option: :class:`.Option`
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
@@ -183,6 +186,9 @@ class SubCommand(InvokableApplicationCommand):
     ----------
     name: :class:`str`
         The name of the subcommand.
+    qualified_name: :class:`str`
+        The full command name, including parent names in the case of slash subcommands or groups.
+        For example, the qualified name for ``/one two three`` would be ``one two three``.
     option: :class:`.Option`
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
@@ -287,6 +293,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     ----------
     name: :class:`str`
         The name of the command.
+    qualified_name: :class:`str`
+        The full command name, including parent names in the case of slash subcommands or groups.
+        For example, the qualified name for ``/one two three`` would be ``one two three``.
     body: :class:`.SlashCommand`
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
