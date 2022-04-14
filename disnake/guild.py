@@ -2183,7 +2183,7 @@ class Guild(Hashable):
         self,
         *,
         enabled: bool = MISSING,
-        channels: List[WelcomeScreenChannel] = MISSING,
+        channels: Optional[List[WelcomeScreenChannel]] = MISSING,
         description: Optional[str] = MISSING,
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
@@ -2202,7 +2202,7 @@ class Guild(Hashable):
             Whether the welcome screen is enabled.
         description: Optional[:class:`str`]
             The new guild description in the welcome screen.
-        channels: List[:class:`WelcomeScreenChannel`]
+        channels: Optional[List[:class:`WelcomeScreenChannel`]]
             The new welcome channels.
         reason: Optional[:class:`str`]
             The reason for editing the welcome screen. Shows up on the audit log.

@@ -162,8 +162,8 @@ class WelcomeScreen:
         self,
         *,
         enabled: bool = MISSING,
-        description: str = MISSING,
-        channels: List[WelcomeScreenChannel] = MISSING,
+        description: Optional[str] = MISSING,
+        channels: Optional[List[WelcomeScreenChannel]] = MISSING,
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
         """|coro|
@@ -173,15 +173,15 @@ class WelcomeScreen:
         You must have the :attr:`~Permissions.manage_guild` permission to
         use this.
 
-        All fields are optional and nullable.
+        All fields are optional.
 
         Parameters
         ----------
         enabled: :class:`bool`
             Whether the welcome screen is enabled.
-        description: :class:`str`
+        description: Optional[:class:`str`]
             The new guild description in the welcome screen.
-        channels: List[:class:`WelcomeScreenChannel`]
+        channels: Optional[List[:class:`WelcomeScreenChannel`]]
             The new welcome channels.
         reason: Optional[:class:`str`]
             The reason for editing the welcome screen. Shows up on the audit log.
