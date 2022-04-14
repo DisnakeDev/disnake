@@ -341,6 +341,23 @@ class Client:
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+        
+    max_ratelimit_wait: :class:`float`
+        How long the library should wait for a ratelimit, or raise a :exc:`RatelimitTooLong` exception.
+        If set to 0, the library will raise for
+
+        .. versionadded:: 2.5
+
+        .. note::
+            If this is set, **all methods** that may raise a :exc:`HTTPException`
+            may also raise a :exc:`RatelimitTooLong` exception.
+
+            If this is set to ``0``, the library will raise a :exc:`RatelimitTooLong` exception
+            whenever the library would need to sleep for a ratelimit.
+
+        .. warning::
+            This does not apply to global ratelimits.
+            A global ratelimit will continue to sleep irregardless of this setting.
 
         .. versionchanged:: 2.6
             Can no longer be provided together with ``localization_provider``, as this parameter is

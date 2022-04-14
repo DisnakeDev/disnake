@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 if TYPE_CHECKING:
@@ -164,20 +165,26 @@ class DiscordServerError(HTTPException):
 
 
 class RatelimitTooLong(DiscordException):
-    """Exception that's raised for when waiting for a ratelimit would be too long.
+    """Exception that's raised when waiting for a ratelimit would take longer than the
+    configured maximum time (see :attr:`Client.max_ratelimit_wait <Client>`).
+
+    Attributes
+    ----------
+    reset_after: float
+        How long until another request can be made.
 
     .. versionadded:: 2.5
     """
 
-    def __init__(self, time: float, route: Route, message: Optional[str] = None):
+    def __init__(self, time: float, delta: float, route: Route, message: Optional[str] = None):
         self.reset_at = time
+        self.reset_after = delta
         self.message = message or ""
         self._method = route.method
         self._bucket = route.bucket
         self._url = route.url
-
-        fmt = f"Ratelimit for bucket {route.bucket} expires at {self.reset_at}."
-        if len(self.message):
+        fmt = f"Ratelimit for bucket {route.bucket} expires at {datetime.fromtimestamp(self.reset_at)!s}."
+        if self.message:
             fmt += f": {self.message}"
 
         super().__init__(fmt)

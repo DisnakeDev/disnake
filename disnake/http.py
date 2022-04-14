@@ -6,6 +6,7 @@ import asyncio
 import logging
 import re
 import sys
+import time
 import weakref
 from typing import (
     TYPE_CHECKING,
@@ -246,7 +247,9 @@ class HTTPClient:
         self._global_over.set()
         self.token: Optional[str] = None
         self.bot_token: bool = False
-        self.max_ratelimit_wait: Optional[float] = max_ratelimit_wait
+        self.max_ratelimit_wait: Optional[float] = (
+            max(0, max_ratelimit_wait) if max_ratelimit_wait is not None else None
+        )
         self.proxy: Optional[str] = proxy
         self.proxy_auth: Optional[aiohttp.BasicAuth] = proxy_auth
         self.use_clock: bool = not unsync_clock
@@ -326,9 +329,10 @@ class HTTPClient:
             await self._global_over.wait()
 
         if self.max_ratelimit_wait is not None and lock.locked():
-            max_wait_time = self.max_ratelimit_wait + self.loop.time()
+            max_wait_time = self.max_ratelimit_wait + time.time()
             if lock.reset_at > max_wait_time:
-                raise RatelimitTooLong(max_wait_time, route)
+                delta = lock.reset_at - max_wait_time
+                raise RatelimitTooLong(max_wait_time, delta, route)
 
         response: Optional[aiohttp.ClientResponse] = None
         data: Optional[Union[Dict[str, Any], str]] = None
@@ -379,7 +383,7 @@ class HTTPClient:
                             )
                             maybe_lock.defer()
                             if self.max_ratelimit_wait is not None:
-                                lock.reset_at = self.loop.time() + delta
+                                lock.reset_at = time.time() + delta
                             self.loop.call_later(delta, lock.release)
 
                         # the request was successful so just return the text/json
@@ -410,11 +414,10 @@ class HTTPClient:
                             else:
                                 # modify the lock
                                 if self.max_ratelimit_wait is not None:
+                                    reset_at = time.time() + retry_after
                                     if retry_after >= self.max_ratelimit_wait:
-                                        raise RatelimitTooLong(
-                                            self.loop.time() + retry_after, route
-                                        )
-                                    lock.reset_at = self.loop.time() + retry_after
+                                        raise RatelimitTooLong(reset_at, retry_after, route)
+                                    lock.reset_at = reset_at
 
                             await asyncio.sleep(retry_after)
                             _log.debug("Done sleeping for the rate limit. Retrying...")
