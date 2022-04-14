@@ -321,6 +321,8 @@ class Guild(Hashable):
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
         self._threads: Dict[int, Thread] = {}
+        self._stage_instances: Dict[int, StageInstance] = {}
+        self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
         self._state: ConnectionState = state
         self._from_data(data)
 
@@ -536,15 +538,19 @@ class Guild(Hashable):
         self.approximate_presence_count: Optional[int] = guild.get("approximate_presence_count")
         self.approximate_member_count: Optional[int] = guild.get("approximate_member_count")
 
-        self._stage_instances: Dict[int, StageInstance] = {}
-        for s in guild.get("stage_instances", []):
-            stage_instance = StageInstance(guild=self, data=s, state=state)
-            self._stage_instances[stage_instance.id] = stage_instance
+        stage_instances = guild.get("stage_instances")
+        if stage_instances is not None:
+            self._stage_instances = {}
+            for s in stage_instances:
+                stage_instance = StageInstance(guild=self, data=s, state=state)
+                self._stage_instances[stage_instance.id] = stage_instance
 
-        self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
-        for e in guild.get("guild_scheduled_events", []):
-            scheduled_event = GuildScheduledEvent(state=state, data=e)
-            self._scheduled_events[scheduled_event.id] = scheduled_event
+        scheduled_events = guild.get("guild_scheduled_events")
+        if scheduled_events is not None:
+            self._scheduled_events = {}
+            for e in scheduled_events:
+                scheduled_event = GuildScheduledEvent(state=state, data=e)
+                self._scheduled_events[scheduled_event.id] = scheduled_event
 
         cache_joined = self._state.member_cache_flags.joined
         self_id = self._state.self_id
