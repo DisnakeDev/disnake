@@ -977,6 +977,13 @@ class InteractionResponse:
         payload = {}
         if content is not MISSING:
             payload["content"] = None if content is None else str(content)
+
+        if file is not MISSING and files is not MISSING:
+            raise TypeError("cannot mix file and files keyword arguments")
+
+        if file is not MISSING:
+            files = [file]
+
         if embed is not MISSING and embeds is not MISSING:
             raise TypeError("cannot mix both embed and embeds keyword arguments")
 
@@ -986,15 +993,8 @@ class InteractionResponse:
             payload["embeds"] = [e.to_dict() for e in embeds]
             for embed in embeds:
                 if embed._files:
-                    raise NotImplementedError(
-                        "Embed images in edit interaction responses are not supported"
-                    )
-
-        if file is not MISSING and files is not MISSING:
-            raise TypeError("cannot mix file and files keyword arguments")
-
-        if file is not MISSING:
-            files = [file]
+                    files = files or []
+                    files += embed._files
 
         if files is not MISSING and len(files) > 10:
             raise ValueError("files cannot exceed maximum of 10 elements")
