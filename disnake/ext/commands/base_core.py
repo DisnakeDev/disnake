@@ -102,6 +102,31 @@ class InvokableApplicationCommand(ABC):
 
     These are not created manually, instead they are created via the
     decorator or functional interface.
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The name of the command.
+    qualified_name: :class:`str`
+        The full command name, including parent names in the case of slash subcommands or groups.
+        For example, the qualified name for ``/one two three`` would be ``one two three``.
+    body: :class:`.ApplicationCommand`
+        An object being registered in the API.
+    callback: :ref:`coroutine <coroutine>`
+        The coroutine that is executed when the command is called.
+    cog: Optional[:class:`Cog`]
+        The cog that this command belongs to. ``None`` if there isn't one.
+    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+        A list of predicates that verifies if the command could be executed
+        with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
+        is necessary to be thrown to signal failure, then one inherited from
+        :exc:`.CommandError` should be used. Note that if the checks fail then
+        :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
+        event.
+    guild_ids: Optional[List[:class:`int`]]
+        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
+    auto_sync: :class:`bool`
+        Whether to automatically register the command.
     """
 
     body: ApplicationCommand
@@ -160,7 +185,6 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def callback(self) -> CommandCallback:
-        """Callable[..., Coroutine]: The callback associated with the interaction."""
         return self._callback
 
     def add_check(self, func: Check) -> None:
