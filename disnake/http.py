@@ -999,6 +999,7 @@ class HTTPClient:
             "locked",
             "invitable",
             "default_auto_archive_duration",
+            "flags",
         )
         payload = {k: v for k, v in options.items() if k in valid_keys}
         return self.request(r, reason=reason, json=payload)
@@ -1038,6 +1039,7 @@ class HTTPClient:
             "rtc_region",
             "video_quality_mode",
             "auto_archive_duration",
+            "default_auto_archive_duration",
         )
         payload.update({k: v for k, v in options.items() if k in valid_keys and v is not None})
 
@@ -1192,6 +1194,40 @@ class HTTPClient:
     def get_thread_members(self, channel_id: Snowflake) -> Response[List[threads.ThreadMember]]:
         route = Route("GET", "/channels/{channel_id}/thread-members", channel_id=channel_id)
         return self.request(route)
+
+    def start_thread_in_forum_channel(
+        self,
+        channel_id: Snowflake,
+        files: Optional[Sequence[File]] = None,
+        reason: Optional[str] = None,
+        **fields: Any,
+    ) -> Response[threads.Thread]:
+        valid_keys = (
+            # Thread fields
+            "name",
+            "auto_archive_duration",
+            "rate_limit_per_user",
+            "type",
+            # Message fields
+            "content",
+            "embeds",
+            "allowed_mentions",
+            "components",
+            "sticker_ids",
+            "flags",
+        )
+        payload = {k: v for k, v in fields.items() if k in valid_keys}
+        route = Route("POST", "/channels/{channel_id}/threads", channel_id=channel_id)
+        query_params = {"has_message": 1}
+
+        if files:
+            multipart = to_multipart_with_attachments(payload, files)
+
+            return self.request(
+                route, form=multipart, params=query_params, files=files, reason=reason
+            )
+
+        return self.request(route, json=payload, params=query_params, reason=reason)
 
     # Webhook management
 

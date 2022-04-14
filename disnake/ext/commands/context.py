@@ -174,9 +174,9 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         ----------
         command: :class:`.Command`
             The command that is going to be called.
-        \*args
+        *args
             The arguments to use.
-        \*\*kwargs
+        **kwargs
             The keyword arguments to use.
 
         Raises
