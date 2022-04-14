@@ -1718,7 +1718,7 @@ class Guild(Hashable):
             splash. This is only available to guilds that contain ``DISCOVERABLE``
             in :attr:`Guild.features`.
         community: :class:`bool`
-            Whether the guild should be a Community guild. If set to ``True``\, both ``rules_channel``
+            Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
         region: Union[:class:`str`, :class:`VoiceRegion`]
             The new region for the guild's voice communication.
@@ -2380,7 +2380,7 @@ class Guild(Hashable):
             Whether to compute the prune count. This defaults to ``True``
             which makes it prone to timeouts in very large guilds. In order
             to prevent timeouts, you must set this to ``False``. If this is
-            set to ``False``\, then this function will always return ``None``.
+            set to ``False``\\, then this function will always return ``None``.
         roles: List[:class:`abc.Snowflake`]
             A list of :class:`abc.Snowflake` that represent roles to include in the pruning process. If a member
             has a role that is not specified, they'll be excluded.
@@ -2637,7 +2637,7 @@ class Guild(Hashable):
     async def fetch_stickers(self) -> List[GuildSticker]:
         """|coro|
 
-        Retrieves a list of all :class:`Sticker`\s that the guild has.
+        Retrieves a list of all :class:`Sticker`\\s that the guild has.
 
         .. versionadded:: 2.0
 
@@ -2777,7 +2777,7 @@ class Guild(Hashable):
     async def fetch_emojis(self) -> List[Emoji]:
         """|coro|
 
-        Retrieves all custom :class:`Emoji`\s that the guild has.
+        Retrieves all custom :class:`Emoji`\\s that the guild has.
 
         .. note::
 
@@ -2861,7 +2861,7 @@ class Guild(Hashable):
             The :term:`py:bytes-like object` representing the image data to use.
             Only JPG, PNG and GIF images are supported.
         roles: List[:class:`Role`]
-            A :class:`list` of :class:`Role`\s that can use this emoji. Leave empty to make it available to everyone.
+            A :class:`list` of :class:`Role`\\s that can use this emoji. Leave empty to make it available to everyone.
         reason: Optional[:class:`str`]
             The reason for creating this emoji. Shows up on the audit log.
 
