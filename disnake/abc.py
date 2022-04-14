@@ -232,6 +232,7 @@ class GuildChannel(ABC):
     - :class:`.VoiceChannel`
     - :class:`.CategoryChannel`
     - :class:`.StageChannel`
+    - :class:`.ForumChannel`
 
     This ABC must also implement :class:`.abc.Snowflake`.
 
