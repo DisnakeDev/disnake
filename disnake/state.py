@@ -981,12 +981,22 @@ class ConnectionState:
 
     def parse_channel_delete(self, data) -> None:
         guild = self._get_guild(utils._get_as_snowflake(data, "guild_id"))
+        if guild is None:
+            return
+
         channel_id = int(data["id"])
-        if guild is not None:
-            channel = guild.get_channel(channel_id)
-            if channel is not None:
-                guild._remove_channel(channel)
-                self.dispatch("guild_channel_delete", channel)
+        channel = guild.get_channel(channel_id)
+        if channel is None:
+            return
+
+        guild._remove_channel(channel)
+        self.dispatch("guild_channel_delete", channel)
+
+        if channel.type in (ChannelType.voice, ChannelType.stage_voice):
+            for event_id, scheduled_event in list(guild._scheduled_events.items()):
+                if scheduled_event.channel_id == channel_id:
+                    guild._scheduled_events.pop(event_id)
+                    self.dispatch("guild_scheduled_event_delete", scheduled_event)
 
     def parse_channel_update(self, data) -> None:
         channel_type = try_enum(ChannelType, data.get("type"))
@@ -1069,7 +1079,13 @@ class ConnectionState:
         has_thread = guild.get_thread(thread.id)
         guild._add_thread(thread)
         if not has_thread:
-            self.dispatch("thread_join", thread)
+            if data.get("newly_created"):
+                if isinstance(thread.parent, ForumChannel):
+                    thread.parent.last_thread_id = thread.id
+
+                self.dispatch("thread_create", thread)
+            else:
+                self.dispatch("thread_join", thread)
 
     def parse_thread_update(self, data) -> None:
         guild_id = int(data["guild_id"])
@@ -1694,7 +1710,7 @@ class ConnectionState:
                         logging_coroutine(coro, info="Voice Protocol voice state update handler")
                     )
 
-            member, before, after = guild._update_voice_state(data, channel_id)  # type: ignore
+            member, before, after = guild._update_voice_state(data, channel_id)
             if member is not None:
                 if flags.voice:
                     if channel_id is None and flags._voice_only and member.id != self_id:
@@ -1946,9 +1962,10 @@ class AutoShardedConnectionState(ConnectionState):
         self.shard_ids: Union[List[int], range] = []
         self.shards_launched: asyncio.Event = asyncio.Event()
 
-    def _update_message_references(self) -> None:
-        # self._messages won't be None when this is called
-        for msg in self._messages:  # type: ignore
+    def _update_guild_channel_references(self) -> None:
+        if not self._messages:
+            return
+        for msg in self._messages:
             if not msg.guild:
                 continue
 
@@ -1956,7 +1973,7 @@ class AutoShardedConnectionState(ConnectionState):
             if new_guild is not None and new_guild is not msg.guild:
                 channel_id = msg.channel.id
                 channel = new_guild._resolve_channel(channel_id) or Object(id=channel_id)
-                # channel will either be a TextChannel, Thread or Object
+                # channel will either be a TextChannel, VoiceChannel, Thread or Object
                 msg._rebind_cached_references(new_guild, channel)  # type: ignore
 
     async def chunker(
@@ -2013,6 +2030,9 @@ class AutoShardedConnectionState(ConnectionState):
                     future.set_result([])
 
                 processed.append((guild, future))
+
+        # update references once the guild cache is repopulated
+        self._update_guild_channel_references()
 
         guilds = sorted(processed, key=lambda g: g[0].shard_id)
         for shard_id, info in itertools.groupby(guilds, key=lambda g: g[0].shard_id):
@@ -2076,9 +2096,6 @@ class AutoShardedConnectionState(ConnectionState):
 
         for guild_data in data["guilds"]:
             self._add_guild_from_data(guild_data)
-
-        if self._messages:
-            self._update_message_references()
 
         self.dispatch("connect")
         self.dispatch("shard_connect", data["__shard_id__"])
