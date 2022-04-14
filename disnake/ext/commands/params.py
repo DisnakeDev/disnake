@@ -929,7 +929,20 @@ def inject(function: Callable[..., Any]) -> Any:
 def option_enum(
     choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
 ) -> Type[TChoice]:
-    """A utility function to create an enum type with the provided values."""
+    """
+    A utility function to create an enum type.
+    Returns a new :class:`~enum.Enum` based on the provided parameters.
+
+    .. versionadded:: 2.1
+
+    Parameters
+    ----------
+    choices: Union[Dict[:class:`str`, :class:`Any`], List[:class:`Any`]]
+        A name/value mapping of choices, or a list of values whose stringified representations
+        will be used as the names.
+    \\*\\*kwargs
+        Name/value pairs to use instead of the ``choices`` parameter.
+    """
     if isinstance(choices, list):
         choices = {str(i): i for i in choices}
 
