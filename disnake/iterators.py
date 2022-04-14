@@ -33,8 +33,10 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
+    Dict,
     List,
     Optional,
+    Tuple,
     TypeVar,
     Union,
     cast,
@@ -65,14 +67,18 @@ if TYPE_CHECKING:
     from .message import Message
     from .state import ConnectionState
     from .threads import Thread
-    from .types.audit_log import AuditLog as AuditLogPayload, AuditLogEntry as AuditLogEntryPayload
+    from .types.audit_log import (
+        AuditLog as AuditLogPayload,
+        AuditLogEntry as AuditLogEntryPayload,
+        AuditLogEvent,
+    )
     from .types.guild import Ban as BanPayload, Guild as GuildPayload
     from .types.guild_scheduled_event import (
         GuildScheduledEventUser as GuildScheduledEventUserPayload,
     )
     from .types.message import Message as MessagePayload
     from .types.threads import Thread as ThreadPayload
-    from .types.user import PartialUser as PartialUserPayload
+    from .types.user import PartialUser as PartialUserPayload, User as UserPayload
     from .user import User
 
 T = TypeVar("T")
@@ -509,49 +515,39 @@ class BanIterator(_AsyncIterator["BanEntry"]):
 class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
     def __init__(
         self,
-        guild,
-        limit=None,
-        before=None,
-        after=None,
-        oldest_first=None,
-        user_id=None,
-        action_type=None,
+        guild: Guild,
+        limit: int = None,
+        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+        after: Optional[Union[Snowflake, datetime.datetime]] = None,
+        user_id: Optional[int] = None,
+        action_type: Optional[AuditLogEvent] = None,
     ):
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
         if isinstance(after, datetime.datetime):
             after = Object(id=time_snowflake(after, high=True))
 
-        if oldest_first is None:
-            self.reverse = after is not None
-        else:
-            self.reverse = oldest_first
+        self.limit: Optional[int] = limit
+        self.before: Optional[Snowflake] = before
+        self.after: Snowflake = after or OLDEST_OBJECT
+        self.user_id: Optional[int] = user_id
+        self.action_type: Optional[AuditLogEvent] = action_type
 
         self.guild = guild
-        self.loop = guild._state.loop
-        self.request = guild._state.http.get_audit_logs
-        self.limit = limit
-        self.before = before
-        self.user_id = user_id
-        self.action_type = action_type
-        self.after = OLDEST_OBJECT
-        self._users = {}
         self._state = guild._state
+        self.request = guild._state.http.get_audit_logs
+
+        self._users: Dict[int, User] = {}
+
+        self.entries: asyncio.Queue[AuditLogEntry] = asyncio.Queue()
 
         self._filter: Optional[Callable[[AuditLogEntryPayload], bool]] = None
+        if self.after and self.after != OLDEST_OBJECT:
+            self._filter = lambda e: int(e["id"]) > self.after.id
 
-        self.entries = asyncio.Queue()
-
-        if self.reverse:
-            self._strategy = self._after_strategy
-            if self.before:
-                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
-        else:
-            self._strategy = self._before_strategy
-            if self.after and self.after != OLDEST_OBJECT:
-                self._filter = lambda m: int(m["id"]) > self.after.id
-
-    async def _before_strategy(self, retrieve):
+    async def _retrieve_data(
+        self, retrieve: int
+    ) -> Tuple[List[UserPayload], List[AuditLogEntryPayload]]:
         before = self.before.id if self.before else None
         data: AuditLogPayload = await self.request(
             self.guild.id,
@@ -562,26 +558,10 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         )
 
         entries = data.get("audit_log_entries", [])
-        if len(data) and entries:
+        if entries:
             if self.limit is not None:
                 self.limit -= retrieve
             self.before = Object(id=int(entries[-1]["id"]))
-        return data.get("users", []), entries
-
-    async def _after_strategy(self, retrieve):
-        after = self.after.id if self.after else None
-        data: AuditLogPayload = await self.request(
-            self.guild.id,
-            limit=retrieve,
-            user_id=self.user_id,
-            action_type=self.action_type,
-            after=after,
-        )
-        entries = data.get("audit_log_entries", [])
-        if len(data) and entries:
-            if self.limit is not None:
-                self.limit -= retrieve
-            self.after = Object(id=int(entries[0]["id"]))
         return data.get("users", []), entries
 
     async def next(self) -> AuditLogEntry:
@@ -604,16 +584,16 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
     async def _fill(self):
         if self._get_retrieve():
-            users, data = await self._strategy(self.retrieve)
+            users, data = await self._retrieve_data(self.retrieve)
             if len(data) < 100:
                 self.limit = 0  # terminate the infinite loop
 
-            if self.reverse:
-                data = reversed(data)
             if self._filter:
                 data = filter(self._filter, data)
 
             for user in users:
+                if int(user["id"]) in self._users:
+                    continue
                 u = self._state.create_user(data=user)
                 self._users[u.id] = u
 
