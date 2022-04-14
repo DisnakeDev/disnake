@@ -39,7 +39,7 @@ class PermissionOverwrite(TypedDict):
     deny: str
 
 
-ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14]
+ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15]
 
 
 class _BaseChannel(TypedDict):
@@ -62,7 +62,7 @@ class PartialChannel(_BaseChannel):
 class _TextChannelOptional(TypedDict, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
-    last_pin_timestamp: str
+    last_pin_timestamp: Optional[str]
     rate_limit_per_user: int
     default_auto_archive_duration: ThreadArchiveDurationLiteral
 
@@ -128,6 +128,16 @@ class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
     thread_metadata: ThreadMetadata
 
 
+class _ForumChannelOptional(TypedDict, total=False):
+    topic: Optional[str]
+    last_message_id: Optional[Snowflake]
+    default_auto_archive_duration: ThreadArchiveDurationLiteral
+
+
+class ForumChannel(_BaseGuildChannel, _ForumChannelOptional):
+    type: Literal[15]
+
+
 GuildChannel = Union[
     TextChannel,
     NewsChannel,
@@ -135,6 +145,7 @@ GuildChannel = Union[
     CategoryChannel,
     StageChannel,
     ThreadChannel,
+    ForumChannel,
 ]
 
 

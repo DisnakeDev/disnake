@@ -39,6 +39,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    cast,
 )
 
 from .audit_logs import AuditLogEntry
@@ -54,14 +55,17 @@ __all__ = (
     "AuditLogIterator",
     "GuildIterator",
     "MemberIterator",
+    "GuildScheduledEventUserIterator",
 )
 
 if TYPE_CHECKING:
     from .abc import Messageable, Snowflake
     from .audit_logs import AuditLogEntry
     from .guild import Guild
+    from .guild_scheduled_event import GuildScheduledEvent
     from .member import Member
     from .message import Message
+    from .state import ConnectionState
     from .threads import Thread
     from .types.audit_log import (
         AuditLog as AuditLogPayload,
@@ -69,6 +73,9 @@ if TYPE_CHECKING:
         AuditLogEvent,
     )
     from .types.guild import Ban as BanPayload, Guild as GuildPayload
+    from .types.guild_scheduled_event import (
+        GuildScheduledEventUser as GuildScheduledEventUserPayload,
+    )
     from .types.message import Message as MessagePayload
     from .types.threads import Thread as ThreadPayload
     from .types.user import PartialUser as PartialUserPayload, User as UserPayload
@@ -858,3 +865,112 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
         from .threads import Thread
 
         return Thread(guild=self.guild, state=self.guild._state, data=data)
+
+
+class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
+    def __init__(
+        self,
+        event: GuildScheduledEvent,
+        limit: Optional[int],
+        with_members: bool,
+        before: Optional[Snowflake],
+        after: Optional[Snowflake],
+    ):
+        self.event: GuildScheduledEvent = event
+        self.limit: Optional[int] = limit
+        self.with_members: bool = with_members
+        self.before: Optional[Snowflake] = before
+        self.after: Optional[Snowflake] = after
+
+        self.state: ConnectionState = event._state
+        self.get_event_users = self.state.http.get_guild_scheduled_event_users
+        self.users = asyncio.Queue()
+
+        self._filter: Optional[Callable[[GuildScheduledEventUserPayload], bool]] = None
+        if self.before is not None:
+            self._strategy = self._before_strategy
+            if self.after is not None:
+                self._filter = lambda u: int(u["user"]["id"]) > cast("Snowflake", self.after).id
+            # reverse if using `before` strategy, since chunks are always received in
+            # ascending order (200-299, 100-199, 0-99) regardless of before/after
+            self.reverse = True
+        else:
+            self._strategy = self._after_strategy
+            self.reverse = False
+
+    async def next(self) -> Message:
+        if self.users.empty():
+            await self.fill_users()
+
+        try:
+            return self.users.get_nowait()
+        except asyncio.QueueEmpty:
+            raise NoMoreItems()
+
+    def _get_retrieve(self) -> bool:
+        l = self.limit
+        if l is None or l > 100:
+            r = 100
+        else:
+            r = l
+        self.retrieve: int = r
+        return r > 0
+
+    def create_user(self, data: GuildScheduledEventUserPayload) -> Union[User, Member]:
+        user_data = data["user"]
+        member_data = data.get("member")
+        if member_data is not None and (guild := self.event.guild) is not None:
+            return guild.get_member(int(user_data["id"])) or Member(
+                data=member_data, user_data=user_data, guild=guild, state=self.state
+            )
+        else:
+            return self.state.store_user(data["user"])
+
+    async def fill_users(self) -> None:
+        if not self._get_retrieve():
+            return
+
+        data = await self._strategy(self.retrieve)
+        if len(data) < 100:
+            self.limit = 0  # terminate loop
+
+        if self.reverse:
+            data = reversed(data)
+        if self._filter:
+            data = filter(self._filter, data)
+
+        for user in data:
+            await self.users.put(self.create_user(user))
+
+    async def _before_strategy(self, retrieve: int) -> List[GuildScheduledEventUserPayload]:
+        before = self.before.id if self.before else None
+        data = await self.get_event_users(
+            self.event.guild_id,
+            self.event.id,
+            limit=retrieve,
+            with_member=self.with_members,
+            before=before,
+        )
+
+        if len(data):
+            if self.limit is not None:
+                self.limit -= retrieve
+            # users are always returned in ascending order
+            self.before = Object(id=int(data[0]["user"]["id"]))
+        return data
+
+    async def _after_strategy(self, retrieve: int) -> List[GuildScheduledEventUserPayload]:
+        after = self.after.id if self.after else None
+        data = await self.get_event_users(
+            self.event.guild_id,
+            self.event.id,
+            limit=retrieve,
+            with_member=self.with_members,
+            after=after,
+        )
+
+        if len(data):
+            if self.limit is not None:
+                self.limit -= retrieve
+            self.after = Object(id=int(data[-1]["user"]["id"]))
+        return data
