@@ -455,7 +455,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     def _presence_update(
         self, data: PartialPresenceUpdate, user: UserPayload
     ) -> Optional[Tuple[User, User]]:
-        self.activities = tuple(map(create_activity, data["activities"]))
+        self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
             sys.intern(key): sys.intern(value) for key, value in data.get("client_status", {}).items()  # type: ignore
         }
@@ -946,15 +946,15 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         |coro|
 
-        Gives the member a number of :class:`Role`\s.
+        Gives the member a number of :class:`Role`\\s.
 
         You must have :attr:`~Permissions.manage_roles` permission to
-        use this, and the added :class:`Role`\s must appear lower in the list
+        use this, and the added :class:`Role`\\s must appear lower in the list
         of roles than the highest role of the member.
 
         Parameters
         ----------
-        \*roles: :class:`abc.Snowflake`
+        *roles: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing a :class:`Role`
             to give to the member.
         reason: Optional[:class:`str`]
@@ -987,15 +987,15 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         |coro|
 
-        Removes :class:`Role`\s from this member.
+        Removes :class:`Role`\\s from this member.
 
         You must have :attr:`~Permissions.manage_roles` permission to
-        use this, and the removed :class:`Role`\s must appear lower in the list
+        use this, and the removed :class:`Role`\\s must appear lower in the list
         of roles than the highest role of the member.
 
         Parameters
         ----------
-        \*roles: :class:`abc.Snowflake`
+        *roles: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing a :class:`Role`
             to remove from the member.
         reason: Optional[:class:`str`]
