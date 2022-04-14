@@ -2285,7 +2285,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         Parameters
         ----------
-        limit: Optional[:class:`bool`]
+        limit: Optional[:class:`int`]
             The number of threads to retrieve.
             If ``None``, retrieves every archived thread in the channel. Note, however,
             that this would make it a slow operation.
