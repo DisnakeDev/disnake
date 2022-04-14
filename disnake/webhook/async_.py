@@ -566,7 +566,7 @@ def handle_message_parameters(
     ephemeral: bool = False,
     file: File = MISSING,
     files: List[File] = MISSING,
-    attachments: List[Attachment] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
