@@ -128,7 +128,7 @@ class WelcomeScreen:
 
     __slots__ = (
         "description",
-        "welcome_channels",
+        "channels",
         "_guild",
         "_state",
     )
@@ -143,13 +143,13 @@ class WelcomeScreen:
         self._state = state
         self._guild = guild
         self.description: Optional[str] = data.get("description")
-        self.welcome_channels: List[WelcomeScreenChannel] = [
+        self.channels: List[WelcomeScreenChannel] = [
             WelcomeScreenChannel._from_data(data=channel, state=state)
             for channel in data["welcome_channels"]
         ]
 
     def __repr__(self) -> str:
-        return f"<WelcomeScreen description={self.description!r} welcome_channels={self.welcome_channels!r} enabled={self.enabled!r}>"
+        return f"<WelcomeScreen description={self.description!r} channels={self.channels!r} enabled={self.enabled!r}>"
 
     @property
     def enabled(self) -> bool:
@@ -163,7 +163,7 @@ class WelcomeScreen:
         *,
         enabled: bool = MISSING,
         description: str = MISSING,
-        welcome_channels: List[WelcomeScreenChannel] = MISSING,
+        channels: List[WelcomeScreenChannel] = MISSING,
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
         """|coro|
@@ -181,7 +181,7 @@ class WelcomeScreen:
             Whether the welcome screen is enabled.
         description: :class:`str`
             The new guild description in the welcome screen.
-        welcome_channels: List[:class:`WelcomeScreenChannel`]
+        channels: List[:class:`WelcomeScreenChannel`]
             The new welcome channels.
         reason: Optional[:class:`str`]
             The reason for editing the welcome screen. Shows up on the audit log.
@@ -193,7 +193,7 @@ class WelcomeScreen:
         HTTPException
             Editing the welcome screen failed.
         TypeError
-            ``welcome_channels`` is not a list of :class:`~disnake.WelcomeScreenChannel` instances
+            ``channels`` is not a list of :class:`~disnake.WelcomeScreenChannel` instances
 
         Returns
         -------
@@ -207,7 +207,7 @@ class WelcomeScreen:
 
         return await self._guild.edit_welcome_screen(
             enabled=enabled,
-            welcome_channels=welcome_channels,
+            channels=channels,
             description=description,
             reason=reason,
         )

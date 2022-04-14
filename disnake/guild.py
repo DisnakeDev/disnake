@@ -2183,7 +2183,7 @@ class Guild(Hashable):
         self,
         *,
         enabled: bool = MISSING,
-        welcome_channels: List[WelcomeScreenChannel] = MISSING,
+        channels: List[WelcomeScreenChannel] = MISSING,
         description: Optional[str] = MISSING,
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
@@ -2202,7 +2202,7 @@ class Guild(Hashable):
             Whether the welcome screen is enabled.
         description: Optional[:class:`str`]
             The new guild description in the welcome screen.
-        welcome_channels: List[:class:`WelcomeScreenChannel`]
+        channels: List[:class:`WelcomeScreenChannel`]
             The new welcome channels.
         reason: Optional[:class:`str`]
             The reason for editing the welcome screen. Shows up on the audit log.
@@ -2215,7 +2215,7 @@ class Guild(Hashable):
         HTTPException
             Editing the welcome screen failed.
         TypeError
-            ``welcome_channels`` is not a list of :class:`~disnake.WelcomeScreenChannel` instances
+            ``channels`` is not a list of :class:`~disnake.WelcomeScreenChannel` instances
 
         Returns
         -------
@@ -2230,15 +2230,15 @@ class Guild(Hashable):
         if description is not MISSING:
             payload["description"] = description
 
-        if welcome_channels is not MISSING:
-            if welcome_channels is None:
+        if channels is not MISSING:
+            if channels is None:
                 payload["welcome_channels"] = None
             else:
                 welcome_channel_payload = []
-                for channel in welcome_channels:
+                for channel in channels:
                     if not isinstance(channel, WelcomeScreenChannel):
                         raise TypeError(
-                            "'welcome_channels' must be a list of 'WelcomeScreenChannel' objects"
+                            "'channels' must be a list of 'WelcomeScreenChannel' objects"
                         )
                     welcome_channel_payload.append(channel.to_dict())
                 payload["welcome_channels"] = welcome_channel_payload
