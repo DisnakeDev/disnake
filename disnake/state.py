@@ -2100,6 +2100,9 @@ class AutoShardedConnectionState(ConnectionState):
         self._ready_task = None
 
         # update member references once guilds are chunked
+        # note: this is always called regardless of whether chunking/caching is enabled;
+        #       the bot member is always cached, so if any of the bot's own messages are
+        #       cached, their `author` should be rebound to the new member object
         self._update_member_references()
 
         # dispatch the event
