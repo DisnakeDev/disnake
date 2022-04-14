@@ -1402,8 +1402,8 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        *,
         content: Optional[str] = ...,
+        *,
         embed: Optional[Embed] = ...,
         file: File = ...,
         attachments: List[Attachment] = ...,
@@ -1418,8 +1418,8 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        *,
         content: Optional[str] = ...,
+        *,
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
         attachments: List[Attachment] = ...,
@@ -1434,8 +1434,8 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        *,
         content: Optional[str] = ...,
+        *,
         embeds: List[Embed] = ...,
         file: File = ...,
         attachments: List[Attachment] = ...,
@@ -1450,8 +1450,8 @@ class Message(Hashable):
     @overload
     async def edit(
         self,
-        *,
         content: Optional[str] = ...,
+        *,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         attachments: List[Attachment] = ...,
@@ -1463,7 +1463,7 @@ class Message(Hashable):
     ) -> Message:
         ...
 
-    async def edit(self, **fields: Any) -> Message:
+    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
 
         Edits the message.
@@ -1574,6 +1574,7 @@ class Message(Hashable):
             self,
             default_flags=self.flags.value,
             previous_allowed_mentions=previous_allowed_mentions,
+            content=content,
             **fields,
         )
 
@@ -1926,6 +1927,7 @@ class PartialMessage(Hashable):
     - :meth:`VoiceChannel.get_partial_message`
     - :meth:`Thread.get_partial_message`
     - :meth:`DMChannel.get_partial_message`
+    - :meth:`PartialMessageable.get_partial_message`
 
     Note that this class is trimmed down and has no rich attributes.
 
@@ -1947,7 +1949,7 @@ class PartialMessage(Hashable):
 
     Attributes
     ----------
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`VoiceChannel`]
+    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`VoiceChannel`, :class:`PartialMessageable`]
         The channel associated with this partial message.
     id: :class:`int`
         The message ID.
@@ -1979,7 +1981,8 @@ class PartialMessage(Hashable):
             ChannelType.voice,
         ):
             raise TypeError(
-                f"Expected TextChannel, DMChannel, VoiceChannel, or Thread not {type(channel)!r}"
+                f"Expected TextChannel, DMChannel, VoiceChannel, Thread, or PartialMessageable "
+                f"with a valid type, not {type(channel)!r} (type: {channel.type!r})"
             )
 
         self.channel: MessageableChannel = channel
@@ -2030,7 +2033,7 @@ class PartialMessage(Hashable):
         data = await self._state.http.get_message(self.channel.id, self.id)
         return self._state.create_message(channel=self.channel, data=data)
 
-    async def edit(self, **fields: Any) -> Message:
+    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
 
         Edits the message.
@@ -2139,5 +2142,6 @@ class PartialMessage(Hashable):
             self,
             default_flags=0,
             previous_allowed_mentions=None,
+            content=content,
             **fields,
         )

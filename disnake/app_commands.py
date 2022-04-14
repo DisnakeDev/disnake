@@ -207,7 +207,7 @@ class Option:
         self.max_value: Optional[float] = max_value
 
         if channel_types is not None and not all(isinstance(t, ChannelType) for t in channel_types):
-            raise InvalidArgument("channel_types must be instances of ChannelType")
+            raise InvalidArgument("channel_types must be a list of `ChannelType`s")
 
         self.channel_types: List[ChannelType] = channel_types or []
 

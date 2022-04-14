@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, TypeVar, U
 
 import disnake.abc
 import disnake.utils
+from disnake import ApplicationCommandInteraction
 from disnake.message import Message
 
 if TYPE_CHECKING:
@@ -409,3 +410,6 @@ class GuildContext(Context):
     channel: Union[TextChannel, Thread, VoiceChannel]
     author: Member
     me: Member
+
+
+AnyContext = Union[Context, ApplicationCommandInteraction]

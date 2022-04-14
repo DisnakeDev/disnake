@@ -384,7 +384,7 @@ A lot of disnake models work out of the gate as a parameter:
 - :class:`VoiceChannel`
 - :class:`StageChannel` (since v1.7)
 - :class:`CategoryChannel`
-- :class:`StoreChannel` (since v1.7)
+- :class:`ForumChannel` (since v2.5)
 - :class:`Thread` (since v2.0)
 - :class:`Colour`
 - :class:`Role`
@@ -426,7 +426,7 @@ converter is given below:
 +------------------------------+--------------------------------------------------------+
 | :class:`CategoryChannel`     | :class:`~ext.commands.CategoryChannelConverter`        |
 +------------------------------+--------------------------------------------------------+
-| :class:`StoreChannel`        | :class:`~ext.commands.StoreChannelConverter`           |
+| :class:`ForumChannel`        | :class:`~ext.commands.ForumChannelConverter`           |
 +------------------------------+--------------------------------------------------------+
 | :class:`Thread`              | :class:`~ext.commands.ThreadConverter`                 |
 +------------------------------+--------------------------------------------------------+

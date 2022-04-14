@@ -511,7 +511,8 @@ class Permissions(BaseFlags):
 
     @flag_value
     def send_messages(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels."""
+        """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels
+        and create threads in forum channels."""
         return 1 << 11
 
     @flag_value
