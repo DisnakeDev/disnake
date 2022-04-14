@@ -280,9 +280,9 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        \*args
+        *args
             The arguments to use.
-        \*\*kwargs
+        **kwargs
             The keyword arguments to use.
         """
         if self._injected is not None:
@@ -296,9 +296,9 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        \*args
+        *args
             The arguments to use.
-        \*\*kwargs
+        **kwargs
             The keyword arguments to use.
 
         Raises
@@ -364,9 +364,9 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        \*args
+        *args
             The arguments to use.
-        \*\*kwargs
+        **kwargs
             The keyword arguments to use.
         """
 
@@ -391,7 +391,7 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        \*exceptions: Type[:class:`BaseException`]
+        *exceptions: Type[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Raises
@@ -422,7 +422,7 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        \*exceptions: Type[:class:`BaseException`]
+        *exceptions: Type[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Returns

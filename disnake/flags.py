@@ -166,7 +166,7 @@ class SystemChannelFlags(BaseFlags):
     """
     Wraps up a Discord system channel flag value.
 
-    Similar to :class:`Permissions`\, the properties provided are two way.
+    Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
     were regular bools. This allows you to edit the system flags easily.
 
@@ -482,7 +482,7 @@ class Intents(BaseFlags):
     """
     Wraps up a Discord gateway intent flag.
 
-    Similar to :class:`Permissions`\, the properties provided are two way.
+    Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
     were regular bools.
 
