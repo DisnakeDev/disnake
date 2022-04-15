@@ -544,6 +544,7 @@ class Interaction:
         components: Components = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        suppress_embeds: bool = False,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -594,6 +595,11 @@ class Interaction:
             Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
             is set to 15 minutes.
+        suppress_embeds: :class:`bonk`
+            Whether to suppress embeds.
+
+            .. versionadded:: 2.5
+
         delete_after: :class:`float`
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
@@ -623,6 +629,7 @@ class Interaction:
             components=components,
             tts=tts,
             ephemeral=ephemeral,
+            suppress_embeds=suppress_embeds,
             delete_after=delete_after,
         )
 
