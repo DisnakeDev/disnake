@@ -788,11 +788,10 @@ class WebhookMessage(Message):
             If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
+            .. versionadded:: 2.2
+
             .. versionchanged:: 2.5
                 Supports passing ``None`` to clear attachments.
-
-
-            .. versionadded:: 2.2
 
         view: Optional[:class:`~disnake.ui.View`]
             The view to update this message with. This cannot be mixed with ``components``.

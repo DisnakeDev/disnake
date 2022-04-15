@@ -443,11 +443,10 @@ class SyncWebhookMessage(Message):
             If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
+            .. versionadded:: 2.2
+
             .. versionchanged:: 2.5
                 Supports passing ``None`` to clear attachments.
-
-
-            .. versionadded:: 2.2
 
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
