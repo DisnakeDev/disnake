@@ -33,7 +33,7 @@ __all__ = ("VoiceRegion",)
 
 
 class VoiceRegion:
-    """Represents a discord Voice Region.
+    """Represents a Discord voice region.
 
     .. versionadded:: 2.6
 
