@@ -406,11 +406,10 @@ class Guild(Hashable):
         return f"<Guild {inner}>"
 
     def _update_voice_state(
-        self, data: GuildVoiceState, channel_id: int
+        self, data: GuildVoiceState, channel_id: Optional[int]
     ) -> Tuple[Optional[Member], VoiceState, VoiceState]:
         user_id = int(data["user_id"])
-        channel = self.get_channel(channel_id)
-        channel = cast(Optional[VocalGuildChannel], channel)
+        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # type: ignore
         try:
             # check if we should remove the voice state from cache
             if channel is None:
@@ -593,7 +592,7 @@ class Guild(Hashable):
         self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(utils._get_as_snowflake(guild, "afk_channel_id"))  # type: ignore
 
         for obj in guild.get("voice_states", []):
-            self._update_voice_state(obj, int(obj["channel_id"]))
+            self._update_voice_state(obj, utils._get_as_snowflake(obj, "channel_id"))
 
     # TODO: refactor/remove?
     def _sync(self, data: GuildPayload) -> None:
@@ -2047,6 +2046,12 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
+        If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
+
+        - ``channel_id`` should be not be set
+        - ``entity_metadata`` with a location field must be provided
+        - ``scheduled_end_time`` must be provided
+
         .. versionadded:: 2.3
 
         Parameters
@@ -3013,8 +3018,8 @@ class Guild(Hashable):
         color: Union[Colour, int] = MISSING,
         colour: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
-        icon: bytes = MISSING,
-        emoji: str = MISSING,
+        icon: Optional[bytes] = MISSING,
+        emoji: Optional[str] = MISSING,
         mentionable: bool = MISSING,
         reason: Optional[str] = None,
     ) -> Role:
