@@ -173,8 +173,6 @@ class WelcomeScreen:
         You must have the :attr:`~Permissions.manage_guild` permission to
         use this.
 
-        All fields are optional.
-
         Parameters
         ----------
         enabled: :class:`bool`
