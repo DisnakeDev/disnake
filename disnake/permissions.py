@@ -515,6 +515,11 @@ class Permissions(BaseFlags):
         and create threads in forum channels."""
         return 1 << 11
 
+    @make_permission_alias("send_messages")
+    def create_forum_posts(self) -> int:
+        """:class:`bool`: An alias for :attr:`send_messages`."""
+        return 1 << 11
+
     @flag_value
     def send_tts_messages(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can send TTS messages from all or specific text channels."""
