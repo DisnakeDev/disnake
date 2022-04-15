@@ -76,7 +76,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     def __init__(
@@ -160,7 +160,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     def __init__(
@@ -242,7 +242,7 @@ def user_command(
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
 
     Returns
     -------
@@ -303,7 +303,7 @@ def message_command(
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
 
     Returns
     -------

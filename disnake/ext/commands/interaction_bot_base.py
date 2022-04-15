@@ -484,7 +484,7 @@ class InteractionBotBase(CommonBotBase):
             .. note::
                 This object may be copied by the library.
 
-            .. versionadded: 2.5
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -544,7 +544,7 @@ class InteractionBotBase(CommonBotBase):
             .. note::
                 This object may be copied by the library.
 
-            .. versionadded: 2.5
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -601,7 +601,7 @@ class InteractionBotBase(CommonBotBase):
             .. note::
                 This object may be copied by the library.
 
-            .. versionadded: 2.5
+            .. versionadded:: 2.5
 
         Returns
         -------

@@ -133,7 +133,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     def __init__(
@@ -230,7 +230,7 @@ class SubCommand(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     def __init__(
@@ -350,7 +350,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     def __init__(
@@ -440,7 +440,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             .. note::
                 This object may be copied by the library.
 
-            .. versionadded: 2.5
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -489,7 +489,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             .. note::
                 This object may be copied by the library.
 
-            .. versionadded: 2.5
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -685,7 +685,7 @@ def slash_command(
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
 
     Returns
     -------

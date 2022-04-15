@@ -136,7 +136,7 @@ class InvokableApplicationCommand(ABC):
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     body: ApplicationCommand
