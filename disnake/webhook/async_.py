@@ -72,6 +72,7 @@ if TYPE_CHECKING:
     import datetime
 
     from ..abc import Snowflake
+    from ..asset import AssetBytes
     from ..channel import TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
@@ -492,7 +493,7 @@ def handle_message_parameters_dict(
     ephemeral: bool = False,
     file: File = MISSING,
     files: List[File] = MISSING,
-    attachments: List[Attachment] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
@@ -531,7 +532,7 @@ def handle_message_parameters_dict(
         payload["components"] = [] if components is None else components_to_dict(components)
 
     if attachments is not MISSING:
-        payload["attachments"] = [a.to_dict() for a in attachments]
+        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
 
     payload["tts"] = tts
     if avatar_url:
@@ -566,7 +567,7 @@ def handle_message_parameters(
     ephemeral: bool = False,
     file: File = MISSING,
     files: List[File] = MISSING,
-    attachments: List[Attachment] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
@@ -738,7 +739,7 @@ class WebhookMessage(Message):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
@@ -783,12 +784,15 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.0
 
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         view: Optional[:class:`~disnake.ui.View`]
             The view to update this message with. This cannot be mixed with ``components``.
@@ -991,8 +995,8 @@ class Webhook(BaseWebhook):
     bot user or authentication.
 
     There are two main ways to use Webhooks. The first is through the ones
-    received by the library such as :meth:`.Guild.webhooks` and
-    :meth:`.TextChannel.webhooks`. The ones received by the library will
+    received by the library such as :meth:`.Guild.webhooks`, :meth:`.TextChannel.webhooks`,
+    and :meth:`.VoiceChannel.webhooks`. The ones received by the library will
     automatically be bound using the library's internal HTTP session.
 
     The second form involves creating a webhook object manually using the
@@ -1287,7 +1291,7 @@ class Webhook(BaseWebhook):
         *,
         reason: Optional[str] = None,
         name: Optional[str] = MISSING,
-        avatar: Optional[bytes] = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
         channel: Optional[Snowflake] = None,
         prefer_auth: bool = True,
     ) -> Webhook:
@@ -1299,8 +1303,12 @@ class Webhook(BaseWebhook):
         ----------
         name: Optional[:class:`str`]
             The webhook's new default name.
-        avatar: Optional[:class:`bytes`]
-            A :term:`py:bytes-like object` representing the webhook's new default avatar.
+        avatar: Optional[|resource_type|]
+            The webhook's new default avatar.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         channel: Optional[:class:`abc.Snowflake`]
             The webhook's new channel. This requires an authenticated webhook.
 
@@ -1319,13 +1327,15 @@ class Webhook(BaseWebhook):
 
         Raises
         ------
+        NotFound
+            This webhook does not exist or the ``avatar`` asset couldn't be found.
         HTTPException
             Editing the webhook failed.
-        NotFound
-            This webhook does not exist.
         InvalidArgument
             This webhook does not have a token associated with it
             or it tried editing a channel without authentication.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -1340,7 +1350,7 @@ class Webhook(BaseWebhook):
             payload["name"] = str(name) if name is not None else None
 
         if avatar is not MISSING:
-            payload["avatar"] = utils._bytes_to_base64_data(avatar) if avatar is not None else None
+            payload["avatar"] = await utils._assetbytes_to_base64_data(avatar)
 
         adapter = async_context.get()
 
@@ -1667,7 +1677,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
@@ -1718,12 +1728,15 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then

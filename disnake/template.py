@@ -29,13 +29,14 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from .enums import VoiceRegion
 from .guild import Guild
-from .utils import MISSING, _bytes_to_base64_data, parse_time, warn_deprecated
+from .utils import MISSING, _assetbytes_to_base64_data, parse_time, warn_deprecated
 
 __all__ = ("Template",)
 
 if TYPE_CHECKING:
     import datetime
 
+    from .asset import AssetBytes
     from .state import ConnectionState
     from .types.template import Template as TemplatePayload
     from .user import User
@@ -170,7 +171,7 @@ class Template:
         )
 
     async def create_guild(
-        self, name: str, region: Optional[VoiceRegion] = None, icon: Any = None
+        self, name: str, region: Optional[VoiceRegion] = None, icon: Optional[AssetBytes] = None
     ) -> Guild:
         """|coro|
 
@@ -188,16 +189,24 @@ class Template:
             .. deprecated:: 2.5
 
                 This no longer has any effect.
-        icon: :class:`bytes`
-            The :term:`py:bytes-like object` representing the icon. See :meth:`.ClientUser.edit`
-            for more details on what is expected.
+        icon: Optional[|resource_type|]
+            The icon of the guild.
+            See :meth:`.ClientUser.edit` for more details on what is expected.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
 
         Raises
         ------
+        NotFound
+            The ``icon`` asset couldn't be found.
         HTTPException
             Guild creation failed.
         InvalidArgument
             Invalid icon image format given. Must be PNG or JPG.
+        TypeError
+            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -205,15 +214,14 @@ class Template:
             The guild created. This is not the same guild that is
             added to cache.
         """
-        if icon is not None:
-            icon = _bytes_to_base64_data(icon)
+        icon_data = await _assetbytes_to_base64_data(icon)
 
         if region is not None:
             warn_deprecated(
                 "region is deprecated and will be removed in a future version", stacklevel=2
             )
 
-        data = await self._state.http.create_from_template(self.code, name, icon)
+        data = await self._state.http.create_from_template(self.code, name, icon_data)
         return Guild(data=data, state=self._state)
 
     async def sync(self) -> Template:

@@ -39,7 +39,7 @@ from .mixins import Hashable
 from .user import User
 from .utils import (
     MISSING,
-    _bytes_to_base64_data,
+    _assetbytes_to_base64_data,
     _get_as_snowflake,
     cached_slot_property,
     parse_time,
@@ -47,6 +47,7 @@ from .utils import (
 
 if TYPE_CHECKING:
     from .abc import GuildChannel, Snowflake
+    from .asset import AssetBytes
     from .guild import Guild
     from .state import ConnectionState
     from .types.guild_scheduled_event import (
@@ -265,7 +266,7 @@ class GuildScheduledEvent(Hashable):
         *,
         name: str = MISSING,
         description: Optional[str] = MISSING,
-        image: Optional[bytes] = MISSING,
+        image: Optional[AssetBytes] = MISSING,
         channel_id: Optional[int] = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         scheduled_start_time: datetime = MISSING,
@@ -291,10 +292,13 @@ class GuildScheduledEvent(Hashable):
             The name of the guild scheduled event.
         description: Optional[:class:`str`]
             The description of the guild scheduled event.
-        image: Optional[:class:`bytes`]
+        image: Optional[|resource_type|]
             The cover image of the guild scheduled event. Set to ``None`` to remove the image.
 
             .. versionadded:: 2.4
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
 
         channel_id: Optional[:class:`int`]
             The channel ID in which the guild scheduled event will be hosted.
@@ -319,9 +323,11 @@ class GuildScheduledEvent(Hashable):
         Forbidden
             You do not have proper permissions to edit the event.
         NotFound
-            The event does not exist.
+            The event does not exist or the ``image`` asset couldn't be found.
         HTTPException
             Editing the event failed.
+        TypeError
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -376,10 +382,7 @@ class GuildScheduledEvent(Hashable):
             fields["description"] = description
 
         if image is not MISSING:
-            if image is None:
-                fields["image"] = None
-            else:
-                fields["image"] = _bytes_to_base64_data(image)
+            fields["image"] = await _assetbytes_to_base64_data(image)
 
         if channel_id is not MISSING:
             if channel_id is not None and is_external:

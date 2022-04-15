@@ -43,6 +43,8 @@ if TYPE_CHECKING:
     ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
     ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
 
+AssetBytes = Union[bytes, "AssetMixin"]
+
 VALID_STATIC_FORMATS = frozenset({"jpeg", "jpg", "webp", "png"})
 VALID_ASSET_FORMATS = VALID_STATIC_FORMATS | {"gif"}
 
@@ -121,7 +123,13 @@ class AssetMixin:
             with open(fp, "wb") as f:
                 return f.write(data)
 
-    async def to_file(self, *, spoiler: bool = False) -> File:
+    async def to_file(
+        self,
+        *,
+        spoiler: bool = False,
+        filename: Optional[str] = None,
+        description: Optional[str] = None,
+    ) -> File:
         """|coro|
 
         Converts the asset into a :class:`File` suitable for sending via
@@ -133,6 +141,11 @@ class AssetMixin:
         -----------
         spoiler: :class:`bool`
             Whether the file is a spoiler.
+        filename:
+            The filename to display when uploading to Discord. If this is not given, it defaults to
+            the name of the asset's URL.
+        description:
+            The file's description.
 
         Raises
         ------
@@ -152,10 +165,9 @@ class AssetMixin:
         :class:`File`
             The asset as a file suitable for sending.
         """
-
         data = await self.read()
-        filename = yarl.URL(self.url).name
-        return File(io.BytesIO(data), filename=filename, spoiler=spoiler)
+        filename = filename or yarl.URL(self.url).name
+        return File(io.BytesIO(data), filename=filename, spoiler=spoiler, description=description)
 
 
 class Asset(AssetMixin):

@@ -355,7 +355,7 @@ class Interaction:
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
@@ -396,12 +396,15 @@ class Interaction:
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. This cannot be mixed with ``components``.
@@ -888,7 +891,7 @@ class InteractionResponse:
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components] = MISSING,
@@ -933,12 +936,15 @@ class InteractionResponse:
 
             .. versionadded:: 2.2
 
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.4
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
@@ -1015,7 +1021,9 @@ class InteractionResponse:
         if attachments is MISSING and (file or files):
             attachments = message.attachments
         if attachments is not MISSING:
-            payload["attachments"] = [a.to_dict() for a in attachments]
+            payload["attachments"] = (
+                [] if attachments is None else [a.to_dict() for a in attachments]
+            )
 
         if view is not MISSING and components is not MISSING:
             raise TypeError("cannot mix view and components keyword arguments")
@@ -1301,7 +1309,7 @@ class InteractionMessage(Message):
         *,
         embed: Optional[Embed] = ...,
         file: File = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
         components: Optional[Components] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1315,7 +1323,7 @@ class InteractionMessage(Message):
         *,
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
         components: Optional[Components] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1329,7 +1337,7 @@ class InteractionMessage(Message):
         *,
         embeds: List[Embed] = ...,
         file: File = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
         components: Optional[Components] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1343,7 +1351,7 @@ class InteractionMessage(Message):
         *,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
         components: Optional[Components] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1381,12 +1389,15 @@ class InteractionMessage(Message):
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. This cannot be mixed with ``components``.
