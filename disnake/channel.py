@@ -1492,17 +1492,21 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         name: :class:`str`
             The webhook's name.
         avatar: Optional[:class:`bytes`]
-            A :term:`py:bytes-like object` representing the webhook's default avatar.
+            The webhook's default avatar.
             This operates similarly to :meth:`~ClientUser.edit`.
         reason: Optional[:class:`str`]
             The reason for creating this webhook. Shows up in the audit logs.
 
         Raises
         ------
-        HTTPException
-            Creating the webhook failed.
+        NotFound
+            The ``avatar`` asset couldn't be found.
         Forbidden
             You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -1511,11 +1515,10 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         """
         from .webhook import Webhook
 
-        if avatar is not None:
-            avatar = utils._bytes_to_base64_data(avatar)  # type: ignore
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
 
         data = await self._state.http.create_webhook(
-            self.id, name=str(name), avatar=avatar, reason=reason
+            self.id, name=str(name), avatar=avatar_data, reason=reason
         )
         return Webhook.from_state(data, state=self._state)
 
