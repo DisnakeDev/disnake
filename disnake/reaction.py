@@ -66,7 +66,7 @@ class Reaction:
             Returns the string form of the reaction's emoji.
 
     Attributes
-    -----------
+    ----------
     emoji: Union[:class:`Emoji`, :class:`PartialEmoji`, :class:`str`]
         The reaction emoji. May be a custom emoji, or a unicode emoji.
     count: :class:`int`
@@ -74,7 +74,7 @@ class Reaction:
     me: :class:`bool`
         If the user sent this reaction.
     message: :class:`Message`
-        Message this reaction is for.
+        The message this reaction belongs to.
     """
 
     __slots__ = ("message", "count", "emoji", "me")
@@ -91,11 +91,11 @@ class Reaction:
             data["emoji"]
         )
         self.count: int = data.get("count", 1)
-        self.me: bool = data.get("me")
+        self.me: bool = data["me"]
 
     # TODO: typeguard
     def is_custom_emoji(self) -> bool:
-        """If this is a custom emoji.
+        """Whether the emoji is a custom emoji.
 
         :return type: :class:`bool`
         """
@@ -121,7 +121,7 @@ class Reaction:
     async def remove(self, user: Snowflake) -> None:
         """|coro|
 
-        Remove the reaction by the provided :class:`User` from the message.
+        Removes the reaction by the provided :class:`User` from the message.
 
         If the reaction is not your own (i.e. ``user`` parameter is not you) then
         the :attr:`~Permissions.manage_messages` permission is needed.
@@ -130,12 +130,12 @@ class Reaction:
         the :class:`abc.Snowflake` abc.
 
         Parameters
-        -----------
+        ----------
         user: :class:`abc.Snowflake`
-             The user or member from which to remove the reaction.
+            The user or member from which to remove the reaction.
 
         Raises
-        -------
+        ------
         HTTPException
             Removing the reaction failed.
         Forbidden
@@ -143,7 +143,6 @@ class Reaction:
         NotFound
             The user you specified, or the reaction's message was not found.
         """
-
         await self.message.remove_reaction(self.emoji, user)
 
     async def clear(self) -> None:
@@ -156,7 +155,7 @@ class Reaction:
         .. versionadded:: 1.3
 
         Raises
-        --------
+        ------
         HTTPException
             Clearing the reaction failed.
         Forbidden
@@ -177,11 +176,10 @@ class Reaction:
         and meet the :class:`abc.Snowflake` abc.
 
         Examples
-        ---------
-
+        --------
         Usage ::
 
-            # I do not actually recommend doing this.
+            # We do not actually recommend doing this.
             async for user in reaction.users():
                 await channel.send(f'{user} has reacted with {reaction.emoji}!')
 
@@ -193,7 +191,7 @@ class Reaction:
             await channel.send(f'{winner} has won the raffle.')
 
         Parameters
-        ------------
+        ----------
         limit: Optional[:class:`int`]
             The maximum number of results to return.
             If not provided, returns all the users who
@@ -202,7 +200,7 @@ class Reaction:
             For pagination, reactions are sorted by member.
 
         Raises
-        --------
+        ------
         HTTPException
             Getting the users for the reaction failed.
 
@@ -214,7 +212,6 @@ class Reaction:
             in a guild message context. Sometimes it can be a :class:`User`
             if the member has left the guild.
         """
-
         if not isinstance(self.emoji, str):
             emoji = f"{self.emoji.name}:{self.emoji.id}"
         else:

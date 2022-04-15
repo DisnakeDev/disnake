@@ -123,6 +123,7 @@ Discord itself supports only a few built-in types which are guaranteed to be enf
 - :class:`disnake.User` or :class:`disnake.Member`
 - :class:`disnake.abc.GuildChannel`\*
 - :class:`disnake.Role`\*\*
+- :class:`disnake.Attachment`
 
 All the other types may be converted implicitly, similarly to :ref:`ext_commands_basic_converters`
 
@@ -141,9 +142,63 @@ All the other types may be converted implicitly, similarly to :ref:`ext_commands
         ...
 
 .. note::
-  \* All channel subclasses and unions are also supported, see :attr:`Option.channel_types <Option>`
+  \* All channel subclasses and unions are also supported. See :attr:`.ParamInfo.channel_types` for more fine-grained control
 
-  \*\* Role and Member may be used together to create a "mentionable" (:class:`Union[Role, Member]`)
+  \*\* Role and Member may be used together to create a "mentionable" (``Union[Role, Member]``)
+
+
+.. _param_ranges:
+
+Number Ranges
++++++++++++++
+
+:class:`int` and :class:`float` parameters support minimum and maximum allowed
+values using the ``lt``, ``le``, ``gt``, ``ge`` parameters on :func:`Param <ext.commands.Param>`.
+For instance, you could restrict an option to only accept positive integers:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def command(
+        inter: disnake.ApplicationCommandInteraction,
+        amount: int = commands.Param(gt=0),
+    ):
+        ...
+
+
+Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`Range` annotation.
+The range bounds are both inclusive; using ``...`` as a bound indicates that this end of the range is unbounded.
+The type of the option is determined by the range bounds, with the option being a
+:class:`float` if at least one of the bounds is a :class:`float`, and :class:`int` otherwise.
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def ranges(
+        inter: disnake.ApplicationCommandInteraction,
+        a: commands.Range[0, 10],       # 0 - 10 int
+        b: commands.Range[0, 10.0],     # 0 - 10 float
+        c: commands.Range[1, ...],      # positive int
+    ):
+        ...
+
+.. note::
+
+    Type checker support for :class:`Range` is limited. Pylance/Pyright seem to handle it correctly;
+    MyPy currently needs a plugin for it to understand :class:`Range` semantics, which can be added in
+    the configuration file (``setup.cfg``, ``mypy.ini``):
+
+    .. code-block:: ini
+
+        [mypy]
+        plugins = disnake.ext.mypy_plugin
+
+    For ``pyproject.toml`` configs, use this instead:
+
+    .. code-block:: toml
+
+        [tool.mypy]
+        plugins = "disnake.ext.mypy_plugin"
 
 
 Docstrings
@@ -202,9 +257,9 @@ Parameter Descriptors
 +++++++++++++++++++++
 
 Python has no truly *clean* way to provide metadata for parameters, so disnake uses the same approach as fastapi using
-parameter defaults. At the current time there's only :class:`Param`.
+parameter defaults. At the current time there's only :class:`~disnake.ext.commands.Param`.
 
-With this you may set the name, description, custom converters and :ref:`autocompleters`.
+With this you may set the name, description, custom converters, :ref:`autocompleters`, and more.
 
 .. code-block:: python3
 
@@ -326,6 +381,23 @@ For example:
         inter: disnake.ApplicationCommandInteraction,
         language: str = commands.Param(autocomplete=autocomp_langs)
     ):
+        ...
+
+
+In case you need don't want to use :class:`Param <ext.commands.Param>` or need to use ``self`` in a cog you may
+create autocomplete options with the :func:`autocomplete <ext.commands.InvokableSlashCommand.autocomplete>` decorator:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def languages(inter: disnake.CommandInteraction, language: str):
+        pass
+
+
+    @languages.autocomplete("language")
+    async def language_autocomp(inter: disnake.CommandInteraction, string: str):
+        string = string.lower()
+        return [lang for lang in LANGUAGES if string in lang.lower()]
         ...
 
 Subcommands And Groups

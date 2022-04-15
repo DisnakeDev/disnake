@@ -180,4 +180,3 @@ To do the same with listeners, we can query them with :meth:`.Cog.get_listeners`
 
     >>> for name, func in cog.get_listeners():
     ...     print(name, '->', func)
-

@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, List, Optional, Type, TypeVar, Union
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
-from .enums import ChannelType, InviteTarget, VerificationLevel, try_enum
+from .enums import ChannelType, InviteTarget, NSFWLevel, VerificationLevel, try_enum
 from .mixins import Hashable
 from .object import Object
 from .utils import _get_as_snowflake, parse_time, snowflake_time
@@ -84,8 +84,8 @@ class PartialInviteChannel:
             Returns the partial channel's name.
 
     Attributes
-    -----------
-    name: :class:`str`
+    ----------
+    name: Optional[:class:`str`]
         The partial channel's name.
     id: :class:`int`
         The partial channel's ID.
@@ -97,11 +97,13 @@ class PartialInviteChannel:
 
     def __init__(self, data: InviteChannelPayload):
         self.id: int = int(data["id"])
-        self.name: str = data["name"]
+        self.name: Optional[str] = data.get("name")
         self.type: ChannelType = try_enum(ChannelType, data["type"])
 
     def __str__(self) -> str:
-        return self.name
+        if self.type is ChannelType.group:
+            return self.name or "Unnamed"
+        return self.name or ""
 
     def __repr__(self) -> str:
         return f"<PartialInviteChannel id={self.id} name={self.name} type={self.type!r}>"
@@ -142,17 +144,31 @@ class PartialInviteGuild:
             Returns the partial guild's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The partial guild's name.
     id: :class:`int`
         The partial guild's ID.
-    verification_level: :class:`VerificationLevel`
-        The partial guild's verification level.
-    features: List[:class:`str`]
-        A list of features the guild has. See :attr:`Guild.features` for more information.
     description: Optional[:class:`str`]
         The partial guild's description.
+    features: List[:class:`str`]
+        A list of features the partial guild has. See :attr:`Guild.features` for more information.
+    nsfw_level: :class:`NSFWLevel`
+        The partial guild's nsfw level.
+
+        .. versionadded:: 2.4
+
+    vanity_url_code: Optional[:class:`str`]
+        The partial guild's vanity url code, if any.
+
+        .. versionadded:: 2.4
+
+    verification_level: :class:`VerificationLevel`
+        The partial guild's verification level.
+    premium_subscription_count: :class:`int`
+        The number of "boosts" this guild currently has.
+
+        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -163,8 +179,11 @@ class PartialInviteGuild:
         "id",
         "name",
         "_splash",
-        "verification_level",
         "description",
+        "nsfw_level",
+        "vanity_url_code",
+        "verification_level",
+        "premium_subscription_count",
     )
 
     def __init__(self, state: ConnectionState, data: InviteGuildPayload, id: int):
@@ -175,10 +194,13 @@ class PartialInviteGuild:
         self._icon: Optional[str] = data.get("icon")
         self._banner: Optional[str] = data.get("banner")
         self._splash: Optional[str] = data.get("splash")
+        self.nsfw_level: NSFWLevel = try_enum(NSFWLevel, data.get("nsfw_level", 0))
+        self.vanity_url_code: Optional[str] = data.get("vanity_url_code")
         self.verification_level: VerificationLevel = try_enum(
             VerificationLevel, data.get("verification_level")
         )
         self.description: Optional[str] = data.get("description")
+        self.premium_subscription_count: int = data.get("premium_subscription_count") or 0
 
     def __str__(self) -> str:
         return self.name
@@ -220,7 +242,8 @@ I = TypeVar("I", bound="Invite")
 
 
 class Invite(Hashable):
-    r"""Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
+    """
+    Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
 
     Depending on the way this object was created, some of the attributes can
     have a value of ``None``.
@@ -248,15 +271,15 @@ class Invite(Hashable):
     +------------------------------------+-------------------------------------------------------------------+
     |             Attribute              |                          Method                                   |
     +====================================+===================================================================+
-    | :attr:`max_age`                    | :meth:`abc.GuildChannel.invites`\, :meth:`Guild.invites`          |
+    | :attr:`max_age`                    | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`          |
     +------------------------------------+-------------------------------------------------------------------+
-    | :attr:`max_uses`                   | :meth:`abc.GuildChannel.invites`\, :meth:`Guild.invites`          |
+    | :attr:`max_uses`                   | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`          |
     +------------------------------------+-------------------------------------------------------------------+
-    | :attr:`created_at`                 | :meth:`abc.GuildChannel.invites`\, :meth:`Guild.invites`          |
+    | :attr:`created_at`                 | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`          |
     +------------------------------------+-------------------------------------------------------------------+
-    | :attr:`temporary`                  | :meth:`abc.GuildChannel.invites`\, :meth:`Guild.invites`          |
+    | :attr:`temporary`                  | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`          |
     +------------------------------------+-------------------------------------------------------------------+
-    | :attr:`uses`                       | :meth:`abc.GuildChannel.invites`\, :meth:`Guild.invites`          |
+    | :attr:`uses`                       | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`          |
     +------------------------------------+-------------------------------------------------------------------+
     | :attr:`approximate_member_count`   | :meth:`Client.fetch_invite` with `with_counts` enabled            |
     +------------------------------------+-------------------------------------------------------------------+
@@ -271,7 +294,7 @@ class Invite(Hashable):
     If it's not in the table above then it is available by all methods.
 
     Attributes
-    -----------
+    ----------
     max_age: :class:`int`
         How long before the invite expires in seconds.
         A value of ``0`` indicates that it doesn't expire.
@@ -279,12 +302,10 @@ class Invite(Hashable):
         The URL fragment used for the invite.
     guild: Optional[Union[:class:`Guild`, :class:`Object`, :class:`PartialInviteGuild`]]
         The guild the invite is for. Can be ``None`` if it's from a group direct message.
-    revoked: :class:`bool`
-        Indicates if the invite has been revoked.
     created_at: :class:`datetime.datetime`
         An aware UTC datetime object denoting the time the invite was created.
     temporary: :class:`bool`
-        Indicates that the invite grants temporary membership.
+        Whether the invite grants temporary membership.
         If ``True``, members who joined via this invite will be kicked upon disconnect.
     uses: :class:`int`
         How many times the invite has been used.
@@ -331,7 +352,6 @@ class Invite(Hashable):
         "max_age",
         "code",
         "guild",
-        "revoked",
         "created_at",
         "uses",
         "temporary",
@@ -340,12 +360,12 @@ class Invite(Hashable):
         "channel",
         "target_user",
         "target_type",
-        "_state",
         "approximate_member_count",
         "approximate_presence_count",
         "target_application",
         "expires_at",
         "guild_scheduled_event",
+        "_state",
     )
 
     BASE = "https://discord.gg"
@@ -362,7 +382,6 @@ class Invite(Hashable):
         self.max_age: Optional[int] = data.get("max_age")
         self.code: str = data["code"]
         self.guild: Optional[InviteGuildType] = self._resolve_guild(data.get("guild"), guild)
-        self.revoked: Optional[bool] = data.get("revoked")
         self.created_at: Optional[datetime.datetime] = parse_time(data.get("created_at"))
         self.temporary: Optional[bool] = data.get("temporary")
         self.uses: Optional[int] = data.get("uses")
@@ -429,7 +448,7 @@ class Invite(Hashable):
         guild: Optional[Union[Guild, Object]] = state._get_guild(guild_id)
         channel_id = int(data["channel_id"])
         if guild is not None:
-            channel = guild.get_channel(channel_id) or Object(id=channel_id)  # type: ignore
+            channel = guild.get_channel(channel_id) or Object(id=channel_id)
         else:
             guild = Object(id=guild_id) if guild_id is not None else None
             channel = Object(id=channel_id)
@@ -494,15 +513,15 @@ class Invite(Hashable):
 
         Revokes the instant invite.
 
-        You must have the :attr:`~Permissions.manage_channels` permission to do this.
+        You must have :attr:`~Permissions.manage_channels` permission to do this.
 
         Parameters
-        -----------
+        ----------
         reason: Optional[:class:`str`]
             The reason for deleting this invite. Shows up on the audit log.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permissions to revoke invites.
         NotFound
@@ -510,5 +529,4 @@ class Invite(Hashable):
         HTTPException
             Revoking the invite failed.
         """
-
         await self._state.http.delete_invite(self.code, reason=reason)

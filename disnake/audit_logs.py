@@ -124,9 +124,9 @@ def _transform_overwrites(
         ow_type = elem["type"]
         ow_id = int(elem["id"])
         target = None
-        if ow_type == "0":
+        if ow_type == 0:
             target = entry.guild.get_role(ow_id)
-        elif ow_type == "1":
+        elif ow_type == 1:
             target = entry._get_member(ow_id)
 
         if target is None:
@@ -189,6 +189,14 @@ def _transform_privacy_level(
     return enums.try_enum(enums.StagePrivacyLevel, data)
 
 
+def _transform_guild_scheduled_event_image(
+    entry: AuditLogEntry, data: Optional[str]
+) -> Optional[Asset]:
+    if data is None:
+        return None
+    return Asset._from_guild_scheduled_event_image(entry._state, entry._target_id, data)  # type: ignore
+
+
 class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
@@ -241,9 +249,11 @@ class AuditLogChanges:
         'tags':                          ('emoji', None),
         'default_message_notifications': ('default_notifications', _enum_transformer(enums.NotificationLevel)),
         'communication_disabled_until':  ('timeout', _transform_datetime),
+        'image_hash':                    ('image', _transform_guild_scheduled_event_image),
         'region':                        (None, _enum_transformer(enums.VoiceRegion)),
         'rtc_region':                    (None, _enum_transformer(enums.VoiceRegion)),
         'video_quality_mode':            (None, _enum_transformer(enums.VideoQualityMode)),
+        'preferred_locale':              (None, _enum_transformer(enums.Locale)),
         'privacy_level':                 (None, _transform_privacy_level),
         'format_type':                   (None, _enum_transformer(enums.StickerFormatType)),
         'entity_type':                   (None, _enum_transformer(enums.GuildScheduledEventEntityType)),
@@ -319,7 +329,7 @@ class AuditLogChanges:
             setattr(first, "roles", [])
 
         data = []
-        g: Guild = entry.guild  # type: ignore
+        g: Guild = entry.guild
 
         for e in elem:
             role_id = int(e["id"])
@@ -358,7 +368,8 @@ class _AuditLogProxyStageInstanceAction:
 
 
 class AuditLogEntry(Hashable):
-    r"""Represents an Audit Log entry.
+    """
+    Represents an Audit Log entry.
 
     You retrieve these via :meth:`Guild.audit_logs`.
 
@@ -380,24 +391,24 @@ class AuditLogEntry(Hashable):
         Audit log entries are now comparable and hashable.
 
     Attributes
-    -----------
+    ----------
     action: :class:`AuditLogAction`
         The action that was done.
     user: :class:`abc.User`
-        The user who initiated this action. Usually a :class:`Member`\, unless gone
+        The user who initiated this action. Usually a :class:`Member`\\, unless gone
         then it's a :class:`User`.
     id: :class:`int`
         The entry ID.
     target: Any
         The target that got changed. The exact type of this depends on
         the action being done.
-    reason: Optional[:class:`str`]
-        The reason this action was done.
     extra: Any
         Extra information that this entry has that might be useful.
         For most actions, this is ``None``. However in some cases it
         contains extra information. See :class:`AuditLogAction` for
         which actions have this field filled out.
+    reason: Optional[:class:`str`]
+        The reason this action was done.
     """
 
     def __init__(self, *, users: Dict[int, User], data: AuditLogEntryPayload, guild: Guild):
@@ -548,7 +559,7 @@ class AuditLogEntry(Hashable):
         return self.guild
 
     def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
-        return self.guild.get_channel(target_id) or Object(id=target_id)  # type: ignore
+        return self.guild.get_channel(target_id) or Object(id=target_id)
 
     def _convert_target_user(self, target_id: int) -> Union[Member, User, None]:
         return self._get_member(target_id)

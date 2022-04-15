@@ -31,7 +31,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type
 from .enums import ExpireBehaviour, try_enum
 from .errors import InvalidArgument
 from .user import User
-from .utils import MISSING, _get_as_snowflake, parse_time
+from .utils import MISSING, _get_as_snowflake, deprecated, parse_time, warn_deprecated
 
 __all__ = (
     "IntegrationAccount",
@@ -60,7 +60,7 @@ class IntegrationAccount:
     .. versionadded:: 1.4
 
     Attributes
-    -----------
+    ----------
     id: :class:`str`
         The account ID.
     name: :class:`str`
@@ -83,7 +83,7 @@ class Integration:
     .. versionadded:: 1.4
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The integration ID.
     name: :class:`str`
@@ -129,23 +129,28 @@ class Integration:
         self.user = User(state=self._state, data=user) if user else None
         self.enabled: bool = data["enabled"]
 
+    @deprecated("Guild.leave")
     async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
 
+        .. deprecated:: 2.5
+            Can only be used on the application's own integration and is therefore
+            equivalent to leaving the guild.
+
         Deletes the integration.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         Parameters
-        -----------
+        ----------
         reason: :class:`str`
             The reason the integration was deleted. Shows up on the audit log.
 
             .. versionadded:: 2.0
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permission to delete the integration.
         HTTPException
@@ -172,7 +177,7 @@ class StreamIntegration(Integration):
     enabled: :class:`bool`
         Whether the integration is currently enabled.
     syncing: :class:`bool`
-        Where the integration is currently syncing.
+        Whether the integration is currently syncing.
     enable_emoticons: Optional[:class:`bool`]
         Whether emoticons should be synced for this integration (currently twitch only).
     expire_behaviour: :class:`ExpireBehaviour`
@@ -219,6 +224,7 @@ class StreamIntegration(Integration):
         """Optional[:class:`Role`] The role which the integration uses for subscribers."""
         return self.guild.get_role(self._role_id)  # type: ignore
 
+    @deprecated()
     async def edit(
         self,
         *,
@@ -228,13 +234,16 @@ class StreamIntegration(Integration):
     ) -> None:
         """|coro|
 
+        .. deprecated:: 2.5
+            No longer supported, bots cannot use this endpoint anymore.
+
         Edits the integration.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         Parameters
-        -----------
+        ----------
         expire_behaviour: :class:`ExpireBehaviour`
             The behaviour when an integration subscription lapses. Aliased to ``expire_behavior`` as well.
         expire_grace_period: :class:`int`
@@ -243,7 +252,7 @@ class StreamIntegration(Integration):
             Where emoticons should be synced for this integration (currently twitch only).
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permission to edit the integration.
         HTTPException
@@ -268,16 +277,20 @@ class StreamIntegration(Integration):
         # Unsure if it returns the data or not as a result
         await self._state.http.edit_integration(self.guild.id, self.id, **payload)
 
+    @deprecated()
     async def sync(self) -> None:
         """|coro|
 
+        .. deprecated:: 2.5
+            No longer supported, bots cannot use this endpoint anymore.
+
         Syncs the integration.
 
-        You must have the :attr:`~Permissions.manage_guild` permission to
-        do this.
+        You must have :attr:`~Permissions.manage_guild` permission to
+        use this.
 
         Raises
-        -------
+        ------
         Forbidden
             You do not have permission to sync the integration.
         HTTPException
@@ -295,17 +308,15 @@ class IntegrationApplication:
     Attributes
     ----------
     id: :class:`int`
-        The ID for this application.
+        The application's ID.
     name: :class:`str`
         The application's name.
     icon: Optional[:class:`str`]
         The application's icon hash.
     description: :class:`str`
         The application's description. Can be an empty string.
-    summary: :class:`str`
-        The summary of the application. Can be an empty string.
     user: Optional[:class:`User`]
-        The bot user on this application.
+        The bot user associated with this application.
     """
 
     __slots__ = (
@@ -313,7 +324,7 @@ class IntegrationApplication:
         "name",
         "icon",
         "description",
-        "summary",
+        "_summary",
         "user",
     )
 
@@ -322,9 +333,23 @@ class IntegrationApplication:
         self.name: str = data["name"]
         self.icon: Optional[str] = data["icon"]
         self.description: str = data["description"]
-        self.summary: str = data["summary"]
+        self._summary: str = data.get("summary", "")
         user = data.get("bot")
         self.user: Optional[User] = User(state=state, data=user) if user else None
+
+    @property
+    def summary(self) -> str:
+        """:class:`str`: The application's summary. Can be an empty string.
+
+        .. deprecated:: 2.5
+
+            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
+        """
+        warn_deprecated(
+            "summary is deprecated and will be removed in a future version. Consider using description instead.",
+            stacklevel=2,
+        )
+        return self._summary
 
 
 class BotIntegration(Integration):

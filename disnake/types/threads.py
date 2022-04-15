@@ -41,9 +41,9 @@ class ThreadMember(TypedDict):
 
 
 class _ThreadMetadataOptional(TypedDict, total=False):
-    archiver_id: Snowflake
     locked: bool
     invitable: bool
+    create_timestamp: str
 
 
 class ThreadMetadata(_ThreadMetadataOptional):
@@ -56,7 +56,8 @@ class _ThreadOptional(TypedDict, total=False):
     member: ThreadMember
     owner_id: Snowflake
     last_message_id: Optional[Snowflake]
-    last_pin_timestamp: Optional[Snowflake]
+    last_pin_timestamp: Optional[str]
+    flags: int
 
 
 class Thread(_ThreadOptional):

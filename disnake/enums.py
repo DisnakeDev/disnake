@@ -52,6 +52,7 @@ __all__ = (
     "VideoQualityMode",
     "ComponentType",
     "ButtonStyle",
+    "TextInputStyle",
     "StagePrivacyLevel",
     "InteractionType",
     "InteractionResponseType",
@@ -63,6 +64,8 @@ __all__ = (
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
     "ThreadArchiveDuration",
+    "WidgetStyle",
+    "Locale",
 )
 
 
@@ -140,7 +143,7 @@ class EnumMeta(type):
         attrs["_enum_member_names_"] = member_names
         attrs["_enum_value_cls_"] = value_cls
         actual_cls = super().__new__(cls, name, bases, attrs)
-        value_cls._actual_enum_cls_ = actual_cls  # type: ignore
+        value_cls._actual_enum_cls_ = actual_cls
         return actual_cls
 
     def __iter__(cls):
@@ -203,12 +206,12 @@ class ChannelType(Enum):
     group = 3
     category = 4
     news = 5
-    store = 6
     news_thread = 10
     public_thread = 11
     private_thread = 12
     stage_voice = 13
     guild_directory = 14
+    forum = 15
 
     def __str__(self):
         return self.name
@@ -242,7 +245,6 @@ class MessageType(Enum):
 
 
 class PartyType(Enum):
-    youtube = 755600276941176913
     poker = 755827207812677713
     betrayal = 773336526917861400
     fishing = 814288819477020702
@@ -252,9 +254,9 @@ class PartyType(Enum):
     doodle_crew = 878067389634314250
     checkers = 832013003968348200
     spellcast = 852509694341283871
-    awkword = 879863881349087252
-    sketchy_artist = 879864070101172255
     watch_together = 880218394199220334
+    sketch_heads = 902271654783242291
+    ocho = 832025144389533716
 
 
 class VoiceRegion(Enum):
@@ -262,25 +264,15 @@ class VoiceRegion(Enum):
     us_east = "us-east"
     us_south = "us-south"
     us_central = "us-central"
-    eu_west = "eu-west"
-    eu_central = "eu-central"
     singapore = "singapore"
-    london = "london"
     sydney = "sydney"
-    amsterdam = "amsterdam"
-    frankfurt = "frankfurt"
+    rotterdam = "rotterdam"
     brazil = "brazil"
     hongkong = "hongkong"
     russia = "russia"
     japan = "japan"
     southafrica = "southafrica"
-    south_korea = "south-korea"
     india = "india"
-    europe = "europe"
-    dubai = "dubai"
-    vip_us_east = "vip-us-east"
-    vip_us_west = "vip-us-west"
-    vip_amsterdam = "vip-amsterdam"
 
     def __str__(self):
         return self.value
@@ -583,6 +575,7 @@ class InteractionType(Enum):
     application_command = 2
     component = 3
     application_command_autocomplete = 4
+    modal_submit = 5
 
 
 class InteractionResponseType(Enum):
@@ -594,6 +587,7 @@ class InteractionResponseType(Enum):
     deferred_message_update = 6  # for components
     message_update = 7  # for components
     application_command_autocomplete_result = 8  # for autocomplete
+    modal = 9  # for modals
 
 
 class VideoQualityMode(Enum):
@@ -608,6 +602,7 @@ class ComponentType(Enum):
     action_row = 1
     button = 2
     select = 3
+    text_input = 4
 
     def __int__(self):
         return self.value
@@ -629,6 +624,18 @@ class ButtonStyle(Enum):
     url = 5
 
     def __int__(self):
+        return self.value
+
+
+class TextInputStyle(Enum):
+    short = 1
+    paragraph = 2
+    # Aliases
+    single_line = 1
+    multi_line = 2
+    long = 2
+
+    def __int__(self) -> int:
         return self.value
 
 
@@ -687,6 +694,54 @@ class ThreadArchiveDuration(Enum):
     day = 1440
     three_days = 4320
     week = 10080
+
+
+class WidgetStyle(Enum):
+    shield = "shield"
+    banner1 = "banner1"
+    banner2 = "banner2"
+    banner3 = "banner3"
+    banner4 = "banner4"
+
+    def __str__(self):
+        return self.value
+
+
+# reference: https://discord.com/developers/docs/reference#locales
+class Locale(Enum):
+    bg = "bg"
+    cs = "cs"
+    da = "da"
+    de = "de"
+    el = "el"
+    en_GB = "en-GB"
+    en_US = "en-US"
+    es_ES = "es-ES"
+    fi = "fi"
+    fr = "fr"
+    hi = "hi"
+    hr = "hr"
+    it = "it"
+    ja = "ja"
+    ko = "ko"
+    lt = "lt"
+    hu = "hu"
+    nl = "nl"
+    no = "no"
+    pl = "pl"
+    pt_BR = "pt-BR"
+    ro = "ro"
+    ru = "ru"
+    sv_SE = "sv-SE"
+    th = "th"
+    tr = "tr"
+    uk = "uk"
+    vi = "vi"
+    zh_CN = "zh-CN"
+    zh_TW = "zh-TW"
+
+    def __str__(self):
+        return self.value
 
 
 T = TypeVar("T")

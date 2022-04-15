@@ -29,13 +29,14 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from .enums import VoiceRegion
 from .guild import Guild
-from .utils import MISSING, _bytes_to_base64_data, parse_time
+from .utils import MISSING, _assetbytes_to_base64_data, parse_time, warn_deprecated
 
 __all__ = ("Template",)
 
 if TYPE_CHECKING:
     import datetime
 
+    from .asset import AssetBytes
     from .state import ConnectionState
     from .types.template import Template as TemplatePayload
     from .user import User
@@ -94,7 +95,7 @@ class Template:
     .. versionadded:: 1.4
 
     Attributes
-    -----------
+    ----------
     code: :class:`str`
         The template code.
     uses: :class:`int`
@@ -170,7 +171,7 @@ class Template:
         )
 
     async def create_guild(
-        self, name: str, region: Optional[VoiceRegion] = None, icon: Any = None
+        self, name: str, region: Optional[VoiceRegion] = None, icon: Optional[AssetBytes] = None
     ) -> Guild:
         """|coro|
 
@@ -184,17 +185,28 @@ class Template:
             The name of the guild.
         region: :class:`.VoiceRegion`
             The region for the voice communication server.
-            Defaults to :attr:`.VoiceRegion.us_west`.
-        icon: :class:`bytes`
-            The :term:`py:bytes-like object` representing the icon. See :meth:`.ClientUser.edit`
-            for more details on what is expected.
+
+            .. deprecated:: 2.5
+
+                This no longer has any effect.
+        icon: Optional[|resource_type|]
+            The icon of the guild.
+            See :meth:`.ClientUser.edit` for more details on what is expected.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
 
         Raises
         ------
+        NotFound
+            The ``icon`` asset couldn't be found.
         HTTPException
             Guild creation failed.
         InvalidArgument
             Invalid icon image format given. Must be PNG or JPG.
+        TypeError
+            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -202,19 +214,20 @@ class Template:
             The guild created. This is not the same guild that is
             added to cache.
         """
-        if icon is not None:
-            icon = _bytes_to_base64_data(icon)
+        icon_data = await _assetbytes_to_base64_data(icon)
 
-        region = region or VoiceRegion.us_west
-        region_value = region.value
+        if region is not None:
+            warn_deprecated(
+                "region is deprecated and will be removed in a future version", stacklevel=2
+            )
 
-        data = await self._state.http.create_from_template(self.code, name, region_value, icon)
+        data = await self._state.http.create_from_template(self.code, name, icon_data)
         return Guild(data=data, state=self._state)
 
     async def sync(self) -> Template:
         """|coro|
 
-        Sync the template to the guild's current state.
+        Syncs the template to the guild's current state.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.
@@ -225,7 +238,7 @@ class Template:
             The template is no longer edited in-place, instead it is returned.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden
@@ -234,7 +247,7 @@ class Template:
             This template does not exist.
 
         Returns
-        --------
+        -------
         :class:`Template`
             The newly edited template.
         """
@@ -250,7 +263,7 @@ class Template:
     ) -> Template:
         """|coro|
 
-        Edit the template metadata.
+        Edits the template metadata.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.
@@ -261,14 +274,14 @@ class Template:
             The template is no longer edited in-place, instead it is returned.
 
         Parameters
-        ------------
+        ----------
         name: :class:`str`
             The template's new name.
         description: Optional[:class:`str`]
             The template's new description.
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden
@@ -277,7 +290,7 @@ class Template:
             This template does not exist.
 
         Returns
-        --------
+        -------
         :class:`Template`
             The newly edited template.
         """
@@ -294,7 +307,7 @@ class Template:
     async def delete(self) -> None:
         """|coro|
 
-        Delete the template.
+        Deletes the template.
 
         You must have the :attr:`~Permissions.manage_guild` permission in the
         source guild to do this.
@@ -302,7 +315,7 @@ class Template:
         .. versionadded:: 1.7
 
         Raises
-        -------
+        ------
         HTTPException
             Editing the template failed.
         Forbidden

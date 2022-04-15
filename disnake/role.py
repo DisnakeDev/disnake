@@ -33,7 +33,7 @@ from .errors import InvalidArgument
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .permissions import Permissions
-from .utils import MISSING, _bytes_to_base64_data, _get_as_snowflake, snowflake_time
+from .utils import MISSING, _assetbytes_to_base64_data, _get_as_snowflake, snowflake_time
 
 __all__ = (
     "RoleTags",
@@ -43,6 +43,7 @@ __all__ = (
 if TYPE_CHECKING:
     import datetime
 
+    from .asset import AssetBytes
     from .guild import Guild
     from .member import Member
     from .state import ConnectionState
@@ -62,7 +63,7 @@ class RoleTags:
     .. versionadded:: 1.6
 
     Attributes
-    ------------
+    ----------
     bot_id: Optional[:class:`int`]
         The bot's user ID that manages this role.
     integration_id: Optional[:class:`int`]
@@ -155,7 +156,7 @@ class Role(Hashable):
     Attributes
     ----------
     id: :class:`int`
-        The ID for the role.
+        The ID of the role.
     name: :class:`str`
         The name of the role.
     guild: :class:`Guild`
@@ -173,7 +174,6 @@ class Role(Hashable):
             checking for role hierarchy. The recommended and correct way to
             compare for roles in the hierarchy is using the comparison
             operators on the role objects themselves.
-
     managed: :class:`bool`
         Indicates if the role is managed by the guild through some form of
         integrations such as Twitch.
@@ -404,8 +404,8 @@ class Role(Hashable):
         colour: Union[Colour, int] = MISSING,
         color: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
-        icon: bytes = MISSING,
-        emoji: str = MISSING,
+        icon: Optional[AssetBytes] = MISSING,
+        emoji: Optional[str] = MISSING,
         mentionable: bool = MISSING,
         position: int = MISSING,
         reason: Optional[str] = MISSING,
@@ -426,18 +426,22 @@ class Role(Hashable):
             Edits are no longer in-place, the newly edited role is returned instead.
 
         Parameters
-        -----------
+        ----------
         name: :class:`str`
             The new role name to change to.
         permissions: :class:`Permissions`
             The new permissions to change to.
         colour: Union[:class:`Colour`, :class:`int`]
-            The new colour to change to. (aliased to color as well)
+            The new colour to change to. (aliased to ``color`` as well)
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
-        icon: :class:`bytes`
+        icon: Optional[|resource_type|]
             The role's new icon image (if the guild has the ``ROLE_ICONS`` feature).
-        emoji: :class:`str`
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
+        emoji: Optional[:class:`str`]
             The role's new unicode emoji.
         mentionable: :class:`bool`
             Indicates if the role should be mentionable by others.
@@ -448,7 +452,9 @@ class Role(Hashable):
             The reason for editing this role. Shows up on the audit log.
 
         Raises
-        -------
+        ------
+        NotFound
+            The ``icon`` asset couldn't be found.
         Forbidden
             You do not have permissions to change the role.
         HTTPException
@@ -456,9 +462,11 @@ class Role(Hashable):
         InvalidArgument
             An invalid position was given or the default
             role was asked to be moved.
+        TypeError
+            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
-        --------
+        -------
         :class:`Role`
             The newly edited role.
         """
@@ -488,10 +496,7 @@ class Role(Hashable):
             payload["mentionable"] = mentionable
 
         if icon is not MISSING:
-            if icon is None:
-                payload["icon"] = icon
-            else:
-                payload["icon"] = _bytes_to_base64_data(icon)
+            payload["icon"] = await _assetbytes_to_base64_data(icon)
 
         if emoji is not MISSING:
             payload["unicode_emoji"] = emoji
@@ -508,16 +513,15 @@ class Role(Hashable):
         use this.
 
         Parameters
-        -----------
+        ----------
         reason: Optional[:class:`str`]
             The reason for deleting this role. Shows up on the audit log.
 
         Raises
-        --------
+        ------
         Forbidden
             You do not have permissions to delete the role.
         HTTPException
             Deleting the role failed.
         """
-
         await self._state.http.delete_role(self.guild.id, self.id, reason=reason)

@@ -26,7 +26,18 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
 from disnake.enums import ApplicationCommandType
@@ -36,12 +47,24 @@ from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import *
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec
+    from typing_extensions import Concatenate, ParamSpec
 
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import Check, Error, Hook
-    from .cog import Cog
+    from .cog import Cog, CogT
+
+    ApplicationCommandInteractionT = TypeVar(
+        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
+    )
+
+    P = ParamSpec("P")
+
+    CommandCallback = Callable[..., Coroutine]
+    InteractionCommandCallback = Union[
+        Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
+        Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
+    ]
 
 
 __all__ = ("InvokableApplicationCommand", "guild_permissions")
@@ -52,11 +75,6 @@ AppCommandT = TypeVar("AppCommandT", bound="InvokableApplicationCommand")
 CogT = TypeVar("CogT", bound="Cog")
 HookT = TypeVar("HookT", bound="Hook")
 ErrorT = TypeVar("ErrorT", bound="Error")
-
-if TYPE_CHECKING:
-    P = ParamSpec("P")
-else:
-    P = TypeVar("P")
 
 
 def _get_overridden_method(method):
@@ -84,13 +102,38 @@ class InvokableApplicationCommand(ABC):
 
     These are not created manually, instead they are created via the
     decorator or functional interface.
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The name of the command.
+    qualified_name: :class:`str`
+        The full command name, including parent names in the case of slash subcommands or groups.
+        For example, the qualified name for ``/one two three`` would be ``one two three``.
+    body: :class:`.ApplicationCommand`
+        An object being registered in the API.
+    callback: :ref:`coroutine <coroutine>`
+        The coroutine that is executed when the command is called.
+    cog: Optional[:class:`Cog`]
+        The cog that this command belongs to. ``None`` if there isn't one.
+    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+        A list of predicates that verifies if the command could be executed
+        with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
+        is necessary to be thrown to signal failure, then one inherited from
+        :exc:`.CommandError` should be used. Note that if the checks fail then
+        :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
+        event.
+    guild_ids: Optional[List[:class:`int`]]
+        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
+    auto_sync: :class:`bool`
+        Whether to automatically register the command.
     """
 
     body: ApplicationCommand
 
-    def __init__(self, func, *, name: str = None, **kwargs):
+    def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
         self.__command_flag__ = None
-        self._callback: Callable[..., Any] = func
+        self._callback: CommandCallback = func
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
         # only an internal feature for now
@@ -141,8 +184,7 @@ class InvokableApplicationCommand(ABC):
         self._after_invoke: Optional[Hook] = None
 
     @property
-    def callback(self) -> Callable[..., Any]:
-        """Callable[..., Any]: The callback associated with the interaction."""
+    def callback(self) -> CommandCallback:
         return self._callback
 
     def add_check(self, func: Check) -> None:
@@ -151,7 +193,7 @@ class InvokableApplicationCommand(ABC):
         This is the non-decorator interface to :func:`.check`.
 
         Parameters
-        -----------
+        ----------
         func
             The function that will be used as a check.
         """
@@ -165,7 +207,7 @@ class InvokableApplicationCommand(ABC):
         if the function is not in the command's checks.
 
         Parameters
-        -----------
+        ----------
         func
             The function to remove from the checks.
         """
@@ -213,7 +255,7 @@ class InvokableApplicationCommand(ABC):
 
         try:
             self._prepare_cooldowns(inter)
-            await self.call_before_hooks(inter)  # type: ignore
+            await self.call_before_hooks(inter)
         except:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)  # type: ignore
@@ -223,12 +265,12 @@ class InvokableApplicationCommand(ABC):
         """Checks whether the application command is currently on cooldown.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction with the application command currently being invoked.
 
         Returns
-        --------
+        -------
         :class:`bool`
             A boolean indicating if the application command is on cooldown.
         """
@@ -244,7 +286,7 @@ class InvokableApplicationCommand(ABC):
         """Resets the cooldown on this application command.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction with this application command
         """
@@ -256,12 +298,12 @@ class InvokableApplicationCommand(ABC):
         """Retrieves the amount of seconds before this application command can be tried again.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction with this application command.
 
         Returns
-        --------
+        -------
         :class:`float`
             The amount of time left on this command's cooldown in seconds.
             If this is ``0.0`` then the command isn't on cooldown.
@@ -307,12 +349,12 @@ class InvokableApplicationCommand(ABC):
         A local error handler is an error event limited to a single application command.
 
         Parameters
-        -----------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register as the local error handler.
 
         Raises
-        -------
+        ------
         TypeError
             The coroutine passed is not actually a coroutine.
         """
@@ -426,12 +468,12 @@ class InvokableApplicationCommand(ABC):
         This pre-invoke hook takes a sole parameter, a :class:`.ApplicationCommandInteraction`.
 
         Parameters
-        -----------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register as the pre-invoke hook.
 
         Raises
-        -------
+        ------
         TypeError
             The coroutine passed is not actually a coroutine.
         """
@@ -449,12 +491,12 @@ class InvokableApplicationCommand(ABC):
         This post-invoke hook takes a sole parameter, a :class:`.ApplicationCommandInteraction`.
 
         Parameters
-        -----------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register as the post-invoke hook.
 
         Raises
-        -------
+        ------
         TypeError
             The coroutine passed is not actually a coroutine.
         """
@@ -476,18 +518,18 @@ class InvokableApplicationCommand(ABC):
         inside the :attr:`~Command.checks` attribute.
 
         Parameters
-        -----------
+        ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction with the application command currently being invoked.
 
         Raises
-        -------
+        ------
         :class:`CommandError`
             Any application command error that was raised during a check call will be propagated
             by this function.
 
         Returns
-        --------
+        -------
         :class:`bool`
             A boolean indicating if the application command can be invoked.
         """
@@ -535,7 +577,7 @@ def guild_permissions(
     *,
     roles: Optional[Mapping[int, bool]] = None,
     users: Optional[Mapping[int, bool]] = None,
-    owner: bool = None,
+    owner: Optional[bool] = None,
     **kwargs: None,
 ) -> Callable[[T], T]:
     """
@@ -546,13 +588,13 @@ def guild_permissions(
     Parameters
     ----------
     guild_id: :class:`int`
-        the ID of the guild to apply the permissions to.
-    roles: Mapping[:class:`int`, :class:`bool`]
-        a mapping of role IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
-    users: Mapping[:class:`int`, :class:`bool`]
-        a mapping of user IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
-    owner: :class:`bool`
-        whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
+        The ID of the guild to apply the permissions to.
+    roles: Optional[Mapping[:class:`int`, :class:`bool`]]
+        A mapping of role IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
+    users: Optional[Mapping[:class:`int`, :class:`bool`]]
+        A mapping of user IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
+    owner: Optional[:class:`bool`]
+        Whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
     """
     if kwargs:
         warn_deprecated(

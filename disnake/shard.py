@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Ty
 import aiohttp
 
 from .backoff import ExponentialBackoff
-from .client import Client
+from .client import Client, SessionStartLimit
 from .enums import Status
 from .errors import (
     ClientException,
@@ -230,7 +230,7 @@ class ShardInfo:
     .. versionadded:: 1.4
 
     Attributes
-    ------------
+    ----------
     id: :class:`int`
         The shard ID for this shard.
     shard_count: Optional[:class:`int`]
@@ -323,7 +323,7 @@ class AutoShardedClient(Client):
     0 to ``shard_count - 1``.
 
     Attributes
-    ------------
+    ----------
     shard_ids: Optional[List[:class:`int`]]
         An optional list of shard_ids to launch the shards with.
     """
@@ -392,7 +392,10 @@ class AutoShardedClient(Client):
         return [(shard_id, shard.ws.latency) for shard_id, shard in self.__shards.items()]
 
     def get_shard(self, shard_id: int) -> Optional[ShardInfo]:
-        """Optional[:class:`ShardInfo`]: Gets the shard information at a given shard ID or ``None`` if not found."""
+        """Gets the shard information of a given shard ID, or ``None`` if not found.
+
+        :return type: Optional[:class:`ShardInfo`]
+        """
         try:
             parent = self.__shards[shard_id]
         except KeyError:
@@ -424,16 +427,18 @@ class AutoShardedClient(Client):
         ret.launch()
 
     async def launch_shards(self) -> None:
+        shard_count, gateway, session_start_limit = await self.http.get_bot_gateway()
         if self.shard_count is None:
-            self.shard_count, gateway = await self.http.get_bot_gateway()
-        else:
-            gateway = await self.http.get_gateway()
+            self.shard_count = shard_count
+
+        self.session_start_limit = SessionStartLimit(session_start_limit)
 
         self._connection.shard_count = self.shard_count
 
         shard_ids = self.shard_ids or range(self.shard_count)
         self._connection.shard_ids = shard_ids
 
+        # TODO: maybe take session_start_limit values into account?
         for shard_id in shard_ids:
             initial = shard_id == shard_ids[0]
             await self.launch_shard(gateway, shard_id, initial=initial)
@@ -449,10 +454,10 @@ class AutoShardedClient(Client):
             if item.type == EventType.close:
                 await self.close()
                 if isinstance(item.error, ConnectionClosed):
-                    if item.error.code != 1000:
-                        raise item.error
                     if item.error.code == 4014:
                         raise PrivilegedIntentsRequired(item.shard.id) from None
+                    if item.error.code != 1000:
+                        raise item.error
                 return
             elif item.type in (EventType.identify, EventType.resume):
                 await item.shard.reidentify(item.error)
@@ -525,7 +530,6 @@ class AutoShardedClient(Client):
         InvalidArgument
             If the ``activity`` parameter is not of proper type.
         """
-
         if status is None:
             status_value = "online"
             status_enum = Status.online
