@@ -189,7 +189,7 @@ class Template:
 
                 This no longer has any effect.
 
-            .. versionchanged:: 2.6
+            .. versionchanged:: 2.5
                 No longer a ``VoiceRegion`` instance.
 
         icon: Optional[|resource_type|]

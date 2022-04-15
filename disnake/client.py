@@ -1690,7 +1690,7 @@ class Client:
 
                 This no longer has any effect.
 
-            .. versionchanged:: 2.6
+            .. versionchanged:: 2.5
                 No longer a ``VoiceRegion`` instance.
 
         icon: |resource_type|
@@ -1872,7 +1872,7 @@ class Client:
 
         Retrieves voice regions for the user, or a guild if provided.
 
-        .. versionadded:: 2.6
+        .. versionadded:: 2.5
 
         Parameters
         ----------

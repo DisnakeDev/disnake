@@ -1057,7 +1057,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionadded:: 1.7
 
-        .. versionchanged:: 2.6
+        .. versionchanged:: 2.5
             No longer a ``VoiceRegion`` instance.
 
     video_quality_mode: :class:`VideoQualityMode`
@@ -1247,7 +1247,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
             .. versionadded:: 1.7
 
-            .. versionchanged:: 2.6
+            .. versionchanged:: 2.5
                 No longer a ``VoiceRegion`` instance.
 
         video_quality_mode: :class:`VideoQualityMode`
@@ -1333,7 +1333,7 @@ class StageChannel(VocalGuildChannel):
         The region for the stage channel's voice communication.
         A value of ``None`` indicates automatic voice region detection.
 
-        .. versionchanged:: 2.6
+        .. versionchanged:: 2.5
                 No longer a ``VoiceRegion`` instance.
 
     video_quality_mode: :class:`VideoQualityMode`
@@ -1567,7 +1567,7 @@ class StageChannel(VocalGuildChannel):
             The new region for the stage channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
 
-            .. versionchanged:: 2.6
+            .. versionchanged:: 2.5
                 No longer a ``VoiceRegion`` instance.
 
         video_quality_mode: :class:`VideoQualityMode`

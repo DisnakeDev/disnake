@@ -1065,7 +1065,7 @@ class Guild(Hashable):
             VoiceRegion is no longer set on the guild, and is set on the individual voice channels instead.
             See :attr:`VoiceChannel.rtc_region` and :attr:`StageChannel.rtc_region` instead.
 
-        .. versionchanged:: 2.6
+        .. versionchanged:: 2.5
             No longer a ``VoiceRegion`` instance.
         """
         utils.warn_deprecated(
@@ -1358,7 +1358,7 @@ class Guild(Hashable):
 
             .. versionadded:: 1.7
 
-            .. versionchanged:: 2.6
+            .. versionchanged:: 2.5
                 No longer a ``VoiceRegion`` instance.
 
         video_quality_mode: :class:`VideoQualityMode`
@@ -1771,7 +1771,7 @@ class Guild(Hashable):
 
                 Use :func:`VoiceChannel.edit` or :func:`StageChannel.edit` with ``rtc_region`` instead.
 
-            .. versionchanged:: 2.6
+            .. versionchanged:: 2.5
                 No longer a ``VoiceRegion`` instance.
 
         afk_channel: Optional[:class:`VoiceChannel`]
@@ -3805,7 +3805,7 @@ class Guild(Hashable):
 
         Retrieves a list of :class:`VoiceRegion` for this guild.
 
-        .. versionadded:: 2.6
+        .. versionadded:: 2.5
 
         Raises
         ------
