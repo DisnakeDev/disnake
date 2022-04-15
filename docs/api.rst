@@ -5201,6 +5201,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: ModalChainNotSupported
 
+.. autoexception:: LocalizationKeyError
+
 .. autoexception:: disnake.opus.OpusError
 
 .. autoexception:: disnake.opus.OpusNotLoaded
@@ -5229,6 +5231,7 @@ Exception Hierarchy
                 - :exc:`Forbidden`
                 - :exc:`NotFound`
                 - :exc:`DiscordServerError`
+            - :exc:`LocalizationKeyError`
 
 
 Warnings

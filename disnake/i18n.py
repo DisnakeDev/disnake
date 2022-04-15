@@ -35,6 +35,7 @@ from typing import DefaultDict, Dict, Optional, Set, Union
 from . import utils
 from .custom_warnings import LocalizationWarning
 from .enums import Locale
+from .errors import LocalizationKeyError
 
 MISSING = utils.MISSING
 
@@ -125,7 +126,7 @@ class LocalizationProtocol(ABC):
 
         Raises
         ------
-        RuntimeError
+        LocalizationKeyError
             May be raised if no localizations for the provided key were found,
             depending on the implementation.
 
@@ -192,7 +193,7 @@ class LocalizationStore(LocalizationProtocol):
 
         Raises
         ------
-        RuntimeError
+        LocalizationKeyError
             No localizations for the provided key were found.
             Raised only if :attr:`strict` is enabled, returns ``None`` otherwise.
 
@@ -205,7 +206,7 @@ class LocalizationStore(LocalizationProtocol):
 
         data = self._loc.get(key)
         if data is None and self.strict:
-            raise RuntimeError(f"no localizations found for key '{key}'")
+            raise LocalizationKeyError(key)
         return data
 
     def load(self, path: Union[str, os.PathLike]) -> None:
