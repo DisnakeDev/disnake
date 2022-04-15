@@ -1340,7 +1340,7 @@ Utility Functions
 
 .. autofunction:: disnake.utils.search_directory
 
-.. autofunction:: disnake.utils.is_valid_locale
+.. autofunction:: disnake.utils.as_valid_locale
 
 .. _discord-api-enums:
 
