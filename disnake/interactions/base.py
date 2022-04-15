@@ -793,7 +793,7 @@ class InteractionResponse:
             before deleting the message we just sent. If the deletion fails,
             then it is silently ignored.
 
-         suppress_embeds: :class:`bool`
+        suppress_embeds: :class:`bool`
             Whether to suppress embeds.
 
             .. versionadded:: 2.5
