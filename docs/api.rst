@@ -4666,6 +4666,14 @@ Widget
 .. autoclass:: Widget()
     :members:
 
+VoiceRegion
+~~~~~~~~~~~
+
+.. attributetable:: VoiceRegion
+
+.. autoclass:: VoiceRegion()
+    :members:
+
 StickerPack
 ~~~~~~~~~~~~~
 
