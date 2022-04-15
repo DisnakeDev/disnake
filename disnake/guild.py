@@ -87,6 +87,7 @@ from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
 from .user import User
+from .voice_region import VoiceRegion
 from .widget import Widget, WidgetSettings
 
 __all__ = ("Guild",)
@@ -3798,6 +3799,21 @@ class Guild(Hashable):
         return members
 
     getch_members = get_or_fetch_members
+
+    async def fetch_voice_regions(self) -> List[VoiceRegion]:
+        """|coro|
+
+        Retrieves a list of :class:`VoiceRegion` for this guild.
+
+        .. versionadded:: 2.6
+
+        Raises
+        ------
+        HTTPException
+            Retrieving voice regions failed.
+        """
+        data = await self._state.http.get_guild_voice_regions(self.id)
+        return [VoiceRegion(data=region) for region in data]
 
     async def change_voice_state(
         self, *, channel: Optional[Snowflake], self_mute: bool = False, self_deaf: bool = False

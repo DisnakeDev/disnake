@@ -85,6 +85,7 @@ from .ui.view import View
 from .user import ClientUser, User
 from .utils import MISSING
 from .voice_client import VoiceClient
+from .voice_region import VoiceRegion
 from .webhook import Webhook
 from .widget import Widget
 
@@ -1863,6 +1864,33 @@ class Client:
         """
         invite_id = utils.resolve_invite(invite)
         await self.http.delete_invite(invite_id)
+
+    # Voice region stuff
+
+    async def fetch_voice_regions(self, guild_id: Optional[int] = None) -> List[VoiceRegion]:
+        """Retrieves a list of :class:`VoiceRegion`s.
+
+        Retrieves voice regions for the user, or a guild if provided.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        guild_id: Optional[:class:`int`]:
+            The guild to get regions for, if provided.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving voice regions failed.
+        NotFound
+            The provided guild_id could not be found.
+        """
+        if guild_id:
+            regions = await self.http.get_guild_voice_regions(guild_id)
+        else:
+            regions = await self.http.get_voice_regions()
+        return [VoiceRegion(data=data) for data in regions]
 
     # Miscellaneous stuff
 
