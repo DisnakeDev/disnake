@@ -32,6 +32,13 @@ Breaking Changes
 
 - The :attr:`~Intents.message_content` intent is now required to receive to receive message content and related fields, see above (:issue:`353`)
 - :func:`TextChannel.create_thread` now requires either a ``message`` or a ``type`` parameter (:issue:`355`)
+- :func:`GuildScheduledEvent.fetch_users` and :func:`Guild.bans` now return an async iterator instead of a list users (:issue:`428`, :issue:`442`)
+- Store channels have been removed as they're not supported by Discord any longer (:issue:`438`)
+- :func:`on_thread_join` will no longer be invoked when a new thread is created, see :func:`on_thread_create` (:issue:`445`)
+- ``Invite.revoked`` and ``Thread.archiver_id`` have been removed (deprecated in 2.4) (:issue:`455`)
+- ``locale`` attributes are now of type :class:`Locale` instead of :class:`str` (:issue:`439`)
+- Slash command names and option names are no longer automatically converted to lowercase, an :class:`InvalidArgument` exception is now raised instead (:issue:`422`)
+- :func:`Guild.audit_logs` no longer supports the ``oldest_first`` parameter (:issue:`473`)
 - The ``interaction`` parameter of :func:`ui.Item.callback` is now positional-only (:issue:`311`)
 - Invalid voice regions were removed from :class:`VoiceRegion` (:issue:`357`)
     - removed: ``eu_west``, ``eu_central``, ``london``, ``amsterdam``, ``frankfurt``, ``south_korea``, ``europe``, ``vip_us_east``, ``vip_us_west``, ``vip_amsterdam``
@@ -58,6 +65,13 @@ New Features
 - Support API v10 (:issue:`353`)
     - New intent: :attr:`Intents.message_content`
     - |commands| New warning: :class:`~ext.commands.MessageContentPrefixWarning`
+- Add forum channels (:issue:`448`)
+    - Add :class:`ForumChannel`
+    - Add :attr:`CategoryChannel.forum_channels`, :attr:`Guild.forum_channels`
+    - Add :attr:`CategoryChannel.create_forum_channel`, :attr:`Guild.create_forum_channel`
+    - Add :class:`ChannelFlags`, :attr:`Thread.flags`, :attr:`Thread.is_pinned`
+    - Add ``pinned`` parameter to :func:`Thread.edit`
+    - |commands| Add :class:`~ext.commands.ForumChannelConverter`
 - Add guild previews (:issue:`359`)
     - Add :class:`GuildPreview`
     - Add :func:`Client.fetch_guild_preview`
@@ -69,11 +83,27 @@ New Features
 - Add :attr:`ModalInteraction.message` (:issue:`363`, :issue:`400`)
 - Support :func:`InteractionResponse.edit_message` for modal interactions, if modal was sent in response to component interaction (:issue:`364`, :issue:`400`)
 - Add :func:`Guild.search_members` (:issue:`358`, :issue:`388`)
+- Update :func:`GuildScheduledEvent.fetch_users` and :func:`Guild.bans` to be async iterators supporting pagination (:issue:`428`, :issue:`442`)
+- Add :func:`on_thread_create` event (:issue:`445`)
+- Add :attr:`Client.session_start_limit` (:issue:`402`)
 - Add :attr:`PartialInviteGuild.premium_subscription_count` (:issue:`410`)
+- Add :func:`~Asset.to_file` method to assets, emojis, stickers (:issue:`443`)
+- Add ``filename`` and ``description`` parameters to :func:`Asset.to_file` (:issue:`475`)
+- Add :class:`Locale` enum (:issue:`439`)
+- Add :attr:`AppInfo.tags`, :attr:`AppInfo.install_params`, :attr:`AppInfo.custom_install_url` (:issue:`463`)
+- Add :attr:`Interaction.expires_at` and :attr:`Interaction.is_expired`, automatically fall back to message edit/delete if interaction expired (:issue:`469`)
+- Add ``notify_everyone`` parameter to :func:`StageChannel.create_instance` (:issue:`440`)
+- Allow passing asset types for most image parameters, in addition to :class:`bytes` (:issue:`415`)
+- Add :func:`VoiceChannel.delete_messages`, :func:`VoiceChannel.purge`, :func:`VoiceChannel.webhooks`, :func:`VoiceChannel.create_webhook`, and improve :func:`VoiceChannel.permissions_for` (:issue:`461`)
 - Support ``List[str]`` and ``Dict[str, str]`` in ``option`` parameter of :class:`disnake.ui.Select` (:issue:`326`)
 - Support ``reason`` parameter in :func:`Message.create_thread` and :func:`Thread.delete` (:issue:`366`)
+- Support ``reason`` parameter in :func:`Thread.edit` (:issue:`454`)
 - Add :attr:`AuditLogDiff.image` for scheduled event images (:issue:`432`)
 - Add :attr:`StageInstance.guild_scheduled_event` and :attr:`StageInstance.guild_scheduled_event_id` (:issue:`394`)
+- Add ``__repr__`` methods to interaction data types (:issue:`458`)
+- Add temporary workaround for setting API version to avoid message content intent requirement until deadline (:issue:`467`)
+- Add ``default_auto_archive_duration`` parameter to :func:`Guild.create_text_channel`, add ``nsfw`` parameter to :func:`Guild.create_voice_channel` (:issue:`456`)
+- Add :attr:`TextChannel.last_pin_timestamp`, :attr:`DMChannel.last_pin_timestamp`, :attr:`Thread.last_pin_timestamp` (:issue:`464`)
 - |commands| Add :class:`~ext.commands.GuildScheduledEventConverter` and :exc:`~ext.commands.GuildScheduledEventNotFound` (:issue:`376`)
 
 
@@ -90,13 +120,22 @@ Bug Fixes
 - Fix :attr:`PartialInviteChannel.__str__ <PartialInviteChannel>` (:issue:`383`)
 - Use proper HTTP method for joining threads, remove unused methods (:issue:`356`)
 - Improve :func:`abc.Messageable.send` typing and fix annotations of HTTP methods (:issue:`378`)
+- Allow ``content`` parameters in send/edit methods to be positional (:issue:`411`)
 - Remove cached scheduled events if associated channel was deleted (:issue:`406`)
 - Update some types/parameters of roles, scheduled events and voice states (:issue:`407`)
 - Use :func:`asyncio.iscoroutinefunction` instead of :func:`inspect.iscoroutinefunction` (:issue:`427`)
 - Don't automatically enable logging if autoreload is enabled (:issue:`431`)
 - Improve :class:`PartialMessageable` channel handling (:issue:`426`)
+- Fix :func:`~PartialEmoji.read` for activity emojis (:issue:`430`)
+- Fix caching of stage instances andd scheduled events (:issue:`416`)
+- Support embed images in :func:`InteractionResponse.edit_message` (:issue:`466`)
+- Fix memory leaks on shard reconnect (:issue:`424`, :issue:`425`)
+- Fix ``after`` parameter of :func:`Guild.audit_logs` (:issue:`473`)
 - |commands| Fix :class:`~ext.commands.clean_content` converter (:issue:`396`)
 - |commands| Make conversion exceptions in slash commands propagate cleanly as documented (:issue:`362`)
+- |commands| Fix unloading of listeners with custom names (:issue:`444`)
+- |commands| Fix usage of custom converters with :func:`Param <ext.commands.Param>` (:issue:`398`)
+- |commands| Support interactions in :class:`~ext.commands.UserConverter`, :class:`~ext.commands.MemberConverter` (:issue:`429`)
 
 
 Documentation
@@ -107,17 +146,22 @@ Documentation
 - Fix duplicate search results, improve scoring (:issue:`423`)
 - Update return type of :func:`Guild.create_template` (:issue:`372`)
 - Add documentation for :class:`GuildCommandInteraction`, :class:`UserCommandInteraction`, and :class:`MessageCommandInteraction` (:issue:`374`)
+- Add several previously missing documentation entries (:issue:`446`, :issue:`470`)
 - Update broken references (:issue:`419`)
 - Add search hotkeys ``ctrl+k``, ``/``, ``s`` (:issue:`434`)
+- Add autocomplete decorator example (:issue:`472`)
+- Fix string escape warnings (:issue:`436`)
 
 
 Miscellaneous
 ~~~~~~~~~~~~~~
 
 - Fix remaining pyright issues, add pyright CI (:issue:`311`, :issue:`387`)
-- Update dev dependencies and CI (:issue:`345`, :issue:`386`)
+- Update dev dependencies and CI (:issue:`345`, :issue:`386`, :issue:`451`)
 - Improve ``_WebhookState`` typing (:issue:`391`)
 - Improve ``basic_bot.py`` example (:issue:`399`)
+- Add low-level component example (:issue:`452`)
+- Update Discord server invite links (:issue:`476`)
 
 
 .. _vp2p4p0:
