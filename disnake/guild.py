@@ -98,6 +98,7 @@ MISSING = utils.MISSING
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime, User as ABCUser
     from .app_commands import APIApplicationCommand
+    from .asset import AssetBytes
     from .channel import CategoryChannel, ForumChannel, StageChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
@@ -226,7 +227,7 @@ class Guild(Hashable):
         - ``THREE_DAY_THREAD_ARCHIVE``: Guild has access to the three day archive time for threads.
         - ``THREADS_ENABLED``: Guild had early access to threads.
         - ``TICKETED_EVENTS_ENABLED``: Guild has enabled ticketed events.
-        - ``VANITY_URL``: Guild can have a vanity invite URL (e.g. discord.gg/discord-api).
+        - ``VANITY_URL``: Guild can have a vanity invite URL (e.g. discord.gg/disnake).
         - ``VERIFIED``: Guild is a verified server.
         - ``VIP_REGIONS``: Guild has VIP voice regions.
         - ``WELCOME_SCREEN_ENABLED``: Guild has enabled the welcome screen.
@@ -1191,6 +1192,7 @@ class Guild(Hashable):
         position: int = MISSING,
         topic: str = MISSING,
         slowmode_delay: int = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> TextChannel:
@@ -1253,6 +1255,12 @@ class Guild(Hashable):
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+            The default auto archive duration in minutes for threads created in this channel.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+
+            .. versionadded:: 2.5
+
         nsfw: :class:`bool`
             Whether mark the channel as NSFW or not.
         reason: Optional[:class:`str`]
@@ -1285,6 +1293,11 @@ class Guild(Hashable):
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
 
+        if default_auto_archive_duration is not MISSING:
+            options["default_auto_archive_duration"] = cast(
+                "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
+            )
+
         data = await self._create_channel(
             name,
             overwrites=overwrites,
@@ -1310,6 +1323,7 @@ class Guild(Hashable):
         user_limit: int = MISSING,
         rtc_region: Optional[VoiceRegion] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
+        nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> VoiceChannel:
         """|coro|
@@ -1346,6 +1360,11 @@ class Guild(Hashable):
 
             .. versionadded:: 2.0
 
+        nsfw: :class:`bool`
+            Whether to mark the channel as NSFW or not.
+
+            .. versionadded:: 2.5
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1378,6 +1397,9 @@ class Guild(Hashable):
 
         if video_quality_mode is not MISSING:
             options["video_quality_mode"] = video_quality_mode.value
+
+        if nsfw is not MISSING:
+            options["nsfw"] = nsfw
 
         data = await self._create_channel(
             name,
@@ -1654,10 +1676,10 @@ class Guild(Hashable):
         reason: Optional[str] = MISSING,
         name: str = MISSING,
         description: Optional[str] = MISSING,
-        icon: Optional[bytes] = MISSING,
-        banner: Optional[bytes] = MISSING,
-        splash: Optional[bytes] = MISSING,
-        discovery_splash: Optional[bytes] = MISSING,
+        icon: Optional[AssetBytes] = MISSING,
+        banner: Optional[AssetBytes] = MISSING,
+        splash: Optional[AssetBytes] = MISSING,
+        discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
         region: Optional[Union[str, VoiceRegion]] = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
@@ -1698,25 +1720,41 @@ class Guild(Hashable):
         description: Optional[:class:`str`]
             The new description of the guild. Could be ``None`` for no description.
             This is only available to guilds that contain ``PUBLIC`` in :attr:`Guild.features`.
-        icon: :class:`bytes`
-            A :term:`py:bytes-like object` representing the icon. Only PNG/JPEG is supported.
+        icon: Optional[|resource_type|]
+            The new guild icon. Only PNG/JPG is supported.
             GIF is only available to guilds that contain ``ANIMATED_ICON`` in :attr:`Guild.features`.
             Could be ``None`` to denote removal of the icon.
-        banner: :class:`bytes`
-            A :term:`py:bytes-like object` representing the banner.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
+        banner: Optional[|resource_type|]
+            The new guild banner.
             GIF is only available to guilds that contain ``ANIMATED_BANNER`` in :attr:`Guild.features`.
             Could be ``None`` to denote removal of the banner. This is only available to guilds that contain
             ``BANNER`` in :attr:`Guild.features`.
-        splash: :class:`bytes`
-            A :term:`py:bytes-like object` representing the invite splash.
-            Only PNG/JPEG supported. Could be ``None`` to denote removing the
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
+        splash: Optional[|resource_type|]
+            The new guild invite splash.
+            Only PNG/JPG is supported. Could be ``None`` to denote removing the
             splash. This is only available to guilds that contain ``INVITE_SPLASH``
             in :attr:`Guild.features`.
-        discovery_splash: :class:`bytes`
-            A :term:`py:bytes-like object` representing the discovery splash.
-            Only PNG/JPEG supported. Could be ``None`` to denote removing the
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
+        discovery_splash: Optional[|resource_type|]
+            The new guild discovery splash.
+            Only PNG/JPG is supported. Could be ``None`` to denote removing the
             splash. This is only available to guilds that contain ``DISCOVERABLE``
             in :attr:`Guild.features`.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         community: :class:`bool`
             Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
@@ -1767,6 +1805,8 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            At least one of the assets (``icon``, ``banner``, ``splash`` or ``discovery_splash``) couldn't be found.
         Forbidden
             You do not have permissions to edit the guild.
         HTTPException
@@ -1775,6 +1815,8 @@ class Guild(Hashable):
             The image format passed in to ``icon`` is invalid. It must be
             PNG or JPG. This is also raised if you are not the owner of the
             guild and request an ownership transfer.
+        TypeError
+            At least one of the assets (``icon``, ``banner``, ``splash`` or ``discovery_splash``) is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -1801,28 +1843,16 @@ class Guild(Hashable):
             fields["afk_timeout"] = afk_timeout
 
         if icon is not MISSING:
-            if icon is None:
-                fields["icon"] = icon
-            else:
-                fields["icon"] = utils._bytes_to_base64_data(icon)
+            fields["icon"] = await utils._assetbytes_to_base64_data(icon)
 
         if banner is not MISSING:
-            if banner is None:
-                fields["banner"] = banner
-            else:
-                fields["banner"] = utils._bytes_to_base64_data(banner)
+            fields["banner"] = await utils._assetbytes_to_base64_data(banner)
 
         if splash is not MISSING:
-            if splash is None:
-                fields["splash"] = splash
-            else:
-                fields["splash"] = utils._bytes_to_base64_data(splash)
+            fields["splash"] = await utils._assetbytes_to_base64_data(splash)
 
         if discovery_splash is not MISSING:
-            if discovery_splash is None:
-                fields["discovery_splash"] = discovery_splash
-            else:
-                fields["discovery_splash"] = utils._bytes_to_base64_data(discovery_splash)
+            fields["discovery_splash"] = await utils._assetbytes_to_base64_data(discovery_splash)
 
         if default_notifications is not MISSING:
             if not isinstance(default_notifications, NotificationLevel):
@@ -2039,7 +2069,7 @@ class Guild(Hashable):
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         scheduled_end_time: datetime.datetime = MISSING,
         description: str = MISSING,
-        image: bytes = MISSING,
+        image: AssetBytes = MISSING,
         reason: Optional[str] = None,
     ) -> GuildScheduledEvent:
         """|coro|
@@ -2060,10 +2090,13 @@ class Guild(Hashable):
             The name of the guild scheduled event.
         description: :class:`str`
             The description of the guild scheduled event.
-        image: :class:`bytes`
+        image: |resource_type|
             The cover image of the guild scheduled event.
 
             .. versionadded:: 2.4
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
 
         channel_id: :class:`int`
             The channel ID in which the guild scheduled event will be hosted.
@@ -2082,8 +2115,12 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            The ``image`` asset couldn't be found.
         HTTPException
             The request failed.
+        TypeError
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -2117,7 +2154,7 @@ class Guild(Hashable):
             fields["description"] = description
 
         if image is not MISSING:
-            fields["image"] = utils._bytes_to_base64_data(image)
+            fields["image"] = await utils._assetbytes_to_base64_data(image)
 
         if channel_id is not MISSING:
             fields["channel_id"] = channel_id
@@ -2830,7 +2867,7 @@ class Guild(Hashable):
         self,
         *,
         name: str,
-        image: bytes,
+        image: AssetBytes,
         roles: Sequence[Role] = MISSING,
         reason: Optional[str] = None,
     ) -> Emoji:
@@ -2857,9 +2894,13 @@ class Guild(Hashable):
         ----------
         name: :class:`str`
             The emoji name. Must be at least 2 characters.
-        image: :class:`bytes`
-            The :term:`py:bytes-like object` representing the image data to use.
+        image: |resource_type|
+            The image data of the emoji.
             Only JPG, PNG and GIF images are supported.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         roles: List[:class:`Role`]
             A :class:`list` of :class:`Role`\\s that can use this emoji. Leave empty to make it available to everyone.
         reason: Optional[:class:`str`]
@@ -2867,17 +2908,21 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            The ``image`` asset couldn't be found.
         Forbidden
             You are not allowed to create emojis.
         HTTPException
             An error occurred creating an emoji.
+        TypeError
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
         :class:`Emoji`
             The newly created emoji.
         """
-        img = utils._bytes_to_base64_data(image)
+        img = await utils._assetbytes_to_base64_data(image)
         if roles:
             role_ids = [role.id for role in roles]
         else:
@@ -2989,7 +3034,7 @@ class Guild(Hashable):
         permissions: Permissions = ...,
         colour: Union[Colour, int] = ...,
         hoist: bool = ...,
-        icon: bytes = ...,
+        icon: AssetBytes = ...,
         emoji: str = ...,
         mentionable: bool = ...,
     ) -> Role:
@@ -3004,7 +3049,7 @@ class Guild(Hashable):
         permissions: Permissions = ...,
         color: Union[Colour, int] = ...,
         hoist: bool = ...,
-        icon: bytes = ...,
+        icon: AssetBytes = ...,
         emoji: str = ...,
         mentionable: bool = ...,
     ) -> Role:
@@ -3018,8 +3063,8 @@ class Guild(Hashable):
         color: Union[Colour, int] = MISSING,
         colour: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
-        icon: Optional[bytes] = MISSING,
-        emoji: Optional[str] = MISSING,
+        icon: AssetBytes = MISSING,
+        emoji: str = MISSING,
         mentionable: bool = MISSING,
         reason: Optional[str] = None,
     ) -> Role:
@@ -3047,8 +3092,12 @@ class Guild(Hashable):
         hoist: :class:`bool`
             Whether the role should be shown separately in the member list.
             Defaults to ``False``.
-        icon: :class:`bytes`
+        icon: |resource_type|
             The role's icon image (if the guild has the ``ROLE_ICONS`` feature).
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         emoji: :class:`str`
             The role's unicode emoji.
         mentionable: :class:`bool`
@@ -3059,12 +3108,16 @@ class Guild(Hashable):
 
         Raises
         ------
+        NotFound
+            The ``icon`` asset couldn't be found.
         Forbidden
             You do not have permissions to create the role.
         HTTPException
             Creating the role failed.
         InvalidArgument
             An invalid keyword argument was given.
+        TypeError
+            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -3093,10 +3146,7 @@ class Guild(Hashable):
             fields["name"] = name
 
         if icon is not MISSING:
-            if icon is None:
-                fields["icon"] = icon
-            else:
-                fields["icon"] = utils._bytes_to_base64_data(icon)
+            fields["icon"] = await utils._assetbytes_to_base64_data(icon)
 
         if emoji is not MISSING:
             fields["unicode_emoji"] = emoji
@@ -3305,13 +3355,15 @@ class Guild(Hashable):
         limit: int = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
-        oldest_first: Optional[bool] = None,
         user: Snowflake = None,
         action: AuditLogAction = None,
     ) -> AuditLogIterator:
         """Returns an :class:`AsyncIterator` that enables receiving the guild's audit logs.
 
         You must have :attr:`~Permissions.view_audit_log` permission to use this.
+
+        Entries are always returned in order from newest to oldest, regardless of the
+        ``before`` and ``after`` parameters.
 
         Examples
         --------
@@ -3343,9 +3395,6 @@ class Guild(Hashable):
             Retrieve entries after this date or entry.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        oldest_first: :class:`bool`
-            If set to ``True``, return entries in oldest->newest order. Defaults to ``True`` if
-            ``after`` is specified, otherwise ``False``.
         user: :class:`abc.Snowflake`
             The moderator to filter entries from.
         action: :class:`AuditLogAction`
@@ -3368,17 +3417,13 @@ class Guild(Hashable):
         else:
             user_id = None
 
-        if action:
-            action = action.value
-
         return AuditLogIterator(
             self,
             before=before,
             after=after,
             limit=limit,
-            oldest_first=oldest_first,
             user_id=user_id,
-            action_type=action,
+            action_type=action.value if action is not None else None,
         )
 
     async def widget(self) -> Widget:
