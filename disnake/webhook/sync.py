@@ -407,7 +407,7 @@ class SyncWebhookMessage(Message):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> SyncWebhookMessage:
         """Edits the message.
