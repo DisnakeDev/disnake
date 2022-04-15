@@ -14,7 +14,7 @@ in specific versions.
 
 .. _vp2p5p0:
 
-v2.5.0b1
+v2.5.0
 ---------
 
 This version adds support for API v10, improves API coverage by adding support for previously missing features,
