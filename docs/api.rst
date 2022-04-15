@@ -4730,6 +4730,7 @@ StickerItem
 
 .. autoclass:: StickerItem()
     :members:
+    :inherited-members:
 
 Sticker
 ~~~~~~~~~~~~~~~
@@ -4738,6 +4739,7 @@ Sticker
 
 .. autoclass:: Sticker()
     :members:
+    :inherited-members:
 
 StandardSticker
 ~~~~~~~~~~~~~~~~
@@ -4746,6 +4748,7 @@ StandardSticker
 
 .. autoclass:: StandardSticker()
     :members:
+    :inherited-members:
 
 GuildSticker
 ~~~~~~~~~~~~~
@@ -4754,6 +4757,7 @@ GuildSticker
 
 .. autoclass:: GuildSticker()
     :members:
+    :inherited-members:
 
 RawMessageDeleteEvent
 ~~~~~~~~~~~~~~~~~~~~~~~
