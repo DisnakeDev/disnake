@@ -517,7 +517,10 @@ class Permissions(BaseFlags):
 
     @make_permission_alias("send_messages")
     def create_forum_posts(self) -> int:
-        """:class:`bool`: An alias for :attr:`send_messages`."""
+        """:class:`bool`: An alias for :attr:`send_messages`.
+
+        .. versionadded:: 2.5
+        """
         return 1 << 11
 
     @flag_value
