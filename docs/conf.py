@@ -72,6 +72,7 @@ rst_prolog = """
 .. |maybecoro| replace:: This function *could be a* |coroutine_link|_.
 .. |coroutine_link| replace:: *coroutine*
 .. |components_type| replace:: Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[:class:`disnake.ui.WrappedComponent`]]]]
+.. |resource_type| replace:: Union[:class:`bytes`, :class:`.Asset`, :class:`.Emoji`, :class:`.PartialEmoji`, :class:`.StickerItem`, :class:`.Sticker`]
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
 """
 
@@ -231,7 +232,7 @@ html_experimental_html5_writer = True
 html_theme = "basic"
 
 html_context = {
-    "discord_invite": "https://discord.gg/gJDbCw8aQy",
+    "discord_invite": "https://discord.gg/disnake",
     "discord_extensions": [
         ("disnake.ext.commands", "ext/commands"),
         ("disnake.ext.tasks", "ext/tasks"),
@@ -239,7 +240,7 @@ html_context = {
 }
 
 resource_links = {
-    "disnake": "https://discord.gg/gJDbCw8aQy",
+    "disnake": "https://discord.gg/disnake",
     "issues": f"{github_repo}/issues",
     "discussions": f"{github_repo}/discussions",
     "examples": f"{github_repo}/tree/{git_ref}/examples",
@@ -424,5 +425,5 @@ texinfo_documents = [
 def setup(app):
     if app.config.language == "ja":
         app.config.intersphinx_mapping["py"] = ("https://docs.python.org/ja/3", None)
-        app.config.html_context["discord_invite"] = "https://discord.gg/gJDbCw8aQy"
-        app.config.resource_links["disnake"] = "https://discord.gg/gJDbCw8aQy"
+        app.config.html_context["discord_invite"] = "https://discord.gg/disnake"
+        app.config.resource_links["disnake"] = "https://discord.gg/disnake"

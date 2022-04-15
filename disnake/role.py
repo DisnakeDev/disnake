@@ -33,7 +33,7 @@ from .errors import InvalidArgument
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .permissions import Permissions
-from .utils import MISSING, _bytes_to_base64_data, _get_as_snowflake, snowflake_time
+from .utils import MISSING, _assetbytes_to_base64_data, _get_as_snowflake, snowflake_time
 
 __all__ = (
     "RoleTags",
@@ -43,6 +43,7 @@ __all__ = (
 if TYPE_CHECKING:
     import datetime
 
+    from .asset import AssetBytes
     from .guild import Guild
     from .member import Member
     from .state import ConnectionState
@@ -403,7 +404,7 @@ class Role(Hashable):
         colour: Union[Colour, int] = MISSING,
         color: Union[Colour, int] = MISSING,
         hoist: bool = MISSING,
-        icon: Optional[bytes] = MISSING,
+        icon: Optional[AssetBytes] = MISSING,
         emoji: Optional[str] = MISSING,
         mentionable: bool = MISSING,
         position: int = MISSING,
@@ -434,8 +435,12 @@ class Role(Hashable):
             The new colour to change to. (aliased to ``color`` as well)
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
-        icon: Optional[:class:`bytes`]
+        icon: Optional[|resource_type|]
             The role's new icon image (if the guild has the ``ROLE_ICONS`` feature).
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         emoji: Optional[:class:`str`]
             The role's new unicode emoji.
         mentionable: :class:`bool`
@@ -448,6 +453,8 @@ class Role(Hashable):
 
         Raises
         ------
+        NotFound
+            The ``icon`` asset couldn't be found.
         Forbidden
             You do not have permissions to change the role.
         HTTPException
@@ -455,6 +462,8 @@ class Role(Hashable):
         InvalidArgument
             An invalid position was given or the default
             role was asked to be moved.
+        TypeError
+            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -487,10 +496,7 @@ class Role(Hashable):
             payload["mentionable"] = mentionable
 
         if icon is not MISSING:
-            if icon is None:
-                payload["icon"] = icon
-            else:
-                payload["icon"] = _bytes_to_base64_data(icon)
+            payload["icon"] = await _assetbytes_to_base64_data(icon)
 
         if emoji is not MISSING:
             payload["unicode_emoji"] = emoji
