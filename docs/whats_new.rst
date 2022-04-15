@@ -17,11 +17,12 @@ in specific versions.
 v2.5.0
 ---------
 
-This version adds support for API v10, improves API coverage by adding support for previously missing features,
+This version adds support for API v10 (which comes with a few breaking changes), forum channels,
+improves API coverage by adding support for previously missing features,
 and contains several miscellaneous enhancements and bugfixes.
 
 Regarding the message content intent:
-Note that earlier versions will continue working fine after the message content intent deadline (April 30th 2022),
+Note that earlier versions will continue working fine after the message content intent deadline (August 31st 2022),
 as long as the intent is enabled in the developer portal. However, from this version (``2.5.0``) onward, the intent needs to be
 enabled in the developer portal *and* your code.
 See `this page <https://guide.disnake.dev/popular-topics/intents#why-do-most-messages-have-no-content>`_ of the guide for more information.
