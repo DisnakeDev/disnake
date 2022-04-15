@@ -48,14 +48,12 @@ from typing import (
 
 import disnake
 
-from .context import Context
+from .context import AnyContext, Context
 from .errors import *
 
 if TYPE_CHECKING:
     from disnake.message import MessageableChannel
 
-    # TODO: don't use unbound generic `Context`
-    from .core import AnyContext
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES
 
@@ -72,7 +70,7 @@ __all__ = (
     "VoiceChannelConverter",
     "StageChannelConverter",
     "CategoryChannelConverter",
-    "StoreChannelConverter",
+    "ForumChannelConverter",
     "ThreadConverter",
     "ColourConverter",
     "ColorConverter",
@@ -237,8 +235,7 @@ class MemberConverter(IDConverter[disnake.Member]):
             return None
         return members[0]
 
-    # note: this uses `Context` instead of `AnyContext`, as it's not used by application commands
-    async def convert(self, ctx: Context, argument: str) -> disnake.Member:
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.Member:
         bot: disnake.Client = ctx.bot
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{15,20})>$", argument)
         guild = ctx.guild
@@ -254,9 +251,13 @@ class MemberConverter(IDConverter[disnake.Member]):
         else:
             user_id = int(match.group(1))
             if guild:
-                mentions = (
-                    user for user in ctx.message.mentions if isinstance(user, disnake.Member)
-                )
+                mentions: Iterable[disnake.Member]
+                if isinstance(ctx, Context):
+                    mentions = (
+                        user for user in ctx.message.mentions if isinstance(user, disnake.Member)
+                    )
+                else:
+                    mentions = []
                 result = guild.get_member(user_id) or _utils_get(mentions, id=user_id)
             else:
                 result = _get_from_guilds(bot, lambda g: g.get_member(user_id))
@@ -296,15 +297,22 @@ class UserConverter(IDConverter[disnake.User]):
         and it's not available in cache.
     """
 
-    # note: this uses `Context` instead of `AnyContext`, as it's not used by application commands
-    async def convert(self, ctx: Context, argument: str) -> disnake.User:
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.User:
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{15,20})>$", argument)
         state = ctx._state
         bot: disnake.Client = ctx.bot
+        result: Optional[Union[disnake.User, disnake.Member]] = None
 
         if match is not None:
             user_id = int(match.group(1))
-            result = bot.get_user(user_id) or _utils_get(ctx.message.mentions, id=user_id)
+
+            mentions: Iterable[Union[disnake.User, disnake.Member]]
+            if isinstance(ctx, Context):
+                mentions = ctx.message.mentions
+            else:
+                mentions = []
+            result = bot.get_user(user_id) or _utils_get(mentions, id=user_id)
+
             if result is None:
                 try:
                     result = await bot.fetch_user(user_id)
@@ -584,8 +592,10 @@ class CategoryChannelConverter(IDConverter[disnake.CategoryChannel]):
         )
 
 
-class StoreChannelConverter(IDConverter[disnake.StoreChannel]):
-    """Converts to a :class:`~disnake.StoreChannel`.
+class ForumChannelConverter(IDConverter[disnake.ForumChannel]):
+    """Converts to a :class:`~disnake.ForumChannel`.
+
+    .. versionadded:: 2.5
 
     All lookups are via the local guild. If in a DM context, then the lookup
     is done by the global cache.
@@ -594,14 +604,12 @@ class StoreChannelConverter(IDConverter[disnake.StoreChannel]):
 
     1. Lookup by ID.
     2. Lookup by mention.
-    3. Lookup by name.
-
-    .. versionadded:: 1.7
+    3. Lookup by name
     """
 
-    async def convert(self, ctx: AnyContext, argument: str) -> disnake.StoreChannel:
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.ForumChannel:
         return GuildChannelConverter._resolve_channel(
-            ctx, argument, "channels", disnake.StoreChannel
+            ctx, argument, "forum_channels", disnake.ForumChannel
         )
 
 
@@ -1157,7 +1165,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
     disnake.Emoji: EmojiConverter,
     disnake.PartialEmoji: PartialEmojiConverter,
     disnake.CategoryChannel: CategoryChannelConverter,
-    disnake.StoreChannel: StoreChannelConverter,
+    disnake.ForumChannel: ForumChannelConverter,
     disnake.Thread: ThreadConverter,
     disnake.abc.GuildChannel: GuildChannelConverter,
     disnake.GuildSticker: GuildStickerConverter,

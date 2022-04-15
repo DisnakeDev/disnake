@@ -30,6 +30,7 @@ import logging
 import signal
 import sys
 import traceback
+from datetime import datetime, timedelta
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -90,14 +91,16 @@ from .widget import Widget
 if TYPE_CHECKING:
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime, User as ABCUser
     from .app_commands import APIApplicationCommand
+    from .asset import AssetBytes
     from .channel import DMChannel
     from .member import Member
     from .message import Message
     from .role import Role
+    from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
 
 
-__all__ = ("Client",)
+__all__ = ("Client", "SessionStartLimit")
 
 Coro = TypeVar("Coro", bound=Callable[..., Coroutine[Any, Any, Any]])
 
@@ -138,6 +141,51 @@ def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
     finally:
         _log.info("Closing the event loop.")
         loop.close()
+
+
+class SessionStartLimit:
+    """A class that contains information about the current session start limit,
+    at the time when the client connected for the first time.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    total: :class:`int`
+        The total number of allowed session starts.
+    remaining: :class:`int`
+        The remaining number of allowed session starts.
+    reset_after: :class:`int`
+        The number of milliseconds after which the :attr:`.remaining` limit resets,
+        relative to when the client connected.
+        See also :attr:`reset_time`.
+    max_concurrency: :class:`int`
+        The number of allowed ``IDENTIFY`` requests per 5 seconds.
+    reset_time: :class:`datetime.datetime`
+        The approximate time at which which the :attr:`.remaining` limit resets.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "total",
+        "remaining",
+        "reset_after",
+        "max_concurrency",
+        "reset_time",
+    )
+
+    def __init__(self, data: SessionStartLimitPayload):
+        self.total: int = data["total"]
+        self.remaining: int = data["remaining"]
+        self.reset_after: int = data["reset_after"]
+        self.max_concurrency: int = data["max_concurrency"]
+
+        self.reset_time: datetime = utils.utcnow() + timedelta(milliseconds=self.reset_after)
+
+    def __repr__(self):
+        return (
+            f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
+            f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}>"
+        )
 
 
 class Client:
@@ -265,6 +313,11 @@ class Client:
     asyncio_debug: :class:`bool`
         Whether to enable asyncio debugging when the client starts.
         Defaults to False.
+    session_start_limit: Optional[:class:`SessionStartLimit`]
+        Information about the current session start limit.
+        Only available after initiating the connection.
+
+        .. versionadded:: 2.5
     """
 
     def __init__(
@@ -281,6 +334,7 @@ class Client:
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.shard_id: Optional[int] = options.get("shard_id")
         self.shard_count: Optional[int] = options.get("shard_count")
+        self.session_start_limit: Optional[SessionStartLimit] = None
 
         connector: Optional[aiohttp.BaseConnector] = options.pop("connector", None)
         proxy: Optional[str] = options.pop("proxy", None)
@@ -685,11 +739,16 @@ class Client:
         ConnectionClosed
             The websocket connection has been terminated.
         """
-        backoff = ExponentialBackoff()
+        _, gateway, session_start_limit = await self.http.get_bot_gateway()
+        self.session_start_limit = SessionStartLimit(session_start_limit)
+
         ws_params = {
             "initial": True,
             "shard_id": self.shard_id,
+            "gateway": gateway,
         }
+
+        backoff = ExponentialBackoff()
         while not self.is_closed():
             try:
                 coro = DiscordWebSocket.from_client(self, **ws_params)
@@ -873,7 +932,7 @@ class Client:
     @property
     def activity(self) -> Optional[ActivityTypes]:
         """Optional[:class:`.BaseActivity`]: The activity being used upon logging in."""
-        return create_activity(self._connection._activity)
+        return create_activity(self._connection._activity, state=self._connection)
 
     @activity.setter
     def activity(self, value: Optional[ActivityTypes]) -> None:
@@ -1610,7 +1669,7 @@ class Client:
         *,
         name: str,
         region: Union[VoiceRegion, str] = None,
-        icon: bytes = MISSING,
+        icon: AssetBytes = MISSING,
         code: str = MISSING,
     ) -> Guild:
         """|coro|
@@ -1629,9 +1688,13 @@ class Client:
             .. deprecated:: 2.5
 
                 This no longer has any effect.
-        icon: Optional[:class:`bytes`]
-            The :term:`py:bytes-like object` representing the icon. See :meth:`.ClientUser.edit`
-            for more details on what is expected.
+        icon: |resource_type|
+            The icon of the guild.
+            See :meth:`.ClientUser.edit` for more details on what is expected.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         code: :class:`str`
             The code for a template to create the guild with.
 
@@ -1639,10 +1702,14 @@ class Client:
 
         Raises
         ------
+        NotFound
+            The ``icon`` asset couldn't be found.
         HTTPException
             Guild creation failed.
         InvalidArgument
             Invalid icon image format given. Must be PNG or JPG.
+        TypeError
+            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
 
         Returns
         -------
@@ -1651,7 +1718,7 @@ class Client:
             added to cache.
         """
         if icon is not MISSING:
-            icon_base64 = utils._bytes_to_base64_data(icon)
+            icon_base64 = await utils._assetbytes_to_base64_data(icon)
         else:
             icon_base64 = None
 

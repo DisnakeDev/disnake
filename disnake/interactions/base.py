@@ -28,12 +28,13 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
+from datetime import timedelta
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast, overload
 
 from .. import utils
 from ..app_commands import OptionChoice
 from ..channel import ChannelType, PartialMessageable
-from ..enums import InteractionResponseType, InteractionType, WebhookType, try_enum
+from ..enums import InteractionResponseType, InteractionType, Locale, WebhookType, try_enum
 from ..errors import (
     HTTPException,
     InteractionNotEditable,
@@ -68,7 +69,6 @@ if TYPE_CHECKING:
         CategoryChannel,
         PartialMessageable,
         StageChannel,
-        StoreChannel,
         TextChannel,
         VoiceChannel,
     )
@@ -95,7 +95,6 @@ if TYPE_CHECKING:
         StageChannel,
         TextChannel,
         CategoryChannel,
-        StoreChannel,
         Thread,
         PartialMessageable,
     ]
@@ -123,20 +122,27 @@ class Interaction:
         The application ID that the interaction was for.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
-    guild_locale: Optional[:class:`str`]
+    guild_locale: Optional[:class:`Locale`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
     channel_id: :class:`int`
         The channel ID the interaction was sent from.
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
-    locale: :class:`str`
+    locale: :class:`Locale`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
 
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
@@ -164,6 +170,7 @@ class Interaction:
         "_cs_followup",
         "_cs_channel",
         "_cs_me",
+        "_cs_expires_at",
     )
 
     def __init__(self, *, data: InteractionPayload, state: ConnectionState):
@@ -181,8 +188,8 @@ class Interaction:
 
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
-        self.locale: str = data["locale"]
-        self.guild_locale: Optional[str] = data.get("guild_locale")
+        self.locale: Locale = try_enum(Locale, data["locale"])
+        self.guild_locale: Optional[Locale] = try_enum(Locale, data.get("guild_locale"))
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
         self._permissions = None
@@ -278,6 +285,27 @@ class Interaction:
         }
         return Webhook.from_state(data=payload, state=self._state)
 
+    @utils.cached_slot_property("_cs_expires_at")
+    def expires_at(self) -> datetime:
+        """:class:`datetime.datetime`: Returns the interaction's expiration time in UTC.
+
+        This is exactly 15 minutes after the interaction was created.
+
+        .. versionadded:: 2.5
+        """
+        return self.created_at + timedelta(minutes=15)
+
+    def is_expired(self) -> bool:
+        """Whether the interaction can still be used to make requests to Discord.
+
+        This does not take into account the 3 second limit for the initial response.
+
+        .. versionadded:: 2.5
+
+        :return type: :class:`bool`
+        """
+        return self.expires_at <= utils.utcnow()
+
     async def original_message(self) -> InteractionMessage:
         """|coro|
 
@@ -321,8 +349,8 @@ class Interaction:
 
     async def edit_original_message(
         self,
-        *,
         content: Optional[str] = MISSING,
+        *,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -351,7 +379,7 @@ class Interaction:
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
@@ -498,7 +526,7 @@ class Interaction:
 
     async def send(
         self,
-        content: Any = None,
+        content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -578,7 +606,7 @@ class Interaction:
         else:
             sender = self.response.send_message
         await sender(
-            content=content,  # type: ignore
+            content=content,
             embed=embed,
             embeds=embeds,
             file=file,
@@ -698,7 +726,7 @@ class InteractionResponse:
 
     async def send_message(
         self,
-        content: Any = None,
+        content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -854,8 +882,8 @@ class InteractionResponse:
 
     async def edit_message(
         self,
+        content: Optional[str] = MISSING,
         *,
-        content: Any = MISSING,
         embed: Optional[Embed] = MISSING,
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
@@ -949,6 +977,13 @@ class InteractionResponse:
         payload = {}
         if content is not MISSING:
             payload["content"] = None if content is None else str(content)
+
+        if file is not MISSING and files is not MISSING:
+            raise TypeError("cannot mix file and files keyword arguments")
+
+        if file is not MISSING:
+            files = [file]
+
         if embed is not MISSING and embeds is not MISSING:
             raise TypeError("cannot mix both embed and embeds keyword arguments")
 
@@ -958,15 +993,8 @@ class InteractionResponse:
             payload["embeds"] = [e.to_dict() for e in embeds]
             for embed in embeds:
                 if embed._files:
-                    raise NotImplementedError(
-                        "Embed images in edit interaction responses are not supported"
-                    )
-
-        if file is not MISSING and files is not MISSING:
-            raise TypeError("cannot mix file and files keyword arguments")
-
-        if file is not MISSING:
-            files = [file]
+                    files = files or []
+                    files += embed._files
 
         if files is not MISSING and len(files) > 10:
             raise ValueError("files cannot exceed maximum of 10 elements")
@@ -1201,23 +1229,128 @@ class InteractionMessage(Message):
     :meth:`edit` and :meth:`delete` to work.
 
     .. versionadded:: 2.0
+
+    Attributes
+    ----------
+    type: :class:`MessageType`
+        The type of message.
+    author: Union[:class:`Member`, :class:`abc.User`]
+        A :class:`Member` that sent the message. If :attr:`channel` is a
+        private channel, then it is a :class:`User` instead.
+    content: :class:`str`
+        The actual contents of the message.
+    embeds: List[:class:`Embed`]
+        A list of embeds the message has.
+    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+        The :class:`TextChannel` or :class:`Thread` that the message was sent from.
+        Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
+    reference: Optional[:class:`~disnake.MessageReference`]
+        The message that this message references. This is only applicable to message replies.
+    interaction: Optional[:class:`~disnake.InteractionReference`]
+        The interaction that this message references.
+        This exists only when the message is a response to an interaction without an existing message.
+
+        .. versionadded:: 2.1
+
+    mention_everyone: :class:`bool`
+        Specifies if the message mentions everyone.
+
+        .. note::
+
+            This does not check if the ``@everyone`` or the ``@here`` text is in the message itself.
+            Rather this boolean indicates if either the ``@everyone`` or the ``@here`` text is in the message
+            **and** it did end up mentioning.
+    mentions: List[:class:`abc.User`]
+        A list of :class:`Member` that were mentioned. If the message is in a private message
+        then the list will be of :class:`User` instead.
+
+        .. warning::
+
+            The order of the mentions list is not in any particular order so you should
+            not rely on it. This is a Discord limitation, not one with the library.
+    role_mentions: List[:class:`Role`]
+        A list of :class:`Role` that were mentioned. If the message is in a private message
+        then the list is always empty.
+    id: :class:`int`
+        The message ID.
+    webhook_id: Optional[:class:`int`]
+        The ID of the application that sent this message.
+    attachments: List[:class:`Attachment`]
+        A list of attachments given to a message.
+    pinned: :class:`bool`
+        Specifies if the message is currently pinned.
+    flags: :class:`MessageFlags`
+        Extra features of the message.
+    reactions : List[:class:`Reaction`]
+        Reactions to a message. Reactions can be either custom emoji or standard unicode emoji.
+    stickers: List[:class:`StickerItem`]
+        A list of sticker items given to the message.
+    components: List[:class:`Component`]
+        A list of components in the message.
+    guild: Optional[:class:`Guild`]
+        The guild that the message belongs to, if applicable.
     """
 
     __slots__ = ()
     _state: _InteractionMessageState
 
+    @overload
     async def edit(
         self,
-        content: Optional[str] = MISSING,
-        embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
-        file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
-        view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = None,
+        content: Optional[str] = ...,
+        *,
+        embed: Optional[Embed] = ...,
+        file: File = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embed: Optional[Embed] = ...,
+        files: List[File] = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+    ) -> InteractionMessage:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embeds: List[Embed] = ...,
+        file: File = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+    ) -> InteractionMessage:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
+        attachments: List[Attachment] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+    ) -> InteractionMessage:
+        ...
+
+    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
 
         Edits the message.
@@ -1231,7 +1364,7 @@ class InteractionMessage(Message):
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
@@ -1284,22 +1417,16 @@ class InteractionMessage(Message):
         :class:`InteractionMessage`
             The newly edited message.
         """
+        if self._state._interaction.is_expired():
+            return await super().edit(content=content, **fields)
+
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
-        if attachments is MISSING and (file or files):
-            attachments = self.attachments
+        # this isn't necessary when using the superclass, as the implementation there takes care of attachments
+        if "attachments" not in fields and (fields.get("file") or fields.get("files")):
+            fields["attachments"] = self.attachments
 
-        return await self._state._interaction.edit_original_message(
-            content=content,
-            embeds=embeds,
-            embed=embed,
-            file=file,
-            files=files,
-            attachments=attachments,
-            view=view,
-            components=components,
-            allowed_mentions=allowed_mentions,
-        )
+        return await self._state._interaction.edit_original_message(content=content, **fields)
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
         """|coro|
@@ -1321,6 +1448,8 @@ class InteractionMessage(Message):
         HTTPException
             Deleting the message failed.
         """
+        if self._state._interaction.is_expired():
+            return await super().delete(delay=delay)
         if delay is not None:
 
             async def inner_call(delay: float = delay):

@@ -232,6 +232,7 @@ class GuildChannel(ABC):
     - :class:`.VoiceChannel`
     - :class:`.CategoryChannel`
     - :class:`.StageChannel`
+    - :class:`.ForumChannel`
 
     This ABC must also implement :class:`.abc.Snowflake`.
 
@@ -814,7 +815,7 @@ class GuildChannel(ABC):
         overwrite: Optional[:class:`.PermissionOverwrite`]
             The permissions to allow and deny to the target, or ``None`` to
             delete the overwrite.
-        \*\*permissions
+        **permissions
             A keyword argument list of permissions to set for ease of use.
             Cannot be mixed with ``overwrite``.
         reason: Optional[:class:`str`]
@@ -1223,7 +1224,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embed: Embed = ...,
@@ -1242,7 +1243,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embed: Embed = ...,
@@ -1261,7 +1262,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embeds: List[Embed] = ...,
@@ -1280,7 +1281,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embeds: List[Embed] = ...,
@@ -1298,7 +1299,7 @@ class Messageable:
 
     async def send(
         self,
-        content: Any = None,
+        content: Optional[str] = None,
         *,
         tts: bool = False,
         embed: Embed = None,
@@ -1319,8 +1320,9 @@ class Messageable:
         Sends a message to the destination with the content given.
 
         The content must be a type that can convert to a string through ``str(content)``.
-        If the content is set to ``None`` (the default), then the ``embed`` parameter must
-        be provided.
+
+        At least one of ``content``, ``embed``/``embeds``, ``file``/``files``
+        or ``stickers`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
         single :class:`.File` object. To upload multiple files, the ``files``

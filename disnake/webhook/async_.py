@@ -38,6 +38,7 @@ from typing import (
     Literal,
     NamedTuple,
     Optional,
+    Sequence,
     Tuple,
     TypeVar,
     Union,
@@ -71,6 +72,7 @@ if TYPE_CHECKING:
     import datetime
 
     from ..abc import Snowflake
+    from ..asset import AssetBytes
     from ..channel import TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
@@ -79,6 +81,7 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..state import ConnectionState
+    from ..sticker import GuildSticker, StickerItem
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui.action_row import Components
@@ -470,13 +473,18 @@ class AsyncWebhookAdapter:
         return self.request(r, session=session)
 
 
-class ExecuteWebhookParameters(NamedTuple):
+class DictPayloadParameters(NamedTuple):
+    payload: Dict[str, Any]
+    files: Optional[List[File]]
+
+
+class PayloadParameters(NamedTuple):
     payload: Optional[Dict[str, Any]]
     multipart: Optional[List[Dict[str, Any]]]
     files: Optional[List[File]]
 
 
-def handle_message_parameters(
+def handle_message_parameters_dict(
     content: Optional[str] = MISSING,
     *,
     username: str = MISSING,
@@ -492,7 +500,8 @@ def handle_message_parameters(
     components: Optional[Components] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
-) -> ExecuteWebhookParameters:
+    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
         raise TypeError("Cannot mix file and files keyword arguments.")
     if embeds is not MISSING and embed is not MISSING:
@@ -543,13 +552,53 @@ def handle_message_parameters(
     elif previous_allowed_mentions is not None:
         payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
 
-    multipart = []
+    if stickers is not MISSING:
+        payload["sticker_ids"] = [s.id for s in stickers]
 
-    if files:
-        multipart = to_multipart_with_attachments(payload, files)
-        payload = None
+    return DictPayloadParameters(payload=payload, files=files)
 
-    return ExecuteWebhookParameters(payload=payload, multipart=multipart, files=files)
+
+def handle_message_parameters(
+    content: Optional[str] = MISSING,
+    *,
+    username: str = MISSING,
+    avatar_url: Any = MISSING,
+    tts: bool = False,
+    ephemeral: bool = False,
+    file: File = MISSING,
+    files: List[File] = MISSING,
+    attachments: List[Attachment] = MISSING,
+    embed: Optional[Embed] = MISSING,
+    embeds: List[Embed] = MISSING,
+    view: Optional[View] = MISSING,
+    components: Optional[Components] = MISSING,
+    allowed_mentions: Optional[AllowedMentions] = MISSING,
+    previous_allowed_mentions: Optional[AllowedMentions] = None,
+    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+) -> PayloadParameters:
+    params = handle_message_parameters_dict(
+        content=content,
+        username=username,
+        avatar_url=avatar_url,
+        tts=tts,
+        ephemeral=ephemeral,
+        file=file,
+        files=files,
+        attachments=attachments,
+        embed=embed,
+        embeds=embeds,
+        view=view,
+        components=components,
+        allowed_mentions=allowed_mentions,
+        previous_allowed_mentions=previous_allowed_mentions,
+        stickers=stickers,
+    )
+
+    if params.files:
+        multipart = to_multipart_with_attachments(params.payload, params.files)
+        return PayloadParameters(payload=None, multipart=multipart, files=params.files)
+
+    return PayloadParameters(payload=params.payload, multipart=None, files=params.files)
 
 
 async_context: ContextVar[AsyncWebhookAdapter] = ContextVar(
@@ -713,7 +762,7 @@ class WebhookMessage(Message):
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the ``embeds`` parameter.
             Could be ``None`` to remove the embed.
@@ -1239,7 +1288,7 @@ class Webhook(BaseWebhook):
         *,
         reason: Optional[str] = None,
         name: Optional[str] = MISSING,
-        avatar: Optional[bytes] = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
         channel: Optional[Snowflake] = None,
         prefer_auth: bool = True,
     ) -> Webhook:
@@ -1251,8 +1300,12 @@ class Webhook(BaseWebhook):
         ----------
         name: Optional[:class:`str`]
             The webhook's new default name.
-        avatar: Optional[:class:`bytes`]
-            A :term:`py:bytes-like object` representing the webhook's new default avatar.
+        avatar: Optional[|resource_type|]
+            The webhook's new default avatar.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         channel: Optional[:class:`abc.Snowflake`]
             The webhook's new channel. This requires an authenticated webhook.
 
@@ -1271,13 +1324,15 @@ class Webhook(BaseWebhook):
 
         Raises
         ------
+        NotFound
+            This webhook does not exist or the ``avatar`` asset couldn't be found.
         HTTPException
             Editing the webhook failed.
-        NotFound
-            This webhook does not exist.
         InvalidArgument
             This webhook does not have a token associated with it
             or it tried editing a channel without authentication.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -1292,7 +1347,7 @@ class Webhook(BaseWebhook):
             payload["name"] = str(name) if name is not None else None
 
         if avatar is not MISSING:
-            payload["avatar"] = utils._bytes_to_base64_data(avatar) if avatar is not None else None
+            payload["avatar"] = await utils._assetbytes_to_base64_data(avatar)
 
         adapter = async_context.get()
 
@@ -1331,7 +1386,7 @@ class Webhook(BaseWebhook):
     @overload
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1353,7 +1408,7 @@ class Webhook(BaseWebhook):
     @overload
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1374,7 +1429,7 @@ class Webhook(BaseWebhook):
 
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
@@ -1406,7 +1461,7 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        content: :class:`str`
+        content: Optional[:class:`str`]
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1647,7 +1702,7 @@ class Webhook(BaseWebhook):
         message_id: :class:`int`
             The ID of the message to edit.
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.

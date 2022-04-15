@@ -6,7 +6,7 @@ body:
     attributes:
       value: >
         Thanks for taking the time to fill out a bug.
-        If you want real-time support, consider joining our [Discord server](https://discord.gg/gJDbCw8aQy) instead.
+        If you want real-time support, consider joining our [Discord server](https://discord.gg/disnake) instead.
 
         Please note that this form is for bugs only!
   - type: input

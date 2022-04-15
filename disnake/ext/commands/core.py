@@ -48,11 +48,10 @@ from typing import (
 )
 
 import disnake
-from disnake.interactions import ApplicationCommandInteraction
 
 from ._types import _BaseCommand
 from .cog import Cog
-from .context import Context
+from .context import AnyContext, Context
 from .converter import Greedy, get_converter, run_converters
 from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
 from .errors import *
@@ -98,7 +97,6 @@ T = TypeVar("T")
 CogT = TypeVar("CogT", bound="Cog")
 CommandT = TypeVar("CommandT", bound="Command")
 ContextT = TypeVar("ContextT", bound="Context")
-AnyContext = Union[Context, ApplicationCommandInteraction]
 GroupT = TypeVar("GroupT", bound="Group")
 HookT = TypeVar("HookT", bound="Hook")
 ErrorT = TypeVar("ErrorT", bound="Error")
@@ -1739,7 +1737,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
 
     Parameters
     ----------
-    \*checks: Callable[[:class:`Context`], :class:`bool`]
+    *checks: Callable[[:class:`Context`], :class:`bool`]
         An argument list of checks that have been decorated with
         the :func:`check` decorator.
 

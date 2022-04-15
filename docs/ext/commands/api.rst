@@ -326,6 +326,8 @@ Helper Functions
 
 .. autofunction:: disnake.ext.commands.Param
 
+.. autofunction:: disnake.ext.commands.option_enum
+
 .. autofunction:: disnake.ext.commands.inject
 
 .. autofunction:: disnake.ext.commands.register_injection
@@ -755,7 +757,7 @@ Converters
 .. autoclass:: disnake.ext.commands.CategoryChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.StoreChannelConverter
+.. autoclass:: disnake.ext.commands.ForumChannelConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.ThreadConverter
