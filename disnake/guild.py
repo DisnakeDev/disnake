@@ -2169,7 +2169,7 @@ class Guild(Hashable):
         NotFound
             The welcome screen is not set up, or you do not have permission to view it.
         HTTPException
-            Editing the welcome screen failed.
+            Retrieving the welcome screen failed.
 
         Returns
         -------
