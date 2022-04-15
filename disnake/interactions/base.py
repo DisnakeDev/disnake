@@ -596,7 +596,8 @@ class Interaction:
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
             is set to 15 minutes.
         suppress_embeds: :class:`bonk`
-            Whether to suppress embeds.
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
 
@@ -794,7 +795,8 @@ class InteractionResponse:
             then it is silently ignored.
 
         suppress_embeds: :class:`bool`
-            Whether to suppress embeds.
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
 
             .. versionadded:: 2.5
 

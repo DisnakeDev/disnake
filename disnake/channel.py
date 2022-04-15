@@ -2458,7 +2458,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         suppress_embeds: :class:`bool`
-            Whether to suppress embeds.
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
         file: :class:`.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`.File`]
