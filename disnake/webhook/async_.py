@@ -490,7 +490,7 @@ def handle_message_parameters_dict(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: bool = False,
+    ephemeral: bool = None,
     suppress_embeds: bool = None,
     file: File = MISSING,
     files: List[File] = MISSING,
@@ -541,11 +541,12 @@ def handle_message_parameters_dict(
     if username:
         payload["username"] = username
 
-    payload["flags"] = 0
-    if suppress_embeds:
-        payload["flags"] += MessageFlagsEnum.suppress_embeds.value
-    if ephemeral:
-        payload["flags"] += MessageFlagsEnum.ephemeral.value
+    if ephemeral is not None or suppress_embeds is not None:
+        payload["flags"] = 0
+        if suppress_embeds:
+            payload["flags"] += MessageFlagsEnum.suppress_embeds.value
+        if ephemeral:
+            payload["flags"] += MessageFlagsEnum.ephemeral.value
 
     if allowed_mentions:
         if previous_allowed_mentions is not None:
@@ -569,8 +570,8 @@ def handle_message_parameters(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: bool = False,
-    suppress_embeds: bool = False,
+    ephemeral: bool = None,
+    suppress_embeds: bool = None,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: List[Attachment] = MISSING,
