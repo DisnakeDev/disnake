@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from .asset import Asset
 from .enums import (
@@ -34,19 +34,20 @@ from .enums import (
     GuildScheduledEventStatus,
     try_enum,
 )
-from .member import Member
+from .iterators import GuildScheduledEventUserIterator
 from .mixins import Hashable
 from .user import User
 from .utils import (
     MISSING,
-    _bytes_to_base64_data,
+    _assetbytes_to_base64_data,
     _get_as_snowflake,
     cached_slot_property,
     parse_time,
 )
 
 if TYPE_CHECKING:
-    from .abc import GuildChannel
+    from .abc import GuildChannel, Snowflake
+    from .asset import AssetBytes
     from .guild import Guild
     from .state import ConnectionState
     from .types.guild_scheduled_event import (
@@ -265,7 +266,7 @@ class GuildScheduledEvent(Hashable):
         *,
         name: str = MISSING,
         description: Optional[str] = MISSING,
-        image: Optional[bytes] = MISSING,
+        image: Optional[AssetBytes] = MISSING,
         channel_id: Optional[int] = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         scheduled_start_time: datetime = MISSING,
@@ -291,10 +292,13 @@ class GuildScheduledEvent(Hashable):
             The name of the guild scheduled event.
         description: Optional[:class:`str`]
             The description of the guild scheduled event.
-        image: Optional[:class:`bytes`]
+        image: Optional[|resource_type|]
             The cover image of the guild scheduled event. Set to ``None`` to remove the image.
 
             .. versionadded:: 2.4
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
 
         channel_id: Optional[:class:`int`]
             The channel ID in which the guild scheduled event will be hosted.
@@ -319,9 +323,11 @@ class GuildScheduledEvent(Hashable):
         Forbidden
             You do not have proper permissions to edit the event.
         NotFound
-            The event does not exist.
+            The event does not exist or the ``image`` asset couldn't be found.
         HTTPException
             Editing the event failed.
+        TypeError
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -376,10 +382,7 @@ class GuildScheduledEvent(Hashable):
             fields["description"] = description
 
         if image is not MISSING:
-            if image is None:
-                fields["image"] = None
-            else:
-                fields["image"] = _bytes_to_base64_data(image)
+            fields["image"] = await _assetbytes_to_base64_data(image)
 
         if channel_id is not MISSING:
             if channel_id is not None and is_external:
@@ -403,17 +406,23 @@ class GuildScheduledEvent(Hashable):
         )
         return GuildScheduledEvent(state=self._state, data=data)
 
-    async def fetch_users(
+    def fetch_users(
         self,
         *,
         limit: Optional[int] = None,
         with_members: bool = True,
-        before_id: Optional[int] = None,
-        after_id: Optional[int] = None,
-    ) -> List[Union[Member, User]]:
+        before: Optional[Snowflake] = None,
+        after: Optional[Snowflake] = None,
+    ) -> GuildScheduledEventUserIterator:
         """|coro|
 
-        Retrieves a list of users subscribed to the guild scheduled event.
+        Returns an :class:`AsyncIterator` of users subscribed to the guild scheduled event.
+
+        If ``before`` is specified, users are returned in reverse order,
+        i.e. starting with the highest ID.
+
+        .. versionchanged:: 2.5
+            Now returns an :class:`AsyncIterator` instead of a list of the first 100 users.
 
         Parameters
         ----------
@@ -421,10 +430,10 @@ class GuildScheduledEvent(Hashable):
             The number of users to retrieve.
         with_members: :class:`bool`
             Whether to include some users as members. Defaults to ``True``.
-        before_id: Optional[:class:`int`]
-            Consider only users before given user ID.
-        after_id: Optional[:class:`int`]
-            Consider only users after given user ID.
+        before: Optional[:class:`abc.Snowflake`]
+            Retrieve users before this object.
+        after: Optional[:class:`abc.Snowflake`]
+            Retrieve users after this object.
 
         Raises
         ------
@@ -435,31 +444,28 @@ class GuildScheduledEvent(Hashable):
         HTTPException
             Retrieving the users failed.
 
-        Returns
-        -------
-        List[Union[:class:`Member`, :class:`User`]]
-            A list of users subscribed to the guild scheduled event.
+        Yields
+        ------
+        Union[:class:`User`, :class:`Member`]
+            The member (if retrievable) or user subscribed to the guild scheduled event.
+
+        Examples
+        --------
+
+        Usage ::
+
+            async for user in event.fetch_users(limit=500):
+                print(user.name)
+
+        Flattening into a list ::
+
+            users = await event.fetch_users(limit=250).flatten()
         """
-        raw_users = await self._state.http.get_guild_scheduled_event_users(
-            guild_id=self.guild_id,
-            event_id=self.id,
+
+        return GuildScheduledEventUserIterator(
+            self,
             limit=limit,
-            with_member=with_members,
-            before=before_id,
-            after=after_id,
+            with_members=with_members,
+            before=before,
+            after=after,
         )
-        users = []
-        user: Union[User, Member]
-
-        for data in raw_users:
-            user_data = data["user"]
-            member_data = data.get("member")
-            if member_data is not None and self.guild is not None:
-                user = self.guild.get_member(int(user_data["id"])) or Member(
-                    data=member_data, user_data=user_data, guild=self.guild, state=self._state
-                )
-            else:
-                user = self._state.store_user(data["user"])
-            users.append(user)
-
-        return users

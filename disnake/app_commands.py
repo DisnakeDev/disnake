@@ -100,11 +100,12 @@ def _validate_name(name: str) -> None:
     # used for slash command names and option names
     # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
 
-    assert name == name.lower() and re.fullmatch(r"[\w-]{1,32}", name), (
-        f"Slash command or option name '{name}' should be lowercase, "
-        "between 1 and 32 characters long, and only consist of "
-        "these symbols: a-z, 0-9, -, _, and other languages'/scripts' symbols"
-    )
+    if name != name.lower() or not re.fullmatch(r"[\w-]{1,32}", name):
+        raise InvalidArgument(
+            f"Slash command or option name '{name}' should be lowercase, "
+            "between 1 and 32 characters long, and only consist of "
+            "these symbols: a-z, 0-9, -, _, and other languages'/scripts' symbols"
+        )
 
 
 class OptionChoice:
@@ -191,8 +192,8 @@ class Option:
         min_value: float = None,
         max_value: float = None,
     ):
-        self.name: str = name.lower()
-        _validate_name(self.name)
+        _validate_name(name)
+        self.name: str = name
         self.description: str = description or "-"
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
@@ -207,7 +208,7 @@ class Option:
         self.max_value: Optional[float] = max_value
 
         if channel_types is not None and not all(isinstance(t, ChannelType) for t in channel_types):
-            raise InvalidArgument("channel_types must be instances of ChannelType")
+            raise InvalidArgument("channel_types must be a list of `ChannelType`s")
 
         self.channel_types: List[ChannelType] = channel_types or []
 
@@ -533,7 +534,6 @@ class SlashCommand(ApplicationCommand):
         options: List[Option] = None,
         default_permission: bool = True,
     ):
-        name = name.lower()
         _validate_name(name)
 
         super().__init__(

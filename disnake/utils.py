@@ -129,6 +129,7 @@ if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
     from .abc import Snowflake
+    from .asset import AssetBytes
     from .invite import Invite
     from .permissions import Permissions
     from .template import Template
@@ -463,7 +464,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     ----------
     iterable
         An iterable to search through.
-    \*\*attrs
+    **attrs
         Keyword arguments that denote attributes to search with.
     """
 
@@ -525,6 +526,24 @@ def _bytes_to_base64_data(data: bytes) -> str:
     mime = _get_mime_type_for_image(data)
     b64 = b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
+
+
+@overload
+async def _assetbytes_to_base64_data(data: None) -> None:
+    ...
+
+
+@overload
+async def _assetbytes_to_base64_data(data: AssetBytes) -> str:
+    ...
+
+
+async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str]:
+    if data is None:
+        return None
+    if not isinstance(data, (bytes, bytearray, memoryview)):
+        data = await data.read()
+    return _bytes_to_base64_data(data)
 
 
 if HAS_ORJSON:
@@ -826,8 +845,8 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     as_needed: :class:`bool`
         Whether to escape the markdown characters as needed. This
         means that it does not escape extraneous characters if it's
-        not necessary, e.g. ``**hello**`` is escaped into ``\*\*hello**``
-        instead of ``\*\*hello\*\*``. Note however that this can open
+        not necessary, e.g. ``**hello**`` is escaped into ``\\*\\*hello**``
+        instead of ``\\*\\*hello\\*\\*``. Note however that this can open
         you up to some clever syntax abuse. Defaults to ``False``.
     ignore_links: :class:`bool`
         Whether to leave links alone when escaping markdown. For example,

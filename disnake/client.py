@@ -91,6 +91,7 @@ from .widget import Widget
 if TYPE_CHECKING:
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime, User as ABCUser
     from .app_commands import APIApplicationCommand
+    from .asset import AssetBytes
     from .channel import DMChannel
     from .member import Member
     from .message import Message
@@ -931,7 +932,7 @@ class Client:
     @property
     def activity(self) -> Optional[ActivityTypes]:
         """Optional[:class:`.BaseActivity`]: The activity being used upon logging in."""
-        return create_activity(self._connection._activity)
+        return create_activity(self._connection._activity, state=self._connection)
 
     @activity.setter
     def activity(self, value: Optional[ActivityTypes]) -> None:
@@ -1668,7 +1669,7 @@ class Client:
         *,
         name: str,
         region: Union[VoiceRegion, str] = None,
-        icon: bytes = MISSING,
+        icon: AssetBytes = MISSING,
         code: str = MISSING,
     ) -> Guild:
         """|coro|
@@ -1687,9 +1688,13 @@ class Client:
             .. deprecated:: 2.5
 
                 This no longer has any effect.
-        icon: Optional[:class:`bytes`]
-            The :term:`py:bytes-like object` representing the icon. See :meth:`.ClientUser.edit`
-            for more details on what is expected.
+        icon: |resource_type|
+            The icon of the guild.
+            See :meth:`.ClientUser.edit` for more details on what is expected.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         code: :class:`str`
             The code for a template to create the guild with.
 
@@ -1697,10 +1702,14 @@ class Client:
 
         Raises
         ------
+        NotFound
+            The ``icon`` asset couldn't be found.
         HTTPException
             Guild creation failed.
         InvalidArgument
             Invalid icon image format given. Must be PNG or JPG.
+        TypeError
+            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
 
         Returns
         -------
@@ -1709,7 +1718,7 @@ class Client:
             added to cache.
         """
         if icon is not MISSING:
-            icon_base64 = utils._bytes_to_base64_data(icon)
+            icon_base64 = await utils._assetbytes_to_base64_data(icon)
         else:
             icon_base64 = None
 

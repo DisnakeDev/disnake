@@ -109,6 +109,9 @@ class SubCommandGroup(InvokableApplicationCommand):
     ----------
     name: :class:`str`
         The name of the group.
+    qualified_name: :class:`str`
+        The full command name, including parent names in the case of slash subcommands or groups.
+        For example, the qualified name for ``/one two three`` would be ``one two three``.
     option: :class:`.Option`
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
@@ -130,7 +133,6 @@ class SubCommandGroup(InvokableApplicationCommand):
         self.option = Option(
             name=self.name, description="-", type=OptionType.sub_command_group, options=[]
         )
-        self.name = self.option.name
         self.qualified_name: str = ""
 
     @property
@@ -183,6 +185,9 @@ class SubCommand(InvokableApplicationCommand):
     ----------
     name: :class:`str`
         The name of the subcommand.
+    qualified_name: :class:`str`
+        The full command name, including parent names in the case of slash subcommands or groups.
+        For example, the qualified name for ``/one two three`` would be ``one two three``.
     option: :class:`.Option`
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
@@ -226,7 +231,6 @@ class SubCommand(InvokableApplicationCommand):
             type=OptionType.sub_command,
             options=options,
         )
-        self.name = self.option.name
         self.qualified_name = ""
 
     @property
@@ -287,6 +291,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     ----------
     name: :class:`str`
         The name of the command.
+    qualified_name: :class:`str`
+        The full command name, including parent names in the case of slash subcommands or groups.
+        For example, the qualified name for ``/one two three`` would be ``one two three``.
     body: :class:`.SlashCommand`
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
@@ -340,8 +347,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             options=options or [],
             default_permission=default_permission,
         )
-        # `SlashCommand.__init__` converts names to lowercase, need to use that name here as well
-        self.qualified_name = self.name = self.body.name
 
     @property
     def description(self) -> str:
