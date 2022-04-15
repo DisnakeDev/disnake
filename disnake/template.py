@@ -27,7 +27,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional
 
-from .enums import VoiceRegion
 from .guild import Guild
 from .utils import MISSING, _assetbytes_to_base64_data, parse_time, warn_deprecated
 
@@ -171,7 +170,7 @@ class Template:
         )
 
     async def create_guild(
-        self, name: str, region: Optional[VoiceRegion] = None, icon: Optional[AssetBytes] = None
+        self, name: str, region: Optional[str] = None, icon: Optional[AssetBytes] = None
     ) -> Guild:
         """|coro|
 
@@ -183,12 +182,16 @@ class Template:
         ----------
         name: :class:`str`
             The name of the guild.
-        region: :class:`.VoiceRegion`
+        region: :class:`str`
             The region for the voice communication server.
 
             .. deprecated:: 2.5
 
                 This no longer has any effect.
+
+            .. versionchanged:: 2.6
+                No longer a ``VoiceRegion`` instance.
+
         icon: Optional[|resource_type|]
             The icon of the guild.
             See :meth:`.ClientUser.edit` for more details on what is expected.

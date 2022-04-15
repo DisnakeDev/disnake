@@ -52,14 +52,7 @@ import disnake.abc
 from . import utils
 from .asset import Asset
 from .context_managers import Typing
-from .enums import (
-    ChannelType,
-    StagePrivacyLevel,
-    VideoQualityMode,
-    VoiceRegion,
-    try_enum,
-    try_enum_to_int,
-)
+from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
 from .errors import ClientException, InvalidArgument
 from .file import File
 from .iterators import ArchivedThreadIterator
@@ -951,9 +944,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         self.guild = guild
         self.name: str = data["name"]
         rtc = data.get("rtc_region")
-        self.rtc_region: Optional[VoiceRegion] = (
-            try_enum(VoiceRegion, rtc) if rtc is not None else None
-        )
+        self.rtc_region: Optional[str] = rtc
         self.video_quality_mode: VideoQualityMode = try_enum(
             VideoQualityMode, data.get("video_quality_mode", 1)
         )
@@ -1060,11 +1051,14 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         The channel's preferred audio bitrate in bits per second.
     user_limit: :class:`int`
         The channel's limit for number of members that can be in a voice channel.
-    rtc_region: Optional[:class:`VoiceRegion`]
+    rtc_region: Optional[:class:`str`]
         The region for the voice channel's voice communication.
         A value of ``None`` indicates automatic voice region detection.
 
         .. versionadded:: 1.7
+
+        .. versionchanged:: 2.6
+            No longer a ``VoiceRegion`` instance.
 
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
@@ -1200,7 +1194,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         sync_permissions: int = ...,
         category: Optional[CategoryChannel] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
-        rtc_region: Optional[VoiceRegion] = ...,
+        rtc_region: Optional[str] = ...,
         video_quality_mode: VideoQualityMode = ...,
         nsfw: bool = ...,
         slowmode_delay: int = ...,
@@ -1247,11 +1241,14 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        rtc_region: Optional[:class:`VoiceRegion`]
+        rtc_region: Optional[:class:`str`]
             The new region for the voice channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
 
             .. versionadded:: 1.7
+
+            .. versionchanged:: 2.6
+                No longer a ``VoiceRegion`` instance.
 
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the voice channel's participants.
@@ -1332,9 +1329,13 @@ class StageChannel(VocalGuildChannel):
         The channel's preferred audio bitrate in bits per second.
     user_limit: :class:`int`
         The channel's limit for number of members that can be in a stage channel.
-    rtc_region: Optional[:class:`VoiceRegion`]
+    rtc_region: Optional[:class:`str`]
         The region for the stage channel's voice communication.
         A value of ``None`` indicates automatic voice region detection.
+
+        .. versionchanged:: 2.6
+                No longer a ``VoiceRegion`` instance.
+
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the stage channel's participants.
 
@@ -1523,7 +1524,7 @@ class StageChannel(VocalGuildChannel):
         sync_permissions: int = ...,
         category: Optional[CategoryChannel] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
-        rtc_region: Optional[VoiceRegion] = ...,
+        rtc_region: Optional[str] = ...,
         video_quality_mode: VideoQualityMode = ...,
         reason: Optional[str] = ...,
     ) -> Optional[StageChannel]:
@@ -1562,9 +1563,13 @@ class StageChannel(VocalGuildChannel):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        rtc_region: Optional[:class:`VoiceRegion`]
+        rtc_region: Optional[:class:`str`]
             The new region for the stage channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
+
+            .. versionchanged:: 2.6
+                No longer a ``VoiceRegion`` instance.
+
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the stage channel's participants.
 

@@ -65,7 +65,7 @@ from .appinfo import AppInfo
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
-from .enums import ApplicationCommandType, ChannelType, Status, VoiceRegion
+from .enums import ApplicationCommandType, ChannelType, Status
 from .errors import *
 from .flags import ApplicationFlags, Intents
 from .gateway import *
@@ -1668,7 +1668,7 @@ class Client:
         self,
         *,
         name: str,
-        region: Union[VoiceRegion, str] = None,
+        region: Optional[str] = None,
         icon: AssetBytes = MISSING,
         code: str = MISSING,
     ) -> Guild:
@@ -1682,12 +1682,16 @@ class Client:
         ----------
         name: :class:`str`
             The name of the guild.
-        region: :class:`.VoiceRegion`
+        region: Optional[:class:`str`]
             The region for the voice communication server.
 
             .. deprecated:: 2.5
 
                 This no longer has any effect.
+
+            .. versionchanged:: 2.6
+                No longer a ``VoiceRegion`` instance.
+
         icon: |resource_type|
             The icon of the guild.
             See :meth:`.ClientUser.edit` for more details on what is expected.
