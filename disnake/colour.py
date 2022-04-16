@@ -127,6 +127,11 @@ class Colour:
         """Constructs a :class:`Colour` from an HSV tuple."""
         rgb = colorsys.hsv_to_rgb(h, s, v)
         return cls.from_rgb(*(int(x * 255) for x in rgb))
+    
+    @classmethod
+    def from_hex(cls: Type[CT], hex: str) -> CT:
+        """Constructs a :class:`Colour` from hex value."""
+        return cls.from_rgb(*tuple(int(hex.replace("#","")[i:i+2], 16) for i in (0, 2, 4)))
 
     @classmethod
     def default(cls: Type[CT]) -> CT:
