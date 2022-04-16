@@ -2114,6 +2114,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`TextChannel`
             The newly created text channel.
         """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_text_channel(name, category=self, **options)
 
     async def create_voice_channel(self, name: str, **options: Any) -> VoiceChannel:
@@ -2126,6 +2128,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`VoiceChannel`
             The newly created voice channel.
         """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_voice_channel(name, category=self, **options)
 
     async def create_stage_channel(self, name: str, **options: Any) -> StageChannel:
@@ -2140,6 +2144,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`StageChannel`
             The newly created stage channel.
         """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_stage_channel(name, category=self, **options)
 
     async def create_forum_channel(self, name: str, **options: Any) -> ForumChannel:
@@ -2154,6 +2160,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`ForumChannel`
             The newly created forum channel.
         """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_forum_channel(name, category=self, **options)
 
 
