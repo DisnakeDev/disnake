@@ -1991,6 +1991,50 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
 
+    @overload
+    async def move(
+        self,
+        *,
+        beginning: bool,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def move(
+        self,
+        *,
+        end: bool,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: str = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def move(
+        self,
+        *,
+        before: Snowflake,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: str = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def move(
+        self,
+        *,
+        after: Snowflake,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: str = ...,
+    ) -> None:
+        ...
+
     @utils.copy_doc(disnake.abc.GuildChannel.move)
     async def move(self, **kwargs):
         kwargs.pop("category", None)
