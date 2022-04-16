@@ -842,16 +842,16 @@ class SyncWebhook(BaseWebhook):
     @overload
     def send(
         self,
-        content: Optional[str] = MISSING,
+        content: Optional[str] = ...,
         *,
-        username: str = MISSING,
-        avatar_url: Any = MISSING,
-        tts: bool = MISSING,
-        file: File = MISSING,
-        files: List[File] = MISSING,
-        embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
-        allowed_mentions: AllowedMentions = MISSING,
+        username: str = ...,
+        avatar_url: Any = ...,
+        tts: bool = ...,
+        file: File = ...,
+        files: List[File] = ...,
+        embed: Embed = ...,
+        embeds: List[Embed] = ...,
+        allowed_mentions: AllowedMentions = ...,
         wait: Literal[True],
     ) -> SyncWebhookMessage:
         ...
@@ -859,16 +859,16 @@ class SyncWebhook(BaseWebhook):
     @overload
     def send(
         self,
-        content: Optional[str] = MISSING,
+        content: Optional[str] = ...,
         *,
-        username: str = MISSING,
-        avatar_url: Any = MISSING,
-        tts: bool = MISSING,
-        file: File = MISSING,
-        files: List[File] = MISSING,
-        embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
-        allowed_mentions: AllowedMentions = MISSING,
+        username: str = ...,
+        avatar_url: Any = ...,
+        tts: bool = ...,
+        file: File = ...,
+        files: List[File] = ...,
+        embed: Embed = ...,
+        embeds: List[Embed] = ...,
+        allowed_mentions: AllowedMentions = ...,
         wait: Literal[False] = ...,
     ) -> None:
         ...

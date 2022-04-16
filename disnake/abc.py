@@ -923,10 +923,10 @@ class GuildChannel(ABC):
         self,
         *,
         beginning: bool,
-        offset: int = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        sync_permissions: bool = MISSING,
-        reason: Optional[str] = MISSING,
+        offset: int = ...,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
     ) -> None:
         ...
 
@@ -935,10 +935,10 @@ class GuildChannel(ABC):
         self,
         *,
         end: bool,
-        offset: int = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        sync_permissions: bool = MISSING,
-        reason: str = MISSING,
+        offset: int = ...,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: str = ...,
     ) -> None:
         ...
 
@@ -947,10 +947,10 @@ class GuildChannel(ABC):
         self,
         *,
         before: Snowflake,
-        offset: int = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        sync_permissions: bool = MISSING,
-        reason: str = MISSING,
+        offset: int = ...,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: str = ...,
     ) -> None:
         ...
 
@@ -959,10 +959,10 @@ class GuildChannel(ABC):
         self,
         *,
         after: Snowflake,
-        offset: int = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        sync_permissions: bool = MISSING,
-        reason: str = MISSING,
+        offset: int = ...,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: str = ...,
     ) -> None:
         ...
 
