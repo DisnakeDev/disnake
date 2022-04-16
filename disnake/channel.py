@@ -2433,7 +2433,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         Creates a thread in this forum channel.
 
-        You must have the :attr:`~Permissions.send_messages` permission to do this.
+        You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
 
         Parameters
         ----------
