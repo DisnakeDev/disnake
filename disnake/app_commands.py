@@ -358,7 +358,7 @@ class ApplicationCommand(ABC):
         return f"<{type(self).__name__} {attrs}>"
 
     def __str__(self) -> str:
-        return f"<{type(self).__name__} name={self.name!r}>"
+        return self.name
 
     def __eq__(self, other) -> bool:
         return (
