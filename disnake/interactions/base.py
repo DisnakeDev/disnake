@@ -864,9 +864,9 @@ class InteractionResponse:
 
         payload["flags"] = 0
         if suppress_embeds:
-            payload["flags"] += MessageFlagsEnum.suppress_embeds.value
+            payload["flags"] |= MessageFlagsEnum.suppress_embeds.value
         if ephemeral:
-            payload["flags"] += MessageFlagsEnum.ephemeral.value
+            payload["flags"] |= MessageFlagsEnum.ephemeral.value
 
         if view is not MISSING:
             payload["components"] = view.to_components()

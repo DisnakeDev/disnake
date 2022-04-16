@@ -544,9 +544,9 @@ def handle_message_parameters_dict(
     if ephemeral is not None or suppress_embeds is not None:
         payload["flags"] = 0
         if suppress_embeds:
-            payload["flags"] += MessageFlagsEnum.suppress_embeds.value
+            payload["flags"] |= MessageFlagsEnum.suppress_embeds.value
         if ephemeral:
-            payload["flags"] += MessageFlagsEnum.ephemeral.value
+            payload["flags"] |= MessageFlagsEnum.ephemeral.value
 
     if allowed_mentions:
         if previous_allowed_mentions is not None:
