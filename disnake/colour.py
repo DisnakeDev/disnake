@@ -131,7 +131,7 @@ class Colour:
     @classmethod
     def from_hex(cls: Type[CT], hex: str) -> CT:
         """Constructs a :class:`Colour` from hex value."""
-        return cls.from_rgb(*tuple(int(hex.replace("#","")[i:i+2], 16) for i in (0, 2, 4)))
+        return cls(int(hex.strip("#"), 16))
 
     @classmethod
     def default(cls: Type[CT]) -> CT:
