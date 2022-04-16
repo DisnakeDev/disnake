@@ -1324,7 +1324,7 @@ class Guild(Hashable):
         position: int = MISSING,
         bitrate: int = MISSING,
         user_limit: int = MISSING,
-        rtc_region: Optional[str] = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
@@ -1352,14 +1352,11 @@ class Guild(Hashable):
             The channel's preferred audio bitrate in bits per second.
         user_limit: :class:`int`
             The channel's limit for number of members that can be in a voice channel.
-        rtc_region: Optional[:class:`str`]
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The region for the voice channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
 
             .. versionadded:: 1.7
-
-            .. versionchanged:: 2.5
-                No longer a ``VoiceRegion`` instance.
 
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the voice channel's participants.
@@ -1429,6 +1426,7 @@ class Guild(Hashable):
         position: int = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         category: Optional[CategoryChannel] = None,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         reason: Optional[str] = None,
     ) -> StageChannel:
         """|coro|
@@ -1454,6 +1452,12 @@ class Guild(Hashable):
         position: :class:`int`
             The position in the channel list. This is a number that starts
             at 0. e.g. the top channel is position 0.
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
+            The region for the voice channel's voice communication.
+            A value of ``None`` indicates automatic voice region detection.
+
+            .. versionadded:: 2.5
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1476,6 +1480,9 @@ class Guild(Hashable):
         }
         if position is not MISSING:
             options["position"] = position
+
+        if rtc_region is not MISSING:
+            options["rtc_region"] = None if rtc_region is None else str(rtc_region)
 
         data = await self._create_channel(
             name,

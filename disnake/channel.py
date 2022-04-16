@@ -99,6 +99,7 @@ if TYPE_CHECKING:
     from .ui.action_row import Components
     from .ui.view import View
     from .user import BaseUser, ClientUser, User
+    from .voice_region import VoiceRegion
     from .webhook import Webhook
 
 
@@ -1051,14 +1052,11 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         The channel's preferred audio bitrate in bits per second.
     user_limit: :class:`int`
         The channel's limit for number of members that can be in a voice channel.
-    rtc_region: Optional[:class:`str`]
+    rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
         The region for the voice channel's voice communication.
         A value of ``None`` indicates automatic voice region detection.
 
         .. versionadded:: 1.7
-
-        .. versionchanged:: 2.5
-            No longer a ``VoiceRegion`` instance.
 
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
@@ -1194,7 +1192,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         sync_permissions: int = ...,
         category: Optional[CategoryChannel] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
-        rtc_region: Optional[str] = ...,
+        rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
         nsfw: bool = ...,
         slowmode_delay: int = ...,
@@ -1524,7 +1522,7 @@ class StageChannel(VocalGuildChannel):
         sync_permissions: int = ...,
         category: Optional[CategoryChannel] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
-        rtc_region: Optional[str] = ...,
+        rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
         reason: Optional[str] = ...,
     ) -> Optional[StageChannel]:
@@ -1563,13 +1561,9 @@ class StageChannel(VocalGuildChannel):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        rtc_region: Optional[:class:`str`]
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The new region for the stage channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
-
-            .. versionchanged:: 2.5
-                No longer a ``VoiceRegion`` instance.
-
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the stage channel's participants.
 
