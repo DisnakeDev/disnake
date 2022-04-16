@@ -2039,6 +2039,70 @@ class PartialMessage(Hashable):
         data = await self._state.http.get_message(self.channel.id, self.id)
         return self._state.create_message(channel=self.channel, data=data)
 
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embed: Optional[Embed] = ...,
+        file: File = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embed: Optional[Embed] = ...,
+        files: List[File] = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embeds: List[Embed] = ...,
+        file: File = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
+
     async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
 
