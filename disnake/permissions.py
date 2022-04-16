@@ -827,6 +827,7 @@ class PermissionOverwrite:
         read_messages: Optional[bool]
         view_channel: Optional[bool]
         send_messages: Optional[bool]
+        create_forum_posts: Optional[bool]
         send_tts_messages: Optional[bool]
         manage_messages: Optional[bool]
         embed_links: Optional[bool]
