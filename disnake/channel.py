@@ -2412,6 +2412,78 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         """
         return self.guild.get_thread(thread_id)
 
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embed: Embed = ...,
+        file: File = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> Thread:
+        ...
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embed: Embed = ...,
+        files: List[File] = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> Thread:
+        ...
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embeds: List[Embed] = ...,
+        file: File = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> Thread:
+        ...
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> Thread:
+        ...
+
     async def create_thread(
         self,
         *,
