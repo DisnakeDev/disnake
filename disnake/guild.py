@@ -1198,6 +1198,7 @@ class Guild(Hashable):
         slowmode_delay: int = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         nsfw: bool = MISSING,
+        news: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> TextChannel:
         """|coro|
@@ -1266,7 +1267,13 @@ class Guild(Hashable):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether mark the channel as NSFW or not.
+            Whether to mark the channel as NSFW or not.
+        news: :class:`bool`
+            Whether to make a news channel. News channels are text channels that can be followed.
+            This is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`.
+
+            .. versionadded:: 2.5
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1302,10 +1309,15 @@ class Guild(Hashable):
                 "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
             )
 
+        if news is True:
+            channel_type = ChannelType.news
+        else:
+            channel_type = ChannelType.text
+
         data = await self._create_channel(
             name,
             overwrites=overwrites,
-            channel_type=ChannelType.text,
+            channel_type=channel_type,
             category=category,
             reason=reason,
             **options,
