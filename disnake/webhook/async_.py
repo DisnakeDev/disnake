@@ -173,10 +173,11 @@ class AsyncWebhookAdapter:
                         method, url, data=to_send, headers=headers, params=params
                     ) as response:
                         _log.debug(
-                            "Webhook ID %s with %s %s has returned status code %s",
+                            "Webhook ID %s with %s %s with %s has returned status code %s",
                             webhook_id,
                             method,
                             url,
+                            to_send,
                             response.status,
                         )
                         data = (await response.text(encoding="utf-8")) or None
