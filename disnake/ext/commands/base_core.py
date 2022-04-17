@@ -113,6 +113,7 @@ class InvokableApplicationCommand(ABC):
         self.qualified_name: str = self.name
         # only an internal feature for now
         self.guild_only: bool = kwargs.get("guild_only", False)
+        self.extras: Dict[str, Any] = kwargs.get("extras") or {}
 
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
