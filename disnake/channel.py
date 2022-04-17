@@ -311,7 +311,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         reason: Optional[str] = ...,
         name: str = ...,
-        topic: str = ...,
+        topic: Optional[str] = ...,
         position: int = ...,
         nsfw: bool = ...,
         sync_permissions: bool = ...,
@@ -348,7 +348,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ----------
         name: :class:`str`
             The new channel's name.
-        topic: :class:`str`
+        topic: Optional[:class:`str`]
             The new channel's topic.
         position: :class:`int`
             The new channel's position.
