@@ -3,6 +3,7 @@ from pprint import pformat
 from typing import List
 
 import disnake
+from disnake import Localized
 from disnake.enums import Locale
 from disnake.ext import commands
 
@@ -19,16 +20,16 @@ class Localizations(commands.Cog):
         choice: str = commands.Param(
             choices=[
                 # lookup keys for choices
-                disnake.OptionChoice("a", "a", name_localizations="CHOICE_A"),
-                disnake.OptionChoice("o", "o", name_localizations="CHOICE_O"),
-                disnake.OptionChoice("u", "u", name_localizations="CHOICE_U"),
+                disnake.OptionChoice(Localized("a", key="CHOICE_A"), "a"),
+                disnake.OptionChoice(Localized("o", key="CHOICE_O"), "o"),
+                disnake.OptionChoice(Localized("u", key="CHOICE_U"), "u"),
             ]
         ),
         other: str = commands.Param(
             # by lookup key
-            name_localizations="OTHER_NAME",
+            name=Localized(None, key="OTHER_NAME"),
             # specify localizations directly
-            description_localizations={Locale.en_GB: "insert bri'ish description here"},
+            description=Localized(None, data={Locale.en_GB: "insert bri'ish description here"}),
         ),
     ) -> None:
         """
@@ -47,7 +48,7 @@ class Localizations(commands.Cog):
         # not really autocomplete, only used for showing autocomplete localization
         x = list(map(str, range(1, 6)))
         random.shuffle(x)
-        return [disnake.OptionChoice(v, v, name_localizations=f"AUTOCOMP_{v}") for v in x]
+        return [disnake.OptionChoice(Localized(v, key=f"AUTOCOMP_{v}"), v) for v in x]
 
     @commands.slash_command()
     async def localized_top_level(self, inter: disnake.AppCmdInter) -> None:
@@ -58,20 +59,19 @@ class Localizations(commands.Cog):
         pass
 
     @second.sub_command(
-        name_localizations={Locale.en_GB: "british_subcommand"},
-        description_localizations="MY_SUBCMD_DESC",
+        name=Localized(None, data={Locale.en_GB: "british_subcommand"}),
+        description=Localized(None, key="MY_SUBCMD_DESC"),
     )
     async def third(
         self,
         inter: disnake.AppCmdInter,
-        value: str = commands.Param(name="a_string", name_localizations="A_VERY_COOL_PARAM_NAME"),
+        value: str = commands.Param(name=Localized("a_string", key="A_VERY_COOL_PARAM_NAME")),
     ) -> None:
         await inter.response.send_message(f"```py\n{pformat(locals())}\n```")
 
     # works for message/user commands as well
     @commands.message_command(
-        name="Localized Reverse",
-        name_localizations="MSG_REVERSE",
+        name=Localized("Localized Reverse", key="MSG_REVERSE"),
     )
     async def cmd_msg(self, inter: disnake.AppCmdInter, msg: disnake.Message) -> None:
         await inter.response.send_message(msg.content[::-1])

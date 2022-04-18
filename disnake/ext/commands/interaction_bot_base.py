@@ -66,7 +66,7 @@ from .errors import CommandRegistrationError
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
-    from disnake.i18n import Localizations
+    from disnake.i18n import LocalizedOptional
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import Check, CoroFunc
@@ -434,10 +434,8 @@ class InteractionBotBase(CommonBotBase):
     def slash_command(
         self,
         *,
-        name: str = None,
-        description: str = None,
-        name_localizations: Localizations = None,
-        description_localizations: Localizations = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
         options: List[Option] = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
@@ -490,8 +488,6 @@ class InteractionBotBase(CommonBotBase):
             result = slash_command(
                 name=name,
                 description=description,
-                name_localizations=name_localizations,
-                description_localizations=description_localizations,
                 options=options,
                 default_permission=default_permission,
                 guild_ids=guild_ids,
@@ -507,8 +503,7 @@ class InteractionBotBase(CommonBotBase):
     def user_command(
         self,
         *,
-        name: str = None,
-        name_localizations: Localizations = None,
+        name: LocalizedOptional = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
@@ -543,7 +538,6 @@ class InteractionBotBase(CommonBotBase):
         def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
             result = user_command(
                 name=name,
-                name_localizations=name_localizations,
                 default_permission=default_permission,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
@@ -557,8 +551,7 @@ class InteractionBotBase(CommonBotBase):
     def message_command(
         self,
         *,
-        name: str = None,
-        name_localizations: Localizations = None,
+        name: LocalizedOptional = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
@@ -593,7 +586,6 @@ class InteractionBotBase(CommonBotBase):
         def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
-                name_localizations=name_localizations,
                 default_permission=default_permission,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,

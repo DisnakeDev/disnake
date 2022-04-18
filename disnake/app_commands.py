@@ -40,12 +40,12 @@ from .enums import (
     try_enum_to_int,
 )
 from .errors import InvalidArgument
-from .i18n import LocalizationValue
+from .i18n import Localized
 from .role import Role
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:
-    from .i18n import LocalizationProtocol, Localizations
+    from .i18n import LocalizationProtocol, LocalizationValue, LocalizedOptional, LocalizedRequired
     from .state import ConnectionState
     from .types.interactions import (
         ApplicationCommand as ApplicationCommandPayload,
@@ -128,14 +128,13 @@ class OptionChoice:
 
     def __init__(
         self,
-        name: str,
+        name: LocalizedRequired,
         value: ApplicationCommandOptionChoiceValue,
-        *,
-        name_localizations: Localizations = None,
     ):
-        self.name: str = name
+        name_loc = Localized._create(name)
+        self.name: str = name_loc.name
+        self.name_localizations: LocalizationValue = name_loc.value
         self.value: ApplicationCommandOptionChoiceValue = value
-        self.name_localizations: LocalizationValue = LocalizationValue(name_localizations)
 
     def __repr__(self) -> str:
         return f"<OptionChoice name={self.name!r} value={self.value!r}>"
@@ -148,7 +147,7 @@ class OptionChoice:
         )
 
     def to_dict(self, *, locale: Optional[Locale] = None) -> ApplicationCommandOptionChoicePayload:
-        localizations = self.name_localizations.data
+        localizations = self.name_localizations and self.name_localizations.data
 
         name: Optional[str] = None
         # if `locale` provided, get localized name from dict
@@ -171,9 +170,8 @@ class OptionChoice:
     @classmethod
     def from_dict(cls, data: ApplicationCommandOptionChoicePayload):
         return OptionChoice(
-            name=data["name"],
+            name=Localized(data["name"], data=data.get("name_localizations")),
             value=data["value"],
-            name_localizations=data.get("name_localizations"),
         )
 
     def localize(self, store: LocalizationProtocol) -> None:
@@ -234,8 +232,8 @@ class Option:
 
     def __init__(
         self,
-        name: str,
-        description: str = None,
+        name: LocalizedRequired,
+        description: LocalizedOptional = None,
         type: Union[OptionType, int] = None,
         required: bool = False,
         choices: Choices = None,
@@ -244,12 +242,16 @@ class Option:
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
-        name_localizations: Localizations = None,
-        description_localizations: Localizations = None,
     ):
-        _validate_name(name)
-        self.name: str = name
-        self.description: str = description or "-"
+        name_loc = Localized._create(name)
+        _validate_name(name_loc.name)
+        self.name: str = name_loc.name
+        self.name_localizations: LocalizationValue = name_loc.value
+
+        desc_loc = Localized._create(description)
+        self.description: str = desc_loc.name or "-"
+        self.description_localizations: LocalizationValue = desc_loc.value
+
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
         self.options: List[Option] = options or []
@@ -282,11 +284,6 @@ class Option:
 
         self.autocomplete: bool = autocomplete
 
-        self.name_localizations: LocalizationValue = LocalizationValue(name_localizations)
-        self.description_localizations: LocalizationValue = LocalizationValue(
-            description_localizations
-        )
-
     def __repr__(self) -> str:
         return (
             f"<Option name={self.name!r} description={self.description!r}"
@@ -313,8 +310,10 @@ class Option:
     @classmethod
     def from_dict(cls, data: ApplicationCommandOptionPayload) -> Option:
         return Option(
-            name=data["name"],
-            description=data.get("description"),
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            description=Localized(
+                data.get("description"), data=data.get("description_localizations")
+            ),
             type=data.get("type"),
             required=data.get("required", False),
             choices=_maybe_cast(
@@ -329,15 +328,12 @@ class Option:
             autocomplete=data.get("autocomplete", False),
             min_value=data.get("min_value"),
             max_value=data.get("max_value"),
-            name_localizations=data.get("name_localizations"),
-            description_localizations=data.get("description_localizations"),
         )
 
     def add_choice(
         self,
-        name: str,
+        name: LocalizedRequired,
         value: Union[str, int],
-        name_localizations: Localizations = None,
     ) -> None:
         """Adds an OptionChoice to the list of current choices,
         parameters are the same as for :class:`OptionChoice`.
@@ -346,14 +342,13 @@ class Option:
             OptionChoice(
                 name=name,
                 value=value,
-                name_localizations=name_localizations,
             )
         )
 
     def add_option(
         self,
-        name: str,
-        description: str = None,
+        name: LocalizedRequired,
+        description: LocalizedOptional = None,
         type: OptionType = None,
         required: bool = False,
         choices: List[OptionChoice] = None,
@@ -362,8 +357,6 @@ class Option:
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
-        name_localizations: Localizations = None,
-        description_localizations: Localizations = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`."""
@@ -380,8 +373,6 @@ class Option:
                 autocomplete=autocomplete,
                 min_value=min_value,
                 max_value=max_value,
-                name_localizations=name_localizations,
-                description_localizations=description_localizations,
             )
         )
 
@@ -449,14 +440,15 @@ class ApplicationCommand(ABC):
     def __init__(
         self,
         type: ApplicationCommandType,
-        name: str,
+        name: LocalizedRequired,
         default_permission: bool = True,
-        name_localizations: Localizations = None,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
-        self.name: str = name
         self.default_permission: bool = default_permission
-        self.name_localizations: LocalizationValue = LocalizationValue(name_localizations)
+
+        name_loc = Localized._create(name)
+        self.name: str = name_loc.name
+        self.name_localizations: LocalizationValue = name_loc.value
 
         self._always_synced: bool = False
 
@@ -518,15 +510,13 @@ class UserCommand(ApplicationCommand):
 
     def __init__(
         self,
-        name: str,
+        name: LocalizedRequired,
         default_permission: bool = True,
-        name_localizations: Localizations = None,
     ):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             default_permission=default_permission,
-            name_localizations=name_localizations,
         )
 
 
@@ -566,9 +556,8 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
         self = cls(
-            name=data["name"],
+            name=Localized(data["name"], data=data.get("name_localizations")),
             default_permission=data.get("default_permission", True),
-            name_localizations=data.get("name_localizations"),
         )
         self._update_common(data)
         return self
@@ -595,15 +584,13 @@ class MessageCommand(ApplicationCommand):
 
     def __init__(
         self,
-        name: str,
+        name: LocalizedRequired,
         default_permission: bool = True,
-        name_localizations: Localizations = None,
     ):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             default_permission=default_permission,
-            name_localizations=name_localizations,
         )
 
 
@@ -643,9 +630,8 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
         self = cls(
-            name=data["name"],
+            name=Localized(data["name"], data=data.get("name_localizations")),
             default_permission=data.get("default_permission", True),
-            name_localizations=data.get("name_localizations"),
         )
         self._update_common(data)
         return self
@@ -680,26 +666,23 @@ class SlashCommand(ApplicationCommand):
 
     def __init__(
         self,
-        name: str,
-        description: str,
+        name: LocalizedRequired,
+        description: LocalizedRequired,
         options: List[Option] = None,
         default_permission: bool = True,
-        name_localizations: Localizations = None,
-        description_localizations: Localizations = None,
     ):
-        _validate_name(name)
-
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
             default_permission=default_permission,
-            name_localizations=name_localizations,
         )
-        self.description: str = description
+        _validate_name(self.name)
+
+        desc_loc = Localized._create(description)
+        self.description: str = desc_loc.name
+        self.description_localizations: LocalizationValue = desc_loc.value
+
         self.options: List[Option] = options or []
-        self.description_localizations: LocalizationValue = LocalizationValue(
-            description_localizations
-        )
 
     def __str__(self) -> str:
         return f"<SlashCommand name={self.name!r}>"
@@ -714,8 +697,8 @@ class SlashCommand(ApplicationCommand):
 
     def add_option(
         self,
-        name: str,
-        description: str = None,
+        name: LocalizedRequired,
+        description: LocalizedOptional = None,
         type: OptionType = None,
         required: bool = False,
         choices: List[OptionChoice] = None,
@@ -724,8 +707,6 @@ class SlashCommand(ApplicationCommand):
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
-        name_localizations: Localizations = None,
-        description_localizations: Localizations = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`
@@ -742,8 +723,6 @@ class SlashCommand(ApplicationCommand):
                 autocomplete=autocomplete,
                 min_value=min_value,
                 max_value=max_value,
-                name_localizations=name_localizations,
-                description_localizations=description_localizations,
             )
         )
 
@@ -811,14 +790,12 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
 
         self = cls(
-            name=data["name"],
-            description=data["description"],
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            description=Localized(data["description"], data=data.get("description_localizations")),
             default_permission=data.get("default_permission", True),
             options=_maybe_cast(
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
             ),
-            name_localizations=data.get("name_localizations"),
-            description_localizations=data.get("description_localizations"),
         )
         self._update_common(data)
         return self

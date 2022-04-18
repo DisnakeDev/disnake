@@ -30,26 +30,127 @@ import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
-from typing import DefaultDict, Dict, Optional, Set, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    DefaultDict,
+    Dict,
+    Generic,
+    Optional,
+    Set,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from . import utils
 from .custom_warnings import LocalizationWarning
 from .enums import Locale
 from .errors import LocalizationKeyError
 
-MISSING = utils.MISSING
+if TYPE_CHECKING:
+    from typing_extensions import TypeGuard
 
-
-Localizations = Union[str, Dict[Locale, str], Dict[str, str]]
+    LocalizedRequired = Union[str, "Localized[str]"]
+    LocalizedOptional = Union[str, "Localized[Optional[str]]"]
 
 
 __all__ = (
+    "Localized",
+    "LocalizationValue",
     "LocalizationProtocol",
     "LocalizationStore",
 )
 
+MISSING = utils.MISSING
 
 _log = logging.getLogger(__name__)
+
+
+LocalizationsDict = Union[Dict[Locale, str], Dict[str, str]]
+Localizations = Union[str, LocalizationsDict]
+
+NameT = TypeVar("NameT", str, Optional[str], covariant=True)
+UpgradeT = TypeVar("UpgradeT", str, Optional[str])
+
+
+# This is generic over `name`, as some localized strings can be optional, e.g. option descriptions.
+# The basic idea for parameters is this:
+#     abc: LocalizedRequired
+#     xyz: LocalizedOptional = None
+#
+# With that, one may use `abc="somename"` and `abc=Localized("somename", ...)`,
+# but not `abc=Localized(None, ...)`. All three work fine for `xyz` though.
+
+
+class Localized(Generic[NameT]):
+    """
+    A container type used for localizations of names/descriptions.
+
+    Exactly one of ``key`` or ``data`` must be provided.
+
+    Parameters
+    ----------
+    name: Optional[:class:`str`]
+        The default (non-localized) value of the string.
+    key: :class:`str`
+        A localization key used for lookups.
+        Incompatible with ``data``.
+    data: Union[Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
+        A mapping from locales to localized values.
+        Incompatible with ``key``.
+    """
+
+    __slots__ = ("name", "value")
+
+    @overload
+    def __init__(self, name: NameT, *, key: str):
+        ...
+
+    @overload
+    def __init__(self, name: NameT, *, data: Optional[LocalizationsDict]):
+        ...
+
+    def __init__(
+        self, name: NameT, *, key: str = MISSING, data: Optional[LocalizationsDict] = MISSING
+    ):
+        self.name: NameT = name
+
+        if not (key is MISSING) ^ (data is MISSING):
+            raise TypeError("Exactly one of `key` or `data` must be provided")
+        self.value = LocalizationValue(key if key is not MISSING else data)
+
+    @classmethod
+    def _create(cls, name: Union[NameT, Localized[NameT]]) -> Localized[NameT]:
+        if isinstance(name, Localized):
+            return name
+        return cls(name, data=None)
+
+    @overload
+    def _upgrade(self: Localized[UpgradeT], *, key: Optional[str] = None) -> Localized[UpgradeT]:
+        ...
+
+    @overload
+    def _upgrade(self, name: str, *, key: Optional[str] = None) -> Localized[str]:
+        ...
+
+    def _upgrade(self, name: Optional[str] = None, *, key: Optional[str] = None) -> Localized[Any]:
+        if key:
+            if not (self.value._key is None and self.value._data is None):
+                raise ValueError("Can't specify multiple localization keys or dicts")
+            self.value = LocalizationValue(key)
+
+        # Only overwrite if not already set (`Localized()` parameter value takes precedence over function names etc.)
+        # Note: not checking whether `name` is an empty string, to keep generic typing correct
+        if not self.name and name is not None:
+            self.name = name
+
+        # this is safe, see above
+        return self
+
+    @staticmethod
+    def _has_name(val: Localized[Any]) -> TypeGuard[Localized[str]]:
+        return val.name is not None
 
 
 class LocalizationValue:

@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence,
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
 from disnake.enums import OptionType
+from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
@@ -37,7 +38,7 @@ from .params import call_param_func, expand_params
 
 if TYPE_CHECKING:
     from disnake.app_commands import Choices
-    from disnake.i18n import Localizations
+    from disnake.i18n import LocalizedOptional
 
     from .base_core import CommandCallback
 
@@ -132,15 +133,14 @@ class SubCommandGroup(InvokableApplicationCommand):
         self,
         func: CommandCallback,
         *,
-        name: str = None,
-        name_localizations: Localizations = None,
+        name: LocalizedOptional = None,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._create(name)
+        super().__init__(func, name=name_loc.name, **kwargs)
         self.children: Dict[str, SubCommand] = {}
         self.option = Option(
-            name=self.name,
-            name_localizations=name_localizations,
+            name=name_loc._upgrade(self.name),
             description="-",
             type=OptionType.sub_command_group,
             options=[],
@@ -153,12 +153,10 @@ class SubCommandGroup(InvokableApplicationCommand):
 
     def sub_command(
         self,
-        name: str = None,
-        description: str = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
         options: list = None,
         connectors: dict = None,
-        name_localizations: Localizations = None,
-        description_localizations: Localizations = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
         """
@@ -176,8 +174,6 @@ class SubCommandGroup(InvokableApplicationCommand):
                 func,
                 name=name,
                 description=description,
-                name_localizations=name_localizations,
-                description_localizations=description_localizations,
                 options=options,
                 connectors=connectors,
                 **kwargs,
@@ -225,30 +221,27 @@ class SubCommand(InvokableApplicationCommand):
         self,
         func: CommandCallback,
         *,
-        name: str = None,
-        description: str = None,
-        name_localizations: Localizations = None,
-        description_localizations: Localizations = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
         options: list = None,
         connectors: Dict[str, str] = None,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._create(name)
+        super().__init__(func, name=name_loc.name, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
         self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
-
-        self.docstring = utils.parse_docstring(func)
-        description = description or self.docstring["description"]
 
         if options is None:
             options = expand_params(self)
 
+        self.docstring = utils.parse_docstring(func)
+        desc_loc = Localized._create(description)
+
         self.option = Option(
-            name=self.name,
-            description=description or "-",
-            name_localizations=name_localizations or self.docstring["localization_key_name"],
-            description_localizations=(
-                description_localizations or self.docstring["localization_key_desc"]
+            name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),
+            description=desc_loc._upgrade(
+                self.docstring["description"] or "-", key=self.docstring["localization_key_desc"]
             ),
             type=OptionType.sub_command,
             options=options,
@@ -341,10 +334,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         func: CommandCallback,
         *,
-        name: str = None,
-        description: str = None,
-        name_localizations: Localizations = None,
-        description_localizations: Localizations = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
         options: List[Option] = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
@@ -352,28 +343,27 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         auto_sync: bool = True,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._create(name)
+        super().__init__(func, name=name_loc.name, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = auto_sync
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
 
-        self.docstring = utils.parse_docstring(func)
-        description = description or self.docstring["description"]
-
         if options is None:
             options = expand_params(self)
 
+        self.docstring = utils.parse_docstring(func)
+        desc_loc = Localized._create(description)
+
         self.body: SlashCommand = SlashCommand(
-            name=self.name,
-            description=description or "-",
+            name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),
+            description=desc_loc._upgrade(
+                self.docstring["description"] or "-", key=self.docstring["localization_key_desc"]
+            ),
             options=options or [],
             default_permission=default_permission,
-            name_localizations=name_localizations or self.docstring["localization_key_name"],
-            description_localizations=(
-                description_localizations or self.docstring["localization_key_desc"]
-            ),
         )
 
     @property
@@ -390,12 +380,10 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     def sub_command(
         self,
-        name: str = None,
-        description: str = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
         options: list = None,
         connectors: dict = None,
-        name_localizations: Localizations = None,
-        description_localizations: Localizations = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
         """
@@ -436,8 +424,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 func,
                 name=name,
                 description=description,
-                name_localizations=name_localizations,
-                description_localizations=description_localizations,
                 options=options,
                 connectors=connectors,
                 **kwargs,
@@ -451,8 +437,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     def sub_command_group(
         self,
-        name: str = None,
-        name_localizations: Localizations = None,
+        name: LocalizedOptional = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
         """
@@ -479,7 +464,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             new_func = SubCommandGroup(
                 func,
                 name=name,
-                name_localizations=name_localizations,
                 **kwargs,
             )
             new_func.qualified_name = f"{self.qualified_name} {new_func.name}"
@@ -612,10 +596,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
 def slash_command(
     *,
-    name: str = None,
-    description: str = None,
-    name_localizations: Localizations = None,
-    description_localizations: Localizations = None,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
     options: List[Option] = None,
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
@@ -674,8 +656,6 @@ def slash_command(
             func,
             name=name,
             description=description,
-            name_localizations=name_localizations,
-            description_localizations=description_localizations,
             options=options,
             default_permission=default_permission,
             guild_ids=guild_ids,

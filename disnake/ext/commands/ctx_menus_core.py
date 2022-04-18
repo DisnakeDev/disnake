@@ -26,13 +26,14 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.i18n import Localized
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
 from .params import safe_call
 
 if TYPE_CHECKING:
-    from disnake.i18n import Localizations
+    from disnake.i18n import LocalizedOptional
     from disnake.interactions import ApplicationCommandInteraction
 
     from .base_core import InteractionCommandCallback
@@ -75,20 +76,19 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self,
         func: InteractionCommandCallback,
         *,
-        name: str = None,
-        name_localizations: Localizations = None,
+        name: LocalizedOptional = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._create(name)
+        super().__init__(func, name=name_loc.name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
         self.body = UserCommand(
-            name=self.name,
+            name=name_loc._upgrade(self.name),
             default_permission=default_permission,
-            name_localizations=name_localizations,
         )
 
     async def _call_external_error_handlers(
@@ -153,20 +153,19 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         self,
         func: InteractionCommandCallback,
         *,
-        name: str = None,
-        name_localizations: Localizations = None,
+        name: LocalizedOptional = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._create(name)
+        super().__init__(func, name=name_loc.name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
         self.body = MessageCommand(
-            name=self.name,
+            name=name_loc._upgrade(self.name),
             default_permission=default_permission,
-            name_localizations=name_localizations,
         )
 
     async def _call_external_error_handlers(
@@ -198,8 +197,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
 def user_command(
     *,
-    name: str = None,
-    name_localizations: Localizations = None,
+    name: LocalizedOptional = None,
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
@@ -240,7 +238,6 @@ def user_command(
         return InvokableUserCommand(
             func,
             name=name,
-            name_localizations=name_localizations,
             default_permission=default_permission,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
@@ -252,8 +249,7 @@ def user_command(
 
 def message_command(
     *,
-    name: str = None,
-    name_localizations: Localizations = None,
+    name: LocalizedOptional = None,
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
@@ -294,7 +290,6 @@ def message_command(
         return InvokableMessageCommand(
             func,
             name=name,
-            name_localizations=name_localizations,
             default_permission=default_permission,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
