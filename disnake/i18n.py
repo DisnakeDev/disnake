@@ -150,7 +150,7 @@ class Localized(Generic[NameT]):
 
     @staticmethod
     def _has_name(val: Localized[Any]) -> TypeGuard[Localized[str]]:
-        return val.name is not None
+        return bool(val.name)
 
 
 class LocalizationValue:
