@@ -448,18 +448,18 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str`
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
             The name of the slash command (defaults to function name).
-        description: :class:`str`
+
+            .. versionchanged:: 2.5
+                Now supports localization.
+
+        description: Optional[Union[:class:`str`, :class:`.Localized`]]
             The description of the slash command. It will be visible in Discord.
-        name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-            Localizations for ``name``.
 
-            .. versionadded:: 2.5
-        description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-            Localizations for ``description``.
+            .. versionchanged:: 2.5
+                Now supports localization.
 
-            .. versionadded:: 2.5
         options: List[:class:`.Option`]
             The list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
@@ -514,12 +514,12 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str`
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
             The name of the user command (defaults to function name).
-        name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-            Localizations for ``name``.
 
-            .. versionadded:: 2.5
+            .. versionchanged:: 2.5
+                Now supports localization.
+
         default_permission: :class:`bool`
             Whether the command is enabled by default. If set to ``False``, this command
             cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -562,12 +562,12 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str`
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
             The name of the message command (defaults to function name).
-        name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-            Localizations for ``name``.
 
-            .. versionadded:: 2.5
+            .. versionchanged:: 2.5
+                Now supports localization.
+
         default_permission: :class:`bool`
             Whether the command is enabled by default. If set to ``False``, this command
             cannot be used in guilds (unless explicit command permissions are set), or in DMs.

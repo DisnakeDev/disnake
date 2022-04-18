@@ -391,18 +391,18 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Parameters
         ----------
-        name: :class:`str`
-            the name of the subcommand. Defaults to the function name
-        description: :class:`str`
-            the description of the subcommand
-        name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-            Localizations for ``name``.
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
+            The name of the subcommand (defaults to function name).
 
-            .. versionadded:: 2.5
-        description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-            Localizations for ``description``.
+            .. versionchanged:: 2.5
+                Now supports localization.
 
-            .. versionadded:: 2.5
+        description: Optional[Union[:class:`str`, :class:`.Localized`]]
+            The description of the subcommand.
+
+            .. versionchanged:: 2.5
+                Now supports localization.
+
         options: List[:class:`.Option`]
             the options of the subcommand for registration in API
         connectors: Dict[:class:`str`, :class:`str`]
@@ -445,12 +445,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Parameters
         ----------
-        name : :class:`str`
-            the name of the subcommand group. Defaults to the function name
-        name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-            Localizations for ``name``.
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
+            The name of the subcommand group (defaults to function name).
 
-            .. versionadded:: 2.5
+            .. versionchanged:: 2.5
+                Now supports localization.
 
         Returns
         -------
@@ -611,18 +610,18 @@ def slash_command(
     ----------
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``
-    name: :class:`str`
-        The name of the slash command. (equals to function name by default).
-    description: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+        The name of the slash command (defaults to function name).
+
+        .. versionchanged:: 2.5
+            Now supports localization.
+
+    description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The description of the slash command. It will be visible in Discord.
-    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-        Localizations for ``name``.
 
-        .. versionadded:: 2.5
-    description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-        Localizations for ``description``.
+        .. versionchanged:: 2.5
+            Now supports localization.
 
-        .. versionadded:: 2.5
     options: List[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.

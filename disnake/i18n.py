@@ -182,13 +182,13 @@ class LocalizationValue:
             raise TypeError(f"Invalid localizations type: {type(localizations).__name__}")
 
     def _link(self, store: LocalizationProtocol) -> None:
-        """Loads localizations from the specified store if this object has a key"""
+        """Loads localizations from the specified store if this object has a key."""
         if self._key is not None:
             self._data = store.get(self._key)
 
     @property
     def data(self) -> Optional[Dict[str, str]]:
-        """Returns a dict with a locale -> localization mapping"""
+        """Optional[Dict[:class:`str`, :class:`str`]]: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
             warnings.warn(
                 "value was never localized, this is likely a library bug",

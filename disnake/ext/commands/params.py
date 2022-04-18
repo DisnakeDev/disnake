@@ -283,18 +283,18 @@ class ParamInfo:
     ----------
     default: Any
         The actual default value for the corresponding function param.
-    name: :class:`str`
+    name: :class:`.Localized`
         The name of this slash command option.
-    description: :class:`str`
+
+        .. versionchanged:: 2.5
+            Now supports localization.
+
+    description: :class:`.Localized`
         The description of this slash command option.
-    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-        Localizations for ``name``.
 
-        .. versionadded:: 2.5
-    description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-        Localizations for ``description``.
+        .. versionchanged:: 2.5
+            Now supports localization.
 
-        .. versionadded:: 2.5
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of choices of this slash command option.
     ge: :class:`float`
@@ -859,19 +859,19 @@ def Param(
     ----------
     default: Any
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
-    name: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the option. By default, the option name is the parameter name.
-    description: :class:`str`
+
+        .. versionchanged:: 2.5
+            Now supports localization.
+
+    description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
-    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-        Localizations for ``name``.
 
-        .. versionadded:: 2.5
-    description_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-        Localizations for ``description``.
+        .. versionchanged:: 2.5
+            Now supports localization.
 
-        .. versionadded:: 2.5
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.
     converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]

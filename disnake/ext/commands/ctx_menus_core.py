@@ -207,12 +207,12 @@ def user_command(
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the user command (defaults to the function name).
-    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-        Localizations for ``name``.
 
-        .. versionadded:: 2.5
+        .. versionchanged:: 2.5
+            Now supports localization.
+
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -259,12 +259,12 @@ def message_command(
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the message command (defaults to the function name).
-    name_localizations: Union[:class:`str`, Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-        Localizations for ``name``.
 
-        .. versionadded:: 2.5
+        .. versionchanged:: 2.5
+            Now supports localization.
+
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
