@@ -535,14 +535,20 @@ Customization
 +++++++++++++
 
 If you want more customization or low-level control over localizations, you can specify arbitrary keys for the commands/options directly.
+:class:`.Localized` takes the non-localized string (optional depending on target type) to keep the ability of e.g.
+overwriting ``name`` in the command decorator, and either a ``key`` or ``data`` parameter.
+
 This would create the same command as the code above, though you're free to change the keys like ``ADD_NUM_DESCRIPTION`` however you want:
 
 .. code-block:: python3
 
-    @bot.slash_command(name_localizations="ADD_NUM_NAME", description_localizations="ADD_NUM_DESCRIPTION")
-    async def add_5(
+    @bot.slash_command(name=Localized("add_5", key="ADD_NUM_NAME"), description=Localized(None, key="ADD_NUM_DESCRIPTION"))
+    async def _add_5_slash(
         inter: disnake.ApplicationCommandInteraction,
-        num: int = commands.Param(name_localizations="COOL_NUMBER_NAME", description_localizations="COOL_NUMBER_DESCRIPTION"),
+        num: int = commands.Param(
+            name=Localized(None, key="COOL_NUMBER_NAME"),
+            description=Localized(None, key="COOL_NUMBER_DESCRIPTION")
+        ),
     ):
         """
         Adds 5 to a number.
@@ -558,14 +564,14 @@ While not recommended, it is also possible to not use ``.json`` files at all and
 .. code-block:: python3
 
     @bot.slash_command(
-        name_localizations={Locale.de: "addiere_5"},
-        description_localizations={Locale.de: "Addiere 5 zu einer anderen Zahl."},
+        name=Localized(None, data={Locale.de: "addiere_5"}),
+        description=Localized(None, data={Locale.de: "Addiere 5 zu einer anderen Zahl."}),
     )
     async def add_5(
         inter: disnake.ApplicationCommandInteraction,
         num: int = commands.Param(
-            name_localizations={Locale.de: "zahl"},
-            description_localizations={Locale.de: "Eine Zahl"},
+            name=Localized(None, data={Locale.de: "zahl"}),
+            description=Localized(None, {Locale.de: "Eine Zahl"}),
         ),
     ):
         ...
@@ -582,7 +588,7 @@ Choices/Autocomplete
 
     async def autocomp_langs(inter: disnake.ApplicationCommandInteraction, user_input: str):
         return [
-            OptionChoice(lang, lang, name_localizations=f"AUTOCOMP_{lang.upper()}")
+            OptionChoice(Localized(lang, key=f"AUTOCOMP_{lang.upper()}"), lang)
             for lang in LANGUAGES
             if user_input.lower() in lang
         ]
@@ -591,8 +597,8 @@ Choices/Autocomplete
     async def example(
         inter: disnake.ApplicationCommandInteraction,
         animal: str = commands.Param(choices=[
-            OptionChoice("Cat", "cat", name_localizations="OPTION_CAT"),
-            OptionChoice("Dolphin", "dolphin", name_localizations="OPTION_DOLPHIN"),
+            OptionChoice(Localized("Cat", key="OPTION_CAT"), "cat"),
+            OptionChoice(Localized("Dolphin", key="OPTION_DOLPHIN"), "dolphin"),
         ]),
         language: str = commands.Param(autocomplete=autocomp_langs),
     ):
