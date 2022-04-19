@@ -131,9 +131,9 @@ class OptionChoice:
         name: LocalizedRequired,
         value: ApplicationCommandOptionChoiceValue,
     ):
-        name_loc = Localized._create(name)
-        self.name: str = name_loc.name
-        self.name_localizations: LocalizationValue = name_loc.value
+        name_loc = Localized._cast(name)
+        self.name: str = name_loc.string
+        self.name_localizations: LocalizationValue = name_loc.localizations
         self.value: ApplicationCommandOptionChoiceValue = value
 
     def __repr__(self) -> str:
@@ -243,14 +243,14 @@ class Option:
         min_value: float = None,
         max_value: float = None,
     ):
-        name_loc = Localized._create(name)
-        _validate_name(name_loc.name)
-        self.name: str = name_loc.name
-        self.name_localizations: LocalizationValue = name_loc.value
+        name_loc = Localized._cast(name)
+        _validate_name(name_loc.string)
+        self.name: str = name_loc.string
+        self.name_localizations: LocalizationValue = name_loc.localizations
 
-        desc_loc = Localized._create(description)
-        self.description: str = desc_loc.name or "-"
-        self.description_localizations: LocalizationValue = desc_loc.value
+        desc_loc = Localized._cast(description)
+        self.description: str = desc_loc.string or "-"
+        self.description_localizations: LocalizationValue = desc_loc.localizations
 
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
@@ -447,9 +447,9 @@ class ApplicationCommand(ABC):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.default_permission: bool = default_permission
 
-        name_loc = Localized._create(name)
-        self.name: str = name_loc.name
-        self.name_localizations: LocalizationValue = name_loc.value
+        name_loc = Localized._cast(name)
+        self.name: str = name_loc.string
+        self.name_localizations: LocalizationValue = name_loc.localizations
 
         self._always_synced: bool = False
 
@@ -685,9 +685,9 @@ class SlashCommand(ApplicationCommand):
         )
         _validate_name(self.name)
 
-        desc_loc = Localized._create(description)
-        self.description: str = desc_loc.name
-        self.description_localizations: LocalizationValue = desc_loc.value
+        desc_loc = Localized._cast(description)
+        self.description: str = desc_loc.string
+        self.description_localizations: LocalizationValue = desc_loc.localizations
 
         self.options: List[Option] = options or []
 

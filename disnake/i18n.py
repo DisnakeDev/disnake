@@ -70,10 +70,10 @@ _log = logging.getLogger(__name__)
 LocalizationsDict = Union[Dict[Locale, str], Dict[str, str]]
 Localizations = Union[str, LocalizationsDict]
 
-NameT = TypeVar("NameT", str, Optional[str], covariant=True)
+StringT = TypeVar("StringT", str, Optional[str], covariant=True)
 
 
-# This is generic over `name`, as some localized strings can be optional, e.g. option descriptions.
+# This is generic over `string`, as some localized strings can be optional, e.g. option descriptions.
 # The basic idea for parameters is this:
 #     abc: LocalizedRequired
 #     xyz: LocalizedOptional = None
@@ -82,7 +82,7 @@ NameT = TypeVar("NameT", str, Optional[str], covariant=True)
 # but not `abc=Localized(None, ...)`. All three work fine for `xyz` though.
 
 
-class Localized(Generic[NameT]):
+class Localized(Generic[StringT]):
     """
     A container type used for localized parameters.
 
@@ -92,7 +92,7 @@ class Localized(Generic[NameT]):
 
     Parameters
     ----------
-    name: Optional[:class:`str`]
+    string: Optional[:class:`str`]
         The default (non-localized) value of the string.
     key: :class:`str`
         A localization key used for lookups.
@@ -102,56 +102,60 @@ class Localized(Generic[NameT]):
         Incompatible with ``key``.
     """
 
-    __slots__ = ("name", "value")
+    __slots__ = ("string", "localizations")
 
     @overload
-    def __init__(self, name: NameT, *, key: str):
+    def __init__(self, string: StringT, *, key: str):
         ...
 
     @overload
-    def __init__(self, name: NameT, *, data: Union[Optional[LocalizationsDict], LocalizationValue]):
+    def __init__(
+        self, string: StringT, *, data: Union[Optional[LocalizationsDict], LocalizationValue]
+    ):
         ...
 
     # note: `data` accepting `LocalizationValue` is intentionally undocumented,
     # as it's only meant to be used internally
     def __init__(
         self,
-        name: NameT,
+        string: StringT,
         *,
         key: str = MISSING,
         data: Union[Optional[LocalizationsDict], LocalizationValue] = MISSING,
     ):
-        self.name: NameT = name
+        self.string: StringT = string
 
         if not (key is MISSING) ^ (data is MISSING):
             raise TypeError("Exactly one of `key` or `data` must be provided")
         if isinstance(data, LocalizationValue):
-            self.value = data
+            self.localizations = data
         else:
-            self.value = LocalizationValue(key if key is not MISSING else data)
+            self.localizations = LocalizationValue(key if key is not MISSING else data)
 
     @classmethod
-    def _create(cls, name: Union[NameT, Localized[NameT]]) -> Localized[NameT]:
-        if isinstance(name, Localized):
-            return name
-        return cls(name, data=None)
+    def _cast(cls, string: Union[StringT, Localized[StringT]]) -> Localized[StringT]:
+        if isinstance(string, Localized):
+            return string
+        return cls(string, data=None)
 
     @overload
     def _upgrade(self, *, key: Optional[str]) -> Self:
         ...
 
     @overload
-    def _upgrade(self, name: str, *, key: Optional[str] = None) -> Localized[str]:
+    def _upgrade(self, string: str, *, key: Optional[str] = None) -> Localized[str]:
         ...
 
-    def _upgrade(self, name: Optional[str] = None, *, key: Optional[str] = None) -> Localized[Any]:
+    def _upgrade(
+        self, string: Optional[str] = None, *, key: Optional[str] = None
+    ) -> Localized[Any]:
         # update key if provided and not already set
-        self.value._upgrade(key)
+        self.localizations._upgrade(key)
 
         # Only overwrite if not already set (`Localized()` parameter value takes precedence over function names etc.)
-        # Note: not checking whether `name` is an empty string, to keep generic typing correct
-        if not self.name and name is not None:
-            self.name = name
+        # Note: not checking whether `string` is an empty string, to keep generic typing correct
+        if not self.string and string is not None:
+            self.string = string
 
         # this is safe, see above
         return self
