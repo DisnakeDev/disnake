@@ -49,8 +49,6 @@ from .enums import Locale
 from .errors import LocalizationKeyError
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeGuard
-
     LocalizedRequired = Union[str, "Localized[str]"]
     LocalizedOptional = Union[str, "Localized[Optional[str]]"]
 
@@ -110,17 +108,26 @@ class Localized(Generic[NameT]):
         ...
 
     @overload
-    def __init__(self, name: NameT, *, data: Optional[LocalizationsDict]):
+    def __init__(self, name: NameT, *, data: Union[Optional[LocalizationsDict], LocalizationValue]):
         ...
 
+    # note: `data` accepting `LocalizationValue` is intentionally undocumented,
+    # as it's only meant to be used internally
     def __init__(
-        self, name: NameT, *, key: str = MISSING, data: Optional[LocalizationsDict] = MISSING
+        self,
+        name: NameT,
+        *,
+        key: str = MISSING,
+        data: Union[Optional[LocalizationsDict], LocalizationValue] = MISSING,
     ):
         self.name: NameT = name
 
         if not (key is MISSING) ^ (data is MISSING):
             raise TypeError("Exactly one of `key` or `data` must be provided")
-        self.value = LocalizationValue(key if key is not MISSING else data)
+        if isinstance(data, LocalizationValue):
+            self.value = data
+        else:
+            self.value = LocalizationValue(key if key is not MISSING else data)
 
     @classmethod
     def _create(cls, name: Union[NameT, Localized[NameT]]) -> Localized[NameT]:
@@ -149,10 +156,6 @@ class Localized(Generic[NameT]):
 
         # this is safe, see above
         return self
-
-    @staticmethod
-    def _has_name(val: Localized[Any]) -> TypeGuard[Localized[str]]:
-        return bool(val.name)
 
 
 class LocalizationValue:

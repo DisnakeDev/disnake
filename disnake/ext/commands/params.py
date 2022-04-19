@@ -55,7 +55,7 @@ from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
-from disnake.i18n import Localized
+from disnake.i18n import LocalizationValue, Localized
 from disnake.interactions import CommandInteraction
 from disnake.utils import maybe_coroutine
 
@@ -279,17 +279,17 @@ class ParamInfo:
     The instances of this class are not created manually, but via the functional interface instead.
     See :func:`Param`.
 
-    Attributes
+    Parameters
     ----------
     default: Any
         The actual default value for the corresponding function param.
-    name: :class:`.Localized`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of this slash command option.
 
         .. versionchanged:: 2.5
             Now supports localization.
 
-    description: :class:`.Localized`
+    description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The description of this slash command option.
 
         .. versionchanged:: 2.5
@@ -349,14 +349,16 @@ class ParamInfo:
         ge: float = None,
         large: bool = False,
     ) -> None:
-        # use "" as value for now if missing, will be replaced with parameter name later
-        name_loc = Localized._create(name)._upgrade("")
+        name_loc = Localized._create(name)
+        self.name: str = name_loc.name or ""
+        self.name_localizations: LocalizationValue = name_loc.value
+
         desc_loc = Localized._create(description)
+        self.description: Optional[str] = desc_loc.name
+        self.description_Localizations: LocalizationValue = desc_loc.value
 
         self.default = default
-        self.name: Localized[str] = name_loc
         self.param_name: str = ""
-        self.description: Localized[Optional[str]] = desc_loc
         self.converter = converter
         self.convert_default = convert_default
         self.autocomplete = autcomplete
@@ -582,24 +584,30 @@ class ParamInfo:
         )
 
     def parse_parameter(self, param: inspect.Parameter) -> None:
-        self.name = self.name._upgrade(param.name)
+        self.name = self.name or param.name
         self.param_name = param.name
 
     def parse_doc(self, doc: disnake.utils._DocstringParam) -> None:
-        self.description = self.description._upgrade(
-            doc["description"], key=doc["localization_key_desc"]
-        )
         if self.type == str and doc["type"] is not None:
             self.parse_annotation(doc["type"])
-        self.name = self.name._upgrade(key=doc["localization_key_name"])
+        self.name_localizations = self.name_localizations or LocalizationValue(
+            doc["localization_key_name"]
+        )
+        self.description = self.description or doc["description"]
+        self.description_Localizations = self.description_Localizations or LocalizationValue(
+            doc["localization_key_desc"]
+        )
 
     def to_option(self) -> Option:
-        if not Localized._has_name(self.name):
+        if not self.name:
             raise TypeError("Param must be parsed first")
 
+        name = Localized(self.name, data=self.name_localizations)
+        desc = Localized(self.description, data=self.description_Localizations)
+
         return Option(
-            name=self.name,
-            description=self.description,
+            name=name,
+            description=desc,
             type=self.discord_type,
             required=self.required,
             choices=self.choices or None,
@@ -822,10 +830,10 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
 
     # update connectors and autocompleters
     for param in params:
-        if param.name.name != param.param_name:
-            command.connectors[param.name.name] = param.param_name
+        if param.name != param.param_name:
+            command.connectors[param.name] = param.param_name
         if param.autocomplete:
-            command.autocompleters[param.name.name] = param.autocomplete
+            command.autocompleters[param.name] = param.autocomplete
 
     if issubclass_(sig.parameters[inter_param].annotation, disnake.GuildCommandInteraction):
         command.guild_only = True
