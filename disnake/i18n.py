@@ -89,6 +89,8 @@ class Localized(Generic[NameT]):
 
     Exactly one of ``key`` or ``data`` must be provided.
 
+    .. versionadded:: 2.5
+
     Parameters
     ----------
     name: Optional[:class:`str`]
@@ -127,7 +129,7 @@ class Localized(Generic[NameT]):
         return cls(name, data=None)
 
     @overload
-    def _upgrade(self: Localized[UpgradeT], *, key: Optional[str] = None) -> Localized[UpgradeT]:
+    def _upgrade(self: Localized[UpgradeT], *, key: Optional[str]) -> Localized[UpgradeT]:
         ...
 
     @overload
