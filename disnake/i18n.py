@@ -196,6 +196,7 @@ class LocalizationValue:
         # if empty, use new key
         if self._key is None and self._data is None:
             self._key = key
+            self._data = MISSING
             return
 
         # if key is the same, ignore
