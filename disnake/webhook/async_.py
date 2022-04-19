@@ -195,6 +195,7 @@ class AsyncWebhookAdapter:
                             lock.delay_by(delta)
 
                         if 300 > response.status >= 200:
+                            _log.debug("%s %s has received %s", method, url, data)
                             return data
 
                         if response.status == 429:
