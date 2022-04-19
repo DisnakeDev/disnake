@@ -142,7 +142,7 @@ All the other types may be converted implicitly, similarly to :ref:`ext_commands
         ...
 
 .. note::
-  \* All channel subclasses and unions are also supported. See :attr:`.ParamInfo.channel_types` for more fine-grained control
+  \* All channel subclasses and unions are also supported. See :attr:`ParamInfo.channel_types <ext.commands.ParamInfo>` for more fine-grained control
 
   \*\* Role and Member may be used together to create a "mentionable" (``Union[Role, Member]``)
 

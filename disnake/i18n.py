@@ -83,7 +83,7 @@ UpgradeT = TypeVar("UpgradeT", str, Optional[str])
 
 class Localized(Generic[NameT]):
     """
-    A container type used for localizations of names/descriptions.
+    A container type used for localized parameters.
 
     Exactly one of ``key`` or ``data`` must be provided.
 
@@ -97,7 +97,7 @@ class Localized(Generic[NameT]):
         A localization key used for lookups.
         Incompatible with ``data``.
     data: Union[Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
-        A mapping from locales to localized values.
+        A mapping of locales to localized values.
         Incompatible with ``key``.
     """
 
