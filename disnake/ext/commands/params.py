@@ -55,7 +55,7 @@ from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
-from disnake.i18n import LocalizationValue, Localized
+from disnake.i18n import Localized
 from disnake.interactions import CommandInteraction
 from disnake.utils import maybe_coroutine
 
@@ -64,7 +64,7 @@ from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
     from disnake.app_commands import Choices
-    from disnake.i18n import LocalizedOptional
+    from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 
     from .slash_core import InvokableSlashCommand, SubCommand
@@ -355,10 +355,10 @@ class ParamInfo:
 
         desc_loc = Localized._create(description)
         self.description: Optional[str] = desc_loc.name
-        self.description_Localizations: LocalizationValue = desc_loc.value
+        self.description_localizations: LocalizationValue = desc_loc.value
 
         self.default = default
-        self.param_name: str = ""
+        self.param_name: str = self.name
         self.converter = converter
         self.convert_default = convert_default
         self.autocomplete = autcomplete
@@ -590,20 +590,18 @@ class ParamInfo:
     def parse_doc(self, doc: disnake.utils._DocstringParam) -> None:
         if self.type == str and doc["type"] is not None:
             self.parse_annotation(doc["type"])
-        self.name_localizations = self.name_localizations or LocalizationValue(
-            doc["localization_key_name"]
-        )
+
         self.description = self.description or doc["description"]
-        self.description_Localizations = self.description_Localizations or LocalizationValue(
-            doc["localization_key_desc"]
-        )
+
+        self.name_localizations._upgrade(doc["localization_key_name"])
+        self.description_localizations._upgrade(doc["localization_key_desc"])
 
     def to_option(self) -> Option:
         if not self.name:
             raise TypeError("Param must be parsed first")
 
         name = Localized(self.name, data=self.name_localizations)
-        desc = Localized(self.description, data=self.description_Localizations)
+        desc = Localized(self.description, data=self.description_localizations)
 
         return Option(
             name=name,

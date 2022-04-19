@@ -144,10 +144,8 @@ class Localized(Generic[NameT]):
         ...
 
     def _upgrade(self, name: Optional[str] = None, *, key: Optional[str] = None) -> Localized[Any]:
-        if key:
-            if not (self.value._key is None and self.value._data is None):
-                raise ValueError("Can't specify multiple localization keys or dicts")
-            self.value = LocalizationValue(key)
+        # update key if provided and not already set
+        self.value._upgrade(key)
 
         # Only overwrite if not already set (`Localized()` parameter value takes precedence over function names etc.)
         # Note: not checking whether `name` is an empty string, to keep generic typing correct
@@ -185,6 +183,23 @@ class LocalizationValue:
             self._data = {str(k): v for k, v in localizations.items()}
         else:
             raise TypeError(f"Invalid localizations type: {type(localizations).__name__}")
+
+    def _upgrade(self, key: Optional[str]) -> None:
+        if not key:
+            return
+
+        # if empty, use new key
+        if self._key is None and self._data is None:
+            self._key = key
+            return
+
+        # if key is the same, ignore
+        if self._key == key:
+            return
+
+        # at this point, the keys don't match, which either means that they're different strings,
+        # or that there is no existing `_key` but `_data` is set
+        raise ValueError("Can't specify multiple localization keys or dicts")
 
     def _link(self, store: LocalizationProtocol) -> None:
         """Loads localizations from the specified store if this object has a key."""
