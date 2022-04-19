@@ -49,6 +49,8 @@ from .enums import Locale
 from .errors import LocalizationKeyError
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     LocalizedRequired = Union[str, "Localized[str]"]
     LocalizedOptional = Union[str, "Localized[Optional[str]]"]
 
@@ -69,7 +71,6 @@ LocalizationsDict = Union[Dict[Locale, str], Dict[str, str]]
 Localizations = Union[str, LocalizationsDict]
 
 NameT = TypeVar("NameT", str, Optional[str], covariant=True)
-UpgradeT = TypeVar("UpgradeT", str, Optional[str])
 
 
 # This is generic over `name`, as some localized strings can be optional, e.g. option descriptions.
@@ -136,7 +137,7 @@ class Localized(Generic[NameT]):
         return cls(name, data=None)
 
     @overload
-    def _upgrade(self: Localized[UpgradeT], *, key: Optional[str]) -> Localized[UpgradeT]:
+    def _upgrade(self, *, key: Optional[str]) -> Self:
         ...
 
     @overload
