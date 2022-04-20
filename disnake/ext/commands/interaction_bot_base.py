@@ -452,13 +452,13 @@ class InteractionBotBase(CommonBotBase):
             The name of the slash command (defaults to function name).
 
             .. versionchanged:: 2.5
-                Now supports localization.
+                Added support for localizations.
 
         description: Optional[Union[:class:`str`, :class:`.Localized`]]
             The description of the slash command. It will be visible in Discord.
 
             .. versionchanged:: 2.5
-                Now supports localization.
+                Added support for localizations.
 
         options: List[:class:`.Option`]
             The list of slash command options. The options will be visible in Discord.
@@ -518,7 +518,7 @@ class InteractionBotBase(CommonBotBase):
             The name of the user command (defaults to function name).
 
             .. versionchanged:: 2.5
-                Now supports localization.
+                Added support for localizations.
 
         default_permission: :class:`bool`
             Whether the command is enabled by default. If set to ``False``, this command
@@ -566,7 +566,7 @@ class InteractionBotBase(CommonBotBase):
             The name of the message command (defaults to function name).
 
             .. versionchanged:: 2.5
-                Now supports localization.
+                Added support for localizations.
 
         default_permission: :class:`bool`
             Whether the command is enabled by default. If set to ``False``, this command

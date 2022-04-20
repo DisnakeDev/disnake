@@ -287,13 +287,13 @@ class ParamInfo:
         The name of this slash command option.
 
         .. versionchanged:: 2.5
-            Now supports localization.
+            Added support for localizations.
 
     description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The description of this slash command option.
 
         .. versionchanged:: 2.5
-            Now supports localization.
+            Added support for localizations.
 
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of choices of this slash command option.
@@ -869,14 +869,14 @@ def Param(
         The name of the option. By default, the option name is the parameter name.
 
         .. versionchanged:: 2.5
-            Now supports localization.
+            Added support for localizations.
 
     description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
 
         .. versionchanged:: 2.5
-            Now supports localization.
+            Added support for localizations.
 
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.

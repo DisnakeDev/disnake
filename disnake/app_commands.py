@@ -120,7 +120,7 @@ class OptionChoice:
         The name of the option choice (visible to users).
 
         .. versionchanged:: 2.5
-            Now supports localization.
+            Added support for localizations.
 
     value: Union[:class:`str`, :class:`int`]
         The value of the option choice.
@@ -187,13 +187,13 @@ class Option:
         The option's name.
 
         .. versionchanged:: 2.5
-            Now supports localization.
+            Added support for localizations.
 
     description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The option's description.
 
         .. versionchanged:: 2.5
-            Now supports localization.
+            Added support for localizations.
 
     type: :class:`OptionType`
         The option type, e.g. :class:`OptionType.user`.

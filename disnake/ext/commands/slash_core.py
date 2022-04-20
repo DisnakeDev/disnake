@@ -395,13 +395,13 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             The name of the subcommand (defaults to function name).
 
             .. versionchanged:: 2.5
-                Now supports localization.
+                Added support for localizations.
 
         description: Optional[Union[:class:`str`, :class:`.Localized`]]
             The description of the subcommand.
 
             .. versionchanged:: 2.5
-                Now supports localization.
+                Added support for localizations.
 
         options: List[:class:`.Option`]
             the options of the subcommand for registration in API
@@ -449,7 +449,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             The name of the subcommand group (defaults to function name).
 
             .. versionchanged:: 2.5
-                Now supports localization.
+                Added support for localizations.
 
         Returns
         -------
@@ -614,13 +614,13 @@ def slash_command(
         The name of the slash command (defaults to function name).
 
         .. versionchanged:: 2.5
-            Now supports localization.
+            Added support for localizations.
 
     description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The description of the slash command. It will be visible in Discord.
 
         .. versionchanged:: 2.5
-            Now supports localization.
+            Added support for localizations.
 
     options: List[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.

@@ -211,7 +211,7 @@ def user_command(
         The name of the user command (defaults to the function name).
 
         .. versionchanged:: 2.5
-            Now supports localization.
+            Added support for localizations.
 
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
@@ -263,7 +263,7 @@ def message_command(
         The name of the message command (defaults to the function name).
 
         .. versionchanged:: 2.5
-            Now supports localization.
+            Added support for localizations.
 
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
