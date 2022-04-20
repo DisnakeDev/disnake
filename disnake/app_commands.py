@@ -147,7 +147,7 @@ class OptionChoice:
         )
 
     def to_dict(self, *, locale: Optional[Locale] = None) -> ApplicationCommandOptionChoicePayload:
-        localizations = self.name_localizations and self.name_localizations.data
+        localizations = self.name_localizations.data
 
         name: Optional[str] = None
         # if `locale` provided, get localized name from dict
