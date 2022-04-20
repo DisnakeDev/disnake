@@ -1453,7 +1453,7 @@ class Guild(Hashable):
             The position in the channel list. This is a number that starts
             at 0. e.g. the top channel is position 0.
         rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
-            The region for the voice channel's voice communication.
+            The region for the stage channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
 
             .. versionadded:: 2.5

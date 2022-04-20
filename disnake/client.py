@@ -1868,7 +1868,7 @@ class Client:
     # Voice region stuff
 
     async def fetch_voice_regions(self, guild_id: Optional[int] = None) -> List[VoiceRegion]:
-        """Retrieves a list of :class:`VoiceRegion`s.
+        """Retrieves a list of :class:`VoiceRegion`\\s.
 
         Retrieves voice regions for the user, or a guild if provided.
 
@@ -1876,7 +1876,7 @@ class Client:
 
         Parameters
         ----------
-        guild_id: Optional[:class:`int`]:
+        guild_id: Optional[:class:`int`]
             The guild to get regions for, if provided.
 
         Raises
@@ -1884,7 +1884,7 @@ class Client:
         HTTPException
             Retrieving voice regions failed.
         NotFound
-            The provided guild_id could not be found.
+            The provided ``guild_id`` could not be found.
         """
         if guild_id:
             regions = await self.http.get_guild_voice_regions(guild_id)
