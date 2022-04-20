@@ -70,4 +70,4 @@ class VoiceRegion:
         return self.id
 
     def __repr__(self):
-        return f"<VoiceRegion id={self.id!r} name={self.name!r}>"
+        return f"<VoiceRegion id={self.id!r} name={self.name!r} optimal={self.optimal!r}>"
