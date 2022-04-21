@@ -129,6 +129,7 @@ class InvokableApplicationCommand(ABC):
         Whether to automatically register the command.
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
+
         .. versionadded: 2.5
     """
 
