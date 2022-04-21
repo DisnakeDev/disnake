@@ -131,7 +131,7 @@ class OptionChoice:
         name: LocalizedRequired,
         value: ApplicationCommandOptionChoiceValue,
     ):
-        name_loc = Localized._cast(name)
+        name_loc = Localized._cast(name, True)
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
         self.value: ApplicationCommandOptionChoiceValue = value
@@ -243,12 +243,12 @@ class Option:
         min_value: float = None,
         max_value: float = None,
     ):
-        name_loc = Localized._cast(name)
+        name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
 
-        desc_loc = Localized._cast(description)
+        desc_loc = Localized._cast(description, False)
         self.description: str = desc_loc.string or "-"
         self.description_localizations: LocalizationValue = desc_loc.localizations
 
@@ -447,7 +447,7 @@ class ApplicationCommand(ABC):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.default_permission: bool = default_permission
 
-        name_loc = Localized._cast(name)
+        name_loc = Localized._cast(name, True)
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
 
@@ -685,7 +685,7 @@ class SlashCommand(ApplicationCommand):
         )
         _validate_name(self.name)
 
-        desc_loc = Localized._cast(description)
+        desc_loc = Localized._cast(description, True)
         self.description: str = desc_loc.string
         self.description_localizations: LocalizationValue = desc_loc.localizations
 

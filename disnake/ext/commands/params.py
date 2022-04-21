@@ -349,11 +349,11 @@ class ParamInfo:
         ge: float = None,
         large: bool = False,
     ) -> None:
-        name_loc = Localized._cast(name)
+        name_loc = Localized._cast(name, False)
         self.name: str = name_loc.string or ""
         self.name_localizations: LocalizationValue = name_loc.localizations
 
-        desc_loc = Localized._cast(description)
+        desc_loc = Localized._cast(description, False)
         self.description: Optional[str] = desc_loc.string
         self.description_localizations: LocalizationValue = desc_loc.localizations
 

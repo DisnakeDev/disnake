@@ -136,7 +136,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         name: LocalizedOptional = None,
         **kwargs,
     ):
-        name_loc = Localized._cast(name)
+        name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.children: Dict[str, SubCommand] = {}
         self.option = Option(
@@ -227,7 +227,7 @@ class SubCommand(InvokableApplicationCommand):
         connectors: Dict[str, str] = None,
         **kwargs,
     ):
-        name_loc = Localized._cast(name)
+        name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
         self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
@@ -236,7 +236,7 @@ class SubCommand(InvokableApplicationCommand):
             options = expand_params(self)
 
         self.docstring = utils.parse_docstring(func)
-        desc_loc = Localized._cast(description)
+        desc_loc = Localized._cast(description, False)
 
         self.option = Option(
             name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),
@@ -343,7 +343,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         auto_sync: bool = True,
         **kwargs,
     ):
-        name_loc = Localized._cast(name)
+        name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
@@ -355,7 +355,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             options = expand_params(self)
 
         self.docstring = utils.parse_docstring(func)
-        desc_loc = Localized._cast(description)
+        desc_loc = Localized._cast(description, False)
 
         self.body: SlashCommand = SlashCommand(
             name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),

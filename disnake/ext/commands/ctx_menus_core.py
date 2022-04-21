@@ -82,7 +82,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         auto_sync: bool = True,
         **kwargs,
     ):
-        name_loc = Localized._cast(name)
+        name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
@@ -159,7 +159,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         auto_sync: bool = True,
         **kwargs,
     ):
-        name_loc = Localized._cast(name)
+        name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync

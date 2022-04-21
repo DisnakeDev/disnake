@@ -36,6 +36,7 @@ from typing import (
     DefaultDict,
     Dict,
     Generic,
+    Literal,
     Optional,
     Set,
     TypeVar,
@@ -52,7 +53,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     LocalizedRequired = Union[str, "Localized[str]"]
-    LocalizedOptional = Union[str, "Localized[Optional[str]]"]
+    LocalizedOptional = Union[Optional[str], "Localized[Optional[str]]"]
 
 
 __all__ = (
@@ -94,6 +95,7 @@ class Localized(Generic[StringT]):
     ----------
     string: Optional[:class:`str`]
         The default (non-localized) value of the string.
+        Whether this is optional or not depends on the localized parameter type.
     key: :class:`str`
         A localization key used for lookups.
         Incompatible with ``data``.
@@ -132,11 +134,25 @@ class Localized(Generic[StringT]):
         else:
             self.localizations = LocalizationValue(key if key is not MISSING else data)
 
+    @overload
     @classmethod
-    def _cast(cls, string: Union[StringT, Localized[StringT]]) -> Localized[StringT]:
-        if isinstance(string, Localized):
-            return string
-        return cls(string, data=None)
+    def _cast(cls, string: LocalizedOptional, required: Literal[False]) -> Localized[Optional[str]]:
+        ...
+
+    @overload
+    @classmethod
+    def _cast(cls, string: LocalizedRequired, required: Literal[True]) -> Localized[str]:
+        ...
+
+    @classmethod
+    def _cast(cls, string: Union[Optional[str], Localized[Any]], required: bool) -> Localized[Any]:
+        if not isinstance(string, Localized):
+            string = cls(string, data=None)
+
+        # enforce the `StringT` type at runtime
+        if required and string.string is None:
+            raise ValueError("`string` parameter must be provided")
+        return string
 
     @overload
     def _upgrade(self, *, key: Optional[str]) -> Self:
