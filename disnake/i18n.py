@@ -107,12 +107,27 @@ class Localized(Generic[StringT]):
     __slots__ = ("string", "localizations")
 
     @overload
-    def __init__(self, string: StringT, *, key: str):
+    def __init__(self: Localized[StringT], string: StringT, *, key: str):
+        ...
+
+    @overload
+    def __init__(self: Localized[Optional[str]], *, key: str):
         ...
 
     @overload
     def __init__(
-        self, string: StringT, *, data: Union[Optional[LocalizationsDict], LocalizationValue]
+        self: Localized[StringT],
+        string: StringT,
+        *,
+        data: Union[Optional[LocalizationsDict], LocalizationValue],
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self: Localized[Optional[str]],
+        *,
+        data: Union[Optional[LocalizationsDict], LocalizationValue],
     ):
         ...
 
@@ -120,7 +135,7 @@ class Localized(Generic[StringT]):
     # as it's only meant to be used internally
     def __init__(
         self,
-        string: StringT,
+        string: StringT = None,
         *,
         key: str = MISSING,
         data: Union[Optional[LocalizationsDict], LocalizationValue] = MISSING,

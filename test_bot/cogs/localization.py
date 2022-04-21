@@ -27,9 +27,9 @@ class Localizations(commands.Cog):
         ),
         other: str = commands.Param(
             # by lookup key
-            name=Localized(None, key="OTHER_NAME"),
+            name=Localized(key="OTHER_NAME"),
             # specify localizations directly
-            description=Localized(None, data={Locale.en_GB: "insert bri'ish description here"}),
+            description=Localized(data={Locale.en_GB: "insert bri'ish description here"}),
         ),
     ) -> None:
         """
@@ -59,8 +59,8 @@ class Localizations(commands.Cog):
         pass
 
     @second.sub_command(
-        name=Localized(None, data={Locale.en_GB: "british_subcommand"}),
-        description=Localized(None, key="MY_SUBCMD_DESC"),
+        name=Localized(data={Locale.en_GB: "british_subcommand"}),
+        description=Localized(key="MY_SUBCMD_DESC"),
     )
     async def third(
         self,

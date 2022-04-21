@@ -542,12 +542,12 @@ This would create the same command as the code above, though you're free to chan
 
 .. code-block:: python3
 
-    @bot.slash_command(name=Localized("add_5", key="ADD_NUM_NAME"), description=Localized(None, key="ADD_NUM_DESCRIPTION"))
+    @bot.slash_command(name=Localized("add_5", key="ADD_NUM_NAME"), description=Localized(key="ADD_NUM_DESCRIPTION"))
     async def _add_5_slash(
         inter: disnake.ApplicationCommandInteraction,
         num: int = commands.Param(
-            name=Localized(None, key="COOL_NUMBER_NAME"),
-            description=Localized(None, key="COOL_NUMBER_DESCRIPTION")
+            name=Localized(key="COOL_NUMBER_NAME"),
+            description=Localized(key="COOL_NUMBER_DESCRIPTION")
         ),
     ):
         """
@@ -564,14 +564,14 @@ While not recommended, it is also possible to not use ``.json`` files at all and
 .. code-block:: python3
 
     @bot.slash_command(
-        name=Localized(None, data={Locale.de: "addiere_5"}),
-        description=Localized(None, data={Locale.de: "Addiere 5 zu einer anderen Zahl."}),
+        name=Localized(data={Locale.de: "addiere_5"}),
+        description=Localized(data={Locale.de: "Addiere 5 zu einer anderen Zahl."}),
     )
     async def add_5(
         inter: disnake.ApplicationCommandInteraction,
         num: int = commands.Param(
-            name=Localized(None, data={Locale.de: "zahl"}),
-            description=Localized(None, {Locale.de: "Eine Zahl"}),
+            name=Localized(data={Locale.de: "zahl"}),
+            description=Localized(data={Locale.de: "Eine Zahl"}),
         ),
     ):
         ...
