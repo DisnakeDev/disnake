@@ -1419,7 +1419,7 @@ class Guild(Hashable):
         self,
         name: str,
         *,
-        topic: str,
+        topic: str = MISSING,
         position: int = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         category: Optional[CategoryChannel] = None,
@@ -1437,6 +1437,10 @@ class Guild(Hashable):
             The channel's name.
         topic: :class:`str`
             The channel's topic.
+
+            .. versionchanged:: 2.5
+                This no longer must be set.
+
         overwrites: Dict[Union[:class:`Role`, :class:`Member`], :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
@@ -1465,9 +1469,11 @@ class Guild(Hashable):
         :class:`StageChannel`
             The channel that was just created.
         """
-        options: Dict[str, Any] = {
-            "topic": topic,
-        }
+        options: Dict[str, Any] = {}
+
+        if topic is not MISSING:
+            options["topic"] = topic
+
         if position is not MISSING:
             options["position"] = position
 

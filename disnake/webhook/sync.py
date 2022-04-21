@@ -148,10 +148,11 @@ class WebhookAdapter:
                         method, url, data=to_send, files=file_data, headers=headers, params=params
                     ) as response:
                         _log.debug(
-                            "Webhook ID %s with %s %s has returned status code %s",
+                            "Webhook ID %s with %s %s with %s has returned status code %s",
                             webhook_id,
                             method,
                             url,
+                            to_send,
                             response.status_code,
                         )
                         response.encoding = "utf-8"
@@ -173,6 +174,7 @@ class WebhookAdapter:
                             lock.delay_by(delta)
 
                         if 300 > response.status_code >= 200:
+                            _log.debug("%s %s has received %s", method, url, data)
                             return data
 
                         if response.status_code == 429:
