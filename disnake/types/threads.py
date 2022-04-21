@@ -56,7 +56,8 @@ class _ThreadOptional(TypedDict, total=False):
     member: ThreadMember
     owner_id: Snowflake
     last_message_id: Optional[Snowflake]
-    last_pin_timestamp: Optional[Snowflake]
+    last_pin_timestamp: Optional[str]
+    flags: int
 
 
 class Thread(_ThreadOptional):

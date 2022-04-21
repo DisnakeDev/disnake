@@ -91,6 +91,14 @@ TeamMember
 .. autoclass:: TeamMember()
     :members:
 
+InstallParams
+~~~~~~~~~~~~~
+
+.. attributetable:: InstallParams
+
+.. autoclass:: InstallParams()
+    :members:
+
 Voice Related
 ---------------
 
@@ -353,11 +361,14 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when someone begins typing a message.
 
-    The ``channel`` parameter can be a :class:`abc.Messageable` instance.
-    Which could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`GroupChannel`,
+    The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel`.
+    If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`GroupChannel`,
     or :class:`DMChannel`.
 
-    If the ``channel`` is a :class:`TextChannel` or :class:`VoiceChannel` then the
+    .. versionchanged:: 2.5
+        ``channel`` may be a type :class:`ForumChannel`
+
+    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, or :class:`VoiceChannel` then the
     ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
 
     If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,
@@ -376,7 +387,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
         to enable the members intent.
 
     :param channel: The location where the typing originated from.
-    :type channel: :class:`abc.Messageable`
+    :type channel: Union[:class:`abc.Messageable`, :class:`ForumChannel`]
     :param user: The user that started typing.
     :type user: Union[:class:`User`, :class:`Member`]
     :param when: When the typing started as an aware datetime in UTC.
@@ -2107,6 +2118,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.icon`
         - :attr:`~AuditLogDiff.banner`
         - :attr:`~AuditLogDiff.vanity_url_code`
+        - :attr:`~AuditLogDiff.preferred_locale`
 
     .. attribute:: channel_create
 
@@ -3096,6 +3108,132 @@ of :class:`enum.Enum`.
         A large image with a large Discord logo, guild icon, name and online member count,
         with a "Join My Server" label at the bottom.
 
+.. class:: Locale
+
+    Represents supported locales by Discord.
+
+    .. versionadded:: 2.5
+
+    .. attribute:: bg
+
+        The ``bg`` (Bulgarian) locale.
+
+    .. attribute:: cs
+
+        The ``cs`` (Czech) locale.
+
+    .. attribute:: da
+
+        The ``da`` (Danish) locale.
+
+    .. attribute:: de
+
+        The ``de`` (German) locale.
+
+    .. attribute:: el
+
+        The ``el`` (Greek) locale.
+
+    .. attribute:: en_GB
+
+        The ``en_GB`` (English, UK) locale.
+
+    .. attribute:: en_US
+
+        The ``en_US`` (English, US) locale.
+
+    .. attribute:: es_ES
+
+        The ``es_ES`` (Spanish) locale.
+
+    .. attribute:: fi
+
+        The ``fi`` (Finnish) locale.
+
+    .. attribute:: fr
+
+        The ``fr`` (French) locale.
+
+    .. attribute:: hi
+
+        The ``hi`` (Hindi) locale.
+
+    .. attribute:: hr
+
+        The ``hr`` (Croatian) locale.
+
+    .. attribute:: it
+
+        The ``it`` (Italian) locale.
+
+    .. attribute:: ja
+
+        The ``ja`` (Japanese) locale.
+
+    .. attribute:: ko
+
+        The ``ko`` (Korean) locale.
+
+    .. attribute:: lt
+
+        The ``lt`` (Lithuanian) locale.
+
+    .. attribute:: hu
+
+        The ``hu`` (Hungarian) locale.
+
+    .. attribute:: nl
+
+        The ``nl`` (Dutch) locale.
+
+    .. attribute:: no
+
+        The ``no`` (Norwegian) locale.
+
+    .. attribute:: pl
+
+        The ``pl`` (Polish) locale.
+
+    .. attribute:: pt_BR
+
+        The ``pt_BR`` (Portuguese) locale.
+
+    .. attribute:: ro
+
+        The ``ro`` (Romanian) locale.
+
+    .. attribute:: ru
+
+        The ``ru`` (Russian) locale.
+
+    .. attribute:: sv_SE
+
+        The ``sv_SE`` (Swedish) locale.
+
+    .. attribute:: th
+
+        The ``th`` (Thai) locale.
+
+    .. attribute:: tr
+
+        The ``tr`` (Turkish) locale.
+
+    .. attribute:: uk
+
+        The ``uk`` (Ukrainian) locale.
+
+    .. attribute:: vi
+
+        The ``vi`` (Vietnamese) locale.
+
+    .. attribute:: zh_CN
+
+        The ``zh_CN`` (Chinese, China) locale.
+
+    .. attribute:: zh_TW
+
+        The ``zh_TW`` (Chinese, Taiwan) locale.
+
 
 Async Iterator
 ----------------
@@ -3470,6 +3608,12 @@ AuditLogDiff
 
         :type: :class:`str`
 
+    .. attribute:: preferred_locale
+
+        The guild's preferred locale.
+
+        :type: :class:`Locale`
+
     .. attribute:: position
 
         The position of a :class:`Role` or :class:`abc.GuildChannel`.
@@ -3484,9 +3628,9 @@ AuditLogDiff
 
     .. attribute:: topic
 
-        The topic of a :class:`TextChannel` or :class:`StageChannel`.
+        The topic of a :class:`TextChannel`, :class:`StageChannel` or :class:`ForumChannel`.
 
-        See also :attr:`TextChannel.topic` or :attr:`StageChannel.topic`.
+        See also :attr:`TextChannel.topic`, :attr:`StageChannel.topic` or :attr:`ForumChannel.topic`.
 
         :type: :class:`str`
 
@@ -3664,9 +3808,9 @@ AuditLogDiff
     .. attribute:: slowmode_delay
 
         The number of seconds members have to wait before
-        sending another message in the channel.
+        sending another message or creating another thread in the channel.
 
-        See also :attr:`TextChannel.slowmode_delay`.
+        See also :attr:`TextChannel.slowmode_delay` or :attr:`ForumChannel.slowmode_delay`.
 
         :type: :class:`int`
 
@@ -4269,6 +4413,7 @@ InteractionMessage
 
 .. autoclass:: InteractionMessage()
     :members:
+    :inherited-members:
 
 ApplicationCommandInteractionData
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4443,6 +4588,18 @@ StageChannel
     :members:
     :inherited-members:
 
+ForumChannel
+~~~~~~~~~~~~
+
+.. attributetable:: ForumChannel
+
+.. autoclass:: ForumChannel()
+    :members:
+    :inherited-members:
+    :exclude-members: typing
+
+    .. automethod:: typing
+        :async-with:
 
 StageInstance
 ~~~~~~~~~~~~~~
@@ -4573,6 +4730,7 @@ StickerItem
 
 .. autoclass:: StickerItem()
     :members:
+    :inherited-members:
 
 Sticker
 ~~~~~~~~~~~~~~~
@@ -4581,6 +4739,7 @@ Sticker
 
 .. autoclass:: Sticker()
     :members:
+    :inherited-members:
 
 StandardSticker
 ~~~~~~~~~~~~~~~~
@@ -4589,6 +4748,7 @@ StandardSticker
 
 .. autoclass:: StandardSticker()
     :members:
+    :inherited-members:
 
 GuildSticker
 ~~~~~~~~~~~~~
@@ -4597,6 +4757,7 @@ GuildSticker
 
 .. autoclass:: GuildSticker()
     :members:
+    :inherited-members:
 
 RawMessageDeleteEvent
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4781,6 +4942,14 @@ ApplicationFlags
 .. attributetable:: ApplicationFlags
 
 .. autoclass:: ApplicationFlags
+    :members:
+
+ChannelFlags
+~~~~~~~~~~~~
+
+.. attributetable:: ChannelFlags
+
+.. autoclass:: ChannelFlags
     :members:
 
 File

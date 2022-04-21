@@ -183,7 +183,7 @@ For example:
 Why do most messages have no content?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As of April 30th 2022, Discord has blocked message content from being sent to bots that do not declare the :attr:`Intents.message_content` intent when connecting to discord.
+As of August 31st, 2022, Discord has blocked message content from being sent to bots that do not declare the :attr:`Intents.message_content` intent when connecting to discord.
 
 If you are on version 2.4 or before, your bot will be able to access message content without the intent enabled in the code. However, as of version 2.5, it is required to enable :attr:`Intents.message_content` to receive message content over the gateway.
 
