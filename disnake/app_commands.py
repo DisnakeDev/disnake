@@ -357,6 +357,9 @@ class ApplicationCommand(ABC):
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
         return f"<{type(self).__name__} {attrs}>"
 
+    def __str__(self) -> str:
+        return self.name
+
     def __eq__(self, other) -> bool:
         return (
             self.type == other.type
@@ -543,9 +546,6 @@ class SlashCommand(ApplicationCommand):
         )
         self.description: str = description
         self.options: List[Option] = options or []
-
-    def __str__(self) -> str:
-        return f"<SlashCommand name={self.name!r}>"
 
     def __eq__(self, other) -> bool:
         return (
