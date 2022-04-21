@@ -127,6 +127,9 @@ class InvokableApplicationCommand(ABC):
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+        .. versionadded: 2.5
     """
 
     body: ApplicationCommand
