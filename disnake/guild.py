@@ -68,7 +68,6 @@ from .enums import (
     NSFWLevel,
     VerificationLevel,
     VideoQualityMode,
-    VoiceRegion,
     WidgetStyle,
     try_enum,
     try_enum_to_int,
@@ -88,6 +87,7 @@ from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .threads import Thread, ThreadMember
 from .user import User
+from .voice_region import VoiceRegion
 from .widget import Widget, WidgetSettings
 
 __all__ = ("Guild",)
@@ -513,7 +513,7 @@ class Guild(Hashable):
             self._member_count: int = member_count
 
         self.name: str = guild.get("name", "")
-        self._region: VoiceRegion = try_enum(VoiceRegion, guild.get("region"))
+        self._region: str = guild.get("region", "")
         self.verification_level: VerificationLevel = try_enum(
             VerificationLevel, guild.get("verification_level")
         )
@@ -1057,13 +1057,16 @@ class Guild(Hashable):
             return len(self._members)
 
     @property
-    def region(self) -> VoiceRegion:
-        """:class:`VoiceRegion`: The region the guild belongs on.
+    def region(self) -> str:
+        """Optional[:class:`str`]: The region the guild belongs on.
 
         .. deprecated:: 2.5
 
             VoiceRegion is no longer set on the guild, and is set on the individual voice channels instead.
             See :attr:`VoiceChannel.rtc_region` and :attr:`StageChannel.rtc_region` instead.
+
+        .. versionchanged:: 2.5
+            No longer a ``VoiceRegion`` instance.
         """
         utils.warn_deprecated(
             "Guild.region is deprecated and will be removed in a future version.", stacklevel=2
@@ -1321,7 +1324,7 @@ class Guild(Hashable):
         position: int = MISSING,
         bitrate: int = MISSING,
         user_limit: int = MISSING,
-        rtc_region: Optional[VoiceRegion] = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
@@ -1349,7 +1352,7 @@ class Guild(Hashable):
             The channel's preferred audio bitrate in bits per second.
         user_limit: :class:`int`
             The channel's limit for number of members that can be in a voice channel.
-        rtc_region: Optional[:class:`VoiceRegion`]
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The region for the voice channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
 
@@ -1423,6 +1426,7 @@ class Guild(Hashable):
         position: int = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         category: Optional[CategoryChannel] = None,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         reason: Optional[str] = None,
     ) -> StageChannel:
         """|coro|
@@ -1452,6 +1456,12 @@ class Guild(Hashable):
         position: :class:`int`
             The position in the channel list. This is a number that starts
             at 0. e.g. the top channel is position 0.
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
+            The region for the stage channel's voice communication.
+            A value of ``None`` indicates automatic voice region detection.
+
+            .. versionadded:: 2.5
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1476,6 +1486,9 @@ class Guild(Hashable):
 
         if position is not MISSING:
             options["position"] = position
+
+        if rtc_region is not MISSING:
+            options["rtc_region"] = None if rtc_region is None else str(rtc_region)
 
         data = await self._create_channel(
             name,
@@ -1687,7 +1700,6 @@ class Guild(Hashable):
         splash: Optional[AssetBytes] = MISSING,
         discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
-        region: Optional[Union[str, VoiceRegion]] = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
         owner: Snowflake = MISSING,
         afk_timeout: int = MISSING,
@@ -1718,6 +1730,10 @@ class Guild(Hashable):
 
         .. versionchanged:: 2.0
             The newly updated guild is returned.
+
+        .. versionchanged:: 2.5
+            Removed the ``region`` parameter.
+            Use :func:`VoiceChannel.edit` or :func:`StageChannel.edit` with ``rtc_region`` instead.
 
         Parameters
         ----------
@@ -1764,13 +1780,6 @@ class Guild(Hashable):
         community: :class:`bool`
             Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
-        region: Union[:class:`str`, :class:`VoiceRegion`]
-            The new region for the guild's voice communication.
-
-            .. deprecated:: 2.5
-
-                Use :func:`VoiceChannel.edit` or :func:`StageChannel.edit` with ``rtc_region`` instead.
-
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`
@@ -1896,11 +1905,6 @@ class Guild(Hashable):
                 raise InvalidArgument("To transfer ownership you must be the owner of the guild.")
 
             fields["owner_id"] = owner.id
-
-        if region is not MISSING:
-            utils.warn_deprecated(
-                "Guild.region is deprecated and will be removed in a future version", stacklevel=2
-            )
 
         if verification_level is not MISSING:
             if not isinstance(verification_level, VerificationLevel):
@@ -3796,6 +3800,21 @@ class Guild(Hashable):
         return members
 
     getch_members = get_or_fetch_members
+
+    async def fetch_voice_regions(self) -> List[VoiceRegion]:
+        """|coro|
+
+        Retrieves a list of :class:`VoiceRegion` for this guild.
+
+        .. versionadded:: 2.5
+
+        Raises
+        ------
+        HTTPException
+            Retrieving voice regions failed.
+        """
+        data = await self._state.http.get_guild_voice_regions(self.id)
+        return [VoiceRegion(data=region) for region in data]
 
     async def change_voice_state(
         self, *, channel: Optional[Snowflake], self_mute: bool = False, self_deaf: bool = False
