@@ -1732,6 +1732,10 @@ class Guild(Hashable):
         .. versionchanged:: 2.0
             The newly updated guild is returned.
 
+        .. versionchanged:: 2.5
+            Removed the ``region`` parameter.
+            Use :func:`VoiceChannel.edit` or :func:`StageChannel.edit` with ``rtc_region`` instead.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1777,16 +1781,6 @@ class Guild(Hashable):
         community: :class:`bool`
             Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
-        region: :class:`str`
-            The new region for the guild's voice communication.
-
-            .. deprecated:: 2.5
-
-                Use :func:`VoiceChannel.edit` or :func:`StageChannel.edit` with ``rtc_region`` instead.
-
-            .. versionchanged:: 2.5
-                No longer a ``VoiceRegion`` instance.
-
         afk_channel: Optional[:class:`VoiceChannel`]
             The new channel that is the AFK channel. Could be ``None`` for no AFK channel.
         afk_timeout: :class:`int`

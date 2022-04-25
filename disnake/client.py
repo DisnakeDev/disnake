@@ -1669,7 +1669,6 @@ class Client:
         self,
         *,
         name: str,
-        region: Optional[str] = None,
         icon: AssetBytes = MISSING,
         code: str = MISSING,
     ) -> Guild:
@@ -1679,20 +1678,13 @@ class Client:
 
         Bot accounts in more than 10 guilds are not allowed to create guilds.
 
+        .. versionchanged:: 2.5
+            Removed the ``region`` parameter.
+
         Parameters
         ----------
         name: :class:`str`
             The name of the guild.
-        region: Optional[:class:`str`]
-            The region for the voice communication server.
-
-            .. deprecated:: 2.5
-
-                This no longer has any effect.
-
-            .. versionchanged:: 2.5
-                No longer a ``VoiceRegion`` instance.
-
         icon: |resource_type|
             The icon of the guild.
             See :meth:`.ClientUser.edit` for more details on what is expected.
@@ -1726,11 +1718,6 @@ class Client:
             icon_base64 = await utils._assetbytes_to_base64_data(icon)
         else:
             icon_base64 = None
-
-        if region is not None:
-            utils.warn_deprecated(
-                "region is deprecated and will be removed in a future version.", stacklevel=2
-            )
 
         if code:
             data = await self.http.create_from_template(code, name, icon_base64)
