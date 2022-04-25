@@ -1040,6 +1040,9 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionadded:: 1.7
 
+        .. versionchanged:: 2.5
+            No longer a ``VoiceRegion`` instance.
+
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
     nsfw: :class:`bool`
@@ -1246,9 +1249,6 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             A value of ``None`` indicates automatic voice region detection.
 
             .. versionadded:: 1.7
-
-            .. versionchanged:: 2.5
-                No longer a ``VoiceRegion`` instance.
 
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the voice channel's participants.
