@@ -2009,7 +2009,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         end: bool,
         offset: int = ...,
         sync_permissions: bool = ...,
-        reason: str = ...,
+        reason: Optional[str] = ...,
     ) -> None:
         ...
 
@@ -2020,7 +2020,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         before: Snowflake,
         offset: int = ...,
         sync_permissions: bool = ...,
-        reason: str = ...,
+        reason: Optional[str] = ...,
     ) -> None:
         ...
 
@@ -2031,7 +2031,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         after: Snowflake,
         offset: int = ...,
         sync_permissions: bool = ...,
-        reason: str = ...,
+        reason: Optional[str] = ...,
     ) -> None:
         ...
 

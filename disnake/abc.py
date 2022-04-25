@@ -938,7 +938,7 @@ class GuildChannel(ABC):
         offset: int = ...,
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
-        reason: str = ...,
+        reason: Optional[str] = ...,
     ) -> None:
         ...
 
@@ -950,7 +950,7 @@ class GuildChannel(ABC):
         offset: int = ...,
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
-        reason: str = ...,
+        reason: Optional[str] = ...,
     ) -> None:
         ...
 
@@ -962,7 +962,7 @@ class GuildChannel(ABC):
         offset: int = ...,
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
-        reason: str = ...,
+        reason: Optional[str] = ...,
     ) -> None:
         ...
 
