@@ -2214,6 +2214,8 @@ class Guild(Hashable):
         This is a lower level method to :meth:`WelcomeScreen.edit` that allows you
         to edit the welcome screen without fetching it and save an API request.
 
+        This requires 'COMMUNITY' in :attr:`.Guild.features`.
+
         .. versionadded:: 2.5
 
         Parameters
@@ -2230,8 +2232,8 @@ class Guild(Hashable):
         Raises
         ------
         Forbidden
-            You do not have the :attr:`~Permissions.manage_guild` permission or the
-            guild is not allowed to create welcome screens.
+            You do not have permissions to change the welcome screen
+            or the guild is not allowed to create welcome screens.
         HTTPException
             Editing the welcome screen failed.
         TypeError

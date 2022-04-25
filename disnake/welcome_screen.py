@@ -179,6 +179,8 @@ class WelcomeScreen:
         You must have the :attr:`~Permissions.manage_guild` permission to
         use this.
 
+        This requires 'COMMUNITY' in :attr:`.Guild.features`.
+
         Parameters
         ----------
         enabled: :class:`bool`
@@ -193,7 +195,8 @@ class WelcomeScreen:
         Raises
         ------
         Forbidden
-            You do not have permissions to change the welcome screen.
+            You do not have permissions to change the welcome screen
+            or the guild is not allowed to create welcome screens.
         HTTPException
             Editing the welcome screen failed.
         TypeError
