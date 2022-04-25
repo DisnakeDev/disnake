@@ -64,6 +64,7 @@ from .user import *
 from .voice_client import *
 from .voice_region import *
 from .webhook import *
+from .welcome_screen import *
 from .widget import *
 
 
