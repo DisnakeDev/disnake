@@ -1700,7 +1700,6 @@ class Guild(Hashable):
         splash: Optional[AssetBytes] = MISSING,
         discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
-        region: Optional[str] = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
         owner: Snowflake = MISSING,
         afk_timeout: int = MISSING,
@@ -1906,11 +1905,6 @@ class Guild(Hashable):
                 raise InvalidArgument("To transfer ownership you must be the owner of the guild.")
 
             fields["owner_id"] = owner.id
-
-        if region is not MISSING:
-            utils.warn_deprecated(
-                "Guild.region is deprecated and will be removed in a future version", stacklevel=2
-            )
 
         if verification_level is not MISSING:
             if not isinstance(verification_level, VerificationLevel):
