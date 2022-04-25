@@ -48,9 +48,10 @@ from typing import (
 
 from . import utils
 from .context_managers import Typing
-from .enums import ChannelType, MessageFlags as MessageFlagsEnum, PartyType, try_enum_to_int
+from .enums import ChannelType, PartyType, try_enum_to_int
 from .errors import ClientException, InvalidArgument
 from .file import File
+from .flags import MessageFlags
 from .invite import Invite
 from .iterators import HistoryIterator
 from .mentions import AllowedMentions
@@ -1497,7 +1498,7 @@ class Messageable:
             components_payload = None
 
         if suppress_embeds:
-            flags = MessageFlagsEnum.suppress_embeds.value
+            flags = MessageFlags.suppress_embeds.flag
         else:
             flags = 0
 

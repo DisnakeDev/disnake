@@ -51,8 +51,9 @@ import aiohttp
 from .. import utils
 from ..asset import Asset
 from ..channel import PartialMessageable
-from ..enums import MessageFlags as MessageFlagsEnum, WebhookType, try_enum
+from ..enums import WebhookType, try_enum
 from ..errors import DiscordServerError, Forbidden, HTTPException, InvalidArgument, NotFound
+from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
 from ..mixins import Hashable
@@ -544,9 +545,9 @@ def handle_message_parameters_dict(
     if ephemeral is not None or suppress_embeds is not None:
         payload["flags"] = 0
         if suppress_embeds:
-            payload["flags"] |= MessageFlagsEnum.suppress_embeds.value
+            payload["flags"] |= MessageFlags.suppress_embeds.flag
         if ephemeral:
-            payload["flags"] |= MessageFlagsEnum.ephemeral.value
+            payload["flags"] |= MessageFlags.ephemeral.flag
 
     if allowed_mentions:
         if previous_allowed_mentions is not None:

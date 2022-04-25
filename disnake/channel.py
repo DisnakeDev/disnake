@@ -54,7 +54,6 @@ from .asset import Asset
 from .context_managers import Typing
 from .enums import (
     ChannelType,
-    MessageFlags as MessageFlagsEnum,
     StagePrivacyLevel,
     VideoQualityMode,
     VoiceRegion,
@@ -63,6 +62,7 @@ from .enums import (
 )
 from .errors import ClientException, InvalidArgument
 from .file import File
+from .flags import MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .permissions import PermissionOverwrite, Permissions
@@ -2526,7 +2526,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             raise InvalidArgument("files parameter must be a list of File")
 
         if suppress_embeds:
-            flags = MessageFlagsEnum.suppress_embeds.value
+            flags = MessageFlags.suppress_embeds.flag
         else:
             flags = 0
 

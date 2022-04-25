@@ -512,18 +512,6 @@ class UserFlags(Enum):
     spammer = 1048576
 
 
-class MessageFlags(Enum):
-    crossposted = 1 << 0
-    is_crosspost = 1 << 1
-    suppress_embeds = 1 << 2
-    source_message_deleted = 1 << 3
-    urgent = 1 << 4
-    has_thread = 1 << 5
-    ephemeral = 1 << 6
-    loading = 1 << 7
-    failed_to_mention_some_roles_in_thread = 1 << 8
-
-
 class ActivityType(Enum):
     unknown = -1
     playing = 0

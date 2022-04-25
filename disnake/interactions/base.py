@@ -34,14 +34,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Uni
 from .. import utils
 from ..app_commands import OptionChoice
 from ..channel import ChannelType, PartialMessageable
-from ..enums import (
-    InteractionResponseType,
-    InteractionType,
-    Locale,
-    MessageFlags as MessageFlagsEnum,
-    WebhookType,
-    try_enum,
-)
+from ..enums import InteractionResponseType, InteractionType, Locale, WebhookType, try_enum
 from ..errors import (
     HTTPException,
     InteractionNotEditable,
@@ -51,6 +44,7 @@ from ..errors import (
     ModalChainNotSupported,
     NotFound,
 )
+from ..flags import MessageFlags
 from ..guild import Guild
 from ..member import Member
 from ..message import Attachment, Message
@@ -700,7 +694,7 @@ class InteractionResponse:
         ):
             defer_type = InteractionResponseType.deferred_channel_message.value
             if ephemeral:
-                data = {"flags": MessageFlagsEnum.ephemeral.value}
+                data = {"flags": MessageFlags.ephemeral.flag}
         elif parent.type is InteractionType.component:
             defer_type = InteractionResponseType.deferred_message_update.value
 
@@ -864,9 +858,9 @@ class InteractionResponse:
 
         payload["flags"] = 0
         if suppress_embeds:
-            payload["flags"] |= MessageFlagsEnum.suppress_embeds.value
+            payload["flags"] |= MessageFlags.suppress_embeds.flag
         if ephemeral:
-            payload["flags"] |= MessageFlagsEnum.ephemeral.value
+            payload["flags"] |= MessageFlags.ephemeral.flag
 
         if view is not MISSING:
             payload["components"] = view.to_components()
