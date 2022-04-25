@@ -40,7 +40,7 @@ class VoiceRegion:
     Attributes
     ----------
     id: :class:`str`
-        unique ID for the region.
+        Unique ID for the region.
     name: :class:`str`
         The name of the region.
     optimal: :class:`bool`
