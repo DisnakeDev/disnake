@@ -23,10 +23,10 @@ DEALINGS IN THE SOFTWARE.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, _get_as_snowflake
+from .utils import MISSING, _get_as_snowflake, get
 
 if TYPE_CHECKING:
     from .emoji import Emoji
@@ -53,7 +53,7 @@ class WelcomeScreenChannel:
         The ID of the guild channel this welcome screen channel represents.
     description: :class:`str`
         The description of this channel in the official UI.
-    emoji: Optional[:class:`PartialEmoji`]
+    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
         The emoji associated with this channel's welcome message, if any.
     """
 
@@ -72,15 +72,13 @@ class WelcomeScreenChannel:
     ):
         self.id: int = id
         self.description: str = description
-        self.emoji: Optional[PartialEmoji] = None
+        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
         if emoji is None:
             self.emoji = None
         elif isinstance(emoji, str):
             self.emoji = PartialEmoji.from_str(emoji)
-        elif isinstance(emoji, PartialEmoji):
-            self.emoji = emoji
         elif isinstance(emoji, _EmojiTag):
-            self.emoji = emoji._to_partial()
+            self.emoji = emoji
         else:
             raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
 
@@ -89,13 +87,21 @@ class WelcomeScreenChannel:
 
     @classmethod
     def _from_data(
-        cls, *, data: WelcomeScreenChannelPayload, state: ConnectionState
+        cls,
+        *,
+        data: WelcomeScreenChannelPayload,
+        state: ConnectionState,
+        guild: Union[Guild, PartialInviteGuild],
     ) -> WelcomeScreenChannel:
         emoji_id = _get_as_snowflake(data, "emoji_id")
         emoji_name = data.get("emoji_name") or None
         emoji = None
+        emojis: Tuple[Emoji]
         if emoji_name:
-            emoji = PartialEmoji.with_state(state, name=emoji_name, id=emoji_id)
+            if emojis := getattr(guild, "emojis", None):
+                emoji = get(emojis, id=emoji_id, name=emoji_name)
+            if not emoji:
+                emoji = PartialEmoji.with_state(state, name=emoji_name, id=emoji_id)
 
         return cls(id=int(data["channel_id"]), description=data["description"], emoji=emoji)
 
@@ -144,7 +150,7 @@ class WelcomeScreen:
         self._guild = guild
         self.description: Optional[str] = data.get("description")
         self.channels: List[WelcomeScreenChannel] = [
-            WelcomeScreenChannel._from_data(data=channel, state=state)
+            WelcomeScreenChannel._from_data(data=channel, state=state, guild=guild)
             for channel in data["welcome_channels"]
         ]
 
