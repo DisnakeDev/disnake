@@ -25,8 +25,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
+from . import utils
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, _get_as_snowflake, get
 
 if TYPE_CHECKING:
     from .emoji import Emoji
@@ -38,8 +38,12 @@ if TYPE_CHECKING:
         WelcomeScreenChannel as WelcomeScreenChannelPayload,
     )
 
+__all__ = (
+    "WelcomeScreen",
+    "WelcomeScreenChannel",
+)
 
-__all__ = ("WelcomeScreen", "WelcomeScreenChannel")
+MISSING = utils.MISSING
 
 
 class WelcomeScreenChannel:
@@ -93,13 +97,13 @@ class WelcomeScreenChannel:
         state: ConnectionState,
         guild: Union[Guild, PartialInviteGuild],
     ) -> WelcomeScreenChannel:
-        emoji_id = _get_as_snowflake(data, "emoji_id")
+        emoji_id = utils._get_as_snowflake(data, "emoji_id")
         emoji_name = data.get("emoji_name") or None
         emoji = None
         if emoji_name:
             emojis: Optional[Tuple[Emoji]]
             if emojis := getattr(guild, "emojis", None):
-                emoji = get(emojis, id=emoji_id, name=emoji_name)
+                emoji = utils.get(emojis, id=emoji_id, name=emoji_name)
             if not emoji:
                 emoji = PartialEmoji.with_state(state, name=emoji_name, id=emoji_id)
 
