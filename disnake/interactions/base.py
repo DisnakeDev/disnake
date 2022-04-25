@@ -29,7 +29,19 @@ from __future__ import annotations
 
 import asyncio
 from datetime import timedelta
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -658,7 +670,40 @@ class InteractionResponse:
         """
         return self._responded
 
-    async def defer(self, *, ephemeral: bool = False, with_message: bool = False) -> None:
+    @overload
+    async def defer(
+        self,
+        *,
+        with_message: Literal[True],
+        ephemeral: bool = ...,
+        suppress_embeds: bool = ...,
+    ):
+        ...
+
+    @overload
+    async def defer(
+        self,
+        *,
+        ephemeral: bool = ...,
+        suppress_embeds: bool = ...,
+    ):
+        ...
+
+    @overload
+    async def defer(
+        self,
+        *,
+        with_message: Literal[False],
+    ):
+        ...
+
+    async def defer(
+        self,
+        *,
+        with_message: bool = MISSING,
+        ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
+    ) -> None:
         """|coro|
 
         Defers the interaction response.
@@ -666,17 +711,25 @@ class InteractionResponse:
         This is typically used when the interaction is acknowledged
         and a secondary action will be done later.
 
+        .. versionchanged:: 2.5
+
+            ``ephemeral`` and ``suppress_embeds`` now imply ``with_message`` if it is not already set.
+
         Parameters
         ----------
-        ephemeral: :class:`bool`
-            Whether the deferred message will eventually be ephemeral.
-            This applies to interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
-            or when the ``with_message`` parameter is ``True``.
         with_message: :class:`bool`
             Whether the response will be a message with thinking state (bot is thinking...).
-            This only applies to interactions of type :attr:`InteractionType.component`.
-
             .. versionadded:: 2.4
+        ephemeral: :class:`bool`
+            Whether the deferred message will eventually be ephemeral.
+
+            .. note:: This automatically implies with_message is True.
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds on the deferred message.
+
+            .. note:: This automatically implies with_message is True.
+
+            ..versionadded:: 2.5
 
         Raises
         ------
@@ -688,23 +741,33 @@ class InteractionResponse:
         if self._responded:
             raise InteractionResponded(self._parent)
 
-        defer_type: int = 0
-        data: Optional[Dict[str, Any]] = None
+        defer_type: Optional[int] = None
+        data: Dict[str, Any] = {}
         parent = self._parent
-        if (
-            parent.type in (InteractionType.application_command, InteractionType.modal_submit)
-            or with_message
-        ):
+        if with_message is MISSING:
+            if ephemeral is not MISSING or suppress_embeds is not MISSING:
+                with_message = True
+
+        if parent.type in (InteractionType.application_command, InteractionType.modal_submit):
             defer_type = InteractionResponseType.deferred_channel_message.value
-            if ephemeral:
-                data = {"flags": MessageFlags.ephemeral.flag}
         elif parent.type is InteractionType.component:
-            defer_type = InteractionResponseType.deferred_message_update.value
+            if with_message:
+                defer_type = InteractionResponseType.deferred_channel_message.value
+            else:
+                defer_type = InteractionResponseType.deferred_message_update.value
+
+        if defer_type == InteractionResponseType.deferred_channel_message.value:
+            if ephemeral is not MISSING or suppress_embeds is not MISSING:
+                data["flags"] = 0
+                if ephemeral:
+                    data["flags"] |= MessageFlags.ephemeral.flag
+                if suppress_embeds:
+                    data["flags"] |= MessageFlags.suppress_embeds.flag
 
         if defer_type:
             adapter = async_context.get()
             await adapter.create_interaction_response(
-                parent.id, parent.token, session=parent._session, type=defer_type, data=data
+                parent.id, parent.token, session=parent._session, type=defer_type, data=data or None
             )
             self._responded = True
 
