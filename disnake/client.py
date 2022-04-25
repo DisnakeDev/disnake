@@ -65,7 +65,7 @@ from .appinfo import AppInfo
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
-from .enums import ApplicationCommandType, ChannelType, Status, VoiceRegion
+from .enums import ApplicationCommandType, ChannelType, Status
 from .errors import *
 from .flags import ApplicationFlags, Intents
 from .gateway import *
@@ -85,6 +85,7 @@ from .ui.view import View
 from .user import ClientUser, User
 from .utils import MISSING
 from .voice_client import VoiceClient
+from .voice_region import VoiceRegion
 from .webhook import Webhook
 from .widget import Widget
 
@@ -1668,7 +1669,6 @@ class Client:
         self,
         *,
         name: str,
-        region: Union[VoiceRegion, str] = None,
         icon: AssetBytes = MISSING,
         code: str = MISSING,
     ) -> Guild:
@@ -1678,16 +1678,13 @@ class Client:
 
         Bot accounts in more than 10 guilds are not allowed to create guilds.
 
+        .. versionchanged:: 2.5
+            Removed the ``region`` parameter.
+
         Parameters
         ----------
         name: :class:`str`
             The name of the guild.
-        region: :class:`.VoiceRegion`
-            The region for the voice communication server.
-
-            .. deprecated:: 2.5
-
-                This no longer has any effect.
         icon: |resource_type|
             The icon of the guild.
             See :meth:`.ClientUser.edit` for more details on what is expected.
@@ -1721,11 +1718,6 @@ class Client:
             icon_base64 = await utils._assetbytes_to_base64_data(icon)
         else:
             icon_base64 = None
-
-        if region is not None:
-            utils.warn_deprecated(
-                "region is deprecated and will be removed in a future version.", stacklevel=2
-            )
 
         if code:
             data = await self.http.create_from_template(code, name, icon_base64)
@@ -1859,6 +1851,33 @@ class Client:
         """
         invite_id = utils.resolve_invite(invite)
         await self.http.delete_invite(invite_id)
+
+    # Voice region stuff
+
+    async def fetch_voice_regions(self, guild_id: Optional[int] = None) -> List[VoiceRegion]:
+        """Retrieves a list of :class:`.VoiceRegion`\\s.
+
+        Retrieves voice regions for the user, or a guild if provided.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        guild_id: Optional[:class:`int`]
+            The guild to get regions for, if provided.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving voice regions failed.
+        NotFound
+            The provided ``guild_id`` could not be found.
+        """
+        if guild_id:
+            regions = await self.http.get_guild_voice_regions(guild_id)
+        else:
+            regions = await self.http.get_voice_regions()
+        return [VoiceRegion(data=data) for data in regions]
 
     # Miscellaneous stuff
 
