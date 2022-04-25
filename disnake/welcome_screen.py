@@ -96,8 +96,8 @@ class WelcomeScreenChannel:
         emoji_id = _get_as_snowflake(data, "emoji_id")
         emoji_name = data.get("emoji_name") or None
         emoji = None
-        emojis: Tuple[Emoji]
         if emoji_name:
+            emojis: Optional[Tuple[Emoji]]
             if emojis := getattr(guild, "emojis", None):
                 emoji = get(emojis, id=emoji_id, name=emoji_name)
             if not emoji:
