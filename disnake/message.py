@@ -136,6 +136,7 @@ async def _edit_handler(
     files: List[File] = MISSING,
     attachments: List[Attachment] = MISSING,
     suppress: bool = MISSING,
+    suppress_embeds: bool = MISSING,
     delete_after: Optional[float] = None,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     view: Optional[View] = MISSING,
@@ -147,6 +148,15 @@ async def _edit_handler(
         raise InvalidArgument("Cannot mix file and files keyword arguments.")
     if view is not MISSING and components is not MISSING:
         raise InvalidArgument("Cannot mix view and components keyword arguments.")
+    if suppress is not MISSING:
+        suppress_deprecated_msg = "'suppress' is deprecated in favour of 'suppress_embeds'."
+        if suppress_embeds is not MISSING:
+            raise InvalidArgument(
+                "Cannot mix suppress and suppress_embeds keyword arguments.\n"
+                + suppress_deprecated_msg
+            )
+        utils.warn_deprecated(suppress_deprecated_msg, stacklevel=2)
+        suppress_embeds = suppress
 
     payload: Dict[str, Any] = {}
     if content is not MISSING:
@@ -167,9 +177,9 @@ async def _edit_handler(
                 files = files or []
                 files += embed._files
 
-    if suppress is not MISSING:
+    if suppress_embeds is not MISSING:
         flags = MessageFlags._from_value(default_flags)
-        flags.suppress_embeds = suppress
+        flags.suppress_embeds = suppress_embeds
         payload["flags"] = flags.value
 
     if allowed_mentions is MISSING:
@@ -1409,7 +1419,7 @@ class Message(Hashable):
         embed: Optional[Embed] = ...,
         file: File = ...,
         attachments: List[Attachment] = ...,
-        suppress: bool = ...,
+        suppress_embeds: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
@@ -1425,7 +1435,7 @@ class Message(Hashable):
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
         attachments: List[Attachment] = ...,
-        suppress: bool = ...,
+        suppress_embeds: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
@@ -1441,7 +1451,7 @@ class Message(Hashable):
         embeds: List[Embed] = ...,
         file: File = ...,
         attachments: List[Attachment] = ...,
-        suppress: bool = ...,
+        suppress_embeds: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
@@ -1457,7 +1467,7 @@ class Message(Hashable):
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         attachments: List[Attachment] = ...,
-        suppress: bool = ...,
+        suppress_embeds: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
@@ -1474,6 +1484,9 @@ class Message(Hashable):
 
         .. versionchanged:: 1.3
             The ``suppress`` keyword-only parameter was added.
+
+        .. versionchanged:: 2.5
+            The ``suppress`` keyword-only parameter was deprecated for ``suppress_embeds``.
 
         .. note::
             If the original message has embeds with images that were created from local files
@@ -1515,7 +1528,7 @@ class Message(Hashable):
             A list of attachments to keep in the message. If ``[]`` is passed
             then all existing attachments are removed.
             Keeps existing attachments if not provided.
-        suppress: :class:`bool`
+        suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
             this brings the embeds back if they were suppressed.
@@ -1551,7 +1564,7 @@ class Message(Hashable):
         HTTPException
             Editing the message failed.
         Forbidden
-            Tried to suppress a message without permissions or
+            Tried to suppress embeds on a message without permissions or
             edited a message's content or embed that isn't yours.
         ~disnake.InvalidArgument
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
@@ -2045,6 +2058,9 @@ class PartialMessage(Hashable):
         .. versionchanged:: 2.1
             :class:`disnake.Message` is always returned.
 
+        .. versionchanged:: 2.5
+            The ``suppress`` keyword-only parameter was deprecated for ``suppress_embeds``.
+
         .. note::
             If the original message has embeds with images that were created from local files
             (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
@@ -2088,7 +2104,7 @@ class PartialMessage(Hashable):
 
             .. versionadded:: 2.1
 
-        suppress: :class:`bool`
+        suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
             this brings the embeds back if they were suppressed.
@@ -2125,7 +2141,7 @@ class PartialMessage(Hashable):
         HTTPException
             Editing the message failed.
         Forbidden
-            Tried to suppress a message without permissions or
+            Tried to suppress embeds on a message without permissions or
             edited a message's content or embed that isn't yours.
         ~disnake.InvalidArgument
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
