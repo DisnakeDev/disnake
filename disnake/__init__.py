@@ -32,6 +32,7 @@ from .client import *
 from .colour import *
 from .components import *
 from .custom_warnings import *
+from .discovery import *
 from .embeds import *
 from .emoji import *
 from .enums import *
