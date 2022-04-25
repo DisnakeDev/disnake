@@ -1868,7 +1868,7 @@ class Client:
     # Voice region stuff
 
     async def fetch_voice_regions(self, guild_id: Optional[int] = None) -> List[VoiceRegion]:
-        """Retrieves a list of :class:`VoiceRegion`\\s.
+        """Retrieves a list of :class:`.VoiceRegion`\\s.
 
         Retrieves voice regions for the user, or a guild if provided.
 

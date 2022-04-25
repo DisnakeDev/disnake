@@ -1241,7 +1241,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        rtc_region: Optional[Union[:class:`str, `:class:`VoiceRegion`]]
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The new region for the voice channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
 
