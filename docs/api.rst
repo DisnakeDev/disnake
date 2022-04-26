@@ -881,7 +881,8 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_thread_delete(thread)
 
-    Called whenever a thread is deleted.
+    Called when a thread is deleted. If the thread is not found
+    in the internal thread cache, then this event will not be called.
 
     Note that you can get the guild from :attr:`Thread.guild`.
 
@@ -891,6 +892,21 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     :param thread: The thread that got deleted.
     :type thread: :class:`Thread`
+
+.. function:: on_raw_thread_delete(payload)
+
+    Called whenever a thread is deleted.
+    Unlike :func:`on_thread_update`, this is called
+    regardless of the state of the internal thread cache.
+
+    Note that you can get the guild from :attr:`Thread.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. versionadded:: 2.5
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawThreadDeleteEvent`
 
 .. function:: on_thread_member_join(member)
               on_thread_member_remove(member)
@@ -906,9 +922,24 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param member: The member who joined or left.
     :type member: :class:`ThreadMember`
 
+.. function:: on_raw_thread_member_remove(payload)
+
+    Called when a :class:`ThreadMember` leaves :class:`Thread`.
+    Unlike :func:`on_thread_member_remove`, this is called regardless of the thread member cache.
+
+    You can get the thread a member belongs in by accessing :attr:`ThreadMember.thread`.
+
+    This requires :attr:`Intents.members` to be enabled.
+
+    .. versionadded:: 2.5
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawThreadMemberRemoveEvent`
+
 .. function:: on_thread_update(before, after)
 
-    Called whenever a thread is updated.
+    Called when a thread is updated. If the thread is not found
+    in the internal thread cache, then this event will not be called.
 
     This requires :attr:`Intents.guilds` to be enabled.
 
@@ -918,6 +949,19 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :type before: :class:`Thread`
     :param after: The updated thread's new info.
     :type after: :class:`Thread`
+
+.. function:: on_raw_thread_update(after)
+
+    Called whenever a thread is updated.
+    Unlike :func:`on_thread_update`, this is called
+    regardless of the state of the internal thread cache.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. versionadded:: 2.5
+
+    :param thread: The updated thread's new info.
+    :type thread: :class:`Thread`
 
 .. function:: on_guild_integrations_update(guild)
 
@@ -4795,6 +4839,22 @@ RawGuildScheduledEventUserActionEvent
 .. attributetable:: RawGuildScheduledEventUserActionEvent
 
 .. autoclass:: RawGuildScheduledEventUserActionEvent()
+    :members:
+
+RawThreadDeleteEvent
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawThreadDeleteEvent
+
+.. autoclass:: RawThreadDeleteEvent()
+    :members:
+
+RawThreadMemberRemoveEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawThreadMemberRemoveEvent
+
+.. autoclass:: RawThreadMemberRemoveEvent()
     :members:
 
 RawTypingEvent

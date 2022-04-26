@@ -22,12 +22,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+from __future__ import annotations
 
-from typing import List, Optional, TypedDict
+from typing import TYPE_CHECKING, List, Literal, Optional, TypedDict
 
-from .emoji import PartialEmoji
-from .member import MemberWithUser
-from .snowflake import Snowflake
+if TYPE_CHECKING:
+    from .emoji import PartialEmoji
+    from .member import MemberWithUser
+    from .snowflake import Snowflake
 
 
 class _MessageEventOptional(TypedDict, total=False):
@@ -113,3 +115,10 @@ class _ChannelPinsUpdateOptional(TypedDict, total=False):
 
 class ChannelPinsUpdate(_ChannelPinsUpdateOptional):
     channel_id: Snowflake
+
+
+class ThreadDeleteEvent(TypedDict):
+    id: Snowflake
+    guild_id: Snowflake
+    parent_id: Snowflake
+    type: Literal[10, 11, 12]
