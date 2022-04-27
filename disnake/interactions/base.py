@@ -87,6 +87,10 @@ class _ResponseLock:
         self._condition = asyncio.Condition()
 
     async def __aenter__(self):
+        # when we acquire this manager, we are attempting to make a request
+        # the problem is we don't know if the request will success or not
+        # to get around this, we wait and see if it was successful.
+        # if it was successful, we raise an InteractionResponded exception
         if not self._condition.locked():
             await self._condition.acquire()
             return
@@ -96,8 +100,11 @@ class _ResponseLock:
             raise InteractionResponded(self.interaction)
 
     async def __aexit__(self, exc_type, exc, tb):
+        # we are no longer making a request so we release the lock
+        # however, we only want to set responded to True if it was success
+        # eg did not raise an Exception
         self._condition.release()
-        if exc_type:
+        if exc_type is not None:
             return
         self.interaction.response._responded = True
 
@@ -664,6 +671,10 @@ class Interaction:
         ValueError
             The length of ``embeds`` was invalid.
         """
+        # this is done before determining which sender to use
+        # if we are currently responding we should use the followup
+        # but there is a chance the response will fail and therefore
+        # we should send the response
         if self._response_lock.is_responding():
             await self._response_lock.wait()
 
