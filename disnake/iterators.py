@@ -173,7 +173,7 @@ class _MappedAsyncIterator(_AsyncIterator[T]):
     async def next(self) -> T:
         # this raises NoMoreItems and will propagate appropriately
         item = await self.iterator.next()
-        return await maybe_coroutine(self.func, item)
+        return await maybe_coroutine(self.func, item)  # type: ignore
 
 
 class _FilteredAsyncIterator(_AsyncIterator[T]):

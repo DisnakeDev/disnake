@@ -43,6 +43,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     AsyncIterator,
+    Awaitable,
     Callable,
     Dict,
     ForwardRef,
@@ -55,6 +56,7 @@ from typing import (
     Optional,
     Protocol,
     Sequence,
+    Set,
     Tuple,
     Type,
     TypedDict,
@@ -572,15 +574,17 @@ def _parse_ratelimit_header(request: Any, *, use_clock: bool = False) -> float:
         return float(reset_after)
 
 
-async def maybe_coroutine(f, *args, **kwargs):
+async def maybe_coroutine(
+    f: Callable[P, Union[Awaitable[T], T]], *args: P.args, **kwargs: P.kwargs
+) -> T:
     value = f(*args, **kwargs)
     if _isawaitable(value):
         return await value
     else:
-        return value
+        return value  # type: ignore  # typeguard doesn't narrow in the negative case
 
 
-async def async_all(gen, *, check=_isawaitable):
+async def async_all(gen: Iterable[Union[Awaitable[bool], bool]], *, check=_isawaitable) -> bool:
     for elem in gen:
         if check(elem):
             elem = await elem
@@ -589,7 +593,7 @@ async def async_all(gen, *, check=_isawaitable):
     return True
 
 
-async def sane_wait_for(futures, *, timeout):
+async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> Set[asyncio.Task[T]]:
     ensured = [asyncio.ensure_future(fut) for fut in futures]
     done, pending = await asyncio.wait(ensured, timeout=timeout, return_when=asyncio.ALL_COMPLETED)
 
