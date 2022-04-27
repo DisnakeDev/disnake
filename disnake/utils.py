@@ -1259,9 +1259,13 @@ def search_directory(path: str) -> Iterator[str]:
         raise ValueError(f"Provided path '{abspath}' is not a directory")
 
     prefix = relpath.replace(os.sep, ".")
+    if prefix in ("", "."):
+        prefix = ""
+    else:
+        prefix += "."
 
     for _, name, ispkg in pkgutil.iter_modules([path]):
         if ispkg:
             yield from search_directory(os.path.join(path, name))
         else:
-            yield prefix + "." + name
+            yield prefix + name
