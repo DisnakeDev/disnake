@@ -25,6 +25,8 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+import functools
+import operator
 from typing import (
     Any,
     Callable,
@@ -48,6 +50,7 @@ __all__ = (
     "Intents",
     "MemberCacheFlags",
     "ApplicationFlags",
+    "ChannelFlags",
 )
 
 FV = TypeVar("FV", bound="flag_value")
@@ -163,7 +166,7 @@ class SystemChannelFlags(BaseFlags):
     """
     Wraps up a Discord system channel flag value.
 
-    Similar to :class:`Permissions`\, the properties provided are two way.
+    Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
     were regular bools. This allows you to edit the system flags easily.
 
@@ -479,7 +482,7 @@ class Intents(BaseFlags):
     """
     Wraps up a Discord gateway intent flag.
 
-    Similar to :class:`Permissions`\, the properties provided are two way.
+    Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
     were regular bools.
 
@@ -527,10 +530,8 @@ class Intents(BaseFlags):
     @classmethod
     def all(cls: Type[Intents]) -> Intents:
         """A factory method that creates a :class:`Intents` with everything enabled."""
-        bits = max(cls.VALID_FLAGS.values()).bit_length()
-        value = (1 << bits) - 1
         self = cls.__new__(cls)
-        self.value = value
+        self.value = functools.reduce(operator.or_, cls.VALID_FLAGS.values())
         return self
 
     @classmethod
@@ -543,11 +544,12 @@ class Intents(BaseFlags):
     @classmethod
     def default(cls: Type[Intents]) -> Intents:
         """A factory method that creates a :class:`Intents` with everything enabled
-        except :attr:`presences` and :attr:`members`.
+        except :attr:`presences`, :attr:`members`, and :attr:`message_content`.
         """
         self = cls.all()
         self.presences = False
         self.members = False
+        self.message_content = False
         return self
 
     @flag_value
@@ -766,6 +768,10 @@ class Intents(BaseFlags):
         - :func:`on_reaction_add` (both guilds and DMs)
         - :func:`on_reaction_remove` (both guilds and DMs)
         - :func:`on_reaction_clear` (both guilds and DMs)
+
+        .. note::
+
+            :attr:`.Intents.message_content` is required to receive the content of messages.
         """
         return (1 << 9) | (1 << 12)
 
@@ -822,6 +828,33 @@ class Intents(BaseFlags):
         - :func:`on_reaction_clear` (only for DMs)
         """
         return 1 << 12
+
+    @flag_value
+    def message_content(self):
+        """:class:`bool`: Whether messages will have access to message content.
+
+        This applies to the following fields on :class:`~disnake.Message` instances:
+
+        - :attr:`~disnake.Message.content`
+        - :attr:`~disnake.Message.embeds`
+        - :attr:`~disnake.Message.attachments`
+        - :attr:`~disnake.Message.components`
+
+        The following cases will always have the above fields:
+
+        - Messages the bot sends
+        - Messages the bot receives as a direct message
+        - Messages in which the bot is mentioned
+        - Messages received from an interaction payload, these will typically be attributes on :class:`~disnake.MessageInteraction` instances
+
+        For more information go to the :ref:`message content intent documentation <need_message_content_intent>`.
+
+        .. note::
+
+            Currently, this requires opting in explicitly via the developer portal as well.
+            Bots in over 100 guilds will need to apply to Discord for verification.
+        """
+        return 1 << 15
 
     @alias_flag_value
     def reactions(self):
@@ -946,6 +979,7 @@ class Intents(BaseFlags):
 
         - :attr:`Guild.scheduled_events`
         - :meth:`Guild.get_scheduled_event`
+        - :attr:`StageInstance.guild_scheduled_event`
         """
         return 1 << 16
 
@@ -1163,3 +1197,39 @@ class ApplicationFlags(BaseFlags):
         receive limited message content over the gateway.
         """
         return 1 << 19
+
+
+@fill_with_flags()
+class ChannelFlags(BaseFlags):
+    """Wraps up the Discord Channel flags.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two flags are equal.
+        .. describe:: x != y
+
+            Checks if two flags are not equal.
+        .. describe:: hash(x)
+
+            Return the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    @flag_value
+    def pinned(self):
+        """:class:`bool`: Returns ``True`` if the thread is pinned."""
+        return 1 << 1

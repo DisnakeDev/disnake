@@ -28,7 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
 
 from .channel import ChannelType
-from .components import ActionRow, Component, ComponentType
+from .components import ActionRow, Component, ComponentType, Modal
 from .embed import Embed
 from .member import Member, MemberWithUser
 from .role import Role
@@ -36,7 +36,6 @@ from .snowflake import Snowflake
 from .user import User
 
 if TYPE_CHECKING:
-    from .components import Modal
     from .message import AllowedMentions, Attachment, Message
 
 

@@ -1,7 +1,6 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2021 Rapptz
 Copyright (c) 2021-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,21 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+from disnake import DiscordWarning
 
-from __future__ import annotations
-
-from typing import List, Optional, TypedDict
-
-from .snowflake import Snowflake
+__all__ = ("MessageContentPrefixWarning",)
 
 
-class WelcomeScreen(TypedDict):
-    description: Optional[str]
-    welcome_channels: List[WelcomeScreenChannel]
+class MessageContentPrefixWarning(DiscordWarning):
+    """
+    Warning for invalid prefixes without message content.
+    """
 
-
-class WelcomeScreenChannel(TypedDict):
-    channel_id: Snowflake
-    description: str
-    emoji_id: Optional[Snowflake]
-    emoji_name: Optional[str]
+    pass

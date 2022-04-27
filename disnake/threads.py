@@ -32,8 +32,9 @@ from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Optional, Unio
 from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
+from .flags import ChannelFlags
 from .mixins import Hashable
-from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time, warn_deprecated
+from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
     "Thread",
@@ -44,7 +45,7 @@ if TYPE_CHECKING:
     import datetime
 
     from .abc import Snowflake, SnowflakeTime
-    from .channel import CategoryChannel, TextChannel
+    from .channel import CategoryChannel, ForumChannel, TextChannel
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage
@@ -94,7 +95,7 @@ class Thread(Messageable, Hashable):
     id: :class:`int`
         The thread ID.
     parent_id: :class:`int`
-        The parent :class:`TextChannel` ID this thread belongs to.
+        The parent :class:`TextChannel` or :class:`ForumChannel` ID this thread belongs to.
     owner_id: Optional[:class:`int`]
         The user's ID that created this thread.
     last_message_id: Optional[:class:`int`]
@@ -129,6 +130,16 @@ class Thread(Messageable, Hashable):
         This is only available for threads created after 2022-01-09.
 
         .. versionadded:: 2.4
+
+    last_pin_timestamp: Optional[:class:`datetime.datetime`]
+        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
+
+        .. versionadded:: 2.5
+
+    flags: :class:`ChannelFlags`
+        The flags the thread has.
+
+        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -148,10 +159,11 @@ class Thread(Messageable, Hashable):
         "auto_archive_duration",
         "archive_timestamp",
         "create_timestamp",
+        "last_pin_timestamp",
+        "flags",
         "_type",
         "_state",
         "_members",
-        "_archiver_id",
     )
 
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload):
@@ -165,8 +177,9 @@ class Thread(Messageable, Hashable):
 
     def __repr__(self) -> str:
         return (
-            f"<Thread id={self.id!r} name={self.name!r} parent={self.parent}"
-            f" owner_id={self.owner_id!r} locked={self.locked} archived={self.archived}>"
+            f"<Thread id={self.id!r} name={self.name!r} parent={self.parent} "
+            f"owner_id={self.owner_id!r} locked={self.locked} archived={self.archived} "
+            f"flags={self.flags!r}>"
         )
 
     def __str__(self) -> str:
@@ -182,6 +195,10 @@ class Thread(Messageable, Hashable):
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self.message_count = data.get("message_count")
         self.member_count = data.get("member_count")
+        self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
+            data.get("last_pin_timestamp")
+        )
+        self.flags = ChannelFlags._from_value(data.get("flags", 0))
         self._unroll_metadata(data["thread_metadata"])
 
         try:
@@ -193,7 +210,6 @@ class Thread(Messageable, Hashable):
 
     def _unroll_metadata(self, data: ThreadMetadata):
         self.archived = data["archived"]
-        self._archiver_id = _get_as_snowflake(data, "archiver_id")
         self.auto_archive_duration = data["auto_archive_duration"]
         self.archive_timestamp = parse_time(data["archive_timestamp"])
         self.locked = data.get("locked", False)
@@ -207,6 +223,7 @@ class Thread(Messageable, Hashable):
             pass
 
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
+        self.flags = ChannelFlags._from_value(data.get("flags", 0))
 
         try:
             self._unroll_metadata(data["thread_metadata"])
@@ -219,8 +236,8 @@ class Thread(Messageable, Hashable):
         return self._type
 
     @property
-    def parent(self) -> Optional[TextChannel]:
-        """Optional[:class:`TextChannel`]: The parent channel this thread belongs to."""
+    def parent(self) -> Optional[Union[TextChannel, ForumChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`ForumChannel`]]: The parent channel this thread belongs to."""
         return self.guild.get_channel(self.parent_id)  # type: ignore
 
     @property
@@ -316,22 +333,6 @@ class Thread(Messageable, Hashable):
         return self.create_timestamp or snowflake_time(self.id)
 
     @property
-    def archiver_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: The user's ID that archived this thread.
-
-        As of June 10th, 2021, this value will always be ``None`` since Discord
-        doesn't provide this information anymore.
-
-        .. warning::
-
-            This property will be removed in a future version.
-        """
-        warn_deprecated(
-            "archiver_id is deprecated and will be removed in a future version.", stacklevel=2
-        )
-        return self._archiver_id
-
-    @property
     def jump_url(self) -> str:
         """
         A URL that can be used to jump to this thread.
@@ -370,6 +371,17 @@ class Thread(Messageable, Hashable):
         """
         parent = self.parent
         return parent is not None and parent.is_nsfw()
+
+    def is_pinned(self) -> bool:
+        """Whether the thread is pinned in a :class:`ForumChannel`
+
+        Pinned threads are not affected by the auto archive duration.
+
+        .. versionadded:: 2.5
+
+        :return type: :class:`bool`
+        """
+        return self.flags.pinned
 
     def permissions_for(
         self,
@@ -596,6 +608,8 @@ class Thread(Messageable, Hashable):
         invitable: bool = MISSING,
         slowmode_delay: int = MISSING,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        pinned: bool = MISSING,
+        reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
 
@@ -625,6 +639,15 @@ class Thread(Messageable, Hashable):
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+        pinned: :class:`bool`
+            Whether to pin the thread or not. This is only available for threads created in a :class:`ForumChannel`.
+
+            .. versionadded:: 2.5
+
+        reason: Optional[:class:`str`]
+            The reason for editing this thread. Shows up on the audit log.
+
+            .. versionadded:: 2.5
 
         Raises
         ------
@@ -651,8 +674,12 @@ class Thread(Messageable, Hashable):
             payload["invitable"] = invitable
         if slowmode_delay is not MISSING:
             payload["rate_limit_per_user"] = slowmode_delay
+        if pinned is not MISSING:
+            flags = ChannelFlags._from_value(self.flags.value)
+            flags.pinned = pinned
+            payload["flags"] = flags.value
 
-        data = await self._state.http.edit_channel(self.id, **payload)
+        data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
         # The data payload will always be a Thread payload
         return Thread(data=data, state=self._state, guild=self.guild)  # type: ignore
 

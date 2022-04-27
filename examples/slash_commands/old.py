@@ -5,7 +5,7 @@ Not the most convenient syntax.
 import disnake
 from disnake.ext import commands
 
-bot = commands.Bot("!")
+bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 @bot.slash_command(

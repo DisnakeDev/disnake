@@ -26,6 +26,7 @@ from .app_commands import *
 from .appinfo import *
 from .asset import *
 from .audit_logs import *
+from .bans import *
 from .channel import *
 from .client import *
 from .colour import *
@@ -61,7 +62,9 @@ from .template import *
 from .threads import *
 from .user import *
 from .voice_client import *
+from .voice_region import *
 from .webhook import *
+from .welcome_screen import *
 from .widget import *
 
 

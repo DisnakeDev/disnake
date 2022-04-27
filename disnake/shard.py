@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Ty
 import aiohttp
 
 from .backoff import ExponentialBackoff
-from .client import Client
+from .client import Client, SessionStartLimit
 from .enums import Status
 from .errors import (
     ClientException,
@@ -427,16 +427,18 @@ class AutoShardedClient(Client):
         ret.launch()
 
     async def launch_shards(self) -> None:
+        shard_count, gateway, session_start_limit = await self.http.get_bot_gateway()
         if self.shard_count is None:
-            self.shard_count, gateway = await self.http.get_bot_gateway()
-        else:
-            gateway = await self.http.get_gateway()
+            self.shard_count = shard_count
+
+        self.session_start_limit = SessionStartLimit(session_start_limit)
 
         self._connection.shard_count = self.shard_count
 
         shard_ids = self.shard_ids or range(self.shard_count)
         self._connection.shard_ids = shard_ids
 
+        # TODO: maybe take session_start_limit values into account?
         for shard_id in shard_ids:
             initial = shard_id == shard_ids[0]
             await self.launch_shard(gateway, shard_id, initial=initial)

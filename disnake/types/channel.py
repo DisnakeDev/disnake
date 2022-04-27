@@ -39,7 +39,7 @@ class PermissionOverwrite(TypedDict):
     deny: str
 
 
-ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14]
+ChannelType = Literal[0, 1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15]
 
 
 class _BaseChannel(TypedDict):
@@ -60,9 +60,9 @@ class PartialChannel(_BaseChannel):
 
 
 class _TextChannelOptional(TypedDict, total=False):
-    topic: str
+    topic: Optional[str]
     last_message_id: Optional[Snowflake]
-    last_pin_timestamp: str
+    last_pin_timestamp: Optional[str]
     rate_limit_per_user: int
     default_auto_archive_duration: ThreadArchiveDurationLiteral
 
@@ -95,13 +95,9 @@ class CategoryChannel(_BaseGuildChannel):
     type: Literal[4]
 
 
-class StoreChannel(_BaseGuildChannel):
-    type: Literal[6]
-
-
 class _StageChannelOptional(TypedDict, total=False):
     rtc_region: Optional[str]
-    topic: str
+    topic: Optional[str]
 
 
 class StageChannel(_BaseGuildChannel, _StageChannelOptional):
@@ -132,14 +128,24 @@ class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
     thread_metadata: ThreadMetadata
 
 
+class _ForumChannelOptional(TypedDict, total=False):
+    topic: Optional[str]
+    last_message_id: Optional[Snowflake]
+    default_auto_archive_duration: ThreadArchiveDurationLiteral
+
+
+class ForumChannel(_BaseGuildChannel, _ForumChannelOptional):
+    type: Literal[15]
+
+
 GuildChannel = Union[
     TextChannel,
     NewsChannel,
     VoiceChannel,
     CategoryChannel,
-    StoreChannel,
     StageChannel,
     ThreadChannel,
+    ForumChannel,
 ]
 
 
@@ -168,6 +174,7 @@ class StageInstance(TypedDict):
     topic: str
     privacy_level: PrivacyLevel
     discoverable_disabled: bool
+    guild_scheduled_event_id: Optional[Snowflake]
 
 
 class GuildDirectory(_BaseChannel):

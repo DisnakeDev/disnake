@@ -30,6 +30,7 @@ import logging
 import signal
 import sys
 import traceback
+from datetime import datetime, timedelta
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -64,7 +65,7 @@ from .appinfo import AppInfo
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
-from .enums import ApplicationCommandType, ChannelType, Status, VoiceRegion
+from .enums import ApplicationCommandType, ChannelType, Status
 from .errors import *
 from .flags import ApplicationFlags, Intents
 from .gateway import *
@@ -84,20 +85,23 @@ from .ui.view import View
 from .user import ClientUser, User
 from .utils import MISSING
 from .voice_client import VoiceClient
+from .voice_region import VoiceRegion
 from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime, User as ABCUser
     from .app_commands import APIApplicationCommand
+    from .asset import AssetBytes
     from .channel import DMChannel
     from .member import Member
     from .message import Message
     from .role import Role
+    from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
 
 
-__all__ = ("Client",)
+__all__ = ("Client", "SessionStartLimit")
 
 Coro = TypeVar("Coro", bound=Callable[..., Coroutine[Any, Any, Any]])
 
@@ -138,6 +142,51 @@ def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
     finally:
         _log.info("Closing the event loop.")
         loop.close()
+
+
+class SessionStartLimit:
+    """A class that contains information about the current session start limit,
+    at the time when the client connected for the first time.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    total: :class:`int`
+        The total number of allowed session starts.
+    remaining: :class:`int`
+        The remaining number of allowed session starts.
+    reset_after: :class:`int`
+        The number of milliseconds after which the :attr:`.remaining` limit resets,
+        relative to when the client connected.
+        See also :attr:`reset_time`.
+    max_concurrency: :class:`int`
+        The number of allowed ``IDENTIFY`` requests per 5 seconds.
+    reset_time: :class:`datetime.datetime`
+        The approximate time at which which the :attr:`.remaining` limit resets.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "total",
+        "remaining",
+        "reset_after",
+        "max_concurrency",
+        "reset_time",
+    )
+
+    def __init__(self, data: SessionStartLimitPayload):
+        self.total: int = data["total"]
+        self.remaining: int = data["remaining"]
+        self.reset_after: int = data["reset_after"]
+        self.max_concurrency: int = data["max_concurrency"]
+
+        self.reset_time: datetime = utils.utcnow() + timedelta(milliseconds=self.reset_after)
+
+    def __repr__(self):
+        return (
+            f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
+            f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}>"
+        )
 
 
 class Client:
@@ -265,6 +314,11 @@ class Client:
     asyncio_debug: :class:`bool`
         Whether to enable asyncio debugging when the client starts.
         Defaults to False.
+    session_start_limit: Optional[:class:`SessionStartLimit`]
+        Information about the current session start limit.
+        Only available after initiating the connection.
+
+        .. versionadded:: 2.5
     """
 
     def __init__(
@@ -281,6 +335,7 @@ class Client:
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.shard_id: Optional[int] = options.get("shard_id")
         self.shard_count: Optional[int] = options.get("shard_count")
+        self.session_start_limit: Optional[SessionStartLimit] = None
 
         connector: Optional[aiohttp.BaseConnector] = options.pop("connector", None)
         proxy: Optional[str] = options.pop("proxy", None)
@@ -685,11 +740,16 @@ class Client:
         ConnectionClosed
             The websocket connection has been terminated.
         """
-        backoff = ExponentialBackoff()
+        _, gateway, session_start_limit = await self.http.get_bot_gateway()
+        self.session_start_limit = SessionStartLimit(session_start_limit)
+
         ws_params = {
             "initial": True,
             "shard_id": self.shard_id,
+            "gateway": gateway,
         }
+
+        backoff = ExponentialBackoff()
         while not self.is_closed():
             try:
                 coro = DiscordWebSocket.from_client(self, **ws_params)
@@ -873,7 +933,7 @@ class Client:
     @property
     def activity(self) -> Optional[ActivityTypes]:
         """Optional[:class:`.BaseActivity`]: The activity being used upon logging in."""
-        return create_activity(self._connection._activity)
+        return create_activity(self._connection._activity, state=self._connection)
 
     @activity.setter
     def activity(self, value: Optional[ActivityTypes]) -> None:
@@ -1582,7 +1642,7 @@ class Client:
 
         .. note::
 
-            This method may fetch any guild that has ``DISCOVERABLE`` in :attr:`Guild.features`,
+            This method may fetch any guild that has ``DISCOVERABLE`` in :attr:`.Guild.features`,
             but this information can not be known ahead of time.
 
             This will work for any guild that you are in.
@@ -1609,8 +1669,7 @@ class Client:
         self,
         *,
         name: str,
-        region: Union[VoiceRegion, str] = None,
-        icon: bytes = MISSING,
+        icon: AssetBytes = MISSING,
         code: str = MISSING,
     ) -> Guild:
         """|coro|
@@ -1619,19 +1678,20 @@ class Client:
 
         Bot accounts in more than 10 guilds are not allowed to create guilds.
 
+        .. versionchanged:: 2.5
+            Removed the ``region`` parameter.
+
         Parameters
         ----------
         name: :class:`str`
             The name of the guild.
-        region: :class:`.VoiceRegion`
-            The region for the voice communication server.
+        icon: |resource_type|
+            The icon of the guild.
+            See :meth:`.ClientUser.edit` for more details on what is expected.
 
-            .. deprecated:: 2.5
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
 
-                This no longer has any effect.
-        icon: Optional[:class:`bytes`]
-            The :term:`py:bytes-like object` representing the icon. See :meth:`.ClientUser.edit`
-            for more details on what is expected.
         code: :class:`str`
             The code for a template to create the guild with.
 
@@ -1639,10 +1699,14 @@ class Client:
 
         Raises
         ------
+        NotFound
+            The ``icon`` asset couldn't be found.
         HTTPException
             Guild creation failed.
         InvalidArgument
             Invalid icon image format given. Must be PNG or JPG.
+        TypeError
+            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
 
         Returns
         -------
@@ -1651,14 +1715,9 @@ class Client:
             added to cache.
         """
         if icon is not MISSING:
-            icon_base64 = utils._bytes_to_base64_data(icon)
+            icon_base64 = await utils._assetbytes_to_base64_data(icon)
         else:
             icon_base64 = None
-
-        if region is not None:
-            utils.warn_deprecated(
-                "region is deprecated and will be removed in a future version.", stacklevel=2
-            )
 
         if code:
             data = await self.http.create_from_template(code, name, icon_base64)
@@ -1792,6 +1851,33 @@ class Client:
         """
         invite_id = utils.resolve_invite(invite)
         await self.http.delete_invite(invite_id)
+
+    # Voice region stuff
+
+    async def fetch_voice_regions(self, guild_id: Optional[int] = None) -> List[VoiceRegion]:
+        """Retrieves a list of :class:`.VoiceRegion`\\s.
+
+        Retrieves voice regions for the user, or a guild if provided.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        guild_id: Optional[:class:`int`]
+            The guild to get regions for, if provided.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving voice regions failed.
+        NotFound
+            The provided ``guild_id`` could not be found.
+        """
+        if guild_id:
+            regions = await self.http.get_guild_voice_regions(guild_id)
+        else:
+            regions = await self.http.get_voice_regions()
+        return [VoiceRegion(data=data) for data in regions]
 
     # Miscellaneous stuff
 

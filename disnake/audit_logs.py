@@ -189,6 +189,14 @@ def _transform_privacy_level(
     return enums.try_enum(enums.StagePrivacyLevel, data)
 
 
+def _transform_guild_scheduled_event_image(
+    entry: AuditLogEntry, data: Optional[str]
+) -> Optional[Asset]:
+    if data is None:
+        return None
+    return Asset._from_guild_scheduled_event_image(entry._state, entry._target_id, data)  # type: ignore
+
+
 class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
@@ -241,9 +249,9 @@ class AuditLogChanges:
         'tags':                          ('emoji', None),
         'default_message_notifications': ('default_notifications', _enum_transformer(enums.NotificationLevel)),
         'communication_disabled_until':  ('timeout', _transform_datetime),
-        'region':                        (None, _enum_transformer(enums.VoiceRegion)),
-        'rtc_region':                    (None, _enum_transformer(enums.VoiceRegion)),
+        'image_hash':                    ('image', _transform_guild_scheduled_event_image),
         'video_quality_mode':            (None, _enum_transformer(enums.VideoQualityMode)),
+        'preferred_locale':              (None, _enum_transformer(enums.Locale)),
         'privacy_level':                 (None, _transform_privacy_level),
         'format_type':                   (None, _enum_transformer(enums.StickerFormatType)),
         'entity_type':                   (None, _enum_transformer(enums.GuildScheduledEventEntityType)),
@@ -385,7 +393,7 @@ class AuditLogEntry(Hashable):
     action: :class:`AuditLogAction`
         The action that was done.
     user: :class:`abc.User`
-        The user who initiated this action. Usually a :class:`Member`\, unless gone
+        The user who initiated this action. Usually a :class:`Member`\\, unless gone
         then it's a :class:`User`.
     id: :class:`int`
         The entry ID.
