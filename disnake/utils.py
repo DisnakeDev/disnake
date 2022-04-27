@@ -612,10 +612,10 @@ def get_slots(cls: Type[Any]) -> Iterator[str]:
             yield from slots
 
 
-def compute_timedelta(dt: datetime.datetime):
+def compute_timedelta(dt: datetime.datetime) -> float:
     if dt.tzinfo is None:
         dt = dt.astimezone()
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = utcnow()
     return max((dt - now).total_seconds(), 0)
 
 
@@ -995,7 +995,7 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
                 param = line.strip()
                 maybe_type = None
             desc_lines = []
-        elif spaces > 0:
+        else:
             desc_lines.append(line.strip())
     # After the last iteration
     add_param(param, desc_lines, maybe_type)
@@ -1220,6 +1220,7 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
     ----------
     dt: Union[:class:`datetime.datetime`, :class:`int`, :class:`float`]
         The datetime to format.
+        If this is a naive datetime, it is assumed to be local time.
     style: :class:`str`
         The style to format the datetime with. Defaults to ``f``
 
