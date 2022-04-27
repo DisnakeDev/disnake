@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Type, TypeVar, Union
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
@@ -67,6 +67,7 @@ class PartialInviteChannel:
     This model will be given when the user is not part of the
     guild the :class:`Invite` resolves to.
 
+
     .. container:: operations
 
         .. describe:: x == y
@@ -85,6 +86,11 @@ class PartialInviteChannel:
 
             Returns the partial channel's name.
 
+            .. versionchanged:: 2.5
+                If the channel is of type :attr:`ChannelType.group`,
+                returns the name that's rendered by the official client.
+
+
     Attributes
     ----------
     name: Optional[:class:`str`]
@@ -95,17 +101,21 @@ class PartialInviteChannel:
         The partial channel's type.
     """
 
-    __slots__ = ("id", "name", "type")
+    __slots__ = ("id", "name", "type", "_recipients")
 
     def __init__(self, data: InviteChannelPayload):
         self.id: int = int(data["id"])
         self.name: Optional[str] = data.get("name")
         self.type: ChannelType = try_enum(ChannelType, data["type"])
+        if self.type is ChannelType.group:
+            self._recipients: List[Dict[Literal["username"], str]] = data.get("recipients", [])
 
     def __str__(self) -> str:
+        if self.name:
+            return self.name
         if self.type is ChannelType.group:
-            return self.name or "Unnamed"
-        return self.name or ""
+            return ", ".join([recipient["username"] for recipient in self._recipients]) or "Unnamed"
+        return ""
 
     def __repr__(self) -> str:
         return f"<PartialInviteChannel id={self.id} name={self.name} type={self.type!r}>"
