@@ -26,12 +26,13 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Optional, Type, TypeVar, Union
 
 if TYPE_CHECKING:
     from types import TracebackType
 
     from .abc import Messageable
+    from .channel import ForumChannel
 
     TypingT = TypeVar("TypingT", bound="Typing")
 
@@ -47,9 +48,9 @@ def _typing_done_callback(fut: asyncio.Future) -> None:
 
 
 class Typing:
-    def __init__(self, messageable: Messageable) -> None:
+    def __init__(self, messageable: Union[Messageable, ForumChannel]) -> None:
         self.loop: asyncio.AbstractEventLoop = messageable._state.loop
-        self.messageable: Messageable = messageable
+        self.messageable: Union[Messageable, ForumChannel] = messageable
 
     async def do_typing(self) -> None:
         try:

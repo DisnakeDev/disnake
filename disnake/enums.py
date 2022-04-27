@@ -31,7 +31,6 @@ __all__ = (
     "Enum",
     "ChannelType",
     "MessageType",
-    "VoiceRegion",
     "SpeakingState",
     "VerificationLevel",
     "ContentFilter",
@@ -65,6 +64,7 @@ __all__ = (
     "GuildScheduledEventPrivacyLevel",
     "ThreadArchiveDuration",
     "WidgetStyle",
+    "Locale",
 )
 
 
@@ -210,6 +210,7 @@ class ChannelType(Enum):
     private_thread = 12
     stage_voice = 13
     guild_directory = 14
+    forum = 15
 
     def __str__(self):
         return self.name
@@ -255,25 +256,6 @@ class PartyType(Enum):
     watch_together = 880218394199220334
     sketch_heads = 902271654783242291
     ocho = 832025144389533716
-
-
-class VoiceRegion(Enum):
-    us_west = "us-west"
-    us_east = "us-east"
-    us_south = "us-south"
-    us_central = "us-central"
-    singapore = "singapore"
-    sydney = "sydney"
-    rotterdam = "rotterdam"
-    brazil = "brazil"
-    hongkong = "hongkong"
-    russia = "russia"
-    japan = "japan"
-    southafrica = "southafrica"
-    india = "india"
-
-    def __str__(self):
-        return self.value
 
 
 class SpeakingState(Enum):
@@ -700,6 +682,43 @@ class WidgetStyle(Enum):
     banner2 = "banner2"
     banner3 = "banner3"
     banner4 = "banner4"
+
+    def __str__(self):
+        return self.value
+
+
+# reference: https://discord.com/developers/docs/reference#locales
+class Locale(Enum):
+    bg = "bg"
+    cs = "cs"
+    da = "da"
+    de = "de"
+    el = "el"
+    en_GB = "en-GB"
+    en_US = "en-US"
+    es_ES = "es-ES"
+    fi = "fi"
+    fr = "fr"
+    hi = "hi"
+    hr = "hr"
+    it = "it"
+    ja = "ja"
+    ko = "ko"
+    lt = "lt"
+    hu = "hu"
+    nl = "nl"
+    no = "no"
+    pl = "pl"
+    pt_BR = "pt-BR"
+    ro = "ro"
+    ru = "ru"
+    sv_SE = "sv-SE"
+    th = "th"
+    tr = "tr"
+    uk = "uk"
+    vi = "vi"
+    zh_CN = "zh-CN"
+    zh_TW = "zh-TW"
 
     def __str__(self):
         return self.value
