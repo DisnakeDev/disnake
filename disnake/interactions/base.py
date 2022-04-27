@@ -78,12 +78,12 @@ MISSING: Any = utils.MISSING
 
 class _ResponseLock:
     __slots__ = (
-        "interaction",
+        "_response",
         "_condition",
     )
 
-    def __init__(self, interaction: "Interaction") -> None:
-        self.interaction = interaction
+    def __init__(self, response: InteractionResponse) -> None:
+        self._response = response
         self._condition = asyncio.Condition()
 
     async def __aenter__(self):
@@ -96,8 +96,8 @@ class _ResponseLock:
             return
 
         await self._condition.acquire()
-        if self.interaction.response._responded:
-            raise InteractionResponded(self.interaction)
+        if self._response._response_type is not None:
+            raise InteractionResponded(self._response._parent)
 
     async def __aexit__(self, exc_type, exc, tb):
         # we are no longer making a request so we release the lock
@@ -106,7 +106,7 @@ class _ResponseLock:
         self._condition.release()
         if exc_type is not None:
             return
-        self.interaction.response._responded = True
+        # todo: set that we responded somehow
 
     def is_responding(self):
         return self._condition.locked()
@@ -183,7 +183,6 @@ class Interaction:
         "_state",
         "_session",
         "_original_response",
-        "_response_lock",
         "_cs_response",
         "_cs_followup",
         "_cs_channel",
@@ -198,7 +197,6 @@ class Interaction:
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
         self.client: Client = state._get_client()
         self._original_response: Optional[InteractionMessage] = None
-        self._response_lock = _ResponseLock(self)
 
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, data["type"])
@@ -675,8 +673,8 @@ class Interaction:
         # if we are currently responding we should use the followup
         # but there is a chance the response will fail and therefore
         # we should send the response
-        if self._response_lock.is_responding():
-            await self._response_lock.wait()
+        if self.response._lock.is_responding():
+            await self.response._lock.wait()
 
         if self.response._response_type is not None:
             sender = self.followup.send
@@ -708,12 +706,14 @@ class InteractionResponse:
 
     __slots__: Tuple[str, ...] = (
         "_parent",
+        "_lock",
         "_response_type",
     )
 
     def __init__(self, parent: Interaction):
         self._parent: Interaction = parent
         self._response_type: Optional[InteractionResponseType] = None
+        self._lock = _ResponseLock(self)
 
     @property
     def type(self) -> Optional[InteractionResponseType]:
@@ -722,6 +722,7 @@ class InteractionResponse:
         .. versionadded:: 2.6
         """
         return self._response_type
+        self._lock = _ResponseLock(self)
 
     def is_done(self) -> bool:
         """Whether an interaction response has been done before.
@@ -815,7 +816,7 @@ class InteractionResponse:
                 data["flags"] |= MessageFlags.ephemeral.flag
 
         adapter = async_context.get()
-        async with parent._response_lock:
+        async with self._lock:
             await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
@@ -846,7 +847,7 @@ class InteractionResponse:
         if parent.type is InteractionType.ping:
             adapter = async_context.get()
             response_type = InteractionResponseType.pong
-            async with parent._response_lock:
+            async with self._lock:
                 await adapter.create_interaction_response(
                     parent.id,
                     parent.token,
@@ -994,7 +995,7 @@ class InteractionResponse:
         adapter = async_context.get()
         response_type = InteractionResponseType.channel_message
         try:
-            async with parent._response_lock:
+            async with self._lock:
                 await adapter.create_interaction_response(
                     parent.id,
                     parent.token,
@@ -1177,7 +1178,7 @@ class InteractionResponse:
         adapter = async_context.get()
         response_type = InteractionResponseType.message_update
         try:
-            async with parent._response_lock:
+            async with self._lock:
                 await adapter.create_interaction_response(
                     parent.id,
                     parent.token,
@@ -1237,7 +1238,7 @@ class InteractionResponse:
         parent = self._parent
         adapter = async_context.get()
         response_type = InteractionResponseType.application_command_autocomplete_result
-        async with parent._response_lock:
+        async with self._lock:
             await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
@@ -1337,7 +1338,7 @@ class InteractionResponse:
 
         adapter = async_context.get()
         response_type = InteractionResponseType.modal
-        async with parent._response_lock:
+        async with self._lock:
             await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
