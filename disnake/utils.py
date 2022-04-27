@@ -945,6 +945,7 @@ def _get_next_header_line(lines: List[str], underline: str, start: int = 0) -> i
         clean_line = line.rstrip()
         if (
             i > 0
+            and len(clean_line) > 0
             and clean_line.count(underline) == len(clean_line)
             and _count_left_spaces(lines[i - 1]) == 0
             and len(lines[i - 1].rstrip()) <= len(clean_line)
