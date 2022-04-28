@@ -31,6 +31,7 @@ from typing import TYPE_CHECKING, ClassVar, Dict, Iterable, List, Mapping, Optio
 from .abc import GuildChannel, User
 from .custom_warnings import ConfigWarning
 from .enums import (
+    ApplicationCommandPermissionType,
     ApplicationCommandType,
     ChannelType,
     OptionType,
@@ -51,7 +52,6 @@ if TYPE_CHECKING:
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         ApplicationCommandOptionChoiceValue,
         ApplicationCommandPermissions as ApplicationCommandPermissionsPayload,
-        ApplicationCommandPermissionType,
         EditApplicationCommand as EditApplicationCommandPayload,
         GuildApplicationCommandPermissions as GuildApplicationCommandPermissionsPayload,
         PartialGuildApplicationCommandPermissions as PartialGuildApplicationCommandPermissionsPayload,
@@ -109,11 +109,11 @@ def kwargs_to_application_command_permissions(
     if permissions is not None:
         for obj, value in permissions.items():
             if isinstance(obj, Role):
-                target_type = 1
+                target_type = ApplicationCommandPermissionType.role
             elif isinstance(obj, User):
-                target_type = 2
+                target_type = ApplicationCommandPermissionType.user
             elif isinstance(obj, GuildChannel):
-                target_type = 3
+                target_type = ApplicationCommandPermissionType.channel
             else:
                 raise ValueError("Permission target should be an instance of Role or abc.User")
             perms.append(
@@ -125,19 +125,25 @@ def kwargs_to_application_command_permissions(
     if role_ids is not None:
         for item_id, value in role_ids.items():
             perms.append(
-                ApplicationCommandPermissions.from_attributes(id=item_id, type=1, permission=value)
+                ApplicationCommandPermissions.from_attributes(
+                    id=item_id, type=ApplicationCommandPermissionType.role, permission=value
+                )
             )
 
     if user_ids is not None:
         for item_id, value in user_ids.items():
             perms.append(
-                ApplicationCommandPermissions.from_attributes(id=item_id, type=2, permission=value)
+                ApplicationCommandPermissions.from_attributes(
+                    id=item_id, type=ApplicationCommandPermissionType.user, permission=value
+                )
             )
 
     if channel_ids is not None:
         for item_id, value in channel_ids.items():
             perms.append(
-                ApplicationCommandPermissions.from_attributes(id=item_id, type=3, permission=value)
+                ApplicationCommandPermissions.from_attributes(
+                    id=item_id, type=ApplicationCommandPermissionType.channel, permission=value
+                )
             )
 
     return perms
@@ -747,7 +753,7 @@ class ApplicationCommandPermissions:
     ----------
     id: :class:`int`
         The ID of the role or user.
-    type: :class:`int`
+    type: ApplicationCommandPermissionType
         The type of the target.
         1 if target is a role; 2 if target is a user; 3 if target is a channel.
     permission: :class:`bool`
@@ -758,7 +764,9 @@ class ApplicationCommandPermissions:
 
     def __init__(self, *, data: ApplicationCommandPermissionsPayload):
         self.id: int = int(data["id"])
-        self.type: ApplicationCommandPermissionType = data["type"]
+        self.type: ApplicationCommandPermissionType = try_enum(
+            ApplicationCommandPermissionType, data["type"]
+        )
         self.permission: bool = data["permission"]
 
     def __repr__(self):
@@ -778,7 +786,7 @@ class ApplicationCommandPermissions:
         return self
 
     def to_dict(self) -> ApplicationCommandPermissionsPayload:
-        return {"id": self.id, "type": self.type, "permission": self.permission}
+        return {"id": self.id, "type": int(self.type), "permission": self.permission}  # type: ignore
 
 
 class GuildApplicationCommandPermissions:
@@ -798,7 +806,7 @@ class GuildApplicationCommandPermissions:
 
     __slots__ = ("_state", "id", "application_id", "guild_id", "permissions")
 
-    def __init__(self, *, state: ConnectionState, data: GuildApplicationCommandPermissionsPayload):
+    def __init__(self, *, data: GuildApplicationCommandPermissionsPayload, state: ConnectionState):
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])

@@ -770,6 +770,10 @@ class ConnectionState:
     def parse_resumed(self, data) -> None:
         self.dispatch("resumed")
 
+    def parse_application_command_permissions_update(self, data) -> None:
+        app_command_perms = GuildApplicationCommandPermissions(data=data, state=self)
+        self.dispatch("application_command_permissions_update", app_command_perms)
+
     def parse_message_create(self, data) -> None:
         channel, _ = self._get_guild_channel(data)
         # channel would be the correct type here

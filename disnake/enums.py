@@ -58,6 +58,7 @@ __all__ = (
     "NSFWLevel",
     "OptionType",
     "ApplicationCommandType",
+    "ApplicationCommandPermissionType",
     "PartyType",
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
@@ -623,6 +624,15 @@ class ApplicationCommandType(Enum):
     chat_input = 1
     user = 2
     message = 3
+
+
+class ApplicationCommandPermissionType(Enum):
+    role = 1
+    user = 2
+    channel = 3
+
+    def __int__(self):
+        return self.value
 
 
 class OptionType(Enum):
