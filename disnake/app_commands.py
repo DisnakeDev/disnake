@@ -725,7 +725,7 @@ class ApplicationCommandPermissions:
             ApplicationCommandPermissionType, data["type"]
         )
         self.permission: bool = data["permission"]
-        self._guild_id: Optional[int] = guild_id
+        self._guild_id: int = guild_id
 
     def __repr__(self):
         return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
@@ -754,7 +754,7 @@ class ApplicationCommandPermissions:
 
         :return type: :class:`bool`
         """
-        return self.id - 1 == self._guild_id
+        return self.id == self._guild_id - 1
 
 
 class GuildApplicationCommandPermissions:
