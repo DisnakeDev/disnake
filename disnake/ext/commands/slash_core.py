@@ -41,6 +41,8 @@ if TYPE_CHECKING:
 
     from .base_core import CommandCallback
 
+MISSING = utils.MISSING
+
 __all__ = ("InvokableSlashCommand", "SubCommandGroup", "SubCommand", "slash_command")
 
 
@@ -319,9 +321,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name: str = None,
         description: str = None,
         options: List[Option] = None,
-        default_permission: bool = utils.MISSING,
+        default_permission: bool = MISSING,
         dm_permission: bool = True,
-        default_member_permissions: Optional[Permissions] = utils.MISSING,
+        default_member_permissions: Optional[Permissions] = MISSING,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
@@ -340,7 +342,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         if options is None:
             options = expand_params(self)
 
-        if default_member_permissions is utils.MISSING:
+        if default_member_permissions is MISSING:
             if (default_perms := getattr(func, "__default_member_permissions__", None)) is not None:
                 default_member_permissions = Permissions(default_perms)
             else:
@@ -566,7 +568,7 @@ def slash_command(
     options: List[Option] = None,
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
-    default_permission: bool = utils.MISSING,
+    default_permission: bool = MISSING,
     auto_sync: bool = True,
     **kwargs,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
