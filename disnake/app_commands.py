@@ -704,12 +704,12 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
 
 class ApplicationCommandPermissions:
-    """Represents application command permissions for a role or a user.
+    """Represents application command permissions for a role, user, or channel.
 
     Attributes
     ----------
     id: :class:`int`
-        The ID of the role or user.
+        The ID of the role, user, or channel.
     type: ApplicationCommandPermissionType
         The type of the target.
         1 if target is a role; 2 if target is a user; 3 if target is a channel.
@@ -717,14 +717,15 @@ class ApplicationCommandPermissions:
         Whether to allow or deny the access to the application command.
     """
 
-    __slots__ = ("id", "type", "permission")
+    __slots__ = ("id", "type", "permission", "_guild_id")
 
-    def __init__(self, *, data: ApplicationCommandPermissionsPayload):
+    def __init__(self, *, data: ApplicationCommandPermissionsPayload, guild_id: int):
         self.id: int = int(data["id"])
         self.type: ApplicationCommandPermissionType = try_enum(
             ApplicationCommandPermissionType, data["type"]
         )
         self.permission: bool = data["permission"]
+        self._guild_id: Optional[int] = guild_id
 
     def __repr__(self):
         return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
@@ -734,16 +735,26 @@ class ApplicationCommandPermissions:
             self.id == other.id and self.type == other.type and self.permission == other.permission
         )
 
-    @classmethod
-    def from_attributes(cls, *, id: int, type: ApplicationCommandPermissionType, permission: bool):
-        self = cls.__new__(cls)
-        self.id = id
-        self.type = type
-        self.permission = permission
-        return self
-
     def to_dict(self) -> ApplicationCommandPermissionsPayload:
         return {"id": self.id, "type": int(self.type), "permission": self.permission}  # type: ignore
+
+    def is_everyone(self) -> bool:
+        """Whether this permission object is affecting the @everyone role.
+
+        .. versionadded:: 2.5
+
+        :return type: :class:`bool`
+        """
+        return self.id == self._guild_id
+
+    def is_all_channels(self) -> bool:
+        """Whether this permission object is affecting all channels.
+
+        .. versionadded:: 2.5
+
+        :return type: :class:`bool`
+        """
+        return self.id - 1 == self._guild_id
 
 
 class GuildApplicationCommandPermissions:
@@ -770,7 +781,8 @@ class GuildApplicationCommandPermissions:
         self.guild_id: int = int(data["guild_id"])
 
         self.permissions: List[ApplicationCommandPermissions] = [
-            ApplicationCommandPermissions(data=elem) for elem in data["permissions"]
+            ApplicationCommandPermissions(data=elem, guild_id=self.guild_id)
+            for elem in data["permissions"]
         ]
 
     def __repr__(self):
