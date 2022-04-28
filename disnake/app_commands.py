@@ -336,7 +336,12 @@ class ApplicationCommand(ABC):
         Whether this command can be used in DMs.
     """
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = ("type", "name")
+    __repr_info__: ClassVar[Tuple[str, ...]] = (
+        "type",
+        "name",
+        "dm_permission",
+        "default_member_permisions",
+    )
 
     def __init__(
         self,
