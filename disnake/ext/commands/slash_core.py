@@ -585,7 +585,7 @@ def slash_command(
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-    default_member_permissions: :class:`Permissions`
+    default_member_permissions: :class:`.Permissions`
         The default required permissions for this command.
     guild_ids: List[:class:`int`]
         If specified, the client will register a command in these guilds.

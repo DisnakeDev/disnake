@@ -233,7 +233,7 @@ def user_command(
         The name of the user command (defaults to the function name).
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-    default_member_permissions: :class:`Permissions`
+    default_member_permissions: :class:`.Permissions`
         The default required permissions for this command.
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
@@ -286,7 +286,7 @@ def message_command(
         The name of the message command (defaults to the function name).
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-    default_member_permissions: :class:`Permissions`
+    default_member_permissions: :class:`.Permissions`
         The default required permissions for this command.
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.

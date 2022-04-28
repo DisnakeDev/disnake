@@ -199,11 +199,11 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
-        """Optional[:class:`Permissions`]: The default member permissions for this command.
+        """Optional[:class:`.Permissions`]: The default member permissions for this command.
 
         If no permissions are returned, this means everyone can use the command by default.
 
-        If an empty :class:`Permissions` object is returned, this means no one can use the command.
+        If an empty :class:`.Permissions` object is returned, this means no one can use the command.
 
         .. versionadded:: 2.5
         """
