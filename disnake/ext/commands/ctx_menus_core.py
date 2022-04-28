@@ -95,7 +95,8 @@ class InvokableUserCommand(InvokableApplicationCommand):
 
         self.body = UserCommand(
             name=self.name,
-            dm_permission=dm_permission and not self._guild_only,
+            # see InvokableSlashCommand.__init__
+            dm_permission=dm_permission or self._guild_only,
             default_member_permissions=default_member_permissions,
         )
 
@@ -180,7 +181,8 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
         self.body = MessageCommand(
             name=self.name,
-            dm_permission=dm_permission and not self._guild_only,
+            # see InvokableSlashCommand.__init__
+            dm_permission=dm_permission or self._guild_only,
             default_member_permissions=default_member_permissions,
         )
 
