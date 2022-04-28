@@ -53,11 +53,7 @@ from typing import (
 
 from . import utils
 from .activity import BaseActivity
-from .app_commands import (
-    GuildApplicationCommandPermissions,
-    PartialGuildApplicationCommandPermissions,
-    application_command_factory,
-)
+from .app_commands import GuildApplicationCommandPermissions, application_command_factory
 from .channel import *
 from .channel import _channel_factory
 from .emoji import Emoji
@@ -1934,30 +1930,6 @@ class ConnectionState:
             self.application_id, guild_id, command_id  # type: ignore
         )
         return GuildApplicationCommandPermissions(state=self, data=data)
-
-    async def edit_command_permissions(
-        self, guild_id: int, permissions: PartialGuildApplicationCommandPermissions
-    ) -> GuildApplicationCommandPermissions:
-        result = await self.http.edit_application_command_permissions(
-            self.application_id, guild_id, permissions.id, permissions.to_dict()  # type: ignore
-        )
-        perms = GuildApplicationCommandPermissions(state=self, data=result)
-        self._set_command_permissions(perms)
-        return perms
-
-    async def bulk_edit_command_permissions(
-        self, guild_id: int, permissions: List[PartialGuildApplicationCommandPermissions]
-    ) -> List[GuildApplicationCommandPermissions]:
-        payload = [perm.to_dict() for perm in permissions]
-
-        array = await self.http.bulk_edit_guild_application_command_permissions(
-            self.application_id, guild_id=guild_id, payload=payload  # type: ignore
-        )
-
-        perms = [GuildApplicationCommandPermissions(state=self, data=obj) for obj in array]
-        if self._cache_application_command_permissions:
-            self._application_command_permissions[guild_id] = {elem.id: elem for elem in perms}
-        return perms
 
 
 class AutoShardedConnectionState(ConnectionState):

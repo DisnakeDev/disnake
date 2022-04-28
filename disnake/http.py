@@ -2471,36 +2471,6 @@ class HTTPClient:
         )
         return self.request(r)
 
-    def edit_application_command_permissions(
-        self,
-        application_id: Snowflake,
-        guild_id: Snowflake,
-        command_id: Snowflake,
-        payload: interactions.BaseGuildApplicationCommandPermissions,
-    ) -> Response[interactions.GuildApplicationCommandPermissions]:
-        r = Route(
-            "PUT",
-            "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions",
-            application_id=application_id,
-            guild_id=guild_id,
-            command_id=command_id,
-        )
-        return self.request(r, json=payload)
-
-    def bulk_edit_guild_application_command_permissions(
-        self,
-        application_id: Snowflake,
-        guild_id: Snowflake,
-        payload: List[interactions.PartialGuildApplicationCommandPermissions],
-    ) -> Response[List[interactions.GuildApplicationCommandPermissions]]:
-        r = Route(
-            "PUT",
-            "/applications/{application_id}/guilds/{guild_id}/commands/permissions",
-            application_id=application_id,
-            guild_id=guild_id,
-        )
-        return self.request(r, json=payload)
-
     # Misc
 
     def get_voice_regions(self) -> Response[List[voice.VoiceRegion]]:

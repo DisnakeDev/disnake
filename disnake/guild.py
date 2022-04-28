@@ -35,7 +35,6 @@ from typing import (
     Dict,
     List,
     Literal,
-    Mapping,
     NamedTuple,
     Optional,
     Sequence,
@@ -47,10 +46,7 @@ from typing import (
 )
 
 from . import abc, utils
-from .app_commands import (
-    GuildApplicationCommandPermissions,
-    PartialGuildApplicationCommandPermissions,
-)
+from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
 from .bans import BanEntry
 from .channel import *
@@ -97,7 +93,7 @@ VocalGuildChannel = Union[VoiceChannel, StageChannel]
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
-    from .abc import Snowflake, SnowflakeTime, User as ABCUser
+    from .abc import Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .channel import CategoryChannel, ForumChannel, StageChannel, TextChannel, VoiceChannel
@@ -3966,66 +3962,6 @@ class Guild(Hashable):
             The application command permissions.
         """
         return await self._state.fetch_command_permissions(self.id, command_id)
-
-    async def edit_command_permissions(
-        self,
-        command_id: int,
-        *,
-        permissions: Mapping[Union[Role, ABCUser, abc.GuildChannel], bool] = None,
-        role_ids: Mapping[int, bool] = None,
-        user_ids: Mapping[int, bool] = None,
-        channel_ids: Mapping[int, bool] = None,
-    ) -> GuildApplicationCommandPermissions:
-        """
-        Edits guild permissions of a single command.
-
-        Parameters
-        ----------
-        command_id: :class:`int`
-            The ID of the application command you want to apply these permissions to.
-        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`, :class:`disnake.abc.GuildChannel`], :class:`bool`]
-            Roles or users or channels to booleans. ``True`` means "allow", ``False`` means "deny".
-        role_ids: Mapping[:class:`int`, :class:`bool`]
-            Role IDs to booleans.
-        user_ids: Mapping[:class:`int`, :class:`bool`]
-            User IDs to booleans.
-        channel_ids: Mapping[:class:`int`, :class:`bool`]
-            Channel IDs to booleans.
-
-        Returns
-        -------
-        :class:`GuildApplicationCommandPermissions`
-            The object representing the edited application command permissions.
-        """
-        perms = PartialGuildApplicationCommandPermissions(
-            command_id=command_id,
-            permissions=permissions,
-            role_ids=role_ids,
-            user_ids=user_ids,
-            channel_ids=channel_ids,
-        )
-        return await self._state.edit_command_permissions(self.id, perms)
-
-    async def bulk_edit_command_permissions(
-        self, permissions: List[PartialGuildApplicationCommandPermissions]
-    ) -> List[GuildApplicationCommandPermissions]:
-        """|coro|
-
-        Edits guild permissions of multiple application commands at once.
-
-        .. versionadded:: 2.1
-
-        Parameters
-        ----------
-        permissions: List[:class:`PartialGuildApplicationCommandPermissions`]
-            A list of partial permissions for each application command you want to edit.
-
-        Returns
-        -------
-        List[:class:`GuildApplicationCommandPermissions`]
-            A list of edited permissions of application commands.
-        """
-        return await self._state.bulk_edit_command_permissions(self.id, permissions)
 
     @overload
     async def timeout(

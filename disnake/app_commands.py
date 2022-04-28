@@ -822,48 +822,6 @@ class GuildApplicationCommandPermissions:
             "permissions": [perm.to_dict() for perm in self.permissions],
         }
 
-    async def edit(
-        self,
-        *,
-        permissions: Mapping[Union[Role, User, GuildChannel], bool] = None,
-        role_ids: Mapping[int, bool] = None,
-        user_ids: Mapping[int, bool] = None,
-        channel_ids: Mapping[int, bool] = None,
-    ) -> GuildApplicationCommandPermissions:
-        """Replaces the current permissions with the specified ones.
-
-        Parameters
-        ----------
-        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`, :class:`disnake.abc.GuildChannel`], :class:`bool`]
-            Roles or users or channels to booleans. ``True`` means "allow", ``False`` means "deny".
-        role_ids: Mapping[:class:`int`, :class:`bool`]
-            Role IDs to booleans.
-        user_ids: Mapping[:class:`int`, :class:`bool`]
-            User IDs to booleans.
-        channel_ids: Mapping[:class:`int`, :class:`bool`]
-            Channel IDs to booleans.
-
-        Returns
-        -------
-        :class:`GuildApplicationCommandPermissions`
-            The newly updated permissions.
-        """
-        data: List[ApplicationCommandPermissionsPayload] = [
-            permission.to_dict()
-            for permission in kwargs_to_application_command_permissions(
-                permissions=permissions,
-                role_ids=role_ids,
-                user_ids=user_ids,
-                channel_ids=channel_ids,
-            )
-        ]
-
-        res = await self._state.http.edit_application_command_permissions(
-            self.application_id, self.guild_id, self.id, {"permissions": data}
-        )
-
-        return GuildApplicationCommandPermissions(state=self._state, data=res)
-
 
 class PartialGuildApplicationCommandPermissions:
     """Creates a partial object representing permissions of the application command.
