@@ -512,15 +512,13 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         else:
             return self.copy()
 
-    async def dispatch_error(self, ctx: Context, error: Exception) -> None:
+    async def dispatch_error(self, ctx: Context, error: CommandError) -> None:
         stop_propagation = False
         ctx.command_failed = True
         cog = self.cog
-        try:
-            coro = self.on_error
-        except AttributeError:
-            pass
-        else:
+
+        coro = getattr(self, "on_error")
+        if coro is not None:
             injected = wrap_callback(coro)
             if cog is not None:
                 stop_propagation = await injected(cog, ctx, error)
