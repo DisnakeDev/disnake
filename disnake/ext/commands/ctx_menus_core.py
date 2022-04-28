@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, TypeVar
 
 from disnake.app_commands import MessageCommand, UserCommand
 
@@ -37,6 +37,10 @@ if TYPE_CHECKING:
     from .base_core import InteractionCommandCallback
 
 __all__ = ("InvokableUserCommand", "InvokableMessageCommand", "user_command", "message_command")
+
+
+MessageCommandT = TypeVar("MessageCommandT", bound="InvokableMessageCommand")
+UserCommandT = TypeVar("UserCommandT", bound="InvokableUserCommand")
 
 
 class InvokableUserCommand(InvokableApplicationCommand):
@@ -76,14 +80,38 @@ class InvokableUserCommand(InvokableApplicationCommand):
         *,
         name: str = None,
         default_permission: bool = True,
-        guild_ids: Sequence[int] = None,
+        guild_ids: List[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
         super().__init__(func, name=name, **kwargs)
-        self.guild_ids: Optional[Sequence[int]] = guild_ids
+        self.guild_ids: Optional[List[int]] = guild_ids
         self.auto_sync: bool = auto_sync
         self.body = UserCommand(name=self.name, default_permission=default_permission)
+
+    def _ensure_assignment_on_copy(self, other: UserCommandT) -> UserCommandT:
+        super()._ensure_assignment_on_copy(other)
+        if self.guild_ids and self.guild_ids != other.guild_ids:
+            other.guild_ids = self.guild_ids.copy()
+        return other
+
+    def copy(self: UserCommandT) -> UserCommandT:
+        """Create a copy of this user command.
+
+        Returns
+        -------
+        :class:`SubCommand`
+            A new instance of this user command.
+        """
+        copy = type(self)(
+            self.callback,
+            name=self.name,
+            default_permission=self.body.default_permission,
+            guild_ids=self.guild_ids,
+            auto_sync=self.auto_sync,
+            **self.__original_kwargs__,
+        )
+        return self._ensure_assignment_on_copy(copy)
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -149,14 +177,39 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         *,
         name: str = None,
         default_permission: bool = True,
-        guild_ids: Sequence[int] = None,
+        guild_ids: List[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
         super().__init__(func, name=name, **kwargs)
-        self.guild_ids: Optional[Sequence[int]] = guild_ids
+        self.guild_ids: Optional[List[int]] = guild_ids
         self.auto_sync: bool = auto_sync
         self.body = MessageCommand(name=self.name, default_permission=default_permission)
+
+    def _ensure_assignment_on_copy(self, other: MessageCommandT) -> MessageCommandT:
+        super()._ensure_assignment_on_copy(other)
+        if self.guild_ids and self.guild_ids != other.guild_ids:
+            other.guild_ids = self.guild_ids.copy()
+        return other
+
+    def copy(self: MessageCommandT) -> MessageCommandT:
+        """Create a copy of this message command.
+
+        Returns
+        -------
+        :class:`SubCommand`
+            A new instance of this message command.
+        """
+        copy = type(self)(
+            self.callback,
+            name=self.name,
+            default_permission=self.body.default_permission,
+            guild_ids=self.guild_ids,
+            auto_sync=self.auto_sync,
+            **self.__original_kwargs__,
+        )
+        return self._ensure_assignment_on_copy(copy)
+
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError

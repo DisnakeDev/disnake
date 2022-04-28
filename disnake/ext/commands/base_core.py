@@ -37,6 +37,7 @@ from typing import (
     Optional,
     TypeVar,
     Union,
+    cast,
 )
 
 from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
@@ -132,6 +133,8 @@ class InvokableApplicationCommand(ABC):
     body: ApplicationCommand
 
     def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
+        self.__original_kwargs__ = kwargs.copy()
+
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
@@ -182,6 +185,43 @@ class InvokableApplicationCommand(ABC):
 
         self._before_invoke: Optional[Hook] = None
         self._after_invoke: Optional[Hook] = None
+
+    def _ensure_assignment_on_copy(self, other: AppCommandT) -> AppCommandT:
+        other._before_invoke = self._before_invoke
+        other._after_invoke = self._after_invoke
+        if self.checks != other.checks:
+            other.checks = self.checks.copy()
+        if self._buckets.valid and not other._buckets.valid:
+            other._buckets = self._buckets.copy()
+        if self._max_concurrency != other._max_concurrency:
+            # _max_concurrency won't be None at this point
+            other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+        if self.permissions != other.permissions:
+            # TODO: Maybe update instead?
+            other.permissions = self.permissions.copy()
+        if None is not self.guild_ids != other.guild_ids:
+            other.guild_ids = self.guild_ids.copy()
+        return other
+
+    def copy(self: AppCommandT) -> AppCommandT:
+        """Create a copy of this application command.
+
+        Returns
+        -------
+        :class:`InvokableApplicationCommand`
+            A new instance of this application command.
+        """
+        copy = type(self)(self.callback, name=self.name, **self.__original_kwargs__)
+        return self._ensure_assignment_on_copy(copy)
+
+    def _update_copy(self: AppCommandT, kwargs: Dict[str, Any]) -> AppCommandT:
+        if kwargs:
+            kw = kwargs.copy()
+            kw.update(self.__original_kwargs__)
+            copy = type(self)(self.callback, name=self.name, **kw)
+            return self._ensure_assignment_on_copy(copy)
+        else:
+            return self.copy()
 
     @property
     def callback(self) -> CommandCallback:

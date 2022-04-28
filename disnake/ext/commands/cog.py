@@ -136,6 +136,7 @@ class CogMeta(type):
 
     __cog_name__: str
     __cog_settings__: Dict[str, Any]
+    __cog_app_settings__: Dict[str, Any]
     __cog_commands__: List[Command]
     __cog_app_commands__: List[InvokableApplicationCommand]
     __cog_listeners__: List[Tuple[str, str]]
@@ -144,6 +145,7 @@ class CogMeta(type):
         name, bases, attrs = args
         attrs["__cog_name__"] = kwargs.pop("name", name)
         attrs["__cog_settings__"] = kwargs.pop("command_attrs", {})
+        attrs["__cog_app_settings__"] = kwargs.pop("application_command_attrs", {})
 
         description = kwargs.pop("description", None)
         if description is None:
@@ -240,10 +242,12 @@ class Cog(metaclass=CogMeta):
         # To do this, we need to interfere with the Cog creation process.
         self = super().__new__(cls)
         cmd_attrs = cls.__cog_settings__
+        app_cmd_attrs = cls.__cog_app_settings__
 
         # Either update the command with the cog provided defaults or copy it.
         # r.e type ignore, type-checker complains about overriding a ClassVar
         self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore
+        self.__cog_app_commands__ = tuple(c._update_copy(app_cmd_attrs) for c in cls.__cog_app_commands__)
 
         lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}
 

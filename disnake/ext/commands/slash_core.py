@@ -24,14 +24,14 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, TypeVar, Union
 
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
 from disnake.enums import OptionType
 from disnake.interactions import ApplicationCommandInteraction
 
-from .base_core import InvokableApplicationCommand, _get_overridden_method
+from .base_core import AppCommandT, InvokableApplicationCommand, _get_overridden_method
 from .errors import *
 from .params import call_param_func, expand_params
 
@@ -41,6 +41,11 @@ if TYPE_CHECKING:
     from .base_core import CommandCallback
 
 __all__ = ("InvokableSlashCommand", "SubCommandGroup", "SubCommand", "slash_command")
+
+
+SlashCommandT = TypeVar("SlashCommandT", bound="InvokableSlashCommand")
+SubCommandGroupT = TypeVar("SubCommandGroupT", bound="SubCommandGroup")
+SubCommandT = TypeVar("SubCommandT", bound="SubCommand")
 
 
 def _autocomplete(
@@ -134,6 +139,14 @@ class SubCommandGroup(InvokableApplicationCommand):
             name=self.name, description="-", type=OptionType.sub_command_group, options=[]
         )
         self.qualified_name: str = ""
+
+    def _ensure_assignment_on_copy(self, other: SubCommandGroupT) -> SubCommandGroupT:
+        super()._ensure_assignment_on_copy(other)
+        if other.children != self.children:
+            other.children = self.children.copy()
+        if other.qualified_name != self.qualified_name:
+            other.qualified_name = self.qualified_name
+        return other
 
     @property
     def body(self) -> Option:
@@ -232,6 +245,39 @@ class SubCommand(InvokableApplicationCommand):
             options=options,
         )
         self.qualified_name = ""
+
+    def _ensure_assignment_on_copy(self, other: SubCommandT) -> SubCommandT:
+        super()._ensure_assignment_on_copy(other)
+        if self.connectors != other.connectors:
+            other.connectors = self.connectors.copy()
+        if "-" != self.description != other.description:
+            # Allows overriding the default description cog-wide.
+            other.option.description = self.description
+        if self.qualified_name != other.qualified_name:
+            other.qualified_name = self.qualified_name
+        return other
+
+    def copy(self: SubCommandT) -> SubCommandT:
+        """Create a copy of this slash subcommand.
+
+        Returns
+        -------
+        :class:`SubCommand`
+            A new instance of this subcommand.
+        """
+        copy = type(self)(
+            self.callback,
+            name=self.name,
+            description=self.description,
+            options=self.body.options,
+            connectors=self.connectors,
+            **self.__original_kwargs__,
+        )
+        return self._ensure_assignment_on_copy(copy)
+
+    @property
+    def description(self) -> str:
+        return self.body.description
 
     @property
     def body(self) -> Option:
@@ -347,6 +393,40 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             options=options or [],
             default_permission=default_permission,
         )
+
+    def _ensure_assignment_on_copy(self, other: SlashCommandT) -> SlashCommandT:
+        super()._ensure_assignment_on_copy(other)
+        if self.connectors != other.connectors:
+            other.connectors = self.connectors.copy()
+        if self.children != other.children:
+            other.children = self.children.copy()
+        if self.autocompleters != other.autocompleters:
+            other.autocompleters = self.autocompleters.copy()
+        if "-" != self.description != other.description:
+            # Allows overriding the default description cog-wide.
+            other.body.description = self.description
+        return other
+
+    def copy(self: SlashCommandT) -> SlashCommandT:
+        """Create a copy of this slash subcommand.
+
+        Returns
+        -------
+        :class:`SubCommand`
+            A new instance of this slash command.
+        """
+        copy = type(self)(
+            self.callback,
+            name=self.name,
+            description=self.body.description,
+            options=self.body.options,
+            default_permission=self.body.default_permission,
+            guild_ids=self.guild_ids,
+            connectors=self.connectors,
+            auto_sync=self.auto_sync,
+            **self.__original_kwargs__,
+        )
+        return self._ensure_assignment_on_copy(copy)
 
     @property
     def description(self) -> str:
