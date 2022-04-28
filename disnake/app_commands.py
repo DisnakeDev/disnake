@@ -378,8 +378,7 @@ class ApplicationCommand(ABC):
         """
         if self._default_member_permissions is None:
             return None
-        else:
-            return Permissions(self._default_member_permissions)
+        return Permissions(self._default_member_permissions)
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
@@ -400,15 +399,16 @@ class ApplicationCommand(ABC):
         data: EditApplicationCommandPayload = {
             "type": try_enum_to_int(self.type),
             "name": self.name,
+            "dm_permission": self.dm_permission,
         }
-
-        if not self.dm_permission:
-            data["dm_permission"] = False
 
         if self._default_member_permissions is None:
             data["default_member_permissions"] = None
         else:
             data["default_member_permissions"] = str(self._default_member_permissions)
+
+        # this is for backwards compatibility, and can be removed once its ignored by clients and the api
+        data["default_permission"] = True
 
         return data
 

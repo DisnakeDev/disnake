@@ -280,6 +280,7 @@ class _EditApplicationCommandOptional(TypedDict, total=False):
     default_member_permissions: Optional[str]
     dm_permission: bool
     type: ApplicationCommandType
+    default_permission: bool
 
 
 class EditApplicationCommand(_EditApplicationCommandOptional):
