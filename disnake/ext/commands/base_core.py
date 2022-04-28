@@ -57,7 +57,7 @@ if TYPE_CHECKING:
     ]
 
 
-__all__ = ("InvokableApplicationCommand", "require_permissions")
+__all__ = ("InvokableApplicationCommand", "default_member_permissions")
 
 
 T = TypeVar("T")
@@ -569,7 +569,7 @@ class InvokableApplicationCommand(ABC):
             inter.application_command = original
 
 
-def require_permissions(**permissions: Literal[True]) -> Callable[[T], T]:
+def default_member_permissions(**permissions: Literal[True]) -> Callable[[T], T]:
     """
     A decorator that sets default required member permissions for the command.
     Unlike :func:`~.ext.commands.has_permissions`, this decorator does not add any checks.
