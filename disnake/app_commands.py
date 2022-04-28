@@ -92,58 +92,6 @@ def application_command_factory(data: ApplicationCommandPayload) -> APIApplicati
     raise TypeError(f"Application command of type {cmd_type} is not valid")
 
 
-def kwargs_to_application_command_permissions(
-    *,
-    permissions: Mapping[Union[Role, User, GuildChannel], bool] = None,
-    role_ids: Mapping[int, bool] = None,
-    user_ids: Mapping[int, bool] = None,
-    channel_ids: Mapping[int, bool] = None,
-) -> List[ApplicationCommandPermissions]:
-    perms: List[ApplicationCommandPermissions] = []
-
-    if permissions is not None:
-        for obj, value in permissions.items():
-            if isinstance(obj, Role):
-                target_type = ApplicationCommandPermissionType.role
-            elif isinstance(obj, User):
-                target_type = ApplicationCommandPermissionType.user
-            elif isinstance(obj, GuildChannel):
-                target_type = ApplicationCommandPermissionType.channel
-            else:
-                raise ValueError("Permission target should be an instance of Role or abc.User")
-            perms.append(
-                ApplicationCommandPermissions.from_attributes(
-                    id=obj.id, type=target_type, permission=value
-                )
-            )
-
-    if role_ids is not None:
-        for item_id, value in role_ids.items():
-            perms.append(
-                ApplicationCommandPermissions.from_attributes(
-                    id=item_id, type=ApplicationCommandPermissionType.role, permission=value
-                )
-            )
-
-    if user_ids is not None:
-        for item_id, value in user_ids.items():
-            perms.append(
-                ApplicationCommandPermissions.from_attributes(
-                    id=item_id, type=ApplicationCommandPermissionType.user, permission=value
-                )
-            )
-
-    if channel_ids is not None:
-        for item_id, value in channel_ids.items():
-            perms.append(
-                ApplicationCommandPermissions.from_attributes(
-                    id=item_id, type=ApplicationCommandPermissionType.channel, permission=value
-                )
-            )
-
-    return perms
-
-
 def _validate_name(name: str) -> None:
     # used for slash command names and option names
     # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
