@@ -142,14 +142,14 @@ class CogMeta(type):
         .. versionadded:: 2.5
 
     user_command_attrs: :class:`dict`
-        A list of attributes to apply to every slash command inside this cog. The dictionary
+        A list of attributes to apply to every user command inside this cog. The dictionary
         is passed into the :class:`InvokableUserCommand`'s options at ``__init__``. Usage of this
         kwarg is otherwise the same as with `command_attrs`.
 
         .. versionadded:: 2.5
 
     message_command_attrs: :class:`dict`
-        A list of attributes to apply to every slash command inside this cog. The dictionary
+        A list of attributes to apply to every message command inside this cog. The dictionary
         is passed into the :class:`InvokableMessageCommand`'s options at ``__init__``. Usage of
         this kwarg is otherwise the same as with `command_attrs`.
 
