@@ -587,9 +587,10 @@ class Client:
             await coro(*args, **kwargs)
         except asyncio.CancelledError:
             pass
-        except Exception:
+        except Exception as exc:
             try:
-                await self.on_error(event_name, *args, **kwargs)
+                exception = EventInvokeError(exc, event_name)
+                await self.on_error(exception, *args, **kwargs)
             except asyncio.CancelledError:
                 pass
 
@@ -602,7 +603,7 @@ class Client:
     ) -> asyncio.Task:
         wrapped = self._run_event(coro, event_name, *args, **kwargs)
         # Schedules the task
-        return asyncio.create_task(wrapped, name=f"disnake: {event_name}")
+        return self.loop.create_task(wrapped, name=f"disnake: {event_name}")
 
     def dispatch(self, event: str, *args: Any, **kwargs: Any) -> None:
         _log.debug("Dispatching event %s", event)
@@ -644,7 +645,7 @@ class Client:
         else:
             self._schedule_event(coro, method, *args, **kwargs)
 
-    async def on_error(self, event_method: str, *args: Any, **kwargs: Any) -> None:
+    async def on_error(self, error: EventInvokeError, *args: Any, **kwargs: Any) -> None:
         """|coro|
 
         The default error handler provided by the client.
@@ -653,7 +654,7 @@ class Client:
         overridden to have a different implementation.
         Check :func:`~disnake.on_error` for more details.
         """
-        print(f"Ignoring exception in {event_method}", file=sys.stderr)
+        print(f"Ignoring exception in {error.event_name}", file=sys.stderr)
         traceback.print_exc()
 
     # hooks
