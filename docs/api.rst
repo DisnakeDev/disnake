@@ -661,6 +661,16 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param payload: The raw event payload data.
     :type payload: :class:`RawReactionClearEmojiEvent`
 
+.. function:: on_application_command_permissions_update(guild_command)
+
+    Called when an application command owned by the bot has its permissions updated.
+
+    .. versionadded:: 2.5
+
+    :param guild_command: The updated permission object.
+    :type guild_command: :class:`GuildApplicationCommandPermissions`
+
+
 .. function:: on_interaction(interaction)
 
     Called when an interaction happened.
@@ -1706,8 +1716,6 @@ of :class:`enum.Enum`.
 
     .. attribute:: channel
         Represents a permission that affects channels.
-
-
 
 .. class:: InteractionType
 
