@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
 from disnake.permissions import Permissions
@@ -78,7 +78,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         *,
         name: str = None,
         dm_permission: bool = True,
-        default_member_permissions: Optional[Permissions] = MISSING,
+        default_member_permissions: Optional[Union[Permissions, int]] = MISSING,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -163,7 +163,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         *,
         name: str = None,
         dm_permission: bool = True,
-        default_member_permissions: Optional[Permissions] = MISSING,
+        default_member_permissions: Optional[Union[Permissions, int]] = MISSING,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -215,7 +215,7 @@ def user_command(
     *,
     name: str = None,
     dm_permission: bool = True,
-    default_member_permissions: Optional[Permissions] = None,
+    default_member_permissions: Optional[Union[Permissions, int]] = None,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     **kwargs,
@@ -266,7 +266,7 @@ def message_command(
     *,
     name: str = None,
     dm_permission: bool = True,
-    default_member_permissions: Optional[Permissions] = None,
+    default_member_permissions: Optional[Union[Permissions, int]] = None,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     **kwargs,

@@ -343,7 +343,7 @@ class ApplicationCommand(ABC):
         type: ApplicationCommandType,
         name: str,
         dm_permission: bool = True,
-        default_member_permissions: Optional[Permissions] = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
@@ -354,6 +354,8 @@ class ApplicationCommand(ABC):
         if default_member_permissions is None:
             # allow everyone to use the command if its not supplied
             self._default_member_permissions = None
+        elif isinstance(default_member_permissions, int):
+            self._default_member_permissions = default_member_permissions
         else:
             self._default_member_permissions = default_member_permissions.value
 
@@ -440,7 +442,7 @@ class UserCommand(ApplicationCommand):
         self,
         name: str,
         dm_permission: bool = True,
-        default_member_permissions: Optional[Permissions] = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         super().__init__(
             type=ApplicationCommandType.user,
@@ -503,7 +505,7 @@ class MessageCommand(ApplicationCommand):
         self,
         name: str,
         dm_permission: bool = True,
-        default_member_permissions: Optional[Permissions] = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         super().__init__(
             type=ApplicationCommandType.message,
@@ -578,7 +580,7 @@ class SlashCommand(ApplicationCommand):
         description: str,
         options: List[Option] = None,
         dm_permission: bool = True,
-        default_member_permissions: Optional[Permissions] = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         _validate_name(name)
 
