@@ -485,23 +485,6 @@ class Guild(Hashable):
         """
         return self._state._get_guild_command_named(self.id, name)
 
-    def get_command_permissions(
-        self, command_id: int, /
-    ) -> Optional[GuildApplicationCommandPermissions]:
-        """Gets the cached application command permissions for the command with the specified ID.
-
-        Parameters
-        ----------
-        command_id: :class:`int`
-            The application command ID to search for.
-
-        Returns
-        -------
-        Optional[:class:`GuildApplicationCommandPermissions`]
-            The application command permissions if found, or ``None`` otherwise.
-        """
-        return self._state._get_command_permissions(self.id, command_id)
-
     def _from_data(self, guild: GuildPayload) -> None:
         # according to Stan, this is always available even if the guild is unavailable
         # I don't have this guarantee when someone updates the guild.

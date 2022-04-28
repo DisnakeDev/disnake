@@ -292,10 +292,6 @@ class ConnectionState:
         if application_commands:
             self._global_application_commands: Dict[int, APIApplicationCommand] = {}
             self._guild_application_commands: Dict[int, Dict[int, APIApplicationCommand]] = {}
-            # todo: remove this, as this doesn't need to be cached anymores
-            self._application_command_permissions: Dict[
-                int, Dict[int, GuildApplicationCommandPermissions]
-            ] = {}
 
         if views:
             self._view_store: ViewStore = ViewStore(self)
@@ -458,7 +454,6 @@ class ConnectionState:
 
     def _remove_global_application_command(self, application_command_id: int, /) -> None:
         self._global_application_commands.pop(application_command_id, None)
-        self._unset_command_permissions(application_command_id)
 
     def _clear_global_application_commands(self) -> None:
         self._global_application_commands.clear()
@@ -488,7 +483,6 @@ class ConnectionState:
             granula.pop(application_command_id, None)
         except KeyError:
             pass
-        self._unset_command_permissions(application_command_id, guild_id)
 
     def _clear_guild_application_commands(self, guild_id: int) -> None:
         self._guild_application_commands.pop(guild_id, None)
@@ -507,34 +501,6 @@ class ConnectionState:
         for cmd in granula.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
-
-    def _set_command_permissions(self, permissions: GuildApplicationCommandPermissions) -> None:
-        if not self._cache_application_command_permissions:
-            return
-        try:
-            granula = self._application_command_permissions[permissions.guild_id]
-            granula[permissions.id] = permissions
-        except KeyError:
-            self._application_command_permissions[permissions.guild_id] = {
-                permissions.id: permissions
-            }
-
-    def _unset_command_permissions(self, command_id: int, guild_id: int = None) -> None:
-        if guild_id is None:
-            for granula in self._application_command_permissions.values():
-                granula.pop(command_id, None)
-            return
-        try:
-            granula = self._application_command_permissions[guild_id]
-            granula.pop(command_id, None)
-        except KeyError:
-            pass
-
-    def _get_command_permissions(self, guild_id: int, command_id: int):
-        try:
-            return self._application_command_permissions[guild_id][command_id]
-        except KeyError:
-            pass
 
     @property
     def emojis(self) -> List[Emoji]:

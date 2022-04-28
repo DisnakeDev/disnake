@@ -28,7 +28,6 @@ import warnings
 from abc import ABC
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Mapping, Optional, Tuple, Union
 
-from .abc import GuildChannel, User
 from .enums import (
     ApplicationCommandPermissionType,
     ApplicationCommandType,
@@ -40,7 +39,6 @@ from .enums import (
 )
 from .errors import InvalidArgument
 from .permissions import Permissions
-from .role import Role
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:

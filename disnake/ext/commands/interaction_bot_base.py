@@ -45,7 +45,7 @@ from typing import (
 
 import disnake
 from disnake.app_commands import ApplicationCommand, Option
-from disnake.custom_warnings import ConfigWarning, SyncWarning
+from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 
 from . import errors
@@ -700,36 +700,6 @@ class InteractionBotBase(CommonBotBase):
         # Last debug message
         self._log_sync_debug("Command synchronization task has finished")
 
-    async def _cache_application_command_permissions(self) -> None:
-        # This method is usually called once per bot start
-        if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
-
-        guilds_to_cache = set()
-        for cmd in self.application_commands_iterator():
-            if not cmd.auto_sync:
-                continue
-            for guild_id in cmd.permissions:
-                guilds_to_cache.add(guild_id)
-
-        if not self._sync_permissions:
-            if guilds_to_cache:
-                warnings.warn(
-                    "You're using the @commands.guild_permissions decorator, however, the"
-                    f" 'sync_permissions' kwarg of '{self.__class__.__name__}' is set to 'False'.",
-                    ConfigWarning,
-                )
-            return
-
-        for guild_id in guilds_to_cache:
-            try:
-                perms = await self.bulk_fetch_command_permissions(guild_id)
-                self._connection._application_command_permissions[guild_id] = {
-                    perm.id: perm for perm in perms
-                }
-            except Exception:
-                pass
-
     def _log_sync_debug(self, text: str) -> None:
         if self._sync_commands_debug:
             # if sync debugging is enabled, *always* output logs
@@ -751,7 +721,6 @@ class InteractionBotBase(CommonBotBase):
         await self.wait_until_first_connect()
         await self._cache_application_commands()
         await self._sync_application_commands()
-        await self._cache_application_command_permissions()
         self._sync_queued = False
 
     async def _delayed_command_sync(self) -> None:
