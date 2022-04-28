@@ -155,9 +155,6 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
-    sync_permissions: :class:`bool`
-        Whether to enable automatic synchronization of application command permissions in your code.
-        Defaults to ``False``.
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
@@ -229,12 +226,6 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
-    sync_permissions: :class:`bool`
-        Whether to enable automatic synchronization of application command permissions in your code.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.1
-
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically

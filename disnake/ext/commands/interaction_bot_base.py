@@ -141,7 +141,6 @@ class InteractionBotBase(CommonBotBase):
         sync_commands: bool = True,
         sync_commands_debug: bool = False,
         sync_commands_on_cog_unload: bool = True,
-        sync_permissions: bool = False,
         test_guilds: Sequence[int] = None,
         **options: Any,
     ):
@@ -154,8 +153,6 @@ class InteractionBotBase(CommonBotBase):
         self._sync_commands: bool = sync_commands
         self._sync_commands_debug: bool = sync_commands_debug
         self._sync_commands_on_cog_unload = sync_commands_on_cog_unload
-        # todo: this needs to be removed
-        self._sync_permissions: bool = sync_permissions
         self._sync_queued: bool = False
 
         self._slash_command_checks = []
