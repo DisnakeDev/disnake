@@ -244,6 +244,41 @@ class ConnectionClosed(ClientException):
         super().__init__(f"Shard ID {self.shard_id} WebSocket closed with {self.code}")
 
 
+class EventError(DiscordException):
+    """Exception that's raised when an event raises an error.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    event_name: :class:`str`
+        The name of the event that raised the error.
+    """
+
+    def __init__(self, message: Optional[str] = None, *args: Any) -> None:
+        if message is not None:
+            super().__init__(message, *args)
+        else:
+            super().__init__(*args)
+
+
+class EventInvokeError(DiscordException):
+    """Exception that's raised when an event raises an error.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    event_name: :class:`str`
+        The name of the event that raised the error.
+    """
+
+    def __init__(self, e: Exception, event_name: str) -> None:
+        self.original: Exception = e
+        self.event_name = event_name
+        super().__init__(f"Event raised an exception: {self.event_name}: {e}")
+
+
 class PrivilegedIntentsRequired(ClientException):
     """Exception that's raised when the gateway is requesting privileged intents
     but they're not ticked in the developer page yet.
