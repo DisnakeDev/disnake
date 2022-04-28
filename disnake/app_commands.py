@@ -377,7 +377,7 @@ class ApplicationCommand(ABC):
 
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
-        """Optional[:class:`Permissions`]: The default member permissions for this command.
+        """Optional[:class:`Permissions`]: The default required member permissions for this command.
 
         If no permissions are returned, this means everyone can use the command by default.
 
