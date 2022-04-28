@@ -42,7 +42,7 @@ from typing import (
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.permissions import Permissions
-from disnake.utils import async_all, maybe_coroutine, warn_deprecated
+from disnake.utils import async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import *
@@ -180,17 +180,6 @@ class InvokableApplicationCommand(ABC):
 
         self._before_invoke: Optional[Hook] = None
         self._after_invoke: Optional[Hook] = None
-
-    @property
-    def default_permission(self) -> bool:
-        """:class:`bool`: Whether this command is usable by default. Deprecated in 2.5."""
-        warn_deprecated(
-            "default_permission is deprecated. "
-            "Please use dm_permission and default_member_permissions instead",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-        return bool(self.default_member_permissions)
 
     @property
     def dm_permission(self) -> bool:

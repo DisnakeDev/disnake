@@ -424,7 +424,6 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
-        default_permission: bool = MISSING,
         **kwargs,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         """A shortcut decorator that invokes :func:`.slash_command` and adds it to
@@ -466,7 +465,6 @@ class InteractionBotBase(CommonBotBase):
                 name=name,
                 description=description,
                 options=options,
-                default_permission=default_permission,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,
@@ -487,7 +485,6 @@ class InteractionBotBase(CommonBotBase):
         default_member_permissions: Optional[Permissions] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
-        default_permission: bool = MISSING,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
         """A shortcut decorator that invokes :func:`.user_command` and adds it to
@@ -516,7 +513,6 @@ class InteractionBotBase(CommonBotBase):
         def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
             result = user_command(
                 name=name,
-                default_permission=default_permission,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,
@@ -536,7 +532,6 @@ class InteractionBotBase(CommonBotBase):
         default_member_permissions: Optional[Permissions] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
-        default_permission: bool = MISSING,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
         """A shortcut decorator that invokes :func:`.message_command` and adds it to
@@ -567,7 +562,6 @@ class InteractionBotBase(CommonBotBase):
         def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
-                default_permission=default_permission,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,

@@ -321,7 +321,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name: str = None,
         description: str = None,
         options: List[Option] = None,
-        default_permission: bool = MISSING,
         dm_permission: bool = True,
         default_member_permissions: Optional[Permissions] = MISSING,
         guild_ids: Sequence[int] = None,
@@ -352,7 +351,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             name=self.name,
             description=description or "-",
             options=options or [],
-            default_permission=default_permission,
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
         )
@@ -568,7 +566,6 @@ def slash_command(
     options: List[Option] = None,
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
-    default_permission: bool = MISSING,
     auto_sync: bool = True,
     **kwargs,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
@@ -617,7 +614,6 @@ def slash_command(
             name=name,
             description=description,
             options=options,
-            default_permission=default_permission,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             guild_ids=guild_ids,

@@ -46,7 +46,7 @@ class _ApplicationCommandOptional(TypedDict, total=False):
     type: ApplicationCommandType
     guild_id: Snowflake
     options: List[ApplicationCommandOption]
-    default_permission: bool
+    default_permission: bool  # deprecated
     default_member_permissions: Optional[str]
     dm_permission: bool
 
@@ -280,7 +280,6 @@ class _EditApplicationCommandOptional(TypedDict, total=False):
     default_member_permissions: Optional[str]
     dm_permission: bool
     type: ApplicationCommandType
-    default_permission: Literal[False]
 
 
 class EditApplicationCommand(_EditApplicationCommandOptional):

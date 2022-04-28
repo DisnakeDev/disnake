@@ -77,7 +77,6 @@ class InvokableUserCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback,
         *,
         name: str = None,
-        default_permission: bool = MISSING,
         dm_permission: bool = True,
         default_member_permissions: Optional[Permissions] = MISSING,
         guild_ids: Sequence[int] = None,
@@ -96,7 +95,6 @@ class InvokableUserCommand(InvokableApplicationCommand):
 
         self.body = UserCommand(
             name=self.name,
-            default_permission=default_permission,
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
         )
@@ -164,7 +162,6 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback,
         *,
         name: str = None,
-        default_permission: bool = MISSING,
         dm_permission: bool = True,
         default_member_permissions: Optional[Permissions] = MISSING,
         guild_ids: Sequence[int] = None,
@@ -183,7 +180,6 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
         self.body = MessageCommand(
             name=self.name,
-            default_permission=default_permission,
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
         )
@@ -222,7 +218,6 @@ def user_command(
     default_member_permissions: Optional[Permissions] = None,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
-    default_permission: bool = MISSING,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
@@ -257,7 +252,6 @@ def user_command(
         return InvokableUserCommand(
             func,
             name=name,
-            default_permission=default_permission,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             guild_ids=guild_ids,
@@ -275,7 +269,6 @@ def message_command(
     default_member_permissions: Optional[Permissions] = None,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
-    default_permission: bool = MISSING,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
     """A shortcut decorator that builds a message command.
@@ -310,7 +303,6 @@ def message_command(
         return InvokableMessageCommand(
             func,
             name=name,
-            default_permission=default_permission,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             guild_ids=guild_ids,

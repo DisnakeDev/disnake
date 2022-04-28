@@ -38,7 +38,7 @@ from .enums import (
 )
 from .errors import InvalidArgument
 from .permissions import Permissions
-from .utils import MISSING, _get_as_snowflake, _maybe_cast, warn_deprecated
+from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:
     from .state import ConnectionState
@@ -342,29 +342,13 @@ class ApplicationCommand(ABC):
         self,
         type: ApplicationCommandType,
         name: str,
-        default_permission: bool = MISSING,
-        dm_permission: bool = MISSING,
-        default_member_permissions: Optional[Permissions] = MISSING,
+        dm_permission: bool = True,
+        default_member_permissions: Optional[Permissions] = None,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
 
-        if default_permission is not MISSING:
-            warn_deprecated(
-                "default_permission is deprecated. "
-                "Please use dm_permission and default_member_permissions instead",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            if default_permission:
-                self.dm_permission = True
-                default_member_permissions = None
-            else:
-                self.dm_permission = False
-                default_member_permissions = Permissions(0)
-
-        if dm_permission is not MISSING:
-            self.dm_permission: bool = dm_permission
+        self.dm_permission: bool = dm_permission
 
         self._default_member_permissions: Optional[int]
         if default_member_permissions is None:
@@ -455,14 +439,12 @@ class UserCommand(ApplicationCommand):
     def __init__(
         self,
         name: str,
-        default_permission: bool = MISSING,
         dm_permission: bool = True,
         default_member_permissions: Optional[Permissions] = None,
     ):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
-            default_permission=default_permission,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
         )
@@ -520,14 +502,12 @@ class MessageCommand(ApplicationCommand):
     def __init__(
         self,
         name: str,
-        default_permission: bool = MISSING,
         dm_permission: bool = True,
         default_member_permissions: Optional[Permissions] = None,
     ):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
-            default_permission=default_permission,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
         )
@@ -597,7 +577,6 @@ class SlashCommand(ApplicationCommand):
         name: str,
         description: str,
         options: List[Option] = None,
-        default_permission: bool = MISSING,
         dm_permission: bool = True,
         default_member_permissions: Optional[Permissions] = None,
     ):
@@ -606,7 +585,6 @@ class SlashCommand(ApplicationCommand):
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
-            default_permission=default_permission,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
         )
