@@ -40,8 +40,6 @@ from typing import (
     cast,
 )
 
-from typing_extensions import TypeAlias
-
 from .enums import ButtonStyle, ComponentType, TextInputStyle, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, get_slots
@@ -69,8 +67,6 @@ __all__ = (
 
 C = TypeVar("C", bound="Component")
 NestedComponent = Union["Button", "SelectMenu", "TextInput"]
-MessageComponent = Union["Button", "SelectMenu"]
-ModalComponent: TypeAlias = "TextInput"
 ComponentT = TypeVar("ComponentT", bound=NestedComponent)
 
 
@@ -480,6 +476,8 @@ class TextInput(Component):
         return payload
 
 
+MessageComponent = Union[Button, SelectMenu]
+ModalComponent = TextInput
 T = TypeVar("T", bound=Component)
 
 

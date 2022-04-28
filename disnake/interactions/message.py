@@ -24,7 +24,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from ..components import ActionRow, Button, SelectMenu
+from ..components import Button, SelectMenu
 from ..enums import ComponentType, try_enum
 from ..message import Message
 from ..utils import cached_slot_property
@@ -106,12 +106,7 @@ class MessageInteraction(Interaction):
     def component(self) -> Union[Button, SelectMenu]:
         """Union[:class:`Button`, :class:`SelectMenu`]: The component the user interacted with"""
         for action_row in self.message.components:
-            if not isinstance(action_row, ActionRow):
-                continue
             for component in action_row.children:
-                if not isinstance(component, (Button, SelectMenu)):
-                    continue
-
                 if component.custom_id == self.data.custom_id:
                     return component
 

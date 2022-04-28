@@ -56,7 +56,7 @@ from ..errors import DiscordServerError, Forbidden, HTTPException, InvalidArgume
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
 from ..mixins import Hashable
-from ..ui.action_row import components_to_dict
+from ..ui.action_row import ActionRow, MessageComponent, components_to_dict
 from ..user import BaseUser, User
 
 __all__ = (
@@ -499,7 +499,7 @@ def handle_message_parameters_dict(
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
-    components: Optional[Components] = MISSING,
+    components: Optional[Components[ActionRow[MessageComponent]]] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
@@ -573,7 +573,7 @@ def handle_message_parameters(
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
-    components: Optional[Components] = MISSING,
+    components: Optional[Components[ActionRow[MessageComponent]]] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
@@ -1403,7 +1403,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components = MISSING,
+        components: Components[ActionRow[MessageComponent]] = MISSING,
         thread: Snowflake = MISSING,
         wait: Literal[True],
         delete_after: float = MISSING,
@@ -1425,7 +1425,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components = MISSING,
+        components: Components[ActionRow[MessageComponent]] = MISSING,
         thread: Snowflake = MISSING,
         wait: Literal[False] = ...,
         delete_after: float = MISSING,
@@ -1446,7 +1446,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components = MISSING,
+        components: Components[ActionRow[MessageComponent]] = MISSING,
         thread: Snowflake = MISSING,
         wait: bool = False,
         delete_after: float = MISSING,

@@ -61,7 +61,11 @@ from .partial_emoji import PartialEmoji
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
-from .ui.action_row import components_to_dict
+from .ui.action_row import (
+    ActionRow as UIActionRow,
+    MessageComponent as UIMessageComponent,
+    components_to_dict,
+)
 from .user import User
 from .utils import MISSING, escape_mentions
 
@@ -138,7 +142,7 @@ async def _edit_handler(
     delete_after: Optional[float] = None,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     view: Optional[View] = MISSING,
-    components: Optional[Components] = MISSING,
+    components: Optional[Components[UIActionRow[UIMessageComponent]]] = MISSING,
 ) -> Message:
     if embed is not MISSING and embeds is not MISSING:
         raise InvalidArgument("Cannot mix embed and embeds keyword arguments.")
@@ -1415,7 +1419,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[UIActionRow[UIMessageComponent]]] = ...,
     ) -> Message:
         ...
 
@@ -1431,7 +1435,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[UIActionRow[UIMessageComponent]]] = ...,
     ) -> Message:
         ...
 
@@ -1447,7 +1451,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[UIActionRow[UIMessageComponent]]] = ...,
     ) -> Message:
         ...
 
@@ -1463,7 +1467,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[UIActionRow[UIMessageComponent]]] = ...,
     ) -> Message:
         ...
 
