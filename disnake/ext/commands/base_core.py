@@ -26,18 +26,7 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Coroutine,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Coroutine, List, Literal, Optional, TypeVar, Union
 
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
@@ -143,8 +132,6 @@ class InvokableApplicationCommand(ABC):
 
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
-
-        self.permissions: Dict[int, Any] = {}
 
         try:
             checks = func.__commands_checks__
