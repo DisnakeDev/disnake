@@ -377,6 +377,7 @@ class AuditLogAction(Enum):
     thread_create                    = 110
     thread_update                    = 111
     thread_delete                    = 112
+    application_command_permission_update = 121
     # fmt: on
 
     @property
@@ -430,6 +431,7 @@ class AuditLogAction(Enum):
             AuditLogAction.guild_scheduled_event_create: AuditLogActionCategory.create,
             AuditLogAction.guild_scheduled_event_update: AuditLogActionCategory.update,
             AuditLogAction.guild_scheduled_event_delete: AuditLogActionCategory.delete,
+            AuditLogAction.application_command_permission_update: AuditLogActionCategory.update,
         }
         # fmt: on
         return lookup[self]
@@ -467,6 +469,8 @@ class AuditLogAction(Enum):
             return "guild_scheduled_event"
         elif v < 113:
             return "thread"
+        elif v < 122:
+            return "application_command"
         else:
             return None
 

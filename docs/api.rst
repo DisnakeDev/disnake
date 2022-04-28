@@ -3895,6 +3895,15 @@ AuditLogDiff
 
         :type: :class:`Asset`
 
+    .. attribute:: command_permissions
+
+        A mapping of target ID to guild permissions of an application command.
+
+        Note that only changed permission entries are included,
+        not necessarily all of the command's permissions.
+
+        :type: Dict[:class:`int`, :class:`ApplicationCommandPermissions`]
+
 .. this is currently missing the following keys: reason and application_id
    I'm not sure how to about porting these
 
