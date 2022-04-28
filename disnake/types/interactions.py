@@ -47,7 +47,7 @@ class _ApplicationCommandOptional(TypedDict, total=False):
     guild_id: Snowflake
     options: List[ApplicationCommandOption]
     default_permission: bool
-    default_member_permissions: str
+    default_member_permissions: Optional[str]
     dm_permission: bool
 
 
@@ -277,10 +277,10 @@ class InteractionMessageReference(TypedDict):
 class _EditApplicationCommandOptional(TypedDict, total=False):
     description: str
     options: Optional[List[ApplicationCommandOption]]
-    default_permission: bool
-    default_member_permissions: str
+    default_member_permissions: Optional[str]
     dm_permission: bool
     type: ApplicationCommandType
+    default_permission: Literal[False]
 
 
 class EditApplicationCommand(_EditApplicationCommandOptional):

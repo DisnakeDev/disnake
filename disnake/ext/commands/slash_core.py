@@ -321,7 +321,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         options: List[Option] = None,
         default_permission: bool = utils.MISSING,
         dm_permission: bool = True,
-        default_member_permissions: Permissions = None,
+        default_member_permissions: Optional[Permissions] = utils.MISSING,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
@@ -340,14 +340,19 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         if options is None:
             options = expand_params(self)
 
+        if default_member_permissions is utils.MISSING:
+            if (default_perms := getattr(func, "__default_member_permissions__", None)) is not None:
+                default_member_permissions = Permissions(default_perms)
+            else:
+                default_member_permissions = None
+
         self.body: SlashCommand = SlashCommand(
             name=self.name,
             description=description or "-",
             options=options or [],
             default_permission=default_permission,
             dm_permission=dm_permission and not self._guild_only,
-            default_member_permissions=default_member_permissions
-            or Permissions(getattr(func, "__default_member_permissions__", 0)),
+            default_member_permissions=default_member_permissions,
         )
 
     @property
@@ -557,7 +562,7 @@ def slash_command(
     name: str = None,
     description: str = None,
     dm_permission: bool = True,
-    default_member_permissions: Permissions = None,
+    default_member_permissions: Optional[Permissions] = None,
     options: List[Option] = None,
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,

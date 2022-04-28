@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import math
 import re
-import warnings
 from abc import ABC
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Mapping, Optional, Tuple, Union
 
@@ -39,7 +38,7 @@ from .enums import (
 )
 from .errors import InvalidArgument
 from .permissions import Permissions
-from .utils import MISSING, _get_as_snowflake, _maybe_cast
+from .utils import MISSING, _get_as_snowflake, _maybe_cast, warn_deprecated
 
 if TYPE_CHECKING:
     from .state import ConnectionState
@@ -344,37 +343,52 @@ class ApplicationCommand(ABC):
         type: ApplicationCommandType,
         name: str,
         default_permission: bool = MISSING,
-        dm_permission: bool = True,
-        default_member_permissions: Permissions = None,
+        dm_permission: bool = MISSING,
+        default_member_permissions: Optional[Permissions] = MISSING,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
         self.name: str = name
-        self.dm_permission: bool = dm_permission
 
-        self._default_member_permissions: int
-        if default_member_permissions is None:
-            self._default_member_permissions = 0
-        else:
-            self._default_member_permissions = default_member_permissions.value
-
-        self.default_permission: bool
         if default_permission is not MISSING:
-            warnings.warn(
+            warn_deprecated(
                 "default_permission is deprecated. "
                 "Please use dm_permission and default_member_permissions instead",
                 DeprecationWarning,
                 stacklevel=2,
             )
-            self.default_permission = default_permission
+            if default_permission:
+                self.dm_permission = True
+                default_member_permissions = None
+            else:
+                self.dm_permission = False
+                default_member_permissions = Permissions(0)
+
+        if dm_permission is not MISSING:
+            self.dm_permission: bool = dm_permission
+
+        self._default_member_permissions: Optional[int]
+        if default_member_permissions is None:
+            # allow everyone to use the command if its not supplied
+            self._default_member_permissions = None
         else:
-            self.default_permission = True
+            self._default_member_permissions = default_member_permissions.value
 
         self._always_synced: bool = False
 
     @property
-    def default_member_permissions(self) -> Permissions:
-        """:class:`Permissions`: The default member permissions for this command."""
-        return Permissions(self._default_member_permissions)
+    def default_member_permissions(self) -> Optional[Permissions]:
+        """Optional[:class:`Permissions`]: The default member permissions for this command.
+
+        If no permissions are returned, this means everyone can use the command by default.
+
+        If an empty :class:`Permissions` object is returned, this means no one can use the command.
+
+        .. versionadded:: 2.5
+        """
+        if self._default_member_permissions is None:
+            return None
+        else:
+            return Permissions(self._default_member_permissions)
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
@@ -387,7 +401,6 @@ class ApplicationCommand(ABC):
         return (
             self.type == other.type
             and self.name == other.name
-            and self.default_permission == other.default_permission
             and self.dm_permission == other.dm_permission
             and self._default_member_permissions == other._default_member_permissions
         )
@@ -398,11 +411,12 @@ class ApplicationCommand(ABC):
             "name": self.name,
         }
 
-        if not self.default_permission:
-            data["default_permission"] = False
         if not self.dm_permission:
             data["dm_permission"] = False
-        if self._default_member_permissions:
+
+        if self._default_member_permissions is None:
+            data["default_member_permissions"] = None
+        else:
             data["default_member_permissions"] = str(self._default_member_permissions)
 
         return data
@@ -417,9 +431,11 @@ class _APIApplicationCommandMixin:
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.version: int = int(data["version"])
         self.dm_permission: bool = data.get("dm_permission", True)
-        self.default_permission: bool = data.get("default_permission", True)
-        # here we're using "or 0" instead of .get(..., 0) because the field can be literally None
-        self._default_member_permissions: int = int(data.get("default_member_permissions") or 0)
+        default_member_permissions = data.get("default_member_permissions")
+        if default_member_permissions is not None:
+            self._default_member_permissions: Optional[int] = int(default_member_permissions)
+        else:
+            self._default_member_permissions: Optional[int] = None
 
 
 class UserCommand(ApplicationCommand):
@@ -441,7 +457,7 @@ class UserCommand(ApplicationCommand):
         name: str,
         default_permission: bool = MISSING,
         dm_permission: bool = True,
-        default_member_permissions: Permissions = None,
+        default_member_permissions: Optional[Permissions] = None,
     ):
         super().__init__(
             type=ApplicationCommandType.user,
@@ -506,7 +522,7 @@ class MessageCommand(ApplicationCommand):
         name: str,
         default_permission: bool = MISSING,
         dm_permission: bool = True,
-        default_member_permissions: Permissions = None,
+        default_member_permissions: Optional[Permissions] = None,
     ):
         super().__init__(
             type=ApplicationCommandType.message,
@@ -583,7 +599,7 @@ class SlashCommand(ApplicationCommand):
         options: List[Option] = None,
         default_permission: bool = MISSING,
         dm_permission: bool = True,
-        default_member_permissions: Permissions = None,
+        default_member_permissions: Optional[Permissions] = None,
     ):
         _validate_name(name)
 

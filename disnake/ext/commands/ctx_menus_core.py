@@ -79,7 +79,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         name: str = None,
         default_permission: bool = MISSING,
         dm_permission: bool = True,
-        default_member_permissions: Permissions = None,
+        default_member_permissions: Optional[Permissions] = MISSING,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -87,12 +87,18 @@ class InvokableUserCommand(InvokableApplicationCommand):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
+
+        if default_member_permissions is MISSING:
+            if (default_perms := getattr(func, "__default_member_permissions__", None)) is not None:
+                default_member_permissions = Permissions(default_perms)
+            else:
+                default_member_permissions = None
+
         self.body = UserCommand(
             name=self.name,
             default_permission=default_permission,
             dm_permission=dm_permission and not self._guild_only,
-            default_member_permissions=default_member_permissions
-            or Permissions(getattr(func, "__default_member_permissions__", 0)),
+            default_member_permissions=default_member_permissions,
         )
 
     async def _call_external_error_handlers(
@@ -160,7 +166,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         name: str = None,
         default_permission: bool = MISSING,
         dm_permission: bool = True,
-        default_member_permissions: Permissions = None,
+        default_member_permissions: Optional[Permissions] = MISSING,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -168,12 +174,18 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         super().__init__(func, name=name, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
+
+        if default_member_permissions is MISSING:
+            if (default_perms := getattr(func, "__default_member_permissions__", None)) is not None:
+                default_member_permissions = Permissions(default_perms)
+            else:
+                default_member_permissions = None
+
         self.body = MessageCommand(
             name=self.name,
             default_permission=default_permission,
             dm_permission=dm_permission and not self._guild_only,
-            default_member_permissions=default_member_permissions
-            or Permissions(getattr(func, "__default_member_permissions__", 0)),
+            default_member_permissions=default_member_permissions,
         )
 
     async def _call_external_error_handlers(
@@ -207,7 +219,7 @@ def user_command(
     *,
     name: str = None,
     dm_permission: bool = True,
-    default_member_permissions: Permissions = None,
+    default_member_permissions: Optional[Permissions] = None,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     default_permission: bool = MISSING,
@@ -260,7 +272,7 @@ def message_command(
     *,
     name: str = None,
     dm_permission: bool = True,
-    default_member_permissions: Permissions = None,
+    default_member_permissions: Optional[Permissions] = None,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     default_permission: bool = MISSING,

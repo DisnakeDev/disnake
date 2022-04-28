@@ -422,7 +422,7 @@ class InteractionBotBase(CommonBotBase):
         name: str = None,
         description: str = None,
         dm_permission: bool = True,
-        default_member_permissions: Permissions = None,
+        default_member_permissions: Optional[Permissions] = None,
         options: List[Option] = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
@@ -487,7 +487,7 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: str = None,
         dm_permission: bool = True,
-        default_member_permissions: Permissions = None,
+        default_member_permissions: Optional[Permissions] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         default_permission: bool = MISSING,
@@ -536,7 +536,7 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: str = None,
         dm_permission: bool = True,
-        default_member_permissions: Permissions = None,
+        default_member_permissions: Optional[Permissions] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         default_permission: bool = MISSING,
@@ -551,8 +551,10 @@ class InteractionBotBase(CommonBotBase):
             The name of the message command (defaults to function name).
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
-        default_member_permissions: :class:`Permissions`
+        default_member_permissions: Optional[:class:`Permissions`]
             The default required permissions for this command.
+
+            If this is None, this command cannot be ran by anyone by default.
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: List[:class:`int`]

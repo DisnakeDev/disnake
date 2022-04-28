@@ -42,7 +42,7 @@ from typing import (
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.permissions import Permissions
-from disnake.utils import async_all, maybe_coroutine
+from disnake.utils import async_all, maybe_coroutine, warn_deprecated
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import *
@@ -183,8 +183,14 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def default_permission(self) -> bool:
-        """:class:`bool`: Whether this command is usable be default. Deprecated in 2.5."""
-        return self.body.default_permission
+        """:class:`bool`: Whether this command is usable by default. Deprecated in 2.5."""
+        warn_deprecated(
+            "default_permission is deprecated. "
+            "Please use dm_permission and default_member_permissions instead",
+            DeprecationWarning,
+            stacklevel=1,
+        )
+        return bool(self.default_member_permissions)
 
     @property
     def dm_permission(self) -> bool:
@@ -192,8 +198,15 @@ class InvokableApplicationCommand(ABC):
         return self.body.dm_permission
 
     @property
-    def default_member_permissions(self) -> Permissions:
-        """:class:`Permissions`: The default member permissions for this command."""
+    def default_member_permissions(self) -> Optional[Permissions]:
+        """Optional[:class:`Permissions`]: The default member permissions for this command.
+
+        If no permissions are returned, this means everyone can use the command by default.
+
+        If an empty :class:`Permissions` object is returned, this means no one can use the command.
+
+        .. versionadded:: 2.5
+        """
         return self.body.default_member_permissions
 
     @property
@@ -584,7 +597,7 @@ def require_permissions(**permissions: Literal[True]) -> Callable[[T], T]:
     """
     A decorator that sets default required member permissions for the command.
     Unlike :func:`~.ext.commands.has_permissions`, this decorator does not add any checks.
-    Instead, it greys out the command for members without the requested permissions.
+    Instead, it prevents the command from being run by members without the requested permissions.
 
     Parameters
     ----------
