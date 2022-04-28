@@ -199,7 +199,7 @@ class InvokableApplicationCommand(ABC):
         if self.permissions != other.permissions:
             # TODO: Maybe update instead?
             other.permissions = self.permissions.copy()
-        if None is not self.guild_ids != other.guild_ids:
+        if self.guild_ids and self.guild_ids != other.guild_ids:
             other.guild_ids = self.guild_ids.copy()
         return other
 

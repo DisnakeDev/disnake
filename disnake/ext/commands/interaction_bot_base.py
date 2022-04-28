@@ -36,7 +36,6 @@ from typing import (
     Iterable,
     List,
     Optional,
-    Sequence,
     Set,
     Tuple,
     TypeVar,
@@ -145,15 +144,15 @@ class InteractionBotBase(CommonBotBase):
         sync_commands_debug: bool = False,
         sync_commands_on_cog_unload: bool = True,
         sync_permissions: bool = False,
-        test_guilds: Sequence[int] = None,
+        test_guilds: List[int] = None,
         **options: Any,
     ):
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
-            raise ValueError("test_guilds must be a sequence of int.")
+            raise ValueError("test_guilds must be a List of int.")
 
         super().__init__(**options)
 
-        self._test_guilds: Optional[Sequence[int]] = test_guilds
+        self._test_guilds: Optional[List[int]] = test_guilds
         self._sync_commands: bool = sync_commands
         self._sync_commands_debug: bool = sync_commands_debug
         self._sync_commands_on_cog_unload = sync_commands_on_cog_unload
@@ -425,7 +424,7 @@ class InteractionBotBase(CommonBotBase):
         description: str = None,
         options: List[Option] = None,
         default_permission: bool = True,
-        guild_ids: Sequence[int] = None,
+        guild_ids: List[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -484,7 +483,7 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: str = None,
         default_permission: bool = True,
-        guild_ids: Sequence[int] = None,
+        guild_ids: List[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
@@ -528,7 +527,7 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: str = None,
         default_permission: bool = True,
-        guild_ids: Sequence[int] = None,
+        guild_ids: List[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
@@ -570,7 +569,7 @@ class InteractionBotBase(CommonBotBase):
     # command synchronisation
 
     def _ordered_unsynced_commands(
-        self, test_guilds: Sequence[int] = None
+        self, test_guilds: List[int] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
         global_cmds = []
         guilds = {}

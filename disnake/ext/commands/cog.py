@@ -47,7 +47,7 @@ import disnake.utils
 from ._types import _BaseCommand
 from .base_core import InvokableApplicationCommand
 from .ctx_menus_core import InvokableMessageCommand, InvokableUserCommand
-from .slash_core import InvokableSlashCommand
+from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup
 
 if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction
@@ -132,11 +132,35 @@ class CogMeta(type):
                 @commands.command(hidden=False)
                 async def bar(self, ctx):
                     pass # hidden -> False
+
+    slash_command_attrs: :class:`dict`
+        A list of attributes to apply to every slash command inside this cog. The dictionary
+        is passed into the :class:`InvokableSlashCommand`, :class:`SubCommandGroup` and
+        :class:`SubCommand`'s options at ``__init__``. Usage of this kwarg is otherwise the same
+        as with `command_attrs`.
+
+        .. versionadded:: 2.5
+
+    user_command_attrs: :class:`dict`
+        A list of attributes to apply to every slash command inside this cog. The dictionary
+        is passed into the :class:`InvokableUserCommand`'s options at ``__init__``. Usage of this
+        kwarg is otherwise the same as with `command_attrs`.
+
+        .. versionadded:: 2.5
+
+    message_command_attrs: :class:`dict`
+        A list of attributes to apply to every slash command inside this cog. The dictionary
+        is passed into the :class:`InvokableMessageCommand`'s options at ``__init__``. Usage of
+        this kwarg is otherwise the same as with `command_attrs`.
+
+        .. versionadded:: 2.5
     """
 
     __cog_name__: str
     __cog_settings__: Dict[str, Any]
-    __cog_app_settings__: Dict[str, Any]
+    __cog_slash_settings__: Dict[str, Any]
+    __cog_user_settings__: Dict[str, Any]
+    __cog_message_settings__: Dict[str, Any]
     __cog_commands__: List[Command]
     __cog_app_commands__: List[InvokableApplicationCommand]
     __cog_listeners__: List[Tuple[str, str]]
@@ -145,7 +169,9 @@ class CogMeta(type):
         name, bases, attrs = args
         attrs["__cog_name__"] = kwargs.pop("name", name)
         attrs["__cog_settings__"] = kwargs.pop("command_attrs", {})
-        attrs["__cog_app_settings__"] = kwargs.pop("application_command_attrs", {})
+        attrs["__cog_slash_settings__"] = kwargs.pop("slash_command_attrs", {})
+        attrs["__cog_user_settings__"] = kwargs.pop("user_command_attrs", {})
+        attrs["__cog_message_settings__"] = kwargs.pop("message_command_attrs", {})
 
         description = kwargs.pop("description", None)
         if description is None:
@@ -242,12 +268,24 @@ class Cog(metaclass=CogMeta):
         # To do this, we need to interfere with the Cog creation process.
         self = super().__new__(cls)
         cmd_attrs = cls.__cog_settings__
-        app_cmd_attrs = cls.__cog_app_settings__
+        slash_cmd_attrs = cls.__cog_slash_settings__
+        user_cmd_attrs = cls.__cog_user_settings__
+        message_cmd_attrs = cls.__cog_message_settings__
 
         # Either update the command with the cog provided defaults or copy it.
         # r.e type ignore, type-checker complains about overriding a ClassVar
         self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore
-        self.__cog_app_commands__ = tuple(c._update_copy(app_cmd_attrs) for c in cls.__cog_app_commands__)
+        cog_app_commands: List[InvokableApplicationCommand] = []
+        for c in cls.__cog_app_commands__:
+            if isinstance(c, (InvokableSlashCommand, SubCommandGroup, SubCommand)):
+                updated = c._update_copy(slash_cmd_attrs)
+            elif isinstance(c, InvokableUserCommand):
+                updated = c._update_copy(user_cmd_attrs)
+            else:
+                updated = c._update_copy(message_cmd_attrs)
+            cog_app_commands.append(updated)
+
+        self.__cog_app_commands__ = tuple(cog_app_commands)  # type: ignore
 
         lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}
 

@@ -24,14 +24,14 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, TypeVar, Union
 
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
 from disnake.enums import OptionType
 from disnake.interactions import ApplicationCommandInteraction
 
-from .base_core import AppCommandT, InvokableApplicationCommand, _get_overridden_method
+from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
 from .params import call_param_func, expand_params
 
@@ -369,7 +369,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         description: str = None,
         options: List[Option] = None,
         default_permission: bool = True,
-        guild_ids: Sequence[int] = None,
+        guild_ids: List[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -378,7 +378,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = auto_sync
-        self.guild_ids: Optional[Sequence[int]] = guild_ids
+        self.guild_ids: Optional[List[int]] = guild_ids
         self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
 
         self.docstring = utils.parse_docstring(func)
@@ -644,7 +644,7 @@ def slash_command(
     description: str = None,
     options: List[Option] = None,
     default_permission: bool = True,
-    guild_ids: Sequence[int] = None,
+    guild_ids: List[int] = None,
     connectors: Dict[str, str] = None,
     auto_sync: bool = True,
     **kwargs,

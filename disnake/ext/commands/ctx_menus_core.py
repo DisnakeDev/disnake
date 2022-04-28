@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, TypeVar
 
 from disnake.app_commands import MessageCommand, UserCommand
 
@@ -210,7 +210,6 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         )
         return self._ensure_assignment_on_copy(copy)
 
-
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
     ) -> None:
@@ -242,7 +241,7 @@ def user_command(
     *,
     name: str = None,
     default_permission: bool = True,
-    guild_ids: Sequence[int] = None,
+    guild_ids: List[int] = None,
     auto_sync: bool = True,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
@@ -290,7 +289,7 @@ def message_command(
     *,
     name: str = None,
     default_permission: bool = True,
-    guild_ids: Sequence[int] = None,
+    guild_ids: List[int] = None,
     auto_sync: bool = True,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
