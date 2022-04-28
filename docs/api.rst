@@ -274,7 +274,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param shard_id: The shard ID that has resumed.
     :type shard_id: :class:`int`
 
-.. function:: on_error(event, *args, **kwargs)
+.. function:: on_error(error, *args, **kwargs)
 
     Usually when an event raises an uncaught exception, a traceback is
     printed to stderr and the exception is ignored. If you want to
@@ -298,8 +298,8 @@ to handle it, which defaults to print a traceback and ignoring the exception.
         :ref:`ext_commands_api_bot` listeners such as
         :meth:`~ext.commands.Bot.listen` or :meth:`~ext.commands.Cog.listener`.
 
-    :param event: The name of the event that raised the exception.
-    :type event: :class:`str`
+    :param error: The name of the event that raised the exception.
+    :type error: :class:`EventInvokeError`
 
     :param args: The positional arguments for the event that raised the
         exception.
@@ -5146,6 +5146,10 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: ConnectionClosed
 
+.. autoexception:: EventError
+
+.. autoexception:: EventInvokeError
+
 .. autoexception:: PrivilegedIntentsRequired
 
 .. autoexception:: InteractionException
@@ -5180,6 +5184,8 @@ Exception Hierarchy
                     - :exc:`InteractionNotResponded`
                     - :exc:`InteractionTimedOut`
                     - :exc:`ModalChainNotSupported`
+            - :exc:`EventError`
+                - :exc:`EventInvokeError`
             - :exc:`NoMoreItems`
             - :exc:`GatewayNotFound`
             - :exc:`HTTPException`
