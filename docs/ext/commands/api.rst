@@ -690,9 +690,6 @@ Checks
 .. autofunction:: disnake.ext.commands.is_nsfw(,)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.guild_permissions(guild_id, *, roles=None, users=None, owner=None)
-    :decorator:
-
 .. _ext_commands_api_context:
 
 Cooldown
