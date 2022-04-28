@@ -292,6 +292,7 @@ class ConnectionState:
         if application_commands:
             self._global_application_commands: Dict[int, APIApplicationCommand] = {}
             self._guild_application_commands: Dict[int, Dict[int, APIApplicationCommand]] = {}
+            # todo: remove this, as this doesn't need to be cached anymores
             self._application_command_permissions: Dict[
                 int, Dict[int, GuildApplicationCommandPermissions]
             ] = {}

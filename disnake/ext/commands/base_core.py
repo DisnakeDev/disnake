@@ -34,16 +34,15 @@ from typing import (
     Dict,
     List,
     Literal,
-    Mapping,
     Optional,
     TypeVar,
     Union,
 )
 
-from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
+from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.permissions import Permissions
-from disnake.utils import async_all, maybe_coroutine, warn_deprecated
+from disnake.utils import async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import *
@@ -69,7 +68,7 @@ if TYPE_CHECKING:
     ]
 
 
-__all__ = ("InvokableApplicationCommand", "guild_permissions", "require_permissions")
+__all__ = ("InvokableApplicationCommand", "require_permissions")
 
 
 T = TypeVar("T")
@@ -145,11 +144,7 @@ class InvokableApplicationCommand(ABC):
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
 
-        try:
-            perms = func.__app_command_permissions__
-        except AttributeError:
-            perms = {}
-        self.permissions: Dict[int, UnresolvedGuildApplicationCommandPermissions] = perms
+        self.permissions: Dict[int, Any] = {}
 
         try:
             checks = func.__commands_checks__
@@ -583,55 +578,6 @@ class InvokableApplicationCommand(ABC):
             return await async_all(predicate(inter) for predicate in predicates)  # type: ignore
         finally:
             inter.application_command = original
-
-
-# kwargs are annotated as None to ensure the user gets a linter error when using them
-def guild_permissions(
-    guild_id: int,
-    *,
-    roles: Optional[Mapping[int, bool]] = None,
-    users: Optional[Mapping[int, bool]] = None,
-    owner: Optional[bool] = None,
-    **kwargs: None,
-) -> Callable[[T], T]:
-    """
-    A decorator that sets application command permissions in the specified guild.
-    This type of permissions "greys out" the command in the command picker.
-    If you want to change this type of permissions dynamically, this decorator is not useful.
-
-    Parameters
-    ----------
-    guild_id: :class:`int`
-        The ID of the guild to apply the permissions to.
-    roles: Optional[Mapping[:class:`int`, :class:`bool`]]
-        A mapping of role IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
-    users: Optional[Mapping[:class:`int`, :class:`bool`]]
-        A mapping of user IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
-    owner: Optional[:class:`bool`]
-        Whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
-    """
-    if kwargs:
-        warn_deprecated(
-            f"guild_permissions got unexpected deprecated keyword arguments: {', '.join(map(repr, kwargs))}",
-            stacklevel=2,
-        )
-        roles = roles or kwargs.get("role_ids")
-        users = users or kwargs.get("user_ids")
-
-    perms = UnresolvedGuildApplicationCommandPermissions(
-        role_ids=roles, user_ids=users, owner=owner
-    )
-
-    def decorator(func: T) -> T:
-        if isinstance(func, InvokableApplicationCommand):
-            func.permissions[guild_id] = perms
-        else:
-            if not hasattr(func, "__app_command_permissions__"):
-                func.__app_command_permissions__ = {}  # type: ignore
-            func.__app_command_permissions__[guild_id] = perms  # type: ignore
-        return func
-
-    return decorator
 
 
 def require_permissions(**permissions: Literal[True]) -> Callable[[T], T]:

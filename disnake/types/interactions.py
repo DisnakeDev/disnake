@@ -95,17 +95,11 @@ class ApplicationCommandPermissions(TypedDict):
     permission: bool
 
 
-class BaseGuildApplicationCommandPermissions(TypedDict):
-    permissions: List[ApplicationCommandPermissions]
-
-
-class PartialGuildApplicationCommandPermissions(BaseGuildApplicationCommandPermissions):
+class GuildApplicationCommandPermissions(TypedDict):
     id: Snowflake
-
-
-class GuildApplicationCommandPermissions(PartialGuildApplicationCommandPermissions):
     application_id: Snowflake
     guild_id: Snowflake
+    permissions: List[ApplicationCommandPermissions]
 
 
 InteractionType = Literal[1, 2, 3]

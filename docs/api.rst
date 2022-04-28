@@ -4160,22 +4160,6 @@ GuildApplicationCommandPermissions
 .. autoclass:: GuildApplicationCommandPermissions()
     :members:
 
-PartialGuildApplicationCommandPermissions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: PartialGuildApplicationCommandPermissions
-
-.. autoclass:: PartialGuildApplicationCommandPermissions()
-    :members:
-
-UnresolvedGuildApplicationCommandPermissions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: UnresolvedGuildApplicationCommandPermissions
-
-.. autoclass:: UnresolvedGuildApplicationCommandPermissions()
-    :members:
-
 Component
 ~~~~~~~~~~
 

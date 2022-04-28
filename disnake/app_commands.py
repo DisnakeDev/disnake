@@ -26,10 +26,9 @@ import math
 import re
 import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, ClassVar, Dict, Iterable, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Mapping, Optional, Tuple, Union
 
 from .abc import GuildChannel, User
-from .custom_warnings import ConfigWarning
 from .enums import (
     ApplicationCommandPermissionType,
     ApplicationCommandType,
@@ -54,7 +53,6 @@ if TYPE_CHECKING:
         ApplicationCommandPermissions as ApplicationCommandPermissionsPayload,
         EditApplicationCommand as EditApplicationCommandPayload,
         GuildApplicationCommandPermissions as GuildApplicationCommandPermissionsPayload,
-        PartialGuildApplicationCommandPermissions as PartialGuildApplicationCommandPermissionsPayload,
     )
 
     Choices = Union[
@@ -79,9 +77,6 @@ __all__ = (
     "Option",
     "ApplicationCommandPermissions",
     "GuildApplicationCommandPermissions",
-    "PartialGuildApplicationCommandPermissions",
-    "PartialGuildAppCmdPerms",
-    "UnresolvedGuildApplicationCommandPermissions",
 )
 
 
@@ -829,129 +824,3 @@ class GuildApplicationCommandPermissions:
             "guild_id": self.guild_id,
             "permissions": [perm.to_dict() for perm in self.permissions],
         }
-
-
-class PartialGuildApplicationCommandPermissions:
-    """Creates a partial object representing permissions of the application command.
-
-    Parameters
-    ----------
-    command_id: :class:`int`
-        The ID of the application command you want to apply these permissions to.
-    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`, :class:`disnake.abc.GuildChannel`], :class:`bool`]
-        Roles or users or channels to booleans. ``True`` means "allow", ``False`` means "deny".
-    role_ids: Mapping[:class:`int`, :class:`bool`]
-        Role IDs to booleans.
-    user_ids: Mapping[:class:`int`, :class:`bool`]
-        User IDs to booleans.
-    channel_ids: Mapping[:class:`int`, :class:`bool`]
-        Channel IDs to booleans.
-    """
-
-    def __init__(
-        self,
-        command_id: int,
-        *,
-        permissions: Mapping[Union[Role, User, GuildChannel], bool] = None,
-        role_ids: Mapping[int, bool] = None,
-        user_ids: Mapping[int, bool] = None,
-        channel_ids: Mapping[int, bool] = None,
-    ):
-        self.id: int = command_id
-        self.permissions: List[ApplicationCommandPermissions]
-        self.permissions = kwargs_to_application_command_permissions(
-            permissions=permissions,
-            role_ids=role_ids,
-            user_ids=user_ids,
-            channel_ids=channel_ids,
-        )
-
-    def to_dict(self) -> PartialGuildApplicationCommandPermissionsPayload:
-        return {
-            "id": self.id,
-            "permissions": [perm.to_dict() for perm in self.permissions],
-        }
-
-
-PartialGuildAppCmdPerms = PartialGuildApplicationCommandPermissions
-
-
-class UnresolvedGuildApplicationCommandPermissions:
-    """Creates an object representing permissions of an application command,
-    without a specific command ID.
-
-    Parameters
-    ----------
-    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`, :class:`disnake.abc.GuildChannel`], :class:`bool`]
-        Roles or users or channels to booleans. ``True`` means "allow", ``False`` means "deny".
-    role_ids: Mapping[:class:`int`, :class:`bool`]
-        Role IDs to booleans.
-    user_ids: Mapping[:class:`int`, :class:`bool`]
-        User IDs to booleans.
-    channel_ids: Mapping[:class:`int`, :class:`bool`]
-        Channel IDs to booleans.
-    owner: :class:`bool`
-        Whether to allow or deny the bot owner(s).
-    """
-
-    def __init__(
-        self,
-        *,
-        permissions: Mapping[Union[Role, User, GuildChannel], bool] = None,
-        role_ids: Mapping[int, bool] = None,
-        user_ids: Mapping[int, bool] = None,
-        channel_ids: Mapping[int, bool] = None,
-        owner: bool = None,
-    ):
-        self.permissions: Optional[Mapping[Union[Role, User, GuildChannel], bool]] = permissions
-        self.role_ids: Optional[Mapping[int, bool]] = role_ids
-        self.user_ids: Optional[Mapping[int, bool]] = user_ids
-        self.channel_ids: Optional[Mapping[int, bool]] = channel_ids
-        self.owner: Optional[bool] = owner
-
-    def resolve(
-        self, *, command_id: int, owners: Iterable[int]
-    ) -> PartialGuildApplicationCommandPermissions:
-        """
-        Creates a new :class:`PartialGuildApplicationCommandPermissions` object,
-        combining the previously supplied permission values with the provided
-        command ID and owner IDs.
-
-        Parameters
-        ----------
-        command_id: :class:`int`
-            The command ID to use.
-        owners: Iterable[:class:`int`]
-            The owner IDs, used for extending the user ID mapping
-            based on the previously set ``owner`` permission if applicable
-
-        Returns
-        -------
-        :class:`PartialGuildApplicationCommandPermissions`
-            A new permissions object based on this instance
-            and the provided command ID and owner IDs.
-        """
-        resolved_users: Optional[Mapping[int, bool]]
-        if self.owner is not None:
-            owner_ids = dict.fromkeys(owners, self.owner)
-            if not owner_ids:
-                raise ValueError("Cannot properly resolve permissions without owner IDs")
-
-            users = self.user_ids or {}
-            common_ids = owner_ids.keys() & users.keys()
-            if any(users[id] != owner_ids[id] for id in common_ids):
-                warnings.warn(
-                    "Conflicting permissions for owner(s) provided in users", ConfigWarning
-                )
-
-            resolved_users = {**users, **owner_ids}
-        else:
-            resolved_users = self.user_ids
-
-        return PartialGuildApplicationCommandPermissions(
-            command_id=command_id,
-            permissions=self.permissions,
-            role_ids=self.role_ids,
-            user_ids=resolved_users,
-            channel_ids=self.channel_ids,
-        )
