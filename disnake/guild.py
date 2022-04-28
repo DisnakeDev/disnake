@@ -1309,7 +1309,7 @@ class Guild(Hashable):
                 "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
             )
 
-        if news is True:
+        if news:
             channel_type = ChannelType.news
         else:
             channel_type = ChannelType.text
