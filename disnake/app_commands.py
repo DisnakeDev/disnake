@@ -709,9 +709,8 @@ class ApplicationCommandPermissions:
     ----------
     id: :class:`int`
         The ID of the role, user, or channel.
-    type: ApplicationCommandPermissionType
+    type: :class:`ApplicationCommandPermissionType`
         The type of the target.
-        1 if target is a role; 2 if target is a user; 3 if target is a channel.
     permission: :class:`bool`
         Whether to allow or deny the access to the application command.
     """
