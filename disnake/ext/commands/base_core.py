@@ -581,7 +581,8 @@ def default_member_permissions(**permissions: Literal[True]) -> Callable[[T], T]
     Parameters
     ----------
     permissions: Literal[True]
-        Set required permissions for a command.
+        The required permissions for a command. A member must have *all* these
+        permissions to be able to invoke the command.
     """
     perms_value = Permissions(**permissions).value
 

@@ -369,11 +369,12 @@ class ApplicationCommand(ABC):
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
         """Optional[:class:`Permissions`]: The default required member permissions for this command.
+        A member must have *all* these permissions to be able to invoke the command.
+
         This is a default value, the set of users/roles that may invoke this command can be
         overridden by administrators on a guild-specific basis.
 
         If ``None`` is returned, it means everyone can use the command by default.
-
         If an empty :class:`Permissions` object is returned (that is, all permissions set to ``False``),
         this means no one can use the command.
 
