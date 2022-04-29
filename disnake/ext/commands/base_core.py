@@ -576,6 +576,8 @@ def default_member_permissions(**permissions: Literal[True]) -> Callable[[T], T]
     Instead, it prevents the command from being run by members without all required permissions,
     if not overridden by administrators on a guild-specific basis.
 
+    See also the ``default_member_permissions`` parameter for application command decorators.
+
     Parameters
     ----------
     permissions: Literal[True]
