@@ -357,20 +357,19 @@ class AuditLogChanges:
         data: AuditLogChangeAppCmdPermsPayload,
     ) -> None:
         guild_id = entry.guild.id
+        entity_id = int(data["key"])
 
-        # TODO: rename?
-        # TODO: use a list instead?
         if not hasattr(self.before, "command_permissions"):
             self.before.command_permissions = {}
         if (old := data.get("old_value")) is not None:
-            self.before.command_permissions[int(data["key"])] = ApplicationCommandPermissions(
+            self.before.command_permissions[entity_id] = ApplicationCommandPermissions(
                 data=old, guild_id=guild_id
             )
 
         if not hasattr(self.after, "command_permissions"):
             self.after.command_permissions = {}
         if (new := data.get("new_value")) is not None:
-            self.after.command_permissions[int(data["key"])] = ApplicationCommandPermissions(
+            self.after.command_permissions[entity_id] = ApplicationCommandPermissions(
                 data=new, guild_id=guild_id
             )
 
