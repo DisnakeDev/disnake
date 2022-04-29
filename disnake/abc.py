@@ -57,7 +57,7 @@ from .mentions import AllowedMentions
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
 from .sticker import GuildSticker, StickerItem
-from .ui.action_row import ActionRow, MessageComponent, components_to_dict
+from .ui.action_row import components_to_dict
 from .voice_client import VoiceClient, VoiceProtocol
 
 __all__ = (
@@ -91,7 +91,7 @@ if TYPE_CHECKING:
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
-    from .ui.action_row import Components
+    from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import ClientUser
 
@@ -1236,7 +1236,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[ActionRow[MessageComponent]] = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1255,7 +1255,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[ActionRow[MessageComponent]] = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1274,7 +1274,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[ActionRow[MessageComponent]] = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1293,7 +1293,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[ActionRow[MessageComponent]] = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1313,7 +1313,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = None,
         mention_author: bool = None,
         view: View = None,
-        components: Components[ActionRow[MessageComponent]] = None,
+        components: Components[MessageUIComponent] = None,
     ):
         """|coro|
 

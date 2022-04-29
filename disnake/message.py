@@ -61,11 +61,7 @@ from .partial_emoji import PartialEmoji
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
-from .ui.action_row import (
-    ActionRow as UIActionRow,
-    MessageComponent as UIMessageComponent,
-    components_to_dict,
-)
+from .ui.action_row import components_to_dict
 from .user import User
 from .utils import MISSING, escape_mentions
 
@@ -93,7 +89,7 @@ if TYPE_CHECKING:
     from .types.raw_models import ReactionActionEvent
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
-    from .ui.action_row import Components
+    from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
 
     MR = TypeVar("MR", bound="MessageReference")
@@ -142,7 +138,7 @@ async def _edit_handler(
     delete_after: Optional[float] = None,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     view: Optional[View] = MISSING,
-    components: Optional[Components[UIActionRow[UIMessageComponent]]] = MISSING,
+    components: Optional[Components[MessageUIComponent]] = MISSING,
 ) -> Message:
     if embed is not MISSING and embeds is not MISSING:
         raise InvalidArgument("Cannot mix embed and embeds keyword arguments.")
@@ -1419,7 +1415,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[UIActionRow[UIMessageComponent]]] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1435,7 +1431,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[UIActionRow[UIMessageComponent]]] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1451,7 +1447,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[UIActionRow[UIMessageComponent]]] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1467,7 +1463,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[UIActionRow[UIMessageComponent]]] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 

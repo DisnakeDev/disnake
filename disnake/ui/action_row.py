@@ -51,43 +51,44 @@ from .item import WrappedComponent
 from .select import Select
 from .text_input import TextInput
 
-__all__ = ("ActionRow",)
-
-
-MessageComponent = Union[Button[Any], Select[Any]]
-ModalComponent = TextInput
-
-ComponentT = TypeVar("ComponentT", bound=WrappedComponent)
-
 if TYPE_CHECKING:
     from ..emoji import Emoji
     from ..message import Message
     from ..partial_emoji import PartialEmoji
     from ..types.components import ActionRow as ActionRowPayload
 
+__all__ = ("ActionRow",)
 
-class ActionRow(Generic[ComponentT]):
+
+MessageUIComponent = Union[Button[Any], Select[Any]]
+ModalUIComponent = TextInput
+UIComponentT = TypeVar("UIComponentT", bound=WrappedComponent)
+
+Components = Union[
+    "ActionRow[UIComponentT]",
+    UIComponentT,
+    Sequence[Union["ActionRow[UIComponentT]", UIComponentT, Sequence[UIComponentT]]],
+]
+
+
+class ActionRow(Generic[UIComponentT]):
 
     type: ClassVar[Literal[ComponentType.action_row]] = ComponentType.action_row
 
     @overload
-    def __new__(cls: Any, *args: MessageComponent) -> ActionRow[MessageComponent]:
+    def __new__(cls: Any, *args: MessageUIComponent) -> ActionRow[MessageUIComponent]:
         ...
 
     @overload
-    def __new__(cls: Any, *args: ModalComponent) -> ActionRow[ModalComponent]:
+    def __new__(cls: Any, *args: ModalUIComponent) -> ActionRow[ModalUIComponent]:
         ...
 
-    @overload
-    def __new__(cls: Any, *args: WrappedComponent) -> ActionRow[WrappedComponent]:
-        ...
-
-    def __new__(cls, *args: Any) -> ActionRow[Any]:
+    def __new__(cls, *args: UIComponentT) -> ActionRow[UIComponentT]:  # type: ignore
         return super().__new__(cls)
 
-    def __init__(self, *components: ComponentT):
+    def __init__(self, *components: UIComponentT):
         self.width: int = 0
-        self._components: List[ComponentT] = []
+        self._components: List[UIComponentT] = []
 
         # Validate the components
         for component in components:
@@ -101,10 +102,10 @@ class ActionRow(Generic[ComponentT]):
             self._components.append(component)
 
     @property
-    def components(self) -> List[ComponentT]:
+    def components(self) -> List[UIComponentT]:
         return self._components
 
-    def append_item(self, item: ComponentT) -> None:
+    def append_item(self, item: UIComponentT) -> None:
         """Appends a component to the action row.
 
         Parameters
@@ -123,11 +124,11 @@ class ActionRow(Generic[ComponentT]):
         self.width += item.width
         self._components.append(item)
 
-    # Maybe this can be overloaded with NoReturn for `self: ActionRow[ModalComponent]`,
+    # Maybe this can be overloaded with NoReturn for `self: ActionRow[ModalUIComponent]`,
     # same thing for the other add_<component> methods.
 
     def add_button(
-        self: Union[ActionRow[MessageComponent], ActionRow[WrappedComponent]],
+        self: ActionRow[MessageUIComponent],
         *,
         style: ButtonStyle = ButtonStyle.secondary,
         label: Optional[str] = None,
@@ -174,7 +175,7 @@ class ActionRow(Generic[ComponentT]):
         )
 
     def add_select(
-        self: Union[ActionRow[MessageComponent], ActionRow[WrappedComponent]],
+        self: ActionRow[MessageUIComponent],
         *,
         custom_id: str = MISSING,
         placeholder: Optional[str] = None,
@@ -223,7 +224,7 @@ class ActionRow(Generic[ComponentT]):
         )
 
     def add_text_input(
-        self: Union[ActionRow[ModalComponent], ActionRow[WrappedComponent]],
+        self: ActionRow[ModalUIComponent],
         *,
         label: str,
         custom_id: str,
@@ -288,7 +289,7 @@ class ActionRow(Generic[ComponentT]):
     def to_component_dict(self) -> ActionRowPayload:
         return self._underlying.to_dict()
 
-    def __getitem__(self, index: int) -> ComponentT:
+    def __getitem__(self, index: int) -> UIComponentT:
         # Do we support indexing a select at 0/1/2/3/4 or only at 0?
         # As I implemented it now, indexing at e.g. 3 for a 5-width component would
         # return that component instead of erroring out.
@@ -300,11 +301,11 @@ class ActionRow(Generic[ComponentT]):
         raise IndexError("ActionRow index out of range")
 
     @classmethod
-    def from_message(cls, message: Message) -> List[ActionRow[MessageComponent]]:
+    def from_message(cls, message: Message) -> List[ActionRow[MessageUIComponent]]:
         # :prayge: this actually typechecks without cast/whatever now
-        rows: List[ActionRow[MessageComponent]] = []
+        rows: List[ActionRow[MessageUIComponent]] = []
         for row in message.components:
-            rows.append(current_row := ActionRow[MessageComponent]())
+            rows.append(current_row := ActionRow[MessageUIComponent]())
             for component in row.children:
                 if isinstance(component, ButtonComponent):
                     current_row.append_item(Button.from_component(component))
@@ -314,15 +315,7 @@ class ActionRow(Generic[ComponentT]):
         return rows
 
 
-ActionRowT = TypeVar("ActionRowT", bound=ActionRow)
-Components = Union[
-    ActionRowT,
-    WrappedComponent,
-    Sequence[Union[ActionRowT, WrappedComponent, Sequence[WrappedComponent]]],
-]
-
-
-def components_to_rows(components: Components[ActionRow[Any]]) -> List[ActionRow[WrappedComponent]]:
+def components_to_rows(components: Components[UIComponentT]) -> List[ActionRow[UIComponentT]]:
     if not isinstance(components, Sequence):
         components = [components]
 
@@ -331,7 +324,7 @@ def components_to_rows(components: Components[ActionRow[Any]]) -> List[ActionRow
     # ^ Any to politely tell typechecking to stfu, maybe fix if deemed important.
 
     for component in components:
-        if isinstance(component, WrappedComponent):
+        if isinstance(component, (Button, Select, TextInput)):
             try:
                 auto_row.append_item(component)
             except ValueError:
@@ -346,7 +339,7 @@ def components_to_rows(components: Components[ActionRow[Any]]) -> List[ActionRow
                 action_rows.append(component)
 
             elif isinstance(component, Sequence):
-                action_rows.append(ActionRow(*component))
+                action_rows.append(ActionRow(*component))  # type: ignore
 
             else:
                 raise ValueError(
@@ -361,5 +354,5 @@ def components_to_rows(components: Components[ActionRow[Any]]) -> List[ActionRow
     return action_rows
 
 
-def components_to_dict(components: Components[ActionRow[Any]]) -> List[ActionRowPayload]:
+def components_to_dict(components: Components[Any]) -> List[ActionRowPayload]:
     return [row.to_component_dict() for row in components_to_rows(components)]
