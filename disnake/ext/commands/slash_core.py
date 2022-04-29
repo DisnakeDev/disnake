@@ -351,12 +351,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             name=self.name,
             description=description or "-",
             options=options or [],
-            # If this is a guild-only command, force `dm_permission=True`.
-            # The reason for this is that the API doesn't return `dm_permission` for
-            # guild-specific commands, which means that we set it to `True` by default in
-            # the API command object.
-            # By setting it to `True` here as well, `ApplicationCommand.__eq__` continues to work.
-            dm_permission=dm_permission or self._guild_only,
+            dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
         )
 

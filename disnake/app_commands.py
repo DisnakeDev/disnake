@@ -391,7 +391,14 @@ class ApplicationCommand(ABC):
         return (
             self.type == other.type
             and self.name == other.name
-            and self.dm_permission == other.dm_permission
+            # ignore `dm_permission` if comparing guild commands
+            and (
+                any(
+                    (isinstance(obj, _APIApplicationCommandMixin) and obj.guild_id)
+                    for obj in (self, other)
+                )
+                or self.dm_permission == other.dm_permission
+            )
             and self._default_member_permissions == other._default_member_permissions
         )
 
