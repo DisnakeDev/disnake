@@ -341,11 +341,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         if options is None:
             options = expand_params(self)
 
-        if default_member_permissions is MISSING:
-            if (default_perms := getattr(func, "__default_member_permissions__", None)) is not None:
-                default_member_permissions = Permissions(default_perms)
-            else:
-                default_member_permissions = None
+        try:
+            default_perms = func.__default_member_permissions__
+        except AttributeError:
+            pass
+        else:
+            default_member_permissions = Permissions(default_perms)
 
         self.body: SlashCommand = SlashCommand(
             name=self.name,
