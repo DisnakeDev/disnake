@@ -668,7 +668,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         return max(guild.get_role(rid) or guild.default_role for rid in self._roles)
 
     @property
-    def display_icon(self) -> Optional[Asset]:
+    def role_icon(self) -> Optional[Asset]:
         """Optional[:class:`Asset`]: Returns the member's displayed role icon, if any.
         .. versionadded:: 2.5
         """
