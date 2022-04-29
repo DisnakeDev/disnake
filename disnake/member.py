@@ -670,6 +670,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     @property
     def role_icon(self) -> Optional[Asset]:
         """Optional[:class:`Asset`]: Returns the member's displayed role icon, if any.
+
         .. versionadded:: 2.5
         """
         roles = self.roles[1:]  # remove @everyone
