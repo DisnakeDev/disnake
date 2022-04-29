@@ -248,10 +248,6 @@ class ConnectionState:
 
             cache_flags._verify_intents(intents)
 
-        # TODO: maybe we don't need to cache permissions at all
-        self._cache_application_command_permissions: bool = options.get(
-            "cache_application_command_permissions", True
-        )
         self.member_cache_flags: MemberCacheFlags = cache_flags
         self._activity: Optional[ActivityPayload] = activity
         self._status: Optional[str] = status
