@@ -421,12 +421,6 @@ class _APIApplicationCommandMixin:
         self.application_id: int = int(data["application_id"])
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.version: int = int(data["version"])
-        self.dm_permission: bool = data.get("dm_permission", True)
-        default_member_permissions = data.get("default_member_permissions")
-        if default_member_permissions is not None:
-            self._default_member_permissions: Optional[int] = int(default_member_permissions)
-        else:
-            self._default_member_permissions: Optional[int] = None
 
 
 class UserCommand(ApplicationCommand):
@@ -487,7 +481,11 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         if cmd_type != ApplicationCommandType.user.value:
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
-        self = cls(name=data["name"])
+        self = cls(
+            name=data["name"],
+            dm_permission=data.get("dm_permission") is not False,
+            default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
+        )
         self._update_common(data)
         return self
 
@@ -550,7 +548,11 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         if cmd_type != ApplicationCommandType.message.value:
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
-        self = cls(name=data["name"])
+        self = cls(
+            name=data["name"],
+            dm_permission=data.get("dm_permission") is not False,
+            default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
+        )
         self._update_common(data)
         return self
 
@@ -683,6 +685,8 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             options=_maybe_cast(
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
             ),
+            dm_permission=data.get("dm_permission") is not False,
+            default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
         )
         self._update_common(data)
         return self

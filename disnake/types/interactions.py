@@ -48,7 +48,7 @@ class _ApplicationCommandOptional(TypedDict, total=False):
     options: List[ApplicationCommandOption]
     default_permission: bool  # deprecated
     default_member_permissions: Optional[str]
-    dm_permission: bool
+    dm_permission: Optional[bool]
 
 
 class ApplicationCommand(_ApplicationCommandOptional):
