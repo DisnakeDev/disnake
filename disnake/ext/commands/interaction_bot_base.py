@@ -443,8 +443,12 @@ class InteractionBotBase(CommonBotBase):
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
-        default_member_permissions: :class:`.Permissions`
+        default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
+            See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+            .. versionadded:: 2.5
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: List[:class:`int`]
@@ -499,8 +503,12 @@ class InteractionBotBase(CommonBotBase):
             The name of the user command (defaults to function name).
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
-        default_member_permissions: :class:`.Permissions`
+        default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
+            See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+            .. versionadded:: 2.5
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
         guild_ids: List[:class:`int`]
@@ -546,10 +554,12 @@ class InteractionBotBase(CommonBotBase):
             The name of the message command (defaults to function name).
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
-        default_member_permissions: Optional[:class:`.Permissions`]
+        default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
+            See :attr:`.ApplicationCommand.default_member_permissions` for details.
 
-            If this is None, this command cannot be ran by anyone by default.
+            .. versionadded:: 2.5
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: List[:class:`int`]

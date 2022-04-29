@@ -228,8 +228,12 @@ def user_command(
         The name of the user command (defaults to the function name).
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-    default_member_permissions: :class:`.Permissions`
+    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
+        See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+        .. versionadded:: 2.5
+
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
@@ -279,8 +283,12 @@ def message_command(
         The name of the message command (defaults to the function name).
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-    default_member_permissions: :class:`.Permissions`
+    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
+        See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+        .. versionadded:: 2.5
+
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]

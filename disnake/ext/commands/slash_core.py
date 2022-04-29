@@ -584,8 +584,12 @@ def slash_command(
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-    default_member_permissions: :class:`.Permissions`
+    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
+        See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+        .. versionadded:: 2.5
+
     guild_ids: List[:class:`int`]
         If specified, the client will register a command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
