@@ -27,7 +27,6 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
 from disnake.permissions import Permissions
-from disnake.utils import MISSING
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -78,7 +77,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         *,
         name: str = None,
         dm_permission: bool = True,
-        default_member_permissions: Optional[Union[Permissions, int]] = MISSING,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -164,7 +163,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         *,
         name: str = None,
         dm_permission: bool = True,
-        default_member_permissions: Optional[Union[Permissions, int]] = MISSING,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,

@@ -322,7 +322,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         description: str = None,
         options: List[Option] = None,
         dm_permission: bool = True,
-        default_member_permissions: Optional[Union[Permissions, int]] = MISSING,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
