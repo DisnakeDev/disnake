@@ -3555,7 +3555,7 @@ AuditLogDiff
 
         The guild's vanity URL.
 
-        See also :meth:`Guild.vanity_invite` and :meth:`Guild.edit`.
+        See also :meth:`Guild.vanity_invite`, :meth:`Guild.edit`, and :attr:`Guild.vanity_url_code`.
 
         :type: :class:`str`
 
