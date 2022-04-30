@@ -33,6 +33,7 @@ from .enums import ChannelType, InviteTarget, NSFWLevel, VerificationLevel, try_
 from .mixins import Hashable
 from .object import Object
 from .utils import _get_as_snowflake, parse_time, snowflake_time
+from .welcome_screen import WelcomeScreen
 
 __all__ = (
     "PartialInviteChannel",
@@ -43,6 +44,7 @@ __all__ = (
 if TYPE_CHECKING:
     from .abc import GuildChannel
     from .guild import Guild
+    from .guild_scheduled_event import GuildScheduledEvent
     from .state import ConnectionState
     from .types.channel import PartialChannel as InviteChannelPayload
     from .types.guild import GuildFeature
@@ -346,6 +348,11 @@ class Invite(Hashable):
         The guild scheduled event included in the invite, if any.
 
         .. versionadded:: 2.3
+
+    guild_welcome_screen: Optional[:class:`WelcomeScreen`]
+        The partial guild's welcome screen, if any.
+
+        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -365,6 +372,7 @@ class Invite(Hashable):
         "target_application",
         "expires_at",
         "guild_scheduled_event",
+        "guild_welcome_screen",
         "_state",
     )
 
@@ -401,6 +409,21 @@ class Invite(Hashable):
             data.get("channel"), channel
         )
 
+        # this is stored here due to disnake.Guild not storing a welcome screen
+        # if it was stored on the Guild object, we would be throwing away this data from the api request
+        if (
+            self.guild is not None
+            and (guild_data := data.get("guild"))
+            and "welcome_screen" in guild_data
+        ):
+            self.guild_welcome_screen: Optional[WelcomeScreen] = WelcomeScreen(
+                state=self._state,
+                data=guild_data["welcome_screen"],
+                guild=self.guild,  # type: ignore
+            )
+        else:
+            self.guild_welcome_screen: Optional[WelcomeScreen] = None
+
         target_user_data = data.get("target_user")
         self.target_user: Optional[User] = None if target_user_data is None else self._state.create_user(target_user_data)  # type: ignore
 
@@ -411,12 +434,14 @@ class Invite(Hashable):
             PartialAppInfo(data=application, state=state) if application else None
         )
 
-        from .guild_scheduled_event import GuildScheduledEvent  # cyclic import
+        if scheduled_event := data.get("guild_scheduled_event"):
+            from .guild_scheduled_event import GuildScheduledEvent  # cyclic import
 
-        scheduled_event = data.get("guild_scheduled_event")
-        self.guild_scheduled_event: Optional[GuildScheduledEvent] = (
-            GuildScheduledEvent(state=state, data=scheduled_event) if scheduled_event else None
-        )
+            self.guild_scheduled_event: Optional[GuildScheduledEvent] = GuildScheduledEvent(
+                state=state, data=scheduled_event
+            )
+        else:
+            self.guild_scheduled_event: Optional[GuildScheduledEvent] = None
 
     @classmethod
     def from_incomplete(cls: Type[I], *, state: ConnectionState, data: InvitePayload) -> I:
