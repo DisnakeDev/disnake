@@ -134,11 +134,15 @@ class InvokableApplicationCommand(ABC):
         .. versionadded: 2.5
     """
 
+    __original_kwargs__: Dict[str, Any]
     body: ApplicationCommand
 
-    def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
+    def __new__(cls, *args: Any, **kwargs: Any) -> InvokableApplicationCommand:
+        self = super().__new__(cls)
         self.__original_kwargs__ = kwargs.copy()
+        return self
 
+    def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
@@ -204,8 +208,8 @@ class InvokableApplicationCommand(ABC):
         if self.permissions != other.permissions:
             # TODO: Maybe update instead?
             other.permissions = self.permissions.copy()
-        if self.guild_ids and self.guild_ids != other.guild_ids:
-            other.guild_ids = self.guild_ids.copy()
+        if self.guild_ids != other.guild_ids:
+            other.guild_ids = None if self.guild_ids is None else self.guild_ids.copy()
         return other
 
     def copy(self: AppCommandT) -> AppCommandT:

@@ -278,15 +278,13 @@ class Cog(metaclass=CogMeta):
         cog_app_commands: List[InvokableApplicationCommand] = []
         for c in cls.__cog_app_commands__:
             if isinstance(c, (InvokableSlashCommand, SubCommandGroup, SubCommand)):
-                updated = c._update_copy(slash_cmd_attrs)
+                c = c._update_copy(slash_cmd_attrs)
             elif isinstance(c, InvokableUserCommand):
-                updated = c._update_copy(user_cmd_attrs)
+                c = c._update_copy(user_cmd_attrs)
             elif isinstance(c, InvokableMessageCommand):
-                updated = c._update_copy(message_cmd_attrs)
-            else:
-                updated = c
+                c = c._update_copy(message_cmd_attrs)
 
-            cog_app_commands.append(updated)
+            cog_app_commands.append(c)
 
         self.__cog_app_commands__ = tuple(cog_app_commands)  # type: ignore
 

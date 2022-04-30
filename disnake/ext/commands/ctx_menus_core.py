@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, TypeVar
 
 from disnake.app_commands import MessageCommand, UserCommand
 
