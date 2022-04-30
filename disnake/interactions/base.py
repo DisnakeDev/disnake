@@ -734,7 +734,7 @@ class InteractionResponse:
         if self._responded:
             raise InteractionResponded(self._parent)
 
-        defer_type: Optional[int] = None
+        defer_type: Optional[InteractionResponseType] = None
         data: Dict[str, Any] = {}
         parent = self._parent
         if with_message is MISSING:
@@ -742,14 +742,14 @@ class InteractionResponse:
                 with_message = True
 
         if parent.type in (InteractionType.application_command, InteractionType.modal_submit):
-            defer_type = InteractionResponseType.deferred_channel_message.value
+            defer_type = InteractionResponseType.deferred_channel_message
         elif parent.type is InteractionType.component:
             if with_message:
-                defer_type = InteractionResponseType.deferred_channel_message.value
+                defer_type = InteractionResponseType.deferred_channel_message
             else:
-                defer_type = InteractionResponseType.deferred_message_update.value
+                defer_type = InteractionResponseType.deferred_message_update
 
-        if defer_type == InteractionResponseType.deferred_channel_message.value:
+        if defer_type is InteractionResponseType.deferred_channel_message:
             data["flags"] = 0
             if ephemeral is not MISSING:
                 data["flags"] |= MessageFlags.ephemeral.flag
@@ -757,7 +757,11 @@ class InteractionResponse:
         if defer_type:
             adapter = async_context.get()
             await adapter.create_interaction_response(
-                parent.id, parent.token, session=parent._session, type=defer_type, data=data or None
+                parent.id,
+                parent.token,
+                session=parent._session,
+                type=defer_type.value,
+                data=data or None,
             )
             self._responded = True
 
