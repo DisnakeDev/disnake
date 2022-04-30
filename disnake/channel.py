@@ -2427,7 +2427,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         view: View = MISSING,
         components: Components = MISSING,
         reason: Optional[str] = None,
-    ) -> Thread:
+    ) -> Tuple[Thread, Message]:
         """|coro|
 
         Creates a thread in this forum channel.
@@ -2492,9 +2492,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        :class:`Thread`
-            The newly created thread.
+        Tuple[:class:`Thread`, :class:`Message`]
+            The newly created thread and the message sent in it.
         """
+        from .message import Message
         from .webhook.async_ import handle_message_parameters_dict
 
         params = handle_message_parameters_dict(
@@ -2520,7 +2521,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             raise InvalidArgument("files parameter must be a list of File")
 
         try:
-            thread_data = await self._state.http.start_thread_in_forum_channel(
+            data = await self._state.http.start_thread_in_forum_channel(
                 self.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
@@ -2536,9 +2537,13 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                     f.close()
 
         if view:
-            self._state.store_view(view, int(thread_data["id"]))
+            self._state.store_view(view, int(data["message"]["id"]))
 
-        return Thread(guild=self.guild, data=thread_data, state=self._state)
+        thread = Thread(guild=self.guild, data=data, state=self._state)
+        return (
+            thread,
+            Message(channel=thread, data=data["message"], state=self._state),
+        )
 
     def archived_threads(
         self,
