@@ -176,10 +176,14 @@ class InvokableApplicationCommand(ABC):
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
         """Optional[:class:`.Permissions`]: The default required member permissions for this command.
+        A member must have *all* these permissions to be able to invoke the command in a guild.
 
-        If no permissions are returned, this means everyone can use the command by default.
+        This is a default value, the set of users/roles that may invoke this command can be
+        overridden by administrators on a guild-specific basis.
 
-        If an empty :class:`.Permissions` object is returned, this means no one can use the command.
+        If ``None`` is returned, it means everyone can use the command by default.
+        If an empty :class:`.Permissions` object is returned (that is, all permissions set to ``False``),
+        this means no one can use the command.
 
         .. versionadded:: 2.5
         """
@@ -573,8 +577,8 @@ def default_member_permissions(**permissions: Literal[True]) -> Callable[[T], T]
     """
     A decorator that sets default required member permissions for the command.
     Unlike :func:`~.ext.commands.has_permissions`, this decorator does not add any checks.
-    Instead, it prevents the command from being run by members without all required permissions,
-    if not overridden by administrators on a guild-specific basis.
+    Instead, it prevents the command from being run by members without *all* required permissions,
+    if not overridden by moderators on a guild-specific basis.
 
     See also the ``default_member_permissions`` parameter for application command decorators.
 
