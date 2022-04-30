@@ -283,6 +283,13 @@ class Guild(Hashable):
 
             This value is unreliable and will only be set after the guild was updated at least once.
             Avoid using this and use :func:`widget_settings` instead.
+
+    vanity_url_code: Optional[:class:`str`]
+        The vanity invite code for this guild, if set.
+
+        To get a full :class:`Invite` object, see :attr:`Guild.vanity_invite`.
+
+        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -312,6 +319,7 @@ class Guild(Hashable):
         "approximate_presence_count",
         "widget_enabled",
         "widget_channel_id",
+        "vanity_url_code",
         "_members",
         "_channels",
         "_icon",
@@ -564,6 +572,7 @@ class Guild(Hashable):
         self.approximate_member_count: Optional[int] = guild.get("approximate_member_count")
         self.widget_enabled: Optional[bool] = guild.get("widget_enabled")
         self.widget_channel_id: Optional[int] = utils._get_as_snowflake(guild, "widget_channel_id")
+        self.vanity_url_code: Optional[str] = guild.get("vanity_url_code")
 
         stage_instances = guild.get("stage_instances")
         if stage_instances is not None:
@@ -1198,6 +1207,7 @@ class Guild(Hashable):
         slowmode_delay: int = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         nsfw: bool = MISSING,
+        news: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> TextChannel:
         """|coro|
@@ -1266,7 +1276,13 @@ class Guild(Hashable):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether mark the channel as NSFW or not.
+            Whether to mark the channel as NSFW or not.
+        news: :class:`bool`
+            Whether to make a news channel. News channels are text channels that can be followed.
+            This is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`.
+
+            .. versionadded:: 2.5
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1302,10 +1318,15 @@ class Guild(Hashable):
                 "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
             )
 
+        if news:
+            channel_type = ChannelType.news
+        else:
+            channel_type = ChannelType.text
+
         data = await self._create_channel(
             name,
             overwrites=overwrites,
-            channel_type=ChannelType.text,
+            channel_type=channel_type,
             category=category,
             reason=reason,
             **options,
@@ -3416,15 +3437,23 @@ class Guild(Hashable):
         """
         await self._state.http.unban(user.id, self.id, reason=reason)
 
-    async def vanity_invite(self) -> Optional[Invite]:
+    async def vanity_invite(self, *, use_cached: bool = False) -> Optional[Invite]:
         """|coro|
 
         Returns the guild's special vanity invite.
 
         The guild must have ``VANITY_URL`` in :attr:`~Guild.features`.
 
-        You must have :attr:`~Permissions.manage_guild` permission to
-        use this.
+        If ``use_cached`` is False, then you must have
+        :attr:`~Permissions.manage_guild` permission to use this.
+
+        Parameters
+        ----------
+        use_cached: :class:`bool`
+            Whether to use the cached :attr:`Guild.vanity_url_code`
+            and attempt to convert it into a full invite.
+
+            .. versionadded:: 2.5
 
         Raises
         ------
@@ -3440,9 +3469,14 @@ class Guild(Hashable):
             have a vanity invite set.
         """
         # we start with { code: abc }
-        payload: Any = await self._state.http.get_vanity_code(self.id)
-        if not payload["code"]:
-            return None
+        if use_cached:
+            if not self.vanity_url_code:
+                return None
+            payload: Any = {"code": self.vanity_url_code}
+        else:
+            payload: Any = await self._state.http.get_vanity_code(self.id)
+            if not payload["code"]:
+                return None
 
         # get the vanity URL channel since default channels aren't
         # reliable or a thing anymore

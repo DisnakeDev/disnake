@@ -128,6 +128,10 @@ class InvokableApplicationCommand(ABC):
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. versionadded: 2.5
     """
 
     body: ApplicationCommand
@@ -141,6 +145,7 @@ class InvokableApplicationCommand(ABC):
         self.qualified_name: str = self.name
         # only an internal feature for now
         self.guild_only: bool = kwargs.get("guild_only", False)
+        self.extras: Dict[str, Any] = kwargs.get("extras") or {}
 
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
