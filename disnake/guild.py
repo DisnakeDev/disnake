@@ -2883,7 +2883,7 @@ class Guild(Hashable):
             The name of a unicode emoji that represents the sticker's expression.
         file: :class:`File`
             The file of the sticker to upload.
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason for creating this sticker. Shows up on the audit log.
 
         Raises

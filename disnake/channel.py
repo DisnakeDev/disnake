@@ -818,7 +818,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.3
 
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason for creating the thread. Shows up on the audit log.
 
         Raises
@@ -1698,7 +1698,7 @@ class StageChannel(VocalGuildChannel):
             The stage instance's topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's privacy level. Defaults to :attr:`StagePrivacyLevel.guild_only`.
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason the stage instance was created. Shows up on the audit log.
         notify_everyone: :class:`bool`
             Whether to notify ``@everyone`` that the stage instance has started.

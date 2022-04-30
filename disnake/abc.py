@@ -1012,7 +1012,7 @@ class GuildChannel(ABC):
             This parameter is ignored if moving a category channel.
         sync_permissions: :class:`bool`
             Whether to sync the permissions with the category (if given).
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason for moving this channel. Shows up on the audit log.
 
         Raises
