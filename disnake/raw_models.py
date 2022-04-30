@@ -322,7 +322,7 @@ class RawThreadDeleteEvent(_RawReprMixin):
     guild_id: :class:`int`
         The ID of the guild the thread was deleted in.
     thread_type: :class:`ChannelType`
-        The channel type of the deleted thread.
+        The type of the deleted thread.
     parent_id: :class:`int`
         The ID of the channel the thread belonged to.
     thread: Optional[:class:`Thread`]

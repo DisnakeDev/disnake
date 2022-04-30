@@ -897,7 +897,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 .. function:: on_raw_thread_delete(payload)
 
     Called whenever a thread is deleted.
-    Unlike :func:`on_thread_update`, this is called
+    Unlike :func:`on_thread_delete`, this is called
     regardless of the state of the internal thread cache.
 
     Note that you can get the guild from :attr:`Thread.guild`.
@@ -965,7 +965,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     .. versionadded:: 2.5
 
-    :param thread: The updated thread's new info.
+    :param thread: The updated thread.
     :type thread: :class:`Thread`
 
 .. function:: on_guild_integrations_update(guild)
