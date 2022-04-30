@@ -24,6 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+from enum import Enum
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -33,8 +34,10 @@ from typing import (
     Literal,
     Optional,
     Sequence,
+    Tuple,
     TypeVar,
     Union,
+    get_args,
     overload,
 )
 
@@ -61,7 +64,7 @@ __all__ = ("ActionRow",)
 
 
 MessageUIComponent = Union[Button[Any], Select[Any]]
-ModalUIComponent = TextInput
+ModalUIComponent = Union[TextInput, Select[Any]]
 UIComponentT = TypeVar("UIComponentT", bound=WrappedComponent)
 
 Components = Union[
@@ -71,7 +74,33 @@ Components = Union[
 ]
 
 
+class ActionRowType(tuple, Enum):
+    """Simple container for component type categories."""
+
+    message = get_args(MessageUIComponent)
+    modal = (ModalUIComponent,)  # TODO: replace with get_args(...) when modals support other types
+
+    def __str__(self) -> str:
+        return f"{self.name.title()}UIComponent"
+
+
 class ActionRow(Generic[UIComponentT]):
+    """Represents a UI action row. Useful for lower level component manipulation.
+
+    .. versionadded:: 2.4
+
+    .. versionchanged:: 2.6
+        Requires and provides stricter typing for contained components.
+
+    Parameters
+    ----------
+    *components: :class:`WrappedComponent`
+        The components of this action row.
+
+        .. versionchanged:: 2.6
+            Components can now be either valid in the context of a message, or in the
+            context of a modal. Combining components from both contexts is not supported.
+    """
 
     type: ClassVar[Literal[ComponentType.action_row]] = ComponentType.action_row
 
@@ -91,9 +120,15 @@ class ActionRow(Generic[UIComponentT]):
         self._components: List[UIComponentT] = []
 
         # Validate the components
+        type_candidates = list(ActionRowType)
+
         for component in components:
-            if not isinstance(component, WrappedComponent):
-                raise ValueError("ActionRow must contain only WrappedComponent instances.")
+            for candidate in type_candidates:
+                if not isinstance(component, candidate):
+                    type_candidates.remove(candidate)
+
+            if not type_candidates:
+                raise TypeError("Unable to narrow down type of action row.")
 
             self.width += component.width
             if self.width >= 5:
@@ -101,12 +136,21 @@ class ActionRow(Generic[UIComponentT]):
 
             self._components.append(component)
 
+        # Best we can do without directly inferring the generic type: Through type_candidates we
+        # narrow down the possible types (MessageUIComponents and/or ModalUIComponents) by checking
+        # all components that are added to the ActionRow.
+        # At the end, we just combine all remaining type_candidates into one tuple that holds all
+        # possible types. This is therefore not strictly type-safe but it is as close as we can get.
+        self._component_types: Tuple[Any, ...] = sum(type_candidates, ())
+
     @property
     def components(self) -> List[UIComponentT]:
+        """List[:class:`WrappedComponent`]: The UI components stored this action row."""
         return self._components
 
     def append_item(self, item: UIComponentT) -> None:
-        """Appends a component to the action row.
+        """Appends a component to the action row. The component's type must match that
+        of the action row.
 
         Parameters
         ----------
@@ -117,15 +161,19 @@ class ActionRow(Generic[UIComponentT]):
         ------
         ValueError
             The width of the action row exceeds 5.
+        TypeError
+            The action row does not support items of this type.
         """
+        if not isinstance(item, self._component_types):
+            raise TypeError(
+                f"{type(item).__name__} cannot be added to ActionRow[{self._component_types}]s."
+            )
+
         if self.width + item.width > 5:
             raise ValueError("Too many components in this row, can not append a new one.")
 
         self.width += item.width
         self._components.append(item)
-
-    # Maybe this can be overloaded with NoReturn for `self: ActionRow[ModalUIComponent]`,
-    # same thing for the other add_<component> methods.
 
     def add_button(
         self: ActionRow[MessageUIComponent],
@@ -137,7 +185,8 @@ class ActionRow(Generic[UIComponentT]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     ) -> None:
-        """Adds a button to the action row.
+        """Adds a button to the action row. Can only be used if the action
+        row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.Button` use the
         :meth:`append_item` method instead.
@@ -162,7 +211,12 @@ class ActionRow(Generic[UIComponentT]):
         ------
         ValueError
             The width of the action row exceeds 5.
+        TypeError
+            The action row does not support items of this type.
         """
+        if self._component_types is not ActionRowType.message:
+            raise TypeError("Buttons can only be added to ActionRow[MessageUIComponent]s.")
+
         self.append_item(
             Button(
                 style=style,
@@ -184,7 +238,8 @@ class ActionRow(Generic[UIComponentT]):
         options: List[SelectOption] = MISSING,
         disabled: bool = False,
     ) -> None:
-        """Adds a select menu to the action row.
+        """Adds a select menu to the action row. Can only be used if the action
+        row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.Select` use the
         :meth:`append_item` method instead.
@@ -211,7 +266,12 @@ class ActionRow(Generic[UIComponentT]):
         ------
         ValueError
             The width of the action row exceeds 5.
+        TypeError
+            The action row does not support items of this type.
         """
+        if self._component_types is not ActionRowType.message:
+            raise TypeError("Selects can only be added to ActionRow[MessageUIComponent]s.")
+
         self.append_item(
             Select(
                 custom_id=custom_id,
@@ -235,7 +295,8 @@ class ActionRow(Generic[UIComponentT]):
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
-        """Adds a text input to the action row.
+        """Adds a text input to the action row. Can only be used if the action
+        row holds modal components.
 
         To append a pre-existing :class:`~disnake.ui.TextInput` use the
         :meth:`append_item` method instead.
@@ -265,7 +326,12 @@ class ActionRow(Generic[UIComponentT]):
         ------
         ValueError
             The width of the action row exceeds 5.
+        TypeError
+            The action row does not support items of this type.
         """
+        if self._component_types is not ActionRowType.modal:
+            raise TypeError("TextInputs can only be added to ActionRow[ModalUIComponent]s.")
+
         self.append_item(
             TextInput(
                 label=label,
@@ -302,6 +368,19 @@ class ActionRow(Generic[UIComponentT]):
 
     @classmethod
     def from_message(cls, message: Message) -> List[ActionRow[MessageUIComponent]]:
+        """Create a list of up to 5 action rows from the components on an existing message.
+
+        This will abide by existing component format on the message, including component
+        ordering and rows. Components will be transformed to UI kit components, such that
+        they can be easily modified and re-sent as action rows.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        message: :class:`disnake.Message`
+            The message from which to extract the components.
+        """
         # :prayge: this actually typechecks without cast/whatever now
         rows: List[ActionRow[MessageUIComponent]] = []
         for row in message.components:
