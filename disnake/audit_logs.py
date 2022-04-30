@@ -250,8 +250,6 @@ class AuditLogChanges:
         'default_message_notifications': ('default_notifications', _enum_transformer(enums.NotificationLevel)),
         'communication_disabled_until':  ('timeout', _transform_datetime),
         'image_hash':                    ('image', _transform_guild_scheduled_event_image),
-        'region':                        (None, _enum_transformer(enums.VoiceRegion)),
-        'rtc_region':                    (None, _enum_transformer(enums.VoiceRegion)),
         'video_quality_mode':            (None, _enum_transformer(enums.VideoQualityMode)),
         'preferred_locale':              (None, _enum_transformer(enums.Locale)),
         'privacy_level':                 (None, _transform_privacy_level),

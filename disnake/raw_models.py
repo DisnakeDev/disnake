@@ -28,12 +28,14 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, List, Optional, Set
 
+from .enums import ChannelType, try_enum
 from .utils import get_slots
 
 if TYPE_CHECKING:
     from .member import Member
     from .message import Message
     from .partial_emoji import PartialEmoji
+    from .threads import Thread, ThreadMember
     from .types.raw_models import (
         BulkMessageDeleteEvent,
         GuildScheduledEventUserActionEvent,
@@ -56,6 +58,8 @@ __all__ = (
     "RawReactionClearEmojiEvent",
     "RawIntegrationDeleteEvent",
     "RawGuildScheduledEventUserActionEvent",
+    "RawThreadDeleteEvent",
+    "RawThreadMemberRemoveEvent",
     "RawTypingEvent",
 )
 
@@ -304,6 +308,68 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
         self.event_id: int = int(data["guild_scheduled_event_id"])
         self.user_id: int = int(data["user_id"])
         self.guild_id: int = int(data["guild_id"])
+
+
+class RawThreadDeleteEvent(_RawReprMixin):
+    """Represents the payload for a :func:`on_raw_thread_delete` event.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    thread_id: :class:`int`
+        The ID of the thread that was deleted.
+    guild_id: :class:`int`
+        The ID of the guild the thread was deleted in.
+    thread_type: :class:`ChannelType`
+        The type of the deleted thread.
+    parent_id: :class:`int`
+        The ID of the channel the thread belonged to.
+    thread: Optional[:class:`Thread`]
+        The thread, if it could be found in the internal cache.
+    """
+
+    __slots__ = (
+        "thread_id",
+        "thread_type",
+        "parent_id",
+        "guild_id",
+        "thread",
+    )
+
+    def __init__(self, data):
+        self.thread_id: int = int(data["id"])
+        self.thread_type: ChannelType = try_enum(ChannelType, data["type"])
+        self.guild_id: int = int(data["guild_id"])
+        self.parent_id: int = int(data["parent_id"])
+        self.thread: Optional[Thread] = None
+
+
+class RawThreadMemberRemoveEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_thread_member_remove` event.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    thread: :class:`Thread`
+        The Thread that the member was removed from
+    member_id: :class:`int`
+        The ID of the removed member.
+    cached_member: Optional[:class:`.ThreadMember`]
+        The member, if they could be found in the internal cache.
+    """
+
+    __slots__ = (
+        "thread",
+        "member_id",
+        "cached_member",
+    )
+
+    def __init__(self, thread: Thread, member_id: int):
+        self.thread: Thread = thread
+        self.member_id: int = member_id
+        self.cached_member: Optional[ThreadMember] = None
 
 
 class RawTypingEvent(_RawReprMixin):
