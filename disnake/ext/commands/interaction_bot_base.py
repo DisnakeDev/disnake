@@ -427,6 +427,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: List[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
+        extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         """A shortcut decorator that invokes :func:`.slash_command` and adds it to
@@ -455,6 +456,13 @@ class InteractionBotBase(CommonBotBase):
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``.
             If you're using :ref:`param_syntax`, you don't need to specify this.
+        extras: Dict[:class:`str`, Any]
+            A dict of user provided extras to attach to the command.
+
+            .. note::
+                This object may be copied by the library.
+
+            .. versionadded: 2.5
 
         Returns
         -------
@@ -471,6 +479,7 @@ class InteractionBotBase(CommonBotBase):
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
+                extras=extras,
                 **kwargs,
             )(func)
             self.add_slash_command(result)
@@ -485,6 +494,7 @@ class InteractionBotBase(CommonBotBase):
         default_permission: bool = True,
         guild_ids: List[int] = None,
         auto_sync: bool = True,
+        extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
         """A shortcut decorator that invokes :func:`.user_command` and adds it to
@@ -502,6 +512,13 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: List[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally in ~1 hour.
+        extras: Dict[:class:`str`, Any]
+            A dict of user provided extras to attach to the command.
+
+            .. note::
+                This object may be copied by the library.
+
+            .. versionadded: 2.5
 
         Returns
         -------
@@ -515,6 +532,7 @@ class InteractionBotBase(CommonBotBase):
                 default_permission=default_permission,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
+                extras=extras,
                 **kwargs,
             )(func)
             self.add_user_command(result)
@@ -529,6 +547,7 @@ class InteractionBotBase(CommonBotBase):
         default_permission: bool = True,
         guild_ids: List[int] = None,
         auto_sync: bool = True,
+        extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
         """A shortcut decorator that invokes :func:`.message_command` and adds it to
@@ -546,6 +565,13 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: List[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally in ~1 hour.
+        extras: Dict[:class:`str`, Any]
+            A dict of user provided extras to attach to the command.
+
+            .. note::
+                This object may be copied by the library.
+
+            .. versionadded: 2.5
 
         Returns
         -------
@@ -559,6 +585,7 @@ class InteractionBotBase(CommonBotBase):
                 default_permission=default_permission,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
+                extras=extras,
                 **kwargs,
             )(func)
             self.add_message_command(result)
