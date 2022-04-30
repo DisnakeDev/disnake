@@ -2757,6 +2757,20 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.0
 
+    .. attribute:: application_command_permission_update
+
+        The permissions of an application command were updated.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`ApplicationCommand` or :class:`Object` with the ID of the command whose
+        permissions were updated or the application ID if these are application-wide permissions.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.command_permissions`
+
+        .. versionadded:: 2.5
+
 .. class:: AuditLogActionCategory
 
     Represents the category that the :class:`AuditLogAction` belongs to.
