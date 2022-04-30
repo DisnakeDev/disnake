@@ -1109,6 +1109,8 @@ class ConnectionState:
             guild._add_thread(thread)
             self.dispatch("thread_join", thread)
 
+        self.dispatch("raw_thread_update", thread)
+
     def parse_thread_delete(self, data) -> None:
         guild_id = int(data["guild_id"])
         guild = self._get_guild(guild_id)
@@ -1118,9 +1120,12 @@ class ConnectionState:
 
         thread_id = int(data["id"])
         thread = guild.get_thread(thread_id)
+        raw = RawThreadDeleteEvent(data)
         if thread is not None:
+            raw.thread = thread
             guild._remove_thread(thread)
             self.dispatch("thread_delete", thread)
+        self.dispatch("raw_thread_delete", raw)
 
     def parse_thread_list_sync(self, data) -> None:
         guild_id = int(data["guild_id"])
@@ -1208,9 +1213,12 @@ class ConnectionState:
 
         for member_id in removed_member_ids:
             if member_id != self_id:
+                raw = RawThreadMemberRemoveEvent(thread, member_id)
                 member = thread._pop_member(member_id)
                 if member is not None:
+                    raw.cached_member = member
                     self.dispatch("thread_member_remove", member)
+                self.dispatch("raw_thread_member_remove", raw)
             else:
                 self.dispatch("thread_remove", thread)
 
