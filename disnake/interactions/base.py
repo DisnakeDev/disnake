@@ -750,6 +750,7 @@ class InteractionResponse:
                 defer_type = InteractionResponseType.deferred_message_update
 
         if defer_type is InteractionResponseType.deferred_channel_message:
+            # we only want to set flags if we are sending a message
             data["flags"] = 0
             if ephemeral is not MISSING:
                 data["flags"] |= MessageFlags.ephemeral.flag
