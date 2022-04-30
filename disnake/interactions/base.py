@@ -670,60 +670,21 @@ class InteractionResponse:
         """
         return self._responded
 
-    @overload
-    async def defer(
-        self,
-        *,
-        with_message: Literal[True],
-        ephemeral: bool = ...,
-    ):
-        ...
-
-    @overload
-    async def defer(
-        self,
-        *,
-        ephemeral: bool = ...,
-    ):
-        ...
-
-    @overload
-    async def defer(
-        self,
-        *,
-        with_message: Literal[False],
-    ):
-        ...
-
-    async def defer(
-        self,
-        *,
-        with_message: bool = MISSING,
-        ephemeral: bool = MISSING,
-    ) -> None:
+    async def defer(self, *, ephemeral: bool = False, with_message: bool = False) -> None:
         """|coro|
-
         Defers the interaction response.
-
         This is typically used when the interaction is acknowledged
         and a secondary action will be done later.
-
-        .. versionchanged:: 2.5
-
-            ``ephemeral`` now implies ``with_message`` if it is not already set.
-
         Parameters
         ----------
-        with_message: :class:`bool`
-            Whether the response will be a message with thinking state (bot is thinking...).
-
-            .. versionadded:: 2.4
-
         ephemeral: :class:`bool`
             Whether the deferred message will eventually be ephemeral.
-
-            .. note:: This automatically implies ``with_message`` is True.
-
+            This applies to interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
+            or when the ``with_message`` parameter is ``True``.
+        with_message: :class:`bool`
+            Whether the response will be a message with thinking state (bot is thinking...).
+            This only applies to interactions of type :attr:`InteractionType.component`.
+            .. versionadded:: 2.4
         Raises
         ------
         HTTPException
@@ -734,35 +695,23 @@ class InteractionResponse:
         if self._responded:
             raise InteractionResponded(self._parent)
 
-        defer_type: Optional[InteractionResponseType] = None
-        data: Dict[str, Any] = {}
+        defer_type: int = 0
+        data: Optional[Dict[str, Any]] = None
         parent = self._parent
-        if with_message is MISSING:
-            if ephemeral is not MISSING:
-                with_message = True
-
-        if parent.type in (InteractionType.application_command, InteractionType.modal_submit):
-            defer_type = InteractionResponseType.deferred_channel_message
+        if (
+            parent.type in (InteractionType.application_command, InteractionType.modal_submit)
+            or with_message
+        ):
+            defer_type = InteractionResponseType.deferred_channel_message.value
+            if ephemeral:
+                data = {"flags": MessageFlags.ephemeral.flag}
         elif parent.type is InteractionType.component:
-            if with_message:
-                defer_type = InteractionResponseType.deferred_channel_message
-            else:
-                defer_type = InteractionResponseType.deferred_message_update
-
-        if defer_type is InteractionResponseType.deferred_channel_message:
-            # we only want to set flags if we are sending a message
-            data["flags"] = 0
-            if ephemeral is not MISSING:
-                data["flags"] |= MessageFlags.ephemeral.flag
+            defer_type = InteractionResponseType.deferred_message_update.value
 
         if defer_type:
             adapter = async_context.get()
             await adapter.create_interaction_response(
-                parent.id,
-                parent.token,
-                session=parent._session,
-                type=defer_type.value,
-                data=data or None,
+                parent.id, parent.token, session=parent._session, type=defer_type, data=data
             )
             self._responded = True
 
