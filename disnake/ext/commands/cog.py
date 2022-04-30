@@ -281,8 +281,11 @@ class Cog(metaclass=CogMeta):
                 updated = c._update_copy(slash_cmd_attrs)
             elif isinstance(c, InvokableUserCommand):
                 updated = c._update_copy(user_cmd_attrs)
-            else:
+            elif isinstance(c, InvokableMessageCommand):
                 updated = c._update_copy(message_cmd_attrs)
+            else:
+                updated = c
+
             cog_app_commands.append(updated)
 
         self.__cog_app_commands__ = tuple(cog_app_commands)  # type: ignore

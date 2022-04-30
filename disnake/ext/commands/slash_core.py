@@ -250,7 +250,7 @@ class SubCommand(InvokableApplicationCommand):
         super()._ensure_assignment_on_copy(other)
         if self.connectors != other.connectors:
             other.connectors = self.connectors.copy()
-        if "-" != self.description != other.description:
+        if self.description != "-" and self.description != other.description:
             # Allows overriding the default description cog-wide.
             other.option.description = self.description
         if self.qualified_name != other.qualified_name:
@@ -402,7 +402,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             other.children = self.children.copy()
         if self.autocompleters != other.autocompleters:
             other.autocompleters = self.autocompleters.copy()
-        if "-" != self.description != other.description:
+        if self.description != "-" and self.description != other.description:
             # Allows overriding the default description cog-wide.
             other.body.description = self.description
         return other
