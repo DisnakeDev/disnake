@@ -883,6 +883,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when a thread is deleted. If the thread is not found
     in the internal thread cache, then this event will not be called.
+    Consider using :func:`on_raw_thread_delete` instead.
 
     Note that you can get the guild from :attr:`Thread.guild`.
 
@@ -915,6 +916,9 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     You can get the thread a member belongs in by accessing :attr:`ThreadMember.thread`.
 
+    On removal events, if the member being removed is not found in the internal cache,
+    then this event will not be called. Consider using :func:`on_raw_thread_member_remove` instead.
+
     This requires :attr:`Intents.members` to be enabled.
 
     .. versionadded:: 2.0
@@ -940,6 +944,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when a thread is updated. If the thread is not found
     in the internal thread cache, then this event will not be called.
+    Consider using :func:`on_raw_thread_update` which will be called regardless of the cache.
 
     This requires :attr:`Intents.guilds` to be enabled.
 
