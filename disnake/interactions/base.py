@@ -79,42 +79,34 @@ MISSING: Any = utils.MISSING
 class _ResponseLock:
     __slots__ = (
         "_response",
-        "_condition",
+        "_lock",
     )
 
     def __init__(self, response: InteractionResponse) -> None:
         self._response = response
-        self._condition = asyncio.Condition()
+        self._lock = asyncio.Lock()
 
     async def __aenter__(self):
         # when we acquire this manager, we are attempting to make a request
         # the problem is we don't know if the request will success or not
         # to get around this, we wait and see if it was successful.
         # if it was successful, we raise an InteractionResponded exception
-        if not self._condition.locked():
-            await self._condition.acquire()
-            return
-
-        await self._condition.acquire()
+        await self._lock.acquire()
         if self._response._response_type is not None:
+            self._lock.release()
             raise InteractionResponded(self._response._parent)
 
     async def __aexit__(self, exc_type, exc, tb):
         # we are no longer making a request so we release the lock
         # however, we only want to set responded to True if it was success
         # eg did not raise an Exception
-        self._condition.release()
+        self._lock.release()
         if exc_type is not None:
             return
         # todo: set that we responded somehow
 
     def is_responding(self):
-        return self._condition.locked()
-
-    async def wait(self):
-        if self._condition.locked():
-            return await self._condition.wait()
-        return True
+        return self._lock.locked()
 
 
 class Interaction:
@@ -674,7 +666,8 @@ class Interaction:
         # but there is a chance the response will fail and therefore
         # we should send the response
         if self.response._lock.is_responding():
-            await self.response._lock.wait()
+            async with self.response._lock:
+                pass
 
         if self.response._response_type is not None:
             sender = self.followup.send
