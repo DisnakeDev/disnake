@@ -604,7 +604,7 @@ class Interaction:
             Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
             is set to 15 minutes.
-        suppress_embeds: :class:`bonk`
+        suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all embeds from the UI if set to ``True``.
 
