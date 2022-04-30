@@ -69,6 +69,7 @@ if TYPE_CHECKING:
     from .flags import PublicUserFlags
     from .guild import Guild
     from .message import Message
+    from .partial_emoji import PartialEmoji
     from .role import Role
     from .state import ConnectionState
     from .types.activity import PartialPresenceUpdate
@@ -668,16 +669,16 @@ class Member(disnake.abc.Messageable, _UserTag):
         return max(guild.get_role(rid) or guild.default_role for rid in self._roles)
 
     @property
-    def role_icon(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns the member's displayed role icon, if any.
+    def role_icon(self) -> Optional[Union[Asset, PartialEmoji]]:
+        """Optional[Union[:class:`Asset`, :class:`PartialEmoji`]]: Returns the member's displayed role icon, if any.
 
         .. versionadded:: 2.5
         """
         roles = self.roles[1:]  # remove @everyone
 
         for role in reversed(roles):
-            if role.icon:
-                return role.icon
+            if icon := (role.icon or role.emoji):
+                return icon
         return None
 
     @property
