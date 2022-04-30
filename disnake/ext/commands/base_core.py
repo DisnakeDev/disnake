@@ -26,7 +26,18 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Callable, Coroutine, List, Literal, Optional, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Coroutine,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
@@ -117,6 +128,10 @@ class InvokableApplicationCommand(ABC):
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. versionadded: 2.5
     """
 
     body: ApplicationCommand
@@ -129,6 +144,7 @@ class InvokableApplicationCommand(ABC):
         # Annotation parser needs this attribute because body doesn't exist at this moment.
         # We will use this attribute later in order to set the dm_permission.
         self._guild_only: bool = kwargs.get("guild_only", False)
+        self.extras: Dict[str, Any] = kwargs.get("extras") or {}
 
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
