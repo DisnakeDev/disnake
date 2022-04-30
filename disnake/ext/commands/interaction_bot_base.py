@@ -460,6 +460,9 @@ class InteractionBotBase(CommonBotBase):
         extras: Dict[:class:`str`, Any]
             A dict of user provided extras to attach to the command.
 
+            .. note::
+                This object may be copied by the library.
+
             .. versionadded: 2.5
 
         Returns
@@ -513,6 +516,9 @@ class InteractionBotBase(CommonBotBase):
         extras: Dict[:class:`str`, Any]
             A dict of user provided extras to attach to the command.
 
+            .. note::
+                This object may be copied by the library.
+
             .. versionadded: 2.5
 
         Returns
@@ -562,6 +568,9 @@ class InteractionBotBase(CommonBotBase):
             Otherwise this command will be registered globally in ~1 hour.
         extras: Dict[:class:`str`, Any]
             A dict of user provided extras to attach to the command.
+
+            .. note::
+                This object may be copied by the library.
 
             .. versionadded: 2.5
 
