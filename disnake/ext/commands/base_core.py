@@ -578,6 +578,9 @@ def default_member_permissions(**permissions: Literal[True]) -> Callable[[T], T]
 
     See also the ``default_member_permissions`` parameter for application command decorators.
 
+    .. note::
+        This does not work with slash subcommands/groups.
+
     Parameters
     ----------
     permissions: Literal[True]
