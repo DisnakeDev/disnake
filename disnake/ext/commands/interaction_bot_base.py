@@ -130,7 +130,7 @@ def _format_diff(diff: Dict[str, List[ApplicationCommand]]) -> str:
     for key, label in _diff_map.items():
         lines.append(label)
         if changes := diff[key]:
-            lines.extend(f"    {cmd}" for cmd in changes)
+            lines.extend(f"    <{type(cmd).__name__} name={cmd.name!r}>" for cmd in changes)
         else:
             lines.append("    -")
 
