@@ -585,6 +585,21 @@ def default_member_permissions(value: int = 0, **permissions: Literal[True]) -> 
     .. note::
         This does not work with slash subcommands/groups.
 
+    Example
+    -------
+
+    This would only allow members with :attr:`~.Permissions.manage_messages` *and*
+    :attr:`~.Permissions.view_audit_log` permissions to use the command by default,
+    however moderators can override this and allow/disallow specific users and
+    roles to use the command in their guilds on top of that.
+
+    .. code-block:: python3
+
+        @bot.slash_command()
+        @commands.default_member_permissions(manage_messages=True, view_audit_log=True)
+        async def purge(inter, num: int):
+            ...
+
     Parameters
     ----------
     value: :class:`int`
