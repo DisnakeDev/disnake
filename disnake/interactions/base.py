@@ -29,19 +29,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import timedelta
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Literal,
-    Mapping,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast, overload
 
 from .. import utils
 from ..app_commands import OptionChoice
