@@ -762,7 +762,7 @@ class GuildApplicationCommandPermissions:
     Attributes
     ----------
     id: :class:`int`
-        The application command's ID.
+        The application command's ID, or the application ID if these are application-wide permissions.
     application_id: :class:`int`
         The application ID this command belongs to.
     guild_id: :class:`int`
