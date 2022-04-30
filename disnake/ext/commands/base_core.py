@@ -573,7 +573,7 @@ class InvokableApplicationCommand(ABC):
             inter.application_command = original
 
 
-def default_member_permissions(**permissions: Literal[True]) -> Callable[[T], T]:
+def default_member_permissions(value: int = 0, **permissions: Literal[True]) -> Callable[[T], T]:
     """
     A decorator that sets default required member permissions for the command.
     Unlike :func:`~.ext.commands.has_permissions`, this decorator does not add any checks.
@@ -587,11 +587,14 @@ def default_member_permissions(**permissions: Literal[True]) -> Callable[[T], T]
 
     Parameters
     ----------
-    permissions: Literal[True]
+    value: :class:`int`
+        A raw permission bitfield of an integer representing the required permissions.
+        May be used instead of specifying kwargs.
+    **permissions: Literal[True]
         The required permissions for a command. A member must have *all* these
         permissions to be able to invoke the command.
     """
-    perms_value = Permissions(**permissions).value
+    perms_value = Permissions(value, **permissions).value
 
     def decorator(func: T) -> T:
         if isinstance(func, InvokableApplicationCommand):
