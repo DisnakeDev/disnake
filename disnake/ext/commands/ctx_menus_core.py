@@ -71,6 +71,9 @@ class InvokableUserCommand(InvokableApplicationCommand):
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
+        .. note::
+            This object may be copied by the library.
+
         .. versionadded: 2.5
     """
 
@@ -148,6 +151,9 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
+        .. note::
+            This object may be copied by the library.
+
         .. versionadded: 2.5
     """
 
@@ -219,6 +225,9 @@ def user_command(
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
+        .. note::
+            This object may be copied by the library.
+
         .. versionadded: 2.5
 
     Returns
@@ -272,6 +281,9 @@ def message_command(
         Otherwise this command will be registered globally in ~1 hour.
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
 
         .. versionadded: 2.5
 

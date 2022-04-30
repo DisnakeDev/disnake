@@ -128,6 +128,9 @@ class SubCommandGroup(InvokableApplicationCommand):
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the subcommand group.
 
+        .. note::
+            This object may be copied by the library.
+
         .. versionadded: 2.5
     """
 
@@ -211,6 +214,9 @@ class SubCommand(InvokableApplicationCommand):
         A mapping of option names to function parameter names, mainly for internal processes.
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the subcommand.
+
+        .. note::
+            This object may be copied by the library.
 
         .. versionadded: 2.5
     """
@@ -326,6 +332,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
+        .. note::
+            This object may be copied by the library.
+
         .. versionadded: 2.5
     """
 
@@ -402,6 +411,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         extras: Dict[:class:`str`, Any]
             A dict of user provided extras to attach to the subcommand.
 
+            .. note::
+                This object may be copied by the library.
+
             .. versionadded: 2.5
 
         Returns
@@ -441,6 +453,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             the name of the subcommand group. Defaults to the function name
         extras: Dict[:class:`str`, Any]
             A dict of user provided extras to attach to the subcommand group.
+
+            .. note::
+                This object may be copied by the library.
 
             .. versionadded: 2.5
 
@@ -621,6 +636,9 @@ def slash_command(
         If you're using :ref:`param_syntax`, you don't need to specify this.
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
 
         .. versionadded: 2.5
 
