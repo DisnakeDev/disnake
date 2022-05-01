@@ -68,7 +68,7 @@ async def game_autocomp(inter: disnake.CommandInteraction, string: str):
     # but for the purposes of this example it'll do
     games = ("Tic-tac-toe", "Chess", "Risk")
     return [
-        disnake.OptionChoice(Localized(game, key=f"GAME_{game.upper()}"), game)
+        Localized(game, key=f"GAME_{game.upper()}")
         for game in games
         if string.lower() in game.lower()
     ]

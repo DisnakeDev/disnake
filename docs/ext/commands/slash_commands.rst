@@ -588,7 +588,9 @@ Choices/Autocomplete
 
     async def autocomp_langs(inter: disnake.ApplicationCommandInteraction, user_input: str):
         return [
-            OptionChoice(Localized(lang, key=f"AUTOCOMP_{lang.upper()}"), lang)
+            # alternatively:
+            # `OptionChoice(Localized(lang, key=f"AUTOCOMP_{lang.upper()}"), lang)`
+            Localized(lang, key=f"AUTOCOMP_{lang.upper()}")
             for lang in LANGUAGES
             if user_input.lower() in lang
         ]
@@ -597,8 +599,10 @@ Choices/Autocomplete
     async def example(
         inter: disnake.ApplicationCommandInteraction,
         animal: str = commands.Param(choices=[
-            OptionChoice(Localized("Cat", key="OPTION_CAT"), "cat"),
-            OptionChoice(Localized("Dolphin", key="OPTION_DOLPHIN"), "dolphin"),
+            # alternatively:
+            # OptionChoice(Localized("Cat", key="OPTION_CAT"), "Cat")
+            Localized("Cat", key="OPTION_CAT"),
+            Localized("Dolphin", key="OPTION_DOLPHIN"),
         ]),
         language: str = commands.Param(autocomplete=autocomp_langs),
     ):

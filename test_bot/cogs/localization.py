@@ -1,6 +1,5 @@
 import random
 from pprint import pformat
-from typing import List
 
 import disnake
 from disnake import Localized
@@ -20,9 +19,9 @@ class Localizations(commands.Cog):
         choice: str = commands.Param(
             choices=[
                 # lookup keys for choices
-                disnake.OptionChoice(Localized("a", key="CHOICE_A"), "a"),
-                disnake.OptionChoice(Localized("o", key="CHOICE_O"), "o"),
-                disnake.OptionChoice(Localized("u", key="CHOICE_U"), "u"),
+                Localized("a", key="CHOICE_A"),
+                Localized("o", key="CHOICE_O"),
+                Localized("u", key="CHOICE_U"),
             ]
         ),
         other: str = commands.Param(
@@ -44,11 +43,13 @@ class Localizations(commands.Cog):
         await inter.response.send_message(f"```py\n{pformat(locals())}\n```")
 
     @localized_command.autocomplete("auto")
-    async def autocomp(self, inter: disnake.AppCmdInter, value: str) -> List[disnake.OptionChoice]:
+    async def autocomp(
+        self, inter: disnake.AppCmdInter, value: str
+    ) -> "disnake.app_commands.Choices":
         # not really autocomplete, only used for showing autocomplete localization
         x = list(map(str, range(1, 6)))
         random.shuffle(x)
-        return [disnake.OptionChoice(Localized(v, key=f"AUTOCOMP_{v}"), v) for v in x]
+        return [Localized(v, key=f"AUTOCOMP_{v}") for v in x]
 
     @commands.slash_command()
     async def localized_top_level(self, inter: disnake.AppCmdInter) -> None:

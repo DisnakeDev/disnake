@@ -63,6 +63,7 @@ if TYPE_CHECKING:
         List["OptionChoice"],
         List[ApplicationCommandOptionChoiceValue],
         Dict[str, ApplicationCommandOptionChoiceValue],
+        List[Localized[str]],
     ]
 
     APIApplicationCommand = Union["APIUserCommand", "APIMessageCommand", "APISlashCommand"]
@@ -278,7 +279,9 @@ class Option:
                 self.choices = [OptionChoice(name, value) for name, value in choices.items()]
             else:
                 for c in choices:
-                    if not isinstance(c, OptionChoice):
+                    if isinstance(c, Localized):
+                        c = OptionChoice(c, c.string)
+                    elif not isinstance(c, OptionChoice):
                         c = OptionChoice(str(c), c)
                     self.choices.append(c)
 
