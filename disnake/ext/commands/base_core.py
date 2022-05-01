@@ -201,7 +201,7 @@ class InvokableApplicationCommand(ABC):
         A member must have *all* these permissions to be able to invoke the command in a guild.
 
         This is a default value, the set of users/roles that may invoke this command can be
-        overridden by administrators on a guild-specific basis.
+        overridden by moderators on a guild-specific basis, disregarding this setting.
 
         If ``None`` is returned, it means everyone can use the command by default.
         If an empty :class:`.Permissions` object is returned (that is, all permissions set to ``False``),
@@ -613,7 +613,7 @@ def default_member_permissions(value: int = 0, **permissions: Literal[True]) -> 
     This would only allow members with :attr:`~.Permissions.manage_messages` *and*
     :attr:`~.Permissions.view_audit_log` permissions to use the command by default,
     however moderators can override this and allow/disallow specific users and
-    roles to use the command in their guilds on top of that.
+    roles to use the command in their guilds regardless of this setting.
 
     .. code-block:: python3
 
