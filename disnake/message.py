@@ -155,7 +155,7 @@ async def _edit_handler(
                 "Cannot mix suppress and suppress_embeds keyword arguments.\n"
                 + suppress_deprecated_msg
             )
-        utils.warn_deprecated(suppress_deprecated_msg, stacklevel=2)
+        utils.warn_deprecated(suppress_deprecated_msg, stacklevel=3)
         suppress_embeds = suppress
 
     payload: Dict[str, Any] = {}
