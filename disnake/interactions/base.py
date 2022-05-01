@@ -44,6 +44,7 @@ from ..errors import (
     ModalChainNotSupported,
     NotFound,
 )
+from ..flags import MessageFlags
 from ..guild import Guild
 from ..member import Member
 from ..message import Attachment, Message
@@ -540,6 +541,7 @@ class Interaction:
         components: Components = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        suppress_embeds: bool = False,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -590,6 +592,12 @@ class Interaction:
             Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
             is set to 15 minutes.
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+
+            .. versionadded:: 2.5
+
         delete_after: :class:`float`
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
@@ -619,6 +627,7 @@ class Interaction:
             components=components,
             tts=tts,
             ephemeral=ephemeral,
+            suppress_embeds=suppress_embeds,
             delete_after=delete_after,
         )
 
@@ -688,7 +697,7 @@ class InteractionResponse:
         ):
             defer_type = InteractionResponseType.deferred_channel_message.value
             if ephemeral:
-                data = {"flags": 64}
+                data = {"flags": MessageFlags.ephemeral.flag}
         elif parent.type is InteractionType.component:
             defer_type = InteractionResponseType.deferred_message_update.value
 
@@ -740,6 +749,7 @@ class InteractionResponse:
         components: Components = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        suppress_embeds: bool = False,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -780,6 +790,12 @@ class InteractionResponse:
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
             then it is silently ignored.
+
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+
+            .. versionadded:: 2.5
 
         Raises
         ------
@@ -843,8 +859,11 @@ class InteractionResponse:
         if content is not None:
             payload["content"] = str(content)
 
+        payload["flags"] = 0
+        if suppress_embeds:
+            payload["flags"] |= MessageFlags.suppress_embeds.flag
         if ephemeral:
-            payload["flags"] = 64
+            payload["flags"] |= MessageFlags.ephemeral.flag
 
         if view is not MISSING:
             payload["components"] = view.to_components()

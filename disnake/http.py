@@ -556,6 +556,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[List[components.Component]] = None,
+        flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
         payload: Dict[str, Any] = {}
@@ -587,6 +588,9 @@ class HTTPClient:
         if stickers:
             payload["sticker_ids"] = stickers
 
+        if flags is not None:
+            payload["flags"] = flags
+
         return self.request(r, json=payload)
 
     def send_typing(self, channel_id: Snowflake) -> Response[None]:
@@ -606,6 +610,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[List[components.Component]] = None,
+        flags: Optional[int] = None,
     ) -> Response[message.Message]:
         payload: Dict[str, Any] = {"tts": tts}
         if content:
@@ -624,6 +629,8 @@ class HTTPClient:
             payload["components"] = components
         if stickers:
             payload["sticker_ids"] = stickers
+        if flags is not None:
+            payload["flags"] = flags
 
         multipart = to_multipart_with_attachments(payload, files)
 
@@ -643,6 +650,7 @@ class HTTPClient:
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
         components: Optional[List[components.Component]] = None,
+        flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
         return self.send_multipart_helper(
@@ -657,6 +665,7 @@ class HTTPClient:
             message_reference=message_reference,
             stickers=stickers,
             components=components,
+            flags=flags,
         )
 
     def delete_message(
@@ -1202,14 +1211,14 @@ class HTTPClient:
         files: Optional[Sequence[File]] = None,
         reason: Optional[str] = None,
         **fields: Any,
-    ) -> Response[threads.Thread]:
-        valid_keys = (
-            # Thread fields
+    ) -> Response[threads.ForumThread]:
+        valid_thread_keys = (
             "name",
             "auto_archive_duration",
             "rate_limit_per_user",
             "type",
-            # Message fields
+        )
+        valid_message_keys = (
             "content",
             "embeds",
             "allowed_mentions",
@@ -1217,9 +1226,10 @@ class HTTPClient:
             "sticker_ids",
             "flags",
         )
-        payload = {k: v for k, v in fields.items() if k in valid_keys}
+        payload = {k: v for k, v in fields.items() if k in valid_thread_keys}
+        payload["message"] = {k: v for k, v in fields.items() if k in valid_message_keys}
         route = Route("POST", "/channels/{channel_id}/threads", channel_id=channel_id)
-        query_params = {"has_message": 1}
+        query_params = {"use_nested_fields": 1}
 
         if files:
             multipart = to_multipart_with_attachments(payload, files)
