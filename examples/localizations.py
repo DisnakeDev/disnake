@@ -1,3 +1,7 @@
+"""
+An example on how to set up localized application commands.
+"""
+
 from typing import Any
 
 import disnake
