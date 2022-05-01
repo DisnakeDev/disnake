@@ -1203,15 +1203,20 @@ class HTTPClient:
         reason: Optional[str] = None,
         **fields: Any,
     ) -> Response[threads.ForumThread]:
-        valid_thread_keys = {"name", "auto_archive_duration", "rate_limit_per_user", "type"}
-        valid_message_keys = {
+        valid_thread_keys = (
+            "name",
+            "auto_archive_duration",
+            "rate_limit_per_user",
+            "type",
+        )
+        valid_message_keys = (
             "content",
             "embeds",
             "allowed_mentions",
             "components",
             "sticker_ids",
             "flags",
-        }
+        )
         payload = {k: v for k, v in fields.items() if k in valid_thread_keys}
         payload["message"] = {k: v for k, v in fields.items() if k in valid_message_keys}
         route = Route("POST", "/channels/{channel_id}/threads", channel_id=channel_id)
