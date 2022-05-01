@@ -103,7 +103,7 @@ class InvokableApplicationCommand(ABC):
     These are not created manually, instead they are created via the
     decorator or functional interface.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~.InvokableSlashCommand`
     - :class:`~.InvokableMessageCommand`

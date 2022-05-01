@@ -333,7 +333,8 @@ class ApplicationCommand(ABC):
     """
     The base class for application commands.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
+
     - :class:`~.SlashCommand`
     - :class:`~.MessageCommand`
     - :class:`~.UserCommand`
