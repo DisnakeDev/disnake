@@ -628,7 +628,13 @@ def default_member_permissions(value: int = 0, **permissions: Literal[True]) -> 
     perms_value = Permissions(value, **permissions).value
 
     def decorator(func: T) -> T:
+        from .slash_core import SubCommand, SubCommandGroup
+
         if isinstance(func, InvokableApplicationCommand):
+            if isinstance(func, (SubCommand, SubCommandGroup)):
+                raise TypeError(
+                    "Cannot set `default_member_permissions` on subcommands or subcommand groups"
+                )
             func.body._default_member_permissions = perms_value
         else:
             func.__default_member_permissions__ = perms_value  # type: ignore

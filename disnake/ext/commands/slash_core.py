@@ -145,6 +145,11 @@ class SubCommandGroup(InvokableApplicationCommand):
         )
         self.qualified_name: str = ""
 
+        if hasattr(func, "__default_member_permissions__"):
+            raise TypeError(
+                "Cannot set `default_member_permissions` on subcommands or subcommand groups"
+            )
+
     @property
     def body(self) -> Option:
         return self.option
@@ -251,6 +256,11 @@ class SubCommand(InvokableApplicationCommand):
             options=options,
         )
         self.qualified_name = ""
+
+        if hasattr(func, "__default_member_permissions__"):
+            raise TypeError(
+                "Cannot set `default_member_permissions` on subcommands or subcommand groups"
+            )
 
     @property
     def body(self) -> Option:
