@@ -281,22 +281,22 @@ class MessageFlags(BaseFlags):
     @flag_value
     def crossposted(self):
         """:class:`bool`: Returns ``True`` if the message is the original crossposted message."""
-        return 1
+        return 1 << 0
 
     @flag_value
     def is_crossposted(self):
         """:class:`bool`: Returns ``True`` if the message was crossposted from another channel."""
-        return 2
+        return 1 << 1
 
     @flag_value
     def suppress_embeds(self):
         """:class:`bool`: Returns ``True`` if the message's embeds have been suppressed."""
-        return 4
+        return 1 << 2
 
     @flag_value
     def source_message_deleted(self):
         """:class:`bool`: Returns ``True`` if the source message for this crosspost has been deleted."""
-        return 8
+        return 1 << 3
 
     @flag_value
     def urgent(self):
@@ -304,7 +304,7 @@ class MessageFlags(BaseFlags):
 
         An urgent message is one sent by Discord Trust and Safety.
         """
-        return 16
+        return 1 << 4
 
     @flag_value
     def has_thread(self):
@@ -312,7 +312,7 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.0
         """
-        return 32
+        return 1 << 5
 
     @flag_value
     def ephemeral(self):
@@ -320,7 +320,7 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.0
         """
-        return 64
+        return 1 << 6
 
     @flag_value
     def loading(self):
@@ -329,7 +329,7 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.3
         """
-        return 128
+        return 1 << 7
 
     @flag_value
     def failed_to_mention_roles_in_thread(self):
@@ -338,7 +338,7 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.4
         """
-        return 256
+        return 1 << 8
 
 
 @fill_with_flags()
