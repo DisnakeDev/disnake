@@ -559,7 +559,7 @@ This would create the same command as the code above, though you're free to chan
         """
         await inter.response.send_message(f"{num} + 5 = {num + 5}")
 
-While not recommended, it is also possible to not use ``.json`` files at all and instead specify localizations directly in the code:
+While not recommended, it is also possible to avoid using ``.json`` files at all, and instead specify localizations directly in the code:
 
 .. code-block:: python3
 
