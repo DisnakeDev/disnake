@@ -27,6 +27,7 @@ from __future__ import annotations
 
 from typing import List, Literal, Optional, TypedDict
 
+from .message import Message
 from .snowflake import Snowflake
 
 ThreadType = Literal[10, 11, 12]
@@ -70,6 +71,10 @@ class Thread(_ThreadOptional):
     message_count: int
     rate_limit_per_user: int
     thread_metadata: ThreadMetadata
+
+
+class ForumThread(Thread):
+    message: Message
 
 
 class ThreadPaginationPayload(TypedDict):
