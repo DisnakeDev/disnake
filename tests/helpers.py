@@ -20,8 +20,13 @@ class freeze_time(ContextManager):
 
     def __init__(self, dt: Optional[datetime.datetime] = None):
         dt = dt or datetime.datetime.now(datetime.timezone.utc)
+        assert dt.tzinfo
+
+        def fake_now(tz=None):
+            return dt.astimezone(tz).replace(tzinfo=tz)
+
         self.mock_datetime = mock.MagicMock(wraps=datetime.datetime)
-        self.mock_datetime.now = dt.astimezone
+        self.mock_datetime.now = fake_now
 
     def __enter__(self) -> mock.MagicMock:
         self._mock = mock.patch.object(datetime, "datetime", self.mock_datetime)
