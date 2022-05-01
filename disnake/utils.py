@@ -62,6 +62,7 @@ from typing import (
     TypedDict,
     TypeVar,
     Union,
+    get_origin,
     overload,
 )
 from urllib.parse import parse_qs, urlencode
@@ -1092,10 +1093,9 @@ else:
 
 def flatten_literal_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
     params = []
-    literal_cls = type(Literal[0])
     for p in parameters:
-        if isinstance(p, literal_cls):
-            params.extend(p.__args__)
+        if get_origin(p) is Literal:
+            params.extend(_unique(flatten_literal_params(p.__args__)))
         else:
             params.append(p)
     return tuple(params)
