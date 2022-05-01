@@ -55,6 +55,7 @@ from .context_managers import Typing
 from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
 from .errors import ClientException, InvalidArgument
 from .file import File
+from .flags import MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .permissions import PermissionOverwrite, Permissions
@@ -2422,6 +2423,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
+        suppress_embeds: bool = MISSING,
         stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
@@ -2454,6 +2456,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         embeds: List[:class:`.Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
         file: :class:`.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
         files: List[:class:`.File`]
@@ -2520,6 +2525,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         elif params.files and not all(isinstance(file, File) for file in params.files):
             raise InvalidArgument("files parameter must be a list of File")
 
+        if suppress_embeds:
+            flags = MessageFlags.suppress_embeds.flag
+        else:
+            flags = 0
+
         try:
             data = await self._state.http.start_thread_in_forum_channel(
                 self.id,
@@ -2528,6 +2538,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 rate_limit_per_user=slowmode_delay or 0,
                 type=ChannelType.public_thread.value,
                 files=params.files,
+                flags=flags,
                 reason=reason,
                 **params.payload,
             )
