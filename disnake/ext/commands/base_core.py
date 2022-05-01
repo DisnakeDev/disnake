@@ -149,6 +149,12 @@ class InvokableApplicationCommand(ABC):
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
 
+        if "default_permission" in kwargs:
+            raise TypeError(
+                "`default_permission` is deprecated, "
+                "see `default_member_permissions` and `dm_permission` instead"
+            )
+
         try:
             checks = func.__commands_checks__
             checks.reverse()

@@ -418,9 +418,6 @@ class ApplicationCommand(ABC):
         else:
             data["default_member_permissions"] = str(self._default_member_permissions)
 
-        # this is for backwards compatibility, and can be removed once its ignored by clients and the api
-        data["default_permission"] = True
-
         return data
 
 
@@ -432,6 +429,8 @@ class _APIApplicationCommandMixin:
         self.application_id: int = int(data["application_id"])
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.version: int = int(data["version"])
+        # deprecated, but kept until API stops returning this field
+        self.default_permission = data.get("default_permission") is not False
 
 
 class UserCommand(ApplicationCommand):
