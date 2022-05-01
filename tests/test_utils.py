@@ -1,9 +1,10 @@
 import asyncio
+import datetime
 import inspect
 import os
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta, timezone
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 from unittest import mock
 
@@ -51,7 +52,7 @@ def test_cached_slot_property():
 
 def test_parse_time():
     assert utils.parse_time(None) is None
-    assert utils.parse_time("2021-08-29T13:50:00+00:00") == datetime(
+    assert utils.parse_time("2021-08-29T13:50:00+00:00") == datetime.datetime(
         2021, 8, 29, 13, 50, 0, tzinfo=timezone.utc
     )
 
@@ -132,16 +133,16 @@ def test_parse_token():
 
     parts = utils.parse_token(token)
     assert parts[0] == 908281298555109396
-    assert parts[1] == datetime(2021, 11, 11, 9, 5, 36, tzinfo=timezone.utc)
+    assert parts[1] == datetime.datetime(2021, 11, 11, 9, 5, 36, tzinfo=timezone.utc)
     assert parts[2] == bytes.fromhex("4c1ecd83a0ce9d50e5a4c4b889d8c6a6db2b7858")
 
 
 @pytest.mark.parametrize(
     ("num", "expected"),
     [
-        (0, datetime(2015, 1, 1, tzinfo=timezone.utc)),
-        (881536165478499999, datetime(2021, 8, 29, 13, 50, 0, tzinfo=timezone.utc)),
-        (10000000000000000000, datetime(2090, 7, 20, 17, 49, 51, tzinfo=timezone.utc)),
+        (0, datetime.datetime(2015, 1, 1, tzinfo=timezone.utc)),
+        (881536165478499999, datetime.datetime(2021, 8, 29, 13, 50, 0, tzinfo=timezone.utc)),
+        (10000000000000000000, datetime.datetime(2090, 7, 20, 17, 49, 51, tzinfo=timezone.utc)),
     ],
 )
 def test_snowflake_time(num, expected):
@@ -151,8 +152,8 @@ def test_snowflake_time(num, expected):
 @pytest.mark.parametrize(
     ("dt", "expected"),
     [
-        (datetime(2015, 1, 1, tzinfo=timezone.utc), 0),
-        (datetime(2021, 8, 29, 13, 50, 0, tzinfo=timezone.utc), 881536165478400000),
+        (datetime.datetime(2015, 1, 1, tzinfo=timezone.utc), 0),
+        (datetime.datetime(2021, 8, 29, 13, 50, 0, tzinfo=timezone.utc), 881536165478400000),
     ],
 )
 def test_time_snowflake(dt, expected):
@@ -740,7 +741,7 @@ def test_resolve_annotation_literal():
     with pytest.raises(
         TypeError, match=r"Literal arguments must be of type str, int, bool, or NoneType."
     ):
-        utils.resolve_annotation(Literal[datetime.now(), 3], globals(), locals(), {})  # type: ignore
+        utils.resolve_annotation(Literal[datetime.datetime.now(), 3], globals(), locals(), {})  # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -748,7 +749,7 @@ def test_resolve_annotation_literal():
     [
         (0, "F", "<t:0:F>"),
         (1630245000.1234, "T", "<t:1630245000:T>"),
-        (datetime(2021, 8, 29, 13, 50, 0, tzinfo=timezone.utc), "f", "<t:1630245000:f>"),
+        (datetime.datetime(2021, 8, 29, 13, 50, 0, tzinfo=timezone.utc), "f", "<t:1630245000:f>"),
     ],
 )
 def test_format_dt(dt, style, expected):
