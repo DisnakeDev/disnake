@@ -3,6 +3,7 @@ import datetime
 import inspect
 import os
 import sys
+import warnings
 from dataclasses import dataclass
 from datetime import timedelta, timezone
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
@@ -70,18 +71,18 @@ def test_copy_doc():
     assert inspect.signature(func) == inspect.signature(func2)
 
 
-@mock.patch.object(utils, "warn_deprecated")
+@mock.patch.object(warnings, "warn")
 @pytest.mark.parametrize(
     ("instead", "msg"),
     [(None, "stuff is deprecated."), ("other", "stuff is deprecated, use other instead.")],
 )
-def test_deprecated(mock_warn_deprecated: mock.Mock, instead, msg):
+def test_deprecated(mock_warn: mock.Mock, instead, msg):
     @utils.deprecated(instead)
     def stuff(num: int) -> int:
         return num
 
     stuff(42)
-    mock_warn_deprecated.assert_called_once_with(msg, stacklevel=2)
+    mock_warn.assert_called_once_with(msg, stacklevel=3, category=DeprecationWarning)
 
     assert stuff(3) == 3
 
@@ -200,6 +201,7 @@ def test_get():
     assert utils.get(lst, value=789) == lst[2]
     assert utils.get(lst, a__value=42) == lst[0]
 
+    assert utils.get(lst, value=456, a__value=42) is lst[1]
     assert utils.get(lst, value=789, a__value=42) is None
 
 
@@ -390,7 +392,9 @@ def test_get_slots():
 @pytest.mark.parametrize(
     ("tz", "delta", "expected"),
     [
-        # timezones
+        # naive datetime
+        (utils.MISSING, 7, 7),
+        # aware datetime
         (None, 7, 7),
         (timezone.utc, 7, 7),
         (timezone(timedelta(hours=-9)), 7, 7),
@@ -400,7 +404,9 @@ def test_get_slots():
 )
 @helpers.freeze_time()
 def test_compute_timedelta(tz, delta, expected):
-    dt = utils.utcnow().astimezone(tz)
+    dt = datetime.datetime.now()
+    if tz is not utils.MISSING:
+        dt = dt.astimezone(tz)
     assert utils.compute_timedelta(dt + timedelta(seconds=delta)) == expected
 
 
@@ -725,16 +731,18 @@ def test_normalise_optional_params(params, expected):
         ),
     ],
 )
-def test_resolve_annotation(tp, expected, expected_cache):
-    cache = {}
+@pytest.mark.parametrize("use_cache", [False, True])
+def test_resolve_annotation(tp, expected, expected_cache, use_cache):
+    cache = {} if use_cache else None
     result = utils.resolve_annotation(tp, globals(), locals(), cache)
     assert result == expected
 
-    # check if state is what we expect
-    assert bool(cache) == expected_cache
-    # if it's a forward ref, resolve again and ensure cache is used
-    if isinstance(tp, str):
-        assert utils.resolve_annotation(tp, globals(), locals(), cache) is result
+    if use_cache:
+        # check if state is what we expect
+        assert bool(cache) == expected_cache
+        # if it's a forward ref, resolve again and ensure cache is used
+        if isinstance(tp, str):
+            assert utils.resolve_annotation(tp, globals(), locals(), cache) is result
 
 
 def test_resolve_annotation_literal():
