@@ -27,4 +27,7 @@ jobs:
       run: python -m pip install -r requirements.txt -r requirements_dev.txt
 
     - name: Run pytest
+      # use non-utc timezone, to test time/date-dependent features properly
+      env:
+        TZ: "America/New_York"
       run: task test
