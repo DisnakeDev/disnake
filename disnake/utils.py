@@ -1129,7 +1129,7 @@ def evaluate_annotation(
     if hasattr(tp, "__args__"):
         implicit_str = True
         is_literal = False
-        args = tp.__args__
+        orig_args = args = tp.__args__
         if not hasattr(tp, "__origin__"):
             if tp.__class__ is UnionType:
                 converted = Union[args]  # type: ignore
@@ -1158,7 +1158,7 @@ def evaluate_annotation(
         ):
             raise TypeError("Literal arguments must be of type str, int, bool, or NoneType.")
 
-        if evaluated_args == args:
+        if evaluated_args == orig_args:
             return tp
 
         try:
