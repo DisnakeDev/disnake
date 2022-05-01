@@ -660,9 +660,12 @@ class InteractionResponse:
 
     async def defer(self, *, ephemeral: bool = False, with_message: bool = False) -> None:
         """|coro|
+
         Defers the interaction response.
+
         This is typically used when the interaction is acknowledged
         and a secondary action will be done later.
+
         Parameters
         ----------
         ephemeral: :class:`bool`
@@ -672,7 +675,9 @@ class InteractionResponse:
         with_message: :class:`bool`
             Whether the response will be a message with thinking state (bot is thinking...).
             This only applies to interactions of type :attr:`InteractionType.component`.
+
             .. versionadded:: 2.4
+
         Raises
         ------
         HTTPException
