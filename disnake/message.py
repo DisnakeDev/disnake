@@ -1486,7 +1486,8 @@ class Message(Hashable):
             The ``suppress`` keyword-only parameter was added.
 
         .. versionchanged:: 2.5
-            The ``suppress`` keyword-only parameter was deprecated for ``suppress_embeds``.
+            The ``suppress`` keyword-only parameter was deprecated
+            in favor of ``suppress_embeds``.
 
         .. note::
             If the original message has embeds with images that were created from local files
@@ -2063,7 +2064,8 @@ class PartialMessage(Hashable):
             :class:`disnake.Message` is always returned.
 
         .. versionchanged:: 2.5
-            The ``suppress`` keyword-only parameter was deprecated for ``suppress_embeds``.
+            The ``suppress`` keyword-only parameter was deprecated
+            in favor of ``suppress_embeds``.
 
         .. note::
             If the original message has embeds with images that were created from local files
