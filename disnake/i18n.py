@@ -90,6 +90,8 @@ class Localized(Generic[StringT]):
 
     Exactly one of ``key`` or ``data`` must be provided.
 
+    There is an alias for this called ``Localised``.
+
     .. versionadded:: 2.5
 
     Parameters
@@ -198,7 +200,7 @@ Localised = Localized
 
 class LocalizationValue:
     """
-    Internal container type for (pending) localization data
+    Container type for (pending) localization data
 
     .. versionadded:: 2.5
     """
