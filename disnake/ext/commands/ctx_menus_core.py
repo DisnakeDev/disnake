@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence
 
 from disnake.app_commands import MessageCommand, UserCommand
 from disnake.i18n import Localized
@@ -70,6 +70,13 @@ class InvokableUserCommand(InvokableApplicationCommand):
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
     """
 
     def __init__(
@@ -147,6 +154,13 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
     """
 
     def __init__(
@@ -201,6 +215,7 @@ def user_command(
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
+    extras: Dict[str, Any] = None,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
@@ -221,6 +236,13 @@ def user_command(
     guild_ids: Sequence[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
 
     Returns
     -------
@@ -241,6 +263,7 @@ def user_command(
             default_permission=default_permission,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
+            extras=extras,
             **kwargs,
         )
 
@@ -253,6 +276,7 @@ def message_command(
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
+    extras: Dict[str, Any] = None,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
     """A shortcut decorator that builds a message command.
@@ -273,6 +297,13 @@ def message_command(
     guild_ids: Sequence[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
 
     Returns
     -------
@@ -293,6 +324,7 @@ def message_command(
             default_permission=default_permission,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
+            extras=extras,
             **kwargs,
         )
 

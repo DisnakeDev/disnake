@@ -127,6 +127,13 @@ class SubCommandGroup(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the subcommand group.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
     """
 
     def __init__(
@@ -157,6 +164,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: list = None,
         connectors: dict = None,
+        extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
         """
@@ -176,6 +184,7 @@ class SubCommandGroup(InvokableApplicationCommand):
                 description=description,
                 options=options,
                 connectors=connectors,
+                extras=extras,
                 **kwargs,
             )
             qualified_name = self.qualified_name or self.name
@@ -215,6 +224,13 @@ class SubCommand(InvokableApplicationCommand):
         event.
     connectors: Dict[:class:`str`, :class:`str`]
         A mapping of option names to function parameter names, mainly for internal processes.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the subcommand.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
     """
 
     def __init__(
@@ -328,6 +344,13 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         A mapping of option names to function parameter names, mainly for internal processes.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
     """
 
     def __init__(
@@ -384,6 +407,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: list = None,
         connectors: dict = None,
+        extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommand]:
         """
@@ -410,6 +434,13 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``
+        extras: Dict[:class:`str`, Any]
+            A dict of user provided extras to attach to the subcommand.
+
+            .. note::
+                This object may be copied by the library.
+
+            .. versionadded: 2.5
 
         Returns
         -------
@@ -426,6 +457,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 description=description,
                 options=options,
                 connectors=connectors,
+                extras=extras,
                 **kwargs,
             )
             new_func.qualified_name = f"{self.qualified_name} {new_func.name}"
@@ -438,6 +470,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     def sub_command_group(
         self,
         name: LocalizedOptional = None,
+        extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
         """
@@ -450,6 +483,13 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
             .. versionchanged:: 2.5
                 Added support for localizations.
+        extras: Dict[:class:`str`, Any]
+            A dict of user provided extras to attach to the subcommand group.
+
+            .. note::
+                This object may be copied by the library.
+
+            .. versionadded: 2.5
 
         Returns
         -------
@@ -463,6 +503,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             new_func = SubCommandGroup(
                 func,
                 name=name,
+                extras=extras,
                 **kwargs,
             )
             new_func.qualified_name = f"{self.qualified_name} {new_func.name}"
@@ -602,6 +643,7 @@ def slash_command(
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
     auto_sync: bool = True,
+    extras: Dict[str, Any] = None,
     **kwargs,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
     """A decorator that builds a slash command.
@@ -637,6 +679,13 @@ def slash_command(
         you don't have to specify the connectors. Connectors template:
         ``{"option-name": "param_name", ...}``.
         If you're using :ref:`param_syntax`, you don't need to specify this.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
 
     Returns
     -------
@@ -660,6 +709,7 @@ def slash_command(
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,
+            extras=extras,
             **kwargs,
         )
 

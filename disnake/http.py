@@ -94,6 +94,7 @@ if TYPE_CHECKING:
         user,
         voice,
         webhook,
+        welcome_screen,
         widget,
     )
     from .types.snowflake import Snowflake, SnowflakeList
@@ -2095,6 +2096,31 @@ class HTTPClient:
             event_id=event_id,
         )
         return self.request(route, params=params)
+
+    # Welcome screens
+
+    def get_guild_welcome_screen(
+        self, guild_id: Snowflake
+    ) -> Response[welcome_screen.WelcomeScreen]:
+        r = Route("GET", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
+        return self.request(r)
+
+    def edit_guild_welcome_screen(
+        self,
+        guild_id: Snowflake,
+        *,
+        reason: Optional[str] = None,
+        **kwargs,
+    ) -> Response[welcome_screen.WelcomeScreen]:
+        valid_keys = (
+            "enabled",
+            "welcome_channels",
+            "description",
+        )
+        payload = {k: v for k, v in kwargs.items() if k in valid_keys}
+
+        r = Route("PATCH", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
+        return self.request(r, json=payload, reason=reason)
 
     # Application commands (global)
 
