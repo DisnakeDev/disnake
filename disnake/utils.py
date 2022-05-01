@@ -1316,6 +1316,12 @@ def as_valid_locale(locale: str) -> Optional[str]:
     try:
         Locale(locale)
     except ValueError:
-        return None
+        pass
     else:
         return locale
+
+    # didn't match, try language without country code (e.g. `en` instead of `en-US`)
+    language = re.split(r"[-_]", locale)[0]
+    if language != locale:
+        return as_valid_locale(language)
+    return None
