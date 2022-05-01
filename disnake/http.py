@@ -2140,6 +2140,7 @@ class HTTPClient:
         with_localizations: bool = True,
     ) -> Response[List[interactions.ApplicationCommand]]:
         params: Dict[str, Any] = {}
+        # the API currently interprets any non-empty value as truthy
         if with_localizations:
             params["with_localizations"] = int(with_localizations)
 
@@ -2212,6 +2213,7 @@ class HTTPClient:
         with_localizations: bool = True,
     ) -> Response[List[interactions.ApplicationCommand]]:
         params: Dict[str, Any] = {}
+        # the API currently interprets any non-empty value as truthy
         if with_localizations:
             params["with_localizations"] = int(with_localizations)
 

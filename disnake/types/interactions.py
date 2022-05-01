@@ -50,7 +50,6 @@ class _ApplicationCommandOptional(TypedDict, total=False):
     guild_id: Snowflake
     options: List[ApplicationCommandOption]
     default_permission: bool
-    # contrary to the API docs, these are actually nullable
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
 
