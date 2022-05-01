@@ -31,7 +31,6 @@ __all__ = (
     "Enum",
     "ChannelType",
     "MessageType",
-    "VoiceRegion",
     "SpeakingState",
     "VerificationLevel",
     "ContentFilter",
@@ -257,25 +256,6 @@ class PartyType(Enum):
     watch_together = 880218394199220334
     sketch_heads = 902271654783242291
     ocho = 832025144389533716
-
-
-class VoiceRegion(Enum):
-    us_west = "us-west"
-    us_east = "us-east"
-    us_south = "us-south"
-    us_central = "us-central"
-    singapore = "singapore"
-    sydney = "sydney"
-    rotterdam = "rotterdam"
-    brazil = "brazil"
-    hongkong = "hongkong"
-    russia = "russia"
-    japan = "japan"
-    southafrica = "southafrica"
-    india = "india"
-
-    def __str__(self):
-        return self.value
 
 
 class SpeakingState(Enum):
