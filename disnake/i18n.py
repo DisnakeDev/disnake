@@ -58,6 +58,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     "Localized",
+    "Localised",
     "LocalizationValue",
     "LocalizationProtocol",
     "LocalizationStore",
@@ -190,6 +191,9 @@ class Localized(Generic[StringT]):
 
         # this is safe, see above
         return self
+
+
+Localised = Localized
 
 
 class LocalizationValue:
