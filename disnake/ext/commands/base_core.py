@@ -139,7 +139,7 @@ class InvokableApplicationCommand(ABC):
 
     def __new__(cls, *args: Any, **kwargs: Any) -> InvokableApplicationCommand:
         self = super().__new__(cls)
-        self.__original_kwargs__ = kwargs.copy()
+        self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
     def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
@@ -206,7 +206,6 @@ class InvokableApplicationCommand(ABC):
             # _max_concurrency won't be None at this point
             other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
         if self.permissions != other.permissions:
-            # TODO: Maybe update instead?
             other.permissions = self.permissions.copy()
         if self.guild_ids != other.guild_ids:
             other.guild_ids = None if self.guild_ids is None else self.guild_ids.copy()
@@ -220,14 +219,14 @@ class InvokableApplicationCommand(ABC):
         :class:`InvokableApplicationCommand`
             A new instance of this application command.
         """
-        copy = type(self)(self.callback, name=self.name, **self.__original_kwargs__)
+        copy = type(self)(self.callback, **self.__original_kwargs__)
         return self._ensure_assignment_on_copy(copy)
 
     def _update_copy(self: AppCommandT, kwargs: Dict[str, Any]) -> AppCommandT:
         if kwargs:
             kw = kwargs.copy()
             kw.update(self.__original_kwargs__)
-            copy = type(self)(self.callback, name=self.name, **kw)
+            copy = type(self)(self.callback, **kw)
             return self._ensure_assignment_on_copy(copy)
         else:
             return self.copy()

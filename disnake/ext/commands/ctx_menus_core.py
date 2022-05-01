@@ -102,24 +102,6 @@ class InvokableUserCommand(InvokableApplicationCommand):
             other.guild_ids = self.guild_ids.copy()
         return other
 
-    def copy(self: UserCommandT) -> UserCommandT:
-        """Create a copy of this user command.
-
-        Returns
-        -------
-        :class:`SubCommand`
-            A new instance of this user command.
-        """
-        copy = type(self)(
-            self.callback,
-            name=self.name,
-            default_permission=self.body.default_permission,
-            guild_ids=self.guild_ids,
-            auto_sync=self.auto_sync,
-            **self.__original_kwargs__,
-        )
-        return self._ensure_assignment_on_copy(copy)
-
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
     ) -> None:
@@ -205,24 +187,6 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         if self.guild_ids and self.guild_ids != other.guild_ids:
             other.guild_ids = self.guild_ids.copy()
         return other
-
-    def copy(self: MessageCommandT) -> MessageCommandT:
-        """Create a copy of this message command.
-
-        Returns
-        -------
-        :class:`SubCommand`
-            A new instance of this message command.
-        """
-        copy = type(self)(
-            self.callback,
-            name=self.name,
-            default_permission=self.body.default_permission,
-            guild_ids=self.guild_ids,
-            auto_sync=self.auto_sync,
-            **self.__original_kwargs__,
-        )
-        return self._ensure_assignment_on_copy(copy)
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError

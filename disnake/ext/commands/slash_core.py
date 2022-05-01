@@ -273,24 +273,6 @@ class SubCommand(InvokableApplicationCommand):
             other.qualified_name = self.qualified_name
         return other
 
-    def copy(self: SubCommandT) -> SubCommandT:
-        """Create a copy of this slash subcommand.
-
-        Returns
-        -------
-        :class:`SubCommand`
-            A new instance of this subcommand.
-        """
-        copy = type(self)(
-            self.callback,
-            name=self.name,
-            description=self.description,
-            options=self.body.options,
-            connectors=self.connectors,
-            **self.__original_kwargs__,
-        )
-        return self._ensure_assignment_on_copy(copy)
-
     @property
     def description(self) -> str:
         return self.body.description
@@ -429,27 +411,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             # Allows overriding the default description cog-wide.
             other.body.description = self.description
         return other
-
-    def copy(self: SlashCommandT) -> SlashCommandT:
-        """Create a copy of this slash subcommand.
-
-        Returns
-        -------
-        :class:`SubCommand`
-            A new instance of this slash command.
-        """
-        copy = type(self)(
-            self.callback,
-            name=self.name,
-            description=self.body.description,
-            options=self.body.options,
-            default_permission=self.body.default_permission,
-            guild_ids=self.guild_ids,
-            connectors=self.connectors,
-            auto_sync=self.auto_sync,
-            **self.__original_kwargs__,
-        )
-        return self._ensure_assignment_on_copy(copy)
 
     @property
     def description(self) -> str:
