@@ -584,17 +584,6 @@ Choices/Autocomplete
 
 .. code-block:: python3
 
-    LANGUAGES = ["english", "german", "spanish", "japanese"]
-
-    async def autocomp_langs(inter: disnake.ApplicationCommandInteraction, user_input: str):
-        return [
-            # alternatively:
-            # `OptionChoice(Localized(lang, key=f"AUTOCOMP_{lang.upper()}"), lang)`
-            Localized(lang, key=f"AUTOCOMP_{lang.upper()}")
-            for lang in LANGUAGES
-            if user_input.lower() in lang
-        ]
-
     @bot.slash_command()
     async def example(
         inter: disnake.ApplicationCommandInteraction,
@@ -607,6 +596,17 @@ Choices/Autocomplete
         language: str = commands.Param(autocomplete=autocomp_langs),
     ):
         ...
+
+    @example.autocomplete("language")
+    async def language_autocomp(inter: disnake.ApplicationCommandInteraction, user_input: str):
+        languages = ("english", "german", "spanish", "japanese")
+        return [
+            # alternatively:
+            # `OptionChoice(Localized(lang, key=f"AUTOCOMP_{lang.upper()}"), lang)`
+            Localized(lang, key=f"AUTOCOMP_{lang.upper()}")
+            for lang in languages
+            if user_input.lower() in lang
+        ]
 
 Yet again, with a file like ``locale/de.json`` containing localizations like this:
 
