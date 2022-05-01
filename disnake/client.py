@@ -2185,7 +2185,9 @@ class Client:
     # Application commands (global)
 
     async def fetch_global_commands(
-        self, *, with_localizations: bool = True
+        self,
+        *,
+        with_localizations: bool = True,
     ) -> List[APIApplicationCommand]:
         """|coro|
 
@@ -2312,7 +2314,10 @@ class Client:
     # Application commands (guild)
 
     async def fetch_guild_commands(
-        self, guild_id: int, *, with_localizations: bool = True
+        self,
+        guild_id: int,
+        *,
+        with_localizations: bool = True,
     ) -> List[APIApplicationCommand]:
         """|coro|
 
