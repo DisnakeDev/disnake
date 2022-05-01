@@ -331,7 +331,13 @@ class Option:
 
 class ApplicationCommand(ABC):
     """
-    The base class for application commands
+    The base class for application commands.
+
+    The following classes implement this ABC:
+
+    - :class:`~.SlashCommand`
+    - :class:`~.MessageCommand`
+    - :class:`~.UserCommand`
 
     Attributes
     ----------
