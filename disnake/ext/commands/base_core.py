@@ -647,6 +647,10 @@ def default_member_permissions(value: int = 0, **permissions: Literal[True]) -> 
                 raise TypeError(
                     "Cannot set `default_member_permissions` on subcommands or subcommand groups"
                 )
+            if func.body._default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both parameter and decorator"
+                )
             func.body._default_member_permissions = perms_value
         else:
             func.__default_member_permissions__ = perms_value  # type: ignore

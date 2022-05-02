@@ -101,6 +101,10 @@ class InvokableUserCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
         else:
+            if default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both parameter and decorator"
+                )
             default_member_permissions = Permissions(default_perms)
 
         self.body = UserCommand(
@@ -195,6 +199,10 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
         else:
+            if default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both parameter and decorator"
+                )
             default_member_permissions = Permissions(default_perms)
 
         self.body = MessageCommand(
