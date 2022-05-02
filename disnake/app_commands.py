@@ -437,11 +437,6 @@ class ApplicationCommand(ABC):
         Whether this command can be used in DMs.
 
         .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
-
-        .. versionadded:: 2.5
     """
 
     __repr_info__: ClassVar[Tuple[str, ...]] = (
