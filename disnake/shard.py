@@ -46,7 +46,6 @@ from .state import AutoShardedConnectionState
 
 if TYPE_CHECKING:
     from .activity import BaseActivity
-    from .enums import Status
     from .gateway import DiscordWebSocket
 
     EI = TypeVar("EI", bound="EventItem")

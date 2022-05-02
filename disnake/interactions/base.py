@@ -67,13 +67,7 @@ if TYPE_CHECKING:
     from aiohttp import ClientSession
 
     from ..app_commands import Choices
-    from ..channel import (
-        CategoryChannel,
-        PartialMessageable,
-        StageChannel,
-        TextChannel,
-        VoiceChannel,
-    )
+    from ..channel import CategoryChannel, StageChannel, TextChannel, VoiceChannel
     from ..client import Client
     from ..embeds import Embed
     from ..ext.commands import AutoShardedBot, Bot

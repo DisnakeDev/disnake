@@ -60,7 +60,6 @@ __all__ = (
 
 if TYPE_CHECKING:
     from .abc import Messageable, Snowflake
-    from .audit_logs import AuditLogEntry
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
     from .member import Member

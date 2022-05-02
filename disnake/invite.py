@@ -44,7 +44,6 @@ __all__ = (
 if TYPE_CHECKING:
     from .abc import GuildChannel
     from .guild import Guild
-    from .guild_scheduled_event import GuildScheduledEvent
     from .state import ConnectionState
     from .types.channel import PartialChannel as InviteChannelPayload
     from .types.guild import GuildFeature
