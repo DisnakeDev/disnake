@@ -4111,38 +4111,6 @@ Message
 .. autoclass:: Message()
     :members:
 
-ApplicationCommand
-~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: ApplicationCommand
-
-.. autoclass:: ApplicationCommand()
-    :members:
-
-SlashCommand
-~~~~~~~~~~~~
-
-.. attributetable:: SlashCommand
-
-.. autoclass:: SlashCommand()
-    :members:
-
-UserCommand
-~~~~~~~~~~~
-
-.. attributetable:: UserCommand
-
-.. autoclass:: UserCommand()
-    :members:
-
-MessageCommand
-~~~~~~~~~~~~~~
-
-.. attributetable:: MessageCommand
-
-.. autoclass:: MessageCommand()
-    :members:
-
 APISlashCommand
 ~~~~~~~~~~~~~~~
 
@@ -4165,22 +4133,6 @@ APIMessageCommand
 .. attributetable:: APIMessageCommand
 
 .. autoclass:: APIMessageCommand()
-    :members:
-
-Option
-~~~~~~
-
-.. attributetable:: Option
-
-.. autoclass:: Option()
-    :members:
-
-OptionChoice
-~~~~~~~~~~~~
-
-.. attributetable:: OptionChoice
-
-.. autoclass:: OptionChoice()
     :members:
 
 ApplicationCommandPermissions
@@ -4956,6 +4908,54 @@ PartialMessage
 .. attributetable:: PartialMessage
 
 .. autoclass:: PartialMessage
+    :members:
+
+ApplicationCommand
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationCommand
+
+.. autoclass:: ApplicationCommand()
+    :members:
+
+SlashCommand
+~~~~~~~~~~~~
+
+.. attributetable:: SlashCommand
+
+.. autoclass:: SlashCommand()
+    :members:
+
+UserCommand
+~~~~~~~~~~~
+
+.. attributetable:: UserCommand
+
+.. autoclass:: UserCommand()
+    :members:
+
+MessageCommand
+~~~~~~~~~~~~~~
+
+.. attributetable:: MessageCommand
+
+.. autoclass:: MessageCommand()
+    :members:
+
+Option
+~~~~~~
+
+.. attributetable:: Option
+
+.. autoclass:: Option()
+    :members:
+
+OptionChoice
+~~~~~~~~~~~~
+
+.. attributetable:: OptionChoice
+
+.. autoclass:: OptionChoice()
     :members:
 
 SelectOption
