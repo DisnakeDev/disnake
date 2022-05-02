@@ -3971,7 +3971,10 @@ class Guild(Hashable):
         Parameters
         ----------
         command_id: :class:`int`
-            The ID of the application command.
+            The ID of the application command, or the application ID to fetch application-wide permissions.
+
+            .. versionchanged:: 2.5
+                Can now also fetch application-wide permissions.
 
         Returns
         -------

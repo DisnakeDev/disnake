@@ -978,6 +978,9 @@ class ApplicationCommandPermissions:
 class GuildApplicationCommandPermissions:
     """Represents application command permissions in a guild.
 
+    .. versionchanged:: 2.5
+        Can now also represent application-wide permissions that apply to every command by default.
+
     Attributes
     ----------
     id: :class:`int`
