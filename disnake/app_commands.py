@@ -435,6 +435,13 @@ class ApplicationCommand(ABC):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
+    default_member_permissions: Optional[:class:`Permissions`]
+        The default required member permissions for this command.
+
+        .. versionadded:: 2.5
     """
 
     __repr_info__: ClassVar[Tuple[str, ...]] = (
@@ -558,6 +565,13 @@ class UserCommand(ApplicationCommand):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
+    default_member_permissions: Optional[:class:`Permissions`]
+        The default required member permissions for this command.
+
+        .. versionadded:: 2.5
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -593,6 +607,14 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
+    default_member_permissions: Optional[:class:`Permissions`]
+        The default required member permissions for this command.
+
+        .. versionadded:: 2.5
+
     id: :class:`int`
         The user command's ID.
     application_id: :class:`int`
@@ -635,6 +657,13 @@ class MessageCommand(ApplicationCommand):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
+    default_member_permissions: Optional[:class:`Permissions`]
+        The default required member permissions for this command.
+
+        .. versionadded:: 2.5
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -670,6 +699,14 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
+    default_member_permissions: Optional[:class:`Permissions`]
+        The default required member permissions for this command.
+
+        .. versionadded:: 2.5
+
     id: :class:`int`
         The message command's ID.
     application_id: :class:`int`
@@ -719,6 +756,14 @@ class SlashCommand(ApplicationCommand):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
+    default_member_permissions: Optional[:class:`Permissions`]
+        The default required member permissions for this command.
+
+        .. versionadded:: 2.5
+
     options: List[:class:`Option`]
         The list of options the slash command has.
     """
@@ -836,6 +881,14 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
+    default_member_permissions: Optional[:class:`Permissions`]
+        The default required member permissions for this command.
+
+        .. versionadded:: 2.5
+
     id: :class:`int`
         The slash command's ID.
     options: List[:class:`Option`]
