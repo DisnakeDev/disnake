@@ -597,7 +597,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                     # User has an option to cancel the global error handler by returning True
         finally:
             if stop_propagation:
-                return
+                return  # noqa: B012
             inter.bot.dispatch("slash_command_error", inter, error)
 
     async def _call_autocompleter(

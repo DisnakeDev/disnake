@@ -19,7 +19,9 @@ exclude =
 # For error codes, see this https://flake8.pycqa.org/en/latest/user/error-codes.html
 ignore =
     # not compatiable with black
-    E203, W503,
+    E203,W503,
+    # ignore linebreak after `/`
+    W504,
     # line too long. Acceptable at the moment since these are mostly comments
     E501,
     # assigning lambdas to variables
@@ -31,9 +33,12 @@ ignore =
     # ignore try-except-pass. Bare excepts are caught with B001 and E722
     S110,
     # ignore using setattr and getattr with constants
-    B009,B010
+    B009,B010,
     # ignore escaping in docstrings: temporary
-    W605
+    W605,
+    # ignore multiple `##` starting a comment
+    E266,
+
 per-file-ignores =
     # unused imports, star imports
     */__init__.py: F401, F403
