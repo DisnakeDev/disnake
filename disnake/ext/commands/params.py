@@ -622,7 +622,7 @@ class ParamInfo:
         )
 
 
-def safe_call(function: Callable[..., T], *possible_args: Any, **possible_kwargs: Any) -> T:
+def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwargs: Any) -> T:
     """Calls a function without providing any extra unexpected arguments"""
     MISSING = object()
     sig = signature(function)
@@ -769,6 +769,7 @@ def format_kwargs(
     interaction: CommandInteraction,
     cog_param: str = None,
     inter_param: str = None,
+    /,
     *args: Any,
     **kwargs: Any,
 ) -> Dict[str, Any]:
@@ -793,7 +794,7 @@ def format_kwargs(
 
 
 async def run_injections(
-    injections: Dict[str, Injection], interaction: CommandInteraction, *args: Any, **kwargs: Any
+    injections: Dict[str, Injection], interaction: CommandInteraction, /, *args: Any, **kwargs: Any
 ) -> Dict[str, Any]:
     """Run and resolve a list of injections"""
 
@@ -805,7 +806,7 @@ async def run_injections(
 
 
 async def call_param_func(
-    function: Callable, interaction: CommandInteraction, *args: Any, **kwargs: Any
+    function: Callable, interaction: CommandInteraction, /, *args: Any, **kwargs: Any
 ) -> Any:
     """Call a function utilizing ParamInfo"""
     cog_param, inter_param, paraminfos, injections = collect_params(function)
