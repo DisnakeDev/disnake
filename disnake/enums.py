@@ -31,7 +31,6 @@ __all__ = (
     "Enum",
     "ChannelType",
     "MessageType",
-    "VoiceRegion",
     "SpeakingState",
     "VerificationLevel",
     "ContentFilter",
@@ -211,6 +210,7 @@ class ChannelType(Enum):
     private_thread = 12
     stage_voice = 13
     guild_directory = 14
+    forum = 15
 
     def __str__(self):
         return self.name
@@ -257,25 +257,6 @@ class PartyType(Enum):
     watch_together = 880218394199220334
     sketch_heads = 902271654783242291
     ocho = 832025144389533716
-
-
-class VoiceRegion(Enum):
-    us_west = "us-west"
-    us_east = "us-east"
-    us_south = "us-south"
-    us_central = "us-central"
-    singapore = "singapore"
-    sydney = "sydney"
-    rotterdam = "rotterdam"
-    brazil = "brazil"
-    hongkong = "hongkong"
-    russia = "russia"
-    japan = "japan"
-    southafrica = "southafrica"
-    india = "india"
-
-    def __str__(self):
-        return self.value
 
 
 class SpeakingState(Enum):
@@ -710,35 +691,65 @@ class WidgetStyle(Enum):
 # reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
     bg = "bg"
+    "Bulgarian | български"
     cs = "cs"
+    "Czech | Čeština"
     da = "da"
+    "Danish | Dansk"
     de = "de"
+    "German | Deutsch"
     el = "el"
+    "Greek | Ελληνικά"
     en_GB = "en-GB"
+    "English, UK | English, UK"
     en_US = "en-US"
+    "English, US | English, US"
     es_ES = "es-ES"
+    "Spanish | Español"
     fi = "fi"
+    "Finnish | Suomi"
     fr = "fr"
+    "French | Français"
     hi = "hi"
+    "Hindi | हिन्दी"
     hr = "hr"
+    "Croatian | Hrvatski"
     it = "it"
+    "Italian | Italiano"
     ja = "ja"
+    "Japanese | 日本語"
     ko = "ko"
+    "Korean | 한국어"
     lt = "lt"
+    "Lithuanian | Lietuviškai"
     hu = "hu"
+    "Hungarian | Magyar"
     nl = "nl"
+    "Dutch | Nederlands"
     no = "no"
+    "Norwegian | Norsk"
     pl = "pl"
+    "Polish | Polski"
     pt_BR = "pt-BR"
+    "Portuguese, Brazilian | Português do Brasil"
     ro = "ro"
+    "Romanian, Romania | Română"
     ru = "ru"
+    "Russian | Pусский"
     sv_SE = "sv-SE"
+    "Swedish | Svenska"
     th = "th"
+    "Thai | ไทย"
     tr = "tr"
+    "Turkish | Türkçe"
     uk = "uk"
+    "Ukrainian | Українська"
     vi = "vi"
+    "Vietnamese | Tiếng Việt"
     zh_CN = "zh-CN"
+    "Chinese, China | 中文"
     zh_TW = "zh-TW"
+    "Chinese, Taiwan | 繁體中文"
 
     def __str__(self):
         return self.value

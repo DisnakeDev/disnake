@@ -33,16 +33,19 @@ from .custom_warnings import ConfigWarning
 from .enums import (
     ApplicationCommandType,
     ChannelType,
+    Locale,
     OptionType,
     enum_if_int,
     try_enum,
     try_enum_to_int,
 )
 from .errors import InvalidArgument
+from .i18n import Localized
 from .role import Role
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:
+    from .i18n import LocalizationProtocol, LocalizationValue, LocalizedOptional, LocalizedRequired
     from .state import ConnectionState
     from .types.interactions import (
         ApplicationCommand as ApplicationCommandPayload,
@@ -60,6 +63,7 @@ if TYPE_CHECKING:
         List["OptionChoice"],
         List[ApplicationCommandOptionChoiceValue],
         Dict[str, ApplicationCommandOptionChoiceValue],
+        List[Localized[str]],
     ]
 
     APIApplicationCommand = Union["APIUserCommand", "APIMessageCommand", "APISlashCommand"]
@@ -100,11 +104,12 @@ def _validate_name(name: str) -> None:
     # used for slash command names and option names
     # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
 
-    assert name == name.lower() and re.fullmatch(r"[\w-]{1,32}", name), (
-        f"Slash command or option name '{name}' should be lowercase, "
-        "between 1 and 32 characters long, and only consist of "
-        "these symbols: a-z, 0-9, -, _, and other languages'/scripts' symbols"
-    )
+    if name != name.lower() or not re.fullmatch(r"[\w-]{1,32}", name):
+        raise InvalidArgument(
+            f"Slash command or option name '{name}' should be lowercase, "
+            "between 1 and 32 characters long, and only consist of "
+            "these symbols: a-z, 0-9, -, _, and other languages'/scripts' symbols"
+        )
 
 
 class OptionChoice:
@@ -112,28 +117,66 @@ class OptionChoice:
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Union[:class:`str`, :class:`.Localized`]
         The name of the option choice (visible to users).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     value: Union[:class:`str`, :class:`int`]
         The value of the option choice.
     """
 
-    def __init__(self, name: str, value: ApplicationCommandOptionChoiceValue):
-        self.name: str = name
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        value: ApplicationCommandOptionChoiceValue,
+    ):
+        name_loc = Localized._cast(name, True)
+        self.name: str = name_loc.string
+        self.name_localizations: LocalizationValue = name_loc.localizations
         self.value: ApplicationCommandOptionChoiceValue = value
 
     def __repr__(self) -> str:
         return f"<OptionChoice name={self.name!r} value={self.value!r}>"
 
     def __eq__(self, other) -> bool:
-        return self.name == other.name and self.value == other.value
+        return (
+            self.name == other.name
+            and self.value == other.value
+            and self.name_localizations == other.name_localizations
+        )
 
-    def to_dict(self) -> ApplicationCommandOptionChoicePayload:
-        return {"name": self.name, "value": self.value}
+    def to_dict(self, *, locale: Optional[Locale] = None) -> ApplicationCommandOptionChoicePayload:
+        localizations = self.name_localizations.data
+
+        name: Optional[str] = None
+        # if `locale` provided, get localized name from dict
+        if locale is not None and localizations:
+            name = localizations.get(str(locale))
+
+        # fall back to default name if no locale or no localized name
+        if name is None:
+            name = self.name
+
+        payload: ApplicationCommandOptionChoicePayload = {
+            "name": name,
+            "value": self.value,
+        }
+        # if no `locale` provided, include all localizations in payload
+        if locale is None and localizations:
+            payload["name_localizations"] = localizations
+        return payload
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandOptionChoicePayload):
-        return OptionChoice(name=data["name"], value=data["value"])
+        return OptionChoice(
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            value=data["value"],
+        )
+
+    def localize(self, store: LocalizationProtocol) -> None:
+        self.name_localizations._link(store)
 
 
 class Option:
@@ -141,10 +184,18 @@ class Option:
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Union[:class:`str`, :class:`.Localized`]
         The option's name.
-    description: :class:`str`
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
+    description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The option's description.
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     type: :class:`OptionType`
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
@@ -176,12 +227,14 @@ class Option:
         "autocomplete",
         "min_value",
         "max_value",
+        "name_localizations",
+        "description_localizations",
     )
 
     def __init__(
         self,
-        name: str,
-        description: str = None,
+        name: LocalizedRequired,
+        description: LocalizedOptional = None,
         type: Union[OptionType, int] = None,
         required: bool = False,
         choices: Choices = None,
@@ -191,9 +244,15 @@ class Option:
         min_value: float = None,
         max_value: float = None,
     ):
-        self.name: str = name.lower()
-        _validate_name(self.name)
-        self.description: str = description or "-"
+        name_loc = Localized._cast(name, True)
+        _validate_name(name_loc.string)
+        self.name: str = name_loc.string
+        self.name_localizations: LocalizationValue = name_loc.localizations
+
+        desc_loc = Localized._cast(description, False)
+        self.description: str = desc_loc.string or "-"
+        self.description_localizations: LocalizationValue = desc_loc.localizations
+
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
         self.options: List[Option] = options or []
@@ -207,7 +266,7 @@ class Option:
         self.max_value: Optional[float] = max_value
 
         if channel_types is not None and not all(isinstance(t, ChannelType) for t in channel_types):
-            raise InvalidArgument("channel_types must be instances of ChannelType")
+            raise InvalidArgument("channel_types must be a list of `ChannelType`s")
 
         self.channel_types: List[ChannelType] = channel_types or []
 
@@ -220,7 +279,9 @@ class Option:
                 self.choices = [OptionChoice(name, value) for name, value in choices.items()]
             else:
                 for c in choices:
-                    if not isinstance(c, OptionChoice):
+                    if isinstance(c, Localized):
+                        c = OptionChoice(c, c.string)
+                    elif not isinstance(c, OptionChoice):
                         c = OptionChoice(str(c), c)
                     self.choices.append(c)
 
@@ -245,13 +306,17 @@ class Option:
             and self.autocomplete == other.autocomplete
             and self.min_value == other.min_value
             and self.max_value == other.max_value
+            and self.name_localizations == other.name_localizations
+            and self.description_localizations == other.description_localizations
         )
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandOptionPayload) -> Option:
         return Option(
-            name=data["name"],
-            description=data.get("description"),
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            description=Localized(
+                data.get("description"), data=data.get("description_localizations")
+            ),
             type=data.get("type"),
             required=data.get("required", False),
             choices=_maybe_cast(
@@ -268,16 +333,25 @@ class Option:
             max_value=data.get("max_value"),
         )
 
-    def add_choice(self, name: str, value: Union[str, int]) -> None:
+    def add_choice(
+        self,
+        name: LocalizedRequired,
+        value: Union[str, int],
+    ) -> None:
         """Adds an OptionChoice to the list of current choices,
         parameters are the same as for :class:`OptionChoice`.
         """
-        self.choices.append(OptionChoice(name=name, value=value))
+        self.choices.append(
+            OptionChoice(
+                name=name,
+                value=value,
+            )
+        )
 
     def add_option(
         self,
-        name: str,
-        description: str = None,
+        name: LocalizedRequired,
+        description: LocalizedOptional = None,
         type: OptionType = None,
         required: bool = False,
         choices: List[OptionChoice] = None,
@@ -325,12 +399,35 @@ class Option:
             payload["min_value"] = self.min_value
         if self.max_value is not None:
             payload["max_value"] = self.max_value
+        if (loc := self.name_localizations.data) is not None:
+            payload["name_localizations"] = loc
+        if (loc := self.description_localizations.data) is not None:
+            payload["description_localizations"] = loc
         return payload
+
+    def localize(self, store: LocalizationProtocol) -> None:
+        self.name_localizations._link(store)
+        self.description_localizations._link(store)
+
+        if (name_loc := self.name_localizations.data) is not None:
+            for value in name_loc.values():
+                _validate_name(value)
+
+        for c in self.choices:
+            c.localize(store)
+        for o in self.options:
+            o.localize(store)
 
 
 class ApplicationCommand(ABC):
     """
-    The base class for application commands
+    The base class for application commands.
+
+    The following classes implement this ABC:
+
+    - :class:`~.SlashCommand`
+    - :class:`~.MessageCommand`
+    - :class:`~.UserCommand`
 
     Attributes
     ----------
@@ -338,6 +435,11 @@ class ApplicationCommand(ABC):
         The command type
     name: :class:`str`
         The command name
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -345,10 +447,18 @@ class ApplicationCommand(ABC):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = ("type", "name")
 
-    def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        type: ApplicationCommandType,
+        name: LocalizedRequired,
+        default_permission: bool = True,
+    ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
-        self.name: str = name
         self.default_permission: bool = default_permission
+
+        name_loc = Localized._cast(name, True)
+        self.name: str = name_loc.string
+        self.name_localizations: LocalizationValue = name_loc.localizations
 
         self._always_synced: bool = False
 
@@ -356,11 +466,15 @@ class ApplicationCommand(ABC):
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
         return f"<{type(self).__name__} {attrs}>"
 
+    def __str__(self) -> str:
+        return self.name
+
     def __eq__(self, other) -> bool:
         return (
             self.type == other.type
             and self.name == other.name
             and self.default_permission == other.default_permission
+            and self.name_localizations == other.name_localizations
         )
 
     def to_dict(self) -> EditApplicationCommandPayload:
@@ -370,7 +484,12 @@ class ApplicationCommand(ABC):
         }
         if not self.default_permission:
             data["default_permission"] = False
+        if (loc := self.name_localizations.data) is not None:
+            data["name_localizations"] = loc
         return data
+
+    def localize(self, store: LocalizationProtocol) -> None:
+        self.name_localizations._link(store)
 
 
 class _APIApplicationCommandMixin:
@@ -391,6 +510,11 @@ class UserCommand(ApplicationCommand):
     ----------
     name: :class:`str`
         The user command's name.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
     default_permission: :class:`bool`
         Whether the user command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -398,7 +522,11 @@ class UserCommand(ApplicationCommand):
 
     __repr_info__ = ("name", "default_permission")
 
-    def __init__(self, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        default_permission: bool = True,
+    ):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
@@ -416,6 +544,11 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     ----------
     name: :class:`str`
         The user command's name.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
     default_permission: :class:`bool`
         Whether the user command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -438,7 +571,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
         self = cls(
-            name=data["name"],
+            name=Localized(data["name"], data=data.get("name_localizations")),
             default_permission=data.get("default_permission", True),
         )
         self._update_common(data)
@@ -453,6 +586,11 @@ class MessageCommand(ApplicationCommand):
     ----------
     name: :class:`str`
         The message command's name.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
     default_permission: :class:`bool`
         Whether the message command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -460,7 +598,11 @@ class MessageCommand(ApplicationCommand):
 
     __repr_info__ = ("name", "default_permission")
 
-    def __init__(self, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        default_permission: bool = True,
+    ):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
@@ -478,6 +620,11 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     ----------
     name: :class:`str`
         The message command's name.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
     default_permission: :class:`bool`
         Whether the message command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -500,7 +647,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
         self = cls(
-            name=data["name"],
+            name=Localized(data["name"], data=data.get("name_localizations")),
             default_permission=data.get("default_permission", True),
         )
         self._update_common(data)
@@ -511,15 +658,25 @@ class SlashCommand(ApplicationCommand):
     """
     The base class for building slash commands.
 
-    Parameters
+    Attributes
     ----------
     name: :class:`str`
         The slash command's name.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
+    description: :class:`str`
+        The slash command's description.
+    description_localizations: :class:`.LocalizationValue`
+        Localizations for ``description``.
+
+        .. versionadded:: 2.5
+
     default_permission: :class:`bool`
         Whether the slash command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
-    description: :class:`str`
-        The slash command's description.
     options: List[:class:`Option`]
         The list of options the slash command has.
     """
@@ -528,36 +685,36 @@ class SlashCommand(ApplicationCommand):
 
     def __init__(
         self,
-        name: str,
-        description: str,
+        name: LocalizedRequired,
+        description: LocalizedRequired,
         options: List[Option] = None,
         default_permission: bool = True,
     ):
-        name = name.lower()
-        _validate_name(name)
-
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
             default_permission=default_permission,
         )
-        self.description: str = description
-        self.options: List[Option] = options or []
+        _validate_name(self.name)
 
-    def __str__(self) -> str:
-        return f"<SlashCommand name={self.name!r}>"
+        desc_loc = Localized._cast(description, True)
+        self.description: str = desc_loc.string
+        self.description_localizations: LocalizationValue = desc_loc.localizations
+
+        self.options: List[Option] = options or []
 
     def __eq__(self, other) -> bool:
         return (
             super().__eq__(other)
             and self.description == other.description
             and self.options == other.options
+            and self.description_localizations == other.description_localizations
         )
 
     def add_option(
         self,
-        name: str,
-        description: str = None,
+        name: LocalizedRequired,
+        description: LocalizedOptional = None,
         type: OptionType = None,
         required: bool = False,
         choices: List[OptionChoice] = None,
@@ -589,7 +746,20 @@ class SlashCommand(ApplicationCommand):
         res = super().to_dict()
         res["description"] = self.description
         res["options"] = [o.to_dict() for o in self.options]
+        if (loc := self.description_localizations.data) is not None:
+            res["description_localizations"] = loc
         return res
+
+    def localize(self, store: LocalizationProtocol) -> None:
+        super().localize(store)
+        if (name_loc := self.name_localizations.data) is not None:
+            for value in name_loc.values():
+                _validate_name(value)
+
+        self.description_localizations._link(store)
+
+        for o in self.options:
+            o.localize(store)
 
 
 class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
@@ -602,13 +772,23 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     ----------
     name: :class:`str`
         The slash command's name.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
+    description: :class:`str`
+        The slash command's description.
+    description_localizations: :class:`.LocalizationValue`
+        Localizations for ``description``.
+
+        .. versionadded:: 2.5
+
     default_permission: :class:`bool`
         Whether the slash command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
     id: :class:`int`
         The slash command's ID.
-    description: :class:`str`
-        The slash command's description.
     options: List[:class:`Option`]
         The list of options the slash command has.
     application_id: :class:`int`
@@ -628,8 +808,8 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
 
         self = cls(
-            name=data["name"],
-            description=data["description"],
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            description=Localized(data["description"], data=data.get("description_localizations")),
             default_permission=data.get("default_permission", True),
             options=_maybe_cast(
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))

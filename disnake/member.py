@@ -69,6 +69,7 @@ if TYPE_CHECKING:
     from .flags import PublicUserFlags
     from .guild import Guild
     from .message import Message
+    from .partial_emoji import PartialEmoji
     from .role import Role
     from .state import ConnectionState
     from .types.activity import PartialPresenceUpdate
@@ -668,6 +669,19 @@ class Member(disnake.abc.Messageable, _UserTag):
         return max(guild.get_role(rid) or guild.default_role for rid in self._roles)
 
     @property
+    def role_icon(self) -> Optional[Union[Asset, PartialEmoji]]:
+        """Optional[Union[:class:`Asset`, :class:`PartialEmoji`]]: Returns the member's displayed role icon, if any.
+
+        .. versionadded:: 2.5
+        """
+        roles = self.roles[1:]  # remove @everyone
+
+        for role in reversed(roles):
+            if icon := (role.icon or role.emoji):
+                return icon
+        return None
+
+    @property
     def guild_permissions(self) -> Permissions:
         """:class:`Permissions`: Returns the member's guild permissions.
 
@@ -946,15 +960,15 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         |coro|
 
-        Gives the member a number of :class:`Role`\s.
+        Gives the member a number of :class:`Role`\\s.
 
         You must have :attr:`~Permissions.manage_roles` permission to
-        use this, and the added :class:`Role`\s must appear lower in the list
+        use this, and the added :class:`Role`\\s must appear lower in the list
         of roles than the highest role of the member.
 
         Parameters
         ----------
-        \*roles: :class:`abc.Snowflake`
+        *roles: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing a :class:`Role`
             to give to the member.
         reason: Optional[:class:`str`]
@@ -987,15 +1001,15 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         |coro|
 
-        Removes :class:`Role`\s from this member.
+        Removes :class:`Role`\\s from this member.
 
         You must have :attr:`~Permissions.manage_roles` permission to
-        use this, and the removed :class:`Role`\s must appear lower in the list
+        use this, and the removed :class:`Role`\\s must appear lower in the list
         of roles than the highest role of the member.
 
         Parameters
         ----------
-        \*roles: :class:`abc.Snowflake`
+        *roles: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing a :class:`Role`
             to remove from the member.
         reason: Optional[:class:`str`]

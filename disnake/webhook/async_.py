@@ -38,6 +38,7 @@ from typing import (
     Literal,
     NamedTuple,
     Optional,
+    Sequence,
     Tuple,
     TypeVar,
     Union,
@@ -52,6 +53,7 @@ from ..asset import Asset
 from ..channel import PartialMessageable
 from ..enums import WebhookType, try_enum
 from ..errors import DiscordServerError, Forbidden, HTTPException, InvalidArgument, NotFound
+from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
 from ..mixins import Hashable
@@ -71,6 +73,7 @@ if TYPE_CHECKING:
     import datetime
 
     from ..abc import Snowflake
+    from ..asset import AssetBytes
     from ..channel import TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
@@ -79,6 +82,7 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..state import ConnectionState
+    from ..sticker import GuildSticker, StickerItem
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui.action_row import Components
@@ -170,10 +174,11 @@ class AsyncWebhookAdapter:
                         method, url, data=to_send, headers=headers, params=params
                     ) as response:
                         _log.debug(
-                            "Webhook ID %s with %s %s has returned status code %s",
+                            "Webhook ID %s with %s %s with %s has returned status code %s",
                             webhook_id,
                             method,
                             url,
+                            to_send,
                             response.status,
                         )
                         data = (await response.text(encoding="utf-8")) or None
@@ -191,6 +196,7 @@ class AsyncWebhookAdapter:
                             lock.delay_by(delta)
 
                         if 300 > response.status >= 200:
+                            _log.debug("%s %s has received %s", method, url, data)
                             return data
 
                         if response.status == 429:
@@ -470,29 +476,36 @@ class AsyncWebhookAdapter:
         return self.request(r, session=session)
 
 
-class ExecuteWebhookParameters(NamedTuple):
+class DictPayloadParameters(NamedTuple):
+    payload: Dict[str, Any]
+    files: Optional[List[File]]
+
+
+class PayloadParameters(NamedTuple):
     payload: Optional[Dict[str, Any]]
     multipart: Optional[List[Dict[str, Any]]]
     files: Optional[List[File]]
 
 
-def handle_message_parameters(
+def handle_message_parameters_dict(
     content: Optional[str] = MISSING,
     *,
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: bool = False,
+    ephemeral: bool = None,
+    suppress_embeds: bool = None,
     file: File = MISSING,
     files: List[File] = MISSING,
-    attachments: List[Attachment] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
     components: Optional[Components] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
-) -> ExecuteWebhookParameters:
+    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
         raise TypeError("Cannot mix file and files keyword arguments.")
     if embeds is not MISSING and embed is not MISSING:
@@ -523,15 +536,20 @@ def handle_message_parameters(
         payload["components"] = [] if components is None else components_to_dict(components)
 
     if attachments is not MISSING:
-        payload["attachments"] = [a.to_dict() for a in attachments]
+        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
 
     payload["tts"] = tts
     if avatar_url:
         payload["avatar_url"] = str(avatar_url)
     if username:
         payload["username"] = username
-    if ephemeral:
-        payload["flags"] = 64
+
+    if ephemeral is not None or suppress_embeds is not None:
+        payload["flags"] = 0
+        if suppress_embeds:
+            payload["flags"] |= MessageFlags.suppress_embeds.flag
+        if ephemeral:
+            payload["flags"] |= MessageFlags.ephemeral.flag
 
     if allowed_mentions:
         if previous_allowed_mentions is not None:
@@ -543,13 +561,55 @@ def handle_message_parameters(
     elif previous_allowed_mentions is not None:
         payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
 
-    multipart = []
+    if stickers is not MISSING:
+        payload["sticker_ids"] = [s.id for s in stickers]
 
-    if files:
-        multipart = to_multipart_with_attachments(payload, files)
-        payload = None
+    return DictPayloadParameters(payload=payload, files=files)
 
-    return ExecuteWebhookParameters(payload=payload, multipart=multipart, files=files)
+
+def handle_message_parameters(
+    content: Optional[str] = MISSING,
+    *,
+    username: str = MISSING,
+    avatar_url: Any = MISSING,
+    tts: bool = False,
+    ephemeral: bool = None,
+    suppress_embeds: bool = None,
+    file: File = MISSING,
+    files: List[File] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
+    embed: Optional[Embed] = MISSING,
+    embeds: List[Embed] = MISSING,
+    view: Optional[View] = MISSING,
+    components: Optional[Components] = MISSING,
+    allowed_mentions: Optional[AllowedMentions] = MISSING,
+    previous_allowed_mentions: Optional[AllowedMentions] = None,
+    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+) -> PayloadParameters:
+    params = handle_message_parameters_dict(
+        content=content,
+        username=username,
+        avatar_url=avatar_url,
+        tts=tts,
+        ephemeral=ephemeral,
+        suppress_embeds=suppress_embeds,
+        file=file,
+        files=files,
+        attachments=attachments,
+        embed=embed,
+        embeds=embeds,
+        view=view,
+        components=components,
+        allowed_mentions=allowed_mentions,
+        previous_allowed_mentions=previous_allowed_mentions,
+        stickers=stickers,
+    )
+
+    if params.files:
+        multipart = to_multipart_with_attachments(params.payload, params.files)
+        return PayloadParameters(payload=None, multipart=multipart, files=params.files)
+
+    return PayloadParameters(payload=params.payload, multipart=None, files=params.files)
 
 
 async_context: ContextVar[AsyncWebhookAdapter] = ContextVar(
@@ -690,7 +750,7 @@ class WebhookMessage(Message):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
@@ -735,12 +795,15 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.0
 
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         view: Optional[:class:`~disnake.ui.View`]
             The view to update this message with. This cannot be mixed with ``components``.
@@ -943,8 +1006,8 @@ class Webhook(BaseWebhook):
     bot user or authentication.
 
     There are two main ways to use Webhooks. The first is through the ones
-    received by the library such as :meth:`.Guild.webhooks` and
-    :meth:`.TextChannel.webhooks`. The ones received by the library will
+    received by the library such as :meth:`.Guild.webhooks`, :meth:`.TextChannel.webhooks`,
+    and :meth:`.VoiceChannel.webhooks`. The ones received by the library will
     automatically be bound using the library's internal HTTP session.
 
     The second form involves creating a webhook object manually using the
@@ -1239,7 +1302,7 @@ class Webhook(BaseWebhook):
         *,
         reason: Optional[str] = None,
         name: Optional[str] = MISSING,
-        avatar: Optional[bytes] = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
         channel: Optional[Snowflake] = None,
         prefer_auth: bool = True,
     ) -> Webhook:
@@ -1251,8 +1314,12 @@ class Webhook(BaseWebhook):
         ----------
         name: Optional[:class:`str`]
             The webhook's new default name.
-        avatar: Optional[:class:`bytes`]
-            A :term:`py:bytes-like object` representing the webhook's new default avatar.
+        avatar: Optional[|resource_type|]
+            The webhook's new default avatar.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         channel: Optional[:class:`abc.Snowflake`]
             The webhook's new channel. This requires an authenticated webhook.
 
@@ -1271,13 +1338,15 @@ class Webhook(BaseWebhook):
 
         Raises
         ------
+        NotFound
+            This webhook does not exist or the ``avatar`` asset couldn't be found.
         HTTPException
             Editing the webhook failed.
-        NotFound
-            This webhook does not exist.
         InvalidArgument
             This webhook does not have a token associated with it
             or it tried editing a channel without authentication.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -1292,7 +1361,7 @@ class Webhook(BaseWebhook):
             payload["name"] = str(name) if name is not None else None
 
         if avatar is not MISSING:
-            payload["avatar"] = utils._bytes_to_base64_data(avatar) if avatar is not None else None
+            payload["avatar"] = await utils._assetbytes_to_base64_data(avatar)
 
         adapter = async_context.get()
 
@@ -1337,6 +1406,7 @@ class Webhook(BaseWebhook):
         avatar_url: Any = MISSING,
         tts: bool = MISSING,
         ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
         embed: Embed = MISSING,
@@ -1359,6 +1429,7 @@ class Webhook(BaseWebhook):
         avatar_url: Any = MISSING,
         tts: bool = MISSING,
         ephemeral: bool = MISSING,
+        suppress_embeds: bool = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
         embed: Embed = MISSING,
@@ -1380,6 +1451,7 @@ class Webhook(BaseWebhook):
         avatar_url: Any = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        suppress_embeds: bool = False,
         file: File = MISSING,
         files: List[File] = MISSING,
         embed: Embed = MISSING,
@@ -1475,6 +1547,12 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.1
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+
+            .. versionadded:: 2.5
+
         Raises
         ------
         HTTPException
@@ -1532,6 +1610,7 @@ class Webhook(BaseWebhook):
             embed=embed,
             embeds=embeds,
             ephemeral=ephemeral,
+            suppress_embeds=suppress_embeds,
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,
@@ -1619,7 +1698,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[Components] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
@@ -1670,12 +1749,15 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then

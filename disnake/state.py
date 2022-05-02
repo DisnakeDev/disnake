@@ -97,6 +97,7 @@ if TYPE_CHECKING:
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
     from .types.raw_models import (
+        ChannelPinsUpdate,
         GuildScheduledEventUserActionEvent,
         ReactionActionEvent,
         TypingEvent,
@@ -1043,7 +1044,7 @@ class ConnectionState:
             _log.debug("CHANNEL_CREATE referencing an unknown guild ID: %s. Discarding.", guild_id)
             return
 
-    def parse_channel_pins_update(self, data) -> None:
+    def parse_channel_pins_update(self, data: ChannelPinsUpdate) -> None:
         channel_id = int(data["channel_id"])
         try:
             guild = self._get_guild(int(data["guild_id"]))
@@ -1059,9 +1060,12 @@ class ConnectionState:
             )
             return
 
-        last_pin = (
-            utils.parse_time(data["last_pin_timestamp"]) if data["last_pin_timestamp"] else None
-        )
+        last_pin = None
+        if "last_pin_timestamp" in data:
+            last_pin = utils.parse_time(data["last_pin_timestamp"])
+
+        if isinstance(channel, (DMChannel, TextChannel, Thread)):
+            channel.last_pin_timestamp = last_pin
 
         if guild is None:
             self.dispatch("private_channel_pins_update", channel, last_pin)
@@ -1080,6 +1084,9 @@ class ConnectionState:
         guild._add_thread(thread)
         if not has_thread:
             if data.get("newly_created"):
+                if isinstance(thread.parent, ForumChannel):
+                    thread.parent.last_thread_id = thread.id
+
                 self.dispatch("thread_create", thread)
             else:
                 self.dispatch("thread_join", thread)
@@ -1102,6 +1109,8 @@ class ConnectionState:
             guild._add_thread(thread)
             self.dispatch("thread_join", thread)
 
+        self.dispatch("raw_thread_update", thread)
+
     def parse_thread_delete(self, data) -> None:
         guild_id = int(data["guild_id"])
         guild = self._get_guild(guild_id)
@@ -1111,9 +1120,12 @@ class ConnectionState:
 
         thread_id = int(data["id"])
         thread = guild.get_thread(thread_id)
+        raw = RawThreadDeleteEvent(data)
         if thread is not None:
+            raw.thread = thread
             guild._remove_thread(thread)
             self.dispatch("thread_delete", thread)
+        self.dispatch("raw_thread_delete", raw)
 
     def parse_thread_list_sync(self, data) -> None:
         guild_id = int(data["guild_id"])
@@ -1201,9 +1213,12 @@ class ConnectionState:
 
         for member_id in removed_member_ids:
             if member_id != self_id:
+                raw = RawThreadMemberRemoveEvent(thread, member_id)
                 member = thread._pop_member(member_id)
                 if member is not None:
+                    raw.cached_member = member
                     self.dispatch("thread_member_remove", member)
+                self.dispatch("raw_thread_member_remove", raw)
             else:
                 self.dispatch("thread_remove", thread)
 
@@ -1822,8 +1837,12 @@ class ConnectionState:
     # All these methods (except fetchers) update the application command cache as well,
     # since there're no events related to application command updates
 
-    async def fetch_global_commands(self) -> List[APIApplicationCommand]:
-        results = await self.http.get_global_commands(self.application_id)  # type: ignore
+    async def fetch_global_commands(
+        self,
+        *,
+        with_localizations: bool = True,
+    ) -> List[APIApplicationCommand]:
+        results = await self.http.get_global_commands(self.application_id, with_localizations=with_localizations)  # type: ignore
         return [application_command_factory(data) for data in results]
 
     async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
@@ -1865,8 +1884,13 @@ class ConnectionState:
 
     # Application commands (guild)
 
-    async def fetch_guild_commands(self, guild_id: int) -> List[APIApplicationCommand]:
-        results = await self.http.get_guild_commands(self.application_id, guild_id)  # type: ignore
+    async def fetch_guild_commands(
+        self,
+        guild_id: int,
+        *,
+        with_localizations: bool = True,
+    ) -> List[APIApplicationCommand]:
+        results = await self.http.get_guild_commands(self.application_id, guild_id, with_localizations=with_localizations)  # type: ignore
         return [application_command_factory(data) for data in results]
 
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
@@ -1973,6 +1997,34 @@ class AutoShardedConnectionState(ConnectionState):
                 # channel will either be a TextChannel, VoiceChannel, Thread or Object
                 msg._rebind_cached_references(new_guild, channel)  # type: ignore
 
+        # these generally get deallocated once the voice reconnect times out
+        # (it never succeeds after gateway reconnects)
+        # but we rebind the channel reference just in case
+        for vc in self._voice_clients.values():
+            if not getattr(vc.channel, "guild", None):
+                continue
+
+            new_guild = self._get_guild(vc.channel.guild.id)
+            if new_guild is None:
+                continue
+
+            new_channel = new_guild._resolve_channel(vc.channel.id) or Object(id=vc.channel.id)
+            if new_channel is not vc.channel:
+                vc.channel = new_channel  # type: ignore
+
+    def _update_member_references(self) -> None:
+        messages: Sequence[Message] = self._messages or []
+        for msg in messages:
+            if not msg.guild:
+                continue
+
+            # note that unlike with channels, this doesn't fall back to `Object` in case
+            # guild chunking is disabled, but still shouldn't lead to old references being
+            # kept as `msg.author.guild` was already rebound (see above) at this point.
+            new_author = msg.guild.get_member(msg.author.id)
+            if new_author is not None and new_author is not msg.author:
+                msg.author = new_author
+
     async def chunker(
         self,
         guild_id: int,
@@ -2065,10 +2117,14 @@ class AutoShardedConnectionState(ConnectionState):
         except AttributeError:
             pass  # already been deleted somehow
 
-        # regular users cannot shard so we won't worry about it here.
-
         # clear the current task
         self._ready_task = None
+
+        # update member references once guilds are chunked
+        # note: this is always called regardless of whether chunking/caching is enabled;
+        #       the bot member is always cached, so if any of the bot's own messages are
+        #       cached, their `author` should be rebound to the new member object
+        self._update_member_references()
 
         # dispatch the event
         self.call_handlers("ready")
