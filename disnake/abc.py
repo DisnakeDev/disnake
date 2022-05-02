@@ -134,7 +134,7 @@ class Snowflake(Protocol):
 class User(Snowflake, Protocol):
     """An ABC that details the common operations on a Discord user.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.User`
     - :class:`~disnake.ClientUser`
@@ -176,7 +176,7 @@ class User(Snowflake, Protocol):
 class PrivateChannel(Snowflake, Protocol):
     """An ABC that details the common operations on a private Discord channel.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.DMChannel`
     - :class:`~disnake.GroupChannel`
@@ -227,7 +227,7 @@ GCH = TypeVar("GCH", bound="GuildChannel")
 class GuildChannel(ABC):
     """An ABC that details the common operations on a Discord guild channel.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`.TextChannel`
     - :class:`.VoiceChannel`
@@ -1203,7 +1203,7 @@ class GuildChannel(ABC):
 class Messageable:
     """An ABC that details the common operations on a model that can send messages.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.TextChannel`
     - :class:`~disnake.DMChannel`
@@ -1707,7 +1707,7 @@ class Connectable(Protocol):
     """An ABC that details the common operations on a channel that can
     connect to a voice server.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.VoiceChannel`
     - :class:`~disnake.StageChannel`
