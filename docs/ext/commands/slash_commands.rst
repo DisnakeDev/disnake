@@ -637,7 +637,7 @@ For example:
 
     @bot.slash_command()
     @commands.default_member_permissions(moderate_members=True)
-    async def command(inter: disnake.CommandInteraction):
+    async def command(inter: disnake.ApplicationCommandInteraction):
         ...
 
 Or use the ``default_member_permissions`` parameter in the ``commands.slash_command`` decorator:
@@ -645,7 +645,7 @@ Or use the ``default_member_permissions`` parameter in the ``commands.slash_comm
 .. code-block:: python3
 
     @bot.slash_command(default_member_permissions=disnake.Permissions.manage_guild)
-    async def command(inter: disnake.CommandInteraction):
+    async def command(inter: disnake.ApplicationCommandInteraction):
         ...
 
 This will make the ``command`` slash command not visible for any member that does not have the ``moderate_members`` guild permission.
@@ -657,7 +657,7 @@ Using this, you can specify if you want a certain slash command to work in DM's 
 .. code-block:: python3
 
     @bot.slash_command(dm_permissions=False)
-    async def command(inter: disnake.CommandInteraction):
+    async def config(inter: disnake.ApplicationCommandInteraction):
         ...
 
 This will make the ``command`` slash command not visible in a DM but will be visible in a guild.
