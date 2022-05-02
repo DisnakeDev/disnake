@@ -1399,6 +1399,8 @@ Utility Functions
 
 .. autofunction:: disnake.utils.search_directory
 
+.. autofunction:: disnake.utils.as_valid_locale
+
 .. _discord-api-enums:
 
 Enumerations
@@ -5213,6 +5215,39 @@ TextInput
     :members:
 
 
+Localization
+------------
+
+The library uses the following types/methods to support localization.
+
+Localized
+~~~~~~~~~
+
+.. autoclass:: disnake.i18n.Localized
+    :members:
+    :inherited-members:
+
+LocalizationValue
+~~~~~~~~~~~~~~~~~
+
+.. autoclass:: disnake.i18n.LocalizationValue
+    :members:
+    :inherited-members:
+
+LocalizationStore
+~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: disnake.i18n.LocalizationStore
+    :members:
+    :inherited-members:
+
+LocalizationProtocol
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: disnake.i18n.LocalizationProtocol
+    :members:
+
+
 Exceptions
 ------------
 
@@ -5255,6 +5290,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: ModalChainNotSupported
 
+.. autoexception:: LocalizationKeyError
+
 .. autoexception:: disnake.opus.OpusError
 
 .. autoexception:: disnake.opus.OpusNotLoaded
@@ -5283,6 +5320,7 @@ Exception Hierarchy
                 - :exc:`Forbidden`
                 - :exc:`NotFound`
                 - :exc:`DiscordServerError`
+            - :exc:`LocalizationKeyError`
 
 
 Warnings
@@ -5294,6 +5332,8 @@ Warnings
 
 .. autoclass:: SyncWarning
 
+.. autoclass:: LocalizationWarning
+
 Warning Hierarchy
 ~~~~~~~~~~~~~~~~~~~
 
@@ -5302,3 +5342,4 @@ Warning Hierarchy
     - :class:`DiscordWarning`
         - :class:`ConfigWarning`
         - :class:`SyncWarning`
+        - :class:`LocalizationWarning`

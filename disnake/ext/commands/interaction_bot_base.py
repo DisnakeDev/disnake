@@ -62,6 +62,7 @@ from .errors import CommandRegistrationError
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
+    from disnake.i18n import LocalizedOptional
     from disnake.interactions import ApplicationCommandInteraction
     from disnake.permissions import Permissions
 
@@ -223,12 +224,16 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The slash command passed is not an instance of :class:`InvokableSlashCommand`.
         """
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+
         if not isinstance(slash_command, InvokableSlashCommand):
             raise TypeError("The slash_command passed must be an instance of InvokableSlashCommand")
 
         if slash_command.name in self.all_slash_commands:
             raise CommandRegistrationError(slash_command.name)
 
+        slash_command.body.localize(self.i18n)
         self.all_slash_commands[slash_command.name] = slash_command
 
     def add_user_command(self, user_command: InvokableUserCommand) -> None:
@@ -249,12 +254,16 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The user command passed is not an instance of :class:`InvokableUserCommand`.
         """
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+
         if not isinstance(user_command, InvokableUserCommand):
             raise TypeError("The user_command passed must be an instance of InvokableUserCommand")
 
         if user_command.name in self.all_user_commands:
             raise CommandRegistrationError(user_command.name)
 
+        user_command.body.localize(self.i18n)
         self.all_user_commands[user_command.name] = user_command
 
     def add_message_command(self, message_command: InvokableMessageCommand) -> None:
@@ -275,6 +284,9 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The message command passed is not an instance of :class:`InvokableMessageCommand`.
         """
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+
         if not isinstance(message_command, InvokableMessageCommand):
             raise TypeError(
                 "The message_command passed must be an instance of InvokableMessageCommand"
@@ -283,6 +295,7 @@ class InteractionBotBase(CommonBotBase):
         if message_command.name in self.all_message_commands:
             raise CommandRegistrationError(message_command.name)
 
+        message_command.body.localize(self.i18n)
         self.all_message_commands[message_command.name] = message_command
 
     def remove_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
@@ -419,8 +432,8 @@ class InteractionBotBase(CommonBotBase):
     def slash_command(
         self,
         *,
-        name: str = None,
-        description: str = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
         dm_permission: bool = True,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         options: List[Option] = None,
@@ -435,10 +448,18 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str`
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
             The name of the slash command (defaults to function name).
-        description: :class:`str`
+
+            .. versionchanged:: 2.5
+                Added support for localizations.
+
+        description: Optional[Union[:class:`str`, :class:`.Localized`]]
             The description of the slash command. It will be visible in Discord.
+
+            .. versionchanged:: 2.5
+                Added support for localizations.
+
         options: List[:class:`.Option`]
             The list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
@@ -496,7 +517,7 @@ class InteractionBotBase(CommonBotBase):
     def user_command(
         self,
         *,
-        name: str = None,
+        name: LocalizedOptional = None,
         dm_permission: bool = True,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
@@ -509,8 +530,12 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str`
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
             The name of the user command (defaults to function name).
+
+            .. versionchanged:: 2.5
+                Added support for localizations.
+
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
@@ -556,7 +581,7 @@ class InteractionBotBase(CommonBotBase):
     def message_command(
         self,
         *,
-        name: str = None,
+        name: LocalizedOptional = None,
         dm_permission: bool = True,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
@@ -569,8 +594,12 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str`
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
             The name of the message command (defaults to function name).
+
+            .. versionchanged:: 2.5
+                Added support for localizations.
+
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
@@ -654,7 +683,7 @@ class InteractionBotBase(CommonBotBase):
         # However, our approach has blind spots. We deal with them in :meth:`process_application_commands`.
 
         try:
-            commands = await self.fetch_global_commands()
+            commands = await self.fetch_global_commands(with_localizations=True)
             self._connection._global_application_commands = {
                 command.id: command for command in commands
             }
@@ -662,7 +691,7 @@ class InteractionBotBase(CommonBotBase):
             pass
         for guild_id in guilds:
             try:
-                commands = await self.fetch_guild_commands(guild_id)
+                commands = await self.fetch_guild_commands(guild_id, with_localizations=True)
                 if commands:
                     self._connection._guild_application_commands[guild_id] = {
                         command.id: command for command in commands

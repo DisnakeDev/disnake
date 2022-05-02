@@ -26,6 +26,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.i18n import Localized
 from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
@@ -33,6 +34,7 @@ from .errors import *
 from .params import safe_call
 
 if TYPE_CHECKING:
+    from disnake.i18n import LocalizedOptional
     from disnake.interactions import ApplicationCommandInteraction
 
     from .base_core import InteractionCommandCallback
@@ -82,14 +84,15 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self,
         func: InteractionCommandCallback,
         *,
-        name: str = None,
+        name: LocalizedOptional = None,
         dm_permission: bool = True,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
 
@@ -101,7 +104,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
             default_member_permissions = Permissions(default_perms)
 
         self.body = UserCommand(
-            name=self.name,
+            name=name_loc._upgrade(self.name),
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
         )
@@ -175,14 +178,15 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         self,
         func: InteractionCommandCallback,
         *,
-        name: str = None,
+        name: LocalizedOptional = None,
         dm_permission: bool = True,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
 
@@ -194,7 +198,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
             default_member_permissions = Permissions(default_perms)
 
         self.body = MessageCommand(
-            name=self.name,
+            name=name_loc._upgrade(self.name),
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
         )
@@ -228,7 +232,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
 def user_command(
     *,
-    name: str = None,
+    name: LocalizedOptional = None,
     dm_permission: bool = True,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     guild_ids: Sequence[int] = None,
@@ -240,8 +244,12 @@ def user_command(
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the user command (defaults to the function name).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
@@ -292,7 +300,7 @@ def user_command(
 
 def message_command(
     *,
-    name: str = None,
+    name: LocalizedOptional = None,
     dm_permission: bool = True,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     guild_ids: Sequence[int] = None,
@@ -304,8 +312,12 @@ def message_command(
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the message command (defaults to the function name).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]

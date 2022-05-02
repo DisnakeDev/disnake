@@ -29,7 +29,10 @@ class TestBot(commands.Bot):
                 808030843078836254,
                 723976264511389746,
             ],
+            strict_localization=True,
         )
+
+        self.i18n.load("test_bot/locale")
 
     def load_all_extensions(self, folder: str) -> None:
         py_path = f"test_bot.{folder}"
