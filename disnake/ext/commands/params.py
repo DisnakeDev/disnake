@@ -145,13 +145,13 @@ def signature(func: Callable) -> inspect.Signature:
     for name, param in signature.parameters.items():
         if isinstance(param.annotation, str):
             param = param.replace(annotation=typehints.get(name, inspect.Parameter.empty))
-        if param.annotation is type(None):
+        if param.annotation is type(None):  # noqa: E721
             param = param.replace(annotation=None)
 
         parameters.append(param)
 
     return_annotation = typehints.get("return", inspect.Parameter.empty)
-    if return_annotation is type(None):
+    if return_annotation is type(None):  # noqa: E721
         return_annotation = None
 
     return signature.replace(parameters=parameters, return_annotation=return_annotation)
@@ -459,7 +459,7 @@ class ParamInfo:
         if self.large:
             try:
                 argument = int(argument)
-            except ValueError as e:
+            except ValueError:
                 raise errors.LargeIntConversionFailure(argument) from None
 
         if self.converter is None:
