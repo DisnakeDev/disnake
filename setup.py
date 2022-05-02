@@ -43,7 +43,6 @@ extras_require = {
         "sphinx~=4.4.0",
         "sphinxcontrib_trio==1.1.2",
         "sphinx-hoverxref~=1.0.0",
-        "sphinx-autobuild==2021.3.14",
     ],
     "speed": [
         "orjson>=3.5.4",

@@ -1,0 +1,167 @@
+from typing import Optional
+
+import nox
+
+nox.options.error_on_external_run = True
+nox.options.sessions = [
+    "lint",
+    "pyright",
+    "tests",
+]
+nox.needs_version = ">=2022.1.7"
+
+
+GENERAL_REQUIREMENTS = ["taskipy~=1.10.1", "python-dotenv[cli]~=0.19.2"]
+
+LINT_REQUIREMENTS = [
+    "pre-commit~=2.17.0",
+]
+
+PYRIGHT_REQUIREMENTS = [
+    "pyright==1.1.226",
+    "mypy",  # needed to typecheck the mypy plugin with pyright
+]
+
+PYRIGHT_ENV = {
+    "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
+    "PYRIGHT_VERSION": "1.1.226",
+}
+TEST_REQUIREMENTS = [
+    "pytest~=7.1.2",
+    "pytest-cov~=3.0.0",
+    "pytest-asyncio~=0.18.3",
+    "looptime~=0.2",
+]
+
+ALL_REQUIREMENTS = [
+    *GENERAL_REQUIREMENTS,
+    *LINT_REQUIREMENTS,
+    *PYRIGHT_REQUIREMENTS,
+    *TEST_REQUIREMENTS,
+]
+
+
+@nox.session()
+def docs(session: nox.Session):
+    """Build and generate the documentation.
+
+    If running locally, will build automatic reloading docs.
+    If running in CI, will build a production version of the documentation.
+    """
+    session.install("-e", ".[docs]")
+    with session.chdir("docs"):
+        if session.interactive:
+            session.install("sphinx-autobuild==2021.3.14")
+            session.run(
+                "sphinx-autobuild",
+                ".",
+                "_build/html",
+                "--ignore",
+                "_build",
+                "--watch",
+                "../disnake",
+                "--port",
+                "8009",
+            )
+        else:
+            session.run(
+                "sphinx-build",
+                "-b",
+                "html",
+                "-aE",
+                "-j",
+                "auto",
+                ".",
+                "_build/html",
+            )
+
+
+@nox.session(
+    reuse_venv=True,
+    python="3.8",
+)
+def lint(session: nox.Session):
+    """Check all files for linting errors"""
+    session.install(*LINT_REQUIREMENTS)
+    session.run("pre-commit", "run", "--all-files")
+
+
+@nox.session(
+    python="3.8",
+)
+def slotscheck(session: nox.Session):
+    """Run slotscheck."""
+    session.install("-e", ".")
+    session.install("slotscheck~=0.13.0")
+    session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
+
+
+@nox.session(
+    reuse_venv=True,
+    python=["3.8", "3.9", "3.10"],
+)
+def pyright(session: nox.Session):
+    """Run pyright on all supported python versions."""
+    session.install("-e", ".[docs,speed,voice]")
+    session.install(*PYRIGHT_REQUIREMENTS)
+    try:
+        session.run("python", "-m", "pyright", *session.posargs, env=PYRIGHT_ENV)
+    except KeyboardInterrupt:
+        pass
+
+
+@nox.session(
+    python=["3.8", "3.9", "3.10"],
+)
+@nox.parametrize("extras", [None, "speed", "voice"])
+def tests(session: nox.Session, extras: Optional[str]):
+    """Run tests on all supported python versions."""
+    if extras:
+        session.install("-e", f".[{extras}]")
+    else:
+        session.install("-e", ".")
+    session.install(*TEST_REQUIREMENTS)
+    session.run("pytest", "-v", "--cov", "--cov-report=term", "--cov-append", "--cov-context=test")
+    session.notify("coverage", session.posargs)
+
+
+@nox.session(reuse_venv=True)
+def coverage(session: nox.Session):
+    """Display coverage information from the tests."""
+    session.install("coverage[toml]~=6.3.2")
+    if "html" in session.posargs or "serve" in session.posargs:
+        session.run("coverage", "html", "--show-contexts")
+    if "serve" in session.posargs:
+        session.run(
+            "python", "-m", "http.server", "8009", "--directory", "htmlcov", "--bind", "127.0.0.1"
+        )
+    if "erase" in session.posargs:
+        session.run("coverage", "erase")
+
+
+@nox.session(python=False)
+def setup(session: nox.Session):
+    """Sets up the local environment."""
+    session.log("Installing dependencies to the global environment.")
+    if session.posargs:
+        posargs = session.posargs[:]
+    else:
+        posargs = [
+            "lint",
+            "docs",
+            "tests",
+        ]
+    if "docs" in posargs:
+        session.run("python", "-m", "pip", "install", "-e", ".[docs]")
+    else:
+        session.run("python", "-m", "pip", "install", "-e", ".")
+    session.run("python", "-m", "pip", "install", *GENERAL_REQUIREMENTS)
+
+    if "lint" in posargs:
+        session.run("python", "-m", "pip", "install", *LINT_REQUIREMENTS)
+        session.run("python", "-m", "pip", "install", *PYRIGHT_REQUIREMENTS)
+        session.run("python", "-m", "pip", "install", "slotscheck~=0.13.0")
+        session.run("pre-commit", "install", "--install-hooks")
+
+    if "tests" in posargs:
+        session.run("python", "-m", "pip", "install", *TEST_REQUIREMENTS)
