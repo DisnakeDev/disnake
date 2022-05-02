@@ -881,7 +881,9 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_thread_delete(thread)
 
-    Called whenever a thread is deleted.
+    Called when a thread is deleted. If the thread is not found
+    in the internal thread cache, then this event will not be called.
+    Consider using :func:`on_raw_thread_delete` instead.
 
     Note that you can get the guild from :attr:`Thread.guild`.
 
@@ -892,12 +894,30 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param thread: The thread that got deleted.
     :type thread: :class:`Thread`
 
+.. function:: on_raw_thread_delete(payload)
+
+    Called whenever a thread is deleted.
+    Unlike :func:`on_thread_delete`, this is called
+    regardless of the state of the internal thread cache.
+
+    Note that you can get the guild from :attr:`Thread.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. versionadded:: 2.5
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawThreadDeleteEvent`
+
 .. function:: on_thread_member_join(member)
               on_thread_member_remove(member)
 
     Called when a :class:`ThreadMember` leaves or joins a :class:`Thread`.
 
     You can get the thread a member belongs in by accessing :attr:`ThreadMember.thread`.
+
+    On removal events, if the member being removed is not found in the internal cache,
+    then this event will not be called. Consider using :func:`on_raw_thread_member_remove` instead.
 
     This requires :attr:`Intents.members` to be enabled.
 
@@ -906,9 +926,25 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param member: The member who joined or left.
     :type member: :class:`ThreadMember`
 
+.. function:: on_raw_thread_member_remove(payload)
+
+    Called when a :class:`ThreadMember` leaves :class:`Thread`.
+    Unlike :func:`on_thread_member_remove`, this is called regardless of the thread member cache.
+
+    You can get the thread a member belongs in by accessing :attr:`ThreadMember.thread`.
+
+    This requires :attr:`Intents.members` to be enabled.
+
+    .. versionadded:: 2.5
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawThreadMemberRemoveEvent`
+
 .. function:: on_thread_update(before, after)
 
-    Called whenever a thread is updated.
+    Called when a thread is updated. If the thread is not found
+    in the internal thread cache, then this event will not be called.
+    Consider using :func:`on_raw_thread_update` which will be called regardless of the cache.
 
     This requires :attr:`Intents.guilds` to be enabled.
 
@@ -918,6 +954,19 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :type before: :class:`Thread`
     :param after: The updated thread's new info.
     :type after: :class:`Thread`
+
+.. function:: on_raw_thread_update(after)
+
+    Called whenever a thread is updated.
+    Unlike :func:`on_thread_update`, this is called
+    regardless of the state of the internal thread cache.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. versionadded:: 2.5
+
+    :param thread: The updated thread.
+    :type thread: :class:`Thread`
 
 .. function:: on_guild_integrations_update(guild)
 
@@ -1339,6 +1388,8 @@ Utility Functions
 .. autofunction:: disnake.utils.as_chunks
 
 .. autofunction:: disnake.utils.search_directory
+
+.. autofunction:: disnake.utils.as_valid_locale
 
 .. _discord-api-enums:
 
@@ -3555,7 +3606,7 @@ AuditLogDiff
 
         The guild's vanity URL.
 
-        See also :meth:`Guild.vanity_invite` and :meth:`Guild.edit`.
+        See also :meth:`Guild.vanity_invite`, :meth:`Guild.edit`, and :attr:`Guild.vanity_url_code`.
 
         :type: :class:`str`
 
@@ -4797,6 +4848,22 @@ RawGuildScheduledEventUserActionEvent
 .. autoclass:: RawGuildScheduledEventUserActionEvent()
     :members:
 
+RawThreadDeleteEvent
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawThreadDeleteEvent
+
+.. autoclass:: RawThreadDeleteEvent()
+    :members:
+
+RawThreadMemberRemoveEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawThreadMemberRemoveEvent
+
+.. autoclass:: RawThreadMemberRemoveEvent()
+    :members:
+
 RawTypingEvent
 ~~~~~~~~~~~~~~
 
@@ -5116,6 +5183,39 @@ TextInput
     :members:
 
 
+Localization
+------------
+
+The library uses the following types/methods to support localization.
+
+Localized
+~~~~~~~~~
+
+.. autoclass:: disnake.i18n.Localized
+    :members:
+    :inherited-members:
+
+LocalizationValue
+~~~~~~~~~~~~~~~~~
+
+.. autoclass:: disnake.i18n.LocalizationValue
+    :members:
+    :inherited-members:
+
+LocalizationStore
+~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: disnake.i18n.LocalizationStore
+    :members:
+    :inherited-members:
+
+LocalizationProtocol
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: disnake.i18n.LocalizationProtocol
+    :members:
+
+
 Exceptions
 ------------
 
@@ -5158,6 +5258,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: ModalChainNotSupported
 
+.. autoexception:: LocalizationKeyError
+
 .. autoexception:: disnake.opus.OpusError
 
 .. autoexception:: disnake.opus.OpusNotLoaded
@@ -5186,6 +5288,7 @@ Exception Hierarchy
                 - :exc:`Forbidden`
                 - :exc:`NotFound`
                 - :exc:`DiscordServerError`
+            - :exc:`LocalizationKeyError`
 
 
 Warnings
@@ -5197,6 +5300,8 @@ Warnings
 
 .. autoclass:: SyncWarning
 
+.. autoclass:: LocalizationWarning
+
 Warning Hierarchy
 ~~~~~~~~~~~~~~~~~~~
 
@@ -5205,3 +5310,4 @@ Warning Hierarchy
     - :class:`DiscordWarning`
         - :class:`ConfigWarning`
         - :class:`SyncWarning`
+        - :class:`LocalizationWarning`
