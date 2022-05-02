@@ -504,7 +504,7 @@ class _APIApplicationCommandMixin:
 
 class UserCommand(ApplicationCommand):
     """
-    A user context menu command
+    A user context menu command.
 
     Attributes
     ----------
@@ -536,7 +536,7 @@ class UserCommand(ApplicationCommand):
 
 class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     """
-    A user context menu command returned by the API
+    A user context menu command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -612,7 +612,7 @@ class MessageCommand(ApplicationCommand):
 
 class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     """
-    A message context menu command returned by the API
+    A message context menu command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -764,7 +764,7 @@ class SlashCommand(ApplicationCommand):
 
 class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     """
-    A slash command returned by the API
+    A slash command returned by the API.
 
     .. versionadded:: 2.4
 
