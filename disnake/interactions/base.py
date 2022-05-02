@@ -677,15 +677,7 @@ class InteractionResponse:
         *,
         with_message: Literal[True],
         ephemeral: bool = ...,
-    ):
-        ...
-
-    @overload
-    async def defer(
-        self,
-        *,
-        ephemeral: bool = ...,
-    ):
+    ) -> None:
         ...
 
     @overload
@@ -693,7 +685,7 @@ class InteractionResponse:
         self,
         *,
         with_message: Literal[False],
-    ):
+    ) -> None:
         ...
 
     async def defer(
@@ -709,9 +701,6 @@ class InteractionResponse:
         This is typically used when the interaction is acknowledged
         and a secondary action will be done later.
 
-        .. versionchanged:: 2.5
-            ``ephemeral`` now implies ``with_message`` if it is not already set.
-
         Parameters
         ----------
         with_message: :class:`bool`
@@ -721,7 +710,6 @@ class InteractionResponse:
 
         ephemeral: :class:`bool`
             Whether the deferred message will eventually be ephemeral.
-            .. note:: This automatically implies ``with_message`` is True.
 
         Raises
         ------
@@ -736,9 +724,6 @@ class InteractionResponse:
         defer_type: Optional[InteractionResponseType] = None
         data: Dict[str, Any] = {}
         parent = self._parent
-        if with_message is MISSING:
-            if ephemeral is not MISSING:
-                with_message = True
 
         if parent.type in (InteractionType.application_command, InteractionType.modal_submit):
             defer_type = InteractionResponseType.deferred_channel_message
@@ -751,8 +736,13 @@ class InteractionResponse:
         if defer_type is InteractionResponseType.deferred_channel_message:
             # we only want to set flags if we are sending a message
             data["flags"] = 0
-            if ephemeral is not MISSING:
+            if ephemeral:
                 data["flags"] |= MessageFlags.ephemeral.flag
+
+        if not defer_type:
+            raise TypeError(
+                "This interaction must be of type 'application_command', 'modal_submit', or 'component' in order to defer."
+            )
 
         if defer_type:
             adapter = async_context.get()
