@@ -157,9 +157,13 @@ class SubCommandGroup(InvokableApplicationCommand):
         )
         self.qualified_name: str = ""
 
-        if hasattr(func, "__default_member_permissions__"):
+        if (
+            "dm_permission" in kwargs
+            or "default_member_permissions" in kwargs
+            or hasattr(func, "__default_member_permissions__")
+        ):
             raise TypeError(
-                "Cannot set `default_member_permissions` on subcommands or subcommand groups"
+                "Cannot set `default_member_permissions` or `dm_permission` on subcommand groups"
             )
 
     @property
@@ -272,9 +276,13 @@ class SubCommand(InvokableApplicationCommand):
         )
         self.qualified_name = ""
 
-        if hasattr(func, "__default_member_permissions__"):
+        if (
+            "dm_permission" in kwargs
+            or "default_member_permissions" in kwargs
+            or hasattr(func, "__default_member_permissions__")
+        ):
             raise TypeError(
-                "Cannot set `default_member_permissions` on subcommands or subcommand groups"
+                "Cannot set `default_member_permissions` or `dm_permission` on subcommands"
             )
 
     @property
