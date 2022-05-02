@@ -207,7 +207,13 @@ class RangeMeta(type):
 
 
 class Range(type, metaclass=RangeMeta):
-    """Type depicting a limited range of allowed values"""
+    """Type depicting a limited range of allowed values.
+
+    See :ref:`param_ranges` for more information.
+
+    .. versionadded:: 2.4
+
+    """
 
     min_value: Optional[float]
     max_value: Optional[float]
