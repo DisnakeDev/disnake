@@ -23,15 +23,17 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, TypeVar
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.i18n import Localized
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
 from .params import safe_call
 
 if TYPE_CHECKING:
+    from disnake.i18n import LocalizedOptional
     from disnake.interactions import ApplicationCommandInteraction
 
     from .base_core import InteractionCommandCallback
@@ -68,7 +70,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_user_command_error`
         event.
-    guild_ids: Optional[List[:class:`int`]]
+    guild_ids: Optional[Sequence[:class:`int`]`
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -85,22 +87,20 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self,
         func: InteractionCommandCallback,
         *,
-        name: str = None,
+        name: LocalizedOptional = None,
         default_permission: bool = True,
-        guild_ids: List[int] = None,
+        guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
-        self.guild_ids: Optional[List[int]] = guild_ids
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
+        self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = UserCommand(name=self.name, default_permission=default_permission)
-
-    def _ensure_assignment_on_copy(self, other: UserCommandT) -> UserCommandT:
-        super()._ensure_assignment_on_copy(other)
-        if self.guild_ids and self.guild_ids != other.guild_ids:
-            other.guild_ids = self.guild_ids.copy()
-        return other
+        self.body = UserCommand(
+            name=name_loc._upgrade(self.name),
+            default_permission=default_permission,
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -154,7 +154,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_message_command_error`
         event.
-    guild_ids: Optional[List[:class:`int`]]
+    guild_ids: Optional[Sequence[:class:`int`]`
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -171,22 +171,20 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         self,
         func: InteractionCommandCallback,
         *,
-        name: str = None,
+        name: LocalizedOptional = None,
         default_permission: bool = True,
-        guild_ids: List[int] = None,
+        guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
-        self.guild_ids: Optional[List[int]] = guild_ids
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
+        self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = MessageCommand(name=self.name, default_permission=default_permission)
-
-    def _ensure_assignment_on_copy(self, other: MessageCommandT) -> MessageCommandT:
-        super()._ensure_assignment_on_copy(other)
-        if self.guild_ids and self.guild_ids != other.guild_ids:
-            other.guild_ids = self.guild_ids.copy()
-        return other
+        self.body = MessageCommand(
+            name=name_loc._upgrade(self.name),
+            default_permission=default_permission,
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -217,9 +215,9 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
 def user_command(
     *,
-    name: str = None,
+    name: LocalizedOptional = None,
     default_permission: bool = True,
-    guild_ids: List[int] = None,
+    guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     extras: Dict[str, Any] = None,
     **kwargs,
@@ -228,8 +226,12 @@ def user_command(
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the user command (defaults to the function name).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -274,9 +276,9 @@ def user_command(
 
 def message_command(
     *,
-    name: str = None,
+    name: LocalizedOptional = None,
     default_permission: bool = True,
-    guild_ids: List[int] = None,
+    guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     extras: Dict[str, Any] = None,
     **kwargs,
@@ -285,8 +287,12 @@ def message_command(
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the message command (defaults to the function name).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.

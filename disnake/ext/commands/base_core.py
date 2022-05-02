@@ -35,6 +35,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     TypeVar,
     Union,
     cast,
@@ -104,6 +105,12 @@ class InvokableApplicationCommand(ABC):
     These are not created manually, instead they are created via the
     decorator or functional interface.
 
+    The following classes implement this ABC:
+
+    - :class:`~.InvokableSlashCommand`
+    - :class:`~.InvokableMessageCommand`
+    - :class:`~.InvokableUserCommand`
+
     Attributes
     ----------
     name: :class:`str`
@@ -124,7 +131,7 @@ class InvokableApplicationCommand(ABC):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: Optional[List[:class:`int`]]
+    guild_ids: Optional[Sequence[:class:`int`]`
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -189,7 +196,7 @@ class InvokableApplicationCommand(ABC):
         self._max_concurrency: Optional[MaxConcurrency] = max_concurrency
 
         self.cog: Optional[Cog] = None
-        self.guild_ids: Optional[List[int]] = None
+        self.guild_ids: Optional[Sequence[int]] = None
         self.auto_sync: bool = True
 
         self._before_invoke: Optional[Hook] = None
@@ -208,7 +215,7 @@ class InvokableApplicationCommand(ABC):
         if self.permissions != other.permissions:
             other.permissions = self.permissions.copy()
         if self.guild_ids != other.guild_ids:
-            other.guild_ids = None if self.guild_ids is None else self.guild_ids.copy()
+            other.guild_ids = None if self.guild_ids is None else self.guild_ids[:]
         return other
 
     def copy(self: AppCommandT) -> AppCommandT:
