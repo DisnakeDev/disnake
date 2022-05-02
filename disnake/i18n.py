@@ -200,7 +200,7 @@ Localised = Localized
 
 class LocalizationValue:
     """
-    Container type for (pending) localization data
+    Container type for (pending) localization data.
 
     .. versionadded:: 2.5
     """
