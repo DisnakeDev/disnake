@@ -72,6 +72,7 @@ from .gateway import *
 from .guild import Guild
 from .guild_preview import GuildPreview
 from .http import HTTPClient
+from .i18n import LocalizationProtocol, LocalizationStore
 from .invite import Invite
 from .iterators import GuildIterator
 from .mentions import AllowedMentions
@@ -305,6 +306,22 @@ class Client:
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
 
+    localization_provider: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` to use for localization of
+        application commands.
+        If not provided, the default :class:`.LocalizationStore` implementation is used.
+
+        .. versionadded:: 2.5
+
+    strict_localization: :class:`bool`
+        Whether to raise an exception when localizations for a specific key couldn't be found.
+        This is mainly useful for testing/debugging, consider disabling this eventually
+        as missing localized names will automatically fall back to the default/base name without it.
+        Only applicable if the ``localization_provider`` parameter is not provided.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.5
+
     Attributes
     ----------
     ws
@@ -364,6 +381,12 @@ class Client:
         if VoiceClient.warn_nacl:
             VoiceClient.warn_nacl = False
             _log.warning("PyNaCl is not installed, voice will NOT be supported")
+
+        i18n_strict: bool = options.pop("strict_localization", False)
+        i18n = options.pop("localization_provider", None)
+        if i18n is None:
+            i18n = LocalizationStore(strict=i18n_strict)
+        self.i18n: LocalizationProtocol = i18n
 
     # internals
 
@@ -1962,7 +1985,9 @@ class Client:
         return User(state=self._connection, data=data)
 
     async def fetch_channel(
-        self, channel_id: int, /
+        self,
+        channel_id: int,
+        /,
     ) -> Union[GuildChannel, PrivateChannel, Thread]:
         """|coro|
 
@@ -2161,19 +2186,30 @@ class Client:
 
     # Application commands (global)
 
-    async def fetch_global_commands(self) -> List[APIApplicationCommand]:
+    async def fetch_global_commands(
+        self,
+        *,
+        with_localizations: bool = True,
+    ) -> List[APIApplicationCommand]:
         """|coro|
 
         Retrieves a list of global application commands.
 
         .. versionadded:: 2.1
 
+        Parameters
+        ----------
+        with_localizations: :class:`bool`
+            Whether to include localizations in the response. Defaults to ``True``.
+
+            .. versionadded:: 2.5
+
         Returns
         -------
         List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of application commands.
         """
-        return await self._connection.fetch_global_commands()
+        return await self._connection.fetch_global_commands(with_localizations=with_localizations)
 
     async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
         """|coro|
@@ -2213,6 +2249,7 @@ class Client:
         Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The application command that was created.
         """
+        application_command.localize(self.i18n)
         return await self._connection.create_global_command(application_command)
 
     async def edit_global_command(
@@ -2236,6 +2273,7 @@ class Client:
         Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The edited application command.
         """
+        new_command.localize(self.i18n)
         return await self._connection.edit_global_command(command_id, new_command)
 
     async def delete_global_command(self, command_id: int) -> None:
@@ -2271,11 +2309,18 @@ class Client:
         List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of registered application commands.
         """
+        for cmd in application_commands:
+            cmd.localize(self.i18n)
         return await self._connection.bulk_overwrite_global_commands(application_commands)
 
     # Application commands (guild)
 
-    async def fetch_guild_commands(self, guild_id: int) -> List[APIApplicationCommand]:
+    async def fetch_guild_commands(
+        self,
+        guild_id: int,
+        *,
+        with_localizations: bool = True,
+    ) -> List[APIApplicationCommand]:
         """|coro|
 
         Retrieves a list of guild application commands.
@@ -2286,13 +2331,19 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID of the guild to fetch commands from.
+        with_localizations: :class:`bool`
+            Whether to include localizations in the response. Defaults to ``True``.
+
+            .. versionadded:: 2.5
 
         Returns
         -------
         List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of application commands.
         """
-        return await self._connection.fetch_guild_commands(guild_id)
+        return await self._connection.fetch_guild_commands(
+            guild_id, with_localizations=with_localizations
+        )
 
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
         """|coro|
@@ -2336,6 +2387,7 @@ class Client:
         Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The newly created application command.
         """
+        application_command.localize(self.i18n)
         return await self._connection.create_guild_command(guild_id, application_command)
 
     async def edit_guild_command(
@@ -2361,6 +2413,7 @@ class Client:
         Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The newly edited application command.
         """
+        new_command.localize(self.i18n)
         return await self._connection.edit_guild_command(guild_id, command_id, new_command)
 
     async def delete_guild_command(self, guild_id: int, command_id: int) -> None:
@@ -2400,6 +2453,8 @@ class Client:
         List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of registered application commands.
         """
+        for cmd in application_commands:
+            cmd.localize(self.i18n)
         return await self._connection.bulk_overwrite_guild_commands(guild_id, application_commands)
 
     # Application command permissions

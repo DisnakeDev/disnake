@@ -498,7 +498,9 @@ class Guild(Hashable):
         return self._state._get_guild_command_named(self.id, name)
 
     def get_command_permissions(
-        self, command_id: int, /
+        self,
+        command_id: int,
+        /,
     ) -> Optional[GuildApplicationCommandPermissions]:
         """Gets the cached application command permissions for the command with the specified ID.
 

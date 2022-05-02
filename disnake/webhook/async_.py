@@ -53,6 +53,7 @@ from ..asset import Asset
 from ..channel import PartialMessageable
 from ..enums import WebhookType, try_enum
 from ..errors import DiscordServerError, Forbidden, HTTPException, InvalidArgument, NotFound
+from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
 from ..mixins import Hashable
@@ -492,7 +493,8 @@ def handle_message_parameters_dict(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: bool = False,
+    ephemeral: bool = None,
+    suppress_embeds: bool = None,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: Optional[List[Attachment]] = MISSING,
@@ -541,8 +543,13 @@ def handle_message_parameters_dict(
         payload["avatar_url"] = str(avatar_url)
     if username:
         payload["username"] = username
-    if ephemeral:
-        payload["flags"] = 64
+
+    if ephemeral is not None or suppress_embeds is not None:
+        payload["flags"] = 0
+        if suppress_embeds:
+            payload["flags"] |= MessageFlags.suppress_embeds.flag
+        if ephemeral:
+            payload["flags"] |= MessageFlags.ephemeral.flag
 
     if allowed_mentions:
         if previous_allowed_mentions is not None:
@@ -566,7 +573,8 @@ def handle_message_parameters(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: bool = False,
+    ephemeral: bool = None,
+    suppress_embeds: bool = None,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: Optional[List[Attachment]] = MISSING,
@@ -584,6 +592,7 @@ def handle_message_parameters(
         avatar_url=avatar_url,
         tts=tts,
         ephemeral=ephemeral,
+        suppress_embeds=suppress_embeds,
         file=file,
         files=files,
         attachments=attachments,
@@ -1397,6 +1406,7 @@ class Webhook(BaseWebhook):
         avatar_url: Any = ...,
         tts: bool = ...,
         ephemeral: bool = ...,
+        suppress_embeds: bool = ...,
         file: File = ...,
         files: List[File] = ...,
         embed: Embed = ...,
@@ -1419,6 +1429,7 @@ class Webhook(BaseWebhook):
         avatar_url: Any = ...,
         tts: bool = ...,
         ephemeral: bool = ...,
+        suppress_embeds: bool = ...,
         file: File = ...,
         files: List[File] = ...,
         embed: Embed = ...,
@@ -1440,6 +1451,7 @@ class Webhook(BaseWebhook):
         avatar_url: Any = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        suppress_embeds: bool = False,
         file: File = MISSING,
         files: List[File] = MISSING,
         embed: Embed = MISSING,
@@ -1535,6 +1547,12 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.1
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+
+            .. versionadded:: 2.5
+
         Raises
         ------
         HTTPException
@@ -1592,6 +1610,7 @@ class Webhook(BaseWebhook):
             embed=embed,
             embeds=embeds,
             ephemeral=ephemeral,
+            suppress_embeds=suppress_embeds,
             view=view,
             components=components,
             allowed_mentions=allowed_mentions,

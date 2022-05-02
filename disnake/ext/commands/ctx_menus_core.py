@@ -23,15 +23,17 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.i18n import Localized
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
 from .params import safe_call
 
 if TYPE_CHECKING:
+    from disnake.i18n import LocalizedOptional
     from disnake.interactions import ApplicationCommandInteraction
 
     from .base_core import InteractionCommandCallback
@@ -68,22 +70,33 @@ class InvokableUserCommand(InvokableApplicationCommand):
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
     """
 
     def __init__(
         self,
         func: InteractionCommandCallback,
         *,
-        name: str = None,
+        name: LocalizedOptional = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = UserCommand(name=self.name, default_permission=default_permission)
+        self.body = UserCommand(
+            name=name_loc._upgrade(self.name),
+            default_permission=default_permission,
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -141,22 +154,33 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
     """
 
     def __init__(
         self,
         func: InteractionCommandCallback,
         *,
-        name: str = None,
+        name: LocalizedOptional = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = MessageCommand(name=self.name, default_permission=default_permission)
+        self.body = MessageCommand(
+            name=name_loc._upgrade(self.name),
+            default_permission=default_permission,
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -187,18 +211,23 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
 def user_command(
     *,
-    name: str = None,
+    name: LocalizedOptional = None,
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
+    extras: Dict[str, Any] = None,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the user command (defaults to the function name).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -207,6 +236,13 @@ def user_command(
     guild_ids: Sequence[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
 
     Returns
     -------
@@ -227,6 +263,7 @@ def user_command(
             default_permission=default_permission,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
+            extras=extras,
             **kwargs,
         )
 
@@ -235,18 +272,23 @@ def user_command(
 
 def message_command(
     *,
-    name: str = None,
+    name: LocalizedOptional = None,
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
+    extras: Dict[str, Any] = None,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
     """A shortcut decorator that builds a message command.
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the message command (defaults to the function name).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -255,6 +297,13 @@ def message_command(
     guild_ids: Sequence[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded: 2.5
 
     Returns
     -------
@@ -275,6 +324,7 @@ def message_command(
             default_permission=default_permission,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
+            extras=extras,
             **kwargs,
         )
 
