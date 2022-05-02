@@ -629,8 +629,8 @@ Permissions
 Default Member Permissions
 ++++++++++++++++++++++++++
 
-These commands will not be enabled/visible for members who do not have all the required guild permissions,
-in this example both the ``manage_guild`` and the ``moderate_members`` permissions would be required:
+These commands will not be enabled/visible for members who do not have all the required guild permissions.
+In this example both the ``manage_guild`` and the ``moderate_members`` permissions would be required:
 
 .. code-block:: python3
 
@@ -648,7 +648,7 @@ Or use the ``default_member_permissions`` parameter in the application command d
         ...
 
 This can be overridden by moderators on a per-guild basis; ``default_member_permissions`` may be
-ignored entirely once a permission override, application-wide or for this command in particular, is configured
+ignored entirely once a permission override — application-wide or for this command in particular — is configured
 in the guild settings, and will be restored if the permissions are re-synced in the settings.
 
 Note that ``default_member_permissions`` and ``dm_permission`` cannot be configured for a slash subcommand or
