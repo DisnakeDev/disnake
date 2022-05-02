@@ -14,6 +14,7 @@ exclude =
     *.egg
     .venv
     venv
+    build
 
 # For error codes, see this https://flake8.pycqa.org/en/latest/user/error-codes.html
 ignore =
@@ -40,6 +41,6 @@ per-file-ignores =
     # ignore setattr constants
     disnake/audit_logs.py:E241,B010
     # ignore whitespacing on flags
-    disnake/enums.py:E221,E241
+    disnake/enums.py:E221,E241,N815
     # ignore whitespacing after `:`
     disnake/ext/commands/params.py:E241
