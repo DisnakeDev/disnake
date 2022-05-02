@@ -46,6 +46,7 @@ from ..errors import (
 )
 from ..flags import MessageFlags
 from ..guild import Guild
+from ..i18n import Localized
 from ..member import Member
 from ..message import Attachment, Message
 from ..object import Object
@@ -1101,9 +1102,14 @@ class InteractionResponse:
         else:
             choices_data = []
             value: ApplicationCommandOptionChoicePayload
+            i18n = self._parent.client.i18n
             for c in choices:
+                if isinstance(c, Localized):
+                    c = OptionChoice(c, c.string)
+
                 if isinstance(c, OptionChoice):
-                    value = c.to_dict()
+                    c.localize(i18n)
+                    value = c.to_dict(locale=self._parent.locale)
                 else:
                     value = {"name": str(c), "value": c}
                 choices_data.append(value)
