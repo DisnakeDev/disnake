@@ -620,3 +620,44 @@ Yet again, with a file like ``locale/de.json`` containing localizations like thi
         "AUTOCOMP_SPANISH": "Spanisch",
         "AUTOCOMP_JAPANESE": "Japanisch"
     }
+
+.. _app_command_permissions_v2:
+
+Command Permissions v2
+----------------------
+
+Default Member Permissions
+++++++++++++++++++++++++++
+
+These commands will not be visible for members who do not have the required guild permissions.
+
+For example:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    @commands.default_member_permissions(moderate_members=True)
+    async def command(inter: disnake.CommandInteraction):
+        ...
+
+Or use the ``default_member_permissions`` parameter in the ``commands.slash_command`` decorator:
+
+.. code-block:: python3
+
+    @bot.slash_command(default_member_permissions=disnake.Permissions.manage_guild)
+    async def command(inter: disnake.CommandInteraction):
+        ...
+
+This will make the ``command`` slash command not visible for any member that does not have the ``moderate_members`` guild permission.
+
+DM Permissions
+++++++++++++++
+Using this, you can specify if you want a certain slash command to work in DM's or not.
+
+.. code-block:: python3
+
+    @bot.slash_command(dm_permissions=False)
+    async def command(inter: disnake.CommandInteraction):
+        ...
+
+This will make the ``command`` slash command not visible in a DM but will be visible in a guild.
