@@ -660,4 +660,4 @@ Using this, you can specify if you want a certain slash command to work in DM's 
     async def config(inter: disnake.ApplicationCommandInteraction):
         ...
 
-This will make the ``command`` slash command not visible in a DM but will be visible in a guild.
+This will make the ``config`` slash command invisible in DMs, while it will remain visible in guilds.
