@@ -17,8 +17,9 @@ in specific versions.
 v2.5.0
 ---------
 
-This version adds support for API v10 (which comes with a few breaking changes), forum channels,
-improves API coverage by adding support for previously missing features,
+This version adds support for API v10 (which comes with a few breaking changes),
+forum channels, localizations, improves API coverage by adding support for previously
+missing features like guild previews, widgets, or welcome screens,
 and contains several miscellaneous enhancements and bugfixes.
 
 Regarding the message content intent:
@@ -33,7 +34,7 @@ Breaking Changes
 
 - The :attr:`~Intents.message_content` intent is now required to receive to receive message content and related fields, see above (:issue:`353`)
 - :func:`TextChannel.create_thread` now requires either a ``message`` or a ``type`` parameter (:issue:`355`)
-- :func:`GuildScheduledEvent.fetch_users` and :func:`Guild.bans` now return an async iterator instead of a list users (:issue:`428`, :issue:`442`)
+- :func:`GuildScheduledEvent.fetch_users` and :func:`Guild.bans` now return an async iterator instead of a list of users (:issue:`428`, :issue:`442`)
 - Store channels have been removed as they're not supported by Discord any longer (:issue:`438`)
 - :func:`on_thread_join` will no longer be invoked when a new thread is created, see :func:`on_thread_create` (:issue:`445`)
 - ``Invite.revoked`` and ``Thread.archiver_id`` have been removed (deprecated in 2.4) (:issue:`455`)
@@ -41,9 +42,7 @@ Breaking Changes
 - Slash command names and option names are no longer automatically converted to lowercase, an :class:`InvalidArgument` exception is now raised instead (:issue:`422`)
 - :func:`Guild.audit_logs` no longer supports the ``oldest_first`` parameter (:issue:`473`)
 - The ``interaction`` parameter of :func:`ui.Item.callback` is now positional-only (:issue:`311`)
-- Invalid voice regions were removed from :class:`VoiceRegion` (:issue:`357`)
-    - removed: ``eu_west``, ``eu_central``, ``london``, ``amsterdam``, ``frankfurt``, ``south_korea``, ``europe``, ``vip_us_east``, ``vip_us_west``, ``vip_amsterdam``
-    - added: ``rotterdam``
+- The voice region enum was replaced with a generic :class:`VoiceRegion` data class (:issue:`477`)
 - The ``youtube``, ``awkword`` and ``sketchy_artist`` :class:`PartyType`\s no longer work and were removed (:issue:`408`, :issue:`409`)
 - |commands| Failure to convert an input parameter annotated as :class:`~ext.commands.LargeInt` now
   raises a :exc:`~ext.commands.LargeIntConversionFailure` (:issue:`362`)
@@ -58,6 +57,7 @@ Deprecations
   they should be set on a per-channel basis instead (:issue:`357`, :issue:`374`)
 - :attr:`AppInfo.summary`, :attr:`PartialAppInfo.summary` and :attr:`IntegrationApplication.summary` are deprecated, use ``.description`` instead (:issue:`369`)
 - Public stages and stage discoverability are deprecated and no longer supported (:issue:`287`)
+- The ``suppress`` parameter for edit methods has been deprecated in favor of ``suppress_embeds``, with unchanged functionality (:issue:`474`)
 
 
 New Features
@@ -66,13 +66,24 @@ New Features
 - Support API v10 (:issue:`353`)
     - New intent: :attr:`Intents.message_content`
     - |commands| New warning: :class:`~ext.commands.MessageContentPrefixWarning`
-- Add forum channels (:issue:`448`)
+- Add forum channels (:issue:`448`, :issue:`479`, :issue:`504`)
     - Add :class:`ForumChannel`
     - Add :attr:`CategoryChannel.forum_channels`, :attr:`Guild.forum_channels`
     - Add :attr:`CategoryChannel.create_forum_channel`, :attr:`Guild.create_forum_channel`
     - Add :class:`ChannelFlags`, :attr:`Thread.flags`, :attr:`Thread.is_pinned`
     - Add ``pinned`` parameter to :func:`Thread.edit`
+    - Add :attr:`Permissions.create_forum_threads`, alias of :attr:`~Permissions.send_messages`
     - |commands| Add :class:`~ext.commands.ForumChannelConverter`
+- Add application command localizations, see :ref:`localizations` (:issue:`269`)
+    - Add :class:`Localized`, :class:`LocalizationProtocol`, :class:`LocalizationStore`
+    - Most ``name`` and ``description`` parameters now also accept a :class:`Localized` object
+    - Update docstring parsing to accommodate for localizations
+    - Add :attr:`Client.i18n`
+    - Add ``localization_provider`` and ``strict_localization`` parameters to :class:`Client`
+    - Add ``with_localizations`` parameter to :func:`Client.fetch_global_commands`, :func:`Client.fetch_guild_commands`
+    - Add :class:`LocalizationWarning`, :class:`LocalizationKeyError`
+    - Add :func:`utils.as_valid_locale`
+    - Add localization example
 - Add guild previews (:issue:`359`)
     - Add :class:`GuildPreview`
     - Add :func:`Client.fetch_guild_preview`
@@ -81,6 +92,10 @@ New Features
     - Add :func:`Guild.widget_settings`, :func:`Guild.widget_image_url`
     - Add :func:`Widget.image_url`
     - Change :func:`Guild.edit_widget` return type
+- Add guild welcome screens (:issue:`339`)
+    - Add :class:`WelcomeScreen`, :class:`WelcomeScreenChannel`
+    - Add :func:`Guild.welcome_screen`, :func:`Guild.edit_welcome_screen`
+    - Add :attr:`Invite.guild_welcome_screen`
 - Add :attr:`ModalInteraction.message` (:issue:`363`, :issue:`400`)
 - Support :func:`InteractionResponse.edit_message` for modal interactions, if modal was sent in response to component interaction (:issue:`364`, :issue:`400`)
 - Add :func:`Guild.search_members` (:issue:`358`, :issue:`388`)
@@ -105,7 +120,17 @@ New Features
 - Add temporary workaround for setting API version to avoid message content intent requirement until deadline (:issue:`467`)
 - Add ``default_auto_archive_duration`` parameter to :func:`Guild.create_text_channel`, add ``nsfw`` parameter to :func:`Guild.create_voice_channel` (:issue:`456`)
 - Add :attr:`TextChannel.last_pin_timestamp`, :attr:`DMChannel.last_pin_timestamp`, :attr:`Thread.last_pin_timestamp` (:issue:`464`)
+- Allow providing ``attachments=None`` to clear attachments when editing a message (:issue:`457`)
+- Add debug logging of webhook request/response data (:issue:`486`)
+- Add :class:`VoiceRegion` (replacing voice region enum), :func:`Client.fetch_voice_regions`, :func:`Guild.fetch_voice_regions` (:issue:`477`)
+- Support creating news channels using :func:`Guild.create_text_channel` (:issue:`497`)
+- Add :attr:`Guild.vanity_url_code`, add option to :func:`Guild.vanity_invite` to use cached invite code (:issue:`502`)
+- Add :attr:`Member.role_icon` property (:issue:`485`)
+- Add :func:`on_raw_thread_delete`, :func:`on_raw_thread_member_remove` and :func:`on_raw_thread_update` events (:issue:`495`)
+- Add ``suppress_embeds`` parameter to message send methods (:issue:`474`)
+- Add :attr:`MessageType.auto_moderation_action` (:issue:`465`)
 - |commands| Add :class:`~ext.commands.GuildScheduledEventConverter` and :exc:`~ext.commands.GuildScheduledEventNotFound` (:issue:`376`)
+- |commands| Add :attr:`~ext.commands.InvokableApplicationCommand.extras` to application commands (:issue:`483`)
 
 
 Bug Fixes
@@ -132,11 +157,15 @@ Bug Fixes
 - Support embed images in :func:`InteractionResponse.edit_message` (:issue:`466`)
 - Fix memory leaks on shard reconnect (:issue:`424`, :issue:`425`)
 - Fix ``after`` parameter of :func:`Guild.audit_logs` (:issue:`473`)
+- Don't require a ``topic`` when creating a stage channel (:issue:`480`)
+- Add ``__str__`` to :class:`ApplicationCommand`, improve sync debug output (:issue:`478`)
+- Make ``disnake.types.interactions`` importable at runtime (:issue:`493`)
 - |commands| Fix :class:`~ext.commands.clean_content` converter (:issue:`396`)
 - |commands| Make conversion exceptions in slash commands propagate cleanly as documented (:issue:`362`)
 - |commands| Fix unloading of listeners with custom names (:issue:`444`)
 - |commands| Fix usage of custom converters with :func:`Param <ext.commands.Param>` (:issue:`398`)
 - |commands| Support interactions in :class:`~ext.commands.UserConverter`, :class:`~ext.commands.MemberConverter` (:issue:`429`)
+- |commands| Fix parameter name conflicts in slash commands (:issue:`503`)
 
 
 Documentation
@@ -152,6 +181,7 @@ Documentation
 - Add search hotkeys ``ctrl+k``, ``/``, ``s`` (:issue:`434`)
 - Add autocomplete decorator example (:issue:`472`)
 - Fix string escape warnings (:issue:`436`)
+- Update docs of ABCs to mention subclasses (:issue:`506`)
 
 
 Miscellaneous
