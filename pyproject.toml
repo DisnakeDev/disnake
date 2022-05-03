@@ -23,6 +23,51 @@ setup_env = {cmd = 'nox -s setup --', help = 'Setup the local environment and se
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 
+[tool.towncrier]
+template = 'changes/_template.rst'
+package = "disnake"
+filename = "docs/whats_new.rst"
+directory = "changes/"
+title_format = "v{version}"
+underlines = "-~"
+issue_format = ":issue:`{issue}`"
+
+    [[tool.towncrier.type]]
+    directory = 'breaking'
+    name = "Breaking Changes"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = 'feature'
+    name = "Features"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = 'bugfix'
+    name = "Bugfixes"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = 'removal'
+    name = "Deprecations and Removals"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = 'doc'
+    name = "Improved Documentation"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = 'typing'
+    name = "Typings"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = 'misc'
+    name = "Misc"
+    showcontent = false
+
+
 [tool.slotscheck]
 strict-imports = true
 require-superclass = true

@@ -19,3 +19,7 @@ pytest-cov~=3.0.0
 pytest-asyncio~=0.18.3
 looptime~=0.2
 coverage[toml]~=6.3.2
+
+
+# changelog
+towncrier==21.9.0
