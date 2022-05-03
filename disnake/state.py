@@ -735,9 +735,6 @@ class ConnectionState:
 
     def parse_application_command_permissions_update(self, data) -> None:
         app_command_perms = GuildApplicationCommandPermissions(data=data, state=self)
-        if app_command_perms.application_id != self.application_id:
-            # we have no reason to dispatch an application command permission update for a different app
-            return
         self.dispatch("application_command_permissions_update", app_command_perms)
 
     def parse_message_create(self, data) -> None:

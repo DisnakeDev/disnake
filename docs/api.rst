@@ -661,14 +661,18 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param payload: The raw event payload data.
     :type payload: :class:`RawReactionClearEmojiEvent`
 
-.. function:: on_application_command_permissions_update(guild_command)
+.. function:: on_application_command_permissions_update(permissions)
 
-    Called when an application command owned by the bot has its permissions updated.
+    Called when the permissions of an application command or
+    the application-wide command permissions are updated.
+
+    Note that this will also be called when permissions of other applications change,
+    not just this application's permissions.
 
     .. versionadded:: 2.5
 
-    :param guild_command: The updated permission object.
-    :type guild_command: :class:`GuildApplicationCommandPermissions`
+    :param permissions: The updated permission object.
+    :type permissions: :class:`GuildApplicationCommandPermissions`
 
 
 .. function:: on_interaction(interaction)
