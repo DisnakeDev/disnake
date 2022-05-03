@@ -1035,12 +1035,13 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when a :class:`Member` updates their profile.
 
-    This is called when one or more of the following things change:
+    This is called when one or more of the following things change, but is not limited to:
 
     - nickname
     - roles
     - pending
     - timeout
+    - guild specific avatar
 
     This requires :attr:`Intents.members` to be enabled.
 
