@@ -1040,6 +1040,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     - nickname
     - roles
     - pending
+    - timeout
 
     This requires :attr:`Intents.members` to be enabled.
 
