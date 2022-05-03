@@ -377,7 +377,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`]`
+    guild_ids: Optional[Tuple[:class:`int`, ...]`
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     connectors: Dict[:class:`str`, :class:`str`]
         A mapping of option names to function parameter names, mainly for internal processes.
