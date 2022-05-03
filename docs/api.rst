@@ -5196,28 +5196,28 @@ The library uses the following types/methods to support localization.
 Localized
 ~~~~~~~~~
 
-.. autoclass:: disnake.i18n.Localized
+.. autoclass:: Localized
     :members:
     :inherited-members:
 
 LocalizationValue
 ~~~~~~~~~~~~~~~~~
 
-.. autoclass:: disnake.i18n.LocalizationValue
+.. autoclass:: LocalizationValue
     :members:
     :inherited-members:
 
 LocalizationStore
 ~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: disnake.i18n.LocalizationStore
+.. autoclass:: LocalizationStore
     :members:
     :inherited-members:
 
 LocalizationProtocol
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: disnake.i18n.LocalizationProtocol
+.. autoclass:: LocalizationProtocol
     :members:
 
 

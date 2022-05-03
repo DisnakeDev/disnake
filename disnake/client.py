@@ -336,6 +336,11 @@ class Client:
         Only available after initiating the connection.
 
         .. versionadded:: 2.5
+    i18n: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` used for localization of
+        application commands.
+
+        .. versionadded:: 2.5
     """
 
     def __init__(
