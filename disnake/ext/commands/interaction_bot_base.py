@@ -36,6 +36,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Sequence,
     Set,
     Tuple,
     TypeVar,
@@ -437,7 +438,7 @@ class InteractionBotBase(CommonBotBase):
         description: LocalizedOptional = None,
         options: List[Option] = None,
         default_permission: bool = True,
-        guild_ids: List[int] = None,
+        guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
         extras: Dict[str, Any] = None,
@@ -468,7 +469,7 @@ class InteractionBotBase(CommonBotBase):
             cannot be used in guilds (unless explicit command permissions are set), or in DMs.
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: List[:class:`int`]
+        guild_ids: Sequence[:class:`int`]
             If specified, the client will register a command in these guilds.
             Otherwise this command will be registered globally in ~1 hour.
         connectors: Dict[:class:`str`, :class:`str`]
@@ -513,7 +514,7 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: LocalizedOptional = None,
         default_permission: bool = True,
-        guild_ids: List[int] = None,
+        guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         extras: Dict[str, Any] = None,
         **kwargs,
@@ -534,7 +535,7 @@ class InteractionBotBase(CommonBotBase):
             cannot be used in guilds (unless explicit command permissions are set), or in DMs.
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
-        guild_ids: List[:class:`int`]
+        guild_ids: Sequence[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally in ~1 hour.
         extras: Dict[:class:`str`, Any]
@@ -570,7 +571,7 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: LocalizedOptional = None,
         default_permission: bool = True,
-        guild_ids: List[int] = None,
+        guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         extras: Dict[str, Any] = None,
         **kwargs,
@@ -591,7 +592,7 @@ class InteractionBotBase(CommonBotBase):
             cannot be used in guilds (unless explicit command permissions are set), or in DMs.
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: List[:class:`int`]
+        guild_ids: Sequence[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally in ~1 hour.
         extras: Dict[:class:`str`, Any]

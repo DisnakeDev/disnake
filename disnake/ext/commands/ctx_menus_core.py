@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, TypeVar
 
 from disnake.app_commands import MessageCommand, UserCommand
 from disnake.i18n import Localized
@@ -70,7 +70,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_user_command_error`
         event.
-    guild_ids: Optional[Sequence[:class:`int`]`
+    guild_ids: Optional[Tuple[:class:`int`]`
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -95,7 +95,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
-        self.guild_ids: Optional[Sequence[int]] = guild_ids
+        self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
         self.auto_sync: bool = auto_sync
         self.body = UserCommand(
             name=name_loc._upgrade(self.name),
@@ -154,7 +154,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_message_command_error`
         event.
-    guild_ids: Optional[Sequence[:class:`int`]`
+    guild_ids: Optional[Tuple[:class:`int`]`
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -179,7 +179,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
-        self.guild_ids: Optional[Sequence[int]] = guild_ids
+        self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
         self.auto_sync: bool = auto_sync
         self.body = MessageCommand(
             name=name_loc._upgrade(self.name),

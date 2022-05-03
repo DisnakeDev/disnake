@@ -24,7 +24,18 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
@@ -366,7 +377,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: Optional[Sequence[:class:`int`]`
+    guild_ids: Optional[Tuple[:class:`int`]`
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     connectors: Dict[:class:`str`, :class:`str`]
         A mapping of option names to function parameter names, mainly for internal processes.
@@ -399,7 +410,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = auto_sync
-        self.guild_ids: Optional[Sequence[int]] = guild_ids
+        self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
         self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
 
         if options is None:
@@ -711,7 +722,7 @@ def slash_command(
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
-    guild_ids: Sequence[:class:`int`]
+    guild_ids: Sequence[:class:`int`, ...]
         If specified, the client will register a command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
     connectors: Dict[:class:`str`, :class:`str`]
