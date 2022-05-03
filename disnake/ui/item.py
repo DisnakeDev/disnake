@@ -58,7 +58,7 @@ if TYPE_CHECKING:
 class WrappedComponent(ABC):
     """Represents the base UI component that all UI components inherit from.
 
-    The current UI components supported are:
+    The following classes implement this ABC:
 
     - :class:`disnake.ui.Button`
     - :class:`disnake.ui.Select`

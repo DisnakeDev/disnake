@@ -26,12 +26,14 @@ import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.i18n import Localized
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
 from .params import safe_call
 
 if TYPE_CHECKING:
+    from disnake.i18n import LocalizedOptional
     from disnake.interactions import ApplicationCommandInteraction
 
     from .base_core import InteractionCommandCallback
@@ -81,16 +83,20 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self,
         func: InteractionCommandCallback,
         *,
-        name: str = None,
+        name: LocalizedOptional = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = UserCommand(name=self.name, default_permission=default_permission)
+        self.body = UserCommand(
+            name=name_loc._upgrade(self.name),
+            default_permission=default_permission,
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -161,16 +167,20 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         self,
         func: InteractionCommandCallback,
         *,
-        name: str = None,
+        name: LocalizedOptional = None,
         default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Sequence[int]] = guild_ids
         self.auto_sync: bool = auto_sync
-        self.body = MessageCommand(name=self.name, default_permission=default_permission)
+        self.body = MessageCommand(
+            name=name_loc._upgrade(self.name),
+            default_permission=default_permission,
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -201,7 +211,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
 def user_command(
     *,
-    name: str = None,
+    name: LocalizedOptional = None,
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
@@ -212,8 +222,12 @@ def user_command(
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the user command (defaults to the function name).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.
@@ -258,7 +272,7 @@ def user_command(
 
 def message_command(
     *,
-    name: str = None,
+    name: LocalizedOptional = None,
     default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
@@ -269,8 +283,12 @@ def message_command(
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the message command (defaults to the function name).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     default_permission: :class:`bool`
         Whether the command is enabled by default. If set to ``False``, this command
         cannot be used in guilds (unless explicit command permissions are set), or in DMs.

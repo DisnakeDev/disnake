@@ -241,6 +241,7 @@ class MessageType(Enum):
     thread_starter_message = 21
     guild_invite_reminder = 22
     context_menu_command = 23
+    auto_moderation_action = 24
 
 
 class PartyType(Enum):
@@ -690,35 +691,65 @@ class WidgetStyle(Enum):
 # reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
     bg = "bg"
+    "Bulgarian | български"
     cs = "cs"
+    "Czech | Čeština"
     da = "da"
+    "Danish | Dansk"
     de = "de"
+    "German | Deutsch"
     el = "el"
+    "Greek | Ελληνικά"
     en_GB = "en-GB"
+    "English, UK | English, UK"
     en_US = "en-US"
+    "English, US | English, US"
     es_ES = "es-ES"
+    "Spanish | Español"
     fi = "fi"
+    "Finnish | Suomi"
     fr = "fr"
+    "French | Français"
     hi = "hi"
+    "Hindi | हिन्दी"
     hr = "hr"
+    "Croatian | Hrvatski"
     it = "it"
+    "Italian | Italiano"
     ja = "ja"
+    "Japanese | 日本語"
     ko = "ko"
+    "Korean | 한국어"
     lt = "lt"
+    "Lithuanian | Lietuviškai"
     hu = "hu"
+    "Hungarian | Magyar"
     nl = "nl"
+    "Dutch | Nederlands"
     no = "no"
+    "Norwegian | Norsk"
     pl = "pl"
+    "Polish | Polski"
     pt_BR = "pt-BR"
+    "Portuguese, Brazilian | Português do Brasil"
     ro = "ro"
+    "Romanian, Romania | Română"
     ru = "ru"
+    "Russian | Pусский"
     sv_SE = "sv-SE"
+    "Swedish | Svenska"
     th = "th"
+    "Thai | ไทย"
     tr = "tr"
+    "Turkish | Türkçe"
     uk = "uk"
+    "Ukrainian | Українська"
     vi = "vi"
+    "Vietnamese | Tiếng Việt"
     zh_CN = "zh-CN"
+    "Chinese, China | 中文"
     zh_TW = "zh-TW"
+    "Chinese, Taiwan | 繁體中文"
 
     def __str__(self):
         return self.value
