@@ -2504,10 +2504,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         Returns
         -------
         Tuple[:class:`Thread`, :class:`Message`]
-            The newly created thread and the message sent in it.
+            A :class:`~typing.NamedTuple` with the newly created thread and the message sent in it.
 
-            These values can also be accessed through the ``thread`` and ``message``
-            fields in the returned namedtuple.
+            These values can also be accessed through the ``thread`` and ``message`` fields.
         """
         from .message import Message
         from .webhook.async_ import handle_message_parameters_dict
