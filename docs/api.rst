@@ -1049,11 +1049,13 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when a :class:`Member` updates their profile.
 
-    This is called when one or more of the following things change:
+    This is called when one or more of the following things change, but is not limited to:
 
     - nickname
     - roles
     - pending
+    - timeout
+    - guild specific avatar
 
     This requires :attr:`Intents.members` to be enabled.
 
@@ -1594,6 +1596,11 @@ of :class:`enum.Enum`.
         The system message denoting that a context menu command was executed.
 
         .. versionadded:: 2.3
+    .. attribute:: auto_moderation_action
+
+        The system message denoting that Auto Moderation has taken an action on a message.
+
+        .. versionadded:: 2.5
 
 .. class:: UserFlags
 
