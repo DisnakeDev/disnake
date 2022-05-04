@@ -214,8 +214,12 @@ class InvokableApplicationCommand(ABC):
             other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
         if self.permissions != other.permissions:
             other.permissions = self.permissions.copy()
-        if self.guild_ids != other.guild_ids:
-            other.guild_ids = None if self.guild_ids is None else self.guild_ids
+
+        try:
+            other.on_error = self.on_error
+        except AttributeError:
+            pass
+
         return other
 
     def copy(self: AppCommandT) -> AppCommandT:
