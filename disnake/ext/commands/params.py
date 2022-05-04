@@ -36,6 +36,7 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Generic,
     List,
     Literal,
     Optional,
@@ -89,6 +90,7 @@ __all__ = (
     "LargeInt",
     "ParamInfo",
     "Param",
+    "Private",
     "param",
     "inject",
     "option_enum",
@@ -272,6 +274,10 @@ class Range(type, metaclass=RangeMeta):
 
 class LargeInt(int):
     """Type for large integers in slash commands."""
+
+
+class Private(Generic[T]):
+    """Type depicting a private parameter for application commands."""
 
 
 class ParamInfo:
@@ -666,7 +672,8 @@ def safe_call(function: Callable[..., T], *possible_args: Any, **possible_kwargs
 def isolate_self(
     function: Callable,
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
-    """Create parameters without self and the first interaction"""
+    """Create parameters without self and the first interaction.
+    Also, remove all the private parameters"""
     sig = signature(function)
 
     parameters = dict(sig.parameters)
@@ -685,6 +692,13 @@ def isolate_self(
         annot = parametersl[0].annotation
         if issubclass_(annot, CommandInteraction) or annot is inspect.Parameter.empty:
             inter_param = parameters.pop(parametersl[0].name)
+        # we remove all the private parameters.
+        # private parameters start with an _ or that are annotated with Private class
+        for param in parametersl:
+            name = param.name
+            tpe = get_origin(param.annotation)
+            if name.startswith("_") or issubclass_(tpe, Private):
+                parameters.pop(name)
 
     return (cog_param, inter_param), parameters
 
