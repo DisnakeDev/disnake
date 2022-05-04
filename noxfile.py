@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import nox
 
@@ -121,6 +121,7 @@ def tests(session: nox.Session, extras: Optional[str]):
     else:
         session.install("-e", ".")
     session.install(*TEST_REQUIREMENTS)
+    # todo: only run tests that depend on the different dependencies
     session.run("pytest", "-v", "--cov", "--cov-report=term", "--cov-append", "--cov-context=test")
     session.notify("coverage", session.posargs)
 
@@ -143,25 +144,28 @@ def coverage(session: nox.Session):
 def setup(session: nox.Session):
     """Sets up the local environment."""
     session.log("Installing dependencies to the global environment.")
+
     if session.posargs:
         posargs = session.posargs[:]
     else:
         posargs = [
             "lint",
-            "docs",
             "tests",
+            "docs",
         ]
-    if "docs" in posargs:
-        session.run("python", "-m", "pip", "install", "-e", ".[docs]")
-    else:
-        session.run("python", "-m", "pip", "install", "-e", ".")
-    session.run("python", "-m", "pip", "install", *GENERAL_REQUIREMENTS)
 
+    deps: List[str] = [".", *GENERAL_REQUIREMENTS]
     if "lint" in posargs:
-        session.run("python", "-m", "pip", "install", *LINT_REQUIREMENTS)
-        session.run("python", "-m", "pip", "install", *PYRIGHT_REQUIREMENTS)
-        session.run("python", "-m", "pip", "install", "slotscheck~=0.13.0")
-        session.run("pre-commit", "install", "--install-hooks")
+        deps.extend([*LINT_REQUIREMENTS, *PYRIGHT_REQUIREMENTS, "slotscheck~=0.13.0"])
+
+    if "docs" in posargs:
+        deps.remove(".")
+        deps.insert(0, ".[docs]")
 
     if "tests" in posargs:
-        session.run("python", "-m", "pip", "install", *TEST_REQUIREMENTS)
+        deps.extend(TEST_REQUIREMENTS)
+
+    session.run("python", "-m", "pip", "install", "-U", *deps)
+
+    if "lint" in posargs:
+        session.run("pre-commit", "install", "--install-hooks")
