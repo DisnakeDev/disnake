@@ -522,6 +522,7 @@ class ApplicationCommand(ABC):
             "type": try_enum_to_int(self.type),
             "name": self.name,
             "dm_permission": self.dm_permission,
+            "default_permission": True,
         }
 
         if self._default_member_permissions is None:

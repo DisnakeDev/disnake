@@ -291,7 +291,7 @@ class _EditApplicationCommandOptional(TypedDict, total=False):
     default_member_permissions: Optional[str]
     dm_permission: bool
     type: ApplicationCommandType
-    default_permission: bool
+    default_permission: bool  # deprecated
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
 

@@ -157,8 +157,8 @@ class InvokableApplicationCommand(ABC):
 
         if "default_permission" in kwargs:
             raise TypeError(
-                "`default_permission` is deprecated, "
-                "see `default_member_permissions` and `dm_permission` instead"
+                "`default_permission` is deprecated and will always be set to `True`. "
+                "See `default_member_permissions` and `dm_permission` instead."
             )
 
         try:
