@@ -472,6 +472,9 @@ class ApplicationCommand(ABC):
 
         self._always_synced: bool = False
 
+        # reset `default_permission` if set before
+        self._default_permission: bool = True
+
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
         """Optional[:class:`Permissions`]: The default required member permissions for this command.
@@ -501,6 +504,8 @@ class ApplicationCommand(ABC):
         return (
             self.type == other.type
             and self.name == other.name
+            and self.name_localizations == other.name_localizations
+            and self._default_member_permissions == other._default_member_permissions
             # ignore `dm_permission` if comparing guild commands
             and (
                 any(
@@ -509,8 +514,7 @@ class ApplicationCommand(ABC):
                 )
                 or self.dm_permission == other.dm_permission
             )
-            and self._default_member_permissions == other._default_member_permissions
-            and self.name_localizations == other.name_localizations
+            and self._default_permission == other._default_permission
         )
 
     def to_dict(self) -> EditApplicationCommandPayload:
@@ -542,7 +546,7 @@ class _APIApplicationCommandMixin:
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.version: int = int(data["version"])
         # deprecated, but kept until API stops returning this field
-        self.default_permission = data.get("default_permission") is not False
+        self._default_permission = data.get("default_permission") is not False
 
 
 class UserCommand(ApplicationCommand):
