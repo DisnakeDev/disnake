@@ -715,16 +715,15 @@ class InteractionResponse:
                 "This interaction must be of type 'application_command', 'modal_submit', or 'component' in order to defer."
             )
 
-        if defer_type:
-            adapter = async_context.get()
-            await adapter.create_interaction_response(
-                parent.id,
-                parent.token,
-                session=parent._session,
-                type=defer_type.value,
-                data=data or None,
-            )
-            self._responded = True
+        adapter = async_context.get()
+        await adapter.create_interaction_response(
+            parent.id,
+            parent.token,
+            session=parent._session,
+            type=defer_type.value,
+            data=data or None,
+        )
+        self._responded = True
 
     async def pong(self) -> None:
         """|coro|
