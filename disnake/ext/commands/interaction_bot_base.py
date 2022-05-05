@@ -44,11 +44,7 @@ from typing import (
 )
 
 import disnake
-from disnake.app_commands import (
-    ApplicationCommand,
-    Option,
-    PartialGuildApplicationCommandPermissions,
-)
+from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import ConfigWarning, SyncWarning
 from disnake.enums import ApplicationCommandType
 
@@ -68,6 +64,7 @@ from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slas
 if TYPE_CHECKING:
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import ApplicationCommandInteraction
+    from disnake.permissions import Permissions
 
     from ._types import Check, CoroFunc
     from .base_core import CommandCallback, InteractionCommandCallback
@@ -145,12 +142,14 @@ class InteractionBotBase(CommonBotBase):
         sync_commands: bool = True,
         sync_commands_debug: bool = False,
         sync_commands_on_cog_unload: bool = True,
-        sync_permissions: bool = False,
         test_guilds: Sequence[int] = None,
         **options: Any,
     ):
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
             raise ValueError("test_guilds must be a sequence of int.")
+
+        if options.pop("sync_permissions", None) is not None:
+            warnings.warn("'sync_permissions' has been removed in 2.5", ConfigWarning, stacklevel=3)
 
         super().__init__(**options)
 
@@ -158,7 +157,6 @@ class InteractionBotBase(CommonBotBase):
         self._sync_commands: bool = sync_commands
         self._sync_commands_debug: bool = sync_commands_debug
         self._sync_commands_on_cog_unload = sync_commands_on_cog_unload
-        self._sync_permissions: bool = sync_permissions
         self._sync_queued: bool = False
 
         self._slash_command_checks = []
@@ -436,8 +434,9 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
+        dm_permission: bool = True,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         options: List[Option] = None,
-        default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
@@ -464,9 +463,14 @@ class InteractionBotBase(CommonBotBase):
         options: List[:class:`.Option`]
             The list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
-        default_permission: :class:`bool`
-            Whether the command is enabled by default. If set to ``False``, this command
-            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+        dm_permission: :class:`bool`
+            Whether this command can be used in DMs.
+        default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+            The default required permissions for this command.
+            See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+            .. versionadded:: 2.5
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: List[:class:`int`]
@@ -497,7 +501,8 @@ class InteractionBotBase(CommonBotBase):
                 name=name,
                 description=description,
                 options=options,
-                default_permission=default_permission,
+                dm_permission=dm_permission,
+                default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
@@ -513,7 +518,8 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         extras: Dict[str, Any] = None,
@@ -530,9 +536,14 @@ class InteractionBotBase(CommonBotBase):
             .. versionchanged:: 2.5
                 Added support for localizations.
 
-        default_permission: :class:`bool`
-            Whether the command is enabled by default. If set to ``False``, this command
-            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+        dm_permission: :class:`bool`
+            Whether this command can be used in DMs.
+        default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+            The default required permissions for this command.
+            See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+            .. versionadded:: 2.5
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
         guild_ids: List[:class:`int`]
@@ -555,7 +566,8 @@ class InteractionBotBase(CommonBotBase):
         def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
             result = user_command(
                 name=name,
-                default_permission=default_permission,
+                dm_permission=dm_permission,
+                default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -570,7 +582,8 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         extras: Dict[str, Any] = None,
@@ -587,9 +600,14 @@ class InteractionBotBase(CommonBotBase):
             .. versionchanged:: 2.5
                 Added support for localizations.
 
-        default_permission: :class:`bool`
-            Whether the command is enabled by default. If set to ``False``, this command
-            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+        dm_permission: :class:`bool`
+            Whether this command can be used in DMs.
+        default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+            The default required permissions for this command.
+            See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+            .. versionadded:: 2.5
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: List[:class:`int`]
@@ -612,7 +630,8 @@ class InteractionBotBase(CommonBotBase):
         def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
-                default_permission=default_permission,
+                dm_permission=dm_permission,
+                default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -743,99 +762,6 @@ class InteractionBotBase(CommonBotBase):
         # Last debug message
         self._log_sync_debug("Command synchronization task has finished")
 
-    async def _cache_application_command_permissions(self) -> None:
-        # This method is usually called once per bot start
-        if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
-
-        guilds_to_cache = set()
-        for cmd in self.application_commands_iterator():
-            if not cmd.auto_sync:
-                continue
-            for guild_id in cmd.permissions:
-                guilds_to_cache.add(guild_id)
-
-        if not self._sync_permissions:
-            if guilds_to_cache:
-                warnings.warn(
-                    "You're using the @commands.guild_permissions decorator, however, the"
-                    f" 'sync_permissions' kwarg of '{self.__class__.__name__}' is set to 'False'.",
-                    ConfigWarning,
-                )
-            return
-
-        for guild_id in guilds_to_cache:
-            try:
-                perms = await self.bulk_fetch_command_permissions(guild_id)
-                self._connection._application_command_permissions[guild_id] = {
-                    perm.id: perm for perm in perms
-                }
-            except Exception:
-                pass
-
-    async def _sync_application_command_permissions(self) -> None:
-        # Assuming that permissions and commands are cached
-        if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
-
-        if not self._sync_permissions or self._is_closed or self.loop.is_closed():
-            return
-
-        guilds_to_compare: Dict[
-            int, List[PartialGuildApplicationCommandPermissions]
-        ] = {}  # {guild_id: [partial_perms, ...], ...}
-
-        for cmd_wrapper in self.application_commands_iterator():
-            if not cmd_wrapper.auto_sync:
-                continue
-
-            for guild_id, perms in cmd_wrapper.permissions.items():
-                # Here we need to get the ID of the relevant API object
-                # representing the application command from the user's code
-                guild_ids_for_sync = cmd_wrapper.guild_ids or self._test_guilds
-                if guild_ids_for_sync is None:
-                    cmd = self.get_global_command_named(cmd_wrapper.name, cmd_wrapper.body.type)
-                else:
-                    cmd = self.get_guild_command_named(
-                        guild_id, cmd_wrapper.name, cmd_wrapper.body.type
-                    )
-                if cmd is None:
-                    continue
-                # If we got here, we know the ID of the application command
-
-                if not self.owner_id and not self.owner_ids:
-                    await self._fill_owners()
-                resolved_perms = perms.resolve(
-                    command_id=cmd.id,
-                    owners=[self.owner_id] if self.owner_id else self.owner_ids,
-                )
-
-                if guild_id not in guilds_to_compare:
-                    guilds_to_compare[guild_id] = []
-                guilds_to_compare[guild_id].append(resolved_perms)
-
-        # Once per-guild permissions are collected from the code,
-        # we can compare them to the cached permissions
-        for guild_id, new_array in guilds_to_compare.items():
-            old_perms = self._connection._application_command_permissions.get(guild_id, {})
-            if len(new_array) == len(old_perms) and all(
-                new_cmd_perms.id in old_perms
-                and old_perms[new_cmd_perms.id].permissions == new_cmd_perms.permissions
-                for new_cmd_perms in new_array
-            ):
-                self._log_sync_debug(f"Command permissions in <Guild id={guild_id}>: no changes")
-                continue
-            # If we got here, the permissions require an update
-            try:
-                await self.bulk_edit_command_permissions(guild_id, new_array)
-            except Exception as err:
-                warnings.warn(
-                    f"Failed to overwrite permissions in <Guild id={guild_id}> due to {err}",
-                    SyncWarning,
-                )
-            finally:
-                self._log_sync_debug(f"Command permissions in <Guild id={guild_id}>: edited")
-
     def _log_sync_debug(self, text: str) -> None:
         if self._sync_commands_debug:
             # if sync debugging is enabled, *always* output logs
@@ -857,8 +783,6 @@ class InteractionBotBase(CommonBotBase):
         await self.wait_until_first_connect()
         await self._cache_application_commands()
         await self._sync_application_commands()
-        await self._cache_application_command_permissions()
-        await self._sync_application_command_permissions()
         self._sync_queued = False
 
     async def _delayed_command_sync(self) -> None:
@@ -878,7 +802,6 @@ class InteractionBotBase(CommonBotBase):
         self._sync_queued = True
         await asyncio.sleep(2)
         await self._sync_application_commands()
-        await self._sync_application_command_permissions()
         self._sync_queued = False
 
     def _schedule_app_command_preparation(self) -> None:
