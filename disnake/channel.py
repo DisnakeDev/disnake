@@ -2485,7 +2485,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         view: View = ...,
         components: Components = ...,
         reason: Optional[str] = None,
-    ) -> Thread:
+    ) -> ThreadWithMessage:
         ...
 
     @overload
@@ -2503,7 +2503,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         view: View = ...,
         components: Components = ...,
         reason: Optional[str] = None,
-    ) -> Thread:
+    ) -> ThreadWithMessage:
         ...
 
     @overload
@@ -2521,7 +2521,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         view: View = ...,
         components: Components = ...,
         reason: Optional[str] = None,
-    ) -> Thread:
+    ) -> ThreadWithMessage:
         ...
 
     @overload
@@ -2539,7 +2539,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         view: View = ...,
         components: Components = ...,
         reason: Optional[str] = None,
-    ) -> Thread:
+    ) -> ThreadWithMessage:
         ...
 
     async def create_thread(
