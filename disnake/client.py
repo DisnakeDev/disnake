@@ -40,7 +40,6 @@ from typing import (
     Generator,
     List,
     Literal,
-    Mapping,
     Optional,
     Sequence,
     Tuple,
@@ -59,7 +58,6 @@ from .app_commands import (
     APIUserCommand,
     ApplicationCommand,
     GuildApplicationCommandPermissions,
-    PartialGuildApplicationCommandPermissions,
 )
 from .appinfo import AppInfo
 from .backoff import ExponentialBackoff
@@ -91,13 +89,12 @@ from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
-    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime, User as ABCUser
+    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .channel import DMChannel
     from .member import Member
     from .message import Message
-    from .role import Role
     from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
 
@@ -2489,7 +2486,10 @@ class Client:
         guild_id: :class:`int`
             The ID of the guild to inspect.
         command_id: :class:`int`
-            The ID of the application command.
+            The ID of the application command, or the application ID to fetch application-wide permissions.
+
+            .. versionchanged:: 2.5
+                Can now also fetch application-wide permissions.
 
         Returns
         -------
@@ -2497,65 +2497,3 @@ class Client:
             The newly edited application command permissions.
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
-
-    async def edit_command_permissions(
-        self,
-        guild_id: int,
-        command_id: int,
-        *,
-        permissions: Mapping[Union[Role, ABCUser], bool] = None,
-        role_ids: Mapping[int, bool] = None,
-        user_ids: Mapping[int, bool] = None,
-    ) -> GuildApplicationCommandPermissions:
-        """|coro|
-
-        Edits guild permissions of a single command.
-
-        Parameters
-        ----------
-        guild_id: :class:`int`
-            The ID of the guild where the permissions should be applied.
-        command_id: :class:`int`
-            The ID of the application command you want to apply these permissions to.
-        permissions: Mapping[Union[:class:`~disnake.Role`, :class:`disnake.abc.User`], :class:`bool`]
-            Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-        role_ids: Mapping[:class:`int`, :class:`bool`]
-            Role IDs to booleans.
-        user_ids: Mapping[:class:`int`, :class:`bool`]
-            User IDs to booleans.
-
-        Returns
-        -------
-        :class:`.GuildApplicationCommandPermissions`
-            The newly edited application command permissions.
-        """
-        perms = PartialGuildApplicationCommandPermissions(
-            command_id=command_id,
-            permissions=permissions,
-            role_ids=role_ids,
-            user_ids=user_ids,
-        )
-        return await self._connection.edit_command_permissions(guild_id, perms)
-
-    async def bulk_edit_command_permissions(
-        self, guild_id: int, permissions: List[PartialGuildApplicationCommandPermissions]
-    ) -> List[GuildApplicationCommandPermissions]:
-        """|coro|
-
-        Edits guild permissions of multiple application commands in one API request.
-
-        .. versionadded:: 2.1
-
-        Parameters
-        ----------
-        guild_id: :class:`int`
-            The ID of the guild where the permissions should be applied.
-        permissions: List[:class:`.PartialGuildApplicationCommandPermissions`]
-            A list of partial permissions for each application command you want to edit.
-
-        Returns
-        -------
-        List[:class:`.GuildApplicationCommandPermissions`]
-            A list of edited permissions of application commands.
-        """
-        return await self._connection.bulk_edit_command_permissions(guild_id, permissions)

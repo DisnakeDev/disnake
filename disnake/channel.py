@@ -37,6 +37,7 @@ from typing import (
     List,
     Literal,
     Mapping,
+    NamedTuple,
     Optional,
     Sequence,
     Tuple,
@@ -2174,6 +2175,11 @@ class NewsChannel(TextChannel):
     type: ChannelType = ChannelType.news
 
 
+class ThreadWithMessage(NamedTuple):
+    thread: Thread
+    message: Message
+
+
 class ForumChannel(disnake.abc.GuildChannel, Hashable):
     """Represents a Discord Forum channel.
 
@@ -2553,7 +2559,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         view: View = MISSING,
         components: Components = MISSING,
         reason: Optional[str] = None,
-    ) -> Tuple[Thread, Message]:
+    ) -> ThreadWithMessage:
         """|coro|
 
         Creates a thread in this forum channel.
@@ -2622,7 +2628,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         Returns
         -------
         Tuple[:class:`Thread`, :class:`Message`]
-            The newly created thread and the message sent in it.
+            A :class:`~typing.NamedTuple` with the newly created thread and the message sent in it.
+
+            These values can also be accessed through the ``thread`` and ``message`` fields.
         """
         from .message import Message
         from .webhook.async_ import handle_message_parameters_dict
@@ -2671,14 +2679,13 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 for f in params.files:
                     f.close()
 
-        if view:
-            self._state.store_view(view, int(data["message"]["id"]))
-
         thread = Thread(guild=self.guild, data=data, state=self._state)
-        return (
-            thread,
-            Message(channel=thread, data=data["message"], state=self._state),
-        )
+        message = Message(channel=thread, data=data["message"], state=self._state)
+
+        if view:
+            self._state.store_view(view, message.id)
+
+        return ThreadWithMessage(thread, message)
 
     def archived_threads(
         self,

@@ -53,11 +53,7 @@ from typing import (
 
 from . import utils
 from .activity import BaseActivity
-from .app_commands import (
-    GuildApplicationCommandPermissions,
-    PartialGuildApplicationCommandPermissions,
-    application_command_factory,
-)
+from .app_commands import GuildApplicationCommandPermissions, application_command_factory
 from .channel import *
 from .channel import _channel_factory
 from .emoji import Emoji
@@ -252,10 +248,6 @@ class ConnectionState:
 
             cache_flags._verify_intents(intents)
 
-        # TODO: maybe we don't need to cache permissions at all
-        self._cache_application_command_permissions: bool = options.get(
-            "cache_application_command_permissions", True
-        )
         self.member_cache_flags: MemberCacheFlags = cache_flags
         self._activity: Optional[ActivityPayload] = activity
         self._status: Optional[str] = status
@@ -296,9 +288,6 @@ class ConnectionState:
         if application_commands:
             self._global_application_commands: Dict[int, APIApplicationCommand] = {}
             self._guild_application_commands: Dict[int, Dict[int, APIApplicationCommand]] = {}
-            self._application_command_permissions: Dict[
-                int, Dict[int, GuildApplicationCommandPermissions]
-            ] = {}
 
         if views:
             self._view_store: ViewStore = ViewStore(self)
@@ -463,7 +452,6 @@ class ConnectionState:
 
     def _remove_global_application_command(self, application_command_id: int, /) -> None:
         self._global_application_commands.pop(application_command_id, None)
-        self._unset_command_permissions(application_command_id)
 
     def _clear_global_application_commands(self) -> None:
         self._global_application_commands.clear()
@@ -493,7 +481,6 @@ class ConnectionState:
             granula.pop(application_command_id, None)
         except KeyError:
             pass
-        self._unset_command_permissions(application_command_id, guild_id)
 
     def _clear_guild_application_commands(self, guild_id: int) -> None:
         self._guild_application_commands.pop(guild_id, None)
@@ -512,34 +499,6 @@ class ConnectionState:
         for cmd in granula.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
-
-    def _set_command_permissions(self, permissions: GuildApplicationCommandPermissions) -> None:
-        if not self._cache_application_command_permissions:
-            return
-        try:
-            granula = self._application_command_permissions[permissions.guild_id]
-            granula[permissions.id] = permissions
-        except KeyError:
-            self._application_command_permissions[permissions.guild_id] = {
-                permissions.id: permissions
-            }
-
-    def _unset_command_permissions(self, command_id: int, guild_id: int = None) -> None:
-        if guild_id is None:
-            for granula in self._application_command_permissions.values():
-                granula.pop(command_id, None)
-            return
-        try:
-            granula = self._application_command_permissions[guild_id]
-            granula.pop(command_id, None)
-        except KeyError:
-            pass
-
-    def _get_command_permissions(self, guild_id: int, command_id: int):
-        try:
-            return self._application_command_permissions[guild_id][command_id]
-        except KeyError:
-            pass
 
     @property
     def emojis(self) -> List[Emoji]:
@@ -775,6 +734,10 @@ class ConnectionState:
 
     def parse_resumed(self, data) -> None:
         self.dispatch("resumed")
+
+    def parse_application_command_permissions_update(self, data) -> None:
+        app_command_perms = GuildApplicationCommandPermissions(data=data, state=self)
+        self.dispatch("application_command_permissions_update", app_command_perms)
 
     def parse_message_create(self, data) -> None:
         channel, _ = self._get_guild_channel(data)
@@ -1953,30 +1916,6 @@ class ConnectionState:
             self.application_id, guild_id, command_id  # type: ignore
         )
         return GuildApplicationCommandPermissions(state=self, data=data)
-
-    async def edit_command_permissions(
-        self, guild_id: int, permissions: PartialGuildApplicationCommandPermissions
-    ) -> GuildApplicationCommandPermissions:
-        result = await self.http.edit_application_command_permissions(
-            self.application_id, guild_id, permissions.id, permissions.to_dict()  # type: ignore
-        )
-        perms = GuildApplicationCommandPermissions(state=self, data=result)
-        self._set_command_permissions(perms)
-        return perms
-
-    async def bulk_edit_command_permissions(
-        self, guild_id: int, permissions: List[PartialGuildApplicationCommandPermissions]
-    ) -> List[GuildApplicationCommandPermissions]:
-        payload = [perm.to_dict() for perm in permissions]
-
-        array = await self.http.bulk_edit_guild_application_command_permissions(
-            self.application_id, guild_id=guild_id, payload=payload  # type: ignore
-        )
-
-        perms = [GuildApplicationCommandPermissions(state=self, data=obj) for obj in array]
-        if self._cache_application_command_permissions:
-            self._application_command_permissions[guild_id] = {elem.id: elem for elem in perms}
-        return perms
 
 
 class AutoShardedConnectionState(ConnectionState):

@@ -58,6 +58,7 @@ __all__ = (
     "NSFWLevel",
     "OptionType",
     "ApplicationCommandType",
+    "ApplicationCommandPermissionType",
     "PartyType",
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
@@ -241,6 +242,7 @@ class MessageType(Enum):
     thread_starter_message = 21
     guild_invite_reminder = 22
     context_menu_command = 23
+    auto_moderation_action = 24
 
 
 class PartyType(Enum):
@@ -376,6 +378,7 @@ class AuditLogAction(Enum):
     thread_create                    = 110
     thread_update                    = 111
     thread_delete                    = 112
+    application_command_permission_update = 121
     # fmt: on
 
     @property
@@ -429,6 +432,7 @@ class AuditLogAction(Enum):
             AuditLogAction.guild_scheduled_event_create: AuditLogActionCategory.create,
             AuditLogAction.guild_scheduled_event_update: AuditLogActionCategory.update,
             AuditLogAction.guild_scheduled_event_delete: AuditLogActionCategory.delete,
+            AuditLogAction.application_command_permission_update: AuditLogActionCategory.update,
         }
         # fmt: on
         return lookup[self]
@@ -466,6 +470,8 @@ class AuditLogAction(Enum):
             return "guild_scheduled_event"
         elif v < 113:
             return "thread"
+        elif v < 122:
+            return "application_command"
         else:
             return None
 
@@ -623,6 +629,15 @@ class ApplicationCommandType(Enum):
     chat_input = 1
     user = 2
     message = 3
+
+
+class ApplicationCommandPermissionType(Enum):
+    role = 1
+    user = 2
+    channel = 3
+
+    def __int__(self):
+        return self.value
 
 
 class OptionType(Enum):
