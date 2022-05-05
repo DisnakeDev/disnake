@@ -144,7 +144,7 @@ class Integration:
 
         Parameters
         ----------
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason the integration was deleted. Shows up on the audit log.
 
             .. versionadded:: 2.0
