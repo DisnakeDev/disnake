@@ -4172,6 +4172,7 @@ APISlashCommand
 
 .. autoclass:: APISlashCommand()
     :members:
+    :inherited-members:
 
 APIUserCommand
 ~~~~~~~~~~~~~~
@@ -4180,6 +4181,7 @@ APIUserCommand
 
 .. autoclass:: APIUserCommand()
     :members:
+    :inherited-members:
 
 APIMessageCommand
 ~~~~~~~~~~~~~~~~~
@@ -4188,6 +4190,7 @@ APIMessageCommand
 
 .. autoclass:: APIMessageCommand()
     :members:
+    :inherited-members:
 
 ApplicationCommandPermissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4963,6 +4966,7 @@ SlashCommand
 
 .. autoclass:: SlashCommand()
     :members:
+    :inherited-members:
 
 UserCommand
 ~~~~~~~~~~~
@@ -4971,6 +4975,7 @@ UserCommand
 
 .. autoclass:: UserCommand()
     :members:
+    :inherited-members:
 
 MessageCommand
 ~~~~~~~~~~~~~~
@@ -4979,6 +4984,7 @@ MessageCommand
 
 .. autoclass:: MessageCommand()
     :members:
+    :inherited-members:
 
 Option
 ~~~~~~

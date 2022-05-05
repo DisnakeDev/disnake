@@ -567,11 +567,6 @@ class UserCommand(ApplicationCommand):
         Whether this command can be used in DMs.
 
         .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
-
-        .. versionadded:: 2.5
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -607,11 +602,6 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
 
@@ -659,11 +649,6 @@ class MessageCommand(ApplicationCommand):
         Whether this command can be used in DMs.
 
         .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
-
-        .. versionadded:: 2.5
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -699,11 +684,6 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
 
@@ -756,11 +736,6 @@ class SlashCommand(ApplicationCommand):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
 
@@ -881,11 +856,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
 
