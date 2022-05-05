@@ -835,7 +835,7 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
             command.autocompleters[param.name] = param.autocomplete
 
     if issubclass_(sig.parameters[inter_param].annotation, disnake.GuildCommandInteraction):
-        command.guild_only = True
+        command._guild_only = True
 
     return [param.to_option() for param in params]
 

@@ -36,6 +36,7 @@ from .guild import (
     VerificationLevel,
 )
 from .integration import IntegrationExpireBehavior, PartialIntegration
+from .interactions import ApplicationCommandPermissions
 from .role import Role
 from .snowflake import Snowflake
 from .threads import Thread
@@ -90,6 +91,7 @@ AuditLogEvent = Literal[
     110,
     111,
     112,
+    121,
 ]
 
 
@@ -241,6 +243,12 @@ class _AuditLogChange_Datetime(TypedDict):
     old_value: datetime.datetime
 
 
+class _AuditLogChange_ApplicationCommandPermissions(TypedDict):
+    key: str
+    new_value: ApplicationCommandPermissions
+    old_value: ApplicationCommandPermissions
+
+
 AuditLogChange = Union[
     _AuditLogChange_Str,
     _AuditLogChange_AssetHash,
@@ -257,6 +265,7 @@ AuditLogChange = Union[
     _AuditLogChange_VideoQualityMode,
     _AuditLogChange_Overwrites,
     _AuditLogChange_Datetime,
+    _AuditLogChange_ApplicationCommandPermissions,
 ]
 
 
