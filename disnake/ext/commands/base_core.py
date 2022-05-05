@@ -238,7 +238,6 @@ class InvokableApplicationCommand(ABC):
         if kwargs:
             kw = kwargs.copy()
             kw.update(self.__original_kwargs__)
-            print(kw)
             copy = type(self)(self.callback, **kw)
             return self._ensure_assignment_on_copy(copy)
         else:
