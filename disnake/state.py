@@ -443,7 +443,9 @@ class ConnectionState:
         return self._global_application_commands.get(application_command_id)
 
     def _add_global_application_command(
-        self, application_command: APIApplicationCommand, /
+        self,
+        application_command: APIApplicationCommand,
+        /,
     ) -> None:
         assert application_command.id
         self._global_application_commands[application_command.id] = application_command
