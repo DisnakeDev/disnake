@@ -728,7 +728,8 @@ def slash_command(
         The list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
     dm_permission: :class:`bool`
-        Whether this command can be used in DMs. Defaults to ``True``
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.

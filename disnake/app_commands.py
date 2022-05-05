@@ -435,6 +435,7 @@ class ApplicationCommand(ABC):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+        Defaults to ``True``.
 
         .. versionadded:: 2.5
     """
@@ -565,6 +566,7 @@ class UserCommand(ApplicationCommand):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+        Defaults to ``True``.
 
         .. versionadded:: 2.5
 
@@ -657,6 +659,7 @@ class MessageCommand(ApplicationCommand):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+        Defaults to ``True``.
 
         .. versionadded:: 2.5
 
@@ -756,6 +759,7 @@ class SlashCommand(ApplicationCommand):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+        Defaults to ``True``.
 
         .. versionadded:: 2.5
 

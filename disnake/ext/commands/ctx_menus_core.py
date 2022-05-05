@@ -268,6 +268,7 @@ def user_command(
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+        Defaults to ``True``.
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -336,6 +337,7 @@ def message_command(
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+        Defaults to ``True``.
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
