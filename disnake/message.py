@@ -1188,16 +1188,16 @@ class Message(Hashable):
             respectively, along with this function.
         """
         transformations = {
-            re.escape(f"<#{channel.id}>"): "#" + channel.name for channel in self.channel_mentions
+            re.escape(f"<#{channel.id}>"): f"#{channel.name}" for channel in self.channel_mentions
         }
 
         mention_transforms = {
-            re.escape(f"<@{member.id}>"): "@" + member.display_name for member in self.mentions
+            re.escape(f"<@{member.id}>"): f"@{member.display_name}" for member in self.mentions
         }
 
         # add the <@!user_id> cases as well..
         second_mention_transforms = {
-            re.escape(f"<@!{member.id}>"): "@" + member.display_name for member in self.mentions
+            re.escape(f"<@!{member.id}>"): f"@{member.display_name}" for member in self.mentions
         }
 
         transformations.update(mention_transforms)
@@ -1205,7 +1205,7 @@ class Message(Hashable):
 
         if self.guild is not None:
             role_transforms = {
-                re.escape(f"<@&{role.id}>"): "@" + role.name for role in self.role_mentions
+                re.escape(f"<@&{role.id}>"): f"@{role.name}" for role in self.role_mentions
             }
             transformations.update(role_transforms)
 
