@@ -672,15 +672,22 @@ class InteractionResponse:
         This is typically used when the interaction is acknowledged
         and a secondary action will be done later.
 
+        .. versionchanged:: 2.5
+
+            Raises :exc:`TypeError` when an interaction cannot be deferred.
+
         Parameters
         ----------
         with_message: :class:`bool`
             Whether the response will be a message with thinking state (bot is thinking...).
+            This only applies to interactions of type :attr:`InteractionType.component`.
 
             .. versionadded:: 2.4
 
         ephemeral: :class:`bool`
             Whether the deferred message will eventually be ephemeral.
+            This applies to interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
+            or when the ``with_message`` parameter is ``True``.
 
         Raises
         ------
@@ -688,6 +695,8 @@ class InteractionResponse:
             Deferring the interaction failed.
         InteractionResponded
             This interaction has already been responded to before.
+        TypeError
+            This interaction cannot be deferred.
         """
         if self._responded:
             raise InteractionResponded(self._parent)
