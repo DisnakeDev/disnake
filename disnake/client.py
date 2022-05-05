@@ -2480,7 +2480,7 @@ class Client:
     ) -> GuildApplicationCommandPermissions:
         """|coro|
 
-        Retrieves :class:`.GuildApplicationCommandPermissions` for a specific application command.
+        Retrieves :class:`.GuildApplicationCommandPermissions` for a specific application command in the guild with the given ID.
 
         .. versionadded:: 2.1
 
@@ -2497,6 +2497,6 @@ class Client:
         Returns
         -------
         :class:`.GuildApplicationCommandPermissions`
-            The newly edited application command permissions.
+            The permissions configured for the specified application command.
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
