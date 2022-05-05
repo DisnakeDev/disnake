@@ -1,8 +1,7 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-2021 Rapptz
-Copyright (c) 2021-present Disnake Development
+Copyright (c) 2022-present Disnake Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -10,10 +9,8 @@ to deal in the Software without restriction, including without limitation
 the rights to use, copy, modify, merge, publish, distribute, sublicense,
 and/or sell copies of the Software, and to permit persons to whom the
 Software is furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,18 +22,14 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import List, Optional, TypedDict
+from typing import TYPE_CHECKING, NamedTuple, Optional
 
-from .snowflake import Snowflake
+__all__ = ("BanEntry",)
 
-
-class WelcomeScreen(TypedDict):
-    description: Optional[str]
-    welcome_channels: List[WelcomeScreenChannel]
+if TYPE_CHECKING:
+    from .user import User
 
 
-class WelcomeScreenChannel(TypedDict):
-    channel_id: Snowflake
-    description: str
-    emoji_id: Optional[Snowflake]
-    emoji_name: Optional[str]
+class BanEntry(NamedTuple):
+    reason: Optional[str]
+    user: "User"

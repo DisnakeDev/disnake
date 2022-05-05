@@ -64,6 +64,7 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
+from .enums import Locale
 from .errors import InvalidArgument
 
 try:
@@ -89,6 +90,7 @@ __all__ = (
     "as_chunks",
     "format_dt",
     "search_directory",
+    "as_valid_locale",
 )
 
 DISCORD_EPOCH = 1420070400000
@@ -129,6 +131,7 @@ if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
     from .abc import Snowflake
+    from .asset import AssetBytes
     from .invite import Invite
     from .permissions import Permissions
     from .template import Template
@@ -463,7 +466,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     ----------
     iterable
         An iterable to search through.
-    \*\*attrs
+    **attrs
         Keyword arguments that denote attributes to search with.
     """
 
@@ -527,6 +530,24 @@ def _bytes_to_base64_data(data: bytes) -> str:
     return fmt.format(mime=mime, data=b64)
 
 
+@overload
+async def _assetbytes_to_base64_data(data: None) -> None:
+    ...
+
+
+@overload
+async def _assetbytes_to_base64_data(data: AssetBytes) -> str:
+    ...
+
+
+async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str]:
+    if data is None:
+        return None
+    if not isinstance(data, (bytes, bytearray, memoryview)):
+        data = await data.read()
+    return _bytes_to_base64_data(data)
+
+
 if HAS_ORJSON:
 
     def _to_json(obj: Any) -> str:
@@ -553,7 +574,7 @@ def _parse_ratelimit_header(request: Any, *, use_clock: bool = False) -> float:
         return float(reset_after)
 
 
-async def maybe_coroutine(f, *args, **kwargs):
+async def maybe_coroutine(f, /, *args, **kwargs):
     value = f(*args, **kwargs)
     if _isawaitable(value):
         return await value
@@ -826,8 +847,8 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     as_needed: :class:`bool`
         Whether to escape the markdown characters as needed. This
         means that it does not escape extraneous characters if it's
-        not necessary, e.g. ``**hello**`` is escaped into ``\*\*hello**``
-        instead of ``\*\*hello\*\*``. Note however that this can open
+        not necessary, e.g. ``**hello**`` is escaped into ``\\*\\*hello**``
+        instead of ``\\*\\*hello\\*\\*``. Note however that this can open
         you up to some clever syntax abuse. Defaults to ``False``.
     ignore_links: :class:`bool`
         Whether to leave links alone when escaping markdown. For example,
@@ -888,13 +909,18 @@ def escape_mentions(text: str) -> str:
 # Custom docstring parser
 
 
-class _DocstringParam(TypedDict):
+class _DocstringLocalizationsMixin(TypedDict):
+    localization_key_name: Optional[str]
+    localization_key_desc: Optional[str]
+
+
+class _DocstringParam(_DocstringLocalizationsMixin):
     name: str
     type: None
     description: str
 
 
-class _ParsedDocstring(TypedDict):
+class _ParsedDocstring(_DocstringLocalizationsMixin):
     description: str
     params: Dict[str, _DocstringParam]
 
@@ -935,6 +961,15 @@ def _get_description(lines: List[str]) -> str:
     return "\n".join(lines[:end]).strip()
 
 
+def _extract_localization_key(desc: str) -> Tuple[str, Tuple[Optional[str], Optional[str]]]:
+    match = re.search(r"\{\{(.*?)\}\}", desc)
+    if match:
+        desc = desc.replace(match.group(0), "").strip()
+        loc_key = match.group(1).strip()
+        return desc, (f"{loc_key}_NAME", f"{loc_key}_DESCRIPTION")
+    return desc, (None, None)
+
+
 def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
     start = _get_header_line(lines, "Parameters", "-") + 2
     end = _get_next_header_line(lines, "-", start)
@@ -952,8 +987,15 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
         elif maybe_type:
             desc = maybe_type
         if desc is not None:
+            desc, (loc_key_name, loc_key_desc) = _extract_localization_key(desc)
             # TODO: maybe parse types in the future
-            options[param] = {"name": param, "type": None, "description": desc}
+            options[param] = {
+                "name": param,
+                "type": None,
+                "description": desc,
+                "localization_key_name": loc_key_name,
+                "localization_key_desc": loc_key_desc,
+            }
 
     desc_lines: List[str] = []
     param: Optional[str] = None
@@ -982,9 +1024,20 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
 def parse_docstring(func: Callable) -> _ParsedDocstring:
     doc = _getdoc(func)
     if doc is None:
-        return {"description": "", "params": {}}
+        return {
+            "description": "",
+            "params": {},
+            "localization_key_name": None,
+            "localization_key_desc": None,
+        }
     lines = doc.splitlines()
-    return {"description": _get_description(lines), "params": _get_option_desc(lines)}
+    desc, (loc_key_name, loc_key_desc) = _extract_localization_key(_get_description(lines))
+    return {
+        "description": desc,
+        "localization_key_name": loc_key_name,
+        "localization_key_desc": loc_key_desc,
+        "params": _get_option_desc(lines),
+    }
 
 
 # Chunkers
@@ -1240,3 +1293,35 @@ def search_directory(path: str) -> Iterator[str]:
             yield from search_directory(os.path.join(path, name))
         else:
             yield prefix + "." + name
+
+
+def as_valid_locale(locale: str) -> Optional[str]:
+    """
+    Converts the provided locale name to a name that is valid for use with the API,
+    for example by returning ``en-US`` for ``en_US``.
+    Returns ``None`` for invalid names.
+
+    .. versionadded:: 2.5
+
+    Parameters
+    ----------
+    locale: :class:`str`
+        The input locale name.
+    """
+    # check for key first (e.g. `en_US`)
+    if locale_type := Locale.__members__.get(locale):
+        return locale_type.value
+
+    # check for value (e.g. `en-US`)
+    try:
+        Locale(locale)
+    except ValueError:
+        pass
+    else:
+        return locale
+
+    # didn't match, try language without country code (e.g. `en` instead of `en-US`)
+    language = re.split(r"[-_]", locale)[0]
+    if language != locale:
+        return as_valid_locale(language)
+    return None

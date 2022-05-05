@@ -51,6 +51,7 @@ from .context_managers import Typing
 from .enums import ChannelType, PartyType, try_enum_to_int
 from .errors import ClientException, InvalidArgument
 from .file import File
+from .flags import MessageFlags
 from .invite import Invite
 from .iterators import HistoryIterator
 from .mentions import AllowedMentions
@@ -133,7 +134,7 @@ class Snowflake(Protocol):
 class User(Snowflake, Protocol):
     """An ABC that details the common operations on a Discord user.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.User`
     - :class:`~disnake.ClientUser`
@@ -175,7 +176,7 @@ class User(Snowflake, Protocol):
 class PrivateChannel(Snowflake, Protocol):
     """An ABC that details the common operations on a private Discord channel.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.DMChannel`
     - :class:`~disnake.GroupChannel`
@@ -226,12 +227,13 @@ GCH = TypeVar("GCH", bound="GuildChannel")
 class GuildChannel(ABC):
     """An ABC that details the common operations on a Discord guild channel.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`.TextChannel`
     - :class:`.VoiceChannel`
     - :class:`.CategoryChannel`
     - :class:`.StageChannel`
+    - :class:`.ForumChannel`
 
     This ABC must also implement :class:`.abc.Snowflake`.
 
@@ -814,7 +816,7 @@ class GuildChannel(ABC):
         overwrite: Optional[:class:`.PermissionOverwrite`]
             The permissions to allow and deny to the target, or ``None`` to
             delete the overwrite.
-        \*\*permissions
+        **permissions
             A keyword argument list of permissions to set for ease of use.
             Cannot be mixed with ``overwrite``.
         reason: Optional[:class:`str`]
@@ -1201,7 +1203,7 @@ class GuildChannel(ABC):
 class Messageable:
     """An ABC that details the common operations on a model that can send messages.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.TextChannel`
     - :class:`~disnake.DMChannel`
@@ -1211,6 +1213,7 @@ class Messageable:
     - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.Thread`
     - :class:`~disnake.VoiceChannel`
+    - :class:`~disnake.PartialMessageable`
     """
 
     __slots__ = ()
@@ -1222,7 +1225,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embed: Embed = ...,
@@ -1230,6 +1233,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1241,7 +1245,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embed: Embed = ...,
@@ -1249,6 +1253,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1260,7 +1265,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embeds: List[Embed] = ...,
@@ -1268,6 +1273,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1279,7 +1285,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Any = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embeds: List[Embed] = ...,
@@ -1287,6 +1293,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1297,7 +1304,7 @@ class Messageable:
 
     async def send(
         self,
-        content: Any = None,
+        content: Optional[str] = None,
         *,
         tts: bool = False,
         embed: Embed = None,
@@ -1307,6 +1314,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = None,
         delete_after: float = None,
         nonce: Union[str, int] = None,
+        suppress_embeds: bool = False,
         allowed_mentions: AllowedMentions = None,
         reference: Union[Message, MessageReference, PartialMessage] = None,
         mention_author: bool = None,
@@ -1318,8 +1326,9 @@ class Messageable:
         Sends a message to the destination with the content given.
 
         The content must be a type that can convert to a string through ``str(content)``.
-        If the content is set to ``None`` (the default), then the ``embed`` parameter must
-        be provided.
+
+        At least one of ``content``, ``embed``/``embeds``, ``file``/``files``
+        or ``stickers`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
         single :class:`.File` object. To upload multiple files, the ``files``
@@ -1395,6 +1404,12 @@ class Messageable:
             A list of components to include in the message. This cannot be mixed with ``view``.
 
             .. versionadded:: 2.4
+
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+
+            .. versionadded:: 2.5
 
         Raises
         ------
@@ -1482,6 +1497,11 @@ class Messageable:
         else:
             components_payload = None
 
+        if suppress_embeds:
+            flags = MessageFlags.suppress_embeds.flag
+        else:
+            flags = 0
+
         if files is not None:
             if len(files) > 10:
                 raise InvalidArgument("files parameter must be a list of up to 10 elements")
@@ -1500,6 +1520,7 @@ class Messageable:
                     message_reference=reference_payload,
                     stickers=stickers_payload,
                     components=components_payload,  # type: ignore
+                    flags=flags,
                 )
             finally:
                 for f in files:
@@ -1515,6 +1536,7 @@ class Messageable:
                 message_reference=reference_payload,
                 stickers=stickers_payload,
                 components=components_payload,  # type: ignore
+                flags=flags,
             )
 
         ret = state.create_message(channel=channel, data=data)
@@ -1685,7 +1707,7 @@ class Connectable(Protocol):
     """An ABC that details the common operations on a channel that can
     connect to a voice server.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.VoiceChannel`
     - :class:`~disnake.StageChannel`

@@ -27,3 +27,4 @@ venvs/
 coverage.xml
 
 !/task.env
+!test_bot/locale/*.json
