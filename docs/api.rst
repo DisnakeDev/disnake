@@ -5251,18 +5251,18 @@ LocalizationValue
     :members:
     :inherited-members:
 
+LocalizationProtocol
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: LocalizationProtocol
+    :members:
+
 LocalizationStore
 ~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: LocalizationStore
     :members:
     :inherited-members:
-
-LocalizationProtocol
-~~~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: LocalizationProtocol
-    :members:
 
 
 Exceptions
