@@ -659,21 +659,6 @@ class InteractionResponse:
         """
         return self._responded
 
-    @overload
-    async def defer(
-        self,
-        *,
-        with_message: bool = ...,
-        ephemeral: bool = ...,
-    ) -> None:
-        ...
-
-    @overload
-    async def defer(
-        self,
-    ) -> None:
-        ...
-
     async def defer(
         self,
         *,
