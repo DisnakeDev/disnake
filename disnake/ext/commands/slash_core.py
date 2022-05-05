@@ -170,14 +170,6 @@ class SubCommandGroup(InvokableApplicationCommand):
         )
         self.qualified_name: str = ""
 
-    def _ensure_assignment_on_copy(self, other: SubCommandGroupT) -> SubCommandGroupT:
-        super()._ensure_assignment_on_copy(other)
-        if other.children != self.children:
-            other.children = self.children.copy()
-        if other.qualified_name != self.qualified_name:
-            other.qualified_name = self.qualified_name
-        return other
-
     @property
     def body(self) -> Option:
         return self.option
@@ -287,17 +279,6 @@ class SubCommand(InvokableApplicationCommand):
             options=options,
         )
         self.qualified_name = ""
-
-    def _ensure_assignment_on_copy(self, other: SubCommandT) -> SubCommandT:
-        super()._ensure_assignment_on_copy(other)
-        if self.connectors != other.connectors:
-            other.connectors = self.connectors.copy()
-        if self.description != "-" and self.description != other.description:
-            # Allows overriding the default description cog-wide.
-            other.option.description = self.description
-        if self.qualified_name != other.qualified_name:
-            other.qualified_name = self.qualified_name
-        return other
 
     @property
     def description(self) -> str:
@@ -432,13 +413,16 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         super()._ensure_assignment_on_copy(other)
         if self.connectors != other.connectors:
             other.connectors = self.connectors.copy()
-        if self.children != other.children:
-            other.children = self.children.copy()
         if self.autocompleters != other.autocompleters:
             other.autocompleters = self.autocompleters.copy()
+        if self.children != other.children:
+            other.children = self.children.copy()
+
         if self.description != "-" and self.description != other.description:
             # Allows overriding the default description cog-wide.
             other.body.description = self.description
+        if self.options != other.options:
+            other.body.options = self.options
         return other
 
     @property

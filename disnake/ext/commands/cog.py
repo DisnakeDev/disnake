@@ -47,7 +47,7 @@ import disnake.utils
 from ._types import _BaseCommand
 from .base_core import InvokableApplicationCommand
 from .ctx_menus_core import InvokableMessageCommand, InvokableUserCommand
-from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup
+from .slash_core import InvokableSlashCommand
 
 if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction
@@ -135,22 +135,23 @@ class CogMeta(type):
 
     slash_command_attrs: :class:`dict`
         A list of attributes to apply to every slash command inside this cog. The dictionary
-        is passed into the :class:`InvokableSlashCommand`, :class:`SubCommandGroup` and
-        :class:`SubCommand`'s options at ``__init__``. Usage of this kwarg is otherwise the same
-        as with `command_attrs`.
+        is passed into the :class:`InvokableSlashCommand`s' options at ``__init__``. Usage of
+        this kwarg is otherwise the same as with `command_attrs`.
+
+        .. note:: This does not apply to :class:`SubCommand`s or `SubCommandGroup`s
 
         .. versionadded:: 2.5
 
     user_command_attrs: :class:`dict`
         A list of attributes to apply to every user command inside this cog. The dictionary
-        is passed into the :class:`InvokableUserCommand`'s options at ``__init__``. Usage of this
+        is passed into the :class:`InvokableUserCommand`s' options at ``__init__``. Usage of this
         kwarg is otherwise the same as with `command_attrs`.
 
         .. versionadded:: 2.5
 
     message_command_attrs: :class:`dict`
         A list of attributes to apply to every message command inside this cog. The dictionary
-        is passed into the :class:`InvokableMessageCommand`'s options at ``__init__``. Usage of
+        is passed into the :class:`InvokableMessageCommand`s' options at ``__init__``. Usage of
         this kwarg is otherwise the same as with `command_attrs`.
 
         .. versionadded:: 2.5
@@ -277,7 +278,7 @@ class Cog(metaclass=CogMeta):
         self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore
         cog_app_commands: List[InvokableApplicationCommand] = []
         for c in cls.__cog_app_commands__:
-            if isinstance(c, (InvokableSlashCommand, SubCommandGroup, SubCommand)):
+            if isinstance(c, InvokableSlashCommand):
                 c = c._update_copy(slash_cmd_attrs)
             elif isinstance(c, InvokableUserCommand):
                 c = c._update_copy(user_cmd_attrs)
