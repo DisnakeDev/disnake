@@ -175,7 +175,7 @@ class StageInstance(Hashable):
             The stage instance's new topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's new privacy level.
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason the stage instance was edited. Shows up on the audit log.
 
         Raises
@@ -216,7 +216,7 @@ class StageInstance(Hashable):
 
         Parameters
         ----------
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason the stage instance was deleted. Shows up on the audit log.
 
         Raises
