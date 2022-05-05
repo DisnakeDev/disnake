@@ -1982,7 +1982,9 @@ class Client:
         return User(state=self._connection, data=data)
 
     async def fetch_channel(
-        self, channel_id: int, /
+        self,
+        channel_id: int,
+        /,
     ) -> Union[GuildChannel, PrivateChannel, Thread]:
         """|coro|
 
