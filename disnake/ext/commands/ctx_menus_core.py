@@ -89,16 +89,16 @@ class InvokableUserCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback,
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
-        self.auto_sync: bool = auto_sync
+        self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
             default_perms = func.__default_member_permissions__
@@ -110,6 +110,8 @@ class InvokableUserCommand(InvokableApplicationCommand):
                     "Cannot set `default_member_permissions` in both parameter and decorator"
                 )
             default_member_permissions = Permissions(default_perms)
+
+        dm_permission = True if dm_permission is None else dm_permission
 
         self.body = UserCommand(
             name=name_loc._upgrade(self.name),
@@ -187,16 +189,16 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback,
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
-        self.auto_sync: bool = auto_sync
+        self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
             default_perms = func.__default_member_permissions__
@@ -208,6 +210,8 @@ class InvokableMessageCommand(InvokableApplicationCommand):
                     "Cannot set `default_member_permissions` in both parameter and decorator"
                 )
             default_member_permissions = Permissions(default_perms)
+
+        dm_permission = True if dm_permission is None else dm_permission
 
         self.body = MessageCommand(
             name=name_loc._upgrade(self.name),
@@ -245,10 +249,10 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: bool = True,
+    dm_permission: bool = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     guild_ids: Sequence[int] = None,
-    auto_sync: bool = True,
+    auto_sync: bool = None,
     extras: Dict[str, Any] = None,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
@@ -313,10 +317,10 @@ def user_command(
 def message_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: bool = True,
+    dm_permission: bool = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     guild_ids: Sequence[int] = None,
-    auto_sync: bool = True,
+    auto_sync: bool = None,
     extras: Dict[str, Any] = None,
     **kwargs,
 ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:

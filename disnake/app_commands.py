@@ -450,7 +450,7 @@ class ApplicationCommand(ABC):
         self,
         type: ApplicationCommandType,
         name: LocalizedRequired,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
@@ -459,7 +459,7 @@ class ApplicationCommand(ABC):
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
 
-        self.dm_permission: bool = dm_permission
+        self.dm_permission: bool = True if dm_permission is None else dm_permission
 
         self._default_member_permissions: Optional[int]
         if default_member_permissions is None:
@@ -579,7 +579,7 @@ class UserCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         super().__init__(
@@ -671,7 +671,7 @@ class MessageCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         super().__init__(
@@ -781,7 +781,7 @@ class SlashCommand(ApplicationCommand):
         name: LocalizedRequired,
         description: LocalizedRequired,
         options: List[Option] = None,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         super().__init__(

@@ -401,14 +401,14 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
-        self.auto_sync: bool = auto_sync
+        self.auto_sync: bool = True if auto_sync is None else auto_sync
         self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
         self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
 
@@ -702,7 +702,7 @@ def slash_command(
     options: List[Option] = None,
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
-    auto_sync: bool = True,
+    auto_sync: bool = None,
     extras: Dict[str, Any] = None,
     **kwargs,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:

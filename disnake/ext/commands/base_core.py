@@ -147,6 +147,7 @@ class InvokableApplicationCommand(ABC):
 
     def __new__(cls, *args: Any, **kwargs: Any) -> InvokableApplicationCommand:
         self = super().__new__(cls)
+        # todo: refactor to not require None and change this to be based on the presence of a kwarg
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
