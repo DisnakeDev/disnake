@@ -49,7 +49,9 @@ class _ApplicationCommandOptional(TypedDict, total=False):
     type: ApplicationCommandType
     guild_id: Snowflake
     options: List[ApplicationCommandOption]
-    default_permission: bool
+    default_permission: bool  # deprecated
+    default_member_permissions: Optional[str]
+    dm_permission: Optional[bool]
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
 
@@ -95,7 +97,7 @@ class ApplicationCommandOptionChoice(_ApplicationCommandOptionChoiceOptional):
     value: ApplicationCommandOptionChoiceValue
 
 
-ApplicationCommandPermissionType = Literal[1, 2]
+ApplicationCommandPermissionType = Literal[1, 2, 3]
 
 
 class ApplicationCommandPermissions(TypedDict):
@@ -104,17 +106,11 @@ class ApplicationCommandPermissions(TypedDict):
     permission: bool
 
 
-class BaseGuildApplicationCommandPermissions(TypedDict):
-    permissions: List[ApplicationCommandPermissions]
-
-
-class PartialGuildApplicationCommandPermissions(BaseGuildApplicationCommandPermissions):
+class GuildApplicationCommandPermissions(TypedDict):
     id: Snowflake
-
-
-class GuildApplicationCommandPermissions(PartialGuildApplicationCommandPermissions):
     application_id: Snowflake
     guild_id: Snowflake
+    permissions: List[ApplicationCommandPermissions]
 
 
 InteractionType = Literal[1, 2, 3]
@@ -292,8 +288,10 @@ class InteractionMessageReference(TypedDict):
 class _EditApplicationCommandOptional(TypedDict, total=False):
     description: str
     options: Optional[List[ApplicationCommandOption]]
-    default_permission: bool
+    default_member_permissions: Optional[str]
+    dm_permission: bool
     type: ApplicationCommandType
+    default_permission: bool  # deprecated
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
 
