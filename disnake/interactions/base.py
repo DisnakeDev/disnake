@@ -1045,7 +1045,7 @@ class InteractionResponse:
             for embed in embeds:
                 if embed._files:
                     files = files or []
-                    files += embed._files
+                    files.extend(embed._files.values())
 
         if files is not MISSING and len(files) > 10:
             raise ValueError("files cannot exceed maximum of 10 elements")
