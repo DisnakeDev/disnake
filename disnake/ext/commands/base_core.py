@@ -33,7 +33,7 @@ from typing import (
     Coroutine,
     Dict,
     List,
-    Mapping,
+    Literal,
     Optional,
     Tuple,
     TypeVar,
@@ -41,9 +41,10 @@ from typing import (
     cast,
 )
 
-from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
+from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
-from disnake.utils import async_all, maybe_coroutine, warn_deprecated
+from disnake.permissions import Permissions
+from disnake.utils import async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import *
@@ -69,7 +70,7 @@ if TYPE_CHECKING:
     ]
 
 
-__all__ = ("InvokableApplicationCommand", "guild_permissions")
+__all__ = ("InvokableApplicationCommand", "default_member_permissions")
 
 
 T = TypeVar("T")
@@ -154,18 +155,19 @@ class InvokableApplicationCommand(ABC):
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
-        # only an internal feature for now
-        self.guild_only: bool = kwargs.get("guild_only", False)
+        # Annotation parser needs this attribute because body doesn't exist at this moment.
+        # We will use this attribute later in order to set the dm_permission.
+        self._guild_only: bool = kwargs.get("guild_only", False)
         self.extras: Dict[str, Any] = kwargs.get("extras") or {}
 
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
 
-        try:
-            perms = func.__app_command_permissions__
-        except AttributeError:
-            perms = {}
-        self.permissions: Dict[int, UnresolvedGuildApplicationCommandPermissions] = perms
+        if "default_permission" in kwargs:
+            raise TypeError(
+                "`default_permission` is deprecated and will always be set to `True`. "
+                "See `default_member_permissions` and `dm_permission` instead."
+            )
 
         try:
             checks = func.__commands_checks__
@@ -212,8 +214,6 @@ class InvokableApplicationCommand(ABC):
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
             other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
-        if self.permissions != other.permissions:
-            other.permissions = self.permissions.copy()
 
         try:
             other.on_error = self.on_error
@@ -237,10 +237,32 @@ class InvokableApplicationCommand(ABC):
         if kwargs:
             kw = kwargs.copy()
             kw.update(self.__original_kwargs__)
+            print(kw)
             copy = type(self)(self.callback, **kw)
             return self._ensure_assignment_on_copy(copy)
         else:
             return self.copy()
+
+    @property
+    def dm_permission(self) -> bool:
+        """:class:`bool`: Whether this command can be used in DMs."""
+        return self.body.dm_permission
+
+    @property
+    def default_member_permissions(self) -> Optional[Permissions]:
+        """Optional[:class:`.Permissions`]: The default required member permissions for this command.
+        A member must have *all* these permissions to be able to invoke the command in a guild.
+
+        This is a default value, the set of users/roles that may invoke this command can be
+        overridden by moderators on a guild-specific basis, disregarding this setting.
+
+        If ``None`` is returned, it means everyone can use the command by default.
+        If an empty :class:`.Permissions` object is returned (that is, all permissions set to ``False``),
+        this means no one can use the command.
+
+        .. versionadded:: 2.5
+        """
+        return self.body.default_member_permissions
 
     @property
     def callback(self) -> CommandCallback:
@@ -379,10 +401,6 @@ class InvokableApplicationCommand(ABC):
         """
         This method isn't really usable in this class, but it's usable in subclasses.
         """
-        if self.guild_only and inter.guild_id is None:
-            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
-            return
-
         await self.prepare(inter)
 
         try:
@@ -630,50 +648,59 @@ class InvokableApplicationCommand(ABC):
             inter.application_command = original
 
 
-# kwargs are annotated as None to ensure the user gets a linter error when using them
-def guild_permissions(
-    guild_id: int,
-    *,
-    roles: Optional[Mapping[int, bool]] = None,
-    users: Optional[Mapping[int, bool]] = None,
-    owner: Optional[bool] = None,
-    **kwargs: None,
-) -> Callable[[T], T]:
+def default_member_permissions(value: int = 0, **permissions: Literal[True]) -> Callable[[T], T]:
     """
-    A decorator that sets application command permissions in the specified guild.
-    This type of permissions "greys out" the command in the command picker.
-    If you want to change this type of permissions dynamically, this decorator is not useful.
+    A decorator that sets default required member permissions for the command.
+    Unlike :func:`~.ext.commands.has_permissions`, this decorator does not add any checks.
+    Instead, it prevents the command from being run by members without *all* required permissions,
+    if not overridden by moderators on a guild-specific basis.
+
+    See also the ``default_member_permissions`` parameter for application command decorators.
+
+    .. note::
+        This does not work with slash subcommands/groups.
+
+    Example
+    -------
+
+    This would only allow members with :attr:`~.Permissions.manage_messages` *and*
+    :attr:`~.Permissions.view_audit_log` permissions to use the command by default,
+    however moderators can override this and allow/disallow specific users and
+    roles to use the command in their guilds regardless of this setting.
+
+    .. code-block:: python3
+
+        @bot.slash_command()
+        @commands.default_member_permissions(manage_messages=True, view_audit_log=True)
+        async def purge(inter, num: int):
+            ...
 
     Parameters
     ----------
-    guild_id: :class:`int`
-        The ID of the guild to apply the permissions to.
-    roles: Optional[Mapping[:class:`int`, :class:`bool`]]
-        A mapping of role IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
-    users: Optional[Mapping[:class:`int`, :class:`bool`]]
-        A mapping of user IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
-    owner: Optional[:class:`bool`]
-        Whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
+    value: :class:`int`
+        A raw permission bitfield of an integer representing the required permissions.
+        May be used instead of specifying kwargs.
+    **permissions: Literal[True]
+        The required permissions for a command. A member must have *all* these
+        permissions to be able to invoke the command.
     """
-    if kwargs:
-        warn_deprecated(
-            f"guild_permissions got unexpected deprecated keyword arguments: {', '.join(map(repr, kwargs))}",
-            stacklevel=2,
-        )
-        roles = roles or kwargs.get("role_ids")
-        users = users or kwargs.get("user_ids")
-
-    perms = UnresolvedGuildApplicationCommandPermissions(
-        role_ids=roles, user_ids=users, owner=owner
-    )
+    perms_value = Permissions(value, **permissions).value
 
     def decorator(func: T) -> T:
+        from .slash_core import SubCommand, SubCommandGroup
+
         if isinstance(func, InvokableApplicationCommand):
-            func.permissions[guild_id] = perms
+            if isinstance(func, (SubCommand, SubCommandGroup)):
+                raise TypeError(
+                    "Cannot set `default_member_permissions` on subcommands or subcommand groups"
+                )
+            if func.body._default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both parameter and decorator"
+                )
+            func.body._default_member_permissions = perms_value
         else:
-            if not hasattr(func, "__app_command_permissions__"):
-                func.__app_command_permissions__ = {}  # type: ignore
-            func.__app_command_permissions__[guild_id] = perms  # type: ignore
+            func.__default_member_permissions__ = perms_value  # type: ignore
         return func
 
     return decorator

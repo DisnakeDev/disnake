@@ -177,8 +177,8 @@ class Thread(Messageable, Hashable):
 
     def __repr__(self) -> str:
         return (
-            f"<Thread id={self.id!r} name={self.name!r} parent={self.parent} "
-            f"owner_id={self.owner_id!r} locked={self.locked} archived={self.archived} "
+            f"<Thread id={self.id!r} name={self.name!r} parent={self.parent!r} "
+            f"owner_id={self.owner_id!r} locked={self.locked!r} archived={self.archived!r} "
             f"flags={self.flags!r}>"
         )
 

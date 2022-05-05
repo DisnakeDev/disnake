@@ -42,6 +42,7 @@ from disnake.app_commands import Option, SlashCommand
 from disnake.enums import OptionType
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
+from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -52,6 +53,8 @@ if TYPE_CHECKING:
     from disnake.i18n import LocalizedOptional
 
     from .base_core import CommandCallback
+
+MISSING = utils.MISSING
 
 __all__ = ("InvokableSlashCommand", "SubCommandGroup", "SubCommand", "slash_command")
 
@@ -170,6 +173,15 @@ class SubCommandGroup(InvokableApplicationCommand):
         )
         self.qualified_name: str = ""
 
+        if (
+            "dm_permission" in kwargs
+            or "default_member_permissions" in kwargs
+            or hasattr(func, "__default_member_permissions__")
+        ):
+            raise TypeError(
+                "Cannot set `default_member_permissions` or `dm_permission` on subcommand groups"
+            )
+
     @property
     def body(self) -> Option:
         return self.option
@@ -280,6 +292,15 @@ class SubCommand(InvokableApplicationCommand):
         )
         self.qualified_name = ""
 
+        if (
+            "dm_permission" in kwargs
+            or "default_member_permissions" in kwargs
+            or hasattr(func, "__default_member_permissions__")
+        ):
+            raise TypeError(
+                "Cannot set `default_member_permissions` or `dm_permission` on subcommands"
+            )
+
     @property
     def description(self) -> str:
         return self.body.description
@@ -294,10 +315,6 @@ class SubCommand(InvokableApplicationCommand):
         return await _call_autocompleter(self, param, inter, user_input)
 
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
-        if self.guild_only and inter.guild_id is None:
-            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
-            return
-
         for k, v in self.connectors.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
@@ -380,7 +397,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
         options: List[Option] = None,
-        default_permission: bool = True,
+        dm_permission: bool = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = True,
@@ -397,8 +415,20 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         if options is None:
             options = expand_params(self)
 
+        try:
+            default_perms = func.__default_member_permissions__
+        except AttributeError:
+            pass
+        else:
+            if default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both parameter and decorator"
+                )
+            default_member_permissions = Permissions(default_perms)
         self.docstring = utils.parse_docstring(func)
         desc_loc = Localized._cast(description, False)
+
+        dm_permission = True if dm_permission is None else dm_permission
 
         self.body: SlashCommand = SlashCommand(
             name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),
@@ -406,7 +436,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 self.docstring["description"] or "-", key=self.docstring["localization_key_desc"]
             ),
             options=options or [],
-            default_permission=default_permission,
+            dm_permission=dm_permission and not self._guild_only,
+            default_member_permissions=default_member_permissions,
         )
 
     def _ensure_assignment_on_copy(self, other: SlashCommandT) -> SlashCommandT:
@@ -432,10 +463,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     @property
     def options(self) -> List[Option]:
         return self.body.options
-
-    @property
-    def default_permission(self) -> bool:
-        return self.body.default_permission
 
     def sub_command(
         self,
@@ -638,10 +665,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                     raise
 
     async def invoke(self, inter: ApplicationCommandInteraction):
-        if self.guild_only and inter.guild_id is None:
-            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
-            return
-
         await self.prepare(inter)
 
         try:
@@ -674,8 +697,9 @@ def slash_command(
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
+    dm_permission: bool = None,
+    default_member_permissions: Optional[Union[Permissions, int]] = None,
     options: List[Option] = None,
-    default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
     auto_sync: bool = True,
@@ -687,7 +711,7 @@ def slash_command(
     Parameters
     ----------
     auto_sync: :class:`bool`
-        Whether to automatically register the command. Defaults to ``True``
+        Whether to automatically register the command. Defaults to ``True``.
     name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the slash command (defaults to function name).
 
@@ -703,10 +727,15 @@ def slash_command(
     options: List[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
-    default_permission: :class:`bool`
-        Whether the command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
-    guild_ids: Sequence[:class:`int`, ...]
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs. Defaults to ``True``
+    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+        The default required permissions for this command.
+        See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+        .. versionadded:: 2.5
+
+    guild_ids: List[:class:`int`]
         If specified, the client will register a command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
     connectors: Dict[:class:`str`, :class:`str`]
@@ -741,7 +770,8 @@ def slash_command(
             name=name,
             description=description,
             options=options,
-            default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,

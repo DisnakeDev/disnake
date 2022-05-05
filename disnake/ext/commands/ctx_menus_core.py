@@ -23,10 +23,11 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
 from disnake.i18n import Localized
+from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -41,8 +42,8 @@ if TYPE_CHECKING:
 __all__ = ("InvokableUserCommand", "InvokableMessageCommand", "user_command", "message_command")
 
 
-MessageCommandT = TypeVar("MessageCommandT", bound="InvokableMessageCommand")
-UserCommandT = TypeVar("UserCommandT", bound="InvokableUserCommand")
+# MessageCommandT = TypeVar("MessageCommandT", bound="InvokableMessageCommand")
+# UserCommandT = TypeVar("UserCommandT", bound="InvokableUserCommand")
 
 
 class InvokableUserCommand(InvokableApplicationCommand):
@@ -88,7 +89,8 @@ class InvokableUserCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback,
         *,
         name: LocalizedOptional = None,
-        default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -97,9 +99,22 @@ class InvokableUserCommand(InvokableApplicationCommand):
         super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
         self.auto_sync: bool = auto_sync
+
+        try:
+            default_perms = func.__default_member_permissions__
+        except AttributeError:
+            pass
+        else:
+            if default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both parameter and decorator"
+                )
+            default_member_permissions = Permissions(default_perms)
+
         self.body = UserCommand(
             name=name_loc._upgrade(self.name),
-            default_permission=default_permission,
+            dm_permission=dm_permission and not self._guild_only,
+            default_member_permissions=default_member_permissions,
         )
 
     async def _call_external_error_handlers(
@@ -172,7 +187,8 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback,
         *,
         name: LocalizedOptional = None,
-        default_permission: bool = True,
+        dm_permission: bool = True,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = True,
         **kwargs,
@@ -181,9 +197,22 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         super().__init__(func, name=name_loc.string, **kwargs)
         self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
         self.auto_sync: bool = auto_sync
+
+        try:
+            default_perms = func.__default_member_permissions__
+        except AttributeError:
+            pass
+        else:
+            if default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both parameter and decorator"
+                )
+            default_member_permissions = Permissions(default_perms)
+
         self.body = MessageCommand(
             name=name_loc._upgrade(self.name),
-            default_permission=default_permission,
+            dm_permission=dm_permission and not self._guild_only,
+            default_member_permissions=default_member_permissions,
         )
 
     async def _call_external_error_handlers(
@@ -216,7 +245,8 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: LocalizedOptional = None,
-    default_permission: bool = True,
+    dm_permission: bool = True,
+    default_member_permissions: Optional[Union[Permissions, int]] = None,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     extras: Dict[str, Any] = None,
@@ -232,9 +262,14 @@ def user_command(
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    default_permission: :class:`bool`
-        Whether the command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+        The default required permissions for this command.
+        See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+        .. versionadded:: 2.5
+
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
@@ -264,7 +299,8 @@ def user_command(
         return InvokableUserCommand(
             func,
             name=name,
-            default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             extras=extras,
@@ -277,7 +313,8 @@ def user_command(
 def message_command(
     *,
     name: LocalizedOptional = None,
-    default_permission: bool = True,
+    dm_permission: bool = True,
+    default_member_permissions: Optional[Union[Permissions, int]] = None,
     guild_ids: Sequence[int] = None,
     auto_sync: bool = True,
     extras: Dict[str, Any] = None,
@@ -293,9 +330,14 @@ def message_command(
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    default_permission: :class:`bool`
-        Whether the command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+        The default required permissions for this command.
+        See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+        .. versionadded:: 2.5
+
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
@@ -325,7 +367,8 @@ def message_command(
         return InvokableMessageCommand(
             func,
             name=name,
-            default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             extras=extras,
