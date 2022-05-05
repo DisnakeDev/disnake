@@ -35,6 +35,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    Type,
     TypeVar,
     Union,
     get_args,
@@ -105,6 +106,10 @@ class ActionRow(Generic[UIComponentT]):
     type: ClassVar[Literal[ComponentType.action_row]] = ComponentType.action_row
 
     @overload
+    def __new__(cls: Type[ActionRow[UIComponentT]], *args: Any) -> ActionRow[UIComponentT]:
+        ...
+
+    @overload
     def __new__(cls: Any, *args: MessageUIComponent) -> ActionRow[MessageUIComponent]:
         ...
 
@@ -112,7 +117,7 @@ class ActionRow(Generic[UIComponentT]):
     def __new__(cls: Any, *args: ModalUIComponent) -> ActionRow[ModalUIComponent]:
         ...
 
-    def __new__(cls, *args: UIComponentT) -> ActionRow[UIComponentT]:  # type: ignore
+    def __new__(cls: Type[ActionRow[UIComponentT]], *args: Any) -> ActionRow[UIComponentT]:  # type: ignore
         return super().__new__(cls)
 
     def __init__(self, *components: UIComponentT):
@@ -145,11 +150,11 @@ class ActionRow(Generic[UIComponentT]):
 
     @property
     def components(self) -> List[UIComponentT]:
-        """List[:class:`WrappedComponent`]: The UI components stored this action row."""
+        """List[:class:`WrappedComponent`]: The UI components stored in this action row."""
         return self._components
 
     def append_item(self, item: UIComponentT) -> None:
-        """Appends a component to the action row. The component's type must match that
+        """Append a component to the action row. The component's type must match that
         of the action row.
 
         Parameters
@@ -185,7 +190,7 @@ class ActionRow(Generic[UIComponentT]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     ) -> None:
-        """Adds a button to the action row. Can only be used if the action
+        """Add a button to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.Button` use the
@@ -238,7 +243,7 @@ class ActionRow(Generic[UIComponentT]):
         options: List[SelectOption] = MISSING,
         disabled: bool = False,
     ) -> None:
-        """Adds a select menu to the action row. Can only be used if the action
+        """Add a select menu to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.Select` use the
@@ -295,7 +300,7 @@ class ActionRow(Generic[UIComponentT]):
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
-        """Adds a text input to the action row. Can only be used if the action
+        """Add a text input to the action row. Can only be used if the action
         row holds modal components.
 
         To append a pre-existing :class:`~disnake.ui.TextInput` use the
@@ -367,6 +372,30 @@ class ActionRow(Generic[UIComponentT]):
         raise IndexError("ActionRow index out of range")
 
     @classmethod
+    def with_modal_components(cls) -> ActionRow[ModalUIComponent]:
+        """Create an empty action row meant to store components compatible with
+        :class:`disnake.ui.Modal`. Saves the need to import type specifiers to
+        typehint empty action rows.
+
+        Returns:
+        :class:`ActionRow`[MessageUIComponent]:
+            The newly created empty action row.
+        """
+        return ActionRow[ModalUIComponent]()
+
+    @classmethod
+    def with_message_components(cls) -> ActionRow[MessageUIComponent]:
+        """Create an empty action row meant to store components compatible with
+        :class:`disnake.Message`. Saves the need to import type specifiers to
+        typehint empty action rows.
+
+        Returns:
+        :class:`ActionRow`[MessageUIComponent]:
+            The newly created empty action row.
+        """
+        return ActionRow[MessageUIComponent]()
+
+    @classmethod
     def from_message(cls, message: Message) -> List[ActionRow[MessageUIComponent]]:
         """Create a list of up to 5 action rows from the components on an existing message.
 
@@ -380,11 +409,16 @@ class ActionRow(Generic[UIComponentT]):
         ----------
         message: :class:`disnake.Message`
             The message from which to extract the components.
+
+        Returns
+        -------
+        List[:class:`disnake.ui.ActionRow`]:
+            The action rows parsed from the components on the message.
         """
         # :prayge: this actually typechecks without cast/whatever now
         rows: List[ActionRow[MessageUIComponent]] = []
         for row in message.components:
-            rows.append(current_row := ActionRow[MessageUIComponent]())
+            rows.append(current_row := ActionRow.with_message_components())
             for component in row.children:
                 if isinstance(component, ButtonComponent):
                     current_row.append_item(Button.from_component(component))
@@ -418,7 +452,7 @@ def components_to_rows(components: Components[UIComponentT]) -> List[ActionRow[U
                 action_rows.append(component)
 
             elif isinstance(component, Sequence):
-                action_rows.append(ActionRow(*component))  # type: ignore
+                action_rows.append(ActionRow(*component))
 
             else:
                 raise ValueError(
