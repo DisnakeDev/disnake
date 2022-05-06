@@ -624,7 +624,7 @@ class ParamInfo:
 
 def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwargs: Any) -> T:
     """Calls a function without providing any extra unexpected arguments"""
-    MISSING = object()
+    MISSING: Any = object()
     sig = signature(function)
 
     kinds = {p.kind for p in sig.parameters.values()}
