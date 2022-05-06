@@ -587,7 +587,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         view.previous = previous
 
         # type-checker fails to narrow argument
-        return await run_converters(ctx, converter, argument, param)  # type: ignore
+        return await run_converters(ctx, converter, argument, param)
 
     async def _transform_greedy_pos(
         self, ctx: Context, param: inspect.Parameter, required: bool, converter: Any
