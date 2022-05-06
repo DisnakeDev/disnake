@@ -461,7 +461,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         if not isinstance(ret, str):
             try:
-                ret = list(ret)  # type: ignore
+                ret = list(ret)
             except TypeError:
                 # It's possible that a generator raised this exception.  Don't
                 # replace it with our own error if that's the case.
