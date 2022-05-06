@@ -48,7 +48,7 @@ Breaking Changes
 - Slash command names and option names are no longer automatically converted to lowercase, an :class:`InvalidArgument` exception is now raised instead (:issue:`422`)
 - The ``interaction`` parameter of :func:`ui.Item.callback` is now positional-only (:issue:`311`)
 - The ``youtube``, ``awkword`` and ``sketchy_artist`` :class:`PartyType`\s no longer work and have been removed (:issue:`408`, :issue:`409`)
-- Trying to defer and interaction response that does not support deferring (e.g. autocomplete) will now raise a :class:`TypeError` (:issue:`505`)
+- Trying to defer an interaction response that does not support deferring (e.g. autocomplete) will now raise a :class:`TypeError` (:issue:`505`)
 - |commands| Failure to convert an input parameter annotated as :class:`~ext.commands.LargeInt` now
   raises a :exc:`~ext.commands.LargeIntConversionFailure` (:issue:`362`)
 
