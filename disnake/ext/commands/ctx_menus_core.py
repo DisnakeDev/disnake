@@ -34,10 +34,18 @@ from .errors import *
 from .params import safe_call
 
 if TYPE_CHECKING:
-    from disnake.i18n import LocalizedOptional
-    from disnake.interactions import ApplicationCommandInteraction
+    from typing_extensions import ParamSpec
 
-    from .base_core import InteractionCommandCallback
+    from disnake.i18n import LocalizedOptional
+    from disnake.interactions import (
+        ApplicationCommandInteraction,
+        MessageCommandInteraction,
+        UserCommandInteraction,
+    )
+
+    from .base_core import CogT, InteractionCommandCallback
+
+    P = ParamSpec("P")
 
 __all__ = ("InvokableUserCommand", "InvokableMessageCommand", "user_command", "message_command")
 
@@ -82,7 +90,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func: InteractionCommandCallback,
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
         dm_permission: bool = None,
@@ -182,7 +190,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
     def __init__(
         self,
-        func: InteractionCommandCallback,
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
         dm_permission: bool = None,
@@ -251,7 +259,7 @@ def user_command(
     auto_sync: bool = None,
     extras: Dict[str, Any] = None,
     **kwargs,
-) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
+) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
 
     Parameters
@@ -290,7 +298,9 @@ def user_command(
         A decorator that converts the provided method into an InvokableUserCommand and returns it.
     """
 
-    def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
+    def decorator(
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+    ) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
@@ -320,7 +330,10 @@ def message_command(
     auto_sync: bool = None,
     extras: Dict[str, Any] = None,
     **kwargs,
-) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
+) -> Callable[
+    [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
+    InvokableMessageCommand,
+]:
     """A shortcut decorator that builds a message command.
 
     Parameters
@@ -359,7 +372,9 @@ def message_command(
         A decorator that converts the provided method into an InvokableMessageCommand and then returns it.
     """
 
-    def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
+    def decorator(
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+    ) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
