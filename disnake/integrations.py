@@ -353,7 +353,7 @@ class IntegrationApplication:
 
 
 class BotIntegration(Integration):
-    """Represents a bot integration on disnake.
+    """Represents a bot integration on Discord.
 
     .. versionadded:: 2.0
 

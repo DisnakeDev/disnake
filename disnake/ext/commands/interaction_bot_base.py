@@ -490,7 +490,7 @@ class InteractionBotBase(CommonBotBase):
             .. note::
                 This object may be copied by the library.
 
-            .. versionadded: 2.5
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -558,7 +558,7 @@ class InteractionBotBase(CommonBotBase):
             .. note::
                 This object may be copied by the library.
 
-            .. versionadded: 2.5
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -623,7 +623,7 @@ class InteractionBotBase(CommonBotBase):
             .. note::
                 This object may be copied by the library.
 
-            .. versionadded: 2.5
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -1049,7 +1049,7 @@ class InteractionBotBase(CommonBotBase):
 
             This function can either be a regular function or a coroutine.
 
-        Similar to a command :func:`check`\, this takes a single parameter
+        Similar to a command :func:`check`\\, this takes a single parameter
         of type :class:`.ApplicationCommandInteraction` and can only raise exceptions inherited from
         :exc:`CommandError`.
 

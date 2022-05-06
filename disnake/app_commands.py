@@ -553,7 +553,7 @@ class _APIApplicationCommandMixin:
 
 class UserCommand(ApplicationCommand):
     """
-    A user context menu command
+    A user context menu command.
 
     Attributes
     ----------
@@ -567,11 +567,6 @@ class UserCommand(ApplicationCommand):
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
         Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
     """
@@ -594,7 +589,7 @@ class UserCommand(ApplicationCommand):
 
 class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     """
-    A user context menu command returned by the API
+    A user context menu command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -609,11 +604,6 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
 
@@ -662,11 +652,6 @@ class MessageCommand(ApplicationCommand):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
-
-        .. versionadded:: 2.5
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -687,7 +672,7 @@ class MessageCommand(ApplicationCommand):
 
 class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     """
-    A message context menu command returned by the API
+    A message context menu command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -702,11 +687,6 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
 
@@ -760,11 +740,6 @@ class SlashCommand(ApplicationCommand):
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
         Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
 
@@ -863,7 +838,7 @@ class SlashCommand(ApplicationCommand):
 
 class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     """
-    A slash command returned by the API
+    A slash command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -885,11 +860,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
 

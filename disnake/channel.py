@@ -873,7 +873,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         limit: Optional[int] = 50,
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
     ) -> ArchivedThreadIterator:
-        """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the guild.
+        """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the channel.
 
         You must have :attr:`~Permissions.read_message_history` permission to use this. If iterating over private threads
         then :attr:`~Permissions.manage_threads` permission is also required.
@@ -2582,7 +2582,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
-        content: Optional[:class:`str`]
+        content: :class:`str`
             The content of the message to send.
         embed: :class:`.Embed`
             The rich embed for the content to send. This cannot be mixed with the

@@ -330,7 +330,7 @@ class LocalizationProtocol(ABC):
 
 class LocalizationStore(LocalizationProtocol):
     """
-    Manages a key-value mapping of localizations.
+    Manages a key-value mapping of localizations using ``.json`` files.
 
     .. versionadded:: 2.5
 

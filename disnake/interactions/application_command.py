@@ -167,8 +167,11 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
     This prevents the command from being invoked in DMs by automatically setting
-    :attr:`ApplicationCommand.dm_permission` to ``False``, and annotations of some attributes
-    are modified to match the expected types in guilds.
+    :attr:`ApplicationCommand.dm_permission` to ``False`` for user/message commands and top-level slash commands.
+
+    Note that this does not apply to slash subcommands, subcommand groups, or autocomplete callbacks.
+
+    Additionally, annotations of some attributes are modified to match the expected types in guilds.
     """
 
     guild: Guild
