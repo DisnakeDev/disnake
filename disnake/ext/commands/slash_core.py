@@ -446,8 +446,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             other.autocompleters = self.autocompleters.copy()
         if self.children != other.children:
             other.children = self.children.copy()
-
-        if self.description != "-" and self.description != other.description:
+        if self.description != other.description and "description" not in other.__original_kwargs__:
             # Allows overriding the default description cog-wide.
             other.body.description = self.description
         if self.options != other.options:
