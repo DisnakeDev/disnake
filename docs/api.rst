@@ -1771,12 +1771,13 @@ of :class:`enum.Enum`.
     .. versionadded:: 2.5
 
     .. attribute:: role
+
         Represents a permission that affects roles.
-
     .. attribute:: user
-        Represents a permission that affects users.
 
+        Represents a permission that affects users.
     .. attribute:: channel
+
         Represents a permission that affects channels.
 
 .. class:: InteractionType
