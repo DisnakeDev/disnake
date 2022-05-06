@@ -366,7 +366,7 @@ class DiscordWebSocket:
         self.loop: asyncio.AbstractEventLoop = loop
 
         # an empty dispatcher to prevent crashes
-        self._dispatch: DispatchFunc = lambda *args: None
+        self._dispatch: DispatchFunc = lambda event, *args: None
         # generic event listeners
         self._dispatch_listeners: List[EventListener] = []
         # the keep alive

@@ -34,10 +34,18 @@ from .errors import *
 from .params import safe_call
 
 if TYPE_CHECKING:
-    from disnake.i18n import LocalizedOptional
-    from disnake.interactions import ApplicationCommandInteraction
+    from typing_extensions import ParamSpec
 
-    from .base_core import InteractionCommandCallback
+    from disnake.i18n import LocalizedOptional
+    from disnake.interactions import (
+        ApplicationCommandInteraction,
+        MessageCommandInteraction,
+        UserCommandInteraction,
+    )
+
+    from .base_core import CogT, InteractionCommandCallback
+
+    P = ParamSpec("P")
 
 __all__ = ("InvokableUserCommand", "InvokableMessageCommand", "user_command", "message_command")
 
@@ -67,7 +75,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_user_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`, ...]]`
+    guild_ids: Optional[Tuple[:class:`int`, ...]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -77,12 +85,12 @@ class InvokableUserCommand(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     def __init__(
         self,
-        func: InteractionCommandCallback,
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
         dm_permission: bool = None,
@@ -167,7 +175,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_message_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`, ...]]`
+    guild_ids: Optional[Tuple[:class:`int`, ...]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -177,12 +185,12 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     def __init__(
         self,
-        func: InteractionCommandCallback,
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
         dm_permission: bool = None,
@@ -251,7 +259,7 @@ def user_command(
     auto_sync: bool = None,
     extras: Dict[str, Any] = None,
     **kwargs,
-) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
+) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
 
     Parameters
@@ -282,7 +290,7 @@ def user_command(
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
 
     Returns
     -------
@@ -290,7 +298,9 @@ def user_command(
         A decorator that converts the provided method into an InvokableUserCommand and returns it.
     """
 
-    def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
+    def decorator(
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+    ) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
@@ -320,7 +330,10 @@ def message_command(
     auto_sync: bool = None,
     extras: Dict[str, Any] = None,
     **kwargs,
-) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
+) -> Callable[
+    [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
+    InvokableMessageCommand,
+]:
     """A shortcut decorator that builds a message command.
 
     Parameters
@@ -351,7 +364,7 @@ def message_command(
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
 
     Returns
     -------
@@ -359,7 +372,9 @@ def message_command(
         A decorator that converts the provided method into an InvokableMessageCommand and then returns it.
     """
 
-    def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
+    def decorator(
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+    ) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):

@@ -721,7 +721,7 @@ class Message(Hashable):
     tts: :class:`bool`
         Specifies if the message was done with text-to-speech.
         This can only be accurately received in :func:`on_message` due to
-        a disnake limitation.
+        a Discord limitation.
     type: :class:`MessageType`
         The type of message. In most cases this should not be checked, but it is helpful
         in cases where it might be a system message for :attr:`system_content`.
@@ -731,7 +731,7 @@ class Message(Hashable):
     content: :class:`str`
         The actual contents of the message.
     nonce: Optional[Union[:class:`str`, :class:`int`]]
-        The value used by the disnake guild and the client to verify that the message is successfully sent.
+        The value used by the Discord guild and the client to verify that the message is successfully sent.
         This is not stored long term within Discord's servers and is only used ephemerally.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
@@ -1000,7 +1000,7 @@ class Message(Hashable):
             # already removed?
             raise ValueError("Emoji already removed?")
 
-        # if reaction isn't in the list, we crash. This means disnake
+        # if reaction isn't in the list, we crash. This means Discord
         # sent bad data, or we stored improperly
         reaction.count -= 1
 
