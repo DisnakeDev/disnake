@@ -27,6 +27,8 @@ Note that earlier versions will continue working fine after the message content 
 as long as the intent is enabled in the developer portal. However, from this version (``2.5.0``) onward, the intent needs to be
 enabled in the developer portal *and* your code.
 See `this page <https://guide.disnake.dev/popular-topics/intents#why-do-most-messages-have-no-content>`_ of the guide for more information.
+If you do not have access to the intent yet, you can temporarily continue using API v9 by calling ``disnake.http._workaround_set_api_version(9)`` before connecting,
+which will keep sending message content before the intent deadline, even with the intent disabled.
 
 
 Breaking Changes
