@@ -46,7 +46,7 @@ Breaking Changes
 - ``locale`` attributes are now of type :class:`Locale` instead of :class:`str` (:issue:`439`)
 - ``Invite.revoked`` and ``Thread.archiver_id`` have been removed (deprecated in 2.4) (:issue:`455`)
 - Slash command names and option names are no longer automatically converted to lowercase, an :class:`InvalidArgument` exception is now raised instead (:issue:`422`)
-- The ``interaction`` parameter of :func:`ui.Item.callback` is now positional-only (:issue:`311`)
+- The ``interaction`` parameter of :func:`ui.Item.callback` can no longer be passed as a kwarg (:issue:`311`)
 - The ``youtube``, ``awkword`` and ``sketchy_artist`` :class:`PartyType`\s no longer work and have been removed (:issue:`408`, :issue:`409`)
 - Trying to defer an interaction response that does not support deferring (e.g. autocomplete) will now raise a :class:`TypeError` (:issue:`505`)
 - |commands| Failure to convert an input parameter annotated as :class:`~ext.commands.LargeInt` now
