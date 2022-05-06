@@ -17,8 +17,8 @@ in specific versions.
 v2.5.0
 ---------
 
-This version adds support for API v10 (which comes with a few breaking changes),
-forum channels, localizations, improves API coverage by adding support for previously
+This version adds support for **API v10** (which comes with a few breaking changes),
+**forum channels**, **localizations**, **permissions v2**, improves API coverage by adding support for previously
 missing features like guild previews, widgets, or welcome screens,
 and contains several miscellaneous enhancements and bugfixes.
 
@@ -35,6 +35,8 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~~
 
 - The :attr:`~Intents.message_content` intent is now required to receive to receive message content and related fields, see above (:issue:`353`)
+- The new permissions v2 system revamped application command permissions, with the most notable changes being the
+  removal of ``default_permission`` and ``commands.guild_permissions`` in favor of new fields/methods - see below for all new changes (:issue:`405`)
 - :func:`TextChannel.create_thread` now requires either a ``message`` or a ``type`` parameter (:issue:`355`)
 - :func:`GuildScheduledEvent.fetch_users` and :func:`Guild.bans` now return an async iterator instead of a list of users (:issue:`428`, :issue:`442`)
 - :func:`Guild.audit_logs` no longer supports the ``oldest_first`` parameter (:issue:`473`)
@@ -46,6 +48,7 @@ Breaking Changes
 - Slash command names and option names are no longer automatically converted to lowercase, an :class:`InvalidArgument` exception is now raised instead (:issue:`422`)
 - The ``interaction`` parameter of :func:`ui.Item.callback` is now positional-only (:issue:`311`)
 - The ``youtube``, ``awkword`` and ``sketchy_artist`` :class:`PartyType`\s no longer work and have been removed (:issue:`408`, :issue:`409`)
+- Trying to defer and interaction response that does not support deferring (e.g. autocomplete) will now raise a :class:`TypeError` (:issue:`505`)
 - |commands| Failure to convert an input parameter annotated as :class:`~ext.commands.LargeInt` now
   raises a :exc:`~ext.commands.LargeIntConversionFailure` (:issue:`362`)
 
@@ -68,7 +71,7 @@ New Features
 - Support API v10 (:issue:`353`)
     - New intent: :attr:`Intents.message_content`
     - |commands| New warning: :class:`~ext.commands.MessageContentPrefixWarning`
-- Add forum channels (:issue:`448`, :issue:`479`, :issue:`504`)
+- Add forum channels (:issue:`448`, :issue:`479`, :issue:`504`, :issue:`512`)
     - Add :class:`ForumChannel`
     - Add :attr:`CategoryChannel.forum_channels`, :attr:`Guild.forum_channels`
     - Add :attr:`CategoryChannel.create_forum_channel`, :attr:`Guild.create_forum_channel`
@@ -86,6 +89,22 @@ New Features
     - Add :class:`LocalizationWarning`, :class:`LocalizationKeyError`
     - Add :func:`utils.as_valid_locale`
     - Add localization example
+- Support permissions v2, see :ref:`app_command_permissions` (:issue:`405`)
+    - Remove support for ``default_permission``
+    - Add ``dm_permission`` and ``default_member_permissions`` parameters to application command objects and decorators
+    - Add :attr:`~ApplicationCommand.dm_permission`, :attr:`~ApplicationCommand.default_member_permissions` attributes
+      to :class:`ApplicationCommand` and :class:`~ext.commands.InvokableApplicationCommand`
+    - Add :class:`ApplicationCommandPermissionType` enum, change type of :attr:`ApplicationCommandPermissions.type` to support channel targets
+    - Add :func:`ApplicationCommandPermissions.is_everyone` and :func:`ApplicationCommandPermissions.is_all_channels`
+    - Remove :func:`GuildApplicationCommandPermissions.edit`, :class:`PartialGuildApplicationCommandPermissions`, :class:`UnresolvedGuildApplicationCommandPermissions`
+    - Remove :func:`Client.edit_command_permissions`, :func:`Client.bulk_edit_command_permissions`, :func:`Client.edit_command_permissions`, :func:`Client.edit_command_permissions`
+    - Remove :func:`Guild.get_command_permissions`, :func:`Guild.edit_command_permissions`, :func:`Guild.bulk_edit_command_permissions`
+    - Update behavior of :class:`GuildCommandInteraction` annotation to automatically set ``dm_permission=False`` instead of adding a local check
+    - Add :attr:`AuditLogAction.application_command_permission_update` enum value and :attr:`AuditLogDiff.command_permissions`
+    - Add :func:`on_application_command_permissions_update` event
+    - |commands| Add :func:`~ext.commands.default_member_permissions` decorator, alternative to identically named parameter
+    - |commands| Remove :func:`~ext.commands.guild_permissions` decorator
+    - |commands| Remove ``sync_permissions`` parameter from :class:`~ext.commands.Bot`
 - Add guild previews (:issue:`359`)
     - Add :class:`GuildPreview`
     - Add :func:`Client.fetch_guild_preview`
@@ -132,8 +151,10 @@ New Features
 - Add :func:`on_raw_thread_delete`, :func:`on_raw_thread_member_remove` and :func:`on_raw_thread_update` events (:issue:`495`)
 - Support creating news channels using :func:`Guild.create_text_channel` (:issue:`497`)
 - Add :attr:`Guild.vanity_url_code`, add option to :func:`Guild.vanity_invite` to use cached invite code (:issue:`502`)
+- Add :attr:`Message.application_id` (:issue:`513`)
 - |commands| Add :class:`~ext.commands.GuildScheduledEventConverter` and :exc:`~ext.commands.GuildScheduledEventNotFound` (:issue:`376`)
 - |commands| Add :attr:`~ext.commands.InvokableApplicationCommand.extras` to application commands (:issue:`483`)
+- |commands| Add ``slash_command_attrs``, ``user_command_attrs`` and ``message_command_attrs`` :class:`~ext.commands.Cog` parameters (:issue:`501`)
 
 
 Bug Fixes
@@ -162,7 +183,10 @@ Bug Fixes
 - Fix ``after`` parameter of :func:`Guild.audit_logs` (:issue:`473`)
 - Add ``__str__`` to :class:`ApplicationCommand`, improve sync debug output (:issue:`478`)
 - Don't require a ``topic`` when creating a stage channel (:issue:`480`)
+- Update and add missing overloads (:issue:`482`)
 - Make ``disnake.types.interactions`` importable at runtime (:issue:`493`)
+- Raise :class:`TypeError` instead of silently returning when trying to defer an unsupported interaction type (:issue:`505`)
+- Fix delay of ``after`` callback in :class:`AudioPlayer` when stopping (:issue:`508`)
 - |commands| Make conversion exceptions in slash commands propagate cleanly as documented (:issue:`362`)
 - |commands| Fix :class:`~ext.commands.clean_content` converter (:issue:`396`)
 - |commands| Fix usage of custom converters with :func:`Param <ext.commands.Param>` (:issue:`398`)
@@ -185,6 +209,7 @@ Documentation
 - Add several previously missing documentation entries (:issue:`446`, :issue:`470`)
 - Add autocomplete decorator example (:issue:`472`)
 - Update docs of ABCs to mention subclasses (:issue:`506`)
+- Update :func:`on_member_update` documentation to include new and future attributes (:issue:`510`)
 
 
 Miscellaneous
