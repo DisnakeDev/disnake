@@ -153,7 +153,8 @@ class InteractionBotBase(CommonBotBase):
 
         super().__init__(**options)
 
-        self._test_guilds: Optional[Sequence[int]] = test_guilds
+        test_guilds = None if test_guilds is None else tuple(test_guilds)
+        self._test_guilds: Optional[Tuple[int, ...]] = test_guilds
         self._sync_commands: bool = sync_commands
         self._sync_commands_debug: bool = sync_commands_debug
         self._sync_commands_on_cog_unload = sync_commands_on_cog_unload
@@ -434,12 +435,12 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         options: List[Option] = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
         extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
@@ -465,6 +466,7 @@ class InteractionBotBase(CommonBotBase):
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
+            Defaults to ``True``.
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -473,7 +475,7 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: List[:class:`int`]
+        guild_ids: Sequence[:class:`int`]
             If specified, the client will register a command in these guilds.
             Otherwise this command will be registered globally in ~1 hour.
         connectors: Dict[:class:`str`, :class:`str`]
@@ -518,10 +520,10 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
         extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
@@ -538,6 +540,7 @@ class InteractionBotBase(CommonBotBase):
 
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
+            Defaults to ``True``.
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -546,7 +549,7 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
-        guild_ids: List[:class:`int`]
+        guild_ids: Sequence[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally in ~1 hour.
         extras: Dict[:class:`str`, Any]
@@ -582,10 +585,10 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
         extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
@@ -602,6 +605,7 @@ class InteractionBotBase(CommonBotBase):
 
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
+            Defaults to ``True``.
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -610,7 +614,7 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: List[:class:`int`]
+        guild_ids: Sequence[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise this command will be registered globally in ~1 hour.
         extras: Dict[:class:`str`, Any]

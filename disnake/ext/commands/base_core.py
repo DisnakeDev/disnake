@@ -35,8 +35,10 @@ from typing import (
     List,
     Literal,
     Optional,
+    Tuple,
     TypeVar,
     Union,
+    cast,
 )
 
 from disnake.app_commands import ApplicationCommand
@@ -130,7 +132,7 @@ class InvokableApplicationCommand(ABC):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: Optional[List[:class:`int`]]
+    guild_ids: Optional[Tuple[:class:`int`, ...]`
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -140,7 +142,14 @@ class InvokableApplicationCommand(ABC):
         .. versionadded:: 2.5
     """
 
+    __original_kwargs__: Dict[str, Any]
     body: ApplicationCommand
+
+    def __new__(cls, *args: Any, **kwargs: Any) -> InvokableApplicationCommand:
+        self = super().__new__(cls)
+        # todo: refactor to not require None and change this to be based on the presence of a kwarg
+        self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
+        return self
 
     def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
         self.__command_flag__ = None
@@ -190,11 +199,49 @@ class InvokableApplicationCommand(ABC):
         self._max_concurrency: Optional[MaxConcurrency] = max_concurrency
 
         self.cog: Optional[Cog] = None
-        self.guild_ids: Optional[List[int]] = None
+        self.guild_ids: Optional[Tuple[int, ...]] = None
         self.auto_sync: bool = True
 
         self._before_invoke: Optional[Hook] = None
         self._after_invoke: Optional[Hook] = None
+
+    def _ensure_assignment_on_copy(self, other: AppCommandT) -> AppCommandT:
+        other._before_invoke = self._before_invoke
+        other._after_invoke = self._after_invoke
+        if self.checks != other.checks:
+            other.checks = self.checks.copy()
+        if self._buckets.valid and not other._buckets.valid:
+            other._buckets = self._buckets.copy()
+        if self._max_concurrency != other._max_concurrency:
+            # _max_concurrency won't be None at this point
+            other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+
+        try:
+            other.on_error = self.on_error
+        except AttributeError:
+            pass
+
+        return other
+
+    def copy(self: AppCommandT) -> AppCommandT:
+        """Create a copy of this application command.
+
+        Returns
+        -------
+        :class:`InvokableApplicationCommand`
+            A new instance of this application command.
+        """
+        copy = type(self)(self.callback, **self.__original_kwargs__)
+        return self._ensure_assignment_on_copy(copy)
+
+    def _update_copy(self: AppCommandT, kwargs: Dict[str, Any]) -> AppCommandT:
+        if kwargs:
+            kw = kwargs.copy()
+            kw.update(self.__original_kwargs__)
+            copy = type(self)(self.callback, **kw)
+            return self._ensure_assignment_on_copy(copy)
+        else:
+            return self.copy()
 
     @property
     def dm_permission(self) -> bool:
