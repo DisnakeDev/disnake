@@ -212,12 +212,13 @@ Documentation
 - Add autocomplete decorator example (:issue:`472`)
 - Update docs of ABCs to mention subclasses (:issue:`506`)
 - Update :func:`on_member_update` documentation to include new and future attributes (:issue:`510`)
+- Fix miscellaneous issues, improve formatting (:issue:`511`)
 
 
 Miscellaneous
 ~~~~~~~~~~~~~~
 
-- Fix remaining pyright issues, add pyright CI (:issue:`311`, :issue:`387`)
+- Fix remaining pyright issues, add pyright CI (:issue:`311`, :issue:`387`, :issue:`514`)
 - Update dev dependencies and CI (:issue:`345`, :issue:`386`, :issue:`451`)
 - Improve ``_WebhookState`` typing (:issue:`391`)
 - Improve ``basic_bot.py`` example (:issue:`399`)
