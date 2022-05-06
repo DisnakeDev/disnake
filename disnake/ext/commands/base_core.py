@@ -132,14 +132,14 @@ class InvokableApplicationCommand(ABC):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`, ...]`
+    guild_ids: Optional[Tuple[:class:`int`, ...]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     __original_kwargs__: Dict[str, Any]

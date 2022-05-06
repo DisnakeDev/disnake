@@ -277,7 +277,7 @@ class HelpCommand:
     ----------
     context: Optional[:class:`Context`]
         The context that invoked this help formatter. This is generally set after
-        the help command assigned, :func:`command_callback`\, has been called.
+        the help command assigned, :func:`command_callback`\\, has been called.
     show_hidden: :class:`bool`
         Specifies if hidden commands should be shown in the output.
         Defaults to ``False``.

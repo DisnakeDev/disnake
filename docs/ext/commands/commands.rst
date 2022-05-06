@@ -372,7 +372,7 @@ When this command is executed, it attempts to convert the string given into a :c
 parameter for the function. This works by checking if the string is a mention, an ID, a nickname, a username + discriminator,
 or just a regular username. The default set of converters have been written to be as easy to use as possible.
 
-A lot of disnake models work out of the gate as a parameter:
+A lot of Discord models work out of the gate as a parameter:
 
 - :class:`Object` (since v2.0)
 - :class:`Member`

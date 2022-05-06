@@ -508,7 +508,7 @@ the directory name/path can be changed arbitrarily, ``locale`` is just the one u
         "COOL_NUMBER_DESCRIPTION": "Eine Zahl",
     }
 
-To load a directory or file containing localizations, use :func:`bot.i18n.load(path) <i18n.LocalizationStore.load>`:
+To load a directory or file containing localizations, use :func:`bot.i18n.load(path) <disnake.LocalizationStore.load>`:
 
 .. code-block:: python3
 
