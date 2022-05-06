@@ -90,21 +90,23 @@ New Features
     - Add :func:`utils.as_valid_locale`
     - Add localization example
 - Support permissions v2, see :ref:`app_command_permissions` (:issue:`405`)
-    - Remove support for ``default_permission``
-    - Add ``dm_permission`` and ``default_member_permissions`` parameters to application command objects and decorators
-    - Add :attr:`~ApplicationCommand.dm_permission`, :attr:`~ApplicationCommand.default_member_permissions` attributes
-      to :class:`ApplicationCommand` and :class:`~ext.commands.InvokableApplicationCommand`
-    - Add :class:`ApplicationCommandPermissionType` enum, change type of :attr:`ApplicationCommandPermissions.type` to support channel targets
-    - Add :func:`ApplicationCommandPermissions.is_everyone` and :func:`ApplicationCommandPermissions.is_all_channels`
-    - Remove :func:`GuildApplicationCommandPermissions.edit`, :class:`PartialGuildApplicationCommandPermissions`, :class:`UnresolvedGuildApplicationCommandPermissions`
-    - Remove :func:`Client.edit_command_permissions`, :func:`Client.bulk_edit_command_permissions`, :func:`Client.edit_command_permissions`, :func:`Client.edit_command_permissions`
-    - Remove :func:`Guild.get_command_permissions`, :func:`Guild.edit_command_permissions`, :func:`Guild.bulk_edit_command_permissions`
-    - Update behavior of :class:`GuildCommandInteraction` annotation to automatically set ``dm_permission=False`` instead of adding a local check
-    - Add :attr:`AuditLogAction.application_command_permission_update` enum value and :attr:`AuditLogDiff.command_permissions`
-    - Add :func:`on_application_command_permissions_update` event
-    - |commands| Add :func:`~ext.commands.default_member_permissions` decorator, alternative to identically named parameter
-    - |commands| Remove :func:`~ext.commands.guild_permissions` decorator
-    - |commands| Remove ``sync_permissions`` parameter from :class:`~ext.commands.Bot`
+    - Breaking changes:
+        - Remove support for ``default_permission``
+        - Remove :func:`GuildApplicationCommandPermissions.edit`, :class:`PartialGuildApplicationCommandPermissions`, :class:`UnresolvedGuildApplicationCommandPermissions`
+        - Remove :func:`Client.edit_command_permissions`, :func:`Client.bulk_edit_command_permissions`, :func:`Client.edit_command_permissions`, :func:`Client.edit_command_permissions`
+        - Remove :func:`Guild.get_command_permissions`, :func:`Guild.edit_command_permissions`, :func:`Guild.bulk_edit_command_permissions`
+        - Update behavior of :class:`GuildCommandInteraction` annotation to automatically set ``dm_permission=False`` instead of adding a local check, remove support for subcommands
+        - Add :class:`ApplicationCommandPermissionType` enum, change type of :attr:`ApplicationCommandPermissions.type` to support channel targets
+        - |commands| Remove :func:`~ext.commands.guild_permissions` decorator
+        - |commands| Remove ``sync_permissions`` parameter from :class:`~ext.commands.Bot`
+    - New features:
+        - Add ``dm_permission`` and ``default_member_permissions`` parameters to application command objects and decorators
+        - Add :attr:`~ApplicationCommand.dm_permission`, :attr:`~ApplicationCommand.default_member_permissions` attributes
+          to :class:`ApplicationCommand` and :class:`~ext.commands.InvokableApplicationCommand`
+        - Add :func:`ApplicationCommandPermissions.is_everyone` and :func:`ApplicationCommandPermissions.is_all_channels`
+        - Add :attr:`AuditLogAction.application_command_permission_update` enum value and :attr:`AuditLogDiff.command_permissions`
+        - Add :func:`on_application_command_permissions_update` event
+        - |commands| Add :func:`~ext.commands.default_member_permissions` decorator, alternative to identically named parameter
 - Add guild previews (:issue:`359`)
     - Add :class:`GuildPreview`
     - Add :func:`Client.fetch_guild_preview`
