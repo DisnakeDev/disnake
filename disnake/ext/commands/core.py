@@ -1584,7 +1584,7 @@ def command(
     ) -> Union[Command[CogT, P, T], CommandT]:
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        return cls(func, name=name, **attrs)
+        return cls(func, name=name, **attrs)  # type: ignore
 
     return decorator
 
@@ -1622,7 +1622,7 @@ def group(
     """
     if cls is MISSING:
         cls = Group
-    return command(name=name, cls=cls, **attrs)
+    return command(name=name, cls=cls, **attrs)  # type: ignore
 
 
 def check(predicate: Check) -> Callable[[T], T]:
