@@ -1085,7 +1085,7 @@ class Greedy(List[T]):
             await ctx.send("numbers: {}, reason: {}".format(numbers, reason))
 
     An invocation of ``[p]test 1 2 3 4 5 6 hello`` would pass ``numbers`` with
-    ``[1, 2, 3, 4, 5, 6]`` and ``reason`` with ``hello``\.
+    ``[1, 2, 3, 4, 5, 6]`` and ``reason`` with ``hello``.
 
     For more information, check :ref:`ext_commands_special_converters`.
     """
