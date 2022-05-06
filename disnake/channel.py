@@ -37,6 +37,7 @@ from typing import (
     List,
     Literal,
     Mapping,
+    NamedTuple,
     Optional,
     Sequence,
     Tuple,
@@ -306,7 +307,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         reason: Optional[str] = ...,
         name: str = ...,
-        topic: str = ...,
+        topic: Optional[str] = ...,
         position: int = ...,
         nsfw: bool = ...,
         sync_permissions: bool = ...,
@@ -343,7 +344,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ----------
         name: :class:`str`
             The new channel's name.
-        topic: :class:`str`
+        topic: Optional[:class:`str`]
             The new channel's topic.
         position: :class:`int`
             The new channel's position.
@@ -819,7 +820,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.3
 
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason for creating the thread. Shows up on the audit log.
 
         Raises
@@ -1699,7 +1700,7 @@ class StageChannel(VocalGuildChannel):
             The stage instance's topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's privacy level. Defaults to :attr:`StagePrivacyLevel.guild_only`.
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason the stage instance was created. Shows up on the audit log.
         notify_everyone: :class:`bool`
             Whether to notify ``@everyone`` that the stage instance has started.
@@ -1991,6 +1992,50 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
 
+    @overload
+    async def move(
+        self,
+        *,
+        beginning: bool,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def move(
+        self,
+        *,
+        end: bool,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def move(
+        self,
+        *,
+        before: Snowflake,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def move(
+        self,
+        *,
+        after: Snowflake,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
     @utils.copy_doc(disnake.abc.GuildChannel.move)
     async def move(self, **kwargs):
         kwargs.pop("category", None)
@@ -2070,6 +2115,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`TextChannel`
             The newly created text channel.
         """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_text_channel(name, category=self, **options)
 
     async def create_voice_channel(self, name: str, **options: Any) -> VoiceChannel:
@@ -2082,6 +2129,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`VoiceChannel`
             The newly created voice channel.
         """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_voice_channel(name, category=self, **options)
 
     async def create_stage_channel(self, name: str, **options: Any) -> StageChannel:
@@ -2096,6 +2145,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`StageChannel`
             The newly created stage channel.
         """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_stage_channel(name, category=self, **options)
 
     async def create_forum_channel(self, name: str, **options: Any) -> ForumChannel:
@@ -2110,6 +2161,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`ForumChannel`
             The newly created forum channel.
         """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_forum_channel(name, category=self, **options)
 
 
@@ -2120,6 +2173,11 @@ class NewsChannel(TextChannel):
     """
 
     type: ChannelType = ChannelType.news
+
+
+class ThreadWithMessage(NamedTuple):
+    thread: Thread
+    message: Message
 
 
 class ForumChannel(disnake.abc.GuildChannel, Hashable):
@@ -2412,6 +2470,82 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         """
         return self.guild.get_thread(thread_id)
 
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embed: Embed = ...,
+        file: File = ...,
+        suppress_embeds: bool = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> ThreadWithMessage:
+        ...
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embed: Embed = ...,
+        files: List[File] = ...,
+        suppress_embeds: bool = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> ThreadWithMessage:
+        ...
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embeds: List[Embed] = ...,
+        file: File = ...,
+        suppress_embeds: bool = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> ThreadWithMessage:
+        ...
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
+        suppress_embeds: bool = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> ThreadWithMessage:
+        ...
+
     async def create_thread(
         self,
         *,
@@ -2429,7 +2563,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         view: View = MISSING,
         components: Components = MISSING,
         reason: Optional[str] = None,
-    ) -> Tuple[Thread, Message]:
+    ) -> ThreadWithMessage:
         """|coro|
 
         Creates a thread in this forum channel.
@@ -2498,7 +2632,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         Returns
         -------
         Tuple[:class:`Thread`, :class:`Message`]
-            The newly created thread and the message sent in it.
+            A :class:`~typing.NamedTuple` with the newly created thread and the message sent in it.
+
+            These values can also be accessed through the ``thread`` and ``message`` fields.
         """
         from .message import Message
         from .webhook.async_ import handle_message_parameters_dict
@@ -2547,14 +2683,13 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 for f in params.files:
                     f.close()
 
-        if view:
-            self._state.store_view(view, int(data["message"]["id"]))
-
         thread = Thread(guild=self.guild, data=data, state=self._state)
-        return (
-            thread,
-            Message(channel=thread, data=data["message"], state=self._state),
-        )
+        message = Message(channel=thread, data=data["message"], state=self._state)
+
+        if view:
+            self._state.store_view(view, message.id)
+
+        return ThreadWithMessage(thread, message)
 
     def archived_threads(
         self,

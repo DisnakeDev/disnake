@@ -774,6 +774,12 @@ class Message(Hashable):
         then the list is always empty.
     id: :class:`int`
         The message ID.
+    application_id: Optional[:class:`int`]
+        If this message was sent from an interaction, or is an application owned webhook,
+        then this is the ID of the application.
+
+        .. versionadded:: 2.5
+
     webhook_id: Optional[:class:`int`]
         If this message was sent by a webhook, then this is the webhook ID's that sent this
         message.
@@ -832,6 +838,7 @@ class Message(Hashable):
         "tts",
         "content",
         "channel",
+        "application_id",
         "webhook_id",
         "mention_everyone",
         "embeds",
@@ -872,6 +879,7 @@ class Message(Hashable):
     ):
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
+        self.application_id: Optional[int] = utils._get_as_snowflake(data, "application_id")
         self.webhook_id: Optional[int] = utils._get_as_snowflake(data, "webhook_id")
         self.reactions: List[Reaction] = [
             Reaction(message=self, data=d) for d in data.get("reactions", [])
@@ -2052,6 +2060,70 @@ class PartialMessage(Hashable):
         """
         data = await self._state.http.get_message(self.channel.id, self.id)
         return self._state.create_message(channel=self.channel, data=data)
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embed: Optional[Embed] = ...,
+        file: File = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embed: Optional[Embed] = ...,
+        files: List[File] = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embeds: List[Embed] = ...,
+        file: File = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
 
     async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
