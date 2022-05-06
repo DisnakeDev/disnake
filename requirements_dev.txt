@@ -4,4 +4,4 @@ slotscheck~=0.13.0
 mypy~=0.910
 python-dotenv[cli]~=0.19.2
 # this is not pyright itself, but the python wrapper
-pyright==1.1.226
+pyright==1.1.244
