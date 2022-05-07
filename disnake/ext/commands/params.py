@@ -207,7 +207,13 @@ class RangeMeta(type):
 
 
 class Range(type, metaclass=RangeMeta):
-    """Type depicting a limited range of allowed values"""
+    """Type depicting a limited range of allowed values.
+
+    See :ref:`param_ranges` for more information.
+
+    .. versionadded:: 2.4
+
+    """
 
     min_value: Optional[float]
     max_value: Optional[float]
@@ -616,9 +622,9 @@ class ParamInfo:
         )
 
 
-def safe_call(function: Callable[..., T], *possible_args: Any, **possible_kwargs: Any) -> T:
+def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwargs: Any) -> T:
     """Calls a function without providing any extra unexpected arguments"""
-    MISSING = object()
+    MISSING: Any = object()
     sig = signature(function)
 
     kinds = {p.kind for p in sig.parameters.values()}
@@ -755,6 +761,7 @@ def format_kwargs(
     interaction: CommandInteraction,
     cog_param: str = None,
     inter_param: str = None,
+    /,
     *args: Any,
     **kwargs: Any,
 ) -> Dict[str, Any]:
@@ -779,7 +786,7 @@ def format_kwargs(
 
 
 async def run_injections(
-    injections: Dict[str, Injection], interaction: CommandInteraction, *args: Any, **kwargs: Any
+    injections: Dict[str, Injection], interaction: CommandInteraction, /, *args: Any, **kwargs: Any
 ) -> Dict[str, Any]:
     """Run and resolve a list of injections"""
 
@@ -791,7 +798,7 @@ async def run_injections(
 
 
 async def call_param_func(
-    function: Callable, interaction: CommandInteraction, *args: Any, **kwargs: Any
+    function: Callable, interaction: CommandInteraction, /, *args: Any, **kwargs: Any
 ) -> Any:
     """Call a function utilizing ParamInfo"""
     cog_param, inter_param, paraminfos, injections = collect_params(function)
@@ -834,7 +841,7 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
             command.autocompleters[param.name] = param.autocomplete
 
     if issubclass_(sig.parameters[inter_param].annotation, disnake.GuildCommandInteraction):
-        command.guild_only = True
+        command._guild_only = True
 
     return [param.to_option() for param in params]
 

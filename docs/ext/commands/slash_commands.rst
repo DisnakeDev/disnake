@@ -508,7 +508,7 @@ the directory name/path can be changed arbitrarily, ``locale`` is just the one u
         "COOL_NUMBER_DESCRIPTION": "Eine Zahl",
     }
 
-To load a directory or file containing localizations, use :func:`bot.i18n.load(path) <i18n.LocalizationStore.load>`:
+To load a directory or file containing localizations, use :func:`bot.i18n.load(path) <disnake.LocalizationStore.load>`:
 
 .. code-block:: python3
 
@@ -620,3 +620,50 @@ Yet again, with a file like ``locale/de.json`` containing localizations like thi
         "AUTOCOMP_SPANISH": "Spanisch",
         "AUTOCOMP_JAPANESE": "Japanisch"
     }
+
+.. _app_command_permissions:
+
+Permissions
+-----------
+
+Default Member Permissions
+++++++++++++++++++++++++++
+
+These commands will not be enabled/visible for members who do not have all the required guild permissions.
+In this example both the ``manage_guild`` and the ``moderate_members`` permissions would be required:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    @commands.default_member_permissions(manage_guild=True, moderate_members=True)
+    async def command(inter: disnake.ApplicationCommandInteraction):
+        ...
+
+Or use the ``default_member_permissions`` parameter in the application command decorator:
+
+.. code-block:: python3
+
+    @bot.slash_command(default_member_permissions=disnake.Permissions(manage_guild=True, moderate_members=True))
+    async def command(inter: disnake.ApplicationCommandInteraction):
+        ...
+
+This can be overridden by moderators on a per-guild basis; ``default_member_permissions`` may be
+ignored entirely once a permission override — application-wide or for this command in particular — is configured
+in the guild settings, and will be restored if the permissions are re-synced in the settings.
+
+Note that ``default_member_permissions`` and ``dm_permission`` cannot be configured for a slash subcommand or
+subcommand group, only in top-level slash commands and user/message commands.
+
+
+DM Permissions
+++++++++++++++
+
+Using this, you can specify if you want a certain slash command to work in DMs or not:
+
+.. code-block:: python3
+
+    @bot.slash_command(dm_permission=False)
+    async def config(inter: disnake.ApplicationCommandInteraction):
+        ...
+
+This will make the ``config`` slash command invisible in DMs, while it will remain visible in guilds.

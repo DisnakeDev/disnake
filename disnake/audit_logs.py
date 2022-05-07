@@ -42,6 +42,7 @@ from typing import (
 )
 
 from . import abc, enums, utils
+from .app_commands import ApplicationCommandPermissions
 from .asset import Asset
 from .colour import Colour
 from .invite import Invite
@@ -59,6 +60,7 @@ __all__ = (
 if TYPE_CHECKING:
     import datetime
 
+    from .app_commands import APIApplicationCommand
     from .emoji import Emoji
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
@@ -70,6 +72,7 @@ if TYPE_CHECKING:
     from .types.audit_log import (
         AuditLogChange as AuditLogChangePayload,
         AuditLogEntry as AuditLogEntryPayload,
+        _AuditLogChange_ApplicationCommandPermissions as AuditLogChangeAppCmdPermsPayload,
     )
     from .types.channel import PermissionOverwrite as PermissionOverwritePayload
     from .types.role import Role as RolePayload
@@ -275,6 +278,13 @@ class AuditLogChanges:
                 self._handle_role(self.after, self.before, entry, elem["new_value"])  # type: ignore
                 continue
 
+            # special case for application command permissions update
+            if entry.action == enums.AuditLogAction.application_command_permission_update:
+                self._handle_command_permissions(
+                    entry, cast("AuditLogChangeAppCmdPermsPayload", elem)
+                )
+                continue
+
             try:
                 key, transformer = self.TRANSFORMERS[attr]
             except (ValueError, KeyError):
@@ -340,6 +350,28 @@ class AuditLogChanges:
             data.append(role)
 
         setattr(second, "roles", data)
+
+    def _handle_command_permissions(
+        self,
+        entry: AuditLogEntry,
+        data: AuditLogChangeAppCmdPermsPayload,
+    ) -> None:
+        guild_id = entry.guild.id
+        entity_id = int(data["key"])
+
+        if not hasattr(self.before, "command_permissions"):
+            self.before.command_permissions = {}
+        if (old := data.get("old_value")) is not None:
+            self.before.command_permissions[entity_id] = ApplicationCommandPermissions(
+                data=old, guild_id=guild_id
+            )
+
+        if not hasattr(self.after, "command_permissions"):
+            self.after.command_permissions = {}
+        if (new := data.get("new_value")) is not None:
+            self.after.command_permissions[entity_id] = ApplicationCommandPermissions(
+                data=new, guild_id=guild_id
+            )
 
 
 class _AuditLogProxyMemberPrune:
@@ -518,6 +550,7 @@ class AuditLogEntry(Hashable):
         GuildSticker,
         Thread,
         GuildScheduledEvent,
+        APIApplicationCommand,
         Object,
         None,
     ]:
@@ -532,9 +565,9 @@ class AuditLogEntry(Hashable):
             return converter(self._target_id)
 
     @utils.cached_property
-    def category(self) -> enums.AuditLogActionCategory:
+    def category(self) -> Optional[enums.AuditLogActionCategory]:
         """Optional[:class:`AuditLogActionCategory`]: The category of the action, if applicable."""
-        return self.action.category  # type: ignore
+        return self.action.category
 
     @utils.cached_property
     def changes(self) -> AuditLogChanges:
@@ -604,3 +637,12 @@ class AuditLogEntry(Hashable):
         self, target_id: int
     ) -> Union[GuildScheduledEvent, Object]:
         return self.guild.get_scheduled_event(target_id) or Object(id=target_id)
+
+    def _convert_target_application_command(
+        self, target_id: int
+    ) -> Union[APIApplicationCommand, Object]:
+        return (
+            self._state._get_guild_application_command(self.guild.id, target_id)
+            or self._state._get_global_application_command(target_id)
+            or Object(id=target_id)
+        )
