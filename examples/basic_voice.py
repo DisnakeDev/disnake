@@ -1,3 +1,5 @@
+# pyright: reportUnknownLambdaType=false
+
 import asyncio
 
 import disnake
