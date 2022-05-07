@@ -287,8 +287,10 @@ class ParamInfo:
 
     Parameters
     ----------
-    default: Any
+    default: Union[Any, Callable[[:class:`CommandInteraction`], Any]]
         The actual default value for the corresponding function param.
+        Can be a sync/async callable taking an interaction and returning a dynamic default value,
+        if the user didn't pass a value for this parameter.
     name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of this slash command option.
 
@@ -339,7 +341,7 @@ class ParamInfo:
 
     def __init__(
         self,
-        default: Any = ...,
+        default: Union[Any, Callable[[CommandInteraction], Any]] = ...,
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
@@ -847,7 +849,7 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
 
 
 def Param(
-    default: Any = ...,
+    default: Union[Any, Callable[[CommandInteraction], Any]] = ...,
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
@@ -870,8 +872,10 @@ def Param(
 
     Parameters
     ----------
-    default: Any
+    default: Union[Any, Callable[[:class:`CommandInteraction`], Any]]
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
+        Can be a sync/async callable taking an interaction and returning a dynamic default value,
+        if the user didn't pass a value for this parameter.
     name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the option. By default, the option name is the parameter name.
 
