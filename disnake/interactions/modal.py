@@ -24,16 +24,17 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Generator, List
+from typing import TYPE_CHECKING, Dict, Generator, List, Optional
 
 from ..components import ActionRow, NestedComponent, TextInput
+from ..message import Message
 from ..utils import cached_slot_property
 from .base import Interaction
 
 if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..types.interactions import (
-        Interaction as InteractionPayload,
+        ModalInteraction as ModalInteractionPayload,
         ModalInteractionData as ModalInteractionDataPayload,
     )
 
@@ -62,31 +63,43 @@ class ModalInteraction(Interaction):
         The channel ID the interaction was sent from.
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
-    locale: :class:`str`
+    locale: :class:`Locale`
         The selected language of the interaction's author.
-    guild_locale: Optional[:class:`str`]
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
+    guild_locale: Optional[:class:`Locale`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
-    me: Union[:class:`.Member`, :class:`.ClientUser`]
-        Similar to :attr:`.Guild.me`
-    permissions: :class:`Permissions`
-        The resolved permissions of the member in the channel, including overwrites.
-    response: :class:`InteractionResponse`
-        Returns an object responsible for handling responding to the interaction.
-    followup: :class:`Webhook`
-        Returns the follow up webhook for follow up interactions.
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
+    message: Optional[:class:`Message`]
+        The message that this interaction's modal originated from,
+        if the modal was sent in response to a component interaction.
+
+        .. versionadded:: 2.5
+
     data: :class:`ModalInteractionData`
         The wrapped interaction data.
     client: :class:`Client`
         The interaction client.
     """
 
-    __slots__ = ("data", "_cs_text_values")
+    __slots__ = ("data", "message", "_cs_text_values")
 
-    def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
-        self.data = ModalInteractionData(data=data["data"])  # type: ignore
+        self.data = ModalInteractionData(data=data["data"])
+
+        if message_data := data.get("message"):
+            message = Message(state=self._state, channel=self.channel, data=message_data)
+        else:
+            message = None
+        self.message: Optional[Message] = message
 
     def walk_components(self) -> Generator[NestedComponent, None, None]:
         """Returns a generator that yields components from action rows one by one.
@@ -129,3 +142,8 @@ class ModalInteractionData:
         self.custom_id: str = data["custom_id"]
         # this attribute is not meant to be used since it lacks most of the component data
         self._components: List[ActionRow] = [ActionRow(d) for d in data["components"]]
+
+    def __repr__(self):
+        return (
+            f"<ModalInteractionData custom_id={self.custom_id!r} _components={self._components!r}>"
+        )

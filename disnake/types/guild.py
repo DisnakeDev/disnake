@@ -87,7 +87,6 @@ GuildFeature = Literal[
     "ANIMATED_BANNER",
     "ANIMATED_ICON",
     "BANNER",
-    "COMMERCE",
     "COMMUNITY",
     "DISCOVERABLE",
     "ENABLED_DISCOVERABLE_BEFORE",
@@ -125,6 +124,7 @@ class _BaseGuildPreview(UnavailableGuild):
     emojis: List[Emoji]
     features: List[GuildFeature]
     description: Optional[str]
+    stickers: List[GuildSticker]
 
 
 class GuildPreview(_BaseGuildPreview):

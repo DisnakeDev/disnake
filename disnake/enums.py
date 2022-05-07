@@ -31,7 +31,6 @@ __all__ = (
     "Enum",
     "ChannelType",
     "MessageType",
-    "VoiceRegion",
     "SpeakingState",
     "VerificationLevel",
     "ContentFilter",
@@ -59,11 +58,14 @@ __all__ = (
     "NSFWLevel",
     "OptionType",
     "ApplicationCommandType",
+    "ApplicationCommandPermissionType",
     "PartyType",
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
     "ThreadArchiveDuration",
+    "WidgetStyle",
+    "Locale",
 )
 
 
@@ -141,7 +143,7 @@ class EnumMeta(type):
         attrs["_enum_member_names_"] = member_names
         attrs["_enum_value_cls_"] = value_cls
         actual_cls = super().__new__(cls, name, bases, attrs)
-        value_cls._actual_enum_cls_ = actual_cls  # type: ignore
+        value_cls._actual_enum_cls_ = actual_cls
         return actual_cls
 
     def __iter__(cls):
@@ -204,12 +206,12 @@ class ChannelType(Enum):
     group = 3
     category = 4
     news = 5
-    store = 6
     news_thread = 10
     public_thread = 11
     private_thread = 12
     stage_voice = 13
     guild_directory = 14
+    forum = 15
 
     def __str__(self):
         return self.name
@@ -240,10 +242,10 @@ class MessageType(Enum):
     thread_starter_message = 21
     guild_invite_reminder = 22
     context_menu_command = 23
+    auto_moderation_action = 24
 
 
 class PartyType(Enum):
-    youtube = 755600276941176913
     poker = 755827207812677713
     betrayal = 773336526917861400
     fishing = 814288819477020702
@@ -253,40 +255,9 @@ class PartyType(Enum):
     doodle_crew = 878067389634314250
     checkers = 832013003968348200
     spellcast = 852509694341283871
-    awkword = 879863881349087252
-    sketchy_artist = 879864070101172255
     watch_together = 880218394199220334
     sketch_heads = 902271654783242291
     ocho = 832025144389533716
-
-
-class VoiceRegion(Enum):
-    us_west = "us-west"
-    us_east = "us-east"
-    us_south = "us-south"
-    us_central = "us-central"
-    eu_west = "eu-west"
-    eu_central = "eu-central"
-    singapore = "singapore"
-    london = "london"
-    sydney = "sydney"
-    amsterdam = "amsterdam"
-    frankfurt = "frankfurt"
-    brazil = "brazil"
-    hongkong = "hongkong"
-    russia = "russia"
-    japan = "japan"
-    southafrica = "southafrica"
-    south_korea = "south-korea"
-    india = "india"
-    europe = "europe"
-    dubai = "dubai"
-    vip_us_east = "vip-us-east"
-    vip_us_west = "vip-us-west"
-    vip_amsterdam = "vip-amsterdam"
-
-    def __str__(self):
-        return self.value
 
 
 class SpeakingState(Enum):
@@ -407,6 +378,7 @@ class AuditLogAction(Enum):
     thread_create                    = 110
     thread_update                    = 111
     thread_delete                    = 112
+    application_command_permission_update = 121
     # fmt: on
 
     @property
@@ -460,6 +432,7 @@ class AuditLogAction(Enum):
             AuditLogAction.guild_scheduled_event_create: AuditLogActionCategory.create,
             AuditLogAction.guild_scheduled_event_update: AuditLogActionCategory.update,
             AuditLogAction.guild_scheduled_event_delete: AuditLogActionCategory.delete,
+            AuditLogAction.application_command_permission_update: AuditLogActionCategory.update,
         }
         # fmt: on
         return lookup[self]
@@ -497,6 +470,8 @@ class AuditLogAction(Enum):
             return "guild_scheduled_event"
         elif v < 113:
             return "thread"
+        elif v < 122:
+            return "application_command"
         else:
             return None
 
@@ -656,6 +631,15 @@ class ApplicationCommandType(Enum):
     message = 3
 
 
+class ApplicationCommandPermissionType(Enum):
+    role = 1
+    user = 2
+    channel = 3
+
+    def __int__(self):
+        return self.value
+
+
 class OptionType(Enum):
     sub_command = 1
     sub_command_group = 2
@@ -705,6 +689,84 @@ class ThreadArchiveDuration(Enum):
     day = 1440
     three_days = 4320
     week = 10080
+
+
+class WidgetStyle(Enum):
+    shield = "shield"
+    banner1 = "banner1"
+    banner2 = "banner2"
+    banner3 = "banner3"
+    banner4 = "banner4"
+
+    def __str__(self):
+        return self.value
+
+
+# reference: https://discord.com/developers/docs/reference#locales
+class Locale(Enum):
+    bg = "bg"
+    "Bulgarian | български"
+    cs = "cs"
+    "Czech | Čeština"
+    da = "da"
+    "Danish | Dansk"
+    de = "de"
+    "German | Deutsch"
+    el = "el"
+    "Greek | Ελληνικά"
+    en_GB = "en-GB"
+    "English, UK | English, UK"
+    en_US = "en-US"
+    "English, US | English, US"
+    es_ES = "es-ES"
+    "Spanish | Español"
+    fi = "fi"
+    "Finnish | Suomi"
+    fr = "fr"
+    "French | Français"
+    hi = "hi"
+    "Hindi | हिन्दी"
+    hr = "hr"
+    "Croatian | Hrvatski"
+    it = "it"
+    "Italian | Italiano"
+    ja = "ja"
+    "Japanese | 日本語"
+    ko = "ko"
+    "Korean | 한국어"
+    lt = "lt"
+    "Lithuanian | Lietuviškai"
+    hu = "hu"
+    "Hungarian | Magyar"
+    nl = "nl"
+    "Dutch | Nederlands"
+    no = "no"
+    "Norwegian | Norsk"
+    pl = "pl"
+    "Polish | Polski"
+    pt_BR = "pt-BR"
+    "Portuguese, Brazilian | Português do Brasil"
+    ro = "ro"
+    "Romanian, Romania | Română"
+    ru = "ru"
+    "Russian | Pусский"
+    sv_SE = "sv-SE"
+    "Swedish | Svenska"
+    th = "th"
+    "Thai | ไทย"
+    tr = "tr"
+    "Turkish | Türkçe"
+    uk = "uk"
+    "Ukrainian | Українська"
+    vi = "vi"
+    "Vietnamese | Tiếng Việt"
+    zh_CN = "zh-CN"
+    "Chinese, China | 中文"
+    zh_TW = "zh-TW"
+    "Chinese, Taiwan | 繁體中文"
+
+    def __str__(self):
+        return self.value
 
 
 T = TypeVar("T")

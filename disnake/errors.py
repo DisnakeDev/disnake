@@ -58,11 +58,13 @@ __all__ = (
     "InteractionResponded",
     "InteractionNotResponded",
     "ModalChainNotSupported",
+    "InteractionNotEditable",
+    "LocalizationKeyError",
 )
 
 
 class DiscordException(Exception):
-    """Base exception class for disnake
+    """Base exception class for disnake.
 
     Ideally speaking, this could be caught to handle any exceptions raised from this library.
     """
@@ -158,7 +160,7 @@ class HTTPException(DiscordException):
 class Forbidden(HTTPException):
     """Exception that's raised for when status code 403 occurs.
 
-    Subclass of :exc:`HTTPException`
+    Subclass of :exc:`HTTPException`.
     """
 
     pass
@@ -167,7 +169,7 @@ class Forbidden(HTTPException):
 class NotFound(HTTPException):
     """Exception that's raised for when status code 404 occurs.
 
-    Subclass of :exc:`HTTPException`
+    Subclass of :exc:`HTTPException`.
     """
 
     pass
@@ -252,6 +254,7 @@ class PrivilegedIntentsRequired(ClientException):
 
     - :attr:`Intents.members`
     - :attr:`Intents.presences`
+    - :attr:`Intents.message_content`
 
     Attributes
     ----------
@@ -278,7 +281,7 @@ class InteractionException(ClientException):
     Attributes
     ----------
     interaction: :class:`Interaction`
-        The interaction that was responded to
+        The interaction that was responded to.
     """
 
     interaction: Interaction
@@ -286,14 +289,14 @@ class InteractionException(ClientException):
 
 class InteractionTimedOut(InteractionException):
     """Exception that's raised when an interaction takes more than 3 seconds
-    to respond but is not deffered.
+    to respond but is not deferred.
 
     .. versionadded:: 2.0
 
     Attributes
     ----------
     interaction: :class:`Interaction`
-        The interaction that was responded to
+        The interaction that was responded to.
     """
 
     def __init__(self, interaction: Interaction):
@@ -315,7 +318,7 @@ class InteractionResponded(InteractionException):
     """Exception that's raised when sending another interaction response using
     :class:`InteractionResponse` when one has already been done before.
 
-    An interaction can only respond once.
+    An interaction can only be responded to once.
 
     .. versionadded:: 2.0
 
@@ -334,14 +337,14 @@ class InteractionNotResponded(InteractionException):
     """Exception that's raised when editing an interaction response without
     sending a response message first.
 
-    An interaction can only respond once.
+    An interaction must be responded to exactly once.
 
     .. versionadded:: 2.0
 
     Attributes
     ----------
     interaction: :class:`Interaction`
-        The interaction that's already been responded to.
+        The interaction that hasn't been responded to.
     """
 
     def __init__(self, interaction: Interaction):
@@ -363,3 +366,36 @@ class ModalChainNotSupported(InteractionException):
     def __init__(self, interaction: ModalInteraction):
         self.interaction: ModalInteraction = interaction
         super().__init__("You cannot respond to a modal with another modal.")
+
+
+class InteractionNotEditable(InteractionException):
+    """Exception that's raised when trying to use :func:`InteractionResponse.edit_message`
+    on an interaction without an associated message (which is thus non-editable).
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    interaction: :class:`Interaction`
+        The interaction that was responded to.
+    """
+
+    def __init__(self, interaction: Interaction):
+        self.interaction: Interaction = interaction
+        super().__init__("This interaction does not have a message to edit.")
+
+
+class LocalizationKeyError(DiscordException):
+    """Exception that's raised when a localization key lookup fails.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    key: :class:`str`
+        The localization key that couldn't be found.
+    """
+
+    def __init__(self, key: str):
+        self.key: str = key
+        super().__init__(f"No localizations were found for the key '{key}'.")

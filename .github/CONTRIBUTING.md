@@ -8,7 +8,7 @@ The following is a set of guidelines for contributing to the repository. These a
 
 Generally speaking questions are better suited in our resources below.
 
-- The official support server: https://discord.gg/gJDbCw8aQy
+- The official support server: https://discord.gg/disnake
 - The [FAQ in the documentation](https://docs.disnake.dev/en/latest/faq.html)
 - Stack Overflow's [`discord.py` tag](https://stackoverflow.com/questions/tagged/discord.py)
 
@@ -33,11 +33,13 @@ If the bug report is missing this information then it'll take us longer to fix t
 
 Submitting a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go. It would be incredibly lovely if the style is consistent to that found in the project. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
-Before submitting a pull request, ensure that the code is formatted properly by installing the required tooling (`pip install -r requirements_dev.txt`) and running `pre-commit run` once your files are staged, or `task lint` to check and fix all files.  
+We appreciate it a lot if the code is formatted properly and there are no type-checking issues before submitting a pull request. To ensure that, install the required tooling using `pip install -r requirements_dev.txt`, and follow these steps:
 
-Alternatively, run `task precommit` to install hooks that will automatically run all the checks when you commit changes (check out the [pre-commit docs](https://pre-commit.com/#quick-start) for more info).
-
-**Note**: If the code is formatted incorrectly, `pre-commit` will apply fixes and exit without committing the changes - just stage and commit again.
+- To format the code consistently, run `pre-commit run` once your files are staged, or `task lint` to check and fix all files.  
+  Alternatively, run `task precommit` to install hooks that will automatically run all formatting checks when you commit changes (check out the [pre-commit docs](https://pre-commit.com/#quick-start) for more info).  
+  **Note**: If the code is formatted incorrectly, `pre-commit` will apply fixes and exit without committing the changes - just stage and commit again.
+- For type-checking, run `task pyright` (you can use `task pyright -w` to automatically re-check on every file change)  
+  **Note**: If you're using VSCode and pylance, it will use the same type-checking settings, which generally means that you don't necessarily have to run `pyright` separately. However, there can be version differences which may lead to different results when later run in CI on GitHub.
 
 ### Git Commit Guidelines
 

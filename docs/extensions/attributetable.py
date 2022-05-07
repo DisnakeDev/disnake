@@ -1,11 +1,14 @@
+import asyncio
 import importlib
 import inspect
-import os
 import re
-from collections import OrderedDict, namedtuple
+from collections import defaultdict
+from typing import DefaultDict, Dict, List, NamedTuple, Optional
 
 from docutils import nodes
 from sphinx import addnodes
+from sphinx.application import Sphinx
+from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.util.docutils import SphinxDirective
 
@@ -143,10 +146,10 @@ class PyAttributeTable(SphinxDirective):
         return [node]
 
 
-def build_lookup_table(env):
+def build_lookup_table(env: BuildEnvironment) -> Dict[str, List[str]]:
     # Given an environment, load up a lookup table of
     # full-class-name: objects
-    result = {}
+    result: DefaultDict[str, List[str]] = defaultdict(list)
     domain = env.domains["py"]
 
     ignored = {
@@ -156,23 +159,24 @@ def build_lookup_table(env):
         "class",
     }
 
-    for (fullname, _, objtype, docname, _, _) in domain.get_objects():
+    for (fullname, _, objtype, _, _, _) in domain.get_objects():
         if objtype in ignored:
             continue
 
         classname, _, child = fullname.rpartition(".")
-        try:
-            result[classname].append(child)
-        except KeyError:
-            result[classname] = [child]
+        result[classname].append(child)
 
     return result
 
 
-TableElement = namedtuple("TableElement", "fullname label badge")
+class TableElement(NamedTuple):
+    fullname: str
+    label: str
+    badge: Optional[attributetablebadge]
 
 
-def process_attributetable(app, doctree, fromdocname):
+def process_attributetable(app: Sphinx, doctree: nodes.document, docname: str):
+    assert app.builder and app.builder.env
     env = app.builder.env
 
     lookup = build_lookup_table(env)
@@ -197,16 +201,16 @@ def process_attributetable(app, doctree, fromdocname):
             node.replace_self([table])
 
 
-def get_class_results(lookup, modulename, name, fullname):
+def get_class_results(
+    lookup: Dict[str, List[str]], modulename: str, name: str, fullname: str
+) -> Dict[str, List[TableElement]]:
     module = importlib.import_module(modulename)
     cls = getattr(module, name)
 
-    groups = OrderedDict(
-        [
-            (_("Attributes"), []),
-            (_("Methods"), []),
-        ]
-    )
+    groups: Dict[str, List[TableElement]] = {
+        _("Attributes"): [],
+        _("Methods"): [],
+    }
 
     try:
         members = lookup[fullname]
@@ -227,7 +231,7 @@ def get_class_results(lookup, modulename, name, fullname):
 
         if value is not None:
             doc = value.__doc__ or ""
-            if inspect.iscoroutinefunction(value) or doc.startswith("|coro|"):
+            if asyncio.iscoroutinefunction(value) or doc.startswith("|coro|"):
                 key = _("Methods")
                 badge = attributetablebadge("async", "async")
                 badge["badge-type"] = _("coroutine")
@@ -252,7 +256,7 @@ def get_class_results(lookup, modulename, name, fullname):
     return groups
 
 
-def class_results_to_node(key, elements):
+def class_results_to_node(key: str, elements: List[TableElement]) -> attributetablecolumn:
     title = attributetabletitle(key, key)
     ul = nodes.bullet_list("")
     ul.set_class("py-attribute-table-list")
@@ -274,7 +278,7 @@ def class_results_to_node(key, elements):
     return attributetablecolumn("", title, ul)
 
 
-def setup(app):
+def setup(app: Sphinx) -> None:
     app.add_directive("attributetable", PyAttributeTable)
     app.add_node(attributetable, html=(visit_attributetable_node, depart_attributetable_node))
     app.add_node(

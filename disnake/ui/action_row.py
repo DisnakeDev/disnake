@@ -113,7 +113,7 @@ class ActionRow:
             raise ValueError("Too many components in this row, can not append a new one.")
 
         self.width += item.width
-        self._underlying.children.append(item._underlying)  # type: ignore
+        self._underlying.children.append(item._underlying)
 
     def add_button(
         self,
@@ -293,13 +293,14 @@ def components_to_rows(components: Components) -> List[ActionRow]:
             if isinstance(component, ActionRow):
                 action_rows.append(component)
 
-            elif isinstance(component, list):
+            elif isinstance(component, Sequence):
                 action_rows.append(ActionRow(*component))
 
             else:
                 raise ValueError(
-                    "components must be a WrappedComponent, a list of ActionRow "
-                    "or a list of WrappedComponent"
+                    "`components` must be a `WrappedComponent` or `ActionRow`, "
+                    "a sequence/list of `WrappedComponent`s or `ActionRow`s, "
+                    "or a nested sequence/list of `WrappedComponent`s"
                 )
 
     if auto_row.width > 0:

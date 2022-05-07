@@ -23,3 +23,6 @@ secrets/
 *.env
 venvs/
 .idea
+
+!/task.env
+!test_bot/locale/*.json

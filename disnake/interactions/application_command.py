@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Typ
 
 from .. import utils
 from ..channel import _threaded_channel_factory
-from ..enums import ApplicationCommandType, OptionType, try_enum
+from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
 from ..guild import Guild
 from ..member import Member
 from ..message import Attachment, Message
@@ -57,9 +57,9 @@ MISSING = utils.MISSING
 if TYPE_CHECKING:
     from ..channel import (
         CategoryChannel,
+        ForumChannel,
         PartialMessageable,
         StageChannel,
-        StoreChannel,
         TextChannel,
         VoiceChannel,
     )
@@ -77,10 +77,10 @@ if TYPE_CHECKING:
         StageChannel,
         TextChannel,
         CategoryChannel,
-        StoreChannel,
         Thread,
         PartialMessageable,
         VoiceChannel,
+        ForumChannel,
     ]
 
 
@@ -108,17 +108,23 @@ class ApplicationCommandInteraction(Interaction):
         The channel ID the interaction was sent from.
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
-    locale: :class:`str`
+    locale: :class:`Locale`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
 
-    guild_locale: Optional[:class:`str`]
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
+    guild_locale: Optional[:class:`Locale`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
 
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
@@ -126,6 +132,10 @@ class ApplicationCommandInteraction(Interaction):
         The wrapped interaction data.
     client: :class:`Client`
         The interaction client.
+    application_command: :class:`.InvokableApplicationCommand`
+        The command invoked by the interaction.
+    command_failed: :class:`bool`
+        Whether the command failed to be checked or invoked.
     """
 
     def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
@@ -154,19 +164,23 @@ class ApplicationCommandInteraction(Interaction):
 
 
 class GuildCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation.
+    """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
-    No runtime behavior is changed but annotations are modified
-    to seem like the interaction can only ever be invoked in guilds.
+    This prevents the command from being invoked in DMs by automatically setting
+    :attr:`ApplicationCommand.dm_permission` to ``False`` for user/message commands and top-level slash commands.
+
+    Note that this does not apply to slash subcommands, subcommand groups, or autocomplete callbacks.
+
+    Additionally, annotations of some attributes are modified to match the expected types in guilds.
     """
 
     guild: Guild
     me: Member
-    guild_locale: str
+    guild_locale: Locale
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation.
+    """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a user command.
@@ -176,7 +190,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation.
+    """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a message command.
@@ -237,6 +251,12 @@ class ApplicationCommandInteractionData:
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
             for d in data.get("options", [])
         ]
+
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionData id={self.id!r} name={self.name!r} type={self.type!r} "
+            f"target_id={self.target_id!r} target={self.target!r} resolved={self.resolved!r} options={self.options!r}>"
+        )
 
     def _get_chain_and_kwargs(
         self, chain: Tuple[str, ...] = None
@@ -307,6 +327,12 @@ class ApplicationCommandInteractionDataOption:
             for d in data.get("options", [])
         ]
         self.focused: bool = data.get("focused", False)
+
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionDataOption name={self.name!r} type={self.type!r}>"
+            f"value={self.value!r} focused={self.focused!r} options={self.options!r}>"
+        )
 
     def _simplified_value(self) -> Any:
         if self.value is not None:
@@ -404,7 +430,7 @@ class ApplicationCommandInteractionDataResolved:
             self.roles[int(str_id)] = Role(guild=guild, state=state, data=role)  # type: ignore
 
         for str_id, channel in channels.items():
-            factory, ch_type = _threaded_channel_factory(channel["type"])
+            factory, _ = _threaded_channel_factory(channel["type"])
             if factory:
                 channel["position"] = 0  # type: ignore
                 self.channels[int(str_id)] = (  # type: ignore
@@ -422,6 +448,12 @@ class ApplicationCommandInteractionDataResolved:
 
         for str_id, attachment in attachments.items():
             self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
+
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionDataResolved members={self.members!r} users={self.users!r} "
+            f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
+        )
 
     def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
         if isinstance(option_type, int):

@@ -25,9 +25,9 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import inspect
+import asyncio
 import os
-from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
@@ -48,6 +48,16 @@ if TYPE_CHECKING:
 
 S = TypeVar("S", bound="Select")
 V = TypeVar("V", bound="View", covariant=True)
+
+
+def _parse_select_options(
+    options: Union[List[SelectOption], List[str], Dict[str, str]]
+) -> List[SelectOption]:
+
+    if isinstance(options, dict):
+        return [SelectOption(label=key, value=val) for key, val in options.items()]
+
+    return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
 
 
 class Select(Item[V]):
@@ -72,8 +82,15 @@ class Select(Item[V]):
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: List[:class:`disnake.SelectOption`]
-        A list of options that can be selected in this menu.
+    options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
+        for fine-grained control over the options. Alternatively, a list of strings will be treated
+        as a list of labels, and a dict will be treated as a mapping of labels to values.
+
+        .. versionchanged:: 2.5
+            Now also accepts a list of str or a dict of str to str, which are then appropriately parsed as
+            :class:`.SelectOption` labels and values.
+
     disabled: :class:`bool`
         Whether the select is disabled.
     row: Optional[:class:`int`]
@@ -101,7 +118,7 @@ class Select(Item[V]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: List[SelectOption] = MISSING,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
         disabled: bool = False,
         row: Optional[int] = None,
     ) -> None:
@@ -109,7 +126,7 @@ class Select(Item[V]):
         self._selected_values: List[str] = []
         self._provided_custom_id = custom_id is not MISSING
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        options = [] if options is MISSING else options
+        options = [] if options is MISSING else _parse_select_options(options)
         self._underlying = SelectMenu._raw_construct(
             custom_id=custom_id,
             type=ComponentType.select,
@@ -291,10 +308,10 @@ def select(
     custom_id: str = MISSING,
     min_values: int = 1,
     max_values: int = 1,
-    options: List[SelectOption] = MISSING,
+    options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], DecoratedItem[Select]]:
+) -> Callable[[ItemCallbackType[Select]], DecoratedItem[Select]]:
     """A decorator that attaches a select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -323,14 +340,21 @@ def select(
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: List[:class:`disnake.SelectOption`]
-        A list of options that can be selected in this select menu.
+    options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
+        for fine-grained control over the options. Alternatively, a list of strings will be treated
+        as a list of labels, and a dict will be treated as a mapping of labels to values.
+
+        .. versionchanged:: 2.5
+            Now also accepts a list of str or a dict of str to str, which are then appropriately parsed as
+            :class:`.SelectOption` labels and values.
+
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
     """
 
-    def decorator(func: ItemCallbackType) -> DecoratedItem[Select]:
-        if not inspect.iscoroutinefunction(func):
+    def decorator(func: ItemCallbackType[Select]) -> DecoratedItem[Select]:
+        if not asyncio.iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 
         func.__discord_ui_model_type__ = Select

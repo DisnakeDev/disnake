@@ -51,6 +51,7 @@ from .context_managers import Typing
 from .enums import ChannelType, PartyType, try_enum_to_int
 from .errors import ClientException, InvalidArgument
 from .file import File
+from .flags import MessageFlags
 from .invite import Invite
 from .iterators import HistoryIterator
 from .mentions import AllowedMentions
@@ -133,7 +134,7 @@ class Snowflake(Protocol):
 class User(Snowflake, Protocol):
     """An ABC that details the common operations on a Discord user.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.User`
     - :class:`~disnake.ClientUser`
@@ -175,7 +176,7 @@ class User(Snowflake, Protocol):
 class PrivateChannel(Snowflake, Protocol):
     """An ABC that details the common operations on a private Discord channel.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.DMChannel`
     - :class:`~disnake.GroupChannel`
@@ -226,12 +227,13 @@ GCH = TypeVar("GCH", bound="GuildChannel")
 class GuildChannel(ABC):
     """An ABC that details the common operations on a Discord guild channel.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`.TextChannel`
     - :class:`.VoiceChannel`
     - :class:`.CategoryChannel`
     - :class:`.StageChannel`
+    - :class:`.ForumChannel`
 
     This ABC must also implement :class:`.abc.Snowflake`.
 
@@ -466,6 +468,7 @@ class GuildChannel(ABC):
         :class:`~disnake.PermissionOverwrite`
             The permission overwrites for this object.
         """
+        predicate: Callable[[_Overwrites], bool]
         if isinstance(obj, User):
             predicate = lambda p: p.is_member()
         elif isinstance(obj, Role):
@@ -813,7 +816,7 @@ class GuildChannel(ABC):
         overwrite: Optional[:class:`.PermissionOverwrite`]
             The permissions to allow and deny to the target, or ``None`` to
             delete the overwrite.
-        \*\*permissions
+        **permissions
             A keyword argument list of permissions to set for ease of use.
             Cannot be mixed with ``overwrite``.
         reason: Optional[:class:`str`]
@@ -921,10 +924,10 @@ class GuildChannel(ABC):
         self,
         *,
         beginning: bool,
-        offset: int = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        sync_permissions: bool = MISSING,
-        reason: Optional[str] = MISSING,
+        offset: int = ...,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
     ) -> None:
         ...
 
@@ -933,10 +936,10 @@ class GuildChannel(ABC):
         self,
         *,
         end: bool,
-        offset: int = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        sync_permissions: bool = MISSING,
-        reason: str = MISSING,
+        offset: int = ...,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
     ) -> None:
         ...
 
@@ -945,10 +948,10 @@ class GuildChannel(ABC):
         self,
         *,
         before: Snowflake,
-        offset: int = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        sync_permissions: bool = MISSING,
-        reason: str = MISSING,
+        offset: int = ...,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
     ) -> None:
         ...
 
@@ -957,10 +960,10 @@ class GuildChannel(ABC):
         self,
         *,
         after: Snowflake,
-        offset: int = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        sync_permissions: bool = MISSING,
-        reason: str = MISSING,
+        offset: int = ...,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
     ) -> None:
         ...
 
@@ -1010,7 +1013,7 @@ class GuildChannel(ABC):
             This parameter is ignored if moving a category channel.
         sync_permissions: :class:`bool`
             Whether to sync the permissions with the category (if given).
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason for moving this channel. Shows up on the audit log.
 
         Raises
@@ -1200,7 +1203,7 @@ class GuildChannel(ABC):
 class Messageable:
     """An ABC that details the common operations on a model that can send messages.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.TextChannel`
     - :class:`~disnake.DMChannel`
@@ -1210,6 +1213,7 @@ class Messageable:
     - :class:`~disnake.ext.commands.Context`
     - :class:`~disnake.Thread`
     - :class:`~disnake.VoiceChannel`
+    - :class:`~disnake.PartialMessageable`
     """
 
     __slots__ = ()
@@ -1221,7 +1225,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[Any] = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embed: Embed = ...,
@@ -1229,6 +1233,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1240,7 +1245,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[Any] = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embed: Embed = ...,
@@ -1248,6 +1253,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1259,7 +1265,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[Any] = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embeds: List[Embed] = ...,
@@ -1267,6 +1273,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1278,7 +1285,7 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[Any] = ...,
+        content: Optional[str] = ...,
         *,
         tts: bool = ...,
         embeds: List[Embed] = ...,
@@ -1286,6 +1293,7 @@ class Messageable:
         stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
+        suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
@@ -1296,29 +1304,31 @@ class Messageable:
 
     async def send(
         self,
-        content=None,
+        content: Optional[str] = None,
         *,
-        tts=None,
-        embed=None,
-        embeds=None,
-        file=None,
-        files=None,
-        stickers=None,
-        delete_after=None,
-        nonce=None,
-        allowed_mentions=None,
-        reference=None,
-        mention_author=None,
-        view=None,
-        components=None,
+        tts: bool = False,
+        embed: Embed = None,
+        embeds: List[Embed] = None,
+        file: File = None,
+        files: List[File] = None,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = None,
+        delete_after: float = None,
+        nonce: Union[str, int] = None,
+        suppress_embeds: bool = False,
+        allowed_mentions: AllowedMentions = None,
+        reference: Union[Message, MessageReference, PartialMessage] = None,
+        mention_author: bool = None,
+        view: View = None,
+        components: Components = None,
     ):
         """|coro|
 
         Sends a message to the destination with the content given.
 
         The content must be a type that can convert to a string through ``str(content)``.
-        If the content is set to ``None`` (the default), then the ``embed`` parameter must
-        be provided.
+
+        At least one of ``content``, ``embed``/``embeds``, ``file``/``files``
+        or ``stickers`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
         single :class:`.File` object. To upload multiple files, the ``files``
@@ -1355,7 +1365,7 @@ class Messageable:
 
             .. versionadded:: 2.0
 
-        nonce: :class:`int`
+        nonce: Union[:class:`str`, :class:`int`]
             The nonce to use for sending this message. If the message was successfully sent,
             then the message will have a nonce with this value.
         delete_after: :class:`float`
@@ -1386,14 +1396,20 @@ class Messageable:
             .. versionadded:: 1.6
 
         view: :class:`.ui.View`
-            A Discord UI View to add to the message. This can not be mixed with ``components``.
+            A Discord UI View to add to the message. This cannot be mixed with ``components``.
 
             .. versionadded:: 2.0
 
         components: |components_type|
-            A list of components to include in the message. This can not be mixed with ``view``.
+            A list of components to include in the message. This cannot be mixed with ``view``.
 
             .. versionadded:: 2.4
+
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+
+            .. versionadded:: 2.5
 
         Raises
         ------
@@ -1431,6 +1447,7 @@ class Messageable:
         if embed is not None:
             embeds = [embed]
 
+        embeds_payload = None
         if embeds is not None:
             if len(embeds) > 10:
                 raise InvalidArgument("embeds parameter must be a list of up to 10 elements")
@@ -1438,25 +1455,28 @@ class Messageable:
                 if embed._files:
                     files = files or []
                     files += embed._files
-            embeds = [embed.to_dict() for embed in embeds]
+            embeds_payload = [embed.to_dict() for embed in embeds]
 
+        stickers_payload = None
         if stickers is not None:
-            stickers = [sticker.id for sticker in stickers]
+            stickers_payload = [sticker.id for sticker in stickers]
 
+        allowed_mentions_payload = None
         if allowed_mentions is None:
-            allowed_mentions = state.allowed_mentions and state.allowed_mentions.to_dict()
+            allowed_mentions_payload = state.allowed_mentions and state.allowed_mentions.to_dict()
         elif state.allowed_mentions is not None:
-            allowed_mentions = state.allowed_mentions.merge(allowed_mentions).to_dict()
+            allowed_mentions_payload = state.allowed_mentions.merge(allowed_mentions).to_dict()
         else:
-            allowed_mentions = allowed_mentions.to_dict()
+            allowed_mentions_payload = allowed_mentions.to_dict()
 
         if mention_author is not None:
-            allowed_mentions = allowed_mentions or AllowedMentions().to_dict()
-            allowed_mentions["replied_user"] = bool(mention_author)
+            allowed_mentions_payload = allowed_mentions_payload or AllowedMentions().to_dict()
+            allowed_mentions_payload["replied_user"] = bool(mention_author)
 
+        reference_payload = None
         if reference is not None:
             try:
-                reference = reference.to_message_reference_dict()
+                reference_payload = reference.to_message_reference_dict()
             except AttributeError:
                 raise InvalidArgument(
                     "reference parameter must be Message, MessageReference, or PartialMessage"
@@ -1477,6 +1497,11 @@ class Messageable:
         else:
             components_payload = None
 
+        if suppress_embeds:
+            flags = MessageFlags.suppress_embeds.flag
+        else:
+            flags = 0
+
         if files is not None:
             if len(files) > 10:
                 raise InvalidArgument("files parameter must be a list of up to 10 elements")
@@ -1489,13 +1514,13 @@ class Messageable:
                     files=files,
                     content=content,
                     tts=tts,
-                    embed=embed,
-                    embeds=embeds,
+                    embeds=embeds_payload,
                     nonce=nonce,
-                    allowed_mentions=allowed_mentions,
-                    message_reference=reference,
-                    stickers=stickers,
+                    allowed_mentions=allowed_mentions_payload,
+                    message_reference=reference_payload,
+                    stickers=stickers_payload,
                     components=components_payload,  # type: ignore
+                    flags=flags,
                 )
             finally:
                 for f in files:
@@ -1505,13 +1530,13 @@ class Messageable:
                 channel.id,
                 content,
                 tts=tts,
-                embed=embed,
-                embeds=embeds,
+                embeds=embeds_payload,
                 nonce=nonce,
-                allowed_mentions=allowed_mentions,
-                message_reference=reference,
-                stickers=stickers,
+                allowed_mentions=allowed_mentions_payload,
+                message_reference=reference_payload,
+                stickers=stickers_payload,
                 components=components_payload,  # type: ignore
+                flags=flags,
             )
 
         ret = state.create_message(channel=channel, data=data)
@@ -1682,7 +1707,7 @@ class Connectable(Protocol):
     """An ABC that details the common operations on a channel that can
     connect to a voice server.
 
-    The following implement this ABC:
+    The following classes implement this ABC:
 
     - :class:`~disnake.VoiceChannel`
     - :class:`~disnake.StageChannel`

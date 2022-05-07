@@ -27,7 +27,7 @@ import copy
 import functools
 import itertools
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional
 
 import disnake.utils
 
@@ -277,7 +277,7 @@ class HelpCommand:
     ----------
     context: Optional[:class:`Context`]
         The context that invoked this help formatter. This is generally set after
-        the help command assigned, :func:`command_callback`\, has been called.
+        the help command assigned, :func:`command_callback`\\, has been called.
     show_hidden: :class:`bool`
         Specifies if hidden commands should be shown in the output.
         Defaults to ``False``.
@@ -527,7 +527,13 @@ class HelpCommand:
             return f'Command "{command.qualified_name}" has no subcommand named {string}'
         return f'Command "{command.qualified_name}" has no subcommands.'
 
-    async def filter_commands(self, commands, *, sort=False, key=None):
+    async def filter_commands(
+        self,
+        commands: Iterable[Command[Any, Any, Any]],
+        *,
+        sort: bool = False,
+        key: Optional[Callable[[Command[Any, Any, Any]], Any]] = None,
+    ):
         """|coro|
 
         Returns a filtered list of commands and optionally sorts them.
@@ -551,7 +557,11 @@ class HelpCommand:
         List[:class:`Command`]
             A list of commands that passed the filter.
         """
-        if sort and key is None:
+
+        # set `key` iff `sort` is true
+        if not sort:
+            key = None
+        elif key is None:
             key = lambda c: c.name
 
         iterator = commands if self.show_hidden else filter(lambda c: not c.hidden, commands)
@@ -559,11 +569,11 @@ class HelpCommand:
         if self.verify_checks is False:
             # if we do not need to verify the checks then we can just
             # run it straight through normally without using await.
-            return sorted(iterator, key=key) if sort else list(iterator)
+            return sorted(iterator, key=key) if key else list(iterator)
 
         if self.verify_checks is None and not self.context.guild:
             # if verify_checks is None and we're in a DM, don't verify
-            return sorted(iterator, key=key) if sort else list(iterator)
+            return sorted(iterator, key=key) if key else list(iterator)
 
         # if we're here then we need to check every command if it can run
         async def predicate(cmd):
@@ -578,7 +588,7 @@ class HelpCommand:
             if valid:
                 ret.append(cmd)
 
-        if sort:
+        if key:
             ret.sort(key=key)
         return ret
 

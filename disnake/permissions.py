@@ -402,7 +402,7 @@ class Permissions(BaseFlags):
         base.manage_messages = False
         base.manage_threads = False
         base.send_messages_in_threads = False
-        base.create_private_threads = False
+        base.create_public_threads = False
         base.create_private_threads = False
         return base
 
@@ -416,7 +416,7 @@ class Permissions(BaseFlags):
 
         Parameters
         ----------
-        \*\*kwargs
+        **kwargs
             A list of key/value pairs to bulk update permissions with.
         """
         for key, value in kwargs.items():
@@ -511,7 +511,16 @@ class Permissions(BaseFlags):
 
     @flag_value
     def send_messages(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels."""
+        """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels
+        and create threads in forum channels."""
+        return 1 << 11
+
+    @make_permission_alias("send_messages")
+    def create_forum_threads(self) -> int:
+        """:class:`bool`: An alias for :attr:`send_messages`.
+
+        .. versionadded:: 2.5
+        """
         return 1 << 11
 
     @flag_value
@@ -770,7 +779,7 @@ class PermissionOverwrite:
     """
     A type that is used to represent a channel specific permission.
 
-    Unlike a regular :class:`Permissions`\, the default value of a
+    Unlike a regular :class:`Permissions`\\, the default value of a
     permission is equivalent to ``None`` and not ``False``. Setting
     a value to ``False`` is **explicitly** denying that permission,
     while setting a value to ``True`` is **explicitly** allowing
@@ -795,7 +804,7 @@ class PermissionOverwrite:
 
     Parameters
     ----------
-    \*\*kwargs
+    **kwargs
         Set the value of permissions by their name.
     """
 
@@ -818,6 +827,7 @@ class PermissionOverwrite:
         read_messages: Optional[bool]
         view_channel: Optional[bool]
         send_messages: Optional[bool]
+        create_forum_threads: Optional[bool]
         send_tts_messages: Optional[bool]
         manage_messages: Optional[bool]
         embed_links: Optional[bool]
@@ -924,7 +934,7 @@ class PermissionOverwrite:
 
         Parameters
         ----------
-        \*\*kwargs
+        **kwargs
             A list of key/value pairs to bulk update with.
         """
         for key, value in kwargs.items():

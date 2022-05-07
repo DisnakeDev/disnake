@@ -66,17 +66,23 @@ class MessageInteraction(Interaction):
         The channel ID the interaction was sent from.
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
-    locale: :class:`str`
+    locale: :class:`Locale`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
 
-    guild_locale: Optional[:class:`str`]
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
+    guild_locale: Optional[:class:`Locale`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
 
     message: Optional[:class:`Message`]
         The message that sent this interaction.
@@ -133,3 +139,9 @@ class MessageInteractionData:
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
         self.values: Optional[List[str]] = data.get("values")
+
+    def __repr__(self):
+        return (
+            f"<MessageInteractionData custom_id={self.custom_id!r} "
+            f"component_type={self.component_type!r} values={self.values!r}>"
+        )

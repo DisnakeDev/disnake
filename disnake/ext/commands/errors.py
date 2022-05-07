@@ -37,7 +37,6 @@ if TYPE_CHECKING:
     from disnake.types.snowflake import Snowflake, SnowflakeList
 
     from .context import Context
-    from .converter import Converter
     from .cooldowns import BucketType, Cooldown
     from .flags import Flag
 
@@ -72,8 +71,10 @@ __all__ = (
     "BadInviteArgument",
     "EmojiNotFound",
     "GuildStickerNotFound",
+    "GuildScheduledEventNotFound",
     "PartialEmojiConversionFailure",
     "BadBoolArgument",
+    "LargeIntConversionFailure",
     "MissingRole",
     "BotMissingRole",
     "MissingAnyRole",
@@ -111,7 +112,7 @@ class CommandError(DiscordException):
 
     This exception and exceptions inherited from it are handled
     in a special way as they are caught and passed into a special event
-    from :class:`.Bot`\, :func:`.on_command_error`.
+    from :class:`.Bot`\\, :func:`.on_command_error`.
     """
 
     def __init__(self, message: Optional[str] = None, *args: Any) -> None:
@@ -518,6 +519,24 @@ class GuildStickerNotFound(BadArgument):
         super().__init__(f'Sticker "{argument}" not found.')
 
 
+class GuildScheduledEventNotFound(BadArgument):
+    """Exception raised when the bot cannot find the scheduled event.
+
+    This inherits from :exc:`BadArgument`
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    argument: :class:`str`
+        The scheduled event ID/URL/name supplied by the caller that was not found.
+    """
+
+    def __init__(self, argument: str) -> None:
+        self.argument: str = argument
+        super().__init__(f'Scheduled event "{argument}" not found.')
+
+
 class BadBoolArgument(BadArgument):
     """Exception raised when a boolean argument was not convertable.
 
@@ -534,6 +553,24 @@ class BadBoolArgument(BadArgument):
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
         super().__init__(f"{argument} is not a recognised boolean option")
+
+
+class LargeIntConversionFailure(BadArgument):
+    """Exception raised when a large integer argument was not able to be converted.
+
+    This inherits from :exc:`BadArgument`
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    argument: :class:`str`
+        The argument that could not be converted to an integer.
+    """
+
+    def __init__(self, argument: str) -> None:
+        self.argument: str = argument
+        super().__init__(f"{argument} is not able to be converted to an integer")
 
 
 class DisabledCommand(CommandError):
