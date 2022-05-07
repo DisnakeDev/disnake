@@ -126,7 +126,7 @@ New Features
 - Support :func:`InteractionResponse.edit_message` for modal interactions, if modal was sent in response to component interaction (:issue:`364`, :issue:`400`)
 - Support ``reason`` parameter in :func:`Message.create_thread` and :func:`Thread.delete` (:issue:`366`)
 - Add :attr:`StageInstance.guild_scheduled_event` and :attr:`StageInstance.guild_scheduled_event_id` (:issue:`394`)
-- Add :attr:`Client.session_start_limit` (:issue:`402`)
+- Add :class:`SessionStartLimit` and :attr:`Client.session_start_limit` (:issue:`402`)
 - Add :attr:`PartialInviteGuild.premium_subscription_count` (:issue:`410`)
 - Allow passing asset types for most image parameters, in addition to :class:`bytes` (:issue:`415`)
 - Update :func:`GuildScheduledEvent.fetch_users` and :func:`Guild.bans` to be async iterators supporting pagination (:issue:`428`, :issue:`442`)
