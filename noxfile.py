@@ -3,6 +3,7 @@ from typing import List, Optional
 import nox
 
 nox.options.error_on_external_run = True
+nox.options.reuse_existing_virtualenvs = True
 nox.options.sessions = [
     "lint",
     "pyright",
