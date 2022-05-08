@@ -7,6 +7,15 @@ from typing import TYPE_CHECKING, Callable, Optional, TypeVar
 
 import nox
 
+if TYPE_CHECKING:
+    from typing_extensions import Concatenate, ParamSpec
+
+    P = ParamSpec("P")
+    T = TypeVar("T")
+
+    NoxSessionFunc = Callable[Concatenate[nox.Session, P], T]
+
+
 nox.options.error_on_external_run = True
 nox.options.reuse_existing_virtualenvs = True
 nox.options.sessions = [
@@ -23,15 +32,6 @@ REQUIREMENTS = {
 for path in Path("requirements").iterdir():
     if match := re.fullmatch("requirements_(.+).txt", path.name):
         REQUIREMENTS[match.group(1)] = str(path)
-
-
-if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
-
-    P = ParamSpec("P")
-    T = TypeVar("T")
-
-    NoxSessionFunc = Callable[Concatenate[nox.Session, P], T]
 
 
 def depends(
@@ -123,7 +123,7 @@ def tests(session: nox.Session, extras: Optional[str]):
     if extras:
         install(session, extras)
 
-    # todo: only run tests that depend on the different dependencies
+    # TODO: only run tests that depend on the different dependencies
     session.run("pytest", "-v", "--cov", "--cov-report=term", "--cov-append", "--cov-context=test")
     session.notify("coverage", session.posargs)
 
