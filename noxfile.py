@@ -49,29 +49,24 @@ def docs(session: nox.Session):
     """
     session.install("-e", ".[docs]")
     with session.chdir("docs"):
+        args = ["-b", "html", "-j", "auto", "-n", ".", "_build/html"]
         if session.interactive:
             session.install("sphinx-autobuild==2021.3.14")
             session.run(
                 "sphinx-autobuild",
-                ".",
-                "_build/html",
                 "--ignore",
                 "_build",
                 "--watch",
                 "../disnake",
                 "--port",
                 "8009",
+                *args,
             )
         else:
             session.run(
                 "sphinx-build",
-                "-b",
-                "html",
                 "-aE",
-                "-j",
-                "auto",
-                ".",
-                "_build/html",
+                *args,
             )
 
 
