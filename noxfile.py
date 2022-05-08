@@ -1,4 +1,9 @@
-from typing import List, Optional
+from __future__ import annotations
+
+import functools
+import re
+from pathlib import Path
+from typing import TYPE_CHECKING, Callable, Optional, TypeVar
 
 import nox
 
@@ -12,47 +17,59 @@ nox.options.sessions = [
 nox.needs_version = ">=2022.1.7"
 
 
-GENERAL_REQUIREMENTS = ["taskipy~=1.10.1", "python-dotenv[cli]~=0.19.2"]
-
-LINT_REQUIREMENTS = [
-    "pre-commit~=2.17.0",
-]
-
-PYRIGHT_REQUIREMENTS = [
-    "pyright==1.1.244",
-    "mypy",  # needed to typecheck the mypy plugin with pyright
-]
-
-PYRIGHT_ENV = {
-    "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
+REQUIREMENTS = {
+    ".": "requirements.txt",
 }
-TEST_REQUIREMENTS = [
-    "pytest~=7.1.2",
-    "pytest-cov~=3.0.0",
-    "pytest-asyncio~=0.18.3",
-    "looptime~=0.2",
-]
+for path in Path("requirements").iterdir():
+    if match := re.fullmatch("requirements_(.+).txt", path.name):
+        REQUIREMENTS[match.group(1)] = str(path)
 
-ALL_REQUIREMENTS = [
-    *GENERAL_REQUIREMENTS,
-    *LINT_REQUIREMENTS,
-    *PYRIGHT_REQUIREMENTS,
-    *TEST_REQUIREMENTS,
-]
+
+if TYPE_CHECKING:
+    from typing_extensions import Concatenate, ParamSpec
+
+    P = ParamSpec("P")
+    T = TypeVar("T")
+
+    NoxSessionFunc = Callable[Concatenate[nox.Session, P], T]
+
+
+def depends(
+    *deps: str, update: bool = True
+) -> Callable[[NoxSessionFunc[P, T]], NoxSessionFunc[P, T]]:
+    def decorator(f: NoxSessionFunc[P, T]) -> NoxSessionFunc[P, T]:
+        @functools.wraps(f)
+        def wrapper(session: nox.Session, *args: P.args, **kwargs: P.kwargs) -> T:
+            install(session, *deps, update=update)
+            return f(session, *args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def install(session: nox.Session, *deps: str, update: bool = True, run: bool = False) -> None:
+    install_args = ["-U"] if update else []
+    for d in (".", *deps):
+        install_args.extend(["-r", REQUIREMENTS[d]])
+
+    if run:
+        session.run("python", "-m", "pip", "install", *install_args)
+    else:
+        session.install(*install_args)
 
 
 @nox.session()
+@depends("docs")
 def docs(session: nox.Session):
     """Build and generate the documentation.
 
     If running locally, will build automatic reloading docs.
     If running in CI, will build a production version of the documentation.
     """
-    session.install("-e", ".[docs]")
     with session.chdir("docs"):
         args = ["-b", "html", "-j", "auto", "-n", ".", "_build/html"]
         if session.interactive:
-            session.install("sphinx-autobuild==2021.3.14")
             session.run(
                 "sphinx-autobuild",
                 "--ignore",
@@ -71,50 +88,50 @@ def docs(session: nox.Session):
             )
 
 
-@nox.session(reuse_venv=True)
+@nox.session()
+@depends("dev")
 def lint(session: nox.Session):
     """Check all files for linting errors"""
-    session.install(*LINT_REQUIREMENTS)
     session.run("pre-commit", "run", "--all-files")
 
 
-@nox.session(reuse_venv=True)
+@nox.session()
+@depends("dev")
 def slotscheck(session: nox.Session):
     """Run slotscheck."""
-    session.install("-e", ".")
-    session.install("slotscheck~=0.13.0")
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
-@nox.session(reuse_venv=True)
+@nox.session()
+@depends("dev", "docs", "speed", "voice")
 def pyright(session: nox.Session):
     """Run pyright."""
-    session.install("-e", ".[docs,speed,voice]")
-    session.install(*PYRIGHT_REQUIREMENTS)
+    env = {
+        "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
+    }
     try:
-        session.run("python", "-m", "pyright", *session.posargs, env=PYRIGHT_ENV)
+        session.run("python", "-m", "pyright", *session.posargs, env=env)
     except KeyboardInterrupt:
         pass
 
 
-@nox.session(reuse_venv=True)
+@nox.session()
 @nox.parametrize("extras", [None, "speed", "voice"])
+@depends("dev")
 def tests(session: nox.Session, extras: Optional[str]):
     """Run tests."""
     if extras:
-        session.install("-e", f".[{extras}]")
-    else:
-        session.install("-e", ".")
-    session.install(*TEST_REQUIREMENTS)
+        install(session, extras)
+
     # todo: only run tests that depend on the different dependencies
     session.run("pytest", "-v", "--cov", "--cov-report=term", "--cov-append", "--cov-context=test")
     session.notify("coverage", session.posargs)
 
 
-@nox.session(reuse_venv=True)
+@nox.session()
+@depends("dev")
 def coverage(session: nox.Session):
     """Display coverage information from the tests."""
-    session.install("coverage[toml]~=6.3.2")
     if "html" in session.posargs or "serve" in session.posargs:
         session.run("coverage", "html", "--show-contexts")
     if "serve" in session.posargs:
@@ -131,26 +148,14 @@ def setup(session: nox.Session):
     session.log("Installing dependencies to the global environment.")
 
     if session.posargs:
-        posargs = session.posargs[:]
+        deps = list(session.posargs)
     else:
-        posargs = [
-            "lint",
-            "tests",
-            "docs",
-        ]
+        deps = list(REQUIREMENTS.keys())
 
-    deps: List[str] = [".", *GENERAL_REQUIREMENTS]
-    if "lint" in posargs:
-        deps.extend([*LINT_REQUIREMENTS, *PYRIGHT_REQUIREMENTS, "slotscheck~=0.13.0"])
+    if "." not in deps:
+        deps.insert(0, ".")  # index doesn't really matter
 
-    if "docs" in posargs:
-        deps.remove(".")
-        deps.insert(0, ".[docs]")
+    install(session, *deps, run=True)
 
-    if "tests" in posargs:
-        deps.extend(TEST_REQUIREMENTS)
-
-    session.run("python", "-m", "pip", "install", "-U", *deps)
-
-    if "lint" in posargs:
+    if "lint" in deps:
         session.run("pre-commit", "install", "--install-hooks")

@@ -42,8 +42,10 @@ include = [
     "test_bot",
     "*.py",
 ]
-# this is ignored because nox is not installed in the environment when running pyright
-ignore = ['noxfile.py']
+ignore = [
+    "disnake/ext/mypy_plugin",
+    "noxfile.py",  # this is ignored because nox is not installed in the environment when running pyright
+]
 
 strictParameterNoneValue = false
 reportInvalidStringEscapeSequence = false
