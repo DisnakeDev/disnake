@@ -634,7 +634,7 @@ class InvokableApplicationCommand(ABC):
                 meth = getattr(cog, f"cog_{partial_attr_name}_check", None)
                 local_check = _get_overridden_method(meth)
                 if local_check is not None:
-                    ret = await maybe_coroutine(local_check, inter)  # type: ignore
+                    ret = await maybe_coroutine(local_check, inter)
                     if not ret:
                         return False
 

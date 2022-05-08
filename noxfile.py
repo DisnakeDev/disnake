@@ -18,13 +18,12 @@ LINT_REQUIREMENTS = [
 ]
 
 PYRIGHT_REQUIREMENTS = [
-    "pyright==1.1.226",
+    "pyright==1.1.244",
     "mypy",  # needed to typecheck the mypy plugin with pyright
 ]
 
 PYRIGHT_ENV = {
     "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
-    "PYRIGHT_VERSION": "1.1.226",
 }
 TEST_REQUIREMENTS = [
     "pytest~=7.1.2",
