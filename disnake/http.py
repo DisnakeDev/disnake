@@ -2135,10 +2135,19 @@ class HTTPClient:
     # Application commands (global)
 
     def get_global_commands(
-        self, application_id: Snowflake
+        self,
+        application_id: Snowflake,
+        *,
+        with_localizations: bool = True,
     ) -> Response[List[interactions.ApplicationCommand]]:
+        params: Dict[str, Any] = {}
+        # the API currently interprets any non-empty value as truthy
+        if with_localizations:
+            params["with_localizations"] = int(with_localizations)
+
         return self.request(
-            Route("GET", "/applications/{application_id}/commands", application_id=application_id)
+            Route("GET", "/applications/{application_id}/commands", application_id=application_id),
+            params=params,
         )
 
     def get_global_command(
@@ -2164,12 +2173,6 @@ class HTTPClient:
         command_id: Snowflake,
         payload: interactions.EditApplicationCommand,
     ) -> Response[interactions.ApplicationCommand]:
-        valid_keys = (
-            "name",
-            "description",
-            "options",
-        )
-        payload = {k: v for k, v in payload.items() if k in valid_keys}  # type: ignore
         r = Route(
             "PATCH",
             "/applications/{application_id}/commands/{command_id}",
@@ -2198,15 +2201,24 @@ class HTTPClient:
     # Application commands (guild)
 
     def get_guild_commands(
-        self, application_id: Snowflake, guild_id: Snowflake
+        self,
+        application_id: Snowflake,
+        guild_id: Snowflake,
+        *,
+        with_localizations: bool = True,
     ) -> Response[List[interactions.ApplicationCommand]]:
+        params: Dict[str, Any] = {}
+        # the API currently interprets any non-empty value as truthy
+        if with_localizations:
+            params["with_localizations"] = int(with_localizations)
+
         r = Route(
             "GET",
             "/applications/{application_id}/guilds/{guild_id}/commands",
             application_id=application_id,
             guild_id=guild_id,
         )
-        return self.request(r)
+        return self.request(r, params=params)
 
     def get_guild_command(
         self,
@@ -2244,12 +2256,6 @@ class HTTPClient:
         command_id: Snowflake,
         payload: interactions.EditApplicationCommand,
     ) -> Response[interactions.ApplicationCommand]:
-        valid_keys = (
-            "name",
-            "description",
-            "options",
-        )
-        payload = {k: v for k, v in payload.items() if k in valid_keys}  # type: ignore
         r = Route(
             "PATCH",
             "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}",
@@ -2480,36 +2486,6 @@ class HTTPClient:
             command_id=command_id,
         )
         return self.request(r)
-
-    def edit_application_command_permissions(
-        self,
-        application_id: Snowflake,
-        guild_id: Snowflake,
-        command_id: Snowflake,
-        payload: interactions.BaseGuildApplicationCommandPermissions,
-    ) -> Response[interactions.GuildApplicationCommandPermissions]:
-        r = Route(
-            "PUT",
-            "/applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions",
-            application_id=application_id,
-            guild_id=guild_id,
-            command_id=command_id,
-        )
-        return self.request(r, json=payload)
-
-    def bulk_edit_guild_application_command_permissions(
-        self,
-        application_id: Snowflake,
-        guild_id: Snowflake,
-        payload: List[interactions.PartialGuildApplicationCommandPermissions],
-    ) -> Response[List[interactions.GuildApplicationCommandPermissions]]:
-        r = Route(
-            "PUT",
-            "/applications/{application_id}/guilds/{guild_id}/commands/permissions",
-            application_id=application_id,
-            guild_id=guild_id,
-        )
-        return self.request(r, json=payload)
 
     # Misc
 

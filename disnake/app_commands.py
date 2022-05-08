@@ -24,25 +24,26 @@ from __future__ import annotations
 
 import math
 import re
-import warnings
 from abc import ABC
-from typing import TYPE_CHECKING, ClassVar, Dict, Iterable, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Mapping, Optional, Tuple, Union
 
-from .abc import User
-from .custom_warnings import ConfigWarning
 from .enums import (
+    ApplicationCommandPermissionType,
     ApplicationCommandType,
     ChannelType,
+    Locale,
     OptionType,
     enum_if_int,
     try_enum,
     try_enum_to_int,
 )
 from .errors import InvalidArgument
-from .role import Role
+from .i18n import Localized
+from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:
+    from .i18n import LocalizationProtocol, LocalizationValue, LocalizedOptional, LocalizedRequired
     from .state import ConnectionState
     from .types.interactions import (
         ApplicationCommand as ApplicationCommandPayload,
@@ -50,16 +51,15 @@ if TYPE_CHECKING:
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         ApplicationCommandOptionChoiceValue,
         ApplicationCommandPermissions as ApplicationCommandPermissionsPayload,
-        ApplicationCommandPermissionType,
         EditApplicationCommand as EditApplicationCommandPayload,
         GuildApplicationCommandPermissions as GuildApplicationCommandPermissionsPayload,
-        PartialGuildApplicationCommandPermissions as PartialGuildApplicationCommandPermissionsPayload,
     )
 
     Choices = Union[
         List["OptionChoice"],
         List[ApplicationCommandOptionChoiceValue],
         Dict[str, ApplicationCommandOptionChoiceValue],
+        List[Localized[str]],
     ]
 
     APIApplicationCommand = Union["APIUserCommand", "APIMessageCommand", "APISlashCommand"]
@@ -78,9 +78,6 @@ __all__ = (
     "Option",
     "ApplicationCommandPermissions",
     "GuildApplicationCommandPermissions",
-    "PartialGuildApplicationCommandPermissions",
-    "PartialGuildAppCmdPerms",
-    "UnresolvedGuildApplicationCommandPermissions",
 )
 
 
@@ -113,28 +110,66 @@ class OptionChoice:
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Union[:class:`str`, :class:`.Localized`]
         The name of the option choice (visible to users).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     value: Union[:class:`str`, :class:`int`]
         The value of the option choice.
     """
 
-    def __init__(self, name: str, value: ApplicationCommandOptionChoiceValue):
-        self.name: str = name
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        value: ApplicationCommandOptionChoiceValue,
+    ):
+        name_loc = Localized._cast(name, True)
+        self.name: str = name_loc.string
+        self.name_localizations: LocalizationValue = name_loc.localizations
         self.value: ApplicationCommandOptionChoiceValue = value
 
     def __repr__(self) -> str:
         return f"<OptionChoice name={self.name!r} value={self.value!r}>"
 
     def __eq__(self, other) -> bool:
-        return self.name == other.name and self.value == other.value
+        return (
+            self.name == other.name
+            and self.value == other.value
+            and self.name_localizations == other.name_localizations
+        )
 
-    def to_dict(self) -> ApplicationCommandOptionChoicePayload:
-        return {"name": self.name, "value": self.value}
+    def to_dict(self, *, locale: Optional[Locale] = None) -> ApplicationCommandOptionChoicePayload:
+        localizations = self.name_localizations.data
+
+        name: Optional[str] = None
+        # if `locale` provided, get localized name from dict
+        if locale is not None and localizations:
+            name = localizations.get(str(locale))
+
+        # fall back to default name if no locale or no localized name
+        if name is None:
+            name = self.name
+
+        payload: ApplicationCommandOptionChoicePayload = {
+            "name": name,
+            "value": self.value,
+        }
+        # if no `locale` provided, include all localizations in payload
+        if locale is None and localizations:
+            payload["name_localizations"] = localizations
+        return payload
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandOptionChoicePayload):
-        return OptionChoice(name=data["name"], value=data["value"])
+        return OptionChoice(
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            value=data["value"],
+        )
+
+    def localize(self, store: LocalizationProtocol) -> None:
+        self.name_localizations._link(store)
 
 
 class Option:
@@ -142,10 +177,18 @@ class Option:
 
     Parameters
     ----------
-    name: :class:`str`
+    name: Union[:class:`str`, :class:`.Localized`]
         The option's name.
-    description: :class:`str`
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
+    description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The option's description.
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     type: :class:`OptionType`
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
@@ -177,12 +220,14 @@ class Option:
         "autocomplete",
         "min_value",
         "max_value",
+        "name_localizations",
+        "description_localizations",
     )
 
     def __init__(
         self,
-        name: str,
-        description: str = None,
+        name: LocalizedRequired,
+        description: LocalizedOptional = None,
         type: Union[OptionType, int] = None,
         required: bool = False,
         choices: Choices = None,
@@ -192,9 +237,15 @@ class Option:
         min_value: float = None,
         max_value: float = None,
     ):
-        _validate_name(name)
-        self.name: str = name
-        self.description: str = description or "-"
+        name_loc = Localized._cast(name, True)
+        _validate_name(name_loc.string)
+        self.name: str = name_loc.string
+        self.name_localizations: LocalizationValue = name_loc.localizations
+
+        desc_loc = Localized._cast(description, False)
+        self.description: str = desc_loc.string or "-"
+        self.description_localizations: LocalizationValue = desc_loc.localizations
+
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
         self.options: List[Option] = options or []
@@ -221,7 +272,9 @@ class Option:
                 self.choices = [OptionChoice(name, value) for name, value in choices.items()]
             else:
                 for c in choices:
-                    if not isinstance(c, OptionChoice):
+                    if isinstance(c, Localized):
+                        c = OptionChoice(c, c.string)
+                    elif not isinstance(c, OptionChoice):
                         c = OptionChoice(str(c), c)
                     self.choices.append(c)
 
@@ -246,13 +299,17 @@ class Option:
             and self.autocomplete == other.autocomplete
             and self.min_value == other.min_value
             and self.max_value == other.max_value
+            and self.name_localizations == other.name_localizations
+            and self.description_localizations == other.description_localizations
         )
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandOptionPayload) -> Option:
         return Option(
-            name=data["name"],
-            description=data.get("description"),
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            description=Localized(
+                data.get("description"), data=data.get("description_localizations")
+            ),
             type=data.get("type"),
             required=data.get("required", False),
             choices=_maybe_cast(
@@ -269,16 +326,25 @@ class Option:
             max_value=data.get("max_value"),
         )
 
-    def add_choice(self, name: str, value: Union[str, int]) -> None:
+    def add_choice(
+        self,
+        name: LocalizedRequired,
+        value: Union[str, int],
+    ) -> None:
         """Adds an OptionChoice to the list of current choices,
         parameters are the same as for :class:`OptionChoice`.
         """
-        self.choices.append(OptionChoice(name=name, value=value))
+        self.choices.append(
+            OptionChoice(
+                name=name,
+                value=value,
+            )
+        )
 
     def add_option(
         self,
-        name: str,
-        description: str = None,
+        name: LocalizedRequired,
+        description: LocalizedOptional = None,
         type: OptionType = None,
         required: bool = False,
         choices: List[OptionChoice] = None,
@@ -326,12 +392,35 @@ class Option:
             payload["min_value"] = self.min_value
         if self.max_value is not None:
             payload["max_value"] = self.max_value
+        if (loc := self.name_localizations.data) is not None:
+            payload["name_localizations"] = loc
+        if (loc := self.description_localizations.data) is not None:
+            payload["description_localizations"] = loc
         return payload
+
+    def localize(self, store: LocalizationProtocol) -> None:
+        self.name_localizations._link(store)
+        self.description_localizations._link(store)
+
+        if (name_loc := self.name_localizations.data) is not None:
+            for value in name_loc.values():
+                _validate_name(value)
+
+        for c in self.choices:
+            c.localize(store)
+        for o in self.options:
+            o.localize(store)
 
 
 class ApplicationCommand(ABC):
     """
-    The base class for application commands
+    The base class for application commands.
+
+    The following classes implement this ABC:
+
+    - :class:`~.SlashCommand`
+    - :class:`~.MessageCommand`
+    - :class:`~.UserCommand`
 
     Attributes
     ----------
@@ -339,19 +428,71 @@ class ApplicationCommand(ABC):
         The command type
     name: :class:`str`
         The command name
-    default_permission: :class:`bool`
-        Whether the command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.5
     """
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = ("type", "name")
+    __repr_info__: ClassVar[Tuple[str, ...]] = (
+        "type",
+        "name",
+        "dm_permission",
+        "default_member_permisions",
+    )
 
-    def __init__(self, type: ApplicationCommandType, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        type: ApplicationCommandType,
+        name: LocalizedRequired,
+        dm_permission: bool = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
+    ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
-        self.name: str = name
-        self.default_permission: bool = default_permission
+
+        name_loc = Localized._cast(name, True)
+        self.name: str = name_loc.string
+        self.name_localizations: LocalizationValue = name_loc.localizations
+
+        self.dm_permission: bool = True if dm_permission is None else dm_permission
+
+        self._default_member_permissions: Optional[int]
+        if default_member_permissions is None:
+            # allow everyone to use the command if its not supplied
+            self._default_member_permissions = None
+        elif isinstance(default_member_permissions, int):
+            self._default_member_permissions = default_member_permissions
+        else:
+            self._default_member_permissions = default_member_permissions.value
 
         self._always_synced: bool = False
+
+        # reset `default_permission` if set before
+        self._default_permission: bool = True
+
+    @property
+    def default_member_permissions(self) -> Optional[Permissions]:
+        """Optional[:class:`Permissions`]: The default required member permissions for this command.
+        A member must have *all* these permissions to be able to invoke the command in a guild.
+
+        This is a default value, the set of users/roles that may invoke this command can be
+        overridden by moderators on a guild-specific basis, disregarding this setting.
+
+        If ``None`` is returned, it means everyone can use the command by default.
+        If an empty :class:`Permissions` object is returned (that is, all permissions set to ``False``),
+        this means no one can use the command.
+
+        .. versionadded:: 2.5
+        """
+        if self._default_member_permissions is None:
+            return None
+        return Permissions(self._default_member_permissions)
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
@@ -364,17 +505,38 @@ class ApplicationCommand(ABC):
         return (
             self.type == other.type
             and self.name == other.name
-            and self.default_permission == other.default_permission
+            and self.name_localizations == other.name_localizations
+            and self._default_member_permissions == other._default_member_permissions
+            # ignore `dm_permission` if comparing guild commands
+            and (
+                any(
+                    (isinstance(obj, _APIApplicationCommandMixin) and obj.guild_id)
+                    for obj in (self, other)
+                )
+                or self.dm_permission == other.dm_permission
+            )
+            and self._default_permission == other._default_permission
         )
 
     def to_dict(self) -> EditApplicationCommandPayload:
         data: EditApplicationCommandPayload = {
             "type": try_enum_to_int(self.type),
             "name": self.name,
+            "dm_permission": self.dm_permission,
+            "default_permission": True,
         }
-        if not self.default_permission:
-            data["default_permission"] = False
+
+        if self._default_member_permissions is None:
+            data["default_member_permissions"] = None
+        else:
+            data["default_member_permissions"] = str(self._default_member_permissions)
+        if (loc := self.name_localizations.data) is not None:
+            data["name_localizations"] = loc
+
         return data
+
+    def localize(self, store: LocalizationProtocol) -> None:
+        self.name_localizations._link(store)
 
 
 class _APIApplicationCommandMixin:
@@ -385,34 +547,49 @@ class _APIApplicationCommandMixin:
         self.application_id: int = int(data["application_id"])
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.version: int = int(data["version"])
+        # deprecated, but kept until API stops returning this field
+        self._default_permission = data.get("default_permission") is not False
 
 
 class UserCommand(ApplicationCommand):
     """
-    A user context menu command
+    A user context menu command.
 
     Attributes
     ----------
     name: :class:`str`
         The user command's name.
-    default_permission: :class:`bool`
-        Whether the user command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.5
     """
 
-    __repr_info__ = ("name", "default_permission")
+    __repr_info__ = ("name", "dm_permission", "default_member_permissions")
 
-    def __init__(self, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        dm_permission: bool = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
+    ):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
-            default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
         )
 
 
 class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     """
-    A user context menu command returned by the API
+    A user context menu command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -420,9 +597,16 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     ----------
     name: :class:`str`
         The user command's name.
-    default_permission: :class:`bool`
-        Whether the user command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
     id: :class:`int`
         The user command's ID.
     application_id: :class:`int`
@@ -442,8 +626,9 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
 
         self = cls(
-            name=data["name"],
-            default_permission=data.get("default_permission", True),
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            dm_permission=data.get("dm_permission") is not False,
+            default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
         )
         self._update_common(data)
         return self
@@ -457,24 +642,37 @@ class MessageCommand(ApplicationCommand):
     ----------
     name: :class:`str`
         The message command's name.
-    default_permission: :class:`bool`
-        Whether the message command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.5
     """
 
-    __repr_info__ = ("name", "default_permission")
+    __repr_info__ = ("name", "dm_permission", "default_member_permissions")
 
-    def __init__(self, name: str, default_permission: bool = True):
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        dm_permission: bool = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
+    ):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
-            default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
         )
 
 
 class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     """
-    A message context menu command returned by the API
+    A message context menu command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -482,9 +680,16 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     ----------
     name: :class:`str`
         The message command's name.
-    default_permission: :class:`bool`
-        Whether the message command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
     id: :class:`int`
         The message command's ID.
     application_id: :class:`int`
@@ -504,8 +709,9 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
 
         self = cls(
-            name=data["name"],
-            default_permission=data.get("default_permission", True),
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            dm_permission=data.get("dm_permission") is not False,
+            default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
         )
         self._update_common(data)
         return self
@@ -515,36 +721,60 @@ class SlashCommand(ApplicationCommand):
     """
     The base class for building slash commands.
 
-    Parameters
+    Attributes
     ----------
     name: :class:`str`
         The slash command's name.
-    default_permission: :class:`bool`
-        Whether the slash command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
     description: :class:`str`
         The slash command's description.
+    description_localizations: :class:`.LocalizationValue`
+        Localizations for ``description``.
+
+        .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.5
+
     options: List[:class:`Option`]
         The list of options the slash command has.
     """
 
-    __repr_info__ = ("name", "description", "options", "default_permission")
+    __repr_info__ = (
+        "name",
+        "description",
+        "options",
+        "dm_permission",
+        "default_member_permissions",
+    )
 
     def __init__(
         self,
-        name: str,
-        description: str,
+        name: LocalizedRequired,
+        description: LocalizedRequired,
         options: List[Option] = None,
-        default_permission: bool = True,
+        dm_permission: bool = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
-        _validate_name(name)
-
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
-            default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
         )
-        self.description: str = description
+        _validate_name(self.name)
+
+        desc_loc = Localized._cast(description, True)
+        self.description: str = desc_loc.string
+        self.description_localizations: LocalizationValue = desc_loc.localizations
+
         self.options: List[Option] = options or []
 
     def __eq__(self, other) -> bool:
@@ -552,12 +782,13 @@ class SlashCommand(ApplicationCommand):
             super().__eq__(other)
             and self.description == other.description
             and self.options == other.options
+            and self.description_localizations == other.description_localizations
         )
 
     def add_option(
         self,
-        name: str,
-        description: str = None,
+        name: LocalizedRequired,
+        description: LocalizedOptional = None,
         type: OptionType = None,
         required: bool = False,
         choices: List[OptionChoice] = None,
@@ -589,12 +820,25 @@ class SlashCommand(ApplicationCommand):
         res = super().to_dict()
         res["description"] = self.description
         res["options"] = [o.to_dict() for o in self.options]
+        if (loc := self.description_localizations.data) is not None:
+            res["description_localizations"] = loc
         return res
+
+    def localize(self, store: LocalizationProtocol) -> None:
+        super().localize(store)
+        if (name_loc := self.name_localizations.data) is not None:
+            for value in name_loc.values():
+                _validate_name(value)
+
+        self.description_localizations._link(store)
+
+        for o in self.options:
+            o.localize(store)
 
 
 class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     """
-    A slash command returned by the API
+    A slash command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -602,13 +846,25 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     ----------
     name: :class:`str`
         The slash command's name.
-    default_permission: :class:`bool`
-        Whether the slash command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
-    id: :class:`int`
-        The slash command's ID.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+
+        .. versionadded:: 2.5
+
     description: :class:`str`
         The slash command's description.
+    description_localizations: :class:`.LocalizationValue`
+        Localizations for ``description``.
+
+        .. versionadded:: 2.5
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+
+        .. versionadded:: 2.5
+
+    id: :class:`int`
+        The slash command's ID.
     options: List[:class:`Option`]
         The list of options the slash command has.
     application_id: :class:`int`
@@ -628,37 +884,40 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
 
         self = cls(
-            name=data["name"],
-            description=data["description"],
-            default_permission=data.get("default_permission", True),
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            description=Localized(data["description"], data=data.get("description_localizations")),
             options=_maybe_cast(
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
             ),
+            dm_permission=data.get("dm_permission") is not False,
+            default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
         )
         self._update_common(data)
         return self
 
 
 class ApplicationCommandPermissions:
-    """Represents application command permissions for a role or a user.
+    """Represents application command permissions for a role, user, or channel.
 
     Attributes
     ----------
     id: :class:`int`
-        The ID of the role or user.
-    type: :class:`int`
+        The ID of the role, user, or channel.
+    type: :class:`ApplicationCommandPermissionType`
         The type of the target.
-        1 if target is a role; 2 if target is a user.
     permission: :class:`bool`
         Whether to allow or deny the access to the application command.
     """
 
-    __slots__ = ("id", "type", "permission")
+    __slots__ = ("id", "type", "permission", "_guild_id")
 
-    def __init__(self, *, data: ApplicationCommandPermissionsPayload):
+    def __init__(self, *, data: ApplicationCommandPermissionsPayload, guild_id: int):
         self.id: int = int(data["id"])
-        self.type: ApplicationCommandPermissionType = data["type"]
+        self.type: ApplicationCommandPermissionType = try_enum(
+            ApplicationCommandPermissionType, data["type"]
+        )
         self.permission: bool = data["permission"]
+        self._guild_id: int = guild_id
 
     def __repr__(self):
         return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
@@ -669,16 +928,37 @@ class ApplicationCommandPermissions:
         )
 
     def to_dict(self) -> ApplicationCommandPermissionsPayload:
-        return {"id": self.id, "type": self.type, "permission": self.permission}
+        return {"id": self.id, "type": int(self.type), "permission": self.permission}  # type: ignore
+
+    def is_everyone(self) -> bool:
+        """Whether this permission object is affecting the @everyone role.
+
+        .. versionadded:: 2.5
+
+        :return type: :class:`bool`
+        """
+        return self.id == self._guild_id
+
+    def is_all_channels(self) -> bool:
+        """Whether this permission object is affecting all channels.
+
+        .. versionadded:: 2.5
+
+        :return type: :class:`bool`
+        """
+        return self.id == self._guild_id - 1
 
 
 class GuildApplicationCommandPermissions:
     """Represents application command permissions in a guild.
 
+    .. versionchanged:: 2.5
+        Can now also represent application-wide permissions that apply to every command by default.
+
     Attributes
     ----------
     id: :class:`int`
-        The application command's ID.
+        The application command's ID, or the application ID if these are application-wide permissions.
     application_id: :class:`int`
         The application ID this command belongs to.
     guild_id: :class:`int`
@@ -689,14 +969,15 @@ class GuildApplicationCommandPermissions:
 
     __slots__ = ("_state", "id", "application_id", "guild_id", "permissions")
 
-    def __init__(self, *, state: ConnectionState, data: GuildApplicationCommandPermissionsPayload):
+    def __init__(self, *, data: GuildApplicationCommandPermissionsPayload, state: ConnectionState):
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
         self.guild_id: int = int(data["guild_id"])
 
         self.permissions: List[ApplicationCommandPermissions] = [
-            ApplicationCommandPermissions(data=elem) for elem in data["permissions"]
+            ApplicationCommandPermissions(data=elem, guild_id=self.guild_id)
+            for elem in data["permissions"]
         ]
 
     def __repr__(self):
@@ -712,197 +993,3 @@ class GuildApplicationCommandPermissions:
             "guild_id": self.guild_id,
             "permissions": [perm.to_dict() for perm in self.permissions],
         }
-
-    async def edit(
-        self,
-        *,
-        permissions: Dict[Union[Role, User], bool] = None,
-        role_ids: Dict[int, bool] = None,
-        user_ids: Dict[int, bool] = None,
-    ) -> GuildApplicationCommandPermissions:
-        """Replaces the current permissions with the specified ones.
-
-        Parameters
-        ----------
-        permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
-            Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-        role_ids: Mapping[:class:`int`, :class:`bool`]
-            Role IDs to booleans.
-        user_ids: Mapping[:class:`int`, :class:`bool`]
-            User IDs to booleans.
-
-        Returns
-        -------
-        :class:`GuildApplicationCommandPermissions`
-            The newly updated permissions.
-        """
-        data: List[ApplicationCommandPermissionsPayload] = []
-
-        if permissions is not None:
-            for obj, value in permissions.items():
-                if isinstance(obj, Role):
-                    target_type = 1
-                elif isinstance(obj, User):
-                    target_type = 2
-                else:
-                    raise ValueError("Permission target should be an instance of Role or abc.User")
-                data.append({"id": obj.id, "type": target_type, "permission": value})
-
-        if role_ids is not None:
-            for role_id, value in role_ids.items():
-                data.append({"id": role_id, "type": 1, "permission": value})
-
-        if user_ids is not None:
-            for user_id, value in user_ids.items():
-                data.append({"id": user_id, "type": 2, "permission": value})
-
-        res = await self._state.http.edit_application_command_permissions(
-            self.application_id, self.guild_id, self.id, {"permissions": data}
-        )
-
-        return GuildApplicationCommandPermissions(state=self._state, data=res)
-
-
-class PartialGuildApplicationCommandPermissions:
-    """Creates a partial object representing permissions of the application command.
-
-    Parameters
-    ----------
-    command_id: :class:`int`
-        The ID of the application command you want to apply these permissions to.
-    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
-        Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-    role_ids: Mapping[:class:`int`, :class:`bool`]
-        Role IDs to booleans.
-    user_ids: Mapping[:class:`int`, :class:`bool`]
-        User IDs to booleans.
-    """
-
-    def __init__(
-        self,
-        command_id: int,
-        *,
-        permissions: Mapping[Union[Role, User], bool] = None,
-        role_ids: Mapping[int, bool] = None,
-        user_ids: Mapping[int, bool] = None,
-    ):
-        self.id: int = command_id
-        self.permissions: List[ApplicationCommandPermissions] = []
-
-        if permissions is not None:
-            for obj, value in permissions.items():
-                if isinstance(obj, Role):
-                    target_type = 1
-                elif isinstance(obj, User):
-                    target_type = 2
-                else:
-                    raise ValueError("Permission target should be an instance of Role or abc.User")
-                data: ApplicationCommandPermissionsPayload = {
-                    "id": obj.id,
-                    "type": target_type,
-                    "permission": value,
-                }
-                self.permissions.append(ApplicationCommandPermissions(data=data))
-
-        if role_ids is not None:
-            for role_id, value in role_ids.items():
-                data: ApplicationCommandPermissionsPayload = {
-                    "id": role_id,
-                    "type": 1,
-                    "permission": value,
-                }
-                self.permissions.append(ApplicationCommandPermissions(data=data))
-
-        if user_ids is not None:
-            for user_id, value in user_ids.items():
-                data: ApplicationCommandPermissionsPayload = {
-                    "id": user_id,
-                    "type": 2,
-                    "permission": value,
-                }
-                self.permissions.append(ApplicationCommandPermissions(data=data))
-
-    def to_dict(self) -> PartialGuildApplicationCommandPermissionsPayload:
-        return {
-            "id": self.id,
-            "permissions": [perm.to_dict() for perm in self.permissions],
-        }
-
-
-PartialGuildAppCmdPerms = PartialGuildApplicationCommandPermissions
-
-
-class UnresolvedGuildApplicationCommandPermissions:
-    """Creates an object representing permissions of an application command,
-    without a specific command ID.
-
-    Parameters
-    ----------
-    permissions: Mapping[Union[:class:`Role`, :class:`disnake.abc.User`], :class:`bool`]
-        Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-    role_ids: Mapping[:class:`int`, :class:`bool`]
-        Role IDs to booleans.
-    user_ids: Mapping[:class:`int`, :class:`bool`]
-        User IDs to booleans.
-    owner: :class:`bool`
-        Whether to allow or deny the bot owner(s).
-    """
-
-    def __init__(
-        self,
-        *,
-        permissions: Mapping[Union[Role, User], bool] = None,
-        role_ids: Mapping[int, bool] = None,
-        user_ids: Mapping[int, bool] = None,
-        owner: bool = None,
-    ):
-        self.permissions: Optional[Mapping[Union[Role, User], bool]] = permissions
-        self.role_ids: Optional[Mapping[int, bool]] = role_ids
-        self.user_ids: Optional[Mapping[int, bool]] = user_ids
-        self.owner: Optional[bool] = owner
-
-    def resolve(
-        self, *, command_id: int, owners: Iterable[int]
-    ) -> PartialGuildApplicationCommandPermissions:
-        """
-        Creates a new :class:`PartialGuildApplicationCommandPermissions` object,
-        combining the previously supplied permission values with the provided
-        command ID and owner IDs.
-
-        Parameters
-        ----------
-        command_id: :class:`int`
-            The command ID to use.
-        owners: Iterable[:class:`int`]
-            The owner IDs, used for extending the user ID mapping
-            based on the previously set ``owner`` permission if applicable
-
-        Returns
-        -------
-        :class:`PartialGuildApplicationCommandPermissions`
-            A new permissions object based on this instance
-            and the provided command ID and owner IDs.
-        """
-        resolved_users: Optional[Mapping[int, bool]]
-        if self.owner is not None:
-            owner_ids = dict.fromkeys(owners, self.owner)
-            if not owner_ids:
-                raise ValueError("Cannot properly resolve permissions without owner IDs")
-
-            users = self.user_ids or {}
-            common_ids = owner_ids.keys() & users.keys()
-            if any(users[id] != owner_ids[id] for id in common_ids):
-                warnings.warn(
-                    "Conflicting permissions for owner(s) provided in users", ConfigWarning
-                )
-
-            resolved_users = {**users, **owner_ids}
-        else:
-            resolved_users = self.user_ids
-
-        return PartialGuildApplicationCommandPermissions(
-            command_id=command_id,
-            permissions=self.permissions,
-            role_ids=self.role_ids,
-            user_ids=resolved_users,
-        )

@@ -40,7 +40,6 @@ from typing import (
     Generator,
     List,
     Literal,
-    Mapping,
     Optional,
     Sequence,
     Tuple,
@@ -59,7 +58,6 @@ from .app_commands import (
     APIUserCommand,
     ApplicationCommand,
     GuildApplicationCommandPermissions,
-    PartialGuildApplicationCommandPermissions,
 )
 from .appinfo import AppInfo
 from .backoff import ExponentialBackoff
@@ -72,6 +70,7 @@ from .gateway import *
 from .guild import Guild
 from .guild_preview import GuildPreview
 from .http import HTTPClient
+from .i18n import LocalizationProtocol, LocalizationStore
 from .invite import Invite
 from .iterators import GuildIterator
 from .mentions import AllowedMentions
@@ -90,13 +89,12 @@ from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
-    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime, User as ABCUser
+    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .channel import DMChannel
     from .member import Member
     from .message import Message
-    from .role import Role
     from .types.gateway import SessionStartLimit as SessionStartLimitPayload
     from .voice_client import VoiceProtocol
 
@@ -305,6 +303,22 @@ class Client:
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
 
+    localization_provider: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` to use for localization of
+        application commands.
+        If not provided, the default :class:`.LocalizationStore` implementation is used.
+
+        .. versionadded:: 2.5
+
+    strict_localization: :class:`bool`
+        Whether to raise an exception when localizations for a specific key couldn't be found.
+        This is mainly useful for testing/debugging, consider disabling this eventually
+        as missing localized names will automatically fall back to the default/base name without it.
+        Only applicable if the ``localization_provider`` parameter is not provided.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.5
+
     Attributes
     ----------
     ws
@@ -317,6 +331,11 @@ class Client:
     session_start_limit: Optional[:class:`SessionStartLimit`]
         Information about the current session start limit.
         Only available after initiating the connection.
+
+        .. versionadded:: 2.5
+    i18n: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` used for localization of
+        application commands.
 
         .. versionadded:: 2.5
     """
@@ -364,6 +383,12 @@ class Client:
         if VoiceClient.warn_nacl:
             VoiceClient.warn_nacl = False
             _log.warning("PyNaCl is not installed, voice will NOT be supported")
+
+        i18n_strict: bool = options.pop("strict_localization", False)
+        i18n = options.pop("localization_provider", None)
+        if i18n is None:
+            i18n = LocalizationStore(strict=i18n_strict)
+        self.i18n: LocalizationProtocol = i18n
 
     # internals
 
@@ -796,7 +821,7 @@ class Client:
 
                 # We should only get this when an unhandled close code happens,
                 # such as a clean disconnect (1000) or a bad state (bad token, no sharding, etc)
-                # sometimes, disnake sends us 1000 for unknown reasons so we should reconnect
+                # sometimes, Discord sends us 1000 for unknown reasons so we should reconnect
                 # regardless and rely on is_closed instead
                 if isinstance(exc, ConnectionClosed):
                     if exc.code == 4014:
@@ -1962,7 +1987,9 @@ class Client:
         return User(state=self._connection, data=data)
 
     async def fetch_channel(
-        self, channel_id: int, /
+        self,
+        channel_id: int,
+        /,
     ) -> Union[GuildChannel, PrivateChannel, Thread]:
         """|coro|
 
@@ -2161,19 +2188,30 @@ class Client:
 
     # Application commands (global)
 
-    async def fetch_global_commands(self) -> List[APIApplicationCommand]:
+    async def fetch_global_commands(
+        self,
+        *,
+        with_localizations: bool = True,
+    ) -> List[APIApplicationCommand]:
         """|coro|
 
         Retrieves a list of global application commands.
 
         .. versionadded:: 2.1
 
+        Parameters
+        ----------
+        with_localizations: :class:`bool`
+            Whether to include localizations in the response. Defaults to ``True``.
+
+            .. versionadded:: 2.5
+
         Returns
         -------
         List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of application commands.
         """
-        return await self._connection.fetch_global_commands()
+        return await self._connection.fetch_global_commands(with_localizations=with_localizations)
 
     async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
         """|coro|
@@ -2213,6 +2251,7 @@ class Client:
         Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The application command that was created.
         """
+        application_command.localize(self.i18n)
         return await self._connection.create_global_command(application_command)
 
     async def edit_global_command(
@@ -2236,6 +2275,7 @@ class Client:
         Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The edited application command.
         """
+        new_command.localize(self.i18n)
         return await self._connection.edit_global_command(command_id, new_command)
 
     async def delete_global_command(self, command_id: int) -> None:
@@ -2271,11 +2311,18 @@ class Client:
         List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of registered application commands.
         """
+        for cmd in application_commands:
+            cmd.localize(self.i18n)
         return await self._connection.bulk_overwrite_global_commands(application_commands)
 
     # Application commands (guild)
 
-    async def fetch_guild_commands(self, guild_id: int) -> List[APIApplicationCommand]:
+    async def fetch_guild_commands(
+        self,
+        guild_id: int,
+        *,
+        with_localizations: bool = True,
+    ) -> List[APIApplicationCommand]:
         """|coro|
 
         Retrieves a list of guild application commands.
@@ -2286,13 +2333,19 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID of the guild to fetch commands from.
+        with_localizations: :class:`bool`
+            Whether to include localizations in the response. Defaults to ``True``.
+
+            .. versionadded:: 2.5
 
         Returns
         -------
         List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of application commands.
         """
-        return await self._connection.fetch_guild_commands(guild_id)
+        return await self._connection.fetch_guild_commands(
+            guild_id, with_localizations=with_localizations
+        )
 
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
         """|coro|
@@ -2336,6 +2389,7 @@ class Client:
         Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The newly created application command.
         """
+        application_command.localize(self.i18n)
         return await self._connection.create_guild_command(guild_id, application_command)
 
     async def edit_guild_command(
@@ -2361,6 +2415,7 @@ class Client:
         Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]
             The newly edited application command.
         """
+        new_command.localize(self.i18n)
         return await self._connection.edit_guild_command(guild_id, command_id, new_command)
 
     async def delete_guild_command(self, guild_id: int, command_id: int) -> None:
@@ -2400,6 +2455,8 @@ class Client:
         List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]]
             A list of registered application commands.
         """
+        for cmd in application_commands:
+            cmd.localize(self.i18n)
         return await self._connection.bulk_overwrite_guild_commands(guild_id, application_commands)
 
     # Application command permissions
@@ -2425,7 +2482,7 @@ class Client:
     ) -> GuildApplicationCommandPermissions:
         """|coro|
 
-        Retrieves :class:`.GuildApplicationCommandPermissions` for a specific application command.
+        Retrieves :class:`.GuildApplicationCommandPermissions` for a specific application command in the guild with the given ID.
 
         .. versionadded:: 2.1
 
@@ -2434,73 +2491,14 @@ class Client:
         guild_id: :class:`int`
             The ID of the guild to inspect.
         command_id: :class:`int`
-            The ID of the application command.
+            The ID of the application command, or the application ID to fetch application-wide permissions.
+
+            .. versionchanged:: 2.5
+                Can now also fetch application-wide permissions.
 
         Returns
         -------
         :class:`.GuildApplicationCommandPermissions`
-            The newly edited application command permissions.
+            The permissions configured for the specified application command.
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
-
-    async def edit_command_permissions(
-        self,
-        guild_id: int,
-        command_id: int,
-        *,
-        permissions: Mapping[Union[Role, ABCUser], bool] = None,
-        role_ids: Mapping[int, bool] = None,
-        user_ids: Mapping[int, bool] = None,
-    ) -> GuildApplicationCommandPermissions:
-        """|coro|
-
-        Edits guild permissions of a single command.
-
-        Parameters
-        ----------
-        guild_id: :class:`int`
-            The ID of the guild where the permissions should be applied.
-        command_id: :class:`int`
-            The ID of the application command you want to apply these permissions to.
-        permissions: Mapping[Union[:class:`~disnake.Role`, :class:`disnake.abc.User`], :class:`bool`]
-            Roles or users to booleans. ``True`` means "allow", ``False`` means "deny".
-        role_ids: Mapping[:class:`int`, :class:`bool`]
-            Role IDs to booleans.
-        user_ids: Mapping[:class:`int`, :class:`bool`]
-            User IDs to booleans.
-
-        Returns
-        -------
-        :class:`.GuildApplicationCommandPermissions`
-            The newly edited application command permissions.
-        """
-        perms = PartialGuildApplicationCommandPermissions(
-            command_id=command_id,
-            permissions=permissions,
-            role_ids=role_ids,
-            user_ids=user_ids,
-        )
-        return await self._connection.edit_command_permissions(guild_id, perms)
-
-    async def bulk_edit_command_permissions(
-        self, guild_id: int, permissions: List[PartialGuildApplicationCommandPermissions]
-    ) -> List[GuildApplicationCommandPermissions]:
-        """|coro|
-
-        Edits guild permissions of multiple application commands in one API request.
-
-        .. versionadded:: 2.1
-
-        Parameters
-        ----------
-        guild_id: :class:`int`
-            The ID of the guild where the permissions should be applied.
-        permissions: List[:class:`.PartialGuildApplicationCommandPermissions`]
-            A list of partial permissions for each application command you want to edit.
-
-        Returns
-        -------
-        List[:class:`.GuildApplicationCommandPermissions`]
-            A list of edited permissions of application commands.
-        """
-        return await self._connection.bulk_edit_command_permissions(guild_id, permissions)

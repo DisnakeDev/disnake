@@ -661,6 +661,20 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param payload: The raw event payload data.
     :type payload: :class:`RawReactionClearEmojiEvent`
 
+.. function:: on_application_command_permissions_update(permissions)
+
+    Called when the permissions of an application command or
+    the application-wide command permissions are updated.
+
+    Note that this will also be called when permissions of other applications change,
+    not just this application's permissions.
+
+    .. versionadded:: 2.5
+
+    :param permissions: The updated permission object.
+    :type permissions: :class:`GuildApplicationCommandPermissions`
+
+
 .. function:: on_interaction(interaction)
 
     Called when an interaction happened.
@@ -1035,11 +1049,13 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when a :class:`Member` updates their profile.
 
-    This is called when one or more of the following things change:
+    This is called when one or more of the following things change, but is not limited to:
 
     - nickname
     - roles
     - pending
+    - timeout
+    - guild specific avatar
 
     This requires :attr:`Intents.members` to be enabled.
 
@@ -1389,6 +1405,8 @@ Utility Functions
 
 .. autofunction:: disnake.utils.search_directory
 
+.. autofunction:: disnake.utils.as_valid_locale
+
 .. _discord-api-enums:
 
 Enumerations
@@ -1578,6 +1596,11 @@ of :class:`enum.Enum`.
         The system message denoting that a context menu command was executed.
 
         .. versionadded:: 2.3
+    .. attribute:: auto_moderation_action
+
+        The system message denoting that Auto Moderation has taken an action on a message.
+
+        .. versionadded:: 2.5
 
 .. class:: UserFlags
 
@@ -1740,6 +1763,22 @@ of :class:`enum.Enum`.
     .. attribute:: message
 
         Represents a message command from the context menu.
+
+.. class:: ApplicationCommandPermissionType
+
+    Represents the type of a permission of an application command.
+
+    .. versionadded:: 2.5
+
+    .. attribute:: role
+
+        Represents a permission that affects roles.
+    .. attribute:: user
+
+        Represents a permission that affects users.
+    .. attribute:: channel
+
+        Represents a permission that affects channels.
 
 .. class:: InteractionType
 
@@ -2780,6 +2819,20 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.auto_archive_duration`
 
         .. versionadded:: 2.0
+
+    .. attribute:: application_command_permission_update
+
+        The permissions of an application command were updated.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`ApplicationCommand` or :class:`Object` with the ID of the command whose
+        permissions were updated or the application ID if these are application-wide permissions.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.command_permissions`
+
+        .. versionadded:: 2.5
 
 .. class:: AuditLogActionCategory
 
@@ -3919,6 +3972,15 @@ AuditLogDiff
 
         :type: :class:`Asset`
 
+    .. attribute:: command_permissions
+
+        A mapping of target ID to guild permissions of an application command.
+
+        Note that only changed permission entries are included,
+        not necessarily all of the command's permissions.
+
+        :type: Dict[:class:`int`, :class:`ApplicationCommandPermissions`]
+
 .. this is currently missing the following keys: reason and application_id
    I'm not sure how to about porting these
 
@@ -4104,38 +4166,6 @@ Message
 .. autoclass:: Message()
     :members:
 
-ApplicationCommand
-~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: ApplicationCommand
-
-.. autoclass:: ApplicationCommand()
-    :members:
-
-SlashCommand
-~~~~~~~~~~~~
-
-.. attributetable:: SlashCommand
-
-.. autoclass:: SlashCommand()
-    :members:
-
-UserCommand
-~~~~~~~~~~~
-
-.. attributetable:: UserCommand
-
-.. autoclass:: UserCommand()
-    :members:
-
-MessageCommand
-~~~~~~~~~~~~~~
-
-.. attributetable:: MessageCommand
-
-.. autoclass:: MessageCommand()
-    :members:
-
 APISlashCommand
 ~~~~~~~~~~~~~~~
 
@@ -4143,6 +4173,7 @@ APISlashCommand
 
 .. autoclass:: APISlashCommand()
     :members:
+    :inherited-members:
 
 APIUserCommand
 ~~~~~~~~~~~~~~
@@ -4151,6 +4182,7 @@ APIUserCommand
 
 .. autoclass:: APIUserCommand()
     :members:
+    :inherited-members:
 
 APIMessageCommand
 ~~~~~~~~~~~~~~~~~
@@ -4159,22 +4191,7 @@ APIMessageCommand
 
 .. autoclass:: APIMessageCommand()
     :members:
-
-Option
-~~~~~~
-
-.. attributetable:: Option
-
-.. autoclass:: Option()
-    :members:
-
-OptionChoice
-~~~~~~~~~~~~
-
-.. attributetable:: OptionChoice
-
-.. autoclass:: OptionChoice()
-    :members:
+    :inherited-members:
 
 ApplicationCommandPermissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4190,22 +4207,6 @@ GuildApplicationCommandPermissions
 .. attributetable:: GuildApplicationCommandPermissions
 
 .. autoclass:: GuildApplicationCommandPermissions()
-    :members:
-
-PartialGuildApplicationCommandPermissions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: PartialGuildApplicationCommandPermissions
-
-.. autoclass:: PartialGuildApplicationCommandPermissions()
-    :members:
-
-UnresolvedGuildApplicationCommandPermissions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: UnresolvedGuildApplicationCommandPermissions
-
-.. autoclass:: UnresolvedGuildApplicationCommandPermissions()
     :members:
 
 Component
@@ -4951,6 +4952,57 @@ PartialMessage
 .. autoclass:: PartialMessage
     :members:
 
+ApplicationCommand
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationCommand
+
+.. autoclass:: ApplicationCommand()
+    :members:
+
+SlashCommand
+~~~~~~~~~~~~
+
+.. attributetable:: SlashCommand
+
+.. autoclass:: SlashCommand()
+    :members:
+    :inherited-members:
+
+UserCommand
+~~~~~~~~~~~
+
+.. attributetable:: UserCommand
+
+.. autoclass:: UserCommand()
+    :members:
+    :inherited-members:
+
+MessageCommand
+~~~~~~~~~~~~~~
+
+.. attributetable:: MessageCommand
+
+.. autoclass:: MessageCommand()
+    :members:
+    :inherited-members:
+
+Option
+~~~~~~
+
+.. attributetable:: Option
+
+.. autoclass:: Option()
+    :members:
+
+OptionChoice
+~~~~~~~~~~~~
+
+.. attributetable:: OptionChoice
+
+.. autoclass:: OptionChoice()
+    :members:
+
 SelectOption
 ~~~~~~~~~~~~~
 
@@ -5181,6 +5233,39 @@ TextInput
     :members:
 
 
+Localization
+------------
+
+The library uses the following types/methods to support localization.
+
+Localized
+~~~~~~~~~
+
+.. autoclass:: Localized
+    :members:
+    :inherited-members:
+
+LocalizationValue
+~~~~~~~~~~~~~~~~~
+
+.. autoclass:: LocalizationValue
+    :members:
+    :inherited-members:
+
+LocalizationProtocol
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: LocalizationProtocol
+    :members:
+
+LocalizationStore
+~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: LocalizationStore
+    :members:
+    :inherited-members:
+
+
 Exceptions
 ------------
 
@@ -5223,6 +5308,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: ModalChainNotSupported
 
+.. autoexception:: LocalizationKeyError
+
 .. autoexception:: disnake.opus.OpusError
 
 .. autoexception:: disnake.opus.OpusNotLoaded
@@ -5251,6 +5338,7 @@ Exception Hierarchy
                 - :exc:`Forbidden`
                 - :exc:`NotFound`
                 - :exc:`DiscordServerError`
+            - :exc:`LocalizationKeyError`
 
 
 Warnings
@@ -5262,6 +5350,8 @@ Warnings
 
 .. autoclass:: SyncWarning
 
+.. autoclass:: LocalizationWarning
+
 Warning Hierarchy
 ~~~~~~~~~~~~~~~~~~~
 
@@ -5270,3 +5360,4 @@ Warning Hierarchy
     - :class:`DiscordWarning`
         - :class:`ConfigWarning`
         - :class:`SyncWarning`
+        - :class:`LocalizationWarning`

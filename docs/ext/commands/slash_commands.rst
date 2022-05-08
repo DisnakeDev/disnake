@@ -142,7 +142,7 @@ All the other types may be converted implicitly, similarly to :ref:`ext_commands
         ...
 
 .. note::
-  \* All channel subclasses and unions are also supported. See :attr:`.ParamInfo.channel_types` for more fine-grained control
+  \* All channel subclasses and unions are also supported. See :attr:`ParamInfo.channel_types <ext.commands.ParamInfo>` for more fine-grained control
 
   \*\* Role and Member may be used together to create a "mentionable" (``Union[Role, Member]``)
 
@@ -200,6 +200,8 @@ The type of the option is determined by the range bounds, with the option being 
         [tool.mypy]
         plugins = "disnake.ext.mypy_plugin"
 
+
+.. _docstrings:
 
 Docstrings
 ----------
@@ -454,3 +456,214 @@ Injections
 ----------
 
 We have them, look at `this example <https://github.com/DisnakeDev/disnake/blob/master/examples/slash_commands/injections.py>`_ for more information ✨
+
+
+.. _localizations:
+
+Localizations
+-------------
+
+The names and descriptions of commands and options, as well as the names of choices
+(for use with fixed choices or autocompletion), support localization for a fixed set of locales.
+
+For currently supported locales, see :class:`Locale`.
+
+.. note::
+    You can supply your own custom localization provider by implementing :class:`.LocalizationProtocol`
+    and using the client's/bot's :attr:`localization_provider <ext.commands.Bot.localization_provider>` parameter.
+    The ``.json`` handling mentioned in this section, as well as the :ref:`localizations_strict` section below only
+    apply to the default implementation, :class:`.LocalizationStore`.
+
+The preferred way of adding localizations is to use ``<locale>.json`` files,
+containing mappings from user-defined keys to localized/translated strings,
+and referencing these keys in the commands' :ref:`docstrings <docstrings>`.
+As an example, consider this command:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def add_5(inter: disnake.ApplicationCommandInteraction, num: int):
+        """
+        Adds 5 to a number. {{ADD_NUM}}
+
+        Parameters
+        ----------
+        num: Some number {{ COOL_NUMBER }}
+        """
+        await inter.response.send_message(f"{num} + 5 = {num + 5}")
+
+The keys ``{{XYZ}}`` are automatically extracted from the docstrings,
+and used for looking up names ``XYZ_NAME`` and descriptions ``XYZ_DESCRIPTION``.
+Note that whitespace is ignored, and the positioning inside the line doesn't matter.
+
+For instance, to add German localizations, create a ``locale/de.json`` file;
+the directory name/path can be changed arbitrarily, ``locale`` is just the one used here:
+
+.. code-block:: json
+
+    {
+        "ADD_NUM_NAME": "addiere_5",
+        "ADD_NUM_DESCRIPTION": "Addiere 5 zu einer anderen Zahl.",
+        "COOL_NUMBER_NAME": "zahl",
+        "COOL_NUMBER_DESCRIPTION": "Eine Zahl",
+    }
+
+To load a directory or file containing localizations, use :func:`bot.i18n.load(path) <disnake.LocalizationStore.load>`:
+
+.. code-block:: python3
+
+    ...
+    bot.i18n.load("locale/")  # loads all files in the "locale/" directory
+    bot.run(...)
+
+.. note::
+    If :attr:`Bot.reload <ext.commands.Bot.reload>` is ``True``, all currently loaded localization files
+    are reloaded when an extension gets automatically reloaded.
+
+
+.. _localizations_strict:
+
+Strict Localization
++++++++++++++++++++
+
+By default, missing keys that couldn't be found are silently ignored.
+To instead raise an exception when a key is missing, pass the ``strict_localization=True`` parameter to the client/bot constructor
+(see :attr:`Bot.strict_localization <ext.commands.Bot.strict_localization>`).
+
+
+Customization
++++++++++++++
+
+If you want more customization or low-level control over localizations, you can specify arbitrary keys for the commands/options directly.
+:class:`.Localized` takes the non-localized string (optional depending on target type) to keep the ability of e.g.
+overwriting ``name`` in the command decorator, and either a ``key`` or ``data`` parameter.
+
+This would create the same command as the code above, though you're free to change the keys like ``ADD_NUM_DESCRIPTION`` however you want:
+
+.. code-block:: python3
+
+    @bot.slash_command(name=Localized("add_5", key="ADD_NUM_NAME"), description=Localized(key="ADD_NUM_DESCRIPTION"))
+    async def _add_5_slash(
+        inter: disnake.ApplicationCommandInteraction,
+        num: int = commands.Param(
+            name=Localized(key="COOL_NUMBER_NAME"),
+            description=Localized(key="COOL_NUMBER_DESCRIPTION")
+        ),
+    ):
+        """
+        Adds 5 to a number.
+
+        Parameters
+        ----------
+        num: Some number
+        """
+        await inter.response.send_message(f"{num} + 5 = {num + 5}")
+
+While not recommended, it is also possible to avoid using ``.json`` files at all, and instead specify localizations directly in the code:
+
+.. code-block:: python3
+
+    @bot.slash_command(
+        name=Localized(data={Locale.de: "addiere_5"}),
+        description=Localized(data={Locale.de: "Addiere 5 zu einer anderen Zahl."}),
+    )
+    async def add_5(
+        inter: disnake.ApplicationCommandInteraction,
+        num: int = commands.Param(
+            name=Localized(data={Locale.de: "zahl"}),
+            description=Localized(data={Locale.de: "Eine Zahl"}),
+        ),
+    ):
+        ...
+
+
+Choices/Autocomplete
+++++++++++++++++++++
+
+:ref:`Option choices <option_choices>` and :ref:`autocomplete items <autocompleters>` can also be localized, through the use of :class:`OptionChoice`:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def example(
+        inter: disnake.ApplicationCommandInteraction,
+        animal: str = commands.Param(choices=[
+            # alternatively:
+            # OptionChoice(Localized("Cat", key="OPTION_CAT"), "Cat")
+            Localized("Cat", key="OPTION_CAT"),
+            Localized("Dolphin", key="OPTION_DOLPHIN"),
+        ]),
+        language: str = commands.Param(autocomplete=autocomp_langs),
+    ):
+        ...
+
+    @example.autocomplete("language")
+    async def language_autocomp(inter: disnake.ApplicationCommandInteraction, user_input: str):
+        languages = ("english", "german", "spanish", "japanese")
+        return [
+            # alternatively:
+            # `OptionChoice(Localized(lang, key=f"AUTOCOMP_{lang.upper()}"), lang)`
+            Localized(lang, key=f"AUTOCOMP_{lang.upper()}")
+            for lang in languages
+            if user_input.lower() in lang
+        ]
+
+Yet again, with a file like ``locale/de.json`` containing localizations like this:
+
+.. code-block:: json
+
+    {
+        "OPTION_CAT": "Katze",
+        "OPTION_DOLPHIN": "Delfin",
+        "AUTOCOMP_ENGLISH": "Englisch",
+        "AUTOCOMP_GERMAN": "Deutsch",
+        "AUTOCOMP_SPANISH": "Spanisch",
+        "AUTOCOMP_JAPANESE": "Japanisch"
+    }
+
+.. _app_command_permissions:
+
+Permissions
+-----------
+
+Default Member Permissions
+++++++++++++++++++++++++++
+
+These commands will not be enabled/visible for members who do not have all the required guild permissions.
+In this example both the ``manage_guild`` and the ``moderate_members`` permissions would be required:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    @commands.default_member_permissions(manage_guild=True, moderate_members=True)
+    async def command(inter: disnake.ApplicationCommandInteraction):
+        ...
+
+Or use the ``default_member_permissions`` parameter in the application command decorator:
+
+.. code-block:: python3
+
+    @bot.slash_command(default_member_permissions=disnake.Permissions(manage_guild=True, moderate_members=True))
+    async def command(inter: disnake.ApplicationCommandInteraction):
+        ...
+
+This can be overridden by moderators on a per-guild basis; ``default_member_permissions`` may be
+ignored entirely once a permission override — application-wide or for this command in particular — is configured
+in the guild settings, and will be restored if the permissions are re-synced in the settings.
+
+Note that ``default_member_permissions`` and ``dm_permission`` cannot be configured for a slash subcommand or
+subcommand group, only in top-level slash commands and user/message commands.
+
+
+DM Permissions
+++++++++++++++
+
+Using this, you can specify if you want a certain slash command to work in DMs or not:
+
+.. code-block:: python3
+
+    @bot.slash_command(dm_permission=False)
+    async def config(inter: disnake.ApplicationCommandInteraction):
+        ...
+
+This will make the ``config`` slash command invisible in DMs, while it will remain visible in guilds.

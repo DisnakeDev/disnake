@@ -58,6 +58,7 @@ __all__ = (
     "NSFWLevel",
     "OptionType",
     "ApplicationCommandType",
+    "ApplicationCommandPermissionType",
     "PartyType",
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
@@ -241,6 +242,7 @@ class MessageType(Enum):
     thread_starter_message = 21
     guild_invite_reminder = 22
     context_menu_command = 23
+    auto_moderation_action = 24
 
 
 class PartyType(Enum):
@@ -376,6 +378,7 @@ class AuditLogAction(Enum):
     thread_create                    = 110
     thread_update                    = 111
     thread_delete                    = 112
+    application_command_permission_update = 121
     # fmt: on
 
     @property
@@ -429,6 +432,7 @@ class AuditLogAction(Enum):
             AuditLogAction.guild_scheduled_event_create: AuditLogActionCategory.create,
             AuditLogAction.guild_scheduled_event_update: AuditLogActionCategory.update,
             AuditLogAction.guild_scheduled_event_delete: AuditLogActionCategory.delete,
+            AuditLogAction.application_command_permission_update: AuditLogActionCategory.update,
         }
         # fmt: on
         return lookup[self]
@@ -466,6 +470,8 @@ class AuditLogAction(Enum):
             return "guild_scheduled_event"
         elif v < 113:
             return "thread"
+        elif v < 122:
+            return "application_command"
         else:
             return None
 
@@ -625,6 +631,15 @@ class ApplicationCommandType(Enum):
     message = 3
 
 
+class ApplicationCommandPermissionType(Enum):
+    role = 1
+    user = 2
+    channel = 3
+
+    def __int__(self):
+        return self.value
+
+
 class OptionType(Enum):
     sub_command = 1
     sub_command_group = 2
@@ -690,35 +705,65 @@ class WidgetStyle(Enum):
 # reference: https://discord.com/developers/docs/reference#locales
 class Locale(Enum):
     bg = "bg"
+    "Bulgarian | български"
     cs = "cs"
+    "Czech | Čeština"
     da = "da"
+    "Danish | Dansk"
     de = "de"
+    "German | Deutsch"
     el = "el"
+    "Greek | Ελληνικά"
     en_GB = "en-GB"
+    "English, UK | English, UK"
     en_US = "en-US"
+    "English, US | English, US"
     es_ES = "es-ES"
+    "Spanish | Español"
     fi = "fi"
+    "Finnish | Suomi"
     fr = "fr"
+    "French | Français"
     hi = "hi"
+    "Hindi | हिन्दी"
     hr = "hr"
+    "Croatian | Hrvatski"
     it = "it"
+    "Italian | Italiano"
     ja = "ja"
+    "Japanese | 日本語"
     ko = "ko"
+    "Korean | 한국어"
     lt = "lt"
+    "Lithuanian | Lietuviškai"
     hu = "hu"
+    "Hungarian | Magyar"
     nl = "nl"
+    "Dutch | Nederlands"
     no = "no"
+    "Norwegian | Norsk"
     pl = "pl"
+    "Polish | Polski"
     pt_BR = "pt-BR"
+    "Portuguese, Brazilian | Português do Brasil"
     ro = "ro"
+    "Romanian, Romania | Română"
     ru = "ru"
+    "Russian | Pусский"
     sv_SE = "sv-SE"
+    "Swedish | Svenska"
     th = "th"
+    "Thai | ไทย"
     tr = "tr"
+    "Turkish | Türkçe"
     uk = "uk"
+    "Ukrainian | Українська"
     vi = "vi"
+    "Vietnamese | Tiếng Việt"
     zh_CN = "zh-CN"
+    "Chinese, China | 中文"
     zh_TW = "zh-TW"
+    "Chinese, Taiwan | 繁體中文"
 
     def __str__(self):
         return self.value

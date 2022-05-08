@@ -24,12 +24,25 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
 from disnake.enums import OptionType
+from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
+from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import *
@@ -37,10 +50,16 @@ from .params import call_param_func, expand_params
 
 if TYPE_CHECKING:
     from disnake.app_commands import Choices
+    from disnake.i18n import LocalizedOptional
 
     from .base_core import CommandCallback
 
+MISSING = utils.MISSING
+
 __all__ = ("InvokableSlashCommand", "SubCommandGroup", "SubCommand", "slash_command")
+
+
+SlashCommandT = TypeVar("SlashCommandT", bound="InvokableSlashCommand")
 
 
 def _autocomplete(
@@ -131,16 +150,35 @@ class SubCommandGroup(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
-    def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
-        super().__init__(func, name=name, **kwargs)
+    def __init__(
+        self,
+        func: CommandCallback,
+        *,
+        name: LocalizedOptional = None,
+        **kwargs,
+    ):
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
         self.children: Dict[str, SubCommand] = {}
         self.option = Option(
-            name=self.name, description="-", type=OptionType.sub_command_group, options=[]
+            name=name_loc._upgrade(self.name),
+            description="-",
+            type=OptionType.sub_command_group,
+            options=[],
         )
         self.qualified_name: str = ""
+
+        if (
+            "dm_permission" in kwargs
+            or "default_member_permissions" in kwargs
+            or hasattr(func, "__default_member_permissions__")
+        ):
+            raise TypeError(
+                "Cannot set `default_member_permissions` or `dm_permission` on subcommand groups"
+            )
 
     @property
     def body(self) -> Option:
@@ -148,8 +186,8 @@ class SubCommandGroup(InvokableApplicationCommand):
 
     def sub_command(
         self,
-        name: str = None,
-        description: str = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
         options: list = None,
         connectors: dict = None,
         extras: Dict[str, Any] = None,
@@ -218,36 +256,52 @@ class SubCommand(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     def __init__(
         self,
         func: CommandCallback,
         *,
-        name: str = None,
-        description: str = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
         options: list = None,
         connectors: Dict[str, str] = None,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
         self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
-
-        self.docstring = utils.parse_docstring(func)
-        description = description or self.docstring["description"]
 
         if options is None:
             options = expand_params(self)
 
+        self.docstring = utils.parse_docstring(func)
+        desc_loc = Localized._cast(description, False)
+
         self.option = Option(
-            name=self.name,
-            description=description or "-",
+            name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),
+            description=desc_loc._upgrade(
+                self.docstring["description"] or "-", key=self.docstring["localization_key_desc"]
+            ),
             type=OptionType.sub_command,
             options=options,
         )
         self.qualified_name = ""
+
+        if (
+            "dm_permission" in kwargs
+            or "default_member_permissions" in kwargs
+            or hasattr(func, "__default_member_permissions__")
+        ):
+            raise TypeError(
+                "Cannot set `default_member_permissions` or `dm_permission` on subcommands"
+            )
+
+    @property
+    def description(self) -> str:
+        return self.body.description
 
     @property
     def body(self) -> Option:
@@ -259,10 +313,6 @@ class SubCommand(InvokableApplicationCommand):
         return await _call_autocompleter(self, param, inter, user_input)
 
     async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
-        if self.guild_only and inter.guild_id is None:
-            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
-            return
-
         for k, v in self.connectors.items():
             if k in kwargs:
                 kwargs[v] = kwargs.pop(k)
@@ -323,7 +373,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: Optional[List[:class:`int`]]
+    guild_ids: Optional[Tuple[:class:`int`, ...]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     connectors: Dict[:class:`str`, :class:`str`]
         A mapping of option names to function parameter names, mainly for internal processes.
@@ -335,41 +385,73 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     def __init__(
         self,
         func: CommandCallback,
         *,
-        name: str = None,
-        description: str = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
         options: List[Option] = None,
-        default_permission: bool = True,
+        dm_permission: bool = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
         self.connectors: Dict[str, str] = connectors or {}
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
-        self.auto_sync: bool = auto_sync
-        self.guild_ids: Optional[Sequence[int]] = guild_ids
+        self.auto_sync: bool = True if auto_sync is None else auto_sync
+        self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
         self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
-
-        self.docstring = utils.parse_docstring(func)
-        description = description or self.docstring["description"]
 
         if options is None:
             options = expand_params(self)
 
+        try:
+            default_perms = func.__default_member_permissions__
+        except AttributeError:
+            pass
+        else:
+            if default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both parameter and decorator"
+                )
+            default_member_permissions = Permissions(default_perms)
+        self.docstring = utils.parse_docstring(func)
+        desc_loc = Localized._cast(description, False)
+
+        dm_permission = True if dm_permission is None else dm_permission
+
         self.body: SlashCommand = SlashCommand(
-            name=self.name,
-            description=description or "-",
+            name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),
+            description=desc_loc._upgrade(
+                self.docstring["description"] or "-", key=self.docstring["localization_key_desc"]
+            ),
             options=options or [],
-            default_permission=default_permission,
+            dm_permission=dm_permission and not self._guild_only,
+            default_member_permissions=default_member_permissions,
         )
+
+    def _ensure_assignment_on_copy(self, other: SlashCommandT) -> SlashCommandT:
+        super()._ensure_assignment_on_copy(other)
+        if self.connectors != other.connectors:
+            other.connectors = self.connectors.copy()
+        if self.autocompleters != other.autocompleters:
+            other.autocompleters = self.autocompleters.copy()
+        if self.children != other.children:
+            other.children = self.children.copy()
+        if self.description != other.description and "description" not in other.__original_kwargs__:
+            # Allows overriding the default description cog-wide.
+            other.body.description = self.description
+        if self.options != other.options:
+            other.body.options = self.options
+        return other
 
     @property
     def description(self) -> str:
@@ -379,14 +461,10 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     def options(self) -> List[Option]:
         return self.body.options
 
-    @property
-    def default_permission(self) -> bool:
-        return self.body.default_permission
-
     def sub_command(
         self,
-        name: str = None,
-        description: str = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
         options: list = None,
         connectors: dict = None,
         extras: Dict[str, Any] = None,
@@ -397,10 +475,18 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Parameters
         ----------
-        name: :class:`str`
-            the name of the subcommand. Defaults to the function name
-        description: :class:`str`
-            the description of the subcommand
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
+            The name of the subcommand (defaults to function name).
+
+            .. versionchanged:: 2.5
+                Added support for localizations.
+
+        description: Optional[Union[:class:`str`, :class:`.Localized`]]
+            The description of the subcommand.
+
+            .. versionchanged:: 2.5
+                Added support for localizations.
+
         options: List[:class:`.Option`]
             the options of the subcommand for registration in API
         connectors: Dict[:class:`str`, :class:`str`]
@@ -414,7 +500,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             .. note::
                 This object may be copied by the library.
 
-            .. versionadded: 2.5
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -442,22 +528,28 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return decorator
 
     def sub_command_group(
-        self, name: str = None, extras: Dict[str, Any] = None, **kwargs
+        self,
+        name: LocalizedOptional = None,
+        extras: Dict[str, Any] = None,
+        **kwargs,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
         """
         A decorator that creates a subcommand group under the base command.
 
         Parameters
         ----------
-        name : :class:`str`
-            the name of the subcommand group. Defaults to the function name
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
+            The name of the subcommand group (defaults to function name).
+
+            .. versionchanged:: 2.5
+                Added support for localizations.
         extras: Dict[:class:`str`, Any]
             A dict of user provided extras to attach to the subcommand group.
 
             .. note::
                 This object may be copied by the library.
 
-            .. versionadded: 2.5
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -468,7 +560,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         def decorator(func: CommandCallback) -> SubCommandGroup:
             if len(self.children) == 0 and len(self.body.options) > 0:
                 self.body.options = []
-            new_func = SubCommandGroup(func, name=name, extras=extras, **kwargs)
+            new_func = SubCommandGroup(
+                func,
+                name=name,
+                extras=extras,
+                **kwargs,
+            )
             new_func.qualified_name = f"{self.qualified_name} {new_func.name}"
             self.children[new_func.name] = new_func
             self.body.options.append(new_func.option)
@@ -565,10 +662,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                     raise
 
     async def invoke(self, inter: ApplicationCommandInteraction):
-        if self.guild_only and inter.guild_id is None:
-            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
-            return
-
         await self.prepare(inter)
 
         try:
@@ -599,13 +692,14 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
 def slash_command(
     *,
-    name: str = None,
-    description: str = None,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
+    dm_permission: bool = None,
+    default_member_permissions: Optional[Union[Permissions, int]] = None,
     options: List[Option] = None,
-    default_permission: bool = True,
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
-    auto_sync: bool = True,
+    auto_sync: bool = None,
     extras: Dict[str, Any] = None,
     **kwargs,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
@@ -614,17 +708,31 @@ def slash_command(
     Parameters
     ----------
     auto_sync: :class:`bool`
-        Whether to automatically register the command. Defaults to ``True``
-    name: :class:`str`
-        The name of the slash command. (equals to function name by default).
-    description: :class:`str`
+        Whether to automatically register the command. Defaults to ``True``.
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+        The name of the slash command (defaults to function name).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
+    description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The description of the slash command. It will be visible in Discord.
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     options: List[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
-    default_permission: :class:`bool`
-        Whether the command is enabled by default. If set to ``False``, this command
-        cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
+    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+        The default required permissions for this command.
+        See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+        .. versionadded:: 2.5
+
     guild_ids: List[:class:`int`]
         If specified, the client will register a command in these guilds.
         Otherwise this command will be registered globally in ~1 hour.
@@ -640,7 +748,7 @@ def slash_command(
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
 
     Returns
     -------
@@ -660,7 +768,8 @@ def slash_command(
             name=name,
             description=description,
             options=options,
-            default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,

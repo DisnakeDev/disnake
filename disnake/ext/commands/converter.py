@@ -624,7 +624,7 @@ class ThreadConverter(IDConverter[disnake.Thread]):
     2. Lookup by mention.
     3. Lookup by name.
 
-    .. versionadded: 2.0
+    .. versionadded:: 2.0
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Thread:
@@ -1085,7 +1085,7 @@ class Greedy(List[T]):
             await ctx.send("numbers: {}, reason: {}".format(numbers, reason))
 
     An invocation of ``[p]test 1 2 3 4 5 6 hello`` would pass ``numbers`` with
-    ``[1, 2, 3, 4, 5, 6]`` and ``reason`` with ``hello``\.
+    ``[1, 2, 3, 4, 5, 6]`` and ``reason`` with ``hello``.
 
     For more information, check :ref:`ext_commands_special_converters`.
     """
@@ -1209,7 +1209,7 @@ async def _actual_conversion(
         try:
             name = converter.__name__
         except AttributeError:
-            name = converter.__class__.__name__  # type: ignore
+            name = converter.__class__.__name__
 
         raise BadArgument(f'Converting to "{name}" failed for parameter "{param.name}".') from exc
 

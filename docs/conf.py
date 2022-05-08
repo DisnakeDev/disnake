@@ -196,7 +196,7 @@ def linkcode_resolve(domain, info):
         obj = sys.modules[info["module"]]
         for part in info["fullname"].split("."):
             obj = getattr(obj, part)
-        obj = inspect.unwrap(obj)  # type: ignore
+        obj = inspect.unwrap(obj)
 
         if isinstance(obj, property):
             obj = inspect.unwrap(obj.fget)  # type: ignore
