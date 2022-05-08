@@ -659,6 +659,41 @@ def test_parse_docstring_param(docstring, expected):
     assert utils.parse_docstring(f)["params"] == expected  # ignore description
 
 
+def test_parse_docstring_localizations():
+    def f():
+        """
+        Does stuff. {{cool_key}}
+
+        Parameters
+        ----------
+        p1: {{ PARAM_1 }} Probably a number.
+        p2: str
+            Definitely a string {{   PARAM_X }}
+        """
+
+    assert utils.parse_docstring(f) == {
+        "description": "Does stuff.",
+        "localization_key_name": "cool_key_NAME",
+        "localization_key_desc": "cool_key_DESCRIPTION",
+        "params": {
+            "p1": {
+                "name": "p1",
+                "description": "Probably a number.",
+                "localization_key_name": "PARAM_1_NAME",
+                "localization_key_desc": "PARAM_1_DESCRIPTION",
+                "type": None,
+            },
+            "p2": {
+                "name": "p2",
+                "description": "Definitely a string",
+                "localization_key_name": "PARAM_X_NAME",
+                "localization_key_desc": "PARAM_X_DESCRIPTION",
+                "type": None,
+            },
+        },
+    }
+
+
 @pytest.mark.parametrize(
     ("it", "max_size", "expected"),
     [
@@ -827,3 +862,18 @@ def test_search_directory_exc(tmp_module_root, path, exc):
             list(utils.search_directory(tmp_module_root / path))
     finally:
         os.chdir(orig_cwd)
+
+
+@pytest.mark.parametrize(
+    ("locale", "expected"),
+    [
+        ("abc", None),
+        ("en-US", "en-US"),
+        ("en_US", "en-US"),
+        ("de", "de"),
+        ("de-DE", "de"),
+        ("de_DE", "de"),
+    ],
+)
+def test_as_valid_locale(locale, expected):
+    assert utils.as_valid_locale(locale) == expected
