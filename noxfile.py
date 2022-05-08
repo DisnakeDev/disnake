@@ -70,19 +70,14 @@ def docs(session: nox.Session):
             )
 
 
-@nox.session(
-    reuse_venv=True,
-    python="3.8",
-)
+@nox.session(reuse_venv=True)
 def lint(session: nox.Session):
     """Check all files for linting errors"""
     session.install(*LINT_REQUIREMENTS)
     session.run("pre-commit", "run", "--all-files")
 
 
-@nox.session(
-    python="3.8",
-)
+@nox.session()
 def slotscheck(session: nox.Session):
     """Run slotscheck."""
     session.install("-e", ".")
@@ -90,12 +85,9 @@ def slotscheck(session: nox.Session):
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
-@nox.session(
-    reuse_venv=True,
-    python=["3.8", "3.9", "3.10"],
-)
+@nox.session(reuse_venv=True)
 def pyright(session: nox.Session):
-    """Run pyright on all supported python versions."""
+    """Run pyright."""
     session.install("-e", ".[docs,speed,voice]")
     session.install(*PYRIGHT_REQUIREMENTS)
     try:
@@ -104,12 +96,10 @@ def pyright(session: nox.Session):
         pass
 
 
-@nox.session(
-    python=["3.8", "3.9", "3.10"],
-)
+@nox.session()
 @nox.parametrize("extras", [None, "speed", "voice"])
 def tests(session: nox.Session, extras: Optional[str]):
-    """Run tests on all supported python versions."""
+    """Run tests."""
     if extras:
         session.install("-e", f".[{extras}]")
     else:
@@ -136,7 +126,7 @@ def coverage(session: nox.Session):
 
 @nox.session(python=False)
 def setup(session: nox.Session):
-    """Sets up the local environment."""
+    """Set up the local environment."""
     session.log("Installing dependencies to the global environment.")
 
     if session.posargs:
