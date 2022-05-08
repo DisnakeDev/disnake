@@ -77,7 +77,7 @@ def lint(session: nox.Session):
     session.run("pre-commit", "run", "--all-files")
 
 
-@nox.session()
+@nox.session(reuse_venv=True)
 def slotscheck(session: nox.Session):
     """Run slotscheck."""
     session.install("-e", ".")
@@ -96,7 +96,7 @@ def pyright(session: nox.Session):
         pass
 
 
-@nox.session()
+@nox.session(reuse_venv=True)
 @nox.parametrize("extras", [None, "speed", "voice"])
 def tests(session: nox.Session, extras: Optional[str]):
     """Run tests."""
