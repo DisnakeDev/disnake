@@ -592,7 +592,12 @@ def test_parse_docstring_desc(docstring, expected):
         pass
 
     f.__doc__ = docstring
-    assert utils.parse_docstring(f) == {"description": expected, "params": {}}
+    assert utils.parse_docstring(f) == {
+        "description": expected,
+        "params": {},
+        "localization_key_name": None,
+        "localization_key_desc": None,
+    }
 
 
 @pytest.mark.parametrize(
@@ -615,13 +620,12 @@ def test_parse_docstring_desc(docstring, expected):
             Nothing.
             """,
             {
-                "something": {"name": "something", "type": None, "description": "a value"},
+                "something": {"name": "something", "description": "a value"},
                 "other_something": {
                     "name": "other_something",
-                    "type": None,
                     "description": "another value,\nwow",
                 },
-                "thingy": {"name": "thingy", "type": None, "description": "a very cool thingy"},
+                "thingy": {"name": "thingy", "description": "a very cool thingy"},
             },
         ),
         # invalid underline length
@@ -648,6 +652,10 @@ def test_parse_docstring_param(docstring, expected):
         pass
 
     f.__doc__ = docstring
+    expected = {
+        k: {**v, "type": None, "localization_key_name": None, "localization_key_desc": None}
+        for k, v in expected.items()
+    }
     assert utils.parse_docstring(f)["params"] == expected  # ignore description
 
 
