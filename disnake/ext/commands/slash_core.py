@@ -444,6 +444,10 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             other.connectors = self.connectors.copy()
         if self.autocompleters != other.autocompleters:
             other.autocompleters = self.autocompleters.copy()
+            # Link existing autocompleter to the newly copied slash command...
+            for autocompleter in other.autocompleters.values():
+                if callable(autocompleter):
+                    autocompleter.__slash_command__ = other
         if self.children != other.children:
             other.children = self.children.copy()
         if self.description != other.description and "description" not in other.__original_kwargs__:
