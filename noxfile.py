@@ -131,11 +131,12 @@ def pyright(session: nox.Session):
 
 @nox.session(python=["3.8", "3.9", "3.10"])
 @nox.parametrize("extras", [None, "speed", "voice"])
-@depends("dev")
 def tests(session: nox.Session, extras: Optional[str]):
     """Run tests."""
     if extras:
-        install(session, extras)
+        install(session, "dev", extras)
+    else:
+        install(session, "dev")
 
     # TODO: only run tests that depend on the different dependencies
     session.run(
