@@ -179,5 +179,5 @@ def setup(session: nox.Session):
     # TODO: what's the point of `install_cwd=True` here?
     install(session, *deps, update=True, run=True, install_cwd=True)
 
-    if "dev" in deps:
+    if session.interactive and "dev" in deps:
         session.run("pre-commit", "install", "--install-hooks")
