@@ -20,6 +20,7 @@ nox.options.error_on_external_run = True
 nox.options.reuse_existing_virtualenvs = True
 nox.options.sessions = [
     "lint",
+    "slotscheck",
     "pyright",
     "tests",
 ]
