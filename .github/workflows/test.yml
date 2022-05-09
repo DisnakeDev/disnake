@@ -32,4 +32,4 @@ jobs:
       # use non-utc timezone, to test time/date-dependent features properly
       env:
         TZ: "America/New_York"
-      run: nox -s tests
+      run: nox -s tests-${{ matrix.python-version }}
