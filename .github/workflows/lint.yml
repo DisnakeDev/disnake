@@ -52,12 +52,12 @@ jobs:
     - name: Install requirements
       run: |
         python -m pip install nox
-        nox -s setup -- dev
+        nox -s setup
 
     - name: Set pyright version
       run: |
         PYRIGHT_VERSION="$(python -c 'import pyright; print(pyright.__pyright_version__)')"
-        echo "$PYRIGHT_VERSION" >> $GITHUB_ENV
+        echo "PYRIGHT_VERSION=$PYRIGHT_VERSION" >> $GITHUB_ENV
 
     - name: Run pyright (Linux)
       uses: jakebailey/pyright-action@v1.0.3
