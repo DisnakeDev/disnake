@@ -35,12 +35,14 @@ for path in Path("requirements").iterdir():
 
 
 def depends(
-    *deps: str, update: bool = True
+    *deps: str,
+    install_cwd: bool = False,
+    update: bool = True,
 ) -> Callable[[NoxSessionFunc[P, T]], NoxSessionFunc[P, T]]:
     def decorator(f: NoxSessionFunc[P, T]) -> NoxSessionFunc[P, T]:
         @functools.wraps(f)
         def wrapper(session: nox.Session, *args: P.args, **kwargs: P.kwargs) -> T:
-            install(session, *deps, update=update)
+            install(session, *deps, update=update, install_cwd=install_cwd)
             return f(session, *args, **kwargs)
 
         return wrapper
@@ -51,15 +53,18 @@ def depends(
 def install(
     session: nox.Session,
     *deps: str,
-    update: bool = True,
     run: bool = False,
-    install_cwd: bool = True,
+    install_cwd: bool = False,
+    update: bool = True,
 ) -> None:
-    install_args = ["-e", "."] if install_cwd else []
+    install_args = []
+
     if update:
         install_args.append("-U")
+    if install_cwd:
+        install_args.extend(["-e", "."])
 
-    for d in (".", *deps):
+    for d in dict.fromkeys((".", *deps)):  # deduplicate
         install_args.extend(["-r", REQUIREMENTS[d]])
 
     if run:
@@ -125,10 +130,9 @@ def pyright(session: nox.Session):
 
 @nox.session(python=["3.8", "3.9", "3.10"])
 @nox.parametrize("extras", [None, "speed", "voice"])
-@depends("dev")
+@depends("dev", install_cwd=True)
 def tests(session: nox.Session, extras: Optional[str]):
     """Run tests."""
-    session.install("-e", ".")
     if extras:
         install(session, extras)
 
@@ -161,8 +165,8 @@ def coverage(session: nox.Session):
 
 @nox.session(python=False)
 def setup(session: nox.Session):
-    """Set up the local environment."""
-    session.log("Installing dependencies to the global environment.")
+    """Set up the external environment."""
+    session.log("Installing dependencies to the external environment.")
 
     if session.posargs:
         deps = list(session.posargs)
@@ -172,9 +176,8 @@ def setup(session: nox.Session):
     if "." not in deps:
         deps.insert(0, ".")  # index doesn't really matter
 
-    # actually install the package so its installed locally
-    session.run("pip", "install", "-e", ".")
-    install(session, *deps, update=True, run=True)
+    # TODO: what's the point of `install_cwd=True` here?
+    install(session, *deps, update=True, run=True, install_cwd=True)
 
-    if "lint" in deps:
+    if "dev" in deps:
         session.run("pre-commit", "install", "--install-hooks")
