@@ -43,9 +43,9 @@ with open("README.md", encoding="utf-8") as f:
     readme = f.read()
 
 extras_require = {
-    "voice": read_requirements("requirements_voice.txt"),
-    "docs": read_requirements("requirements_docs.txt"),
-    "speed": read_requirements("requirements_speed.txt"),
+    "voice": read_requirements("requirements/requirements_voice.txt"),
+    "docs": read_requirements("requirements/requirements_docs.txt"),
+    "speed": read_requirements("requirements/requirements_speed.txt"),
     "discord": ["discord-disnake"],
 }
 

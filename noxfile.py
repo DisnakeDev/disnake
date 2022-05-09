@@ -48,8 +48,17 @@ def depends(
     return decorator
 
 
-def install(session: nox.Session, *deps: str, update: bool = True, run: bool = False) -> None:
-    install_args = ["-U"] if update else []
+def install(
+    session: nox.Session,
+    *deps: str,
+    update: bool = True,
+    run: bool = False,
+    install_cwd: bool = True,
+) -> None:
+    install_args = ["-e", "."] if install_cwd else []
+    if update:
+        install_args.append("-U")
+
     for d in (".", *deps):
         install_args.extend(["-r", REQUIREMENTS[d]])
 
@@ -88,8 +97,7 @@ def docs(session: nox.Session):
             )
 
 
-@nox.session()
-@depends("dev")
+@nox.session(python=False)
 def lint(session: nox.Session):
     """Check all files for linting errors"""
     session.run("pre-commit", "run", "--all-files")
@@ -115,16 +123,25 @@ def pyright(session: nox.Session):
         pass
 
 
-@nox.session()
+@nox.session(python=["3.8", "3.9", "3.10"])
 @nox.parametrize("extras", [None, "speed", "voice"])
 @depends("dev")
 def tests(session: nox.Session, extras: Optional[str]):
     """Run tests."""
+    session.install("-e", ".")
     if extras:
         install(session, extras)
 
     # TODO: only run tests that depend on the different dependencies
-    session.run("pytest", "-v", "--cov", "--cov-report=term", "--cov-append", "--cov-context=test")
+    session.run(
+        "pytest",
+        "-v",
+        "--cov",
+        "--cov-report=term",
+        "--cov-append",
+        "--cov-context=test",
+        *session.posargs,
+    )
     session.notify("coverage", session.posargs)
 
 
@@ -155,7 +172,9 @@ def setup(session: nox.Session):
     if "." not in deps:
         deps.insert(0, ".")  # index doesn't really matter
 
-    install(session, *deps, run=True)
+    # actually install the package so its installed locally
+    session.run("pip", "install", "-e", ".")
+    install(session, *deps, update=True, run=True)
 
     if "lint" in deps:
         session.run("pre-commit", "install", "--install-hooks")
