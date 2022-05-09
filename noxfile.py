@@ -130,7 +130,7 @@ def pyright(session: nox.Session):
 
 @nox.session(python=["3.8", "3.9", "3.10"])
 @nox.parametrize("extras", [None, "speed", "voice"])
-@depends("dev", install_cwd=True)
+@depends("dev")
 def tests(session: nox.Session, extras: Optional[str]):
     """Run tests."""
     if extras:
