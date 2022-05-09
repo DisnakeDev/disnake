@@ -23,7 +23,7 @@ jobs:
     - name: Install requirements
       run: |
         python -m pip install nox
-        nox -s setup -- dev
+        nox -s setup -- tools
 
     - name: Run pre-commit
       uses: pre-commit/action@v2.0.3
@@ -99,7 +99,7 @@ jobs:
     - name: Install requirements
       run: |
         python -m pip install nox
-        nox -s setup -- dev
+        nox -s setup -- tools
 
     - name: Run slotscheck
       run: task slotscheck
