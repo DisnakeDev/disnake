@@ -12,6 +12,17 @@ This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
 
+.. _vp2p5p1:
+
+v2.5.1
+------
+
+Bug Fixes
+~~~~~~~~~
+
+- |commands| Fix :func:`~ext.commands.InvokableSlashCommand.autocomplete` decorator in cogs (:issue:`521`)
+
+
 .. _vp2p5p0:
 
 v2.5.0
