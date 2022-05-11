@@ -131,6 +131,10 @@ class View:
 
     This object must be inherited to create a UI within Discord.
 
+    Alternatively, components can be handled with :class:`disnake.ui.ActionRow`\\s and event
+    listeners for a more low-level approach. Relevant events are :func:`disnake.on_button_click`,
+    :func:`disnake.on_dropdown`, and the more generic :func:`disnake.on_message_interaction`.
+
     .. versionadded:: 2.0
 
     Parameters

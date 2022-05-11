@@ -88,6 +88,12 @@ class ActionRowType(tuple, Enum):
 class ActionRow(Generic[UIComponentT]):
     """Represents a UI action row. Useful for lower level component manipulation.
 
+    To handle interactions created by components sent in action rows or entirely independently,
+    event listeners must be used. For buttons and selects, the related events are
+    :func:`disnake.on_button_click` and :func:`disnake.on_dropdown`, respectively. Alternatively,
+    :func:`disnake.on_message_interaction` can be used for either. For modals, the related event is
+    :func:`disnake.on_modal_submit`.
+
     .. versionadded:: 2.4
 
     .. versionchanged:: 2.6
@@ -122,7 +128,7 @@ class ActionRow(Generic[UIComponentT]):
 
     def __init__(self, *components: UIComponentT):
         self.width: int = 0
-        self._components: List[UIComponentT] = []
+        self._children: List[UIComponentT] = []
 
         # Validate the components
         type_candidates = list(ActionRowType)
@@ -139,7 +145,7 @@ class ActionRow(Generic[UIComponentT]):
             if self.width >= 5:
                 raise ValueError("Too many components in one row.")
 
-            self._components.append(component)
+            self._children.append(component)
 
         # Best we can do without directly inferring the generic type: Through type_candidates we
         # narrow down the possible types (MessageUIComponents and/or ModalUIComponents) by checking
@@ -149,9 +155,9 @@ class ActionRow(Generic[UIComponentT]):
         self._component_types: Tuple[Any, ...] = sum(type_candidates, ())
 
     @property
-    def components(self) -> List[UIComponentT]:
+    def children(self) -> List[UIComponentT]:
         """List[:class:`WrappedComponent`]: The UI components stored in this action row."""
-        return self._components
+        return self._children
 
     def append_item(self, item: UIComponentT) -> None:
         """Append a component to the action row. The component's type must match that
@@ -178,7 +184,7 @@ class ActionRow(Generic[UIComponentT]):
             raise ValueError("Too many components in this row, can not append a new one.")
 
         self.width += item.width
-        self._components.append(item)
+        self._children.append(item)
 
     def add_button(
         self: ActionRow[MessageUIComponent],
@@ -354,7 +360,7 @@ class ActionRow(Generic[UIComponentT]):
     def _underlying(self) -> ActionRowComponent:
         return ActionRowComponent._raw_construct(
             type=self.type,
-            children=[comp._underlying for comp in self.components],
+            children=[comp._underlying for comp in self._children],
         )
 
     def to_component_dict(self) -> ActionRowPayload:
@@ -365,7 +371,7 @@ class ActionRow(Generic[UIComponentT]):
         # As I implemented it now, indexing at e.g. 3 for a 5-width component would
         # return that component instead of erroring out.
         aggregate = 0
-        for component in self.components:
+        for component in self._children:
             aggregate += component.width
             if aggregate >= index:
                 return component
@@ -377,9 +383,12 @@ class ActionRow(Generic[UIComponentT]):
         :class:`disnake.ui.Modal`. Saves the need to import type specifiers to
         typehint empty action rows.
 
-        Returns:
-        :class:`ActionRow`[MessageUIComponent]:
-            The newly created empty action row.
+        .. versionadded:: 2.6
+
+        Returns
+        -------
+        :class:`ActionRow`:
+            The newly created empty action row, intended for modal components.
         """
         return ActionRow[ModalUIComponent]()
 
@@ -389,9 +398,12 @@ class ActionRow(Generic[UIComponentT]):
         :class:`disnake.Message`. Saves the need to import type specifiers to
         typehint empty action rows.
 
-        Returns:
-        :class:`ActionRow`[MessageUIComponent]:
-            The newly created empty action row.
+        .. versionadded:: 2.6
+
+        Returns
+        -------
+        :class:`ActionRow`:
+            The newly created empty action row, intended for message components.
         """
         return ActionRow[MessageUIComponent]()
 
