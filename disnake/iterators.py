@@ -917,6 +917,8 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
         return r > 0
 
     def create_user(self, data: GuildScheduledEventUserPayload) -> Union[User, Member]:
+        from .member import Member
+
         user_data = data["user"]
         member_data = data.get("member")
         if member_data is not None and (guild := self.event.guild) is not None:
