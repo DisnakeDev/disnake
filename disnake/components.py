@@ -484,6 +484,7 @@ T = TypeVar("T", bound=Component)
 def _component_factory(data: ComponentPayload, *, type: Type[T] = Component) -> T:
     # NOTE: due to speed, this method does not use the ComponentType enum
     #       as this runs every single time a component is received from the api
+    # NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
     component_type = data["type"]
     if component_type == 1:
         return ActionRow(data)  # type: ignore

@@ -24,7 +24,6 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from enum import Enum
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -34,11 +33,8 @@ from typing import (
     Literal,
     Optional,
     Sequence,
-    Tuple,
-    Type,
     TypeVar,
     Union,
-    get_args,
     overload,
 )
 
@@ -65,8 +61,9 @@ __all__ = ("ActionRow",)
 
 
 MessageUIComponent = Union[Button[Any], Select[Any]]
-ModalUIComponent = Union[TextInput, Select[Any]]
+ModalUIComponent = TextInput
 UIComponentT = TypeVar("UIComponentT", bound=WrappedComponent)
+UIComponentT_strict = TypeVar("UIComponentT_strict", MessageUIComponent, ModalUIComponent)
 
 Components = Union[
     "ActionRow[UIComponentT]",
@@ -75,18 +72,14 @@ Components = Union[
 ]
 
 
-class ActionRowType(tuple, Enum):
-    """Simple container for component type categories."""
-
-    message = get_args(MessageUIComponent)
-    modal = (ModalUIComponent,)  # TODO: replace with get_args(...) when modals support other types
-
-    def __str__(self) -> str:
-        return f"{self.name.title()}UIComponent"
-
-
 class ActionRow(Generic[UIComponentT]):
     """Represents a UI action row. Useful for lower level component manipulation.
+
+    .. container:: operations
+
+        .. describe:: x[i]
+
+            Returns the component at position ``i``. This takes component width into account.
 
     To handle interactions created by components sent in action rows or entirely independently,
     event listeners must be used. For buttons and selects, the related events are
@@ -112,47 +105,27 @@ class ActionRow(Generic[UIComponentT]):
     type: ClassVar[Literal[ComponentType.action_row]] = ComponentType.action_row
 
     @overload
-    def __new__(cls: Type[ActionRow[UIComponentT]], *args: Any) -> ActionRow[UIComponentT]:
+    def __init__(self: ActionRow[UIComponentT_strict], *components: UIComponentT_strict):
         ...
 
     @overload
-    def __new__(cls: Any, *args: MessageUIComponent) -> ActionRow[MessageUIComponent]:
+    def __init__(self: ActionRow[UIComponentT], *components: UIComponentT):
         ...
 
-    @overload
-    def __new__(cls: Any, *args: ModalUIComponent) -> ActionRow[ModalUIComponent]:
-        ...
-
-    def __new__(cls: Type[ActionRow[UIComponentT]], *args: Any) -> ActionRow[UIComponentT]:  # type: ignore
-        return super().__new__(cls)
-
-    def __init__(self, *components: UIComponentT):
+    def __init__(self, *components: UIComponentT):  # type: ignore
         self.width: int = 0
         self._children: List[UIComponentT] = []
 
-        # Validate the components
-        type_candidates = list(ActionRowType)
-
         for component in components:
-            for candidate in type_candidates:
-                if not isinstance(component, candidate):
-                    type_candidates.remove(candidate)
-
-            if not type_candidates:
-                raise TypeError("Unable to narrow down type of action row.")
 
             self.width += component.width
-            if self.width >= 5:
+            if self.width > 5:
                 raise ValueError("Too many components in one row.")
 
             self._children.append(component)
 
-        # Best we can do without directly inferring the generic type: Through type_candidates we
-        # narrow down the possible types (MessageUIComponents and/or ModalUIComponents) by checking
-        # all components that are added to the ActionRow.
-        # At the end, we just combine all remaining type_candidates into one tuple that holds all
-        # possible types. This is therefore not strictly type-safe but it is as close as we can get.
-        self._component_types: Tuple[Any, ...] = sum(type_candidates, ())
+    def __repr__(self) -> str:
+        return f"<ActionRow children={self.children!r}>"
 
     @property
     def children(self) -> List[UIComponentT]:
@@ -175,11 +148,6 @@ class ActionRow(Generic[UIComponentT]):
         TypeError
             The action row does not support items of this type.
         """
-        if not isinstance(item, self._component_types):
-            raise TypeError(
-                f"{type(item).__name__} cannot be added to ActionRow[{self._component_types}]s."
-            )
-
         if self.width + item.width > 5:
             raise ValueError("Too many components in this row, can not append a new one.")
 
@@ -225,9 +193,6 @@ class ActionRow(Generic[UIComponentT]):
         TypeError
             The action row does not support items of this type.
         """
-        if self._component_types is not ActionRowType.message:
-            raise TypeError("Buttons can only be added to ActionRow[MessageUIComponent]s.")
-
         self.append_item(
             Button(
                 style=style,
@@ -280,9 +245,6 @@ class ActionRow(Generic[UIComponentT]):
         TypeError
             The action row does not support items of this type.
         """
-        if self._component_types is not ActionRowType.message:
-            raise TypeError("Selects can only be added to ActionRow[MessageUIComponent]s.")
-
         self.append_item(
             Select(
                 custom_id=custom_id,
@@ -340,9 +302,6 @@ class ActionRow(Generic[UIComponentT]):
         TypeError
             The action row does not support items of this type.
         """
-        if self._component_types is not ActionRowType.modal:
-            raise TypeError("TextInputs can only be added to ActionRow[ModalUIComponent]s.")
-
         self.append_item(
             TextInput(
                 label=label,
@@ -444,12 +403,11 @@ def components_to_rows(components: Components[UIComponentT]) -> List[ActionRow[U
     if not isinstance(components, Sequence):
         components = [components]
 
-    action_rows: List[ActionRow[Any]] = []
-    auto_row: ActionRow[Any] = ActionRow()
-    # ^ Any to politely tell typechecking to stfu, maybe fix if deemed important.
+    action_rows: List[ActionRow[UIComponentT]] = []
+    auto_row: ActionRow[UIComponentT] = ActionRow()
 
     for component in components:
-        if isinstance(component, (Button, Select, TextInput)):
+        if isinstance(component, WrappedComponent):
             try:
                 auto_row.append_item(component)
             except ValueError:
