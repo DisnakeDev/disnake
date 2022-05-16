@@ -148,7 +148,6 @@ def tests(session: nox.Session, extras: Optional[str]):
         "--cov-context=test",
         *session.posargs,
     )
-    session.notify("coverage", session.posargs)
 
 
 @nox.session()
