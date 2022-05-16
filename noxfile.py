@@ -134,8 +134,8 @@ def pyright(session: nox.Session):
     "extras",
     [
         [],
-        ["speed"],
-        ["voice"],
+        # ["speed"],
+        # ["voice"],
     ],
 )
 def test(session: nox.Session, extras: List[str]):
