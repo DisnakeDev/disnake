@@ -130,7 +130,14 @@ def pyright(session: nox.Session):
 
 
 @nox.session(python=["3.8", "3.9", "3.10"])
-@nox.parametrize("extras", [None, "speed", "voice"])
+@nox.parametrize(
+    "extras",
+    [
+        None,
+        # "speed",
+        # "voice",
+    ],
+)
 def tests(session: nox.Session, extras: Optional[str]):
     """Run tests."""
     if extras:
@@ -177,8 +184,7 @@ def setup(session: nox.Session):
     if "." not in deps:
         deps.insert(0, ".")  # index doesn't really matter
 
-    # TODO: what's the point of `install_cwd=True` here?
-    install(session, *deps, update=True, run=True, install_cwd=True)
+    install(session, *deps, update=True, run=True)
 
     if session.interactive and "dev" in deps:
         session.run("pre-commit", "install", "--install-hooks")
