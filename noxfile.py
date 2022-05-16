@@ -22,7 +22,7 @@ nox.options.sessions = [
     "lint",
     "slotscheck",
     "pyright",
-    "tests",
+    "test",
 ]
 nox.needs_version = ">=2022.1.7"
 
@@ -138,7 +138,7 @@ def pyright(session: nox.Session):
         ["voice"],
     ],
 )
-def tests(session: nox.Session, extras: List[str]):
+def test(session: nox.Session, extras: List[str]):
     """Run tests."""
     install(session, "dev", *extras)
 
