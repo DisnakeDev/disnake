@@ -3,7 +3,7 @@ from __future__ import annotations
 import functools
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Optional, TypeVar
+from typing import TYPE_CHECKING, Callable, List, Optional, TypeVar
 
 import nox
 
@@ -133,17 +133,14 @@ def pyright(session: nox.Session):
 @nox.parametrize(
     "extras",
     [
-        None,
-        # "speed",
-        # "voice",
+        [],
+        ["speed"],
+        ["voice"],
     ],
 )
-def tests(session: nox.Session, extras: Optional[str]):
+def tests(session: nox.Session, extras: List[str]):
     """Run tests."""
-    if extras:
-        install(session, "dev", extras)
-    else:
-        install(session, "dev")
+    install(session, "dev", *extras)
 
     # TODO: only run tests that depend on the different dependencies
     session.run(
