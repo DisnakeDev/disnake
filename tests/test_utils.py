@@ -81,10 +81,8 @@ def test_deprecated(mock_warn: mock.Mock, instead, msg):
     def stuff(num: int) -> int:
         return num
 
-    stuff(42)
+    assert stuff(42) == 42
     mock_warn.assert_called_once_with(msg, stacklevel=3, category=DeprecationWarning)
-
-    assert stuff(3) == 3
 
 
 @pytest.mark.parametrize(
@@ -390,18 +388,17 @@ def test_get_slots():
 
 
 @pytest.mark.parametrize(
-    ("tz", "delta", "expected"),
+    "tz",
     [
         # naive datetime
-        (utils.MISSING, 7, 7),
+        utils.MISSING,
         # aware datetime
-        (None, 7, 7),
-        (timezone.utc, 7, 7),
-        (timezone(timedelta(hours=-9)), 7, 7),
-        # past datetime
-        (None, -100, 0),
+        None,
+        timezone.utc,
+        timezone(timedelta(hours=-9)),
     ],
 )
+@pytest.mark.parametrize(("delta", "expected"), [(7, 7), (-100, 0)])
 @helpers.freeze_time()
 def test_compute_timedelta(tz, delta, expected):
     dt = datetime.datetime.now()
@@ -760,7 +757,7 @@ def test_normalise_optional_params(params, expected):
         (Literal[1, Literal[False], "hi"], Literal[1, False, "hi"], False),
         # unions
         (Union[timezone, float], Union[timezone, float], False),
-        (Optional[int], Union[int, None], False),
+        (Optional[int], Optional[int], False),
         (Union["tuple", None, int], Union[tuple, int, None], True),
         # forward refs
         ("bool", bool, True),
@@ -774,18 +771,16 @@ def test_normalise_optional_params(params, expected):
         ),
     ],
 )
-@pytest.mark.parametrize("use_cache", [False, True])
-def test_resolve_annotation(tp, expected, expected_cache, use_cache):
-    cache = {} if use_cache else None
+def test_resolve_annotation(tp, expected, expected_cache):
+    cache = {}
     result = utils.resolve_annotation(tp, globals(), locals(), cache)
     assert result == expected
 
-    if use_cache:
-        # check if state is what we expect
-        assert bool(cache) == expected_cache
-        # if it's a forward ref, resolve again and ensure cache is used
-        if isinstance(tp, str):
-            assert utils.resolve_annotation(tp, globals(), locals(), cache) is result
+    # check if state is what we expect
+    assert bool(cache) == expected_cache
+    # if it's a forward ref, resolve again and ensure cache is used
+    if isinstance(tp, str):
+        assert utils.resolve_annotation(tp, globals(), locals(), cache) is result
 
 
 def test_resolve_annotation_literal():
