@@ -19,7 +19,7 @@ docs = { cmd = "nox -s docs --", help = "Build the documentation for development
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
 slotscheck = { cmd = "nox -s slotscheck --", help = "Run slotscheck" }
 setup_env = {cmd = 'nox -s setup --', help = 'Setup the local environment and set up all dependencies'}
-test = { cmd = "pytest -v --cov --cov-report=term", help = "Run pytest" }
+test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 
 [tool.slotscheck]
