@@ -30,6 +30,11 @@ jobs:
       run: |
         python -m pip install nox
 
+    - name: Test package install
+      run: |
+        python -m pip install .
+        python -m pip uninstall -y disnake
+
     - name: Run pytest
       # use non-utc timezone, to test time/date-dependent features properly
       env:
