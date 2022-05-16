@@ -13,10 +13,9 @@ filter_files = true
 
 [tool.taskipy.tasks]
 black = { cmd = "task lint black", help = "Run black" }
-docs = { cmd = "nox -s docs --", help = "Build the documentation for development"}
 isort = { cmd = "task lint isort", help = "Run isort" }
-lint = { cmd = "pre-commit run --all-files", help = "Check all files for linting errors" }
-precommit = { cmd = "pre-commit install --install-hooks && nox -s lint --install-only --", help = "Install the precommit hook" }
+lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
+docs = { cmd = "nox -s docs --", help = "Build the documentation for development"}
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
 slotscheck = { cmd = "nox -s slotscheck --", help = "Run slotscheck" }
 setup_env = {cmd = 'nox -s setup --', help = 'Setup the local environment and set up all dependencies'}
