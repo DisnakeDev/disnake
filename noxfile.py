@@ -106,7 +106,7 @@ def docs(session: nox.Session):
 @nox.session(python=False)
 def lint(session: nox.Session):
     """Check all files for linting errors"""
-    session.run("pre-commit", "run", "--all-files")
+    session.run("pre-commit", "run", "--all-files", *session.posargs)
 
 
 @nox.session()
