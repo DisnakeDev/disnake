@@ -2,7 +2,6 @@
 max-line-length = 100
 statistics = true
 exclude =
-    .svn
     CVS
     .bzr
     .hg
@@ -14,6 +13,9 @@ exclude =
     *.egg
     .venv
     venv
+    .pytest_cache
+    .mypy_cache
+    .nox
     build
 
 # For error codes, see this https://flake8.pycqa.org/en/latest/user/error-codes.html
