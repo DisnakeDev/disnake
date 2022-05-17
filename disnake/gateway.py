@@ -640,7 +640,7 @@ class DiscordWebSocket:
         else:
             try:
                 func(data)
-            except BaseException as e:
+            except Exception as e:
                 if event in {"READY", "RESUMED"}:  # exceptions in these events are fatal
                     raise
 
