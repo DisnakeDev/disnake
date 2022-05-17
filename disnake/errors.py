@@ -51,6 +51,7 @@ __all__ = (
     "InvalidData",
     "InvalidArgument",
     "LoginFailure",
+    "SessionStartLimitReached",
     "ConnectionClosed",
     "PrivilegedIntentsRequired",
     "InteractionException",
@@ -213,6 +214,11 @@ class LoginFailure(ClientException):
     """
 
     pass
+
+
+class SessionStartLimitReached(ClientException):
+    """Exception that's raised when :meth:`Client.connect` function
+    fails to connect to discord due to the session start limit reached."""
 
 
 class ConnectionClosed(ClientException):

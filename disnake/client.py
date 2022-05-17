@@ -65,6 +65,7 @@ from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
 from .enums import ApplicationCommandType, ChannelType, Status
 from .errors import *
+from .errors import SessionStartLimitReached
 from .flags import ApplicationFlags, Intents
 from .gateway import *
 from .guild import Guild
@@ -741,7 +742,9 @@ class Client:
         data = await self.http.static_login(token.strip())
         self._connection.user = ClientUser(state=self._connection, data=data)
 
-    async def connect(self, *, reconnect: bool = True) -> None:
+    async def connect(
+        self, *, reconnect: bool = True, ignore_session_start_limit: bool = False
+    ) -> None:
         """|coro|
 
         Creates a websocket connection and lets the websocket listen
@@ -749,13 +752,27 @@ class Client:
         event system and miscellaneous aspects of the library. Control
         is not resumed until the WebSocket connection is terminated.
 
+        If the client has no more connects remaining for the day and ``ignore_session_start_limit`` is ``False``,
+        this will raise a :class:`` exception rather than connecting and resetting the
+        token. However, if ``ignore_session_start_limit`` is ``True``, this will connect regardless.
+
+        .. versionchanged:: 2.6
+            Added usage of :class:`SessionStartLimit` when connecting to the api.
+
+        .. versionchanged:: 2.6
+            Added the ``ignore_session_start_limit`` parameter.
+
         Parameters
         ----------
         reconnect: :class:`bool`
-            If we should attempt reconnecting, either due to internet
+            Whether reconnecting should be attempted, either due to internet
             failure or a specific failure on Discord's part. Certain
             disconnects that lead to bad state will not be handled (such as
             invalid sharding payloads or bad tokens).
+
+        ignore_session_start_limit: :class:`bool`
+            Whether we should ignore the api provided session start limit when
+            connecting to the api.
 
         Raises
         ------
@@ -767,6 +784,11 @@ class Client:
         """
         _, gateway, session_start_limit = await self.http.get_bot_gateway()
         self.session_start_limit = SessionStartLimit(session_start_limit)
+
+        if not ignore_session_start_limit and self.session_start_limit.remaining == 0:
+            raise SessionStartLimitReached(
+                f"Daily session start limit has been reached, resets at {self.session_start_limit.reset_time}"
+            )
 
         ws_params = {
             "initial": True,

@@ -40,6 +40,7 @@ from .errors import (
     GatewayNotFound,
     HTTPException,
     PrivilegedIntentsRequired,
+    SessionStartLimitReached,
 )
 from .gateway import *
 from .state import AutoShardedConnectionState
@@ -426,12 +427,18 @@ class AutoShardedClient(Client):
         self.__shards[shard_id] = ret = Shard(ws, self, self.__queue.put_nowait)
         ret.launch()
 
-    async def launch_shards(self) -> None:
+    async def launch_shards(self, *, ignore_session_start_limit: bool = False) -> None:
         shard_count, gateway, session_start_limit = await self.http.get_bot_gateway()
-        if self.shard_count is None:
-            self.shard_count = shard_count
 
         self.session_start_limit = SessionStartLimit(session_start_limit)
+
+        if not ignore_session_start_limit and self.session_start_limit.remaining == 0:
+            raise SessionStartLimitReached(
+                f"Daily session start limit has been reached, resets at {self.session_start_limit.reset_time}"
+            )
+
+        if self.shard_count is None:
+            self.shard_count = shard_count
 
         self._connection.shard_count = self.shard_count
 
@@ -445,9 +452,11 @@ class AutoShardedClient(Client):
 
         self._connection.shards_launched.set()
 
-    async def connect(self, *, reconnect: bool = True) -> None:
+    async def connect(
+        self, *, reconnect: bool = True, ignore_session_start_limit: bool = False
+    ) -> None:
         self._reconnect = reconnect
-        await self.launch_shards()
+        await self.launch_shards(ignore_session_start_limit=ignore_session_start_limit)
 
         while not self.is_closed():
             item = await self.__queue.get()
