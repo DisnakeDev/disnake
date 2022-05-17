@@ -895,7 +895,9 @@ class Client:
         self._connection.clear()
         self.http.recreate()
 
-    async def start(self, token: str, *, reconnect: bool = True) -> None:
+    async def start(
+        self, token: str, *, reconnect: bool = True, ignore_session_start_limit: bool = False
+    ) -> None:
         """|coro|
 
         A shorthand coroutine for :meth:`login` + :meth:`connect`.
@@ -906,7 +908,9 @@ class Client:
             An unexpected keyword argument was received.
         """
         await self.login(token)
-        await self.connect(reconnect=reconnect)
+        await self.connect(
+            reconnect=reconnect, ignore_session_start_limit=ignore_session_start_limit
+        )
 
     def run(self, *args: Any, **kwargs: Any) -> None:
         """A blocking call that abstracts away the event loop
