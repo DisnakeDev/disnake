@@ -246,7 +246,7 @@ $(document).keydown((event) => {
       return false;
     }
 
-    // focus search `s` (`/` is already supported by Sphinx)
+    // focus search using `s` (`/` is already supported by Sphinx)
     if (event.key === "s") {
       focusSearch();
       return false;
