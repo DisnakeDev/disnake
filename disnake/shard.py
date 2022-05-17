@@ -432,11 +432,6 @@ class AutoShardedClient(Client):
 
         self.session_start_limit = SessionStartLimit(session_start_limit)
 
-        if not ignore_session_start_limit and self.session_start_limit.remaining == 0:
-            raise SessionStartLimitReached(
-                f"Daily session start limit has been reached, resets at {self.session_start_limit.reset_time}"
-            )
-
         if self.shard_count is None:
             self.shard_count = shard_count
 
@@ -444,6 +439,11 @@ class AutoShardedClient(Client):
 
         shard_ids = self.shard_ids or range(self.shard_count)
         self._connection.shard_ids = shard_ids
+
+        if not ignore_session_start_limit and self.session_start_limit.remaining < self.shard_count:
+            raise SessionStartLimitReached(
+                f"Daily session start limit has been reached, resets at {self.session_start_limit.reset_time}"
+            )
 
         # TODO: maybe take session_start_limit values into account?
         for shard_id in shard_ids:
