@@ -913,7 +913,9 @@ class ThreadMember(Hashable):
         try:
             self.id = int(data["user_id"])
         except KeyError:
-            assert self._state.self_id is not None
+            assert (  # noqa: S101 # ignored as this is fine to remove when compiling to optimised byte code
+                self._state.self_id is not None
+            )
             self.id = self._state.self_id
 
         try:

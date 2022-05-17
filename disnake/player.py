@@ -22,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+# flake8: noqa S404 S603
 from __future__ import annotations
 
 import asyncio
@@ -213,7 +214,7 @@ class FFmpegAudio(AudioSource):
             )
 
     def _pipe_writer(self, source: io.BufferedIOBase) -> None:
-        assert self._stdin
+        assert self._stdin  # noqa: S101 # TODO: remove this ignore (didn't want to touch this)
         while self._process:
             # arbitrarily large read size
             data = source.read(8192)
