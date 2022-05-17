@@ -54,6 +54,8 @@ class _ApplicationCommandOptional(TypedDict, total=False):
     dm_permission: Optional[bool]
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
+    # TODO: may be optional, though it doesn't really matter
+    nsfw: bool
 
 
 class ApplicationCommand(_ApplicationCommandOptional):
@@ -349,6 +351,7 @@ class _EditApplicationCommandOptional(TypedDict, total=False):
     default_permission: bool  # deprecated
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
+    nsfw: bool
 
 
 class EditApplicationCommand(_EditApplicationCommandOptional):
