@@ -75,6 +75,7 @@ if TYPE_CHECKING:
     from .types import (
         appinfo,
         audit_log,
+        auto_moderation,
         channel,
         components,
         embed,
@@ -2131,6 +2132,76 @@ class HTTPClient:
 
         r = Route("PATCH", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
         return self.request(r, json=payload, reason=reason)
+
+    # TODO: untested
+    def get_auto_moderation_rules(
+        self, guild_id: Snowflake
+    ) -> Response[List[auto_moderation.AutomodRule]]:
+        return self.request(
+            Route("GET", "/guilds/{guild_id}/auto-moderation/rules", guild_id=guild_id)
+        )
+
+    # unused
+    def get_auto_moderation_rule(
+        self, guild_id: Snowflake, rule_id: Snowflake
+    ) -> Response[auto_moderation.AutomodRule]:
+        return self.request(
+            Route(
+                "GET",
+                "/guilds/{guild_id}/auto-moderation/rules/{rule_id}",
+                guild_id=guild_id,
+                rule_id=rule_id,
+            )
+        )
+
+    def create_auto_moderation_rule(
+        self,
+        guild_id: Snowflake,
+        payload: auto_moderation.CreateAutomodRule,
+        *,
+        reason: Optional[str] = None,
+    ) -> Response[auto_moderation.AutomodRule]:
+        return self.request(
+            Route("POST", "/guilds/{guild_id}/auto-moderation/rules", guild_id=guild_id),
+            payload=payload,
+            reason=reason,
+        )
+
+    def edit_auto_moderation_rule(
+        self,
+        guild_id: Snowflake,
+        rule_id: Snowflake,
+        payload: auto_moderation.EditAutomodRule,
+        *,
+        reason: Optional[str] = None,
+    ) -> Response[auto_moderation.AutomodRule]:
+        return self.request(
+            Route(
+                "PATCH",
+                "/guilds/{guild_id}/auto-moderation/rules/{rule_id}",
+                guild_id=guild_id,
+                rule_id=rule_id,
+            ),
+            payload=payload,
+            reason=reason,
+        )
+
+    def delete_auto_moderation_rule(
+        self,
+        guild_id: Snowflake,
+        rule_id: Snowflake,
+        *,
+        reason: Optional[str] = None,
+    ) -> Response[None]:
+        return self.request(
+            Route(
+                "DELETE",
+                "/guilds/{guild_id}/auto-moderation/rules/{rule_id}",
+                guild_id=guild_id,
+                rule_id=rule_id,
+            ),
+            reason=reason,
+        )
 
     # Application commands (global)
 

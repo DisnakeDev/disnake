@@ -55,6 +55,8 @@ from .colour import Colour
 from .emoji import Emoji
 from .enums import (
     AuditLogAction,
+    AutomodEventType,
+    AutomodTriggerType,
     ChannelType,
     ContentFilter,
     GuildScheduledEventEntityType,
@@ -96,11 +98,13 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
+    from .auto_moderation import AutomodAction, AutomodRule
     from .channel import CategoryChannel, ForumChannel, StageChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration
+    from .types.auto_moderation import CreateAutomodRule as CreateAutomodRulePayload
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
     from .types.integration import IntegrationType
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
@@ -4074,3 +4078,85 @@ class Guild(Hashable):
 
         data = await self._state.http.edit_member(self.id, user.id, reason=reason, **payload)
         return Member(data=data, guild=self, state=self._state)
+
+    # TODO: untested
+    # TODO: naming
+    async def automod_rules(self) -> List[AutomodRule]:
+        """|coro|
+
+        Retrieves the guild's auto moderation rules.
+
+        Requires the :attr:`~Permissions.manage_guild` permission.
+
+        .. versionadded:: 2.6
+
+        Raises
+        ------
+        Forbidden
+            You do not have proper permissions to retrieve auto moderation rules.
+        HTTPException
+            Retrieving the rules failed.
+
+        Returns
+        -------
+        List[:class:`AutomodRule`]
+            The guild's auto moderation rules.
+        """
+        data = await self._state.http.get_auto_moderation_rules(self.id)
+        return [AutomodRule(data=rule_data, guild=self) for rule_data in data]
+
+    async def create_automod_rule(
+        self,
+        *,
+        name: str = None,
+        enabled: bool = None,
+        event_type: AutomodEventType = None,
+        trigger_type: AutomodTriggerType = None,
+        actions: Sequence[AutomodAction] = None,
+        trigger_metadata: Any = None,
+        exempt_roles: Sequence[Snowflake] = None,
+        exempt_channels: Sequence[Snowflake] = None,
+        reason: Optional[str] = None,
+    ) -> AutomodRule:
+        """|coro|
+
+        Creates a new :class:`AutomodRule` for the guild.
+
+        You must have :attr:`.Permissions.manage_guild` permission to do this.
+
+        .. versionadded:: 2.6
+
+        Raises
+        ------
+        Forbidden
+            You do not have proper permissions to create auto moderation rules.
+        HTTPException
+            Creating the rule failed.
+
+        Returns
+        -------
+        :class:`AutomodRule`
+            The newly created auto moderation rule.
+        """
+
+        payload: CreateAutomodRulePayload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if enabled is not None:
+            payload["enabled"] = enabled
+        if event_type is not None:
+            payload["event_type"] = try_enum_to_int(event_type)
+        if trigger_type is not None:
+            payload["trigger_type"] = try_enum_to_int(trigger_type)
+        if actions:
+            payload["actions"] = [a.to_dict() for a in actions]
+        if trigger_metadata:
+            payload["trigger_metadata"] = trigger_metadata
+        if exempt_roles:
+            payload["exempt_roles"] = [e.id for e in exempt_roles]
+        if exempt_channels:
+            payload["exempt_channels"] = [e.id for e in exempt_channels]
+
+        data = await self._state.http.create_auto_moderation_rule(self.id, payload, reason=reason)
+        return AutomodRule(data=data, guild=self)

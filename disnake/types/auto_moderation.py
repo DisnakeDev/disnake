@@ -59,3 +59,18 @@ class AutomodRule(TypedDict):
     trigger_metadata: Any
     exempt_roles: SnowflakeList
     exempt_channels: SnowflakeList
+
+
+class EditAutomodRule(TypedDict, total=False):
+    name: str
+    enabled: bool
+    trigger_type: AutomodTriggerType
+    actions: List[AutomodAction]
+    trigger_metadata: Any
+    exempt_roles: SnowflakeList
+    exempt_channels: SnowflakeList
+
+
+# TODO
+class CreateAutomodRule(EditAutomodRule, total=False):
+    event_type: AutomodEventType
