@@ -66,6 +66,9 @@ __all__ = (
     "ThreadArchiveDuration",
     "WidgetStyle",
     "Locale",
+    "AutomodTriggerType",
+    "AutomodEventType",
+    "AutomodActionType",
 )
 
 
@@ -379,6 +382,10 @@ class AuditLogAction(Enum):
     thread_update                    = 111
     thread_delete                    = 112
     application_command_permission_update = 121
+    auto_moderation_rule_create      = 140
+    auto_moderation_rule_update      = 141
+    auto_moderation_rule_delete      = 142
+    auto_moderation_block_message    = 143
     # fmt: on
 
     @property
@@ -433,6 +440,10 @@ class AuditLogAction(Enum):
             AuditLogAction.guild_scheduled_event_update: AuditLogActionCategory.update,
             AuditLogAction.guild_scheduled_event_delete: AuditLogActionCategory.delete,
             AuditLogAction.application_command_permission_update: AuditLogActionCategory.update,
+            AuditLogAction.auto_moderation_rule_create:   AuditLogActionCategory.create,
+            AuditLogAction.auto_moderation_rule_update:   AuditLogActionCategory.update,
+            AuditLogAction.auto_moderation_rule_delete:   AuditLogActionCategory.delete,
+            AuditLogAction.auto_moderation_block_message: None,
         }
         # fmt: on
         return lookup[self]
@@ -472,6 +483,12 @@ class AuditLogAction(Enum):
             return "thread"
         elif v < 122:
             return "application_command"
+        elif v < 140:
+            return None
+        elif v == 143:
+            return "user"
+        elif v < 143:
+            return "auto_moderation_rule"
         else:
             return None
 
@@ -767,6 +784,24 @@ class Locale(Enum):
 
     def __str__(self):
         return self.value
+
+
+class AutomodTriggerType(Enum):
+    keyword_filter = 1
+    # TODO: undocumented
+    spam_link_filter = 2
+    ml_spam_filter = 3
+    default_keyword_list = 4
+
+
+class AutomodEventType(Enum):
+    message_send = 1
+
+
+class AutomodActionType(Enum):
+    block_message = 1
+    # TODO: officially called `SEND_AN_ALERT`, unsure if that should be used instead
+    send_alert = 2
 
 
 T = TypeVar("T")
