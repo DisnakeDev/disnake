@@ -149,7 +149,7 @@ class AutomodRule:
 
     @property
     def exempt_channels(self) -> List[GuildChannelType]:
-        """List[:class:`abc.GuildChannel`]: The list of roles that are exempt from this rule."""
+        """List[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_channel, self._exempt_channel_ids)))
 
     def __repr__(self) -> str:
