@@ -34,7 +34,7 @@ AutomodActionType = Literal[1, 2]
 
 
 # TODO: undocumented
-class AutomodActionMetadata(TypedDict, total=True):
+class AutomodActionMetadata(TypedDict, total=False):
     channel_id: Snowflake
 
 
