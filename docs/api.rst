@@ -1400,7 +1400,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_auto_moderation_action(action)
 
-    Called when an :class:`AutomodAction` is executed.
+    Called when an :class:`AutomodAction` is executed due to an auto moderation rule triggering for a particular event.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
     .. versionadded:: 2.6
