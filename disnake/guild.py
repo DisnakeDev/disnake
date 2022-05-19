@@ -4105,6 +4105,7 @@ class Guild(Hashable):
         data = await self._state.http.get_auto_moderation_rules(self.id)
         return [AutomodRule(data=rule_data, guild=self) for rule_data in data]
 
+    # TODO: edit method in guild as well?
     async def create_automod_rule(
         self,
         *,

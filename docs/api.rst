@@ -2894,7 +2894,6 @@ of :class:`enum.Enum`.
 
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.enabled`
-        - :attr:`~AuditLogDiff.position`
         - :attr:`~AuditLogDiff.trigger_type`
         - :attr:`~AuditLogDiff.event_type`
         - :attr:`~AuditLogDiff.actions`
@@ -2914,12 +2913,8 @@ of :class:`enum.Enum`.
 
         Possible attributes for :class:`AuditLogDiff`:
 
-        ..
-            TODO unsure whether `position` is relevant at all
-
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.enabled`
-        - :attr:`~AuditLogDiff.position`
         - :attr:`~AuditLogDiff.trigger_type`
         - :attr:`~AuditLogDiff.event_type`
         - :attr:`~AuditLogDiff.actions`
@@ -2941,7 +2936,6 @@ of :class:`enum.Enum`.
 
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.enabled`
-        - :attr:`~AuditLogDiff.position`
         - :attr:`~AuditLogDiff.trigger_type`
         - :attr:`~AuditLogDiff.event_type`
         - :attr:`~AuditLogDiff.actions`
