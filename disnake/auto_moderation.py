@@ -56,14 +56,16 @@ class AutomodAction:
     ----------
     type: :class:`AutomodActionType`
         The action type.
+    guild: :class:`Guild`
+        The guild of the action, helpful for use with :func:`on_auto_moderation_action`.
     """
 
-    __slots__ = ("type", "_guild", "_metadata")
+    __slots__ = ("type", "guild", "_metadata")
 
     def __init__(
         self, *, guild: Guild, type: AutomodActionType, channel: Optional[Snowflake] = None
     ):
-        self._guild: Guild = guild
+        self.guild: Guild = guild
         self.type: AutomodActionType = enum_if_int(AutomodActionType, type)
         self._metadata: AutomodActionMetadata = {}
 
@@ -79,10 +81,15 @@ class AutomodAction:
     def channel(self) -> Optional[GuildChannelType]:
         """Optional[:class:`abc.GuildChannel`]: The channel to send an alert in when the rule is triggered,
         if :attr:`.type` is :attr:`AutomodActionType.send_alert`."""
-        return self._guild.get_channel(self.channel_id)  # type: ignore
+        # TODO: return Object instead of None?
+        return self.guild.get_channel(self.channel_id)  # type: ignore
 
     def __repr__(self) -> str:
-        return f"<AutomodAction type={self.type!r} channel={self.channel!r}>"
+        if self.type is AutomodActionType.send_alert:
+            channel_repr = f" channel={self.channel!r}"
+        else:
+            channel_repr = ""
+        return f"<AutomodAction type={self.type!r}{channel_repr}>"
 
     @classmethod
     def _from_dict(cls, data: AutomodActionPayload, guild: Guild) -> Self:
@@ -177,6 +184,7 @@ class AutomodRule:
     @property
     def exempt_roles(self) -> List[Role]:
         """List[:class:`Role`]: The list of roles that are exempt from this rule."""
+        # TODO: return Object instead of None?
         return list(filter(None, map(self.guild.get_role, self._exempt_role_ids)))
 
     @property

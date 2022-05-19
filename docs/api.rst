@@ -1012,7 +1012,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     .. versionadded:: 2.0
 
-    :param integration: The integration that was created.
+    :param integration: The integration that was updated.
     :type integration: :class:`Integration`
 
 .. function:: on_raw_integration_delete(payload)
@@ -1361,6 +1361,54 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     :param invite: The invite that was deleted.
     :type invite: :class:`Invite`
+
+.. function:: on_auto_moderation_rule_create(rule)
+
+    Called when an :class:`AutomodRule` is created.
+    You must have the :attr:`~Permissions.manage_guild` permission to receive this.
+
+    .. versionadded:: 2.6
+
+    This requires :attr:`Intents.auto_moderation` or :attr:`Intents.auto_moderation_configuration` to be enabled.
+
+    :param rule: The auto moderation rule that was created.
+    :type rule: :class:`AutomodRule`
+
+.. function:: on_auto_moderation_rule_update(rule)
+
+    Called when an :class:`AutomodRule` is updated.
+    You must have the :attr:`~Permissions.manage_guild` permission to receive this.
+
+    .. versionadded:: 2.6
+
+    This requires :attr:`Intents.auto_moderation` or :attr:`Intents.auto_moderation_configuration` to be enabled.
+
+    :param rule: The auto moderation rule that was updated.
+    :type rule: :class:`AutomodRule`
+
+.. function:: on_auto_moderation_rule_delete(rule)
+
+    Called when an :class:`AutomodRule` is deleted.
+    You must have the :attr:`~Permissions.manage_guild` permission to receive this.
+
+    .. versionadded:: 2.6
+
+    This requires :attr:`Intents.auto_moderation` or :attr:`Intents.auto_moderation_configuration` to be enabled.
+
+    :param rule: The auto moderation rule that was deleted.
+    :type rule: :class:`AutomodRule`
+
+.. function:: on_auto_moderation_action(action)
+
+    Called when an :class:`AutomodAction` is executed.
+    You must have the :attr:`~Permissions.manage_guild` permission to receive this.
+
+    .. versionadded:: 2.6
+
+    This requires :attr:`Intents.auto_moderation` or :attr:`Intents.auto_moderation_execution` to be enabled.
+
+    :param action: The auto moderation action that was executed.
+    :type action: :class:`AutomodAction`
 
 .. function:: on_group_join(channel, user)
               on_group_remove(channel, user)

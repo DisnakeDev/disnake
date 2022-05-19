@@ -54,6 +54,7 @@ from typing import (
 from . import utils
 from .activity import BaseActivity
 from .app_commands import GuildApplicationCommandPermissions, application_command_factory
+from .auto_moderation import AutomodAction, AutomodRule
 from .channel import *
 from .channel import _channel_factory
 from .emoji import Emoji
@@ -88,6 +89,7 @@ if TYPE_CHECKING:
     from .http import HTTPClient
     from .message import MessageableChannel
     from .types.activity import Activity as ActivityPayload
+    from .types.auto_moderation import AutomodRule as AutomodRulePayload
     from .types.channel import DMChannel as DMChannelPayload
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload
@@ -1747,6 +1749,55 @@ class ConnectionState:
                     data["timestamp"], tz=datetime.timezone.utc
                 )
                 self.dispatch("typing", channel, member, timestamp)
+
+    def parse_auto_moderation_rule_create(self, data: AutomodRulePayload) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "AUTO_MODERATION_RULE_CREATE referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        rule = AutomodRule(data=data, guild=guild)
+        self.dispatch("auto_moderation_rule_create", rule)
+
+    def parse_auto_moderation_rule_update(self, data: AutomodRulePayload) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "AUTO_MODERATION_RULE_UPDATE referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        rule = AutomodRule(data=data, guild=guild)
+        self.dispatch("auto_moderation_rule_update", rule)
+
+    def parse_auto_moderation_rule_delete(self, data: AutomodRulePayload) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "AUTO_MODERATION_RULE_DELETE referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        rule = AutomodRule(data=data, guild=guild)
+        self.dispatch("auto_moderation_rule_delete", rule)
+
+    def parse_auto_moderation_action_execution(self, data) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "AUTO_MODERATION_ACTION_EXECUTION referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        action = AutomodAction._from_dict(data=data["action"], guild=guild)
+        # TODO: naming
+        self.dispatch("auto_moderation_action", action)
 
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
