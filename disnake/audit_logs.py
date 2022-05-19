@@ -227,7 +227,7 @@ def _transform_automod_action(
 ) -> Optional[AutomodAction]:
     if data is None:
         return None
-    return AutomodAction(data=data, guild=entry.guild)
+    return AutomodAction._from_dict(data, entry.guild)
 
 
 class AuditLogDiff:

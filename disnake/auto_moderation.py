@@ -26,15 +26,20 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, List, Optional
 
-from .enums import AutomodActionType, AutomodEventType, AutomodTriggerType, try_enum
-from .utils import _get_as_snowflake, cached_slot_property
+from .enums import AutomodActionType, AutomodEventType, AutomodTriggerType, enum_if_int, try_enum
+from .object import Object
+from .utils import _get_as_snowflake
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
+    from .abc import Snowflake
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member
     from .role import Role
     from .types.auto_moderation import (
         AutomodAction as AutomodActionPayload,
+        AutomodActionMetadata,
         AutomodRule as AutomodRulePayload,
     )
 
@@ -51,28 +56,54 @@ class AutomodAction:
     ----------
     type: :class:`AutomodActionType`
         The action type.
-    channel_id: Optional[:class:`int`]
-        The target channel ID, if :attr:`.type` is :attr:`AutomodActionType.send_alert`.
     """
 
-    __slots__ = ("type", "channel_id", "_guild", "_metadata", "_cs_channel")
+    __slots__ = ("type", "_guild", "_metadata")
 
-    # TODO: create a `@classmethod _from_data` instead?
-    def __init__(self, *, data: AutomodActionPayload, guild: Guild):
+    def __init__(
+        self, *, guild: Guild, type: AutomodActionType, channel: Optional[Snowflake] = None
+    ):
         self._guild: Guild = guild
-        self.type: AutomodActionType = try_enum(AutomodActionType, data["type"])
+        self.type: AutomodActionType = enum_if_int(AutomodActionType, type)
+        self._metadata: AutomodActionMetadata = {}
 
-        self._metadata = data.get("metadata", {})  # allow access to unimplemented fields
-        self.channel_id: Optional[int] = _get_as_snowflake(self._metadata, "channel_id")
+        if channel:
+            self._metadata["channel_id"] = channel.id
 
-    @cached_slot_property("_cs_channel")
+    @property
+    def channel_id(self) -> Optional[int]:
+        """Optional[:class:`int`]: The target channel ID. See :attr:`~AutomodAction.channel` for more info."""
+        return _get_as_snowflake(self._metadata, "channel_id")
+
+    @property
     def channel(self) -> Optional[GuildChannelType]:
-        """Optional[:class:`abc.GuildChannel`]: The channel to send an alert in when the automod rule is triggered,
+        """Optional[:class:`abc.GuildChannel`]: The channel to send an alert in when the rule is triggered,
         if :attr:`.type` is :attr:`AutomodActionType.send_alert`."""
         return self._guild.get_channel(self.channel_id)  # type: ignore
 
     def __repr__(self) -> str:
         return f"<AutomodAction type={self.type!r} channel={self.channel!r}>"
+
+    @classmethod
+    def _from_dict(cls, data: AutomodActionPayload, guild: Guild) -> Self:
+        meta = data.get("metadata", {})
+        channel_id = _get_as_snowflake(meta, "channel_id")
+
+        self = cls(
+            guild=guild,
+            type=try_enum(AutomodActionType, data["type"]),
+            channel=Object(channel_id) if channel_id else None,
+        )
+
+        self._metadata = meta  # allow access to unimplemented fields
+
+        return self
+
+    def to_dict(self) -> AutomodActionPayload:
+        return {
+            "type": self.type.value,
+            "metadata": self._metadata,
+        }
 
 
 class AutomodRule:
@@ -117,7 +148,6 @@ class AutomodRule:
         "_exempt_channel_ids",
     )
 
-    # TODO: create a `@classmethod _from_data` instead?
     def __init__(self, *, data: AutomodRulePayload, guild: Guild):
         # note: `data["guild_id"]` also exists, but we don't have any use for it
         self.guild: Guild = guild
@@ -129,7 +159,9 @@ class AutomodRule:
         self.event_type: AutomodEventType = try_enum(AutomodEventType, data["event_type"])
         self.trigger_type: AutomodTriggerType = try_enum(AutomodTriggerType, data["trigger_type"])
         self.actions: List[AutomodAction] = [
-            AutomodAction(data=action, guild=guild) for action in data["actions"] if action
+            AutomodAction._from_dict(data=action, guild=guild)
+            for action in data["actions"]
+            if action
         ]
         self.trigger_metadata: Any = data["trigger_metadata"]
         self._exempt_role_ids: List[int] = list(map(int, data["exempt_roles"]))
