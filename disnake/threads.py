@@ -34,11 +34,13 @@ from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
+from .partial_emoji import PartialEmoji
 from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
     "Thread",
     "ThreadMember",
+    "ThreadTag",
 )
 
 if TYPE_CHECKING:
@@ -46,6 +48,7 @@ if TYPE_CHECKING:
 
     from .abc import Snowflake, SnowflakeTime
     from .channel import CategoryChannel, ForumChannel, TextChannel
+    from .emoji import Emoji
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage
@@ -58,6 +61,7 @@ if TYPE_CHECKING:
         ThreadArchiveDurationLiteral,
         ThreadMember as ThreadMemberPayload,
         ThreadMetadata,
+        ThreadTag as ThreadTagPayload,
     )
 
     AnyThreadArchiveDuration = Union[ThreadArchiveDuration, ThreadArchiveDurationLiteral]
@@ -160,6 +164,7 @@ class Thread(Messageable, Hashable):
         "create_timestamp",
         "last_pin_timestamp",
         "_flags",
+        "_tags",
         "_type",
         "_state",
         "_members",
@@ -198,6 +203,7 @@ class Thread(Messageable, Hashable):
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
+        self._tags = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
         try:
@@ -393,6 +399,27 @@ class Thread(Messageable, Hashable):
         :return type: :class:`bool`
         """
         return self.flags.pinned
+
+    @property
+    def tags(self) -> List[ThreadTag]:
+        """List[:class:`ThreadTag`]: The tags currently applied to this thread.
+        Only applicable to threads in :class:`ForumChannel`\\s.
+
+        .. versionadded:: 2.6
+        """
+        parent = self.parent
+        if not parent:
+            return []
+
+        from .channel import ForumChannel  # cyclic import
+
+        if not isinstance(parent, ForumChannel):
+            # TODO: return [] here as well, instead of raising exception?
+            raise TypeError("Only threads in forum channels have tags")
+
+        # threads may have tag IDs for tags that don't exist anymore
+        tags = (parent._available_tags.get(tag_id) for tag_id in self._tags)
+        return [tag for tag in tags if tag]
 
     def permissions_for(
         self,
@@ -959,3 +986,56 @@ class ThreadMember(Hashable):
     def thread(self) -> Thread:
         """:class:`Thread`: The thread this member belongs to."""
         return self.parent
+
+
+class ThreadTag:
+    """
+    Represents a tag for threads in forum channels.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two tags are equal.
+
+        .. describe:: x != y
+
+            Checks if two tags are not equal.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The tag's ID.
+    name: :class:`str`
+        The tag's name.
+    """
+
+    __slots__ = ("id", "name", "_emoji_id", "_emoji_name", "_channel")
+
+    def __init__(self, data: ThreadTagPayload, channel: ForumChannel):
+        self._channel = channel
+        self.id: int = int(data["id"])
+        self.name: str = data["name"]
+        # emoji_id may be `0`, use `None` instead
+        self._emoji_id: Optional[int] = _get_as_snowflake(data, "emoji_id") or None
+        self._emoji_name: Optional[str] = data.get("emoji_name")
+
+    def __repr__(self) -> str:
+        return f"<ThreadTag id={self.id!r} name={self.name!r} emoji={self.emoji!r}"
+
+    @property
+    def emoji(self) -> Union[Emoji, PartialEmoji]:
+        emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        if self._emoji_id:
+            emoji = self._channel._state.get_emoji(self._emoji_id)
+        if not emoji:
+            emoji = PartialEmoji.with_state(
+                state=self._channel._state,
+                name=self._emoji_name or "",
+                id=self._emoji_id,
+                # note: `animated` is unknown but presumably we already got the (animated)
+                # emoji from the guild cache at this point
+            )
+        return emoji

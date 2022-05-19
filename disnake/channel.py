@@ -60,7 +60,7 @@ from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .permissions import PermissionOverwrite, Permissions
 from .stage_instance import StageInstance
-from .threads import Thread
+from .threads import Thread, ThreadTag
 from .utils import MISSING
 
 __all__ = (
@@ -2489,6 +2489,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between creating threads
         in this channel. A value of `0` denotes that it is disabled.
+
+    template: Optional[:class:`str`]
+        The message template for new forum threads, if any.
+
+        .. versionadded:: 2.6
     """
 
     __slots__ = (
@@ -2503,6 +2508,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "default_auto_archive_duration",
         "guild",
         "slowmode_delay",
+        "_available_tags",
+        "template",
         "_state",
         "_type",
         "_overwrites",
@@ -2524,6 +2531,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
             ("flags", self.flags),
+            ("available_tags", self.available_tags),
+            ("template", self.template),
         )
         joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{type(self).__name__} {joined}>"
@@ -2541,7 +2550,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
             "default_auto_archive_duration", 1440
         )
-        self.slowmode_delay = data.get("rate_limit_per_user", 0)
+        self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        tags = [ThreadTag(data=tag, channel=self) for tag in data.get("available_tags", [])]
+        self._available_tags: Dict[int, ThreadTag] = {tag.id: tag for tag in tags}
+        self.template: Optional[str] = data.get("template") or None
         self._fill_overwrites(data)
 
     async def _get_channel(self) -> ForumChannel:
@@ -2610,6 +2622,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The last created thread in this channel or ``None`` if not found.
         """
         return self._state.get_channel(self.last_thread_id) if self.last_thread_id else None  # type: ignore
+
+    @property
+    def available_tags(self) -> List[ThreadTag]:
+        """List[:class:`ThreadTag`]: The available thread tags for this channel.
+
+        .. versionadded:: 2.6
+        """
+        return list(self._available_tags.values())
 
     # both of these are re-implemented due to forum channels not being messageables
     async def trigger_typing(self) -> None:
