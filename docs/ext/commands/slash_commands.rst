@@ -18,9 +18,9 @@ You have probably noticed that slash commands have really interactive user inter
 This is because each slash command is registered in Discord before people can see it. This library handles registration for you,
 but you can still manage it.
 
-By default, the registration is global. This means that your slash commands will be visible everywhere, including bot DMs.
-Global registration can take up to 1 hour to complete, this is an API limitation. You can change the registration to be local,
-so your slash commands will only be visible in several guilds. This type of registration is almost instant.
+By default, the registration is global. This means that your slash commands will be visible everywhere, including bot DMs,
+though you can disable them in DMs by setting the appropriate :ref:`permissions <app_command_permissions>`.
+You can also change the registration to be local, so your slash commands will only be visible in several guilds.
 
 This code sample shows how to set the registration to be local:
 

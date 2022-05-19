@@ -738,8 +738,8 @@ def slash_command(
         .. versionadded:: 2.5
 
     guild_ids: List[:class:`int`]
-        If specified, the client will register a command in these guilds.
-        Otherwise this command will be registered globally in ~1 hour.
+        If specified, the client will register the command in these guilds.
+        Otherwise, this command will be registered globally.
     connectors: Dict[:class:`str`, :class:`str`]
         Binds function names to option names. If the name
         of an option already matches the corresponding function param,

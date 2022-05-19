@@ -476,8 +476,8 @@ class InteractionBotBase(CommonBotBase):
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
-            If specified, the client will register a command in these guilds.
-            Otherwise this command will be registered globally in ~1 hour.
+            If specified, the client will register the command in these guilds.
+            Otherwise, this command will be registered globally.
         connectors: Dict[:class:`str`, :class:`str`]
             Binds function names to option names. If the name
             of an option already matches the corresponding function param,
@@ -551,7 +551,7 @@ class InteractionBotBase(CommonBotBase):
             Whether to automatically register the command. Defaults to ``True``.
         guild_ids: Sequence[:class:`int`]
             If specified, the client will register the command in these guilds.
-            Otherwise this command will be registered globally in ~1 hour.
+            Otherwise, this command will be registered globally.
         extras: Dict[:class:`str`, Any]
             A dict of user provided extras to attach to the command.
 
@@ -616,7 +616,7 @@ class InteractionBotBase(CommonBotBase):
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
             If specified, the client will register the command in these guilds.
-            Otherwise this command will be registered globally in ~1 hour.
+            Otherwise, this command will be registered globally.
         extras: Dict[:class:`str`, Any]
             A dict of user provided extras to attach to the command.
 
@@ -727,8 +727,6 @@ class InteractionBotBase(CommonBotBase):
             "Application command synchronization:\n"
             "GLOBAL COMMANDS\n"
             "===============\n"
-            "| NOTE: global commands can take up to 1 hour to show up after registration.\n"
-            "|\n"
             f"| Update is required: {update_required}\n{_format_diff(diff)}"
         )
 

@@ -283,7 +283,7 @@ def user_command(
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
         If specified, the client will register the command in these guilds.
-        Otherwise this command will be registered globally in ~1 hour.
+        Otherwise, this command will be registered globally.
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
@@ -357,7 +357,7 @@ def message_command(
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
         If specified, the client will register the command in these guilds.
-        Otherwise this command will be registered globally in ~1 hour.
+        Otherwise, this command will be registered globally.
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
