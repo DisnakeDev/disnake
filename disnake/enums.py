@@ -787,10 +787,9 @@ class Locale(Enum):
 
 
 class AutomodTriggerType(Enum):
-    keyword_filter = 1
-    # TODO: undocumented
-    spam_link_filter = 2
-    ml_spam_filter = 3
+    keywords = 1
+    harmful_links = 2
+    spam = 3
     default_keyword_list = 4
 
 
@@ -800,8 +799,7 @@ class AutomodEventType(Enum):
 
 class AutomodActionType(Enum):
     block_message = 1
-    # TODO: officially called `SEND_AN_ALERT`, unsure if that should be used instead
-    send_alert = 2
+    log_to_channel = 2
 
 
 T = TypeVar("T")

@@ -3424,15 +3424,15 @@ of :class:`enum.Enum`.
 
     .. versionadded:: 2.6
 
-    .. attribute:: keyword_filter
+    .. attribute:: keywords
 
         The rule will filter messages based on a custom keyword list.
 
-    .. attribute:: spam_link_filter
+    .. attribute:: harmful_links
 
-        The rule will filter nessages containing malicious links.
+        The rule will filter messages containing malicious links.
 
-    .. attribute:: ml_spam_filter
+    .. attribute:: spam
 
         The rule will filter messages suspected of being spam.
 
@@ -3460,7 +3460,7 @@ of :class:`enum.Enum`.
 
         The rule will prevent matching messages from being posted.
 
-    .. attribute:: send_alert
+    .. attribute:: log_to_channel
 
         The rule will send an alert to a specified channel.
 

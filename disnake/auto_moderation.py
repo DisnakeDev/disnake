@@ -85,7 +85,7 @@ class AutomodAction:
         return self.guild.get_channel(self.channel_id)  # type: ignore
 
     def __repr__(self) -> str:
-        if self.type is AutomodActionType.send_alert:
+        if self.type is AutomodActionType.log_to_channel:
             channel_repr = f" channel={self.channel!r}"
         else:
             channel_repr = ""
