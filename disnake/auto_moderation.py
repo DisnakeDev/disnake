@@ -164,7 +164,6 @@ class AutomodRule:
     )
 
     def __init__(self, *, data: AutomodRulePayload, guild: Guild):
-        # note: `data["guild_id"]` also exists, but we don't have any use for it
         self.guild: Guild = guild
 
         self.id: int = int(data["id"])
