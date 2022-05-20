@@ -129,6 +129,11 @@ class Colour:
         return cls.from_rgb(*(int(x * 255) for x in rgb))
 
     @classmethod
+    def from_hex(cls: Type[CT], hex: str) -> CT:
+        """Constructs a :class:`Colour` from hex value."""
+        return cls(int(hex.strip("#"), 16))
+
+    @classmethod
     def default(cls: Type[CT]) -> CT:
         """A factory method that returns a :class:`Colour` with a value of ``0``."""
         return cls(0)
