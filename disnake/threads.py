@@ -27,14 +27,14 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Tuple, Union
 
 from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
-from .errors import ClientException
+from .errors import ClientException, InvalidData
 from .flags import ChannelFlags
 from .mixins import Hashable
-from .partial_emoji import PartialEmoji
+from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
@@ -55,8 +55,10 @@ if TYPE_CHECKING:
     from .permissions import Permissions
     from .role import Role
     from .state import ConnectionState
+    from .types.channel import ForumChannel as ForumChannelPayload
     from .types.snowflake import SnowflakeList
     from .types.threads import (
+        EditThreadTag as EditThreadTagPayload,
         Thread as ThreadPayload,
         ThreadArchiveDurationLiteral,
         ThreadMember as ThreadMemberPayload,
@@ -1039,3 +1041,47 @@ class ThreadTag:
                 # emoji from the guild cache at this point
             )
         return emoji
+
+    async def edit(
+        self,
+        *,
+        name: str = MISSING,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        reason: Optional[str] = None,
+    ) -> ThreadTag:
+        # seems like all fields have to be provided when editing  # TODO
+        new_name = name or self.name
+        if emoji:
+            emoji_id, emoji_name = self._get_emoji_params(emoji)
+        else:
+            emoji_id, emoji_name = self._emoji_id, self._emoji_name
+        payload: EditThreadTagPayload = {
+            "name": new_name,
+            "emoji_id": emoji_id,
+            "emoji_name": emoji_name,
+        }
+
+        data = await self._channel._state.http.edit_thread_tag(
+            self._channel.id, self.id, reason=reason, **payload
+        )
+        return self._find_in_response(data, self._channel, new_name)
+
+    async def delete(self, *, reason: Optional[str] = None) -> None:
+        await self._channel._state.http.delete_thread_tag(self._channel.id, self.id, reason=reason)
+
+    @staticmethod
+    def _get_emoji_params(
+        emoji: Optional[Union[str, Emoji, PartialEmoji]]
+    ) -> Tuple[Optional[int], Optional[str]]:
+        if isinstance(emoji, _EmojiTag):
+            return emoji.id, None
+        else:
+            return None, emoji
+
+    @staticmethod
+    def _find_in_response(data: ForumChannelPayload, channel: ForumChannel, name: str) -> ThreadTag:
+        for tag in data.get("available_tags", []):
+            # tag names are unique
+            if tag["name"] == name:
+                return ThreadTag(tag, channel=channel)
+        raise InvalidData("Could not find created tag in response")

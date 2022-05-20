@@ -97,3 +97,18 @@ class ThreadTag(TypedDict):
     name: str
     emoji_id: Snowflake  # note: may be 0
     emoji_name: Optional[str]
+
+
+class _CreateThreadTagOptional(TypedDict, total=False):
+    emoji_id: Optional[Snowflake]
+    emoji_name: Optional[str]
+
+
+class CreateThreadTag(_CreateThreadTagOptional):
+    name: str
+
+
+class EditThreadTag(TypedDict):
+    name: str
+    emoji_id: Optional[Snowflake]
+    emoji_name: Optional[str]

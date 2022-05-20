@@ -81,9 +81,11 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .asset import AssetBytes
     from .embeds import Embed
+    from .emoji import Emoji
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
     from .message import AllowedMentions, Message, PartialMessage
+    from .partial_emoji import PartialEmoji
     from .role import Role
     from .state import ConnectionState
     from .sticker import GuildSticker, StickerItem
@@ -3141,6 +3143,25 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             self.id, name=str(name), avatar=avatar_data, reason=reason
         )
         return Webhook.from_state(data, state=self._state)
+
+    def get_tag(self, tag_id: int, /) -> Optional[ThreadTag]:
+        return self._available_tags.get(tag_id)
+
+    async def create_tag(
+        self,
+        *,
+        name: str,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        reason: Optional[str] = None,
+    ) -> ThreadTag:
+        emoji_id, emoji_name = ThreadTag._get_emoji_params(emoji)
+
+        # note: returns updated channel data instead of tag data
+        data = await self._state.http.create_thread_tag(
+            self.id, name=name, emoji_id=emoji_id, emoji_name=emoji_name, reason=reason
+        )
+        # TODO: parse entire channel here and update cache, instead of just relying on gw event?
+        return ThreadTag._find_in_response(data, self, name)
 
 
 class DMChannel(disnake.abc.Messageable, Hashable):
