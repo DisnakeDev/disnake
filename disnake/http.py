@@ -2271,7 +2271,7 @@ class HTTPClient:
         tag_id: Snowflake,
         *,
         reason: Optional[str] = None,
-    ) -> Response[None]:
+    ) -> Response[channel.ForumChannel]:
         r = Route(
             "DELETE", "/channels/{channel_id}/tags/{tag_id}", channel_id=channel_id, tag_id=tag_id
         )
