@@ -2625,7 +2625,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def available_tags(self) -> List[ThreadTag]:
-        """List[:class:`ThreadTag`]: The available thread tags for this channel.
+        """List[:class:`ThreadTag`]: The available tags for threads in this forum channel.
 
         .. versionadded:: 2.6
         """
@@ -3157,6 +3157,20 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         return Webhook.from_state(data, state=self._state)
 
     def get_tag(self, tag_id: int, /) -> Optional[ThreadTag]:
+        """Returns a thread tag with the given ID.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        tag_id: :class:`int`
+            The ID to search for.
+
+        Returns
+        -------
+        Optional[:class:`ThreadTag`]
+            The tag with the given ID, or ``None`` if not found.
+        """
         return self._available_tags.get(tag_id)
 
     async def create_tag(
@@ -3167,6 +3181,37 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         # TODO: reason support tbd
         reason: Optional[str] = None,
     ) -> ThreadTag:
+        """|coro|
+
+        Creates a :class:`ThreadTag` for the forum channel.
+        A forum channel can have a maximum of 10 tags.
+
+        You must have :attr:`~Permissions.manage_channels` permission to
+        do this.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The tag name.
+        emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The tag emoji, if any.
+        reason: Optional[:class:`str`]
+            The reason for creating this tag. Shows up on the audit log.
+
+        Raises
+        ------
+        InvalidData
+            Invalid channel/tag data was received from Discord.
+        Forbidden
+            You do not have permissions to create the tag.
+        HTTPException
+            Creating the tag failed.
+
+        Returns
+        -------
+        :class:`ThreadTag`
+            The newly created tag.
+        """
         emoji_id, emoji_name = ThreadTag._get_emoji_params(emoji)
 
         # note: returns updated channel data instead of tag data

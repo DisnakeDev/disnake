@@ -1012,7 +1012,8 @@ class ThreadMember(Hashable):
         return self.parent
 
 
-class ThreadTag:
+# TODO: just `Tag` instead of `ThreadTag`?
+class ThreadTag(Hashable):
     """
     Represents a tag for threads in forum channels.
 
@@ -1025,6 +1026,14 @@ class ThreadTag:
         .. describe:: x != y
 
             Checks if two tags are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the tag's hash.
+
+        .. describe:: str(x)
+
+            Returns the tag's name.
 
     .. versionadded:: 2.6
 
@@ -1049,8 +1058,12 @@ class ThreadTag:
     def __repr__(self) -> str:
         return f"<ThreadTag id={self.id!r} name={self.name!r} emoji={self.emoji!r}>"
 
+    def __str__(self) -> str:
+        return self.name
+
     @property
     def emoji(self) -> Optional[Union[Emoji, PartialEmoji]]:
+        """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]: The emoji associated with this tag, if any."""
         if not (self._emoji_name or self._emoji_id):
             return None
 
@@ -1074,6 +1087,36 @@ class ThreadTag:
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         reason: Optional[str] = None,
     ) -> ThreadTag:
+        """|coro|
+
+        Edits the tag.
+
+        You must have the :attr:`~Permissions.manage_channels` permission to
+        do this.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The new tag name.
+        emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The new tag emoji. Set to ``None`` to remove the emoji.
+        reason: Optional[:class:`str`]
+            The reason for editing the tag. Shows up on the audit log.
+
+        Raises
+        ------
+        InvalidData
+            Invalid channel/tag data was received from Discord.
+        Forbidden
+            You do not have permissions to edit the tag.
+        HTTPException
+            Editing the tag failed.
+
+        Returns
+        -------
+        :class:`ThreadTag`
+            The newly edited tag.
+        """
         # seems like all fields have to be provided when editing  # TODO
         new_name = name or self.name
         if emoji:
@@ -1092,6 +1135,25 @@ class ThreadTag:
         return self._find_in_response(data, self._channel, new_name)
 
     async def delete(self, *, reason: Optional[str] = None) -> None:
+        """|coro|
+
+        Deletes the tag.
+
+        You must have :attr:`~Permissions.manage_channels` permission to
+        do this.
+
+        Parameters
+        ----------
+        reason: Optional[:class:`str`]
+            The reason for deleting this tag. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You are not allowed to delete tags.
+        HTTPException
+            An error occurred deleting the tag.
+        """
         await self._channel._state.http.delete_thread_tag(self._channel.id, self.id, reason=reason)
 
     @staticmethod
