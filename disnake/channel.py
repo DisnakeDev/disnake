@@ -2898,6 +2898,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         slowmode_delay: int = MISSING,
+        tags: Sequence[Snowflake] = MISSING,
         content: str,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
@@ -2931,6 +2932,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If not provided, slowmode is disabled.
+        tags: Sequence[:class:`abc.Snowflake`]
+            The tags to apply to the new thread. Maximum of 2.
+
+            .. versionadded:: 2.6
+
         content: :class:`str`
             The content of the message to send.
         embed: :class:`.Embed`
@@ -3005,6 +3011,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
+        applied_tags = [t.id for t in tags] if tags else []
+
         if params.files and len(params.files) > 10:
             raise ValueError("files parameter must be a list of up to 10 elements")
         elif params.files and not all(isinstance(file, File) for file in params.files):
@@ -3021,6 +3029,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
                 rate_limit_per_user=slowmode_delay or 0,
+                applied_tags=applied_tags,
                 type=ChannelType.public_thread.value,
                 files=params.files,
                 flags=flags,
@@ -3155,6 +3164,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        # TODO: reason support tbd
         reason: Optional[str] = None,
     ) -> ThreadTag:
         emoji_id, emoji_name = ThreadTag._get_emoji_params(emoji)

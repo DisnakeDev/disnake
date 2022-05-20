@@ -27,7 +27,18 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 
 from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
@@ -402,6 +413,7 @@ class Thread(Messageable, Hashable):
         """
         return self.flags.pinned
 
+    # TODO: `applied_tags` instead of `tags`?
     @property
     def tags(self) -> List[ThreadTag]:
         """List[:class:`ThreadTag`]: The tags currently applied to this thread.
@@ -656,6 +668,7 @@ class Thread(Messageable, Hashable):
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         pinned: bool = MISSING,
         flags: ChannelFlags = MISSING,
+        tags: Sequence[Snowflake] = MISSING,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
@@ -694,6 +707,12 @@ class Thread(Messageable, Hashable):
         flags: :class:`ChannelFlags`
             The new channel flags to set for this thread. This will overwrite any existing flags set on this channel.
             If parameter ``pinned`` is provided, that will override the setting of :attr:`ChannelFlags.pinned`.
+
+            .. versionadded:: 2.6
+
+        tags: Sequence[:class:`abc.Snowflake`]
+            The new tags of the thread. Maximum of 2.
+            This is only available for threads created in a :class:`ForumChannel`.
 
             .. versionadded:: 2.6
 
@@ -737,6 +756,9 @@ class Thread(Messageable, Hashable):
             if not isinstance(flags, ChannelFlags):
                 raise TypeError("flags field must be of type ChannelFlags")
             payload["flags"] = flags.value
+
+        if tags is not MISSING:
+            payload["applied_tags"] = [t.id for t in tags]
 
         data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
         # The data payload will always be a Thread payload
