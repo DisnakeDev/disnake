@@ -17,12 +17,6 @@ understand how your commands show up in Discord. If ``sync_commands`` kwarg of :
 the library registers / updates all commands automatically. Based on the application commands defined in your code it decides
 which commands should be registered, edited or deleted but there're some edge cases you should keep in mind.
 
-Global registration
-+++++++++++++++++++
-
-Registering commands globally may take up to 1 hour, this is an API limitation. You don't have to keep your bot online this whole time though,
-it's enough to launch it at least once.
-
 Changing test guilds
 ++++++++++++++++++++
 
