@@ -2745,6 +2745,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.6
 
+        template: Optional[:class:`str`]
+            The message template for new forum threads.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
