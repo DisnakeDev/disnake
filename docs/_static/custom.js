@@ -239,16 +239,15 @@ $(document).keydown((event) => {
     return;
   }
 
-  if (!event.ctrlKey) {
+  if (!event.ctrlKey && !event.shiftKey) {
     // close modal using `escape`, if modal exists
-    if (!event.shiftKey && event.key === "Escape" && activeModal) {
+    if (event.key === "Escape" && activeModal) {
       activeModal.close();
       return false;
     }
 
-    // focus search using `/` or `s`
-    // (not checking `shiftKey` for `/` since some keyboards need it)
-    if (event.key === "/" || (!event.shiftKey && event.key === "s")) {
+    // focus search using `s` (`/` is already supported by Sphinx)
+    if (event.key === "s") {
       focusSearch();
       return false;
     }
