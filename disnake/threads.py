@@ -1025,10 +1025,13 @@ class ThreadTag:
         self._emoji_name: Optional[str] = data.get("emoji_name")
 
     def __repr__(self) -> str:
-        return f"<ThreadTag id={self.id!r} name={self.name!r} emoji={self.emoji!r}"
+        return f"<ThreadTag id={self.id!r} name={self.name!r} emoji={self.emoji!r}>"
 
     @property
-    def emoji(self) -> Union[Emoji, PartialEmoji]:
+    def emoji(self) -> Optional[Union[Emoji, PartialEmoji]]:
+        if not (self._emoji_name or self._emoji_id):
+            return None
+
         emoji: Optional[Union[Emoji, PartialEmoji]] = None
         if self._emoji_id:
             emoji = self._channel._state.get_emoji(self._emoji_id)
