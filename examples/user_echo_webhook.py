@@ -6,7 +6,7 @@ description = """This is a script wherein the user can input
                  bot will create a webhook to "impersonate"
                  specified user, so to speak."""
 
-# Not limiting the permissions, since this is an example - set this accordingly.
+# Not limiting the intents, since this is an example - set this accordingly.
 intents = disnake.Intents.all()
 
 client = commands.Bot(
