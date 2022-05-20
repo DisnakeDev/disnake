@@ -185,7 +185,7 @@ class Thread(Messageable, Hashable):
         return (
             f"<Thread id={self.id!r} name={self.name!r} parent={self.parent!r} "
             f"owner_id={self.owner_id!r} locked={self.locked!r} archived={self.archived!r} "
-            f"flags={self.flags!r}>"
+            f"flags={self.flags!r} tags={self.tags!r}>"
         )
 
     def __str__(self) -> str:
