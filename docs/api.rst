@@ -2698,6 +2698,11 @@ of :class:`enum.Enum`.
         the :class:`StageInstance` or :class:`Object` with the ID of the stage
         instance which was created.
 
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` is
+        set to an unspecified proxy object with one attribute:
+
+        - ``channel``: The :class:`StageChannel` or :class:`Object` with the channel ID where the stage instance was started.
+
         Possible attributes for :class:`AuditLogDiff`:
 
         - :attr:`~AuditLogDiff.topic`
@@ -2713,6 +2718,9 @@ of :class:`enum.Enum`.
         the :class:`StageInstance` or :class:`Object` with the ID of the stage
         instance which was updated.
 
+        See :attr:`stage_instance_create` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
+
         Possible attributes for :class:`AuditLogDiff`:
 
         - :attr:`~AuditLogDiff.topic`
@@ -2723,6 +2731,9 @@ of :class:`enum.Enum`.
     .. attribute:: stage_instance_delete
 
         A stage instance was ended.
+
+        See :attr:`stage_instance_create` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
 
         .. versionadded:: 2.0
 
