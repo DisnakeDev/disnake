@@ -53,7 +53,6 @@ from .errors import ClientException, InvalidArgument
 from .file import File
 from .flags import MessageFlags
 from .invite import Invite
-from .iterators import HistoryIterator
 from .mentions import AllowedMentions
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
@@ -82,6 +81,7 @@ if TYPE_CHECKING:
     from .enums import InviteTarget
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
+    from .iterators import HistoryIterator
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .state import ConnectionState
@@ -1698,6 +1698,8 @@ class Messageable:
         :class:`.Message`
             The message with the message data parsed.
         """
+        from .iterators import HistoryIterator  # cyclic import
+
         return HistoryIterator(
             self, limit=limit, before=before, after=after, around=around, oldest_first=oldest_first
         )

@@ -78,6 +78,7 @@ if TYPE_CHECKING:
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
     from .user import User
+    from .webhook import Webhook
 
 
 def _transform_permissions(entry: AuditLogEntry, data: str) -> Permissions:
@@ -441,10 +442,28 @@ class AuditLogEntry(Hashable):
         The reason this action was done.
     """
 
-    def __init__(self, *, users: Dict[int, User], data: AuditLogEntryPayload, guild: Guild):
+    def __init__(
+        self,
+        *,
+        data: AuditLogEntryPayload,
+        guild: Guild,
+        application_commands: Dict[int, APIApplicationCommand],
+        guild_scheduled_events: Dict[int, GuildScheduledEvent],
+        # integrations: Dict[int, PartialIntegration],
+        threads: Dict[int, Thread],
+        users: Dict[int, User],
+        webhooks: Dict[int, Webhook],
+    ):
         self._state = guild._state
         self.guild = guild
+
+        self._application_commands = application_commands
+        self._guild_scheduled_events = guild_scheduled_events
+        # self._integrations = integrations
+        self._threads = threads
         self._users = users
+        self._webhooks = webhooks
+
         self._from_data(data)
 
     def _from_data(self, data: AuditLogEntryPayload) -> None:
@@ -545,7 +564,9 @@ class AuditLogEntry(Hashable):
         User,
         Role,
         Invite,
+        Webhook,
         Emoji,
+        # PartialIntegration,
         StageInstance,
         GuildSticker,
         Thread,
@@ -618,11 +639,17 @@ class AuditLogEntry(Hashable):
             pass
         return obj
 
+    def _convert_target_webhook(self, target_id: int) -> Union[Webhook, Object]:
+        return self._webhooks.get(target_id) or Object(id=target_id)
+
     def _convert_target_emoji(self, target_id: int) -> Union[Emoji, Object]:
         return self._state.get_emoji(target_id) or Object(id=target_id)
 
     def _convert_target_message(self, target_id: int) -> Union[Member, User, None]:
         return self._get_member(target_id)
+
+    # def _convert_target_integration(self, target_id: int) -> Union[PartialIntegration, Object]:
+    #     return self._integrations.get(target_id) or Object(id=target_id)
 
     def _convert_target_stage_instance(self, target_id: int) -> Union[StageInstance, Object]:
         return self.guild.get_stage_instance(target_id) or Object(id=target_id)
@@ -631,12 +658,18 @@ class AuditLogEntry(Hashable):
         return self._state.get_sticker(target_id) or Object(id=target_id)
 
     def _convert_target_thread(self, target_id: int) -> Union[Thread, Object]:
-        return self.guild.get_thread(target_id) or Object(id=target_id)
+        return (
+            self.guild.get_thread(target_id) or self._threads.get(target_id) or Object(id=target_id)
+        )
 
     def _convert_target_guild_scheduled_event(
         self, target_id: int
     ) -> Union[GuildScheduledEvent, Object]:
-        return self.guild.get_scheduled_event(target_id) or Object(id=target_id)
+        return (
+            self.guild.get_scheduled_event(target_id)
+            or self._guild_scheduled_events.get(target_id)
+            or Object(id=target_id)
+        )
 
     def _convert_target_application_command(
         self, target_id: int
@@ -644,5 +677,6 @@ class AuditLogEntry(Hashable):
         return (
             self._state._get_guild_application_command(self.guild.id, target_id)
             or self._state._get_global_application_command(target_id)
+            or self._application_commands.get(target_id)
             or Object(id=target_id)
         )

@@ -78,6 +78,7 @@ from .ui.modal import Modal, ModalStore
 from .ui.view import View, ViewStore
 from .user import ClientUser, User
 from .utils import MISSING
+from .webhook import Webhook
 
 if TYPE_CHECKING:
     from .abc import PrivateChannel
@@ -100,6 +101,7 @@ if TYPE_CHECKING:
     )
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
+    from .types.webhook import Webhook as WebhookPayload
     from .voice_client import VoiceProtocol
 
     T = TypeVar("T")
@@ -1797,6 +1799,9 @@ class ConnectionState:
         data: MessagePayload,
     ) -> Message:
         return Message(state=self, channel=channel, data=data)
+
+    def create_webhook(self, data: WebhookPayload) -> Webhook:
+        return Webhook.from_state(data=data, state=self)
 
     # Application commands (global)
     # All these methods (except fetchers) update the application command cache as well,
