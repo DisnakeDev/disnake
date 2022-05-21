@@ -473,56 +473,56 @@ class AuditLogEntry(Hashable):
 
         # this key is technically not usually present
         self.reason = data.get("reason")
-        self.extra = data.get("options")
+        self.extra = extra = data.get("options")
 
-        if isinstance(self.action, enums.AuditLogAction) and self.extra:
+        if isinstance(self.action, enums.AuditLogAction) and extra:
             if self.action is enums.AuditLogAction.member_prune:
                 # member prune has two keys with useful information
                 self.extra = type(
-                    "_AuditLogProxy", (), {k: int(v) for k, v in self.extra.items()}
+                    "_AuditLogProxy", (), {k: int(v) for k, v in extra.items()}  # type: ignore
                 )()
             elif (
                 self.action is enums.AuditLogAction.member_move
                 or self.action is enums.AuditLogAction.message_delete
             ):
-                channel_id = int(self.extra["channel_id"])
+                channel_id = int(extra["channel_id"])
                 elems = {
-                    "count": int(self.extra["count"]),
+                    "count": int(extra["count"]),
                     "channel": self.guild.get_channel(channel_id) or Object(id=channel_id),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action is enums.AuditLogAction.member_disconnect:
                 # The member disconnect action has a dict with some information
                 elems = {
-                    "count": int(self.extra["count"]),
+                    "count": int(extra["count"]),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action.name.endswith("pin"):
                 # the pin actions have a dict with some information
-                channel_id = int(self.extra["channel_id"])
+                channel_id = int(extra["channel_id"])
                 elems = {
                     "channel": self.guild.get_channel(channel_id) or Object(id=channel_id),
-                    "message_id": int(self.extra["message_id"]),
+                    "message_id": int(extra["message_id"]),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action.name.startswith("overwrite_"):
                 # the overwrite_ actions have a dict with some information
-                instance_id = int(self.extra["id"])
-                the_type = self.extra.get("type")
+                instance_id = int(extra["id"])
+                the_type = extra.get("type")
                 if the_type == "1":
                     self.extra = self._get_member(instance_id)
                 elif the_type == "0":
                     role = self.guild.get_role(instance_id)
                     if role is None:
                         role = Object(id=instance_id)
-                        role.name = self.extra.get("role_name")  # type: ignore
+                        role.name = extra.get("role_name")  # type: ignore
                     self.extra = role
             elif self.action.name.startswith("stage_instance"):
-                channel_id = int(self.extra["channel_id"])
+                channel_id = int(extra["channel_id"])
                 elems = {"channel": self.guild.get_channel(channel_id) or Object(id=channel_id)}
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action is enums.AuditLogAction.application_command_permission_update:
-                app_id = int(self.extra["application_id"])
+                app_id = int(extra["application_id"])
                 elems = {
                     "integration": self._get_integration_by_application_id(app_id) or Object(app_id)
                 }
