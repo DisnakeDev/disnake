@@ -521,6 +521,12 @@ class AuditLogEntry(Hashable):
                 channel_id = int(self.extra["channel_id"])
                 elems = {"channel": self.guild.get_channel(channel_id) or Object(id=channel_id)}
                 self.extra = type("_AuditLogProxy", (), elems)()
+            elif self.action is enums.AuditLogAction.application_command_permission_update:
+                app_id = int(self.extra["application_id"])
+                elems = {
+                    "integration": self._get_integration_by_application_id(app_id) or Object(app_id)
+                }
+                self.extra = type("_AuditLogProxy", (), elems)()
 
         self.extra: Any
         # actually this but there's no reason to annoy users with this:

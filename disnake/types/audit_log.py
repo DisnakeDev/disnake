@@ -279,6 +279,7 @@ class AuditEntryInfo(TypedDict):
     id: Snowflake
     type: Literal["0", "1"]
     role_name: str
+    application_id: Snowflake
 
 
 class _AuditLogEntryOptional(TypedDict, total=False):
