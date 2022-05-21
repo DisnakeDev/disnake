@@ -44,6 +44,7 @@ from .app_commands import application_command_factory
 from .audit_logs import AuditLogEntry
 from .bans import BanEntry
 from .errors import NoMoreItems
+from .integrations import PartialIntegration
 from .object import Object
 from .threads import Thread
 from .utils import maybe_coroutine, snowflake_time, time_snowflake
@@ -599,8 +600,10 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
                 for d in data.get("guild_scheduled_events", [])
             }
 
-            # TODO
-            # integrations = {int(d["id"]): PartialIntegration() for d in data.get("integrations", [])}
+            integrations = {
+                int(d["id"]): PartialIntegration(guild=self.guild, data=d)
+                for d in data.get("integrations", [])
+            }
 
             threads = {
                 int(d["id"]): Thread(guild=self.guild, state=state, data=d)
@@ -622,7 +625,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
                         guild=self.guild,
                         application_commands=appcmds,
                         guild_scheduled_events=events,
-                        # integrations=integrations,
+                        integrations=integrations,
                         threads=threads,
                         users=users,
                         webhooks=webhooks,

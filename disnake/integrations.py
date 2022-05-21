@@ -36,6 +36,7 @@ from .utils import MISSING, _get_as_snowflake, deprecated, parse_time, warn_depr
 __all__ = (
     "IntegrationAccount",
     "IntegrationApplication",
+    "PartialIntegration",
     "Integration",
     "StreamIntegration",
     "BotIntegration",
@@ -50,6 +51,7 @@ if TYPE_CHECKING:
         IntegrationAccount as IntegrationAccountPayload,
         IntegrationApplication as IntegrationApplicationPayload,
         IntegrationType,
+        PartialIntegration as PartialIntegrationPayload,
         StreamIntegration as StreamIntegrationPayload,
     )
 
@@ -77,7 +79,52 @@ class IntegrationAccount:
         return f"<IntegrationAccount id={self.id} name={self.name!r}>"
 
 
-class Integration:
+class PartialIntegration:
+    """Represents a partial guild integration.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The integration ID.
+    name: :class:`str`
+        The integration name.
+    guild: :class:`Guild`
+        The guild of the integration.
+    type: :class:`str`
+        The integration type (i.e. Twitch).
+    account: :class:`IntegrationAccount`
+        The account linked to this integration.
+    application_id: Optional[:class:`int`]
+        The ID of the application tied to this integration.
+    """
+
+    __slots__ = (
+        "guild",
+        "id",
+        "name",
+        "type",
+        "account",
+        "application_id",
+    )
+
+    def __init__(self, *, data: PartialIntegrationPayload, guild: Guild) -> None:
+        self.guild = guild
+        self._from_data(data)
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} id={self.id} name={self.name!r}>"
+
+    def _from_data(self, data: PartialIntegrationPayload) -> None:
+        self.id: int = int(data["id"])
+        self.type: IntegrationType = data["type"]
+        self.name: str = data["name"]
+        self.account: IntegrationAccount = IntegrationAccount(data["account"])
+        self.application_id: Optional[int] = _get_as_snowflake(data, "application_id")
+
+
+class Integration(PartialIntegration):
     """Represents a guild integration.
 
     .. versionadded:: 1.4
@@ -101,29 +148,14 @@ class Integration:
     """
 
     __slots__ = (
-        "guild",
-        "id",
         "_state",
-        "type",
-        "name",
-        "account",
         "user",
         "enabled",
     )
 
-    def __init__(self, *, data: IntegrationPayload, guild: Guild) -> None:
-        self.guild = guild
-        self._state = guild._state
-        self._from_data(data)
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__} id={self.id} name={self.name!r}>"
-
     def _from_data(self, data: IntegrationPayload) -> None:
-        self.id: int = int(data["id"])
-        self.type: IntegrationType = data["type"]
-        self.name: str = data["name"]
-        self.account: IntegrationAccount = IntegrationAccount(data["account"])
+        super()._from_data(data)
+        self._state = self.guild._state
 
         user = data.get("user")
         self.user = User(state=self._state, data=user) if user else None

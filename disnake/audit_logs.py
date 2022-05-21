@@ -64,6 +64,7 @@ if TYPE_CHECKING:
     from .emoji import Emoji
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
+    from .integrations import PartialIntegration
     from .member import Member
     from .role import Role
     from .stage_instance import StageInstance
@@ -449,7 +450,7 @@ class AuditLogEntry(Hashable):
         guild: Guild,
         application_commands: Dict[int, APIApplicationCommand],
         guild_scheduled_events: Dict[int, GuildScheduledEvent],
-        # integrations: Dict[int, PartialIntegration],
+        integrations: Dict[int, PartialIntegration],
         threads: Dict[int, Thread],
         users: Dict[int, User],
         webhooks: Dict[int, Webhook],
@@ -459,7 +460,7 @@ class AuditLogEntry(Hashable):
 
         self._application_commands = application_commands
         self._guild_scheduled_events = guild_scheduled_events
-        # self._integrations = integrations
+        self._integrations = integrations
         self._threads = threads
         self._users = users
         self._webhooks = webhooks
@@ -566,7 +567,7 @@ class AuditLogEntry(Hashable):
         Invite,
         Webhook,
         Emoji,
-        # PartialIntegration,
+        PartialIntegration,
         StageInstance,
         GuildSticker,
         Thread,
@@ -648,8 +649,8 @@ class AuditLogEntry(Hashable):
     def _convert_target_message(self, target_id: int) -> Union[Member, User, None]:
         return self._get_member(target_id)
 
-    # def _convert_target_integration(self, target_id: int) -> Union[PartialIntegration, Object]:
-    #     return self._integrations.get(target_id) or Object(id=target_id)
+    def _convert_target_integration(self, target_id: int) -> Union[PartialIntegration, Object]:
+        return self._integrations.get(target_id) or Object(id=target_id)
 
     def _convert_target_stage_instance(self, target_id: int) -> Union[StageInstance, Object]:
         return self.guild.get_stage_instance(target_id) or Object(id=target_id)

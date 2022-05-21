@@ -4335,17 +4335,23 @@ Integration
 
 .. autoclass:: Integration()
     :members:
+    :inherited-members:
 
 .. autoclass:: IntegrationAccount()
     :members:
 
 .. autoclass:: BotIntegration()
     :members:
+    :inherited-members:
 
 .. autoclass:: IntegrationApplication()
     :members:
 
 .. autoclass:: StreamIntegration()
+    :members:
+    :inherited-members:
+
+.. autoclass:: PartialIntegration()
     :members:
 
 Interaction
