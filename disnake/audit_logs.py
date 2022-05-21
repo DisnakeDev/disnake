@@ -547,6 +547,17 @@ class AuditLogEntry(Hashable):
     def _get_member(self, user_id: int) -> Union[Member, User, None]:
         return self.guild.get_member(user_id) or self._users.get(user_id)
 
+    def _get_integration_by_application_id(
+        self, application_id: int
+    ) -> Optional[PartialIntegration]:
+        if not application_id:
+            return None
+
+        for integration in self._integrations.values():
+            if integration.application_id == application_id:
+                return integration
+        return None
+
     def __repr__(self) -> str:
         return f"<AuditLogEntry id={self.id} action={self.action} user={self.user!r}>"
 
@@ -672,12 +683,21 @@ class AuditLogEntry(Hashable):
             or Object(id=target_id)
         )
 
-    def _convert_target_application_command(
+    def _convert_target_application_command_or_integration(
         self, target_id: int
-    ) -> Union[APIApplicationCommand, Object]:
-        return (
+    ) -> Union[APIApplicationCommand, PartialIntegration, Object]:
+        # try application command
+        if target := (
             self._state._get_guild_application_command(self.guild.id, target_id)
             or self._state._get_global_application_command(target_id)
             or self._application_commands.get(target_id)
-            or Object(id=target_id)
-        )
+        ):
+            return target
+
+        # permissions may also be changed for the entire application,
+        # however the target ID is the application ID, not the integration ID
+        if target := self._get_integration_by_application_id(target_id):
+            return target
+
+        # fall back to object
+        return Object(id=target_id)
