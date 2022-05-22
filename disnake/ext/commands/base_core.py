@@ -684,6 +684,8 @@ def default_member_permissions(value: int = 0, **permissions: Literal[True]) -> 
         The required permissions for a command. A member must have *all* these
         permissions to be able to invoke the command.
     """
+    if isinstance(value, bool):
+        raise TypeError("`value` cannot be a bool value")
     perms_value = Permissions(value, **permissions).value
 
     def decorator(func: T) -> T:
