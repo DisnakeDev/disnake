@@ -6,7 +6,7 @@ bot = commands.Bot(
     # Insert IDs of your test guilds below, if
     # you want the context menus to instantly appear.
     # Without test_guilds specified, your commands will
-    # register globally in ~1 hour.
+    # register globally.
     test_guilds=[12345],
 )
 
