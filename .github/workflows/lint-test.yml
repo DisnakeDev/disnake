@@ -108,7 +108,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
-        os: ["windows-latest", "ubuntu-latest"]
+        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
       fail-fast: true
 
     runs-on: ${{ matrix.os }}
@@ -134,7 +134,6 @@ jobs:
     - name: Test package install
       run: |
         python -m pip install .
-        python -m pip uninstall -y disnake
 
     - name: Run pytest
       # use non-utc timezone, to test time/date-dependent features properly
