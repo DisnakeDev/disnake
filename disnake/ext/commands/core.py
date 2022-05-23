@@ -2136,7 +2136,8 @@ def is_nsfw() -> Callable[[T], T]:
     def pred(ctx: AnyContext) -> bool:
         ch = ctx.channel
         if ctx.guild is None or (
-            isinstance(ch, (disnake.TextChannel, disnake.Thread)) and ch.is_nsfw()
+            isinstance(ch, (disnake.TextChannel, disnake.VoiceChannel, disnake.Thread))
+            and ch.is_nsfw()
         ):
             return True
         raise NSFWChannelRequired(ch)  # type: ignore

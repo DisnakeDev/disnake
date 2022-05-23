@@ -1751,7 +1751,7 @@ class ConnectionState:
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
     ) -> Optional[Union[User, Member]]:
-        if isinstance(channel, (TextChannel, VoiceChannel)):
+        if isinstance(channel, (TextChannel, VoiceChannel, Thread)):
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 
