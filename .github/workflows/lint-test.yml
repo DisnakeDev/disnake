@@ -2,6 +2,9 @@ name: Lint & Test
 
 on: [push, pull_request]
 
+permissions:
+  read-all
+
 jobs:
   pre-commit:
     # Thanks to black for this rule
@@ -124,12 +127,8 @@ jobs:
       run: task slotscheck
 
   pytest:
-    # We want to run on external PRs, but not on our own internal PRs as they'll be run
-    # by the push to the branch. Without this if check, checks are duplicated since
-    # internal PRs match both the push and pull_request events.
-    if:
-      github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
-      github.repository
+    # for testing, we want it to run on both the pull_request and
+    # push so we get a coveralls comment on the pull request
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
