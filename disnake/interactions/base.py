@@ -191,7 +191,10 @@ class Interaction:
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.locale: Locale = try_enum(Locale, data["locale"])
-        self.guild_locale: Optional[Locale] = try_enum(Locale, data.get("guild_locale"))
+        guild_locale = data.get("guild_locale")
+        self.guild_locale: Optional[Locale] = (
+            try_enum(Locale, guild_locale) if guild_locale else None
+        )
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
         self._permissions = None
