@@ -856,9 +856,7 @@ class Guild(Hashable):
     @property
     def bitrate_limit(self) -> float:
         """:class:`float`: The maximum bitrate for voice channels this guild can have."""
-        vip_guild = (
-            self._PREMIUM_GUILD_LIMITS[1].bitrate if "VIP_REGIONS" in self.features else 96e3
-        )
+        vip_guild = self._PREMIUM_GUILD_LIMITS[3].bitrate if "VIP_REGIONS" in self.features else 0
         return max(vip_guild, self._PREMIUM_GUILD_LIMITS[self.premium_tier].bitrate)
 
     @property
