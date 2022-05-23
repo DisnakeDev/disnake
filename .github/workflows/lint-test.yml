@@ -159,15 +159,30 @@ jobs:
       run: |
         python -m pip install .
 
+    - name: Send first styling characters to $GITHUB_STEP_SUMMARY
+      run: |
+        echo '### Test Summary: python ${{ matrix.python-version }} on ${{ matrix.os }}' >> $GITHUB_STEP_SUMMARY
+        echo '-----' >> $GITHUB_STEP_SUMMARY
+
     - name: Run pytest
       id: run_tests
       # use non-utc timezone, to test time/date-dependent features properly
       env:
         TZ: "America/New_York"
       run: |
-        echo '```' >> $GITHUB_STEP_SUMMARY
+        echo '<details>' >> $GITHUB_STEP_SUMMARY
+        echo '<summary>Test Summary: python ${{ matrix.python-version }} on ${{ matrix.os }}</summary>' >> $GITHUB_STEP_SUMMARY
+        echo '------' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+        echo '<pre>' >> $GITHUB_STEP_SUMMARY
         nox -s test-${{ matrix.python-version }} -- --color=no >> $GITHUB_STEP_SUMMARY
-        echo '```' >> $GITHUB_STEP_SUMMARY
+        echo '</pre>' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+        echo '</details>' >> $GITHUB_STEP_SUMMARY
+
+    # - name: Send final styling characters to $GITHUB_STEP_SUMMARY
+    #   if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
+    #   run: |
 
 
     # This step will publish the coverage reports to coveralls.io and
