@@ -147,7 +147,6 @@ def test(session: nox.Session, extras: List[str]):
         "pytest",
         "-v",
         "--cov",
-        "--cov-report=term",
         "--cov-append",
         "--cov-context=test",
         *session.posargs,

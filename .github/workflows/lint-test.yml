@@ -159,11 +159,6 @@ jobs:
       run: |
         python -m pip install .
 
-    - name: Send first styling characters to $GITHUB_STEP_SUMMARY
-      run: |
-        echo '### Test Summary: python ${{ matrix.python-version }} on ${{ matrix.os }}' >> $GITHUB_STEP_SUMMARY
-        echo '-----' >> $GITHUB_STEP_SUMMARY
-
     - name: Run pytest
       id: run_tests
       # use non-utc timezone, to test time/date-dependent features properly
@@ -171,18 +166,32 @@ jobs:
         TZ: "America/New_York"
       run: |
         echo '<details>' >> $GITHUB_STEP_SUMMARY
-        echo '<summary>Test Summary: python ${{ matrix.python-version }} on ${{ matrix.os }}</summary>' >> $GITHUB_STEP_SUMMARY
-        echo '------' >> $GITHUB_STEP_SUMMARY
+        echo '<summary>Test Summary</summary>' >> $GITHUB_STEP_SUMMARY
+        echo '<br/>' >> $GITHUB_STEP_SUMMARY
         echo '' >> $GITHUB_STEP_SUMMARY
         echo '<pre>' >> $GITHUB_STEP_SUMMARY
-        nox -s test-${{ matrix.python-version }} -- --color=no >> $GITHUB_STEP_SUMMARY
+        nox -s test-${{ matrix.python-version }} -- --color=no --cov-report= >> $GITHUB_STEP_SUMMARY
+        echo '</pre>' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+        echo '</details>' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+
+    - name: Print Coverage Output
+      if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
+      run: |
+        echo '<details>' >> $GITHUB_STEP_SUMMARY
+        echo '<summary>Coverage Summary</summary>' >> $GITHUB_STEP_SUMMARY
+        echo '<br/>' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+        echo '<pre>' >> $GITHUB_STEP_SUMMARY
+        python -m coverage report >> $GITHUB_STEP_SUMMARY
         echo '</pre>' >> $GITHUB_STEP_SUMMARY
         echo '' >> $GITHUB_STEP_SUMMARY
         echo '</details>' >> $GITHUB_STEP_SUMMARY
 
     # - name: Send final styling characters to $GITHUB_STEP_SUMMARY
     #   if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
-    #   run: |
+    #   run:
 
 
     # This step will publish the coverage reports to coveralls.io and
@@ -190,7 +199,7 @@ jobs:
     - name: Publish coverage report to coveralls.io
       # upload coverage even if a test run failed
       # this is a test, and may be removed in the future
-      if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
+      if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
       # important that we don't fail the workflow when coveralls is down
       continue-on-error: true
       env:
