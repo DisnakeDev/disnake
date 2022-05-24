@@ -8,18 +8,18 @@ from disnake import Color, Colour
 
 def test_init():
     with pytest.raises(TypeError, match=r"Expected int parameter, received str instead."):
-        Color("0")  # type: ignore
+        Colour("0")  # type: ignore
 
 
 @pytest.mark.parametrize(
     ("value", "string"), [(0, "#000000"), (0x123, "#000123"), (0x12AB34, "#12ab34")]
 )
 def test_str(value: int, string: str):
-    assert str(Color(value)) == string
+    assert str(Colour(value)) == string
 
 
 def test_compare():
-    assert Color(123) == Color(123)
+    assert Colour(123) == Colour(123)
 
 
 @pytest.mark.parametrize(
@@ -27,7 +27,7 @@ def test_compare():
     [(0, (0, 0, 0)), (0xA00233, (0xA0, 0x02, 0x33)), (0x123456, (0x12, 0x34, 0x56))],
 )
 def test_to_rgb(value: int, parts: Tuple[int, int, int]):
-    c = Color(value)
+    c = Colour(value)
     assert c.to_rgb() == parts
     assert (c.r, c.g, c.b) == parts
 
@@ -37,7 +37,7 @@ def test_to_rgb(value: int, parts: Tuple[int, int, int]):
     [(0, (0, 0, 0)), (0xA00233, (0xA0, 0x02, 0x33)), (0x123456, (0x12, 0x34, 0x56))],
 )
 def test_from_rgb(value: int, parts: Tuple[int, int, int]):
-    assert Color.from_rgb(*parts).value == value
+    assert Colour.from_rgb(*parts).value == value
 
 
 @pytest.mark.parametrize(
@@ -49,8 +49,8 @@ def test_from_rgb(value: int, parts: Tuple[int, int, int]):
     ],
 )
 def test_from_hsv(value: int, parts: Tuple[float, float, float]):
-    expected = Color(value)
-    col = Color.from_hsv(*parts)
+    expected = Colour(value)
+    col = Colour.from_hsv(*parts)
     assert all(math.isclose(a, b, abs_tol=1) for a, b in zip(expected.to_rgb(), col.to_rgb()))
 
 
