@@ -62,6 +62,7 @@ class PartialWebhook(_WebhookOptional):
     type: WebhookType
 
 
+# note: `total=False` to support `Webhook.partial`
 class _FullWebhook(TypedDict, total=False):
     name: Optional[str]
     avatar: Optional[str]

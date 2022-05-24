@@ -232,6 +232,7 @@ class AuditLogChanges:
         'deny':                          (None, _transform_permissions),
         'permissions':                   (None, _transform_permissions),
         'id':                            (None, _transform_snowflake),
+        'application_id':                (None, _transform_snowflake),
         'color':                         ('colour', _transform_color),
         'owner_id':                      ('owner', _transform_member_id),
         'inviter_id':                    ('inviter', _transform_member_id),
