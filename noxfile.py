@@ -153,6 +153,7 @@ def pyright(session: nox.Session):
     "extras",
     [
         [],
+        # NOTE: disabled while there are no tests that would require these dependencies
         # ["speed"],
         # ["voice"],
     ],
