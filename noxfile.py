@@ -145,7 +145,6 @@ def test(session: nox.Session, extras: List[str]):
     # TODO: only run tests that depend on the different dependencies
     session.run(
         "pytest",
-        "-v",
         "--cov",
         "--cov-append",
         "--cov-context=test",
@@ -161,7 +160,7 @@ def coverage(session: nox.Session):
         session.run("coverage", "html", "--show-contexts")
     if "serve" in session.posargs:
         session.run(
-            "python", "-m", "http.server", "8009", "--directory", "htmlcov", "--bind", "127.0.0.1"
+            "python", "-m", "http.server", "8012", "--directory", "htmlcov", "--bind", "127.0.0.1"
         )
     if "erase" in session.posargs:
         session.run("coverage", "erase")
