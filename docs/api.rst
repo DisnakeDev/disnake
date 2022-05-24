@@ -5288,6 +5288,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: DiscordServerError
 
+.. autoexception:: RatelimitTooLong
+
 .. autoexception:: InvalidData
 
 .. autoexception:: InvalidArgument
@@ -5339,6 +5341,7 @@ Exception Hierarchy
                 - :exc:`NotFound`
                 - :exc:`DiscordServerError`
             - :exc:`LocalizationKeyError`
+            - :exc:`RatelimitTooLong`
 
 
 Warnings

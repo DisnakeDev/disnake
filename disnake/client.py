@@ -318,6 +318,23 @@ class Client:
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+        
+    max_ratelimit_wait: :class:`float`
+        How long the library should wait for a ratelimit, or raise a :exc:`RatelimitTooLong` exception.
+        If set to 0, the library will raise for
+
+        .. versionadded:: 2.5
+
+        .. note::
+            If this is set, **all methods** that may raise a :exc:`HTTPException`
+            may also raise a :exc:`RatelimitTooLong` exception.
+
+            If this is set to ``0``, the library will raise a :exc:`RatelimitTooLong` exception
+            whenever the library would need to sleep for a ratelimit.
+
+        .. warning::
+            This does not apply to global ratelimits.
+            A global ratelimit will continue to sleep irregardless of this setting.
 
     Attributes
     ----------
@@ -360,8 +377,14 @@ class Client:
         proxy: Optional[str] = options.pop("proxy", None)
         proxy_auth: Optional[aiohttp.BasicAuth] = options.pop("proxy_auth", None)
         unsync_clock: bool = options.pop("assume_unsync_clock", True)
+        max_ratelimit_wait: Optional[float] = options.pop("max_ratelimit_wait", None)
         self.http: HTTPClient = HTTPClient(
-            connector, proxy=proxy, proxy_auth=proxy_auth, unsync_clock=unsync_clock, loop=self.loop
+            connector,
+            proxy=proxy,
+            proxy_auth=proxy_auth,
+            unsync_clock=unsync_clock,
+            loop=self.loop,
+            max_ratelimit_wait=max_ratelimit_wait,
         )
 
         self._handlers: Dict[str, Callable] = {
