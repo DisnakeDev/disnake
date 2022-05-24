@@ -142,7 +142,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Set up python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
         cache: "pip"
@@ -219,11 +219,16 @@ jobs:
     if: success() || failure()
     steps:
       # Set up a consistent version of Python
+    - uses: actions/checkout@v3
+
     - name: Set up Python 3.9
       id: python
       uses: actions/setup-python@v3
       with:
         python-version: '3.9'
+        cache: "pip"
+        cache-dependency-path:
+          '.github/workflows/lint-test.yml'
 
     - name: Coveralls Finished
       continue-on-error: true
@@ -231,5 +236,5 @@ jobs:
         COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_SERVICE_NAME: github
       run: |
-        python3 -m pip install --upgrade coveralls
+        python3 -m pip install coveralls==3.3.1
         python3 -m coveralls --finish
