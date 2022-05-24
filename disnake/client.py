@@ -758,9 +758,8 @@ class Client:
 
         .. versionchanged:: 2.6
             Added usage of :class:`SessionStartLimit` when connecting to the api.
-
-        .. versionchanged:: 2.6
             Added the ``ignore_session_start_limit`` parameter.
+
 
         Parameters
         ----------
@@ -774,6 +773,9 @@ class Client:
             Whether we should ignore the api provided session start limit when
             connecting to the api.
 
+            .. versionchanged:: 2.6
+
+
         Raises
         ------
         GatewayNotFound
@@ -786,9 +788,7 @@ class Client:
         self.session_start_limit = SessionStartLimit(session_start_limit)
 
         if not ignore_session_start_limit and self.session_start_limit.remaining == 0:
-            raise SessionStartLimitReached(
-                f"Daily session start limit has been reached, resets at {self.session_start_limit.reset_time}"
-            )
+            raise SessionStartLimitReached(self.session_start_limit)
 
         ws_params = {
             "initial": True,

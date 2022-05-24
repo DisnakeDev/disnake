@@ -441,9 +441,7 @@ class AutoShardedClient(Client):
         self._connection.shard_ids = shard_ids
 
         if not ignore_session_start_limit and self.session_start_limit.remaining < self.shard_count:
-            raise SessionStartLimitReached(
-                f"Daily session start limit has been reached, resets at {self.session_start_limit.reset_time}"
-            )
+            raise SessionStartLimitReached(self.session_start_limit, requested=self.shard_count)
 
         # TODO: maybe take max_concurrency from session start limit into account?
         for shard_id in shard_ids:
