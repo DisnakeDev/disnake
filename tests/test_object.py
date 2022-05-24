@@ -4,7 +4,7 @@ import pytest
 
 from disnake import Object
 
-snowflake = 881536165478499999
+snowflake = 881536165478499999  # date/time of first commit
 
 
 def test_init():
