@@ -39,6 +39,7 @@ include = [
     "disnake",
     "docs",
     "test_bot",
+    "tests",
     "*.py",
 ]
 ignore = [
@@ -73,7 +74,7 @@ asyncio_mode = "strict"
 
 [tool.coverage.run]
 branch = true
-source = ["disnake"]
+source = ["disnake", "tests"]
 omit = [
     "disnake/ext/mypy_plugin/*",
     "disnake/types/*",
