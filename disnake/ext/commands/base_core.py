@@ -33,7 +33,6 @@ from typing import (
     Coroutine,
     Dict,
     List,
-    Literal,
     Optional,
     Tuple,
     TypeVar,
@@ -648,7 +647,7 @@ class InvokableApplicationCommand(ABC):
             inter.application_command = original
 
 
-def default_member_permissions(value: int = 0, **permissions: Literal[True]) -> Callable[[T], T]:
+def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[[T], T]:
     """
     A decorator that sets default required member permissions for the command.
     Unlike :func:`~.ext.commands.has_permissions`, this decorator does not add any checks.
@@ -680,10 +679,13 @@ def default_member_permissions(value: int = 0, **permissions: Literal[True]) -> 
     value: :class:`int`
         A raw permission bitfield of an integer representing the required permissions.
         May be used instead of specifying kwargs.
-    **permissions: Literal[True]
+    **permissions: bool
         The required permissions for a command. A member must have *all* these
         permissions to be able to invoke the command.
+        Setting a permission to ``False`` does not affect the result.
     """
+    if isinstance(value, bool):
+        raise TypeError("`value` cannot be a bool value")
     perms_value = Permissions(value, **permissions).value
 
     def decorator(func: T) -> T:
