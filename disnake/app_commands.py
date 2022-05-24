@@ -467,7 +467,7 @@ class ApplicationCommand(ABC):
             # allow everyone to use the command if its not supplied
             self._default_member_permissions = None
         elif isinstance(default_member_permissions, bool):
-            raise TypeError("`default_member_permissions` cannot be a bool value")
+            raise TypeError("`default_member_permissions` cannot be a bool")
         elif isinstance(default_member_permissions, int):
             self._default_member_permissions = default_member_permissions
         else:
