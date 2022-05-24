@@ -752,8 +752,8 @@ class Client:
         event system and miscellaneous aspects of the library. Control
         is not resumed until the WebSocket connection is terminated.
 
-        If the client has no more connects remaining for the day and ``ignore_session_start_limit`` is ``False``,
-        this will raise a :class:`` exception rather than connecting and resetting the
+        If the client has no more connects remaining in the current 24-hour window and ``ignore_session_start_limit`` is ``False``,
+        this will raise a :class:`SessionStartLimitReached` exception rather than connecting and Discord resetting the
         token. However, if ``ignore_session_start_limit`` is ``True``, this will connect regardless.
 
         .. versionchanged:: 2.6

@@ -445,7 +445,7 @@ class AutoShardedClient(Client):
                 f"Daily session start limit has been reached, resets at {self.session_start_limit.reset_time}"
             )
 
-        # TODO: maybe take session_start_limit values into account?
+        # TODO: maybe take max_concurrency from session start limit into account?
         for shard_id in shard_ids:
             initial = shard_id == shard_ids[0]
             await self.launch_shard(gateway, shard_id, initial=initial)
