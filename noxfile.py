@@ -40,6 +40,8 @@ def depends(
     install_cwd: bool = False,
     update: bool = True,
 ) -> Callable[[NoxSessionFunc[P, T]], NoxSessionFunc[P, T]]:
+    """A session decorator that invokes :func:`.install` with the given parameters before running the session."""
+
     def decorator(f: NoxSessionFunc[P, T]) -> NoxSessionFunc[P, T]:
         @functools.wraps(f)
         def wrapper(session: nox.Session, *args: P.args, **kwargs: P.kwargs) -> T:
@@ -58,6 +60,23 @@ def install(
     install_cwd: bool = False,
     update: bool = True,
 ) -> None:
+    """
+    Installs dependencies in a session.
+    Dependencies from the main ``requirements.txt`` will always be installed.
+
+    Parameters
+    ----------
+    *deps: :class:`str`
+        Dependency group names, e.g. ``dev`` for ``requirements_dev.txt``.
+    run: :class:`bool`
+        Whether to use :func:`nox.Session.run` instead of :func:`nox.Session.install`,
+        useful to avoid warnings when running in the global python environment.
+    install_cwd: :class:`bool`
+        Whether the main package should be installed (in editable mode, i.e. ``-e .``).
+    update: :class:`bool`
+        Whether packages should be updated (i.e. ``-U``). Defaults to ``True``.
+    """
+
     install_args = []
 
     if update:
