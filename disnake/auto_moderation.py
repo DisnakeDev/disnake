@@ -69,16 +69,11 @@ class AutomodAction:
     ----------
     type: :class:`AutomodActionType`
         The action type.
-    guild: :class:`Guild`
-        The guild of the action, helpful for use with :func:`on_auto_moderation_action`.
     """
 
-    __slots__ = ("type", "guild", "_metadata")
+    __slots__ = ("type", "_metadata")
 
-    def __init__(
-        self, *, guild: Guild, type: AutomodActionType, channel: Optional[Snowflake] = None
-    ):
-        self.guild: Guild = guild
+    def __init__(self, *, type: AutomodActionType, channel: Optional[Snowflake] = None):
         self.type: AutomodActionType = enum_if_int(AutomodActionType, type)
         self._metadata: AutomodActionMetadata = {}
 
@@ -87,30 +82,23 @@ class AutomodAction:
 
     @property
     def channel_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: The target channel ID. See :attr:`~AutomodAction.channel` for details."""
-        return _get_as_snowflake(self._metadata, "channel_id")
-
-    @property
-    def channel(self) -> Optional[GuildChannelType]:
-        """Optional[:class:`abc.GuildChannel`]: The channel to send an alert in when the rule is triggered,
+        """Optional[:class:`int`]: The channel ID to send an alert in when the rule is triggered,
         if :attr:`.type` is :attr:`AutomodActionType.send_alert_message`."""
-        # TODO: return Object instead of None?
-        return self.guild.get_channel(self.channel_id)  # type: ignore
+        return _get_as_snowflake(self._metadata, "channel_id")
 
     def __repr__(self) -> str:
         if self.type is AutomodActionType.send_alert_message:
-            channel_repr = f" channel={self.channel!r}"
+            channel_repr = f" channel_id={self.channel_id!r}"
         else:
             channel_repr = ""
         return f"<AutomodAction type={self.type!r}{channel_repr}>"
 
     @classmethod
-    def _from_dict(cls, data: AutomodActionPayload, guild: Guild) -> Self:
+    def _from_dict(cls, data: AutomodActionPayload) -> Self:
         meta = data.get("metadata", {})
         channel_id = _get_as_snowflake(meta, "channel_id")
 
         self = cls(
-            guild=guild,
             type=try_enum(AutomodActionType, data["type"]),
             channel=Object(channel_id) if channel_id else None,
         )
@@ -231,7 +219,7 @@ class AutomodRule:
         self.event_type: AutomodEventType = try_enum(AutomodEventType, data["event_type"])
         self.trigger_type: AutomodTriggerType = try_enum(AutomodTriggerType, data["trigger_type"])
         self.actions: List[AutomodAction] = [
-            AutomodAction._from_dict(data=action, guild=guild) for action in data["actions"]
+            AutomodAction._from_dict(action) for action in data["actions"]
         ]
         self.trigger_metadata: AutomodTriggerMetadata = AutomodTriggerMetadata._from_dict(
             data["trigger_metadata"]
@@ -415,7 +403,7 @@ class AutomodActionExecution:
 
     def __init__(self, data: AutomodActionExecutionEventPayload, guild: Guild) -> None:
         self.guild: Guild = guild
-        self.action: AutomodAction = AutomodAction._from_dict(data["action"], guild=guild)
+        self.action: AutomodAction = AutomodAction._from_dict(data["action"])
         self.rule_id: int = int(data["rule_id"])
         self.rule_trigger_type: AutomodTriggerType = try_enum(
             AutomodTriggerType, data["rule_trigger_type"]

@@ -230,7 +230,7 @@ def _transform_automod_action(
 ) -> Optional[AutomodAction]:
     if data is None:
         return None
-    return AutomodAction._from_dict(data, entry.guild)
+    return AutomodAction._from_dict(data)
 
 
 def _transform_automod_trigger_metadata(
