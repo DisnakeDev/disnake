@@ -71,7 +71,7 @@ __all__ = (
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
-        _cls_name: str
+        _cls_name: ClassVar[str]
 
     name: str
     value: Any
