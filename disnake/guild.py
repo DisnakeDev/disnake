@@ -113,6 +113,7 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
 
+    GuildMessageable = Union[TextChannel, Thread, VoiceChannel]
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
 
