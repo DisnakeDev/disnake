@@ -54,7 +54,7 @@ from typing import (
 from . import utils
 from .activity import BaseActivity
 from .app_commands import GuildApplicationCommandPermissions, application_command_factory
-from .auto_moderation import AutomodAction, AutomodRule
+from .auto_moderation import AutomodActionExecution, AutomodRule
 from .channel import *
 from .channel import _channel_factory
 from .emoji import Emoji
@@ -89,7 +89,10 @@ if TYPE_CHECKING:
     from .http import HTTPClient
     from .message import MessageableChannel
     from .types.activity import Activity as ActivityPayload
-    from .types.auto_moderation import AutomodRule as AutomodRulePayload
+    from .types.auto_moderation import (
+        AutomodActionExecutionEvent as AutomodActionExecutionEventPayload,
+        AutomodRule as AutomodRulePayload,
+    )
     from .types.channel import DMChannel as DMChannelPayload
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload
@@ -1786,7 +1789,9 @@ class ConnectionState:
         rule = AutomodRule(data=data, guild=guild)
         self.dispatch("auto_moderation_rule_delete", rule)
 
-    def parse_auto_moderation_action_execution(self, data) -> None:
+    def parse_auto_moderation_action_execution(
+        self, data: AutomodActionExecutionEventPayload
+    ) -> None:
         guild = self._get_guild(int(data["guild_id"]))
         if guild is None:
             _log.debug(
@@ -1795,9 +1800,9 @@ class ConnectionState:
             )
             return
 
-        action = AutomodAction._from_dict(data=data["action"], guild=guild)
+        event = AutomodActionExecution(data, guild=guild)
         # TODO: naming
-        self.dispatch("auto_moderation_action", action)
+        self.dispatch("auto_moderation_action", event)
 
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int

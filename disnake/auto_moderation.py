@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Optional, Sequence
+from typing import TYPE_CHECKING, Any, List, Optional, Sequence, Union
 
 from .enums import (
     AutomodActionType,
@@ -41,17 +41,20 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .abc import Snowflake
-    from .guild import Guild, GuildChannel as GuildChannelType
+    from .channel import ForumChannel
+    from .guild import Guild, GuildChannel as GuildChannelType, GuildMessageable
     from .member import Member
+    from .message import Message
     from .role import Role
     from .types.auto_moderation import (
         AutomodAction as AutomodActionPayload,
+        AutomodActionExecutionEvent as AutomodActionExecutionEventPayload,
         AutomodActionMetadata,
         AutomodRule as AutomodRulePayload,
         EditAutomodRule as EditAutomodRulePayload,
     )
 
-__all__ = ("AutomodAction", "AutomodRule")
+__all__ = ("AutomodAction", "AutomodRule", "AutomodActionExecution")
 
 
 class AutomodAction:
@@ -82,7 +85,7 @@ class AutomodAction:
 
     @property
     def channel_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: The target channel ID. See :attr:`~AutomodAction.channel` for more info."""
+        """Optional[:class:`int`]: The target channel ID. See :attr:`~AutomodAction.channel` for details."""
         return _get_as_snowflake(self._metadata, "channel_id")
 
     @property
@@ -307,3 +310,94 @@ class AutomodRule:
         await self.guild._state.http.delete_auto_moderation_rule(
             self.guild.id, self.id, reason=reason
         )
+
+
+class AutomodActionExecution:
+    """Represents the data for an :func:`on_auto_moderation_action` event.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    action: :class:`AutomodAction`
+        The action that was executed.
+    guild: :class:`Guild`
+        The guild this action was executed in.
+    rule_id: :class:`int`
+        The ID of the rule that matched.
+    rule_trigger_type: :class:`AutomodTriggerType`
+        The trigger type of the rule that matched.
+    channel_id: Optional[:class:`int`]
+        The channel or thread ID in which the event occurred, if any.
+        See also :attr:`.channel`.
+    message_id: Optional[:class:`int`]
+        The ID of the message that matched. ``None`` if the message was blocked,
+        or if the content was not part of a message.
+        See also :attr:`.message`.
+    alert_message_id: Optional[:class:`int`]
+        The ID of the alert message sent as a result of this action, if any.
+        See also :attr:`.alert_message`.
+    content: :class:`str`
+        The content that matched.
+    matched_keyword: Optional[:class:`str`]
+        The keyword configured in the auto moderation rule that matched.
+    matched_content: Optional[:class:`str`]
+        The substring of :attr:`.content` that matched the rule/keyword.
+    """
+
+    __slots__ = (
+        "action",
+        "guild",
+        "rule_id",
+        "rule_trigger_type",
+        "channel_id",
+        "message_id",
+        "alert_message_id",
+        "content",
+        "matched_keyword",
+        "matched_content",
+    )
+
+    def __init__(self, data: AutomodActionExecutionEventPayload, guild: Guild) -> None:
+        self.guild: Guild = guild
+        self.action: AutomodAction = AutomodAction._from_dict(data["action"], guild=guild)
+        self.rule_id: int = int(data["rule_id"])
+        self.rule_trigger_type: AutomodTriggerType = try_enum(
+            AutomodTriggerType, data["rule_trigger_type"]
+        )
+        self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
+        self.message_id: Optional[int] = _get_as_snowflake(data, "message_id")
+        self.alert_message_id: Optional[int] = _get_as_snowflake(data, "alert_system_message_id")
+        self.content: str = data["content"]
+        self.matched_keyword: Optional[str] = data.get("matched_keyword")
+        self.matched_content: Optional[str] = data.get("matched_content")
+
+    def __repr__(self) -> str:
+        return (
+            f"<{type(self).__name__} guild={self.guild!r} action={self.action!r}"
+            f" rule_id={self.rule_id!r} rule_trigger_type={self.rule_trigger_type!r}"
+            f" channel={self.channel!r} message_id={self.message_id!r}"
+            f" alert_message_id={self.alert_message_id!r} content={self.content!r}"
+            f" matched_keyword={self.matched_keyword!r} matched_content={self.matched_content!r}>"
+        )
+
+    @property
+    def channel(self) -> Optional[Union[GuildMessageable, ForumChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`ForumChannel`, :class:`Thread`]]:
+        The channel or thread in which the event occurred, if any.
+        """
+        return self.guild.get_channel_or_thread(self.channel_id)  # type: ignore
+
+    @property
+    def message(self) -> Optional[Message]:
+        """Optional[:class:`Message`]: The message that matched, if any.
+        Not available if the message was blocked, if the content was not part of a message,
+        or if the message was not found in the message cache."""
+        return self.guild._state._get_message(self.message_id)
+
+    @property
+    def alert_message(self) -> Optional[Message]:
+        """Optional[:class:`Message`]: The alert message sent as a result of this action, if any.
+        Only available if :attr:`action.type <AutomodAction.type>` is :attr:`~AutomodActionType.send_alert_message`
+        and the message was found in the message cache."""
+        return self.guild._state._get_message(self.alert_message_id)
