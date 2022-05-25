@@ -126,6 +126,7 @@ class AutomodAction:
         }
 
 
+# TODO: perhaps this should just be a typeddict instead?
 class AutomodTriggerMetadata:
     """
     Metadata for an auto moderation trigger.
@@ -138,8 +139,10 @@ class AutomodTriggerMetadata:
         List of keywords to filter. Used with :attr:`AutomodTriggerType.keyword`.
     keyword_lists: Optional[List[:class:`str`]]
         List of filter list types. Possible values are ``PROFANITY``,
-        ``SEXUAL_CONTENT``, ``SLURS``. Used with :attr:`AutomodTriggerType.keyword`.
+        ``SEXUAL_CONTENT``, ``SLURS``. Used with :attr:`AutomodTriggerType.keyword_preset`.
     """
+
+    __slots__ = ("keyword_filter", "keyword_lists")
 
     # TODO: add overloads - can we always require exactly one parameter here, or is it
     #       required to be able to construct this class without any parameters?
