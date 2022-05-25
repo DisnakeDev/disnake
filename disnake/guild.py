@@ -4105,16 +4105,18 @@ class Guild(Hashable):
         data = await self._state.http.get_auto_moderation_rules(self.id)
         return [AutomodRule(data=rule_data, guild=self) for rule_data in data]
 
-    # TODO: edit method in guild as well?
     async def create_automod_rule(
         self,
+        name: str,
         *,
-        name: str = None,
-        enabled: bool = None,
-        event_type: AutomodEventType = None,
-        trigger_type: AutomodTriggerType = None,
-        actions: Sequence[AutomodAction] = None,
-        trigger_metadata: AutomodTriggerMetadata = None,
+        # TODO: should this default to the only existing type currently?
+        event_type: AutomodEventType,
+        trigger_type: AutomodTriggerType,
+        # TODO: should this automatically use an empty metadata object?
+        # perhaps it's actually optional? cannot test yet
+        trigger_metadata: AutomodTriggerMetadata,
+        actions: Sequence[AutomodAction],
+        enabled: bool = False,
         exempt_roles: Sequence[Snowflake] = None,
         exempt_channels: Sequence[Snowflake] = None,
         reason: Optional[str] = None,
@@ -4126,6 +4128,28 @@ class Guild(Hashable):
         You must have :attr:`.Permissions.manage_guild` permission to do this.
 
         .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The rule name.
+        event_type: :class:`AutomodEventType`
+            The type of events that this rule will be applied to.
+        trigger_type: :class:`AutomodTriggerType`
+            The type of trigger that determines whether this rule's actions should run for a specific event.
+        trigger_metadata: :class:`AutomodTriggerMetadata`
+            Additional metadata associated with the trigger type.
+            TODO: check contents against trigger_type locally
+        actions: Sequence[:class:`AutomodAction`]
+            The list of actions that will execute if a matching event triggered this rule.
+        enabled: :class:`bool`
+            Whether to enable the rule. Defaults to ``False``.
+        exempt_roles: Sequence[:class:`abc.Snowflake`]
+            The roles that are exempt from this rule. By default, no roles are exempt.
+        exempt_channels: Sequence[:class:`abc.Snowflake`]
+            The channels that are exempt from this rule. By default, no channels are exempt.
+        reason: Optional[:class:`str`]
+            The reason for creating the rule. Shows up on the audit log.
 
         Raises
         ------
@@ -4140,20 +4164,16 @@ class Guild(Hashable):
             The newly created auto moderation rule.
         """
 
-        payload: CreateAutomodRulePayload = {}
+        payload: CreateAutomodRulePayload = {
+            "name": name,
+            "event_type": try_enum_to_int(event_type),
+            "trigger_type": try_enum_to_int(trigger_type),
+            "trigger_metadata": trigger_metadata.to_dict(),
+            "actions": [a.to_dict() for a in actions],
+        }
 
-        if name is not None:
-            payload["name"] = name
         if enabled is not None:
             payload["enabled"] = enabled
-        if event_type is not None:
-            payload["event_type"] = try_enum_to_int(event_type)
-        if trigger_type is not None:
-            payload["trigger_type"] = try_enum_to_int(trigger_type)
-        if actions:
-            payload["actions"] = [a.to_dict() for a in actions]
-        if trigger_metadata:
-            payload["trigger_metadata"] = trigger_metadata.to_dict()
         if exempt_roles:
             payload["exempt_roles"] = [e.id for e in exempt_roles]
         if exempt_channels:

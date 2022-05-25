@@ -52,31 +52,40 @@ class AutomodTriggerMetadata(TypedDict, total=False):
 
 class AutomodRule(TypedDict):
     id: Snowflake
-    name: str
-    enabled: bool
     guild_id: Snowflake
+    name: str
     creator_id: Snowflake
     event_type: AutomodEventType
     trigger_type: AutomodTriggerType
-    actions: List[AutomodAction]
     trigger_metadata: AutomodTriggerMetadata
+    actions: List[AutomodAction]
+    enabled: bool
     exempt_roles: SnowflakeList
     exempt_channels: SnowflakeList
 
 
 class EditAutomodRule(TypedDict, total=False):
     name: str
-    enabled: bool
-    trigger_type: AutomodTriggerType
+    event_type: AutomodEventType
+    trigger_metadata: AutomodTriggerMetadata
     actions: List[AutomodAction]
-    trigger_metadata: Any
+    enabled: bool
     exempt_roles: SnowflakeList
     exempt_channels: SnowflakeList
 
 
-# TODO
-class CreateAutomodRule(EditAutomodRule, total=False):
+class _CreateAutomodRuleOptional(TypedDict, total=False):
+    enabled: bool
+    exempt_roles: SnowflakeList
+    exempt_channels: SnowflakeList
+
+
+class CreateAutomodRule(_CreateAutomodRuleOptional):
+    name: str
     event_type: AutomodEventType
+    trigger_type: AutomodTriggerType
+    trigger_metadata: AutomodTriggerMetadata
+    actions: List[AutomodAction]
 
 
 # TODO: gateway event, move once full state typings are added

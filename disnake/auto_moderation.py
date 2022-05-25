@@ -269,10 +269,10 @@ class AutomodRule:
         self,
         *,
         name: str = MISSING,
-        enabled: bool = MISSING,
-        trigger_type: AutomodTriggerType = MISSING,
-        actions: Sequence[AutomodAction] = MISSING,
+        event_type: AutomodEventType = MISSING,
         trigger_metadata: AutomodTriggerMetadata = MISSING,
+        actions: Sequence[AutomodAction] = MISSING,
+        enabled: bool = MISSING,
         exempt_roles: Sequence[Snowflake] = MISSING,
         exempt_channels: Sequence[Snowflake] = MISSING,
         reason: Optional[str] = None,
@@ -281,7 +281,7 @@ class AutomodRule:
 
         Edits the auto moderation rule.
 
-        You must have :attr:`.Permissions.manage_guild` permission to do this.  # TODO
+        You must have :attr:`.Permissions.manage_guild` permission to do this.
 
         All fields are optional.
 
@@ -289,14 +289,14 @@ class AutomodRule:
         ----------
         name: :class:`str`
             The rule's new name.
-        enabled: :class:`bool`
-            Whether to enable the rule.
-        trigger_type: :class:`AutomodTriggerType`
-            The rule's new trigger type.
-        actions: Sequence[:class:`AutomodAction`]
-            The rule's new actions.
+        event_type: :class:`AutomodEventType`
+            The rule's new event type.
         trigger_metadata: :class:`AutomodTriggerMetadata`
             The rule's new associated trigger metadata.
+        actions: Sequence[:class:`AutomodAction`]
+            The rule's new actions.
+        enabled: :class:`bool`
+            Whether to enable the rule.
         exempt_roles: Sequence[:class:`abc.Snowflake`]
             The rule's new exempt roles.
         exempt_channels: Sequence[:class:`abc.Snowflake`]
@@ -323,14 +323,14 @@ class AutomodRule:
 
         if name is not MISSING:
             payload["name"] = name
-        if enabled is not MISSING:
-            payload["enabled"] = enabled
-        if trigger_type is not MISSING:
-            payload["trigger_type"] = try_enum_to_int(trigger_type)
-        if actions is not MISSING:
-            payload["actions"] = [a.to_dict() for a in actions]
+        if event_type is not MISSING:
+            payload["event_type"] = try_enum_to_int(event_type)
         if trigger_metadata is not MISSING:
             payload["trigger_metadata"] = trigger_metadata.to_dict()
+        if actions is not MISSING:
+            payload["actions"] = [a.to_dict() for a in actions]
+        if enabled is not MISSING:
+            payload["enabled"] = enabled
         if exempt_roles is not MISSING:
             payload["exempt_roles"] = [e.id for e in exempt_roles]
         if exempt_channels is not MISSING:
