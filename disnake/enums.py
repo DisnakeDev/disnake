@@ -800,7 +800,7 @@ class AutomodEventType(Enum):
 
 class AutomodActionType(Enum):
     block_message = 1
-    log_to_channel = 2
+    send_alert_message = 2
 
 
 T = TypeVar("T")

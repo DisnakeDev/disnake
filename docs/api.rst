@@ -3462,7 +3462,7 @@ of :class:`enum.Enum`.
 
         The rule will prevent matching messages from being posted.
 
-    .. attribute:: log_to_channel
+    .. attribute:: send_alert_message
 
         The rule will send an alert to a specified channel.
 
