@@ -91,7 +91,7 @@ class AutomodAction:
     @property
     def channel(self) -> Optional[GuildChannelType]:
         """Optional[:class:`abc.GuildChannel`]: The channel to send an alert in when the rule is triggered,
-        if :attr:`.type` is :attr:`AutomodActionType.send_alert`."""
+        if :attr:`.type` is :attr:`AutomodActionType.send_alert_message`."""
         # TODO: return Object instead of None?
         return self.guild.get_channel(self.channel_id)  # type: ignore
 
