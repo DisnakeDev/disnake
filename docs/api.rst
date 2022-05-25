@@ -3428,11 +3428,11 @@ of :class:`enum.Enum`.
 
     .. versionadded:: 2.6
 
-    .. attribute:: keywords
+    .. attribute:: keyword
 
         The rule will filter messages based on a custom keyword list.
 
-    .. attribute:: harmful_links
+    .. attribute:: harmful_link
 
         The rule will filter messages containing malicious links.
 
@@ -3440,7 +3440,7 @@ of :class:`enum.Enum`.
 
         The rule will filter messages suspected of being spam.
 
-    .. attribute:: default_keyword_list
+    .. attribute:: keyword_preset
 
         The rule will filter messages based on predefined lists containing commonly flagged words.
 

@@ -788,10 +788,10 @@ class Locale(Enum):
 
 
 class AutomodTriggerType(Enum):
-    keywords = 1
-    harmful_links = 2
+    keyword = 1
+    harmful_link = 2
     spam = 3
-    default_keyword_list = 4
+    keyword_preset = 4
 
 
 class AutomodEventType(Enum):
