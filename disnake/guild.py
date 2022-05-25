@@ -48,6 +48,7 @@ from typing import (
 from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
+from .auto_moderation import AutomodRule
 from .bans import BanEntry
 from .channel import *
 from .channel import _guild_channel_factory, _threaded_guild_channel_factory
@@ -98,7 +99,7 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
-    from .auto_moderation import AutomodAction, AutomodRule, AutomodTriggerMetadata
+    from .auto_moderation import AutomodAction, AutomodTriggerMetadata
     from .channel import CategoryChannel, ForumChannel, StageChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
