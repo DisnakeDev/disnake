@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 
 from .enums import (
     AutomodActionType,
@@ -50,11 +50,13 @@ if TYPE_CHECKING:
         AutomodAction as AutomodActionPayload,
         AutomodActionExecutionEvent as AutomodActionExecutionEventPayload,
         AutomodActionMetadata,
+        AutomodListType,
         AutomodRule as AutomodRulePayload,
+        AutomodTriggerMetadata as AutomodTriggerMetadataPayload,
         EditAutomodRule as EditAutomodRulePayload,
     )
 
-__all__ = ("AutomodAction", "AutomodRule", "AutomodActionExecution")
+__all__ = ("AutomodAction", "AutomodTriggerMetadata", "AutomodRule", "AutomodActionExecution")
 
 
 class AutomodAction:
@@ -124,6 +126,56 @@ class AutomodAction:
         }
 
 
+class AutomodTriggerMetadata:
+    """
+    Metadata for an auto moderation trigger.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    keyword_filter: Optional[List[:class:`str`]]
+        List of keywords to filter. Used with :attr:`AutomodTriggerType.keyword`.
+    keyword_lists: Optional[List[:class:`str`]]
+        List of filter list types. Possible values are ``PROFANITY``,
+        ``SEXUAL_CONTENT``, ``SLURS``. Used with :attr:`AutomodTriggerType.keyword`.
+    """
+
+    # TODO: add overloads - can we always require exactly one parameter here, or is it
+    #       required to be able to construct this class without any parameters?
+    def __init__(
+        self,
+        *,
+        keyword_filter: Optional[Sequence[str]] = None,
+        keyword_lists: Optional[Sequence[AutomodListType]] = None,
+    ):
+        self.keyword_filter: Optional[Sequence[str]] = keyword_filter
+        self.keyword_lists: Optional[Sequence[AutomodListType]] = keyword_lists
+
+    @classmethod
+    def _from_dict(cls, data: AutomodTriggerMetadataPayload) -> Self:
+        return cls(
+            keyword_filter=data.get("keyword_filter"),
+            keyword_lists=data.get("keyword_lists"),
+        )
+
+    def to_dict(self) -> AutomodTriggerMetadataPayload:
+        data: AutomodTriggerMetadataPayload = {}
+        if self.keyword_filter is not None:
+            data["keyword_filter"] = list(self.keyword_filter)
+        if self.keyword_lists is not None:
+            data["keyword_lists"] = list(self.keyword_lists)
+        return data
+
+    def __repr__(self) -> str:
+        s = f"<{type(self).__name__}"
+        if self.keyword_filter is not None:
+            s += f" keyword_filter={self.keyword_filter}"
+        if self.keyword_lists is not None:
+            s += f" keyword_lists={self.keyword_lists}"
+        return f"{s}>"
+
+
 class AutomodRule:
     """
     Represents an auto moderation rule.
@@ -148,8 +200,8 @@ class AutomodRule:
         The type of trigger that determines whether this rule's actions should run for a specific event.
     actions: List[:class:`AutomodAction`]
         The list of actions that will execute if a matching event triggered this rule.
-    trigger_metadata: Any
-        unknown  # TODO
+    trigger_metadata: :class:`AutomodTriggerMetadata`
+        Additional metadata associated with this rule's :attr:`.trigger_type`.
     """
 
     __slots__ = (
@@ -180,7 +232,9 @@ class AutomodRule:
             for action in data["actions"]
             if action
         ]
-        self.trigger_metadata: Any = data["trigger_metadata"]
+        self.trigger_metadata: AutomodTriggerMetadata = AutomodTriggerMetadata._from_dict(
+            data["trigger_metadata"]
+        )
         self._exempt_role_ids: List[int] = list(map(int, data["exempt_roles"]))
         self._exempt_channel_ids: List[int] = list(map(int, data["exempt_channels"]))
 
@@ -217,7 +271,7 @@ class AutomodRule:
         enabled: bool = MISSING,
         trigger_type: AutomodTriggerType = MISSING,
         actions: Sequence[AutomodAction] = MISSING,
-        trigger_metadata: Any = MISSING,
+        trigger_metadata: AutomodTriggerMetadata = MISSING,
         exempt_roles: Sequence[Snowflake] = MISSING,
         exempt_channels: Sequence[Snowflake] = MISSING,
         reason: Optional[str] = None,
@@ -240,8 +294,8 @@ class AutomodRule:
             The rule's new trigger type.
         actions: Sequence[:class:`AutomodAction`]
             The rule's new actions.
-        trigger_metadata: Any
-            unknown  # TODO
+        trigger_metadata: :class:`AutomodTriggerMetadata`
+            The rule's new associated trigger metadata.
         exempt_roles: Sequence[:class:`abc.Snowflake`]
             The rule's new exempt roles.
         exempt_channels: Sequence[:class:`abc.Snowflake`]
@@ -275,7 +329,7 @@ class AutomodRule:
         if actions is not MISSING:
             payload["actions"] = [a.to_dict() for a in actions]
         if trigger_metadata is not MISSING:
-            payload["trigger_metadata"] = trigger_metadata
+            payload["trigger_metadata"] = trigger_metadata.to_dict()
         if exempt_roles is not MISSING:
             payload["exempt_roles"] = [e.id for e in exempt_roles]
         if exempt_channels is not MISSING:

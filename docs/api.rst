@@ -2907,9 +2907,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.trigger_type`
         - :attr:`~AuditLogDiff.event_type`
         - :attr:`~AuditLogDiff.actions`
+        - :attr:`~AuditLogDiff.trigger_metadata`
         - :attr:`~AuditLogDiff.exempt_roles`
         - :attr:`~AuditLogDiff.exempt_channels`
-        - :attr:`~AuditLogDiff.trigger_metadata`
 
         .. versionadded:: 2.6
 
@@ -2928,9 +2928,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.trigger_type`
         - :attr:`~AuditLogDiff.event_type`
         - :attr:`~AuditLogDiff.actions`
+        - :attr:`~AuditLogDiff.trigger_metadata`
         - :attr:`~AuditLogDiff.exempt_roles`
         - :attr:`~AuditLogDiff.exempt_channels`
-        - :attr:`~AuditLogDiff.trigger_metadata`
 
         .. versionadded:: 2.6
 
@@ -2949,9 +2949,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.trigger_type`
         - :attr:`~AuditLogDiff.event_type`
         - :attr:`~AuditLogDiff.actions`
+        - :attr:`~AuditLogDiff.trigger_metadata`
         - :attr:`~AuditLogDiff.exempt_roles`
         - :attr:`~AuditLogDiff.exempt_channels`
-        - :attr:`~AuditLogDiff.trigger_metadata`
 
         .. versionadded:: 2.6
 
@@ -4191,6 +4191,12 @@ AuditLogDiff
 
         :type: List[:class:`AutomodAction`]
 
+    .. attribute:: trigger_metadata
+
+        The additional trigger metadata of an auto moderation rule being changed.
+
+        :type: :class:`AutomodTriggerMetadata`
+
     .. attribute:: exempt_roles
 
         The list of roles that are exempt from an auto moderation rule being changed.
@@ -4206,12 +4212,6 @@ AuditLogDiff
         If a channel is not found then it is an :class:`Object` with the ID being set.
 
         :type: List[Union[:class:`abc.GuildChannel`, :class:`Object`]]
-
-    .. attribute:: trigger_metadata
-
-        unknown
-
-        :type: Any
 
 Webhook Support
 ------------------
@@ -5018,6 +5018,14 @@ AutomodRule
 .. attributetable:: AutomodRule
 
 .. autoclass:: AutomodRule()
+    :members:
+
+AutomodTriggerMetadata
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutomodTriggerMetadata
+
+.. autoclass:: AutomodTriggerMetadata()
     :members:
 
 AutomodAction

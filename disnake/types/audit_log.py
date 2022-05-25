@@ -26,9 +26,14 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import Any, List, Literal, Optional, TypedDict, Union
+from typing import List, Literal, Optional, TypedDict, Union
 
-from .auto_moderation import AutomodAction, AutomodEventType, AutomodTriggerType
+from .auto_moderation import (
+    AutomodAction,
+    AutomodEventType,
+    AutomodTriggerMetadata,
+    AutomodTriggerType,
+)
 from .channel import ChannelType, PermissionOverwrite, VideoQualityMode
 from .guild import (
     DefaultMessageNotificationLevel,
@@ -282,8 +287,8 @@ class _AuditLogChange_AutomodActions(TypedDict):
 # TODO
 class _AuditLogChange_AutomodTriggerMetadata(TypedDict):
     key: Literal["trigger_metadata"]
-    new_value: Any
-    old_value: Any
+    new_value: AutomodTriggerMetadata
+    old_value: AutomodTriggerMetadata
 
 
 AuditLogChange = Union[
@@ -307,7 +312,7 @@ AuditLogChange = Union[
     _AuditLogChange_AutomodTriggerType,
     _AuditLogChange_AutomodEventType,
     _AuditLogChange_AutomodActions,
-    # _AuditLogChange_AutomodTriggerMetadata,
+    _AuditLogChange_AutomodTriggerMetadata,
 ]
 
 

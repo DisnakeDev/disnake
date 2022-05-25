@@ -24,13 +24,15 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Any, List, Literal, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict
 
 from .snowflake import Snowflake, SnowflakeList
 
 AutomodTriggerType = Literal[1, 2, 3, 4]
 AutomodEventType = Literal[1]
 AutomodActionType = Literal[1, 2]
+# TODO: will likely change
+AutomodListType = Literal["PROFANITY", "SEXUAL_CONTENT", "SLURS"]
 
 
 # TODO: undocumented
@@ -40,7 +42,12 @@ class AutomodActionMetadata(TypedDict, total=False):
 
 class AutomodAction(TypedDict):
     type: AutomodActionType
-    metadata: AutomodActionMetadata  # TODO: possibly optional and/or nullable
+    metadata: AutomodActionMetadata
+
+
+class AutomodTriggerMetadata(TypedDict, total=False):
+    keyword_filter: List[str]
+    keyword_lists: List[AutomodListType]
 
 
 # TODO: optional/nullable unknown
@@ -56,7 +63,7 @@ class AutomodRule(TypedDict):
     actions: List[Optional[AutomodAction]]
     # TODO: tbd - currently known structure looks something like this (all keys optional):
     # {"keyword_lists": ["...", "..."], "keyword_filter": ["...", "..."]}
-    trigger_metadata: Any
+    trigger_metadata: AutomodTriggerMetadata
     exempt_roles: SnowflakeList
     exempt_channels: SnowflakeList
 

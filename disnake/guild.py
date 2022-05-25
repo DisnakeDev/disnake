@@ -98,7 +98,7 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
-    from .auto_moderation import AutomodAction, AutomodRule
+    from .auto_moderation import AutomodAction, AutomodRule, AutomodTriggerMetadata
     from .channel import CategoryChannel, ForumChannel, StageChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
@@ -4114,7 +4114,7 @@ class Guild(Hashable):
         event_type: AutomodEventType = None,
         trigger_type: AutomodTriggerType = None,
         actions: Sequence[AutomodAction] = None,
-        trigger_metadata: Any = None,
+        trigger_metadata: AutomodTriggerMetadata = None,
         exempt_roles: Sequence[Snowflake] = None,
         exempt_channels: Sequence[Snowflake] = None,
         reason: Optional[str] = None,
@@ -4153,7 +4153,7 @@ class Guild(Hashable):
         if actions:
             payload["actions"] = [a.to_dict() for a in actions]
         if trigger_metadata:
-            payload["trigger_metadata"] = trigger_metadata
+            payload["trigger_metadata"] = trigger_metadata.to_dict()
         if exempt_roles:
             payload["exempt_roles"] = [e.id for e in exempt_roles]
         if exempt_channels:

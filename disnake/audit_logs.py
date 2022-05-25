@@ -44,7 +44,7 @@ from typing import (
 from . import abc, enums, utils
 from .app_commands import ApplicationCommandPermissions
 from .asset import Asset
-from .auto_moderation import AutomodAction
+from .auto_moderation import AutomodAction, AutomodTriggerMetadata
 from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
@@ -75,7 +75,10 @@ if TYPE_CHECKING:
         AuditLogEntry as AuditLogEntryPayload,
         _AuditLogChange_ApplicationCommandPermissions as AuditLogChangeAppCmdPermsPayload,
     )
-    from .types.auto_moderation import AutomodAction as AutomodActionPayload
+    from .types.auto_moderation import (
+        AutomodAction as AutomodActionPayload,
+        AutomodTriggerMetadata as AutomodTriggerMetadataPayload,
+    )
     from .types.channel import PermissionOverwrite as PermissionOverwritePayload
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
@@ -230,6 +233,14 @@ def _transform_automod_action(
     return AutomodAction._from_dict(data, entry.guild)
 
 
+def _transform_automod_trigger_metadata(
+    entry: AuditLogEntry, data: Optional[AutomodTriggerMetadataPayload]
+) -> Optional[AutomodTriggerMetadata]:
+    if data is None:
+        return None
+    return AutomodTriggerMetadata._from_dict(data)
+
+
 class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
@@ -294,9 +305,9 @@ class AuditLogChanges:
         'trigger_type':                  (None, _enum_transformer(enums.AutomodTriggerType)),
         'event_type':                    (None, _enum_transformer(enums.AutomodEventType)),
         'actions':                       (None, _list_transformer(_transform_automod_action)),
+        'trigger_metadata':              (None, _transform_automod_trigger_metadata),
         'exempt_roles':                  (None, _list_transformer(_transform_role)),
         'exempt_channels':               (None, _list_transformer(_transform_channel)),
-        # TODO: trigger_metadata, format currently not specified
     }
     # fmt: on
 
