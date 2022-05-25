@@ -37,6 +37,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
@@ -759,7 +760,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         mute: bool = MISSING,
         deafen: bool = MISSING,
         suppress: bool = MISSING,
-        roles: List[disnake.abc.Snowflake] = MISSING,
+        roles: Sequence[disnake.abc.Snowflake] = MISSING,
         voice_channel: Optional[VocalGuildChannel] = MISSING,
         timeout: Optional[Union[float, datetime.timedelta, datetime.datetime]] = MISSING,
         reason: Optional[str] = None,
@@ -807,7 +808,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
             .. versionadded:: 1.7
 
-        roles: List[:class:`Role`]
+        roles: Sequence[:class:`Role`]
             The member's new list of roles. This *replaces* the roles.
         voice_channel: Optional[:class:`VoiceChannel`]
             The voice channel to move the member to.

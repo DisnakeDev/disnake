@@ -235,7 +235,7 @@ class Guild(Hashable):
         The number goes from 0 to 3 inclusive.
     premium_subscription_count: :class:`int`
         The number of "boosts" this guild currently has.
-    preferred_locale: Optional[:class:`Locale`]
+    preferred_locale: :class:`Locale`
         The preferred locale for the guild. Used when filtering Server Discovery
         results to a specific language.
 
@@ -539,7 +539,7 @@ class Guild(Hashable):
         self.premium_tier: int = guild.get("premium_tier", 0)
         self.premium_subscription_count: int = guild.get("premium_subscription_count") or 0
         self._system_channel_flags: int = guild.get("system_channel_flags", 0)
-        self.preferred_locale: Optional[Locale] = try_enum(Locale, guild.get("preferred_locale"))
+        self.preferred_locale: Locale = try_enum(Locale, guild.get("preferred_locale"))
         self._discovery_splash: Optional[str] = guild.get("discovery_splash")
         self._rules_channel_id: Optional[int] = utils._get_as_snowflake(guild, "rules_channel_id")
         self._public_updates_channel_id: Optional[int] = utils._get_as_snowflake(
@@ -855,10 +855,9 @@ class Guild(Hashable):
 
     @property
     def bitrate_limit(self) -> float:
-        """:class:`float`: The maximum bitrate for voice channels this guild can have."""
-        vip_guild = (
-            self._PREMIUM_GUILD_LIMITS[1].bitrate if "VIP_REGIONS" in self.features else 96e3
-        )
+        """:class:`float`: The maximum bitrate for voice channels this guild can have.
+        For stage channels, the maximum bitrate is 64000."""
+        vip_guild = self._PREMIUM_GUILD_LIMITS[3].bitrate if "VIP_REGIONS" in self.features else 0
         return max(vip_guild, self._PREMIUM_GUILD_LIMITS[self.premium_tier].bitrate)
 
     @property
@@ -1182,7 +1181,7 @@ class Guild(Hashable):
         reason: Optional[str] = None,
         category: Optional[CategoryChannel] = None,
         position: int = MISSING,
-        topic: str = MISSING,
+        topic: Optional[str] = MISSING,
         slowmode_delay: int = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         nsfw: bool = MISSING,
@@ -1242,7 +1241,7 @@ class Guild(Hashable):
         position: :class:`int`
             The position in the channel list. This is a number that starts
             at 0. e.g. the top channel is position 0.
-        topic: :class:`str`
+        topic: Optional[:class:`str`]
             The channel's topic.
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this channel, in seconds.
@@ -1423,7 +1422,7 @@ class Guild(Hashable):
         self,
         name: str,
         *,
-        topic: str = MISSING,
+        topic: Optional[str] = MISSING,
         position: int = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         category: Optional[CategoryChannel] = None,
@@ -1440,11 +1439,11 @@ class Guild(Hashable):
         ----------
         name: :class:`str`
             The channel's name.
-        topic: :class:`str`
+        topic: Optional[:class:`str`]
             The channel's topic.
 
             .. versionchanged:: 2.5
-                This no longer must be set.
+                This is no longer required to be provided.
 
         overwrites: Dict[Union[:class:`Role`, :class:`Member`], :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
@@ -2862,7 +2861,7 @@ class Guild(Hashable):
             The name of a unicode emoji that represents the sticker's expression.
         file: :class:`File`
             The file of the sticker to upload.
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason for creating this sticker. Shows up on the audit log.
 
         Raises

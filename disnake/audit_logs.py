@@ -232,6 +232,7 @@ class AuditLogChanges:
         'deny':                          (None, _transform_permissions),
         'permissions':                   (None, _transform_permissions),
         'id':                            (None, _transform_snowflake),
+        'application_id':                (None, _transform_snowflake),
         'color':                         ('colour', _transform_color),
         'owner_id':                      ('owner', _transform_member_id),
         'inviter_id':                    ('inviter', _transform_member_id),
@@ -565,9 +566,9 @@ class AuditLogEntry(Hashable):
             return converter(self._target_id)
 
     @utils.cached_property
-    def category(self) -> enums.AuditLogActionCategory:
+    def category(self) -> Optional[enums.AuditLogActionCategory]:
         """Optional[:class:`AuditLogActionCategory`]: The category of the action, if applicable."""
-        return self.action.category  # type: ignore
+        return self.action.category
 
     @utils.cached_property
     def changes(self) -> AuditLogChanges:

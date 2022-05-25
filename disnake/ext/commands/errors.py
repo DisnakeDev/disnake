@@ -112,7 +112,7 @@ class CommandError(DiscordException):
 
     This exception and exceptions inherited from it are handled
     in a special way as they are caught and passed into a special event
-    from :class:`.Bot`\, :func:`.on_command_error`.
+    from :class:`.Bot`\\, :func:`.on_command_error`.
     """
 
     def __init__(self, message: Optional[str] = None, *args: Any) -> None:

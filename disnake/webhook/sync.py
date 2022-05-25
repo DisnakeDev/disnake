@@ -565,6 +565,11 @@ class SyncWebhook(BaseWebhook):
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
+
+    application_id: Optional[:class:`int`]
+        The ID of the application associated with this webhook, if it was created by an application.
+
+        .. versionadded:: 2.6
     """
 
     __slots__: Tuple[str, ...] = ("session",)
@@ -844,18 +849,18 @@ class SyncWebhook(BaseWebhook):
     @overload
     def send(
         self,
-        content: Optional[str] = MISSING,
+        content: Optional[str] = ...,
         *,
-        username: str = MISSING,
-        avatar_url: Any = MISSING,
-        tts: bool = MISSING,
-        file: File = MISSING,
-        files: List[File] = MISSING,
-        embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
-        suppress_embeds: bool = MISSING,
-        allowed_mentions: AllowedMentions = MISSING,
-        thread: Snowflake = MISSING,
+        username: str = ...,
+        avatar_url: Any = ...,
+        tts: bool = ...,
+        file: File = ...,
+        files: List[File] = ...,
+        embed: Embed = ...,
+        embeds: List[Embed] = ...,
+        suppress_embeds: bool = ...,
+        allowed_mentions: AllowedMentions = ...,
+        thread: Snowflake = ...,
         wait: Literal[True],
     ) -> SyncWebhookMessage:
         ...
@@ -863,18 +868,18 @@ class SyncWebhook(BaseWebhook):
     @overload
     def send(
         self,
-        content: Optional[str] = MISSING,
+        content: Optional[str] = ...,
         *,
-        username: str = MISSING,
-        avatar_url: Any = MISSING,
-        tts: bool = MISSING,
-        file: File = MISSING,
-        files: List[File] = MISSING,
-        embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
-        suppress_embeds: bool = MISSING,
-        allowed_mentions: AllowedMentions = MISSING,
-        thread: Snowflake = MISSING,
+        username: str = ...,
+        avatar_url: Any = ...,
+        tts: bool = ...,
+        file: File = ...,
+        files: List[File] = ...,
+        embed: Embed = ...,
+        embeds: List[Embed] = ...,
+        suppress_embeds: bool = ...,
+        allowed_mentions: AllowedMentions = ...,
+        thread: Snowflake = ...,
         wait: Literal[False] = ...,
     ) -> None:
         ...

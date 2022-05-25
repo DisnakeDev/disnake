@@ -443,7 +443,9 @@ class ConnectionState:
         return self._global_application_commands.get(application_command_id)
 
     def _add_global_application_command(
-        self, application_command: APIApplicationCommand, /
+        self,
+        application_command: APIApplicationCommand,
+        /,
     ) -> None:
         assert application_command.id
         self._global_application_commands[application_command.id] = application_command
@@ -1749,7 +1751,7 @@ class ConnectionState:
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
     ) -> Optional[Union[User, Member]]:
-        if isinstance(channel, (TextChannel, VoiceChannel)):
+        if isinstance(channel, (TextChannel, VoiceChannel, Thread)):
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 

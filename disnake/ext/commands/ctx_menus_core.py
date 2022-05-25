@@ -23,7 +23,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
 from disnake.i18n import Localized
@@ -34,10 +34,18 @@ from .errors import *
 from .params import safe_call
 
 if TYPE_CHECKING:
-    from disnake.i18n import LocalizedOptional
-    from disnake.interactions import ApplicationCommandInteraction
+    from typing_extensions import ParamSpec
 
-    from .base_core import InteractionCommandCallback
+    from disnake.i18n import LocalizedOptional
+    from disnake.interactions import (
+        ApplicationCommandInteraction,
+        MessageCommandInteraction,
+        UserCommandInteraction,
+    )
+
+    from .base_core import CogT, InteractionCommandCallback
+
+    P = ParamSpec("P")
 
 __all__ = ("InvokableUserCommand", "InvokableMessageCommand", "user_command", "message_command")
 
@@ -67,7 +75,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_user_command_error`
         event.
-    guild_ids: Optional[List[:class:`int`]]
+    guild_ids: Optional[Tuple[:class:`int`, ...]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -77,27 +85,27 @@ class InvokableUserCommand(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     def __init__(
         self,
-        func: InteractionCommandCallback,
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
-        self.guild_ids: Optional[Sequence[int]] = guild_ids
-        self.auto_sync: bool = auto_sync
+        self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
+        self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
-            default_perms = func.__default_member_permissions__
+            default_perms: int = func.__default_member_permissions__
         except AttributeError:
             pass
         else:
@@ -105,7 +113,9 @@ class InvokableUserCommand(InvokableApplicationCommand):
                 raise ValueError(
                     "Cannot set `default_member_permissions` in both parameter and decorator"
                 )
-            default_member_permissions = Permissions(default_perms)
+            default_member_permissions = default_perms
+
+        dm_permission = True if dm_permission is None else dm_permission
 
         self.body = UserCommand(
             name=name_loc._upgrade(self.name),
@@ -165,7 +175,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_message_command_error`
         event.
-    guild_ids: Optional[List[:class:`int`]]
+    guild_ids: Optional[Tuple[:class:`int`, ...]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -175,27 +185,27 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
     """
 
     def __init__(
         self,
-        func: InteractionCommandCallback,
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
-        self.guild_ids: Optional[Sequence[int]] = guild_ids
-        self.auto_sync: bool = auto_sync
+        self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
+        self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
-            default_perms = func.__default_member_permissions__
+            default_perms: int = func.__default_member_permissions__
         except AttributeError:
             pass
         else:
@@ -203,7 +213,9 @@ class InvokableMessageCommand(InvokableApplicationCommand):
                 raise ValueError(
                     "Cannot set `default_member_permissions` in both parameter and decorator"
                 )
-            default_member_permissions = Permissions(default_perms)
+            default_member_permissions = default_perms
+
+        dm_permission = True if dm_permission is None else dm_permission
 
         self.body = MessageCommand(
             name=name_loc._upgrade(self.name),
@@ -241,13 +253,13 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: bool = True,
+    dm_permission: bool = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     guild_ids: Sequence[int] = None,
-    auto_sync: bool = True,
+    auto_sync: bool = None,
     extras: Dict[str, Any] = None,
     **kwargs,
-) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
+) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
 
     Parameters
@@ -260,6 +272,7 @@ def user_command(
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+        Defaults to ``True``.
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -270,14 +283,14 @@ def user_command(
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
         If specified, the client will register the command in these guilds.
-        Otherwise this command will be registered globally in ~1 hour.
+        Otherwise, this command will be registered globally.
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
 
     Returns
     -------
@@ -285,7 +298,9 @@ def user_command(
         A decorator that converts the provided method into an InvokableUserCommand and returns it.
     """
 
-    def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
+    def decorator(
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+    ) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
@@ -309,13 +324,16 @@ def user_command(
 def message_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: bool = True,
+    dm_permission: bool = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     guild_ids: Sequence[int] = None,
-    auto_sync: bool = True,
+    auto_sync: bool = None,
     extras: Dict[str, Any] = None,
     **kwargs,
-) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
+) -> Callable[
+    [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
+    InvokableMessageCommand,
+]:
     """A shortcut decorator that builds a message command.
 
     Parameters
@@ -328,6 +346,7 @@ def message_command(
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+        Defaults to ``True``.
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -338,14 +357,14 @@ def message_command(
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
         If specified, the client will register the command in these guilds.
-        Otherwise this command will be registered globally in ~1 hour.
+        Otherwise, this command will be registered globally.
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
         .. note::
             This object may be copied by the library.
 
-        .. versionadded: 2.5
+        .. versionadded:: 2.5
 
     Returns
     -------
@@ -353,7 +372,9 @@ def message_command(
         A decorator that converts the provided method into an InvokableMessageCommand and then returns it.
     """
 
-    def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
+    def decorator(
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+    ) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):

@@ -64,7 +64,7 @@ extlinks = {
 intersphinx_mapping = {
     "py": ("https://docs.python.org/3", None),
     "aio": ("https://docs.aiohttp.org/en/stable/", None),
-    "req": ("https://docs.python-requests.org/en/latest/", None),
+    "req": ("https://requests.readthedocs.io/en/latest/", None),
 }
 
 rst_prolog = """
@@ -196,7 +196,7 @@ def linkcode_resolve(domain, info):
         obj = sys.modules[info["module"]]
         for part in info["fullname"].split("."):
             obj = getattr(obj, part)
-        obj = inspect.unwrap(obj)  # type: ignore
+        obj = inspect.unwrap(obj)
 
         if isinstance(obj, property):
             obj = inspect.unwrap(obj.fget)  # type: ignore

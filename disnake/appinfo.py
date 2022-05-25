@@ -284,7 +284,7 @@ class AppInfo:
 
 
 class PartialAppInfo:
-    """Represents a partial AppInfo given by :func:`~disnake.abc.GuildChannel.create_invite`
+    """Represents a partial AppInfo given by :func:`~disnake.abc.GuildChannel.create_invite`.
 
     .. versionadded:: 2.0
 

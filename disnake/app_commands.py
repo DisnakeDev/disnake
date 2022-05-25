@@ -435,6 +435,7 @@ class ApplicationCommand(ABC):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
+        Defaults to ``True``.
 
         .. versionadded:: 2.5
     """
@@ -450,7 +451,7 @@ class ApplicationCommand(ABC):
         self,
         type: ApplicationCommandType,
         name: LocalizedRequired,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
@@ -459,12 +460,14 @@ class ApplicationCommand(ABC):
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
 
-        self.dm_permission: bool = dm_permission
+        self.dm_permission: bool = True if dm_permission is None else dm_permission
 
         self._default_member_permissions: Optional[int]
         if default_member_permissions is None:
             # allow everyone to use the command if its not supplied
             self._default_member_permissions = None
+        elif isinstance(default_member_permissions, bool):
+            raise TypeError("`default_member_permissions` cannot be a bool")
         elif isinstance(default_member_permissions, int):
             self._default_member_permissions = default_member_permissions
         else:
@@ -552,7 +555,7 @@ class _APIApplicationCommandMixin:
 
 class UserCommand(ApplicationCommand):
     """
-    A user context menu command
+    A user context menu command.
 
     Attributes
     ----------
@@ -565,11 +568,7 @@ class UserCommand(ApplicationCommand):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
+        Defaults to ``True``.
 
         .. versionadded:: 2.5
     """
@@ -579,7 +578,7 @@ class UserCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         super().__init__(
@@ -592,7 +591,7 @@ class UserCommand(ApplicationCommand):
 
 class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     """
-    A user context menu command returned by the API
+    A user context menu command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -607,11 +606,6 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
 
@@ -657,11 +651,7 @@ class MessageCommand(ApplicationCommand):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
+        Defaults to ``True``.
 
         .. versionadded:: 2.5
     """
@@ -671,7 +661,7 @@ class MessageCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         super().__init__(
@@ -684,7 +674,7 @@ class MessageCommand(ApplicationCommand):
 
 class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     """
-    A message context menu command returned by the API
+    A message context menu command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -699,11 +689,6 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
 
@@ -756,11 +741,7 @@ class SlashCommand(ApplicationCommand):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
+        Defaults to ``True``.
 
         .. versionadded:: 2.5
 
@@ -781,7 +762,7 @@ class SlashCommand(ApplicationCommand):
         name: LocalizedRequired,
         description: LocalizedRequired,
         options: List[Option] = None,
-        dm_permission: bool = True,
+        dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
         super().__init__(
@@ -859,7 +840,7 @@ class SlashCommand(ApplicationCommand):
 
 class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     """
-    A slash command returned by the API
+    A slash command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -881,11 +862,6 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
-    default_member_permissions: Optional[:class:`Permissions`]
-        The default required member permissions for this command.
 
         .. versionadded:: 2.5
 

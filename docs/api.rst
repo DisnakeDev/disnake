@@ -1771,12 +1771,13 @@ of :class:`enum.Enum`.
     .. versionadded:: 2.5
 
     .. attribute:: role
+
         Represents a permission that affects roles.
-
     .. attribute:: user
-        Represents a permission that affects users.
 
+        Represents a permission that affects users.
     .. attribute:: channel
+
         Represents a permission that affects channels.
 
 .. class:: InteractionType
@@ -2475,6 +2476,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.type` (always set to ``1`` if so)
+        - :attr:`~AuditLogDiff.application_id`
+
+        .. versionchanged:: 2.6
+            Added :attr:`~AuditLogDiff.application_id`.
 
     .. attribute:: webhook_update
 
@@ -2504,6 +2509,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.type` (always set to ``1`` if so)
+        - :attr:`~AuditLogDiff.application_id`
+
+        .. versionchanged:: 2.6
+            Added :attr:`~AuditLogDiff.application_id`.
 
     .. attribute:: emoji_create
 
@@ -3980,8 +3989,11 @@ AuditLogDiff
 
         :type: Dict[:class:`int`, :class:`ApplicationCommandPermissions`]
 
-.. this is currently missing the following keys: reason and application_id
-   I'm not sure how to about porting these
+    .. attribute:: application_id
+
+        The ID of the application that created a webhook.
+
+        :type: :class:`int`
 
 Webhook Support
 ------------------
@@ -4165,38 +4177,6 @@ Message
 .. autoclass:: Message()
     :members:
 
-ApplicationCommand
-~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: ApplicationCommand
-
-.. autoclass:: ApplicationCommand()
-    :members:
-
-SlashCommand
-~~~~~~~~~~~~
-
-.. attributetable:: SlashCommand
-
-.. autoclass:: SlashCommand()
-    :members:
-
-UserCommand
-~~~~~~~~~~~
-
-.. attributetable:: UserCommand
-
-.. autoclass:: UserCommand()
-    :members:
-
-MessageCommand
-~~~~~~~~~~~~~~
-
-.. attributetable:: MessageCommand
-
-.. autoclass:: MessageCommand()
-    :members:
-
 APISlashCommand
 ~~~~~~~~~~~~~~~
 
@@ -4204,6 +4184,7 @@ APISlashCommand
 
 .. autoclass:: APISlashCommand()
     :members:
+    :inherited-members:
 
 APIUserCommand
 ~~~~~~~~~~~~~~
@@ -4212,6 +4193,7 @@ APIUserCommand
 
 .. autoclass:: APIUserCommand()
     :members:
+    :inherited-members:
 
 APIMessageCommand
 ~~~~~~~~~~~~~~~~~
@@ -4220,22 +4202,7 @@ APIMessageCommand
 
 .. autoclass:: APIMessageCommand()
     :members:
-
-Option
-~~~~~~
-
-.. attributetable:: Option
-
-.. autoclass:: Option()
-    :members:
-
-OptionChoice
-~~~~~~~~~~~~
-
-.. attributetable:: OptionChoice
-
-.. autoclass:: OptionChoice()
-    :members:
+    :inherited-members:
 
 ApplicationCommandPermissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4996,6 +4963,57 @@ PartialMessage
 .. autoclass:: PartialMessage
     :members:
 
+ApplicationCommand
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationCommand
+
+.. autoclass:: ApplicationCommand()
+    :members:
+
+SlashCommand
+~~~~~~~~~~~~
+
+.. attributetable:: SlashCommand
+
+.. autoclass:: SlashCommand()
+    :members:
+    :inherited-members:
+
+UserCommand
+~~~~~~~~~~~
+
+.. attributetable:: UserCommand
+
+.. autoclass:: UserCommand()
+    :members:
+    :inherited-members:
+
+MessageCommand
+~~~~~~~~~~~~~~
+
+.. attributetable:: MessageCommand
+
+.. autoclass:: MessageCommand()
+    :members:
+    :inherited-members:
+
+Option
+~~~~~~
+
+.. attributetable:: Option
+
+.. autoclass:: Option()
+    :members:
+
+OptionChoice
+~~~~~~~~~~~~
+
+.. attributetable:: OptionChoice
+
+.. autoclass:: OptionChoice()
+    :members:
+
 SelectOption
 ~~~~~~~~~~~~~
 
@@ -5234,29 +5252,29 @@ The library uses the following types/methods to support localization.
 Localized
 ~~~~~~~~~
 
-.. autoclass:: disnake.i18n.Localized
+.. autoclass:: Localized
     :members:
     :inherited-members:
 
 LocalizationValue
 ~~~~~~~~~~~~~~~~~
 
-.. autoclass:: disnake.i18n.LocalizationValue
-    :members:
-    :inherited-members:
-
-LocalizationStore
-~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: disnake.i18n.LocalizationStore
+.. autoclass:: LocalizationValue
     :members:
     :inherited-members:
 
 LocalizationProtocol
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: disnake.i18n.LocalizationProtocol
+.. autoclass:: LocalizationProtocol
     :members:
+
+LocalizationStore
+~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: LocalizationStore
+    :members:
+    :inherited-members:
 
 
 Exceptions
