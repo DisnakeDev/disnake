@@ -50,7 +50,6 @@ class AutomodTriggerMetadata(TypedDict, total=False):
     keyword_lists: List[AutomodListType]
 
 
-# TODO: optional/nullable unknown
 class AutomodRule(TypedDict):
     id: Snowflake
     name: str
@@ -59,10 +58,7 @@ class AutomodRule(TypedDict):
     creator_id: Snowflake
     event_type: AutomodEventType
     trigger_type: AutomodTriggerType
-    # TODO: not documented properly, client appears to filter null values for some reason
-    actions: List[Optional[AutomodAction]]
-    # TODO: tbd - currently known structure looks something like this (all keys optional):
-    # {"keyword_lists": ["...", "..."], "keyword_filter": ["...", "..."]}
+    actions: List[AutomodAction]
     trigger_metadata: AutomodTriggerMetadata
     exempt_roles: SnowflakeList
     exempt_channels: SnowflakeList

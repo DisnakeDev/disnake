@@ -228,9 +228,7 @@ class AutomodRule:
         self.event_type: AutomodEventType = try_enum(AutomodEventType, data["event_type"])
         self.trigger_type: AutomodTriggerType = try_enum(AutomodTriggerType, data["trigger_type"])
         self.actions: List[AutomodAction] = [
-            AutomodAction._from_dict(data=action, guild=guild)
-            for action in data["actions"]
-            if action
+            AutomodAction._from_dict(data=action, guild=guild) for action in data["actions"]
         ]
         self.trigger_metadata: AutomodTriggerMetadata = AutomodTriggerMetadata._from_dict(
             data["trigger_metadata"]
