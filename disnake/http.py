@@ -2163,7 +2163,7 @@ class HTTPClient:
     ) -> Response[auto_moderation.AutomodRule]:
         return self.request(
             Route("POST", "/guilds/{guild_id}/auto-moderation/rules", guild_id=guild_id),
-            payload=payload,
+            json=payload,
             reason=reason,
         )
 
@@ -2182,7 +2182,7 @@ class HTTPClient:
                 guild_id=guild_id,
                 rule_id=rule_id,
             ),
-            payload=payload,
+            json=payload,
             reason=reason,
         )
 
