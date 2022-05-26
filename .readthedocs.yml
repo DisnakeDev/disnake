@@ -1,6 +1,7 @@
 version: 2
-formats: []
-
+formats:
+  - all # all includes htmlzip, pdf, epub
+ 
 build:
   os: ubuntu-20.04
   tools:
@@ -10,6 +11,7 @@ sphinx:
   configuration: docs/conf.py
   fail_on_warning: false
   builder: html
+  
 
 python:
   install:
