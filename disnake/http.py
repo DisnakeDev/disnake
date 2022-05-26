@@ -2133,7 +2133,6 @@ class HTTPClient:
         r = Route("PATCH", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
         return self.request(r, json=payload, reason=reason)
 
-    # TODO: untested
     def get_auto_moderation_rules(
         self, guild_id: Snowflake
     ) -> Response[List[auto_moderation.AutomodRule]]:

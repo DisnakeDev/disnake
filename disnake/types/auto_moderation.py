@@ -35,7 +35,6 @@ AutomodActionType = Literal[1, 2]
 AutomodListType = Literal["PROFANITY", "SEXUAL_CONTENT", "SLURS"]
 
 
-# TODO: undocumented
 class AutomodActionMetadata(TypedDict, total=False):
     channel_id: Snowflake
 

@@ -4080,7 +4080,6 @@ class Guild(Hashable):
         data = await self._state.http.edit_member(self.id, user.id, reason=reason, **payload)
         return Member(data=data, guild=self, state=self._state)
 
-    # TODO: untested
     # TODO: naming
     async def automod_rules(self) -> List[AutomodRule]:
         """|coro|
@@ -4113,8 +4112,6 @@ class Guild(Hashable):
         # TODO: should this default to the only existing type currently?
         event_type: AutomodEventType,
         trigger_type: AutomodTriggerType,
-        # TODO: should this automatically use an empty metadata object?
-        # perhaps it's actually optional? cannot test yet
         trigger_metadata: AutomodTriggerMetadata,
         actions: Sequence[AutomodAction],
         enabled: bool = False,

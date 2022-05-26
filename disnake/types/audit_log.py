@@ -284,7 +284,6 @@ class _AuditLogChange_AutomodActions(TypedDict):
     old_value: List[AutomodAction]
 
 
-# TODO
 class _AuditLogChange_AutomodTriggerMetadata(TypedDict):
     key: Literal["trigger_metadata"]
     new_value: AutomodTriggerMetadata

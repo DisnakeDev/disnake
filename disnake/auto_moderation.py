@@ -161,9 +161,9 @@ class AutomodTriggerMetadata:
     def __repr__(self) -> str:
         s = f"<{type(self).__name__}"
         if self.keyword_filter is not None:
-            s += f" keyword_filter={self.keyword_filter}"
+            s += f" keyword_filter={self.keyword_filter!r}"
         if self.keyword_lists is not None:
-            s += f" keyword_lists={self.keyword_lists}"
+            s += f" keyword_lists={self.keyword_lists!r}"
         return f"{s}>"
 
 
@@ -237,7 +237,6 @@ class AutomodRule:
     @property
     def exempt_roles(self) -> List[Role]:
         """List[:class:`Role`]: The list of roles that are exempt from this rule."""
-        # TODO: return Object instead of None?
         return list(filter(None, map(self.guild.get_role, self._exempt_role_ids)))
 
     @property
