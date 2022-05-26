@@ -1398,19 +1398,19 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param rule: The auto moderation rule that was deleted.
     :type rule: :class:`AutomodRule`
 
-.. function:: on_auto_moderation_action(action)
+.. function:: on_auto_moderation_action(execution)
 
     Called when an auto moderation action is executed due to a rule triggering for a particular event.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
-    The guild this action has taken place in can be accessed using :attr:`action.guild <AutomodActionExecution.guild>`.
+    The guild this action has taken place in can be accessed using :attr:`AutomodActionExecution.guild`.
 
     .. versionadded:: 2.6
 
     This requires :attr:`Intents.auto_moderation` or :attr:`Intents.auto_moderation_execution` to be enabled.
 
-    :param action: The auto moderation action execution data.
-    :type action: :class:`AutomodActionExecution`
+    :param execution: The auto moderation action execution data.
+    :type execution: :class:`AutomodActionExecution`
 
 .. function:: on_group_join(channel, user)
               on_group_remove(channel, user)
