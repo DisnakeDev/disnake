@@ -113,24 +113,25 @@ class ActionRow(Generic[UIComponentT]):
         ...
 
     def __init__(self, *components: UIComponentT):  # type: ignore
-        self.width: int = 0
         self._children: List[UIComponentT] = []
 
         for component in components:
-
-            self.width += component.width
-            if self.width > 5:
-                raise ValueError("Too many components in one row.")
-
-            self._children.append(component)
+            self.append_item(component)
 
     def __repr__(self) -> str:
         return f"<ActionRow children={self.children!r}>"
+
+    def __len__(self) -> int:
+        return len(self.children)
 
     @property
     def children(self) -> List[UIComponentT]:
         """List[:class:`WrappedComponent`]: The UI components stored in this action row."""
         return self._children
+
+    @property
+    def width(self) -> int:
+        return sum(child.width for child in self.children)
 
     def append_item(self, item: UIComponentT) -> None:
         """Append a component to the action row. The component's type must match that
@@ -145,17 +146,33 @@ class ActionRow(Generic[UIComponentT]):
         ------
         ValueError
             The width of the action row exceeds 5.
-        TypeError
-            The action row does not support items of this type.
+        """
+        self.insert_item(len(self), item)
+
+    def insert_item(self, index: int, item: UIComponentT) -> None:
+        """Insert a component to the action row at a given index. The component's
+        type must match that of the action row.
+
+        Parameters
+        ----------
+        index: :class:`int`
+            The index at which to insert the component into the action row.
+        item: :class:`WrappedComponent`
+            The component to insert into the action row.
+
+        Raises
+        ------
+        ValueError
+            The width of the action row exceeds 5.
         """
         if self.width + item.width > 5:
             raise ValueError("Too many components in this row, can not append a new one.")
 
-        self.width += item.width
-        self._children.append(item)
+        self._children.insert(index, item)
 
     def add_button(
         self: ActionRow[MessageUIComponent],
+        index: Optional[int] = None,
         *,
         style: ButtonStyle = ButtonStyle.secondary,
         label: Optional[str] = None,
@@ -170,8 +187,15 @@ class ActionRow(Generic[UIComponentT]):
         To append a pre-existing :class:`~disnake.ui.Button` use the
         :meth:`append_item` method instead.
 
+        .. versionchanged:: 2.6
+            Now allows for inserting at a given index. The default behaviour of
+            appending is preserved.
+
         Parameters
         ----------
+        index: :class:`int`
+            The index at which to insert the button into the action row. If not provided,
+            this method defaults to appending the button to the action row.
         style: :class:`.ButtonStyle`
             The style of the button.
         custom_id: Optional[:class:`str`]
@@ -190,10 +214,9 @@ class ActionRow(Generic[UIComponentT]):
         ------
         ValueError
             The width of the action row exceeds 5.
-        TypeError
-            The action row does not support items of this type.
         """
-        self.append_item(
+        self.insert_item(
+            len(self) if index is None else index,
             Button(
                 style=style,
                 label=label,
@@ -201,11 +224,12 @@ class ActionRow(Generic[UIComponentT]):
                 custom_id=custom_id,
                 url=url,
                 emoji=emoji,
-            )
+            ),
         )
 
     def add_select(
         self: ActionRow[MessageUIComponent],
+        index: Optional[int] = None,
         *,
         custom_id: str = MISSING,
         placeholder: Optional[str] = None,
@@ -220,8 +244,15 @@ class ActionRow(Generic[UIComponentT]):
         To append a pre-existing :class:`~disnake.ui.Select` use the
         :meth:`append_item` method instead.
 
+        .. versionchanged:: 2.6
+            Now allows for inserting at a given index. The default behaviour of
+            appending is preserved.
+
         Parameters
         ----------
+        index: :class:`int`
+            The index at which to insert the select into the action row. If not provided,
+            this method defaults to appending the select to the action row.
         custom_id: :class:`str`
             The ID of the select menu that gets received during an interaction.
             If not given then one is generated for you.
@@ -242,10 +273,9 @@ class ActionRow(Generic[UIComponentT]):
         ------
         ValueError
             The width of the action row exceeds 5.
-        TypeError
-            The action row does not support items of this type.
         """
-        self.append_item(
+        self.insert_item(
+            len(self) if index is None else index,
             Select(
                 custom_id=custom_id,
                 placeholder=placeholder,
@@ -253,11 +283,12 @@ class ActionRow(Generic[UIComponentT]):
                 max_values=max_values,
                 options=options,
                 disabled=disabled,
-            )
+            ),
         )
 
     def add_text_input(
         self: ActionRow[ModalUIComponent],
+        index: Optional[int] = None,
         *,
         label: str,
         custom_id: str,
@@ -276,8 +307,15 @@ class ActionRow(Generic[UIComponentT]):
 
         .. versionadded:: 2.4
 
+        .. versionchanged:: 2.6
+            Now allows for inserting at a given index. The default behaviour of
+            appending is preserved.
+
         Parameters
         ----------
+        index: :class:`int`
+            The index at which to insert the text input into the action row. If not provided,
+            this method defaults to appending the text input to the action row.
         style: :class:`.TextInputStyle`
             The style of the text input.
         label: :class:`str`
@@ -302,7 +340,8 @@ class ActionRow(Generic[UIComponentT]):
         TypeError
             The action row does not support items of this type.
         """
-        self.append_item(
+        self.insert_item(
+            len(self) if index is None else index,
             TextInput(
                 label=label,
                 custom_id=custom_id,
@@ -312,8 +351,40 @@ class ActionRow(Generic[UIComponentT]):
                 required=required,
                 min_length=min_length,
                 max_length=max_length,
-            )
+            ),
         )
+
+    def remove_item(self, item: UIComponentT) -> None:
+        """Remove a component from the action row.
+
+        Parameters
+        ----------
+        item: :class:`WrappedComponent`
+            The component to remove from the action row.
+
+        Raises
+        ------
+        ValueError:
+            The component could not be found on the action row.
+        """
+        self._children.remove(item)
+
+    def pop(self, index: int) -> UIComponentT:
+        """Pop the component at the provided index from the action row.
+        This takes into account the width of components.
+
+        Parameters
+        ----------
+        index: :class:`int`
+            The index at which to pop the component.
+
+        Raises
+        ------
+        IndexError:
+            There is no component at the provided index.
+        """
+        self.remove_item(component := self[index])
+        return component
 
     @property
     def _underlying(self) -> ActionRowComponent:
@@ -325,10 +396,10 @@ class ActionRow(Generic[UIComponentT]):
     def to_component_dict(self) -> ActionRowPayload:
         return self._underlying.to_dict()
 
+    def __delitem__(self, index: int) -> None:
+        del self._children[index]
+
     def __getitem__(self, index: int) -> UIComponentT:
-        # Do we support indexing a select at 0/1/2/3/4 or only at 0?
-        # As I implemented it now, indexing at e.g. 3 for a 5-width component would
-        # return that component instead of erroring out.
         aggregate = 0
         for component in self._children:
             aggregate += component.width
