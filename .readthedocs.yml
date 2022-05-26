@@ -1,7 +1,9 @@
 version: 2
 formats:
-  - all # all includes htmlzip, pdf, epub
- 
+  - htmlzip
+  - pdf
+  - epub
+  
 build:
   os: ubuntu-20.04
   tools:
