@@ -1075,7 +1075,9 @@ class ThreadTag(Hashable):
         if not emoji:
             emoji = PartialEmoji.with_state(
                 state=self._state,
-                name=self._emoji_name or "",
+                # TODO: this renders correctly, but apparently shouldn't be done
+                # according to https://github.com/discord/discord-api-docs/pull/4983
+                name=self._emoji_name or "_",
                 id=self._emoji_id,
                 # note: `animated` is unknown but presumably we already got the (animated)
                 # emoji from the guild cache at this point
