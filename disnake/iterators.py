@@ -44,6 +44,7 @@ from .app_commands import application_command_factory
 from .audit_logs import AuditLogEntry
 from .bans import BanEntry
 from .errors import NoMoreItems
+from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import PartialIntegration
 from .object import Object
 from .threads import Thread
@@ -63,7 +64,6 @@ if TYPE_CHECKING:
     from .abc import Messageable, Snowflake
     from .audit_logs import AuditLogEntry
     from .guild import Guild
-    from .guild_scheduled_event import GuildScheduledEvent
     from .member import Member
     from .message import Message
     from .state import ConnectionState

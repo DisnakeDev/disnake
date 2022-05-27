@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING, List, Optional, Type, TypeVar, Union
 from .appinfo import PartialAppInfo
 from .asset import Asset
 from .enums import ChannelType, InviteTarget, NSFWLevel, VerificationLevel, try_enum
+from .guild_scheduled_event import GuildScheduledEvent
 from .mixins import Hashable
 from .object import Object
 from .utils import _get_as_snowflake, parse_time, snowflake_time
@@ -44,7 +45,6 @@ __all__ = (
 if TYPE_CHECKING:
     from .abc import GuildChannel
     from .guild import Guild
-    from .guild_scheduled_event import GuildScheduledEvent
     from .state import ConnectionState
     from .types.channel import PartialChannel as InviteChannelPayload
     from .types.guild import GuildFeature
@@ -435,8 +435,6 @@ class Invite(Hashable):
         )
 
         if scheduled_event := data.get("guild_scheduled_event"):
-            from .guild_scheduled_event import GuildScheduledEvent  # cyclic import
-
             self.guild_scheduled_event: Optional[GuildScheduledEvent] = GuildScheduledEvent(
                 state=state, data=scheduled_event
             )
