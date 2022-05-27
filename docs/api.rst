@@ -2343,6 +2343,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
         - :attr:`~AuditLogDiff.template`
+        - :attr:`~AuditLogDiff.available_tags`
 
     .. attribute:: channel_delete
 
@@ -4499,7 +4500,7 @@ AuditLogDiff
 
     .. attribute:: template
 
-        The template for new threads of a forum channel being changed.
+        The template for new threads in a forum channel being changed.
 
         :type: :class:`str`
 
@@ -4511,6 +4512,12 @@ AuditLogDiff
         being set.
 
         :type: List[Union[:class:`ThreadTag`, :class:`Object`]]
+
+    .. attribute:: available_tags
+
+        The available tags for threads in a forum channel being changed.
+
+        :type: List[:class:`ThreadTag`]
 
 Webhook Support
 ------------------

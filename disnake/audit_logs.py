@@ -84,6 +84,7 @@ if TYPE_CHECKING:
     from .types.channel import PermissionOverwrite as PermissionOverwritePayload
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
+    from .types.threads import ThreadTag as ThreadTagPayload
     from .user import User
     from .webhook import Webhook
 
@@ -180,7 +181,18 @@ def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]
     return _transform
 
 
-def _transform_tag(entry: AuditLogEntry, data: Optional[str]) -> Optional[Union[ThreadTag, Object]]:
+def _transform_tag(entry: AuditLogEntry, data: Optional[ThreadTagPayload]) -> Optional[ThreadTag]:
+    if data is None:
+        return None
+    from .threads import ThreadTag  # cyclic import
+
+    target_id: int = entry._target_id  # type: ignore
+    return ThreadTag(data=data, channel=Object(target_id), state=entry._state)
+
+
+def _transform_tag_id(
+    entry: AuditLogEntry, data: Optional[str]
+) -> Optional[Union[ThreadTag, Object]]:
     if data is None:
         return None
     tag_id = int(data)
@@ -357,7 +369,8 @@ class AuditLogChanges:
         "trigger_metadata":              (None, _transform_automod_trigger_metadata),
         "exempt_roles":                  (None, _list_transformer(_transform_role)),
         "exempt_channels":               (None, _list_transformer(_transform_channel)),
-        "applied_tags":                  ("tags", _list_transformer(_transform_tag))
+        "applied_tags":                  ("tags", _list_transformer(_transform_tag)),
+        "available_tags":                (None, _list_transformer(_transform_tag)),
     }
     # fmt: on
 
