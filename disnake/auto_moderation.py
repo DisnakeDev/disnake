@@ -382,7 +382,7 @@ class AutomodActionExecution:
     content: :class:`str`
         The content that matched.
     matched_keyword: Optional[:class:`str`]
-        The keyword configured in the auto moderation rule that matched.
+        The keyword that matched.
     matched_content: Optional[:class:`str`]
         The substring of :attr:`.content` that matched the rule/keyword.
     """

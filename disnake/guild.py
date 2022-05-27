@@ -4112,8 +4112,8 @@ class Guild(Hashable):
         # TODO: should this default to the only existing type currently?
         event_type: AutomodEventType,
         trigger_type: AutomodTriggerType,
-        trigger_metadata: AutomodTriggerMetadata,
         actions: Sequence[AutomodAction],
+        trigger_metadata: AutomodTriggerMetadata = None,
         enabled: bool = False,
         exempt_roles: Sequence[Snowflake] = None,
         exempt_channels: Sequence[Snowflake] = None,
@@ -4139,11 +4139,12 @@ class Guild(Hashable):
             The type of events that this rule will be applied to.
         trigger_type: :class:`AutomodTriggerType`
             The type of trigger that determines whether this rule's actions should run for a specific event.
-        trigger_metadata: :class:`AutomodTriggerMetadata`
-            Additional metadata associated with the trigger type.
-            TODO: check contents against trigger_type locally
+            If set to :attr:`~AutomodTriggerType.keyword` or :attr:`~AutomodTriggerType.keyword_preset`,
+            ``trigger_metadata`` must be set accordingly.
         actions: Sequence[:class:`AutomodAction`]
             The list of actions that will execute if a matching event triggered this rule.
+        trigger_metadata: :class:`AutomodTriggerMetadata`
+            Additional metadata associated with the trigger type.
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.
         exempt_roles: Sequence[:class:`abc.Snowflake`]
@@ -4166,14 +4167,22 @@ class Guild(Hashable):
             The newly created auto moderation rule.
         """
 
+        trigger_type_int = try_enum_to_int(trigger_type)
+        if not trigger_metadata and trigger_type_int in (
+            AutomodTriggerType.keyword.value,
+            AutomodTriggerType.keyword_preset.value,
+        ):
+            raise ValueError("Specified trigger type requires `trigger_metadata`")
+
         payload: CreateAutomodRulePayload = {
             "name": name,
             "event_type": try_enum_to_int(event_type),
-            "trigger_type": try_enum_to_int(trigger_type),
-            "trigger_metadata": trigger_metadata.to_dict(),
+            "trigger_type": trigger_type_int,
             "actions": [a.to_dict() for a in actions],
         }
 
+        if trigger_metadata is not None:
+            payload["trigger_metadata"] = trigger_metadata.to_dict()
         if enabled is not None:
             payload["enabled"] = enabled
         if exempt_roles:
