@@ -166,7 +166,7 @@ For instance, you could restrict an option to only accept positive integers:
         ...
 
 
-Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`Range` annotation.
+Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`~ext.commands.Range` annotation.
 The range bounds are both inclusive; using ``...`` as a bound indicates that this end of the range is unbounded.
 The type of the option is determined by the range bounds, with the option being a
 :class:`float` if at least one of the bounds is a :class:`float`, and :class:`int` otherwise.
@@ -184,8 +184,8 @@ The type of the option is determined by the range bounds, with the option being 
 
 .. note::
 
-    Type checker support for :class:`Range` is limited. Pylance/Pyright seem to handle it correctly;
-    MyPy currently needs a plugin for it to understand :class:`Range` semantics, which can be added in
+    Type checker support for :class:`~ext.commands.Range` is limited. Pylance/Pyright seem to handle it correctly;
+    MyPy currently needs a plugin for it to understand :class:`~ext.commands.Range` semantics, which can be added in
     the configuration file (``setup.cfg``, ``mypy.ini``):
 
     .. code-block:: ini
