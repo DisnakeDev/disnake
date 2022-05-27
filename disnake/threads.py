@@ -45,6 +45,7 @@ from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException, InvalidData
 from .flags import ChannelFlags
 from .mixins import Hashable
+from .object import Object
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 
@@ -1044,10 +1045,12 @@ class ThreadTag(Hashable):
         The tag's name.
     """
 
-    __slots__ = ("id", "name", "_emoji_id", "_emoji_name", "_channel")
+    __slots__ = ("id", "name", "_emoji_id", "_emoji_name", "_channel_id", "_state")
 
-    def __init__(self, data: ThreadTagPayload, channel: ForumChannel):
-        self._channel = channel
+    def __init__(self, *, data: ThreadTagPayload, channel: Snowflake, state: ConnectionState):
+        self._channel_id = channel.id
+        self._state = state
+
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         # emoji_id may be `0`, use `None` instead
@@ -1068,10 +1071,10 @@ class ThreadTag(Hashable):
 
         emoji: Optional[Union[Emoji, PartialEmoji]] = None
         if self._emoji_id:
-            emoji = self._channel._state.get_emoji(self._emoji_id)
+            emoji = self._state.get_emoji(self._emoji_id)
         if not emoji:
             emoji = PartialEmoji.with_state(
-                state=self._channel._state,
+                state=self._state,
                 name=self._emoji_name or "",
                 id=self._emoji_id,
                 # note: `animated` is unknown but presumably we already got the (animated)
@@ -1128,10 +1131,10 @@ class ThreadTag(Hashable):
             "emoji_name": emoji_name,
         }
 
-        data = await self._channel._state.http.edit_thread_tag(
-            self._channel.id, self.id, reason=reason, **payload
+        data = await self._state.http.edit_thread_tag(
+            self._channel_id, self.id, reason=reason, **payload
         )
-        return self._find_in_response(data, self._channel, new_name)
+        return self._find_in_response(data, new_name, Object(self._channel_id), self._state)
 
     async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
@@ -1153,7 +1156,7 @@ class ThreadTag(Hashable):
         HTTPException
             An error occurred deleting the tag.
         """
-        await self._channel._state.http.delete_thread_tag(self._channel.id, self.id, reason=reason)
+        await self._state.http.delete_thread_tag(self._channel_id, self.id, reason=reason)
 
     @staticmethod
     def _get_emoji_params(
@@ -1165,9 +1168,11 @@ class ThreadTag(Hashable):
             return None, emoji
 
     @staticmethod
-    def _find_in_response(data: ForumChannelPayload, channel: ForumChannel, name: str) -> ThreadTag:
+    def _find_in_response(
+        data: ForumChannelPayload, name: str, channel: Snowflake, state: ConnectionState
+    ) -> ThreadTag:
         for tag in data.get("available_tags", []):
             # tag names are unique
             if tag["name"] == name:
-                return ThreadTag(tag, channel=channel)
+                return ThreadTag(data=tag, channel=channel, state=state)
         raise InvalidData("Could not find created tag in response")

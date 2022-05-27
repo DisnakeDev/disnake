@@ -2551,7 +2551,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             "default_auto_archive_duration", 1440
         )
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
-        tags = [ThreadTag(data=tag, channel=self) for tag in data.get("available_tags", [])]
+        tags = [
+            ThreadTag(data=tag, channel=self, state=self._state)
+            for tag in data.get("available_tags", [])
+        ]
         self._available_tags: Dict[int, ThreadTag] = {tag.id: tag for tag in tags}
         self.template: Optional[str] = data.get("template") or None
         self._fill_overwrites(data)
@@ -3219,7 +3222,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             self.id, name=name, emoji_id=emoji_id, emoji_name=emoji_name, reason=reason
         )
         # TODO: parse entire channel here and update cache, instead of just relying on gw event?
-        return ThreadTag._find_in_response(data, self, name)
+        return ThreadTag._find_in_response(data, name, self, self._state)
 
 
 class DMChannel(disnake.abc.Messageable, Hashable):
