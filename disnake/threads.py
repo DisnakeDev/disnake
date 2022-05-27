@@ -422,13 +422,10 @@ class Thread(Messageable, Hashable):
 
         .. versionadded:: 2.6
         """
-        parent = self.parent
-        if not parent:
-            return []
-
         from .channel import ForumChannel  # cyclic import
 
-        if not isinstance(parent, ForumChannel):
+        parent = self.parent
+        if not parent or not isinstance(parent, ForumChannel):
             return []
 
         # threads may have tag IDs for tags that don't exist anymore
