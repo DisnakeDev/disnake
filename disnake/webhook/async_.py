@@ -904,6 +904,7 @@ class BaseWebhook(Hashable):
         "_avatar",
         "source_channel",
         "source_guild",
+        "application_id",
         "_state",
     )
 
@@ -945,6 +946,8 @@ class BaseWebhook(Hashable):
             source_guild = PartialWebhookGuild(data=source_guild, state=self._state)
 
         self.source_guild: Optional[PartialWebhookGuild] = source_guild
+
+        self.application_id: Optional[int] = utils._get_as_snowflake(data, "application_id")
 
     def is_partial(self) -> bool:
         """Whether the webhook is a "partial" webhook.
@@ -1076,6 +1079,11 @@ class Webhook(BaseWebhook):
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
+
+    application_id: Optional[:class:`int`]
+        The ID of the application associated with this webhook, if it was created by an application.
+
+        .. versionadded:: 2.6
     """
 
     __slots__: Tuple[str, ...] = ("session",)
