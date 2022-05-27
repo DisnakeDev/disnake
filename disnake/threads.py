@@ -428,8 +428,7 @@ class Thread(Messageable, Hashable):
         from .channel import ForumChannel  # cyclic import
 
         if not isinstance(parent, ForumChannel):
-            # TODO: return [] here as well, instead of raising exception?
-            raise TypeError("Only threads in forum channels have tags")
+            return []
 
         # threads may have tag IDs for tags that don't exist anymore
         tags = (parent._available_tags.get(tag_id) for tag_id in self._tags)

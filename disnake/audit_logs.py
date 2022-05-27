@@ -186,15 +186,15 @@ def _transform_tag(entry: AuditLogEntry, data: Optional[str]) -> Optional[Union[
     tag_id = int(data)
     tag: Optional[ThreadTag] = None
 
-    # try getting thread parent
     from .channel import ForumChannel  # cyclic import
+    from .threads import Thread
 
-    thread = entry.guild.get_thread(entry._target_id)  # type: ignore
-    if thread and isinstance(thread.parent, ForumChannel):
+    thread = entry.target
+    # try thread parent first
+    if isinstance(thread, Thread) and isinstance(thread.parent, ForumChannel):
         tag = thread.parent.get_tag(tag_id)
     else:
-        # if not found (possibly archived/uncached thread), search all forum channels
-        # TODO: remove this once threads from the audit log data are accessible, and use them instead
+        # if not found (possibly deleted thread), search all forum channels
         for forum in entry.guild.forum_channels:
             if tag := forum.get_tag(tag_id):
                 break
