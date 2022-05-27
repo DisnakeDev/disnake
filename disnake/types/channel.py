@@ -23,7 +23,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-from typing import List, Literal, Optional, TypedDict, Union
+from typing import Dict, List, Literal, Optional, TypedDict, Union
 
 from .snowflake import Snowflake
 from .threads import ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
@@ -57,6 +57,11 @@ class _BaseGuildChannel(_BaseChannel):
 
 class PartialChannel(_BaseChannel):
     type: ChannelType
+
+
+class InviteChannel(PartialChannel, total=False):
+    name: Optional[str]
+    recipients: List[Dict[Literal["username"], str]]
 
 
 class _TextChannelOptional(TypedDict, total=False):
