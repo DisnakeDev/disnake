@@ -100,9 +100,17 @@ class PartialInviteChannel:
         The partial channel's type.
     """
 
-    __slots__ = ("id", "name", "type", "_recipients")
+    __slots__ = (
+        "id",
+        "name",
+        "type",
+        "_recipients",
+        "_icon",
+        "_state",
+    )
 
-    def __init__(self, data: InviteChannelPayload):
+    def __init__(self, *, state: ConnectionState, data: InviteChannelPayload):
+        self._state = state
         self.id: int = int(data["id"])
         self.name: Optional[str] = data.get("name")
         self.type: ChannelType = try_enum(ChannelType, data["type"])
@@ -110,6 +118,7 @@ class PartialInviteChannel:
             self._recipients: List[Dict[Literal["username"], str]] = data.get("recipients", [])
         else:
             self._recipients = []
+        self._icon: Optional[str] = data.get("icon")
 
     def __str__(self) -> str:
         if self.name:
@@ -130,6 +139,13 @@ class PartialInviteChannel:
     def created_at(self) -> datetime.datetime:
         """:class:`datetime.datetime`: Returns the channel's creation time in UTC."""
         return snowflake_time(self.id)
+
+    @property
+    def icon(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the channel's icon asset if available."""
+        if self._icon is None:
+            return None
+        return Asset._from_icon(self._state, self.id, self._icon, path="channel")
 
 
 class PartialInviteGuild:
@@ -469,9 +485,12 @@ class Invite(Hashable):
                 # If it's not cached, then it has to be a partial guild
                 guild = PartialInviteGuild(state, guild_data, guild_id)
 
+        # todo: this is no longer true
         # As far as I know, invites always need a channel
         # So this should never raise.
-        channel: Union[PartialInviteChannel, GuildChannel] = PartialInviteChannel(data["channel"])
+        channel: Union[PartialInviteChannel, GuildChannel] = PartialInviteChannel(
+            data=data["channel"], state=state
+        )
         if guild is not None and not isinstance(guild, PartialInviteGuild):
             # Upgrade the partial data if applicable
             channel = guild.get_channel(channel.id) or channel
@@ -516,7 +535,7 @@ class Invite(Hashable):
         if data is None:
             return None
 
-        return PartialInviteChannel(data)
+        return PartialInviteChannel(data=data, state=self._state)
 
     def __str__(self) -> str:
         return self.url

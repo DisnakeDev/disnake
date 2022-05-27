@@ -62,6 +62,7 @@ class PartialChannel(_BaseChannel):
 class InviteChannel(PartialChannel, total=False):
     name: Optional[str]
     recipients: List[Dict[Literal["username"], str]]
+    icon: Optional[str]
 
 
 class _TextChannelOptional(TypedDict, total=False):
