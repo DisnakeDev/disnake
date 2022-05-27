@@ -2476,6 +2476,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.type` (always set to ``1`` if so)
+        - :attr:`~AuditLogDiff.application_id`
+
+        .. versionchanged:: 2.6
+            Added :attr:`~AuditLogDiff.application_id`.
 
         .. versionchanged:: 2.6
             Added support for :class:`Webhook` instead of plain :class:`Object`\s.
@@ -2511,6 +2515,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.type` (always set to ``1`` if so)
+        - :attr:`~AuditLogDiff.application_id`
+
+        .. versionchanged:: 2.6
+            Added :attr:`~AuditLogDiff.application_id`.
 
     .. attribute:: emoji_create
 
@@ -4015,8 +4023,11 @@ AuditLogDiff
 
         :type: Dict[:class:`int`, :class:`ApplicationCommandPermissions`]
 
-.. this is currently missing the following keys: reason and application_id
-   I'm not sure how to about porting these
+    .. attribute:: application_id
+
+        The ID of the application that created a webhook.
+
+        :type: :class:`int`
 
 Webhook Support
 ------------------

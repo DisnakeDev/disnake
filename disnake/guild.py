@@ -235,7 +235,7 @@ class Guild(Hashable):
         The number goes from 0 to 3 inclusive.
     premium_subscription_count: :class:`int`
         The number of "boosts" this guild currently has.
-    preferred_locale: Optional[:class:`Locale`]
+    preferred_locale: :class:`Locale`
         The preferred locale for the guild. Used when filtering Server Discovery
         results to a specific language.
 
@@ -539,7 +539,7 @@ class Guild(Hashable):
         self.premium_tier: int = guild.get("premium_tier", 0)
         self.premium_subscription_count: int = guild.get("premium_subscription_count") or 0
         self._system_channel_flags: int = guild.get("system_channel_flags", 0)
-        self.preferred_locale: Optional[Locale] = try_enum(Locale, guild.get("preferred_locale"))
+        self.preferred_locale: Locale = try_enum(Locale, guild.get("preferred_locale"))
         self._discovery_splash: Optional[str] = guild.get("discovery_splash")
         self._rules_channel_id: Optional[int] = utils._get_as_snowflake(guild, "rules_channel_id")
         self._public_updates_channel_id: Optional[int] = utils._get_as_snowflake(
@@ -855,10 +855,9 @@ class Guild(Hashable):
 
     @property
     def bitrate_limit(self) -> float:
-        """:class:`float`: The maximum bitrate for voice channels this guild can have."""
-        vip_guild = (
-            self._PREMIUM_GUILD_LIMITS[1].bitrate if "VIP_REGIONS" in self.features else 96e3
-        )
+        """:class:`float`: The maximum bitrate for voice channels this guild can have.
+        For stage channels, the maximum bitrate is 64000."""
+        vip_guild = self._PREMIUM_GUILD_LIMITS[3].bitrate if "VIP_REGIONS" in self.features else 0
         return max(vip_guild, self._PREMIUM_GUILD_LIMITS[self.premium_tier].bitrate)
 
     @property
