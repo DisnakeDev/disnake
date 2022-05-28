@@ -199,7 +199,7 @@ def setup(session: nox.Session):
     if "." not in deps:
         deps.insert(0, ".")  # index doesn't really matter
 
-    install(session, *deps, update=True, run=True)
+    install(session, *deps, run=True, install_cwd=True)
 
     if session.interactive and "dev" in deps:
         session.run("pre-commit", "install", "--install-hooks")
