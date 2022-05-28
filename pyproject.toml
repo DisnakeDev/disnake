@@ -87,8 +87,10 @@ omit = [
 [tool.coverage.report]
 precision = 1
 exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "@overload",
-    "if TYPE_CHECKING",
+    "# pragma: no cov(er(age)?)?$",
+    "^\\s*def __repr__",
+    "^\\s*@overload",
+    "^\\s*if TYPE_CHECKING",
+    "^\\s*raise NotImplementedError$",
+    "^\\s*\\.\\.\\.$",
 ]

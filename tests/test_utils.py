@@ -61,11 +61,11 @@ def test_parse_time():
 def test_copy_doc():
     def func(num: int, *, arg: str) -> float:
         """returns the best number"""
-        return 42.0
+        ...
 
     @utils.copy_doc(func)
     def func2(*args: Any, **kwargs: Any) -> Any:
-        return 0.0
+        ...
 
     assert func2.__doc__ == func.__doc__
     assert inspect.signature(func) == inspect.signature(func2)
@@ -586,7 +586,7 @@ def test_escape_mentions(text, expected):
 )
 def test_parse_docstring_desc(docstring, expected):
     def f():
-        pass
+        ...
 
     f.__doc__ = docstring
     assert utils.parse_docstring(f) == {
@@ -646,7 +646,7 @@ def test_parse_docstring_desc(docstring, expected):
 )
 def test_parse_docstring_param(docstring, expected):
     def f():
-        pass
+        ...
 
     f.__doc__ = docstring
     expected = {
