@@ -5,6 +5,10 @@ on: [push, pull_request]
 permissions:
   read-all
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   pre-commit:
     # Thanks to black for this rule
