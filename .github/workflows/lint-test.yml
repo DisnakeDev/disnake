@@ -170,7 +170,7 @@ jobs:
         echo '<br/>' >> $GITHUB_STEP_SUMMARY
         echo '' >> $GITHUB_STEP_SUMMARY
         echo '<pre>' >> $GITHUB_STEP_SUMMARY
-        nox -s test-${{ matrix.python-version }} -- --color=no --cov-report= >> $GITHUB_STEP_SUMMARY
+        nox -s test-${{ matrix.python-version }} -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
         echo '</pre>' >> $GITHUB_STEP_SUMMARY
         echo '' >> $GITHUB_STEP_SUMMARY
         echo '</details>' >> $GITHUB_STEP_SUMMARY
@@ -184,7 +184,7 @@ jobs:
         echo '<br/>' >> $GITHUB_STEP_SUMMARY
         echo '' >> $GITHUB_STEP_SUMMARY
         echo '<pre>' >> $GITHUB_STEP_SUMMARY
-        python -m coverage report >> $GITHUB_STEP_SUMMARY
+        python -m coverage report | tee -a $GITHUB_STEP_SUMMARY
         echo '</pre>' >> $GITHUB_STEP_SUMMARY
         echo '' >> $GITHUB_STEP_SUMMARY
         echo '</details>' >> $GITHUB_STEP_SUMMARY
