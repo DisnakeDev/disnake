@@ -380,7 +380,7 @@ class ActionRow(Generic[UIComponentT]):
 
         Raises
         ------
-        IndexError:
+        IndexError
             There is no component at the provided index.
         """
         self.remove_item(component := self[index])
