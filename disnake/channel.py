@@ -86,7 +86,7 @@ if TYPE_CHECKING:
     from .role import Role
     from .state import ConnectionState
     from .sticker import GuildSticker, StickerItem
-    from .threads import AnyThreadArchiveDuration
+    from .threads import AnyThreadArchiveDuration, ThreadType
     from .types.channel import (
         CategoryChannel as CategoryChannelPayload,
         DMChannel as DMChannelPayload,
@@ -746,9 +746,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: str,
-        type: Literal[
-            ChannelType.public_thread, ChannelType.private_thread, ChannelType.news_thread
-        ],
+        type: ThreadType,
         auto_archive_duration: AnyThreadArchiveDuration = None,
         invitable: bool = None,
         slowmode_delay: int = None,
@@ -762,9 +760,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         name: str,
         message: Optional[Snowflake] = None,
         auto_archive_duration: AnyThreadArchiveDuration = None,
-        type: Optional[
-            Literal[ChannelType.public_thread, ChannelType.private_thread, ChannelType.news_thread]
-        ] = None,
+        type: Optional[ThreadType] = None,
         invitable: bool = None,
         slowmode_delay: int = None,
         reason: Optional[str] = None,
