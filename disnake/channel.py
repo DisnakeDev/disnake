@@ -2974,7 +2974,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
     def type(self) -> Literal[ChannelType.group]:
         """:class:`ChannelType`: The channel's Discord type.
 
-        This always returns :attr:`ChannelType.private`.
+        This always returns :attr:`ChannelType.group`.
         """
         return ChannelType.group
 
