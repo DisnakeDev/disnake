@@ -153,6 +153,8 @@ class ActionRow(Generic[UIComponentT]):
         """Insert a component to the action row at a given index. The component's
         type must match that of the action row.
 
+        .. versionadded:: 2.6
+
         Parameters
         ----------
         index: :class:`int`
@@ -354,8 +356,17 @@ class ActionRow(Generic[UIComponentT]):
             ),
         )
 
+    def clear_items(self) -> None:
+        """Remove all components from the action row.
+
+        .. versionadded:: 2.6
+        """
+        self._children.clear()
+
     def remove_item(self, item: UIComponentT) -> None:
         """Remove a component from the action row.
+
+        .. versionadded:: 2.6
 
         Parameters
         ----------
@@ -372,6 +383,8 @@ class ActionRow(Generic[UIComponentT]):
     def pop(self, index: int) -> UIComponentT:
         """Pop the component at the provided index from the action row.
         This takes into account the width of components.
+
+        .. versionadded:: 2.6
 
         Parameters
         ----------
@@ -457,7 +470,6 @@ class ActionRow(Generic[UIComponentT]):
         List[:class:`disnake.ui.ActionRow`]:
             The action rows parsed from the components on the message.
         """
-        # :prayge: this actually typechecks without cast/whatever now
         rows: List[ActionRow[MessageUIComponent]] = []
         for row in message.components:
             rows.append(current_row := ActionRow.with_message_components())
