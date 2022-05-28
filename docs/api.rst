@@ -2236,6 +2236,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
 
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
+
     .. attribute:: overwrite_update
 
         A channel permission overwrite was changed, this is typically
@@ -2252,6 +2255,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
 
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
+
     .. attribute:: overwrite_delete
 
         A channel permission overwrite was deleted.
@@ -2266,6 +2272,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.allow`
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
+
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
 
     .. attribute:: kick
 
@@ -2481,6 +2490,9 @@ of :class:`enum.Enum`.
         .. versionchanged:: 2.6
             Added :attr:`~AuditLogDiff.application_id`.
 
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now a :class:`WebhookType`.
+
     .. attribute:: webhook_update
 
         A webhook was updated. This trigger in the following situations:
@@ -2513,6 +2525,9 @@ of :class:`enum.Enum`.
 
         .. versionchanged:: 2.6
             Added :attr:`~AuditLogDiff.application_id`.
+
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now a :class:`WebhookType`.
 
     .. attribute:: emoji_create
 
