@@ -21,23 +21,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-    - name: Set up python 3.8
-      uses: actions/setup-python@v3
+    - name: Set up environment
+      uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
-        cache: "pip"
-        cache-dependency-path: |
-          requirements/
-          requirements.txt
-          setup.py
-
-    - name: Install requirements
-      run: |
-        python -m pip install nox
-        nox -s setup -- tools
+        nox-setup: tools
 
     - name: Run pre-commit
       uses: pre-commit/action@v2.0.3
@@ -56,23 +46,13 @@ jobs:
         python-version: ["3.8", "3.9", "3.10"]
       fail-fast: false
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-    - name: Set up python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - name: Set up environment
+      uses: ./.github/actions/setup-env
       with:
         python-version: ${{ matrix.python-version }}
-        cache: "pip"
-        cache-dependency-path: |
-          requirements/
-          requirements.txt
-          setup.py
-
-    - name: Install requirements
-      run: |
-        python -m pip install nox
-        nox -s setup
+        nox-setup: "*"
 
     - name: Set pyright version
       run: |
@@ -109,23 +89,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-    - name: Set up python 3.8
-      uses: actions/setup-python@v2
+    - name: Set up environment
+      uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
-        cache: "pip"
-        cache-dependency-path: |
-          requirements/
-          requirements.txt
-          setup.py
-
-    - name: Install requirements
-      run: |
-        python -m pip install nox
-        nox -s setup -- tools
+        nox-setup: tools
 
     - name: Run slotscheck
       run: task slotscheck
@@ -142,22 +112,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-    - name: Set up python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - name: Set up environment
+      uses: ./.github/actions/setup-env
       with:
         python-version: ${{ matrix.python-version }}
-        cache: "pip"
-        cache-dependency-path: |
-          requirements/
-          requirements.txt
-          setup.py
-
-    - name: Install requirements
-      run: |
-        python -m pip install nox coveralls==3.3.1 coverage[toml]~=6.3.2
+        dependencies: nox coveralls==3.3.1 coverage[toml]~=6.3.2
 
     - name: Test package install
       run: |
@@ -193,10 +154,6 @@ jobs:
         echo '' >> $GITHUB_STEP_SUMMARY
         echo '</details>' >> $GITHUB_STEP_SUMMARY
 
-    # - name: Send final styling characters to $GITHUB_STEP_SUMMARY
-    #   if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
-    #   run:
-
 
     # This step will publish the coverage reports to coveralls.io and
     # print a "job" link in the output of the GitHub Action
@@ -222,17 +179,15 @@ jobs:
     # as long as the tests were ran, we want to send a finish to coveralls
     if: success() || failure()
     steps:
-      # Set up a consistent version of Python
     - uses: actions/checkout@v3
 
-    - name: Set up Python 3.9
-      id: python
-      uses: actions/setup-python@v3
+    - name: Set up environment
+      uses: ./.github/actions/setup-env
       with:
-        python-version: '3.9'
-        cache: "pip"
-        cache-dependency-path:
-          '.github/workflows/lint-test.yml'
+        python-version: 3.8
+        cache-dependency-path: |
+          .github/workflows/lint-test.yml
+        dependencies: coveralls==3.3.1
 
     - name: Coveralls Finished
       continue-on-error: true
@@ -240,5 +195,4 @@ jobs:
         COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_SERVICE_NAME: github
       run: |
-        python3 -m pip install coveralls==3.3.1
         python3 -m coveralls --finish
