@@ -111,6 +111,10 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    env:
+      GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
+      GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
+
     steps:
     - uses: actions/checkout@v3
 
@@ -130,29 +134,16 @@ jobs:
       env:
         TZ: "America/New_York"
       run: |
-        echo '<details>' >> $GITHUB_STEP_SUMMARY
-        echo '<summary>Test Summary</summary>' >> $GITHUB_STEP_SUMMARY
-        echo '<br/>' >> $GITHUB_STEP_SUMMARY
-        echo '' >> $GITHUB_STEP_SUMMARY
-        echo '<pre>' >> $GITHUB_STEP_SUMMARY
+        echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
         nox -s test-${{ matrix.python-version }} -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
-        echo '</pre>' >> $GITHUB_STEP_SUMMARY
-        echo '' >> $GITHUB_STEP_SUMMARY
-        echo '</details>' >> $GITHUB_STEP_SUMMARY
-        echo '' >> $GITHUB_STEP_SUMMARY
+        echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
     - name: Print Coverage Output
       if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
       run: |
-        echo '<details>' >> $GITHUB_STEP_SUMMARY
-        echo '<summary>Coverage Summary</summary>' >> $GITHUB_STEP_SUMMARY
-        echo '<br/>' >> $GITHUB_STEP_SUMMARY
-        echo '' >> $GITHUB_STEP_SUMMARY
-        echo '<pre>' >> $GITHUB_STEP_SUMMARY
+        echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
         python -m coverage report | tee -a $GITHUB_STEP_SUMMARY
-        echo '</pre>' >> $GITHUB_STEP_SUMMARY
-        echo '' >> $GITHUB_STEP_SUMMARY
-        echo '</details>' >> $GITHUB_STEP_SUMMARY
+        echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
 
     # This step will publish the coverage reports to coveralls.io and
