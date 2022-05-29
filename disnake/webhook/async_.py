@@ -52,7 +52,7 @@ from .. import utils
 from ..asset import Asset
 from ..channel import PartialMessageable
 from ..enums import WebhookType, try_enum
-from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookMissingToken
+from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
 from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
@@ -831,7 +831,7 @@ class WebhookMessage(Message):
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
         ValueError
             The length of ``embeds`` was invalid
-        WebhookMissingToken
+        WebhookTokenMissing
             There was no token associated with this webhook.
 
         Returns
@@ -1235,7 +1235,7 @@ class Webhook(BaseWebhook):
             Could not fetch the webhook
         NotFound
             Could not find the webhook by this ID
-        WebhookMissingToken
+        WebhookTokenMissing
             This webhook does not have a token associated with it.
 
         Returns
@@ -1250,7 +1250,7 @@ class Webhook(BaseWebhook):
         elif self.token:
             data = await adapter.fetch_webhook_with_token(self.id, self.token, session=self.session)
         else:
-            raise WebhookMissingToken("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         return Webhook(data, self.session, token=self.auth_token, state=self._state)
 
@@ -1280,11 +1280,11 @@ class Webhook(BaseWebhook):
             This webhook does not exist.
         Forbidden
             You do not have permissions to delete this webhook.
-        WebhookMissingToken
+        WebhookTokenMissing
             This webhook does not have a token associated with it.
         """
         if self.token is None and self.auth_token is None:
-            raise WebhookMissingToken("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         adapter = async_context.get()
 
@@ -1344,7 +1344,7 @@ class Webhook(BaseWebhook):
             Editing the webhook failed.
         NotFound
             This webhook does not exist.
-        WebhookMissingToken
+        WebhookTokenMissing
             This webhook does not have a token associated with it
             or it tried editing a channel without authentication.
         TypeError
@@ -1356,7 +1356,7 @@ class Webhook(BaseWebhook):
             The newly edited webhook.
         """
         if self.token is None and self.auth_token is None:
-            raise WebhookMissingToken("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         payload = {}
         if name is not MISSING:
@@ -1371,7 +1371,7 @@ class Webhook(BaseWebhook):
         # If a channel is given, always use the authenticated endpoint
         if channel is not None:
             if self.auth_token is None:
-                raise WebhookMissingToken("Editing channel requires authenticated webhook")
+                raise WebhookTokenMissing("Editing channel requires authenticated webhook")
 
             payload["channel_id"] = channel.id
             data = await adapter.edit_webhook(
@@ -1479,7 +1479,7 @@ class Webhook(BaseWebhook):
         ``embeds`` parameter, which must be a :class:`list` of :class:`Embed` objects to send.
 
         .. versionchanged:: 2.6
-            Raises :exc:`WebhookMissingToken` instead of ``InvalidArgument``.
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1570,7 +1570,7 @@ class Webhook(BaseWebhook):
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
         ValueError
             The length of ``embeds`` was invalid.
-        WebhookMissingToken
+        WebhookTokenMissing
             There was no token associated with this webhook.
         TypeError
             ``ephemeral`` was passed with the improper webhook type or there was no state
@@ -1582,7 +1582,7 @@ class Webhook(BaseWebhook):
             If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
         """
         if self.token is None:
-            raise WebhookMissingToken("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._state, "allowed_mentions", None
@@ -1675,7 +1675,7 @@ class Webhook(BaseWebhook):
             You do not have the permissions required to get a message.
         HTTPException
             Retrieving the message failed.
-        WebhookMissingToken
+        WebhookTokenMissing
             There was no token associated with this webhook.
 
         Returns
@@ -1684,7 +1684,7 @@ class Webhook(BaseWebhook):
             The message asked for.
         """
         if self.token is None:
-            raise WebhookMissingToken("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         adapter = async_context.get()
         data = await adapter.get_webhook_message(
@@ -1728,7 +1728,7 @@ class Webhook(BaseWebhook):
             The edit is no longer in-place, instead the newly edited message is returned.
 
         .. versionchanged:: 2.6
-            Raises :exc:`WebhookMissingToken` instead of ``InvalidArgument``.
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1795,7 +1795,7 @@ class Webhook(BaseWebhook):
             or there is no associated state when sending a view.
         ValueError
             The length of ``embeds`` was invalid
-        WebhookMissingToken
+        WebhookTokenMissing
             There was no token associated with this webhook.
 
         Returns
@@ -1804,7 +1804,7 @@ class Webhook(BaseWebhook):
             The newly edited webhook message.
         """
         if self.token is None:
-            raise WebhookMissingToken("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         if view is not MISSING:
             if isinstance(self._state, _WebhookState):
@@ -1864,7 +1864,7 @@ class Webhook(BaseWebhook):
         .. versionadded:: 1.6
 
         .. versionchanged:: 2.6
-            Raises :exc:`WebhookMissingToken` instead of ``InvalidArgument``.
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1877,11 +1877,11 @@ class Webhook(BaseWebhook):
             Deleting the message failed.
         Forbidden
             Deleted a message that is not yours.
-        WebhookMissingToken
+        WebhookTokenMissing
             There was no token associated with this webhook
         """
         if self.token is None:
-            raise WebhookMissingToken("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         adapter = async_context.get()
         await adapter.delete_webhook_message(

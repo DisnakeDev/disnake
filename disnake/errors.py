@@ -49,7 +49,7 @@ __all__ = (
     "NotFound",
     "DiscordServerError",
     "InvalidData",
-    "WebhookMissingToken",
+    "WebhookTokenMissing",
     "LoginFailure",
     "ConnectionClosed",
     "PrivilegedIntentsRequired",
@@ -194,7 +194,7 @@ class InvalidData(ClientException):
     pass
 
 
-class WebhookMissingToken(DiscordException):
+class WebhookTokenMissing(DiscordException):
     """Exception that's raised when a :class:`Webhook` or :class:`SyncWebhook` is missing a token to make requests with.
 
     .. versionadded :: 2.6

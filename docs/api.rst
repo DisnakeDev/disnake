@@ -5290,7 +5290,7 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: InvalidData
 
-.. autoexception:: WebhookMissingToken
+.. autoexception:: WebhookTokenMissing
 
 .. autoexception:: GatewayNotFound
 
@@ -5338,7 +5338,7 @@ Exception Hierarchy
                 - :exc:`NotFound`
                 - :exc:`DiscordServerError`
             - :exc:`LocalizationKeyError`
-            - :exc:`WebhookMissingToken`
+            - :exc:`WebhookTokenMissing`
 
 
 Warnings
