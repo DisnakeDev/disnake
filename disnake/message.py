@@ -1586,7 +1586,7 @@ class Message(Hashable):
             Tried to suppress embeds on a message without permissions or
             edited a message's content or embed that isn't yours.
         TypeError
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
+            You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
 
         Returns
         -------
@@ -2249,7 +2249,7 @@ class PartialMessage(Hashable):
             Tried to suppress embeds on a message without permissions or
             edited a message's content or embed that isn't yours.
         TypeError
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
+            You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
 
         Returns
         -------

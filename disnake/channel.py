@@ -341,7 +341,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Edits are no longer in-place, the newly edited channel is returned instead.
 
         .. versionchanged:: 2.6
-                Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -380,7 +380,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         TypeError
             The permission overwrite information is not in proper form.
         ValueError
-            If position is less than 0 or greater than the number of channels
+            The position is less than 0 or greater than the number of channels.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException

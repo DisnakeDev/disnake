@@ -1571,7 +1571,7 @@ class Webhook(BaseWebhook):
         ValueError
             The length of ``embeds`` was invalid.
         WebhookMissingToken
-            There was no token associated with this webhook
+            There was no token associated with this webhook.
         TypeError
             ``ephemeral`` was passed with the improper webhook type or there was no state
             attached with this webhook when giving it a view.

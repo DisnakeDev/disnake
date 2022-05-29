@@ -1841,13 +1841,13 @@ class Guild(Hashable):
         HTTPException
             Editing the guild failed.
         TypeError
-            The image format passed in to ``icon`` is invalid. It must be
-            PNG or JPG. This is also raised if you are not the owner of the
+            The image format passed in to ``icon`` is invalid.
+            This is also raised if you are not the owner of the
             guild and request an ownership transfer, or at least one of the assets
             (``icon``, ``banner``, ``splash`` or ``discovery_splash``)
             is a lottie sticker (see :func:`Sticker.read`).
         ValueError
-            ``Community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters.
+            ``community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters.
 
         Returns
         -------

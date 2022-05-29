@@ -1348,10 +1348,8 @@ class Messageable:
         parameter should be used with a :class:`list` of :class:`.Embed` objects.
         **Specifying both parameters will lead to an exception**.
 
-
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
-
 
         Parameters
         ----------
@@ -1437,7 +1435,7 @@ class Messageable:
             or the ``reference`` object is not a :class:`.Message`,
             :class:`.MessageReference` or :class:`.PartialMessage`.
         ValueError
-            The ``files`` list is not of the appropriate size.
+            The ``files`` or ``embeds`` list is too large.
 
         Returns
         -------
@@ -1465,7 +1463,7 @@ class Messageable:
         embeds_payload = None
         if embeds is not None:
             if len(embeds) > 10:
-                raise TypeError("embeds parameter must be a list of up to 10 elements")
+                raise ValueError("embeds parameter must be a list of up to 10 elements")
             for embed in embeds:
                 if embed._files:
                     files = files or []
