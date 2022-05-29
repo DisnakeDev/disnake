@@ -231,7 +231,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
     @property
     def type(self) -> Literal[ChannelType.text, ChannelType.news]:
-        """:class:`ChannelType`: The channel's Discord type."""
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.text` or :attr:`ChannelType.news`.
+        """
         if self._type == ChannelType.text.value:
             return ChannelType.text
         return ChannelType.news

@@ -236,7 +236,11 @@ class Thread(Messageable, Hashable):
 
     @property
     def type(self) -> ThreadType:
-        """:class:`ChannelType`: The channel's Discord type."""
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.public_thread`,
+        :attr:`ChannelType.private_thread`, or :attr:`ChannelType.news_thread`.
+        """
         return self._type
 
     @property
