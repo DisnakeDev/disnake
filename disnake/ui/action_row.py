@@ -41,6 +41,7 @@ from typing import (
 from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
+    NestedComponent,
     SelectMenu as SelectComponent,
     SelectOption,
 )
@@ -61,9 +62,9 @@ __all__ = ("ActionRow",)
 
 
 MessageUIComponent = Union[Button[Any], Select[Any]]
-ModalUIComponent = TextInput
+ModalUIComponent = Union[TextInput, Select[Any]]
 UIComponentT = TypeVar("UIComponentT", bound=WrappedComponent)
-UIComponentT_strict = TypeVar("UIComponentT_strict", MessageUIComponent, ModalUIComponent)
+StrictUIComponentT = TypeVar("StrictUIComponentT", MessageUIComponent, ModalUIComponent)
 
 Components = Union[
     "ActionRow[UIComponentT]",
@@ -104,12 +105,29 @@ class ActionRow(Generic[UIComponentT]):
 
     type: ClassVar[Literal[ComponentType.action_row]] = ComponentType.action_row
 
+    # When unspecified and called empty, default to an ActionRow that takes any kind of component.
+
     @overload
-    def __init__(self: ActionRow[UIComponentT_strict], *components: UIComponentT_strict):
+    def __init__(self: ActionRow[WrappedComponent]):
+        ...
+
+    # Explicit definitions are needed to make
+    # "ActionRow(Select(), TextInput())" and
+    # "ActionRow(Select(), Button())"
+    # differentiate themselves properly.
+
+    @overload
+    def __init__(self: ActionRow[MessageUIComponent], *components: MessageUIComponent):
         ...
 
     @overload
-    def __init__(self: ActionRow[UIComponentT], *components: UIComponentT):
+    def __init__(self: ActionRow[ModalUIComponent], *components: ModalUIComponent):
+        ...
+
+    # Allow use of "ActionRow[StrictUIComponent]" externally.
+
+    @overload
+    def __init__(self: ActionRow[StrictUIComponentT], *components: StrictUIComponentT):
         ...
 
     def __init__(self, *components: UIComponentT):  # type: ignore
@@ -375,7 +393,7 @@ class ActionRow(Generic[UIComponentT]):
 
         Raises
         ------
-        ValueError:
+        ValueError
             The component could not be found on the action row.
         """
         self._children.remove(item)
@@ -400,7 +418,7 @@ class ActionRow(Generic[UIComponentT]):
         return component
 
     @property
-    def _underlying(self) -> ActionRowComponent:
+    def _underlying(self) -> ActionRowComponent[NestedComponent]:
         return ActionRowComponent._raw_construct(
             type=self.type,
             children=[comp._underlying for comp in self._children],
@@ -413,12 +431,7 @@ class ActionRow(Generic[UIComponentT]):
         del self._children[index]
 
     def __getitem__(self, index: int) -> UIComponentT:
-        aggregate = 0
-        for component in self._children:
-            aggregate += component.width
-            if aggregate >= index:
-                return component
-        raise IndexError("ActionRow index out of range")
+        return self._children[index]
 
     @classmethod
     def with_modal_components(cls) -> ActionRow[ModalUIComponent]:
@@ -451,7 +464,11 @@ class ActionRow(Generic[UIComponentT]):
         return ActionRow[MessageUIComponent]()
 
     @classmethod
-    def from_message(cls, message: Message) -> List[ActionRow[MessageUIComponent]]:
+    def rows_from_message(  # TODO: Name pending, may be moved altogether.
+        cls,
+        message: Message,
+        strict: bool = True,
+    ) -> List[ActionRow[MessageUIComponent]]:
         """Create a list of up to 5 action rows from the components on an existing message.
 
         This will abide by existing component format on the message, including component
@@ -478,16 +495,20 @@ class ActionRow(Generic[UIComponentT]):
                     current_row.append_item(Button.from_component(component))
                 elif isinstance(component, SelectComponent):
                     current_row.append_item(Select.from_component(component))
+                elif strict:
+                    raise TypeError(f"Encountered unknown component type: {component.type}.")
 
         return rows
 
 
-def components_to_rows(components: Components[UIComponentT]) -> List[ActionRow[UIComponentT]]:
+def components_to_rows(
+    components: Components[StrictUIComponentT],
+) -> List[ActionRow[StrictUIComponentT]]:
     if not isinstance(components, Sequence):
         components = [components]
 
-    action_rows: List[ActionRow[UIComponentT]] = []
-    auto_row: ActionRow[UIComponentT] = ActionRow()
+    action_rows: List[ActionRow[StrictUIComponentT]] = []
+    auto_row: ActionRow[StrictUIComponentT] = ActionRow[StrictUIComponentT]()
 
     for component in components:
         if isinstance(component, WrappedComponent):
@@ -495,17 +516,17 @@ def components_to_rows(components: Components[UIComponentT]) -> List[ActionRow[U
                 auto_row.append_item(component)
             except ValueError:
                 action_rows.append(auto_row)
-                auto_row = ActionRow(component)
+                auto_row = ActionRow[StrictUIComponentT](component)
         else:
             if auto_row.width > 0:
                 action_rows.append(auto_row)
-                auto_row = ActionRow()
+                auto_row = ActionRow[StrictUIComponentT]()
 
             if isinstance(component, ActionRow):
                 action_rows.append(component)
 
             elif isinstance(component, Sequence):
-                action_rows.append(ActionRow(*component))
+                action_rows.append(ActionRow[StrictUIComponentT](*component))
 
             else:
                 raise ValueError(
@@ -520,5 +541,5 @@ def components_to_rows(components: Components[UIComponentT]) -> List[ActionRow[U
     return action_rows
 
 
-def components_to_dict(components: Components[Any]) -> List[ActionRowPayload]:
+def components_to_dict(components: Components[StrictUIComponentT]) -> List[ActionRowPayload]:
     return [row.to_component_dict() for row in components_to_rows(components)]

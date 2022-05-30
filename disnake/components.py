@@ -55,7 +55,6 @@ if TYPE_CHECKING:
         TextInput as TextInputPayload,
     )
 
-
 __all__ = (
     "Component",
     "ActionRow",
@@ -66,7 +65,10 @@ __all__ = (
 )
 
 C = TypeVar("C", bound="Component")
-NestedComponent = Union["Button", "SelectMenu", "TextInput"]
+
+MessageComponent = Union["Button", "SelectMenu"]
+ModalComponent = Union["TextInput", "SelectMenu"]
+NestedComponent = Union[MessageComponent, ModalComponent]
 ComponentT = TypeVar("ComponentT", bound=NestedComponent)
 
 
@@ -476,12 +478,7 @@ class TextInput(Component):
         return payload
 
 
-MessageComponent = Union[Button, SelectMenu]
-ModalComponent = TextInput
-T = TypeVar("T", bound=Component)
-
-
-def _component_factory(data: ComponentPayload, *, type: Type[T] = Component) -> T:
+def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
     # NOTE: due to speed, this method does not use the ComponentType enum
     #       as this runs every single time a component is received from the api
     # NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
