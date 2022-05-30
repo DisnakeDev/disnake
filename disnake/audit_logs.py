@@ -143,6 +143,8 @@ def _transform_overwrites(
 def _transform_icon(entry: AuditLogEntry, data: Optional[str]) -> Optional[Asset]:
     if data is None:
         return None
+    if entry.action.name.startswith("role_"):
+        return Asset._from_role_icon(entry._state, entry._target_id, data)  # type: ignore
     return Asset._from_guild_icon(entry._state, entry.guild.id, data)
 
 
@@ -269,6 +271,7 @@ class AuditLogChanges:
         'rate_limit_per_user':           ('slowmode_delay', None),
         'guild_id':                      ('guild', _transform_guild_id),
         'tags':                          ('emoji', None),
+        'unicode_emoji':                 ('emoji', None),
         'default_message_notifications': ('default_notifications', _enum_transformer(enums.NotificationLevel)),
         'communication_disabled_until':  ('timeout', _transform_datetime),
         'image_hash':                    ('image', _transform_guild_scheduled_event_image),
