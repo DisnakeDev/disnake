@@ -19,6 +19,13 @@ class MyModal(disnake.ui.Modal):
                 custom_id="description",
                 style=TextInputStyle.paragraph,
             ),
+            disnake.ui.Select(
+                placeholder="Display as embed",
+                options=[
+                    disnake.SelectOption(label="Yes"),
+                    disnake.SelectOption(label="No"),
+                ],
+            ),
         ]
         super().__init__(title="Create Tag", custom_id="create_tag", components=components)
 
