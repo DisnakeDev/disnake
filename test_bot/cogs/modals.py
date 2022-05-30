@@ -21,10 +21,7 @@ class MyModal(disnake.ui.Modal):
             ),
             disnake.ui.Select(
                 placeholder="Display as embed",
-                options=[
-                    disnake.SelectOption(label="Yes"),
-                    disnake.SelectOption(label="No"),
-                ],
+                options=["Yes", "No"],
             ),
         ]
         super().__init__(title="Create Tag", custom_id="create_tag", components=components)
