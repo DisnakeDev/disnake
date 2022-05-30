@@ -283,6 +283,7 @@ class AuditLogChanges:
         'status':                        (None, _enum_transformer(enums.GuildScheduledEventStatus)),
         'type':                          (None, _transform_type),
         'flags':                         (None, _flags_transformer(flags.ChannelFlags)),
+        'system_channel_flags':          (None, _flags_transformer(flags.SystemChannelFlags)),
     }
     # fmt: on
 

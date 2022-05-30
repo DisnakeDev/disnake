@@ -2165,6 +2165,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.widget_channel`
         - :attr:`~AuditLogDiff.verification_level`
         - :attr:`~AuditLogDiff.premium_progress_bar_enabled`
+        - :attr:`~AuditLogDiff.system_channel_flags`
 
     .. attribute:: channel_create
 
@@ -4115,6 +4116,14 @@ AuditLogDiff
         See also :attr:`Thread.flags`.
 
         :type: :class:`ChannelFlags`
+
+    .. attribute:: system_channel_flags
+
+        The guild's system channel settings.
+
+        See also :attr:`Guild.system_channel_flags`.
+
+        :type: :class:`SystemChannelFlags`
 
 Webhook Support
 ------------------
