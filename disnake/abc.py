@@ -543,7 +543,7 @@ class GuildChannel(ABC):
 
     @property
     def flags(self) -> ChannelFlags:
-        """:class:`ChannelFlags`: The channel flags for this channel.
+        """:class:`.ChannelFlags`: The channel flags for this channel.
 
         .. versionadded:: 2.6
         """

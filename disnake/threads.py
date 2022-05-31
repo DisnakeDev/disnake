@@ -329,7 +329,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def flags(self) -> ChannelFlags:
-        """:class:`ChannelFlags`: The channel flags for this thread.
+        """:class:`.ChannelFlags`: The channel flags for this thread.
 
         .. versionadded:: 2.5
         """
