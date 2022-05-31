@@ -135,11 +135,6 @@ class Thread(Messageable, Hashable):
         The time the most recent message was pinned, or ``None`` if no message is currently pinned.
 
         .. versionadded:: 2.5
-
-    flags: :class:`ChannelFlags`
-        The flags the thread has.
-
-        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -334,9 +329,9 @@ class Thread(Messageable, Hashable):
 
     @property
     def flags(self) -> ChannelFlags:
-        """:class:`ChannelFlags`: The channel flags for this channel.
+        """:class:`ChannelFlags`: The channel flags for this thread.
 
-        .. versionadded:: 2.6
+        .. versionadded:: 2.5
         """
         return ChannelFlags._from_value(self._flags)
 
