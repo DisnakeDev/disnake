@@ -56,7 +56,7 @@ from .context_managers import Typing
 from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
 from .errors import ClientException, InvalidArgument
 from .file import File
-from .flags import MessageFlags
+from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .permissions import PermissionOverwrite, Permissions
@@ -2803,7 +2803,14 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         .. versionadded:: 2.5
     """
 
-    __slots__ = ("id", "recipient", "me", "last_pin_timestamp", "_state")
+    __slots__ = (
+        "id",
+        "recipient",
+        "me",
+        "last_pin_timestamp",
+        "_state",
+        "_flags",
+    )
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload):
         self._state: ConnectionState = state
@@ -2813,6 +2820,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data.get("last_pin_timestamp")
         )
+        self._flags: int = data.get("flags", 0)
 
     async def _get_channel(self):
         return self
@@ -2857,6 +2865,14 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         .. versionadded:: 2.4
         """
         return f"https://discord.com/channels/@me/{self.id}"
+
+    @property
+    def flags(self) -> ChannelFlags:
+        """:class:`.ChannelFlags`: The channel flags for this channel.
+
+        .. versionadded:: 2.6
+        """
+        return ChannelFlags._from_value(self._flags)
 
     def permissions_for(
         self,
