@@ -56,7 +56,7 @@ from .context_managers import Typing
 from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
 from .errors import ClientException, InvalidArgument
 from .file import File
-from .flags import MessageFlags
+from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .permissions import PermissionOverwrite, Permissions
@@ -185,6 +185,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         "default_auto_archive_duration",
         "last_pin_timestamp",
         "_overwrites",
+        "_flags",
         "_type",
     )
 
@@ -203,6 +204,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             ("news", self.is_news()),
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -213,6 +215,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         # Does this need coercion into `int`? No idea yet.
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
@@ -927,6 +930,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         "category_id",
         "rtc_region",
         "video_quality_mode",
+        "_flags",
     )
 
     def __init__(
@@ -954,6 +958,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         self.video_quality_mode: VideoQualityMode = try_enum(
             VideoQualityMode, data.get("video_quality_mode", 1)
         )
+        self._flags = data.get("flags", 0)
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.position: int = data["position"]
         # these don't exist in partial channel objects of slash command options
@@ -1091,6 +1096,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
             ("nsfw", self.nsfw),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -1594,6 +1600,7 @@ class StageChannel(VocalGuildChannel):
             ("video_quality_mode", self.video_quality_mode),
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -1897,7 +1904,17 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
     """
 
-    __slots__ = ("name", "id", "guild", "nsfw", "_state", "position", "_overwrites", "category_id")
+    __slots__ = (
+        "name",
+        "id",
+        "guild",
+        "nsfw",
+        "_state",
+        "position",
+        "_overwrites",
+        "category_id",
+        "_flags",
+    )
 
     def __init__(self, *, state: ConnectionState, guild: Guild, data: CategoryChannelPayload):
         self._state: ConnectionState = state
@@ -1905,12 +1922,13 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         self._update(guild, data)
 
     def __repr__(self) -> str:
-        return f"<CategoryChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw}>"
+        return f"<CategoryChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw} flags={self.flags!r}>"
 
     def _update(self, guild: Guild, data: CategoryChannelPayload) -> None:
         self.guild: Guild = guild
         self.name: str = data["name"]
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         self.position: int = data["position"]
         self._fill_overwrites(data)
@@ -2254,6 +2272,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "position",
         "nsfw",
         "last_thread_id",
+        "_flags",
         "default_auto_archive_duration",
         "guild",
         "slowmode_delay",
@@ -2277,6 +2296,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             ("nsfw", self.nsfw),
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in atts)
         return f"<{type(self).__name__} {joined}>"
@@ -2287,6 +2307,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         self.last_thread_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
         self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
@@ -2782,7 +2803,14 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         .. versionadded:: 2.5
     """
 
-    __slots__ = ("id", "recipient", "me", "last_pin_timestamp", "_state")
+    __slots__ = (
+        "id",
+        "recipient",
+        "me",
+        "last_pin_timestamp",
+        "_state",
+        "_flags",
+    )
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload):
         self._state: ConnectionState = state
@@ -2792,6 +2820,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data.get("last_pin_timestamp")
         )
+        self._flags: int = data.get("flags", 0)
 
     async def _get_channel(self):
         return self
@@ -2836,6 +2865,14 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         .. versionadded:: 2.4
         """
         return f"https://discord.com/channels/@me/{self.id}"
+
+    @property
+    def flags(self) -> ChannelFlags:
+        """:class:`.ChannelFlags`: The channel flags for this channel.
+
+        .. versionadded:: 2.6
+        """
+        return ChannelFlags._from_value(self._flags)
 
     def permissions_for(
         self,
