@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Union
 
 from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
@@ -61,6 +61,10 @@ if TYPE_CHECKING:
     )
 
     AnyThreadArchiveDuration = Union[ThreadArchiveDuration, ThreadArchiveDurationLiteral]
+
+    ThreadType = Literal[
+        ChannelType.news_thread, ChannelType.public_thread, ChannelType.private_thread
+    ]
 
 
 class Thread(Messageable, Hashable):
@@ -190,7 +194,7 @@ class Thread(Messageable, Hashable):
         self.parent_id = int(data["parent_id"])
         self.owner_id = _get_as_snowflake(data, "owner_id")
         self.name = data["name"]
-        self._type = try_enum(ChannelType, data["type"])
+        self._type: ThreadType = try_enum(ChannelType, data["type"])  # type: ignore
         self.last_message_id = _get_as_snowflake(data, "last_message_id")
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self.message_count = data.get("message_count")
@@ -231,8 +235,12 @@ class Thread(Messageable, Hashable):
             pass
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> ThreadType:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.public_thread`,
+        :attr:`ChannelType.private_thread`, or :attr:`ChannelType.news_thread`.
+        """
         return self._type
 
     @property

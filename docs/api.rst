@@ -1471,6 +1471,12 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.1
 
+    .. attribute:: forum
+
+        A channel of only threads.
+
+        .. versionadded:: 2.5
+
 .. class:: MessageType
 
     Specifies the type of :class:`Message`. This is used to denote if a message

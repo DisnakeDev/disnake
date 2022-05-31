@@ -26,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union, overload
 
 from .asset import Asset
 from .colour import Colour
@@ -381,7 +381,7 @@ class Game(BaseActivity):
             self._end = timestamps.get("end", 0)
 
     @property
-    def type(self) -> ActivityType:
+    def type(self) -> Literal[ActivityType.playing]:
         """:class:`ActivityType`: Returns the game's type. This is for compatibility with :class:`Activity`.
 
         It always returns :attr:`ActivityType.playing`.
@@ -491,7 +491,7 @@ class Streaming(BaseActivity):
         self.assets: ActivityAssets = extra.pop("assets", {})
 
     @property
-    def type(self) -> ActivityType:
+    def type(self) -> Literal[ActivityType.streaming]:
         """:class:`ActivityType`: Returns the game's type. This is for compatibility with :class:`Activity`.
 
         It always returns :attr:`ActivityType.streaming`.
@@ -586,7 +586,7 @@ class Spotify:
         self._created_at: Optional[float] = data.pop("created_at", None)
 
     @property
-    def type(self) -> ActivityType:
+    def type(self) -> Literal[ActivityType.listening]:
         """:class:`ActivityType`: Returns the activity's type. This is for compatibility with :class:`Activity`.
 
         It always returns :attr:`ActivityType.listening`.
@@ -788,7 +788,7 @@ class CustomActivity(BaseActivity):
             )
 
     @property
-    def type(self) -> ActivityType:
+    def type(self) -> Literal[ActivityType.custom]:
         """:class:`ActivityType`: Returns the activity's type. This is for compatibility with :class:`Activity`.
 
         It always returns :attr:`ActivityType.custom`.
