@@ -773,8 +773,7 @@ class Client:
             Whether we should ignore the api provided session start limit when
             connecting to the api.
 
-            .. versionchanged:: 2.6
-
+            .. versionadded:: 2.6
 
         Raises
         ------
