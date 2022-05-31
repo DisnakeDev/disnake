@@ -2242,6 +2242,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
 
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
+
     .. attribute:: overwrite_update
 
         A channel permission overwrite was changed, this is typically
@@ -2258,6 +2261,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
 
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
+
     .. attribute:: overwrite_delete
 
         A channel permission overwrite was deleted.
@@ -2272,6 +2278,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.allow`
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
+
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
 
     .. attribute:: kick
 
@@ -2481,11 +2490,14 @@ of :class:`enum.Enum`.
 
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.name`
-        - :attr:`~AuditLogDiff.type` (always set to ``1`` if so)
+        - :attr:`~AuditLogDiff.type`
         - :attr:`~AuditLogDiff.application_id`
 
         .. versionchanged:: 2.6
             Added :attr:`~AuditLogDiff.application_id`.
+
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now a :class:`WebhookType`.
 
     .. attribute:: webhook_update
 
@@ -2514,11 +2526,14 @@ of :class:`enum.Enum`.
 
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.name`
-        - :attr:`~AuditLogDiff.type` (always set to ``1`` if so)
+        - :attr:`~AuditLogDiff.type`
         - :attr:`~AuditLogDiff.application_id`
 
         .. versionchanged:: 2.6
             Added :attr:`~AuditLogDiff.application_id`.
+
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now a :class:`WebhookType`.
 
     .. attribute:: emoji_create
 
@@ -2797,6 +2812,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.archived`
         - :attr:`~AuditLogDiff.locked`
         - :attr:`~AuditLogDiff.auto_archive_duration`
+        - :attr:`~AuditLogDiff.type`
 
         .. versionadded:: 2.0
 
@@ -2831,6 +2847,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.archived`
         - :attr:`~AuditLogDiff.locked`
         - :attr:`~AuditLogDiff.auto_archive_duration`
+        - :attr:`~AuditLogDiff.type`
 
         .. versionadded:: 2.0
 
@@ -3689,9 +3706,9 @@ AuditLogDiff
 
     .. attribute:: type
 
-        The type of channel or sticker.
+        The type of channel/thread, sticker, webhook, integration (:class:`str`), or permission overwrite (:class:`int`).
 
-        :type: Union[:class:`ChannelType`, :class:`StickerType`]
+        :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`WebhookType`, :class:`str`, :class:`int`]
 
     .. attribute:: topic
 
