@@ -118,7 +118,7 @@ class MessageInteraction(Interaction):
         raise Exception("MessageInteraction is malformed - no component found")
 
 
-class MessageInteractionData:
+class MessageInteractionData(dict):
     """Represents the data of an interaction with a message component.
 
     .. versionadded:: 2.1
@@ -136,6 +136,7 @@ class MessageInteractionData:
     __slots__ = ("custom_id", "component_type", "values")
 
     def __init__(self, *, data: ComponentInteractionDataPayload):
+        super().__init__(data)
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
         self.values: Optional[List[str]] = data.get("values")
