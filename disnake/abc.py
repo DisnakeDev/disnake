@@ -834,8 +834,10 @@ class GuildChannel(ABC):
         NotFound
             The role or member being edited is not part of the guild.
         TypeError
-            The overwrite parameter invalid or the target type was not
-            :class:`.Role` or :class:`.Member`.
+            ``overwrite`` is invalid,
+            the target type was not :class:`.Role` or :class:`.Member`,
+            both keyword arguments and ``overwrite`` were provided,
+            or invalid permissions were provided as keyword arguments.
         """
         http = self._state.http
 
