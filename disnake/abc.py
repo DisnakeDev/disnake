@@ -51,7 +51,7 @@ from .context_managers import Typing
 from .enums import ChannelType, PartyType, try_enum_to_int
 from .errors import ClientException, InvalidArgument
 from .file import File
-from .flags import MessageFlags
+from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
 from .iterators import HistoryIterator
 from .mentions import AllowedMentions
@@ -255,6 +255,7 @@ class GuildChannel(ABC):
     type: ChannelType
     position: int
     category_id: Optional[int]
+    _flags: int
     _state: ConnectionState
     _overwrites: List[_Overwrites]
 
@@ -539,6 +540,14 @@ class GuildChannel(ABC):
 
         category = self.guild.get_channel(self.category_id)
         return bool(category and category.overwrites == self.overwrites)
+
+    @property
+    def flags(self) -> ChannelFlags:
+        """:class:`.ChannelFlags`: The channel flags for this channel.
+
+        .. versionadded:: 2.6
+        """
+        return ChannelFlags._from_value(self._flags)
 
     @property
     def jump_url(self) -> str:

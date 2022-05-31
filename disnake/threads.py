@@ -139,11 +139,6 @@ class Thread(Messageable, Hashable):
         The time the most recent message was pinned, or ``None`` if no message is currently pinned.
 
         .. versionadded:: 2.5
-
-    flags: :class:`ChannelFlags`
-        The flags the thread has.
-
-        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -164,7 +159,7 @@ class Thread(Messageable, Hashable):
         "archive_timestamp",
         "create_timestamp",
         "last_pin_timestamp",
-        "flags",
+        "_flags",
         "_type",
         "_state",
         "_members",
@@ -202,7 +197,7 @@ class Thread(Messageable, Hashable):
         self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
             data.get("last_pin_timestamp")
         )
-        self.flags = ChannelFlags._from_value(data.get("flags", 0))
+        self._flags: int = data.get("flags", 0)
         self._unroll_metadata(data["thread_metadata"])
 
         try:
@@ -227,7 +222,7 @@ class Thread(Messageable, Hashable):
             pass
 
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
-        self.flags = ChannelFlags._from_value(data.get("flags", 0))
+        self._flags = data.get("flags", 0)
 
         try:
             self._unroll_metadata(data["thread_metadata"])
@@ -339,6 +334,14 @@ class Thread(Messageable, Hashable):
             If create_timestamp is provided by discord, that will be used instead of the time in the ID.
         """
         return self.create_timestamp or snowflake_time(self.id)
+
+    @property
+    def flags(self) -> ChannelFlags:
+        """:class:`.ChannelFlags`: The channel flags for this thread.
+
+        .. versionadded:: 2.5
+        """
+        return ChannelFlags._from_value(self._flags)
 
     @property
     def jump_url(self) -> str:
@@ -683,7 +686,7 @@ class Thread(Messageable, Hashable):
         if slowmode_delay is not MISSING:
             payload["rate_limit_per_user"] = slowmode_delay
         if pinned is not MISSING:
-            flags = ChannelFlags._from_value(self.flags.value)
+            flags = ChannelFlags._from_value(self._flags)
             flags.pinned = pinned
             payload["flags"] = flags.value
 
