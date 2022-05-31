@@ -67,7 +67,8 @@ from .utils import MISSING, escape_mentions
 
 if TYPE_CHECKING:
     from .abc import GuildChannel, MessageableChannel, Snowflake
-    from .channel import DMChannel, TextChannel, VoiceChannel
+    from .channel import DMChannel
+    from .guild import GuildMessageable
     from .mentions import AllowedMentions
     from .role import Role
     from .state import ConnectionState
@@ -734,8 +735,8 @@ class Message(Hashable):
         This is not stored long term within Discord's servers and is only used ephemerally.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
-        The :class:`TextChannel` or :class:`Thread` that the message was sent from.
+    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+        The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to messages of
@@ -891,7 +892,7 @@ class Message(Hashable):
         self.activity: Optional[MessageActivityPayload] = data.get("activity")
         # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
-        self.channel: Union[TextChannel, DMChannel, Thread, VoiceChannel] = channel  # type: ignore
+        self.channel: Union[GuildMessageable, DMChannel] = channel  # type: ignore
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data["edited_timestamp"]
         )
@@ -1132,9 +1133,7 @@ class Message(Hashable):
             _component_factory(d, type=ActionRow[MessageComponent]) for d in components
         ]
 
-    def _rebind_cached_references(
-        self, new_guild: Guild, new_channel: Union[TextChannel, Thread, VoiceChannel]
-    ) -> None:
+    def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
         self.guild = new_guild
         self.channel = new_channel
         if isinstance(self.author, Member):
