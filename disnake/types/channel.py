@@ -46,14 +46,17 @@ class _BaseChannel(TypedDict):
     id: Snowflake
 
 
-class _BaseGuildChannel(_BaseChannel):
+class _BaseGuildChannelOptional(TypedDict, total=False):
+    flags: int
+
+
+class _BaseGuildChannel(_BaseChannel, _BaseGuildChannelOptional):
     name: str
     guild_id: Snowflake
     position: int
     permission_overwrites: List[PermissionOverwrite]
     nsfw: bool
     parent_id: Optional[Snowflake]
-    flags: int
 
 
 class PartialChannel(_BaseChannel):
