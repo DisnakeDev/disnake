@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, Type, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Callable, Optional, Tuple, Type, TypeVar, Union, overload
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
@@ -89,15 +89,32 @@ class Button(Item[V]):
     _underlying: ButtonComponent = MISSING
 
     @overload
-    def __new__(cls: Type[Button[None]], **kwargs) -> Button[None]:
+    def __init__(
+        self: Button[None],
+        *,
+        style: ButtonStyle = ButtonStyle.secondary,
+        label: Optional[str] = None,
+        disabled: bool = False,
+        custom_id: Optional[str] = None,
+        url: Optional[str] = None,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        row: Optional[int] = None,
+    ):
         ...
 
     @overload
-    def __new__(cls: Type[Button[V]], **kwargs) -> Button[V]:
+    def __init__(
+        self: Button[V],
+        *,
+        style: ButtonStyle = ButtonStyle.secondary,
+        label: Optional[str] = None,
+        disabled: bool = False,
+        custom_id: Optional[str] = None,
+        url: Optional[str] = None,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        row: Optional[int] = None,
+    ):
         ...
-
-    def __new__(cls: Type[Button[Any]], **kwargs) -> Any:
-        return super().__new__(cls)
 
     def __init__(
         self,

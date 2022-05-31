@@ -29,7 +29,6 @@ import asyncio
 import os
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
     Dict,
     List,
@@ -124,15 +123,32 @@ class Select(Item[V]):
     _underlying: SelectMenu = MISSING
 
     @overload
-    def __new__(cls: Type[Select[None]], **kwargs) -> Select[None]:
+    def __init__(
+        self: Select[None],
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        disabled: bool = False,
+        row: Optional[int] = None,
+    ):
         ...
 
     @overload
-    def __new__(cls: Type[Select[V]], **kwargs) -> Select[V]:
+    def __init__(
+        self: Select[V],
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        disabled: bool = False,
+        row: Optional[int] = None,
+    ):
         ...
-
-    def __new__(cls: Type[Select[Any]], **kwargs) -> Any:
-        return super().__new__(cls)
 
     def __init__(
         self,

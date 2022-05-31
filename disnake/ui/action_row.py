@@ -58,7 +58,14 @@ if TYPE_CHECKING:
     from ..partial_emoji import PartialEmoji
     from ..types.components import ActionRow as ActionRowPayload
 
-__all__ = ("ActionRow",)
+__all__ = (
+    "ActionRow",
+    "Components",
+    "MessageUIComponent",
+    "ModalUIComponent",
+    "MessageActionRow",
+    "ModalActionRow",
+)
 
 
 MessageUIComponent = Union[Button[Any], Select[Any]]
@@ -464,7 +471,7 @@ class ActionRow(Generic[UIComponentT]):
         return ActionRow[MessageUIComponent]()
 
     @classmethod
-    def rows_from_message(  # TODO: Name pending, may be moved altogether.
+    def rows_from_message(
         cls,
         message: Message,
         strict: bool = True,
@@ -499,6 +506,10 @@ class ActionRow(Generic[UIComponentT]):
                     raise TypeError(f"Encountered unknown component type: {component.type}.")
 
         return rows
+
+
+MessageActionRow = ActionRow[MessageUIComponent]
+ModalActionRow = ActionRow[ModalUIComponent]
 
 
 def components_to_rows(

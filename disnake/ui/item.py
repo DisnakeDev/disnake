@@ -108,15 +108,12 @@ class Item(WrappedComponent, Generic[V]):
     __repr_attributes__: Tuple[str, ...] = ("row",)
 
     @overload
-    def __new__(cls: Type[Item[None]], **kwargs) -> Item[None]:
+    def __init__(self: Item[None]):
         ...
 
     @overload
-    def __new__(cls: Type[Item[V]], **kwargs) -> Item[V]:
+    def __init__(self: Item[V]):
         ...
-
-    def __new__(cls, **kwargs) -> Any:
-        return super().__new__(cls)
 
     def __init__(self):
         self._view: Optional[V] = None
