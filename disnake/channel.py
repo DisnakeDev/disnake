@@ -659,7 +659,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionadded:: 1.3
 
         .. versionchanged:: 2.6
-            Raises :exc:`TypeError` instead of ``InvalidArgument``
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1235,7 +1235,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             Edits are no longer in-place, the newly edited channel is returned instead.
 
         .. versionchanged:: 2.6
-            Raises :exc:`TypeError` instead of ``InvalidArgument``
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1707,7 +1707,7 @@ class StageChannel(VocalGuildChannel):
         .. versionadded:: 2.0
 
         .. versionchanged:: 2.6
-            Raises :exc:`TypeError` instead of ``InvalidArgument``
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1815,7 +1815,7 @@ class StageChannel(VocalGuildChannel):
             Edits are no longer in-place, the newly edited channel is returned instead.
 
         .. versionchanged:: 2.6
-            Raises :exc:`TypeError` instead of ``InvalidArgument``
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1977,7 +1977,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             Edits are no longer in-place, the newly edited channel is returned instead.
 
         .. versionchanged:: 2.6
-            Raises :exc:`TypeError` instead of ``InvalidArgument``
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
         Parameters
         ----------

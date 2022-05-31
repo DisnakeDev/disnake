@@ -1145,7 +1145,7 @@ class Webhook(BaseWebhook):
 
 
         .. versionchanged:: 2.6
-            Raises :exc:`ValueError` instead of ``InvalidArgument``
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1228,7 +1228,7 @@ class Webhook(BaseWebhook):
             returned webhook does not contain any user information.
 
         .. versionchanged:: 2.6
-            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1267,7 +1267,7 @@ class Webhook(BaseWebhook):
         Deletes this Webhook.
 
         .. versionchanged:: 2.6
-            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1321,7 +1321,7 @@ class Webhook(BaseWebhook):
         Edits this Webhook.
 
         .. versionchanged:: 2.6
-            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------
