@@ -142,7 +142,10 @@ class PartialInviteChannel:
 
     @property
     def icon(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns the channel's icon asset if available."""
+        """Optional[:class:`Asset`]: Returns the channel's icon asset if available.
+
+        .. versionadded:: 2.6
+        """
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="channel")
