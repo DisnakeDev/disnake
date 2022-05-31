@@ -3245,7 +3245,6 @@ class Guild(Hashable):
             Creating the role failed.
         TypeError
             An invalid keyword argument was given.
-        TypeError
             The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
