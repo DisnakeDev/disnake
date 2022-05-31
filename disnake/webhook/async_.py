@@ -1423,6 +1423,7 @@ class Webhook(BaseWebhook):
         view: View = ...,
         components: Components = ...,
         thread: Snowflake = ...,
+        thread_name: str = ...,
         wait: Literal[True],
         delete_after: float = ...,
     ) -> WebhookMessage:
@@ -1446,6 +1447,7 @@ class Webhook(BaseWebhook):
         view: View = ...,
         components: Components = ...,
         thread: Snowflake = ...,
+        thread_name: str = ...,
         wait: Literal[False] = ...,
         delete_after: float = ...,
     ) -> None:
@@ -1468,6 +1470,7 @@ class Webhook(BaseWebhook):
         view: View = MISSING,
         components: Components = MISSING,
         thread: Snowflake = MISSING,
+        thread_name: Optional[str] = None,
         wait: bool = False,
         delete_after: float = MISSING,
     ) -> Optional[WebhookMessage]:
@@ -1543,6 +1546,12 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
+        thread_name: :class:`str`
+            If in a forum channel, and thread is not specified,
+            the name of the newly created thread.
+
+            .. versionadded:: 2.6
+
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
             means that the return type of this function changes from ``None`` to
@@ -1608,6 +1617,12 @@ class Webhook(BaseWebhook):
             if ephemeral is True and view.timeout is None:
                 view.timeout = 15 * 60.0
 
+        thread_id: Optional[int] = None
+        if thread is not MISSING and thread_name is not None:
+            raise TypeError("only one of thread and thread_name can be provided.")
+        elif thread is not MISSING:
+            thread_id = thread.id
+
         params = handle_message_parameters(
             content=content,
             username=username,
@@ -1624,10 +1639,11 @@ class Webhook(BaseWebhook):
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
+
+        if isinstance(params.payload, dict) and thread_name:
+            params.payload["thread_name"] = thread_name
+
         adapter = async_context.get()
-        thread_id: Optional[int] = None
-        if thread is not MISSING:
-            thread_id = thread.id
 
         try:
             data = await adapter.execute_webhook(

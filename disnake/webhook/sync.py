@@ -861,6 +861,7 @@ class SyncWebhook(BaseWebhook):
         suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         thread: Snowflake = ...,
+        thread_name: str = ...,
         wait: Literal[True],
     ) -> SyncWebhookMessage:
         ...
@@ -880,6 +881,7 @@ class SyncWebhook(BaseWebhook):
         suppress_embeds: bool = ...,
         allowed_mentions: AllowedMentions = ...,
         thread: Snowflake = ...,
+        thread_name: str = ...,
         wait: Literal[False] = ...,
     ) -> None:
         ...
@@ -898,6 +900,7 @@ class SyncWebhook(BaseWebhook):
         suppress_embeds: bool = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         thread: Snowflake = MISSING,
+        thread_name: str = None,
         wait: bool = False,
     ) -> Optional[SyncWebhookMessage]:
         """Sends a message using the webhook.
@@ -944,6 +947,12 @@ class SyncWebhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
+        thread_name: :class:`str`
+            If in a forum channel, and thread is not specified,
+            the name of the newly created thread.
+
+            .. versionadded:: 2.6
+
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all embeds from the UI if set to ``True``.
@@ -984,6 +993,12 @@ class SyncWebhook(BaseWebhook):
         if content is None:
             content = MISSING
 
+        thread_id: Optional[int] = None
+        if thread is not MISSING and thread_name is not None:
+            raise TypeError("only one of thread and thread_name can be provided.")
+        elif thread is not MISSING:
+            thread_id = thread.id
+
         params = handle_message_parameters(
             content=content,
             username=username,
@@ -997,10 +1012,11 @@ class SyncWebhook(BaseWebhook):
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
+
+        if isinstance(params.payload, dict) and thread_name:
+            params.payload["thread_name"] = thread_name
+
         adapter: WebhookAdapter = _get_webhook_adapter()
-        thread_id: Optional[int] = None
-        if thread is not MISSING:
-            thread_id = thread.id
 
         try:
             data = adapter.execute_webhook(
