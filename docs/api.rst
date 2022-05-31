@@ -4113,7 +4113,7 @@ AuditLogDiff
 
         The channel's flags.
 
-        See also :attr:`Thread.flags`.
+        See also :attr:`abc.GuildChannel.flags` or :attr:`Thread.flags`.
 
         :type: :class:`ChannelFlags`
 
