@@ -378,7 +378,7 @@ class Asset(AssetMixin):
 
         Raises
         ------
-        TypeError
+        ValueError
             An invalid size or format was passed.
 
         Returns
@@ -392,15 +392,15 @@ class Asset(AssetMixin):
         if format is not MISSING:
             if self._animated:
                 if format not in VALID_ASSET_FORMATS:
-                    raise TypeError(f"format must be one of {VALID_ASSET_FORMATS}")
+                    raise ValueError(f"format must be one of {VALID_ASSET_FORMATS}")
             else:
                 if format not in VALID_STATIC_FORMATS:
-                    raise TypeError(f"format must be one of {VALID_STATIC_FORMATS}")
+                    raise ValueError(f"format must be one of {VALID_STATIC_FORMATS}")
             url = url.with_path(f"{path}.{format}")
 
         if static_format is not MISSING and not self._animated:
             if static_format not in VALID_STATIC_FORMATS:
-                raise TypeError(f"static_format must be one of {VALID_STATIC_FORMATS}")
+                raise ValueError(f"static_format must be one of {VALID_STATIC_FORMATS}")
             url = url.with_path(f"{path}.{static_format}")
 
         if size is not MISSING:

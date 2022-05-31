@@ -1490,13 +1490,6 @@ class Message(Hashable):
 
         The content must be able to be transformed into a string via ``str(content)``.
 
-        .. versionchanged:: 1.3
-            The ``suppress`` keyword-only parameter was added.
-
-        .. versionchanged:: 2.5
-            The ``suppress`` keyword-only parameter was deprecated
-            in favor of ``suppress_embeds``.
-
         .. note::
             If the original message has embeds with images that were created from local files
             (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
@@ -1505,6 +1498,10 @@ class Message(Hashable):
 
         .. versionchanged:: 1.3
             The ``suppress`` keyword-only parameter was added.
+
+        .. versionchanged:: 2.5
+            The ``suppress`` keyword-only parameter was deprecated
+            in favor of ``suppress_embeds``.
 
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` instead of ``InvalidArgument``.

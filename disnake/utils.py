@@ -519,7 +519,7 @@ def _get_mime_type_for_image(data: bytes):
     elif data.startswith(b"RIFF") and data[8:12] == b"WEBP":
         return "image/webp"
     else:
-        raise TypeError("Unsupported image type given")
+        raise ValueError("Unsupported image type given")
 
 
 def _bytes_to_base64_data(data: bytes) -> str:

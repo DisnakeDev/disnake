@@ -461,8 +461,6 @@ class Role(Hashable):
             You do not have permissions to change the role.
         HTTPException
             Editing the role failed.
-        ValueError
-            An invalid position was given.
         TypeError
             The default role was asked to be moved or the ``icon``
             asset is a lottie sticker (see :func:`Sticker.read`)

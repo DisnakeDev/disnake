@@ -201,9 +201,9 @@ class Template:
         HTTPException
             Guild creation failed.
         TypeError
-            Invalid icon image format given. Must be PNG or JPG.
-        TypeError
             The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
+        ValueError
+            Invalid icon image format given. Must be PNG or JPG.
 
         Returns
         -------

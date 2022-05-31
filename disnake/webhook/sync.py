@@ -420,6 +420,9 @@ class SyncWebhookMessage(Message):
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         content: Optional[:class:`str`]
@@ -491,6 +494,9 @@ class SyncWebhookMessage(Message):
     def delete(self, *, delay: Optional[float] = None) -> None:
         """Deletes the message.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         delay: Optional[:class:`float`]
@@ -505,6 +511,8 @@ class SyncWebhookMessage(Message):
             The message was deleted already.
         HTTPException
             Deleting the message failed.
+        WebhookTokenMissing
+            There is no token associated with this webhook.
         """
         if delay is not None:
             time.sleep(delay)
@@ -1172,6 +1180,9 @@ class SyncWebhook(BaseWebhook):
         you only have an ID.
 
         .. versionadded:: 1.6
+
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------

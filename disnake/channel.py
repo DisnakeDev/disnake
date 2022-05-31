@@ -2646,10 +2646,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Specified both ``file`` and ``files``,
             or you specified both ``embed`` and ``embeds``,
             or you specified both ``view`` and ``components``.
+            or you have passed an object that is not :class:`File` to ``file`` or ``files``.
         ValueError
             Specified more than 10 embeds,
-            or more than 10 files,
-            or you have passed an object that is not :class:`File`.
+            or more than 10 files.
 
         Returns
         -------

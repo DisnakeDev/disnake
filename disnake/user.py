@@ -392,9 +392,9 @@ class ClientUser(BaseUser):
         HTTPException
             Editing your profile failed.
         TypeError
-            Wrong image format passed for ``avatar``.
-        TypeError
             The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+        ValueError
+            Wrong image format passed for ``avatar``.
 
         Returns
         -------

@@ -1143,6 +1143,10 @@ class Webhook(BaseWebhook):
     ) -> Webhook:
         """Creates a partial :class:`Webhook` from a webhook URL.
 
+
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``
+
         Parameters
         ----------
         url: :class:`str`
@@ -1223,6 +1227,9 @@ class Webhook(BaseWebhook):
             :meth:`is_authenticated` returns ``False``, then the
             returned webhook does not contain any user information.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``
+
         Parameters
         ----------
         prefer_auth: :class:`bool`
@@ -1258,6 +1265,9 @@ class Webhook(BaseWebhook):
         """|coro|
 
         Deletes this Webhook.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``
 
         Parameters
         ----------
@@ -1310,6 +1320,9 @@ class Webhook(BaseWebhook):
 
         Edits this Webhook.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``
+
         Parameters
         ----------
         name: Optional[:class:`str`]
@@ -1338,17 +1351,15 @@ class Webhook(BaseWebhook):
 
         Raises
         ------
-        NotFound
-            This webhook does not exist or the ``avatar`` asset couldn't be found.
         HTTPException
             Editing the webhook failed.
         NotFound
-            This webhook does not exist.
+            This webhook does not exist or the ``avatar`` asset couldn't be found.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
         WebhookTokenMissing
             This webhook does not have a token associated with it
             or it tried editing a channel without authentication.
-        TypeError
-            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -1567,14 +1578,14 @@ class Webhook(BaseWebhook):
         Forbidden
             The authorization token for the webhook is incorrect.
         TypeError
+            Raised by any of the following:
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
-        ValueError
-            The length of ``embeds`` was invalid.
+            ``ephemeral`` was passed with the improper webhook type.
+            There was no state attached with this webhook when giving it a view.
         WebhookTokenMissing
             There was no token associated with this webhook.
-        TypeError
-            ``ephemeral`` was passed with the improper webhook type or there was no state
-            attached with this webhook when giving it a view.
+        ValueError
+            The length of ``embeds`` was invalid.
 
         Returns
         -------
@@ -1661,6 +1672,9 @@ class Webhook(BaseWebhook):
         Retrieves a single :class:`WebhookMessage` owned by this webhook.
 
         .. versionadded:: 2.0
+
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1793,10 +1807,10 @@ class Webhook(BaseWebhook):
         TypeError
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
             or there is no associated state when sending a view.
-        ValueError
-            The length of ``embeds`` was invalid
         WebhookTokenMissing
             There was no token associated with this webhook.
+        ValueError
+            The length of ``embeds`` was invalid
 
         Returns
         -------
