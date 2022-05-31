@@ -384,7 +384,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         TypeError
             The permission overwrite information is not in proper form.
         ValueError
-            The position is less than 0 or greater than the number of channels.
+            The position is less than 0.
 
         Returns
         -------
@@ -1289,7 +1289,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         TypeError
             The permission overwrite information is not in proper form.
         ValueError
-            The position is less than 0 or greater than the number of channels.
+            The position is less than 0.
 
         Returns
         -------
@@ -1854,7 +1854,7 @@ class StageChannel(VocalGuildChannel):
         TypeError
             The permission overwrite information is not in proper form.
         ValueError
-            The position is less than 0 or greater than the number of channels.
+            The position is less than 0.
 
         Returns
         -------
@@ -2006,7 +2006,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         TypeError
             The permission overwrite information is not in proper form.
         ValueError
-            The position is less than 0 or greater than the number of channels.
+            The position is less than 0.
 
         Returns
         -------
@@ -2459,7 +2459,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         TypeError
             The permission overwrite information is not in proper form.
         ValueError
-            The position is less than 0 or greater than the number of channels.
+            The position is less than 0.
 
         Returns
         -------
