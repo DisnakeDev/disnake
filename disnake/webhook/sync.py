@@ -468,7 +468,7 @@ class SyncWebhookMessage(Message):
         ValueError
             The length of ``embeds`` was invalid
         WebhookTokenMissing
-            There was no token associated with this webhook.
+            There is no token associated with this webhook.
 
         Returns
         -------
@@ -691,6 +691,9 @@ class SyncWebhook(BaseWebhook):
             :meth:`is_authenticated` returns ``False``, then the
             returned webhook does not contain any user information.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         prefer_auth: :class:`bool`
@@ -724,6 +727,9 @@ class SyncWebhook(BaseWebhook):
 
     def delete(self, *, reason: Optional[str] = None, prefer_auth: bool = True) -> None:
         """Deletes this Webhook.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -771,6 +777,9 @@ class SyncWebhook(BaseWebhook):
         prefer_auth: bool = True,
     ) -> SyncWebhook:
         """Edits this Webhook.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -914,6 +923,9 @@ class SyncWebhook(BaseWebhook):
         it must be a rich embed type. You cannot mix the ``embed`` parameter with the
         ``embeds`` parameter, which must be a :class:`list` of :class:`Embed` objects to send.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         content: Optional[:class:`str`]
@@ -1028,6 +1040,9 @@ class SyncWebhook(BaseWebhook):
 
         .. versionadded:: 2.0
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         id: :class:`int`
@@ -1078,13 +1093,16 @@ class SyncWebhook(BaseWebhook):
         This is a lower level interface to :meth:`WebhookMessage.edit` in case
         you only have an ID.
 
-        .. versionadded:: 1.6
-
         .. note::
             If the original message has embeds with images that were created from local files
             (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
+        .. versionadded:: 1.6
+
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------
