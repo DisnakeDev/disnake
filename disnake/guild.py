@@ -2091,7 +2091,7 @@ class Guild(Hashable):
         scheduled_start_time: datetime.datetime,
         entity_type: GuildScheduledEventEntityType,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
-        channel_id: int = MISSING,
+        channel: Snowflake = MISSING,
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         scheduled_end_time: datetime.datetime = MISSING,
         description: str = MISSING,
@@ -2104,7 +2104,7 @@ class Guild(Hashable):
 
         If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
 
-        - ``channel_id`` should be not be set
+        - ``channel`` should be not be set
         - ``entity_metadata`` with a location field must be provided
         - ``scheduled_end_time`` must be provided
 
@@ -2124,8 +2124,8 @@ class Guild(Hashable):
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel_id: :class:`int`
-            The channel ID in which the guild scheduled event will be hosted.
+        channel: :class:`.abc.Snowflake`
+            The channel in which the guild scheduled event will be hosted.
         privacy_level: :class:`GuildScheduledEventPrivacyLevel`
             The privacy level of the guild scheduled event.
         scheduled_start_time: :class:`datetime.datetime`
@@ -2182,8 +2182,8 @@ class Guild(Hashable):
         if image is not MISSING:
             fields["image"] = await utils._assetbytes_to_base64_data(image)
 
-        if channel_id is not MISSING:
-            fields["channel_id"] = channel_id
+        if channel is not MISSING:
+            fields["channel_id"] = channel.id
 
         if scheduled_end_time is not MISSING:
             fields["scheduled_end_time"] = scheduled_end_time.isoformat()

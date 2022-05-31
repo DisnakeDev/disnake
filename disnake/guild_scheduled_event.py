@@ -267,7 +267,7 @@ class GuildScheduledEvent(Hashable):
         name: str = MISSING,
         description: Optional[str] = MISSING,
         image: Optional[AssetBytes] = MISSING,
-        channel_id: Optional[int] = MISSING,
+        channel: Optional[Snowflake] = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         scheduled_start_time: datetime = MISSING,
         scheduled_end_time: datetime = MISSING,
@@ -282,7 +282,7 @@ class GuildScheduledEvent(Hashable):
 
         If updating ``entity_type`` to :class:`GuildScheduledEventEntityType.external`:
 
-        - ``channel_id`` should be set to ``None`` or ignored
+        - ``channel`` should be set to ``None`` or ignored
         - ``entity_metadata`` with a location field must be provided
         - ``scheduled_end_time`` must be provided
 
@@ -300,8 +300,8 @@ class GuildScheduledEvent(Hashable):
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel_id: Optional[:class:`int`]
-            The channel ID in which the guild scheduled event will be hosted.
+        channel: Optional[:class:`.abc.Snowflake`]
+            The channel in which the guild scheduled event will be hosted.
             Set to ``None`` if changing ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
         privacy_level: :class:`GuildScheduledEventPrivacyLevel`
             The privacy level of the guild scheduled event.
@@ -384,14 +384,12 @@ class GuildScheduledEvent(Hashable):
         if image is not MISSING:
             fields["image"] = await _assetbytes_to_base64_data(image)
 
-        if channel_id is not MISSING:
-            if channel_id is not None and is_external:
+        if channel is not MISSING:
+            if channel is not None and is_external:
                 raise ValueError(
-                    error_for_external_entity.format("channel_id", "None or not provided")
+                    error_for_external_entity.format("channel", "None or not provided")
                 )
-            fields["channel_id"] = channel_id
-        elif channel_id is None and is_external:
-            fields["channel_id"] = None
+            fields["channel_id"] = channel.id if channel is not None else None
 
         if scheduled_start_time is not MISSING:
             fields["scheduled_start_time"] = scheduled_start_time.isoformat()
