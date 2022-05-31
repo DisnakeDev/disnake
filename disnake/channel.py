@@ -204,6 +204,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             ("news", self.is_news()),
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -1092,6 +1093,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
             ("nsfw", self.nsfw),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -1592,6 +1594,7 @@ class StageChannel(VocalGuildChannel):
             ("video_quality_mode", self.video_quality_mode),
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -1910,7 +1913,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         self._update(guild, data)
 
     def __repr__(self) -> str:
-        return f"<CategoryChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw}>"
+        return f"<CategoryChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw} flags={self.flags!r}>"
 
     def _update(self, guild: Guild, data: CategoryChannelPayload) -> None:
         self.guild: Guild = guild
@@ -2281,6 +2284,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             ("nsfw", self.nsfw),
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in atts)
         return f"<{type(self).__name__} {joined}>"
