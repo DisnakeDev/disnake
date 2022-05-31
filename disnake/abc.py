@@ -76,16 +76,15 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from .asset import Asset
-    from .channel import CategoryChannel, DMChannel, PartialMessageable, TextChannel, VoiceChannel
+    from .channel import CategoryChannel, DMChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
     from .enums import InviteTarget
-    from .guild import Guild
+    from .guild import Guild, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .state import ConnectionState
-    from .threads import Thread
     from .types.channel import (
         Channel as ChannelPayload,
         GuildChannel as GuildChannelPayload,
@@ -96,7 +95,7 @@ if TYPE_CHECKING:
     from .ui.view import View
     from .user import ClientUser
 
-    MessageableChannel = Union[TextChannel, Thread, DMChannel, PartialMessageable, VoiceChannel]
+    MessageableChannel = Union[GuildMessageable, DMChannel, PartialMessageable]
     SnowflakeTime = Union["Snowflake", datetime]
 
 MISSING = utils.MISSING
