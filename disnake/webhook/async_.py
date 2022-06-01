@@ -1151,7 +1151,6 @@ class Webhook(BaseWebhook):
     ) -> Webhook:
         """Creates a partial :class:`Webhook` from a webhook URL.
 
-
         .. versionchanged:: 2.6
             Raises :exc:`ValueError` instead of ``InvalidArgument``.
 

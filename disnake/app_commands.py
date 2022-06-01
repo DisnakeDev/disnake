@@ -174,7 +174,6 @@ class OptionChoice:
 class Option:
     """Represents a slash command option.
 
-
     Parameters
     ----------
     name: Union[:class:`str`, :class:`.Localized`]

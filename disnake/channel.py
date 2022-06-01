@@ -2457,7 +2457,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
 
-
         Parameters
         ----------
         name: :class:`str`
