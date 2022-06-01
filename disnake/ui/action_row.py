@@ -28,11 +28,13 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
+    Generator,
     Generic,
     List,
     Literal,
     Optional,
     Sequence,
+    Tuple,
     TypeVar,
     Union,
     overload,
@@ -141,6 +143,10 @@ class ActionRow(Generic[UIComponentT]):
         self._children: List[UIComponentT] = []
 
         for component in components:
+            if not isinstance(component, WrappedComponent):
+                raise TypeError(
+                    f"components should be of type WrappedComponent, got {type(component).__name__}."
+                )
             self.append_item(component)
 
     def __repr__(self) -> str:
@@ -491,7 +497,7 @@ class ActionRow(Generic[UIComponentT]):
 
         Returns
         -------
-        List[:class:`disnake.ui.ActionRow`]:
+        List[:class:`ActionRow`]:
             The action rows parsed from the components on the message.
         """
         rows: List[ActionRow[MessageUIComponent]] = []
@@ -506,6 +512,29 @@ class ActionRow(Generic[UIComponentT]):
                     raise TypeError(f"Encountered unknown component type: {component.type}.")
 
         return rows
+
+    @staticmethod
+    def walk_components(
+        action_rows: Sequence[ActionRow[UIComponentT]],
+    ) -> Generator[Tuple[ActionRow[UIComponentT], UIComponentT], None, None]:
+        """Iterate over the components in a sequence of action rows, yielding each
+        individual component together with the action row of which it is a child.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        action_rows: Sequence[:class:`ActionRow`]
+            The sequence of action rows over which to iterate.
+
+        Yields
+        ------
+        Tuple[:class:`ActionRow`, :class:`WrappedComponent`]
+            A tuple containing an action row and a component of that action row.
+        """
+        for row in action_rows:
+            for component in row.children:
+                yield row, component
 
 
 MessageActionRow = ActionRow[MessageUIComponent]
@@ -540,7 +569,7 @@ def components_to_rows(
                 action_rows.append(ActionRow[StrictUIComponentT](*component))
 
             else:
-                raise ValueError(
+                raise TypeError(
                     "`components` must be a `WrappedComponent` or `ActionRow`, "
                     "a sequence/list of `WrappedComponent`s or `ActionRow`s, "
                     "or a nested sequence/list of `WrappedComponent`s"
