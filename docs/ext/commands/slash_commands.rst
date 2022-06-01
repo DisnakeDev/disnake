@@ -650,7 +650,7 @@ While not recommended, it is also possible to avoid using ``.json`` files at all
 Choices/Autocomplete
 ++++++++++++++++++++
 
-:ref:`Option choices <option_choices>` and :ref:`autocomplete items <autocompleters>` can also be localized, through the use of :class:`OptionChoice`:
+:ref:`Option choices <option_choices>` and :ref:`autocomplete items <autocompleters>` can also be localized, through the use of :class:`SlashOptionChoice`:
 
 .. code-block:: python3
 
@@ -659,7 +659,7 @@ Choices/Autocomplete
         inter: disnake.ApplicationCommandInteraction,
         animal: str = commands.Param(choices=[
             # alternatively:
-            # OptionChoice(Localized("Cat", key="OPTION_CAT"), "Cat")
+            # SlashOptionChoice(Localized("Cat", key="OPTION_CAT"), "Cat")
             Localized("Cat", key="OPTION_CAT"),
             Localized("Dolphin", key="OPTION_DOLPHIN"),
         ]),
@@ -672,7 +672,7 @@ Choices/Autocomplete
         languages = ("english", "german", "spanish", "japanese")
         return [
             # alternatively:
-            # `OptionChoice(Localized(lang, key=f"AUTOCOMP_{lang.upper()}"), lang)`
+            # `SlashOptionChoice(Localized(lang, key=f"AUTOCOMP_{lang.upper()}"), lang)`
             Localized(lang, key=f"AUTOCOMP_{lang.upper()}")
             for lang in languages
             if user_input.lower() in lang

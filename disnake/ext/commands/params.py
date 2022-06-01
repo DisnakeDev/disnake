@@ -52,7 +52,7 @@ from typing import (
 )
 
 import disnake
-from disnake.app_commands import Option, OptionChoice
+from disnake.app_commands import Option, SlashOptionChoice
 from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
@@ -353,7 +353,7 @@ class ParamInfo:
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
+    choices: Union[List[:class:`.SlashOptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of choices of this slash command option.
     ge: :class:`float`
         The lowest allowed value for this option.
@@ -550,9 +550,9 @@ class ParamInfo:
 
     def _parse_enum(self, annotation: Any) -> None:
         if isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)):
-            self.choices = [OptionChoice(name, value.value) for name, value in annotation.__members__.items()]  # type: ignore
+            self.choices = [SlashOptionChoice(name, value.value) for name, value in annotation.__members__.items()]  # type: ignore
         else:
-            self.choices = [OptionChoice(str(i), i) for i in annotation.__args__]
+            self.choices = [SlashOptionChoice(str(i), i) for i in annotation.__args__]
 
         self.type = type(self.choices[0].value)
 
@@ -973,7 +973,7 @@ def Param(
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
+    choices: Union[List[:class:`.SlashOptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.
     converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.

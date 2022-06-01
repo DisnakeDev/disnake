@@ -57,7 +57,7 @@ if TYPE_CHECKING:
     )
 
     Choices = Union[
-        List["OptionChoice"],
+        List["SlashOptionChoice"],
         List[ApplicationCommandOptionChoiceValue],
         Dict[str, ApplicationCommandOptionChoiceValue],
         List[Localized[str]],
@@ -75,7 +75,7 @@ __all__ = (
     "APIUserCommand",
     "MessageCommand",
     "APIMessageCommand",
-    "OptionChoice",
+    "SlashOptionChoice",
     "Option",
     "ApplicationCommandPermissions",
     "GuildApplicationCommandPermissions",
@@ -106,8 +106,13 @@ def _validate_name(name: str) -> None:
         )
 
 
-class OptionChoice:
-    """Represents an option choice.
+class SlashOptionChoice:
+    """Represents a slash command option choice.
+
+
+    .. versionchanged:: SLASH_REFACTOR
+
+        Renamed ``SlashOptionChoice`` from ``OptionChoice``.
 
     Parameters
     ----------
@@ -132,7 +137,7 @@ class OptionChoice:
         self.value: ApplicationCommandOptionChoiceValue = value
 
     def __repr__(self) -> str:
-        return f"<OptionChoice name={self.name!r} value={self.value!r}>"
+        return f"<SlashOptionChoice name={self.name!r} value={self.value!r}>"
 
     def __eq__(self, other) -> bool:
         return (
@@ -164,7 +169,7 @@ class OptionChoice:
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandOptionChoicePayload):
-        return OptionChoice(
+        return SlashOptionChoice(
             name=Localized(data["name"], data=data.get("name_localizations")),
             value=data["value"],
         )
@@ -194,7 +199,7 @@ class Option:
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
+    choices: Union[List[:class:`SlashOptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of option choices.
     options: List[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
@@ -280,19 +285,19 @@ class Option:
 
         self.channel_types: List[ChannelType] = channel_types or []
 
-        self.choices: List[OptionChoice] = []
+        self.choices: List[SlashOptionChoice] = []
         if choices is not None:
             if autocomplete:
                 raise TypeError("can not specify both choices and autocomplete args")
 
             if isinstance(choices, Mapping):
-                self.choices = [OptionChoice(name, value) for name, value in choices.items()]
+                self.choices = [SlashOptionChoice(name, value) for name, value in choices.items()]
             else:
                 for c in choices:
                     if isinstance(c, Localized):
-                        c = OptionChoice(c, c.string)
-                    elif not isinstance(c, OptionChoice):
-                        c = OptionChoice(str(c), c)
+                        c = SlashOptionChoice(c, c.string)
+                    elif not isinstance(c, SlashOptionChoice):
+                        c = SlashOptionChoice(str(c), c)
                     self.choices.append(c)
 
         self.autocomplete: bool = autocomplete
@@ -333,7 +338,7 @@ class Option:
             type=data.get("type"),
             required=data.get("required", False),
             choices=_maybe_cast(
-                data.get("choices", MISSING), lambda x: list(map(OptionChoice.from_dict, x))
+                data.get("choices", MISSING), lambda x: list(map(SlashOptionChoice.from_dict, x))
             ),
             options=_maybe_cast(
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
@@ -353,11 +358,11 @@ class Option:
         name: LocalizedRequired,
         value: Union[str, int],
     ) -> None:
-        """Adds an OptionChoice to the list of current choices,
-        parameters are the same as for :class:`OptionChoice`.
+        """Adds an SlashOptionChoice to the list of current choices,
+        parameters are the same as for :class:`SlashOptionChoice`.
         """
         self.choices.append(
-            OptionChoice(
+            SlashOptionChoice(
                 name=name,
                 value=value,
             )
@@ -369,7 +374,7 @@ class Option:
         description: LocalizedOptional = None,
         type: OptionType = None,
         required: bool = False,
-        choices: List[OptionChoice] = None,
+        choices: List[SlashOptionChoice] = None,
         options: list = None,
         channel_types: List[ChannelType] = None,
         autocomplete: bool = False,
@@ -823,7 +828,7 @@ class SlashCommand(ApplicationCommand):
         description: LocalizedOptional = None,
         type: OptionType = None,
         required: bool = False,
-        choices: List[OptionChoice] = None,
+        choices: List[SlashOptionChoice] = None,
         options: list = None,
         channel_types: List[ChannelType] = None,
         autocomplete: bool = False,

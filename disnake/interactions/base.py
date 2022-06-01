@@ -32,7 +32,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast, overload
 
 from .. import utils
-from ..app_commands import OptionChoice
+from ..app_commands import SlashOptionChoice
 from ..channel import ChannelType, PartialMessageable
 from ..enums import InteractionResponseType, InteractionType, Locale, WebhookType, try_enum
 from ..errors import (
@@ -1124,7 +1124,7 @@ class InteractionResponse:
 
         Parameters
         ----------
-        choices: Union[List[:class:`OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
+        choices: Union[List[:class:`SlashOptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
             The list of choices to suggest.
 
         Raises
@@ -1146,9 +1146,9 @@ class InteractionResponse:
             i18n = self._parent.client.i18n
             for c in choices:
                 if isinstance(c, Localized):
-                    c = OptionChoice(c, c.string)
+                    c = SlashOptionChoice(c, c.string)
 
-                if isinstance(c, OptionChoice):
+                if isinstance(c, SlashOptionChoice):
                     c.localize(i18n)
                     value = c.to_dict(locale=self._parent.locale)
                 else:

@@ -5173,12 +5173,12 @@ Option
 .. autoclass:: Option()
     :members:
 
-OptionChoice
+SlashOptionChoice
 ~~~~~~~~~~~~
 
-.. attributetable:: OptionChoice
+.. attributetable:: SlashOptionChoice
 
-.. autoclass:: OptionChoice()
+.. autoclass:: SlashOptionChoice()
     :members:
 
 SelectOption

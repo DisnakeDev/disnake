@@ -5,7 +5,7 @@ An example on how to set up localized application commands.
 from typing import Any
 
 import disnake
-from disnake import Localized, OptionChoice
+from disnake import Localized, SlashOptionChoice
 from disnake.ext import commands
 
 bot = commands.Bot(command_prefix=commands.when_mentioned)
@@ -46,9 +46,9 @@ async def highscore(
     game: str,
     interval: str = commands.Param(
         choices=[
-            OptionChoice(Localized("Last Day", key="CHOICE_DAY"), "day"),
-            OptionChoice(Localized("Last Week", key="CHOICE_WEEK"), "week"),
-            OptionChoice(Localized("Last Month", key="CHOICE_MONTH"), "month"),
+            SlashOptionChoice(Localized("Last Day", key="CHOICE_DAY"), "day"),
+            SlashOptionChoice(Localized("Last Week", key="CHOICE_WEEK"), "week"),
+            SlashOptionChoice(Localized("Last Month", key="CHOICE_MONTH"), "month"),
         ]
     ),
 ):
