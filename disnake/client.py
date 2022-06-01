@@ -1710,7 +1710,7 @@ class Client:
             Removed the ``region`` parameter.
 
         .. versionchanged:: 2.6
-            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1734,7 +1734,7 @@ class Client:
             The ``icon`` asset couldn't be found.
         HTTPException
             Guild creation failed.
-        TypeError
+        ValueError
             Invalid icon image format given. Must be PNG or JPG.
         TypeError
             The ``icon`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).

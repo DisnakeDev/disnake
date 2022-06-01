@@ -1841,13 +1841,14 @@ class Guild(Hashable):
         HTTPException
             Editing the guild failed.
         TypeError
-            The image format passed in to ``icon`` is invalid.
-            This is also raised if at least one of the assets
-            (``icon``, ``banner``, ``splash`` or ``discovery_splash``)
-            is a lottie sticker (see :func:`Sticker.read`).
+            At least one of the assets (``icon``, ``banner``, ``splash`` or ``discovery_splash``)
+            is a lottie sticker (see :func:`Sticker.read`),
+            or one of the parameters ``default_notifications``, ``verification_level``,
+            ``explicit_content_filter``, or ``system_channel_flags`` was of the incorrect type.
         ValueError
             ``community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters,
-            or if you are not the owner of the guild and request an ownership transfer.
+            or if you are not the owner of the guild and request an ownership transfer,
+            or the image format passed in to ``icon`` is invalid.
 
         Returns
         -------
@@ -3244,8 +3245,8 @@ class Guild(Hashable):
         HTTPException
             Creating the role failed.
         TypeError
-            An invalid keyword argument was given.
-            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
+            An invalid keyword argument was given,
+            or the ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------

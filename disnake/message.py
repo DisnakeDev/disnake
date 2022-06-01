@@ -1915,8 +1915,9 @@ class Message(Hashable):
         Forbidden
             You do not have the proper permissions to send the message.
         TypeError
-            The ``files`` list is not of the appropriate size or
-            you specified both ``file`` and ``files``.
+            You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
+        ValueError
+            The ``files`` or ``embeds`` list is too large.
 
         Returns
         -------

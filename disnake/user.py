@@ -372,7 +372,7 @@ class ClientUser(BaseUser):
             The edit is no longer in-place, instead the newly edited client user is returned.
 
         .. versionchanged:: 2.6
-            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------

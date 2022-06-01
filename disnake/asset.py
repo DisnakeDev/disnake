@@ -363,7 +363,7 @@ class Asset(AssetMixin):
         """Returns a new asset with the passed components replaced.
 
         .. versionchanged:: 2.6
-            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
