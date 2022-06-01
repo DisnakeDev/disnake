@@ -78,6 +78,7 @@ if TYPE_CHECKING:
     from ..embeds import Embed
     from ..ext.commands import AutoShardedBot, Bot
     from ..file import File
+    from ..guild import GuildMessageable
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
     from ..threads import Thread
@@ -191,7 +192,10 @@ class Interaction:
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.locale: Locale = try_enum(Locale, data["locale"])
-        self.guild_locale: Optional[Locale] = try_enum(Locale, data.get("guild_locale"))
+        guild_locale = data.get("guild_locale")
+        self.guild_locale: Optional[Locale] = (
+            try_enum(Locale, guild_locale) if guild_locale else None
+        )
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
         self._permissions = None
@@ -242,7 +246,7 @@ class Interaction:
         return self.guild.me
 
     @utils.cached_slot_property("_cs_channel")
-    def channel(self) -> Union[TextChannel, Thread, VoiceChannel]:
+    def channel(self) -> Union[GuildMessageable, PartialMessageable]:
         """Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]: The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels are not resolved since there is
@@ -255,7 +259,7 @@ class Interaction:
             type = (
                 None if self.guild_id is not None else ChannelType.private
             )  # could be a text, voice, or thread channel in a guild
-            return PartialMessageable(state=self._state, id=self.channel_id, type=type)  # type: ignore
+            return PartialMessageable(state=self._state, id=self.channel_id, type=type)
         return channel  # type: ignore
 
     @property
@@ -1299,8 +1303,8 @@ class InteractionMessage(Message):
         The actual contents of the message.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
-        The :class:`TextChannel` or :class:`Thread` that the message was sent from.
+    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+        The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to message replies.

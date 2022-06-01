@@ -56,7 +56,7 @@ from .context_managers import Typing
 from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
 from .errors import ClientException
 from .file import File
-from .flags import MessageFlags
+from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .permissions import PermissionOverwrite, Permissions
@@ -86,7 +86,7 @@ if TYPE_CHECKING:
     from .role import Role
     from .state import ConnectionState
     from .sticker import GuildSticker, StickerItem
-    from .threads import AnyThreadArchiveDuration
+    from .threads import AnyThreadArchiveDuration, ThreadType
     from .types.channel import (
         CategoryChannel as CategoryChannelPayload,
         DMChannel as DMChannelPayload,
@@ -185,13 +185,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         "default_auto_archive_duration",
         "last_pin_timestamp",
         "_overwrites",
+        "_flags",
         "_type",
     )
 
     def __init__(self, *, state: ConnectionState, guild: Guild, data: TextChannelPayload):
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
-        self._type: int = data["type"]
+        self._type: Literal[0, 5] = data["type"]
         self._update(guild, data)
 
     def __repr__(self) -> str:
@@ -203,6 +204,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             ("news", self.is_news()),
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -213,13 +215,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         # Does this need coercion into `int`? No idea yet.
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
             "default_auto_archive_duration", 1440
         )
-        self._type: int = data.get("type", self._type)
+        self._type: Literal[0, 5] = data.get("type", self._type)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
         self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data.get("last_pin_timestamp")
@@ -230,9 +233,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return self
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
-        return try_enum(ChannelType, self._type)
+    def type(self) -> Literal[ChannelType.text, ChannelType.news]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.text` or :attr:`ChannelType.news`.
+        """
+        if self._type == ChannelType.text.value:
+            return ChannelType.text
+        return ChannelType.news
 
     @property
     def _sorting_bucket(self) -> int:
@@ -753,9 +761,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: str,
-        type: Literal[
-            ChannelType.public_thread, ChannelType.private_thread, ChannelType.news_thread
-        ],
+        type: ThreadType,
         auto_archive_duration: AnyThreadArchiveDuration = None,
         invitable: bool = None,
         slowmode_delay: int = None,
@@ -769,7 +775,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         name: str,
         message: Optional[Snowflake] = None,
         auto_archive_duration: AnyThreadArchiveDuration = None,
-        type: Optional[ChannelType] = None,
+        type: Optional[ThreadType] = None,
         invitable: bool = None,
         slowmode_delay: int = None,
         reason: Optional[str] = None,
@@ -933,6 +939,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         "category_id",
         "rtc_region",
         "video_quality_mode",
+        "_flags",
     )
 
     def __init__(
@@ -960,6 +967,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         self.video_quality_mode: VideoQualityMode = try_enum(
             VideoQualityMode, data.get("video_quality_mode", 1)
         )
+        self._flags = data.get("flags", 0)
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.position: int = data["position"]
         # these don't exist in partial channel objects of slash command options
@@ -1097,6 +1105,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
             ("nsfw", self.nsfw),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -1111,8 +1120,11 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         return self
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.voice]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.voice`.
+        """
         return ChannelType.voice
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
@@ -1602,6 +1614,7 @@ class StageChannel(VocalGuildChannel):
             ("video_quality_mode", self.video_quality_mode),
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -1655,8 +1668,11 @@ class StageChannel(VocalGuildChannel):
         ]
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.stage_voice]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.stage_voice`.
+        """
         return ChannelType.stage_voice
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
@@ -1910,7 +1926,17 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
     """
 
-    __slots__ = ("name", "id", "guild", "nsfw", "_state", "position", "_overwrites", "category_id")
+    __slots__ = (
+        "name",
+        "id",
+        "guild",
+        "nsfw",
+        "_state",
+        "position",
+        "_overwrites",
+        "category_id",
+        "_flags",
+    )
 
     def __init__(self, *, state: ConnectionState, guild: Guild, data: CategoryChannelPayload):
         self._state: ConnectionState = state
@@ -1918,12 +1944,13 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         self._update(guild, data)
 
     def __repr__(self) -> str:
-        return f"<CategoryChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw}>"
+        return f"<CategoryChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw} flags={self.flags!r}>"
 
     def _update(self, guild: Guild, data: CategoryChannelPayload) -> None:
         self.guild: Guild = guild
         self.name: str = data["name"]
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         self.position: int = data["position"]
         self._fill_overwrites(data)
@@ -1933,8 +1960,11 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ChannelType.category.value
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.category]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.category`.
+        """
         return ChannelType.category
 
     def is_nsfw(self) -> bool:
@@ -2269,6 +2299,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "position",
         "nsfw",
         "last_thread_id",
+        "_flags",
         "default_auto_archive_duration",
         "guild",
         "slowmode_delay",
@@ -2292,6 +2323,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             ("nsfw", self.nsfw),
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in atts)
         return f"<{type(self).__name__} {joined}>"
@@ -2302,6 +2334,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         self.last_thread_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
         self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
@@ -2314,8 +2347,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         return self
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.forum]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.forum`.
+        """
         return ChannelType.forum
 
     @property
@@ -2799,7 +2835,14 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         .. versionadded:: 2.5
     """
 
-    __slots__ = ("id", "recipient", "me", "last_pin_timestamp", "_state")
+    __slots__ = (
+        "id",
+        "recipient",
+        "me",
+        "last_pin_timestamp",
+        "_state",
+        "_flags",
+    )
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload):
         self._state: ConnectionState = state
@@ -2809,6 +2852,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data.get("last_pin_timestamp")
         )
+        self._flags: int = data.get("flags", 0)
 
     async def _get_channel(self):
         return self
@@ -2833,8 +2877,11 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         return self
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.private]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.private`.
+        """
         return ChannelType.private
 
     @property
@@ -2850,6 +2897,14 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         .. versionadded:: 2.4
         """
         return f"https://discord.com/channels/@me/{self.id}"
+
+    @property
+    def flags(self) -> ChannelFlags:
+        """:class:`.ChannelFlags`: The channel flags for this channel.
+
+        .. versionadded:: 2.6
+        """
+        return ChannelFlags._from_value(self._flags)
 
     def permissions_for(
         self,
@@ -2984,8 +3039,11 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         return f"<GroupChannel id={self.id} name={self.name!r}>"
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.group]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.group`.
+        """
         return ChannelType.group
 
     @property

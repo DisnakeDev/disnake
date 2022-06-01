@@ -171,9 +171,17 @@ def _enum_transformer(enum: Type[T]) -> Callable[[AuditLogEntry, int], T]:
     return _transform
 
 
-def _transform_type(entry: AuditLogEntry, data: int) -> Union[enums.ChannelType, enums.StickerType]:
-    if entry.action.name.startswith("sticker_"):
+def _transform_type(
+    entry: AuditLogEntry, data: Any
+) -> Union[enums.ChannelType, enums.StickerType, enums.WebhookType, str, int]:
+    action_name = entry.action.name
+    if action_name.startswith("sticker_"):
         return enums.try_enum(enums.StickerType, data)
+    elif action_name.startswith("webhook_"):
+        return enums.try_enum(enums.WebhookType, data)
+    elif action_name.startswith("integration_") or action_name.startswith("overwrite_"):
+        # integration: str, overwrite: int
+        return data
     else:
         return enums.try_enum(enums.ChannelType, data)
 
@@ -232,6 +240,7 @@ class AuditLogChanges:
         'deny':                          (None, _transform_permissions),
         'permissions':                   (None, _transform_permissions),
         'id':                            (None, _transform_snowflake),
+        'application_id':                (None, _transform_snowflake),
         'color':                         ('colour', _transform_color),
         'owner_id':                      ('owner', _transform_member_id),
         'inviter_id':                    ('inviter', _transform_member_id),
