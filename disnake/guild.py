@@ -109,6 +109,7 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
 
+    GuildMessageable = Union[TextChannel, Thread, VoiceChannel]
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
 
@@ -3471,7 +3472,7 @@ class Guild(Hashable):
     def audit_logs(
         self,
         *,
-        limit: int = 100,
+        limit: Optional[int] = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
         user: Snowflake = None,

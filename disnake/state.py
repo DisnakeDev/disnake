@@ -81,13 +81,12 @@ from .utils import MISSING
 from .webhook import Webhook
 
 if TYPE_CHECKING:
-    from .abc import PrivateChannel
+    from .abc import MessageableChannel, PrivateChannel
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
     from .gateway import DiscordWebSocket
     from .guild import GuildChannel, VocalGuildChannel
     from .http import HTTPClient
-    from .message import MessageableChannel
     from .types.activity import Activity as ActivityPayload
     from .types.channel import DMChannel as DMChannelPayload
     from .types.emoji import Emoji as EmojiPayload
@@ -1795,7 +1794,7 @@ class ConnectionState:
     def create_message(
         self,
         *,
-        channel: Union[TextChannel, Thread, DMChannel, PartialMessageable, VoiceChannel],
+        channel: MessageableChannel,
         data: MessagePayload,
     ) -> Message:
         return Message(state=self, channel=channel, data=data)
