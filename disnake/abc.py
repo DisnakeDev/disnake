@@ -51,7 +51,7 @@ from .context_managers import Typing
 from .enums import ChannelType, PartyType, try_enum_to_int
 from .errors import ClientException, InvalidArgument
 from .file import File
-from .flags import MessageFlags
+from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
 from .iterators import HistoryIterator
 from .mentions import AllowedMentions
@@ -76,16 +76,15 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from .asset import Asset
-    from .channel import CategoryChannel, DMChannel, PartialMessageable, TextChannel, VoiceChannel
+    from .channel import CategoryChannel, DMChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
     from .enums import InviteTarget
-    from .guild import Guild
+    from .guild import Guild, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .state import ConnectionState
-    from .threads import Thread
     from .types.channel import (
         Channel as ChannelPayload,
         GuildChannel as GuildChannelPayload,
@@ -96,7 +95,7 @@ if TYPE_CHECKING:
     from .ui.view import View
     from .user import ClientUser
 
-    MessageableChannel = Union[TextChannel, Thread, DMChannel, PartialMessageable, VoiceChannel]
+    MessageableChannel = Union[GuildMessageable, DMChannel, PartialMessageable]
     SnowflakeTime = Union["Snowflake", datetime]
 
 MISSING = utils.MISSING
@@ -256,6 +255,7 @@ class GuildChannel(ABC):
     type: ChannelType
     position: int
     category_id: Optional[int]
+    _flags: int
     _state: ConnectionState
     _overwrites: List[_Overwrites]
 
@@ -540,6 +540,14 @@ class GuildChannel(ABC):
 
         category = self.guild.get_channel(self.category_id)
         return bool(category and category.overwrites == self.overwrites)
+
+    @property
+    def flags(self) -> ChannelFlags:
+        """:class:`.ChannelFlags`: The channel flags for this channel.
+
+        .. versionadded:: 2.6
+        """
+        return ChannelFlags._from_value(self._flags)
 
     @property
     def jump_url(self) -> str:

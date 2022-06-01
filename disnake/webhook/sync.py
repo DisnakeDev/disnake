@@ -565,6 +565,11 @@ class SyncWebhook(BaseWebhook):
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
+
+    application_id: Optional[:class:`int`]
+        The ID of the application associated with this webhook, if it was created by an application.
+
+        .. versionadded:: 2.6
     """
 
     __slots__: Tuple[str, ...] = ("session",)
