@@ -12,11 +12,11 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
     name="slash_command",
     description="A Simple Slash Command",
     options=[
-        disnake.Option("string", description="A string to send", required=True),
-        disnake.Option(
+        disnake.SlashOption("string", description="A string to send", required=True),
+        disnake.SlashOption(
             "channel", description="The destination channel", type=disnake.OptionType.channel
         ),
-        disnake.Option(
+        disnake.SlashOption(
             "number", description="The number of repetitions", type=disnake.OptionType.integer
         ),
     ],

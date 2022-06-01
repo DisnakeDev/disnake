@@ -76,7 +76,7 @@ __all__ = (
     "MessageCommand",
     "APIMessageCommand",
     "SlashOptionChoice",
-    "Option",
+    "SlashOption",
     "ApplicationCommandPermissions",
     "GuildApplicationCommandPermissions",
 )
@@ -178,7 +178,7 @@ class SlashOptionChoice:
         self.name_localizations._link(store)
 
 
-class Option:
+class SlashOption:
     """Represents a slash command option.
 
     Parameters
@@ -201,7 +201,7 @@ class Option:
         Whether this option is required.
     choices: Union[List[:class:`SlashOptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of option choices.
-    options: List[:class:`Option`]
+    options: List[:class:`SlashOption`]
         The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
     channel_types: List[:class:`ChannelType`]
@@ -267,7 +267,7 @@ class Option:
 
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
-        self.options: List[Option] = options or []
+        self.options: List[SlashOption] = options or []
 
         if min_value and self.type is OptionType.integer:
             min_value = math.ceil(min_value)
@@ -304,7 +304,7 @@ class Option:
 
     def __repr__(self) -> str:
         return (
-            f"<Option name={self.name!r} description={self.description!r}"
+            f"<SlashOption name={self.name!r} description={self.description!r}"
             f" type={self.type!r} required={self.required!r} choices={self.choices!r}"
             f" options={self.options!r} min_value={self.min_value!r} max_value={self.max_value!r}"
             f" min_length={self.min_length!r} max_length={self.max_length!r}>"
@@ -329,8 +329,8 @@ class Option:
         )
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandOptionPayload) -> Option:
-        return Option(
+    def from_dict(cls, data: ApplicationCommandOptionPayload) -> SlashOption:
+        return SlashOption(
             name=Localized(data["name"], data=data.get("name_localizations")),
             description=Localized(
                 data.get("description"), data=data.get("description_localizations")
@@ -341,7 +341,7 @@ class Option:
                 data.get("choices", MISSING), lambda x: list(map(SlashOptionChoice.from_dict, x))
             ),
             options=_maybe_cast(
-                data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
+                data.get("options", MISSING), lambda x: list(map(SlashOption.from_dict, x))
             ),
             channel_types=_maybe_cast(
                 data.get("channel_types", MISSING), lambda x: [try_enum(ChannelType, t) for t in x]
@@ -384,10 +384,10 @@ class Option:
         max_length: int = None,
     ) -> None:
         """Adds an option to the current list of options,
-        parameters are the same as for :class:`Option`."""
+        parameters are the same as for :class:`SlashOption`."""
         type = type or OptionType.string
         self.options.append(
-            Option(
+            SlashOption(
                 name=name,
                 description=description,
                 type=type,
@@ -780,7 +780,7 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
-    options: List[:class:`Option`]
+    options: List[:class:`SlashOption`]
         The list of options the slash command has.
     """
 
@@ -796,7 +796,7 @@ class SlashCommand(ApplicationCommand):
         self,
         name: LocalizedRequired,
         description: LocalizedRequired,
-        options: List[Option] = None,
+        options: List[SlashOption] = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
     ):
@@ -812,7 +812,7 @@ class SlashCommand(ApplicationCommand):
         self.description: str = desc_loc.string
         self.description_localizations: LocalizationValue = desc_loc.localizations
 
-        self.options: List[Option] = options or []
+        self.options: List[SlashOption] = options or []
 
     def __eq__(self, other) -> bool:
         return (
@@ -838,10 +838,10 @@ class SlashCommand(ApplicationCommand):
         max_length: int = None,
     ) -> None:
         """Adds an option to the current list of options,
-        parameters are the same as for :class:`Option`
+        parameters are the same as for :class:`SlashOption`
         """
         self.options.append(
-            Option(
+            SlashOption(
                 name=name,
                 description=description,
                 type=type or OptionType.string,
@@ -906,7 +906,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
     id: :class:`int`
         The slash command's ID.
-    options: List[:class:`Option`]
+    options: List[:class:`SlashOption`]
         The list of options the slash command has.
     application_id: :class:`int`
         The application ID this command belongs to.
@@ -928,7 +928,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             name=Localized(data["name"], data=data.get("name_localizations")),
             description=Localized(data["description"], data=data.get("description_localizations")),
             options=_maybe_cast(
-                data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
+                data.get("options", MISSING), lambda x: list(map(SlashOption.from_dict, x))
             ),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),

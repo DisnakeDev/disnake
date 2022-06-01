@@ -52,7 +52,7 @@ from typing import (
 )
 
 import disnake
-from disnake.app_commands import Option, SlashOptionChoice
+from disnake.app_commands import SlashOption, SlashOptionChoice
 from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
@@ -680,14 +680,14 @@ class ParamInfo:
         self.name_localizations._upgrade(doc["localization_key_name"])
         self.description_localizations._upgrade(doc["localization_key_desc"])
 
-    def to_option(self) -> Option:
+    def to_option(self) -> SlashOption:
         if not self.name:
             raise TypeError("Param must be parsed first")
 
         name = Localized(self.name, data=self.name_localizations)
         desc = Localized(self.description, data=self.description_localizations)
 
-        return Option(
+        return SlashOption(
             name=name,
             description=desc,
             type=self.discord_type,
@@ -901,7 +901,7 @@ async def call_param_func(
     return await maybe_coroutine(safe_call, function, **kwargs)
 
 
-def expand_params(command: AnySlashCommand) -> List[Option]:
+def expand_params(command: AnySlashCommand) -> List[SlashOption]:
     """Update an option with its params *in-place*
 
     Returns the created options

@@ -630,7 +630,7 @@ New Features
 - Add :class:`InteractionReference`
 - Add :class:`UnresolvedGuildApplicationCommandPermissions`
 - Add :attr:`Message.interaction`
-- Add kwargs ``min_value`` and ``max_value`` in :class:`Option`
+- Add kwargs ``min_value`` and ``max_value`` in :class:`SlashOption`
 - |commands| Add kwarg ``min_value`` (with aliases ``ge``, ``gt``) to :func:`Param <ext.commands.Param>`
 - |commands| Add kwarg ``max_value`` (with aliases ``le``, ``lt``) to :func:`Param <ext.commands.Param>`
 - |commands| Add kwarg ``owner`` to :func:`guild_permissions <ext.commands.guild_permissions>`

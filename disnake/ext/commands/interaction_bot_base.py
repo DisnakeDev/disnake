@@ -44,7 +44,7 @@ from typing import (
 )
 
 import disnake
-from disnake.app_commands import ApplicationCommand, Option
+from disnake.app_commands import ApplicationCommand, SlashOption
 from disnake.custom_warnings import ConfigWarning, SyncWarning
 from disnake.enums import ApplicationCommandType
 
@@ -443,7 +443,7 @@ class InteractionBotBase(CommonBotBase):
         description: LocalizedOptional = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
-        options: List[Option] = None,
+        options: List[SlashOption] = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = None,
@@ -467,7 +467,7 @@ class InteractionBotBase(CommonBotBase):
             .. versionchanged:: 2.5
                 Added support for localizations.
 
-        options: List[:class:`.Option`]
+        options: List[:class:`.SlashOption`]
             The list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
         dm_permission: :class:`bool`

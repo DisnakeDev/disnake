@@ -110,7 +110,7 @@ You can of course set a default for your option by giving a default value:
 
 You may have as many options as you want but the order matters, an optional option cannot be followed by a required one.
 
-Option Types
+SlashOption Types
 ++++++++++++
 
 You might already be familiar with discord.py's converters, slash commands have a very similar equivalent in the form of option types.
@@ -650,7 +650,7 @@ While not recommended, it is also possible to avoid using ``.json`` files at all
 Choices/Autocomplete
 ++++++++++++++++++++
 
-:ref:`Option choices <option_choices>` and :ref:`autocomplete items <autocompleters>` can also be localized, through the use of :class:`SlashOptionChoice`:
+:ref:`SlashOption choices <option_choices>` and :ref:`autocomplete items <autocompleters>` can also be localized, through the use of :class:`SlashOptionChoice`:
 
 .. code-block:: python3
 

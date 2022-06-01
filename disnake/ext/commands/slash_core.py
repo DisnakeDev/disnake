@@ -38,7 +38,7 @@ from typing import (
 )
 
 from disnake import utils
-from disnake.app_commands import Option, SlashCommand
+from disnake.app_commands import SlashCommand, SlashOption
 from disnake.enums import OptionType
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
@@ -73,7 +73,7 @@ def _autocomplete(
             break
 
     if not exists:
-        raise ValueError(f"Option '{option_name}' doesn't exist in '{self.qualified_name}'")
+        raise ValueError(f"SlashOption '{option_name}' doesn't exist in '{self.qualified_name}'")
 
     def decorator(func: Callable) -> Callable:
         func.__slash_command__ = self
@@ -131,7 +131,7 @@ class SubCommandGroup(InvokableApplicationCommand):
     qualified_name: :class:`str`
         The full command name, including parent names in the case of slash subcommands or groups.
         For example, the qualified name for ``/one two three`` would be ``one two three``.
-    option: :class:`.Option`
+    option: :class:`.SlashOption`
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the command group is invoked.
@@ -163,7 +163,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.children: Dict[str, SubCommand] = {}
-        self.option = Option(
+        self.option = SlashOption(
             name=name_loc._upgrade(self.name),
             description="-",
             type=OptionType.sub_command_group,
@@ -181,7 +181,7 @@ class SubCommandGroup(InvokableApplicationCommand):
             )
 
     @property
-    def body(self) -> Option:
+    def body(self) -> SlashOption:
         return self.option
 
     def sub_command(
@@ -235,7 +235,7 @@ class SubCommand(InvokableApplicationCommand):
     qualified_name: :class:`str`
         The full command name, including parent names in the case of slash subcommands or groups.
         For example, the qualified name for ``/one two three`` would be ``one two three``.
-    option: :class:`.Option`
+    option: :class:`.SlashOption`
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the subcommand is called.
@@ -280,7 +280,7 @@ class SubCommand(InvokableApplicationCommand):
         self.docstring = utils.parse_docstring(func)
         desc_loc = Localized._cast(description, False)
 
-        self.option = Option(
+        self.option = SlashOption(
             name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),
             description=desc_loc._upgrade(
                 self.docstring["description"] or "-", key=self.docstring["localization_key_desc"]
@@ -304,7 +304,7 @@ class SubCommand(InvokableApplicationCommand):
         return self.body.description
 
     @property
-    def body(self) -> Option:
+    def body(self) -> SlashOption:
         return self.option
 
     async def _call_autocompleter(
@@ -394,7 +394,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: List[Option] = None,
+        options: List[SlashOption] = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
@@ -463,7 +463,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return self.body.description
 
     @property
-    def options(self) -> List[Option]:
+    def options(self) -> List[SlashOption]:
         return self.body.options
 
     def sub_command(
@@ -492,7 +492,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             .. versionchanged:: 2.5
                 Added support for localizations.
 
-        options: List[:class:`.Option`]
+        options: List[:class:`.SlashOption`]
             the options of the subcommand for registration in API
         connectors: Dict[:class:`str`, :class:`str`]
             which function param states for each option. If the name
@@ -703,7 +703,7 @@ def slash_command(
     description: LocalizedOptional = None,
     dm_permission: bool = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
-    options: List[Option] = None,
+    options: List[SlashOption] = None,
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
     auto_sync: bool = None,
@@ -728,7 +728,7 @@ def slash_command(
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    options: List[:class:`.Option`]
+    options: List[:class:`.SlashOption`]
         The list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
     dm_permission: :class:`bool`

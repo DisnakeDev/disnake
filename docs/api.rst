@@ -5165,12 +5165,12 @@ MessageCommand
     :members:
     :inherited-members:
 
-Option
+SlashOption
 ~~~~~~
 
-.. attributetable:: Option
+.. attributetable:: SlashOption
 
-.. autoclass:: Option()
+.. autoclass:: SlashOption()
     :members:
 
 SlashOptionChoice
