@@ -27,6 +27,10 @@ nox.options.sessions = [
 nox.needs_version = ">=2022.1.7"
 
 
+# used to reset cached coverage data once for the first test run only
+reset_coverage = True
+
+
 REQUIREMENTS = {
     ".": "requirements.txt",
 }
@@ -162,12 +166,19 @@ def test(session: nox.Session, extras: List[str]):
     """Run tests."""
     install(session, "dev", *extras)
 
+    pytest_args = ["--cov", "--cov-context=test"]
+    global reset_coverage
+    if reset_coverage:
+        # don't use `--cov-append` for first run
+        reset_coverage = False
+    else:
+        # use `--cov-append` in all subsequent runs
+        pytest_args.append("--cov-append")
+
     # TODO: only run tests that depend on the different dependencies
     session.run(
         "pytest",
-        "--cov",
-        "--cov-append",
-        "--cov-context=test",
+        *pytest_args,
         *session.posargs,
     )
 
