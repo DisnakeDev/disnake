@@ -74,7 +74,7 @@ if TYPE_CHECKING:
 
     from ..abc import Snowflake
     from ..asset import AssetBytes
-    from ..channel import TextChannel, VoiceChannel
+    from ..channel import ForumChannel, TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
     from ..guild import Guild
@@ -976,10 +976,13 @@ class BaseWebhook(Hashable):
         return self._state and self._state._get_guild(self.guild_id)
 
     @property
-    def channel(self) -> Optional[Union[TextChannel, VoiceChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`]]: The messageable channel this webhook belongs to.
+    def channel(self) -> Optional[Union[TextChannel, VoiceChannel, ForumChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`ForumChannel`]]: The channel this webhook belongs to.
 
         If this is a partial webhook, then this will always return ``None``.
+
+        Webhooks in :class:`ForumChannel`\\s can not send messages directly,
+        and only create new threads. See ``thread_name`` for :attr:`Webhook.send`.
         """
         guild = self.guild
         return guild and guild.get_channel(self.channel_id)  # type: ignore
