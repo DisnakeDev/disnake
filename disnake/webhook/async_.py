@@ -505,6 +505,7 @@ def handle_message_parameters_dict(
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+    thread_name: Optional[str] = None,
 ) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
         raise TypeError("Cannot mix file and files keyword arguments.")
@@ -564,6 +565,9 @@ def handle_message_parameters_dict(
     if stickers is not MISSING:
         payload["sticker_ids"] = [s.id for s in stickers]
 
+    if thread_name is not None:
+        payload["thread_name"] = thread_name
+
     return DictPayloadParameters(payload=payload, files=files)
 
 
@@ -585,6 +589,7 @@ def handle_message_parameters(
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+    thread_name: Optional[str] = None,
 ) -> PayloadParameters:
     params = handle_message_parameters_dict(
         content=content,
@@ -603,6 +608,7 @@ def handle_message_parameters(
         allowed_mentions=allowed_mentions,
         previous_allowed_mentions=previous_allowed_mentions,
         stickers=stickers,
+        thread_name=thread_name,
     )
 
     if params.files:
@@ -1642,12 +1648,10 @@ class Webhook(BaseWebhook):
             suppress_embeds=suppress_embeds,
             view=view,
             components=components,
+            thread_name=thread_name,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
-
-        if isinstance(params.payload, dict) and thread_name:
-            params.payload["thread_name"] = thread_name
 
         adapter = async_context.get()
 

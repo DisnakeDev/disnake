@@ -1009,12 +1009,10 @@ class SyncWebhook(BaseWebhook):
             files=files,
             embed=embed,
             embeds=embeds,
+            thread_name=thread_name,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
-
-        if isinstance(params.payload, dict) and thread_name:
-            params.payload["thread_name"] = thread_name
 
         adapter: WebhookAdapter = _get_webhook_adapter()
 
