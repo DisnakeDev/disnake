@@ -864,10 +864,10 @@ class SyncWebhook(BaseWebhook):
         # state may be artificial (unlikely at this point...)
         channel = self.channel
         channel_id = int(data["channel_id"])
-        if not channel or channel.id != channel_id:
+        if not channel or self.channel_id != channel_id:
             channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
         # state is artificial
-        return WebhookMessage(data=data, state=state, channel=channel)  # type: ignore
+        return SyncWebhookMessage(data=data, state=state, channel=channel)  # type: ignore
 
     @overload
     def send(
