@@ -28,7 +28,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 from .enums import StagePrivacyLevel, try_enum
-from .errors import InvalidArgument
 from .mixins import Hashable
 from .utils import MISSING, _get_as_snowflake, cached_slot_property, warn_deprecated
 
@@ -169,6 +168,9 @@ class StageInstance(Hashable):
         You must have the :attr:`~Permissions.manage_channels` permission to
         use this.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         topic: :class:`str`
@@ -180,7 +182,7 @@ class StageInstance(Hashable):
 
         Raises
         ------
-        InvalidArgument
+        TypeError
             If the ``privacy_level`` parameter is not the proper type.
         Forbidden
             You do not have permissions to edit the stage instance.
@@ -194,7 +196,7 @@ class StageInstance(Hashable):
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
-                raise InvalidArgument("privacy_level field must be of type PrivacyLevel")
+                raise TypeError("privacy_level field must be of type PrivacyLevel")
             if privacy_level is StagePrivacyLevel.public:
                 warn_deprecated(
                     "Setting privacy_level to public is deprecated and will be removed in a future version.",
