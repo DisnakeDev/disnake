@@ -463,6 +463,14 @@ We have them, look at `this example <https://github.com/DisnakeDev/disnake/blob/
 Localizations
 -------------
 
+.. note::
+    At the time of writing, Discord clients do not support localization right out of the box yet.
+    To enable localization support, a build override from the `Discord Developers <https://discord.gg/discord-developers>`__ server is
+    most likely required, which can be found in `this message <https://discord.com/channels/613425648685547541/697138785317814292/956670963104239666>`__.
+
+    Note that the build override is not necessarily up to date with the other client branches/releases,
+    so you may want to only enable it while you're working on this feature.
+
 The names and descriptions of commands and options, as well as the names of choices
 (for use with fixed choices or autocompletion), support localization for a fixed set of locales.
 
@@ -505,7 +513,7 @@ the directory name/path can be changed arbitrarily, ``locale`` is just the one u
         "ADD_NUM_NAME": "addiere_5",
         "ADD_NUM_DESCRIPTION": "Addiere 5 zu einer anderen Zahl.",
         "COOL_NUMBER_NAME": "zahl",
-        "COOL_NUMBER_DESCRIPTION": "Eine Zahl",
+        "COOL_NUMBER_DESCRIPTION": "Eine Zahl"
     }
 
 To load a directory or file containing localizations, use :func:`bot.i18n.load(path) <disnake.LocalizationStore.load>`:
