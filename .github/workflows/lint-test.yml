@@ -139,7 +139,7 @@ jobs:
         echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
     - name: Print Coverage Output
-      if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
+      if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
       run: |
         echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
         python -m coverage report | tee -a $GITHUB_STEP_SUMMARY
@@ -151,7 +151,7 @@ jobs:
     - name: Publish coverage report to coveralls.io
       # upload coverage even if a test run failed
       # this is a test, and may be removed in the future
-      if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
+      if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
       # important that we don't fail the workflow when coveralls is down
       continue-on-error: true
       env:
