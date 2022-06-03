@@ -1620,6 +1620,7 @@ class Webhook(BaseWebhook):
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
             ``ephemeral`` was passed with the improper webhook type.
             There was no state attached with this webhook when giving it a view.
+            Both `thread` and `thread_name` were provided.
         WebhookTokenMissing
             There was no token associated with this webhook.
         ValueError

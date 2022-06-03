@@ -999,7 +999,9 @@ class SyncWebhook(BaseWebhook):
         Forbidden
             The authorization token for the webhook is incorrect.
         TypeError
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``,
+            or both `thread` and `thread_name` were provided.
+
         ValueError
             The length of ``embeds`` was invalid
         WebhookTokenMissing
