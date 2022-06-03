@@ -34,7 +34,7 @@ If the bug report is missing this information then it'll take us longer to fix t
 Submitting a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go. It would be incredibly lovely if the style is consistent to that found in the project. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
 We use [`nox`](https://nox.thea.codes/en/stable/) for automating development tasks. Run these commands to
-automatically install `nox` and `taskipy` as well as the required dependencies in your environment,
+install `nox` and `taskipy` as well as the required dependencies in your environment,
 and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.  
 Make sure you have a virtualenv activated if you don't want it to install the packages globally!
 ```
