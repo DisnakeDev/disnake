@@ -68,7 +68,6 @@ from typing import (
 from urllib.parse import parse_qs, urlencode
 
 from .enums import Locale
-from .errors import InvalidArgument
 
 try:
     import orjson
@@ -523,7 +522,7 @@ def _get_mime_type_for_image(data: bytes):
     elif data[0:4] == b"RIFF" and data[8:12] == b"WEBP":
         return "image/webp"
     else:
-        raise InvalidArgument("Unsupported image type given")
+        raise ValueError("Unsupported image type given")
 
 
 def _bytes_to_base64_data(data: bytes) -> str:

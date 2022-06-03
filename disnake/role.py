@@ -29,7 +29,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar, Union
 
 from .asset import Asset
 from .colour import Colour
-from .errors import InvalidArgument
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .permissions import Permissions
@@ -371,10 +370,10 @@ class Role(Hashable):
 
     async def _move(self, position: int, reason: Optional[str]) -> None:
         if position <= 0:
-            raise InvalidArgument("Cannot move role to position 0 or below")
+            raise ValueError("Cannot move role to position 0 or below")
 
         if self.is_default():
-            raise InvalidArgument("Cannot move default role")
+            raise TypeError("Cannot move default role")
 
         if self.position == position:
             return  # Save Discord the extra request.
@@ -425,6 +424,9 @@ class Role(Hashable):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited role is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -459,11 +461,11 @@ class Role(Hashable):
             You do not have permissions to change the role.
         HTTPException
             Editing the role failed.
-        InvalidArgument
-            An invalid position was given or the default
-            role was asked to be moved.
         TypeError
-            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
+            The default role was asked to be moved or the ``icon``
+            asset is a lottie sticker (see :func:`Sticker.read`)
+        ValueError
+            An invalid position was provided.
 
         Returns
         -------

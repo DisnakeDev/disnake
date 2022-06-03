@@ -54,7 +54,7 @@ from . import utils
 from .asset import Asset
 from .context_managers import Typing
 from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
-from .errors import ClientException, InvalidArgument
+from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
@@ -348,6 +348,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -382,13 +385,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Raises
         ------
-        InvalidArgument
-            If position is less than 0 or greater than the number of channels, or if
-            the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -662,6 +666,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 1.3
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         destination: :class:`TextChannel`
@@ -677,6 +684,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Following the channel failed.
         Forbidden
             You do not have the permissions to create a webhook.
+        TypeError
+            The current or provided channel is not of the correct type.
 
         Returns
         -------
@@ -684,10 +693,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The newly created webhook.
         """
         if not self.is_news():
-            raise ClientException("The channel must be a news channel.")
+            raise TypeError("This channel must be a news channel.")
 
         if not isinstance(destination, TextChannel):
-            raise InvalidArgument(f"Expected TextChannel received {destination.__class__.__name__}")
+            raise TypeError(f"Expected TextChannel received {destination.__class__.__name__}")
 
         from .webhook import Webhook
 
@@ -1237,6 +1246,9 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1282,12 +1294,14 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Raises
         ------
-        InvalidArgument
-            If the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -1710,6 +1724,9 @@ class StageChannel(VocalGuildChannel):
 
         .. versionadded:: 2.0
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         topic: :class:`str`
@@ -1727,12 +1744,12 @@ class StageChannel(VocalGuildChannel):
 
         Raises
         ------
-        InvalidArgument
-            If the ``privacy_level`` parameter is not the proper type.
         Forbidden
             You do not have permissions to create a stage instance.
         HTTPException
             Creating a stage instance failed.
+        TypeError
+            If the ``privacy_level`` parameter is not the proper type.
 
         Returns
         -------
@@ -1747,7 +1764,7 @@ class StageChannel(VocalGuildChannel):
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
-                raise InvalidArgument("privacy_level field must be of type PrivacyLevel")
+                raise TypeError("privacy_level field must be of type PrivacyLevel")
             if privacy_level is StagePrivacyLevel.public:
                 utils.warn_deprecated(
                     "Setting privacy_level to public is deprecated and will be removed in a future version.",
@@ -1815,6 +1832,9 @@ class StageChannel(VocalGuildChannel):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1843,12 +1863,14 @@ class StageChannel(VocalGuildChannel):
 
         Raises
         ------
-        InvalidArgument
-            If the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -1988,6 +2010,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -2004,12 +2029,14 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         Raises
         ------
-        InvalidArgument
-            If position is less than 0 or greater than the number of categories.
         Forbidden
             You do not have permissions to edit the category.
         HTTPException
             Editing the category failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -2427,6 +2454,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         You must have :attr:`~Permissions.manage_channels` permission to
         do this.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -2457,13 +2487,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         Raises
         ------
-        InvalidArgument
-            If position is less than 0 or greater than the number of channels, or if
-            the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -2606,6 +2637,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -2660,10 +2694,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Specified both ``file`` and ``files``,
             or you specified both ``embed`` and ``embeds``,
             or you specified both ``view`` and ``components``.
-        InvalidArgument
+            or you have passed an object that is not :class:`File` to ``file`` or ``files``.
+        ValueError
             Specified more than 10 embeds,
-            or more than 10 files,
-            or you have passed an object that is not :class:`File`.
+            or more than 10 files.
 
         Returns
         -------
@@ -2693,9 +2727,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             )
 
         if params.files and len(params.files) > 10:
-            raise InvalidArgument("files parameter must be a list of up to 10 elements")
+            raise ValueError("files parameter must be a list of up to 10 elements")
         elif params.files and not all(isinstance(file, File) for file in params.files):
-            raise InvalidArgument("files parameter must be a list of File")
+            raise TypeError("files parameter must be a list of File")
 
         if suppress_embeds:
             flags = MessageFlags.suppress_embeds.flag
