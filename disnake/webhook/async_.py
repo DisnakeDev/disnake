@@ -1410,12 +1410,18 @@ class Webhook(BaseWebhook):
     def _create_message(self, data):
         state = _WebhookState(self, parent=self._state)
         # state may be artificial (unlikely at this point...)
-        channel = self.channel
         channel_id = int(data["channel_id"])
-        if not channel or channel.id != channel_id:
-            channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
+        # if the channel ID does not match, a new thread was created
+        if self.channel_id != channel_id:
+            guild = self.guild
+            msg_channel = guild and guild.get_channel_or_thread(channel_id)
+        else:
+            msg_channel = self.channel
+        if not msg_channel:
+            # state may be artificial (unlikely at this point...)
+            msg_channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
         # state is artificial
-        return WebhookMessage(data=data, state=state, channel=channel)  # type: ignore
+        return WebhookMessage(data=data, state=state, channel=msg_channel)  # type: ignore
 
     @overload
     async def send(
@@ -1559,8 +1565,12 @@ class Webhook(BaseWebhook):
             .. versionadded:: 2.0
 
         thread_name: :class:`str`
-            If in a forum channel, and thread is not specified,
+            If in a forum channel, and ``thread`` is not specified,
             the name of the newly created thread.
+
+            .. note::
+                If this is set, the returned message's ``channel`` (assuming ``wait=True``),
+                representing the created thread, may be a :class:`PartialMessageable`.
 
             .. versionadded:: 2.6
 
