@@ -258,7 +258,7 @@ def test_mime_type_valid(data, expected):
     assert utils._get_mime_type_for_image(data) == expected
     assert utils._get_mime_type_for_image(data + b"\xFF") == expected
 
-    with pytest.raises(disnake.InvalidArgument):
+    with pytest.raises(ValueError, match=r"Unsupported image type given"):
         utils._get_mime_type_for_image(b"\xFF" + data)
 
 
@@ -273,7 +273,7 @@ def test_mime_type_valid(data, expected):
     ],
 )
 def test_mime_type_invalid(data):
-    with pytest.raises(disnake.InvalidArgument):
+    with pytest.raises(ValueError, match=r"Unsupported image type given"):
         utils._get_mime_type_for_image(data)
 
 
