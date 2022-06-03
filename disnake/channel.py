@@ -2637,6 +2637,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`

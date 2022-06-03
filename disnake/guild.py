@@ -1531,6 +1531,9 @@ class Guild(Hashable):
 
         .. versionadded:: 2.5
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`

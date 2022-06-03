@@ -1898,7 +1898,7 @@ class Message(Hashable):
             Added ``fail_if_not_exists`` keyword argument. Defaults to ``True``.
 
         .. versionchanged:: 2.6
-            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
