@@ -988,7 +988,8 @@ class BaseWebhook(Hashable):
         If this is a partial webhook, then this will always return ``None``.
 
         Webhooks in :class:`ForumChannel`\\s can not send messages directly,
-        and only create new threads. See ``thread_name`` for :attr:`Webhook.send`.
+        they can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
+        and interact with existing threads.
         """
         guild = self.guild
         return guild and guild.get_channel(self.channel_id)  # type: ignore
