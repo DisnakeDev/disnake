@@ -1,0 +1,2 @@
+pre-commit~=2.19.0
+taskipy~=1.10.1

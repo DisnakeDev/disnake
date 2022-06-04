@@ -1,0 +1,4 @@
+sphinx~=4.5.0
+sphinxcontrib-trio~=1.1.2
+sphinx-hoverxref~=1.0.1
+sphinx-autobuild~=2021.3
