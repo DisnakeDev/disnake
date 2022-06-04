@@ -2796,6 +2796,78 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             self.id, self.guild, limit=limit, joined=False, private=False, before=before
         )
 
+    async def webhooks(self) -> List[Webhook]:
+        """|coro|
+
+        Retrieves the list of webhooks this channel has.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        use this.
+
+        .. versionadded:: 2.6
+
+        Raises
+        ------
+        Forbidden
+            You don't have permissions to get the webhooks.
+
+        Returns
+        -------
+        List[:class:`Webhook`]
+            The list of webhooks this channel has.
+        """
+        from .webhook import Webhook
+
+        data = await self._state.http.channel_webhooks(self.id)
+        return [Webhook.from_state(d, state=self._state) for d in data]
+
+    async def create_webhook(
+        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+    ) -> Webhook:
+        """|coro|
+
+        Creates a webhook for this channel.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        do this.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The webhook's name.
+        avatar: Optional[:class:`bytes`]
+            The webhook's default avatar.
+            This operates similarly to :meth:`~ClientUser.edit`.
+        reason: Optional[:class:`str`]
+            The reason for creating this webhook. Shows up in the audit logs.
+
+        Raises
+        ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
+        Forbidden
+            You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+
+        Returns
+        -------
+        :class:`Webhook`
+            The newly created webhook.
+        """
+        from .webhook import Webhook
+
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
+
+        data = await self._state.http.create_webhook(
+            self.id, name=str(name), avatar=avatar_data, reason=reason
+        )
+        return Webhook.from_state(data, state=self._state)
+
 
 DMC = TypeVar("DMC", bound="DMChannel")
 
