@@ -801,6 +801,7 @@ class AutomodEventType(Enum):
 class AutomodActionType(Enum):
     block_message = 1
     send_alert_message = 2
+    timeout = 3
 
 
 T = TypeVar("T")

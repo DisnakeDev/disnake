@@ -37,6 +37,7 @@ AutomodListType = Literal["PROFANITY", "SEXUAL_CONTENT", "SLURS"]
 
 class AutomodActionMetadata(TypedDict, total=False):
     channel_id: Snowflake
+    duration_seconds: int
 
 
 class AutomodAction(TypedDict):

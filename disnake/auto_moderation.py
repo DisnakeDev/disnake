@@ -34,7 +34,6 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
-from .object import Object
 from .utils import MISSING, _get_as_snowflake
 
 if TYPE_CHECKING:
@@ -73,37 +72,50 @@ class AutomodAction:
 
     __slots__ = ("type", "_metadata")
 
-    def __init__(self, *, type: AutomodActionType, channel: Optional[Snowflake] = None):
+    def __init__(
+        self,
+        *,
+        type: AutomodActionType,
+        channel: Optional[Snowflake] = None,
+        timeout_duration: Optional[int] = None,
+    ):
         self.type: AutomodActionType = enum_if_int(AutomodActionType, type)
         self._metadata: AutomodActionMetadata = {}
 
-        if channel:
+        # NOTE: if this is changed to do any sort of processing on those parameters,
+        # `_from_dict` would need to be updated as it doesn't pass any of them
+        if channel is not None:
             self._metadata["channel_id"] = channel.id
+        if timeout_duration is not None:
+            self._metadata["duration_seconds"] = timeout_duration
 
     @property
     def channel_id(self) -> Optional[int]:
         """Optional[:class:`int`]: The channel ID to send an alert in when the rule is triggered,
-        if :attr:`.type` is :attr:`AutomodActionType.send_alert_message`."""
+        if :attr:`~AutomodAction.type` is :attr:`AutomodActionType.send_alert_message`."""
         return _get_as_snowflake(self._metadata, "channel_id")
+
+    @property
+    def timeout_duration(self) -> Optional[int]:
+        """Optional[:class:`int`]: The duration for which to timeout the user when the rule is triggered,
+        if :attr:`~AutomodAction.type` is :attr:`AutomodActionType.timeout`."""
+        return _get_as_snowflake(self._metadata, "duration_seconds")
 
     def __repr__(self) -> str:
         if self.type is AutomodActionType.send_alert_message:
-            channel_repr = f" channel_id={self.channel_id!r}"
+            meta_repr = f" channel_id={self.channel_id!r}"
+        elif self.type is AutomodActionType.timeout:
+            meta_repr = f" timeout_duration={self.timeout_duration}"
         else:
-            channel_repr = ""
-        return f"<AutomodAction type={self.type!r}{channel_repr}>"
+            meta_repr = ""
+        return f"<AutomodAction type={self.type!r}{meta_repr}>"
 
     @classmethod
     def _from_dict(cls, data: AutomodActionPayload) -> Self:
         meta = data.get("metadata", {})
-        channel_id = _get_as_snowflake(meta, "channel_id")
 
-        self = cls(
-            type=try_enum(AutomodActionType, data["type"]),
-            channel=Object(channel_id) if channel_id else None,
-        )
-
-        self._metadata = meta  # allow access to unimplemented fields
+        self = cls(type=try_enum(AutomodActionType, data["type"]))
+        self._metadata = meta  # assign directly, also allowing access to unimplemented fields
 
         return self
 

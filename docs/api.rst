@@ -3491,6 +3491,10 @@ of :class:`enum.Enum`.
 
         The rule will send an alert to a specified channel.
 
+    .. attribute:: timeout
+
+        The rule will timeout the user that sent the message.
+
 Async Iterator
 ----------------
 
