@@ -154,6 +154,9 @@ class Reaction:
 
         .. versionadded:: 1.3
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Raises
         ------
         HTTPException
@@ -162,7 +165,7 @@ class Reaction:
             You do not have the proper permissions to clear the reaction.
         NotFound
             The emoji you specified was not found.
-        InvalidArgument
+        TypeError
             The emoji parameter is invalid.
         """
         await self.message.clear_reaction(self.emoji)

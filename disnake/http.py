@@ -57,7 +57,6 @@ from .errors import (
     Forbidden,
     GatewayNotFound,
     HTTPException,
-    InvalidArgument,
     LoginFailure,
     NotFound,
 )
@@ -1538,7 +1537,7 @@ class HTTPClient:
 
         try:
             mime_type = utils._get_mime_type_for_image(initial_bytes)
-        except InvalidArgument:
+        except ValueError:
             if initial_bytes.startswith(b"{"):
                 mime_type = "application/json"
             else:

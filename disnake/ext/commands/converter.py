@@ -52,7 +52,7 @@ from .context import AnyContext, Context
 from .errors import *
 
 if TYPE_CHECKING:
-    from disnake.message import MessageableChannel
+    from disnake.abc import MessageableChannel
 
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES

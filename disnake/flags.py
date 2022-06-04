@@ -1183,6 +1183,8 @@ class ApplicationFlags(BaseFlags):
         rather than using this raw value.
     """
 
+    __slots__ = ()
+
     @flag_value
     def gateway_presence(self):
         """:class:`bool`: Returns ``True`` if the application is verified and is allowed to
@@ -1267,6 +1269,8 @@ class ChannelFlags(BaseFlags):
         The raw value. You should query flags via the properties
         rather than using this raw value.
     """
+
+    __slots__ = ()
 
     @flag_value
     def pinned(self):
