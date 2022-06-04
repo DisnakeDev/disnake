@@ -5364,7 +5364,7 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: InvalidData
 
-.. autoexception:: InvalidArgument
+.. autoexception:: WebhookTokenMissing
 
 .. autoexception:: GatewayNotFound
 
@@ -5397,7 +5397,6 @@ Exception Hierarchy
         - :exc:`DiscordException`
             - :exc:`ClientException`
                 - :exc:`InvalidData`
-                - :exc:`InvalidArgument`
                 - :exc:`LoginFailure`
                 - :exc:`ConnectionClosed`
                 - :exc:`PrivilegedIntentsRequired`
@@ -5413,6 +5412,7 @@ Exception Hierarchy
                 - :exc:`NotFound`
                 - :exc:`DiscordServerError`
             - :exc:`LocalizationKeyError`
+            - :exc:`WebhookTokenMissing`
 
 
 Warnings
