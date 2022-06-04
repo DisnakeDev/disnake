@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Union
 
 from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
@@ -61,6 +61,10 @@ if TYPE_CHECKING:
     )
 
     AnyThreadArchiveDuration = Union[ThreadArchiveDuration, ThreadArchiveDurationLiteral]
+
+    ThreadType = Literal[
+        ChannelType.news_thread, ChannelType.public_thread, ChannelType.private_thread
+    ]
 
 
 class Thread(Messageable, Hashable):
@@ -135,11 +139,6 @@ class Thread(Messageable, Hashable):
         The time the most recent message was pinned, or ``None`` if no message is currently pinned.
 
         .. versionadded:: 2.5
-
-    flags: :class:`ChannelFlags`
-        The flags the thread has.
-
-        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -160,7 +159,7 @@ class Thread(Messageable, Hashable):
         "archive_timestamp",
         "create_timestamp",
         "last_pin_timestamp",
-        "flags",
+        "_flags",
         "_type",
         "_state",
         "_members",
@@ -190,7 +189,7 @@ class Thread(Messageable, Hashable):
         self.parent_id = int(data["parent_id"])
         self.owner_id = _get_as_snowflake(data, "owner_id")
         self.name = data["name"]
-        self._type = try_enum(ChannelType, data["type"])
+        self._type: ThreadType = try_enum(ChannelType, data["type"])  # type: ignore
         self.last_message_id = _get_as_snowflake(data, "last_message_id")
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self.message_count = data.get("message_count")
@@ -198,7 +197,7 @@ class Thread(Messageable, Hashable):
         self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
             data.get("last_pin_timestamp")
         )
-        self.flags = ChannelFlags._from_value(data.get("flags", 0))
+        self._flags: int = data.get("flags", 0)
         self._unroll_metadata(data["thread_metadata"])
 
         try:
@@ -223,7 +222,7 @@ class Thread(Messageable, Hashable):
             pass
 
         self.slowmode_delay = data.get("rate_limit_per_user", 0)
-        self.flags = ChannelFlags._from_value(data.get("flags", 0))
+        self._flags = data.get("flags", 0)
 
         try:
             self._unroll_metadata(data["thread_metadata"])
@@ -231,8 +230,12 @@ class Thread(Messageable, Hashable):
             pass
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> ThreadType:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.public_thread`,
+        :attr:`ChannelType.private_thread`, or :attr:`ChannelType.news_thread`.
+        """
         return self._type
 
     @property
@@ -331,6 +334,14 @@ class Thread(Messageable, Hashable):
             If create_timestamp is provided by discord, that will be used instead of the time in the ID.
         """
         return self.create_timestamp or snowflake_time(self.id)
+
+    @property
+    def flags(self) -> ChannelFlags:
+        """:class:`.ChannelFlags`: The channel flags for this thread.
+
+        .. versionadded:: 2.5
+        """
+        return ChannelFlags._from_value(self._flags)
 
     @property
     def jump_url(self) -> str:
@@ -675,7 +686,7 @@ class Thread(Messageable, Hashable):
         if slowmode_delay is not MISSING:
             payload["rate_limit_per_user"] = slowmode_delay
         if pinned is not MISSING:
-            flags = ChannelFlags._from_value(self.flags.value)
+            flags = ChannelFlags._from_value(self._flags)
             flags.pinned = pinned
             payload["flags"] = flags.value
 

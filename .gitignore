@@ -22,7 +22,9 @@ secrets/
 *_test.py
 *.env
 venvs/
+.nox/
 .idea
+.coverage*
+coverage.xml
 
-!/task.env
 !test_bot/locale/*.json

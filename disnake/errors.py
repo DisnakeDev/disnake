@@ -49,7 +49,7 @@ __all__ = (
     "NotFound",
     "DiscordServerError",
     "InvalidData",
-    "InvalidArgument",
+    "WebhookTokenMissing",
     "LoginFailure",
     "ConnectionClosed",
     "PrivilegedIntentsRequired",
@@ -64,7 +64,7 @@ __all__ = (
 
 
 class DiscordException(Exception):
-    """Base exception class for disnake
+    """Base exception class for disnake.
 
     Ideally speaking, this could be caught to handle any exceptions raised from this library.
     """
@@ -160,7 +160,7 @@ class HTTPException(DiscordException):
 class Forbidden(HTTPException):
     """Exception that's raised for when status code 403 occurs.
 
-    Subclass of :exc:`HTTPException`
+    Subclass of :exc:`HTTPException`.
     """
 
     pass
@@ -169,7 +169,7 @@ class Forbidden(HTTPException):
 class NotFound(HTTPException):
     """Exception that's raised for when status code 404 occurs.
 
-    Subclass of :exc:`HTTPException`
+    Subclass of :exc:`HTTPException`.
     """
 
     pass
@@ -194,13 +194,10 @@ class InvalidData(ClientException):
     pass
 
 
-class InvalidArgument(ClientException):
-    """Exception that's raised when an argument to a function
-    is invalid some way (e.g. wrong value or wrong type).
+class WebhookTokenMissing(DiscordException):
+    """Exception that's raised when a :class:`Webhook` or :class:`SyncWebhook` is missing a token to make requests with.
 
-    This could be considered the analogous of ``ValueError`` and
-    ``TypeError`` except inherited from :exc:`ClientException` and thus
-    :exc:`DiscordException`.
+    .. versionadded :: 2.6
     """
 
     pass
@@ -281,7 +278,7 @@ class InteractionException(ClientException):
     Attributes
     ----------
     interaction: :class:`Interaction`
-        The interaction that was responded to
+        The interaction that was responded to.
     """
 
     interaction: Interaction
@@ -289,14 +286,14 @@ class InteractionException(ClientException):
 
 class InteractionTimedOut(InteractionException):
     """Exception that's raised when an interaction takes more than 3 seconds
-    to respond but is not deffered.
+    to respond but is not deferred.
 
     .. versionadded:: 2.0
 
     Attributes
     ----------
     interaction: :class:`Interaction`
-        The interaction that was responded to
+        The interaction that was responded to.
     """
 
     def __init__(self, interaction: Interaction):

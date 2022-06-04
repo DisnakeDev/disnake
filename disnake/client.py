@@ -333,6 +333,11 @@ class Client:
         Only available after initiating the connection.
 
         .. versionadded:: 2.5
+    i18n: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` used for localization of
+        application commands.
+
+        .. versionadded:: 2.5
     """
 
     def __init__(
@@ -816,7 +821,7 @@ class Client:
 
                 # We should only get this when an unhandled close code happens,
                 # such as a clean disconnect (1000) or a bad state (bad token, no sharding, etc)
-                # sometimes, disnake sends us 1000 for unknown reasons so we should reconnect
+                # sometimes, Discord sends us 1000 for unknown reasons so we should reconnect
                 # regardless and rely on is_closed instead
                 if isinstance(exc, ConnectionClosed):
                     if exc.code == 4014:
@@ -1481,6 +1486,9 @@ class Client:
 
         Changes the client's presence.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Example
         ---------
 
@@ -1502,7 +1510,7 @@ class Client:
 
         Raises
         ------
-        InvalidArgument
+        TypeError
             If the ``activity`` parameter is not the proper type.
         """
         if status is None:
@@ -1701,6 +1709,9 @@ class Client:
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1723,7 +1734,7 @@ class Client:
             The ``icon`` asset couldn't be found.
         HTTPException
             Guild creation failed.
-        InvalidArgument
+        ValueError
             Invalid icon image format given. Must be PNG or JPG.
         TypeError
             The ``icon`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
@@ -1982,7 +1993,9 @@ class Client:
         return User(state=self._connection, data=data)
 
     async def fetch_channel(
-        self, channel_id: int, /
+        self,
+        channel_id: int,
+        /,
     ) -> Union[GuildChannel, PrivateChannel, Thread]:
         """|coro|
 
@@ -2475,7 +2488,7 @@ class Client:
     ) -> GuildApplicationCommandPermissions:
         """|coro|
 
-        Retrieves :class:`.GuildApplicationCommandPermissions` for a specific application command.
+        Retrieves :class:`.GuildApplicationCommandPermissions` for a specific application command in the guild with the given ID.
 
         .. versionadded:: 2.1
 
@@ -2492,6 +2505,6 @@ class Client:
         Returns
         -------
         :class:`.GuildApplicationCommandPermissions`
-            The newly edited application command permissions.
+            The permissions configured for the specified application command.
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)

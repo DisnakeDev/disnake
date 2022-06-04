@@ -80,13 +80,12 @@ from .user import ClientUser, User
 from .utils import MISSING
 
 if TYPE_CHECKING:
-    from .abc import PrivateChannel
+    from .abc import MessageableChannel, PrivateChannel
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
     from .gateway import DiscordWebSocket
     from .guild import GuildChannel, VocalGuildChannel
     from .http import HTTPClient
-    from .message import MessageableChannel
     from .types.activity import Activity as ActivityPayload
     from .types.channel import DMChannel as DMChannelPayload
     from .types.emoji import Emoji as EmojiPayload
@@ -443,7 +442,9 @@ class ConnectionState:
         return self._global_application_commands.get(application_command_id)
 
     def _add_global_application_command(
-        self, application_command: APIApplicationCommand, /
+        self,
+        application_command: APIApplicationCommand,
+        /,
     ) -> None:
         assert application_command.id
         self._global_application_commands[application_command.id] = application_command
@@ -1749,7 +1750,7 @@ class ConnectionState:
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
     ) -> Optional[Union[User, Member]]:
-        if isinstance(channel, (TextChannel, VoiceChannel)):
+        if isinstance(channel, (TextChannel, VoiceChannel, Thread)):
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 
@@ -1791,7 +1792,7 @@ class ConnectionState:
     def create_message(
         self,
         *,
-        channel: Union[TextChannel, Thread, DMChannel, PartialMessageable, VoiceChannel],
+        channel: MessageableChannel,
         data: MessagePayload,
     ) -> Message:
         return Message(state=self, channel=channel, data=data)
