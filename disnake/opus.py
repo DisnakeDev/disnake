@@ -47,7 +47,7 @@ from typing import (
     overload,
 )
 
-from .errors import DiscordException, InvalidArgument
+from .errors import DiscordException
 from .utils import MISSING
 
 if TYPE_CHECKING:
@@ -496,7 +496,7 @@ class Decoder(_OpusStruct):
 
     def decode(self, data: Optional[bytes], *, fec: bool = False) -> bytes:
         if data is None and fec:
-            raise InvalidArgument("Invalid arguments: FEC cannot be used with null data")
+            raise TypeError("Invalid arguments: FEC cannot be used with null data")
 
         if data is None:
             frame_size = self._get_last_packet_duration() or self.SAMPLES_PER_FRAME
