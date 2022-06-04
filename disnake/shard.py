@@ -513,6 +513,9 @@ class AutoShardedClient(Client):
         .. versionchanged:: 2.0
             Removed the ``afk`` keyword-only parameter.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         activity: Optional[:class:`BaseActivity`]
@@ -527,7 +530,7 @@ class AutoShardedClient(Client):
 
         Raises
         ------
-        InvalidArgument
+        TypeError
             If the ``activity`` parameter is not of proper type.
         """
         if status is None:
