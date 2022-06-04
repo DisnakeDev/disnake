@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Generator, List, Optional
 
-from ..components import ActionRow, NestedComponent, TextInput
+from ..components import ActionRow, ModalComponent, NestedComponent, TextInput
 from ..message import Message
 from ..utils import cached_slot_property
 from .base import Interaction
@@ -141,7 +141,9 @@ class ModalInteractionData:
     def __init__(self, *, data: ModalInteractionDataPayload):
         self.custom_id: str = data["custom_id"]
         # this attribute is not meant to be used since it lacks most of the component data
-        self._components: List[ActionRow] = [ActionRow(d) for d in data["components"]]
+        self._components: List[ActionRow[ModalComponent]] = [
+            ActionRow(d) for d in data["components"]
+        ]
 
     def __repr__(self):
         return (

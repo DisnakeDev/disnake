@@ -89,7 +89,7 @@ class ActionRow(Generic[UIComponentT]):
 
         .. describe:: x[i]
 
-            Returns the component at position ``i``. This takes component width into account.
+            Returns the component at position ``i``.
 
     To handle interactions created by components sent in action rows or entirely independently,
     event listeners must be used. For buttons and selects, the related events are
@@ -140,7 +140,7 @@ class ActionRow(Generic[UIComponentT]):
         ...
 
     def __init__(self, *components: UIComponentT):  # type: ignore
-        self._children: List[UIComponentT] = []
+        self.children: List[UIComponentT] = []
 
         for component in components:
             if not isinstance(component, WrappedComponent):
@@ -154,11 +154,6 @@ class ActionRow(Generic[UIComponentT]):
 
     def __len__(self) -> int:
         return len(self.children)
-
-    @property
-    def children(self) -> List[UIComponentT]:
-        """List[:class:`WrappedComponent`]: The UI components stored in this action row."""
-        return self._children
 
     @property
     def width(self) -> int:
@@ -201,10 +196,10 @@ class ActionRow(Generic[UIComponentT]):
         if self.width + item.width > 5:
             raise ValueError("Too many components in this row, can not append a new one.")
 
-        self._children.insert(index, item)
+        self.children.insert(index, item)
 
     def add_button(
-        self: ActionRow[MessageUIComponent],
+        self: Union[ActionRow[MessageUIComponent], ActionRow[WrappedComponent]],
         index: Optional[int] = None,
         *,
         style: ButtonStyle = ButtonStyle.secondary,
@@ -261,8 +256,11 @@ class ActionRow(Generic[UIComponentT]):
         )
 
     def add_select(
-        self: ActionRow[MessageUIComponent],
-        index: Optional[int] = None,
+        self: Union[
+            ActionRow[MessageUIComponent],
+            ActionRow[ModalUIComponent],
+            ActionRow[WrappedComponent],
+        ],
         *,
         custom_id: str = MISSING,
         placeholder: Optional[str] = None,
@@ -277,15 +275,8 @@ class ActionRow(Generic[UIComponentT]):
         To append a pre-existing :class:`~disnake.ui.Select` use the
         :meth:`append_item` method instead.
 
-        .. versionchanged:: 2.6
-            Now allows for inserting at a given index. The default behaviour of
-            appending is preserved.
-
         Parameters
         ----------
-        index: :class:`int`
-            The index at which to insert the select into the action row. If not provided,
-            this method defaults to appending the select to the action row.
         custom_id: :class:`str`
             The ID of the select menu that gets received during an interaction.
             If not given then one is generated for you.
@@ -307,8 +298,7 @@ class ActionRow(Generic[UIComponentT]):
         ValueError
             The width of the action row exceeds 5.
         """
-        self.insert_item(
-            len(self) if index is None else index,
+        self.append_item(
             Select(
                 custom_id=custom_id,
                 placeholder=placeholder,
@@ -320,8 +310,7 @@ class ActionRow(Generic[UIComponentT]):
         )
 
     def add_text_input(
-        self: ActionRow[ModalUIComponent],
-        index: Optional[int] = None,
+        self: Union[ActionRow[ModalUIComponent], ActionRow[WrappedComponent]],
         *,
         label: str,
         custom_id: str,
@@ -340,15 +329,8 @@ class ActionRow(Generic[UIComponentT]):
 
         .. versionadded:: 2.4
 
-        .. versionchanged:: 2.6
-            Now allows for inserting at a given index. The default behaviour of
-            appending is preserved.
-
         Parameters
         ----------
-        index: :class:`int`
-            The index at which to insert the text input into the action row. If not provided,
-            this method defaults to appending the text input to the action row.
         style: :class:`.TextInputStyle`
             The style of the text input.
         label: :class:`str`
@@ -373,8 +355,7 @@ class ActionRow(Generic[UIComponentT]):
         TypeError
             The action row does not support items of this type.
         """
-        self.insert_item(
-            len(self) if index is None else index,
+        self.append_item(
             TextInput(
                 label=label,
                 custom_id=custom_id,
@@ -392,7 +373,7 @@ class ActionRow(Generic[UIComponentT]):
 
         .. versionadded:: 2.6
         """
-        self._children.clear()
+        self.children.clear()
 
     def remove_item(self, item: UIComponentT) -> None:
         """Remove a component from the action row.
@@ -409,11 +390,10 @@ class ActionRow(Generic[UIComponentT]):
         ValueError
             The component could not be found on the action row.
         """
-        self._children.remove(item)
+        self.children.remove(item)
 
     def pop(self, index: int) -> UIComponentT:
         """Pop the component at the provided index from the action row.
-        This takes into account the width of components.
 
         .. versionadded:: 2.6
 
@@ -434,17 +414,17 @@ class ActionRow(Generic[UIComponentT]):
     def _underlying(self) -> ActionRowComponent[NestedComponent]:
         return ActionRowComponent._raw_construct(
             type=self.type,
-            children=[comp._underlying for comp in self._children],
+            children=[comp._underlying for comp in self.children],
         )
 
     def to_component_dict(self) -> ActionRowPayload:
         return self._underlying.to_dict()
 
     def __delitem__(self, index: int) -> None:
-        del self._children[index]
+        del self.children[index]
 
     def __getitem__(self, index: int) -> UIComponentT:
-        return self._children[index]
+        return self.children[index]
 
     @classmethod
     def with_modal_components(cls) -> ActionRow[ModalUIComponent]:
@@ -509,7 +489,7 @@ class ActionRow(Generic[UIComponentT]):
                 elif isinstance(component, SelectComponent):
                     current_row.append_item(Select.from_component(component))
                 elif strict:
-                    raise TypeError(f"Encountered unknown component type: {component.type}.")
+                    raise TypeError(f"Encountered unknown component type: {component.type!r}.")
 
         return rows
 
@@ -532,8 +512,8 @@ class ActionRow(Generic[UIComponentT]):
         Tuple[:class:`ActionRow`, :class:`WrappedComponent`]
             A tuple containing an action row and a component of that action row.
         """
-        for row in action_rows:
-            for component in row.children:
+        for row in tuple(action_rows):
+            for component in tuple(row.children):
                 yield row, component
 
 
