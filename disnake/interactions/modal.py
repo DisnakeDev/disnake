@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Generator, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 
 from ..components import ActionRow, NestedComponent, TextInput
 from ..message import Message
@@ -125,7 +125,7 @@ class ModalInteraction(Interaction):
         return self.data.custom_id
 
 
-class ModalInteractionData(dict):
+class ModalInteractionData(Dict[str, Any]):
     """Represents the data of an interaction with a modal.
 
     .. versionadded:: 2.4

@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from ..components import ActionRow, Button, SelectMenu
 from ..enums import ComponentType, try_enum
@@ -118,7 +118,7 @@ class MessageInteraction(Interaction):
         raise Exception("MessageInteraction is malformed - no component found")
 
 
-class MessageInteractionData(dict):
+class MessageInteractionData(Dict[str, Any]):
     """Represents the data of an interaction with a message component.
 
     .. versionadded:: 2.1

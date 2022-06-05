@@ -199,7 +199,7 @@ class MessageCommandInteraction(ApplicationCommandInteraction):
     target: Message
 
 
-class ApplicationCommandInteractionData(dict):
+class ApplicationCommandInteractionData(Dict[str, Any]):
     """Represents the data of an interaction with an application command.
 
     .. versionadded:: 2.1
@@ -293,7 +293,7 @@ class ApplicationCommandInteractionData(dict):
         return self._get_focused_option()  # type: ignore
 
 
-class ApplicationCommandInteractionDataOption(dict):
+class ApplicationCommandInteractionDataOption(Dict[str, Any]):
     """This class represents the structure of an interaction data option from the API.
 
     Attributes
@@ -362,7 +362,7 @@ class ApplicationCommandInteractionDataOption(dict):
         return chain, {}
 
 
-class ApplicationCommandInteractionDataResolved(dict):
+class ApplicationCommandInteractionDataResolved(Dict[str, Any]):
     """Represents the resolved data related to an interaction with an application command.
 
     .. versionadded:: 2.1
