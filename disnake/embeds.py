@@ -378,7 +378,7 @@ class Embed:
         text: :class:`str`
             The footer text.
 
-            .. versionchanged:: 2.5
+            .. versionchanged:: 2.6
                 No longer optional, must be set to a valid string.
 
         icon_url: Optional[:class:`str`]
