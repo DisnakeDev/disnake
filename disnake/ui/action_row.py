@@ -48,7 +48,7 @@ from ..components import (
     SelectOption,
 )
 from ..enums import ButtonStyle, ComponentType, TextInputStyle
-from ..utils import MISSING
+from ..utils import MISSING, SequenceProxy
 from .button import Button
 from .item import WrappedComponent
 from .select import Select
@@ -71,7 +71,7 @@ __all__ = (
 
 
 MessageUIComponent = Union[Button[Any], Select[Any]]
-ModalUIComponent = Union[TextInput, Select[Any]]
+ModalUIComponent = TextInput  # Union[TextInput, Select[Any]]
 UIComponentT = TypeVar("UIComponentT", bound=WrappedComponent)
 StrictUIComponentT = TypeVar("StrictUIComponentT", MessageUIComponent, ModalUIComponent)
 
@@ -140,7 +140,7 @@ class ActionRow(Generic[UIComponentT]):
         ...
 
     def __init__(self, *components: UIComponentT):  # type: ignore
-        self.children: List[UIComponentT] = []
+        self._children: List[UIComponentT] = []
 
         for component in components:
             if not isinstance(component, WrappedComponent):
@@ -150,14 +150,22 @@ class ActionRow(Generic[UIComponentT]):
             self.append_item(component)
 
     def __repr__(self) -> str:
-        return f"<ActionRow children={self.children!r}>"
+        return f"<ActionRow children={self._children!r}>"
 
     def __len__(self) -> int:
-        return len(self.children)
+        return len(self._children)
+
+    @property
+    def children(self) -> Sequence[UIComponentT]:
+        """Sequence[:class:`WrappedComponent`]:
+        A read-only copy of the UI components stored in this action row. To add/remove
+        components to/from the action row, use its methods to directly modify it.
+        """
+        return SequenceProxy(self._children)
 
     @property
     def width(self) -> int:
-        return sum(child.width for child in self.children)
+        return sum(child.width for child in self._children)
 
     def append_item(self, item: UIComponentT) -> None:
         """Append a component to the action row. The component's type must match that
@@ -196,7 +204,7 @@ class ActionRow(Generic[UIComponentT]):
         if self.width + item.width > 5:
             raise ValueError("Too many components in this row, can not append a new one.")
 
-        self.children.insert(index, item)
+        self._children.insert(index, item)
 
     def add_button(
         self: Union[ActionRow[MessageUIComponent], ActionRow[WrappedComponent]],
@@ -258,7 +266,7 @@ class ActionRow(Generic[UIComponentT]):
     def add_select(
         self: Union[
             ActionRow[MessageUIComponent],
-            ActionRow[ModalUIComponent],
+            # ActionRow[ModalUIComponent],
             ActionRow[WrappedComponent],
         ],
         *,
@@ -352,8 +360,6 @@ class ActionRow(Generic[UIComponentT]):
         ------
         ValueError
             The width of the action row exceeds 5.
-        TypeError
-            The action row does not support items of this type.
         """
         self.append_item(
             TextInput(
@@ -373,7 +379,7 @@ class ActionRow(Generic[UIComponentT]):
 
         .. versionadded:: 2.6
         """
-        self.children.clear()
+        self._children.clear()
 
     def remove_item(self, item: UIComponentT) -> None:
         """Remove a component from the action row.
@@ -390,7 +396,7 @@ class ActionRow(Generic[UIComponentT]):
         ValueError
             The component could not be found on the action row.
         """
-        self.children.remove(item)
+        self._children.remove(item)
 
     def pop(self, index: int) -> UIComponentT:
         """Pop the component at the provided index from the action row.
@@ -414,17 +420,17 @@ class ActionRow(Generic[UIComponentT]):
     def _underlying(self) -> ActionRowComponent[NestedComponent]:
         return ActionRowComponent._raw_construct(
             type=self.type,
-            children=[comp._underlying for comp in self.children],
+            children=[comp._underlying for comp in self._children],
         )
 
     def to_component_dict(self) -> ActionRowPayload:
         return self._underlying.to_dict()
 
     def __delitem__(self, index: int) -> None:
-        del self.children[index]
+        del self._children[index]
 
     def __getitem__(self, index: int) -> UIComponentT:
-        return self.children[index]
+        return self._children[index]
 
     @classmethod
     def with_modal_components(cls) -> ActionRow[ModalUIComponent]:
@@ -460,6 +466,7 @@ class ActionRow(Generic[UIComponentT]):
     def rows_from_message(
         cls,
         message: Message,
+        *,
         strict: bool = True,
     ) -> List[ActionRow[MessageUIComponent]]:
         """Create a list of up to 5 action rows from the components on an existing message.
@@ -474,6 +481,13 @@ class ActionRow(Generic[UIComponentT]):
         ----------
         message: :class:`disnake.Message`
             The message from which to extract the components.
+        strict: :class:`bool`
+            Whether or not to raise an exception if an unknown component type is encountered.
+
+        Raises
+        ------
+        TypeError
+            Strict-mode is enabled and an unknown component type is encountered.
 
         Returns
         -------
@@ -513,7 +527,7 @@ class ActionRow(Generic[UIComponentT]):
             A tuple containing an action row and a component of that action row.
         """
         for row in tuple(action_rows):
-            for component in tuple(row.children):
+            for component in tuple(row._children):
                 yield row, component
 
 
