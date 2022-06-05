@@ -1511,6 +1511,9 @@ class Client:
 
         Changes the client's presence.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Example
         ---------
 
@@ -1532,7 +1535,7 @@ class Client:
 
         Raises
         ------
-        InvalidArgument
+        TypeError
             If the ``activity`` parameter is not the proper type.
         """
         if status is None:
@@ -1731,6 +1734,9 @@ class Client:
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1753,7 +1759,7 @@ class Client:
             The ``icon`` asset couldn't be found.
         HTTPException
             Guild creation failed.
-        InvalidArgument
+        ValueError
             Invalid icon image format given. Must be PNG or JPG.
         TypeError
             The ``icon`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).

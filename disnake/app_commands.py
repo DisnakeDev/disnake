@@ -37,7 +37,6 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
-from .errors import InvalidArgument
 from .i18n import Localized
 from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
@@ -98,7 +97,7 @@ def _validate_name(name: str) -> None:
     # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
 
     if name != name.lower() or not re.fullmatch(r"[\w-]{1,32}", name):
-        raise InvalidArgument(
+        raise ValueError(
             f"Slash command or option name '{name}' should be lowercase, "
             "between 1 and 32 characters long, and only consist of "
             "these symbols: a-z, 0-9, -, _, and other languages'/scripts' symbols"
@@ -259,14 +258,14 @@ class Option:
         self.max_value: Optional[float] = max_value
 
         if channel_types is not None and not all(isinstance(t, ChannelType) for t in channel_types):
-            raise InvalidArgument("channel_types must be a list of `ChannelType`s")
+            raise TypeError("channel_types must be a list of `ChannelType`s")
 
         self.channel_types: List[ChannelType] = channel_types or []
 
         self.choices: List[OptionChoice] = []
         if choices is not None:
             if autocomplete:
-                raise InvalidArgument("can not specify both choices and autocomplete args")
+                raise TypeError("can not specify both choices and autocomplete args")
 
             if isinstance(choices, Mapping):
                 self.choices = [OptionChoice(name, value) for name, value in choices.items()]
@@ -466,6 +465,8 @@ class ApplicationCommand(ABC):
         if default_member_permissions is None:
             # allow everyone to use the command if its not supplied
             self._default_member_permissions = None
+        elif isinstance(default_member_permissions, bool):
+            raise TypeError("`default_member_permissions` cannot be a bool")
         elif isinstance(default_member_permissions, int):
             self._default_member_permissions = default_member_permissions
         else:

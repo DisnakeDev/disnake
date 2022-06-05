@@ -51,7 +51,7 @@ __all__ = (
     "NotFound",
     "DiscordServerError",
     "InvalidData",
-    "InvalidArgument",
+    "WebhookTokenMissing",
     "LoginFailure",
     "SessionStartLimitReached",
     "ConnectionClosed",
@@ -197,13 +197,10 @@ class InvalidData(ClientException):
     pass
 
 
-class InvalidArgument(ClientException):
-    """Exception that's raised when an argument to a function
-    is invalid some way (e.g. wrong value or wrong type).
+class WebhookTokenMissing(DiscordException):
+    """Exception that's raised when a :class:`Webhook` or :class:`SyncWebhook` is missing a token to make requests with.
 
-    This could be considered the analogous of ``ValueError`` and
-    ``TypeError`` except inherited from :exc:`ClientException` and thus
-    :exc:`DiscordException`.
+    .. versionadded :: 2.6
     """
 
     pass
