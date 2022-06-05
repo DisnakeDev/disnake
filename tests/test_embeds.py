@@ -13,7 +13,7 @@ _BASE = {"type": "rich"}
 def embed() -> Embed:
     time = utcnow() + timedelta(days=42)
     return Embed(
-        type="video",
+        type="link",
         title="wow",
         description="what a cool embed",
         url="http://endless.horse",
@@ -43,7 +43,7 @@ def test_init_empty() -> None:
 def test_init_all(embed: Embed) -> None:
     assert embed.timestamp
     assert embed.to_dict() == {
-        "type": "video",
+        "type": "link",
         "title": "wow",
         "description": "what a cool embed",
         "url": "http://endless.horse",
