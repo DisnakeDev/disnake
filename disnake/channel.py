@@ -98,7 +98,7 @@ if TYPE_CHECKING:
     )
     from .types.snowflake import SnowflakeList
     from .types.threads import ThreadArchiveDurationLiteral
-    from .ui.action_row import Components
+    from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import BaseUser, ClientUser, User
     from .voice_region import VoiceRegion
@@ -2628,7 +2628,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components = MISSING,
+        components: Components[MessageUIComponent] = MISSING,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage:
         """|coro|

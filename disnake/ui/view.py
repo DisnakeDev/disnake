@@ -43,13 +43,12 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
-    cast,
 )
 
 from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
-    Component,
+    MessageComponent,
     NestedComponent,
     SelectMenu as SelectComponent,
     _component_factory,
@@ -68,12 +67,11 @@ if TYPE_CHECKING:
     from .item import ItemCallbackType
 
 
-def _walk_all_components(components: List[Component]) -> Iterator[NestedComponent]:
+def _walk_all_components(
+    components: List[ActionRowComponent[MessageComponent]],
+) -> Iterator[NestedComponent]:
     for item in components:
-        if isinstance(item, ActionRowComponent):
-            yield from item.children
-        else:
-            yield cast(NestedComponent, item)
+        yield from item.children
 
 
 def _component_to_item(component: NestedComponent) -> Item:
@@ -132,6 +130,10 @@ class View:
     """Represents a UI view.
 
     This object must be inherited to create a UI within Discord.
+
+    Alternatively, components can be handled with :class:`disnake.ui.ActionRow`\\s and event
+    listeners for a more low-level approach. Relevant events are :func:`disnake.on_button_click`,
+    :func:`disnake.on_dropdown`, and the more generic :func:`disnake.on_message_interaction`.
 
     .. versionadded:: 2.0
 
@@ -396,7 +398,7 @@ class View:
             self._scheduled_task(item, interaction), name=f"disnake-ui-view-dispatch-{self.id}"
         )
 
-    def refresh(self, components: List[Component]):
+    def refresh(self, components: List[ActionRowComponent[MessageComponent]]):
         # TODO: this is pretty hacky at the moment
         old_state: Dict[Tuple[int, str], Item] = {
             (item.type.value, item.custom_id): item  # type: ignore
@@ -558,4 +560,6 @@ class ViewStore:
     def update_from_message(self, message_id: int, components: List[ComponentPayload]):
         # pre-req: is_message_tracked == true
         view = self._synced_message_views[message_id]
-        view.refresh([_component_factory(d) for d in components])
+        view.refresh(
+            [_component_factory(d, type=ActionRowComponent[MessageComponent]) for d in components]
+        )

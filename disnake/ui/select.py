@@ -27,7 +27,18 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
@@ -47,7 +58,7 @@ if TYPE_CHECKING:
     from .view import View
 
 S = TypeVar("S", bound="Select")
-V = TypeVar("V", bound="View", covariant=True)
+V = TypeVar("V", "View", None, covariant=True)
 
 
 def _parse_select_options(
@@ -110,6 +121,34 @@ class Select(Item[V]):
     )
     # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
     _underlying: SelectMenu = MISSING
+
+    @overload
+    def __init__(
+        self: Select[None],
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        disabled: bool = False,
+        row: Optional[int] = None,
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self: Select[V],
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        disabled: bool = False,
+        row: Optional[int] = None,
+    ):
+        ...
 
     def __init__(
         self,

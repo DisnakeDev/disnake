@@ -43,7 +43,7 @@ from typing import (
 __all__ = ("Item", "WrappedComponent")
 
 I = TypeVar("I", bound="Item")
-V = TypeVar("V", bound="View", covariant=True)
+V = TypeVar("V", "View", None, covariant=True)
 
 if TYPE_CHECKING:
     from ..components import NestedComponent
@@ -106,6 +106,14 @@ class Item(WrappedComponent, Generic[V]):
     """
 
     __repr_attributes__: Tuple[str, ...] = ("row",)
+
+    @overload
+    def __init__(self: Item[None]):
+        ...
+
+    @overload
+    def __init__(self: Item[V]):
+        ...
 
     def __init__(self):
         self._view: Optional[V] = None

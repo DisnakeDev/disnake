@@ -696,12 +696,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     This currently happens due to components being used.
 
-    .. warning::
-
-        This is a low level function that is not generally meant to be used.
-        If you are working with components, consider using the callbacks associated
-        with the :class:`~disnake.ui.View` instead as it provides a nicer user experience.
-
     .. versionadded:: 2.0
 
     :param interaction: The interaction object.
@@ -711,10 +705,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when a button is clicked.
 
-    .. warning::
-
-        Consider using the callbacks associated with the :class:`~disnake.ui.View` instead.
-
     .. versionadded:: 2.0
 
     :param interaction: The interaction object.
@@ -723,10 +713,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 .. function:: on_dropdown(interaction)
 
     Called when a select menu is clicked.
-
-    .. warning::
-
-        Consider using the callbacks associated with the :class:`~disnake.ui.View` instead.
 
     .. versionadded:: 2.0
 
