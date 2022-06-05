@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Generator, List, Optional
 
-from ..components import ActionRow, ModalComponent, NestedComponent, TextInput
+from ..components import ActionRow, ModalComponent, TextInput
 from ..message import Message
 from ..utils import cached_slot_property
 from .base import Interaction
@@ -101,10 +101,10 @@ class ModalInteraction(Interaction):
             message = None
         self.message: Optional[Message] = message
 
-    def walk_components(self) -> Generator[NestedComponent, None, None]:
+    def walk_components(self) -> Generator[ModalComponent, None, None]:
         """Returns a generator that yields components from action rows one by one.
 
-        :return type: Generator[Union[:class:`Button`, :class:`SelectMenu`, :class:`TextInput`], None, None]
+        :return type: Generator[:class:`TextInput`, None, None]
         """
         for action_row in self.data._components:
             yield from action_row.children

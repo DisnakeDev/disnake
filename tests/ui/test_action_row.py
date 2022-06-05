@@ -41,7 +41,7 @@ class TestActionRow:
         with pytest.raises(ValueError, match=r"Too many components in this row"):
             r.append_item(select)
 
-        assert r.children == [button1, button2]
+        assert list(r.children) == [button1, button2]
 
     def test_insert_item(self):
         r = ActionRow()
@@ -49,10 +49,10 @@ class TestActionRow:
         r.insert_item(0, button2)
         r.insert_item(1, button3)
 
-        assert r.children == [button2, button3, button1]
+        assert list(r.children) == [button2, button3, button1]
 
         r.insert_item(-2, button1)
-        assert r.children == [button2, button1, button3, button1]
+        assert list(r.children) == [button2, button1, button3, button1]
 
     @pytest.mark.parametrize("index", [None, 1])
     def test_add_button(self, index):
@@ -65,9 +65,9 @@ class TestActionRow:
         new_button = disnake.utils.get(r.children, custom_id="asdf")
         assert isinstance(new_button, Button)
         if index is None:
-            assert r.children == [button1, button2, new_button]
+            assert list(r.children) == [button1, button2, new_button]
         else:
-            assert r.children == [button1, new_button, button2]
+            assert list(r.children) == [button1, new_button, button2]
 
         if TYPE_CHECKING:
             ActionRow().add_button
@@ -86,7 +86,8 @@ class TestActionRow:
         if TYPE_CHECKING:
             ActionRow().add_select
             ActionRow.with_message_components().add_select
-            ActionRow.with_modal_components().add_select
+            # should not work  # TODO: revert when modal select support is added.
+            ActionRow.with_modal_components().add_select  # type: ignore
 
     def test_add_text_input(self):
         r = ActionRow.with_modal_components()
@@ -105,30 +106,30 @@ class TestActionRow:
     def test_clear_items(self):
         r = ActionRow(button1, button2)
         r.clear_items()
-        assert r.children == []
+        assert list(r.children) == []
 
     def test_remove_item(self):
         r = ActionRow(button1, button2)
         r.remove_item(button1)
-        assert r.children == [button2]
+        assert list(r.children) == [button2]
 
     def test_pop(self):
         r = ActionRow(button1, button2)
         assert r.pop(0) is button1
-        assert r.children == [button2]
+        assert list(r.children) == [button2]
 
     def test_dunder(self):
         r = ActionRow(button1, button2)
         assert r[1] is button2
 
         del r[0]
-        assert r.children == [button2]
+        assert list(r.children) == [button2]
 
     def test_with_components(self):
         row_modal = ActionRow.with_modal_components()
-        assert row_modal.children == []
+        assert list(row_modal.children) == []
         row_msg = ActionRow.with_message_components()
-        assert row_msg.children == []
+        assert list(row_msg.children) == []
 
         if TYPE_CHECKING:
             assert_type(row_modal, ActionRow[ModalUIComponent])
@@ -200,13 +201,15 @@ class TestActionRow:
 
         assert_type(ActionRow(button1, select), ActionRow[MessageUIComponent])
         assert_type(ActionRow(select, button1), ActionRow[MessageUIComponent])
-        assert_type(ActionRow(select, text_input), ActionRow[ModalUIComponent])
-        assert_type(ActionRow(text_input, select), ActionRow[ModalUIComponent])
 
         # these should fail to type-check - if they pass, there will be an error
         # because of the unnecessary ignore comment
         ActionRow(button1, text_input)  # type: ignore
         ActionRow(text_input, button1)  # type: ignore
+
+        # TODO: revert when modal select support is added.
+        assert_type(ActionRow(select, text_input), ActionRow[ModalUIComponent])  # type: ignore
+        assert_type(ActionRow(text_input, select), ActionRow[ModalUIComponent])  # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -235,7 +238,7 @@ class TestActionRow:
 def test_components_to_rows(value, expected):
     rows = components_to_rows(value)
     assert all(isinstance(row, ActionRow) for row in rows)
-    assert [row.children for row in rows] == expected
+    assert [list(row.children) for row in rows] == expected
 
 
 def test_components_to_rows__invalid():
