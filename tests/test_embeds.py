@@ -137,22 +137,30 @@ def test_attr_proxy() -> None:
     assert embed.to_dict() == _BASE
 
 
-def test_image(file: File) -> None:
+def test_image_init() -> None:
     # should be empty initially
     embed = Embed()
     assert embed._files == {}
     assert embed.to_dict() == _BASE
 
+
+def test_image_none() -> None:
     # removing image shouldn't change dict
+    embed = Embed()
     embed.set_image(None)
     assert embed._files == {}
     assert embed.to_dict() == _BASE
 
-    # check basic functionality
-    embed.set_image("https://uwu")
-    assert embed._files == {}
-    assert embed.to_dict() == {"image": {"url": "https://uwu"}, **_BASE}
 
+def test_image_url() -> None:
+    embed = Embed()
+    embed.set_image("https://disnake.dev")
+    assert embed._files == {}
+    assert embed.to_dict() == {"image": {"url": "https://disnake.dev"}, **_BASE}
+
+
+def test_image_file(file: File) -> None:
+    embed = Embed()
     embed.set_image(file=file)
     assert embed._files == {"image": file}
     assert embed.to_dict() == {"image": {"url": "attachment://data.txt"}, **_BASE}
@@ -174,15 +182,17 @@ def test_file_filename(file: File) -> None:
         embed.set_image(file=file)
 
 
-def test_file_multiple(file: File) -> None:
+def test_file_overwrite_url(file: File) -> None:
     embed = Embed()
-
     # setting url should remove file
     embed.set_image(file=file)
     embed.set_image("https://abc")
     assert embed._files == {}
     assert embed.to_dict() == {"image": {"url": "https://abc"}, **_BASE}
 
+
+def test_file_overwrite_file(file: File) -> None:
+    embed = Embed()
     # setting file twice should keep second one
     file2 = File(io.BytesIO(), filename="empty.dat")
     embed.set_image(file=file)
@@ -190,6 +200,9 @@ def test_file_multiple(file: File) -> None:
     assert embed._files == {"image": file2}
     assert embed.to_dict() == {"image": {"url": "attachment://empty.dat"}, **_BASE}
 
+
+def test_file_multiple(file: File) -> None:
+    embed = Embed()
     # setting multiple files should work correctly
     embed.set_image(file=file)
     embed.set_thumbnail(file=file)
@@ -232,7 +245,7 @@ def test_fields() -> None:
     assert embed.to_dict() == _BASE
 
 
-def test_fields_remove() -> None:
+def test_fields_exceptions() -> None:
     embed = Embed()
 
     # shouldn't raise
