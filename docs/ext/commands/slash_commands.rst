@@ -466,7 +466,7 @@ Localizations
 .. note::
     At the time of writing, Discord clients do not support localization right out of the box yet.
     To enable localization support, a build override from the `Discord Developers <https://discord.gg/discord-developers>`__ server is
-    most likely required, which can be found in `this message <https://discord.com/channels/613425648685547541/697138785317814292/956670963104239666>`__.
+    most likely required, which can be found by joining the above server and looking around/asking for the override.
 
     Note that the build override is not necessarily up to date with the other client branches/releases,
     so you may want to only enable it while you're working on this feature.
