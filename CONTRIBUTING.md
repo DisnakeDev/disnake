@@ -2,7 +2,8 @@
 
 First off, thanks for taking the time to contribute. It makes the library substantially better. :+1:
 
-The following is a set of guidelines for contributing to the repository. These are guidelines, not hard rules.
+The following is a set of guidelines for contributing to the repository. These are mostly guidelines, not hard rules.
+
 
 ## This is too much to read! I want to ask a question!
 
@@ -13,6 +14,7 @@ Generally speaking questions are better suited in our resources below.
 - Stack Overflow's [`discord.py` tag](https://stackoverflow.com/questions/tagged/discord.py)
 
 Please try your best not to ask questions in our issue tracker. Most of them don't belong there unless they provide value to a larger audience.
+
 
 ## Good Bug Reports
 
@@ -28,6 +30,7 @@ Please be aware of the following things when filing bug reports.
     - Tell us **information about your environment**. What version of disnake are you using? How was it installed? What operating system are you running on? These are valuable questions and information that we use.
 
 If the bug report is missing this information then it'll take us longer to fix the issue. We will probably ask for clarification, and barring that if no response was given then the issue will be closed.
+
 
 ## Submitting a Pull Request
 
