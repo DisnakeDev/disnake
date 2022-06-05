@@ -11,9 +11,9 @@ Generally speaking questions are better suited in our resources below.
 
 - The official support server: https://discord.gg/disnake
 - The [FAQ in the documentation](https://docs.disnake.dev/en/latest/faq.html)
-- Stack Overflow's [`discord.py` tag](https://stackoverflow.com/questions/tagged/discord.py)
+- The project's [discussions section](https://github.com/DisnakeDev/disnake/discussions)
 
-Please try your best not to ask questions in our issue tracker. Most of them don't belong there unless they provide value to a larger audience.
+Please try your best not to create new issues in the issue tracker just to ask questions. Most of them don't belong there unless they provide value to a larger audience.
 
 
 ## Good Bug Reports
