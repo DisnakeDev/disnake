@@ -91,7 +91,7 @@ if TYPE_CHECKING:
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
-    from .ui.action_row import Components
+    from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import ClientUser
 
@@ -1256,7 +1256,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1276,7 +1276,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1296,7 +1296,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1316,7 +1316,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1337,7 +1337,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = None,
         mention_author: bool = None,
         view: View = None,
-        components: Components = None,
+        components: Components[MessageUIComponent] = None,
     ):
         """|coro|
 
