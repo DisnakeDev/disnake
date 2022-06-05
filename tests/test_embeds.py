@@ -61,7 +61,7 @@ def test_timestamp_naive(embed: Embed) -> None:
 def test_len(embed: Embed) -> None:
     assert len(embed) == 20
 
-    embed.set_footer(text="uwu", icon_url="https://localhost")
+    embed.set_footer(text="hmm", icon_url="https://localhost")
     assert len(embed) == 23
 
     embed.set_author(name="someone", url="https://127.0.0.1", icon_url="https://127.0.0.2")
@@ -177,7 +177,7 @@ def test_image_remove(file: File) -> None:
 def test_file_params(file: File) -> None:
     embed = Embed()
     with pytest.raises(TypeError):
-        embed.set_image("https://uwu", file=file)  # type: ignore
+        embed.set_image("https://disnake.dev/assets/disnake-logo.png", file=file)  # type: ignore
 
     assert embed._files == {}
     assert embed.to_dict() == _BASE
@@ -272,7 +272,7 @@ def test_fields_exceptions() -> None:
 
 
 def test_copy(embed: Embed, file: File) -> None:
-    embed.set_footer(text="uwu", icon_url="https://localhost")
+    embed.set_footer(text="hi there", icon_url="https://localhost")
     embed.set_author(name="someone", url="https://127.0.0.1", icon_url="https://127.0.0.2")
     embed.add_field("field name", "field value")
     embed.add_field("another field", "woooo")
