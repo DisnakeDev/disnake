@@ -166,6 +166,14 @@ def test_image_file(file: File) -> None:
     assert embed.to_dict() == {"image": {"url": "attachment://data.txt"}, **_BASE}
 
 
+def test_image_remove(file: File) -> None:
+    embed = Embed()
+    embed.set_image(file=file)
+    embed.set_image(None)
+    assert embed._files == {}
+    assert embed.to_dict() == _BASE
+
+
 def test_file_params(file: File) -> None:
     embed = Embed()
     with pytest.raises(TypeError):
@@ -276,6 +284,5 @@ def test_copy(embed: Embed, file: File) -> None:
     assert embed.to_dict() == copy.to_dict()
 
     # shallow copy, but `_files` should be copied
-    embed.set_image(None)
-    assert len(embed._files) == 0
-    assert len(copy._files) == 1
+    assert embed._files == copy._files
+    assert embed._files is not copy._files
