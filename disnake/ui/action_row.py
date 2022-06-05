@@ -160,6 +160,9 @@ class ActionRow(Generic[UIComponentT]):
         """Sequence[:class:`WrappedComponent`]:
         A read-only copy of the UI components stored in this action row. To add/remove
         components to/from the action row, use its methods to directly modify it.
+
+        .. versionchanged:: 2.6
+            Returns an immutable sequence instead of a list.
         """
         return SequenceProxy(self._children)
 
