@@ -26,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, List, Optional, Set
+from typing import TYPE_CHECKING, List, Optional, Set, cast
 
 from .enums import ChannelType, try_enum
 from .utils import get_slots
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from .member import Member
     from .message import Message
     from .partial_emoji import PartialEmoji
-    from .threads import Thread, ThreadMember
+    from .threads import Thread, ThreadMember, ThreadType
     from .types.raw_models import (
         BulkMessageDeleteEvent,
         GuildScheduledEventUserActionEvent,
@@ -339,7 +339,7 @@ class RawThreadDeleteEvent(_RawReprMixin):
 
     def __init__(self, data):
         self.thread_id: int = int(data["id"])
-        self.thread_type: ChannelType = try_enum(ChannelType, data["type"])
+        self.thread_type: ThreadType = cast("ThreadType", try_enum(ChannelType, data["type"]))
         self.guild_id: int = int(data["guild_id"])
         self.parent_id: int = int(data["parent_id"])
         self.thread: Optional[Thread] = None

@@ -68,7 +68,7 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
-from .errors import ClientException, HTTPException, InvalidArgument, InvalidData
+from .errors import ClientException, HTTPException, InvalidData
 from .file import File
 from .flags import SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
@@ -109,6 +109,7 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
 
+    GuildMessageable = Union[TextChannel, Thread, VoiceChannel]
     GuildChannel = Union[VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel]
     ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
 
@@ -1145,14 +1146,12 @@ class Guild(Hashable):
         if overwrites is MISSING:
             overwrites = {}
         elif not isinstance(overwrites, dict):
-            raise InvalidArgument("overwrites parameter expects a dict.")
+            raise TypeError("overwrites parameter expects a dict.")
 
         perms = []
         for target, perm in overwrites.items():
             if not isinstance(perm, PermissionOverwrite):
-                raise InvalidArgument(
-                    f"Expected PermissionOverwrite received {perm.__class__.__name__}"
-                )
+                raise TypeError(f"Expected PermissionOverwrite received {perm.__class__.__name__}")
 
             allow, deny = perm.pair()
             payload = {"allow": allow.value, "deny": deny.value, "id": target.id}
@@ -1205,6 +1204,9 @@ class Guild(Hashable):
             Creating a channel of a specified position will not update the position of
             other channels to follow suit. A follow-up call to :meth:`~TextChannel.edit`
             will be required to update the position of the channel in the channel list.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
         Examples
         --------
@@ -1270,7 +1272,7 @@ class Guild(Hashable):
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
-        InvalidArgument
+        TypeError
             The permission overwrite information is not in proper form.
 
         Returns
@@ -1333,6 +1335,9 @@ class Guild(Hashable):
 
         This is similar to :meth:`create_text_channel` except makes a :class:`VoiceChannel` instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1377,7 +1382,7 @@ class Guild(Hashable):
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
-        InvalidArgument
+        TypeError
             The permission overwrite information is not in proper form.
 
         Returns
@@ -1435,6 +1440,9 @@ class Guild(Hashable):
 
         .. versionadded:: 1.7
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1471,7 +1479,7 @@ class Guild(Hashable):
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
-        InvalidArgument
+        TypeError
             The permission overwrite information is not in proper form.
 
         Returns
@@ -1523,6 +1531,9 @@ class Guild(Hashable):
 
         .. versionadded:: 2.5
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1558,7 +1569,7 @@ class Guild(Hashable):
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
-        InvalidArgument
+        TypeError
             The permission overwrite information is not in proper form.
 
         Returns
@@ -1615,6 +1626,9 @@ class Guild(Hashable):
             The ``category`` parameter is not supported in this function since categories
             cannot have categories.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1634,7 +1648,7 @@ class Guild(Hashable):
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
-        InvalidArgument
+        TypeError
             The permission overwrite information is not in proper form.
 
         Returns
@@ -1735,6 +1749,9 @@ class Guild(Hashable):
             Removed the ``region`` parameter.
             Use :func:`VoiceChannel.edit` or :func:`StageChannel.edit` with ``rtc_region`` instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1826,12 +1843,15 @@ class Guild(Hashable):
             You do not have permissions to edit the guild.
         HTTPException
             Editing the guild failed.
-        InvalidArgument
-            The image format passed in to ``icon`` is invalid. It must be
-            PNG or JPG. This is also raised if you are not the owner of the
-            guild and request an ownership transfer.
         TypeError
-            At least one of the assets (``icon``, ``banner``, ``splash`` or ``discovery_splash``) is a lottie sticker (see :func:`Sticker.read`).
+            At least one of the assets (``icon``, ``banner``, ``splash`` or ``discovery_splash``)
+            is a lottie sticker (see :func:`Sticker.read`),
+            or one of the parameters ``default_notifications``, ``verification_level``,
+            ``explicit_content_filter``, or ``system_channel_flags`` was of the incorrect type.
+        ValueError
+            ``community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters,
+            or if you are not the owner of the guild and request an ownership transfer,
+            or the image format passed in to ``icon`` is invalid.
 
         Returns
         -------
@@ -1871,9 +1891,7 @@ class Guild(Hashable):
 
         if default_notifications is not MISSING:
             if not isinstance(default_notifications, NotificationLevel):
-                raise InvalidArgument(
-                    "default_notifications field must be of type NotificationLevel"
-                )
+                raise TypeError("default_notifications field must be of type NotificationLevel")
             fields["default_message_notifications"] = default_notifications.value
 
         if afk_channel is not MISSING:
@@ -1902,27 +1920,25 @@ class Guild(Hashable):
 
         if owner is not MISSING:
             if self.owner_id != self._state.self_id:
-                raise InvalidArgument("To transfer ownership you must be the owner of the guild.")
+                raise ValueError("To transfer ownership you must be the owner of the guild.")
 
             fields["owner_id"] = owner.id
 
         if verification_level is not MISSING:
             if not isinstance(verification_level, VerificationLevel):
-                raise InvalidArgument("verification_level field must be of type VerificationLevel")
+                raise TypeError("verification_level field must be of type VerificationLevel")
 
             fields["verification_level"] = verification_level.value
 
         if explicit_content_filter is not MISSING:
             if not isinstance(explicit_content_filter, ContentFilter):
-                raise InvalidArgument("explicit_content_filter field must be of type ContentFilter")
+                raise TypeError("explicit_content_filter field must be of type ContentFilter")
 
             fields["explicit_content_filter"] = explicit_content_filter.value
 
         if system_channel_flags is not MISSING:
             if not isinstance(system_channel_flags, SystemChannelFlags):
-                raise InvalidArgument(
-                    "system_channel_flags field must be of type SystemChannelFlags"
-                )
+                raise TypeError("system_channel_flags field must be of type SystemChannelFlags")
 
             fields["system_channel_flags"] = system_channel_flags.value
 
@@ -1932,7 +1948,7 @@ class Guild(Hashable):
                 if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
                     features.append("COMMUNITY")
                 else:
-                    raise InvalidArgument(
+                    raise ValueError(
                         "community field requires both rules_channel and public_updates_channel fields to be provided"
                     )
 
@@ -2515,6 +2531,9 @@ class Guild(Hashable):
         .. versionchanged:: 1.4
             The ``roles`` keyword-only parameter was added.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         days: :class:`int`
@@ -2536,7 +2555,7 @@ class Guild(Hashable):
             You do not have permissions to prune members.
         HTTPException
             An error occurred while pruning members.
-        InvalidArgument
+        TypeError
             An integer was not passed for ``days``.
 
         Returns
@@ -2546,7 +2565,7 @@ class Guild(Hashable):
             then this returns ``None``.
         """
         if not isinstance(days, int):
-            raise InvalidArgument(
+            raise TypeError(
                 f"Expected int for ``days``, received {days.__class__.__name__} instead."
             )
 
@@ -2615,6 +2634,9 @@ class Guild(Hashable):
         pruning members, it returns how many members it would prune
         from the guild had it been called.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         days: :class:`int`
@@ -2631,7 +2653,7 @@ class Guild(Hashable):
             You do not have permissions to prune members.
         HTTPException
             An error occurred while fetching the prune members estimate.
-        InvalidArgument
+        TypeError
             An integer was not passed for ``days``.
 
         Returns
@@ -2640,7 +2662,7 @@ class Guild(Hashable):
             The number of members estimated to be pruned.
         """
         if not isinstance(days, int):
-            raise InvalidArgument(
+            raise TypeError(
                 f"Expected int for ``days``, received {days.__class__.__name__} instead."
             )
 
@@ -3022,6 +3044,8 @@ class Guild(Hashable):
             An error occurred creating an emoji.
         TypeError
             The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
+        ValueError
+            Wrong image format passed for ``image``.
 
         Returns
         -------
@@ -3186,6 +3210,9 @@ class Guild(Hashable):
         .. versionchanged:: 1.6
             Can now pass ``int`` to ``colour`` keyword-only parameter.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -3220,10 +3247,9 @@ class Guild(Hashable):
             You do not have permissions to create the role.
         HTTPException
             Creating the role failed.
-        InvalidArgument
-            An invalid keyword argument was given.
         TypeError
-            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
+            An invalid keyword argument was given,
+            or the ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -3275,6 +3301,9 @@ class Guild(Hashable):
 
         .. versionadded:: 1.4
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Example:
 
         .. code-block:: python3
@@ -3301,7 +3330,7 @@ class Guild(Hashable):
             You do not have permissions to move the roles.
         HTTPException
             Moving the roles failed.
-        InvalidArgument
+        TypeError
             An invalid keyword argument was given.
 
         Returns
@@ -3310,7 +3339,7 @@ class Guild(Hashable):
             A list of all the roles in the guild.
         """
         if not isinstance(positions, dict):
-            raise InvalidArgument("positions parameter expects a dict.")
+            raise TypeError("positions parameter expects a dict.")
 
         role_positions: List[Any] = []
         for role, position in positions.items():
@@ -3471,7 +3500,7 @@ class Guild(Hashable):
     def audit_logs(
         self,
         *,
-        limit: int = 100,
+        limit: Optional[int] = 100,
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
         user: Snowflake = None,
