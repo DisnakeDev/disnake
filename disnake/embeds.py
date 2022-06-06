@@ -733,7 +733,7 @@ class Embed:
             result["fields"] = self._fields
 
         # deal with basic convenience wrappers
-        if isinstance(self.colour, Colour):
+        if self.colour:
             result["color"] = self.colour.value
 
         if self._timestamp:

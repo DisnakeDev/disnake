@@ -72,6 +72,16 @@ def test_len(embed: Embed) -> None:
     assert len(embed) == 69
 
 
+def test_color_zero() -> None:
+    e = Embed()
+    assert not e
+
+    # color=0 should be applied to bool and dict
+    e.color = 0
+    assert e
+    assert e.to_dict() == {"color": 0, **_BASE}
+
+
 def test_default_color() -> None:
     try:
         # color applies if set before init
