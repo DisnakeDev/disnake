@@ -53,6 +53,14 @@ def test_init_all(embed: Embed) -> None:
     assert bool(embed)
 
 
+def test_type_default() -> None:
+    # type for new embeds should be set to default value
+    assert Embed().type == "rich"
+
+    # type shouldn't be set in from_dict if dict didn't contain a type
+    assert Embed.from_dict({}).type is None
+
+
 def test_timestamp_naive(embed: Embed) -> None:
     embed.timestamp = datetime.now()
     assert embed.timestamp.tzinfo is not None

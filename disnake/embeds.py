@@ -143,10 +143,10 @@ class Embed:
     ----------
     title: Optional[:class:`str`]
         The title of the embed.
-    type: :class:`str`
+    type: Optional[:class:`str`]
         The type of embed. Usually "rich".
-        Possible strings for embed types can be found on discord's
-        `api docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-types>`_
+        Possible strings for embed types can be found on Discord's
+        `api docs <https://discord.com/developers/docs/resources/channel#embed-object-embed-types>`__.
     description: Optional[:class:`str`]
         The description of the embed.
     url: Optional[:class:`str`]
@@ -185,7 +185,7 @@ class Embed:
         self,
         *,
         title: Optional[Any] = None,
-        type: EmbedType = "rich",
+        type: Optional[EmbedType] = "rich",
         description: Optional[Any] = None,
         url: Optional[Any] = None,
         timestamp: Optional[datetime.datetime] = None,
@@ -193,7 +193,7 @@ class Embed:
         color: Optional[Union[int, Colour]] = MISSING,
     ):
         self.title: Optional[str] = str(title) if title is not None else None
-        self.type: EmbedType = type
+        self.type: Optional[EmbedType] = type
         self.description: Optional[str] = str(description) if description is not None else None
         self.url: Optional[str] = str(url) if url is not None else None
 
@@ -236,7 +236,7 @@ class Embed:
         # fill in the basic fields
 
         self.title = str(title) if (title := data.get("title")) is not None else None
-        self.type = data.get("type", "rich")
+        self.type = data.get("type")
         self.description = (
             str(description) if (description := data.get("description")) is not None else None
         )
