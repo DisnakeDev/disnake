@@ -47,7 +47,7 @@ from typing import (
 )
 
 from . import utils
-from .components import _component_factory
+from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
@@ -68,7 +68,6 @@ from .utils import MISSING, escape_mentions
 if TYPE_CHECKING:
     from .abc import GuildChannel, MessageableChannel, Snowflake
     from .channel import DMChannel
-    from .components import Component
     from .guild import GuildMessageable
     from .mentions import AllowedMentions
     from .role import Role
@@ -91,7 +90,7 @@ if TYPE_CHECKING:
     from .types.raw_models import ReactionActionEvent
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
-    from .ui.action_row import Components
+    from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
 
     MR = TypeVar("MR", bound="MessageReference")
@@ -141,7 +140,7 @@ async def _edit_handler(
     delete_after: Optional[float] = None,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     view: Optional[View] = MISSING,
-    components: Optional[Components] = MISSING,
+    components: Optional[Components[MessageUIComponent]] = MISSING,
 ) -> Message:
     if embed is not MISSING and embeds is not MISSING:
         raise TypeError("Cannot mix embed and embeds keyword arguments.")
@@ -907,8 +906,9 @@ class Message(Hashable):
         self.stickers: List[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components: List[Component] = [
-            _component_factory(d) for d in data.get("components", [])
+        self.components: List[ActionRow[MessageComponent]] = [
+            _component_factory(d, type=ActionRow[MessageComponent])
+            for d in data.get("components", [])
         ]
 
         inter_payload = data.get("interaction")
@@ -1129,7 +1129,9 @@ class Message(Hashable):
                     self.role_mentions.append(role)
 
     def _handle_components(self, components: List[ComponentPayload]):
-        self.components = [_component_factory(d) for d in components]
+        self.components = [
+            _component_factory(d, type=ActionRow[MessageComponent]) for d in components
+        ]
 
     def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
         self.guild = new_guild
@@ -1430,7 +1432,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1446,7 +1448,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1462,7 +1464,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1478,7 +1480,7 @@ class Message(Hashable):
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 

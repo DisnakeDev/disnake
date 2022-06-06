@@ -87,7 +87,7 @@ if TYPE_CHECKING:
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
     )
-    from ..ui.action_row import Components
+    from ..ui.action_row import Components, MessageUIComponent, ModalUIComponent
     from ..ui.modal import Modal
     from ..ui.view import View
     from .message import MessageInteraction
@@ -363,7 +363,7 @@ class Interaction:
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> InteractionMessage:
         """|coro|
@@ -543,7 +543,7 @@ class Interaction:
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components = MISSING,
+        components: Components[MessageUIComponent] = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
         suppress_embeds: bool = False,
@@ -776,7 +776,7 @@ class InteractionResponse:
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components = MISSING,
+        components: Components[MessageUIComponent] = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
         suppress_embeds: bool = False,
@@ -943,7 +943,7 @@ class InteractionResponse:
         attachments: Optional[List[Attachment]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
     ) -> None:
         """|coro|
 
@@ -1165,7 +1165,7 @@ class InteractionResponse:
         *,
         title: str,
         custom_id: str,
-        components: Components,
+        components: Components[ModalUIComponent],
     ) -> None:
         ...
 
@@ -1175,7 +1175,7 @@ class InteractionResponse:
         *,
         title: str = None,
         custom_id: str = None,
-        components: Components = None,
+        components: Components[ModalUIComponent] = None,
     ) -> None:
         """|coro|
 
@@ -1365,7 +1365,7 @@ class InteractionMessage(Message):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
@@ -1379,7 +1379,7 @@ class InteractionMessage(Message):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
@@ -1393,7 +1393,7 @@ class InteractionMessage(Message):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
@@ -1407,7 +1407,7 @@ class InteractionMessage(Message):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...

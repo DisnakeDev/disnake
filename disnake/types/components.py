@@ -34,6 +34,9 @@ ButtonStyle = Literal[1, 2, 3, 4, 5]
 TextInputStyle = Literal[1, 2]
 
 
+Component = Union["ActionRow", "ButtonComponent", "SelectMenu", "TextInput"]
+
+
 class ActionRow(TypedDict):
     type: Literal[1]
     components: List[Component]
@@ -95,6 +98,3 @@ class TextInput(_TextInputOptional):
     custom_id: str
     style: TextInputStyle
     label: str
-
-
-Component = Union[ActionRow, ButtonComponent, SelectMenu, TextInput]
