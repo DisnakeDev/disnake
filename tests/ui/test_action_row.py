@@ -86,8 +86,7 @@ class TestActionRow:
         if TYPE_CHECKING:
             ActionRow().add_select
             ActionRow.with_message_components().add_select
-            # should not work  # TODO: revert when modal select support is added.
-            ActionRow.with_modal_components().add_select  # type: ignore
+            ActionRow.with_modal_components().add_select
 
     def test_add_text_input(self):
         r = ActionRow.with_modal_components()
@@ -202,14 +201,13 @@ class TestActionRow:
         assert_type(ActionRow(button1, select), ActionRow[MessageUIComponent])
         assert_type(ActionRow(select, button1), ActionRow[MessageUIComponent])
 
+        assert_type(ActionRow(select, text_input), ActionRow[ModalUIComponent])
+        assert_type(ActionRow(text_input, select), ActionRow[ModalUIComponent])
+
         # these should fail to type-check - if they pass, there will be an error
         # because of the unnecessary ignore comment
         ActionRow(button1, text_input)  # type: ignore
         ActionRow(text_input, button1)  # type: ignore
-
-        # TODO: revert when modal select support is added.
-        assert_type(ActionRow(select, text_input), ActionRow[ModalUIComponent])  # type: ignore
-        assert_type(ActionRow(text_input, select), ActionRow[ModalUIComponent])  # type: ignore
 
 
 @pytest.mark.parametrize(

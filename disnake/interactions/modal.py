@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 
-from ..components import ActionRow, ModalComponent, TextInput
+from ..components import ActionRow, ModalComponent, SelectMenu, TextInput
 from ..message import Message
 from ..utils import cached_slot_property
 from .base import Interaction
@@ -89,7 +89,12 @@ class ModalInteraction(Interaction):
         The interaction client.
     """
 
-    __slots__ = ("data", "message", "_cs_text_values")
+    __slots__ = (
+        "data",
+        "message",
+        "_cs_text_values",
+        "_cs_select_values",
+    )
 
     def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
@@ -104,7 +109,7 @@ class ModalInteraction(Interaction):
     def walk_components(self) -> Generator[ModalComponent, None, None]:
         """Returns a generator that yields components from action rows one by one.
 
-        :return type: Generator[:class:`TextInput`, None, None]
+        :return type: Generator[Union[:class:`TextInput`,:class:`SelectMenu`], None, None]
         """
         for action_row in self.data._components:
             yield from action_row.children
@@ -117,6 +122,19 @@ class ModalInteraction(Interaction):
             component.custom_id: component.value or ""
             for component in self.walk_components()
             if isinstance(component, TextInput)
+        }
+
+    @cached_slot_property("_cs_select_values")
+    def select_values(self) -> Dict[str, List[str]]:
+        """Dict[:class:`str`, :class:`str`]: Returns the select values the user has entered in the modal.
+        This is a dict of the form ``{custom_id: value}``.
+
+        .. versionadded:: 2.6
+        """
+        return {
+            component.custom_id: component.values
+            for component in self.walk_components()
+            if isinstance(component, SelectMenu)
         }
 
     @property

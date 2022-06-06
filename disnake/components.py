@@ -68,11 +68,7 @@ C = TypeVar("C", bound="Component")
 
 MessageComponent = Union["Button", "SelectMenu"]
 
-if TYPE_CHECKING:  # TODO: remove when we add modal select support
-    from typing_extensions import TypeAlias
-
-# ModalComponent = Union["TextInput", "SelectMenu"]
-ModalComponent: TypeAlias = "TextInput"
+ModalComponent = Union["TextInput", "SelectMenu"]
 NestedComponent = Union[MessageComponent, ModalComponent]
 ComponentT = TypeVar("ComponentT", bound=NestedComponent)
 
@@ -266,6 +262,7 @@ class SelectMenu(Component):
         "max_values",
         "options",
         "disabled",
+        "values",
     )
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
@@ -279,6 +276,7 @@ class SelectMenu(Component):
         self.options: List[SelectOption] = [
             SelectOption.from_dict(option) for option in data.get("options", [])
         ]
+        self.values: List[str] = data.get("values", [])
         self.disabled: bool = data.get("disabled", False)
 
     def to_dict(self) -> SelectMenuPayload:

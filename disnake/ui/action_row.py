@@ -71,7 +71,7 @@ __all__ = (
 
 
 MessageUIComponent = Union[Button[Any], Select[Any]]
-ModalUIComponent = TextInput  # Union[TextInput, Select[Any]]
+ModalUIComponent = Union[TextInput, Select[Any]]
 UIComponentT = TypeVar("UIComponentT", bound=WrappedComponent)
 StrictUIComponentT = TypeVar("StrictUIComponentT", MessageUIComponent, ModalUIComponent)
 
@@ -139,7 +139,7 @@ class ActionRow(Generic[UIComponentT]):
     def __init__(self: ActionRow[StrictUIComponentT], *components: StrictUIComponentT):
         ...
 
-    def __init__(self, *components: UIComponentT):  # type: ignore
+    def __init__(self, *components: UIComponentT):
         self._children: List[UIComponentT] = []
 
         for component in components:
@@ -269,7 +269,7 @@ class ActionRow(Generic[UIComponentT]):
     def add_select(
         self: Union[
             ActionRow[MessageUIComponent],
-            # ActionRow[ModalUIComponent],
+            ActionRow[ModalUIComponent],
             ActionRow[WrappedComponent],
         ],
         *,
