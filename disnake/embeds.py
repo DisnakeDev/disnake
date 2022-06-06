@@ -222,11 +222,8 @@ class Embed:
         """Converts a :class:`dict` to a :class:`Embed` provided it is in the
         format that Discord expects it to be in.
 
-        You can find out about this format in the `official Discord documentation`__.
-
-        .. _DiscordDocs: https://discord.com/developers/docs/resources/channel#embed-object
-
-        __ DiscordDocs_
+        You can find out about this format in the
+        `official Discord documentation <https://discord.com/developers/docs/resources/channel#embed-object>`__.
 
         Parameters
         ----------
@@ -238,37 +235,27 @@ class Embed:
 
         # fill in the basic fields
 
-        self.title = data.get("title", None)
+        self.title = str(title) if (title := data.get("title")) is not None else None
         self.type = data.get("type", "rich")
-        self.description = data.get("description", None)
-        self.url = data.get("url", None)
-
-        if self.title is not None:
-            self.title = str(self.title)
-
-        if self.description is not None:
-            self.description = str(self.description)
-
-        if self.url is not None:
-            self.url = str(self.url)
+        self.description = (
+            str(description) if (description := data.get("description")) is not None else None
+        )
+        self.url = str(url) if (url := data.get("url")) is not None else None
 
         self._files = {}
 
         # try to fill in the more rich fields
 
-        color_value: Optional[int] = data.get("color", None)
-        self.colour = color_value
+        self.colour = data.get("color")
+        self.timestamp = utils.parse_time(data.get("timestamp"))
 
-        ts_value = data.get("timestamp", None)
-        self.timestamp = utils.parse_time(ts_value)
-
-        self._thumbnail = data.get("thumbnail", None)
-        self._video = data.get("video", None)
-        self._provider = data.get("provider", None)
-        self._author = data.get("author", None)
-        self._image = data.get("image", None)
-        self._footer = data.get("footer", None)
-        self._fields = data.get("fields", None)
+        self._thumbnail = data.get("thumbnail")
+        self._video = data.get("video")
+        self._provider = data.get("provider")
+        self._author = data.get("author")
+        self._image = data.get("image")
+        self._footer = data.get("footer")
+        self._fields = data.get("fields")
 
         return self
 
