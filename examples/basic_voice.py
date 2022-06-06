@@ -3,7 +3,7 @@
 import asyncio
 
 import disnake
-import youtube_dl
+import youtube_dl  # type: ignore
 from disnake.ext import commands
 
 # Suppress noise about console usage from errors
