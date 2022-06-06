@@ -217,14 +217,14 @@ class LoginFailure(ClientException):
 
 class SessionStartLimitReached(ClientException):
     """Exception that's raised when :meth:`Client.connect` function
-    fails to connect to discord due to the session start limit reached.
+    fails to connect to Discord due to the session start limit being reached.
 
     .. versionadded:: 2.6
 
     Attributes
     ----------
     session_start_limit: :class:`.SessionStartLimit`
-        The current situation of the session start limit.
+        The current state of the session start limit.
 
     """
 
