@@ -304,3 +304,9 @@ def test_copy(embed: Embed, file: File) -> None:
     # shallow copy, but `_files` should be copied
     assert embed._files == copy._files
     assert embed._files is not copy._files
+
+
+def test_copy_empty() -> None:
+    e = Embed.from_dict({})
+    copy = e.copy()
+    assert e.to_dict() == copy.to_dict() == {}
