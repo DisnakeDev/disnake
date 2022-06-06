@@ -753,7 +753,7 @@ class Client:
         is not resumed until the WebSocket connection is terminated.
 
         If the client doesn't have enough connects remaining in the current 24-hour window and ``ignore_session_start_limit`` is ``False``,
-        this will raise a :class:`SessionStartLimitReached` exception rather than connecting and Discord resetting the
+        this will raise a :exc:`SessionStartLimitReached` exception rather than connecting and Discord resetting the
         token. However, if ``ignore_session_start_limit`` is ``True``, this will connect regardless.
 
         .. versionchanged:: 2.6
