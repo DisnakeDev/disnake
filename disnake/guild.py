@@ -2084,16 +2084,51 @@ class Guild(Hashable):
         )
         return GuildScheduledEvent(state=self._state, data=data)
 
+    @overload
     async def create_scheduled_event(
         self,
         *,
         name: str,
+        entity_type: Literal[GuildScheduledEventEntityType.external],
         scheduled_start_time: datetime.datetime,
+        scheduled_end_time: datetime.datetime,
+        entity_metadata: GuildScheduledEventMetadata,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        description: str = ...,
+        image: AssetBytes = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    @overload
+    async def create_scheduled_event(
+        self,
+        *,
+        name: str,
+        entity_type: Literal[
+            GuildScheduledEventEntityType.voice,
+            GuildScheduledEventEntityType.stage_instance,
+        ],
+        channel: Snowflake,
+        scheduled_start_time: datetime.datetime,
+        scheduled_end_time: datetime.datetime = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        description: str = ...,
+        image: AssetBytes = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    async def create_scheduled_event(
+        self,
+        *,
+        name: str,
         entity_type: GuildScheduledEventEntityType,
-        privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
-        channel: Snowflake = MISSING,
-        entity_metadata: GuildScheduledEventMetadata = MISSING,
+        scheduled_start_time: datetime.datetime,
         scheduled_end_time: datetime.datetime = MISSING,
+        channel: Snowflake = MISSING,
+        privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
+        entity_metadata: GuildScheduledEventMetadata = MISSING,
         description: str = MISSING,
         image: AssetBytes = MISSING,
         reason: Optional[str] = None,

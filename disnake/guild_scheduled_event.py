@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, overload
 
 from .asset import Asset
 from .enums import (
@@ -261,6 +261,67 @@ class GuildScheduledEvent(Hashable):
         """
         await self._state.http.delete_guild_scheduled_event(self.guild_id, self.id)
 
+    # note: unlike `Guild.create_scheduled_event`, we don't remove `entity_type`-specific defaults
+    # from parameters in the overloads here, as the entity_type might be the same as before,
+    # in which case those parameters don't have to be passed
+
+    # no entity_type specified
+    @overload
+    async def edit(
+        self,
+        *,
+        name: str = ...,
+        description: Optional[str] = ...,
+        image: Optional[AssetBytes] = ...,
+        channel: Optional[Snowflake] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        scheduled_start_time: datetime = ...,
+        scheduled_end_time: datetime = ...,
+        entity_metadata: Optional[GuildScheduledEventMetadata] = ...,
+        status: GuildScheduledEventStatus = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    # new entity_type is `external`, no channel
+    @overload
+    async def edit(
+        self,
+        *,
+        entity_type: Literal[GuildScheduledEventEntityType.external],
+        name: str = ...,
+        description: Optional[str] = ...,
+        image: Optional[AssetBytes] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        scheduled_start_time: datetime = ...,
+        scheduled_end_time: datetime = ...,
+        entity_metadata: Optional[GuildScheduledEventMetadata] = ...,
+        status: GuildScheduledEventStatus = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    # new entity_type is `voice` or `stage_instance`, no entity_metadata
+    @overload
+    async def edit(
+        self,
+        *,
+        entity_type: Literal[
+            GuildScheduledEventEntityType.voice,
+            GuildScheduledEventEntityType.stage_instance,
+        ],
+        name: str = ...,
+        description: Optional[str] = ...,
+        image: Optional[AssetBytes] = ...,
+        channel: Optional[Snowflake] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        scheduled_start_time: datetime = ...,
+        scheduled_end_time: datetime = ...,
+        status: GuildScheduledEventStatus = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
     async def edit(
         self,
         *,
@@ -282,7 +343,6 @@ class GuildScheduledEvent(Hashable):
 
         If updating ``entity_type`` to :class:`GuildScheduledEventEntityType.external`:
 
-        - ``channel`` should be set to ``None`` or ignored
         - ``entity_metadata`` with a location field must be provided
         - ``scheduled_end_time`` must be provided
 
