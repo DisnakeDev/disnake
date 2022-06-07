@@ -752,10 +752,6 @@ class Client:
         event system and miscellaneous aspects of the library. Control
         is not resumed until the WebSocket connection is terminated.
 
-        If the client doesn't have enough connects remaining in the current 24-hour window and ``ignore_session_start_limit`` is ``False``,
-        this will raise a :exc:`.SessionStartLimitReached` exception rather than connecting and Discord resetting the
-        token. However, if ``ignore_session_start_limit`` is ``True``, this will connect regardless.
-
         .. versionchanged:: 2.6
             Added usage of :class:`.SessionStartLimit` when connecting to the API.
             Added the ``ignore_session_start_limit`` parameter.
@@ -782,6 +778,12 @@ class Client:
             is thrown then there is a Discord API outage.
         ConnectionClosed
             The websocket connection has been terminated.
+        SessionStartLimitReached
+            If the client doesn't have enough connects remaining in the current 24-hour window
+            and ``ignore_session_start_limit`` is ``False`` this will be raised rather than
+            connecting to the gateawy and Discord resetting the token.
+            However, if ``ignore_session_start_limit`` is ``True``, the client will connect regardless
+            and this exception will not be raised.
         """
         _, gateway, session_start_limit = await self.http.get_bot_gateway()
         self.session_start_limit = SessionStartLimit(session_start_limit)
