@@ -527,7 +527,7 @@ def handle_message_parameters_dict(
         for embed in embeds:
             if embed._files:
                 files = files or []
-                files += embed._files
+                files.extend(embed._files.values())
 
     if content is not MISSING:
         payload["content"] = str(content) if content is not None else None
