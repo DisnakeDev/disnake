@@ -326,6 +326,8 @@ Helper Functions
 
 .. autofunction:: disnake.ext.commands.Param
 
+.. autofunction:: disnake.ext.commands.option_enum
+
 .. autofunction:: disnake.ext.commands.inject
 
 .. autofunction:: disnake.ext.commands.register_injection
@@ -688,7 +690,7 @@ Checks
 .. autofunction:: disnake.ext.commands.is_nsfw(,)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.guild_permissions(guild_id, *, roles=None, users=None, owner=None)
+.. autofunction:: disnake.ext.commands.default_member_permissions
     :decorator:
 
 .. _ext_commands_api_context:
@@ -755,7 +757,7 @@ Converters
 .. autoclass:: disnake.ext.commands.CategoryChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.StoreChannelConverter
+.. autoclass:: disnake.ext.commands.ForumChannelConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.ThreadConverter

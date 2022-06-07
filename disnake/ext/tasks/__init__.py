@@ -280,9 +280,9 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        \*args
+        *args
             The arguments to use.
-        \*\*kwargs
+        **kwargs
             The keyword arguments to use.
         """
         if self._injected is not None:
@@ -296,9 +296,9 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        \*args
+        *args
             The arguments to use.
-        \*\*kwargs
+        **kwargs
             The keyword arguments to use.
 
         Raises
@@ -327,7 +327,7 @@ class Loop(Generic[LF]):
         """
         Gracefully stops the task from running.
 
-        Unlike :meth:`cancel`\, this allows the task to finish its
+        Unlike :meth:`cancel`\\, this allows the task to finish its
         current iteration before gracefully exiting.
 
         .. note::
@@ -364,9 +364,9 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        \*args
+        *args
             The arguments to use.
-        \*\*kwargs
+        **kwargs
             The keyword arguments to use.
         """
 
@@ -383,7 +383,7 @@ class Loop(Generic[LF]):
         Adds exception types to be handled during the reconnect logic.
 
         By default the exception types handled are those handled by
-        :meth:`disnake.Client.connect`\, which includes a lot of internet disconnection
+        :meth:`disnake.Client.connect`\\, which includes a lot of internet disconnection
         errors.
 
         This function is useful if you're interacting with a 3rd party library that
@@ -391,7 +391,7 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        \*exceptions: Type[:class:`BaseException`]
+        *exceptions: Type[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Raises
@@ -422,7 +422,7 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        \*exceptions: Type[:class:`BaseException`]
+        *exceptions: Type[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Returns

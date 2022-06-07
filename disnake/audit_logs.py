@@ -42,6 +42,7 @@ from typing import (
 )
 
 from . import abc, enums, utils
+from .app_commands import ApplicationCommandPermissions
 from .asset import Asset
 from .colour import Colour
 from .invite import Invite
@@ -59,6 +60,7 @@ __all__ = (
 if TYPE_CHECKING:
     import datetime
 
+    from .app_commands import APIApplicationCommand
     from .emoji import Emoji
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
@@ -70,6 +72,7 @@ if TYPE_CHECKING:
     from .types.audit_log import (
         AuditLogChange as AuditLogChangePayload,
         AuditLogEntry as AuditLogEntryPayload,
+        _AuditLogChange_ApplicationCommandPermissions as AuditLogChangeAppCmdPermsPayload,
     )
     from .types.channel import PermissionOverwrite as PermissionOverwritePayload
     from .types.role import Role as RolePayload
@@ -168,9 +171,17 @@ def _enum_transformer(enum: Type[T]) -> Callable[[AuditLogEntry, int], T]:
     return _transform
 
 
-def _transform_type(entry: AuditLogEntry, data: int) -> Union[enums.ChannelType, enums.StickerType]:
-    if entry.action.name.startswith("sticker_"):
+def _transform_type(
+    entry: AuditLogEntry, data: Any
+) -> Union[enums.ChannelType, enums.StickerType, enums.WebhookType, str, int]:
+    action_name = entry.action.name
+    if action_name.startswith("sticker_"):
         return enums.try_enum(enums.StickerType, data)
+    elif action_name.startswith("webhook_"):
+        return enums.try_enum(enums.WebhookType, data)
+    elif action_name.startswith("integration_") or action_name.startswith("overwrite_"):
+        # integration: str, overwrite: int
+        return data
     else:
         return enums.try_enum(enums.ChannelType, data)
 
@@ -187,6 +198,14 @@ def _transform_privacy_level(
     if entry.action.target_type == "guild_scheduled_event":
         return enums.try_enum(enums.GuildScheduledEventPrivacyLevel, data)
     return enums.try_enum(enums.StagePrivacyLevel, data)
+
+
+def _transform_guild_scheduled_event_image(
+    entry: AuditLogEntry, data: Optional[str]
+) -> Optional[Asset]:
+    if data is None:
+        return None
+    return Asset._from_guild_scheduled_event_image(entry._state, entry._target_id, data)  # type: ignore
 
 
 class AuditLogDiff:
@@ -221,6 +240,7 @@ class AuditLogChanges:
         'deny':                          (None, _transform_permissions),
         'permissions':                   (None, _transform_permissions),
         'id':                            (None, _transform_snowflake),
+        'application_id':                (None, _transform_snowflake),
         'color':                         ('colour', _transform_color),
         'owner_id':                      ('owner', _transform_member_id),
         'inviter_id':                    ('inviter', _transform_member_id),
@@ -241,9 +261,9 @@ class AuditLogChanges:
         'tags':                          ('emoji', None),
         'default_message_notifications': ('default_notifications', _enum_transformer(enums.NotificationLevel)),
         'communication_disabled_until':  ('timeout', _transform_datetime),
-        'region':                        (None, _enum_transformer(enums.VoiceRegion)),
-        'rtc_region':                    (None, _enum_transformer(enums.VoiceRegion)),
+        'image_hash':                    ('image', _transform_guild_scheduled_event_image),
         'video_quality_mode':            (None, _enum_transformer(enums.VideoQualityMode)),
+        'preferred_locale':              (None, _enum_transformer(enums.Locale)),
         'privacy_level':                 (None, _transform_privacy_level),
         'format_type':                   (None, _enum_transformer(enums.StickerFormatType)),
         'entity_type':                   (None, _enum_transformer(enums.GuildScheduledEventEntityType)),
@@ -265,6 +285,13 @@ class AuditLogChanges:
                 continue
             elif attr == "$remove":
                 self._handle_role(self.after, self.before, entry, elem["new_value"])  # type: ignore
+                continue
+
+            # special case for application command permissions update
+            if entry.action == enums.AuditLogAction.application_command_permission_update:
+                self._handle_command_permissions(
+                    entry, cast("AuditLogChangeAppCmdPermsPayload", elem)
+                )
                 continue
 
             try:
@@ -333,6 +360,28 @@ class AuditLogChanges:
 
         setattr(second, "roles", data)
 
+    def _handle_command_permissions(
+        self,
+        entry: AuditLogEntry,
+        data: AuditLogChangeAppCmdPermsPayload,
+    ) -> None:
+        guild_id = entry.guild.id
+        entity_id = int(data["key"])
+
+        if not hasattr(self.before, "command_permissions"):
+            self.before.command_permissions = {}
+        if (old := data.get("old_value")) is not None:
+            self.before.command_permissions[entity_id] = ApplicationCommandPermissions(
+                data=old, guild_id=guild_id
+            )
+
+        if not hasattr(self.after, "command_permissions"):
+            self.after.command_permissions = {}
+        if (new := data.get("new_value")) is not None:
+            self.after.command_permissions[entity_id] = ApplicationCommandPermissions(
+                data=new, guild_id=guild_id
+            )
+
 
 class _AuditLogProxyMemberPrune:
     delete_member_days: int
@@ -385,7 +434,7 @@ class AuditLogEntry(Hashable):
     action: :class:`AuditLogAction`
         The action that was done.
     user: :class:`abc.User`
-        The user who initiated this action. Usually a :class:`Member`\, unless gone
+        The user who initiated this action. Usually a :class:`Member`\\, unless gone
         then it's a :class:`User`.
     id: :class:`int`
         The entry ID.
@@ -510,6 +559,7 @@ class AuditLogEntry(Hashable):
         GuildSticker,
         Thread,
         GuildScheduledEvent,
+        APIApplicationCommand,
         Object,
         None,
     ]:
@@ -524,9 +574,9 @@ class AuditLogEntry(Hashable):
             return converter(self._target_id)
 
     @utils.cached_property
-    def category(self) -> enums.AuditLogActionCategory:
+    def category(self) -> Optional[enums.AuditLogActionCategory]:
         """Optional[:class:`AuditLogActionCategory`]: The category of the action, if applicable."""
-        return self.action.category  # type: ignore
+        return self.action.category
 
     @utils.cached_property
     def changes(self) -> AuditLogChanges:
@@ -596,3 +646,12 @@ class AuditLogEntry(Hashable):
         self, target_id: int
     ) -> Union[GuildScheduledEvent, Object]:
         return self.guild.get_scheduled_event(target_id) or Object(id=target_id)
+
+    def _convert_target_application_command(
+        self, target_id: int
+    ) -> Union[APIApplicationCommand, Object]:
+        return (
+            self._state._get_guild_application_command(self.guild.id, target_id)
+            or self._state._get_global_application_command(target_id)
+            or Object(id=target_id)
+        )

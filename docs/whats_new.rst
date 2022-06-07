@@ -12,6 +12,230 @@ This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
 
+.. _vp2p5p1:
+
+v2.5.1
+------
+
+Bug Fixes
+~~~~~~~~~
+
+- |commands| Fix :func:`~ext.commands.InvokableSlashCommand.autocomplete` decorator in cogs (:issue:`521`)
+
+
+.. _vp2p5p0:
+
+v2.5.0
+---------
+
+This version adds support for **API v10** (which comes with a few breaking changes),
+**forum channels**, **localizations**, **permissions v2**, improves API coverage by adding support for previously
+missing features like guild previews, widgets, or welcome screens,
+and contains several miscellaneous enhancements and bugfixes.
+
+Regarding the message content intent:
+Note that earlier versions will continue working fine after the message content intent deadline (August 31st 2022),
+as long as the intent is enabled in the developer portal. However, from this version (``2.5.0``) onward, the intent needs to be
+enabled in the developer portal *and* your code.
+See `this page <https://guide.disnake.dev/popular-topics/intents#why-do-most-messages-have-no-content>`_ of the guide for more information.
+If you do not have access to the intent yet, you can temporarily continue using API v9 by calling ``disnake.http._workaround_set_api_version(9)`` before connecting,
+which will keep sending message content before the intent deadline, even with the intent disabled.
+
+
+Breaking Changes
+~~~~~~~~~~~~~~~~~
+
+- The :attr:`~Intents.message_content` intent is now required to receive message content and related fields, see above (:issue:`353`)
+- The new permissions v2 system revamped application command permissions, with the most notable changes being the
+  removal of ``default_permission`` and ``commands.guild_permissions`` in favor of new fields/methods - see below for all new changes (:issue:`405`)
+- :func:`TextChannel.create_thread` now requires either a ``message`` or a ``type`` parameter (:issue:`355`)
+- :func:`GuildScheduledEvent.fetch_users` and :func:`Guild.bans` now return an async iterator instead of a list of users (:issue:`428`, :issue:`442`)
+- :func:`Guild.audit_logs` no longer supports the ``oldest_first`` parameter (:issue:`473`)
+- Store channels have been removed as they're not supported by Discord any longer (:issue:`438`)
+- :func:`on_thread_join` will no longer be invoked when a new thread is created, see :func:`on_thread_create` (:issue:`445`)
+- The voice region enum was replaced with a generic :class:`VoiceRegion` data class (:issue:`477`)
+- ``locale`` attributes are now of type :class:`Locale` instead of :class:`str` (:issue:`439`)
+- ``Invite.revoked`` and ``Thread.archiver_id`` have been removed (deprecated in 2.4) (:issue:`455`)
+- Slash command names and option names are no longer automatically converted to lowercase, an :class:`InvalidArgument` exception is now raised instead (:issue:`422`)
+- The ``interaction`` parameter of :func:`ui.Item.callback` can no longer be passed as a kwarg (:issue:`311`)
+- The ``youtube``, ``awkword`` and ``sketchy_artist`` :class:`PartyType`\s no longer work and have been removed (:issue:`408`, :issue:`409`)
+- Trying to defer an interaction response that does not support deferring (e.g. autocomplete) will now raise a :class:`TypeError` (:issue:`505`)
+- |commands| Failure to convert an input parameter annotated as :class:`~ext.commands.LargeInt` now
+  raises a :exc:`~ext.commands.LargeIntConversionFailure` (:issue:`362`)
+
+
+Deprecations
+~~~~~~~~~~~~~
+
+- Public stages and stage discoverability are deprecated and no longer supported (:issue:`287`)
+- Voice regions on guild level are deprecated and no longer have any effect;
+  they should be set on a per-channel basis instead (:issue:`357`, :issue:`374`)
+- :func:`Guild.create_integration`, :func:`Integration.delete`, :func:`StreamIntegration.edit` and :func:`StreamIntegration.sync`
+  can't be used by bots anymore and will be removed in a future version (:issue:`361`)
+- :attr:`AppInfo.summary`, :attr:`PartialAppInfo.summary` and :attr:`IntegrationApplication.summary` are deprecated, use ``.description`` instead (:issue:`369`)
+- The ``suppress`` parameter for edit methods has been deprecated in favor of ``suppress_embeds``, with unchanged functionality (:issue:`474`)
+
+
+New Features
+~~~~~~~~~~~~~
+
+- Support API v10 (:issue:`353`)
+    - New intent: :attr:`Intents.message_content`
+    - |commands| New warning: :class:`~ext.commands.MessageContentPrefixWarning`
+- Add forum channels (:issue:`448`, :issue:`479`, :issue:`504`, :issue:`512`)
+    - Add :class:`ForumChannel`
+    - Add :attr:`CategoryChannel.forum_channels`, :attr:`Guild.forum_channels`
+    - Add :attr:`CategoryChannel.create_forum_channel`, :attr:`Guild.create_forum_channel`
+    - Add :class:`ChannelFlags`, :attr:`Thread.flags`, :attr:`Thread.is_pinned`
+    - Add ``pinned`` parameter to :func:`Thread.edit`
+    - Add :attr:`Permissions.create_forum_threads`, alias of :attr:`~Permissions.send_messages`
+    - |commands| Add :class:`~ext.commands.ForumChannelConverter`
+- Add application command localizations, see :ref:`localizations` (:issue:`269`)
+    - Add :class:`Localized`, :class:`LocalizationProtocol`, :class:`LocalizationStore`
+    - Most ``name`` and ``description`` parameters now also accept a :class:`Localized` object
+    - Update docstring parsing to accommodate for localizations
+    - Add :attr:`Client.i18n`
+    - Add ``localization_provider`` and ``strict_localization`` parameters to :class:`Client`
+    - Add ``with_localizations`` parameter to :func:`Client.fetch_global_commands`, :func:`Client.fetch_guild_commands`
+    - Add :class:`LocalizationWarning`, :class:`LocalizationKeyError`
+    - Add :func:`utils.as_valid_locale`
+    - Add localization example
+- Support permissions v2, see :ref:`app_command_permissions` (:issue:`405`)
+    - Breaking changes:
+        - Remove support for ``default_permission``
+        - Remove :func:`GuildApplicationCommandPermissions.edit`, :class:`PartialGuildApplicationCommandPermissions`, :class:`UnresolvedGuildApplicationCommandPermissions`
+        - Remove :func:`Client.edit_command_permissions`, :func:`Client.bulk_edit_command_permissions`, :func:`Client.edit_command_permissions`, :func:`Client.edit_command_permissions`
+        - Remove :func:`Guild.get_command_permissions`, :func:`Guild.edit_command_permissions`, :func:`Guild.bulk_edit_command_permissions`
+        - Update behavior of :class:`GuildCommandInteraction` annotation to automatically set ``dm_permission=False`` instead of adding a local check, remove support for subcommands
+        - Add :class:`ApplicationCommandPermissionType` enum, change type of :attr:`ApplicationCommandPermissions.type` to support channel targets
+        - |commands| Remove :func:`~ext.commands.guild_permissions` decorator
+        - |commands| Remove ``sync_permissions`` parameter from :class:`~ext.commands.Bot`
+    - New features:
+        - Add ``dm_permission`` and ``default_member_permissions`` parameters to application command objects and decorators
+        - Add :attr:`~ApplicationCommand.dm_permission`, :attr:`~ApplicationCommand.default_member_permissions` attributes
+          to :class:`ApplicationCommand` and :class:`~ext.commands.InvokableApplicationCommand`
+        - Add :func:`ApplicationCommandPermissions.is_everyone` and :func:`ApplicationCommandPermissions.is_all_channels`
+        - Add :attr:`AuditLogAction.application_command_permission_update` enum value and :attr:`AuditLogDiff.command_permissions`
+        - Add :func:`on_application_command_permissions_update` event
+        - |commands| Add :func:`~ext.commands.default_member_permissions` decorator, alternative to identically named parameter
+- Add guild previews (:issue:`359`)
+    - Add :class:`GuildPreview`
+    - Add :func:`Client.fetch_guild_preview`
+- Add guild widget settings and widget url (:issue:`360`, :issue:`365`)
+    - Add :class:`WidgetSettings`, :class:`WidgetStyle`
+    - Add :func:`Guild.widget_settings`, :func:`Guild.widget_image_url`
+    - Add :func:`Widget.image_url`
+    - Change :func:`Guild.edit_widget` return type
+- Add guild welcome screens (:issue:`339`)
+    - Add :class:`WelcomeScreen`, :class:`WelcomeScreenChannel`
+    - Add :func:`Guild.welcome_screen`, :func:`Guild.edit_welcome_screen`
+    - Add :attr:`Invite.guild_welcome_screen`
+
+- Support ``List[str]`` and ``Dict[str, str]`` in ``option`` parameter of :class:`disnake.ui.Select` (:issue:`326`)
+- Add :func:`Guild.search_members` (:issue:`358`, :issue:`388`)
+- Add :attr:`ModalInteraction.message` (:issue:`363`, :issue:`400`)
+- Support :func:`InteractionResponse.edit_message` for modal interactions, if modal was sent in response to component interaction (:issue:`364`, :issue:`400`)
+- Support ``reason`` parameter in :func:`Message.create_thread` and :func:`Thread.delete` (:issue:`366`)
+- Add :attr:`StageInstance.guild_scheduled_event` and :attr:`StageInstance.guild_scheduled_event_id` (:issue:`394`)
+- Add :class:`SessionStartLimit` and :attr:`Client.session_start_limit` (:issue:`402`)
+- Add :attr:`PartialInviteGuild.premium_subscription_count` (:issue:`410`)
+- Allow passing asset types for most image parameters, in addition to :class:`bytes` (:issue:`415`)
+- Update :func:`GuildScheduledEvent.fetch_users` and :func:`Guild.bans` to be async iterators supporting pagination (:issue:`428`, :issue:`442`)
+- Add :attr:`AuditLogDiff.image` for scheduled event images (:issue:`432`)
+- Add :class:`Locale` enum (:issue:`439`)
+- Add ``notify_everyone`` parameter to :func:`StageChannel.create_instance` (:issue:`440`)
+- Add :func:`~Asset.to_file` method to assets, emojis, stickers (:issue:`443`, :issue:`475`)
+- Add :func:`on_thread_create` event (:issue:`445`)
+- Support ``reason`` parameter in :func:`Thread.edit` (:issue:`454`)
+- Add ``default_auto_archive_duration`` parameter to :func:`Guild.create_text_channel`, add ``nsfw`` parameter to :func:`Guild.create_voice_channel` (:issue:`456`)
+- Allow providing ``attachments=None`` to clear attachments when editing a message (:issue:`457`)
+- Add ``__repr__`` methods to interaction data types (:issue:`458`)
+- Add :func:`VoiceChannel.delete_messages`, :func:`VoiceChannel.purge`, :func:`VoiceChannel.webhooks`, :func:`VoiceChannel.create_webhook`, and improve :func:`VoiceChannel.permissions_for` (:issue:`461`)
+- Add :attr:`AppInfo.tags`, :attr:`AppInfo.install_params`, :attr:`AppInfo.custom_install_url` (:issue:`463`)
+- Add :attr:`TextChannel.last_pin_timestamp`, :attr:`DMChannel.last_pin_timestamp`, :attr:`Thread.last_pin_timestamp` (:issue:`464`)
+- Add :attr:`MessageType.auto_moderation_action` (:issue:`465`)
+- Add temporary workaround for setting API version to avoid message content intent requirement until deadline (:issue:`467`)
+- Add :attr:`Interaction.expires_at` and :attr:`Interaction.is_expired`, automatically fall back to message edit/delete if interaction expired (:issue:`469`)
+- Add ``suppress_embeds`` parameter to message send methods (:issue:`474`)
+- Add :class:`VoiceRegion` (replacing voice region enum), :func:`Client.fetch_voice_regions`, :func:`Guild.fetch_voice_regions` (:issue:`477`)
+- Add :attr:`Member.role_icon` property (:issue:`485`)
+- Add debug logging of webhook request/response data (:issue:`486`)
+- Add :func:`on_raw_thread_delete`, :func:`on_raw_thread_member_remove` and :func:`on_raw_thread_update` events (:issue:`495`)
+- Support creating news channels using :func:`Guild.create_text_channel` (:issue:`497`)
+- Add :attr:`Guild.vanity_url_code`, add option to :func:`Guild.vanity_invite` to use cached invite code (:issue:`502`)
+- Add :attr:`Message.application_id` (:issue:`513`)
+- |commands| Add :class:`~ext.commands.GuildScheduledEventConverter` and :exc:`~ext.commands.GuildScheduledEventNotFound` (:issue:`376`)
+- |commands| Add :attr:`~ext.commands.InvokableApplicationCommand.extras` to application commands (:issue:`483`)
+- |commands| Add ``slash_command_attrs``, ``user_command_attrs`` and ``message_command_attrs`` :class:`~ext.commands.Cog` parameters (:issue:`501`)
+
+
+Bug Fixes
+~~~~~~~~~~
+
+- Improve components exception message (:issue:`352`)
+- Use proper HTTP method for joining threads, remove unused methods (:issue:`356`)
+- Fix missing ``create_public_threads`` permission in :attr:`Permissions.private_channel` (:issue:`373`)
+- Ensure token is of type :class:`str` (:issue:`375`)
+- Improve :func:`abc.Messageable.send` typing and fix annotations of HTTP methods (:issue:`378`)
+- Fix shadowed ``disnake.message`` module (:issue:`380`)
+- Fix missing/incorrect ``__slots__`` (:issue:`381`)
+- Fix :attr:`PartialInviteChannel.__str__ <PartialInviteChannel>` (:issue:`383`)
+- Fix role icon/emoji editing (:issue:`403`)
+- Remove cached scheduled events if associated channel was deleted (:issue:`406`)
+- Update some types/parameters of roles, scheduled events and voice states (:issue:`407`)
+- Allow ``content`` parameters in send/edit methods to be positional (:issue:`411`)
+- Fix gateway ratelimiter being too strict (:issue:`413`)
+- Fix caching of stage instances andd scheduled events (:issue:`416`)
+- Fix memory leaks on shard reconnect (:issue:`424`, :issue:`425`)
+- Improve :class:`PartialMessageable` channel handling (:issue:`426`)
+- Use :func:`asyncio.iscoroutinefunction` instead of :func:`inspect.iscoroutinefunction` (:issue:`427`)
+- Fix :func:`~PartialEmoji.read` for activity emojis (:issue:`430`)
+- Don't automatically enable logging if autoreload is enabled (:issue:`431`)
+- Support embed images in :func:`InteractionResponse.edit_message` (:issue:`466`)
+- Fix ``after`` parameter of :func:`Guild.audit_logs` (:issue:`473`)
+- Add ``__str__`` to :class:`ApplicationCommand`, improve sync debug output (:issue:`478`)
+- Don't require a ``topic`` when creating a stage channel (:issue:`480`)
+- Update and add missing overloads (:issue:`482`)
+- Make ``disnake.types.interactions`` importable at runtime (:issue:`493`)
+- Raise :class:`TypeError` instead of silently returning when trying to defer an unsupported interaction type (:issue:`505`)
+- Fix delay of ``after`` callback in :class:`AudioPlayer` when stopping (:issue:`508`)
+- |commands| Make conversion exceptions in slash commands propagate cleanly as documented (:issue:`362`)
+- |commands| Fix :class:`~ext.commands.clean_content` converter (:issue:`396`)
+- |commands| Fix usage of custom converters with :func:`Param <ext.commands.Param>` (:issue:`398`)
+- |commands| Support interactions in :class:`~ext.commands.UserConverter`, :class:`~ext.commands.MemberConverter` (:issue:`429`)
+- |commands| Fix unloading of listeners with custom names (:issue:`444`)
+- |commands| Fix parameter name conflicts in slash commands (:issue:`503`)
+
+
+Documentation
+~~~~~~~~~~~~~~
+
+- Disable mathjax in documentation to improve loading times (:issue:`370`)
+- Update return type of :func:`Guild.create_template` (:issue:`372`)
+- Add documentation for :class:`GuildCommandInteraction`, :class:`UserCommandInteraction`, and :class:`MessageCommandInteraction` (:issue:`374`)
+- Fix several bugs of redesign (:issue:`377`)
+- Update broken references (:issue:`419`)
+- Fix duplicate search results, improve scoring (:issue:`423`)
+- Add search hotkeys ``ctrl+k``, ``/``, ``s`` (:issue:`434`)
+- Fix string escape warnings (:issue:`436`)
+- Add several previously missing documentation entries (:issue:`446`, :issue:`470`)
+- Add autocomplete decorator example (:issue:`472`)
+- Update docs of ABCs to mention subclasses (:issue:`506`)
+- Update :func:`on_member_update` documentation to include new and future attributes (:issue:`510`)
+- Fix miscellaneous issues, improve formatting (:issue:`511`)
+
+
+Miscellaneous
+~~~~~~~~~~~~~~
+
+- Fix remaining pyright issues, add pyright CI (:issue:`311`, :issue:`387`, :issue:`514`)
+- Update dev dependencies and CI (:issue:`345`, :issue:`386`, :issue:`451`)
+- Improve ``_WebhookState`` typing (:issue:`391`)
+- Improve ``basic_bot.py`` example (:issue:`399`)
+- Add low-level component example (:issue:`452`)
+- Update Discord server invite links (:issue:`476`)
+
+
 .. _vp2p4p0:
 
 v2.4.0

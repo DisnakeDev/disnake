@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from disnake.activity import BaseActivity
     from disnake.enums import Status
     from disnake.flags import Intents, MemberCacheFlags
+    from disnake.i18n import LocalizationProtocol
     from disnake.mentions import AllowedMentions
 
     from ._types import CoroFunc
@@ -166,15 +167,27 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
-    sync_permissions: :class:`bool`
-        Whether to enable automatic synchronization of application command permissions in your code.
-        Defaults to ``False``.
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
         reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
         .. versionadded:: 2.1
+    localization_provider: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` to use for localization of
+        application commands.
+        If not provided, the default :class:`.LocalizationStore` implementation is used.
+
+        .. versionadded:: 2.5
+
+    strict_localization: :class:`bool`
+        Whether to raise an exception when localizations for a specific key couldn't be found.
+        This is mainly useful for testing/debugging, consider disabling this eventually
+        as missing localized names will automatically fall back to the default/base name without it.
+        Only applicable if the ``localization_provider`` parameter is not provided.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.5
     """
 
     if TYPE_CHECKING:
@@ -215,6 +228,8 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
             cache_application_command_permissions: bool = True,
+            localization_provider: Optional[LocalizationProtocol] = None,
+            strict_localization: bool = False,
         ):
             ...
 
@@ -262,6 +277,8 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
             cache_application_command_permissions: bool = True,
+            localization_provider: Optional[LocalizationProtocol] = None,
+            strict_localization: bool = False,
         ):
             ...
 
@@ -318,18 +335,27 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         .. versionchanged:: 2.4
             Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
             instead of controlling whether they are enabled at all.
-    sync_permissions: :class:`bool`
-        Whether to enable automatic synchronization of application command permissions in your code.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.1
-
     reload: :class:`bool`
         Whether to enable automatic extension reloading on file modification for debugging.
         Whenever you save an extension with reloading enabled the file will be automatically
         reloaded for you so you do not have to reload the extension manually. Defaults to ``False``
 
         .. versionadded:: 2.1
+    localization_provider: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` to use for localization of
+        application commands.
+        If not provided, the default :class:`.LocalizationStore` implementation is used.
+
+        .. versionadded:: 2.5
+
+    strict_localization: :class:`bool`
+        Whether to raise an exception when localizations for a specific key couldn't be found.
+        This is mainly useful for testing/debugging, consider disabling this eventually
+        as missing localized names will automatically fall back to the default/base name without it.
+        Only applicable if the ``localization_provider`` parameter is not provided.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.5
     """
 
     if TYPE_CHECKING:
@@ -365,6 +391,8 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
             cache_application_command_permissions: bool = True,
+            localization_provider: Optional[LocalizationProtocol] = None,
+            strict_localization: bool = False,
         ):
             ...
 
@@ -407,5 +435,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
             cache_application_command_permissions: bool = True,
+            localization_provider: Optional[LocalizationProtocol] = None,
+            strict_localization: bool = False,
         ):
             ...

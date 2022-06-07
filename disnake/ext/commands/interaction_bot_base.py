@@ -44,11 +44,7 @@ from typing import (
 )
 
 import disnake
-from disnake.app_commands import (
-    ApplicationCommand,
-    Option,
-    PartialGuildApplicationCommandPermissions,
-)
+from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import ConfigWarning, SyncWarning
 from disnake.enums import ApplicationCommandType
 
@@ -66,7 +62,9 @@ from .errors import CommandRegistrationError
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
+    from disnake.i18n import LocalizedOptional
     from disnake.interactions import ApplicationCommandInteraction
+    from disnake.permissions import Permissions
 
     from ._types import Check, CoroFunc
     from .base_core import CommandCallback, InteractionCommandCallback
@@ -130,7 +128,7 @@ def _format_diff(diff: Dict[str, List[ApplicationCommand]]) -> str:
     for key, label in _diff_map.items():
         lines.append(label)
         if changes := diff[key]:
-            lines.extend(f"    {cmd}" for cmd in changes)
+            lines.extend(f"    <{type(cmd).__name__} name={cmd.name!r}>" for cmd in changes)
         else:
             lines.append("    -")
 
@@ -144,20 +142,22 @@ class InteractionBotBase(CommonBotBase):
         sync_commands: bool = True,
         sync_commands_debug: bool = False,
         sync_commands_on_cog_unload: bool = True,
-        sync_permissions: bool = False,
         test_guilds: Sequence[int] = None,
         **options: Any,
     ):
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
             raise ValueError("test_guilds must be a sequence of int.")
 
+        if options.pop("sync_permissions", None) is not None:
+            warnings.warn("'sync_permissions' has been removed in 2.5", ConfigWarning, stacklevel=3)
+
         super().__init__(**options)
 
-        self._test_guilds: Optional[Sequence[int]] = test_guilds
+        test_guilds = None if test_guilds is None else tuple(test_guilds)
+        self._test_guilds: Optional[Tuple[int, ...]] = test_guilds
         self._sync_commands: bool = sync_commands
         self._sync_commands_debug: bool = sync_commands_debug
         self._sync_commands_on_cog_unload = sync_commands_on_cog_unload
-        self._sync_permissions: bool = sync_permissions
         self._sync_queued: bool = False
 
         self._slash_command_checks = []
@@ -225,12 +225,16 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The slash command passed is not an instance of :class:`InvokableSlashCommand`.
         """
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+
         if not isinstance(slash_command, InvokableSlashCommand):
             raise TypeError("The slash_command passed must be an instance of InvokableSlashCommand")
 
         if slash_command.name in self.all_slash_commands:
             raise CommandRegistrationError(slash_command.name)
 
+        slash_command.body.localize(self.i18n)
         self.all_slash_commands[slash_command.name] = slash_command
 
     def add_user_command(self, user_command: InvokableUserCommand) -> None:
@@ -251,12 +255,16 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The user command passed is not an instance of :class:`InvokableUserCommand`.
         """
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+
         if not isinstance(user_command, InvokableUserCommand):
             raise TypeError("The user_command passed must be an instance of InvokableUserCommand")
 
         if user_command.name in self.all_user_commands:
             raise CommandRegistrationError(user_command.name)
 
+        user_command.body.localize(self.i18n)
         self.all_user_commands[user_command.name] = user_command
 
     def add_message_command(self, message_command: InvokableMessageCommand) -> None:
@@ -277,6 +285,9 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The message command passed is not an instance of :class:`InvokableMessageCommand`.
         """
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+
         if not isinstance(message_command, InvokableMessageCommand):
             raise TypeError(
                 "The message_command passed must be an instance of InvokableMessageCommand"
@@ -285,6 +296,7 @@ class InteractionBotBase(CommonBotBase):
         if message_command.name in self.all_message_commands:
             raise CommandRegistrationError(message_command.name)
 
+        message_command.body.localize(self.i18n)
         self.all_message_commands[message_command.name] = message_command
 
     def remove_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
@@ -421,13 +433,15 @@ class InteractionBotBase(CommonBotBase):
     def slash_command(
         self,
         *,
-        name: str = None,
-        description: str = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        dm_permission: bool = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         options: List[Option] = None,
-        default_permission: bool = True,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
+        extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         """A shortcut decorator that invokes :func:`.slash_command` and adds it to
@@ -435,27 +449,48 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str`
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
             The name of the slash command (defaults to function name).
-        description: :class:`str`
+
+            .. versionchanged:: 2.5
+                Added support for localizations.
+
+        description: Optional[Union[:class:`str`, :class:`.Localized`]]
             The description of the slash command. It will be visible in Discord.
+
+            .. versionchanged:: 2.5
+                Added support for localizations.
+
         options: List[:class:`.Option`]
             The list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
-        default_permission: :class:`bool`
-            Whether the command is enabled by default. If set to ``False``, this command
-            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+        dm_permission: :class:`bool`
+            Whether this command can be used in DMs.
+            Defaults to ``True``.
+        default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+            The default required permissions for this command.
+            See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+            .. versionadded:: 2.5
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: List[:class:`int`]
-            If specified, the client will register a command in these guilds.
-            Otherwise this command will be registered globally in ~1 hour.
+        guild_ids: Sequence[:class:`int`]
+            If specified, the client will register the command in these guilds.
+            Otherwise, this command will be registered globally.
         connectors: Dict[:class:`str`, :class:`str`]
             Binds function names to option names. If the name
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``.
             If you're using :ref:`param_syntax`, you don't need to specify this.
+        extras: Dict[:class:`str`, Any]
+            A dict of user provided extras to attach to the command.
+
+            .. note::
+                This object may be copied by the library.
+
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -468,10 +503,12 @@ class InteractionBotBase(CommonBotBase):
                 name=name,
                 description=description,
                 options=options,
-                default_permission=default_permission,
+                dm_permission=dm_permission,
+                default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
+                extras=extras,
                 **kwargs,
             )(func)
             self.add_slash_command(result)
@@ -482,10 +519,12 @@ class InteractionBotBase(CommonBotBase):
     def user_command(
         self,
         *,
-        name: str = None,
-        default_permission: bool = True,
+        name: LocalizedOptional = None,
+        dm_permission: bool = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
+        extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
         """A shortcut decorator that invokes :func:`.user_command` and adds it to
@@ -493,16 +532,33 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str`
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
             The name of the user command (defaults to function name).
-        default_permission: :class:`bool`
-            Whether the command is enabled by default. If set to ``False``, this command
-            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+
+            .. versionchanged:: 2.5
+                Added support for localizations.
+
+        dm_permission: :class:`bool`
+            Whether this command can be used in DMs.
+            Defaults to ``True``.
+        default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+            The default required permissions for this command.
+            See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+            .. versionadded:: 2.5
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
-        guild_ids: List[:class:`int`]
+        guild_ids: Sequence[:class:`int`]
             If specified, the client will register the command in these guilds.
-            Otherwise this command will be registered globally in ~1 hour.
+            Otherwise, this command will be registered globally.
+        extras: Dict[:class:`str`, Any]
+            A dict of user provided extras to attach to the command.
+
+            .. note::
+                This object may be copied by the library.
+
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -513,9 +569,11 @@ class InteractionBotBase(CommonBotBase):
         def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
             result = user_command(
                 name=name,
-                default_permission=default_permission,
+                dm_permission=dm_permission,
+                default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
+                extras=extras,
                 **kwargs,
             )(func)
             self.add_user_command(result)
@@ -526,10 +584,12 @@ class InteractionBotBase(CommonBotBase):
     def message_command(
         self,
         *,
-        name: str = None,
-        default_permission: bool = True,
+        name: LocalizedOptional = None,
+        dm_permission: bool = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Sequence[int] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
+        extras: Dict[str, Any] = None,
         **kwargs,
     ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
         """A shortcut decorator that invokes :func:`.message_command` and adds it to
@@ -537,16 +597,33 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str`
+        name: Optional[Union[:class:`str`, :class:`.Localized`]]
             The name of the message command (defaults to function name).
-        default_permission: :class:`bool`
-            Whether the command is enabled by default. If set to ``False``, this command
-            cannot be used in guilds (unless explicit command permissions are set), or in DMs.
+
+            .. versionchanged:: 2.5
+                Added support for localizations.
+
+        dm_permission: :class:`bool`
+            Whether this command can be used in DMs.
+            Defaults to ``True``.
+        default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+            The default required permissions for this command.
+            See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+            .. versionadded:: 2.5
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: List[:class:`int`]
+        guild_ids: Sequence[:class:`int`]
             If specified, the client will register the command in these guilds.
-            Otherwise this command will be registered globally in ~1 hour.
+            Otherwise, this command will be registered globally.
+        extras: Dict[:class:`str`, Any]
+            A dict of user provided extras to attach to the command.
+
+            .. note::
+                This object may be copied by the library.
+
+            .. versionadded:: 2.5
 
         Returns
         -------
@@ -557,9 +634,11 @@ class InteractionBotBase(CommonBotBase):
         def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
-                default_permission=default_permission,
+                dm_permission=dm_permission,
+                default_member_permissions=default_member_permissions,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
+                extras=extras,
                 **kwargs,
             )(func)
             self.add_message_command(result)
@@ -608,7 +687,7 @@ class InteractionBotBase(CommonBotBase):
         # However, our approach has blind spots. We deal with them in :meth:`process_application_commands`.
 
         try:
-            commands = await self.fetch_global_commands()
+            commands = await self.fetch_global_commands(with_localizations=True)
             self._connection._global_application_commands = {
                 command.id: command for command in commands
             }
@@ -616,7 +695,7 @@ class InteractionBotBase(CommonBotBase):
             pass
         for guild_id in guilds:
             try:
-                commands = await self.fetch_guild_commands(guild_id)
+                commands = await self.fetch_guild_commands(guild_id, with_localizations=True)
                 if commands:
                     self._connection._guild_application_commands[guild_id] = {
                         command.id: command for command in commands
@@ -648,8 +727,6 @@ class InteractionBotBase(CommonBotBase):
             "Application command synchronization:\n"
             "GLOBAL COMMANDS\n"
             "===============\n"
-            "| NOTE: global commands can take up to 1 hour to show up after registration.\n"
-            "|\n"
             f"| Update is required: {update_required}\n{_format_diff(diff)}"
         )
 
@@ -687,99 +764,6 @@ class InteractionBotBase(CommonBotBase):
         # Last debug message
         self._log_sync_debug("Command synchronization task has finished")
 
-    async def _cache_application_command_permissions(self) -> None:
-        # This method is usually called once per bot start
-        if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
-
-        guilds_to_cache = set()
-        for cmd in self.application_commands_iterator():
-            if not cmd.auto_sync:
-                continue
-            for guild_id in cmd.permissions:
-                guilds_to_cache.add(guild_id)
-
-        if not self._sync_permissions:
-            if guilds_to_cache:
-                warnings.warn(
-                    "You're using the @commands.guild_permissions decorator, however, the"
-                    f" 'sync_permissions' kwarg of '{self.__class__.__name__}' is set to 'False'.",
-                    ConfigWarning,
-                )
-            return
-
-        for guild_id in guilds_to_cache:
-            try:
-                perms = await self.bulk_fetch_command_permissions(guild_id)
-                self._connection._application_command_permissions[guild_id] = {
-                    perm.id: perm for perm in perms
-                }
-            except Exception:
-                pass
-
-    async def _sync_application_command_permissions(self) -> None:
-        # Assuming that permissions and commands are cached
-        if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
-
-        if not self._sync_permissions or self._is_closed or self.loop.is_closed():
-            return
-
-        guilds_to_compare: Dict[
-            int, List[PartialGuildApplicationCommandPermissions]
-        ] = {}  # {guild_id: [partial_perms, ...], ...}
-
-        for cmd_wrapper in self.application_commands_iterator():
-            if not cmd_wrapper.auto_sync:
-                continue
-
-            for guild_id, perms in cmd_wrapper.permissions.items():
-                # Here we need to get the ID of the relevant API object
-                # representing the application command from the user's code
-                guild_ids_for_sync = cmd_wrapper.guild_ids or self._test_guilds
-                if guild_ids_for_sync is None:
-                    cmd = self.get_global_command_named(cmd_wrapper.name, cmd_wrapper.body.type)
-                else:
-                    cmd = self.get_guild_command_named(
-                        guild_id, cmd_wrapper.name, cmd_wrapper.body.type
-                    )
-                if cmd is None:
-                    continue
-                # If we got here, we know the ID of the application command
-
-                if not self.owner_id and not self.owner_ids:
-                    await self._fill_owners()
-                resolved_perms = perms.resolve(
-                    command_id=cmd.id,
-                    owners=[self.owner_id] if self.owner_id else self.owner_ids,
-                )
-
-                if guild_id not in guilds_to_compare:
-                    guilds_to_compare[guild_id] = []
-                guilds_to_compare[guild_id].append(resolved_perms)
-
-        # Once per-guild permissions are collected from the code,
-        # we can compare them to the cached permissions
-        for guild_id, new_array in guilds_to_compare.items():
-            old_perms = self._connection._application_command_permissions.get(guild_id, {})
-            if len(new_array) == len(old_perms) and all(
-                new_cmd_perms.id in old_perms
-                and old_perms[new_cmd_perms.id].permissions == new_cmd_perms.permissions
-                for new_cmd_perms in new_array
-            ):
-                self._log_sync_debug(f"Command permissions in <Guild id={guild_id}>: no changes")
-                continue
-            # If we got here, the permissions require an update
-            try:
-                await self.bulk_edit_command_permissions(guild_id, new_array)
-            except Exception as err:
-                warnings.warn(
-                    f"Failed to overwrite permissions in <Guild id={guild_id}> due to {err}",
-                    SyncWarning,
-                )
-            finally:
-                self._log_sync_debug(f"Command permissions in <Guild id={guild_id}>: edited")
-
     def _log_sync_debug(self, text: str) -> None:
         if self._sync_commands_debug:
             # if sync debugging is enabled, *always* output logs
@@ -801,8 +785,6 @@ class InteractionBotBase(CommonBotBase):
         await self.wait_until_first_connect()
         await self._cache_application_commands()
         await self._sync_application_commands()
-        await self._cache_application_command_permissions()
-        await self._sync_application_command_permissions()
         self._sync_queued = False
 
     async def _delayed_command_sync(self) -> None:
@@ -822,7 +804,6 @@ class InteractionBotBase(CommonBotBase):
         self._sync_queued = True
         await asyncio.sleep(2)
         await self._sync_application_commands()
-        await self._sync_application_command_permissions()
         self._sync_queued = False
 
     def _schedule_app_command_preparation(self) -> None:
@@ -1066,7 +1047,7 @@ class InteractionBotBase(CommonBotBase):
 
             This function can either be a regular function or a coroutine.
 
-        Similar to a command :func:`check`\, this takes a single parameter
+        Similar to a command :func:`check`\\, this takes a single parameter
         of type :class:`.ApplicationCommandInteraction` and can only raise exceptions inherited from
         :exc:`CommandError`.
 

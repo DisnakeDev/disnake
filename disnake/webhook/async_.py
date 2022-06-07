@@ -38,6 +38,7 @@ from typing import (
     Literal,
     NamedTuple,
     Optional,
+    Sequence,
     Tuple,
     TypeVar,
     Union,
@@ -51,11 +52,12 @@ from .. import utils
 from ..asset import Asset
 from ..channel import PartialMessageable
 from ..enums import WebhookType, try_enum
-from ..errors import DiscordServerError, Forbidden, HTTPException, InvalidArgument, NotFound
+from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
+from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
 from ..mixins import Hashable
-from ..ui.action_row import components_to_dict
+from ..ui.action_row import MessageUIComponent, components_to_dict
 from ..user import BaseUser, User
 
 __all__ = (
@@ -71,7 +73,8 @@ if TYPE_CHECKING:
     import datetime
 
     from ..abc import Snowflake
-    from ..channel import TextChannel, VoiceChannel
+    from ..asset import AssetBytes
+    from ..channel import ForumChannel, TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
     from ..guild import Guild
@@ -79,6 +82,7 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..state import ConnectionState
+    from ..sticker import GuildSticker, StickerItem
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui.action_row import Components
@@ -170,10 +174,11 @@ class AsyncWebhookAdapter:
                         method, url, data=to_send, headers=headers, params=params
                     ) as response:
                         _log.debug(
-                            "Webhook ID %s with %s %s has returned status code %s",
+                            "Webhook ID %s with %s %s with %s has returned status code %s",
                             webhook_id,
                             method,
                             url,
+                            to_send,
                             response.status,
                         )
                         data = (await response.text(encoding="utf-8")) or None
@@ -191,6 +196,7 @@ class AsyncWebhookAdapter:
                             lock.delay_by(delta)
 
                         if 300 > response.status >= 200:
+                            _log.debug("%s %s has received %s", method, url, data)
                             return data
 
                         if response.status == 429:
@@ -470,29 +476,37 @@ class AsyncWebhookAdapter:
         return self.request(r, session=session)
 
 
-class ExecuteWebhookParameters(NamedTuple):
+class DictPayloadParameters(NamedTuple):
+    payload: Dict[str, Any]
+    files: Optional[List[File]]
+
+
+class PayloadParameters(NamedTuple):
     payload: Optional[Dict[str, Any]]
     multipart: Optional[List[Dict[str, Any]]]
     files: Optional[List[File]]
 
 
-def handle_message_parameters(
+def handle_message_parameters_dict(
     content: Optional[str] = MISSING,
     *,
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: bool = False,
+    ephemeral: bool = None,
+    suppress_embeds: bool = None,
     file: File = MISSING,
     files: List[File] = MISSING,
-    attachments: List[Attachment] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
-    components: Optional[Components] = MISSING,
+    components: Optional[Components[MessageUIComponent]] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
-) -> ExecuteWebhookParameters:
+    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+    thread_name: Optional[str] = None,
+) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
         raise TypeError("Cannot mix file and files keyword arguments.")
     if embeds is not MISSING and embed is not MISSING:
@@ -508,12 +522,12 @@ def handle_message_parameters(
         embeds = [embed] if embed else []
     if embeds is not MISSING:
         if len(embeds) > 10:
-            raise InvalidArgument("embeds has a maximum of 10 elements.")
+            raise ValueError("embeds has a maximum of 10 elements.")
         payload["embeds"] = [e.to_dict() for e in embeds]
         for embed in embeds:
             if embed._files:
                 files = files or []
-                files += embed._files
+                files.extend(embed._files.values())
 
     if content is not MISSING:
         payload["content"] = str(content) if content is not None else None
@@ -523,15 +537,20 @@ def handle_message_parameters(
         payload["components"] = [] if components is None else components_to_dict(components)
 
     if attachments is not MISSING:
-        payload["attachments"] = [a.to_dict() for a in attachments]
+        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
 
     payload["tts"] = tts
     if avatar_url:
         payload["avatar_url"] = str(avatar_url)
     if username:
         payload["username"] = username
-    if ephemeral:
-        payload["flags"] = 64
+
+    if ephemeral is not None or suppress_embeds is not None:
+        payload["flags"] = 0
+        if suppress_embeds:
+            payload["flags"] |= MessageFlags.suppress_embeds.flag
+        if ephemeral:
+            payload["flags"] |= MessageFlags.ephemeral.flag
 
     if allowed_mentions:
         if previous_allowed_mentions is not None:
@@ -543,13 +562,60 @@ def handle_message_parameters(
     elif previous_allowed_mentions is not None:
         payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
 
-    multipart = []
+    if stickers is not MISSING:
+        payload["sticker_ids"] = [s.id for s in stickers]
 
-    if files:
-        multipart = to_multipart_with_attachments(payload, files)
-        payload = None
+    if thread_name is not None:
+        payload["thread_name"] = thread_name
 
-    return ExecuteWebhookParameters(payload=payload, multipart=multipart, files=files)
+    return DictPayloadParameters(payload=payload, files=files)
+
+
+def handle_message_parameters(
+    content: Optional[str] = MISSING,
+    *,
+    username: str = MISSING,
+    avatar_url: Any = MISSING,
+    tts: bool = False,
+    ephemeral: bool = None,
+    suppress_embeds: bool = None,
+    file: File = MISSING,
+    files: List[File] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
+    embed: Optional[Embed] = MISSING,
+    embeds: List[Embed] = MISSING,
+    view: Optional[View] = MISSING,
+    components: Optional[Components[MessageUIComponent]] = MISSING,
+    allowed_mentions: Optional[AllowedMentions] = MISSING,
+    previous_allowed_mentions: Optional[AllowedMentions] = None,
+    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+    thread_name: Optional[str] = None,
+) -> PayloadParameters:
+    params = handle_message_parameters_dict(
+        content=content,
+        username=username,
+        avatar_url=avatar_url,
+        tts=tts,
+        ephemeral=ephemeral,
+        suppress_embeds=suppress_embeds,
+        file=file,
+        files=files,
+        attachments=attachments,
+        embed=embed,
+        embeds=embeds,
+        view=view,
+        components=components,
+        allowed_mentions=allowed_mentions,
+        previous_allowed_mentions=previous_allowed_mentions,
+        stickers=stickers,
+        thread_name=thread_name,
+    )
+
+    if params.files:
+        multipart = to_multipart_with_attachments(params.payload, params.files)
+        return PayloadParameters(payload=None, multipart=multipart, files=params.files)
+
+    return PayloadParameters(payload=params.payload, multipart=None, files=params.files)
 
 
 async_context: ContextVar[AsyncWebhookAdapter] = ContextVar(
@@ -690,9 +756,9 @@ class WebhookMessage(Message):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> WebhookMessage:
         """|coro|
@@ -713,7 +779,7 @@ class WebhookMessage(Message):
         Parameters
         ----------
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the ``embeds`` parameter.
             Could be ``None`` to remove the embed.
@@ -735,12 +801,15 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.0
 
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         view: Optional[:class:`~disnake.ui.View`]
             The view to update this message with. This cannot be mixed with ``components``.
@@ -768,7 +837,7 @@ class WebhookMessage(Message):
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
         ValueError
             The length of ``embeds`` was invalid
-        InvalidArgument
+        WebhookTokenMissing
             There was no token associated with this webhook.
 
         Returns
@@ -841,6 +910,7 @@ class BaseWebhook(Hashable):
         "_avatar",
         "source_channel",
         "source_guild",
+        "application_id",
         "_state",
     )
 
@@ -883,6 +953,8 @@ class BaseWebhook(Hashable):
 
         self.source_guild: Optional[PartialWebhookGuild] = source_guild
 
+        self.application_id: Optional[int] = utils._get_as_snowflake(data, "application_id")
+
     def is_partial(self) -> bool:
         """Whether the webhook is a "partial" webhook.
 
@@ -910,10 +982,14 @@ class BaseWebhook(Hashable):
         return self._state and self._state._get_guild(self.guild_id)
 
     @property
-    def channel(self) -> Optional[Union[TextChannel, VoiceChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`]]: The messageable channel this webhook belongs to.
+    def channel(self) -> Optional[Union[TextChannel, VoiceChannel, ForumChannel]]:
+        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`ForumChannel`]]: The channel this webhook belongs to.
 
         If this is a partial webhook, then this will always return ``None``.
+
+        Webhooks in :class:`ForumChannel`\\s can not send messages directly,
+        they can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
+        and interact with existing threads.
         """
         guild = self.guild
         return guild and guild.get_channel(self.channel_id)  # type: ignore
@@ -943,8 +1019,8 @@ class Webhook(BaseWebhook):
     bot user or authentication.
 
     There are two main ways to use Webhooks. The first is through the ones
-    received by the library such as :meth:`.Guild.webhooks` and
-    :meth:`.TextChannel.webhooks`. The ones received by the library will
+    received by the library such as :meth:`.Guild.webhooks`, :meth:`.TextChannel.webhooks`,
+    and :meth:`.VoiceChannel.webhooks`. The ones received by the library will
     automatically be bound using the library's internal HTTP session.
 
     The second form involves creating a webhook object manually using the
@@ -1013,6 +1089,11 @@ class Webhook(BaseWebhook):
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
+
+    application_id: Optional[:class:`int`]
+        The ID of the application associated with this webhook, if it was created by an application.
+
+        .. versionadded:: 2.6
     """
 
     __slots__: Tuple[str, ...] = ("session",)
@@ -1080,6 +1161,9 @@ class Webhook(BaseWebhook):
     ) -> Webhook:
         """Creates a partial :class:`Webhook` from a webhook URL.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         url: :class:`str`
@@ -1099,7 +1183,7 @@ class Webhook(BaseWebhook):
 
         Raises
         ------
-        InvalidArgument
+        ValueError
             The URL is invalid.
 
         Returns
@@ -1113,7 +1197,7 @@ class Webhook(BaseWebhook):
             url,
         )
         if m is None:
-            raise InvalidArgument("Invalid webhook URL given.")
+            raise ValueError("Invalid webhook URL given.")
 
         data: Dict[str, Any] = m.groupdict()
         data["type"] = 1
@@ -1160,6 +1244,9 @@ class Webhook(BaseWebhook):
             :meth:`is_authenticated` returns ``False``, then the
             returned webhook does not contain any user information.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         prefer_auth: :class:`bool`
@@ -1172,7 +1259,7 @@ class Webhook(BaseWebhook):
             Could not fetch the webhook
         NotFound
             Could not find the webhook by this ID
-        InvalidArgument
+        WebhookTokenMissing
             This webhook does not have a token associated with it.
 
         Returns
@@ -1187,7 +1274,7 @@ class Webhook(BaseWebhook):
         elif self.token:
             data = await adapter.fetch_webhook_with_token(self.id, self.token, session=self.session)
         else:
-            raise InvalidArgument("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         return Webhook(data, self.session, token=self.auth_token, state=self._state)
 
@@ -1195,6 +1282,9 @@ class Webhook(BaseWebhook):
         """|coro|
 
         Deletes this Webhook.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1217,11 +1307,11 @@ class Webhook(BaseWebhook):
             This webhook does not exist.
         Forbidden
             You do not have permissions to delete this webhook.
-        InvalidArgument
+        WebhookTokenMissing
             This webhook does not have a token associated with it.
         """
         if self.token is None and self.auth_token is None:
-            raise InvalidArgument("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         adapter = async_context.get()
 
@@ -1239,7 +1329,7 @@ class Webhook(BaseWebhook):
         *,
         reason: Optional[str] = None,
         name: Optional[str] = MISSING,
-        avatar: Optional[bytes] = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
         channel: Optional[Snowflake] = None,
         prefer_auth: bool = True,
     ) -> Webhook:
@@ -1247,12 +1337,19 @@ class Webhook(BaseWebhook):
 
         Edits this Webhook.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: Optional[:class:`str`]
             The webhook's new default name.
-        avatar: Optional[:class:`bytes`]
-            A :term:`py:bytes-like object` representing the webhook's new default avatar.
+        avatar: Optional[|resource_type|]
+            The webhook's new default avatar.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         channel: Optional[:class:`abc.Snowflake`]
             The webhook's new channel. This requires an authenticated webhook.
 
@@ -1274,8 +1371,10 @@ class Webhook(BaseWebhook):
         HTTPException
             Editing the webhook failed.
         NotFound
-            This webhook does not exist.
-        InvalidArgument
+            This webhook does not exist or the ``avatar`` asset couldn't be found.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+        WebhookTokenMissing
             This webhook does not have a token associated with it
             or it tried editing a channel without authentication.
 
@@ -1285,14 +1384,14 @@ class Webhook(BaseWebhook):
             The newly edited webhook.
         """
         if self.token is None and self.auth_token is None:
-            raise InvalidArgument("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         payload = {}
         if name is not MISSING:
             payload["name"] = str(name) if name is not None else None
 
         if avatar is not MISSING:
-            payload["avatar"] = utils._bytes_to_base64_data(avatar) if avatar is not None else None
+            payload["avatar"] = await utils._assetbytes_to_base64_data(avatar)
 
         adapter = async_context.get()
 
@@ -1300,7 +1399,7 @@ class Webhook(BaseWebhook):
         # If a channel is given, always use the authenticated endpoint
         if channel is not None:
             if self.auth_token is None:
-                raise InvalidArgument("Editing channel requires authenticated webhook")
+                raise WebhookTokenMissing("Editing channel requires authenticated webhook")
 
             payload["channel_id"] = channel.id
             data = await adapter.edit_webhook(
@@ -1324,70 +1423,85 @@ class Webhook(BaseWebhook):
     def _create_message(self, data):
         state = _WebhookState(self, parent=self._state)
         # state may be artificial (unlikely at this point...)
-        channel = self.channel or PartialMessageable(state=self._state, id=int(data["channel_id"]))  # type: ignore
+        channel_id = int(data["channel_id"])
+        # if the channel ID does not match, a new thread was created
+        if self.channel_id != channel_id:
+            guild = self.guild
+            msg_channel = guild and guild.get_channel_or_thread(channel_id)
+        else:
+            msg_channel = self.channel
+        if not msg_channel:
+            # state may be artificial (unlikely at this point...)
+            msg_channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
         # state is artificial
-        return WebhookMessage(data=data, state=state, channel=channel)  # type: ignore
+        return WebhookMessage(data=data, state=state, channel=msg_channel)  # type: ignore
 
     @overload
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = ...,
         *,
-        username: str = MISSING,
-        avatar_url: Any = MISSING,
-        tts: bool = MISSING,
-        ephemeral: bool = MISSING,
-        file: File = MISSING,
-        files: List[File] = MISSING,
-        embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
-        allowed_mentions: AllowedMentions = MISSING,
-        view: View = MISSING,
-        components: Components = MISSING,
-        thread: Snowflake = MISSING,
+        username: str = ...,
+        avatar_url: Any = ...,
+        tts: bool = ...,
+        ephemeral: bool = ...,
+        suppress_embeds: bool = ...,
+        file: File = ...,
+        files: List[File] = ...,
+        embed: Embed = ...,
+        embeds: List[Embed] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components[MessageUIComponent] = ...,
+        thread: Snowflake = ...,
+        thread_name: str = ...,
         wait: Literal[True],
-        delete_after: float = MISSING,
+        delete_after: float = ...,
     ) -> WebhookMessage:
         ...
 
     @overload
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = ...,
         *,
-        username: str = MISSING,
-        avatar_url: Any = MISSING,
-        tts: bool = MISSING,
-        ephemeral: bool = MISSING,
-        file: File = MISSING,
-        files: List[File] = MISSING,
-        embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
-        allowed_mentions: AllowedMentions = MISSING,
-        view: View = MISSING,
-        components: Components = MISSING,
-        thread: Snowflake = MISSING,
+        username: str = ...,
+        avatar_url: Any = ...,
+        tts: bool = ...,
+        ephemeral: bool = ...,
+        suppress_embeds: bool = ...,
+        file: File = ...,
+        files: List[File] = ...,
+        embed: Embed = ...,
+        embeds: List[Embed] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components[MessageUIComponent] = ...,
+        thread: Snowflake = ...,
+        thread_name: str = ...,
         wait: Literal[False] = ...,
-        delete_after: float = MISSING,
+        delete_after: float = ...,
     ) -> None:
         ...
 
     async def send(
         self,
-        content: str = MISSING,
+        content: Optional[str] = MISSING,
         *,
         username: str = MISSING,
         avatar_url: Any = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        suppress_embeds: bool = False,
         file: File = MISSING,
         files: List[File] = MISSING,
         embed: Embed = MISSING,
         embeds: List[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components = MISSING,
+        components: Components[MessageUIComponent] = MISSING,
         thread: Snowflake = MISSING,
+        thread_name: Optional[str] = None,
         wait: bool = False,
         delete_after: float = MISSING,
     ) -> Optional[WebhookMessage]:
@@ -1404,9 +1518,12 @@ class Webhook(BaseWebhook):
         it must be a rich embed type. You cannot mix the ``embed`` parameter with the
         ``embeds`` parameter, which must be a :class:`list` of :class:`Embed` objects to send.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
         Parameters
         ----------
-        content: :class:`str`
+        content: Optional[:class:`str`]
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1463,6 +1580,16 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
+        thread_name: :class:`str`
+            If in a forum channel, and ``thread`` is not specified,
+            the name of the newly created thread.
+
+            .. note::
+                If this is set, the returned message's ``channel`` (assuming ``wait=True``),
+                representing the created thread, may be a :class:`PartialMessageable`.
+
+            .. versionadded:: 2.6
+
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
             means that the return type of this function changes from ``None`` to
@@ -1475,6 +1602,12 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.1
 
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+
+            .. versionadded:: 2.5
+
         Raises
         ------
         HTTPException
@@ -1484,13 +1617,15 @@ class Webhook(BaseWebhook):
         Forbidden
             The authorization token for the webhook is incorrect.
         TypeError
+            Raised by any of the following:
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
+            ``ephemeral`` was passed with the improper webhook type.
+            There was no state attached with this webhook when giving it a view.
+            Both ``thread`` and ``thread_name`` were provided.
+        WebhookTokenMissing
+            There was no token associated with this webhook.
         ValueError
             The length of ``embeds`` was invalid.
-        InvalidArgument
-            There was no token associated with this webhook or ``ephemeral``
-            was passed with the improper webhook type or there was no state
-            attached with this webhook when giving it a view.
 
         Returns
         -------
@@ -1498,7 +1633,7 @@ class Webhook(BaseWebhook):
             If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
         """
         if self.token is None:
-            raise InvalidArgument("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._state, "allowed_mentions", None
@@ -1508,19 +1643,25 @@ class Webhook(BaseWebhook):
 
         application_webhook = self.type is WebhookType.application
         if ephemeral and not application_webhook:
-            raise InvalidArgument("ephemeral messages can only be sent from application webhooks")
+            raise TypeError("ephemeral messages can only be sent from application webhooks")
 
         if delete_after is not MISSING and ephemeral:
-            raise InvalidArgument("ephemeral messages can not be deleted via endpoints")
+            raise TypeError("ephemeral messages can not be deleted via endpoints")
 
         if application_webhook or delete_after is not MISSING:
             wait = True
 
         if view is not MISSING:
             if isinstance(self._state, _WebhookState):
-                raise InvalidArgument("Webhook views require an associated state with the webhook")
+                raise TypeError("Webhook views require an associated state with the webhook")
             if ephemeral is True and view.timeout is None:
                 view.timeout = 15 * 60.0
+
+        thread_id: Optional[int] = None
+        if thread is not MISSING and thread_name is not None:
+            raise TypeError("only one of thread and thread_name can be provided.")
+        elif thread is not MISSING:
+            thread_id = thread.id
 
         params = handle_message_parameters(
             content=content,
@@ -1532,15 +1673,15 @@ class Webhook(BaseWebhook):
             embed=embed,
             embeds=embeds,
             ephemeral=ephemeral,
+            suppress_embeds=suppress_embeds,
             view=view,
             components=components,
+            thread_name=thread_name,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )
+
         adapter = async_context.get()
-        thread_id: Optional[int] = None
-        if thread is not MISSING:
-            thread_id = thread.id
 
         try:
             data = await adapter.execute_webhook(
@@ -1577,6 +1718,9 @@ class Webhook(BaseWebhook):
 
         .. versionadded:: 2.0
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         id: :class:`int`
@@ -1590,7 +1734,7 @@ class Webhook(BaseWebhook):
             You do not have the permissions required to get a message.
         HTTPException
             Retrieving the message failed.
-        InvalidArgument
+        WebhookTokenMissing
             There was no token associated with this webhook.
 
         Returns
@@ -1599,7 +1743,7 @@ class Webhook(BaseWebhook):
             The message asked for.
         """
         if self.token is None:
-            raise InvalidArgument("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         adapter = async_context.get()
         data = await adapter.get_webhook_message(
@@ -1619,9 +1763,9 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> WebhookMessage:
         """|coro|
@@ -1631,23 +1775,26 @@ class Webhook(BaseWebhook):
         This is a lower level interface to :meth:`WebhookMessage.edit` in case
         you only have an ID.
 
-        .. versionadded:: 1.6
-
-        .. versionchanged:: 2.0
-            The edit is no longer in-place, instead the newly edited message is returned.
-
         .. note::
             If the original message has embeds with images that were created from local files
             (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
 
+        .. versionadded:: 1.6
+
+        .. versionchanged:: 2.0
+            The edit is no longer in-place, instead the newly edited message is returned.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         message_id: :class:`int`
             The ID of the message to edit.
         content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
+            The content to edit the message with, or ``None`` to clear it.
         embed: Optional[:class:`Embed`]
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
@@ -1670,12 +1817,15 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. If ``None`` is passed then
@@ -1701,11 +1851,11 @@ class Webhook(BaseWebhook):
             Edited a message that is not yours.
         TypeError
             You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+            or there is no associated state when sending a view.
+        WebhookTokenMissing
+            There was no token associated with this webhook.
         ValueError
             The length of ``embeds`` was invalid
-        InvalidArgument
-            There was no token associated with this webhook or the webhook had
-            no state.
 
         Returns
         -------
@@ -1713,11 +1863,11 @@ class Webhook(BaseWebhook):
             The newly edited webhook message.
         """
         if self.token is None:
-            raise InvalidArgument("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         if view is not MISSING:
             if isinstance(self._state, _WebhookState):
-                raise InvalidArgument("This webhook does not have state associated with it")
+                raise TypeError("This webhook does not have state associated with it")
 
             self._state.prevent_view_updates_for(message_id)
 
@@ -1772,6 +1922,9 @@ class Webhook(BaseWebhook):
 
         .. versionadded:: 1.6
 
+        .. versionchanged:: 2.6
+            Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         message_id: :class:`int`
@@ -1783,9 +1936,11 @@ class Webhook(BaseWebhook):
             Deleting the message failed.
         Forbidden
             Deleted a message that is not yours.
+        WebhookTokenMissing
+            There was no token associated with this webhook
         """
         if self.token is None:
-            raise InvalidArgument("This webhook does not have a token associated with it")
+            raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
         adapter = async_context.get()
         await adapter.delete_webhook_message(

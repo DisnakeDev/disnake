@@ -48,11 +48,10 @@ from typing import (
 )
 
 import disnake
-from disnake.interactions import ApplicationCommandInteraction
 
 from ._types import _BaseCommand
 from .cog import Cog
-from .context import Context
+from .context import AnyContext, Context
 from .converter import Greedy, get_converter, run_converters
 from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
 from .errors import *
@@ -98,7 +97,6 @@ T = TypeVar("T")
 CogT = TypeVar("CogT", bound="Cog")
 CommandT = TypeVar("CommandT", bound="Command")
 ContextT = TypeVar("ContextT", bound="Context")
-AnyContext = Union[Context, ApplicationCommandInteraction]
 GroupT = TypeVar("GroupT", bound="Group")
 HookT = TypeVar("HookT", bound="Hook")
 ErrorT = TypeVar("ErrorT", bound="Error")
@@ -251,7 +249,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
     description: :class:`str`
         The message prefixed into the default help command.
     hidden: :class:`bool`
-        If ``True``\, the default help command does not show this in the help output.
+        If ``True``, the default help command does not show this in the help output.
     rest_is_raw: :class:`bool`
         If ``False`` and a keyword-only argument is provided then the keyword
         only argument is stripped and handled as if it was a regular argument
@@ -268,12 +266,12 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         .. versionadded:: 1.5
 
     ignore_extra: :class:`bool`
-        If ``True``\, ignores extraneous strings passed to a command if all its
+        If ``True``, ignores extraneous strings passed to a command if all its
         requirements are met (e.g. ``?foo a b c`` when only expecting ``a``
         and ``b``). Otherwise :func:`.on_command_error` and local error handlers
         are called with :exc:`.TooManyArguments`. Defaults to ``True``.
     cooldown_after_parsing: :class:`bool`
-        If ``True``\, cooldown processing is done after argument parsing,
+        If ``True``, cooldown processing is done after argument parsing,
         which calls converters. If ``False`` then cooldown processing is done
         first and then the converters are called second. Defaults to ``False``.
     extras: :class:`dict`
@@ -589,7 +587,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         view.previous = previous
 
         # type-checker fails to narrow argument
-        return await run_converters(ctx, converter, argument, param)  # type: ignore
+        return await run_converters(ctx, converter, argument, param)
 
     async def _transform_greedy_pos(
         self, ctx: Context, param: inspect.Parameter, required: bool, converter: Any
@@ -1586,7 +1584,7 @@ def command(
     ) -> Union[Command[CogT, P, T], CommandT]:
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        return cls(func, name=name, **attrs)
+        return cls(func, name=name, **attrs)  # type: ignore
 
     return decorator
 
@@ -1624,7 +1622,7 @@ def group(
     """
     if cls is MISSING:
         cls = Group
-    return command(name=name, cls=cls, **attrs)
+    return command(name=name, cls=cls, **attrs)  # type: ignore
 
 
 def check(predicate: Check) -> Callable[[T], T]:
@@ -1633,7 +1631,7 @@ def check(predicate: Check) -> Callable[[T], T]:
     subclasses. These checks could be accessed via :attr:`.Command.checks`.
 
     These checks should be predicates that take in a single parameter taking
-    a :class:`.Context`. If the check returns a ``False``\-like value then
+    a :class:`.Context`. If the check returns a ``False``-like value then
     during invocation a :exc:`.CheckFailure` exception is raised and sent to
     the :func:`.on_command_error` event.
 
@@ -1739,7 +1737,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
 
     Parameters
     ----------
-    \*checks: Callable[[:class:`Context`], :class:`bool`]
+    *checks: Callable[[:class:`Context`], :class:`bool`]
         An argument list of checks that have been decorated with
         the :func:`check` decorator.
 
@@ -1841,7 +1839,7 @@ def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
     command has **any** of the roles specified. This means that if they have
     one out of the three roles specified, then this check will return `True`.
 
-    Similar to :func:`.has_role`\, the names or IDs passed in must be exact.
+    Similar to :func:`.has_role`\\, the names or IDs passed in must be exact.
 
     This check raises one of two special exceptions, :exc:`.MissingAnyRole` if the user
     is missing all roles, or :exc:`.NoPrivateMessage` if it is used in a private message.
@@ -2138,7 +2136,8 @@ def is_nsfw() -> Callable[[T], T]:
     def pred(ctx: AnyContext) -> bool:
         ch = ctx.channel
         if ctx.guild is None or (
-            isinstance(ch, (disnake.TextChannel, disnake.Thread)) and ch.is_nsfw()
+            isinstance(ch, (disnake.TextChannel, disnake.VoiceChannel, disnake.Thread))
+            and ch.is_nsfw()
         ):
             return True
         raise NSFWChannelRequired(ch)  # type: ignore

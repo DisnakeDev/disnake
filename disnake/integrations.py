@@ -29,7 +29,6 @@ import datetime
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type
 
 from .enums import ExpireBehaviour, try_enum
-from .errors import InvalidArgument
 from .user import User
 from .utils import MISSING, _get_as_snowflake, deprecated, parse_time, warn_deprecated
 
@@ -144,7 +143,7 @@ class Integration:
 
         Parameters
         ----------
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason the integration was deleted. Shows up on the audit log.
 
             .. versionadded:: 2.0
@@ -242,6 +241,9 @@ class StreamIntegration(Integration):
         You must have :attr:`~Permissions.manage_guild` permission to
         use this.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         expire_behaviour: :class:`ExpireBehaviour`
@@ -257,13 +259,13 @@ class StreamIntegration(Integration):
             You do not have permission to edit the integration.
         HTTPException
             Editing the guild failed.
-        InvalidArgument
+        TypeError
             ``expire_behaviour`` did not receive a :class:`ExpireBehaviour`.
         """
         payload: Dict[str, Any] = {}
         if expire_behaviour is not MISSING:
             if not isinstance(expire_behaviour, ExpireBehaviour):
-                raise InvalidArgument("expire_behaviour field must be of type ExpireBehaviour")
+                raise TypeError("expire_behaviour field must be of type ExpireBehaviour")
 
             payload["expire_behavior"] = expire_behaviour.value
 
@@ -353,7 +355,7 @@ class IntegrationApplication:
 
 
 class BotIntegration(Integration):
-    """Represents a bot integration on disnake.
+    """Represents a bot integration on Discord.
 
     .. versionadded:: 2.0
 

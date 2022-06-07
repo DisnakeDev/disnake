@@ -30,7 +30,6 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Type, TypeVar, Union
 
 from . import utils
 from .asset import Asset, AssetMixin
-from .errors import InvalidArgument
 
 __all__ = ("PartialEmoji",)
 
@@ -38,6 +37,7 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from .state import ConnectionState
+    from .types.activity import ActivityEmoji as ActivityEmojiPayload
     from .types.message import PartialEmoji as PartialEmojiPayload
 
 
@@ -77,7 +77,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
         .. describe:: str(x)
 
-            Returns the emoji rendered for disnake.
+            Returns the emoji rendered for Discord.
 
     Attributes
     ----------
@@ -104,10 +104,12 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         self.animated = animated
         self.name = name
         self.id = id
-        self._state: Optional[ConnectionState] = None
+        self._state = None
 
     @classmethod
-    def from_dict(cls: Type[PE], data: Union[PartialEmojiPayload, Dict[str, Any]]) -> PE:
+    def from_dict(
+        cls: Type[PE], data: Union[PartialEmojiPayload, ActivityEmojiPayload, Dict[str, Any]]
+    ) -> PE:
         return cls(
             animated=data.get("animated", False),
             id=utils._get_as_snowflake(data, "id"),
@@ -246,9 +248,12 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
         Retrieves the data of this emoji as a :class:`bytes` object.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Raises
         ------
-        InvalidArgument
+        TypeError
             The emoji is not a custom emoji.
         DiscordException
             There was no internal connection state.
@@ -263,6 +268,6 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             The content of the asset.
         """
         if self.is_unicode_emoji():
-            raise InvalidArgument("PartialEmoji is not a custom emoji")
+            raise TypeError("PartialEmoji is not a custom emoji")
 
         return await super().read()

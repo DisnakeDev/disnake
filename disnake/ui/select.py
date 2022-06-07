@@ -27,7 +27,18 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
@@ -47,7 +58,7 @@ if TYPE_CHECKING:
     from .view import View
 
 S = TypeVar("S", bound="Select")
-V = TypeVar("V", bound="View", covariant=True)
+V = TypeVar("V", "View", None, covariant=True)
 
 
 def _parse_select_options(
@@ -83,7 +94,7 @@ class Select(Item[V]):
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
     options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
-        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\s
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.
 
@@ -110,6 +121,34 @@ class Select(Item[V]):
     )
     # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
     _underlying: SelectMenu = MISSING
+
+    @overload
+    def __init__(
+        self: Select[None],
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        disabled: bool = False,
+        row: Optional[int] = None,
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self: Select[V],
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        disabled: bool = False,
+        row: Optional[int] = None,
+    ):
+        ...
 
     def __init__(
         self,
@@ -341,7 +380,7 @@ def select(
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
     options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
-        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\s
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.
 

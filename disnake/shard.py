@@ -43,8 +43,10 @@ from typing import (
 
 import aiohttp
 
+from disnake.i18n import LocalizationProtocol
+
 from .backoff import ExponentialBackoff
-from .client import Client
+from .client import Client, SessionStartLimit
 from .enums import Status
 from .errors import (
     ClientException,
@@ -52,6 +54,7 @@ from .errors import (
     GatewayNotFound,
     HTTPException,
     PrivilegedIntentsRequired,
+    SessionStartLimitReached,
 )
 from .gateway import *
 from .state import AutoShardedConnectionState
@@ -369,6 +372,8 @@ class AutoShardedClient(Client):
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: MemberCacheFlags = None,
         cache_application_command_permissions: bool = True,
+        localization_provider: Optional[LocalizationProtocol] = None,
+        strict_localization: bool = False,
     ):
         ...
 
@@ -468,26 +473,34 @@ class AutoShardedClient(Client):
         self.__shards[shard_id] = ret = Shard(ws, self, self.__queue.put_nowait)
         ret.launch()
 
-    async def launch_shards(self) -> None:
+    async def launch_shards(self, *, ignore_session_start_limit: bool = False) -> None:
+        shard_count, gateway, session_start_limit = await self.http.get_bot_gateway()
+
+        self.session_start_limit = SessionStartLimit(session_start_limit)
+
         if self.shard_count is None:
-            self.shard_count, gateway = await self.http.get_bot_gateway()
-        else:
-            gateway = await self.http.get_gateway()
+            self.shard_count = shard_count
 
         self._connection.shard_count = self.shard_count
 
         shard_ids = self.shard_ids or range(self.shard_count)
         self._connection.shard_ids = shard_ids
 
+        if not ignore_session_start_limit and self.session_start_limit.remaining < self.shard_count:
+            raise SessionStartLimitReached(self.session_start_limit, requested=self.shard_count)
+
+        # TODO: maybe take max_concurrency from session start limit into account?
         for shard_id in shard_ids:
             initial = shard_id == shard_ids[0]
             await self.launch_shard(gateway, shard_id, initial=initial)
 
         self._connection.shards_launched.set()
 
-    async def connect(self, *, reconnect: bool = True) -> None:
+    async def connect(
+        self, *, reconnect: bool = True, ignore_session_start_limit: bool = False
+    ) -> None:
         self._reconnect = reconnect
-        await self.launch_shards()
+        await self.launch_shards(ignore_session_start_limit=ignore_session_start_limit)
 
         while not self.is_closed():
             item = await self.__queue.get()
@@ -553,6 +566,9 @@ class AutoShardedClient(Client):
         .. versionchanged:: 2.0
             Removed the ``afk`` keyword-only parameter.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         activity: Optional[:class:`BaseActivity`]
@@ -567,7 +583,7 @@ class AutoShardedClient(Client):
 
         Raises
         ------
-        InvalidArgument
+        TypeError
             If the ``activity`` parameter is not of proper type.
         """
         if status is None:
