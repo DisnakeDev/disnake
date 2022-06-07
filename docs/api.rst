@@ -5318,6 +5318,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: PrivilegedIntentsRequired
 
+.. autoexception:: SessionStartLimitReached
+
 .. autoexception:: InteractionException
 
 .. autoexception:: InteractionResponded
@@ -5346,6 +5348,7 @@ Exception Hierarchy
                 - :exc:`LoginFailure`
                 - :exc:`ConnectionClosed`
                 - :exc:`PrivilegedIntentsRequired`
+                - :exc:`SessionStartLimitReached`
                 - :exc:`InteractionException`
                     - :exc:`InteractionResponded`
                     - :exc:`InteractionNotResponded`
