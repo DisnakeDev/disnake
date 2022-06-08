@@ -395,10 +395,6 @@ class GuildScheduledEvent(Hashable):
             The newly updated guild scheduled event instance.
         """
         fields: Dict[str, Any] = {}
-        is_external = entity_type is GuildScheduledEventEntityType.external
-        error_for_external_entity = (
-            "if entity_type is GuildScheduledEventEntityType.external, {} must be {}"
-        )
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
@@ -413,9 +409,6 @@ class GuildScheduledEvent(Hashable):
                 raise ValueError("entity_type must be an instance of GuildScheduledEventEntityType")
 
             fields["entity_type"] = entity_type.value
-
-        if not entity_metadata and is_external:
-            raise ValueError(error_for_external_entity.format("entity_metadata", "provided"))
 
         if entity_metadata is not MISSING:
             if entity_metadata is None:
@@ -445,10 +438,6 @@ class GuildScheduledEvent(Hashable):
             fields["image"] = await _assetbytes_to_base64_data(image)
 
         if channel is not MISSING:
-            if channel is not None and is_external:
-                raise ValueError(
-                    error_for_external_entity.format("channel", "None or not provided")
-                )
             fields["channel_id"] = channel.id if channel is not None else None
 
         if scheduled_start_time is not MISSING:
@@ -458,8 +447,6 @@ class GuildScheduledEvent(Hashable):
             fields["scheduled_end_time"] = (
                 scheduled_end_time.isoformat() if scheduled_end_time is not None else None
             )
-        elif is_external:
-            raise ValueError(error_for_external_entity.format("scheduled_end_time", "provided"))
 
         data = await self._state.http.edit_guild_scheduled_event(
             guild_id=self.guild_id, event_id=self.id, reason=reason, **fields
