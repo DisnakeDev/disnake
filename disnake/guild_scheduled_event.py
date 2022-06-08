@@ -439,6 +439,9 @@ class GuildScheduledEvent(Hashable):
 
         if channel is not MISSING:
             fields["channel_id"] = channel.id if channel is not None else None
+        elif entity_type is GuildScheduledEventEntityType.external:
+            # special case, as the API wants `channel_id=null` if type is being changed to `external`
+            fields["channel_id"] = None
 
         if scheduled_start_time is not MISSING:
             fields["scheduled_start_time"] = scheduled_start_time.isoformat()
