@@ -30,6 +30,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 if TYPE_CHECKING:
     from aiohttp import ClientResponse, ClientWebSocketResponse
 
+    from .client import SessionStartLimit
+
     try:
         from requests import Response
 
@@ -49,8 +51,9 @@ __all__ = (
     "NotFound",
     "DiscordServerError",
     "InvalidData",
-    "InvalidArgument",
+    "WebhookTokenMissing",
     "LoginFailure",
+    "SessionStartLimitReached",
     "ConnectionClosed",
     "PrivilegedIntentsRequired",
     "InteractionException",
@@ -194,13 +197,10 @@ class InvalidData(ClientException):
     pass
 
 
-class InvalidArgument(ClientException):
-    """Exception that's raised when an argument to a function
-    is invalid some way (e.g. wrong value or wrong type).
+class WebhookTokenMissing(DiscordException):
+    """Exception that's raised when a :class:`Webhook` or :class:`SyncWebhook` is missing a token to make requests with.
 
-    This could be considered the analogous of ``ValueError`` and
-    ``TypeError`` except inherited from :exc:`ClientException` and thus
-    :exc:`DiscordException`.
+    .. versionadded :: 2.6
     """
 
     pass
@@ -213,6 +213,27 @@ class LoginFailure(ClientException):
     """
 
     pass
+
+
+class SessionStartLimitReached(ClientException):
+    """Exception that's raised when :meth:`Client.connect` function
+    fails to connect to Discord due to the session start limit being reached.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    session_start_limit: :class:`.SessionStartLimit`
+        The current state of the session start limit.
+
+    """
+
+    def __init__(self, session_start_limit: SessionStartLimit, requested: int = 1):
+        self.session_start_limit: SessionStartLimit = session_start_limit
+        super().__init__(
+            f"Daily session start limit has been reached, resets at {self.session_start_limit.reset_time} "
+            f"Requested {requested} shards, have only {session_start_limit.remaining} remaining."
+        )
 
 
 class ConnectionClosed(ClientException):

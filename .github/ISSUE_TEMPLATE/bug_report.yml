@@ -52,6 +52,7 @@ body:
       required: true
   - type: textarea
     attributes:
+      render: markdown
       label: System Information
       description: >
         Run `python -m disnake -v` and paste the output below.

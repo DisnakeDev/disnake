@@ -54,9 +54,9 @@ from . import utils
 from .asset import Asset
 from .context_managers import Typing
 from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
-from .errors import ClientException, InvalidArgument
+from .errors import ClientException
 from .file import File
-from .flags import MessageFlags
+from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .permissions import PermissionOverwrite, Permissions
@@ -86,7 +86,7 @@ if TYPE_CHECKING:
     from .role import Role
     from .state import ConnectionState
     from .sticker import GuildSticker, StickerItem
-    from .threads import AnyThreadArchiveDuration
+    from .threads import AnyThreadArchiveDuration, ThreadType
     from .types.channel import (
         CategoryChannel as CategoryChannelPayload,
         DMChannel as DMChannelPayload,
@@ -98,7 +98,7 @@ if TYPE_CHECKING:
     )
     from .types.snowflake import SnowflakeList
     from .types.threads import ThreadArchiveDurationLiteral
-    from .ui.action_row import Components
+    from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import BaseUser, ClientUser, User
     from .voice_region import VoiceRegion
@@ -185,13 +185,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         "default_auto_archive_duration",
         "last_pin_timestamp",
         "_overwrites",
+        "_flags",
         "_type",
     )
 
     def __init__(self, *, state: ConnectionState, guild: Guild, data: TextChannelPayload):
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
-        self._type: int = data["type"]
+        self._type: Literal[0, 5] = data["type"]
         self._update(guild, data)
 
     def __repr__(self) -> str:
@@ -203,6 +204,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             ("news", self.is_news()),
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -213,13 +215,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         # Does this need coercion into `int`? No idea yet.
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
             "default_auto_archive_duration", 1440
         )
-        self._type: int = data.get("type", self._type)
+        self._type: Literal[0, 5] = data.get("type", self._type)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
         self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data.get("last_pin_timestamp")
@@ -230,9 +233,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return self
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
-        return try_enum(ChannelType, self._type)
+    def type(self) -> Literal[ChannelType.text, ChannelType.news]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.text` or :attr:`ChannelType.news`.
+        """
+        if self._type == ChannelType.text.value:
+            return ChannelType.text
+        return ChannelType.news
 
     @property
     def _sorting_bucket(self) -> int:
@@ -340,6 +348,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -374,13 +385,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Raises
         ------
-        InvalidArgument
-            If position is less than 0 or greater than the number of channels, or if
-            the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -654,6 +666,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 1.3
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         destination: :class:`TextChannel`
@@ -669,6 +684,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Following the channel failed.
         Forbidden
             You do not have the permissions to create a webhook.
+        TypeError
+            The current or provided channel is not of the correct type.
 
         Returns
         -------
@@ -676,10 +693,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The newly created webhook.
         """
         if not self.is_news():
-            raise ClientException("The channel must be a news channel.")
+            raise TypeError("This channel must be a news channel.")
 
         if not isinstance(destination, TextChannel):
-            raise InvalidArgument(f"Expected TextChannel received {destination.__class__.__name__}")
+            raise TypeError(f"Expected TextChannel received {destination.__class__.__name__}")
 
         from .webhook import Webhook
 
@@ -744,9 +761,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: str,
-        type: Literal[
-            ChannelType.public_thread, ChannelType.private_thread, ChannelType.news_thread
-        ],
+        type: ThreadType,
         auto_archive_duration: AnyThreadArchiveDuration = None,
         invitable: bool = None,
         slowmode_delay: int = None,
@@ -760,7 +775,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         name: str,
         message: Optional[Snowflake] = None,
         auto_archive_duration: AnyThreadArchiveDuration = None,
-        type: Optional[ChannelType] = None,
+        type: Optional[ThreadType] = None,
         invitable: bool = None,
         slowmode_delay: int = None,
         reason: Optional[str] = None,
@@ -924,6 +939,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         "category_id",
         "rtc_region",
         "video_quality_mode",
+        "_flags",
     )
 
     def __init__(
@@ -951,6 +967,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         self.video_quality_mode: VideoQualityMode = try_enum(
             VideoQualityMode, data.get("video_quality_mode", 1)
         )
+        self._flags = data.get("flags", 0)
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.position: int = data["position"]
         # these don't exist in partial channel objects of slash command options
@@ -1088,6 +1105,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
             ("nsfw", self.nsfw),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -1102,8 +1120,11 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         return self
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.voice]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.voice`.
+        """
         return ChannelType.voice
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
@@ -1225,6 +1246,9 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1270,12 +1294,14 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Raises
         ------
-        InvalidArgument
-            If the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -1588,6 +1614,7 @@ class StageChannel(VocalGuildChannel):
             ("video_quality_mode", self.video_quality_mode),
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -1641,8 +1668,11 @@ class StageChannel(VocalGuildChannel):
         ]
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.stage_voice]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.stage_voice`.
+        """
         return ChannelType.stage_voice
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
@@ -1694,6 +1724,9 @@ class StageChannel(VocalGuildChannel):
 
         .. versionadded:: 2.0
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         topic: :class:`str`
@@ -1711,12 +1744,12 @@ class StageChannel(VocalGuildChannel):
 
         Raises
         ------
-        InvalidArgument
-            If the ``privacy_level`` parameter is not the proper type.
         Forbidden
             You do not have permissions to create a stage instance.
         HTTPException
             Creating a stage instance failed.
+        TypeError
+            If the ``privacy_level`` parameter is not the proper type.
 
         Returns
         -------
@@ -1731,7 +1764,7 @@ class StageChannel(VocalGuildChannel):
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
-                raise InvalidArgument("privacy_level field must be of type PrivacyLevel")
+                raise TypeError("privacy_level field must be of type PrivacyLevel")
             if privacy_level is StagePrivacyLevel.public:
                 utils.warn_deprecated(
                     "Setting privacy_level to public is deprecated and will be removed in a future version.",
@@ -1799,6 +1832,9 @@ class StageChannel(VocalGuildChannel):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1827,12 +1863,14 @@ class StageChannel(VocalGuildChannel):
 
         Raises
         ------
-        InvalidArgument
-            If the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -1888,7 +1926,17 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
     """
 
-    __slots__ = ("name", "id", "guild", "nsfw", "_state", "position", "_overwrites", "category_id")
+    __slots__ = (
+        "name",
+        "id",
+        "guild",
+        "nsfw",
+        "_state",
+        "position",
+        "_overwrites",
+        "category_id",
+        "_flags",
+    )
 
     def __init__(self, *, state: ConnectionState, guild: Guild, data: CategoryChannelPayload):
         self._state: ConnectionState = state
@@ -1896,12 +1944,13 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         self._update(guild, data)
 
     def __repr__(self) -> str:
-        return f"<CategoryChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw}>"
+        return f"<CategoryChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw} flags={self.flags!r}>"
 
     def _update(self, guild: Guild, data: CategoryChannelPayload) -> None:
         self.guild: Guild = guild
         self.name: str = data["name"]
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         self.position: int = data["position"]
         self._fill_overwrites(data)
@@ -1911,8 +1960,11 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ChannelType.category.value
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.category]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.category`.
+        """
         return ChannelType.category
 
     def is_nsfw(self) -> bool:
@@ -1958,6 +2010,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1974,12 +2029,14 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         Raises
         ------
-        InvalidArgument
-            If position is less than 0 or greater than the number of categories.
         Forbidden
             You do not have permissions to edit the category.
         HTTPException
             Editing the category failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -2242,6 +2299,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "position",
         "nsfw",
         "last_thread_id",
+        "_flags",
         "default_auto_archive_duration",
         "guild",
         "slowmode_delay",
@@ -2265,6 +2323,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             ("nsfw", self.nsfw),
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in atts)
         return f"<{type(self).__name__} {joined}>"
@@ -2275,6 +2334,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         self.last_thread_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
         self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
@@ -2287,8 +2347,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         return self
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.forum]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.forum`.
+        """
         return ChannelType.forum
 
     @property
@@ -2391,6 +2454,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         You must have :attr:`~Permissions.manage_channels` permission to
         do this.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -2421,13 +2487,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         Raises
         ------
-        InvalidArgument
-            If position is less than 0 or greater than the number of channels, or if
-            the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -2561,7 +2628,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components = MISSING,
+        components: Components[MessageUIComponent] = MISSING,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage:
         """|coro|
@@ -2569,6 +2636,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         Creates a thread in this forum channel.
 
         You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -2624,10 +2694,10 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Specified both ``file`` and ``files``,
             or you specified both ``embed`` and ``embeds``,
             or you specified both ``view`` and ``components``.
-        InvalidArgument
+            or you have passed an object that is not :class:`File` to ``file`` or ``files``.
+        ValueError
             Specified more than 10 embeds,
-            or more than 10 files,
-            or you have passed an object that is not :class:`File`.
+            or more than 10 files.
 
         Returns
         -------
@@ -2657,9 +2727,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             )
 
         if params.files and len(params.files) > 10:
-            raise InvalidArgument("files parameter must be a list of up to 10 elements")
+            raise ValueError("files parameter must be a list of up to 10 elements")
         elif params.files and not all(isinstance(file, File) for file in params.files):
-            raise InvalidArgument("files parameter must be a list of File")
+            raise TypeError("files parameter must be a list of File")
 
         if suppress_embeds:
             flags = MessageFlags.suppress_embeds.flag
@@ -2726,6 +2796,78 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             self.id, self.guild, limit=limit, joined=False, private=False, before=before
         )
 
+    async def webhooks(self) -> List[Webhook]:
+        """|coro|
+
+        Retrieves the list of webhooks this channel has.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        use this.
+
+        .. versionadded:: 2.6
+
+        Raises
+        ------
+        Forbidden
+            You don't have permissions to get the webhooks.
+
+        Returns
+        -------
+        List[:class:`Webhook`]
+            The list of webhooks this channel has.
+        """
+        from .webhook import Webhook
+
+        data = await self._state.http.channel_webhooks(self.id)
+        return [Webhook.from_state(d, state=self._state) for d in data]
+
+    async def create_webhook(
+        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+    ) -> Webhook:
+        """|coro|
+
+        Creates a webhook for this channel.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        do this.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The webhook's name.
+        avatar: Optional[:class:`bytes`]
+            The webhook's default avatar.
+            This operates similarly to :meth:`~ClientUser.edit`.
+        reason: Optional[:class:`str`]
+            The reason for creating this webhook. Shows up in the audit logs.
+
+        Raises
+        ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
+        Forbidden
+            You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+
+        Returns
+        -------
+        :class:`Webhook`
+            The newly created webhook.
+        """
+        from .webhook import Webhook
+
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
+
+        data = await self._state.http.create_webhook(
+            self.id, name=str(name), avatar=avatar_data, reason=reason
+        )
+        return Webhook.from_state(data, state=self._state)
+
 
 DMC = TypeVar("DMC", bound="DMChannel")
 
@@ -2767,7 +2909,14 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         .. versionadded:: 2.5
     """
 
-    __slots__ = ("id", "recipient", "me", "last_pin_timestamp", "_state")
+    __slots__ = (
+        "id",
+        "recipient",
+        "me",
+        "last_pin_timestamp",
+        "_state",
+        "_flags",
+    )
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload):
         self._state: ConnectionState = state
@@ -2777,6 +2926,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data.get("last_pin_timestamp")
         )
+        self._flags: int = data.get("flags", 0)
 
     async def _get_channel(self):
         return self
@@ -2801,8 +2951,11 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         return self
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.private]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.private`.
+        """
         return ChannelType.private
 
     @property
@@ -2818,6 +2971,14 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         .. versionadded:: 2.4
         """
         return f"https://discord.com/channels/@me/{self.id}"
+
+    @property
+    def flags(self) -> ChannelFlags:
+        """:class:`.ChannelFlags`: The channel flags for this channel.
+
+        .. versionadded:: 2.6
+        """
+        return ChannelFlags._from_value(self._flags)
 
     def permissions_for(
         self,
@@ -2952,8 +3113,11 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         return f"<GroupChannel id={self.id} name={self.name!r}>"
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.group]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.group`.
+        """
         return ChannelType.group
 
     @property

@@ -696,12 +696,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     This currently happens due to components being used.
 
-    .. warning::
-
-        This is a low level function that is not generally meant to be used.
-        If you are working with components, consider using the callbacks associated
-        with the :class:`~disnake.ui.View` instead as it provides a nicer user experience.
-
     .. versionadded:: 2.0
 
     :param interaction: The interaction object.
@@ -711,10 +705,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when a button is clicked.
 
-    .. warning::
-
-        Consider using the callbacks associated with the :class:`~disnake.ui.View` instead.
-
     .. versionadded:: 2.0
 
     :param interaction: The interaction object.
@@ -723,10 +713,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 .. function:: on_dropdown(interaction)
 
     Called when a select menu is clicked.
-
-    .. warning::
-
-        Consider using the callbacks associated with the :class:`~disnake.ui.View` instead.
 
     .. versionadded:: 2.0
 
@@ -1470,6 +1456,12 @@ of :class:`enum.Enum`.
         A student hub channel.
 
         .. versionadded:: 2.1
+
+    .. attribute:: forum
+
+        A channel of only threads.
+
+        .. versionadded:: 2.5
 
 .. class:: MessageType
 
@@ -2236,6 +2228,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
 
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
+
     .. attribute:: overwrite_update
 
         A channel permission overwrite was changed, this is typically
@@ -2252,6 +2247,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
 
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
+
     .. attribute:: overwrite_delete
 
         A channel permission overwrite was deleted.
@@ -2266,6 +2264,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.allow`
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
+
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
 
     .. attribute:: kick
 
@@ -2475,7 +2476,14 @@ of :class:`enum.Enum`.
 
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.name`
-        - :attr:`~AuditLogDiff.type` (always set to ``1`` if so)
+        - :attr:`~AuditLogDiff.type`
+        - :attr:`~AuditLogDiff.application_id`
+
+        .. versionchanged:: 2.6
+            Added :attr:`~AuditLogDiff.application_id`.
+
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now a :class:`WebhookType`.
 
     .. attribute:: webhook_update
 
@@ -2504,7 +2512,14 @@ of :class:`enum.Enum`.
 
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.name`
-        - :attr:`~AuditLogDiff.type` (always set to ``1`` if so)
+        - :attr:`~AuditLogDiff.type`
+        - :attr:`~AuditLogDiff.application_id`
+
+        .. versionchanged:: 2.6
+            Added :attr:`~AuditLogDiff.application_id`.
+
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now a :class:`WebhookType`.
 
     .. attribute:: emoji_create
 
@@ -2783,6 +2798,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.archived`
         - :attr:`~AuditLogDiff.locked`
         - :attr:`~AuditLogDiff.auto_archive_duration`
+        - :attr:`~AuditLogDiff.type`
 
         .. versionadded:: 2.0
 
@@ -2817,6 +2833,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.archived`
         - :attr:`~AuditLogDiff.locked`
         - :attr:`~AuditLogDiff.auto_archive_duration`
+        - :attr:`~AuditLogDiff.type`
 
         .. versionadded:: 2.0
 
@@ -3675,9 +3692,9 @@ AuditLogDiff
 
     .. attribute:: type
 
-        The type of channel or sticker.
+        The type of channel/thread, sticker, webhook, integration (:class:`str`), or permission overwrite (:class:`int`).
 
-        :type: Union[:class:`ChannelType`, :class:`StickerType`]
+        :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`WebhookType`, :class:`str`, :class:`int`]
 
     .. attribute:: topic
 
@@ -3981,8 +3998,11 @@ AuditLogDiff
 
         :type: Dict[:class:`int`, :class:`ApplicationCommandPermissions`]
 
-.. this is currently missing the following keys: reason and application_id
-   I'm not sure how to about porting these
+    .. attribute:: application_id
+
+        The ID of the application that created a webhook.
+
+        :type: :class:`int`
 
 Webhook Support
 ------------------
@@ -5290,13 +5310,15 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: InvalidData
 
-.. autoexception:: InvalidArgument
+.. autoexception:: WebhookTokenMissing
 
 .. autoexception:: GatewayNotFound
 
 .. autoexception:: ConnectionClosed
 
 .. autoexception:: PrivilegedIntentsRequired
+
+.. autoexception:: SessionStartLimitReached
 
 .. autoexception:: InteractionException
 
@@ -5323,10 +5345,10 @@ Exception Hierarchy
         - :exc:`DiscordException`
             - :exc:`ClientException`
                 - :exc:`InvalidData`
-                - :exc:`InvalidArgument`
                 - :exc:`LoginFailure`
                 - :exc:`ConnectionClosed`
                 - :exc:`PrivilegedIntentsRequired`
+                - :exc:`SessionStartLimitReached`
                 - :exc:`InteractionException`
                     - :exc:`InteractionResponded`
                     - :exc:`InteractionNotResponded`
@@ -5339,6 +5361,7 @@ Exception Hierarchy
                 - :exc:`NotFound`
                 - :exc:`DiscordServerError`
             - :exc:`LocalizationKeyError`
+            - :exc:`WebhookTokenMissing`
 
 
 Warnings
