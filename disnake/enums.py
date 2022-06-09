@@ -25,7 +25,20 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import types
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Iterator, Mapping, Optional, Sequence, Tuple, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    Iterator,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 __all__ = (
     "Enum",
@@ -77,7 +90,6 @@ def _is_descriptor(obj):
 
 
 class _EnumDict(Dict[str, Any]):
-
     def __init__(self, base: Type[Any]):
         # We explicitly take a base in __init__, unlike default Enums, to more easily
         # enforce proper value typing. This should ensure better performance, as e.g.
@@ -129,9 +141,9 @@ class EnumMeta(type):
         metacls: Type[_T],  # pyright: reportSelfClsParameterName=false
         name: str,
         bases: Tuple[Type[Any], Type[Any]],
-        namespace: _EnumDict
+        namespace: _EnumDict,
     ) -> _T:
-        
+
         if not EnumMeta.__is_enum_instantiated:
             EnumMeta.__is_enum_instantiated = True
             return super().__new__(metacls, name, bases, namespace)
@@ -141,13 +153,13 @@ class EnumMeta(type):
         ns: Dict[str, Any] = {
             "__objtype__": base,
             "__enumtype__": enum_type,
-            "_name_map_" : (name_map := {}),
+            "_name_map_": (name_map := {}),
             "_value2member_map_": (value_map := {}),
             **{
                 name_: value_
                 for name_, value_ in Enum.__dict__.items()
                 if name_ not in ("__class__", "__module__", "__doc__")
-            }
+            },
         }
 
         ns.update(namespace)
@@ -777,6 +789,7 @@ class Locale(str, Enum):
 
 EnumT = TypeVar("EnumT", bound=Enum)
 
+
 def create_unknown_value(cls: Type[EnumT], val: Any) -> EnumT:
     unknown = cls.__new__(cls)  # type: ignore  # skip Enum type validation
     unknown._name_ = f"unknown_{val}"
@@ -802,7 +815,7 @@ def enum_if_int(cls: Type[EnumT], val: Any) -> EnumT:
 
     If it fails it returns a proxy invalid value instead.
     """
-    return try_enum(cls, val) if isinstance(val, int) else val
+    return try_enum(cls, val) if isinstance(val, int) else val  # type: ignore
 
 
 def try_enum_to_int(val: Any) -> Any:
