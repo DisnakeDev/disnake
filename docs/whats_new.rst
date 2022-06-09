@@ -12,6 +12,17 @@ This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
 
+.. _vp2p5p1:
+
+v2.5.1
+------
+
+Bug Fixes
+~~~~~~~~~
+
+- |commands| Fix :func:`~ext.commands.InvokableSlashCommand.autocomplete` decorator in cogs (:issue:`521`)
+
+
 .. _vp2p5p0:
 
 v2.5.0
@@ -34,7 +45,7 @@ which will keep sending message content before the intent deadline, even with th
 Breaking Changes
 ~~~~~~~~~~~~~~~~~
 
-- The :attr:`~Intents.message_content` intent is now required to receive to receive message content and related fields, see above (:issue:`353`)
+- The :attr:`~Intents.message_content` intent is now required to receive message content and related fields, see above (:issue:`353`)
 - The new permissions v2 system revamped application command permissions, with the most notable changes being the
   removal of ``default_permission`` and ``commands.guild_permissions`` in favor of new fields/methods - see below for all new changes (:issue:`405`)
 - :func:`TextChannel.create_thread` now requires either a ``message`` or a ``type`` parameter (:issue:`355`)

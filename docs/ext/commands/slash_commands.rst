@@ -18,9 +18,9 @@ You have probably noticed that slash commands have really interactive user inter
 This is because each slash command is registered in Discord before people can see it. This library handles registration for you,
 but you can still manage it.
 
-By default, the registration is global. This means that your slash commands will be visible everywhere, including bot DMs.
-Global registration can take up to 1 hour to complete, this is an API limitation. You can change the registration to be local,
-so your slash commands will only be visible in several guilds. This type of registration is almost instant.
+By default, the registration is global. This means that your slash commands will be visible everywhere, including bot DMs,
+though you can disable them in DMs by setting the appropriate :ref:`permissions <app_command_permissions>`.
+You can also change the registration to be local, so your slash commands will only be visible in several guilds.
 
 This code sample shows how to set the registration to be local:
 
@@ -166,7 +166,7 @@ For instance, you could restrict an option to only accept positive integers:
         ...
 
 
-Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`Range` annotation.
+Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`~ext.commands.Range` annotation.
 The range bounds are both inclusive; using ``...`` as a bound indicates that this end of the range is unbounded.
 The type of the option is determined by the range bounds, with the option being a
 :class:`float` if at least one of the bounds is a :class:`float`, and :class:`int` otherwise.
@@ -184,8 +184,8 @@ The type of the option is determined by the range bounds, with the option being 
 
 .. note::
 
-    Type checker support for :class:`Range` is limited. Pylance/Pyright seem to handle it correctly;
-    MyPy currently needs a plugin for it to understand :class:`Range` semantics, which can be added in
+    Type checker support for :class:`~ext.commands.Range` is limited. Pylance/Pyright seem to handle it correctly;
+    MyPy currently needs a plugin for it to understand :class:`~ext.commands.Range` semantics, which can be added in
     the configuration file (``setup.cfg``, ``mypy.ini``):
 
     .. code-block:: ini
@@ -463,6 +463,14 @@ We have them, look at `this example <https://github.com/DisnakeDev/disnake/blob/
 Localizations
 -------------
 
+.. note::
+    At the time of writing, Discord clients do not support localization right out of the box yet.
+    To enable localization support in your client, a build override from the `Discord Developers <https://discord.gg/discord-developers>`__
+    server is most likely required, which can be found by joining that server and looking around/asking for the override.
+
+    Note that the build override is not necessarily up to date with the other client branches/releases,
+    so you may want to only enable it while you're working on this feature.
+
 The names and descriptions of commands and options, as well as the names of choices
 (for use with fixed choices or autocompletion), support localization for a fixed set of locales.
 
@@ -505,7 +513,7 @@ the directory name/path can be changed arbitrarily, ``locale`` is just the one u
         "ADD_NUM_NAME": "addiere_5",
         "ADD_NUM_DESCRIPTION": "Addiere 5 zu einer anderen Zahl.",
         "COOL_NUMBER_NAME": "zahl",
-        "COOL_NUMBER_DESCRIPTION": "Eine Zahl",
+        "COOL_NUMBER_DESCRIPTION": "Eine Zahl"
     }
 
 To load a directory or file containing localizations, use :func:`bot.i18n.load(path) <disnake.LocalizationStore.load>`:
