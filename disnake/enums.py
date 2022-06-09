@@ -175,6 +175,7 @@ class EnumMeta(type):
         try:
             base, _ = bases  # 'loss' of functionality: only (type, Enum) enums are allowed
         except ValueError:
+            print(bases)
             raise TypeError("Expected exactly two base classes for an enum") from None
 
         if isinstance(base, EnumMeta):
@@ -639,7 +640,7 @@ class ApplicationCommandType(int, Enum):
     message = 3
 
 
-class ApplicationCommandPermissionType(Enum):
+class ApplicationCommandPermissionType(int, Enum):
     role = 1
     user = 2
     channel = 3
@@ -648,7 +649,7 @@ class ApplicationCommandPermissionType(Enum):
         return self.value
 
 
-class OptionType(Enum):
+class OptionType(int, Enum):
     sub_command = 1
     sub_command_group = 2
     string = 3
