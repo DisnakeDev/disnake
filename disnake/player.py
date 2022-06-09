@@ -27,7 +27,6 @@ from __future__ import annotations
 import asyncio
 import audioop
 import io
-import json
 import logging
 import re
 import shlex
@@ -164,9 +163,9 @@ class FFmpegAudio(AudioSource):
         kwargs = {"stdout": subprocess.PIPE}
         kwargs.update(subprocess_kwargs)
 
-        self._process: subprocess.Popen = self._spawn_process(args, **kwargs)
+        self._process: subprocess.Popen[bytes] = self._spawn_process(args, **kwargs)
         self._stdout: IO[bytes] = self._process.stdout  # type: ignore
-        self._stdin: Optional[IO[Bytes]] = None
+        self._stdin: Optional[IO[bytes]] = None
         self._pipe_thread: Optional[threading.Thread] = None
 
         if piping:
@@ -177,17 +176,14 @@ class FFmpegAudio(AudioSource):
             )
             self._pipe_thread.start()
 
-    def _spawn_process(self, args: Any, **subprocess_kwargs: Any) -> subprocess.Popen:
-        process = None
+    def _spawn_process(self, args: Any, **subprocess_kwargs: Any) -> subprocess.Popen[bytes]:
         try:
-            process = subprocess.Popen(args, creationflags=CREATE_NO_WINDOW, **subprocess_kwargs)
+            return subprocess.Popen(args, creationflags=CREATE_NO_WINDOW, **subprocess_kwargs)  # type: ignore
         except FileNotFoundError:
             executable = args.partition(" ")[0] if isinstance(args, str) else args[0]
             raise ClientException(executable + " was not found.") from None
         except subprocess.SubprocessError as exc:
             raise ClientException(f"Popen failed: {exc.__class__.__name__}: {exc}") from exc
-        else:
-            return process
 
     def _kill_process(self) -> None:
         proc = self._process
@@ -217,6 +213,7 @@ class FFmpegAudio(AudioSource):
             )
 
     def _pipe_writer(self, source: io.BufferedIOBase) -> None:
+        assert self._stdin
         while self._process:
             # arbitrarily large read size
             data = source.read(8192)
@@ -453,13 +450,13 @@ class FFmpegOpusAudio(FFmpegAudio):
 
         Use this function to create an :class:`FFmpegOpusAudio` instance instead of the constructor: ::
 
-            source = await discord.FFmpegOpusAudio.from_probe("song.webm")
+            source = await disnake.FFmpegOpusAudio.from_probe("song.webm")
             voice_client.play(source)
 
         If you are on Windows and don't have ffprobe installed, use the ``fallback`` method
         to probe using ffmpeg instead: ::
 
-            source = await discord.FFmpegOpusAudio.from_probe("song.webm", method='fallback')
+            source = await disnake.FFmpegOpusAudio.from_probe("song.webm", method='fallback')
             voice_client.play(source)
 
         Using a custom method of determining codec and bitrate: ::
@@ -468,7 +465,7 @@ class FFmpegOpusAudio(FFmpegAudio):
                 # some analysis code here
                 return codec, bitrate
 
-            source = await discord.FFmpegOpusAudio.from_probe("song.webm", method=custom_probe)
+            source = await disnake.FFmpegOpusAudio.from_probe("song.webm", method=custom_probe)
             voice_client.play(source)
 
         Parameters
@@ -562,7 +559,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         codec = bitrate = None
         loop = asyncio.get_event_loop()
         try:
-            codec, bitrate = await loop.run_in_executor(None, lambda: probefunc(source, executable))  # type: ignore
+            codec, bitrate = await loop.run_in_executor(None, lambda: probefunc(source, executable))
         except Exception:
             if not fallback:
                 _log.exception("Probe '%s' using '%s' failed", method, executable)
@@ -570,7 +567,9 @@ class FFmpegOpusAudio(FFmpegAudio):
 
             _log.exception("Probe '%s' using '%s' failed, trying fallback", method, executable)
             try:
-                codec, bitrate = await loop.run_in_executor(None, lambda: fallback(source, executable))  # type: ignore
+                codec, bitrate = await loop.run_in_executor(
+                    None, lambda: fallback(source, executable)
+                )
             except Exception:
                 _log.exception("Fallback probe using '%s' failed", executable)
             else:
@@ -749,8 +748,8 @@ class AudioPlayer(threading.Thread):
             self._current_error = exc
             self.stop()
         finally:
-            self.source.cleanup()
             self._call_after()
+            self.source.cleanup()
 
     def _call_after(self) -> None:
         error = self._current_error

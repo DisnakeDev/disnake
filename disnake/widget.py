@@ -158,13 +158,9 @@ class WidgetMember(BaseUser):
     """
 
     __slots__ = (
-        "name",
         "status",
         "nick",
         "avatar",
-        "discriminator",
-        "id",
-        "bot",
         "activity",
         "deafened",
         "suppress",
@@ -194,7 +190,7 @@ class WidgetMember(BaseUser):
         except KeyError:
             activity = None
         else:
-            activity = create_activity(game)
+            activity = create_activity(game, state=state)
 
         self.activity: Optional[Union[BaseActivity, Spotify]] = activity
 
@@ -312,7 +308,7 @@ class Widget:
         The guild's name.
     channels: List[:class:`WidgetChannel`]
         The accessible voice channels in the guild.
-    members: List[:class:`Member`]
+    members: List[:class:`WidgetMember`]
         The online members in the server. Offline members
         do not appear in the widget.
 

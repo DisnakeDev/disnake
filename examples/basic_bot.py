@@ -12,8 +12,11 @@ There are a number of utility commands being showcased here."""
 
 intents = disnake.Intents.default()
 intents.members = True
+intents.message_content = True
 
-bot = commands.Bot(command_prefix="?", description=description, intents=intents)
+bot = commands.Bot(
+    command_prefix=commands.when_mentioned_or("?"), description=description, intents=intents
+)
 
 
 @bot.event
@@ -71,7 +74,7 @@ async def cool(ctx):
 
 
 @cool.command(name="bot")
-async def _bot(ctx):
+async def bot_(ctx):
     """Is the bot cool?"""
     await ctx.send("Yes, the bot is cool.")
 

@@ -91,6 +91,14 @@ TeamMember
 .. autoclass:: TeamMember()
     :members:
 
+InstallParams
+~~~~~~~~~~~~~
+
+.. attributetable:: InstallParams
+
+.. autoclass:: InstallParams()
+    :members:
+
 Voice Related
 ---------------
 
@@ -353,11 +361,14 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when someone begins typing a message.
 
-    The ``channel`` parameter can be a :class:`abc.Messageable` instance.
-    Which could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`GroupChannel`,
+    The ``channel`` parameter can be a :class:`abc.Messageable` instance, or a :class:`ForumChannel`.
+    If channel is an :class:`abc.Messageable` instance, it could be a :class:`TextChannel`, :class:`VoiceChannel`, :class:`GroupChannel`,
     or :class:`DMChannel`.
 
-    If the ``channel`` is a :class:`TextChannel` or :class:`VoiceChannel` then the
+    .. versionchanged:: 2.5
+        ``channel`` may be a type :class:`ForumChannel`
+
+    If the ``channel`` is a :class:`TextChannel`, :class:`ForumChannel`, or :class:`VoiceChannel` then the
     ``user`` parameter is a :class:`Member`, otherwise it is a :class:`User`.
 
     If the ``channel`` is a :class:`DMChannel` and the user is not found in the internal user/member cache,
@@ -376,7 +387,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
         to enable the members intent.
 
     :param channel: The location where the typing originated from.
-    :type channel: :class:`abc.Messageable`
+    :type channel: Union[:class:`abc.Messageable`, :class:`ForumChannel`]
     :param user: The user that started typing.
     :type user: Union[:class:`User`, :class:`Member`]
     :param when: When the typing started as an aware datetime in UTC.
@@ -406,6 +417,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
         checking the user IDs. Note that :class:`~ext.commands.Bot` does not
         have this problem.
 
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.message_content` for more information.
+
     :param message: The current message.
     :type message: :class:`Message`
 
@@ -420,6 +436,12 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     or use the :func:`on_raw_message_delete` event instead.
 
     This requires :attr:`Intents.messages` to be enabled.
+
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.message_content` for more information.
+
 
     :param message: The deleted message.
     :type message: :class:`Message`
@@ -476,6 +498,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     If this occurs increase the :class:`max_messages <Client>` parameter
     or use the :func:`on_raw_message_edit` event instead.
+
+    .. note::
+
+        Not all messages will have ``content``. This is a Discord limitation.
+        See the docs of :attr:`Intents.message_content` for more information.
 
     The following non-exhaustive cases trigger this event:
 
@@ -634,6 +661,20 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param payload: The raw event payload data.
     :type payload: :class:`RawReactionClearEmojiEvent`
 
+.. function:: on_application_command_permissions_update(permissions)
+
+    Called when the permissions of an application command or
+    the application-wide command permissions are updated.
+
+    Note that this will also be called when permissions of other applications change,
+    not just this application's permissions.
+
+    .. versionadded:: 2.5
+
+    :param permissions: The updated permission object.
+    :type permissions: :class:`GuildApplicationCommandPermissions`
+
+
 .. function:: on_interaction(interaction)
 
     Called when an interaction happened.
@@ -655,12 +696,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     This currently happens due to components being used.
 
-    .. warning::
-
-        This is a low level function that is not generally meant to be used.
-        If you are working with components, consider using the callbacks associated
-        with the :class:`~disnake.ui.View` instead as it provides a nicer user experience.
-
     .. versionadded:: 2.0
 
     :param interaction: The interaction object.
@@ -670,10 +705,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when a button is clicked.
 
-    .. warning::
-
-        Consider using the callbacks associated with the :class:`~disnake.ui.View` instead.
-
     .. versionadded:: 2.0
 
     :param interaction: The interaction object.
@@ -682,10 +713,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 .. function:: on_dropdown(interaction)
 
     Called when a select menu is clicked.
-
-    .. warning::
-
-        Consider using the callbacks associated with the :class:`~disnake.ui.View` instead.
 
     .. versionadded:: 2.0
 
@@ -796,14 +823,21 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_thread_join(thread)
 
-    Called whenever a thread is joined or created. Note that from the API's perspective there is no way to
-    differentiate between a thread being created or the bot joining a thread.
+    Called whenever the bot joins a thread or gets access to a thread
+    (for example, by gaining access to the parent channel).
 
     Note that you can get the guild from :attr:`Thread.guild`.
 
     This requires :attr:`Intents.guilds` to be enabled.
 
+    .. note::
+        This event will not be called for threads created by the bot or
+        threads created on one of the bot's messages.
+
     .. versionadded:: 2.0
+
+    .. versionchanged:: 2.5
+        This is no longer being called when a thread is created, see :func:`on_thread_create` instead.
 
     :param thread: The thread that got joined.
     :type thread: :class:`Thread`
@@ -828,9 +862,28 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param thread: The thread that got removed.
     :type thread: :class:`Thread`
 
+.. function:: on_thread_create(thread)
+
+    Called whenever a thread is created.
+
+    Note that you can get the guild from :attr:`Thread.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. note::
+        This only works for threads created in channels the bot already has access to,
+        and only for public threads unless the bot has the :attr:`~Permissions.manage_threads` permission.
+
+    .. versionadded:: 2.5
+
+    :param thread: The thread that got created.
+    :type thread: :class:`Thread`
+
 .. function:: on_thread_delete(thread)
 
-    Called whenever a thread is deleted.
+    Called when a thread is deleted. If the thread is not found
+    in the internal thread cache, then this event will not be called.
+    Consider using :func:`on_raw_thread_delete` instead.
 
     Note that you can get the guild from :attr:`Thread.guild`.
 
@@ -841,12 +894,30 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param thread: The thread that got deleted.
     :type thread: :class:`Thread`
 
+.. function:: on_raw_thread_delete(payload)
+
+    Called whenever a thread is deleted.
+    Unlike :func:`on_thread_delete`, this is called
+    regardless of the state of the internal thread cache.
+
+    Note that you can get the guild from :attr:`Thread.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. versionadded:: 2.5
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawThreadDeleteEvent`
+
 .. function:: on_thread_member_join(member)
               on_thread_member_remove(member)
 
     Called when a :class:`ThreadMember` leaves or joins a :class:`Thread`.
 
     You can get the thread a member belongs in by accessing :attr:`ThreadMember.thread`.
+
+    On removal events, if the member being removed is not found in the internal cache,
+    then this event will not be called. Consider using :func:`on_raw_thread_member_remove` instead.
 
     This requires :attr:`Intents.members` to be enabled.
 
@@ -855,9 +926,25 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param member: The member who joined or left.
     :type member: :class:`ThreadMember`
 
+.. function:: on_raw_thread_member_remove(payload)
+
+    Called when a :class:`ThreadMember` leaves :class:`Thread`.
+    Unlike :func:`on_thread_member_remove`, this is called regardless of the thread member cache.
+
+    You can get the thread a member belongs in by accessing :attr:`ThreadMember.thread`.
+
+    This requires :attr:`Intents.members` to be enabled.
+
+    .. versionadded:: 2.5
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawThreadMemberRemoveEvent`
+
 .. function:: on_thread_update(before, after)
 
-    Called whenever a thread is updated.
+    Called when a thread is updated. If the thread is not found
+    in the internal thread cache, then this event will not be called.
+    Consider using :func:`on_raw_thread_update` which will be called regardless of the cache.
 
     This requires :attr:`Intents.guilds` to be enabled.
 
@@ -867,6 +954,19 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :type before: :class:`Thread`
     :param after: The updated thread's new info.
     :type after: :class:`Thread`
+
+.. function:: on_raw_thread_update(after)
+
+    Called whenever a thread is updated.
+    Unlike :func:`on_thread_update`, this is called
+    regardless of the state of the internal thread cache.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. versionadded:: 2.5
+
+    :param thread: The updated thread.
+    :type thread: :class:`Thread`
 
 .. function:: on_guild_integrations_update(guild)
 
@@ -935,11 +1035,13 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when a :class:`Member` updates their profile.
 
-    This is called when one or more of the following things change:
+    This is called when one or more of the following things change, but is not limited to:
 
     - nickname
     - roles
     - pending
+    - timeout
+    - guild specific avatar
 
     This requires :attr:`Intents.members` to be enabled.
 
@@ -1289,6 +1391,8 @@ Utility Functions
 
 .. autofunction:: disnake.utils.search_directory
 
+.. autofunction:: disnake.utils.as_valid_locale
+
 .. _discord-api-enums:
 
 Enumerations
@@ -1323,10 +1427,6 @@ of :class:`enum.Enum`.
 
         A guild news channel.
 
-    .. attribute:: store
-
-        A guild store channel.
-
     .. attribute:: stage_voice
 
         A guild stage voice channel.
@@ -1356,6 +1456,12 @@ of :class:`enum.Enum`.
         A student hub channel.
 
         .. versionadded:: 2.1
+
+    .. attribute:: forum
+
+        A channel of only threads.
+
+        .. versionadded:: 2.5
 
 .. class:: MessageType
 
@@ -1482,6 +1588,11 @@ of :class:`enum.Enum`.
         The system message denoting that a context menu command was executed.
 
         .. versionadded:: 2.3
+    .. attribute:: auto_moderation_action
+
+        The system message denoting that Auto Moderation has taken an action on a message.
+
+        .. versionadded:: 2.5
 
 .. class:: UserFlags
 
@@ -1582,9 +1693,6 @@ of :class:`enum.Enum`.
 
     Represents the type of a voice channel activity/application.
 
-    .. attribute:: youtube
-
-        The (old) "Youtube Together" activity.
     .. attribute:: poker
 
         The "Poker Night" activity.
@@ -1614,16 +1722,6 @@ of :class:`enum.Enum`.
     .. attribute:: spellcast
 
         The "SpellCast" activity.
-
-        .. versionadded:: 2.3
-    .. attribute:: awkword
-
-        The "Awkword" activity.
-
-        .. versionadded:: 2.3
-    .. attribute:: sketchy_artist
-
-        The "Sketchy Artist" activity.
 
         .. versionadded:: 2.3
     .. attribute:: watch_together
@@ -1657,6 +1755,22 @@ of :class:`enum.Enum`.
     .. attribute:: message
 
         Represents a message command from the context menu.
+
+.. class:: ApplicationCommandPermissionType
+
+    Represents the type of a permission of an application command.
+
+    .. versionadded:: 2.5
+
+    .. attribute:: role
+
+        Represents a permission that affects roles.
+    .. attribute:: user
+
+        Represents a permission that affects users.
+    .. attribute:: channel
+
+        Represents a permission that affects channels.
 
 .. class:: InteractionType
 
@@ -1849,89 +1963,6 @@ of :class:`enum.Enum`.
         An alias for :attr:`paragraph`.
 
 
-.. class:: VoiceRegion
-
-    Specifies the region a voice server belongs to.
-
-    .. attribute:: amsterdam
-
-        The Amsterdam region.
-    .. attribute:: brazil
-
-        The Brazil region.
-    .. attribute:: dubai
-
-        The Dubai region.
-
-        .. versionadded:: 1.3
-
-    .. attribute:: eu_central
-
-        The EU Central region.
-    .. attribute:: eu_west
-
-        The EU West region.
-    .. attribute:: europe
-
-        The Europe region.
-
-        .. versionadded:: 1.3
-
-    .. attribute:: frankfurt
-
-        The Frankfurt region.
-    .. attribute:: hongkong
-
-        The Hong Kong region.
-    .. attribute:: india
-
-        The India region.
-
-        .. versionadded:: 1.2
-
-    .. attribute:: japan
-
-        The Japan region.
-    .. attribute:: london
-
-        The London region.
-    .. attribute:: russia
-
-        The Russia region.
-    .. attribute:: singapore
-
-        The Singapore region.
-    .. attribute:: southafrica
-
-        The South Africa region.
-    .. attribute:: south_korea
-
-        The South Korea region.
-    .. attribute:: sydney
-
-        The Sydney region.
-    .. attribute:: us_central
-
-        The US Central region.
-    .. attribute:: us_east
-
-        The US East region.
-    .. attribute:: us_south
-
-        The US South region.
-    .. attribute:: us_west
-
-        The US West region.
-    .. attribute:: vip_amsterdam
-
-        The Amsterdam region for VIP guilds.
-    .. attribute:: vip_us_east
-
-        The US East region for VIP guilds.
-    .. attribute:: vip_us_west
-
-        The US West region for VIP guilds.
-
 .. class:: VerificationLevel
 
     Specifies a :class:`Guild`\'s verification level, which is the criteria in
@@ -2118,6 +2149,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.icon`
         - :attr:`~AuditLogDiff.banner`
         - :attr:`~AuditLogDiff.vanity_url_code`
+        - :attr:`~AuditLogDiff.preferred_locale`
 
     .. attribute:: channel_create
 
@@ -2196,6 +2228,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
 
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
+
     .. attribute:: overwrite_update
 
         A channel permission overwrite was changed, this is typically
@@ -2212,6 +2247,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
 
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
+
     .. attribute:: overwrite_delete
 
         A channel permission overwrite was deleted.
@@ -2226,6 +2264,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.allow`
         - :attr:`~AuditLogDiff.id`
         - :attr:`~AuditLogDiff.type`
+
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
 
     .. attribute:: kick
 
@@ -2435,7 +2476,14 @@ of :class:`enum.Enum`.
 
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.name`
-        - :attr:`~AuditLogDiff.type` (always set to ``1`` if so)
+        - :attr:`~AuditLogDiff.type`
+        - :attr:`~AuditLogDiff.application_id`
+
+        .. versionchanged:: 2.6
+            Added :attr:`~AuditLogDiff.application_id`.
+
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now a :class:`WebhookType`.
 
     .. attribute:: webhook_update
 
@@ -2464,7 +2512,14 @@ of :class:`enum.Enum`.
 
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.name`
-        - :attr:`~AuditLogDiff.type` (always set to ``1`` if so)
+        - :attr:`~AuditLogDiff.type`
+        - :attr:`~AuditLogDiff.application_id`
+
+        .. versionchanged:: 2.6
+            Added :attr:`~AuditLogDiff.application_id`.
+
+        .. versionchanged:: 2.6
+            :attr:`~AuditLogDiff.type` for this action is now a :class:`WebhookType`.
 
     .. attribute:: emoji_create
 
@@ -2615,6 +2670,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.description`
         - :attr:`~AuditLogDiff.privacy_level`
         - :attr:`~AuditLogDiff.status`
+        - :attr:`~AuditLogDiff.image`
 
         .. versionadded:: 2.3
 
@@ -2742,6 +2798,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.archived`
         - :attr:`~AuditLogDiff.locked`
         - :attr:`~AuditLogDiff.auto_archive_duration`
+        - :attr:`~AuditLogDiff.type`
 
         .. versionadded:: 2.0
 
@@ -2776,8 +2833,23 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.archived`
         - :attr:`~AuditLogDiff.locked`
         - :attr:`~AuditLogDiff.auto_archive_duration`
+        - :attr:`~AuditLogDiff.type`
 
         .. versionadded:: 2.0
+
+    .. attribute:: application_command_permission_update
+
+        The permissions of an application command were updated.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`ApplicationCommand` or :class:`Object` with the ID of the command whose
+        permissions were updated or the application ID if these are application-wide permissions.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.command_permissions`
+
+        .. versionadded:: 2.5
 
 .. class:: AuditLogActionCategory
 
@@ -2951,6 +3023,10 @@ of :class:`enum.Enum`.
 
         The stage instance can be joined by external users.
 
+        .. deprecated:: 2.5
+
+            Public stages are no longer supported by discord.
+
     .. attribute:: closed
 
         The stage instance can only be joined by members of the guild.
@@ -3101,6 +3177,132 @@ of :class:`enum.Enum`.
 
         A large image with a large Discord logo, guild icon, name and online member count,
         with a "Join My Server" label at the bottom.
+
+.. class:: Locale
+
+    Represents supported locales by Discord.
+
+    .. versionadded:: 2.5
+
+    .. attribute:: bg
+
+        The ``bg`` (Bulgarian) locale.
+
+    .. attribute:: cs
+
+        The ``cs`` (Czech) locale.
+
+    .. attribute:: da
+
+        The ``da`` (Danish) locale.
+
+    .. attribute:: de
+
+        The ``de`` (German) locale.
+
+    .. attribute:: el
+
+        The ``el`` (Greek) locale.
+
+    .. attribute:: en_GB
+
+        The ``en_GB`` (English, UK) locale.
+
+    .. attribute:: en_US
+
+        The ``en_US`` (English, US) locale.
+
+    .. attribute:: es_ES
+
+        The ``es_ES`` (Spanish) locale.
+
+    .. attribute:: fi
+
+        The ``fi`` (Finnish) locale.
+
+    .. attribute:: fr
+
+        The ``fr`` (French) locale.
+
+    .. attribute:: hi
+
+        The ``hi`` (Hindi) locale.
+
+    .. attribute:: hr
+
+        The ``hr`` (Croatian) locale.
+
+    .. attribute:: it
+
+        The ``it`` (Italian) locale.
+
+    .. attribute:: ja
+
+        The ``ja`` (Japanese) locale.
+
+    .. attribute:: ko
+
+        The ``ko`` (Korean) locale.
+
+    .. attribute:: lt
+
+        The ``lt`` (Lithuanian) locale.
+
+    .. attribute:: hu
+
+        The ``hu`` (Hungarian) locale.
+
+    .. attribute:: nl
+
+        The ``nl`` (Dutch) locale.
+
+    .. attribute:: no
+
+        The ``no`` (Norwegian) locale.
+
+    .. attribute:: pl
+
+        The ``pl`` (Polish) locale.
+
+    .. attribute:: pt_BR
+
+        The ``pt_BR`` (Portuguese) locale.
+
+    .. attribute:: ro
+
+        The ``ro`` (Romanian) locale.
+
+    .. attribute:: ru
+
+        The ``ru`` (Russian) locale.
+
+    .. attribute:: sv_SE
+
+        The ``sv_SE`` (Swedish) locale.
+
+    .. attribute:: th
+
+        The ``th`` (Thai) locale.
+
+    .. attribute:: tr
+
+        The ``tr`` (Turkish) locale.
+
+    .. attribute:: uk
+
+        The ``uk`` (Ukrainian) locale.
+
+    .. attribute:: vi
+
+        The ``vi`` (Vietnamese) locale.
+
+    .. attribute:: zh_CN
+
+        The ``zh_CN`` (Chinese, China) locale.
+
+    .. attribute:: zh_TW
+
+        The ``zh_TW`` (Chinese, Taiwan) locale.
 
 
 Async Iterator
@@ -3363,7 +3565,7 @@ AuditLogDiff
 
         The guild's voice region. See also :attr:`Guild.region`.
 
-        :type: :class:`VoiceRegion`
+        :type: :class:`str`
 
     .. attribute:: afk_channel
 
@@ -3472,9 +3674,15 @@ AuditLogDiff
 
         The guild's vanity URL.
 
-        See also :meth:`Guild.vanity_invite` and :meth:`Guild.edit`.
+        See also :meth:`Guild.vanity_invite`, :meth:`Guild.edit`, and :attr:`Guild.vanity_url_code`.
 
         :type: :class:`str`
+
+    .. attribute:: preferred_locale
+
+        The guild's preferred locale.
+
+        :type: :class:`Locale`
 
     .. attribute:: position
 
@@ -3484,15 +3692,15 @@ AuditLogDiff
 
     .. attribute:: type
 
-        The type of channel or sticker.
+        The type of channel/thread, sticker, webhook, integration (:class:`str`), or permission overwrite (:class:`int`).
 
-        :type: Union[:class:`ChannelType`, :class:`StickerType`]
+        :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`WebhookType`, :class:`str`, :class:`int`]
 
     .. attribute:: topic
 
-        The topic of a :class:`TextChannel` or :class:`StageChannel`.
+        The topic of a :class:`TextChannel`, :class:`StageChannel` or :class:`ForumChannel`.
 
-        See also :attr:`TextChannel.topic` or :attr:`StageChannel.topic`.
+        See also :attr:`TextChannel.topic`, :attr:`StageChannel.topic` or :attr:`ForumChannel.topic`.
 
         :type: :class:`str`
 
@@ -3670,9 +3878,9 @@ AuditLogDiff
     .. attribute:: slowmode_delay
 
         The number of seconds members have to wait before
-        sending another message in the channel.
+        sending another message or creating another thread in the channel.
 
-        See also :attr:`TextChannel.slowmode_delay`.
+        See also :attr:`TextChannel.slowmode_delay` or :attr:`ForumChannel.slowmode_delay`.
 
         :type: :class:`int`
 
@@ -3683,7 +3891,7 @@ AuditLogDiff
 
         See also :attr:`VoiceChannel.rtc_region`.
 
-        :type: :class:`VoiceRegion`
+        :type: :class:`str`
 
     .. attribute:: video_quality_mode
 
@@ -3775,8 +3983,26 @@ AuditLogDiff
 
         :type: :class:`GuildScheduledEventStatus`
 
-.. this is currently missing the following keys: reason and application_id
-   I'm not sure how to about porting these
+    .. attribute:: image
+
+        The cover image of a guild scheduled event being changed.
+
+        :type: :class:`Asset`
+
+    .. attribute:: command_permissions
+
+        A mapping of target ID to guild permissions of an application command.
+
+        Note that only changed permission entries are included,
+        not necessarily all of the command's permissions.
+
+        :type: Dict[:class:`int`, :class:`ApplicationCommandPermissions`]
+
+    .. attribute:: application_id
+
+        The ID of the application that created a webhook.
+
+        :type: :class:`int`
 
 Webhook Support
 ------------------
@@ -3960,38 +4186,6 @@ Message
 .. autoclass:: Message()
     :members:
 
-ApplicationCommand
-~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: ApplicationCommand
-
-.. autoclass:: ApplicationCommand()
-    :members:
-
-SlashCommand
-~~~~~~~~~~~~
-
-.. attributetable:: SlashCommand
-
-.. autoclass:: SlashCommand()
-    :members:
-
-UserCommand
-~~~~~~~~~~~
-
-.. attributetable:: UserCommand
-
-.. autoclass:: UserCommand()
-    :members:
-
-MessageCommand
-~~~~~~~~~~~~~~
-
-.. attributetable:: MessageCommand
-
-.. autoclass:: MessageCommand()
-    :members:
-
 APISlashCommand
 ~~~~~~~~~~~~~~~
 
@@ -3999,6 +4193,7 @@ APISlashCommand
 
 .. autoclass:: APISlashCommand()
     :members:
+    :inherited-members:
 
 APIUserCommand
 ~~~~~~~~~~~~~~
@@ -4007,6 +4202,7 @@ APIUserCommand
 
 .. autoclass:: APIUserCommand()
     :members:
+    :inherited-members:
 
 APIMessageCommand
 ~~~~~~~~~~~~~~~~~
@@ -4015,22 +4211,7 @@ APIMessageCommand
 
 .. autoclass:: APIMessageCommand()
     :members:
-
-Option
-~~~~~~
-
-.. attributetable:: Option
-
-.. autoclass:: Option()
-    :members:
-
-OptionChoice
-~~~~~~~~~~~~
-
-.. attributetable:: OptionChoice
-
-.. autoclass:: OptionChoice()
-    :members:
+    :inherited-members:
 
 ApplicationCommandPermissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4046,22 +4227,6 @@ GuildApplicationCommandPermissions
 .. attributetable:: GuildApplicationCommandPermissions
 
 .. autoclass:: GuildApplicationCommandPermissions()
-    :members:
-
-PartialGuildApplicationCommandPermissions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: PartialGuildApplicationCommandPermissions
-
-.. autoclass:: PartialGuildApplicationCommandPermissions()
-    :members:
-
-UnresolvedGuildApplicationCommandPermissions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: UnresolvedGuildApplicationCommandPermissions
-
-.. autoclass:: UnresolvedGuildApplicationCommandPermissions()
     :members:
 
 Component
@@ -4221,6 +4386,21 @@ ApplicationCommandInteraction
     :members:
     :inherited-members:
 
+GuildCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: GuildCommandInteraction()
+
+UserCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: UserCommandInteraction()
+
+MessageCommandInteraction
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: MessageCommandInteraction()
+
 MessageInteraction
 ~~~~~~~~~~~~~~~~~~
 
@@ -4238,7 +4418,6 @@ ModalInteraction
 .. autoclass:: ModalInteraction()
     :members:
     :inherited-members:
-    :exclude-members: channel, followup, guild, me, permissions, response
 
 InteractionResponse
 ~~~~~~~~~~~~~~~~~~~~
@@ -4255,6 +4434,7 @@ InteractionMessage
 
 .. autoclass:: InteractionMessage()
     :members:
+    :inherited-members:
 
 ApplicationCommandInteractionData
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4411,15 +4591,6 @@ ThreadMember
 .. autoclass:: ThreadMember()
     :members:
 
-StoreChannel
-~~~~~~~~~~~~~
-
-.. attributetable:: StoreChannel
-
-.. autoclass:: StoreChannel()
-    :members:
-    :inherited-members:
-
 VoiceChannel
 ~~~~~~~~~~~~~
 
@@ -4438,6 +4609,18 @@ StageChannel
     :members:
     :inherited-members:
 
+ForumChannel
+~~~~~~~~~~~~
+
+.. attributetable:: ForumChannel
+
+.. autoclass:: ForumChannel()
+    :members:
+    :inherited-members:
+    :exclude-members: typing
+
+    .. automethod:: typing
+        :async-with:
 
 StageInstance
 ~~~~~~~~~~~~~~
@@ -4553,6 +4736,29 @@ Widget
 .. autoclass:: Widget()
     :members:
 
+WelcomeScreen
+~~~~~~~~~~~~~~
+
+.. attributetable:: WelcomeScreen
+
+.. autoclass:: WelcomeScreen()
+    :members:
+
+WelcomeScreenChannel
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: WelcomeScreenChannel
+
+.. autoclass:: WelcomeScreenChannel()
+
+VoiceRegion
+~~~~~~~~~~~
+
+.. attributetable:: VoiceRegion
+
+.. autoclass:: VoiceRegion()
+    :members:
+
 StickerPack
 ~~~~~~~~~~~~~
 
@@ -4568,6 +4774,7 @@ StickerItem
 
 .. autoclass:: StickerItem()
     :members:
+    :inherited-members:
 
 Sticker
 ~~~~~~~~~~~~~~~
@@ -4576,6 +4783,7 @@ Sticker
 
 .. autoclass:: Sticker()
     :members:
+    :inherited-members:
 
 StandardSticker
 ~~~~~~~~~~~~~~~~
@@ -4584,6 +4792,7 @@ StandardSticker
 
 .. autoclass:: StandardSticker()
     :members:
+    :inherited-members:
 
 GuildSticker
 ~~~~~~~~~~~~~
@@ -4592,6 +4801,7 @@ GuildSticker
 
 .. autoclass:: GuildSticker()
     :members:
+    :inherited-members:
 
 RawMessageDeleteEvent
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4655,6 +4865,22 @@ RawGuildScheduledEventUserActionEvent
 .. attributetable:: RawGuildScheduledEventUserActionEvent
 
 .. autoclass:: RawGuildScheduledEventUserActionEvent()
+    :members:
+
+RawThreadDeleteEvent
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawThreadDeleteEvent
+
+.. autoclass:: RawThreadDeleteEvent()
+    :members:
+
+RawThreadMemberRemoveEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawThreadMemberRemoveEvent
+
+.. autoclass:: RawThreadMemberRemoveEvent()
     :members:
 
 RawTypingEvent
@@ -4746,6 +4972,57 @@ PartialMessage
 .. autoclass:: PartialMessage
     :members:
 
+ApplicationCommand
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ApplicationCommand
+
+.. autoclass:: ApplicationCommand()
+    :members:
+
+SlashCommand
+~~~~~~~~~~~~
+
+.. attributetable:: SlashCommand
+
+.. autoclass:: SlashCommand()
+    :members:
+    :inherited-members:
+
+UserCommand
+~~~~~~~~~~~
+
+.. attributetable:: UserCommand
+
+.. autoclass:: UserCommand()
+    :members:
+    :inherited-members:
+
+MessageCommand
+~~~~~~~~~~~~~~
+
+.. attributetable:: MessageCommand
+
+.. autoclass:: MessageCommand()
+    :members:
+    :inherited-members:
+
+Option
+~~~~~~
+
+.. attributetable:: Option
+
+.. autoclass:: Option()
+    :members:
+
+OptionChoice
+~~~~~~~~~~~~
+
+.. attributetable:: OptionChoice
+
+.. autoclass:: OptionChoice()
+    :members:
+
 SelectOption
 ~~~~~~~~~~~~~
 
@@ -4776,6 +5053,14 @@ ApplicationFlags
 .. attributetable:: ApplicationFlags
 
 .. autoclass:: ApplicationFlags
+    :members:
+
+ChannelFlags
+~~~~~~~~~~~~
+
+.. attributetable:: ChannelFlags
+
+.. autoclass:: ChannelFlags
     :members:
 
 File
@@ -4856,6 +5141,14 @@ ShardInfo
 .. attributetable:: ShardInfo
 
 .. autoclass:: ShardInfo()
+    :members:
+
+SessionStartLimit
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: SessionStartLimit
+
+.. autoclass:: SessionStartLimit()
     :members:
 
 SystemChannelFlags
@@ -4960,6 +5253,39 @@ TextInput
     :members:
 
 
+Localization
+------------
+
+The library uses the following types/methods to support localization.
+
+Localized
+~~~~~~~~~
+
+.. autoclass:: Localized
+    :members:
+    :inherited-members:
+
+LocalizationValue
+~~~~~~~~~~~~~~~~~
+
+.. autoclass:: LocalizationValue
+    :members:
+    :inherited-members:
+
+LocalizationProtocol
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: LocalizationProtocol
+    :members:
+
+LocalizationStore
+~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: LocalizationStore
+    :members:
+    :inherited-members:
+
+
 Exceptions
 ------------
 
@@ -4984,13 +5310,15 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: InvalidData
 
-.. autoexception:: InvalidArgument
+.. autoexception:: WebhookTokenMissing
 
 .. autoexception:: GatewayNotFound
 
 .. autoexception:: ConnectionClosed
 
 .. autoexception:: PrivilegedIntentsRequired
+
+.. autoexception:: SessionStartLimitReached
 
 .. autoexception:: InteractionException
 
@@ -5001,6 +5329,8 @@ The following exceptions are thrown by the library.
 .. autoexception:: InteractionTimedOut
 
 .. autoexception:: ModalChainNotSupported
+
+.. autoexception:: LocalizationKeyError
 
 .. autoexception:: disnake.opus.OpusError
 
@@ -5015,10 +5345,10 @@ Exception Hierarchy
         - :exc:`DiscordException`
             - :exc:`ClientException`
                 - :exc:`InvalidData`
-                - :exc:`InvalidArgument`
                 - :exc:`LoginFailure`
                 - :exc:`ConnectionClosed`
                 - :exc:`PrivilegedIntentsRequired`
+                - :exc:`SessionStartLimitReached`
                 - :exc:`InteractionException`
                     - :exc:`InteractionResponded`
                     - :exc:`InteractionNotResponded`
@@ -5030,6 +5360,8 @@ Exception Hierarchy
                 - :exc:`Forbidden`
                 - :exc:`NotFound`
                 - :exc:`DiscordServerError`
+            - :exc:`LocalizationKeyError`
+            - :exc:`WebhookTokenMissing`
 
 
 Warnings
@@ -5041,6 +5373,8 @@ Warnings
 
 .. autoclass:: SyncWarning
 
+.. autoclass:: LocalizationWarning
+
 Warning Hierarchy
 ~~~~~~~~~~~~~~~~~~~
 
@@ -5049,3 +5383,4 @@ Warning Hierarchy
     - :class:`DiscordWarning`
         - :class:`ConfigWarning`
         - :class:`SyncWarning`
+        - :class:`LocalizationWarning`

@@ -22,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+from __future__ import annotations
 
 import types
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Iterator, Mapping, Optional, Sequence, Tuple, Type, TypeVar, Union
@@ -30,7 +31,6 @@ __all__ = (
     "Enum",
     "ChannelType",
     "MessageType",
-    "VoiceRegion",
     "SpeakingState",
     "VerificationLevel",
     "ContentFilter",
@@ -58,12 +58,14 @@ __all__ = (
     "NSFWLevel",
     "OptionType",
     "ApplicationCommandType",
+    "ApplicationCommandPermissionType",
     "PartyType",
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
     "ThreadArchiveDuration",
     "WidgetStyle",
+    "Locale",
 )
 
 
@@ -121,10 +123,10 @@ class EnumMeta(type):
     __is_enum_instantiated: ClassVar[bool] = False
 
     _name_map_: ClassVar[Mapping[str, Enum]]
-    _value_map_: ClassVar[Mapping[Any, Enum]]
+    _value2member_map_: ClassVar[Mapping[Any, Enum]]
 
     def __new__(
-        metacls: Type[_T],
+        metacls: Type[_T],  # pyright: reportSelfClsParameterName=false
         name: str,
         bases: Tuple[Type[Any], Type[Any]],
         namespace: _EnumDict
@@ -134,11 +136,13 @@ class EnumMeta(type):
             EnumMeta.__is_enum_instantiated = True
             return super().__new__(metacls, name, bases, namespace)
 
-        base, _ = bases  # ensured possible in __prepare__
+        base, enum_type = bases  # ensured possible in __prepare__
 
         ns: Dict[str, Any] = {
+            "__objtype__": base,
+            "__enumtype__": enum_type,
             "_name_map_" : (name_map := {}),
-            "_value_map_": (value_map := {}),
+            "_value2member_map_": (value_map := {}),
             **{
                 name_: value_
                 for name_, value_ in Enum.__dict__.items()
@@ -161,7 +165,7 @@ class EnumMeta(type):
 
     @classmethod
     def __prepare__(
-        mcs, name: str, bases: Tuple[Type[Any], ...] = (), /, **kwds: Any
+        metacls, name: str, bases: Tuple[Type[Any], ...] = (), /, **kwds: Any
     ) -> Union[Dict[str, Any], _EnumDict]:
         # with this we get to ensure the new class' namespace is an _EnumDict
 
@@ -181,10 +185,9 @@ class EnumMeta(type):
     def __repr__(cls) -> str:
         return f"<enum {cls.__name__}>"
 
-    def __call__(cls, value: Any) -> Any:  # type: ignore
-        # Enums use different call signature than standard types, mypy be damned
+    def __call__(cls, value: Any) -> Any:
         try:
-            return cls._value_map_[value]
+            return cls._value2member_map_[value]
         except KeyError:
             raise KeyError(f"{value} is not a valid {cls.__name__}") from None
 
@@ -192,7 +195,7 @@ class EnumMeta(type):
         return cls._name_map_[name]
 
     def __contains__(cls, value: Any) -> bool:
-        return value in cls._value_map_
+        return value in cls._value2member_map_
 
     def __iter__(cls) -> Iterator[Any]:
         yield from cls._name_map_.values()
@@ -204,7 +207,7 @@ else:
 
     class Enum(metaclass=EnumMeta):
         _name_map_: ClassVar[Mapping[str, Enum]]
-        _value_map_: ClassVar[Mapping[Any, Enum]]
+        _value2member_map_: ClassVar[Mapping[Any, Enum]]
         _name_: str
         _value_: Any
 
@@ -228,10 +231,10 @@ else:
         @classmethod
         @property
         def _member_names_(cls) -> Sequence[str]:
-            # I _think_ this should be fine as a property?
+            # I *think* this should be fine as a property?
             # Hardly ever gets used so I don't really see the value in pre-computing it like
             # vanilla Enums do. I decided to save memory but we can always just revert this.
-            return list(cls._name_map_)
+            return tuple(cls._name_map_)
 
         def __repr__(self) -> str:
             return f"<{type(self).__name__}.{self._name_}: {self._value_!r}>"
@@ -247,12 +250,12 @@ class ChannelType(int, Enum):
     group = 3
     category = 4
     news = 5
-    store = 6
     news_thread = 10
     public_thread = 11
     private_thread = 12
     stage_voice = 13
     guild_directory = 14
+    forum = 15
 
 
 class MessageType(int, Enum):
@@ -280,10 +283,10 @@ class MessageType(int, Enum):
     thread_starter_message = 21
     guild_invite_reminder = 22
     context_menu_command = 23
+    auto_moderation_action = 24
 
 
 class PartyType(int, Enum):
-    youtube = 755600276941176913
     poker = 755827207812677713
     betrayal = 773336526917861400
     fishing = 814288819477020702
@@ -293,27 +296,9 @@ class PartyType(int, Enum):
     doodle_crew = 878067389634314250
     checkers = 832013003968348200
     spellcast = 852509694341283871
-    awkword = 879863881349087252
-    sketchy_artist = 879864070101172255
     watch_together = 880218394199220334
     sketch_heads = 902271654783242291
     ocho = 832025144389533716
-
-
-class VoiceRegion(str, Enum):
-    us_west = "us-west"
-    us_east = "us-east"
-    us_south = "us-south"
-    us_central = "us-central"
-    singapore = "singapore"
-    sydney = "sydney"
-    rotterdam = "rotterdam"
-    brazil = "brazil"
-    hongkong = "hongkong"
-    russia = "russia"
-    japan = "japan"
-    southafrica = "southafrica"
-    india = "india"
 
 
 class SpeakingState(int, Enum):
@@ -416,6 +401,7 @@ class AuditLogAction(int, Enum):
     thread_create                    = 110
     thread_update                    = 111
     thread_delete                    = 112
+    application_command_permission_update = 121
     # fmt: on
 
     @property
@@ -469,6 +455,7 @@ class AuditLogAction(int, Enum):
             AuditLogAction.guild_scheduled_event_create: AuditLogActionCategory.create,
             AuditLogAction.guild_scheduled_event_update: AuditLogActionCategory.update,
             AuditLogAction.guild_scheduled_event_delete: AuditLogActionCategory.delete,
+            AuditLogAction.application_command_permission_update: AuditLogActionCategory.update,
         }
         # fmt: on
         return lookup[self]
@@ -506,6 +493,8 @@ class AuditLogAction(int, Enum):
             return "guild_scheduled_event"
         elif v < 113:
             return "thread"
+        elif v < 122:
+            return "application_command"
         else:
             return None
 
@@ -650,6 +639,15 @@ class ApplicationCommandType(int, Enum):
     message = 3
 
 
+class ApplicationCommandPermissionType(Enum):
+    role = 1
+    user = 2
+    channel = 3
+
+    def __int__(self):
+        return self.value
+
+
 class OptionType(Enum):
     sub_command = 1
     sub_command_group = 2
@@ -709,8 +707,74 @@ class WidgetStyle(str, Enum):
     banner4 = "banner4"
 
 
-EnumT = TypeVar("EnumT", bound=Enum)
+# reference: https://discord.com/developers/docs/reference#locales
+class Locale(str, Enum):
+    bg = "bg"
+    "Bulgarian | български"
+    cs = "cs"
+    "Czech | Čeština"
+    da = "da"
+    "Danish | Dansk"
+    de = "de"
+    "German | Deutsch"
+    el = "el"
+    "Greek | Ελληνικά"
+    en_GB = "en-GB"
+    "English, UK | English, UK"
+    en_US = "en-US"
+    "English, US | English, US"
+    es_ES = "es-ES"
+    "Spanish | Español"
+    fi = "fi"
+    "Finnish | Suomi"
+    fr = "fr"
+    "French | Français"
+    hi = "hi"
+    "Hindi | हिन्दी"
+    hr = "hr"
+    "Croatian | Hrvatski"
+    it = "it"
+    "Italian | Italiano"
+    ja = "ja"
+    "Japanese | 日本語"
+    ko = "ko"
+    "Korean | 한국어"
+    lt = "lt"
+    "Lithuanian | Lietuviškai"
+    hu = "hu"
+    "Hungarian | Magyar"
+    nl = "nl"
+    "Dutch | Nederlands"
+    no = "no"
+    "Norwegian | Norsk"
+    pl = "pl"
+    "Polish | Polski"
+    pt_BR = "pt-BR"
+    "Portuguese, Brazilian | Português do Brasil"
+    ro = "ro"
+    "Romanian, Romania | Română"
+    ru = "ru"
+    "Russian | Pусский"
+    sv_SE = "sv-SE"
+    "Swedish | Svenska"
+    th = "th"
+    "Thai | ไทย"
+    tr = "tr"
+    "Turkish | Türkçe"
+    uk = "uk"
+    "Ukrainian | Українська"
+    vi = "vi"
+    "Vietnamese | Tiếng Việt"
+    zh_CN = "zh-CN"
+    "Chinese, China | 中文"
+    zh_TW = "zh-TW"
+    "Chinese, Taiwan | 繁體中文"
 
+    def __str__(self):
+        return self.value
+
+
+EnumT = TypeVar("EnumT", bound=Enum)
 
 def create_unknown_value(cls: Type[EnumT], val: Any) -> EnumT:
     unknown = cls.__new__(cls)  # type: ignore  # skip Enum type validation
@@ -724,8 +788,7 @@ def try_enum(cls: Type[EnumT], val: Any) -> EnumT:
     If it fails it returns a proxy invalid value instead.
     """
     try:
-        return cls._value_map_[val]  # type: ignore
-        # incompatibility w/ default enum, will probably fix but hate the name _value2member_map_ :^)
+        return cls._value2member_map_[val]  # type: ignore
     except KeyError:
         return create_unknown_value(cls, val)
 
@@ -738,9 +801,7 @@ def enum_if_int(cls: Type[EnumT], val: Any) -> EnumT:
 
     If it fails it returns a proxy invalid value instead.
     """
-    if not isinstance(val, int):
-        return val
-    return try_enum(cls, val)
+    return try_enum(cls, val) if isinstance(val, int) else val
 
 
 def try_enum_to_int(val: Any) -> Any:

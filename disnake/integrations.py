@@ -29,9 +29,8 @@ import datetime
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type
 
 from .enums import ExpireBehaviour, try_enum
-from .errors import InvalidArgument
 from .user import User
-from .utils import MISSING, _get_as_snowflake, deprecated, parse_time
+from .utils import MISSING, _get_as_snowflake, deprecated, parse_time, warn_deprecated
 
 __all__ = (
     "IntegrationAccount",
@@ -144,7 +143,7 @@ class Integration:
 
         Parameters
         ----------
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason the integration was deleted. Shows up on the audit log.
 
             .. versionadded:: 2.0
@@ -242,6 +241,9 @@ class StreamIntegration(Integration):
         You must have :attr:`~Permissions.manage_guild` permission to
         use this.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         expire_behaviour: :class:`ExpireBehaviour`
@@ -257,13 +259,13 @@ class StreamIntegration(Integration):
             You do not have permission to edit the integration.
         HTTPException
             Editing the guild failed.
-        InvalidArgument
+        TypeError
             ``expire_behaviour`` did not receive a :class:`ExpireBehaviour`.
         """
         payload: Dict[str, Any] = {}
         if expire_behaviour is not MISSING:
             if not isinstance(expire_behaviour, ExpireBehaviour):
-                raise InvalidArgument("expire_behaviour field must be of type ExpireBehaviour")
+                raise TypeError("expire_behaviour field must be of type ExpireBehaviour")
 
             payload["expire_behavior"] = expire_behaviour.value
 
@@ -315,8 +317,6 @@ class IntegrationApplication:
         The application's icon hash.
     description: :class:`str`
         The application's description. Can be an empty string.
-    summary: :class:`str`
-        The application's summary. Can be an empty string.
     user: Optional[:class:`User`]
         The bot user associated with this application.
     """
@@ -326,7 +326,7 @@ class IntegrationApplication:
         "name",
         "icon",
         "description",
-        "summary",
+        "_summary",
         "user",
     )
 
@@ -335,13 +335,27 @@ class IntegrationApplication:
         self.name: str = data["name"]
         self.icon: Optional[str] = data["icon"]
         self.description: str = data["description"]
-        self.summary: str = data["summary"]
+        self._summary: str = data.get("summary", "")
         user = data.get("bot")
         self.user: Optional[User] = User(state=state, data=user) if user else None
 
+    @property
+    def summary(self) -> str:
+        """:class:`str`: The application's summary. Can be an empty string.
+
+        .. deprecated:: 2.5
+
+            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
+        """
+        warn_deprecated(
+            "summary is deprecated and will be removed in a future version. Consider using description instead.",
+            stacklevel=2,
+        )
+        return self._summary
+
 
 class BotIntegration(Integration):
-    """Represents a bot integration on disnake.
+    """Represents a bot integration on Discord.
 
     .. versionadded:: 2.0
 

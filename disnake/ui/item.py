@@ -31,7 +31,6 @@ from typing import (
     Any,
     Callable,
     Coroutine,
-    Dict,
     Generic,
     Optional,
     Protocol,
@@ -44,7 +43,7 @@ from typing import (
 __all__ = ("Item", "WrappedComponent")
 
 I = TypeVar("I", bound="Item")
-V = TypeVar("V", bound="View", covariant=True)
+V = TypeVar("V", "View", None, covariant=True)
 
 if TYPE_CHECKING:
     from ..components import NestedComponent
@@ -59,7 +58,7 @@ if TYPE_CHECKING:
 class WrappedComponent(ABC):
     """Represents the base UI component that all UI components inherit from.
 
-    The current UI components supported are:
+    The following classes implement this ABC:
 
     - :class:`disnake.ui.Button`
     - :class:`disnake.ui.Select`
@@ -82,7 +81,7 @@ class WrappedComponent(ABC):
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
-        return f"<{self.__class__.__name__} {attrs}>"
+        return f"<{type(self).__name__} {attrs}>"
 
     @property
     def type(self) -> ComponentType:
@@ -107,6 +106,14 @@ class Item(WrappedComponent, Generic[V]):
     """
 
     __repr_attributes__: Tuple[str, ...] = ("row",)
+
+    @overload
+    def __init__(self: Item[None]):
+        ...
+
+    @overload
+    def __init__(self: Item[V]):
+        ...
 
     def __init__(self):
         self._view: Optional[V] = None
@@ -154,7 +161,7 @@ class Item(WrappedComponent, Generic[V]):
         """Optional[:class:`View`]: The underlying view for this item."""
         return self._view
 
-    async def callback(self, interaction: MessageInteraction):
+    async def callback(self, interaction: MessageInteraction, /):
         """|coro|
 
         The callback associated with this UI item.

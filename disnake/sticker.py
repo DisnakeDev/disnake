@@ -202,7 +202,7 @@ class StickerItem(_StickerTag):
         The URL for the sticker's image.
     """
 
-    __slots__ = ("_state", "name", "id", "format", "url")
+    __slots__ = ("name", "id", "format", "url")
 
     def __init__(self, *, state: ConnectionState, data: StickerItemPayload):
         self._state: ConnectionState = state
@@ -272,7 +272,7 @@ class Sticker(_StickerTag):
         The URL for the sticker's image.
     """
 
-    __slots__ = ("_state", "id", "name", "description", "format", "url")
+    __slots__ = ("id", "name", "description", "format", "url")
 
     def __init__(self, *, state: ConnectionState, data: StickerPayload) -> None:
         self._state: ConnectionState = state
@@ -459,7 +459,7 @@ class GuildSticker(Sticker):
             The sticker's new description. Can be ``None``.
         emoji: :class:`str`
             The name of a unicode emoji that represents the sticker's expression.
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason for editing this sticker. Shows up on the audit log.
 
         Raises

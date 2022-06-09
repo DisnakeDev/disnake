@@ -91,7 +91,7 @@ class Reaction:
             data["emoji"]
         )
         self.count: int = data.get("count", 1)
-        self.me: bool = data.get("me")
+        self.me: bool = data["me"]
 
     # TODO: typeguard
     def is_custom_emoji(self) -> bool:
@@ -154,6 +154,9 @@ class Reaction:
 
         .. versionadded:: 1.3
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Raises
         ------
         HTTPException
@@ -162,7 +165,7 @@ class Reaction:
             You do not have the proper permissions to clear the reaction.
         NotFound
             The emoji you specified was not found.
-        InvalidArgument
+        TypeError
             The emoji parameter is invalid.
         """
         await self.message.clear_reaction(self.emoji)

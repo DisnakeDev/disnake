@@ -71,7 +71,8 @@ if TYPE_CHECKING:
 has_nacl: bool
 
 try:
-    import nacl.secret  # type: ignore
+    import nacl.secret
+    import nacl.utils
 
     has_nacl = True
 except ImportError:
@@ -267,9 +268,9 @@ class VoiceClient(VoiceProtocol):
     )
 
     @property
-    def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild we're connected to, if applicable."""
-        return getattr(self.channel, "guild", None)
+    def guild(self) -> Guild:
+        """:class:`Guild`: The guild we're connected to."""
+        return self.channel.guild
 
     @property
     def user(self) -> ClientUser:
@@ -307,7 +308,7 @@ class VoiceClient(VoiceProtocol):
             _log.info("Ignoring extraneous voice server update.")
             return
 
-        self.token = data.get("token")
+        self.token = data["token"]
         self.server_id = int(data["guild_id"])
         endpoint = data.get("endpoint")
 

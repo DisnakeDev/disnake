@@ -57,7 +57,7 @@ import aiohttp
 from . import utils
 from .activity import BaseActivity
 from .enums import SpeakingState
-from .errors import ConnectionClosed, InvalidArgument
+from .errors import ConnectionClosed
 
 if TYPE_CHECKING:
     from .client import Client
@@ -166,12 +166,8 @@ class GatewayRatelimiter:
         if self.remaining == 0:
             return self.per - (current - self.window)
 
+        # subtract one command in current window, return no delay
         self.remaining -= 1
-        # TODO: these two lines don't seem to be required; adds a delay of 60 seconds when the
-        # limit is exhausted, instead of just waiting for the current 60 seconds to be over
-        if self.remaining == 0:
-            self.window = current
-
         return 0.0
 
     async def block(self) -> None:
@@ -312,7 +308,7 @@ class HeartbeatWebSocket(Protocol):
 
 
 class DiscordWebSocket:
-    """Implements a WebSocket for Discord's gateway v9.
+    """Implements a WebSocket for Discord's gateway v10.
 
     Attributes
     ----------
@@ -370,7 +366,7 @@ class DiscordWebSocket:
         self.loop: asyncio.AbstractEventLoop = loop
 
         # an empty dispatcher to prevent crashes
-        self._dispatch: DispatchFunc = lambda *args: None
+        self._dispatch: DispatchFunc = lambda event, *args: None
         # generic event listeners
         self._dispatch_listeners: List[EventListener] = []
         # the keep alive
@@ -758,7 +754,7 @@ class DiscordWebSocket:
     ) -> None:
         if activity is not None:
             if not isinstance(activity, BaseActivity):
-                raise InvalidArgument("activity must derive from BaseActivity.")
+                raise TypeError("activity must derive from BaseActivity.")
             activity_data = (activity.to_dict(),)
         else:
             activity_data = ()

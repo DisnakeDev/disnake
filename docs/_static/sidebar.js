@@ -56,11 +56,6 @@ class Sidebar {
     }
   }
 
-  resize() {
-    let rect = this.element.getBoundingClientRect();
-    this.element.style.height = `calc(100vh - 1em - ${rect.top + document.body.offsetTop}px)`;
-  }
-
   collapseSection(icon) {
     icon.classList.remove('expanded');
     icon.classList.add('collapsed');
@@ -118,11 +113,9 @@ function getCurrentSection() {
 
 document.addEventListener('DOMContentLoaded', () => {
   sidebar = new Sidebar(document.getElementById('sidebar'));
-  sidebar.resize();
   sidebar.createCollapsableSections();
 
   window.addEventListener('scroll', () => {
     sidebar.setActiveLink(getCurrentSection());
-    sidebar.resize();
   });
 });

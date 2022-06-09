@@ -37,11 +37,14 @@ from typing import (
     List,
     Literal,
     Mapping,
+    NamedTuple,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
     Union,
+    cast,
     overload,
 )
 
@@ -49,18 +52,13 @@ import disnake.abc
 
 from . import utils
 from .asset import Asset
-from .enums import (
-    ChannelType,
-    StagePrivacyLevel,
-    VideoQualityMode,
-    VoiceRegion,
-    try_enum,
-    try_enum_to_int,
-)
-from .errors import ClientException, InvalidArgument
+from .context_managers import Typing
+from .enums import ChannelType, StagePrivacyLevel, VideoQualityMode, try_enum, try_enum_to_int
+from .errors import ClientException
+from .file import File
+from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
-from .object import Object
 from .permissions import PermissionOverwrite, Permissions
 from .stage_instance import StageInstance
 from .threads import Thread
@@ -73,31 +71,37 @@ __all__ = (
     "DMChannel",
     "CategoryChannel",
     "NewsChannel",
-    "StoreChannel",
+    "ForumChannel",
     "GroupChannel",
     "PartialMessageable",
 )
 
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
+    from .asset import AssetBytes
+    from .embeds import Embed
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
-    from .message import Message, PartialMessage
+    from .message import AllowedMentions, Message, PartialMessage
     from .role import Role
     from .state import ConnectionState
-    from .threads import AnyThreadArchiveDuration
+    from .sticker import GuildSticker, StickerItem
+    from .threads import AnyThreadArchiveDuration, ThreadType
     from .types.channel import (
         CategoryChannel as CategoryChannelPayload,
         DMChannel as DMChannelPayload,
+        ForumChannel as ForumChannelPayload,
         GroupDMChannel as GroupChannelPayload,
         StageChannel as StageChannelPayload,
-        StoreChannel as StoreChannelPayload,
         TextChannel as TextChannelPayload,
         VoiceChannel as VoiceChannelPayload,
     )
     from .types.snowflake import SnowflakeList
     from .types.threads import ThreadArchiveDurationLiteral
+    from .ui.action_row import Components, MessageUIComponent
+    from .ui.view import View
     from .user import BaseUser, ClientUser, User
+    from .voice_region import VoiceRegion
     from .webhook import Webhook
 
 
@@ -160,6 +164,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         The default auto archive duration in minutes for threads created in this channel.
 
         .. versionadded:: 2.0
+
+    last_pin_timestamp: Optional[:class:`datetime.datetime`]
+        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
+
+        .. versionadded:: 2.5
     """
 
     __slots__ = (
@@ -172,16 +181,18 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         "category_id",
         "position",
         "slowmode_delay",
-        "_overwrites",
-        "_type",
         "last_message_id",
         "default_auto_archive_duration",
+        "last_pin_timestamp",
+        "_overwrites",
+        "_flags",
+        "_type",
     )
 
     def __init__(self, *, state: ConnectionState, guild: Guild, data: TextChannelPayload):
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
-        self._type: int = data["type"]
+        self._type: Literal[0, 5] = data["type"]
         self._update(guild, data)
 
     def __repr__(self) -> str:
@@ -193,6 +204,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             ("news", self.is_news()),
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -203,23 +215,32 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         # Does this need coercion into `int`? No idea yet.
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
             "default_auto_archive_duration", 1440
         )
-        self._type: int = data.get("type", self._type)
+        self._type: Literal[0, 5] = data.get("type", self._type)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
-        self._fill_overwrites(data)  # type: ignore
+        self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
+            data.get("last_pin_timestamp")
+        )
+        self._fill_overwrites(data)
 
     async def _get_channel(self):
         return self
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
-        return try_enum(ChannelType, self._type)
+    def type(self) -> Literal[ChannelType.text, ChannelType.news]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.text` or :attr:`ChannelType.news`.
+        """
+        if self._type == ChannelType.text.value:
+            return ChannelType.text
+        return ChannelType.news
 
     @property
     def _sorting_bucket(self) -> int:
@@ -294,7 +315,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         reason: Optional[str] = ...,
         name: str = ...,
-        topic: str = ...,
+        topic: Optional[str] = ...,
         position: int = ...,
         nsfw: bool = ...,
         sync_permissions: bool = ...,
@@ -327,11 +348,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
             The new channel's name.
-        topic: :class:`str`
+        topic: Optional[:class:`str`]
             The new channel's topic.
         position: :class:`int`
             The new channel's position.
@@ -361,13 +385,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Raises
         ------
-        InvalidArgument
-            If position is less than 0 or greater than the number of channels, or if
-            the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -576,7 +601,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return [Webhook.from_state(d, state=self._state) for d in data]
 
     async def create_webhook(
-        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+        self, *, name: str, avatar: Optional[AssetBytes] = None, reason: Optional[str] = None
     ) -> Webhook:
         """|coro|
 
@@ -592,18 +617,26 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ----------
         name: :class:`str`
             The webhook's name.
-        avatar: Optional[:class:`bytes`]
-            A :term:`py:bytes-like object` representing the webhook's default avatar.
+        avatar: Optional[|resource_type|]
+            The webhook's default avatar.
             This operates similarly to :meth:`~ClientUser.edit`.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
+
         reason: Optional[:class:`str`]
             The reason for creating this webhook. Shows up in the audit logs.
 
         Raises
         ------
-        HTTPException
-            Creating the webhook failed.
+        NotFound
+            The ``avatar`` asset couldn't be found.
         Forbidden
             You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
 
         Returns
         -------
@@ -612,11 +645,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         """
         from .webhook import Webhook
 
-        if avatar is not None:
-            avatar = utils._bytes_to_base64_data(avatar)  # type: ignore
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
 
         data = await self._state.http.create_webhook(
-            self.id, name=str(name), avatar=avatar, reason=reason
+            self.id, name=str(name), avatar=avatar_data, reason=reason
         )
         return Webhook.from_state(data, state=self._state)
 
@@ -634,6 +666,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 1.3
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         destination: :class:`TextChannel`
@@ -649,6 +684,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             Following the channel failed.
         Forbidden
             You do not have the permissions to create a webhook.
+        TypeError
+            The current or provided channel is not of the correct type.
 
         Returns
         -------
@@ -656,10 +693,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The newly created webhook.
         """
         if not self.is_news():
-            raise ClientException("The channel must be a news channel.")
+            raise TypeError("This channel must be a news channel.")
 
         if not isinstance(destination, TextChannel):
-            raise InvalidArgument(f"Expected TextChannel received {destination.__class__.__name__}")
+            raise TypeError(f"Expected TextChannel received {destination.__class__.__name__}")
 
         from .webhook import Webhook
 
@@ -712,7 +749,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: str,
-        message: Snowflake = None,
+        message: Snowflake,
         auto_archive_duration: AnyThreadArchiveDuration = None,
         slowmode_delay: int = None,
         reason: Optional[str] = None,
@@ -724,9 +761,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self,
         *,
         name: str,
-        type: Literal[
-            ChannelType.public_thread, ChannelType.private_thread, ChannelType.news_thread
-        ] = None,
+        type: ThreadType,
         auto_archive_duration: AnyThreadArchiveDuration = None,
         invitable: bool = None,
         slowmode_delay: int = None,
@@ -740,7 +775,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         name: str,
         message: Optional[Snowflake] = None,
         auto_archive_duration: AnyThreadArchiveDuration = None,
-        type: Optional[ChannelType] = None,
+        type: Optional[ThreadType] = None,
         invitable: bool = None,
         slowmode_delay: int = None,
         reason: Optional[str] = None,
@@ -767,8 +802,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The name of the thread.
         message: :class:`abc.Snowflake`
             A snowflake representing the message to create the thread with.
-            If ``None`` is passed then a private thread is created.
-            Defaults to ``None``.
 
             .. versionchanged:: 2.5
 
@@ -802,7 +835,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.3
 
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason for creating the thread. Shows up on the audit log.
 
         Raises
@@ -821,8 +854,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             raise ValueError("Exactly one of message and type must be provided.")
 
         if auto_archive_duration is not None:
-            auto_archive_duration: ThreadArchiveDurationLiteral = try_enum_to_int(
-                auto_archive_duration
+            auto_archive_duration = cast(
+                "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
         if message is None:
@@ -855,7 +888,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         limit: Optional[int] = 50,
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
     ) -> ArchivedThreadIterator:
-        """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the guild.
+        """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the channel.
 
         You must have :attr:`~Permissions.read_message_history` permission to use this. If iterating over private threads
         then :attr:`~Permissions.manage_threads` permission is also required.
@@ -864,7 +897,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Parameters
         ----------
-        limit: Optional[:class:`bool`]
+        limit: Optional[:class:`int`]
             The number of threads to retrieve.
             If ``None``, retrieves every archived thread in the channel. Note, however,
             that this would make it a slow operation.
@@ -906,6 +939,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         "category_id",
         "rtc_region",
         "video_quality_mode",
+        "_flags",
     )
 
     def __init__(
@@ -929,16 +963,16 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         self.guild = guild
         self.name: str = data["name"]
         rtc = data.get("rtc_region")
-        self.rtc_region: Optional[VoiceRegion] = (
-            try_enum(VoiceRegion, rtc) if rtc is not None else None
-        )
+        self.rtc_region: Optional[str] = rtc
         self.video_quality_mode: VideoQualityMode = try_enum(
             VideoQualityMode, data.get("video_quality_mode", 1)
         )
+        self._flags = data.get("flags", 0)
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.position: int = data["position"]
-        self.bitrate: int = data.get("bitrate")
-        self.user_limit: int = data.get("user_limit")
+        # these don't exist in partial channel objects of slash command options
+        self.bitrate: int = data.get("bitrate", 0)
+        self.user_limit: int = data.get("user_limit", 0)
         self._fill_overwrites(data)
 
     @property
@@ -980,24 +1014,6 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         }
         # fmt: on
 
-    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
-    def permissions_for(
-        self,
-        obj: Union[Member, Role],
-        /,
-        *,
-        ignore_timeout: bool = MISSING,
-    ) -> Permissions:
-        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
-
-        # voice channels cannot be edited by people who can't connect to them
-        # It also implicitly denies all other voice perms
-        if not base.connect:
-            denied = Permissions.voice()
-            denied.update(manage_channels=True, manage_roles=True)
-            base.value &= ~denied.value
-        return base
-
 
 class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     """Represents a Discord guild voice channel.
@@ -1037,11 +1053,14 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         The channel's preferred audio bitrate in bits per second.
     user_limit: :class:`int`
         The channel's limit for number of members that can be in a voice channel.
-    rtc_region: Optional[:class:`VoiceRegion`]
+    rtc_region: Optional[:class:`str`]
         The region for the voice channel's voice communication.
         A value of ``None`` indicates automatic voice region detection.
 
         .. versionadded:: 1.7
+
+        .. versionchanged:: 2.5
+            No longer a ``VoiceRegion`` instance.
 
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the voice channel's participants.
@@ -1086,6 +1105,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
             ("nsfw", self.nsfw),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
@@ -1100,8 +1120,11 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         return self
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.voice]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.voice`.
+        """
         return ChannelType.voice
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
@@ -1166,6 +1189,26 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         return PartialMessage(channel=self, id=message_id)
 
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+
+        # voice channels cannot be edited by people who can't connect to them
+        # It also implicitly denies all other voice perms
+        if not base.connect:
+            denied = Permissions.voice()
+            # voice channels also deny all text related permissions
+            denied.value |= Permissions.text().value
+            denied.update(manage_channels=True, manage_roles=True)
+            base.value &= ~denied.value
+        return base
+
     @overload
     async def edit(
         self,
@@ -1177,7 +1220,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         sync_permissions: int = ...,
         category: Optional[CategoryChannel] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
-        rtc_region: Optional[VoiceRegion] = ...,
+        rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
         nsfw: bool = ...,
         slowmode_delay: int = ...,
@@ -1203,6 +1246,9 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1224,7 +1270,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        rtc_region: Optional[:class:`VoiceRegion`]
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The new region for the voice channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
 
@@ -1248,12 +1294,14 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Raises
         ------
-        InvalidArgument
-            If the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -1265,6 +1313,237 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+
+    async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
+        """|coro|
+
+        Deletes a list of messages. This is similar to :meth:`Message.delete`
+        except it bulk deletes multiple messages.
+
+        As a special case, if the number of messages is 0, then nothing
+        is done. If the number of messages is 1 then single message
+        delete is done. If it's more than two, then bulk delete is used.
+
+        You cannot bulk delete more than 100 messages or messages that
+        are older than 14 days.
+
+        You must have :attr:`~Permissions.manage_messages` permission to
+        do this.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        messages: Iterable[:class:`abc.Snowflake`]
+            An iterable of messages denoting which ones to bulk delete.
+
+        Raises
+        ------
+        ClientException
+            The number of messages to delete was more than 100.
+        Forbidden
+            You do not have proper permissions to delete the messages.
+        NotFound
+            If single delete, then the message was already deleted.
+        HTTPException
+            Deleting the messages failed.
+        """
+        if not isinstance(messages, (list, tuple)):
+            messages = list(messages)
+
+        if len(messages) == 0:
+            return  # do nothing
+
+        if len(messages) == 1:
+            message_id: int = messages[0].id
+            await self._state.http.delete_message(self.id, message_id)
+            return
+
+        if len(messages) > 100:
+            raise ClientException("Can only bulk delete messages up to 100 messages")
+
+        message_ids: SnowflakeList = [m.id for m in messages]
+        await self._state.http.delete_messages(self.id, message_ids)
+
+    async def purge(
+        self,
+        *,
+        limit: Optional[int] = 100,
+        check: Callable[[Message], bool] = MISSING,
+        before: Optional[SnowflakeTime] = None,
+        after: Optional[SnowflakeTime] = None,
+        around: Optional[SnowflakeTime] = None,
+        oldest_first: Optional[bool] = False,
+        bulk: bool = True,
+    ) -> List[Message]:
+        """|coro|
+
+        Purges a list of messages that meet the criteria given by the predicate
+        ``check``. If a ``check`` is not provided then all messages are deleted
+        without discrimination.
+
+        You must have :attr:`~Permissions.manage_messages` permission to
+        delete messages even if they are your own.
+        :attr:`~Permissions.read_message_history` permission is
+        also needed to retrieve message history.
+
+        .. versionadded:: 2.5
+
+        .. note::
+
+            See :meth:`TextChannel.purge` for examples.
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of messages to search through. This is not the number
+            of messages that will be deleted, though it can be.
+        check: Callable[[:class:`Message`], :class:`bool`]
+            The function used to check if a message should be deleted.
+            It must take a :class:`Message` as its sole parameter.
+        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Same as ``before`` in :meth:`history`.
+        after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Same as ``after`` in :meth:`history`.
+        around: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Same as ``around`` in :meth:`history`.
+        oldest_first: Optional[:class:`bool`]
+            Same as ``oldest_first`` in :meth:`history`.
+        bulk: :class:`bool`
+            If ``True``, use bulk delete. Setting this to ``False`` is useful for mass-deleting
+            a bot's own messages without :attr:`Permissions.manage_messages`. When ``True``, will
+            fall back to single delete if messages are older than two weeks.
+
+        Raises
+        ------
+        Forbidden
+            You do not have proper permissions to do the actions required.
+        HTTPException
+            Purging the messages failed.
+
+        Returns
+        -------
+        List[:class:`.Message`]
+            A list of messages that were deleted.
+        """
+        if check is MISSING:
+            check = lambda m: True
+
+        iterator = self.history(
+            limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
+        )
+        ret: List[Message] = []
+        count = 0
+
+        minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
+        strategy = self.delete_messages if bulk else _single_delete_strategy
+
+        async for message in iterator:
+            if count == 100:
+                to_delete = ret[-100:]
+                await strategy(to_delete)
+                count = 0
+                await asyncio.sleep(1)
+
+            if not check(message):
+                continue
+
+            if message.id < minimum_time:
+                # older than 14 days old
+                if count == 1:
+                    await ret[-1].delete()
+                elif count >= 2:
+                    to_delete = ret[-count:]
+                    await strategy(to_delete)
+
+                count = 0
+                strategy = _single_delete_strategy
+
+            count += 1
+            ret.append(message)
+
+        # SOme messages remaining to poll
+        if count >= 2:
+            # more than 2 messages -> bulk delete
+            to_delete = ret[-count:]
+            await strategy(to_delete)
+        elif count == 1:
+            # delete a single message
+            await ret[-1].delete()
+
+        return ret
+
+    async def webhooks(self) -> List[Webhook]:
+        """|coro|
+
+        Retrieves the list of webhooks this channel has.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        use this.
+
+        .. versionadded:: 2.5
+
+        Raises
+        ------
+        Forbidden
+            You don't have permissions to get the webhooks.
+
+        Returns
+        -------
+        List[:class:`Webhook`]
+            The list of webhooks this channel has.
+        """
+        from .webhook import Webhook
+
+        data = await self._state.http.channel_webhooks(self.id)
+        return [Webhook.from_state(d, state=self._state) for d in data]
+
+    async def create_webhook(
+        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+    ) -> Webhook:
+        """|coro|
+
+        Creates a webhook for this channel.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        do this.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The webhook's name.
+        avatar: Optional[:class:`bytes`]
+            The webhook's default avatar.
+            This operates similarly to :meth:`~ClientUser.edit`.
+        reason: Optional[:class:`str`]
+            The reason for creating this webhook. Shows up in the audit logs.
+
+        Raises
+        ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
+        Forbidden
+            You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+
+        Returns
+        -------
+        :class:`Webhook`
+            The newly created webhook.
+        """
+        from .webhook import Webhook
+
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
+
+        data = await self._state.http.create_webhook(
+            self.id, name=str(name), avatar=avatar_data, reason=reason
+        )
+        return Webhook.from_state(data, state=self._state)
 
 
 class StageChannel(VocalGuildChannel):
@@ -1309,9 +1588,13 @@ class StageChannel(VocalGuildChannel):
         The channel's preferred audio bitrate in bits per second.
     user_limit: :class:`int`
         The channel's limit for number of members that can be in a stage channel.
-    rtc_region: Optional[:class:`VoiceRegion`]
+    rtc_region: Optional[:class:`str`]
         The region for the stage channel's voice communication.
         A value of ``None`` indicates automatic voice region detection.
+
+        .. versionchanged:: 2.5
+            No longer a ``VoiceRegion`` instance.
+
     video_quality_mode: :class:`VideoQualityMode`
         The camera video quality for the stage channel's participants.
 
@@ -1331,13 +1614,14 @@ class StageChannel(VocalGuildChannel):
             ("video_quality_mode", self.video_quality_mode),
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
+            ("flags", self.flags),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<{self.__class__.__name__} {joined}>"
 
     def _update(self, guild: Guild, data: StageChannelPayload) -> None:
         super()._update(guild, data)
-        self.topic = data.get("topic")
+        self.topic: Optional[str] = data.get("topic")
 
     @property
     def requesting_to_speak(self) -> List[Member]:
@@ -1384,8 +1668,11 @@ class StageChannel(VocalGuildChannel):
         ]
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.stage_voice]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.stage_voice`.
+        """
         return ChannelType.stage_voice
 
     @utils.copy_doc(disnake.abc.GuildChannel.clone)
@@ -1402,11 +1689,30 @@ class StageChannel(VocalGuildChannel):
         """
         return utils.get(self.guild.stage_instances, channel_id=self.id)
 
+    @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
+    def permissions_for(
+        self,
+        obj: Union[Member, Role],
+        /,
+        *,
+        ignore_timeout: bool = MISSING,
+    ) -> Permissions:
+        base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
+
+        # voice channels cannot be edited by people who can't connect to them
+        # It also implicitly denies all other voice perms
+        if not base.connect:
+            denied = Permissions.voice()
+            denied.update(manage_channels=True, manage_roles=True)
+            base.value &= ~denied.value
+        return base
+
     async def create_instance(
         self,
         *,
         topic: str,
         privacy_level: StagePrivacyLevel = MISSING,
+        notify_everyone: bool = False,
         reason: Optional[str] = None,
     ) -> StageInstance:
         """|coro|
@@ -1418,34 +1724,52 @@ class StageChannel(VocalGuildChannel):
 
         .. versionadded:: 2.0
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         topic: :class:`str`
             The stage instance's topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's privacy level. Defaults to :attr:`StagePrivacyLevel.guild_only`.
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason the stage instance was created. Shows up on the audit log.
+        notify_everyone: :class:`bool`
+            Whether to notify ``@everyone`` that the stage instance has started.
+            Requires the :attr:`~Permissions.mention_everyone` permission on the stage channel.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.5
 
         Raises
         ------
-        InvalidArgument
-            If the ``privacy_level`` parameter is not the proper type.
         Forbidden
             You do not have permissions to create a stage instance.
         HTTPException
             Creating a stage instance failed.
+        TypeError
+            If the ``privacy_level`` parameter is not the proper type.
 
         Returns
         -------
         :class:`StageInstance`
             The newly created stage instance.
         """
-        payload: Dict[str, Any] = {"channel_id": self.id, "topic": topic}
+        payload: Dict[str, Any] = {
+            "channel_id": self.id,
+            "topic": topic,
+            "send_start_notification": notify_everyone,
+        }
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
-                raise InvalidArgument("privacy_level field must be of type PrivacyLevel")
+                raise TypeError("privacy_level field must be of type PrivacyLevel")
+            if privacy_level is StagePrivacyLevel.public:
+                utils.warn_deprecated(
+                    "Setting privacy_level to public is deprecated and will be removed in a future version.",
+                    stacklevel=2,
+                )
 
             payload["privacy_level"] = privacy_level.value
 
@@ -1484,7 +1808,7 @@ class StageChannel(VocalGuildChannel):
         sync_permissions: int = ...,
         category: Optional[CategoryChannel] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
-        rtc_region: Optional[VoiceRegion] = ...,
+        rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
         reason: Optional[str] = ...,
     ) -> Optional[StageChannel]:
@@ -1508,6 +1832,9 @@ class StageChannel(VocalGuildChannel):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1523,7 +1850,7 @@ class StageChannel(VocalGuildChannel):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        rtc_region: Optional[:class:`VoiceRegion`]
+        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The new region for the stage channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
         video_quality_mode: :class:`VideoQualityMode`
@@ -1536,12 +1863,14 @@ class StageChannel(VocalGuildChannel):
 
         Raises
         ------
-        InvalidArgument
-            If the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -1597,7 +1926,17 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
     """
 
-    __slots__ = ("name", "id", "guild", "nsfw", "_state", "position", "_overwrites", "category_id")
+    __slots__ = (
+        "name",
+        "id",
+        "guild",
+        "nsfw",
+        "_state",
+        "position",
+        "_overwrites",
+        "category_id",
+        "_flags",
+    )
 
     def __init__(self, *, state: ConnectionState, guild: Guild, data: CategoryChannelPayload):
         self._state: ConnectionState = state
@@ -1605,12 +1944,13 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         self._update(guild, data)
 
     def __repr__(self) -> str:
-        return f"<CategoryChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw}>"
+        return f"<CategoryChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw} flags={self.flags!r}>"
 
     def _update(self, guild: Guild, data: CategoryChannelPayload) -> None:
         self.guild: Guild = guild
         self.name: str = data["name"]
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         self.position: int = data["position"]
         self._fill_overwrites(data)
@@ -1620,8 +1960,11 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ChannelType.category.value
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.category]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.category`.
+        """
         return ChannelType.category
 
     def is_nsfw(self) -> bool:
@@ -1667,6 +2010,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         .. versionchanged:: 2.0
             Edits are no longer in-place, the newly edited channel is returned instead.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1683,12 +2029,14 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         Raises
         ------
-        InvalidArgument
-            If position is less than 0 or greater than the number of categories.
         Forbidden
             You do not have permissions to edit the category.
         HTTPException
             Editing the category failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
@@ -1700,6 +2048,50 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+
+    @overload
+    async def move(
+        self,
+        *,
+        beginning: bool,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def move(
+        self,
+        *,
+        end: bool,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def move(
+        self,
+        *,
+        before: Snowflake,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def move(
+        self,
+        *,
+        after: Snowflake,
+        offset: int = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
 
     @utils.copy_doc(disnake.abc.GuildChannel.move)
     async def move(self, **kwargs):
@@ -1714,7 +2106,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         """
 
         def comparator(channel):
-            return (not isinstance(channel, TextChannel), channel.position)
+            return (not isinstance(channel, (TextChannel, ForumChannel)), channel.position)
 
         ret = [c for c in self.guild.channels if c.category_id == self.id]
         ret.sort(key=comparator)
@@ -1756,6 +2148,20 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         ret.sort(key=lambda c: (c.position, c.id))
         return ret
 
+    @property
+    def forum_channels(self) -> List[ForumChannel]:
+        """List[:class:`ForumChannel`]: Returns the forum channels that are under this category.
+
+        .. versionadded:: 2.5
+        """
+        ret = [
+            c
+            for c in self.guild.channels
+            if c.category_id == self.id and isinstance(c, ForumChannel)
+        ]
+        ret.sort(key=lambda c: (c.position, c.id))
+        return ret
+
     async def create_text_channel(self, name: str, **options: Any) -> TextChannel:
         """|coro|
 
@@ -1766,6 +2172,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`TextChannel`
             The newly created text channel.
         """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_text_channel(name, category=self, **options)
 
     async def create_voice_channel(self, name: str, **options: Any) -> VoiceChannel:
@@ -1778,6 +2186,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`VoiceChannel`
             The newly created voice channel.
         """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_voice_channel(name, category=self, **options)
 
     async def create_stage_channel(self, name: str, **options: Any) -> StageChannel:
@@ -1792,7 +2202,25 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         :class:`StageChannel`
             The newly created stage channel.
         """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
         return await self.guild.create_stage_channel(name, category=self, **options)
+
+    async def create_forum_channel(self, name: str, **options: Any) -> ForumChannel:
+        """|coro|
+
+        A shortcut method to :meth:`Guild.create_forum_channel` to create a :class:`ForumChannel` in the category.
+
+        .. versionadded:: 2.5
+
+        Returns
+        -------
+        :class:`ForumChannel`
+            The newly created forum channel.
+        """
+        if "category" in options:
+            raise TypeError("got an unexpected keyword argument 'category'")
+        return await self.guild.create_forum_channel(name, category=self, **options)
 
 
 class NewsChannel(TextChannel):
@@ -1804,13 +2232,15 @@ class NewsChannel(TextChannel):
     type: ChannelType = ChannelType.news
 
 
-class StoreChannel(disnake.abc.GuildChannel, Hashable):
-    """Represents a Discord guild store channel.
+class ThreadWithMessage(NamedTuple):
+    thread: Thread
+    message: Message
 
-    .. warning::
 
-        Store channels will be discontinued on March 1, 2022.
-        For more information read `here <https://support-dev.discord.com/hc/en-us/articles/4414590563479>`_.
+class ForumChannel(disnake.abc.GuildChannel, Hashable):
+    """Represents a Discord Forum channel.
+
+    .. versionadded:: 2.5
 
     .. container:: operations
 
@@ -1832,14 +2262,16 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
 
     Attributes
     ----------
+    id: :class:`int`
+        The channel's ID.
     name: :class:`str`
         The channel's name.
     guild: :class:`Guild`
         The guild the channel belongs to.
-    id: :class:`int`
-        The channel's ID.
-    category_id: :class:`int`
-        The category channel ID this channel belongs to.
+    topic: Optional[:class:`str`]
+        The channel's topic. ``None`` if it isn't set.
+    category_id: Optional[:class:`int`]
+        The category channel ID this channel belongs to, if applicable.
     position: :class:`int`
         The position in the channel list. This is a number that starts at 0. e.g. the
         top channel is position 0.
@@ -1849,43 +2281,82 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
         .. note::
 
             To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
+    last_thread_id: Optional[:class:`int`]
+        The ID of the last created thread in this channel. It may
+        *not* point to an existing or valid thread.
+    default_auto_archive_duration: :class:`int`
+        The default auto archive duration in minutes for threads created in this channel.
+    slowmode_delay: :class:`int`
+        The number of seconds a member must wait between creating threads
+        in this channel. A value of `0` denotes that it is disabled.
     """
 
     __slots__ = (
-        "name",
         "id",
-        "guild",
-        "_state",
-        "nsfw",
+        "name",
         "category_id",
+        "topic",
         "position",
+        "nsfw",
+        "last_thread_id",
+        "_flags",
+        "default_auto_archive_duration",
+        "guild",
+        "slowmode_delay",
+        "_state",
+        "_type",
         "_overwrites",
     )
 
-    def __init__(self, *, state: ConnectionState, guild: Guild, data: StoreChannelPayload):
+    def __init__(self, *, state: ConnectionState, guild: Guild, data: ForumChannelPayload) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
+        self._type: int = data["type"]
         self._update(guild, data)
 
     def __repr__(self) -> str:
-        return f"<StoreChannel id={self.id} name={self.name!r} position={self.position} nsfw={self.nsfw}>"
+        atts = [
+            ("id", self.id),
+            ("name", self.name),
+            ("topic", self.topic),
+            ("position", self.position),
+            ("nsfw", self.nsfw),
+            ("category_id", self.category_id),
+            ("default_auto_archive_duration", self.default_auto_archive_duration),
+            ("flags", self.flags),
+        ]
+        joined = " ".join("%s=%r" % t for t in atts)
+        return f"<{type(self).__name__} {joined}>"
 
-    def _update(self, guild: Guild, data: StoreChannelPayload) -> None:
+    def _update(self, guild: Guild, data: ForumChannelPayload) -> None:
         self.guild: Guild = guild
         self.name: str = data["name"]
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
+        self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
+        self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
+        self.last_thread_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
+        self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
+            "default_auto_archive_duration", 1440
+        )
+        self.slowmode_delay = data.get("rate_limit_per_user", 0)
         self._fill_overwrites(data)
+
+    async def _get_channel(self) -> ForumChannel:
+        return self
+
+    @property
+    def type(self) -> Literal[ChannelType.forum]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.forum`.
+        """
+        return ChannelType.forum
 
     @property
     def _sorting_bucket(self) -> int:
         return ChannelType.text.value
-
-    @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
-        return ChannelType.store
 
     @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
     def permissions_for(
@@ -1897,10 +2368,20 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
     ) -> Permissions:
         base = super().permissions_for(obj, ignore_timeout=ignore_timeout)
 
-        # store channels do not have voice related permissions
+        # forum channels do not have voice related permissions
         denied = Permissions.voice()
         base.value &= ~denied.value
         return base
+
+    @property
+    def members(self) -> List[Member]:
+        """List[:class:`Member`]: Returns all members that can see this channel."""
+        return [m for m in self.guild.members if self.permissions_for(m).view_channel]
+
+    @property
+    def threads(self) -> List[Thread]:
+        """List[:class:`Thread`]: Returns all the threads that you can see."""
+        return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
         """Whether the channel is marked as NSFW.
@@ -1909,31 +2390,63 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
         """
         return self.nsfw
 
-    @utils.copy_doc(disnake.abc.GuildChannel.clone)
-    async def clone(
-        self, *, name: Optional[str] = None, reason: Optional[str] = None
-    ) -> StoreChannel:
-        return await self._clone_impl({"nsfw": self.nsfw}, name=name, reason=reason)
+    @property
+    def last_thread(self) -> Optional[Thread]:
+        """Gets the last created thread in this channel from the cache.
+
+        The thread might not be valid or point to an existing thread.
+
+        .. admonition:: Reliable Fetching
+            :class: helpful
+
+            For a slightly more reliable method of fetching the
+            last thread, use :meth:`Guild.fetch_channel` with the :attr:`last_thread_id`
+            attribute.
+
+        Returns
+        -------
+        Optional[:class:`Thread`]
+            The last created thread in this channel or ``None`` if not found.
+        """
+        return self._state.get_channel(self.last_thread_id) if self.last_thread_id else None  # type: ignore
+
+    # both of these are re-implemented due to forum channels not being messageables
+    async def trigger_typing(self) -> None:
+        """|coro|
+
+        Triggers a *typing* indicator to the desination.
+
+        *Typing* indicator will go away after 10 seconds.
+        """
+        channel = await self._get_channel()
+        await self._state.http.send_typing(channel.id)
+
+    @utils.copy_doc(disnake.abc.Messageable.typing)
+    def typing(self) -> Typing:
+        return Typing(self)
 
     @overload
     async def edit(
         self,
         *,
         name: str = ...,
+        topic: Optional[str] = ...,
         position: int = ...,
         nsfw: bool = ...,
         sync_permissions: bool = ...,
-        category: Optional[CategoryChannel],
-        reason: Optional[str],
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite],
-    ) -> Optional[StoreChannel]:
+        category: Optional[CategoryChannel] = ...,
+        slowmode_delay: Optional[int] = ...,
+        default_auto_archive_duration: AnyThreadArchiveDuration = ...,
+        overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = ...,
+        reason: Optional[str] = ...,
+    ) -> Optional[ForumChannel]:
         ...
 
     @overload
-    async def edit(self) -> Optional[StoreChannel]:
+    async def edit(self) -> Optional[ForumChannel]:
         ...
 
-    async def edit(self, *, reason=None, **options):
+    async def edit(self, *, reason: Optional[str] = None, **options):
         """|coro|
 
         Edits the channel.
@@ -1941,13 +2454,15 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
         You must have :attr:`~Permissions.manage_channels` permission to
         do this.
 
-        .. versionchanged:: 2.0
-            Edits are no longer in-place, the newly edited channel is returned instead.
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
         name: :class:`str`
             The new channel's name.
+        topic: Optional[:class:`str`]
+            The new channel's topic.
         position: :class:`int`
             The new channel's position.
         nsfw: :class:`bool`
@@ -1958,35 +2473,400 @@ class StoreChannel(disnake.abc.GuildChannel, Hashable):
         category: Optional[:class:`CategoryChannel`]
             The new category for this channel. Can be ``None`` to remove the
             category.
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-
-            .. versionadded:: 1.3
-
+        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+            The new default auto archive duration in minutes for threads created in this channel.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
         Raises
         ------
-        InvalidArgument
-            If position is less than 0 or greater than the number of channels, or if
-            the permission overwrite information is not in proper form.
         Forbidden
             You do not have permissions to edit the channel.
         HTTPException
             Editing the channel failed.
+        TypeError
+            The permission overwrite information is not in proper form.
+        ValueError
+            The position is less than 0.
 
         Returns
         -------
-        Optional[:class:`.StoreChannel`]
-            The newly edited store channel. If the edit was only positional
+        Optional[:class:`ForumChannel`]
+            The newly edited forum channel. If the edit was only positional
             then ``None`` is returned instead.
         """
         payload = await self._edit(options, reason=reason)
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+
+    @utils.copy_doc(disnake.abc.GuildChannel.clone)
+    async def clone(
+        self, *, name: Optional[str] = None, reason: Optional[str] = None
+    ) -> ForumChannel:
+        return await self._clone_impl(
+            {
+                "topic": self.topic,
+                "nsfw": self.nsfw,
+                "rate_limit_per_user": self.slowmode_delay,
+                "default_auto_archive_duration": self.default_auto_archive_duration,
+            },
+            name=name,
+            reason=reason,
+        )
+
+    def get_thread(self, thread_id: int, /) -> Optional[Thread]:
+        """Returns a thread with the given ID.
+
+        Parameters
+        ----------
+        thread_id: :class:`int`
+            The ID to search for.
+
+        Returns
+        -------
+        Optional[:class:`Thread`]
+            The returned thread of ``None`` if not found.
+        """
+        return self.guild.get_thread(thread_id)
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embed: Embed = ...,
+        file: File = ...,
+        suppress_embeds: bool = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> ThreadWithMessage:
+        ...
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embed: Embed = ...,
+        files: List[File] = ...,
+        suppress_embeds: bool = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> ThreadWithMessage:
+        ...
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embeds: List[Embed] = ...,
+        file: File = ...,
+        suppress_embeds: bool = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> ThreadWithMessage:
+        ...
+
+    @overload
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = ...,
+        slowmode_delay: int = ...,
+        content: str,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
+        suppress_embeds: bool = ...,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = ...,
+        allowed_mentions: AllowedMentions = ...,
+        view: View = ...,
+        components: Components = ...,
+        reason: Optional[str] = None,
+    ) -> ThreadWithMessage:
+        ...
+
+    async def create_thread(
+        self,
+        *,
+        name: str,
+        auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        slowmode_delay: int = MISSING,
+        content: str,
+        embed: Embed = MISSING,
+        embeds: List[Embed] = MISSING,
+        file: File = MISSING,
+        files: List[File] = MISSING,
+        suppress_embeds: bool = MISSING,
+        stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
+        view: View = MISSING,
+        components: Components[MessageUIComponent] = MISSING,
+        reason: Optional[str] = None,
+    ) -> ThreadWithMessage:
+        """|coro|
+
+        Creates a thread in this forum channel.
+
+        You must have the :attr:`~Permissions.create_forum_threads` permission to do this.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name of the thread.
+        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+            The duration in minutes before the thread is automatically archived for inactivity.
+            If not provided, the channel's default auto archive duration is used.
+            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this thread, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+        content: :class:`str`
+            The content of the message to send.
+        embed: :class:`.Embed`
+            The rich embed for the content to send. This cannot be mixed with the
+            ``embeds`` parameter.
+        embeds: List[:class:`.Embed`]
+            A list of embeds to send with the content. Must be a maximum of 10.
+            This cannot be mixed with the ``embed`` parameter.
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+        file: :class:`.File`
+            The file to upload. This cannot be mixed with the ``files`` parameter.
+        files: List[:class:`.File`]
+            A list of files to upload. Must be a maximum of 10.
+            This cannot be mixed with the ``file`` parameter.
+        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StickerItem`]]
+            A list of stickers to upload. Must be a maximum of 3.
+        allowed_mentions: :class:`.AllowedMentions`
+            Controls the mentions being processed in this message. If this is
+            passed, then the object is merged with :attr:`.Client.allowed_mentions`.
+            The merging behaviour only overrides attributes that have been explicitly passed
+            to the object, otherwise it uses the attributes set in :attr:`.Client.allowed_mentions`.
+            If no object is passed at all then the defaults given by :attr:`.Client.allowed_mentions`
+            are used instead.
+        view: :class:`.ui.View`
+            A Discord UI View to add to the message. This cannot be mixed with ``components``.
+        components: |components_type|
+            A list of components to include in the message. This cannot be mixed with ``view``.
+        reason: Optional[:class:`str`]
+            The reason for creating the thread. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to create a thread.
+        HTTPException
+            Starting the thread failed.
+        TypeError
+            Specified both ``file`` and ``files``,
+            or you specified both ``embed`` and ``embeds``,
+            or you specified both ``view`` and ``components``.
+            or you have passed an object that is not :class:`File` to ``file`` or ``files``.
+        ValueError
+            Specified more than 10 embeds,
+            or more than 10 files.
+
+        Returns
+        -------
+        Tuple[:class:`Thread`, :class:`Message`]
+            A :class:`~typing.NamedTuple` with the newly created thread and the message sent in it.
+
+            These values can also be accessed through the ``thread`` and ``message`` fields.
+        """
+        from .message import Message
+        from .webhook.async_ import handle_message_parameters_dict
+
+        params = handle_message_parameters_dict(
+            content,
+            embed=embed,
+            embeds=embeds,
+            file=file,
+            files=files,
+            view=view,
+            components=components,
+            allowed_mentions=allowed_mentions,
+            stickers=stickers,
+        )
+
+        if auto_archive_duration is not None:
+            auto_archive_duration = cast(
+                "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
+            )
+
+        if params.files and len(params.files) > 10:
+            raise ValueError("files parameter must be a list of up to 10 elements")
+        elif params.files and not all(isinstance(file, File) for file in params.files):
+            raise TypeError("files parameter must be a list of File")
+
+        if suppress_embeds:
+            flags = MessageFlags.suppress_embeds.flag
+        else:
+            flags = 0
+
+        try:
+            data = await self._state.http.start_thread_in_forum_channel(
+                self.id,
+                name=name,
+                auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
+                rate_limit_per_user=slowmode_delay or 0,
+                type=ChannelType.public_thread.value,
+                files=params.files,
+                flags=flags,
+                reason=reason,
+                **params.payload,
+            )
+        finally:
+            if params.files:
+                for f in params.files:
+                    f.close()
+
+        thread = Thread(guild=self.guild, data=data, state=self._state)
+        message = Message(channel=thread, data=data["message"], state=self._state)
+
+        if view:
+            self._state.store_view(view, message.id)
+
+        return ThreadWithMessage(thread, message)
+
+    def archived_threads(
+        self,
+        *,
+        limit: Optional[int] = 50,
+        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+    ) -> ArchivedThreadIterator:
+        """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the channel.
+
+        You must have :attr:`~Permissions.read_message_history` permission to use this.
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of threads to retrieve.
+            If ``None``, retrieves every archived thread in the channel. Note, however,
+            that this would make it a slow operation.
+        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+            Retrieve archived channels before the given date or ID.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to get archived threads.
+        HTTPException
+            The request to get the archived threads failed.
+
+        Yields
+        -------
+        :class:`Thread`
+            The archived threads.
+        """
+        return ArchivedThreadIterator(
+            self.id, self.guild, limit=limit, joined=False, private=False, before=before
+        )
+
+    async def webhooks(self) -> List[Webhook]:
+        """|coro|
+
+        Retrieves the list of webhooks this channel has.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        use this.
+
+        .. versionadded:: 2.6
+
+        Raises
+        ------
+        Forbidden
+            You don't have permissions to get the webhooks.
+
+        Returns
+        -------
+        List[:class:`Webhook`]
+            The list of webhooks this channel has.
+        """
+        from .webhook import Webhook
+
+        data = await self._state.http.channel_webhooks(self.id)
+        return [Webhook.from_state(d, state=self._state) for d in data]
+
+    async def create_webhook(
+        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+    ) -> Webhook:
+        """|coro|
+
+        Creates a webhook for this channel.
+
+        You must have :attr:`~.Permissions.manage_webhooks` permission to
+        do this.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The webhook's name.
+        avatar: Optional[:class:`bytes`]
+            The webhook's default avatar.
+            This operates similarly to :meth:`~ClientUser.edit`.
+        reason: Optional[:class:`str`]
+            The reason for creating this webhook. Shows up in the audit logs.
+
+        Raises
+        ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
+        Forbidden
+            You do not have permissions to create a webhook.
+        HTTPException
+            Creating the webhook failed.
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+
+        Returns
+        -------
+        :class:`Webhook`
+            The newly created webhook.
+        """
+        from .webhook import Webhook
+
+        avatar_data = await utils._assetbytes_to_base64_data(avatar)
+
+        data = await self._state.http.create_webhook(
+            self.id, name=str(name), avatar=avatar_data, reason=reason
+        )
+        return Webhook.from_state(data, state=self._state)
 
 
 DMC = TypeVar("DMC", bound="DMChannel")
@@ -2023,15 +2903,30 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         The user presenting yourself.
     id: :class:`int`
         The direct message channel ID.
+    last_pin_timestamp: Optional[:class:`datetime.datetime`]
+        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
+
+        .. versionadded:: 2.5
     """
 
-    __slots__ = ("id", "recipient", "me", "_state")
+    __slots__ = (
+        "id",
+        "recipient",
+        "me",
+        "last_pin_timestamp",
+        "_state",
+        "_flags",
+    )
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload):
         self._state: ConnectionState = state
         self.recipient: Optional[User] = state.store_user(data["recipients"][0])  # type: ignore
         self.me: ClientUser = me
         self.id: int = int(data["id"])
+        self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
+            data.get("last_pin_timestamp")
+        )
+        self._flags: int = data.get("flags", 0)
 
     async def _get_channel(self):
         return self
@@ -2050,13 +2945,17 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         self._state = state
         self.id = channel_id
         # state.user won't be None here
-        self.me = state.user  # type: ignore
+        self.me = state.user
         self.recipient = state.get_user(user_id) if user_id != self.me.id else None
+        self.last_pin_timestamp = None
         return self
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.private]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.private`.
+        """
         return ChannelType.private
 
     @property
@@ -2072,6 +2971,14 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         .. versionadded:: 2.4
         """
         return f"https://discord.com/channels/@me/{self.id}"
+
+    @property
+    def flags(self) -> ChannelFlags:
+        """:class:`.ChannelFlags`: The channel flags for this channel.
+
+        .. versionadded:: 2.6
+        """
+        return ChannelFlags._from_value(self._flags)
 
     def permissions_for(
         self,
@@ -2206,8 +3113,11 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         return f"<GroupChannel id={self.id} name={self.name!r}>"
 
     @property
-    def type(self) -> ChannelType:
-        """:class:`ChannelType`: The channel's Discord type."""
+    def type(self) -> Literal[ChannelType.group]:
+        """:class:`ChannelType`: The channel's Discord type.
+
+        This always returns :attr:`ChannelType.group`.
+        """
         return ChannelType.group
 
     @property
@@ -2309,12 +3219,11 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
 
     def __init__(self, state: ConnectionState, id: int, type: Optional[ChannelType] = None):
         self._state: ConnectionState = state
-        self._channel: Object = Object(id=id)
         self.id: int = id
         self.type: Optional[ChannelType] = type
 
-    async def _get_channel(self) -> Object:
-        return self._channel
+    async def _get_channel(self) -> PartialMessageable:
+        return self
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
         """Creates a :class:`PartialMessage` from the given message ID.
@@ -2347,10 +3256,10 @@ def _guild_channel_factory(channel_type: int):
         return CategoryChannel, value
     elif value is ChannelType.news:
         return TextChannel, value
-    elif value is ChannelType.store:
-        return StoreChannel, value
     elif value is ChannelType.stage_voice:
         return StageChannel, value
+    elif value is ChannelType.forum:
+        return ForumChannel, value
     else:
         return None, value
 
@@ -2391,8 +3300,8 @@ def _channel_type_factory(
         VoiceChannel: [ChannelType.voice],
         GroupChannel: [ChannelType.group],
         CategoryChannel: [ChannelType.category],
-        StoreChannel: [ChannelType.store],
         NewsChannel: [ChannelType.news],
         Thread: [ChannelType.news_thread, ChannelType.public_thread, ChannelType.private_thread],
         StageChannel: [ChannelType.stage_voice],
+        ForumChannel: [ChannelType.forum],
     }.get(cls, [])
