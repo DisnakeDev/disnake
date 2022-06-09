@@ -59,9 +59,13 @@ class PartialChannel(_BaseChannel):
     type: ChannelType
 
 
+class GroupInviteRecipient(TypedDict):
+    username: str
+
+
 class InviteChannel(PartialChannel, total=False):
     name: Optional[str]
-    recipients: List[Dict[Literal["username"], str]]
+    recipients: List[GroupInviteRecipient]
     icon: Optional[str]
 
 

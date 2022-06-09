@@ -46,7 +46,10 @@ if TYPE_CHECKING:
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
     from .state import ConnectionState
-    from .types.channel import InviteChannel as InviteChannelPayload
+    from .types.channel import (
+        GroupInviteRecipient as GroupInviteRecipientPayload,
+        InviteChannel as InviteChannelPayload,
+    )
     from .types.guild import GuildFeature
     from .types.invite import (
         GatewayInvite as GatewayInvitePayload,
@@ -115,7 +118,7 @@ class PartialInviteChannel:
         self.name: Optional[str] = data.get("name")
         self.type: ChannelType = try_enum(ChannelType, data["type"])
         if self.type is ChannelType.group:
-            self._recipients: List[Dict[Literal["username"], str]] = data.get("recipients", [])
+            self._recipients: List[GroupInviteRecipientPayload] = data.get("recipients", [])
         else:
             self._recipients = []
         self._icon: Optional[str] = data.get("icon")
