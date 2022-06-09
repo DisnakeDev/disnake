@@ -1,28 +1,26 @@
 [![Disnake Banner](https://raw.githubusercontent.com/DisnakeDev/disnake/master/assets/banner.png)](https://disnake.dev/)
 
-disnake
-=======
-
-<p align="center">
+<div align="center">
+<h1>disnake</h1>
+<p>
     <a href="https://discord.gg/disnake"><img src="https://img.shields.io/discord/808030843078836254?style=flat-square&color=5865f2&logo=discord&logoColor=ffffff&label=discord" alt="Discord server invite" /></a>
     <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/v/disnake.svg?style=flat-square" alt="PyPI version info" /></a>
     <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/pyversions/disnake.svg?style=flat-square" alt="PyPI supported Python versions" /></a>
-    <a href="https://github.com/DisnakeDev/disnake/commits"><img src="https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg?style=flat-square" alt="Commit activity" /></a>
-</p>
+    <a href="https://github.com/DisnakeDev/disnake/commits"><img src="https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg?style=flat-square" alt="Commit activity" /></a></p>
 
 A modern, easy to use, feature-rich, and async ready API wrapper for Discord written in Python.
-
+  
 Key Features
 ------------
 
-- Proper rate limit handling.
-- Type-safety measures.
-- [FastAPI](https://fastapi.tiangolo.com/)-like slash command syntax.
-
+-> Proper rate limit handling.<br>
+-> Type-safety measures.<br>
+-> [FastAPI](https://fastapi.tiangolo.com/) - like slash command syntax.<br>
+<br>
 <sup>The syntax and structure of `discord.py 2.0` is preserved.</sup>
 
-Installing
-----------
+<h1>Installing</h1>
+
 
 **Python 3.8 or higher is required.**
 
@@ -37,12 +35,16 @@ python3 -m pip install -U disnake
 py -3 -m pip install -U disnake
 ```
 
+<br>
+    
 Installing `disnake` with full voice support requires you to replace `disnake` here, with `disnake[voice]`. To learn more about voice support (or installing the development version), please visit [this section of our guide](https://guide.disnake.dev/prerequisites/installing-disnake/).
 
 (You can optionally install [PyNaCl](https://pypi.org/project/PyNaCl/) for voice support.)
 
 Note that voice support on Linux requires installation of `libffi-dev` and `python-dev` packages, via your preferred package manager (e.g. `apt`, `dnf`, etc.) before running the following commands.
 
+<br>
+    
 Versioning
 ----------
 
@@ -50,6 +52,8 @@ This project does **not** quite follow semantic versioning; for more details, se
 
 To be on the safe side and avoid unexpected breaking changes, pin the dependency to a minor version (e.g. `disnake==a.b.*` or `disnake~=a.b.c`) or an exact version (e.g. `disnake==a.b.c`).
 
+<br>    
+    
 Quick Example
 -------------
 
@@ -99,9 +103,9 @@ async def ping(ctx):
 
 bot.run("BOT_TOKEN")
 ```
-
+<br><br>
 You can find more examples in the [examples directory](./examples).
-
+<br>
 <br>
 <p align="center">
     <a href="https://docs.disnake.dev/">Documentation</a>
@@ -113,3 +117,4 @@ You can find more examples in the [examples directory](./examples).
     <a href="https://discord.gg/discord-developers">Discord Developers</a>
 </p>
 <br>
+</div>
