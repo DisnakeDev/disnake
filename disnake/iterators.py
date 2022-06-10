@@ -33,6 +33,7 @@ from typing import (
     AsyncIterator,
     Awaitable,
     Callable,
+    Dict,
     List,
     Optional,
     TypeVar,
@@ -62,6 +63,7 @@ __all__ = (
 
 if TYPE_CHECKING:
     from .abc import Messageable, Snowflake
+    from .app_commands import APIApplicationCommand
     from .audit_logs import AuditLogEntry
     from .guild import Guild
     from .member import Member
@@ -590,10 +592,14 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
             state = self._state
 
-            appcmds = {
-                int(d["id"]): application_command_factory(d)
-                for d in data.get("application_commands", [])
-            }
+            appcmds: Dict[int, APIApplicationCommand] = {}
+            for d in data.get("application_commands", []):
+                try:
+                    cmd = application_command_factory(d)
+                except TypeError:
+                    pass
+                else:
+                    appcmds[int(d["id"])] = cmd
 
             events = {
                 int(d["id"]): GuildScheduledEvent(state=state, data=d)
