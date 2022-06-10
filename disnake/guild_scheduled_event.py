@@ -286,6 +286,10 @@ class GuildScheduledEvent(Hashable):
         - ``entity_metadata`` with a location field must be provided
         - ``scheduled_end_time`` must be provided
 
+        .. versionchanged:: 2.6
+            Now raises :exc:`TypeError` instead of :exc:`ValueError` for
+            invalid parameter types.
+
         Parameters
         ----------
         name: :class:`str`
@@ -327,7 +331,9 @@ class GuildScheduledEvent(Hashable):
         HTTPException
             Editing the event failed.
         TypeError
-            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`),
+            or one of ``entity_type``, ``privacy_level``, ``entity_metadata`` or ``status``
+            is not of the correct type.
 
         Returns
         -------
@@ -342,7 +348,7 @@ class GuildScheduledEvent(Hashable):
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
-                raise ValueError(
+                raise TypeError(
                     "privacy_level must be an instance of GuildScheduledEventPrivacyLevel"
                 )
 
@@ -350,7 +356,7 @@ class GuildScheduledEvent(Hashable):
 
         if entity_type is not MISSING:
             if not isinstance(entity_type, GuildScheduledEventEntityType):
-                raise ValueError("entity_type must be an instance of GuildScheduledEventEntityType")
+                raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
 
             fields["entity_type"] = entity_type.value
 
@@ -365,13 +371,13 @@ class GuildScheduledEvent(Hashable):
                 fields["entity_metadata"] = entity_metadata.to_dict()
 
             else:
-                raise ValueError(
+                raise TypeError(
                     "entity_metadata must be an instance of GuildScheduledEventMetadata"
                 )
 
         if status is not MISSING:
             if not isinstance(status, GuildScheduledEventStatus):
-                raise ValueError("status must be an instance of GuildScheduledEventStatus")
+                raise TypeError("status must be an instance of GuildScheduledEventStatus")
 
             fields["status"] = status.value
 
