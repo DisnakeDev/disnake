@@ -199,7 +199,7 @@ class MessageCommandInteraction(ApplicationCommandInteraction):
     target: Message
 
 
-class ApplicationCommandInteractionData:
+class ApplicationCommandInteractionData(Dict[str, Any]):
     """Represents the data of an interaction with an application command.
 
     .. versionadded:: 2.1
@@ -239,6 +239,7 @@ class ApplicationCommandInteractionData:
         state: ConnectionState,
         guild: Optional[Guild],
     ):
+        super().__init__(data)
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
@@ -292,7 +293,7 @@ class ApplicationCommandInteractionData:
         return self._get_focused_option()  # type: ignore
 
 
-class ApplicationCommandInteractionDataOption:
+class ApplicationCommandInteractionDataOption(Dict[str, Any]):
     """This class represents the structure of an interaction data option from the API.
 
     Attributes
@@ -315,6 +316,7 @@ class ApplicationCommandInteractionDataOption:
     def __init__(
         self, *, data: Mapping[str, Any], resolved: ApplicationCommandInteractionDataResolved
     ):
+        super().__init__(data)
         self.name: str = data["name"]
         self.type: OptionType = try_enum(OptionType, data["type"])
         value = data.get("value")
@@ -360,7 +362,7 @@ class ApplicationCommandInteractionDataOption:
         return chain, {}
 
 
-class ApplicationCommandInteractionDataResolved:
+class ApplicationCommandInteractionDataResolved(Dict[str, Any]):
     """Represents the resolved data related to an interaction with an application command.
 
     .. versionadded:: 2.1
@@ -394,6 +396,7 @@ class ApplicationCommandInteractionDataResolved:
         guild: Optional[Guild],
     ):
         data = data or {}
+        super().__init__(data)
 
         self.members: Dict[int, Member] = {}
         self.users: Dict[int, User] = {}

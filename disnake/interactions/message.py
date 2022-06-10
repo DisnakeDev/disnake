@@ -22,9 +22,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from ..components import ActionRow, Button, SelectMenu
+from ..components import MessageComponent
 from ..enums import ComponentType, try_enum
 from ..message import Message
 from ..utils import cached_slot_property
@@ -103,22 +103,17 @@ class MessageInteraction(Interaction):
         return self.data.values
 
     @cached_slot_property("_cs_component")
-    def component(self) -> Union[Button, SelectMenu]:
+    def component(self) -> MessageComponent:
         """Union[:class:`Button`, :class:`SelectMenu`]: The component the user interacted with"""
         for action_row in self.message.components:
-            if not isinstance(action_row, ActionRow):
-                continue
             for component in action_row.children:
-                if not isinstance(component, (Button, SelectMenu)):
-                    continue
-
                 if component.custom_id == self.data.custom_id:
                     return component
 
         raise Exception("MessageInteraction is malformed - no component found")
 
 
-class MessageInteractionData:
+class MessageInteractionData(Dict[str, Any]):
     """Represents the data of an interaction with a message component.
 
     .. versionadded:: 2.1
@@ -136,6 +131,7 @@ class MessageInteractionData:
     __slots__ = ("custom_id", "component_type", "values")
 
     def __init__(self, *, data: ComponentInteractionDataPayload):
+        super().__init__(data)
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
         self.values: Optional[List[str]] = data.get("values")

@@ -57,7 +57,7 @@ from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
 from ..mixins import Hashable
-from ..ui.action_row import components_to_dict
+from ..ui.action_row import MessageUIComponent, components_to_dict
 from ..user import BaseUser, User
 
 __all__ = (
@@ -501,7 +501,7 @@ def handle_message_parameters_dict(
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
-    components: Optional[Components] = MISSING,
+    components: Optional[Components[MessageUIComponent]] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
@@ -527,7 +527,7 @@ def handle_message_parameters_dict(
         for embed in embeds:
             if embed._files:
                 files = files or []
-                files += embed._files
+                files.extend(embed._files.values())
 
     if content is not MISSING:
         payload["content"] = str(content) if content is not None else None
@@ -585,7 +585,7 @@ def handle_message_parameters(
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
-    components: Optional[Components] = MISSING,
+    components: Optional[Components[MessageUIComponent]] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
@@ -758,7 +758,7 @@ class WebhookMessage(Message):
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> WebhookMessage:
         """|coro|
@@ -1452,7 +1452,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
         thread: Snowflake = ...,
         thread_name: str = ...,
         wait: Literal[True],
@@ -1476,7 +1476,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
         thread: Snowflake = ...,
         thread_name: str = ...,
         wait: Literal[False] = ...,
@@ -1499,7 +1499,7 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components = MISSING,
+        components: Components[MessageUIComponent] = MISSING,
         thread: Snowflake = MISSING,
         thread_name: Optional[str] = None,
         wait: bool = False,
@@ -1765,7 +1765,7 @@ class Webhook(BaseWebhook):
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> WebhookMessage:
         """|coro|
