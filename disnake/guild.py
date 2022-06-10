@@ -2139,7 +2139,7 @@ class Guild(Hashable):
 
         If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
 
-        - ``channel`` should be not be set
+        - ``channel`` should not be set
         - ``entity_metadata`` with a location field must be provided
         - ``scheduled_end_time`` must be provided
 

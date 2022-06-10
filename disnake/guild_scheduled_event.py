@@ -341,8 +341,9 @@ class GuildScheduledEvent(Hashable):
 
         Edits the guild scheduled event.
 
-        If updating ``entity_type`` to :class:`GuildScheduledEventEntityType.external`:
+        If updating ``entity_type`` to :attr:`GuildScheduledEventEntityType.external`:
 
+        - ``channel`` should not be set
         - ``entity_metadata`` with a location field must be provided
         - ``scheduled_end_time`` must be provided
 
