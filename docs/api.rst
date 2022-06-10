@@ -3481,6 +3481,24 @@ of :class:`enum.Enum`.
 
         The rule will timeout the user that sent the message.
 
+.. class:: AutomodKeywordPresetType
+
+    Represents an pre-defined auto moderation filter list, provided by Discord.
+
+    .. versionadded:: 2.6
+
+    .. attribute:: profanity
+
+        Contains words that may be considered swearing or cursing.
+
+    .. attribute:: sexual_content
+
+        Contains sexually explicit words.
+
+    .. attribute:: slurs
+
+        Contains insults or words that may be considered hate speech.
+
 Async Iterator
 ----------------
 

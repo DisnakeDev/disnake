@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 from .enums import (
     AutomodActionType,
     AutomodEventType,
+    AutomodKeywordPresetType,
     AutomodTriggerType,
     enum_if_int,
     try_enum,
@@ -49,7 +50,6 @@ if TYPE_CHECKING:
         AutomodAction as AutomodActionPayload,
         AutomodActionExecutionEvent as AutomodActionExecutionEventPayload,
         AutomodActionMetadata,
-        AutomodListType,
         AutomodRule as AutomodRulePayload,
         AutomodTriggerMetadata as AutomodTriggerMetadataPayload,
         EditAutomodRule as EditAutomodRulePayload,
@@ -135,11 +135,10 @@ class AutomodTriggerMetadata:
 
     Attributes
     ----------
-    keyword_filter: Optional[List[:class:`str`]]
+    keyword_filter: Optional[Sequence[:class:`str`]]
         List of keywords to filter. Used with :attr:`AutomodTriggerType.keyword`.
-    presets: Optional[List[:class:`str`]]
-        List of pre-defined filter list types. Possible values are ``PROFANITY``,
-        ``SEXUAL_CONTENT``, ``SLURS``. Used with :attr:`AutomodTriggerType.keyword_preset`.
+    presets: Optional[Sequence[:class:`AutomodKeywordPresetType`]]
+        List of pre-defined filter list types. Used with :attr:`AutomodTriggerType.keyword_preset`.
     """
 
     __slots__ = ("keyword_filter", "presets")
@@ -150,16 +149,21 @@ class AutomodTriggerMetadata:
         self,
         *,
         keyword_filter: Optional[Sequence[str]] = None,
-        presets: Optional[Sequence[AutomodListType]] = None,
+        presets: Optional[Sequence[AutomodKeywordPresetType]] = None,
     ):
         self.keyword_filter: Optional[Sequence[str]] = keyword_filter
-        self.presets: Optional[Sequence[AutomodListType]] = presets
+        self.presets: Optional[Sequence[AutomodKeywordPresetType]] = presets
 
     @classmethod
     def _from_dict(cls, data: AutomodTriggerMetadataPayload) -> Self:
+        if (presets_data := data.get("presets")) is not None:
+            presets = [try_enum(AutomodKeywordPresetType, value) for value in presets_data]
+        else:
+            presets = None
+
         return cls(
             keyword_filter=data.get("keyword_filter"),
-            presets=data.get("presets"),
+            presets=presets,
         )
 
     def to_dict(self) -> AutomodTriggerMetadataPayload:
@@ -167,7 +171,7 @@ class AutomodTriggerMetadata:
         if self.keyword_filter is not None:
             data["keyword_filter"] = list(self.keyword_filter)
         if self.presets is not None:
-            data["presets"] = list(self.presets)
+            data["presets"] = [preset.value for preset in self.presets]
         return data
 
     def __repr__(self) -> str:

@@ -31,8 +31,7 @@ from .snowflake import Snowflake, SnowflakeList
 AutomodTriggerType = Literal[1, 2, 3, 4]
 AutomodEventType = Literal[1]
 AutomodActionType = Literal[1, 2]
-# TODO: will likely change
-AutomodListType = Literal["PROFANITY", "SEXUAL_CONTENT", "SLURS"]
+AutomodListType = Literal[1, 2, 3]
 
 
 class AutomodActionMetadata(TypedDict, total=False):
