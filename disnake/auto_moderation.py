@@ -97,7 +97,8 @@ class AutomodAction:
 
     @property
     def timeout_duration(self) -> Optional[int]:
-        """Optional[:class:`int`]: The duration for which to timeout the user when the rule is triggered,
+        """Optional[:class:`int`]: The duration (in seconds) for which to timeout
+        the user when the rule is triggered,
         if :attr:`~AutomodAction.type` is :attr:`AutomodActionType.timeout`."""
         return _get_as_snowflake(self._metadata, "duration_seconds")
 
