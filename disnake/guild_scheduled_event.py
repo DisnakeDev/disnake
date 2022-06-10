@@ -347,6 +347,9 @@ class GuildScheduledEvent(Hashable):
         - ``entity_metadata`` with a location field must be provided
         - ``scheduled_end_time`` must be provided
 
+        .. versionchanged:: 2.6
+            Removed ``channel_id`` parameter in favor of ``channel``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -364,6 +367,9 @@ class GuildScheduledEvent(Hashable):
         channel: Optional[:class:`.abc.Snowflake`]
             The channel in which the guild scheduled event will be hosted.
             Set to ``None`` if changing ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
+
+            .. versionadded:: 2.6
+
         privacy_level: :class:`GuildScheduledEventPrivacyLevel`
             The privacy level of the guild scheduled event.
         scheduled_start_time: :class:`datetime.datetime`

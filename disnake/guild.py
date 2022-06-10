@@ -2145,6 +2145,9 @@ class Guild(Hashable):
 
         .. versionadded:: 2.3
 
+        .. versionchanged:: 2.6
+            Removed ``channel_id`` parameter in favor of ``channel``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -2161,6 +2164,9 @@ class Guild(Hashable):
 
         channel: :class:`.abc.Snowflake`
             The channel in which the guild scheduled event will be hosted.
+
+            .. versionadded:: 2.6
+
         privacy_level: :class:`GuildScheduledEventPrivacyLevel`
             The privacy level of the guild scheduled event.
         scheduled_start_time: :class:`datetime.datetime`
