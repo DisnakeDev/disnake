@@ -63,6 +63,16 @@ class PartialChannel(_BaseChannel):
     type: ChannelType
 
 
+class GroupInviteRecipient(TypedDict):
+    username: str
+
+
+class InviteChannel(PartialChannel, total=False):
+    name: Optional[str]
+    recipients: List[GroupInviteRecipient]
+    icon: Optional[str]
+
+
 class _TextChannelOptional(TypedDict, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
