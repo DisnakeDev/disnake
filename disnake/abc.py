@@ -49,9 +49,9 @@ from typing import (
 from . import utils
 from .context_managers import Typing
 from .enums import ChannelType, PartyType, try_enum_to_int
-from .errors import ClientException, InvalidArgument
+from .errors import ClientException
 from .file import File
-from .flags import MessageFlags
+from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
 from .iterators import HistoryIterator
 from .mentions import AllowedMentions
@@ -76,27 +76,26 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from .asset import Asset
-    from .channel import CategoryChannel, DMChannel, PartialMessageable, TextChannel, VoiceChannel
+    from .channel import CategoryChannel, DMChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
     from .enums import InviteTarget
-    from .guild import Guild
+    from .guild import Guild, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .state import ConnectionState
-    from .threads import Thread
     from .types.channel import (
         Channel as ChannelPayload,
         GuildChannel as GuildChannelPayload,
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
-    from .ui.action_row import Components
+    from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import ClientUser
 
-    MessageableChannel = Union[TextChannel, Thread, DMChannel, PartialMessageable, VoiceChannel]
+    MessageableChannel = Union[GuildMessageable, DMChannel, PartialMessageable]
     SnowflakeTime = Union["Snowflake", datetime]
 
 MISSING = utils.MISSING
@@ -256,6 +255,7 @@ class GuildChannel(ABC):
     type: ChannelType
     position: int
     category_id: Optional[int]
+    _flags: int
     _state: ConnectionState
     _overwrites: List[_Overwrites]
 
@@ -283,7 +283,7 @@ class GuildChannel(ABC):
         reason: Optional[str],
     ) -> None:
         if position < 0:
-            raise InvalidArgument("Channel position cannot be less than 0.")
+            raise ValueError("Channel position cannot be less than 0.")
 
         http = self._state.http
         bucket = self._sorting_bucket
@@ -372,7 +372,7 @@ class GuildChannel(ABC):
             perms = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
-                    raise InvalidArgument(
+                    raise TypeError(
                         f"Expected PermissionOverwrite received {perm.__class__.__name__}"
                     )
 
@@ -397,7 +397,7 @@ class GuildChannel(ABC):
             pass
         else:
             if not isinstance(ch_type, ChannelType):
-                raise InvalidArgument("type field must be of type ChannelType")
+                raise TypeError("type field must be of type ChannelType")
             options["type"] = ch_type.value
 
         if options:
@@ -540,6 +540,14 @@ class GuildChannel(ABC):
 
         category = self.guild.get_channel(self.category_id)
         return bool(category and category.overwrites == self.overwrites)
+
+    @property
+    def flags(self) -> ChannelFlags:
+        """:class:`.ChannelFlags`: The channel flags for this channel.
+
+        .. versionadded:: 2.6
+        """
+        return ChannelFlags._from_value(self._flags)
 
     @property
     def jump_url(self) -> str:
@@ -790,6 +798,9 @@ class GuildChannel(ABC):
 
             This method *replaces* the old overwrites with the ones given.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Examples
         --------
 
@@ -830,9 +841,11 @@ class GuildChannel(ABC):
             Editing channel specific permissions failed.
         NotFound
             The role or member being edited is not part of the guild.
-        InvalidArgument
-            The overwrite parameter invalid or the target type was not
-            :class:`.Role` or :class:`.Member`.
+        TypeError
+            ``overwrite`` is invalid,
+            the target type was not :class:`.Role` or :class:`.Member`,
+            both keyword arguments and ``overwrite`` were provided,
+            or invalid permissions were provided as keyword arguments.
         """
         http = self._state.http
 
@@ -841,18 +854,18 @@ class GuildChannel(ABC):
         elif isinstance(target, Role):
             perm_type = _Overwrites.ROLE
         else:
-            raise InvalidArgument("target parameter must be either Member or Role")
+            raise TypeError("target parameter must be either Member or Role")
 
         if overwrite is _undefined:
             if len(permissions) == 0:
-                raise InvalidArgument("No overwrite provided.")
+                raise TypeError("No overwrite provided.")
             try:
                 overwrite = PermissionOverwrite(**permissions)
             except (ValueError, TypeError):
-                raise InvalidArgument("Invalid permissions given to keyword arguments.")
+                raise TypeError("Invalid permissions given to keyword arguments.")
         else:
             if len(permissions) > 0:
-                raise InvalidArgument("Cannot mix overwrite and keyword arguments.")
+                raise TypeError("Cannot mix overwrite and keyword arguments.")
 
         # TODO: wait for event
 
@@ -864,7 +877,7 @@ class GuildChannel(ABC):
                 self.id, target.id, allow.value, deny.value, perm_type, reason=reason
             )
         else:
-            raise InvalidArgument("Invalid overwrite type provided.")
+            raise TypeError("Invalid overwrite type provided.")
 
     async def _clone_impl(
         self: GCH,
@@ -984,6 +997,9 @@ class GuildChannel(ABC):
 
         .. versionadded:: 1.7
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         beginning: :class:`bool`
@@ -1018,12 +1034,14 @@ class GuildChannel(ABC):
 
         Raises
         ------
-        InvalidArgument
-            An invalid position was given or a bad mix of arguments were passed.
         Forbidden
             You do not have permissions to move the channel.
         HTTPException
             Moving the channel failed.
+        TypeError
+            A bad mix of arguments were passed.
+        ValueError
+            An invalid position was given.
         """
         if not kwargs:
             return
@@ -1032,7 +1050,7 @@ class GuildChannel(ABC):
         before, after = kwargs.get("before"), kwargs.get("after")
         offset = kwargs.get("offset", 0)
         if sum(bool(a) for a in (beginning, end, before, after)) > 1:
-            raise InvalidArgument("Only one of [before, after, end, beginning] can be used.")
+            raise TypeError("Only one of [before, after, end, beginning] can be used.")
 
         bucket = self._sorting_bucket
         parent_id = kwargs.get("category", MISSING)
@@ -1075,7 +1093,7 @@ class GuildChannel(ABC):
             index = next((i + 1 for i, c in enumerate(channels) if c.id == after.id), None)
 
         if index is None:
-            raise InvalidArgument("Could not resolve appropriate move position")
+            raise ValueError("Could not resolve appropriate move position")
 
         channels.insert(max((index + offset), 0), self)
         payload = []
@@ -1238,7 +1256,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1258,7 +1276,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1278,7 +1296,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1298,7 +1316,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components = ...,
+        components: Components[MessageUIComponent] = ...,
     ) -> Message:
         ...
 
@@ -1319,7 +1337,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = None,
         mention_author: bool = None,
         view: View = None,
-        components: Components = None,
+        components: Components[MessageUIComponent] = None,
     ):
         """|coro|
 
@@ -1339,6 +1357,9 @@ class Messageable:
         single :class:`.Embed` object. To upload multiple embeds, the ``embeds``
         parameter should be used with a :class:`list` of :class:`.Embed` objects.
         **Specifying both parameters will lead to an exception**.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1417,12 +1438,14 @@ class Messageable:
             Sending the message failed.
         Forbidden
             You do not have the proper permissions to send the message.
-        InvalidArgument
-            The ``files`` list is not of the appropriate size,
-            you specified both ``file`` and ``files``,
+        TypeError
+            Specified both ``file`` and ``files``,
             or you specified both ``embed`` and ``embeds``,
+            or you specified both ``view`` and ``components``,
             or the ``reference`` object is not a :class:`.Message`,
             :class:`.MessageReference` or :class:`.PartialMessage`.
+        ValueError
+            The ``files`` or ``embeds`` list is too large.
 
         Returns
         -------
@@ -1434,15 +1457,15 @@ class Messageable:
         content = str(content) if content is not None else None
 
         if file is not None and files is not None:
-            raise InvalidArgument("cannot pass both file and files parameter to send()")
+            raise TypeError("cannot pass both file and files parameter to send()")
 
         if file is not None:
             if not isinstance(file, File):
-                raise InvalidArgument("file parameter must be File")
+                raise TypeError("file parameter must be File")
             files = [file]
 
         if embed is not None and embeds is not None:
-            raise InvalidArgument("cannot pass both embed and embeds parameter to send()")
+            raise TypeError("cannot pass both embed and embeds parameter to send()")
 
         if embed is not None:
             embeds = [embed]
@@ -1450,11 +1473,11 @@ class Messageable:
         embeds_payload = None
         if embeds is not None:
             if len(embeds) > 10:
-                raise InvalidArgument("embeds parameter must be a list of up to 10 elements")
+                raise ValueError("embeds parameter must be a list of up to 10 elements")
             for embed in embeds:
                 if embed._files:
                     files = files or []
-                    files += embed._files
+                    files.extend(embed._files.values())
             embeds_payload = [embed.to_dict() for embed in embeds]
 
         stickers_payload = None
@@ -1478,16 +1501,16 @@ class Messageable:
             try:
                 reference_payload = reference.to_message_reference_dict()
             except AttributeError:
-                raise InvalidArgument(
+                raise TypeError(
                     "reference parameter must be Message, MessageReference, or PartialMessage"
                 ) from None
 
         if view is not None and components is not None:
-            raise InvalidArgument("cannot pass both view and components parameter to send()")
+            raise TypeError("cannot pass both view and components parameter to send()")
 
         elif view:
             if not hasattr(view, "__discord_ui_view__"):
-                raise InvalidArgument(f"view parameter must be View not {view.__class__!r}")
+                raise TypeError(f"view parameter must be View not {view.__class__!r}")
 
             components_payload = view.to_components()
 
@@ -1504,9 +1527,9 @@ class Messageable:
 
         if files is not None:
             if len(files) > 10:
-                raise InvalidArgument("files parameter must be a list of up to 10 elements")
+                raise ValueError("files parameter must be a list of up to 10 elements")
             elif not all(isinstance(file, File) for file in files):
-                raise InvalidArgument("files parameter must be a list of File")
+                raise TypeError("files parameter must be a list of File")
 
             try:
                 data = await state.http.send_files(

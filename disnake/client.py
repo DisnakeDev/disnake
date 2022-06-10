@@ -65,6 +65,7 @@ from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
 from .enums import ApplicationCommandType, ChannelType, Status
 from .errors import *
+from .errors import SessionStartLimitReached
 from .flags import ApplicationFlags, Intents
 from .gateway import *
 from .guild import Guild
@@ -741,7 +742,9 @@ class Client:
         data = await self.http.static_login(token.strip())
         self._connection.user = ClientUser(state=self._connection, data=data)
 
-    async def connect(self, *, reconnect: bool = True) -> None:
+    async def connect(
+        self, *, reconnect: bool = True, ignore_session_start_limit: bool = False
+    ) -> None:
         """|coro|
 
         Creates a websocket connection and lets the websocket listen
@@ -749,13 +752,24 @@ class Client:
         event system and miscellaneous aspects of the library. Control
         is not resumed until the WebSocket connection is terminated.
 
+        .. versionchanged:: 2.6
+            Added usage of :class:`.SessionStartLimit` when connecting to the API.
+            Added the ``ignore_session_start_limit`` parameter.
+
+
         Parameters
         ----------
         reconnect: :class:`bool`
-            If we should attempt reconnecting, either due to internet
+            Whether reconnecting should be attempted, either due to internet
             failure or a specific failure on Discord's part. Certain
             disconnects that lead to bad state will not be handled (such as
             invalid sharding payloads or bad tokens).
+
+        ignore_session_start_limit: :class:`bool`
+            Whether the API provided session start limit should be ignored when
+            connecting to the API.
+
+            .. versionadded:: 2.6
 
         Raises
         ------
@@ -764,9 +778,18 @@ class Client:
             is thrown then there is a Discord API outage.
         ConnectionClosed
             The websocket connection has been terminated.
+        SessionStartLimitReached
+            If the client doesn't have enough connects remaining in the current 24-hour window
+            and ``ignore_session_start_limit`` is ``False`` this will be raised rather than
+            connecting to the gateawy and Discord resetting the token.
+            However, if ``ignore_session_start_limit`` is ``True``, the client will connect regardless
+            and this exception will not be raised.
         """
         _, gateway, session_start_limit = await self.http.get_bot_gateway()
         self.session_start_limit = SessionStartLimit(session_start_limit)
+
+        if not ignore_session_start_limit and self.session_start_limit.remaining == 0:
+            raise SessionStartLimitReached(self.session_start_limit)
 
         ws_params = {
             "initial": True,
@@ -873,7 +896,9 @@ class Client:
         self._connection.clear()
         self.http.recreate()
 
-    async def start(self, token: str, *, reconnect: bool = True) -> None:
+    async def start(
+        self, token: str, *, reconnect: bool = True, ignore_session_start_limit: bool = False
+    ) -> None:
         """|coro|
 
         A shorthand coroutine for :meth:`login` + :meth:`connect`.
@@ -884,7 +909,9 @@ class Client:
             An unexpected keyword argument was received.
         """
         await self.login(token)
-        await self.connect(reconnect=reconnect)
+        await self.connect(
+            reconnect=reconnect, ignore_session_start_limit=ignore_session_start_limit
+        )
 
     def run(self, *args: Any, **kwargs: Any) -> None:
         """A blocking call that abstracts away the event loop
@@ -1486,6 +1513,9 @@ class Client:
 
         Changes the client's presence.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Example
         ---------
 
@@ -1507,7 +1537,7 @@ class Client:
 
         Raises
         ------
-        InvalidArgument
+        TypeError
             If the ``activity`` parameter is not the proper type.
         """
         if status is None:
@@ -1706,6 +1736,9 @@ class Client:
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1728,7 +1761,7 @@ class Client:
             The ``icon`` asset couldn't be found.
         HTTPException
             Guild creation failed.
-        InvalidArgument
+        ValueError
             Invalid icon image format given. Must be PNG or JPG.
         TypeError
             The ``icon`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).

@@ -51,3 +51,5 @@ per-file-ignores =
     disnake/enums.py:E221,E241,N815
     # ignore whitespacing after `:`
     disnake/ext/commands/params.py:E241
+    # pytest uses assert for testing
+    tests/**: S101

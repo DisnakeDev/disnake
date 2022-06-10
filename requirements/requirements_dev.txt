@@ -1,0 +1,21 @@
+-r requirements_tools.txt
+
+## type checking
+typing_extensions~=4.2.0
+# this is not pyright itself, but the python wrapper
+pyright==1.1.245
+
+
+## linting
+slotscheck~=0.14.0
+flake8~=4.0.1
+flake8-bandit~=3.0.0
+flake8-isort~=4.1.1
+flake8-bugbear~=22.4.25
+
+## pytest
+pytest~=7.1.2
+pytest-cov~=3.0.0
+pytest-asyncio~=0.18.3
+looptime~=0.2
+coverage[toml]~=6.3.2

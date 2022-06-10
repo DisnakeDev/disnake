@@ -105,7 +105,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
-            default_perms = func.__default_member_permissions__
+            default_perms: int = func.__default_member_permissions__
         except AttributeError:
             pass
         else:
@@ -113,7 +113,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
                 raise ValueError(
                     "Cannot set `default_member_permissions` in both parameter and decorator"
                 )
-            default_member_permissions = Permissions(default_perms)
+            default_member_permissions = default_perms
 
         dm_permission = True if dm_permission is None else dm_permission
 
@@ -205,7 +205,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
-            default_perms = func.__default_member_permissions__
+            default_perms: int = func.__default_member_permissions__
         except AttributeError:
             pass
         else:
@@ -213,7 +213,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
                 raise ValueError(
                     "Cannot set `default_member_permissions` in both parameter and decorator"
                 )
-            default_member_permissions = Permissions(default_perms)
+            default_member_permissions = default_perms
 
         dm_permission = True if dm_permission is None else dm_permission
 
@@ -283,7 +283,7 @@ def user_command(
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
         If specified, the client will register the command in these guilds.
-        Otherwise this command will be registered globally in ~1 hour.
+        Otherwise, this command will be registered globally.
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
@@ -357,7 +357,7 @@ def message_command(
         Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
         If specified, the client will register the command in these guilds.
-        Otherwise this command will be registered globally in ~1 hour.
+        Otherwise, this command will be registered globally.
     extras: Dict[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
