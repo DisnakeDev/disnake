@@ -28,7 +28,7 @@ from __future__ import annotations
 from typing import Literal, Optional, TypedDict, Union
 
 from .appinfo import PartialAppInfo
-from .channel import PartialChannel
+from .channel import InviteChannel
 from .guild import InviteGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .snowflake import Snowflake
@@ -63,7 +63,7 @@ class VanityInvite(_InviteMetadata):
 
 class IncompleteInvite(_InviteMetadata):
     code: str
-    channel: PartialChannel
+    channel: InviteChannel
 
 
 class Invite(IncompleteInvite, _InviteOptional):
