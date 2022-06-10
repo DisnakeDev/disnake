@@ -385,6 +385,9 @@ class AutomodActionExecution:
         The ID of the rule that matched.
     rule_trigger_type: :class:`AutomodTriggerType`
         The trigger type of the rule that matched.
+    user_id: :class:`int`
+        The ID of the user that triggered this action.
+        See also :attr:`.user`.
     channel_id: Optional[:class:`int`]
         The channel or thread ID in which the event occurred, if any.
         See also :attr:`.channel`.
@@ -408,6 +411,7 @@ class AutomodActionExecution:
         "guild",
         "rule_id",
         "rule_trigger_type",
+        "user_id",
         "channel_id",
         "message_id",
         "alert_message_id",
@@ -423,6 +427,7 @@ class AutomodActionExecution:
         self.rule_trigger_type: AutomodTriggerType = try_enum(
             AutomodTriggerType, data["rule_trigger_type"]
         )
+        self.user_id: int = int(data["user_id"])
         self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
         self.message_id: Optional[int] = _get_as_snowflake(data, "message_id")
         self.alert_message_id: Optional[int] = _get_as_snowflake(data, "alert_system_message_id")
@@ -434,10 +439,17 @@ class AutomodActionExecution:
         return (
             f"<{type(self).__name__} guild={self.guild!r} action={self.action!r}"
             f" rule_id={self.rule_id!r} rule_trigger_type={self.rule_trigger_type!r}"
-            f" channel={self.channel!r} message_id={self.message_id!r}"
+            f" channel={self.channel!r} user_id={self.user_id!r} message_id={self.message_id!r}"
             f" alert_message_id={self.alert_message_id!r} content={self.content!r}"
             f" matched_keyword={self.matched_keyword!r} matched_content={self.matched_content!r}>"
         )
+
+    @property
+    def user(self) -> Optional[Member]:
+        """Optional[:class:`Member`]: The guild member that triggered this action.
+        May be ``None`` if the member cannot be found. See also :attr:`.user_id`.
+        """
+        return self.guild.get_member(self.user_id)
 
     @property
     def channel(self) -> Optional[Union[GuildMessageable, ForumChannel]]:

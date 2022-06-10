@@ -91,14 +91,18 @@ class CreateAutomodRule(_CreateAutomodRuleOptional):
 
 
 # TODO: gateway event, move once full state typings are added
-class AutomodActionExecutionEvent(TypedDict):
+class _AutomodActionExecutionEventOptional(TypedDict, total=False):
+    channel_id: Optional[Snowflake]
+    message_id: Optional[Snowflake]
+    alert_system_message_id: Optional[Snowflake]
+
+
+class AutomodActionExecutionEvent(_AutomodActionExecutionEventOptional):
     guild_id: Snowflake
     action: AutomodAction
     rule_id: Snowflake
     rule_trigger_type: AutomodTriggerType
-    channel_id: Optional[Snowflake]
-    message_id: Optional[Snowflake]
-    alert_system_message_id: Optional[Snowflake]
+    user_id: Snowflake
     content: str
     matched_keyword: Optional[str]
     matched_content: Optional[str]
