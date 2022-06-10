@@ -137,12 +137,12 @@ class AutomodTriggerMetadata:
     ----------
     keyword_filter: Optional[List[:class:`str`]]
         List of keywords to filter. Used with :attr:`AutomodTriggerType.keyword`.
-    keyword_lists: Optional[List[:class:`str`]]
-        List of filter list types. Possible values are ``PROFANITY``,
+    presets: Optional[List[:class:`str`]]
+        List of pre-defined filter list types. Possible values are ``PROFANITY``,
         ``SEXUAL_CONTENT``, ``SLURS``. Used with :attr:`AutomodTriggerType.keyword_preset`.
     """
 
-    __slots__ = ("keyword_filter", "keyword_lists")
+    __slots__ = ("keyword_filter", "presets")
 
     # TODO: add overloads - can we always require exactly one parameter here, or is it
     #       required to be able to construct this class without any parameters?
@@ -150,32 +150,32 @@ class AutomodTriggerMetadata:
         self,
         *,
         keyword_filter: Optional[Sequence[str]] = None,
-        keyword_lists: Optional[Sequence[AutomodListType]] = None,
+        presets: Optional[Sequence[AutomodListType]] = None,
     ):
         self.keyword_filter: Optional[Sequence[str]] = keyword_filter
-        self.keyword_lists: Optional[Sequence[AutomodListType]] = keyword_lists
+        self.presets: Optional[Sequence[AutomodListType]] = presets
 
     @classmethod
     def _from_dict(cls, data: AutomodTriggerMetadataPayload) -> Self:
         return cls(
             keyword_filter=data.get("keyword_filter"),
-            keyword_lists=data.get("keyword_lists"),
+            presets=data.get("presets"),
         )
 
     def to_dict(self) -> AutomodTriggerMetadataPayload:
         data: AutomodTriggerMetadataPayload = {}
         if self.keyword_filter is not None:
             data["keyword_filter"] = list(self.keyword_filter)
-        if self.keyword_lists is not None:
-            data["keyword_lists"] = list(self.keyword_lists)
+        if self.presets is not None:
+            data["presets"] = list(self.presets)
         return data
 
     def __repr__(self) -> str:
         s = f"<{type(self).__name__}"
         if self.keyword_filter is not None:
             s += f" keyword_filter={self.keyword_filter!r}"
-        if self.keyword_lists is not None:
-            s += f" keyword_lists={self.keyword_lists!r}"
+        if self.presets is not None:
+            s += f" presets={self.presets!r}"
         return f"{s}>"
 
 
