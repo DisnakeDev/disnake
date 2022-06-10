@@ -471,7 +471,7 @@ class AuditLogAction(Enum):
         elif v < 113:
             return "thread"
         elif v < 122:
-            return "application_command"
+            return "application_command_or_integration"
         else:
             return None
 
