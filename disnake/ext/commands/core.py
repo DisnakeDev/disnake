@@ -315,7 +315,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             raise TypeError("Name of a command must be a string.")
         self.name: str = name
 
-        self.callback = func
+        self.callback = func  # type: ignore
         self.enabled: bool = kwargs.get("enabled", True)
 
         help_doc = kwargs.get("help")
@@ -398,13 +398,13 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
     @property
     def callback(
         self,
-    ) -> CommandCallback[CogT, ContextT, P, T]:
+    ) -> CommandCallback[CogT, Context, P, T]:
         return self._callback
 
     @callback.setter
     def callback(
         self,
-        function: CommandCallback[CogT, ContextT, P, T],
+        function: CommandCallback[CogT, Context, P, T],
     ) -> None:
         self._callback = function
         unwrap = unwrap_function(function)

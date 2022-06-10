@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 
     # NOTE: using undocumented `expected_text` parameter of pyright instead of `assert_type`,
     # as `assert_type` can't handle bound ParamSpecs
+    #
     # sanity check: if `reveal_type` isn't working as intended,
     # the second `type: ignore` will be flagged
     reveal_type(
