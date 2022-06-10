@@ -2111,7 +2111,7 @@ class Guild(Hashable):
         ],
         channel: Snowflake,
         scheduled_start_time: datetime.datetime,
-        scheduled_end_time: datetime.datetime = ...,
+        scheduled_end_time: Optional[datetime.datetime] = ...,
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         description: str = ...,
         image: AssetBytes = ...,
@@ -2125,7 +2125,7 @@ class Guild(Hashable):
         name: str,
         entity_type: GuildScheduledEventEntityType,
         scheduled_start_time: datetime.datetime,
-        scheduled_end_time: datetime.datetime = MISSING,
+        scheduled_end_time: Optional[datetime.datetime] = MISSING,
         channel: Snowflake = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         entity_metadata: GuildScheduledEventMetadata = MISSING,
@@ -2165,7 +2165,7 @@ class Guild(Hashable):
             The privacy level of the guild scheduled event.
         scheduled_start_time: :class:`datetime.datetime`
             The time to schedule the guild scheduled event.
-        scheduled_end_time: :class:`datetime.datetime`
+        scheduled_end_time: Optional[:class:`datetime.datetime`]
             The time when the guild scheduled event is scheduled to end.
         entity_type: :class:`GuildScheduledEventEntityType`
             The entity type of the guild scheduled event.
@@ -2221,7 +2221,9 @@ class Guild(Hashable):
             fields["channel_id"] = channel.id
 
         if scheduled_end_time is not MISSING:
-            fields["scheduled_end_time"] = scheduled_end_time.isoformat()
+            fields["scheduled_end_time"] = (
+                scheduled_end_time.isoformat() if scheduled_end_time is not None else None
+            )
 
         data = await self._state.http.create_guild_scheduled_event(self.id, reason=reason, **fields)
         return GuildScheduledEvent(state=self._state, data=data)
