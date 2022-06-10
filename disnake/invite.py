@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, List, Optional, Type, TypeVar, Union
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
