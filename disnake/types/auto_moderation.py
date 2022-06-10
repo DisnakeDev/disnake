@@ -39,9 +39,12 @@ class AutomodActionMetadata(TypedDict, total=False):
     duration_seconds: int
 
 
-class AutomodAction(TypedDict):
-    type: AutomodActionType
+class _AutomodActionOptional(TypedDict, total=False):
     metadata: AutomodActionMetadata
+
+
+class AutomodAction(_AutomodActionOptional):
+    type: AutomodActionType
 
 
 class AutomodTriggerMetadata(TypedDict, total=False):
