@@ -640,8 +640,7 @@ class MaxConcurrencyReached(CommandError):
         self.per: BucketType = per
         name = per.name
         suffix = f"per {name}" if per.name != "default" else "globally"
-        plural = "%s times %s" if number > 1 else "%s time %s"
-        fmt = plural % (number, suffix)
+        fmt = f"{number} times {suffix}" if number > 1 else f"{number} time {suffix}"
         super().__init__(
             f"Too many people are using this command. It can only be used {fmt} concurrently."
         )

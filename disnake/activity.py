@@ -255,7 +255,7 @@ class Activity(BaseActivity):
             ("session_id", self.session_id),
             ("emoji", self.emoji),
         )
-        inner = " ".join("%s=%r" % t for t in attrs)
+        inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<Activity {inner}>"
 
     def to_dict(self) -> Dict[str, Any]:
