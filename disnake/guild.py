@@ -2220,7 +2220,9 @@ class Guild(Hashable):
         fields: Dict[str, Any] = {
             "name": name,
             "privacy_level": privacy_level.value,
-            "scheduled_start_time": scheduled_start_time.isoformat(),
+            "scheduled_start_time": scheduled_start_time.astimezone(
+                tz=datetime.timezone.utc
+            ).isoformat(),
             "entity_type": entity_type.value,
         }
 
@@ -2243,7 +2245,9 @@ class Guild(Hashable):
 
         if scheduled_end_time is not MISSING:
             fields["scheduled_end_time"] = (
-                scheduled_end_time.isoformat() if scheduled_end_time is not None else None
+                scheduled_end_time.astimezone(tz=datetime.timezone.utc).isoformat()
+                if scheduled_end_time is not None
+                else None
             )
 
         data = await self._state.http.create_guild_scheduled_event(self.id, reason=reason, **fields)

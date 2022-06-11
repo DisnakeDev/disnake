@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, overload
 
 from .asset import Asset
@@ -475,11 +475,15 @@ class GuildScheduledEvent(Hashable):
             fields["channel_id"] = None
 
         if scheduled_start_time is not MISSING:
-            fields["scheduled_start_time"] = scheduled_start_time.isoformat()
+            fields["scheduled_start_time"] = scheduled_start_time.astimezone(
+                tz=timezone.utc
+            ).isoformat()
 
         if scheduled_end_time is not MISSING:
             fields["scheduled_end_time"] = (
-                scheduled_end_time.isoformat() if scheduled_end_time is not None else None
+                scheduled_end_time.astimezone(tz=timezone.utc).isoformat()
+                if scheduled_end_time is not None
+                else None
             )
 
         data = await self._state.http.edit_guild_scheduled_event(
