@@ -2090,16 +2090,51 @@ class Guild(Hashable):
         )
         return GuildScheduledEvent(state=self._state, data=data)
 
+    @overload
     async def create_scheduled_event(
         self,
         *,
         name: str,
+        entity_type: Literal[GuildScheduledEventEntityType.external],
         scheduled_start_time: datetime.datetime,
+        scheduled_end_time: datetime.datetime,
+        entity_metadata: GuildScheduledEventMetadata,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        description: str = ...,
+        image: AssetBytes = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    @overload
+    async def create_scheduled_event(
+        self,
+        *,
+        name: str,
+        entity_type: Literal[
+            GuildScheduledEventEntityType.voice,
+            GuildScheduledEventEntityType.stage_instance,
+        ],
+        channel: Snowflake,
+        scheduled_start_time: datetime.datetime,
+        scheduled_end_time: Optional[datetime.datetime] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        description: str = ...,
+        image: AssetBytes = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    async def create_scheduled_event(
+        self,
+        *,
+        name: str,
         entity_type: GuildScheduledEventEntityType,
+        scheduled_start_time: datetime.datetime,
+        scheduled_end_time: Optional[datetime.datetime] = MISSING,
+        channel: Snowflake = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
-        channel_id: int = MISSING,
         entity_metadata: GuildScheduledEventMetadata = MISSING,
-        scheduled_end_time: datetime.datetime = MISSING,
         description: str = MISSING,
         image: AssetBytes = MISSING,
         reason: Optional[str] = None,
@@ -2110,11 +2145,18 @@ class Guild(Hashable):
 
         If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
 
-        - ``channel_id`` should be not be set
+        - ``channel`` should not be set
         - ``entity_metadata`` with a location field must be provided
         - ``scheduled_end_time`` must be provided
 
         .. versionadded:: 2.3
+
+        .. versionchanged:: 2.6
+            Now raises :exc:`TypeError` instead of :exc:`ValueError` for
+            invalid parameter types.
+
+        .. versionchanged:: 2.6
+            Removed ``channel_id`` parameter in favor of ``channel``.
 
         Parameters
         ----------
@@ -2130,13 +2172,16 @@ class Guild(Hashable):
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel_id: :class:`int`
-            The channel ID in which the guild scheduled event will be hosted.
+        channel: :class:`.abc.Snowflake`
+            The channel in which the guild scheduled event will be hosted.
+
+            .. versionadded:: 2.6
+
         privacy_level: :class:`GuildScheduledEventPrivacyLevel`
             The privacy level of the guild scheduled event.
         scheduled_start_time: :class:`datetime.datetime`
             The time to schedule the guild scheduled event.
-        scheduled_end_time: :class:`datetime.datetime`
+        scheduled_end_time: Optional[:class:`datetime.datetime`]
             The time when the guild scheduled event is scheduled to end.
         entity_type: :class:`GuildScheduledEventEntityType`
             The entity type of the guild scheduled event.
@@ -2152,7 +2197,9 @@ class Guild(Hashable):
         HTTPException
             The request failed.
         TypeError
-            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`),
+            or one of ``entity_type``, ``privacy_level``, or ``entity_metadata``
+            is not of the correct type.
 
         Returns
         -------
@@ -2160,12 +2207,12 @@ class Guild(Hashable):
             The newly created guild scheduled event.
         """
         if not isinstance(entity_type, GuildScheduledEventEntityType):
-            raise ValueError("entity_type must be an instance of GuildScheduledEventEntityType")
+            raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
 
         if privacy_level is MISSING:
             privacy_level = GuildScheduledEventPrivacyLevel.guild_only
         elif not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
-            raise ValueError("privacy_level must be an instance of GuildScheduledEventPrivacyLevel")
+            raise TypeError("privacy_level must be an instance of GuildScheduledEventPrivacyLevel")
 
         fields: Dict[str, Any] = {
             "name": name,
@@ -2176,7 +2223,7 @@ class Guild(Hashable):
 
         if entity_metadata is not MISSING:
             if not isinstance(entity_metadata, GuildScheduledEventMetadata):
-                raise ValueError(
+                raise TypeError(
                     "entity_metadata must be an instance of GuildScheduledEventMetadata"
                 )
 
@@ -2188,11 +2235,13 @@ class Guild(Hashable):
         if image is not MISSING:
             fields["image"] = await utils._assetbytes_to_base64_data(image)
 
-        if channel_id is not MISSING:
-            fields["channel_id"] = channel_id
+        if channel is not MISSING:
+            fields["channel_id"] = channel.id
 
         if scheduled_end_time is not MISSING:
-            fields["scheduled_end_time"] = scheduled_end_time.isoformat()
+            fields["scheduled_end_time"] = (
+                scheduled_end_time.isoformat() if scheduled_end_time is not None else None
+            )
 
         data = await self._state.http.create_guild_scheduled_event(self.id, reason=reason, **fields)
         return GuildScheduledEvent(state=self._state, data=data)

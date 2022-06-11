@@ -41,8 +41,9 @@ from .guild import (
     MFALevel,
     VerificationLevel,
 )
+from .guild_scheduled_event import GuildScheduledEvent
 from .integration import IntegrationExpireBehavior, PartialIntegration
-from .interactions import ApplicationCommandPermissions
+from .interactions import ApplicationCommand, ApplicationCommandPermissions
 from .role import Role
 from .snowflake import Snowflake
 from .threads import Thread
@@ -324,6 +325,7 @@ class AuditEntryInfo(TypedDict):
     id: Snowflake
     type: Literal["0", "1"]
     role_name: str
+    application_id: Snowflake
     auto_moderation_rule_name: str
     auto_moderation_rule_trigger_type: str
 
@@ -342,8 +344,11 @@ class AuditLogEntry(_AuditLogEntryOptional):
 
 
 class AuditLog(TypedDict):
-    webhooks: List[Webhook]
-    users: List[User]
     audit_log_entries: List[AuditLogEntry]
+    application_commands: List[ApplicationCommand]
+    # auto_moderation_rules: List[AutomodRule]
+    guild_scheduled_events: List[GuildScheduledEvent]
     integrations: List[PartialIntegration]
     threads: List[Thread]
+    users: List[User]
+    webhooks: List[Webhook]
