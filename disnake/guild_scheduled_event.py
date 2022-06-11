@@ -195,7 +195,7 @@ class GuildScheduledEvent(Hashable):
         )
         self.entity_id: Optional[int] = _get_as_snowflake(data, "entity_id")
 
-        metadata = data["entity_metadata"]
+        metadata = data.get("entity_metadata")
         self.entity_metadata: Optional[GuildScheduledEventMetadata] = (
             None if metadata is None else GuildScheduledEventMetadata.from_dict(metadata)
         )
@@ -204,10 +204,8 @@ class GuildScheduledEvent(Hashable):
         self.creator: Optional[User]
         if creator_data is not None:
             self.creator = self._state.create_user(creator_data)
-        elif self.creator_id is not None:
-            self.creator = self._state.get_user(self.creator_id)
         else:
-            self.creator = None
+            self.creator = self._state.get_user(self.creator_id)
 
         self.user_count: Optional[int] = data.get("user_count")
         self._image: Optional[str] = data.get("image")
