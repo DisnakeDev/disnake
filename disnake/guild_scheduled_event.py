@@ -34,9 +34,7 @@ from .enums import (
     GuildScheduledEventStatus,
     try_enum,
 )
-from .iterators import GuildScheduledEventUserIterator
 from .mixins import Hashable
-from .user import User
 from .utils import (
     MISSING,
     _assetbytes_to_base64_data,
@@ -49,11 +47,13 @@ if TYPE_CHECKING:
     from .abc import GuildChannel, Snowflake
     from .asset import AssetBytes
     from .guild import Guild
+    from .iterators import GuildScheduledEventUserIterator
     from .state import ConnectionState
     from .types.guild_scheduled_event import (
         GuildScheduledEvent as GuildScheduledEventPayload,
         GuildScheduledEventEntityMetadata as GuildScheduledEventEntityMetadataPayload,
     )
+    from .user import User
 
 
 __all__ = ("GuildScheduledEventMetadata", "GuildScheduledEvent")
@@ -202,7 +202,7 @@ class GuildScheduledEvent(Hashable):
         creator_data = data.get("creator")
         self.creator: Optional[User]
         if creator_data is not None:
-            self.creator = User(state=self._state, data=creator_data)
+            self.creator = self._state.create_user(creator_data)
         elif self.creator_id is not None:
             self.creator = self._state.get_user(self.creator_id)
         else:
@@ -461,6 +461,7 @@ class GuildScheduledEvent(Hashable):
 
             users = await event.fetch_users(limit=250).flatten()
         """
+        from .iterators import GuildScheduledEventUserIterator  # cyclic import
 
         return GuildScheduledEventUserIterator(
             self,

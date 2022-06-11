@@ -696,12 +696,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     This currently happens due to components being used.
 
-    .. warning::
-
-        This is a low level function that is not generally meant to be used.
-        If you are working with components, consider using the callbacks associated
-        with the :class:`~disnake.ui.View` instead as it provides a nicer user experience.
-
     .. versionadded:: 2.0
 
     :param interaction: The interaction object.
@@ -711,10 +705,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     Called when a button is clicked.
 
-    .. warning::
-
-        Consider using the callbacks associated with the :class:`~disnake.ui.View` instead.
-
     .. versionadded:: 2.0
 
     :param interaction: The interaction object.
@@ -723,10 +713,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 .. function:: on_dropdown(interaction)
 
     Called when a select menu is clicked.
-
-    .. warning::
-
-        Consider using the callbacks associated with the :class:`~disnake.ui.View` instead.
 
     .. versionadded:: 2.0
 
@@ -2517,7 +2503,7 @@ of :class:`enum.Enum`.
         A webhook was created.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Object` with the webhook ID.
+        the :class:`Webhook` or :class:`Object` with the webhook ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2533,6 +2519,9 @@ of :class:`enum.Enum`.
         .. versionchanged:: 2.6
             :attr:`~AuditLogDiff.type` for this action is now a :class:`WebhookType`.
 
+        .. versionchanged:: 2.6
+            Added support for :class:`Webhook` instead of plain :class:`Object`\s.
+
     .. attribute:: webhook_update
 
         A webhook was updated. This trigger in the following situations:
@@ -2541,13 +2530,16 @@ of :class:`enum.Enum`.
         - The webhook channel changed
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Object` with the webhook ID.
+        the :class:`Webhook` or :class:`Object` with the webhook ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
         - :attr:`~AuditLogDiff.channel`
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.avatar`
+
+        .. versionchanged:: 2.6
+            Added support for :class:`Webhook` instead of plain :class:`Object`\s.
 
     .. attribute:: webhook_delete
 
@@ -2666,7 +2658,8 @@ of :class:`enum.Enum`.
         A guild integration was created.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Object` with the integration ID of the integration which was created.
+        the :class:`PartialIntegration` or :class:`Object` with the integration ID
+        of the integration which was created.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2674,14 +2667,21 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 1.3
 
+        .. versionchanged:: 2.6
+            Added support for :class:`PartialIntegration` instead of plain :class:`Object`\s.
+
     .. attribute:: integration_update
 
         A guild integration was updated.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Object` with the integration ID of the integration which was updated.
+        the :class:`PartialIntegration` or :class:`Object` with the integration ID
+        of the integration which was updated.
 
         .. versionadded:: 1.3
+
+        .. versionchanged:: 2.6
+            Added support for :class:`PartialIntegration` instead of plain :class:`Object`\s.
 
     .. attribute:: integration_delete
 
@@ -2767,6 +2767,11 @@ of :class:`enum.Enum`.
         the :class:`StageInstance` or :class:`Object` with the ID of the stage
         instance which was created.
 
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` is
+        set to an unspecified proxy object with one attribute:
+
+        - ``channel``: The :class:`StageChannel` or :class:`Object` with the channel ID where the stage instance was started.
+
         Possible attributes for :class:`AuditLogDiff`:
 
         - :attr:`~AuditLogDiff.topic`
@@ -2782,6 +2787,9 @@ of :class:`enum.Enum`.
         the :class:`StageInstance` or :class:`Object` with the ID of the stage
         instance which was updated.
 
+        See :attr:`stage_instance_create` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
+
         Possible attributes for :class:`AuditLogDiff`:
 
         - :attr:`~AuditLogDiff.topic`
@@ -2792,6 +2800,11 @@ of :class:`enum.Enum`.
     .. attribute:: stage_instance_delete
 
         A stage instance was ended.
+
+        See :attr:`stage_instance_create` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
+
+        Possible attributes for :class:`AuditLogDiff`:
 
         - :attr:`~AuditLogDiff.topic`
         - :attr:`~AuditLogDiff.privacy_level`
@@ -2919,14 +2932,23 @@ of :class:`enum.Enum`.
         The permissions of an application command were updated.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`ApplicationCommand` or :class:`Object` with the ID of the command whose
-        permissions were updated or the application ID if these are application-wide permissions.
+        the :class:`ApplicationCommand`, :class:`PartialIntegration`, or :class:`Object`
+        with the ID of the command whose permissions were updated or the application ID
+        if these are application-wide permissions.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` is
+        set to an unspecified proxy object with one attribute:
+
+        - ``integration``: The :class:`PartialIntegration` or :class:`Object` with the application ID of the associated application.
 
         Possible attributes for :class:`AuditLogDiff`:
 
         - :attr:`~AuditLogDiff.command_permissions`
 
         .. versionadded:: 2.5
+
+        .. versionchanged:: 2.6
+            Added support for :class:`PartialIntegration`, and added ``integration`` to :attr:`~AuditLogEntry.extra`.
 
 .. class:: AuditLogActionCategory
 
@@ -4482,17 +4504,23 @@ Integration
 
 .. autoclass:: Integration()
     :members:
+    :inherited-members:
 
 .. autoclass:: IntegrationAccount()
     :members:
 
 .. autoclass:: BotIntegration()
     :members:
+    :inherited-members:
 
 .. autoclass:: IntegrationApplication()
     :members:
 
 .. autoclass:: StreamIntegration()
+    :members:
+    :inherited-members:
+
+.. autoclass:: PartialIntegration()
     :members:
 
 Interaction
@@ -5445,6 +5473,8 @@ The following exceptions are thrown by the library.
 
 .. autoexception:: PrivilegedIntentsRequired
 
+.. autoexception:: SessionStartLimitReached
+
 .. autoexception:: InteractionException
 
 .. autoexception:: InteractionResponded
@@ -5473,6 +5503,7 @@ Exception Hierarchy
                 - :exc:`LoginFailure`
                 - :exc:`ConnectionClosed`
                 - :exc:`PrivilegedIntentsRequired`
+                - :exc:`SessionStartLimitReached`
                 - :exc:`InteractionException`
                     - :exc:`InteractionResponded`
                     - :exc:`InteractionNotResponded`
