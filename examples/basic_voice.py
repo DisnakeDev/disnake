@@ -1,6 +1,7 @@
 # pyright: reportUnknownLambdaType=false
 
 import asyncio
+import os
 
 import disnake
 import youtube_dl  # type: ignore
@@ -140,4 +141,4 @@ async def on_ready():
 
 
 bot.add_cog(Music(bot))
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))
