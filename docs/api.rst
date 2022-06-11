@@ -2204,6 +2204,14 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.banner`
         - :attr:`~AuditLogDiff.vanity_url_code`
         - :attr:`~AuditLogDiff.preferred_locale`
+        - :attr:`~AuditLogDiff.description`
+        - :attr:`~AuditLogDiff.rules_channel`
+        - :attr:`~AuditLogDiff.public_updates_channel`
+        - :attr:`~AuditLogDiff.widget_enabled`
+        - :attr:`~AuditLogDiff.widget_channel`
+        - :attr:`~AuditLogDiff.verification_level`
+        - :attr:`~AuditLogDiff.premium_progress_bar_enabled`
+        - :attr:`~AuditLogDiff.system_channel_flags`
 
     .. attribute:: channel_create
 
@@ -2220,6 +2228,14 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.type`
         - :attr:`~AuditLogDiff.overwrites`
+        - :attr:`~AuditLogDiff.topic`
+        - :attr:`~AuditLogDiff.bitrate`
+        - :attr:`~AuditLogDiff.rtc_region`
+        - :attr:`~AuditLogDiff.video_quality_mode`
+        - :attr:`~AuditLogDiff.default_auto_archive_duration`
+        - :attr:`~AuditLogDiff.user_limit`
+        - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.nsfw`
 
     .. attribute:: channel_update
 
@@ -2245,6 +2261,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.rtc_region`
         - :attr:`~AuditLogDiff.video_quality_mode`
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
+        - :attr:`~AuditLogDiff.user_limit`
+        - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.nsfw`
 
     .. attribute:: channel_delete
 
@@ -2261,6 +2280,14 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.type`
         - :attr:`~AuditLogDiff.overwrites`
+        - :attr:`~AuditLogDiff.topic`
+        - :attr:`~AuditLogDiff.bitrate`
+        - :attr:`~AuditLogDiff.rtc_region`
+        - :attr:`~AuditLogDiff.video_quality_mode`
+        - :attr:`~AuditLogDiff.default_auto_archive_duration`
+        - :attr:`~AuditLogDiff.user_limit`
+        - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.nsfw`
 
     .. attribute:: overwrite_create
 
@@ -2442,6 +2469,8 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.hoist`
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.permissions`
+        - :attr:`~AuditLogDiff.icon`
+        - :attr:`~AuditLogDiff.emoji`
 
     .. attribute:: role_update
 
@@ -2462,13 +2491,15 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.hoist`
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.permissions`
+        - :attr:`~AuditLogDiff.icon`
+        - :attr:`~AuditLogDiff.emoji`
 
     .. attribute:: role_delete
 
         A role was deleted.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Role` or a :class:`Object` with the ID.
+        the :class:`Object` with the ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2477,6 +2508,8 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.hoist`
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.permissions`
+        - :attr:`~AuditLogDiff.icon`
+        - :attr:`~AuditLogDiff.emoji`
 
     .. attribute:: invite_create
 
@@ -2532,6 +2565,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.type`
         - :attr:`~AuditLogDiff.application_id`
+        - :attr:`~AuditLogDiff.avatar`
 
         .. versionchanged:: 2.6
             Added :attr:`~AuditLogDiff.application_id`.
@@ -2574,6 +2608,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.type`
         - :attr:`~AuditLogDiff.application_id`
+        - :attr:`~AuditLogDiff.avatar`
 
         .. versionchanged:: 2.6
             Added :attr:`~AuditLogDiff.application_id`.
@@ -2680,6 +2715,10 @@ of :class:`enum.Enum`.
         the :class:`PartialIntegration` or :class:`Object` with the integration ID
         of the integration which was created.
 
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.type`
+
         .. versionadded:: 1.3
 
         .. versionchanged:: 2.6
@@ -2705,6 +2744,10 @@ of :class:`enum.Enum`.
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`Object` with the integration ID of the integration which was deleted.
 
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.type`
+
         .. versionadded:: 1.3
 
     .. attribute:: guild_scheduled_event_create
@@ -2721,6 +2764,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.description`
         - :attr:`~AuditLogDiff.privacy_level`
         - :attr:`~AuditLogDiff.status`
+        - :attr:`~AuditLogDiff.entity_type`
+        - :attr:`~AuditLogDiff.channel`
+        - :attr:`~AuditLogDiff.location`
+        - :attr:`~AuditLogDiff.image`
 
         .. versionadded:: 2.3
 
@@ -2738,6 +2785,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.description`
         - :attr:`~AuditLogDiff.privacy_level`
         - :attr:`~AuditLogDiff.status`
+        - :attr:`~AuditLogDiff.entity_type`
+        - :attr:`~AuditLogDiff.channel`
+        - :attr:`~AuditLogDiff.location`
         - :attr:`~AuditLogDiff.image`
 
         .. versionadded:: 2.3
@@ -2747,8 +2797,7 @@ of :class:`enum.Enum`.
         A guild scheduled event was deleted.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`GuildScheduledEvent` or :class:`Object` with the ID of the event
-        which was deleted.
+        the :class:`Object` with the ID of the event which was deleted.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2756,6 +2805,10 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.description`
         - :attr:`~AuditLogDiff.privacy_level`
         - :attr:`~AuditLogDiff.status`
+        - :attr:`~AuditLogDiff.entity_type`
+        - :attr:`~AuditLogDiff.channel`
+        - :attr:`~AuditLogDiff.location`
+        - :attr:`~AuditLogDiff.image`
 
         .. versionadded:: 2.3
 
@@ -2804,6 +2857,11 @@ of :class:`enum.Enum`.
         See :attr:`stage_instance_create` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
 
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.topic`
+        - :attr:`~AuditLogDiff.privacy_level`
+
         .. versionadded:: 2.0
 
     .. attribute:: sticker_create
@@ -2812,7 +2870,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`GuildSticker` or :class:`Object` with the ID of the sticker
-        which was updated.
+        which was created.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2837,10 +2895,7 @@ of :class:`enum.Enum`.
 
         - :attr:`~AuditLogDiff.name`
         - :attr:`~AuditLogDiff.emoji`
-        - :attr:`~AuditLogDiff.type`
-        - :attr:`~AuditLogDiff.format_type`
         - :attr:`~AuditLogDiff.description`
-        - :attr:`~AuditLogDiff.available`
 
         .. versionadded:: 2.0
 
@@ -2849,8 +2904,7 @@ of :class:`enum.Enum`.
         A sticker was deleted.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`GuildSticker` or :class:`Object` with the ID of the sticker
-        which was updated.
+        the :class:`Object` with the ID of the sticker which was deleted.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2878,6 +2932,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.locked`
         - :attr:`~AuditLogDiff.auto_archive_duration`
         - :attr:`~AuditLogDiff.type`
+        - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.invitable`
+        - :attr:`~AuditLogDiff.flags`
 
         .. versionadded:: 2.0
 
@@ -2895,6 +2952,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.archived`
         - :attr:`~AuditLogDiff.locked`
         - :attr:`~AuditLogDiff.auto_archive_duration`
+        - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.invitable`
+        - :attr:`~AuditLogDiff.flags`
 
         .. versionadded:: 2.0
 
@@ -2903,8 +2963,7 @@ of :class:`enum.Enum`.
         A thread was deleted.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Thread` or :class:`Object` with the ID of the thread which
-        was deleted.
+        the :class:`Object` with the ID of the thread which was deleted.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2913,6 +2972,9 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.locked`
         - :attr:`~AuditLogDiff.auto_archive_duration`
         - :attr:`~AuditLogDiff.type`
+        - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.invitable`
+        - :attr:`~AuditLogDiff.flags`
 
         .. versionadded:: 2.0
 
@@ -3769,7 +3831,9 @@ AuditLogDiff
 
     .. attribute:: icon
 
-        A guild's icon. See also :attr:`Guild.icon`.
+        A guild's or role's icon.
+
+        See also :attr:`Guild.icon` or :attr:`Role.icon`.
 
         :type: :class:`Asset`
 
@@ -3874,7 +3938,7 @@ AuditLogDiff
         If this could not be found then it falls back to a :class:`Object`
         with the ID being set.
 
-        :type: Union[:class:`TextChannel`, :class:`Object`]
+        :type: Union[:class:`abc.GuildChannel`, :class:`Object`]
 
     .. attribute:: verification_level
 
@@ -3883,6 +3947,14 @@ AuditLogDiff
         See also :attr:`Guild.verification_level`.
 
         :type: :class:`VerificationLevel`
+
+    .. attribute:: premium_progress_bar_enabled
+
+        Whether the guild's premium progress bar is enabled.
+
+        See also :attr:`Guild.premium_progress_bar_enabled`.
+
+        :type: :class:`bool`
 
     .. attribute:: default_notifications
 
@@ -3908,7 +3980,7 @@ AuditLogDiff
 
     .. attribute:: vanity_url_code
 
-        The guild's vanity URL.
+        The guild's vanity URL code.
 
         See also :meth:`Guild.vanity_invite`, :meth:`Guild.edit`, and :attr:`Guild.vanity_url_code`.
 
@@ -3934,17 +4006,18 @@ AuditLogDiff
 
     .. attribute:: topic
 
-        The topic of a :class:`TextChannel`, :class:`StageChannel` or :class:`ForumChannel`.
+        The topic of a :class:`TextChannel`, :class:`StageChannel`, :class:`StageInstance` or :class:`ForumChannel`.
 
-        See also :attr:`TextChannel.topic`, :attr:`StageChannel.topic` or :attr:`ForumChannel.topic`.
+        See also :attr:`TextChannel.topic`, :attr:`StageChannel.topic`,
+        :attr:`StageInstance.topic` or :attr:`ForumChannel.topic`.
 
         :type: :class:`str`
 
     .. attribute:: bitrate
 
-        The bitrate of a :class:`VoiceChannel`.
+        The bitrate of a :class:`VoiceChannel` or :class:`StageChannel`.
 
-        See also :attr:`VoiceChannel.bitrate`.
+        See also :attr:`VoiceChannel.bitrate` or :attr:`StageChannel.bitrate`.
 
         :type: :class:`int`
 
@@ -3959,7 +4032,7 @@ AuditLogDiff
         a ``type`` attribute set to either ``'role'`` or ``'member'`` to help
         decide what type of ID it is.
 
-        :type: List[Tuple[target, :class:`PermissionOverwrite`]]
+        :type: List[Tuple[Union[:class:`Member`, :class:`User`, :class:`Role`, :class:`Object`], :class:`PermissionOverwrite`]]
 
     .. attribute:: privacy_level
 
@@ -4116,26 +4189,43 @@ AuditLogDiff
         The number of seconds members have to wait before
         sending another message or creating another thread in the channel.
 
-        See also :attr:`TextChannel.slowmode_delay` or :attr:`ForumChannel.slowmode_delay`.
+        See also :attr:`TextChannel.slowmode_delay`, :attr:`VoiceChannel.slowmode_delay`,
+        :attr:`ForumChannel.slowmode_delay` or :attr:`Thread.slowmode_delay`.
 
         :type: :class:`int`
 
     .. attribute:: rtc_region
 
-        The region for the voice channel’s voice communication.
+        The region for the voice or stage channel's voice communication.
         A value of ``None`` indicates automatic voice region detection.
 
-        See also :attr:`VoiceChannel.rtc_region`.
+        See also :attr:`VoiceChannel.rtc_region` or :attr:`StageChannel.rtc_region`.
 
         :type: :class:`str`
 
     .. attribute:: video_quality_mode
 
-        The camera video quality for the voice channel's participants.
+        The camera video quality for the voice or stage channel's participants.
 
-        See also :attr:`VoiceChannel.video_quality_mode`.
+        See also :attr:`VoiceChannel.video_quality_mode` or :attr:`StageChannel.video_quality_mode`.
 
         :type: :class:`VideoQualityMode`
+
+    .. attribute:: user_limit
+
+        The voice channel's user limit.
+
+        See also :attr:`VoiceChannel.user_limit`.
+
+        :type: :class:`int`
+
+    .. attribute:: nsfw
+
+        Whether the channel is marked as "not safe for work".
+
+        See also :attr:`TextChannel.nsfw`, :attr:`VoiceChannel.nsfw` or :attr:`ForumChannel.nsfw`.
+
+        :type: :class:`bool`
 
     .. attribute:: format_type
 
@@ -4147,17 +4237,17 @@ AuditLogDiff
 
     .. attribute:: emoji
 
-        The name of the emoji that represents a sticker being changed.
+        The name of the sticker's or role's emoji being changed.
 
-        See also :attr:`GuildSticker.emoji`
+        See also :attr:`GuildSticker.emoji` or :attr:`Role.emoji`.
 
         :type: :class:`str`
 
     .. attribute:: description
 
-        The description of a sticker or a guild scheduled event being changed.
+        The description of a guild, sticker or a guild scheduled event being changed.
 
-        See also :attr:`GuildSticker.description`, :attr:`GuildScheduledEvent.description`
+        See also :attr:`Guild.description`, :attr:`GuildSticker.description`, :attr:`GuildScheduledEvent.description`
 
         :type: :class:`str`
 
@@ -4194,6 +4284,12 @@ AuditLogDiff
         The default auto archive duration for newly created threads being changed.
 
         :type: :class:`int`
+
+    .. attribute:: invitable
+
+        Whether non-moderators can add other non-moderators to the thread.
+
+        :type: :class:`bool`
 
     .. attribute:: timeout
 
@@ -4239,6 +4335,22 @@ AuditLogDiff
         The ID of the application that created a webhook.
 
         :type: :class:`int`
+
+    .. attribute:: flags
+
+        The channel's flags.
+
+        See also :attr:`abc.GuildChannel.flags` or :attr:`Thread.flags`.
+
+        :type: :class:`ChannelFlags`
+
+    .. attribute:: system_channel_flags
+
+        The guild's system channel settings.
+
+        See also :attr:`Guild.system_channel_flags`.
+
+        :type: :class:`SystemChannelFlags`
 
     .. attribute:: enabled
 
