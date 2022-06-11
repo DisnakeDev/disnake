@@ -41,7 +41,7 @@ from typing import (
     cast,
 )
 
-from . import abc, enums, utils
+from . import abc, enums, flags, utils
 from .app_commands import ApplicationCommandPermissions
 from .asset import Asset
 from .colour import Colour
@@ -145,6 +145,8 @@ def _transform_overwrites(
 def _transform_icon(entry: AuditLogEntry, data: Optional[str]) -> Optional[Asset]:
     if data is None:
         return None
+    if entry.action.name.startswith("role_"):
+        return Asset._from_role_icon(entry._state, entry._target_id, data)  # type: ignore
     return Asset._from_guild_icon(entry._state, entry.guild.id, data)
 
 
@@ -163,12 +165,22 @@ def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]
     return _transform
 
 
-T = TypeVar("T", bound=enums.Enum)
+EnumT = TypeVar("EnumT", bound=enums.Enum)
+FlagsT = TypeVar("FlagsT", bound=flags.BaseFlags)
 
 
-def _enum_transformer(enum: Type[T]) -> Callable[[AuditLogEntry, int], T]:
-    def _transform(entry: AuditLogEntry, data: int) -> T:
+def _enum_transformer(enum: Type[EnumT]) -> Callable[[AuditLogEntry, int], EnumT]:
+    def _transform(entry: AuditLogEntry, data: int) -> EnumT:
         return enums.try_enum(enum, data)
+
+    return _transform
+
+
+def _flags_transformer(
+    flags_type: Type[FlagsT],
+) -> Callable[[AuditLogEntry, Optional[int]], Optional[FlagsT]]:
+    def _transform(entry: AuditLogEntry, data: Optional[int]) -> Optional[FlagsT]:
+        return flags_type._from_value(data) if data is not None else None
 
     return _transform
 
@@ -261,6 +273,7 @@ class AuditLogChanges:
         'rate_limit_per_user':           ('slowmode_delay', None),
         'guild_id':                      ('guild', _transform_guild_id),
         'tags':                          ('emoji', None),
+        'unicode_emoji':                 ('emoji', None),
         'default_message_notifications': ('default_notifications', _enum_transformer(enums.NotificationLevel)),
         'communication_disabled_until':  ('timeout', _transform_datetime),
         'image_hash':                    ('image', _transform_guild_scheduled_event_image),
@@ -271,6 +284,8 @@ class AuditLogChanges:
         'entity_type':                   (None, _enum_transformer(enums.GuildScheduledEventEntityType)),
         'status':                        (None, _enum_transformer(enums.GuildScheduledEventStatus)),
         'type':                          (None, _transform_type),
+        'flags':                         (None, _flags_transformer(flags.ChannelFlags)),
+        'system_channel_flags':          (None, _flags_transformer(flags.SystemChannelFlags)),
     }
     # fmt: on
 
