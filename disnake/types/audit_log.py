@@ -31,6 +31,7 @@ from typing import List, Literal, Optional, TypedDict, Union
 from .auto_moderation import (
     AutomodAction,
     AutomodEventType,
+    AutomodRule,
     AutomodTriggerMetadata,
     AutomodTriggerType,
 )
@@ -346,7 +347,7 @@ class AuditLogEntry(_AuditLogEntryOptional):
 class AuditLog(TypedDict):
     audit_log_entries: List[AuditLogEntry]
     application_commands: List[ApplicationCommand]
-    # auto_moderation_rules: List[AutomodRule]
+    auto_moderation_rules: List[AutomodRule]
     guild_scheduled_events: List[GuildScheduledEvent]
     integrations: List[PartialIntegration]
     threads: List[Thread]

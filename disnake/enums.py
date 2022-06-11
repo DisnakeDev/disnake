@@ -489,7 +489,6 @@ class AuditLogAction(Enum):
         elif v == 143:
             return "user"
         elif v < 143:
-            # TODO: target converter
             return "auto_moderation_rule"
         else:
             return None

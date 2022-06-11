@@ -2944,7 +2944,7 @@ of :class:`enum.Enum`.
         An auto moderation rule was created.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        an :class:`Object` with the ID of the auto moderation rule which
+        the :class:`AutomodRule` or :class:`Object` with the ID of the auto moderation rule which
         was created.
 
         Possible attributes for :class:`AuditLogDiff`:
@@ -2965,7 +2965,7 @@ of :class:`enum.Enum`.
         An auto moderation rule was updated.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        an :class:`Object` with the ID of the auto moderation rule which
+        the :class:`AutomodRule` or :class:`Object` with the ID of the auto moderation rule which
         was updated.
 
         Possible attributes for :class:`AuditLogDiff`:
@@ -2986,7 +2986,7 @@ of :class:`enum.Enum`.
         An auto moderation rule was deleted.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        an :class:`Object` with the ID of the auto moderation rule which
+        the :class:`Object` with the ID of the auto moderation rule which
         was deleted.
 
         Possible attributes for :class:`AuditLogDiff`:
