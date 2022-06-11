@@ -26,6 +26,8 @@ Key Features
 
 To install the library without full voice support, you can just run the
 following command:
+    
+</div>
 
 ``` sh
 # Linux/macOS
@@ -35,6 +37,7 @@ python3 -m pip install -U disnake
 py -3 -m pip install -U disnake
 ```
 
+<div align="center">
 <br>
     
 Installing `disnake` with full voice support requires you to replace `disnake` here, with `disnake[voice]`. To learn more about voice support (or installing the development version), please visit [this section of our guide](https://guide.disnake.dev/prerequisites/installing-disnake/).
@@ -58,6 +61,8 @@ Quick Example
 -------------
 
 ### Slash Commands Example
+    
+</div>
 
 ``` py
 import disnake
@@ -72,7 +77,10 @@ async def ping(inter):
 bot.run("BOT_TOKEN")
 ```
 
+<div align="center">
+    
 ### Context Menus Example
+</div>
 
 ``` py
 import disnake
@@ -88,8 +96,10 @@ async def avatar(inter, user):
 
 bot.run("BOT_TOKEN")
 ```
-
+<div align="center">
+    
 ### Prefix Commands Example
+</div>
 
 ``` py
 import disnake
@@ -103,8 +113,12 @@ async def ping(ctx):
 
 bot.run("BOT_TOKEN")
 ```
+
+<div align="center">
 <br><br>
+    
 You can find more examples in the [examples directory](./examples).
+    
 <br>
 <br>
 <p align="center">
