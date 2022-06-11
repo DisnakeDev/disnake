@@ -50,7 +50,7 @@ C = TypeVar("C", bound="CooldownMapping")
 MC = TypeVar("MC", bound="MaxConcurrency")
 
 
-class BucketType(Enum):
+class BucketType(int, Enum):
     default = 0
     user = 1
     guild = 2
