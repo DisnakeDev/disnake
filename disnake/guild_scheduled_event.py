@@ -121,7 +121,7 @@ class GuildScheduledEvent(Hashable):
         The guild ID which the guild scheduled event belongs to.
     channel_id: Optional[:class:`int`]
         The channel ID in which the guild scheduled event will be hosted.
-        This field is ``None`` if :attr:`entity_type` is :class:`GuildScheduledEventEntityType.external`
+        This field is ``None`` if :attr:`entity_type` is :class:`GuildScheduledEventEntityType.external`.
     creator_id: Optional[:class:`int`]
         The ID of the user that created the guild scheduled event.
         This field is ``None`` for events created before October 25th, 2021.
@@ -133,7 +133,7 @@ class GuildScheduledEvent(Hashable):
     description: :class:`str`
         The description of the guild scheduled event (1-1000 characters).
     scheduled_start_time: :class:`datetime.datetime`
-        The time when the guild scheduled event will start
+        The time when the guild scheduled event will start.
     scheduled_end_time: Optional[:class:`datetime.datetime`]
         The time when the guild scheduled event will end, or ``None`` if the event does not have a scheduled time to end.
     privacy_level: :class:`GuildScheduledEventPrivacyLevel`
@@ -249,7 +249,10 @@ class GuildScheduledEvent(Hashable):
 
     @cached_slot_property("_cs_channel")
     def channel(self) -> Optional[GuildChannel]:
-        """Optional[:class:`abc.GuildChannel`]: The channel in which the guild scheduled event will be hosted."""
+        """Optional[:class:`abc.GuildChannel`]: The channel in which the guild scheduled event will be hosted.
+
+        This will be ``None`` if :attr:`entity_type` is :class:`GuildScheduledEventEntityType.external`.
+        """
         if self.channel_id is None:
             return None
         guild = self.guild
