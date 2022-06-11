@@ -2445,7 +2445,7 @@ of :class:`enum.Enum`.
         A role was deleted.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Role` or a :class:`Object` with the ID.
+        the :class:`Object` with the ID.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2743,8 +2743,7 @@ of :class:`enum.Enum`.
         A guild scheduled event was deleted.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`GuildScheduledEvent` or :class:`Object` with the ID of the event
-        which was deleted.
+        the :class:`Object` with the ID of the event which was deleted.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2817,7 +2816,7 @@ of :class:`enum.Enum`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
         the :class:`GuildSticker` or :class:`Object` with the ID of the sticker
-        which was updated.
+        which was created.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2851,8 +2850,7 @@ of :class:`enum.Enum`.
         A sticker was deleted.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`GuildSticker` or :class:`Object` with the ID of the sticker
-        which was updated.
+        the :class:`Object` with the ID of the sticker which was deleted.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -2911,8 +2909,7 @@ of :class:`enum.Enum`.
         A thread was deleted.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Thread` or :class:`Object` with the ID of the thread which
-        was deleted.
+        the :class:`Object` with the ID of the thread which was deleted.
 
         Possible attributes for :class:`AuditLogDiff`:
 
