@@ -202,7 +202,7 @@ class EnumMeta(type):
         try:
             return cls._value2member_map_[value]
         except KeyError:
-            raise KeyError(f"{value} is not a valid {cls.__name__}") from None
+            raise ValueError(f"{value} is not a valid {cls.__name__}") from None
 
     def __getitem__(cls, name: str) -> Any:
         return cls._name_map_[name]
@@ -212,6 +212,17 @@ class EnumMeta(type):
 
     def __iter__(cls) -> Iterator[Any]:
         yield from cls._name_map_.values()
+
+    @property
+    def __members__(cls) -> types.MappingProxyType[str, Enum]:
+        return types.MappingProxyType(cls._name_map_)
+
+    @property
+    def _member_names_(cls) -> Sequence[str]:
+        # I *think* this should be fine as a property?
+        # Hardly ever gets used so I don't really see the value in pre-computing it like
+        # vanilla Enums do. I decided to save memory but we can always just revert this.
+        return tuple(cls._name_map_)
 
 
 if TYPE_CHECKING:
@@ -233,21 +244,6 @@ else:
         def value(self):
             """Return the value of the enum member."""
             return self._value_
-
-        # The rest is just to remain compatible with vanilla Enum API
-
-        @classmethod
-        @property
-        def __members__(cls) -> types.MappingProxyType[str, Enum]:
-            return types.MappingProxyType(cls._name_map_)
-
-        @classmethod
-        @property
-        def _member_names_(cls) -> Sequence[str]:
-            # I *think* this should be fine as a property?
-            # Hardly ever gets used so I don't really see the value in pre-computing it like
-            # vanilla Enums do. I decided to save memory but we can always just revert this.
-            return tuple(cls._name_map_)
 
         def __repr__(self) -> str:
             return f"<{type(self).__name__}.{self._name_}: {self._value_!r}>"
