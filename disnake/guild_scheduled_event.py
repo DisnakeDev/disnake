@@ -41,6 +41,7 @@ from .utils import (
     _get_as_snowflake,
     cached_slot_property,
     parse_time,
+    snowflake_time,
 )
 
 if TYPE_CHECKING:
@@ -224,6 +225,22 @@ class GuildScheduledEvent(Hashable):
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def created_at(self) -> datetime:
+        """:class:`datetime.datetime`: Returns the guild scheduled event's creation time in UTC.
+
+        .. versionadded:: 2.6
+        """
+        return snowflake_time(self.id)
+
+    @property
+    def url(self) -> str:
+        """:class:`str`: The guild scheduled event's URL.
+
+        .. versionadded:: 2.6
+        """
+        return f"https://discord.com/events/{self.guild_id}/{self.id}"
 
     @cached_slot_property("_cs_guild")
     def guild(self) -> Optional[Guild]:
