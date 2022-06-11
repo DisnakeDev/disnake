@@ -2146,6 +2146,10 @@ class Guild(Hashable):
         .. versionadded:: 2.3
 
         .. versionchanged:: 2.6
+            Now raises :exc:`TypeError` instead of :exc:`ValueError` for
+            invalid parameter types.
+
+        .. versionchanged:: 2.6
             Removed ``channel_id`` parameter in favor of ``channel``.
 
         Parameters
@@ -2187,7 +2191,9 @@ class Guild(Hashable):
         HTTPException
             The request failed.
         TypeError
-            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`),
+            or one of ``entity_type``, ``privacy_level``, or ``entity_metadata``
+            is not of the correct type.
 
         Returns
         -------
@@ -2195,12 +2201,12 @@ class Guild(Hashable):
             The newly created guild scheduled event.
         """
         if not isinstance(entity_type, GuildScheduledEventEntityType):
-            raise ValueError("entity_type must be an instance of GuildScheduledEventEntityType")
+            raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
 
         if privacy_level is MISSING:
             privacy_level = GuildScheduledEventPrivacyLevel.guild_only
         elif not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
-            raise ValueError("privacy_level must be an instance of GuildScheduledEventPrivacyLevel")
+            raise TypeError("privacy_level must be an instance of GuildScheduledEventPrivacyLevel")
 
         fields: Dict[str, Any] = {
             "name": name,
@@ -2211,7 +2217,7 @@ class Guild(Hashable):
 
         if entity_metadata is not MISSING:
             if not isinstance(entity_metadata, GuildScheduledEventMetadata):
-                raise ValueError(
+                raise TypeError(
                     "entity_metadata must be an instance of GuildScheduledEventMetadata"
                 )
 
