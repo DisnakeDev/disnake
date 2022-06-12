@@ -39,6 +39,8 @@ jobs:
     if:
       github.event_name == 'push' || github.event.pull_request.head.repo.full_name !=
       github.repository
+    # unlike the other workflows, we are using version 20.04 here as
+    # readthedocs uses 20.04 for building our docs, and we want to be explicit
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3
@@ -50,7 +52,7 @@ jobs:
         nox-setup: "docs"
 
     - name: Run sphinx-build
-      run: nox -s docs -- -W -w $GITHUB_STEP_SUMMARY
+      run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
   pyright:
     # We want to run on external PRs, but not on our own internal PRs as they'll be run
