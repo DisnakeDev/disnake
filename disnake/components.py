@@ -143,9 +143,9 @@ class ActionRow(Component, Generic[ComponentT]):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: ComponentPayload):
+    def __init__(self, data: ActionRowPayload):
         self.type: ComponentType = try_enum(ComponentType, data["type"])
-        self.children: List[ComponentT] = [  # type: ignore
+        self.children: List[ComponentT] = [
             _component_factory(d) for d in data.get("components", [])
         ]
 
