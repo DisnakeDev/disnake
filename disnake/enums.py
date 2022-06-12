@@ -666,7 +666,7 @@ class AuditLogActionCategory(int, Enum):
 
 
 class AuditLogAction(int, Enum):
-    """Represents the type of action being done for a :class:`AuditLogEntry`\,
+    """Represents the type of action being done for a :class:`AuditLogEntry`\\,
     which is retrievable via :meth:`Guild.audit_logs`.
     """
 
