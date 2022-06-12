@@ -210,6 +210,7 @@ class _CaseInsensitiveDict(dict):
         super().__setitem__(k.casefold(), v)
 
 
+# TODO: ideally, `ContextT` should be bound on the class here as well
 class Command(_BaseCommand, Generic[CogT, P, T]):
     """
     A class that implements the protocol for a bot text command.
@@ -315,7 +316,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             raise TypeError("Name of a command must be a string.")
         self.name: str = name
 
-        self.callback = func  # type: ignore
+        self.callback = func
         self.enabled: bool = kwargs.get("enabled", True)
 
         help_doc = kwargs.get("help")
@@ -396,16 +397,11 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.__command_flag__ = None
 
     @property
-    def callback(
-        self,
-    ) -> CommandCallback[CogT, Context, P, T]:
+    def callback(self) -> CommandCallback[CogT, ContextT, P, T]:
         return self._callback
 
     @callback.setter
-    def callback(
-        self,
-        function: CommandCallback[CogT, Context, P, T],
-    ) -> None:
+    def callback(self, function: CommandCallback[CogT, Any, P, T]) -> None:
         self._callback = function
         unwrap = unwrap_function(function)
         self.module = unwrap.__module__
