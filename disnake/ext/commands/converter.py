@@ -1202,7 +1202,7 @@ async def _actual_conversion(
         raise ConversionError(converter, exc) from exc
 
     try:
-        return converter(argument)  # type: ignore
+        return converter(argument)
     except CommandError:
         raise
     except Exception as exc:
