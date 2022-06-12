@@ -106,7 +106,7 @@ def docs(session: nox.Session):
     If running in CI, will build a production version of the documentation.
     """
     with session.chdir("docs"):
-        args = ["-b", "html", "-j", "auto", "-n", ".", "_build/html"]
+        args = ["-b", "html", "-n", ".", "_build/html", *session.posargs]
         if session.interactive:
             session.run(
                 "sphinx-autobuild",
