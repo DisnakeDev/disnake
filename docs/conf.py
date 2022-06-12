@@ -17,6 +17,7 @@ import os
 import re
 import subprocess
 import sys
+from typing import Any
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -193,7 +194,7 @@ def linkcode_resolve(domain, info):
         return None
 
     try:
-        obj = sys.modules[info["module"]]
+        obj: Any = sys.modules[info["module"]]
         for part in info["fullname"].split("."):
             obj = getattr(obj, part)
         obj = inspect.unwrap(obj)

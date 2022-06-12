@@ -33,7 +33,18 @@ import logging
 import sys
 import traceback
 import warnings
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Type, TypeVar, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Iterable,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import disnake
 
@@ -46,9 +57,11 @@ from .help import DefaultHelpCommand, HelpCommand
 from .view import StringView
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from disnake.message import Message
 
-    from ._types import Check, CoroFunc
+    from ._types import Check, CoroFunc, MaybeCoro
 
 __all__ = (
     "when_mentioned",
@@ -61,6 +74,8 @@ MISSING: Any = disnake.utils.MISSING
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
 CXT = TypeVar("CXT", bound="Context")
+
+PrefixType = Union[str, Iterable[str]]
 
 _log = logging.getLogger(__name__)
 
@@ -127,7 +142,9 @@ _default: Any = _DefaultRepr()
 class BotBase(CommonBotBase, GroupMixin):
     def __init__(
         self,
-        command_prefix: Optional[Union[str, List[str], Callable]] = None,
+        command_prefix: Optional[
+            Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
+        ] = None,
         help_command: HelpCommand = _default,
         description: str = None,
         **options: Any,
@@ -452,9 +469,9 @@ class BotBase(CommonBotBase, GroupMixin):
             A list of prefixes or a single prefix that the bot is
             listening for. None if the bot isn't listening for prefixes.
         """
-        prefix = ret = self.command_prefix
-        if callable(prefix):
-            ret = await disnake.utils.maybe_coroutine(prefix, self, message)
+        ret = self.command_prefix
+        if callable(ret):
+            ret = await disnake.utils.maybe_coroutine(ret, self, message)
 
         if ret is None:
             return None

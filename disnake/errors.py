@@ -29,17 +29,12 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse, ClientWebSocketResponse
+    from requests import Response
 
     from .client import SessionStartLimit
-
-    try:
-        from requests import Response
-
-        _ResponseType = Union[ClientResponse, Response]
-    except ModuleNotFoundError:
-        _ResponseType = ClientResponse
-
     from .interactions import Interaction, ModalInteraction
+
+    _ResponseType = Union[ClientResponse, Response]
 
 __all__ = (
     "DiscordException",
