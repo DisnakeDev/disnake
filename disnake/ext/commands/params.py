@@ -319,20 +319,20 @@ class ParamInfo:
 
     TYPES: ClassVar[Dict[type, int]] = {
         # fmt: off
-        str:                                 OptionType.string.value,
-        int:                                 OptionType.integer.value,
-        bool:                                OptionType.boolean.value,
-        disnake.abc.User:                    OptionType.user.value,
-        disnake.User:                        OptionType.user.value,
-        disnake.Member:                      OptionType.user.value,
-        Union[disnake.User, disnake.Member]: OptionType.user.value,
+        str:                                 OptionType.string,
+        int:                                 OptionType.integer,
+        bool:                                OptionType.boolean,
+        disnake.abc.User:                    OptionType.user,
+        disnake.User:                        OptionType.user,
+        disnake.Member:                      OptionType.user,
+        Union[disnake.User, disnake.Member]: OptionType.user,
         # channels handled separately
-        disnake.abc.GuildChannel:            OptionType.channel.value,
-        disnake.Role:                        OptionType.role.value,
-        Union[disnake.Member, disnake.Role]: OptionType.mentionable.value,
-        disnake.abc.Snowflake:               OptionType.mentionable.value,
-        float:                               OptionType.number.value,
-        disnake.Attachment:                  OptionType.attachment.value,
+        disnake.abc.GuildChannel:            OptionType.channel,
+        disnake.Role:                        OptionType.role,
+        Union[disnake.Member, disnake.Role]: OptionType.mentionable,
+        disnake.abc.Snowflake:               OptionType.mentionable,
+        float:                               OptionType.number,
+        disnake.Attachment:                  OptionType.attachment,
         # fmt: on
     }
     _registered_converters: ClassVar[Dict[type, Callable]] = {}
@@ -381,7 +381,7 @@ class ParamInfo:
 
     @property
     def discord_type(self) -> OptionType:
-        return OptionType(self.TYPES.get(self.type, OptionType.string.value))
+        return OptionType(self.TYPES.get(self.type, OptionType.string))
 
     @discord_type.setter
     def discord_type(self, discord_type: OptionType) -> None:

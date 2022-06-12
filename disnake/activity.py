@@ -418,7 +418,7 @@ class Game(BaseActivity):
 
         # fmt: off
         return {
-            'type': ActivityType.playing.value,
+            'type': ActivityType.playing,
             'name': str(self.name),
             'timestamps': timestamps
         }
@@ -521,7 +521,7 @@ class Streaming(BaseActivity):
     def to_dict(self) -> Dict[str, Any]:
         # fmt: off
         ret: Dict[str, Any] = {
-            'type': ActivityType.streaming.value,
+            'type': ActivityType.streaming,
             'name': str(self.name),
             'url': str(self.url),
             'assets': self.assets
@@ -798,13 +798,13 @@ class CustomActivity(BaseActivity):
     def to_dict(self) -> Dict[str, Any]:
         if self.name == self.state:
             o = {
-                "type": ActivityType.custom.value,
+                "type": ActivityType.custom,
                 "state": self.name,
                 "name": "Custom Status",
             }
         else:
             o = {
-                "type": ActivityType.custom.value,
+                "type": ActivityType.custom,
                 "name": self.name,
             }
 
