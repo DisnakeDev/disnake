@@ -36,16 +36,19 @@ from typing import (
     Dict,
     List,
     Optional,
-    Tuple,
     TypeVar,
     Union,
     cast,
 )
 
+from .app_commands import application_command_factory
 from .audit_logs import AuditLogEntry
 from .bans import BanEntry
 from .errors import NoMoreItems
+from .guild_scheduled_event import GuildScheduledEvent
+from .integrations import PartialIntegration
 from .object import Object
+from .threads import Thread
 from .utils import maybe_coroutine, snowflake_time, time_snowflake
 
 __all__ = (
@@ -60,13 +63,12 @@ __all__ = (
 
 if TYPE_CHECKING:
     from .abc import Messageable, Snowflake
+    from .app_commands import APIApplicationCommand
     from .audit_logs import AuditLogEntry
     from .guild import Guild
-    from .guild_scheduled_event import GuildScheduledEvent
     from .member import Member
     from .message import Message
     from .state import ConnectionState
-    from .threads import Thread
     from .types.audit_log import (
         AuditLog as AuditLogPayload,
         AuditLogEntry as AuditLogEntryPayload,
@@ -78,7 +80,7 @@ if TYPE_CHECKING:
     )
     from .types.message import Message as MessagePayload
     from .types.threads import Thread as ThreadPayload
-    from .types.user import PartialUser as PartialUserPayload, User as UserPayload
+    from .types.user import PartialUser as PartialUserPayload
     from .user import User
 
 T = TypeVar("T")
@@ -533,17 +535,13 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         self._state = guild._state
         self.request = guild._state.http.get_audit_logs
 
-        self._users: Dict[int, User] = {}
-
         self.entries: asyncio.Queue[AuditLogEntry] = asyncio.Queue()
 
         self._filter: Optional[Callable[[AuditLogEntryPayload], bool]] = None
         if self.after and self.after != OLDEST_OBJECT:
             self._filter = lambda e: int(e["id"]) > self.after.id
 
-    async def _retrieve_data(
-        self, retrieve: int
-    ) -> Tuple[List[UserPayload], List[AuditLogEntryPayload]]:
+    async def _retrieve_data(self, retrieve: int) -> AuditLogPayload:
         before = self.before.id if self.before else None
         data: AuditLogPayload = await self.request(
             self.guild.id,
@@ -558,7 +556,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
             if self.limit is not None:
                 self.limit -= retrieve
             self.before = Object(id=int(entries[-1]["id"]))
-        return data.get("users", []), entries
+        return data
 
     async def next(self) -> AuditLogEntry:
         if self.entries.empty():
@@ -580,26 +578,60 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
     async def _fill(self):
         if self._get_retrieve():
-            users, data = await self._retrieve_data(self.retrieve)
-            if len(data) < 100:
+            data = await self._retrieve_data(self.retrieve)
+            entries = data.get("audit_log_entries")
+            if len(entries) < 100:
                 self.limit = 0  # terminate the infinite loop
 
             if self._filter:
-                data = filter(self._filter, data)
+                entries = filter(self._filter, entries)
 
-            for user in users:
-                if int(user["id"]) in self._users:
-                    continue
-                u = self._state.create_user(data=user)
-                self._users[u.id] = u
+            state = self._state
 
-            for element in data:
+            appcmds: Dict[int, APIApplicationCommand] = {}
+            for d in data.get("application_commands", []):
+                try:
+                    cmd = application_command_factory(d)
+                except TypeError:
+                    pass
+                else:
+                    appcmds[int(d["id"])] = cmd
+
+            events = {
+                int(d["id"]): GuildScheduledEvent(state=state, data=d)
+                for d in data.get("guild_scheduled_events", [])
+            }
+
+            integrations = {
+                int(d["id"]): PartialIntegration(guild=self.guild, data=d)
+                for d in data.get("integrations", [])
+            }
+
+            threads = {
+                int(d["id"]): Thread(guild=self.guild, state=state, data=d)
+                for d in data.get("threads", [])
+            }
+
+            users = {int(d["id"]): state.create_user(d) for d in data.get("users", [])}
+
+            webhooks = {int(d["id"]): state.create_webhook(d) for d in data.get("webhooks", [])}
+
+            for element in entries:
                 # TODO: remove this if statement later
                 if element["action_type"] is None:
                     continue
 
                 await self.entries.put(
-                    AuditLogEntry(data=element, users=self._users, guild=self.guild)
+                    AuditLogEntry(
+                        data=element,
+                        guild=self.guild,
+                        application_commands=appcmds,
+                        guild_scheduled_events=events,
+                        integrations=integrations,
+                        threads=threads,
+                        users=users,
+                        webhooks=webhooks,
+                    )
                 )
 
 
