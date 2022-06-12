@@ -319,8 +319,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         nsfw: bool = MISSING,
         sync_permissions: bool = MISSING,
         category: Optional[CategoryChannel] = MISSING,
-        slowmode_delay: int = MISSING,
-        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         type: ChannelType = MISSING,
         overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
@@ -361,7 +361,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         category: Optional[:class:`CategoryChannel`]
             The new category for this channel. Can be ``None`` to remove the
             category.
-        slowmode_delay: :class:`int`
+        slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         type: :class:`ChannelType`
@@ -371,7 +371,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         reason: Optional[:class:`str`]
@@ -1229,7 +1229,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
-        slowmode_delay: int = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
         reason: Optional[str] = None,
         **kwargs: NoReturn,
     ) -> Optional[VoiceChannel]:
@@ -1286,7 +1286,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
             .. versionadded:: 2.3
 
-        slowmode_delay: :class:`int`
+        slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
 
@@ -2451,7 +2451,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = MISSING,
         category: Optional[CategoryChannel] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
-        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
         **kwargs: NoReturn,
@@ -2482,13 +2482,13 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         category: Optional[:class:`CategoryChannel`]
             The new category for this channel. Can be ``None`` to remove the
             category.
-        slowmode_delay: :class:`int`
+        slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         reason: Optional[:class:`str`]

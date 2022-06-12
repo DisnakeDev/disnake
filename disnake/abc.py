@@ -78,7 +78,6 @@ if TYPE_CHECKING:
     from .channel import CategoryChannel, DMChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
-    from .voice_region import VoiceRegion
     from .enums import InviteTarget
     from .guild import Guild, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
@@ -96,6 +95,7 @@ if TYPE_CHECKING:
     from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import ClientUser
+    from .voice_region import VoiceRegion
 
     MessageableChannel = Union[GuildMessageable, DMChannel, PartialMessageable]
     SnowflakeTime = Union["Snowflake", datetime]
@@ -317,8 +317,8 @@ class GuildChannel(ABC):
         nsfw: bool = MISSING,
         sync_permissions: bool = MISSING,
         category: Optional[CategoryChannel] = MISSING,
-        slowmode_delay: int = MISSING,
-        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         type: ChannelType = MISSING,
         overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = MISSING,
         bitrate: int = MISSING,
