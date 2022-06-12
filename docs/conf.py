@@ -57,9 +57,11 @@ github_repo = "https://github.com/DisnakeDev/disnake"
 dpy_github_repo = "https://github.com/Rapptz/discord.py"
 
 extlinks = {
-    "issue": (f"{github_repo}/issues/%s", "#"),
-    "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#"),
+    "issue": (f"{github_repo}/issues/%s", "#%s"),
+    "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#%s"),
 }
+
+extlinks_detect_hardcoded_links = True
 
 # Links used for cross-referencing stuff in other documentation
 intersphinx_mapping = {
@@ -131,7 +133,7 @@ if not git_ref or re.search(r"[\^~]", git_ref):
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 locale_dirs = ["locale/"]
 gettext_compact = False
