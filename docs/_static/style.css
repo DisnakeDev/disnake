@@ -1420,6 +1420,13 @@ div.code-block-caption {
   margin-top: 2px;
 }
 
+/* fix styling of search results by using <div> instead of <p>, upstream bug */
+ul.search li div.context {
+  color: #888;
+  margin: 2px 0 0 30px;
+  text-align: left;
+}
+
 
 /* hoverxref stuff */
 /* (this is mostly just a merge of the 'shadow' and 'borderless' themes) */
