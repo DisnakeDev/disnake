@@ -62,12 +62,20 @@ from .errors import CommandRegistrationError
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
+    from typing_extensions import ParamSpec
+
     from disnake.i18n import LocalizedOptional
-    from disnake.interactions import ApplicationCommandInteraction
+    from disnake.interactions import (
+        ApplicationCommandInteraction,
+        MessageCommandInteraction,
+        UserCommandInteraction,
+    )
     from disnake.permissions import Permissions
 
     from ._types import Check, CoroFunc
-    from .base_core import CommandCallback, InteractionCommandCallback
+    from .base_core import CogT, CommandCallback, InteractionCommandCallback
+
+    P = ParamSpec("P")
 
 
 __all__ = ("InteractionBotBase",)
@@ -526,7 +534,9 @@ class InteractionBotBase(CommonBotBase):
         auto_sync: bool = None,
         extras: Dict[str, Any] = None,
         **kwargs,
-    ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
+    ]:
         """A shortcut decorator that invokes :func:`.user_command` and adds it to
         the internal command list.
 
@@ -566,7 +576,9 @@ class InteractionBotBase(CommonBotBase):
             A decorator that converts the provided method into an InvokableUserCommand, adds it to the bot, then returns it.
         """
 
-        def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
+        def decorator(
+            func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+        ) -> InvokableUserCommand:
             result = user_command(
                 name=name,
                 dm_permission=dm_permission,
@@ -591,7 +603,9 @@ class InteractionBotBase(CommonBotBase):
         auto_sync: bool = None,
         extras: Dict[str, Any] = None,
         **kwargs,
-    ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
+    ]:
         """A shortcut decorator that invokes :func:`.message_command` and adds it to
         the internal command list.
 
@@ -631,7 +645,9 @@ class InteractionBotBase(CommonBotBase):
             A decorator that converts the provided method into an InvokableMessageCommand, adds it to the bot, then returns it.
         """
 
-        def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
+        def decorator(
+            func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+        ) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
                 dm_permission=dm_permission,
