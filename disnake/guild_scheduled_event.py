@@ -41,6 +41,7 @@ from .utils import (
     _get_as_snowflake,
     cached_slot_property,
     parse_time,
+    snowflake_time,
 )
 
 if TYPE_CHECKING:
@@ -120,7 +121,7 @@ class GuildScheduledEvent(Hashable):
         The guild ID which the guild scheduled event belongs to.
     channel_id: Optional[:class:`int`]
         The channel ID in which the guild scheduled event will be hosted.
-        This field is ``None`` if :attr:`entity_type` is :class:`GuildScheduledEventEntityType.external`
+        This field is ``None`` if :attr:`entity_type` is :class:`GuildScheduledEventEntityType.external`.
     creator_id: Optional[:class:`int`]
         The ID of the user that created the guild scheduled event.
         This field is ``None`` for events created before October 25th, 2021.
@@ -132,7 +133,7 @@ class GuildScheduledEvent(Hashable):
     description: :class:`str`
         The description of the guild scheduled event (1-1000 characters).
     scheduled_start_time: :class:`datetime.datetime`
-        The time when the guild scheduled event will start
+        The time when the guild scheduled event will start.
     scheduled_end_time: Optional[:class:`datetime.datetime`]
         The time when the guild scheduled event will end, or ``None`` if the event does not have a scheduled time to end.
     privacy_level: :class:`GuildScheduledEventPrivacyLevel`
@@ -194,7 +195,7 @@ class GuildScheduledEvent(Hashable):
         )
         self.entity_id: Optional[int] = _get_as_snowflake(data, "entity_id")
 
-        metadata = data["entity_metadata"]
+        metadata = data.get("entity_metadata")
         self.entity_metadata: Optional[GuildScheduledEventMetadata] = (
             None if metadata is None else GuildScheduledEventMetadata.from_dict(metadata)
         )
@@ -203,10 +204,8 @@ class GuildScheduledEvent(Hashable):
         self.creator: Optional[User]
         if creator_data is not None:
             self.creator = self._state.create_user(creator_data)
-        elif self.creator_id is not None:
-            self.creator = self._state.get_user(self.creator_id)
         else:
-            self.creator = None
+            self.creator = self._state.get_user(self.creator_id)
 
         self.user_count: Optional[int] = data.get("user_count")
         self._image: Optional[str] = data.get("image")
@@ -225,6 +224,22 @@ class GuildScheduledEvent(Hashable):
     def __str__(self) -> str:
         return self.name
 
+    @property
+    def created_at(self) -> datetime:
+        """:class:`datetime.datetime`: Returns the guild scheduled event's creation time in UTC.
+
+        .. versionadded:: 2.6
+        """
+        return snowflake_time(self.id)
+
+    @property
+    def url(self) -> str:
+        """:class:`str`: The guild scheduled event's URL.
+
+        .. versionadded:: 2.6
+        """
+        return f"https://discord.com/events/{self.guild_id}/{self.id}"
+
     @cached_slot_property("_cs_guild")
     def guild(self) -> Optional[Guild]:
         """Optional[:class:`Guild`]: The guild which the guild scheduled event belongs to."""
@@ -232,7 +247,10 @@ class GuildScheduledEvent(Hashable):
 
     @cached_slot_property("_cs_channel")
     def channel(self) -> Optional[GuildChannel]:
-        """Optional[:class:`abc.GuildChannel`]: The channel in which the guild scheduled event will be hosted."""
+        """Optional[:class:`abc.GuildChannel`]: The channel in which the guild scheduled event will be hosted.
+
+        This will be ``None`` if :attr:`entity_type` is :class:`GuildScheduledEventEntityType.external`.
+        """
         if self.channel_id is None:
             return None
         guild = self.guild
@@ -348,6 +366,10 @@ class GuildScheduledEvent(Hashable):
         - ``scheduled_end_time`` must be provided
 
         .. versionchanged:: 2.6
+            Now raises :exc:`TypeError` instead of :exc:`ValueError` for
+            invalid parameter types.
+
+        .. versionchanged:: 2.6
             Removed ``channel_id`` parameter in favor of ``channel``.
 
         Parameters
@@ -394,7 +416,9 @@ class GuildScheduledEvent(Hashable):
         HTTPException
             Editing the event failed.
         TypeError
-            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`).
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read`),
+            or one of ``entity_type``, ``privacy_level``, ``entity_metadata`` or ``status``
+            is not of the correct type.
 
         Returns
         -------
@@ -405,7 +429,7 @@ class GuildScheduledEvent(Hashable):
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
-                raise ValueError(
+                raise TypeError(
                     "privacy_level must be an instance of GuildScheduledEventPrivacyLevel"
                 )
 
@@ -413,7 +437,7 @@ class GuildScheduledEvent(Hashable):
 
         if entity_type is not MISSING:
             if not isinstance(entity_type, GuildScheduledEventEntityType):
-                raise ValueError("entity_type must be an instance of GuildScheduledEventEntityType")
+                raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
 
             fields["entity_type"] = entity_type.value
 
@@ -425,13 +449,13 @@ class GuildScheduledEvent(Hashable):
                 fields["entity_metadata"] = entity_metadata.to_dict()
 
             else:
-                raise ValueError(
+                raise TypeError(
                     "entity_metadata must be an instance of GuildScheduledEventMetadata"
                 )
 
         if status is not MISSING:
             if not isinstance(status, GuildScheduledEventStatus):
-                raise ValueError("status must be an instance of GuildScheduledEventStatus")
+                raise TypeError("status must be an instance of GuildScheduledEventStatus")
 
             fields["status"] = status.value
 

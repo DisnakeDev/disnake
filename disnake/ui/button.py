@@ -46,7 +46,7 @@ if TYPE_CHECKING:
     from .view import View
 
 B = TypeVar("B", bound="Button")
-V = TypeVar("V", "View", None, covariant=True)
+V = TypeVar("V", bound="Optional[View]", covariant=True)
 
 
 class Button(Item[V]):
