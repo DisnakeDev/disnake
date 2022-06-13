@@ -59,7 +59,6 @@ let showHideSidebar;
 document.addEventListener('DOMContentLoaded', () => {
   mobileSearch = new SearchBar();
 
-
   const search_box = document.querySelector(".search input[type='search']");
   const updateSearchPlaceholder = function() {
     if (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) {
@@ -215,25 +214,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function focusSearch() {
-  $('input[name=q]').first().focus();
+  document.querySelector("input[name=q]")?.focus();
 }
 
 
 function unfocusSearch() {
-  $('input[name=q]').first().blur();
+  document.querySelector("input[name=q]")?.blur();
 }
 
 
-$(document).keydown((event) => {
+document.addEventListener("keydown", (event) => {
   if (event.altKey || event.metaKey)
     return;
 
   const focusedElement = document.activeElement;
   if (["TEXTAREA", "INPUT", "SELECT", "BUTTON"].includes(focusedElement.tagName)) {
     // handle `escape` in search field
-    if (!event.ctrlKey && !event.shiftKey && event.key === "Escape" && $('input[name=q]').first().is(focusedElement)) {
+    if (!event.ctrlKey && !event.shiftKey && event.key === "Escape" && document.querySelector("input[name=q]") === focusedElement) {
       unfocusSearch();
-      return false;
+      return event.preventDefault();
     }
     // otherwise, ignore all key presses in inputs
     return;
@@ -243,25 +242,37 @@ $(document).keydown((event) => {
     // close modal using `escape`, if modal exists
     if (event.key === "Escape" && activeModal) {
       activeModal.close();
-      return false;
+      return event.preventDefault();
     }
 
     // focus search using `s` (`/` is already supported by Sphinx)
     if (event.key === "s") {
       focusSearch();
-      return false;
+      return event.preventDefault();
     }
   }
 
   // focus search using `ctrl+k`
   if (!event.shiftKey && event.ctrlKey && event.key == "k") {
     focusSearch();
-    return false;
+    return event.preventDefault();
   }
 });
 
-$(document).ready(function () {
-  $('a.external').attr('target', '_blank');
+
+const _doc_ready = (callback) => {
+  if (document.readyState !== "loading") {
+    callback();
+  } else {
+    document.addEventListener("DOMContentLoaded", callback);
+  }
+};
+
+
+_doc_ready(() => {
+  document.querySelectorAll("a.external").forEach((a) => {
+    a.setAttribute("target", "_blank");
+  })
 });
 
 var url = new URL(window.location.href);
