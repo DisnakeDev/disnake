@@ -30,7 +30,7 @@ Scorer = {
     // and returns the new score.
     score: (result) => {
         // only inflate the score of things that are actual API reference things
-        const [, title, , , score] = result;
+        const [, title, , , score,] = result;
 
         if (pattern !== null && title.startsWith('disnake.')) {
             let _score = __score(title, pattern);
