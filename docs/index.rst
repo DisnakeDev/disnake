@@ -9,7 +9,7 @@ Welcome to disnake
 .. image:: /images/snake.svg
 .. image:: /images/snake_dark.svg
 
-disnake is a modern, easy-to-use, feature-rich, and async-ready API wrapper
+disnake is a modern, easy to use, feature-rich, and async-ready API wrapper
 for Discord.
 
 **Features:**
@@ -17,7 +17,7 @@ for Discord.
 - Modern Pythonic API using ``async``\/``await`` syntax
 - Sane rate limit handling that prevents 429 errors
 - Command extension to aid with bot creation
-- Easy-to-use with an object oriented design
+- Easy to use with an object oriented design
 - Optimised for both speed and memory
 
 Getting started
