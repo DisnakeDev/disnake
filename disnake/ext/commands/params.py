@@ -56,7 +56,7 @@ from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
 from disnake.i18n import Localized
-from disnake.interactions import CommandInteraction
+from disnake.interactions import ApplicationCommandInteraction
 from disnake.utils import maybe_coroutine
 
 from . import errors
@@ -287,8 +287,10 @@ class ParamInfo:
 
     Parameters
     ----------
-    default: Any
+    default: Union[Any, Callable[[:class:`.ApplicationCommandInteraction`], Any]]
         The actual default value for the corresponding function param.
+        Can be a sync/async callable taking an interaction and returning a dynamic default value,
+        if the user didn't pass a value for this parameter.
     name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of this slash command option.
 
@@ -339,13 +341,13 @@ class ParamInfo:
 
     def __init__(
         self,
-        default: Any = ...,
+        default: Union[Any, Callable[[ApplicationCommandInteraction], Any]] = ...,
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        converter: Callable[[CommandInteraction, Any], Any] = None,
+        converter: Callable[[ApplicationCommandInteraction, Any], Any] = None,
         convert_default: bool = False,
-        autcomplete: Callable[[CommandInteraction, str], Any] = None,
+        autcomplete: Callable[[ApplicationCommandInteraction, str], Any] = None,
         choices: Choices = None,
         type: type = None,
         channel_types: List[ChannelType] = None,
@@ -426,7 +428,7 @@ class ParamInfo:
         args = ", ".join(f"{k}={'...' if v is ... else repr(v)}" for k, v in vars(self).items())
         return f"{type(self).__name__}({args})"
 
-    async def get_default(self, inter: CommandInteraction) -> Any:
+    async def get_default(self, inter: ApplicationCommandInteraction) -> Any:
         """Gets the default for an interaction"""
         default = self.default
         if callable(self.default):
@@ -440,7 +442,7 @@ class ParamInfo:
 
         return default
 
-    async def verify_type(self, inter: CommandInteraction, argument: Any) -> Any:
+    async def verify_type(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
         """Check if a type of an argument is correct and possibly fix it"""
         if issubclass_(self.type, disnake.Member):
             if isinstance(argument, disnake.Member):
@@ -451,7 +453,7 @@ class ParamInfo:
         # unexpected types may just be ignored
         return argument
 
-    async def convert_argument(self, inter: CommandInteraction, argument: Any) -> Any:
+    async def convert_argument(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
         """Convert a value if a converter is given"""
         if self.large:
             try:
@@ -689,7 +691,7 @@ def isolate_self(
         parametersl.pop(0)
     if parametersl:
         annot = parametersl[0].annotation
-        if issubclass_(annot, CommandInteraction) or annot is inspect.Parameter.empty:
+        if issubclass_(annot, ApplicationCommandInteraction) or annot is inspect.Parameter.empty:
             inter_param = parameters.pop(parametersl[0].name)
 
     return (cog_param, inter_param), parameters
@@ -719,7 +721,7 @@ def collect_params(
             injections[parameter.name] = default
         elif parameter.annotation in Injection._registered:
             injections[parameter.name] = Injection._registered[parameter.annotation]
-        elif issubclass_(parameter.annotation, CommandInteraction):
+        elif issubclass_(parameter.annotation, ApplicationCommandInteraction):
             if inter_param is None:
                 inter_param = parameter
             else:
@@ -758,7 +760,7 @@ def collect_nested_params(function: Callable) -> List[ParamInfo]:
 
 
 def format_kwargs(
-    interaction: CommandInteraction,
+    interaction: ApplicationCommandInteraction,
     cog_param: str = None,
     inter_param: str = None,
     /,
@@ -786,7 +788,11 @@ def format_kwargs(
 
 
 async def run_injections(
-    injections: Dict[str, Injection], interaction: CommandInteraction, /, *args: Any, **kwargs: Any
+    injections: Dict[str, Injection],
+    interaction: ApplicationCommandInteraction,
+    /,
+    *args: Any,
+    **kwargs: Any,
 ) -> Dict[str, Any]:
     """Run and resolve a list of injections"""
 
@@ -798,7 +804,7 @@ async def run_injections(
 
 
 async def call_param_func(
-    function: Callable, interaction: CommandInteraction, /, *args: Any, **kwargs: Any
+    function: Callable, interaction: ApplicationCommandInteraction, /, *args: Any, **kwargs: Any
 ) -> Any:
     """Call a function utilizing ParamInfo"""
     cog_param, inter_param, paraminfos, injections = collect_params(function)
@@ -847,14 +853,14 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
 
 
 def Param(
-    default: Any = ...,
+    default: Union[Any, Callable[[ApplicationCommandInteraction], Any]] = ...,
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
     choices: Choices = None,
-    converter: Callable[[CommandInteraction, Any], Any] = None,
+    converter: Callable[[ApplicationCommandInteraction, Any], Any] = None,
     convert_defaults: bool = False,
-    autocomplete: Callable[[CommandInteraction, str], Any] = None,
+    autocomplete: Callable[[ApplicationCommandInteraction, str], Any] = None,
     channel_types: List[ChannelType] = None,
     lt: float = None,
     le: float = None,
@@ -870,8 +876,10 @@ def Param(
 
     Parameters
     ----------
-    default: Any
+    default: Union[Any, Callable[[:class:`.ApplicationCommandInteraction`], Any]]
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
+        Can be a sync/async callable taking an interaction and returning a dynamic default value,
+        if the user didn't pass a value for this parameter.
     name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the option. By default, the option name is the parameter name.
 

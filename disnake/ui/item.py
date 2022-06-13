@@ -43,7 +43,7 @@ from typing import (
 __all__ = ("Item", "WrappedComponent")
 
 I = TypeVar("I", bound="Item")
-V = TypeVar("V", "View", None, covariant=True)
+V = TypeVar("V", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
     from ..components import NestedComponent
