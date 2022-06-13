@@ -10,7 +10,7 @@ disnake
     <a href="https://github.com/DisnakeDev/disnake/commits"><img src="https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg?style=flat-square" alt="Commit activity" /></a>
 </p>
 
-A modern, easy-to-use, feature-rich, and async-ready API wrapper for Discord written in Python.
+A modern, easyto use, feature-rich, and async-ready API wrapper for Discord written in Python.
 
 Key Features
 ------------
