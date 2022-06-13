@@ -142,10 +142,6 @@ class _AsyncIterator(AsyncIterator[T]):
             raise StopAsyncIteration()
 
 
-def _identity(x):
-    return x
-
-
 class _ChunkedAsyncIterator(_AsyncIterator[List[T]]):
     def __init__(self, iterator, max_size):
         self.iterator = iterator
@@ -167,25 +163,25 @@ class _ChunkedAsyncIterator(_AsyncIterator[List[T]]):
         return ret
 
 
-class _MappedAsyncIterator(_AsyncIterator[T]):
-    def __init__(self, iterator, func):
+class _MappedAsyncIterator(_AsyncIterator[OT]):
+    def __init__(self, iterator: _AsyncIterator[T], func: _Func[T, OT]):
         self.iterator = iterator
         self.func = func
 
-    async def next(self) -> T:
+    async def next(self) -> OT:
         # this raises NoMoreItems and will propagate appropriately
         item = await self.iterator.next()
         return await maybe_coroutine(self.func, item)
 
 
 class _FilteredAsyncIterator(_AsyncIterator[T]):
-    def __init__(self, iterator, predicate):
+    def __init__(self, iterator: _AsyncIterator[T], predicate: _Func[T, bool]):
         self.iterator = iterator
 
         if predicate is None:
-            predicate = _identity
+            predicate = lambda x: bool(x)
 
-        self.predicate = predicate
+        self.predicate: _Func[T, bool] = predicate
 
     async def next(self) -> T:
         getter = self.iterator.next
