@@ -240,6 +240,7 @@ html_context = {
         ("disnake.ext.commands", "ext/commands"),
         ("disnake.ext.tasks", "ext/tasks"),
     ],
+    "enable_search_shortcuts": True,
 }
 
 resource_links = {
