@@ -3583,7 +3583,8 @@ of :class:`enum.Enum`.
 
         .. note::
             This action type is only available for rules with trigger type
-            :attr:`~AutomodTriggerType.keyword`.
+            :attr:`~AutomodTriggerType.keyword`, and :attr:`~Permissions.moderate_members`
+            permissions are required to use it.
 
 .. class:: AutomodKeywordPresetType
 
