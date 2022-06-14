@@ -320,7 +320,7 @@ class GuildChannel(ABC):
         slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         type: ChannelType = MISSING,
-        overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         bitrate: int = MISSING,
         user_limit: int = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
