@@ -24,6 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+from datetime import timedelta
 from typing import TYPE_CHECKING, List, Literal, Optional, Sequence, Union, overload
 
 from .enums import (
@@ -81,7 +82,12 @@ class AutomodAction:
         ...
 
     @overload
-    def __init__(self, *, type: Literal[AutomodActionType.timeout], timeout_duration: int):
+    def __init__(
+        self,
+        *,
+        type: Literal[AutomodActionType.timeout],
+        timeout_duration: Union[int, timedelta],
+    ):
         ...
 
     def __init__(
@@ -89,7 +95,7 @@ class AutomodAction:
         *,
         type: AutomodActionType,
         channel: Optional[Snowflake] = None,
-        timeout_duration: Optional[int] = None,
+        timeout_duration: Optional[Union[int, timedelta]] = None,
     ):
         self.type: AutomodActionType = enum_if_int(AutomodActionType, type)
         self._metadata: AutomodActionMetadata = {}
@@ -99,6 +105,8 @@ class AutomodAction:
         if channel is not None:
             self._metadata["channel_id"] = channel.id
         if timeout_duration is not None:
+            if isinstance(timeout_duration, timedelta):
+                timeout_duration = int(timeout_duration.total_seconds())
             self._metadata["duration_seconds"] = timeout_duration
 
     @property
