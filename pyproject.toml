@@ -38,6 +38,7 @@ typeCheckingMode = "basic"
 include = [
     "disnake",
     "docs",
+    "examples",
     "test_bot",
     "tests",
     "*.py",
