@@ -1393,10 +1393,6 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     This requires :attr:`Intents.auto_moderation` or :attr:`Intents.auto_moderation_execution` to be enabled.
 
-    .. TODO: might be a bug?
-    .. note::
-        This is not dispatched for actions of type :attr:`AutomodActionType.timeout`.
-
     .. versionadded:: 2.6
 
     :param execution: The auto moderation action execution data.
