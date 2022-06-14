@@ -318,7 +318,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         position: int = MISSING,
         nsfw: bool = MISSING,
         sync_permissions: bool = MISSING,
-        category: Optional[CategoryChannel] = MISSING,
+        category: Optional[Snowflake] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         type: ChannelType = MISSING,
@@ -358,7 +358,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The new category for this channel. Can be ``None`` to remove the
             category.
         slowmode_delay: Optional[:class:`int`]
@@ -1224,7 +1224,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         user_limit: int = MISSING,
         position: int = MISSING,
         sync_permissions: bool = MISSING,
-        category: Optional[CategoryChannel] = MISSING,
+        category: Optional[Snowflake] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
@@ -1262,7 +1262,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The new category for this channel. Can be ``None`` to remove the
             category.
         reason: Optional[:class:`str`]
@@ -1818,7 +1818,7 @@ class StageChannel(VocalGuildChannel):
         name: str = MISSING,
         position: int = MISSING,
         sync_permissions: bool = MISSING,
-        category: Optional[CategoryChannel] = MISSING,
+        category: Optional[Snowflake] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
@@ -1850,7 +1850,7 @@ class StageChannel(VocalGuildChannel):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The new category for this channel. Can be ``None`` to remove the
             category.
         overwrites: :class:`Mapping`
@@ -2449,7 +2449,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         position: int = MISSING,
         nsfw: bool = MISSING,
         sync_permissions: bool = MISSING,
-        category: Optional[CategoryChannel] = MISSING,
+        category: Optional[Snowflake] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
@@ -2479,7 +2479,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The new category for this channel. Can be ``None`` to remove the
             category.
         slowmode_delay: Optional[:class:`int`]

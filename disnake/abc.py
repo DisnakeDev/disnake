@@ -316,7 +316,7 @@ class GuildChannel(ABC):
         position: int = MISSING,
         nsfw: bool = MISSING,
         sync_permissions: bool = MISSING,
-        category: Optional[CategoryChannel] = MISSING,
+        category: Optional[Snowflake] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         type: ChannelType = MISSING,
@@ -330,7 +330,7 @@ class GuildChannel(ABC):
         parent_id: Optional[int]
         if category is not MISSING:
             # if category is given, it's either `None` (no parent) or a category channel
-            parent_id = category and category.id
+            parent_id = category.id if category else None
         else:
             # if it's not given, don't change the category
             parent_id = MISSING
