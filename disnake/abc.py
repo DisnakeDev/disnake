@@ -271,7 +271,7 @@ class GuildChannel(ABC):
     async def _move(
         self,
         position: int,
-        parent_id: Optional[Any] = None,
+        parent_id: Optional[int] = None,
         lock_permissions: bool = False,
         *,
         reason: Optional[str],
@@ -347,7 +347,7 @@ class GuildChannel(ABC):
         else:
             video_quality_mode_payload = MISSING
 
-        lock_permissions: bool = sync_permissions if sync_permissions is not MISSING else False
+        lock_permissions: bool = bool(sync_permissions)
 
         overwrites_payload: List[PermissionOverwritePayload] = MISSING
 
