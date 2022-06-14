@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, List, Literal, Optional, Sequence, Union, overload
 
 from .enums import (
     AutomodActionType,
@@ -72,6 +72,18 @@ class AutomodAction:
 
     __slots__ = ("type", "_metadata")
 
+    @overload
+    def __init__(self, *, type: Literal[AutomodActionType.block_message]):
+        ...
+
+    @overload
+    def __init__(self, *, type: Literal[AutomodActionType.send_alert_message], channel: Snowflake):
+        ...
+
+    @overload
+    def __init__(self, *, type: Literal[AutomodActionType.timeout], timeout_duration: int):
+        ...
+
     def __init__(
         self,
         *,
@@ -113,10 +125,11 @@ class AutomodAction:
 
     @classmethod
     def _from_dict(cls, data: AutomodActionPayload) -> Self:
-        meta = data.get("metadata", {})
+        # bypass init overloads and unnecessary processing
+        self = cls.__new__(cls)
 
-        self = cls(type=try_enum(AutomodActionType, data["type"]))
-        self._metadata = meta  # assign directly, also allowing access to unimplemented fields
+        self.type = try_enum(AutomodActionType, data["type"])
+        self._metadata = data.get("metadata", {})
 
         return self
 
