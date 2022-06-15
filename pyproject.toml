@@ -70,6 +70,7 @@ reportUnknownLambdaType = true
 testpaths = "tests"
 addopts = "--strict-markers -Werror -s"
 xfail_strict = true
+asyncio_mode = "strict"
 
 [tool.coverage.run]
 branch = true
