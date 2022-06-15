@@ -289,6 +289,38 @@ def test_fields_exceptions() -> None:
         embed.set_field_at(0, "x", "y")
 
 
+def test_field_restraints() -> None:
+    embed = Embed(title="T" * 256)  # Size = 256
+    embed.set_footer(text="T" * 2048)  # Size = 2304
+    embed.add_field(name="A" * 256, value="B" * 1024)  # Size = 3584
+    embed.add_field(name="A" * 256, value="B" * 1024)  # Size = 4864
+    embed.add_field(name="A" * 112, value="B" * 1024)  # Size = 6000
+    assert len(embed) == 6000
+
+    with pytest.raises(ValueError):
+        embed.add_field(name="A", value="B")  # Breaks limit of 6000 chars
+
+    with pytest.raises(ValueError):
+        embed.insert_field_at(index=3, name="A", value="B")  # Breaks limit of 6000 chars
+
+    with pytest.raises(ValueError):
+        embed.set_field_at(index=2, name="A" * 113, value="B" * 1024)  # Breaks limit of 6000 chars
+
+    assert len(embed) == 6000
+
+    with pytest.raises(ValueError):
+        embed.set_author(name="A")  # Breaks limit of 6000 chars
+
+    embed.set_footer(text="T" * 2048 + " " * 500)  # Would break the 6000 limit, but leading + trailing whitespace doesn't count
+
+    embed = Embed(title="Too many fields :WAYTOODANK:")
+    for _ in range(25):
+        embed.add_field(name="OK", value=":D")
+
+    with pytest.raises(ValueError):
+        embed.add_field(name="YOU CANT ADD ANOTHER", value="25 MAX")  # Breaks limit of 6000 chars
+
+
 def test_copy(embed: Embed, file: File) -> None:
     embed.set_footer(text="hi there", icon_url="https://localhost")
     embed.set_author(name="someone", url="https://127.0.0.1", icon_url="https://127.0.0.2")

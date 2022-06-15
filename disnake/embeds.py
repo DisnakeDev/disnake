@@ -81,15 +81,18 @@ if TYPE_CHECKING:
         EmbedVideo as EmbedVideoPayload,
     )
 
+
     class _EmbedFooterProxy(Sized, Protocol):
         text: Optional[str]
         icon_url: Optional[str]
         proxy_icon_url: Optional[str]
 
+
     class _EmbedFieldProxy(Sized, Protocol):
         name: Optional[str]
         value: Optional[str]
         inline: Optional[bool]
+
 
     class _EmbedMediaProxy(Sized, Protocol):
         url: Optional[str]
@@ -97,21 +100,25 @@ if TYPE_CHECKING:
         height: Optional[int]
         width: Optional[int]
 
+
     class _EmbedVideoProxy(Sized, Protocol):
         url: Optional[str]
         proxy_url: Optional[str]
         height: Optional[int]
         width: Optional[int]
 
+
     class _EmbedProviderProxy(Sized, Protocol):
         name: Optional[str]
         url: Optional[str]
+
 
     class _EmbedAuthorProxy(Sized, Protocol):
         name: Optional[str]
         url: Optional[str]
         icon_url: Optional[str]
         proxy_icon_url: Optional[str]
+
 
     _FileKey = Literal["image", "thumbnail"]
 
@@ -176,27 +183,36 @@ class Embed:
         "_fields",
         "description",
         "_files",
+        "_length"
     )
 
     _default_colour: ClassVar[Optional[Colour]] = None
     _colour: Optional[Colour]
 
     def __init__(
-        self,
-        *,
-        title: Optional[Any] = None,
-        type: Optional[EmbedType] = "rich",
-        description: Optional[Any] = None,
-        url: Optional[Any] = None,
-        timestamp: Optional[datetime.datetime] = None,
-        colour: Optional[Union[int, Colour]] = MISSING,
-        color: Optional[Union[int, Colour]] = MISSING,
+            self,
+            *,
+            title: Optional[Any] = None,
+            type: Optional[EmbedType] = "rich",
+            description: Optional[Any] = None,
+            url: Optional[Any] = None,
+            timestamp: Optional[datetime.datetime] = None,
+            colour: Optional[Union[int, Colour]] = MISSING,
+            color: Optional[Union[int, Colour]] = MISSING,
     ):
-        self.title: Optional[str] = str(title) if title is not None else None
-        self.type: Optional[EmbedType] = type
-        self.description: Optional[str] = str(description) if description is not None else None
-        self.url: Optional[str] = str(url) if url is not None else None
+        title: Optional[str] = str(title) if title is not None else None
+        if title and len(title.strip()) > 256:
+            raise ValueError("Embed title cannot be longer than 256 characters")
 
+        description: Optional[str] = str(description) if description is not None else None
+        if description and len(description.strip()) > 4096:
+            raise ValueError("Embed description cannot be longer than 4096 characters")
+
+        self.description: Optional[str] = description
+        self.title: Optional[str] = title
+
+        self.type: Optional[EmbedType] = type
+        self.url: Optional[str] = str(url) if url is not None else None
         self.timestamp = timestamp
 
         # possible values:
@@ -233,13 +249,30 @@ class Embed:
         # we are bypassing __init__ here since it doesn't apply here
         self = cls.__new__(cls)
 
-        # fill in the basic fields
+        # fill in the basic fields and check that each field is within the limits
+        title = str(title) if (title := data.get("title")) is not None else None
+        if title and len(title.strip()) > 256:
+            raise ValueError("Embed title cannot be longer than 256 characters")
 
-        self.title = str(title) if (title := data.get("title")) is not None else None
+        description = str(description) if (description := data.get("description")) is not None else None
+        if description and len(description.strip()) > 4096:
+            raise ValueError("Embed description cannot be longer than 4096 characters")
+
+        fields = data.get('fields')
+        footer = data.get('footer')
+        author = data.get('author')
+
+        # make sure the combined size does not exceed the limit
+        if self.__len(title, description, fields, footer, author) > 6000:
+            raise ValueError("Embed total size cannot be longer than 6000 characters")
+
+        self.title = title
+        self.description = description
+        self._fields = fields
+        self._footer = footer
+        self._author = author
+
         self.type = data.get("type")
-        self.description = (
-            str(description) if (description := data.get("description")) is not None else None
-        )
         self.url = str(url) if (url := data.get("url")) is not None else None
 
         self._files = {}
@@ -252,10 +285,7 @@ class Embed:
         self._thumbnail = data.get("thumbnail")
         self._video = data.get("video")
         self._provider = data.get("provider")
-        self._author = data.get("author")
         self._image = data.get("image")
-        self._footer = data.get("footer")
-        self._fields = data.get("fields")
 
         return self
 
@@ -268,19 +298,29 @@ class Embed:
         embed._files = self._files.copy()
         return embed
 
-    def __len__(self) -> int:
-        total = len(self.title or "") + len(self.description or "")
-        if self._fields:
-            for field in self._fields:
-                total += len(field["name"]) + len(field["value"])
+    @staticmethod
+    def __len(title: Optional[str], description: Optional[str],
+              fields: Optional[List[EmbedFieldPayload]] = None, footer: Optional[EmbedFooterPayload] = None,
+              author: Optional[EmbedAuthorPayload] = None, strip: bool = True):
 
-        if self._footer and (footer_text := self._footer.get("text")):
-            total += len(footer_text)
+        def stripped_length(text: str) -> int:
+            return len(text.strip() if strip else text)
 
-        if self._author and (author_name := self._author.get("name")):
-            total += len(author_name)
+        total = stripped_length(title or "") + stripped_length(description or "")
+        if fields:
+            for field in fields:
+                total += stripped_length(field["name"]) + stripped_length(field["value"])
+
+        if footer and (footer_text := footer.get("text")):
+            total += stripped_length(footer_text)
+
+        if author and (author_name := author.get("name")):
+            total += stripped_length(author_name)
 
         return total
+
+    def __len__(self) -> int:
+        return self.__len(self.title, self.description, self._fields, self._footer, self._author, strip=False)
 
     def __bool__(self) -> bool:
         return any(
@@ -371,9 +411,15 @@ class Embed:
         icon_url: Optional[:class:`str`]
             The URL of the footer icon. Only HTTP(S) is supported.
         """
-        self._footer = {
+        footer = {
             "text": str(text),
         }
+        if len(footer["text"].strip()) > 2048:
+            raise ValueError("Embed footer text cannot be longer than 2048 characters")
+        if self.__len(self.title, self.description, self._fields, footer, self._author) > 6000:
+            raise ValueError("Embed total size cannot be longer than 6000 characters")
+
+        self._footer = footer
 
         if icon_url is not None:
             self._footer["icon_url"] = str(icon_url)
@@ -521,11 +567,11 @@ class Embed:
         return cast("_EmbedAuthorProxy", EmbedProxy(self._author))
 
     def set_author(
-        self,
-        *,
-        name: Any,
-        url: Optional[Any] = None,
-        icon_url: Optional[Any] = None,
+            self,
+            *,
+            name: Any,
+            url: Optional[Any] = None,
+            icon_url: Optional[Any] = None,
     ) -> Self:
         """Sets the author for the embed content.
 
@@ -541,9 +587,15 @@ class Embed:
         icon_url: Optional[:class:`str`]
             The URL of the author icon. Only HTTP(S) is supported.
         """
-        self._author = {
+        author = {
             "name": str(name),
         }
+        if len(author["name"].strip()) > 256:
+            raise ValueError("Embed author name cannot be longer than 256 characters")
+        if self.__len(self.title, self.description, self._fields, self._footer, author) > 6000:
+            raise ValueError("Embed total size cannot be longer than 6000 characters")
+
+        self._author = author
 
         if url is not None:
             self._author["url"] = str(url)
@@ -574,6 +626,17 @@ class Embed:
         """
         return cast("List[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
 
+    def _new_field_limit_check(self, field):
+        if (name_length := len(field["name"].strip())) > 256:
+            raise ValueError("Embed field name cannot be longer than 256 characters")
+        if (value_length := len(field["value"].strip())) > 1024:
+            raise ValueError("Embed field value cannot be longer than 1024 characters")
+        if self._fields and len(self._fields) >= 25:
+            raise ValueError("Embeds cannot have more than 25 fields")
+        if self.__len(self.title, self.description, self._fields, self._footer,
+                      self._author) > 6000 - name_length - value_length:
+            raise ValueError("Embed total size cannot be longer than 6000 characters")
+
     def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
         """Adds a field to the embed object.
 
@@ -590,6 +653,15 @@ class Embed:
             Whether the field should be displayed inline.
             Defaults to ``True``.
         """
+
+        field = {
+            "inline": inline,
+            "name": str(name),
+            "value": str(value),
+        }
+
+        self._new_field_limit_check(field)
+
         field: EmbedFieldPayload = {
             "inline": inline,
             "name": str(name),
@@ -623,11 +695,15 @@ class Embed:
             Whether the field should be displayed inline.
             Defaults to ``True``.
         """
-        field: EmbedFieldPayload = {
+        field = {
             "inline": inline,
             "name": str(name),
             "value": str(value),
         }
+
+        self._new_field_limit_check(field)
+
+        field: EmbedFieldPayload = field
 
         if self._fields is not None:
             self._fields.insert(index, field)
@@ -694,9 +770,17 @@ class Embed:
         except IndexError:
             raise IndexError("field index out of range")
 
-        field["name"] = str(name)
-        field["value"] = str(value)
-        field["inline"] = inline
+        new_field = {
+            "inline": inline,
+            "name": str(name),
+            "value": str(value),
+        }
+
+        self._new_field_limit_check(new_field)
+
+        field["name"] = new_field["name"]
+        field["value"] = new_field["name"]
+        field["inline"] = new_field["inline"]
         return self
 
     def to_dict(self) -> EmbedData:
