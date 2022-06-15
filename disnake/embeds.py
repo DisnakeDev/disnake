@@ -159,6 +159,11 @@ class Embed:
         The colour code of the embed. Aliased to ``color`` as well.
         In addition to :class:`Colour`, :class:`int` can also be assigned to it,
         in which case the value will be converted to a :class:`Colour` object.
+
+    Raises
+    ------
+    ValueError
+        The description or title is too long.
     """
 
     __slots__ = (
@@ -237,6 +242,11 @@ class Embed:
         ----------
         data: :class:`dict`
             The dictionary to convert into an embed.
+
+        Raises
+        ------
+        ValueError
+            Any field is too long or causes the embed to excees the maximum size.
         """
         # we are bypassing __init__ here since it doesn't apply here
         self = cls.__new__(cls)
@@ -403,6 +413,11 @@ class Embed:
 
         icon_url: Optional[:class:`str`]
             The URL of the footer icon. Only HTTP(S) is supported.
+
+        Raises
+        ------
+        ValueError
+            The text is too long or causes the embed to excees the maximum size.
         """
         footer: Optional[EmbedFooterPayload] = {
             "text": str(text),
@@ -579,6 +594,11 @@ class Embed:
             The URL for the author.
         icon_url: Optional[:class:`str`]
             The URL of the author icon. Only HTTP(S) is supported.
+
+        Raises
+        ------
+        ValueError
+            The name is too long or causes the embed to excees the maximum size.
         """
         author: Optional[EmbedAuthorPayload] = {
             "name": str(name),
@@ -645,6 +665,12 @@ class Embed:
         inline: :class:`bool`
             Whether the field should be displayed inline.
             Defaults to ``True``.
+
+        Raises
+        ------
+        ValueError
+            Would exceed the 25 field maximum, the name or value is too long,
+            or causes the embed to excees the maximum size.
         """
 
         field = {
@@ -687,6 +713,12 @@ class Embed:
         inline: :class:`bool`
             Whether the field should be displayed inline.
             Defaults to ``True``.
+
+        Raises
+        ------
+        ValueError
+            Would exceed the 25 field maximum, the name or value is too long,
+            or causes the embed to excees the maximum size.
         """
         field = {
             "inline": inline,
@@ -755,6 +787,9 @@ class Embed:
         ------
         IndexError
             An invalid index was provided.
+        ValueError
+            The name or value is too long,
+            or causes the embed to excees the maximum size.
         """
         if not self._fields:
             raise IndexError("field index out of range")
