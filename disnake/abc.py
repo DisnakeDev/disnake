@@ -347,6 +347,16 @@ class GuildChannel(ABC):
         else:
             video_quality_mode_payload = MISSING
 
+        default_auto_archive_duration_payload: Optional[int]
+        if default_auto_archive_duration is not MISSING:
+            default_auto_archive_duration_payload = (
+                int(default_auto_archive_duration)
+                if default_auto_archive_duration is not None
+                else default_auto_archive_duration
+            )
+        else:
+            default_auto_archive_duration_payload = MISSING
+
         lock_permissions: bool = bool(sync_permissions)
 
         overwrites_payload: List[PermissionOverwritePayload] = MISSING
@@ -403,7 +413,7 @@ class GuildChannel(ABC):
             type=type_payload,
             rtc_region=rtc_region_payload,
             video_quality_mode=video_quality_mode_payload,
-            default_auto_archive_duration=default_auto_archive_duration,
+            default_auto_archive_duration=default_auto_archive_duration_payload,
         )
         options = {k: v for k, v in options.items() if v is not MISSING}
 
