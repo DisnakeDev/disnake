@@ -311,7 +311,9 @@ def test_field_restraints() -> None:
     with pytest.raises(ValueError):
         embed.set_author(name="A")  # Breaks limit of 6000 chars
 
-    embed.set_footer(text="T" * 2048 + " " * 500)  # Would break the 6000 limit, but leading + trailing whitespace doesn't count
+    embed.set_footer(
+        text="T" * 2048 + " " * 500
+    )  # Would break the 6000 limit, but leading + trailing whitespace doesn't count
 
     embed = Embed(title="Too many fields :WAYTOODANK:")
     for _ in range(25):

@@ -187,15 +187,15 @@ class Embed:
     _colour: Optional[Colour]
 
     def __init__(
-            self,
-            *,
-            title: Optional[Any] = None,
-            type: Optional[EmbedType] = "rich",
-            description: Optional[Any] = None,
-            url: Optional[Any] = None,
-            timestamp: Optional[datetime.datetime] = None,
-            colour: Optional[Union[int, Colour]] = MISSING,
-            color: Optional[Union[int, Colour]] = MISSING,
+        self,
+        *,
+        title: Optional[Any] = None,
+        type: Optional[EmbedType] = "rich",
+        description: Optional[Any] = None,
+        url: Optional[Any] = None,
+        timestamp: Optional[datetime.datetime] = None,
+        colour: Optional[Union[int, Colour]] = MISSING,
+        color: Optional[Union[int, Colour]] = MISSING,
     ):
         title = str(title) if title is not None else None
         if title and len(title.strip()) > 256:
@@ -256,13 +256,15 @@ class Embed:
         if title and len(title.strip()) > 256:
             raise ValueError("Embed title cannot be longer than 256 characters")
 
-        description = str(description) if (description := data.get("description")) is not None else None
+        description = (
+            str(description) if (description := data.get("description")) is not None else None
+        )
         if description and len(description.strip()) > 4096:
             raise ValueError("Embed description cannot be longer than 4096 characters")
 
-        fields = data.get('fields')
-        footer = data.get('footer')
-        author = data.get('author')
+        fields = data.get("fields")
+        footer = data.get("footer")
+        author = data.get("author")
 
         # make sure the combined size does not exceed the limit
         if self.__len(title, description, fields, footer, author) > 6000:
@@ -301,10 +303,14 @@ class Embed:
         return embed
 
     @staticmethod
-    def __len(title: Optional[str], description: Optional[str],
-              fields: Optional[List[EmbedFieldPayload]] = None, footer: Optional[EmbedFooterPayload] = None,
-              author: Optional[EmbedAuthorPayload] = None, strip: bool = True):
-
+    def __len(
+        title: Optional[str],
+        description: Optional[str],
+        fields: Optional[List[EmbedFieldPayload]] = None,
+        footer: Optional[EmbedFooterPayload] = None,
+        author: Optional[EmbedAuthorPayload] = None,
+        strip: bool = True,
+    ):
         def stripped_length(text: str) -> int:
             return len(text.strip() if strip else text)
 
@@ -322,8 +328,9 @@ class Embed:
         return total
 
     def __len__(self) -> int:
-        return self.__len(self.title, self.description, self._fields,
-                          self._footer, self._author, strip=False)
+        return self.__len(
+            self.title, self.description, self._fields, self._footer, self._author, strip=False
+        )
 
     def __bool__(self) -> bool:
         return any(
@@ -575,11 +582,11 @@ class Embed:
         return cast("_EmbedAuthorProxy", EmbedProxy(self._author))
 
     def set_author(
-            self,
-            *,
-            name: Any,
-            url: Optional[Any] = None,
-            icon_url: Optional[Any] = None,
+        self,
+        *,
+        name: Any,
+        url: Optional[Any] = None,
+        icon_url: Optional[Any] = None,
     ) -> Self:
         """Sets the author for the embed content.
 
@@ -646,8 +653,10 @@ class Embed:
             raise ValueError("Embed field value cannot be longer than 1024 characters")
         if self._fields and len(self._fields) >= 25:
             raise ValueError("Embeds cannot have more than 25 fields")
-        if self.__len(self.title, self.description, self._fields, self._footer,
-                      self._author) > 6000 - name_length - value_length:
+        if (
+            self.__len(self.title, self.description, self._fields, self._footer, self._author)
+            > 6000 - name_length - value_length
+        ):
             raise ValueError("Embed total size cannot be longer than 6000 characters")
 
     def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
@@ -807,7 +816,7 @@ class Embed:
         self._new_field_limit_check(new_field)
 
         field["name"] = new_field["name"]
-        field["value"] = new_field["name"]
+        field["value"] = new_field["value"]
         field["inline"] = new_field["inline"]
         return self
 
