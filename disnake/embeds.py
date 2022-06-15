@@ -197,11 +197,11 @@ class Embed:
             colour: Optional[Union[int, Colour]] = MISSING,
             color: Optional[Union[int, Colour]] = MISSING,
     ):
-        title: Optional[str] = str(title) if title is not None else None
+        title = str(title) if title is not None else None
         if title and len(title.strip()) > 256:
             raise ValueError("Embed title cannot be longer than 256 characters")
 
-        description: Optional[str] = str(description) if description is not None else None
+        description = str(description) if description is not None else None
         if description and len(description.strip()) > 4096:
             raise ValueError("Embed description cannot be longer than 4096 characters")
 

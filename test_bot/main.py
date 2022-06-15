@@ -28,7 +28,6 @@ class TestBot(commands.Bot):
                 768247229840359465,
                 808030843078836254,
                 723976264511389746,
-                505102060119916545
             ],
             strict_localization=True,
         )
@@ -51,20 +50,6 @@ class TestBot(commands.Bot):
             f"ID: {self.user.id}\n"
         )
         # fmt: on
-        channel = self.get_channel(986432755833385000)
-        embed = disnake.Embed(title="T" * 256)  # Size = 256
-        embed.set_footer(text="T" * 2048)  # Size = 2304
-        embed.add_field(name="A" * 256, value="B" * 1024)  # Size = 3584
-        embed.add_field(name="A" * 256, value="B" * 1024)  # Size = 4864
-        embed.add_field(name="A" * 112, value="B" * 1024)  # Size = 6000
-
-        embed.set_footer(
-            text="T" * 2048 + " " * 50012)  # Would break the 6000 limit, but leading + trailing whitespace doesn't count
-
-
-        await channel.send(embed=embed)
-
-
 
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
         embed = disnake.Embed(
