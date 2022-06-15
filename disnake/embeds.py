@@ -81,18 +81,15 @@ if TYPE_CHECKING:
         EmbedVideo as EmbedVideoPayload,
     )
 
-
     class _EmbedFooterProxy(Sized, Protocol):
         text: Optional[str]
         icon_url: Optional[str]
         proxy_icon_url: Optional[str]
 
-
     class _EmbedFieldProxy(Sized, Protocol):
         name: Optional[str]
         value: Optional[str]
         inline: Optional[bool]
-
 
     class _EmbedMediaProxy(Sized, Protocol):
         url: Optional[str]
@@ -100,25 +97,21 @@ if TYPE_CHECKING:
         height: Optional[int]
         width: Optional[int]
 
-
     class _EmbedVideoProxy(Sized, Protocol):
         url: Optional[str]
         proxy_url: Optional[str]
         height: Optional[int]
         width: Optional[int]
 
-
     class _EmbedProviderProxy(Sized, Protocol):
         name: Optional[str]
         url: Optional[str]
-
 
     class _EmbedAuthorProxy(Sized, Protocol):
         name: Optional[str]
         url: Optional[str]
         icon_url: Optional[str]
         proxy_icon_url: Optional[str]
-
 
     _FileKey = Literal["image", "thumbnail"]
 
@@ -183,7 +176,6 @@ class Embed:
         "_fields",
         "description",
         "_files",
-        "_length"
     )
 
     _default_colour: ClassVar[Optional[Colour]] = None
@@ -320,7 +312,8 @@ class Embed:
         return total
 
     def __len__(self) -> int:
-        return self.__len(self.title, self.description, self._fields, self._footer, self._author, strip=False)
+        return self.__len(self.title, self.description, self._fields,
+                          self._footer, self._author, strip=False)
 
     def __bool__(self) -> bool:
         return any(
@@ -411,7 +404,7 @@ class Embed:
         icon_url: Optional[:class:`str`]
             The URL of the footer icon. Only HTTP(S) is supported.
         """
-        footer = {
+        footer: Optional[EmbedFooterPayload] = {
             "text": str(text),
         }
         if len(footer["text"].strip()) > 2048:
@@ -587,7 +580,7 @@ class Embed:
         icon_url: Optional[:class:`str`]
             The URL of the author icon. Only HTTP(S) is supported.
         """
-        author = {
+        author: Optional[EmbedAuthorPayload] = {
             "name": str(name),
         }
         if len(author["name"].strip()) > 256:
