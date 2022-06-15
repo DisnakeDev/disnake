@@ -4,6 +4,7 @@ import pytest
 
 import disnake
 from disnake.abc import GuildChannel
+from disnake.utils import MISSING
 
 
 @pytest.mark.asyncio
@@ -124,18 +125,10 @@ class TestGuildChannelEdit:
         channel._move.assert_not_called()
         channel._state.http.edit_channel.assert_not_called()
 
-    async def test_overwrites_sync(self, channel) -> None:
-        # overwrites should also override `sync_permissions` parameter
-        res = await GuildChannel._edit(channel, sync_permissions=True, overwrites={})
-        assert res is not None
-
-        channel._move.assert_not_called()
-        channel._state.http.edit_channel.assert_awaited_once_with(
-            channel.id, permission_overwrites=[], reason=None
-        )
-
-    async def test_overwrites_empty(self, channel) -> None:
-        res = await GuildChannel._edit(channel, overwrites={})
+    @pytest.mark.parametrize("sync_permissions", [MISSING, True])
+    async def test_overwrites(self, channel, sync_permissions) -> None:
+        # overwrites should override `sync_permissions` parameter
+        res = await GuildChannel._edit(channel, sync_permissions=sync_permissions, overwrites={})
         assert res is not None
 
         channel._move.assert_not_called()
