@@ -311,6 +311,35 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         """
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
+    @overload
+    async def edit(
+        self,
+        *,
+        position: int,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        *,
+        name: str = ...,
+        topic: Optional[str] = ...,
+        position: int = ...,
+        nsfw: bool = ...,
+        sync_permissions: bool = ...,
+        category: Optional[Snowflake] = ...,
+        slowmode_delay: Optional[int] = ...,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
+        type: ChannelType = ...,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        reason: Optional[str] = ...,
+    ) -> TextChannel:
+        ...
+
     async def edit(
         self,
         *,
@@ -1218,6 +1247,36 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             base.value &= ~denied.value
         return base
 
+    @overload
+    async def edit(
+        self,
+        *,
+        position: int,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        *,
+        name: str = ...,
+        bitrate: int = ...,
+        user_limit: int = ...,
+        position: int = ...,
+        sync_permissions: bool = ...,
+        category: Optional[Snowflake] = ...,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        rtc_region: Optional[Union[str, VoiceRegion]] = ...,
+        video_quality_mode: VideoQualityMode = ...,
+        nsfw: bool = ...,
+        slowmode_delay: Optional[int] = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
     async def edit(
         self,
         *,
@@ -1814,6 +1873,32 @@ class StageChannel(VocalGuildChannel):
         data = await self._state.http.get_stage_instance(self.id)
         return StageInstance(guild=self.guild, state=self._state, data=data)
 
+    @overload
+    async def edit(
+        self,
+        *,
+        position: int,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        *,
+        name: str = ...,
+        position: int = ...,
+        sync_permissions: bool = ...,
+        category: Optional[Snowflake] = ...,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        rtc_region: Optional[Union[str, VoiceRegion]] = ...,
+        video_quality_mode: VideoQualityMode = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
     async def edit(
         self,
         *,
@@ -1998,6 +2083,27 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         self, *, name: Optional[str] = None, reason: Optional[str] = None
     ) -> CategoryChannel:
         return await self._clone_impl({"nsfw": self.nsfw}, name=name, reason=reason)
+
+    @overload
+    async def edit(
+        self,
+        *,
+        position: int,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        *,
+        name: str = ...,
+        position: int = ...,
+        nsfw: bool = ...,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
 
     async def edit(
         self,
@@ -2444,6 +2550,34 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     @utils.copy_doc(disnake.abc.Messageable.typing)
     def typing(self) -> Typing:
         return Typing(self)
+
+    @overload
+    async def edit(
+        self,
+        *,
+        position: int,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        *,
+        name: str = ...,
+        topic: Optional[str] = ...,
+        position: int = ...,
+        nsfw: bool = ...,
+        sync_permissions: bool = ...,
+        category: Optional[Snowflake] = ...,
+        slowmode_delay: Optional[int] = ...,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
 
     async def edit(
         self,
