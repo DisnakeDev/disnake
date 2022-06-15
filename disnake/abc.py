@@ -343,6 +343,17 @@ class GuildChannel(ABC):
         else:
             options["video_quality_mode"] = int(video_quality_mode)
 
+        try:
+            default_auto_archive_duration = options.pop("default_auto_archive_duration")
+        except KeyError:
+            pass
+        else:
+            options["default_auto_archive_duration"] = (
+                int(default_auto_archive_duration)
+                if default_auto_archive_duration is not None
+                else None
+            )
+
         lock_permissions = options.pop("sync_permissions", False)
 
         try:
