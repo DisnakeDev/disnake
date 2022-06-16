@@ -611,7 +611,9 @@ class AuditLogEntry(Hashable):
             elif self.action is enums.AuditLogAction.auto_moderation_block_message:
                 channel_id = int(extra["channel_id"])
                 elems = {
-                    "channel": self.guild.get_channel(channel_id) or Object(id=channel_id),
+                    "channel": (
+                        self.guild.get_channel_or_thread(channel_id) or Object(id=channel_id)
+                    ),
                     "rule_name": extra["auto_moderation_rule_name"],
                     "rule_trigger_type": enums.try_enum(
                         enums.AutomodTriggerType,

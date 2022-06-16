@@ -42,11 +42,11 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .abc import Snowflake
-    from .channel import ForumChannel
-    from .guild import Guild, GuildChannel as GuildChannelType, GuildMessageable
+    from .guild import Guild, GuildChannel
     from .member import Member
     from .message import Message
     from .role import Role
+    from .threads import Thread
     from .types.auto_moderation import (
         AutomodAction as AutomodActionPayload,
         AutomodActionExecutionEvent as AutomodActionExecutionEventPayload,
@@ -282,7 +282,7 @@ class AutomodRule:
         return list(filter(None, map(self.guild.get_role, self._exempt_role_ids)))
 
     @property
-    def exempt_channels(self) -> List[GuildChannelType]:
+    def exempt_channels(self) -> List[GuildChannel]:
         """List[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_channel, self._exempt_channel_ids)))
 
@@ -478,8 +478,8 @@ class AutomodActionExecution:
         return self.guild.get_member(self.user_id)
 
     @property
-    def channel(self) -> Optional[Union[GuildMessageable, ForumChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`ForumChannel`, :class:`Thread`]]:
+    def channel(self) -> Optional[Union[GuildChannel, Thread]]:
+        """Optional[Union[:class:`abc.GuildChannel`, :class:`Thread`]]:
         The channel or thread in which the event occurred, if any.
         """
         return self.guild.get_channel_or_thread(self.channel_id)  # type: ignore
