@@ -335,6 +335,7 @@ class AutoModRule:
             The rule's new exempt roles, up to 20.
         exempt_channels: Sequence[:class:`abc.Snowflake`]
             The rule's new exempt channels, up to 50.
+            Can also include categories, in which case all channels inside that category will be exempt.
         reason: Optional[:class:`str`]
             The reason for editing the rule. Shows up on the audit log.
 

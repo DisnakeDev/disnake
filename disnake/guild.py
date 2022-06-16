@@ -4227,6 +4227,7 @@ class Guild(Hashable):
             The roles that are exempt from this rule, up to 20. By default, no roles are exempt.
         exempt_channels: Sequence[:class:`abc.Snowflake`]
             The channels that are exempt from this rule, up to 50. By default, no channels are exempt.
+            Can also include categories, in which case all channels inside that category will be exempt.
         reason: Optional[:class:`str`]
             The reason for creating the rule. Shows up on the audit log.
 
