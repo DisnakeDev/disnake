@@ -1353,7 +1353,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     Called when an :class:`AutomodRule` is created.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
-    This requires :attr:`Intents.auto_moderation` or :attr:`Intents.auto_moderation_configuration` to be enabled.
+    This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
 
     .. versionadded:: 2.6
 
@@ -1365,7 +1365,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     Called when an :class:`AutomodRule` is updated.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
-    This requires :attr:`Intents.auto_moderation` or :attr:`Intents.auto_moderation_configuration` to be enabled.
+    This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
 
     .. versionadded:: 2.6
 
@@ -1377,7 +1377,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     Called when an :class:`AutomodRule` is deleted.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
-    This requires :attr:`Intents.auto_moderation` or :attr:`Intents.auto_moderation_configuration` to be enabled.
+    This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
 
     .. versionadded:: 2.6
 
@@ -1391,7 +1391,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     The guild this action has taken place in can be accessed using :attr:`AutomodActionExecution.guild`.
 
-    This requires :attr:`Intents.auto_moderation` or :attr:`Intents.auto_moderation_execution` to be enabled.
+    This requires :attr:`Intents.auto_moderation_execution` to be enabled.
 
     .. versionadded:: 2.6
 
