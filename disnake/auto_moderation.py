@@ -332,9 +332,9 @@ class AutoModRule:
         enabled: :class:`bool`
             Whether to enable the rule.
         exempt_roles: Sequence[:class:`abc.Snowflake`]
-            The rule's new exempt roles.
+            The rule's new exempt roles, up to 20.
         exempt_channels: Sequence[:class:`abc.Snowflake`]
-            The rule's new exempt channels.
+            The rule's new exempt channels, up to 50.
         reason: Optional[:class:`str`]
             The reason for editing the rule. Shows up on the audit log.
 

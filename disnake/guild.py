@@ -4224,9 +4224,9 @@ class Guild(Hashable):
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.
         exempt_roles: Sequence[:class:`abc.Snowflake`]
-            The roles that are exempt from this rule. By default, no roles are exempt.
+            The roles that are exempt from this rule, up to 20. By default, no roles are exempt.
         exempt_channels: Sequence[:class:`abc.Snowflake`]
-            The channels that are exempt from this rule. By default, no channels are exempt.
+            The channels that are exempt from this rule, up to 50. By default, no channels are exempt.
         reason: Optional[:class:`str`]
             The reason for creating the rule. Shows up on the audit log.
 
