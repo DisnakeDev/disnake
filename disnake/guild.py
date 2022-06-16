@@ -105,7 +105,6 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration
-    from .types.auto_moderation import CreateAutomodRule as CreateAutomodRulePayload
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
     from .types.integration import IntegrationType
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
@@ -4186,7 +4185,6 @@ class Guild(Hashable):
         self,
         name: str,
         *,
-        # TODO: should this default to the only existing type currently?
         event_type: AutomodEventType,
         trigger_type: AutomodTriggerType,
         actions: Sequence[AutomodAction],
@@ -4251,21 +4249,18 @@ class Guild(Hashable):
         ):
             raise ValueError("Specified trigger type requires `trigger_metadata`")
 
-        payload: CreateAutomodRulePayload = {
-            "name": name,
-            "event_type": try_enum_to_int(event_type),
-            "trigger_type": trigger_type_int,
-            "actions": [a.to_dict() for a in actions],
-        }
-
-        if trigger_metadata is not None:
-            payload["trigger_metadata"] = trigger_metadata.to_dict()
-        if enabled is not None:
-            payload["enabled"] = enabled
-        if exempt_roles:
-            payload["exempt_roles"] = [e.id for e in exempt_roles]
-        if exempt_channels:
-            payload["exempt_channels"] = [e.id for e in exempt_channels]
-
-        data = await self._state.http.create_auto_moderation_rule(self.id, payload, reason=reason)
+        data = await self._state.http.create_auto_moderation_rule(
+            self.id,
+            name=name,
+            event_type=try_enum_to_int(event_type),
+            trigger_type=trigger_type_int,
+            actions=[a.to_dict() for a in actions],
+            trigger_metadata=trigger_metadata.to_dict() if trigger_metadata is not None else None,
+            enabled=enabled,
+            exempt_roles=[e.id for e in exempt_roles] if exempt_roles is not None else None,
+            exempt_channels=(
+                [e.id for e in exempt_channels] if exempt_channels is not None else None
+            ),
+            reason=reason,
+        )
         return AutomodRule(data=data, guild=self)

@@ -366,7 +366,7 @@ class AutomodRule:
             payload["exempt_channels"] = [e.id for e in exempt_channels]
 
         data = await self.guild._state.http.edit_auto_moderation_rule(
-            self.guild.id, self.id, payload, reason=reason
+            self.guild.id, self.id, reason=reason, **payload
         )
         return AutomodRule(data=data, guild=self.guild)
 

@@ -2155,10 +2155,33 @@ class HTTPClient:
     def create_auto_moderation_rule(
         self,
         guild_id: Snowflake,
-        payload: auto_moderation.CreateAutomodRule,
         *,
+        name: str,
+        event_type: auto_moderation.AutomodEventType,
+        trigger_type: auto_moderation.AutomodTriggerType,
+        actions: List[auto_moderation.AutomodAction],
+        trigger_metadata: Optional[auto_moderation.AutomodTriggerMetadata] = None,
+        enabled: Optional[bool] = None,
+        exempt_roles: Optional[SnowflakeList] = None,
+        exempt_channels: Optional[SnowflakeList] = None,
         reason: Optional[str] = None,
     ) -> Response[auto_moderation.AutomodRule]:
+        payload: auto_moderation.CreateAutomodRule = {
+            "name": name,
+            "event_type": event_type,
+            "trigger_type": trigger_type,
+            "actions": actions,
+        }
+
+        if trigger_metadata is not None:
+            payload["trigger_metadata"] = trigger_metadata
+        if enabled is not None:
+            payload["enabled"] = enabled
+        if exempt_roles is not None:
+            payload["exempt_roles"] = exempt_roles
+        if exempt_channels is not None:
+            payload["exempt_channels"] = exempt_channels
+
         return self.request(
             Route("POST", "/guilds/{guild_id}/auto-moderation/rules", guild_id=guild_id),
             json=payload,
@@ -2169,9 +2192,9 @@ class HTTPClient:
         self,
         guild_id: Snowflake,
         rule_id: Snowflake,
-        payload: auto_moderation.EditAutomodRule,
         *,
         reason: Optional[str] = None,
+        **fields: Any,
     ) -> Response[auto_moderation.AutomodRule]:
         return self.request(
             Route(
@@ -2180,7 +2203,7 @@ class HTTPClient:
                 guild_id=guild_id,
                 rule_id=rule_id,
             ),
-            json=payload,
+            json=fields,
             reason=reason,
         )
 
