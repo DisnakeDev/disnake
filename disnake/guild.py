@@ -4255,7 +4255,7 @@ class Guild(Hashable):
             name=name,
             event_type=try_enum_to_int(event_type),
             trigger_type=trigger_type_int,
-            actions=[a.to_dict() for a in actions],
+            actions=[a.to_dict() for a in actions] if actions else [],
             trigger_metadata=trigger_metadata.to_dict() if trigger_metadata is not None else None,
             enabled=enabled,
             exempt_roles=[e.id for e in exempt_roles] if exempt_roles is not None else None,

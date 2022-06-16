@@ -362,7 +362,7 @@ class AutomodRule:
         if trigger_metadata is not MISSING:
             payload["trigger_metadata"] = trigger_metadata.to_dict()
         if actions is not MISSING:
-            payload["actions"] = [a.to_dict() for a in actions]
+            payload["actions"] = [a.to_dict() for a in actions] if actions else []
         if enabled is not MISSING:
             payload["enabled"] = enabled
         if exempt_roles is not MISSING:
