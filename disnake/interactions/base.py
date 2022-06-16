@@ -44,7 +44,9 @@ from ..errors import (
     ModalChainNotSupported,
     NotFound,
 )
+from ..flags import MessageFlags
 from ..guild import Guild
+from ..i18n import Localized
 from ..member import Member
 from ..message import Attachment, Message
 from ..object import Object
@@ -76,6 +78,7 @@ if TYPE_CHECKING:
     from ..embeds import Embed
     from ..ext.commands import AutoShardedBot, Bot
     from ..file import File
+    from ..guild import GuildMessageable
     from ..mentions import AllowedMentions
     from ..state import ConnectionState
     from ..threads import Thread
@@ -84,7 +87,7 @@ if TYPE_CHECKING:
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
     )
-    from ..ui.action_row import Components
+    from ..ui.action_row import Components, MessageUIComponent, ModalUIComponent
     from ..ui.modal import Modal
     from ..ui.view import View
     from .message import MessageInteraction
@@ -189,7 +192,10 @@ class Interaction:
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.locale: Locale = try_enum(Locale, data["locale"])
-        self.guild_locale: Optional[Locale] = try_enum(Locale, data.get("guild_locale"))
+        guild_locale = data.get("guild_locale")
+        self.guild_locale: Optional[Locale] = (
+            try_enum(Locale, guild_locale) if guild_locale else None
+        )
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
         self._permissions = None
@@ -240,7 +246,7 @@ class Interaction:
         return self.guild.me
 
     @utils.cached_slot_property("_cs_channel")
-    def channel(self) -> Union[TextChannel, Thread, VoiceChannel]:
+    def channel(self) -> Union[GuildMessageable, PartialMessageable]:
         """Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]: The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels are not resolved since there is
@@ -253,7 +259,7 @@ class Interaction:
             type = (
                 None if self.guild_id is not None else ChannelType.private
             )  # could be a text, voice, or thread channel in a guild
-            return PartialMessageable(state=self._state, id=self.channel_id, type=type)  # type: ignore
+            return PartialMessageable(state=self._state, id=self.channel_id, type=type)
         return channel  # type: ignore
 
     @property
@@ -355,9 +361,9 @@ class Interaction:
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> InteractionMessage:
         """|coro|
@@ -396,12 +402,15 @@ class Interaction:
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. This cannot be mixed with ``components``.
@@ -534,9 +543,10 @@ class Interaction:
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components = MISSING,
+        components: Components[MessageUIComponent] = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        suppress_embeds: bool = False,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -587,6 +597,12 @@ class Interaction:
             Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
             is set to 15 minutes.
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+
+            .. versionadded:: 2.5
+
         delete_after: :class:`float`
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
@@ -616,6 +632,7 @@ class Interaction:
             components=components,
             tts=tts,
             ephemeral=ephemeral,
+            suppress_embeds=suppress_embeds,
             delete_after=delete_after,
         )
 
@@ -646,7 +663,12 @@ class InteractionResponse:
         """
         return self._responded
 
-    async def defer(self, *, ephemeral: bool = False, with_message: bool = False) -> None:
+    async def defer(
+        self,
+        *,
+        with_message: bool = MISSING,
+        ephemeral: bool = MISSING,
+    ) -> None:
         """|coro|
 
         Defers the interaction response.
@@ -654,17 +676,22 @@ class InteractionResponse:
         This is typically used when the interaction is acknowledged
         and a secondary action will be done later.
 
+        .. versionchanged:: 2.5
+
+            Raises :exc:`TypeError` when an interaction cannot be deferred.
+
         Parameters
         ----------
-        ephemeral: :class:`bool`
-            Whether the deferred message will eventually be ephemeral.
-            This applies to interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
-            or when the ``with_message`` parameter is ``True``.
         with_message: :class:`bool`
             Whether the response will be a message with thinking state (bot is thinking...).
             This only applies to interactions of type :attr:`InteractionType.component`.
 
             .. versionadded:: 2.4
+
+        ephemeral: :class:`bool`
+            Whether the deferred message will eventually be ephemeral.
+            This applies to interactions of type :attr:`InteractionType.application_command` and :attr:`InteractionType.modal_submit`
+            or when the ``with_message`` parameter is ``True``.
 
         Raises
         ------
@@ -672,29 +699,44 @@ class InteractionResponse:
             Deferring the interaction failed.
         InteractionResponded
             This interaction has already been responded to before.
+        TypeError
+            This interaction cannot be deferred.
         """
         if self._responded:
             raise InteractionResponded(self._parent)
 
-        defer_type: int = 0
-        data: Optional[Dict[str, Any]] = None
+        defer_type: Optional[InteractionResponseType] = None
+        data: Dict[str, Any] = {}
         parent = self._parent
-        if (
-            parent.type in (InteractionType.application_command, InteractionType.modal_submit)
-            or with_message
-        ):
-            defer_type = InteractionResponseType.deferred_channel_message.value
-            if ephemeral:
-                data = {"flags": 64}
-        elif parent.type is InteractionType.component:
-            defer_type = InteractionResponseType.deferred_message_update.value
 
-        if defer_type:
-            adapter = async_context.get()
-            await adapter.create_interaction_response(
-                parent.id, parent.token, session=parent._session, type=defer_type, data=data
+        if parent.type in (InteractionType.application_command, InteractionType.modal_submit):
+            defer_type = InteractionResponseType.deferred_channel_message
+        elif parent.type is InteractionType.component:
+            if with_message:
+                defer_type = InteractionResponseType.deferred_channel_message
+            else:
+                defer_type = InteractionResponseType.deferred_message_update
+
+        if defer_type is InteractionResponseType.deferred_channel_message:
+            # we only want to set flags if we are sending a message
+            data["flags"] = 0
+            if ephemeral:
+                data["flags"] |= MessageFlags.ephemeral.flag
+
+        if not defer_type:
+            raise TypeError(
+                "This interaction must be of type 'application_command', 'modal_submit', or 'component' in order to defer."
             )
-            self._responded = True
+
+        adapter = async_context.get()
+        await adapter.create_interaction_response(
+            parent.id,
+            parent.token,
+            session=parent._session,
+            type=defer_type.value,
+            data=data or None,
+        )
+        self._responded = True
 
     async def pong(self) -> None:
         """|coro|
@@ -734,9 +776,10 @@ class InteractionResponse:
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components = MISSING,
+        components: Components[MessageUIComponent] = MISSING,
         tts: bool = False,
         ephemeral: bool = False,
+        suppress_embeds: bool = False,
         delete_after: float = MISSING,
     ) -> None:
         """|coro|
@@ -777,6 +820,12 @@ class InteractionResponse:
             If provided, the number of seconds to wait in the background
             before deleting the message we just sent. If the deletion fails,
             then it is silently ignored.
+
+        suppress_embeds: :class:`bool`
+            Whether to suppress embeds for the message. This hides
+            all embeds from the UI if set to ``True``.
+
+            .. versionadded:: 2.5
 
         Raises
         ------
@@ -821,7 +870,7 @@ class InteractionResponse:
             for embed in embeds:
                 if embed._files:
                     files = files or []
-                    files += embed._files
+                    files.extend(embed._files.values())
 
         if files is not MISSING and len(files) > 10:
             raise ValueError("files cannot exceed maximum of 10 elements")
@@ -840,8 +889,11 @@ class InteractionResponse:
         if content is not None:
             payload["content"] = str(content)
 
+        payload["flags"] = 0
+        if suppress_embeds:
+            payload["flags"] |= MessageFlags.suppress_embeds.flag
         if ephemeral:
-            payload["flags"] = 64
+            payload["flags"] |= MessageFlags.ephemeral.flag
 
         if view is not MISSING:
             payload["components"] = view.to_components()
@@ -888,10 +940,10 @@ class InteractionResponse:
         embeds: List[Embed] = MISSING,
         file: File = MISSING,
         files: List[File] = MISSING,
-        attachments: List[Attachment] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
     ) -> None:
         """|coro|
 
@@ -933,12 +985,15 @@ class InteractionResponse:
 
             .. versionadded:: 2.2
 
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.4
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
@@ -994,7 +1049,7 @@ class InteractionResponse:
             for embed in embeds:
                 if embed._files:
                     files = files or []
-                    files += embed._files
+                    files.extend(embed._files.values())
 
         if files is not MISSING and len(files) > 10:
             raise ValueError("files cannot exceed maximum of 10 elements")
@@ -1015,7 +1070,9 @@ class InteractionResponse:
         if attachments is MISSING and (file or files):
             attachments = message.attachments
         if attachments is not MISSING:
-            payload["attachments"] = [a.to_dict() for a in attachments]
+            payload["attachments"] = (
+                [] if attachments is None else [a.to_dict() for a in attachments]
+            )
 
         if view is not MISSING and components is not MISSING:
             raise TypeError("cannot mix view and components keyword arguments")
@@ -1074,9 +1131,14 @@ class InteractionResponse:
         else:
             choices_data = []
             value: ApplicationCommandOptionChoicePayload
+            i18n = self._parent.client.i18n
             for c in choices:
+                if isinstance(c, Localized):
+                    c = OptionChoice(c, c.string)
+
                 if isinstance(c, OptionChoice):
-                    value = c.to_dict()
+                    c.localize(i18n)
+                    value = c.to_dict(locale=self._parent.locale)
                 else:
                     value = {"name": str(c), "value": c}
                 choices_data.append(value)
@@ -1103,7 +1165,7 @@ class InteractionResponse:
         *,
         title: str,
         custom_id: str,
-        components: Components,
+        components: Components[ModalUIComponent],
     ) -> None:
         ...
 
@@ -1113,7 +1175,7 @@ class InteractionResponse:
         *,
         title: str = None,
         custom_id: str = None,
-        components: Components = None,
+        components: Components[ModalUIComponent] = None,
     ) -> None:
         """|coro|
 
@@ -1241,8 +1303,8 @@ class InteractionMessage(Message):
         The actual contents of the message.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
-        The :class:`TextChannel` or :class:`Thread` that the message was sent from.
+    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+        The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to message replies.
@@ -1301,9 +1363,9 @@ class InteractionMessage(Message):
         *,
         embed: Optional[Embed] = ...,
         file: File = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
@@ -1315,9 +1377,9 @@ class InteractionMessage(Message):
         *,
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
@@ -1329,9 +1391,9 @@ class InteractionMessage(Message):
         *,
         embeds: List[Embed] = ...,
         file: File = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
@@ -1343,9 +1405,9 @@ class InteractionMessage(Message):
         *,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
-        attachments: List[Attachment] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
@@ -1381,12 +1443,15 @@ class InteractionMessage(Message):
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
 
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. This cannot be mixed with ``components``.

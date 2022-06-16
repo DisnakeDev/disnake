@@ -348,9 +348,9 @@ class ClientUser(BaseUser):
 
     def _update(self, data: UserPayload) -> None:
         super()._update(data)
-        # There's actually an Optional[str] phone field as well but I won't use it
         self.verified = data.get("verified", False)
-        self.locale = try_enum(Locale, data.get("locale"))
+        locale = data.get("locale")
+        self.locale = try_enum(Locale, locale) if locale else None
         self._flags = data.get("flags", 0)
         self.mfa_enabled = data.get("mfa_enabled", False)
 
@@ -371,6 +371,9 @@ class ClientUser(BaseUser):
         .. versionchanged:: 2.0
             The edit is no longer in-place, instead the newly edited client user is returned.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         username: :class:`str`
@@ -388,10 +391,10 @@ class ClientUser(BaseUser):
             The ``avatar`` asset couldn't be found.
         HTTPException
             Editing your profile failed.
-        InvalidArgument
-            Wrong image format passed for ``avatar``.
         TypeError
             The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+        ValueError
+            Wrong image format passed for ``avatar``.
 
         Returns
         -------

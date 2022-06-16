@@ -450,13 +450,13 @@ class FFmpegOpusAudio(FFmpegAudio):
 
         Use this function to create an :class:`FFmpegOpusAudio` instance instead of the constructor: ::
 
-            source = await discord.FFmpegOpusAudio.from_probe("song.webm")
+            source = await disnake.FFmpegOpusAudio.from_probe("song.webm")
             voice_client.play(source)
 
         If you are on Windows and don't have ffprobe installed, use the ``fallback`` method
         to probe using ffmpeg instead: ::
 
-            source = await discord.FFmpegOpusAudio.from_probe("song.webm", method='fallback')
+            source = await disnake.FFmpegOpusAudio.from_probe("song.webm", method='fallback')
             voice_client.play(source)
 
         Using a custom method of determining codec and bitrate: ::
@@ -465,7 +465,7 @@ class FFmpegOpusAudio(FFmpegAudio):
                 # some analysis code here
                 return codec, bitrate
 
-            source = await discord.FFmpegOpusAudio.from_probe("song.webm", method=custom_probe)
+            source = await disnake.FFmpegOpusAudio.from_probe("song.webm", method=custom_probe)
             voice_client.play(source)
 
         Parameters
@@ -748,8 +748,8 @@ class AudioPlayer(threading.Thread):
             self._current_error = exc
             self.stop()
         finally:
-            self.source.cleanup()
             self._call_after()
+            self.source.cleanup()
 
     def _call_after(self) -> None:
         error = self._current_error

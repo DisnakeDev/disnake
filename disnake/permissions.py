@@ -515,6 +515,14 @@ class Permissions(BaseFlags):
         and create threads in forum channels."""
         return 1 << 11
 
+    @make_permission_alias("send_messages")
+    def create_forum_threads(self) -> int:
+        """:class:`bool`: An alias for :attr:`send_messages`.
+
+        .. versionadded:: 2.5
+        """
+        return 1 << 11
+
     @flag_value
     def send_tts_messages(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can send TTS messages from all or specific text channels."""
@@ -819,6 +827,7 @@ class PermissionOverwrite:
         read_messages: Optional[bool]
         view_channel: Optional[bool]
         send_messages: Optional[bool]
+        create_forum_threads: Optional[bool]
         send_tts_messages: Optional[bool]
         manage_messages: Optional[bool]
         embed_links: Optional[bool]

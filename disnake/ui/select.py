@@ -68,7 +68,7 @@ if TYPE_CHECKING:
 
 S = TypeVar("S", bound="Select")
 S_co = TypeVar("S_co", bound="Select", covariant=True)
-V = TypeVar("V", bound="View", covariant=True)
+V = TypeVar("V", bound="Optional[View]", covariant=True)
 P = ParamSpec("P")
 
 
@@ -137,6 +137,34 @@ class Select(Item[V]):
     )
     # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
     _underlying: SelectMenu = MISSING
+
+    @overload
+    def __init__(
+        self: Select[None],
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        disabled: bool = False,
+        row: Optional[int] = None,
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self: Select[V],
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        disabled: bool = False,
+        row: Optional[int] = None,
+    ):
+        ...
 
     def __init__(
         self,

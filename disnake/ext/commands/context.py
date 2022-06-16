@@ -36,8 +36,8 @@ from disnake.message import Message
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
-    from disnake.channel import DMChannel, TextChannel, Thread, VoiceChannel
-    from disnake.guild import Guild
+    from disnake.channel import DMChannel
+    from disnake.guild import Guild, GuildMessageable
     from disnake.member import Member
     from disnake.state import ConnectionState
     from disnake.user import ClientUser, User
@@ -85,7 +85,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         then this list could be incomplete.
     kwargs: :class:`dict`
         A dictionary of transformed arguments that were passed into the command.
-        Similar to :attr:`args`\, if this is accessed in the
+        Similar to :attr:`args`\\, if this is accessed in the
         :func:`.on_command_error` event then this dict could be incomplete.
     current_parameter: Optional[:class:`inspect.Parameter`]
         The parameter that is currently being inspected and converted.
@@ -286,7 +286,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         return self.message.guild
 
     @disnake.utils.cached_property
-    def channel(self) -> Union[TextChannel, Thread, DMChannel, VoiceChannel]:
+    def channel(self) -> Union[GuildMessageable, DMChannel]:
         """Union[:class:`.abc.Messageable`]: Returns the channel associated with this context's command.
         Shorthand for :attr:`.Message.channel`.
         """
@@ -407,7 +407,7 @@ class GuildContext(Context):
     """
 
     guild: Guild
-    channel: Union[TextChannel, Thread, VoiceChannel]
+    channel: GuildMessageable
     author: Member
     me: Member
 

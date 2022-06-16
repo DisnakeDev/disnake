@@ -65,7 +65,7 @@ if TYPE_CHECKING:
 
 B = TypeVar("B", bound="Button")
 B_co = TypeVar("B_co", bound="Button", covariant=True)
-V = TypeVar("V", bound="View", covariant=True)
+V = TypeVar("V", bound="Optional[View]", covariant=True)
 P = ParamSpec("P")
 
 
@@ -112,6 +112,34 @@ class Button(Item[V]):
     )
     # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
     _underlying: ButtonComponent = MISSING
+
+    @overload
+    def __init__(
+        self: Button[None],
+        *,
+        style: ButtonStyle = ButtonStyle.secondary,
+        label: Optional[str] = None,
+        disabled: bool = False,
+        custom_id: Optional[str] = None,
+        url: Optional[str] = None,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        row: Optional[int] = None,
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self: Button[V],
+        *,
+        style: ButtonStyle = ButtonStyle.secondary,
+        label: Optional[str] = None,
+        disabled: bool = False,
+        custom_id: Optional[str] = None,
+        url: Optional[str] = None,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        row: Optional[int] = None,
+    ):
+        ...
 
     def __init__(
         self,
@@ -219,7 +247,7 @@ class Button(Item[V]):
         return self._underlying.emoji
 
     @emoji.setter
-    def emoji(self, value: Optional[Union[str, Emoji, PartialEmoji]]):  # type: ignore
+    def emoji(self, value: Optional[Union[str, Emoji, PartialEmoji]]):
         if value is not None:
             if isinstance(value, str):
                 self._underlying.emoji = PartialEmoji.from_str(value)

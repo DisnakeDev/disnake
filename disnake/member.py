@@ -37,6 +37,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
@@ -69,6 +70,7 @@ if TYPE_CHECKING:
     from .flags import PublicUserFlags
     from .guild import Guild
     from .message import Message
+    from .partial_emoji import PartialEmoji
     from .role import Role
     from .state import ConnectionState
     from .types.activity import PartialPresenceUpdate
@@ -668,6 +670,19 @@ class Member(disnake.abc.Messageable, _UserTag):
         return max(guild.get_role(rid) or guild.default_role for rid in self._roles)
 
     @property
+    def role_icon(self) -> Optional[Union[Asset, PartialEmoji]]:
+        """Optional[Union[:class:`Asset`, :class:`PartialEmoji`]]: Returns the member's displayed role icon, if any.
+
+        .. versionadded:: 2.5
+        """
+        roles = self.roles[1:]  # remove @everyone
+
+        for role in reversed(roles):
+            if icon := (role.icon or role.emoji):
+                return icon
+        return None
+
+    @property
     def guild_permissions(self) -> Permissions:
         """:class:`Permissions`: Returns the member's guild permissions.
 
@@ -745,7 +760,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         mute: bool = MISSING,
         deafen: bool = MISSING,
         suppress: bool = MISSING,
-        roles: List[disnake.abc.Snowflake] = MISSING,
+        roles: Sequence[disnake.abc.Snowflake] = MISSING,
         voice_channel: Optional[VocalGuildChannel] = MISSING,
         timeout: Optional[Union[float, datetime.timedelta, datetime.datetime]] = MISSING,
         reason: Optional[str] = None,
@@ -793,7 +808,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
             .. versionadded:: 1.7
 
-        roles: List[:class:`Role`]
+        roles: Sequence[:class:`Role`]
             The member's new list of roles. This *replaces* the roles.
         voice_channel: Optional[:class:`VoiceChannel`]
             The voice channel to move the member to.

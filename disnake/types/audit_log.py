@@ -35,7 +35,9 @@ from .guild import (
     MFALevel,
     VerificationLevel,
 )
+from .guild_scheduled_event import GuildScheduledEvent
 from .integration import IntegrationExpireBehavior, PartialIntegration
+from .interactions import ApplicationCommand, ApplicationCommandPermissions
 from .role import Role
 from .snowflake import Snowflake
 from .threads import Thread
@@ -90,6 +92,7 @@ AuditLogEvent = Literal[
     110,
     111,
     112,
+    121,
 ]
 
 
@@ -241,6 +244,12 @@ class _AuditLogChange_Datetime(TypedDict):
     old_value: datetime.datetime
 
 
+class _AuditLogChange_ApplicationCommandPermissions(TypedDict):
+    key: str
+    new_value: ApplicationCommandPermissions
+    old_value: ApplicationCommandPermissions
+
+
 AuditLogChange = Union[
     _AuditLogChange_Str,
     _AuditLogChange_AssetHash,
@@ -257,6 +266,7 @@ AuditLogChange = Union[
     _AuditLogChange_VideoQualityMode,
     _AuditLogChange_Overwrites,
     _AuditLogChange_Datetime,
+    _AuditLogChange_ApplicationCommandPermissions,
 ]
 
 
@@ -269,6 +279,7 @@ class AuditEntryInfo(TypedDict):
     id: Snowflake
     type: Literal["0", "1"]
     role_name: str
+    application_id: Snowflake
 
 
 class _AuditLogEntryOptional(TypedDict, total=False):
@@ -285,8 +296,11 @@ class AuditLogEntry(_AuditLogEntryOptional):
 
 
 class AuditLog(TypedDict):
-    webhooks: List[Webhook]
-    users: List[User]
     audit_log_entries: List[AuditLogEntry]
+    application_commands: List[ApplicationCommand]
+    # auto_moderation_rules: List[AutomodRule]
+    guild_scheduled_events: List[GuildScheduledEvent]
     integrations: List[PartialIntegration]
     threads: List[Thread]
+    users: List[User]
+    webhooks: List[Webhook]

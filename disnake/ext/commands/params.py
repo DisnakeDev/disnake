@@ -55,7 +55,8 @@ from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
-from disnake.interactions import CommandInteraction
+from disnake.i18n import Localized
+from disnake.interactions import ApplicationCommandInteraction
 from disnake.utils import maybe_coroutine
 
 from . import errors
@@ -63,6 +64,7 @@ from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
     from disnake.app_commands import Choices
+    from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 
     from .slash_core import InvokableSlashCommand, SubCommand
@@ -205,7 +207,13 @@ class RangeMeta(type):
 
 
 class Range(type, metaclass=RangeMeta):
-    """Type depicting a limited range of allowed values"""
+    """Type depicting a limited range of allowed values.
+
+    See :ref:`param_ranges` for more information.
+
+    .. versionadded:: 2.4
+
+    """
 
     min_value: Optional[float]
     max_value: Optional[float]
@@ -277,14 +285,24 @@ class ParamInfo:
     The instances of this class are not created manually, but via the functional interface instead.
     See :func:`Param`.
 
-    Attributes
+    Parameters
     ----------
-    default: Any
+    default: Union[Any, Callable[[:class:`.ApplicationCommandInteraction`], Any]]
         The actual default value for the corresponding function param.
-    name: :class:`str`
+        Can be a sync/async callable taking an interaction and returning a dynamic default value,
+        if the user didn't pass a value for this parameter.
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of this slash command option.
-    description: :class:`str`
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
+    description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The description of this slash command option.
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         The list of choices of this slash command option.
     ge: :class:`float`
@@ -323,13 +341,13 @@ class ParamInfo:
 
     def __init__(
         self,
-        default: Any = ...,
+        default: Union[Any, Callable[[ApplicationCommandInteraction], Any]] = ...,
         *,
-        name: str = "",
-        description: str = None,
-        converter: Callable[[CommandInteraction, Any], Any] = None,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        converter: Callable[[ApplicationCommandInteraction, Any], Any] = None,
         convert_default: bool = False,
-        autcomplete: Callable[[CommandInteraction, str], Any] = None,
+        autcomplete: Callable[[ApplicationCommandInteraction, str], Any] = None,
         choices: Choices = None,
         type: type = None,
         channel_types: List[ChannelType] = None,
@@ -339,10 +357,16 @@ class ParamInfo:
         ge: float = None,
         large: bool = False,
     ) -> None:
+        name_loc = Localized._cast(name, False)
+        self.name: str = name_loc.string or ""
+        self.name_localizations: LocalizationValue = name_loc.localizations
+
+        desc_loc = Localized._cast(description, False)
+        self.description: Optional[str] = desc_loc.string
+        self.description_localizations: LocalizationValue = desc_loc.localizations
+
         self.default = default
-        self.name = name
-        self.param_name = name
-        self.description = description
+        self.param_name: str = self.name
         self.converter = converter
         self.convert_default = convert_default
         self.autocomplete = autcomplete
@@ -390,7 +414,7 @@ class ParamInfo:
         self.parse_parameter(param)
         doc = parsed_docstring.get(param.name)
         if doc:
-            self.parse_doc(doc["type"], doc["description"])
+            self.parse_doc(doc)
         self.parse_annotation(type_hints.get(param.name, param.annotation))
 
         return self
@@ -404,7 +428,7 @@ class ParamInfo:
         args = ", ".join(f"{k}={'...' if v is ... else repr(v)}" for k, v in vars(self).items())
         return f"{type(self).__name__}({args})"
 
-    async def get_default(self, inter: CommandInteraction) -> Any:
+    async def get_default(self, inter: ApplicationCommandInteraction) -> Any:
         """Gets the default for an interaction"""
         default = self.default
         if callable(self.default):
@@ -418,7 +442,7 @@ class ParamInfo:
 
         return default
 
-    async def verify_type(self, inter: CommandInteraction, argument: Any) -> Any:
+    async def verify_type(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
         """Check if a type of an argument is correct and possibly fix it"""
         if issubclass_(self.type, disnake.Member):
             if isinstance(argument, disnake.Member):
@@ -429,7 +453,7 @@ class ParamInfo:
         # unexpected types may just be ignored
         return argument
 
-    async def convert_argument(self, inter: CommandInteraction, argument: Any) -> Any:
+    async def convert_argument(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
         """Convert a value if a converter is given"""
         if self.large:
             try:
@@ -571,18 +595,25 @@ class ParamInfo:
         self.name = self.name or param.name
         self.param_name = param.name
 
-    def parse_doc(self, doc_type: Any, doc_description: str) -> None:
-        self.description = self.description or doc_description
-        if self.type == str and doc_type is not None:
-            self.parse_annotation(doc_type)
+    def parse_doc(self, doc: disnake.utils._DocstringParam) -> None:
+        if self.type == str and doc["type"] is not None:
+            self.parse_annotation(doc["type"])
+
+        self.description = self.description or doc["description"]
+
+        self.name_localizations._upgrade(doc["localization_key_name"])
+        self.description_localizations._upgrade(doc["localization_key_desc"])
 
     def to_option(self) -> Option:
-        if self.name == "":
+        if not self.name:
             raise TypeError("Param must be parsed first")
 
+        name = Localized(self.name, data=self.name_localizations)
+        desc = Localized(self.description, data=self.description_localizations)
+
         return Option(
-            name=self.name,
-            description=self.description or "-",
+            name=name,
+            description=desc,
             type=self.discord_type,
             required=self.required,
             choices=self.choices or None,
@@ -593,9 +624,9 @@ class ParamInfo:
         )
 
 
-def safe_call(function: Callable[..., T], *possible_args: Any, **possible_kwargs: Any) -> T:
+def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwargs: Any) -> T:
     """Calls a function without providing any extra unexpected arguments"""
-    MISSING = object()
+    MISSING: Any = object()
     sig = signature(function)
 
     kinds = {p.kind for p in sig.parameters.values()}
@@ -660,7 +691,7 @@ def isolate_self(
         parametersl.pop(0)
     if parametersl:
         annot = parametersl[0].annotation
-        if issubclass_(annot, CommandInteraction) or annot is inspect.Parameter.empty:
+        if issubclass_(annot, ApplicationCommandInteraction) or annot is inspect.Parameter.empty:
             inter_param = parameters.pop(parametersl[0].name)
 
     return (cog_param, inter_param), parameters
@@ -690,7 +721,7 @@ def collect_params(
             injections[parameter.name] = default
         elif parameter.annotation in Injection._registered:
             injections[parameter.name] = Injection._registered[parameter.annotation]
-        elif issubclass_(parameter.annotation, CommandInteraction):
+        elif issubclass_(parameter.annotation, ApplicationCommandInteraction):
             if inter_param is None:
                 inter_param = parameter
             else:
@@ -729,9 +760,10 @@ def collect_nested_params(function: Callable) -> List[ParamInfo]:
 
 
 def format_kwargs(
-    interaction: CommandInteraction,
+    interaction: ApplicationCommandInteraction,
     cog_param: str = None,
     inter_param: str = None,
+    /,
     *args: Any,
     **kwargs: Any,
 ) -> Dict[str, Any]:
@@ -756,7 +788,11 @@ def format_kwargs(
 
 
 async def run_injections(
-    injections: Dict[str, Injection], interaction: CommandInteraction, *args: Any, **kwargs: Any
+    injections: Dict[str, Injection],
+    interaction: ApplicationCommandInteraction,
+    /,
+    *args: Any,
+    **kwargs: Any,
 ) -> Dict[str, Any]:
     """Run and resolve a list of injections"""
 
@@ -768,7 +804,7 @@ async def run_injections(
 
 
 async def call_param_func(
-    function: Callable, interaction: CommandInteraction, *args: Any, **kwargs: Any
+    function: Callable, interaction: ApplicationCommandInteraction, /, *args: Any, **kwargs: Any
 ) -> Any:
     """Call a function utilizing ParamInfo"""
     cog_param, inter_param, paraminfos, injections = collect_params(function)
@@ -811,20 +847,20 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
             command.autocompleters[param.name] = param.autocomplete
 
     if issubclass_(sig.parameters[inter_param].annotation, disnake.GuildCommandInteraction):
-        command.guild_only = True
+        command._guild_only = True
 
     return [param.to_option() for param in params]
 
 
 def Param(
-    default: Any = ...,
+    default: Union[Any, Callable[[ApplicationCommandInteraction], Any]] = ...,
     *,
-    name: str = "",
-    description: str = None,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
     choices: Choices = None,
-    converter: Callable[[CommandInteraction, Any], Any] = None,
+    converter: Callable[[ApplicationCommandInteraction, Any], Any] = None,
     convert_defaults: bool = False,
-    autocomplete: Callable[[CommandInteraction, str], Any] = None,
+    autocomplete: Callable[[ApplicationCommandInteraction, str], Any] = None,
     channel_types: List[ChannelType] = None,
     lt: float = None,
     le: float = None,
@@ -840,13 +876,23 @@ def Param(
 
     Parameters
     ----------
-    default: Any
+    default: Union[Any, Callable[[:class:`.ApplicationCommandInteraction`], Any]]
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
-    name: :class:`str`
+        Can be a sync/async callable taking an interaction and returning a dynamic default value,
+        if the user didn't pass a value for this parameter.
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
         The name of the option. By default, the option name is the parameter name.
-    description: :class:`str`
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
+    description: Optional[Union[:class:`str`, :class:`.Localized`]]
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
     choices: Union[List[:class:`.OptionChoice`], List[Union[:class:`str`, :class:`int`]], Dict[:class:`str`, Union[:class:`str`, :class:`int`]]]
         A list of choices for this option.
     converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
@@ -856,7 +902,7 @@ def Param(
         Whether to also apply the converter to the provided default value.
         Defaults to ``False``.
 
-        .. versionadded: 2.3
+        .. versionadded:: 2.3
     autocomplete: Callable[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
         A function that will suggest possible autocomplete options while typing.
         See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
@@ -875,7 +921,7 @@ def Param(
         Whether to accept large :class:`int` values (if this is ``False``, only
         values in the range ``(-2^53, 2^53)`` would be accepted due to an API limitation).
 
-        .. versionadded: 2.3
+        .. versionadded:: 2.3
 
     Raises
     ------
