@@ -4156,8 +4156,7 @@ class Guild(Hashable):
         data = await self._state.http.edit_member(self.id, user.id, reason=reason, **payload)
         return Member(data=data, guild=self, state=self._state)
 
-    # TODO: naming
-    async def automod_rules(self) -> List[AutomodRule]:
+    async def fetch_automod_rules(self) -> List[AutomodRule]:
         """|coro|
 
         Retrieves the guild's auto moderation rules.
