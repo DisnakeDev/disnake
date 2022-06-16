@@ -1384,7 +1384,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param rule: The auto moderation rule that was deleted.
     :type rule: :class:`AutomodRule`
 
-.. function:: on_auto_moderation_action(execution)
+.. function:: on_auto_moderation_action_execution(execution)
 
     Called when an auto moderation action is executed due to a rule triggering for a particular event.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.

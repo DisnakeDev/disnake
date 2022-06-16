@@ -397,7 +397,7 @@ class AutomodRule:
 
 
 class AutomodActionExecution:
-    """Represents the data for an :func:`on_auto_moderation_action` event.
+    """Represents the data for an :func:`on_auto_moderation_action_execution` event.
 
     .. versionadded:: 2.6
 

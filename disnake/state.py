@@ -1802,8 +1802,7 @@ class ConnectionState:
             return
 
         event = AutomodActionExecution(data=data, guild=guild)
-        # TODO: naming
-        self.dispatch("auto_moderation_action", event)
+        self.dispatch("auto_moderation_action_execution", event)
 
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int

@@ -1011,7 +1011,7 @@ class Intents(BaseFlags):
 
         This corresponds to the following events:
 
-        - :func:`on_auto_moderation_action`
+        - :func:`on_auto_moderation_action_execution`
 
         This does not correspond to any attributes or classes in the library in terms of cache.
         """
@@ -1030,7 +1030,7 @@ class Intents(BaseFlags):
         - :func:`on_auto_moderation_rule_create`
         - :func:`on_auto_moderation_rule_delete`
         - :func:`on_auto_moderation_rule_update`
-        - :func:`on_auto_moderation_action`
+        - :func:`on_auto_moderation_action_execution`
 
         This does not correspond to any attributes or classes in the library in terms of cache.
         """
