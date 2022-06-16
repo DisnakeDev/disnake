@@ -4247,7 +4247,7 @@ class Guild(Hashable):
             AutomodTriggerType.keyword.value,
             AutomodTriggerType.keyword_preset.value,
         ):
-            raise ValueError("Specified trigger type requires `trigger_metadata`")
+            raise ValueError("Specified trigger type requires `trigger_metadata` to not be empty")
 
         data = await self._state.http.create_auto_moderation_rule(
             self.id,
