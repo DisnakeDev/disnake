@@ -1429,6 +1429,7 @@ class Guild(Hashable):
         *,
         topic: Optional[str] = MISSING,
         position: int = MISSING,
+        bitrate: int = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         category: Optional[CategoryChannel] = None,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
@@ -1464,6 +1465,8 @@ class Guild(Hashable):
         position: :class:`int`
             The position in the channel list. This is a number that starts
             at 0. e.g. the top channel is position 0.
+        bitrate: :class:`int`
+            The channel's preferred audio bitrate in bits per second.
         rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The region for the stage channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
@@ -1491,6 +1494,9 @@ class Guild(Hashable):
 
         if topic is not MISSING:
             options["topic"] = topic
+
+        if bitrate is not MISSING:
+            options["bitrate"] = bitrate
 
         if position is not MISSING:
             options["position"] = position
