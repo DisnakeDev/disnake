@@ -56,7 +56,12 @@ if TYPE_CHECKING:
         EditAutomodRule as EditAutomodRulePayload,
     )
 
-__all__ = ("AutomodAction", "AutomodTriggerMetadata", "AutomodRule", "AutomodActionExecution")
+__all__ = (
+    "AutomodAction",
+    "AutomodTriggerMetadata",
+    "AutomodRule",
+    "AutomodActionExecution",
+)
 
 
 class AutomodAction:
