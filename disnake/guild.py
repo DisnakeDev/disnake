@@ -4169,6 +4169,8 @@ class Guild(Hashable):
         ------
         Forbidden
             You do not have proper permissions to retrieve auto moderation rules.
+        NotFound
+            The guild does not have any auto moderation rules set up.
         HTTPException
             Retrieving the rules failed.
 
