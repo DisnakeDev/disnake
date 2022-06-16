@@ -579,8 +579,8 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
     async def _fill(self):
         if self._get_retrieve():
-            data = await self._retrieve_data(self.retrieve)
-            entries = data.get("audit_log_entries")
+            log_data = await self._retrieve_data(self.retrieve)
+            entries = log_data.get("audit_log_entries")
             if len(entries) < 100:
                 self.limit = 0  # terminate the infinite loop
 
@@ -590,37 +590,39 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
             state = self._state
 
             appcmds: Dict[int, APIApplicationCommand] = {}
-            for d in data.get("application_commands", []):
+            for data in log_data.get("application_commands", []):
                 try:
-                    cmd = application_command_factory(d)
+                    cmd = application_command_factory(data)
                 except TypeError:
                     pass
                 else:
-                    appcmds[int(d["id"])] = cmd
+                    appcmds[int(data["id"])] = cmd
 
             auto_moderation_rules = {
-                int(d["id"]): AutomodRule(guild=self.guild, data=d)
-                for d in data.get("auto_moderation_rules", [])
+                int(data["id"]): AutomodRule(guild=self.guild, data=data)
+                for data in log_data.get("auto_moderation_rules", [])
             }
 
             events = {
-                int(d["id"]): GuildScheduledEvent(state=state, data=d)
-                for d in data.get("guild_scheduled_events", [])
+                int(data["id"]): GuildScheduledEvent(state=state, data=data)
+                for data in log_data.get("guild_scheduled_events", [])
             }
 
             integrations = {
-                int(d["id"]): PartialIntegration(guild=self.guild, data=d)
-                for d in data.get("integrations", [])
+                int(data["id"]): PartialIntegration(guild=self.guild, data=data)
+                for data in log_data.get("integrations", [])
             }
 
             threads = {
-                int(d["id"]): Thread(guild=self.guild, state=state, data=d)
-                for d in data.get("threads", [])
+                int(data["id"]): Thread(guild=self.guild, state=state, data=data)
+                for data in log_data.get("threads", [])
             }
 
-            users = {int(d["id"]): state.create_user(d) for d in data.get("users", [])}
+            users = {int(data["id"]): state.create_user(data) for data in log_data.get("users", [])}
 
-            webhooks = {int(d["id"]): state.create_webhook(d) for d in data.get("webhooks", [])}
+            webhooks = {
+                int(data["id"]): state.create_webhook(data) for data in log_data.get("webhooks", [])
+            }
 
             for element in entries:
                 # TODO: remove this if statement later
