@@ -833,6 +833,8 @@ class Intents(BaseFlags):
     def message_content(self):
         """:class:`bool`: Whether messages will have access to message content.
 
+        .. versionadded:: 2.5
+
         This applies to the following fields on :class:`~disnake.Message` instances:
 
         - :attr:`~disnake.Message.content`
@@ -965,6 +967,8 @@ class Intents(BaseFlags):
     def guild_scheduled_events(self):
         """:class:`bool`: Whether guild scheduled event related events are enabled.
 
+        .. versionadded:: 2.3
+
         This corresponds to the following events:
 
         - :func:`on_guild_scheduled_event_create`
@@ -987,6 +991,8 @@ class Intents(BaseFlags):
     def auto_moderation_configuration(self):
         """:class:`bool`: Whether auto moderation configuration related events are enabled.
 
+        .. versionadded:: 2.6
+
         This corresponds to the following events:
 
         - :func:`on_auto_moderation_rule_create`
@@ -1001,6 +1007,8 @@ class Intents(BaseFlags):
     def auto_moderation_execution(self):
         """:class:`bool`: Whether auto moderation execution related events are enabled.
 
+        .. versionadded:: 2.6
+
         This corresponds to the following events:
 
         - :func:`on_auto_moderation_action`
@@ -1012,6 +1020,8 @@ class Intents(BaseFlags):
     @alias_flag_value
     def auto_moderation(self):
         """:class:`bool`: Whether auto moderation related events are enabled.
+
+        .. versionadded:: 2.6
 
         This is a shortcut to set or get both :attr:`auto_moderation_configuration` and :attr:`auto_moderation_execution`.
 
