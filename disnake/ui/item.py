@@ -43,7 +43,7 @@ from typing import (
 __all__ = ("Item", "WrappedComponent")
 
 I = TypeVar("I", bound="Item")
-V = TypeVar("V", bound="View", covariant=True)
+V = TypeVar("V", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
     from ..components import NestedComponent
@@ -58,7 +58,7 @@ if TYPE_CHECKING:
 class WrappedComponent(ABC):
     """Represents the base UI component that all UI components inherit from.
 
-    The current UI components supported are:
+    The following classes implement this ABC:
 
     - :class:`disnake.ui.Button`
     - :class:`disnake.ui.Select`
@@ -106,6 +106,14 @@ class Item(WrappedComponent, Generic[V]):
     """
 
     __repr_attributes__: Tuple[str, ...] = ("row",)
+
+    @overload
+    def __init__(self: Item[None]):
+        ...
+
+    @overload
+    def __init__(self: Item[V]):
+        ...
 
     def __init__(self):
         self._view: Optional[V] = None

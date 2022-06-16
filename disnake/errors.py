@@ -29,15 +29,12 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse, ClientWebSocketResponse
+    from requests import Response
 
-    try:
-        from requests import Response
-
-        _ResponseType = Union[ClientResponse, Response]
-    except ModuleNotFoundError:
-        _ResponseType = ClientResponse
-
+    from .client import SessionStartLimit
     from .interactions import Interaction, ModalInteraction
+
+    _ResponseType = Union[ClientResponse, Response]
 
 __all__ = (
     "DiscordException",
@@ -49,8 +46,9 @@ __all__ = (
     "NotFound",
     "DiscordServerError",
     "InvalidData",
-    "InvalidArgument",
+    "WebhookTokenMissing",
     "LoginFailure",
+    "SessionStartLimitReached",
     "ConnectionClosed",
     "PrivilegedIntentsRequired",
     "InteractionException",
@@ -59,11 +57,12 @@ __all__ = (
     "InteractionNotResponded",
     "ModalChainNotSupported",
     "InteractionNotEditable",
+    "LocalizationKeyError",
 )
 
 
 class DiscordException(Exception):
-    """Base exception class for disnake
+    """Base exception class for disnake.
 
     Ideally speaking, this could be caught to handle any exceptions raised from this library.
     """
@@ -159,7 +158,7 @@ class HTTPException(DiscordException):
 class Forbidden(HTTPException):
     """Exception that's raised for when status code 403 occurs.
 
-    Subclass of :exc:`HTTPException`
+    Subclass of :exc:`HTTPException`.
     """
 
     pass
@@ -168,7 +167,7 @@ class Forbidden(HTTPException):
 class NotFound(HTTPException):
     """Exception that's raised for when status code 404 occurs.
 
-    Subclass of :exc:`HTTPException`
+    Subclass of :exc:`HTTPException`.
     """
 
     pass
@@ -193,13 +192,10 @@ class InvalidData(ClientException):
     pass
 
 
-class InvalidArgument(ClientException):
-    """Exception that's raised when an argument to a function
-    is invalid some way (e.g. wrong value or wrong type).
+class WebhookTokenMissing(DiscordException):
+    """Exception that's raised when a :class:`Webhook` or :class:`SyncWebhook` is missing a token to make requests with.
 
-    This could be considered the analogous of ``ValueError`` and
-    ``TypeError`` except inherited from :exc:`ClientException` and thus
-    :exc:`DiscordException`.
+    .. versionadded :: 2.6
     """
 
     pass
@@ -212,6 +208,27 @@ class LoginFailure(ClientException):
     """
 
     pass
+
+
+class SessionStartLimitReached(ClientException):
+    """Exception that's raised when :meth:`Client.connect` function
+    fails to connect to Discord due to the session start limit being reached.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    session_start_limit: :class:`.SessionStartLimit`
+        The current state of the session start limit.
+
+    """
+
+    def __init__(self, session_start_limit: SessionStartLimit, requested: int = 1):
+        self.session_start_limit: SessionStartLimit = session_start_limit
+        super().__init__(
+            f"Daily session start limit has been reached, resets at {self.session_start_limit.reset_time} "
+            f"Requested {requested} shards, have only {session_start_limit.remaining} remaining."
+        )
 
 
 class ConnectionClosed(ClientException):
@@ -280,7 +297,7 @@ class InteractionException(ClientException):
     Attributes
     ----------
     interaction: :class:`Interaction`
-        The interaction that was responded to
+        The interaction that was responded to.
     """
 
     interaction: Interaction
@@ -288,14 +305,14 @@ class InteractionException(ClientException):
 
 class InteractionTimedOut(InteractionException):
     """Exception that's raised when an interaction takes more than 3 seconds
-    to respond but is not deffered.
+    to respond but is not deferred.
 
     .. versionadded:: 2.0
 
     Attributes
     ----------
     interaction: :class:`Interaction`
-        The interaction that was responded to
+        The interaction that was responded to.
     """
 
     def __init__(self, interaction: Interaction):
@@ -382,3 +399,19 @@ class InteractionNotEditable(InteractionException):
     def __init__(self, interaction: Interaction):
         self.interaction: Interaction = interaction
         super().__init__("This interaction does not have a message to edit.")
+
+
+class LocalizationKeyError(DiscordException):
+    """Exception that's raised when a localization key lookup fails.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    key: :class:`str`
+        The localization key that couldn't be found.
+    """
+
+    def __init__(self, key: str):
+        self.key: str = key
+        super().__init__(f"No localizations were found for the key '{key}'.")

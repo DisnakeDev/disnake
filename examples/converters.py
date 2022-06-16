@@ -68,8 +68,8 @@ async def multiply(ctx: commands.Context, number: int, maybe: bool):
     # See: https://docs.disnake.dev/en/latest/ext/commands/commands.html#bool
 
     if maybe is True:
-        return await ctx.send(number * 2)
-    await ctx.send(number * 5)
+        return await ctx.send(str(number * 2))
+    await ctx.send(str(number * 5))
 
 
 bot.run("token")

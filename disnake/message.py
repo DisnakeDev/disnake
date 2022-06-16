@@ -47,11 +47,11 @@ from typing import (
 )
 
 from . import utils
-from .components import _component_factory
+from .components import ActionRow, MessageComponent, _component_factory
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import ChannelType, InteractionType, MessageType, try_enum, try_enum_to_int
-from .errors import HTTPException, InvalidArgument
+from .errors import HTTPException
 from .file import File
 from .flags import MessageFlags
 from .guild import Guild
@@ -67,8 +67,8 @@ from .utils import MISSING, escape_mentions
 
 if TYPE_CHECKING:
     from .abc import GuildChannel, MessageableChannel, Snowflake
-    from .channel import DMChannel, TextChannel, VoiceChannel
-    from .components import Component
+    from .channel import DMChannel
+    from .guild import GuildMessageable
     from .mentions import AllowedMentions
     from .role import Role
     from .state import ConnectionState
@@ -90,7 +90,7 @@ if TYPE_CHECKING:
     from .types.raw_models import ReactionActionEvent
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
-    from .ui.action_row import Components
+    from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
 
     MR = TypeVar("MR", bound="MessageReference")
@@ -119,7 +119,7 @@ def convert_emoji_reaction(emoji):
         # No existing emojis have <> in them, so this should be okay.
         return emoji.strip("<>")
 
-    raise InvalidArgument(
+    raise TypeError(
         f"emoji argument must be str, Emoji, or Reaction not {emoji.__class__.__name__}."
     )
 
@@ -134,19 +134,29 @@ async def _edit_handler(
     embeds: List[Embed] = MISSING,
     file: File = MISSING,
     files: List[File] = MISSING,
-    attachments: List[Attachment] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
     suppress: bool = MISSING,
+    suppress_embeds: bool = MISSING,
     delete_after: Optional[float] = None,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     view: Optional[View] = MISSING,
-    components: Optional[Components] = MISSING,
+    components: Optional[Components[MessageUIComponent]] = MISSING,
 ) -> Message:
     if embed is not MISSING and embeds is not MISSING:
-        raise InvalidArgument("Cannot mix embed and embeds keyword arguments.")
+        raise TypeError("Cannot mix embed and embeds keyword arguments.")
     if file is not MISSING and files is not MISSING:
-        raise InvalidArgument("Cannot mix file and files keyword arguments.")
+        raise TypeError("Cannot mix file and files keyword arguments.")
     if view is not MISSING and components is not MISSING:
-        raise InvalidArgument("Cannot mix view and components keyword arguments.")
+        raise TypeError("Cannot mix view and components keyword arguments.")
+    if suppress is not MISSING:
+        suppress_deprecated_msg = "'suppress' is deprecated in favour of 'suppress_embeds'."
+        if suppress_embeds is not MISSING:
+            raise TypeError(
+                "Cannot mix suppress and suppress_embeds keyword arguments.\n"
+                + suppress_deprecated_msg
+            )
+        utils.warn_deprecated(suppress_deprecated_msg, stacklevel=3)
+        suppress_embeds = suppress
 
     payload: Dict[str, Any] = {}
     if content is not MISSING:
@@ -165,11 +175,11 @@ async def _edit_handler(
         for embed in embeds:
             if embed._files:
                 files = files or []
-                files += embed._files
+                files.extend(embed._files.values())
 
-    if suppress is not MISSING:
+    if suppress_embeds is not MISSING:
         flags = MessageFlags._from_value(default_flags)
-        flags.suppress_embeds = suppress
+        flags.suppress_embeds = suppress_embeds
         payload["flags"] = flags.value
 
     if allowed_mentions is MISSING:
@@ -185,7 +195,7 @@ async def _edit_handler(
                 payload["allowed_mentions"] = allowed_mentions.to_dict()
 
     if attachments is not MISSING:
-        payload["attachments"] = [a.to_dict() for a in attachments]
+        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
 
     if view is not MISSING:
         msg._state.prevent_view_updates_for(msg.id)
@@ -711,7 +721,7 @@ class Message(Hashable):
     tts: :class:`bool`
         Specifies if the message was done with text-to-speech.
         This can only be accurately received in :func:`on_message` due to
-        a disnake limitation.
+        a Discord limitation.
     type: :class:`MessageType`
         The type of message. In most cases this should not be checked, but it is helpful
         in cases where it might be a system message for :attr:`system_content`.
@@ -721,12 +731,12 @@ class Message(Hashable):
     content: :class:`str`
         The actual contents of the message.
     nonce: Optional[Union[:class:`str`, :class:`int`]]
-        The value used by the disnake guild and the client to verify that the message is successfully sent.
+        The value used by the Discord guild and the client to verify that the message is successfully sent.
         This is not stored long term within Discord's servers and is only used ephemerally.
     embeds: List[:class:`Embed`]
         A list of embeds the message has.
-    channel: Union[:class:`TextChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
-        The :class:`TextChannel` or :class:`Thread` that the message was sent from.
+    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+        The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to messages of
@@ -764,6 +774,12 @@ class Message(Hashable):
         then the list is always empty.
     id: :class:`int`
         The message ID.
+    application_id: Optional[:class:`int`]
+        If this message was sent from an interaction, or is an application owned webhook,
+        then this is the ID of the application.
+
+        .. versionadded:: 2.5
+
     webhook_id: Optional[:class:`int`]
         If this message was sent by a webhook, then this is the webhook ID's that sent this
         message.
@@ -822,6 +838,7 @@ class Message(Hashable):
         "tts",
         "content",
         "channel",
+        "application_id",
         "webhook_id",
         "mention_everyone",
         "embeds",
@@ -862,6 +879,7 @@ class Message(Hashable):
     ):
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
+        self.application_id: Optional[int] = utils._get_as_snowflake(data, "application_id")
         self.webhook_id: Optional[int] = utils._get_as_snowflake(data, "webhook_id")
         self.reactions: List[Reaction] = [
             Reaction(message=self, data=d) for d in data.get("reactions", [])
@@ -874,7 +892,7 @@ class Message(Hashable):
         self.activity: Optional[MessageActivityPayload] = data.get("activity")
         # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
-        self.channel: Union[TextChannel, DMChannel, Thread, VoiceChannel] = channel  # type: ignore
+        self.channel: Union[GuildMessageable, DMChannel] = channel  # type: ignore
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data["edited_timestamp"]
         )
@@ -888,8 +906,9 @@ class Message(Hashable):
         self.stickers: List[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components: List[Component] = [
-            _component_factory(d) for d in data.get("components", [])
+        self.components: List[ActionRow[MessageComponent]] = [
+            _component_factory(d, type=ActionRow[MessageComponent])
+            for d in data.get("components", [])
         ]
 
         inter_payload = data.get("interaction")
@@ -982,7 +1001,7 @@ class Message(Hashable):
             # already removed?
             raise ValueError("Emoji already removed?")
 
-        # if reaction isn't in the list, we crash. This means disnake
+        # if reaction isn't in the list, we crash. This means Discord
         # sent bad data, or we stored improperly
         reaction.count -= 1
 
@@ -1110,11 +1129,11 @@ class Message(Hashable):
                     self.role_mentions.append(role)
 
     def _handle_components(self, components: List[ComponentPayload]):
-        self.components = [_component_factory(d) for d in components]
+        self.components = [
+            _component_factory(d, type=ActionRow[MessageComponent]) for d in components
+        ]
 
-    def _rebind_cached_references(
-        self, new_guild: Guild, new_channel: Union[TextChannel, Thread, VoiceChannel]
-    ) -> None:
+    def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
         self.guild = new_guild
         self.channel = new_channel
         if isinstance(self.author, Member):
@@ -1408,12 +1427,12 @@ class Message(Hashable):
         *,
         embed: Optional[Embed] = ...,
         file: File = ...,
-        attachments: List[Attachment] = ...,
-        suppress: bool = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1424,12 +1443,12 @@ class Message(Hashable):
         *,
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
-        attachments: List[Attachment] = ...,
-        suppress: bool = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1440,12 +1459,12 @@ class Message(Hashable):
         *,
         embeds: List[Embed] = ...,
         file: File = ...,
-        attachments: List[Attachment] = ...,
-        suppress: bool = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1456,12 +1475,12 @@ class Message(Hashable):
         *,
         embeds: List[Embed] = ...,
         files: List[File] = ...,
-        attachments: List[Attachment] = ...,
-        suppress: bool = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
         delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
     ) -> Message:
         ...
 
@@ -1472,14 +1491,21 @@ class Message(Hashable):
 
         The content must be able to be transformed into a string via ``str(content)``.
 
-        .. versionchanged:: 1.3
-            The ``suppress`` keyword-only parameter was added.
-
         .. note::
             If the original message has embeds with images that were created from local files
             (using the ``file`` parameter with :meth:`Embed.set_image` or :meth:`Embed.set_thumbnail`),
             those images will be removed if the message's attachments are edited in any way
             (i.e. by setting ``file``/``files``/``attachments``, or adding an embed with local files).
+
+        .. versionchanged:: 1.3
+            The ``suppress`` keyword-only parameter was added.
+
+        .. versionchanged:: 2.5
+            The ``suppress`` keyword-only parameter was deprecated
+            in favor of ``suppress_embeds``.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -1511,11 +1537,15 @@ class Message(Hashable):
 
             .. versionadded:: 2.1
 
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
-        suppress: :class:`bool`
+
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
+
+        suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
             this brings the embeds back if they were suppressed.
@@ -1551,10 +1581,10 @@ class Message(Hashable):
         HTTPException
             Editing the message failed.
         Forbidden
-            Tried to suppress a message without permissions or
+            Tried to suppress embeds on a message without permissions or
             edited a message's content or embed that isn't yours.
-        ~disnake.InvalidArgument
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
+        TypeError
+            You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
 
         Returns
         -------
@@ -1665,6 +1695,9 @@ class Message(Hashable):
         to use this. If nobody else has reacted to the message using this
         emoji, the :attr:`~Permissions.add_reactions` permission is required.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         emoji: Union[:class:`Emoji`, :class:`Reaction`, :class:`PartialEmoji`, :class:`str`]
@@ -1678,7 +1711,7 @@ class Message(Hashable):
             You do not have the proper permissions to react to the message.
         NotFound
             The emoji you specified was not found.
-        InvalidArgument
+        TypeError
             The emoji parameter is invalid.
         """
         emoji = convert_emoji_reaction(emoji)
@@ -1699,6 +1732,9 @@ class Message(Hashable):
         The ``member`` parameter must represent a member and meet
         the :class:`abc.Snowflake` abc.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         emoji: Union[:class:`Emoji`, :class:`Reaction`, :class:`PartialEmoji`, :class:`str`]
@@ -1714,7 +1750,7 @@ class Message(Hashable):
             You do not have the proper permissions to remove the reaction.
         NotFound
             The member or emoji you specified was not found.
-        InvalidArgument
+        TypeError
             The emoji parameter is invalid.
         """
         emoji = convert_emoji_reaction(emoji)
@@ -1735,6 +1771,9 @@ class Message(Hashable):
 
         .. versionadded:: 1.3
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         emoji: Union[:class:`Emoji`, :class:`Reaction`, :class:`PartialEmoji`, :class:`str`]
@@ -1748,7 +1787,7 @@ class Message(Hashable):
             You do not have the proper permissions to clear the reaction.
         NotFound
             The emoji you specified was not found.
-        InvalidArgument
+        TypeError
             The emoji parameter is invalid.
         """
         emoji = convert_emoji_reaction(emoji)
@@ -1789,6 +1828,9 @@ class Message(Hashable):
 
         .. versionadded:: 2.0
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
@@ -1815,7 +1857,7 @@ class Message(Hashable):
             You do not have permissions to create a thread.
         HTTPException
             Creating the thread failed.
-        InvalidArgument
+        TypeError
             This message does not have guild info attached.
 
         Returns
@@ -1824,7 +1866,7 @@ class Message(Hashable):
             The created thread.
         """
         if self.guild is None:
-            raise InvalidArgument("This message does not have guild info attached.")
+            raise TypeError("This message does not have guild info attached.")
 
         if auto_archive_duration is not None:
             auto_archive_duration = cast(
@@ -1857,6 +1899,9 @@ class Message(Hashable):
         .. versionchanged:: 2.3
             Added ``fail_if_not_exists`` keyword argument. Defaults to ``True``.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         fail_if_not_exists: :class:`bool`
@@ -1867,13 +1912,14 @@ class Message(Hashable):
 
         Raises
         ------
-        ~disnake.HTTPException
+        HTTPException
             Sending the message failed.
-        ~disnake.Forbidden
+        Forbidden
             You do not have the proper permissions to send the message.
-        ~disnake.InvalidArgument
-            The ``files`` list is not of the appropriate size or
-            you specified both ``file`` and ``files``.
+        TypeError
+            You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
+        ValueError
+            The ``files`` or ``embeds`` list is too large.
 
         Returns
         -------
@@ -2035,6 +2081,70 @@ class PartialMessage(Hashable):
         data = await self._state.http.get_message(self.channel.id, self.id)
         return self._state.create_message(channel=self.channel, data=data)
 
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embed: Optional[Embed] = ...,
+        file: File = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embed: Optional[Embed] = ...,
+        files: List[File] = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embeds: List[Embed] = ...,
+        file: File = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        content: Optional[str] = ...,
+        *,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
+        attachments: Optional[List[Attachment]] = ...,
+        suppress_embeds: bool = ...,
+        delete_after: Optional[float] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
+        view: Optional[View] = ...,
+        components: Optional[Components] = ...,
+    ) -> Message:
+        ...
+
     async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
         """|coro|
 
@@ -2044,6 +2154,13 @@ class PartialMessage(Hashable):
 
         .. versionchanged:: 2.1
             :class:`disnake.Message` is always returned.
+
+        .. versionchanged:: 2.5
+            The ``suppress`` keyword-only parameter was deprecated
+            in favor of ``suppress_embeds``.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
 
         .. note::
             If the original message has embeds with images that were created from local files
@@ -2081,14 +2198,17 @@ class PartialMessage(Hashable):
 
             .. versionadded:: 2.1
 
-        attachments: List[:class:`Attachment`]
-            A list of attachments to keep in the message. If ``[]`` is passed
-            then all existing attachments are removed.
+        attachments: Optional[List[:class:`Attachment`]]
+            A list of attachments to keep in the message.
+            If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
 
-        suppress: :class:`bool`
+            .. versionchanged:: 2.5
+                Supports passing ``None`` to clear attachments.
+
+        suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This removes
             all the embeds if set to ``True``. If set to ``False``
             this brings the embeds back if they were suppressed.
@@ -2125,10 +2245,10 @@ class PartialMessage(Hashable):
         HTTPException
             Editing the message failed.
         Forbidden
-            Tried to suppress a message without permissions or
+            Tried to suppress embeds on a message without permissions or
             edited a message's content or embed that isn't yours.
-        ~disnake.InvalidArgument
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
+        TypeError
+            You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
 
         Returns
         -------

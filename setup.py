@@ -2,9 +2,14 @@ import re
 
 from setuptools import setup
 
-requirements = []
-with open("requirements.txt", encoding="utf-8") as f:
-    requirements = f.read().splitlines()
+
+def read_requirements(path: str):
+    with open(path, "r", encoding="utf-8") as f:
+        lines = (x.strip() for x in f.read().splitlines())
+        return [x for x in lines if x and not x.startswith("#")]
+
+
+requirements = read_requirements("requirements.txt")
 
 version = ""
 with open("disnake/__init__.py", encoding="utf-8") as f:
@@ -38,19 +43,9 @@ with open("README.md", encoding="utf-8") as f:
     readme = f.read()
 
 extras_require = {
-    "voice": ["PyNaCl>=1.3.0,<1.5"],
-    "docs": [
-        "sphinx~=4.4.0",
-        "sphinxcontrib_trio==1.1.2",
-        "sphinx-hoverxref~=1.0.0",
-        "sphinx-autobuild==2021.3.14",
-    ],
-    "speed": [
-        "orjson>=3.5.4",
-        "aiodns>=1.1",
-        "Brotli",
-        "cchardet",
-    ],
+    "voice": read_requirements("requirements/requirements_voice.txt"),
+    "docs": read_requirements("requirements/requirements_docs.txt"),
+    "speed": read_requirements("requirements/requirements_speed.txt"),
     "discord": ["discord-disnake"],
 }
 

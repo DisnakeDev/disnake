@@ -27,9 +27,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional
 
-from .enums import VoiceRegion
 from .guild import Guild
-from .utils import MISSING, _assetbytes_to_base64_data, parse_time, warn_deprecated
+from .utils import MISSING, _assetbytes_to_base64_data, parse_time
 
 __all__ = ("Template",)
 
@@ -170,25 +169,23 @@ class Template:
             f" creator={self.creator!r} source_guild={self.source_guild!r} is_dirty={self.is_dirty}>"
         )
 
-    async def create_guild(
-        self, name: str, region: Optional[VoiceRegion] = None, icon: Optional[AssetBytes] = None
-    ) -> Guild:
+    async def create_guild(self, name: str, icon: Optional[AssetBytes] = None) -> Guild:
         """|coro|
 
         Creates a :class:`.Guild` using the template.
 
         Bot accounts in more than 10 guilds are not allowed to create guilds.
 
+        .. versionchanged:: 2.5
+            Removed the ``region`` parameter.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         name: :class:`str`
             The name of the guild.
-        region: :class:`.VoiceRegion`
-            The region for the voice communication server.
-
-            .. deprecated:: 2.5
-
-                This no longer has any effect.
         icon: Optional[|resource_type|]
             The icon of the guild.
             See :meth:`.ClientUser.edit` for more details on what is expected.
@@ -203,10 +200,10 @@ class Template:
             The ``icon`` asset couldn't be found.
         HTTPException
             Guild creation failed.
-        InvalidArgument
-            Invalid icon image format given. Must be PNG or JPG.
         TypeError
             The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
+        ValueError
+            Invalid icon image format given. Must be PNG or JPG.
 
         Returns
         -------
@@ -215,11 +212,6 @@ class Template:
             added to cache.
         """
         icon_data = await _assetbytes_to_base64_data(icon)
-
-        if region is not None:
-            warn_deprecated(
-                "region is deprecated and will be removed in a future version", stacklevel=2
-            )
 
         data = await self._state.http.create_from_template(self.code, name, icon_data)
         return Guild(data=data, state=self._state)

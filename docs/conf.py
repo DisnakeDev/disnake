@@ -17,6 +17,7 @@ import os
 import re
 import subprocess
 import sys
+from typing import Any
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -64,7 +65,7 @@ extlinks = {
 intersphinx_mapping = {
     "py": ("https://docs.python.org/3", None),
     "aio": ("https://docs.aiohttp.org/en/stable/", None),
-    "req": ("https://docs.python-requests.org/en/latest/", None),
+    "req": ("https://requests.readthedocs.io/en/latest/", None),
 }
 
 rst_prolog = """
@@ -193,10 +194,10 @@ def linkcode_resolve(domain, info):
         return None
 
     try:
-        obj = sys.modules[info["module"]]
+        obj: Any = sys.modules[info["module"]]
         for part in info["fullname"].split("."):
             obj = getattr(obj, part)
-        obj = inspect.unwrap(obj)  # type: ignore
+        obj = inspect.unwrap(obj)
 
         if isinstance(obj, property):
             obj = inspect.unwrap(obj.fget)  # type: ignore
@@ -232,7 +233,7 @@ html_experimental_html5_writer = True
 html_theme = "basic"
 
 html_context = {
-    "discord_invite": "https://discord.gg/gJDbCw8aQy",
+    "discord_invite": "https://discord.gg/disnake",
     "discord_extensions": [
         ("disnake.ext.commands", "ext/commands"),
         ("disnake.ext.tasks", "ext/tasks"),
@@ -240,7 +241,7 @@ html_context = {
 }
 
 resource_links = {
-    "disnake": "https://discord.gg/gJDbCw8aQy",
+    "disnake": "https://discord.gg/disnake",
     "issues": f"{github_repo}/issues",
     "discussions": f"{github_repo}/discussions",
     "examples": f"{github_repo}/tree/{git_ref}/examples",
@@ -425,5 +426,5 @@ texinfo_documents = [
 def setup(app):
     if app.config.language == "ja":
         app.config.intersphinx_mapping["py"] = ("https://docs.python.org/ja/3", None)
-        app.config.html_context["discord_invite"] = "https://discord.gg/gJDbCw8aQy"
-        app.config.resource_links["disnake"] = "https://discord.gg/gJDbCw8aQy"
+        app.config.html_context["discord_invite"] = "https://discord.gg/disnake"
+        app.config.resource_links["disnake"] = "https://discord.gg/disnake"
