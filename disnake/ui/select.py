@@ -28,7 +28,20 @@ from __future__ import annotations
 import asyncio
 import os
 import sys
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, Protocol, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
@@ -332,9 +345,7 @@ def select(
 
 @overload
 def select(
-    cls: Type[SelectObject[S_co, P]],
-    *_: P.args,
-    **kwargs: P.kwargs
+    cls: Type[SelectObject[S_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     ...
 

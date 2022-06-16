@@ -28,7 +28,18 @@ from __future__ import annotations
 import asyncio
 import os
 import sys
-from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, Type, TypeVar, Union, Protocol, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Optional,
+    Protocol,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
@@ -260,16 +271,13 @@ def button(
 
 @overload
 def button(
-    cls: Type[ButtonObject[B_co, P]],
-    *_: P.args,
-    **kwargs: P.kwargs
+    cls: Type[ButtonObject[B_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
     ...
 
 
 def button(
-    cls: Type[ButtonObject[B_co, P]] = Button[Any],
-    **kwargs: Any
+    cls: Type[ButtonObject[B_co, P]] = Button[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
     """A decorator that attaches a button to a component.
 
