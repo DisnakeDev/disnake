@@ -1640,7 +1640,7 @@ of :class:`enum.Enum`.
         .. versionadded:: 2.3
     .. attribute:: auto_moderation_action
 
-        The system message denoting that Auto Moderation has taken an action on a message.
+        The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
 
