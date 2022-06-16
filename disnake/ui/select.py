@@ -27,7 +27,14 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+import sys
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, Protocol, overload
+
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+
+else:
+    from typing_extensions import ParamSpec
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
@@ -47,7 +54,14 @@ if TYPE_CHECKING:
     from .view import View
 
 S = TypeVar("S", bound="Select")
+S_co = TypeVar("S_co", bound="Select", covariant=True)
 V = TypeVar("V", bound="View", covariant=True)
+P = ParamSpec("P")
+
+
+class SelectObject(Protocol[S_co, P]):
+    def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
+        ...
 
 
 def _parse_select_options(
@@ -302,6 +316,7 @@ class Select(Item[V]):
         return True
 
 
+@overload
 def select(
     *,
     placeholder: Optional[str] = None,
@@ -311,7 +326,23 @@ def select(
     options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[Select]], DecoratedItem[Select]]:
+) -> Callable[[ItemCallbackType[Select[Any]]], DecoratedItem[Select[Any]]]:
+    ...
+
+
+@overload
+def select(
+    cls: Type[SelectObject[S_co, P]],
+    *_: P.args,
+    **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    ...
+
+
+def select(
+    cls: Type[SelectObject[S_co, P]] = Select[Any],
+    **kwargs: Any,
+) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -323,6 +354,12 @@ def select(
 
     Parameters
     ----------
+    cls: Type[:class:`Select`]
+        The select subclass to create an instance of. If passed, the following keywords
+        this decorator accepts will be the same as the class.
+
+        .. versionadded:: 2.6
+
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
@@ -353,48 +390,10 @@ def select(
         Whether the select is disabled. Defaults to ``False``.
     """
 
-    def decorator(func: ItemCallbackType[Select]) -> DecoratedItem[Select]:
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError("select function must be a coroutine function")
-
-        func.__discord_ui_model_type__ = Select
-        func.__discord_ui_model_kwargs__ = {
-            "placeholder": placeholder,
-            "custom_id": custom_id,
-            "row": row,
-            "min_values": min_values,
-            "max_values": max_values,
-            "options": options,
-            "disabled": disabled,
-        }
-        return func  # type: ignore
-
-    return decorator
-
-
-def custom_select(
-    *, cls: Type[S] = Select, **kwargs: Any
-) -> Callable[[ItemCallbackType[S]], DecoratedItem[S]]:
-    """A decorator that attaches a custom select menu to a component.
-
-    The function being decorated should have three parameters, ``self`` representing
-    the :class:`disnake.ui.View`, the cls being passed and
-    the :class:`disnake.MessageInteraction` you receive.
-
-    In order to get the selected items that the user has chosen within the callback
-    use :attr:`Select.values`.
-
-    Parameters
-    ------------
-    cls: :class:`Select`
-        The select subclass to create an instance of.
-    kwargs: Any
-        Keywords that are passed directly to the cls constructor.
-    """
     if not issubclass(cls, Select):
-        raise TypeError("cls argument must be a class subclassing Select")
+        raise TypeError("cls argument must be a subclass of Select")
 
-    def decorator(func: ItemCallbackType[S]) -> DecoratedItem[S]:
+    def decorator(func: ItemCallbackType[S_co]) -> DecoratedItem[S_co]:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 

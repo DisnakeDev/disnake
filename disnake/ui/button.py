@@ -27,7 +27,14 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, Type, TypeVar, Union
+import sys
+from typing import TYPE_CHECKING, Any, Callable, Optional, Tuple, Type, TypeVar, Union, Protocol, overload
+
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+
+else:
+    from typing_extensions import ParamSpec
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
@@ -46,7 +53,14 @@ if TYPE_CHECKING:
     from .view import View
 
 B = TypeVar("B", bound="Button")
+B_co = TypeVar("B_co", bound="Button", covariant=True)
 V = TypeVar("V", bound="View", covariant=True)
+P = ParamSpec("P")
+
+
+class ButtonObject(Protocol[B_co, P]):
+    def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
+        ...
 
 
 class Button(Item[V]):
@@ -231,6 +245,7 @@ class Button(Item[V]):
         self._underlying = button
 
 
+@overload
 def button(
     *,
     label: Optional[str] = None,
@@ -239,7 +254,23 @@ def button(
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[Button]], DecoratedItem[Button]]:
+) -> Callable[[ItemCallbackType[Button[Any]]], DecoratedItem[Button[Any]]]:
+    ...
+
+
+@overload
+def button(
+    cls: Type[ButtonObject[B_co, P]],
+    *_: P.args,
+    **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
+    ...
+
+
+def button(
+    cls: Type[ButtonObject[B_co, P]] = Button[Any],
+    **kwargs: Any
+) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -256,6 +287,12 @@ def button(
 
     Parameters
     ----------
+    cls: Type[:class:`Button`]
+        The button subclass to create an instance of. If passed, the following keywords
+        this decorator accepts will be the same as the class.
+
+        .. versionadded:: 2.6
+
     label: Optional[:class:`str`]
         The label of the button, if any.
     custom_id: Optional[:class:`str`]
@@ -276,54 +313,11 @@ def button(
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    def decorator(func: ItemCallbackType[Button]) -> DecoratedItem[Button]:
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError("button function must be a coroutine function")
-
-        func.__discord_ui_model_type__ = Button
-        func.__discord_ui_model_kwargs__ = {
-            "style": style,
-            "custom_id": custom_id,
-            "url": None,
-            "disabled": disabled,
-            "label": label,
-            "emoji": emoji,
-            "row": row,
-        }
-        return func  # type: ignore
-
-    return decorator
-
-
-def custom_button(
-    *, cls: Type[B] = Button, **kwargs: Any
-) -> Callable[[ItemCallbackType[B]], DecoratedItem[B]]:
-    """A decorator that attaches a custom button to a component.
-
-    The function being decorated should have three parameters, ``self`` representing
-    the :class:`disnake.ui.View`, the cls being passed and
-    the :class:`disnake.MessageInteraction` you receive.
-
-    .. note::
-
-        Buttons with a URL cannot be created with this function.
-        Consider creating a :class:`Button` manually instead.
-        This is because buttons with a URL do not have a callback
-        associated with them since Discord does not do any processing
-        with it.
-
-    Parameters
-    ------------
-    cls: :class:`Button`
-        The button subclass to create an instance of.
-    kwargs: Any
-        Keywords that are passed directly to the cls constructor.
-    """
     if not issubclass(cls, Button):
-        raise TypeError("cls argument must be a class subclassing Button")
+        raise TypeError("cls argument must be a subclass of Button")
 
-    def decorator(func: ItemCallbackType[B]) -> DecoratedItem[B]:
-        if not inspect.iscoroutinefunction(func):
+    def decorator(func: ItemCallbackType[B_co]) -> DecoratedItem[B_co]:
+        if not asyncio.iscoroutinefunction(func):
             raise TypeError("button function must be a coroutine function")
 
         func.__discord_ui_model_type__ = cls
