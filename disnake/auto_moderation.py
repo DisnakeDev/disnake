@@ -159,6 +159,10 @@ class AutomodTriggerMetadata:
     ----------
     keyword_filter: Optional[Sequence[:class:`str`]]
         List of keywords to filter. Used with :attr:`AutomodTriggerType.keyword`.
+
+        See `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`__
+        for details about how keyword matching works.
+
     presets: Optional[Sequence[:class:`AutomodKeywordPresetType`]]
         List of pre-defined filter list types. Used with :attr:`AutomodTriggerType.keyword_preset`.
     """
