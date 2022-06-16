@@ -2134,7 +2134,7 @@ class HTTPClient:
 
     def get_auto_moderation_rules(
         self, guild_id: Snowflake
-    ) -> Response[List[auto_moderation.AutomodRule]]:
+    ) -> Response[List[auto_moderation.AutoModRule]]:
         return self.request(
             Route("GET", "/guilds/{guild_id}/auto-moderation/rules", guild_id=guild_id)
         )
@@ -2142,7 +2142,7 @@ class HTTPClient:
     # unused
     def get_auto_moderation_rule(
         self, guild_id: Snowflake, rule_id: Snowflake
-    ) -> Response[auto_moderation.AutomodRule]:
+    ) -> Response[auto_moderation.AutoModRule]:
         return self.request(
             Route(
                 "GET",
@@ -2157,16 +2157,16 @@ class HTTPClient:
         guild_id: Snowflake,
         *,
         name: str,
-        event_type: auto_moderation.AutomodEventType,
-        trigger_type: auto_moderation.AutomodTriggerType,
-        actions: List[auto_moderation.AutomodAction],
-        trigger_metadata: Optional[auto_moderation.AutomodTriggerMetadata] = None,
+        event_type: auto_moderation.AutoModEventType,
+        trigger_type: auto_moderation.AutoModTriggerType,
+        actions: List[auto_moderation.AutoModAction],
+        trigger_metadata: Optional[auto_moderation.AutoModTriggerMetadata] = None,
         enabled: Optional[bool] = None,
         exempt_roles: Optional[SnowflakeList] = None,
         exempt_channels: Optional[SnowflakeList] = None,
         reason: Optional[str] = None,
-    ) -> Response[auto_moderation.AutomodRule]:
-        payload: auto_moderation.CreateAutomodRule = {
+    ) -> Response[auto_moderation.AutoModRule]:
+        payload: auto_moderation.CreateAutoModRule = {
             "name": name,
             "event_type": event_type,
             "trigger_type": trigger_type,
@@ -2195,7 +2195,7 @@ class HTTPClient:
         *,
         reason: Optional[str] = None,
         **fields: Any,
-    ) -> Response[auto_moderation.AutomodRule]:
+    ) -> Response[auto_moderation.AutoModRule]:
         return self.request(
             Route(
                 "PATCH",

@@ -44,7 +44,7 @@ from typing import (
 from . import abc, enums, flags, utils
 from .app_commands import ApplicationCommandPermissions
 from .asset import Asset
-from .auto_moderation import AutomodAction, AutomodTriggerMetadata
+from .auto_moderation import AutoModAction, AutoModTriggerMetadata
 from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
@@ -62,7 +62,7 @@ if TYPE_CHECKING:
     import datetime
 
     from .app_commands import APIApplicationCommand
-    from .auto_moderation import AutomodRule
+    from .auto_moderation import AutoModRule
     from .emoji import Emoji
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
@@ -78,8 +78,8 @@ if TYPE_CHECKING:
         _AuditLogChange_ApplicationCommandPermissions as AuditLogChangeAppCmdPermsPayload,
     )
     from .types.auto_moderation import (
-        AutomodAction as AutomodActionPayload,
-        AutomodTriggerMetadata as AutomodTriggerMetadataPayload,
+        AutoModAction as AutoModActionPayload,
+        AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
     )
     from .types.channel import PermissionOverwrite as PermissionOverwritePayload
     from .types.role import Role as RolePayload
@@ -250,19 +250,19 @@ def _transform_guild_scheduled_event_image(
 
 
 def _transform_automod_action(
-    entry: AuditLogEntry, data: Optional[AutomodActionPayload]
-) -> Optional[AutomodAction]:
+    entry: AuditLogEntry, data: Optional[AutoModActionPayload]
+) -> Optional[AutoModAction]:
     if data is None:
         return None
-    return AutomodAction._from_dict(data)
+    return AutoModAction._from_dict(data)
 
 
 def _transform_automod_trigger_metadata(
-    entry: AuditLogEntry, data: Optional[AutomodTriggerMetadataPayload]
-) -> Optional[AutomodTriggerMetadata]:
+    entry: AuditLogEntry, data: Optional[AutoModTriggerMetadataPayload]
+) -> Optional[AutoModTriggerMetadata]:
     if data is None:
         return None
-    return AutomodTriggerMetadata._from_dict(data)
+    return AutoModTriggerMetadata._from_dict(data)
 
 
 class AuditLogDiff:
@@ -329,8 +329,8 @@ class AuditLogChanges:
         'type':                          (None, _transform_type),
         'flags':                         (None, _flags_transformer(flags.ChannelFlags)),
         'system_channel_flags':          (None, _flags_transformer(flags.SystemChannelFlags)),
-        'trigger_type':                  (None, _enum_transformer(enums.AutomodTriggerType)),
-        'event_type':                    (None, _enum_transformer(enums.AutomodEventType)),
+        'trigger_type':                  (None, _enum_transformer(enums.AutoModTriggerType)),
+        'event_type':                    (None, _enum_transformer(enums.AutoModEventType)),
         'actions':                       (None, _list_transformer(_transform_automod_action)),
         'trigger_metadata':              (None, _transform_automod_trigger_metadata),
         'exempt_roles':                  (None, _list_transformer(_transform_role)),
@@ -472,10 +472,10 @@ class _AuditLogProxyStageInstanceAction:
     channel: abc.GuildChannel
 
 
-class _AuditLogProxyAutomodBlockMessage:
+class _AuditLogProxyAutoModBlockMessage:
     channel: abc.GuildChannel
     rule_name: str
-    rule_trigger_type: enums.AutomodTriggerType
+    rule_trigger_type: enums.AutoModTriggerType
 
 
 class AuditLogEntry(Hashable):
@@ -528,7 +528,7 @@ class AuditLogEntry(Hashable):
         data: AuditLogEntryPayload,
         guild: Guild,
         application_commands: Dict[int, APIApplicationCommand],
-        auto_moderation_rules: Dict[int, AutomodRule],
+        auto_moderation_rules: Dict[int, AutoModRule],
         guild_scheduled_events: Dict[int, GuildScheduledEvent],
         integrations: Dict[int, PartialIntegration],
         threads: Dict[int, Thread],
@@ -616,7 +616,7 @@ class AuditLogEntry(Hashable):
                     ),
                     "rule_name": extra["auto_moderation_rule_name"],
                     "rule_trigger_type": enums.try_enum(
-                        enums.AutomodTriggerType,
+                        enums.AutoModTriggerType,
                         int(extra["auto_moderation_rule_trigger_type"]),
                     ),
                 }
@@ -630,7 +630,7 @@ class AuditLogEntry(Hashable):
         #     _AuditLogProxyMemberDisconnect,
         #     _AuditLogProxyPinAction,
         #     _AuditLogProxyStageInstanceAction,
-        #     _AuditLogProxyAutomodBlockMessage,
+        #     _AuditLogProxyAutoModBlockMessage,
         #     Member, User, None,
         #     Role,
         # ]
@@ -685,7 +685,7 @@ class AuditLogEntry(Hashable):
         Thread,
         GuildScheduledEvent,
         APIApplicationCommand,
-        AutomodRule,
+        AutoModRule,
         Object,
         None,
     ]:
@@ -804,5 +804,5 @@ class AuditLogEntry(Hashable):
         # fall back to object
         return Object(id=target_id)
 
-    def _convert_target_auto_moderation_rule(self, target_id: int) -> Union[AutomodRule, Object]:
+    def _convert_target_auto_moderation_rule(self, target_id: int) -> Union[AutoModRule, Object]:
         return self._auto_moderation_rules.get(target_id) or Object(id=target_id)

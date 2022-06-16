@@ -1350,7 +1350,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_auto_moderation_rule_create(rule)
 
-    Called when an :class:`AutomodRule` is created.
+    Called when an :class:`AutoModRule` is created.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
     This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
@@ -1358,11 +1358,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. versionadded:: 2.6
 
     :param rule: The auto moderation rule that was created.
-    :type rule: :class:`AutomodRule`
+    :type rule: :class:`AutoModRule`
 
 .. function:: on_auto_moderation_rule_update(rule)
 
-    Called when an :class:`AutomodRule` is updated.
+    Called when an :class:`AutoModRule` is updated.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
     This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
@@ -1370,11 +1370,11 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. versionadded:: 2.6
 
     :param rule: The auto moderation rule that was updated.
-    :type rule: :class:`AutomodRule`
+    :type rule: :class:`AutoModRule`
 
 .. function:: on_auto_moderation_rule_delete(rule)
 
-    Called when an :class:`AutomodRule` is deleted.
+    Called when an :class:`AutoModRule` is deleted.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
     This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
@@ -1382,21 +1382,21 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     .. versionadded:: 2.6
 
     :param rule: The auto moderation rule that was deleted.
-    :type rule: :class:`AutomodRule`
+    :type rule: :class:`AutoModRule`
 
 .. function:: on_auto_moderation_action_execution(execution)
 
     Called when an auto moderation action is executed due to a rule triggering for a particular event.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
-    The guild this action has taken place in can be accessed using :attr:`AutomodActionExecution.guild`.
+    The guild this action has taken place in can be accessed using :attr:`AutoModActionExecution.guild`.
 
     This requires :attr:`Intents.auto_moderation_execution` to be enabled.
 
     .. versionadded:: 2.6
 
     :param execution: The auto moderation action execution data.
-    :type execution: :class:`AutomodActionExecution`
+    :type execution: :class:`AutoModActionExecution`
 
 .. function:: on_group_join(channel, user)
               on_group_remove(channel, user)
@@ -3002,7 +3002,7 @@ of :class:`enum.Enum`.
         An auto moderation rule was created.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`AutomodRule` or :class:`Object` with the ID of the auto moderation rule which
+        the :class:`AutoModRule` or :class:`Object` with the ID of the auto moderation rule which
         was created.
 
         Possible attributes for :class:`AuditLogDiff`:
@@ -3023,7 +3023,7 @@ of :class:`enum.Enum`.
         An auto moderation rule was updated.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`AutomodRule` or :class:`Object` with the ID of the auto moderation rule which
+        the :class:`AutoModRule` or :class:`Object` with the ID of the auto moderation rule which
         was updated.
 
         Possible attributes for :class:`AuditLogDiff`:
@@ -3072,7 +3072,7 @@ of :class:`enum.Enum`.
 
         - ``channel``: A :class:`~abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked.
         - ``rule_name``: A :class:`str` with the name of the rule that matched.
-        - ``rule_trigger_type``: A :class:`AutomodTriggerType` value with the trigger type of the rule.
+        - ``rule_trigger_type``: A :class:`AutoModTriggerType` value with the trigger type of the rule.
 
 .. class:: AuditLogActionCategory
 
@@ -3527,7 +3527,7 @@ of :class:`enum.Enum`.
 
         The ``zh_TW`` (Chinese, Taiwan) locale.
 
-.. class:: AutomodTriggerType
+.. class:: AutoModTriggerType
 
     Represents the trigger type of an auto moderation rule.
 
@@ -3549,7 +3549,7 @@ of :class:`enum.Enum`.
 
         The rule will filter messages based on predefined lists containing commonly flagged words.
 
-.. class:: AutomodEventType
+.. class:: AutoModEventType
 
     Represents the event type of an auto moderation rule.
 
@@ -3559,7 +3559,7 @@ of :class:`enum.Enum`.
 
         The rule will apply to messages sent in the guild.
 
-.. class:: AutomodActionType
+.. class:: AutoModActionType
 
     Represents an action of an auto moderation rule.
 
@@ -3579,10 +3579,10 @@ of :class:`enum.Enum`.
 
         .. note::
             This action type is only available for rules with trigger type
-            :attr:`~AutomodTriggerType.keyword`, and :attr:`~Permissions.moderate_members`
+            :attr:`~AutoModTriggerType.keyword`, and :attr:`~Permissions.moderate_members`
             permissions are required to use it.
 
-.. class:: AutomodKeywordPresetType
+.. class:: AutoModKeywordPresetType
 
     Represents an pre-defined auto moderation filter list, provided by Discord.
 
@@ -4359,25 +4359,25 @@ AuditLogDiff
 
         The trigger type of an auto moderation rule being changed.
 
-        :type: :class:`AutomodTriggerType`
+        :type: :class:`AutoModTriggerType`
 
     .. attribute:: event_type
 
         The event type of an auto moderation rule being changed.
 
-        :type: :class:`AutomodEventType`
+        :type: :class:`AutoModEventType`
 
     .. attribute:: actions
 
         The list of actions of an auto moderation rule being changed.
 
-        :type: List[:class:`AutomodAction`]
+        :type: List[:class:`AutoModAction`]
 
     .. attribute:: trigger_metadata
 
         The additional trigger metadata of an auto moderation rule being changed.
 
-        :type: :class:`AutomodTriggerMetadata`
+        :type: :class:`AutoModTriggerMetadata`
 
     .. attribute:: exempt_roles
 
@@ -5200,36 +5200,36 @@ GuildSticker
     :members:
     :inherited-members:
 
-AutomodRule
+AutoModRule
 ~~~~~~~~~~~~
 
-.. attributetable:: AutomodRule
+.. attributetable:: AutoModRule
 
-.. autoclass:: AutomodRule()
+.. autoclass:: AutoModRule()
     :members:
 
-AutomodTriggerMetadata
+AutoModTriggerMetadata
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: AutomodTriggerMetadata
+.. attributetable:: AutoModTriggerMetadata
 
-.. autoclass:: AutomodTriggerMetadata()
+.. autoclass:: AutoModTriggerMetadata()
     :members:
 
-AutomodAction
+AutoModAction
 ~~~~~~~~~~~~~~
 
-.. attributetable:: AutomodAction
+.. attributetable:: AutoModAction
 
-.. autoclass:: AutomodAction()
+.. autoclass:: AutoModAction()
     :members:
 
-AutomodActionExecution
+AutoModActionExecution
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. attributetable:: AutomodActionExecution
+.. attributetable:: AutoModActionExecution
 
-.. autoclass:: AutomodActionExecution()
+.. autoclass:: AutoModActionExecution()
     :members:
 
 RawMessageDeleteEvent

@@ -29,11 +29,11 @@ import datetime
 from typing import List, Literal, Optional, TypedDict, Union
 
 from .auto_moderation import (
-    AutomodAction,
-    AutomodEventType,
-    AutomodRule,
-    AutomodTriggerMetadata,
-    AutomodTriggerType,
+    AutoModAction,
+    AutoModEventType,
+    AutoModRule,
+    AutoModTriggerMetadata,
+    AutoModTriggerType,
 )
 from .channel import ChannelType, PermissionOverwrite, VideoQualityMode
 from .guild import (
@@ -268,28 +268,28 @@ class _AuditLogChange_ApplicationCommandPermissions(TypedDict):
     old_value: ApplicationCommandPermissions
 
 
-class _AuditLogChange_AutomodTriggerType(TypedDict):
+class _AuditLogChange_AutoModTriggerType(TypedDict):
     key: Literal["trigger_type"]
-    new_value: AutomodTriggerType
-    old_value: AutomodTriggerType
+    new_value: AutoModTriggerType
+    old_value: AutoModTriggerType
 
 
-class _AuditLogChange_AutomodEventType(TypedDict):
+class _AuditLogChange_AutoModEventType(TypedDict):
     key: Literal["event_type"]
-    new_value: AutomodEventType
-    old_value: AutomodEventType
+    new_value: AutoModEventType
+    old_value: AutoModEventType
 
 
-class _AuditLogChange_AutomodActions(TypedDict):
+class _AuditLogChange_AutoModActions(TypedDict):
     key: Literal["actions"]
-    new_value: List[AutomodAction]
-    old_value: List[AutomodAction]
+    new_value: List[AutoModAction]
+    old_value: List[AutoModAction]
 
 
-class _AuditLogChange_AutomodTriggerMetadata(TypedDict):
+class _AuditLogChange_AutoModTriggerMetadata(TypedDict):
     key: Literal["trigger_metadata"]
-    new_value: AutomodTriggerMetadata
-    old_value: AutomodTriggerMetadata
+    new_value: AutoModTriggerMetadata
+    old_value: AutoModTriggerMetadata
 
 
 AuditLogChange = Union[
@@ -310,10 +310,10 @@ AuditLogChange = Union[
     _AuditLogChange_Overwrites,
     _AuditLogChange_Datetime,
     _AuditLogChange_ApplicationCommandPermissions,
-    _AuditLogChange_AutomodTriggerType,
-    _AuditLogChange_AutomodEventType,
-    _AuditLogChange_AutomodActions,
-    _AuditLogChange_AutomodTriggerMetadata,
+    _AuditLogChange_AutoModTriggerType,
+    _AuditLogChange_AutoModEventType,
+    _AuditLogChange_AutoModActions,
+    _AuditLogChange_AutoModTriggerMetadata,
 ]
 
 
@@ -347,7 +347,7 @@ class AuditLogEntry(_AuditLogEntryOptional):
 class AuditLog(TypedDict):
     audit_log_entries: List[AuditLogEntry]
     application_commands: List[ApplicationCommand]
-    auto_moderation_rules: List[AutomodRule]
+    auto_moderation_rules: List[AutoModRule]
     guild_scheduled_events: List[GuildScheduledEvent]
     integrations: List[PartialIntegration]
     threads: List[Thread]

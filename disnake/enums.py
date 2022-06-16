@@ -66,10 +66,10 @@ __all__ = (
     "ThreadArchiveDuration",
     "WidgetStyle",
     "Locale",
-    "AutomodTriggerType",
-    "AutomodEventType",
-    "AutomodActionType",
-    "AutomodKeywordPresetType",
+    "AutoModTriggerType",
+    "AutoModEventType",
+    "AutoModActionType",
+    "AutoModKeywordPresetType",
 )
 
 
@@ -787,24 +787,24 @@ class Locale(Enum):
         return self.value
 
 
-class AutomodTriggerType(Enum):
+class AutoModTriggerType(Enum):
     keyword = 1
     harmful_link = 2
     spam = 3
     keyword_preset = 4
 
 
-class AutomodEventType(Enum):
+class AutoModEventType(Enum):
     message_send = 1
 
 
-class AutomodActionType(Enum):
+class AutoModActionType(Enum):
     block_message = 1
     send_alert_message = 2
     timeout = 3
 
 
-class AutomodKeywordPresetType(Enum):
+class AutoModKeywordPresetType(Enum):
     profanity = 1
     sexual_content = 2
     slurs = 3

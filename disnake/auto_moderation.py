@@ -28,10 +28,10 @@ from datetime import timedelta
 from typing import TYPE_CHECKING, List, Literal, Optional, Sequence, Union, overload
 
 from .enums import (
-    AutomodActionType,
-    AutomodEventType,
-    AutomodKeywordPresetType,
-    AutomodTriggerType,
+    AutoModActionType,
+    AutoModEventType,
+    AutoModKeywordPresetType,
+    AutoModTriggerType,
     enum_if_int,
     try_enum,
     try_enum_to_int,
@@ -48,23 +48,23 @@ if TYPE_CHECKING:
     from .role import Role
     from .threads import Thread
     from .types.auto_moderation import (
-        AutomodAction as AutomodActionPayload,
-        AutomodActionExecutionEvent as AutomodActionExecutionEventPayload,
-        AutomodActionMetadata,
-        AutomodRule as AutomodRulePayload,
-        AutomodTriggerMetadata as AutomodTriggerMetadataPayload,
-        EditAutomodRule as EditAutomodRulePayload,
+        AutoModAction as AutoModActionPayload,
+        AutoModActionExecutionEvent as AutoModActionExecutionEventPayload,
+        AutoModActionMetadata,
+        AutoModRule as AutoModRulePayload,
+        AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
+        EditAutoModRule as EditAutoModRulePayload,
     )
 
 __all__ = (
-    "AutomodAction",
-    "AutomodTriggerMetadata",
-    "AutomodRule",
-    "AutomodActionExecution",
+    "AutoModAction",
+    "AutoModTriggerMetadata",
+    "AutoModRule",
+    "AutoModActionExecution",
 )
 
 
-class AutomodAction:
+class AutoModAction:
     """
     Represents an auto moderation action.
 
@@ -72,25 +72,25 @@ class AutomodAction:
 
     Attributes
     ----------
-    type: :class:`AutomodActionType`
+    type: :class:`AutoModActionType`
         The action type.
     """
 
     __slots__ = ("type", "_metadata")
 
     @overload
-    def __init__(self, *, type: Literal[AutomodActionType.block_message]):
+    def __init__(self, *, type: Literal[AutoModActionType.block_message]):
         ...
 
     @overload
-    def __init__(self, *, type: Literal[AutomodActionType.send_alert_message], channel: Snowflake):
+    def __init__(self, *, type: Literal[AutoModActionType.send_alert_message], channel: Snowflake):
         ...
 
     @overload
     def __init__(
         self,
         *,
-        type: Literal[AutomodActionType.timeout],
+        type: Literal[AutoModActionType.timeout],
         timeout_duration: Union[int, timedelta],
     ):
         ...
@@ -98,12 +98,12 @@ class AutomodAction:
     def __init__(
         self,
         *,
-        type: AutomodActionType,
+        type: AutoModActionType,
         channel: Optional[Snowflake] = None,
         timeout_duration: Optional[Union[int, timedelta]] = None,
     ):
-        self.type: AutomodActionType = enum_if_int(AutomodActionType, type)
-        self._metadata: AutomodActionMetadata = {}
+        self.type: AutoModActionType = enum_if_int(AutoModActionType, type)
+        self._metadata: AutoModActionMetadata = {}
 
         # NOTE: if this is changed to do any sort of processing on those parameters,
         # `_from_dict` would need to be updated as it doesn't pass any of them
@@ -117,36 +117,36 @@ class AutomodAction:
     @property
     def channel_id(self) -> Optional[int]:
         """Optional[:class:`int`]: The channel ID to send an alert in when the rule is triggered,
-        if :attr:`~AutomodAction.type` is :attr:`AutomodActionType.send_alert_message`."""
+        if :attr:`~AutoModAction.type` is :attr:`AutoModActionType.send_alert_message`."""
         return _get_as_snowflake(self._metadata, "channel_id")
 
     @property
     def timeout_duration(self) -> Optional[int]:
         """Optional[:class:`int`]: The duration (in seconds) for which to timeout
         the user when the rule is triggered,
-        if :attr:`~AutomodAction.type` is :attr:`AutomodActionType.timeout`."""
+        if :attr:`~AutoModAction.type` is :attr:`AutoModActionType.timeout`."""
         return _get_as_snowflake(self._metadata, "duration_seconds")
 
     def __repr__(self) -> str:
-        if self.type is AutomodActionType.send_alert_message:
+        if self.type is AutoModActionType.send_alert_message:
             meta_repr = f" channel_id={self.channel_id!r}"
-        elif self.type is AutomodActionType.timeout:
+        elif self.type is AutoModActionType.timeout:
             meta_repr = f" timeout_duration={self.timeout_duration}"
         else:
             meta_repr = ""
-        return f"<AutomodAction type={self.type!r}{meta_repr}>"
+        return f"<AutoModAction type={self.type!r}{meta_repr}>"
 
     @classmethod
-    def _from_dict(cls, data: AutomodActionPayload) -> Self:
+    def _from_dict(cls, data: AutoModActionPayload) -> Self:
         # bypass init overloads and unnecessary processing
         self = cls.__new__(cls)
 
-        self.type = try_enum(AutomodActionType, data["type"])
+        self.type = try_enum(AutoModActionType, data["type"])
         self._metadata = data.get("metadata", {})
 
         return self
 
-    def to_dict(self) -> AutomodActionPayload:
+    def to_dict(self) -> AutoModActionPayload:
         return {
             "type": self.type.value,
             "metadata": self._metadata,
@@ -154,7 +154,7 @@ class AutomodAction:
 
 
 # TODO: perhaps this should just be a typeddict instead?
-class AutomodTriggerMetadata:
+class AutoModTriggerMetadata:
     """
     Metadata for an auto moderation trigger.
 
@@ -163,13 +163,13 @@ class AutomodTriggerMetadata:
     Attributes
     ----------
     keyword_filter: Optional[Sequence[:class:`str`]]
-        List of keywords to filter. Used with :attr:`AutomodTriggerType.keyword`.
+        List of keywords to filter. Used with :attr:`AutoModTriggerType.keyword`.
 
         See `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`__
         for details about how keyword matching works.
 
-    presets: Optional[Sequence[:class:`AutomodKeywordPresetType`]]
-        List of pre-defined filter list types. Used with :attr:`AutomodTriggerType.keyword_preset`.
+    presets: Optional[Sequence[:class:`AutoModKeywordPresetType`]]
+        List of pre-defined filter list types. Used with :attr:`AutoModTriggerType.keyword_preset`.
     """
 
     __slots__ = ("keyword_filter", "presets")
@@ -180,15 +180,15 @@ class AutomodTriggerMetadata:
         self,
         *,
         keyword_filter: Optional[Sequence[str]] = None,
-        presets: Optional[Sequence[AutomodKeywordPresetType]] = None,
+        presets: Optional[Sequence[AutoModKeywordPresetType]] = None,
     ):
         self.keyword_filter: Optional[Sequence[str]] = keyword_filter
-        self.presets: Optional[Sequence[AutomodKeywordPresetType]] = presets
+        self.presets: Optional[Sequence[AutoModKeywordPresetType]] = presets
 
     @classmethod
-    def _from_dict(cls, data: AutomodTriggerMetadataPayload) -> Self:
+    def _from_dict(cls, data: AutoModTriggerMetadataPayload) -> Self:
         if (presets_data := data.get("presets")) is not None:
-            presets = [try_enum(AutomodKeywordPresetType, value) for value in presets_data]
+            presets = [try_enum(AutoModKeywordPresetType, value) for value in presets_data]
         else:
             presets = None
 
@@ -197,8 +197,8 @@ class AutomodTriggerMetadata:
             presets=presets,
         )
 
-    def to_dict(self) -> AutomodTriggerMetadataPayload:
-        data: AutomodTriggerMetadataPayload = {}
+    def to_dict(self) -> AutoModTriggerMetadataPayload:
+        data: AutoModTriggerMetadataPayload = {}
         if self.keyword_filter is not None:
             data["keyword_filter"] = list(self.keyword_filter)
         if self.presets is not None:
@@ -214,7 +214,7 @@ class AutomodTriggerMetadata:
         return f"{s}>"
 
 
-class AutomodRule:
+class AutoModRule:
     """
     Represents an auto moderation rule.
 
@@ -232,13 +232,13 @@ class AutomodRule:
         The guild of the rule.
     creator_id: :class:`int`
         The rule creator's ID. See also :attr:`.creator`.
-    event_type: :class:`AutomodEventType`
+    event_type: :class:`AutoModEventType`
         The event type this rule is applied to.
-    trigger_type: :class:`AutomodTriggerType`
+    trigger_type: :class:`AutoModTriggerType`
         The type of trigger that determines whether this rule's actions should run for a specific event.
-    actions: List[:class:`AutomodAction`]
+    actions: List[:class:`AutoModAction`]
         The list of actions that will execute if a matching event triggered this rule.
-    trigger_metadata: :class:`AutomodTriggerMetadata`
+    trigger_metadata: :class:`AutoModTriggerMetadata`
         Additional metadata associated with this rule's :attr:`.trigger_type`.
     """
 
@@ -256,19 +256,19 @@ class AutomodRule:
         "_exempt_channel_ids",
     )
 
-    def __init__(self, *, data: AutomodRulePayload, guild: Guild):
+    def __init__(self, *, data: AutoModRulePayload, guild: Guild):
         self.guild: Guild = guild
 
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.enabled: bool = data["enabled"]
         self.creator_id: int = int(data["creator_id"])
-        self.event_type: AutomodEventType = try_enum(AutomodEventType, data["event_type"])
-        self.trigger_type: AutomodTriggerType = try_enum(AutomodTriggerType, data["trigger_type"])
-        self.actions: List[AutomodAction] = [
-            AutomodAction._from_dict(action) for action in data["actions"]
+        self.event_type: AutoModEventType = try_enum(AutoModEventType, data["event_type"])
+        self.trigger_type: AutoModTriggerType = try_enum(AutoModTriggerType, data["trigger_type"])
+        self.actions: List[AutoModAction] = [
+            AutoModAction._from_dict(action) for action in data["actions"]
         ]
-        self.trigger_metadata: AutomodTriggerMetadata = AutomodTriggerMetadata._from_dict(
+        self.trigger_metadata: AutoModTriggerMetadata = AutoModTriggerMetadata._from_dict(
             data["trigger_metadata"]
         )
         self._exempt_role_ids: List[int] = list(map(int, data["exempt_roles"]))
@@ -293,7 +293,7 @@ class AutomodRule:
 
     def __repr__(self) -> str:
         return (
-            f"<AutomodRule id={self.id!r} name={self.name!r} enabled={self.enabled!r}"
+            f"<AutoModRule id={self.id!r} name={self.name!r} enabled={self.enabled!r}"
             f" creator={self.creator!r} event_type={self.event_type!r} trigger_type={self.trigger_type!r}"
             f" actions={self.actions!r} exempt_roles={self._exempt_role_ids!r} exempt_channels={self._exempt_channel_ids!r}"
             f" trigger_metadata={self.trigger_metadata!r}>"
@@ -303,14 +303,14 @@ class AutomodRule:
         self,
         *,
         name: str = MISSING,
-        event_type: AutomodEventType = MISSING,
-        trigger_metadata: AutomodTriggerMetadata = MISSING,
-        actions: Sequence[AutomodAction] = MISSING,
+        event_type: AutoModEventType = MISSING,
+        trigger_metadata: AutoModTriggerMetadata = MISSING,
+        actions: Sequence[AutoModAction] = MISSING,
         enabled: bool = MISSING,
         exempt_roles: Sequence[Snowflake] = MISSING,
         exempt_channels: Sequence[Snowflake] = MISSING,
         reason: Optional[str] = None,
-    ) -> AutomodRule:
+    ) -> AutoModRule:
         """|coro|
 
         Edits the auto moderation rule.
@@ -323,11 +323,11 @@ class AutomodRule:
         ----------
         name: :class:`str`
             The rule's new name.
-        event_type: :class:`AutomodEventType`
+        event_type: :class:`AutoModEventType`
             The rule's new event type.
-        trigger_metadata: :class:`AutomodTriggerMetadata`
+        trigger_metadata: :class:`AutoModTriggerMetadata`
             The rule's new associated trigger metadata.
-        actions: Sequence[:class:`AutomodAction`]
+        actions: Sequence[:class:`AutoModAction`]
             The rule's new actions.
         enabled: :class:`bool`
             Whether to enable the rule.
@@ -349,11 +349,11 @@ class AutomodRule:
 
         Returns
         -------
-        :class:`AutomodRule`
+        :class:`AutoModRule`
             The newly updated auto moderation rule.
         """
 
-        payload: EditAutomodRulePayload = {}
+        payload: EditAutoModRulePayload = {}
 
         if name is not MISSING:
             payload["name"] = name
@@ -373,7 +373,7 @@ class AutomodRule:
         data = await self.guild._state.http.edit_auto_moderation_rule(
             self.guild.id, self.id, reason=reason, **payload
         )
-        return AutomodRule(data=data, guild=self.guild)
+        return AutoModRule(data=data, guild=self.guild)
 
     async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
@@ -401,20 +401,20 @@ class AutomodRule:
         )
 
 
-class AutomodActionExecution:
+class AutoModActionExecution:
     """Represents the data for an :func:`on_auto_moderation_action_execution` event.
 
     .. versionadded:: 2.6
 
     Attributes
     ----------
-    action: :class:`AutomodAction`
+    action: :class:`AutoModAction`
         The action that was executed.
     guild: :class:`Guild`
         The guild this action was executed in.
     rule_id: :class:`int`
         The ID of the rule that matched.
-    rule_trigger_type: :class:`AutomodTriggerType`
+    rule_trigger_type: :class:`AutoModTriggerType`
         The trigger type of the rule that matched.
     user_id: :class:`int`
         The ID of the user that triggered this action.
@@ -451,12 +451,12 @@ class AutomodActionExecution:
         "matched_content",
     )
 
-    def __init__(self, *, data: AutomodActionExecutionEventPayload, guild: Guild) -> None:
+    def __init__(self, *, data: AutoModActionExecutionEventPayload, guild: Guild) -> None:
         self.guild: Guild = guild
-        self.action: AutomodAction = AutomodAction._from_dict(data["action"])
+        self.action: AutoModAction = AutoModAction._from_dict(data["action"])
         self.rule_id: int = int(data["rule_id"])
-        self.rule_trigger_type: AutomodTriggerType = try_enum(
-            AutomodTriggerType, data["rule_trigger_type"]
+        self.rule_trigger_type: AutoModTriggerType = try_enum(
+            AutoModTriggerType, data["rule_trigger_type"]
         )
         self.user_id: int = int(data["user_id"])
         self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
@@ -499,6 +499,6 @@ class AutomodActionExecution:
     @property
     def alert_message(self) -> Optional[Message]:
         """Optional[:class:`Message`]: The alert message sent as a result of this action, if any.
-        Only available if :attr:`action.type <AutomodAction.type>` is :attr:`~AutomodActionType.send_alert_message`
+        Only available if :attr:`action.type <AutoModAction.type>` is :attr:`~AutoModActionType.send_alert_message`
         and the message was found in the message cache."""
         return self.guild._state._get_message(self.alert_message_id)

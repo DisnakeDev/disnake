@@ -28,80 +28,80 @@ from typing import List, Literal, Optional, TypedDict
 
 from .snowflake import Snowflake, SnowflakeList
 
-AutomodTriggerType = Literal[1, 2, 3, 4]
-AutomodEventType = Literal[1]
-AutomodActionType = Literal[1, 2]
-AutomodListType = Literal[1, 2, 3]
+AutoModTriggerType = Literal[1, 2, 3, 4]
+AutoModEventType = Literal[1]
+AutoModActionType = Literal[1, 2]
+AutoModListType = Literal[1, 2, 3]
 
 
-class AutomodActionMetadata(TypedDict, total=False):
+class AutoModActionMetadata(TypedDict, total=False):
     channel_id: Snowflake
     duration_seconds: int
 
 
-class _AutomodActionOptional(TypedDict, total=False):
-    metadata: AutomodActionMetadata
+class _AutoModActionOptional(TypedDict, total=False):
+    metadata: AutoModActionMetadata
 
 
-class AutomodAction(_AutomodActionOptional):
-    type: AutomodActionType
+class AutoModAction(_AutoModActionOptional):
+    type: AutoModActionType
 
 
-class AutomodTriggerMetadata(TypedDict, total=False):
+class AutoModTriggerMetadata(TypedDict, total=False):
     keyword_filter: List[str]
-    presets: List[AutomodListType]
+    presets: List[AutoModListType]
 
 
-class AutomodRule(TypedDict):
+class AutoModRule(TypedDict):
     id: Snowflake
     guild_id: Snowflake
     name: str
     creator_id: Snowflake
-    event_type: AutomodEventType
-    trigger_type: AutomodTriggerType
-    trigger_metadata: AutomodTriggerMetadata
-    actions: List[AutomodAction]
+    event_type: AutoModEventType
+    trigger_type: AutoModTriggerType
+    trigger_metadata: AutoModTriggerMetadata
+    actions: List[AutoModAction]
     enabled: bool
     exempt_roles: SnowflakeList
     exempt_channels: SnowflakeList
 
 
-class EditAutomodRule(TypedDict, total=False):
+class EditAutoModRule(TypedDict, total=False):
     name: str
-    event_type: AutomodEventType
-    trigger_metadata: AutomodTriggerMetadata
-    actions: List[AutomodAction]
+    event_type: AutoModEventType
+    trigger_metadata: AutoModTriggerMetadata
+    actions: List[AutoModAction]
     enabled: bool
     exempt_roles: SnowflakeList
     exempt_channels: SnowflakeList
 
 
-class _CreateAutomodRuleOptional(TypedDict, total=False):
-    trigger_metadata: AutomodTriggerMetadata
+class _CreateAutoModRuleOptional(TypedDict, total=False):
+    trigger_metadata: AutoModTriggerMetadata
     enabled: bool
     exempt_roles: SnowflakeList
     exempt_channels: SnowflakeList
 
 
-class CreateAutomodRule(_CreateAutomodRuleOptional):
+class CreateAutoModRule(_CreateAutoModRuleOptional):
     name: str
-    event_type: AutomodEventType
-    trigger_type: AutomodTriggerType
-    actions: List[AutomodAction]
+    event_type: AutoModEventType
+    trigger_type: AutoModTriggerType
+    actions: List[AutoModAction]
 
 
 # TODO: gateway event, move once full state typings are added
-class _AutomodActionExecutionEventOptional(TypedDict, total=False):
+class _AutoModActionExecutionEventOptional(TypedDict, total=False):
     channel_id: Optional[Snowflake]
     message_id: Optional[Snowflake]
     alert_system_message_id: Optional[Snowflake]
 
 
-class AutomodActionExecutionEvent(_AutomodActionExecutionEventOptional):
+class AutoModActionExecutionEvent(_AutoModActionExecutionEventOptional):
     guild_id: Snowflake
-    action: AutomodAction
+    action: AutoModAction
     rule_id: Snowflake
-    rule_trigger_type: AutomodTriggerType
+    rule_trigger_type: AutoModTriggerType
     user_id: Snowflake
     content: str
     matched_keyword: Optional[str]

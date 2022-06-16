@@ -43,7 +43,7 @@ from typing import (
 
 from .app_commands import application_command_factory
 from .audit_logs import AuditLogEntry
-from .auto_moderation import AutomodRule
+from .auto_moderation import AutoModRule
 from .bans import BanEntry
 from .errors import NoMoreItems
 from .guild_scheduled_event import GuildScheduledEvent
@@ -599,7 +599,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
                     appcmds[int(data["id"])] = cmd
 
             auto_moderation_rules = {
-                int(data["id"]): AutomodRule(guild=self.guild, data=data)
+                int(data["id"]): AutoModRule(guild=self.guild, data=data)
                 for data in log_data.get("auto_moderation_rules", [])
             }
 

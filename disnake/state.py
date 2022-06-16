@@ -54,7 +54,7 @@ from typing import (
 from . import utils
 from .activity import BaseActivity
 from .app_commands import GuildApplicationCommandPermissions, application_command_factory
-from .auto_moderation import AutomodActionExecution, AutomodRule
+from .auto_moderation import AutoModActionExecution, AutoModRule
 from .channel import *
 from .channel import _channel_factory
 from .emoji import Emoji
@@ -90,8 +90,8 @@ if TYPE_CHECKING:
     from .http import HTTPClient
     from .types.activity import Activity as ActivityPayload
     from .types.auto_moderation import (
-        AutomodActionExecutionEvent as AutomodActionExecutionEventPayload,
-        AutomodRule as AutomodRulePayload,
+        AutoModActionExecutionEvent as AutoModActionExecutionEventPayload,
+        AutoModRule as AutoModRulePayload,
     )
     from .types.channel import DMChannel as DMChannelPayload
     from .types.emoji import Emoji as EmojiPayload
@@ -1754,7 +1754,7 @@ class ConnectionState:
                 )
                 self.dispatch("typing", channel, member, timestamp)
 
-    def parse_auto_moderation_rule_create(self, data: AutomodRulePayload) -> None:
+    def parse_auto_moderation_rule_create(self, data: AutoModRulePayload) -> None:
         guild = self._get_guild(int(data["guild_id"]))
         if guild is None:
             _log.debug(
@@ -1763,10 +1763,10 @@ class ConnectionState:
             )
             return
 
-        rule = AutomodRule(data=data, guild=guild)
+        rule = AutoModRule(data=data, guild=guild)
         self.dispatch("auto_moderation_rule_create", rule)
 
-    def parse_auto_moderation_rule_update(self, data: AutomodRulePayload) -> None:
+    def parse_auto_moderation_rule_update(self, data: AutoModRulePayload) -> None:
         guild = self._get_guild(int(data["guild_id"]))
         if guild is None:
             _log.debug(
@@ -1775,10 +1775,10 @@ class ConnectionState:
             )
             return
 
-        rule = AutomodRule(data=data, guild=guild)
+        rule = AutoModRule(data=data, guild=guild)
         self.dispatch("auto_moderation_rule_update", rule)
 
-    def parse_auto_moderation_rule_delete(self, data: AutomodRulePayload) -> None:
+    def parse_auto_moderation_rule_delete(self, data: AutoModRulePayload) -> None:
         guild = self._get_guild(int(data["guild_id"]))
         if guild is None:
             _log.debug(
@@ -1787,11 +1787,11 @@ class ConnectionState:
             )
             return
 
-        rule = AutomodRule(data=data, guild=guild)
+        rule = AutoModRule(data=data, guild=guild)
         self.dispatch("auto_moderation_rule_delete", rule)
 
     def parse_auto_moderation_action_execution(
-        self, data: AutomodActionExecutionEventPayload
+        self, data: AutoModActionExecutionEventPayload
     ) -> None:
         guild = self._get_guild(int(data["guild_id"]))
         if guild is None:
@@ -1801,7 +1801,7 @@ class ConnectionState:
             )
             return
 
-        event = AutomodActionExecution(data=data, guild=guild)
+        event = AutoModActionExecution(data=data, guild=guild)
         self.dispatch("auto_moderation_action_execution", event)
 
     def _get_reaction_user(

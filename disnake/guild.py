@@ -48,7 +48,7 @@ from typing import (
 from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
-from .auto_moderation import AutomodRule
+from .auto_moderation import AutoModRule
 from .bans import BanEntry
 from .channel import *
 from .channel import _guild_channel_factory, _threaded_guild_channel_factory
@@ -56,8 +56,8 @@ from .colour import Colour
 from .emoji import Emoji
 from .enums import (
     AuditLogAction,
-    AutomodEventType,
-    AutomodTriggerType,
+    AutoModEventType,
+    AutoModTriggerType,
     ChannelType,
     ContentFilter,
     GuildScheduledEventEntityType,
@@ -99,7 +99,7 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
-    from .auto_moderation import AutomodAction, AutomodTriggerMetadata
+    from .auto_moderation import AutoModAction, AutoModTriggerMetadata
     from .channel import CategoryChannel, ForumChannel, StageChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
@@ -4156,7 +4156,7 @@ class Guild(Hashable):
         data = await self._state.http.edit_member(self.id, user.id, reason=reason, **payload)
         return Member(data=data, guild=self, state=self._state)
 
-    async def fetch_automod_rules(self) -> List[AutomodRule]:
+    async def fetch_automod_rules(self) -> List[AutoModRule]:
         """|coro|
 
         Retrieves the guild's auto moderation rules.
@@ -4176,28 +4176,28 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`AutomodRule`]
+        List[:class:`AutoModRule`]
             The guild's auto moderation rules.
         """
         data = await self._state.http.get_auto_moderation_rules(self.id)
-        return [AutomodRule(data=rule_data, guild=self) for rule_data in data]
+        return [AutoModRule(data=rule_data, guild=self) for rule_data in data]
 
     async def create_automod_rule(
         self,
         name: str,
         *,
-        event_type: AutomodEventType,
-        trigger_type: AutomodTriggerType,
-        actions: Sequence[AutomodAction],
-        trigger_metadata: AutomodTriggerMetadata = None,
+        event_type: AutoModEventType,
+        trigger_type: AutoModTriggerType,
+        actions: Sequence[AutoModAction],
+        trigger_metadata: AutoModTriggerMetadata = None,
         enabled: bool = False,
         exempt_roles: Sequence[Snowflake] = None,
         exempt_channels: Sequence[Snowflake] = None,
         reason: Optional[str] = None,
-    ) -> AutomodRule:
+    ) -> AutoModRule:
         """|coro|
 
-        Creates a new :class:`AutomodRule` for the guild.
+        Creates a new :class:`AutoModRule` for the guild.
 
         You must have :attr:`.Permissions.manage_guild` permission to do this.
 
@@ -4211,15 +4211,15 @@ class Guild(Hashable):
         ----------
         name: :class:`str`
             The rule name.
-        event_type: :class:`AutomodEventType`
+        event_type: :class:`AutoModEventType`
             The type of events that this rule will be applied to.
-        trigger_type: :class:`AutomodTriggerType`
+        trigger_type: :class:`AutoModTriggerType`
             The type of trigger that determines whether this rule's actions should run for a specific event.
-            If set to :attr:`~AutomodTriggerType.keyword` or :attr:`~AutomodTriggerType.keyword_preset`,
+            If set to :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.keyword_preset`,
             ``trigger_metadata`` must be set accordingly.
-        actions: Sequence[:class:`AutomodAction`]
+        actions: Sequence[:class:`AutoModAction`]
             The list of actions that will execute if a matching event triggered this rule.
-        trigger_metadata: :class:`AutomodTriggerMetadata`
+        trigger_metadata: :class:`AutoModTriggerMetadata`
             Additional metadata associated with the trigger type.
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.
@@ -4239,14 +4239,14 @@ class Guild(Hashable):
 
         Returns
         -------
-        :class:`AutomodRule`
+        :class:`AutoModRule`
             The newly created auto moderation rule.
         """
 
         trigger_type_int = try_enum_to_int(trigger_type)
         if not trigger_metadata and trigger_type_int in (
-            AutomodTriggerType.keyword.value,
-            AutomodTriggerType.keyword_preset.value,
+            AutoModTriggerType.keyword.value,
+            AutoModTriggerType.keyword_preset.value,
         ):
             raise ValueError("Specified trigger type requires `trigger_metadata` to not be empty")
 
@@ -4264,4 +4264,4 @@ class Guild(Hashable):
             ),
             reason=reason,
         )
-        return AutomodRule(data=data, guild=self)
+        return AutoModRule(data=data, guild=self)
