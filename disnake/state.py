@@ -1801,7 +1801,7 @@ class ConnectionState:
             )
             return
 
-        event = AutomodActionExecution(data, guild=guild)
+        event = AutomodActionExecution(data=data, guild=guild)
         # TODO: naming
         self.dispatch("auto_moderation_action", event)
 

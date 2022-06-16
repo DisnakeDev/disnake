@@ -442,7 +442,7 @@ class AutomodActionExecution:
         "matched_content",
     )
 
-    def __init__(self, data: AutomodActionExecutionEventPayload, guild: Guild) -> None:
+    def __init__(self, *, data: AutomodActionExecutionEventPayload, guild: Guild) -> None:
         self.guild: Guild = guild
         self.action: AutomodAction = AutomodAction._from_dict(data["action"])
         self.rule_id: int = int(data["rule_id"])
