@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from .types.auto_moderation import (
         AutoModAction as AutoModActionPayload,
         AutoModActionExecutionEvent as AutoModActionExecutionEventPayload,
-        AutoModActionMetadata,
+        AutoModActionMetadata as AutoModActionMetadataPayload,
         AutoModPresetType,
         AutoModRule as AutoModRulePayload,
         AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
@@ -104,7 +104,7 @@ class AutoModAction:
         timeout_duration: Optional[Union[int, timedelta]] = None,
     ):
         self.type: AutoModActionType = enum_if_int(AutoModActionType, type)
-        self._metadata: AutoModActionMetadata = {}
+        self._metadata: AutoModActionMetadataPayload = {}
 
         # NOTE: if this is changed to do any sort of processing on those parameters,
         # `_from_dict` would need to be updated as it doesn't pass any of them
