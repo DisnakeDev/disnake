@@ -309,8 +309,8 @@ class AutoModRule:
         trigger_metadata: AutoModTriggerMetadata = MISSING,
         actions: Sequence[AutoModAction] = MISSING,
         enabled: bool = MISSING,
-        exempt_roles: Sequence[Snowflake] = MISSING,
-        exempt_channels: Sequence[Snowflake] = MISSING,
+        exempt_roles: Optional[Sequence[Snowflake]] = MISSING,
+        exempt_channels: Optional[Sequence[Snowflake]] = MISSING,
         reason: Optional[str] = None,
     ) -> AutoModRule:
         """|coro|
@@ -333,11 +333,13 @@ class AutoModRule:
             The rule's new actions.
         enabled: :class:`bool`
             Whether to enable the rule.
-        exempt_roles: Sequence[:class:`abc.Snowflake`]
-            The rule's new exempt roles, up to 20.
-        exempt_channels: Sequence[:class:`abc.Snowflake`]
+        exempt_roles: Optional[Sequence[:class:`abc.Snowflake`]]
+            The rule's new exempt roles, up to 20. If ``[]`` or ``None`` is
+            passed then all role exemptions are removed.
+        exempt_channels: Optional[Sequence[:class:`abc.Snowflake`]]
             The rule's new exempt channels, up to 50.
             Can also include categories, in which case all channels inside that category will be exempt.
+            If ``[]`` or ``None`` is passed then all channel exemptions are removed.
         reason: Optional[:class:`str`]
             The reason for editing the rule. Shows up on the audit log.
 
@@ -365,13 +367,17 @@ class AutoModRule:
         if trigger_metadata is not MISSING:
             payload["trigger_metadata"] = trigger_metadata.to_dict()
         if actions is not MISSING:
-            payload["actions"] = [a.to_dict() for a in actions] if actions else []
+            payload["actions"] = [a.to_dict() for a in actions]
         if enabled is not MISSING:
             payload["enabled"] = enabled
         if exempt_roles is not MISSING:
-            payload["exempt_roles"] = [e.id for e in exempt_roles]
+            payload["exempt_roles"] = (
+                [e.id for e in exempt_roles] if exempt_roles is not None else []
+            )
         if exempt_channels is not MISSING:
-            payload["exempt_channels"] = [e.id for e in exempt_channels]
+            payload["exempt_channels"] = (
+                [e.id for e in exempt_channels] if exempt_channels is not None else []
+            )
 
         data = await self.guild._state.http.edit_auto_moderation_rule(
             self.guild.id, self.id, reason=reason, **payload

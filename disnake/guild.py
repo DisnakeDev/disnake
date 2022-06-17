@@ -4219,8 +4219,8 @@ class Guild(Hashable):
         actions: Sequence[AutoModAction],
         trigger_metadata: AutoModTriggerMetadata = None,
         enabled: bool = False,
-        exempt_roles: Sequence[Snowflake] = None,
-        exempt_channels: Sequence[Snowflake] = None,
+        exempt_roles: Optional[Sequence[Snowflake]] = None,
+        exempt_channels: Optional[Sequence[Snowflake]] = None,
         reason: Optional[str] = None,
     ) -> AutoModRule:
         """|coro|
@@ -4251,9 +4251,9 @@ class Guild(Hashable):
             Additional metadata associated with the trigger type.
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.
-        exempt_roles: Sequence[:class:`abc.Snowflake`]
+        exempt_roles: Optional[Sequence[:class:`abc.Snowflake`]]
             The roles that are exempt from this rule, up to 20. By default, no roles are exempt.
-        exempt_channels: Sequence[:class:`abc.Snowflake`]
+        exempt_channels: Optional[Sequence[:class:`abc.Snowflake`]]
             The channels that are exempt from this rule, up to 50. By default, no channels are exempt.
             Can also include categories, in which case all channels inside that category will be exempt.
         reason: Optional[:class:`str`]
@@ -4284,7 +4284,7 @@ class Guild(Hashable):
             name=name,
             event_type=try_enum_to_int(event_type),
             trigger_type=trigger_type_int,
-            actions=[a.to_dict() for a in actions] if actions else [],
+            actions=[a.to_dict() for a in actions],
             trigger_metadata=trigger_metadata.to_dict() if trigger_metadata is not None else None,
             enabled=enabled,
             exempt_roles=[e.id for e in exempt_roles] if exempt_roles is not None else None,
