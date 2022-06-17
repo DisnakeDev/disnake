@@ -498,9 +498,9 @@ class DiscordWebSocket:
             "d": {
                 "token": self.token,
                 "properties": {
-                    "$os": sys.platform,
-                    "$browser": "disnake",
-                    "$device": "disnake",
+                    "os": sys.platform,
+                    "browser": "disnake",
+                    "device": "disnake",
                 },
                 "compress": True,
                 "large_threshold": 250,
