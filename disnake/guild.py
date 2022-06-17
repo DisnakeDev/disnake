@@ -3777,6 +3777,8 @@ class Guild(Hashable):
         ValueError
             You are not the owner of the guild.
         """
+        if isinstance(mfa_level, bool) or not isinstance(mfa_level, int):
+            raise TypeError(f"`mfa_level` must be of type int, got {type(mfa_level).__name__}")
         if self.owner_id != self._state.self_id:
             raise ValueError("To edit the 2FA level, you must be the owner of the guild.")
         # return value unused
