@@ -69,7 +69,6 @@ __all__ = (
     "AutoModTriggerType",
     "AutoModEventType",
     "AutoModActionType",
-    "AutoModKeywordPresetType",
 )
 
 
@@ -802,15 +801,6 @@ class AutoModActionType(Enum):
     block_message = 1
     send_alert_message = 2
     timeout = 3
-
-
-class AutoModKeywordPresetType(Enum):
-    profanity = 1
-    sexual_content = 2
-    slurs = 3
-
-    def __str__(self):
-        return self.name
 
 
 T = TypeVar("T")

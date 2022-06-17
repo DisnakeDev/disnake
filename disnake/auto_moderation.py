@@ -25,17 +25,17 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING, List, Literal, Optional, Sequence, Union, overload
+from typing import TYPE_CHECKING, List, Literal, Optional, Sequence, Union, cast, overload
 
 from .enums import (
     AutoModActionType,
     AutoModEventType,
-    AutoModKeywordPresetType,
     AutoModTriggerType,
     enum_if_int,
     try_enum,
     try_enum_to_int,
 )
+from .flags import AutoModKeywordPresets
 from .utils import MISSING, _get_as_snowflake
 
 if TYPE_CHECKING:
@@ -51,6 +51,7 @@ if TYPE_CHECKING:
         AutoModAction as AutoModActionPayload,
         AutoModActionExecutionEvent as AutoModActionExecutionEventPayload,
         AutoModActionMetadata,
+        AutoModPresetType,
         AutoModRule as AutoModRulePayload,
         AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
         EditAutoModRule as EditAutoModRulePayload,
@@ -163,13 +164,13 @@ class AutoModTriggerMetadata:
     Attributes
     ----------
     keywords: Optional[Sequence[:class:`str`]]
-        List of keywords to filter. Used with :attr:`AutoModTriggerType.keyword`.
+        The list of keywords to check for. Used with :attr:`AutoModTriggerType.keyword`.
 
         See `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`__
         for details about how keyword matching works.
 
-    presets: Optional[Sequence[:class:`AutoModKeywordPresetType`]]
-        List of pre-defined filter list types. Used with :attr:`AutoModTriggerType.keyword_preset`.
+    presets: Optional[:class:`AutoModKeywordPresets`]
+        The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
     """
 
     __slots__ = ("keywords", "presets")
@@ -180,15 +181,15 @@ class AutoModTriggerMetadata:
         self,
         *,
         keywords: Optional[Sequence[str]] = None,
-        presets: Optional[Sequence[AutoModKeywordPresetType]] = None,
+        presets: Optional[AutoModKeywordPresets] = None,
     ):
         self.keywords: Optional[Sequence[str]] = keywords
-        self.presets: Optional[Sequence[AutoModKeywordPresetType]] = presets
+        self.presets: Optional[AutoModKeywordPresets] = presets
 
     @classmethod
     def _from_dict(cls, data: AutoModTriggerMetadataPayload) -> Self:
         if (presets_data := data.get("presets")) is not None:
-            presets = [try_enum(AutoModKeywordPresetType, value) for value in presets_data]
+            presets = AutoModKeywordPresets._from_values(presets_data)
         else:
             presets = None
 
@@ -202,7 +203,8 @@ class AutoModTriggerMetadata:
         if self.keywords is not None:
             data["keyword_filter"] = list(self.keywords)
         if self.presets is not None:
-            data["presets"] = [preset.value for preset in self.presets]
+            values: List[int] = self.presets.values
+            data["presets"] = cast("List[AutoModPresetType]", values)
         return data
 
     def __repr__(self) -> str:

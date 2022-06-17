@@ -52,6 +52,7 @@ __all__ = (
     "MemberCacheFlags",
     "ApplicationFlags",
     "ChannelFlags",
+    "AutoModKeywordPresets",
 )
 
 FV = TypeVar("FV", bound="flag_value")
@@ -1319,3 +1320,72 @@ class ChannelFlags(BaseFlags):
     def pinned(self):
         """:class:`bool`: Returns ``True`` if the thread is pinned."""
         return 1 << 1
+
+
+@fill_with_flags()
+class AutoModKeywordPresets(ListBaseFlags):
+    """
+    Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two flags are equal.
+        .. describe:: x != y
+
+            Checks if two flags are not equal.
+        .. describe:: hash(x)
+
+            Return the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    values: :class:`int`
+        The raw values. You should query flags via the properties
+        rather than using these raw values.
+    """
+
+    __slots__ = ()
+
+    @classmethod
+    def all(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
+        """A factory method that creates a :class:`AutoModKeywordPresets` with everything enabled."""
+        self = cls.__new__(cls)
+        self.value = functools.reduce(operator.or_, cls.VALID_FLAGS.values())
+        return self
+
+    @classmethod
+    def none(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
+        """A factory method that creates a :class:`AutoModKeywordPresets` with everything disabled."""
+        self = cls.__new__(cls)
+        self.value = self.DEFAULT_VALUE
+        return self
+
+    @flag_value
+    def profanity(self):
+        """:class:`bool`: Returns ``True`` if the profanity preset is enabled
+        (contains words that may be considered swearing or cursing).
+        """
+        return 1 << 0
+
+    @flag_value
+    def sexual_content(self):
+        """:class:`bool`: Returns ``True`` if the sexual content preset is enabled
+        (contains sexually explicit words).
+        """
+        return 1 << 1
+
+    @flag_value
+    def slurs(self):
+        """:class:`bool`: Returns ``True`` if the slurs preset is enabled
+        (contains insults or words that may be considered hate speech).
+        """
+        return 1 << 2

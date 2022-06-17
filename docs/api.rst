@@ -3582,24 +3582,6 @@ of :class:`enum.Enum`.
             :attr:`~AutoModTriggerType.keyword`, and :attr:`~Permissions.moderate_members`
             permissions are required to use it.
 
-.. class:: AutoModKeywordPresetType
-
-    Represents an pre-defined auto moderation filter list, provided by Discord.
-
-    .. versionadded:: 2.6
-
-    .. attribute:: profanity
-
-        Contains words that may be considered swearing or cursing.
-
-    .. attribute:: sexual_content
-
-        Contains sexually explicit words.
-
-    .. attribute:: slurs
-
-        Contains insults or words that may be considered hate speech.
-
 Async Iterator
 ----------------
 
@@ -5490,6 +5472,14 @@ ChannelFlags
 .. attributetable:: ChannelFlags
 
 .. autoclass:: ChannelFlags
+    :members:
+
+AutoModKeywordPresets
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModKeywordPresets
+
+.. autoclass:: AutoModKeywordPresets
     :members:
 
 File
