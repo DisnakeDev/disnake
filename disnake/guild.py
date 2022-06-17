@@ -187,7 +187,7 @@ class Guild(Hashable):
     mfa_level: :class:`int`
         Indicates the guild's two-factor authentication level. If this value is 0 then
         the guild does not require 2FA for their administrative members
-        to take moderation actions. If the value is 1 then it does.
+        to take moderation actions. If the value is 1, then 2FA is required.
     verification_level: :class:`VerificationLevel`
         The guild's verification level.
     explicit_content_filter: :class:`ContentFilter`
@@ -3766,7 +3766,7 @@ class Guild(Hashable):
         mfa_level: :class:`int`
             The new 2FA level. If set to 0, the guild does not require
             2FA for their administrative members to take
-            moderation actions. If set to 1, it does.
+            moderation actions. If set to 1, then 2FA is required.
         reason: Optional[:class:`str`]
             The reason for editing the mfa level. Shows up on the audit log.
 
