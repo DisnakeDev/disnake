@@ -1467,6 +1467,9 @@ class Guild(Hashable):
             at 0. e.g. the top channel is position 0.
         bitrate: :class:`int`
             The channel's preferred audio bitrate in bits per second.
+            
+            .. versionadded:: 2.6
+
         rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
             The region for the stage channel's voice communication.
             A value of ``None`` indicates automatic voice region detection.
