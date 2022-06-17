@@ -35,6 +35,7 @@ from typing import (
     Iterator,
     List,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
@@ -159,6 +160,34 @@ class BaseFlags:
             self.value &= ~o
         else:
             raise TypeError(f"Value to set for {self.__class__.__name__} must be a bool.")
+
+
+class ListBaseFlags(BaseFlags):
+    # This is 1-indexed, i.e. value `1` corresponds to bit 0, `2` corresponds to bit 1, ...
+
+    __slots__ = ()
+
+    @classmethod
+    def _from_values(cls, values: Sequence[int]):
+        self = cls.__new__(cls)
+        value = 0
+        for n in values:
+            # protect against DoS with large shift values
+            # n.b. performance overhead of this is negligible
+            if not (0 < n < 64):
+                raise ValueError("Flag values must be within (0, 64)")
+            value += 1 << (n - 1)
+        self.value = value
+        return self
+
+    @property
+    def values(self) -> List[int]:
+        # this may look weird but interestingly it's by far the
+        # fastest out of all benchmarked snippets
+        return [i for i, c in enumerate(bin(self.value)[:1:-1], 1) if c == "1"]
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} values={self.values}>"
 
 
 @fill_with_flags(inverted=True)
