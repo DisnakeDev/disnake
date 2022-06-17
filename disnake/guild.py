@@ -4156,10 +4156,38 @@ class Guild(Hashable):
         data = await self._state.http.edit_member(self.id, user.id, reason=reason, **payload)
         return Member(data=data, guild=self, state=self._state)
 
+    async def fetch_automod_rule(self, rule_id: int, /) -> AutoModRule:
+        """|coro|
+
+        Retrieves an auto moderation rules from the guild.
+        See also :func:`~Guild.fetch_automod_rules`.
+
+        Requires the :attr:`~Permissions.manage_guild` permission.
+
+        .. versionadded:: 2.6
+
+        Raises
+        ------
+        Forbidden
+            You do not have proper permissions to retrieve auto moderation rules.
+        NotFound
+            An auto moderation rule with the provided ID does not exist in the guild.
+        HTTPException
+            Retrieving the rule failed.
+
+        Returns
+        -------
+        :class:`AutoModRule`
+            The auto moderation rule.
+        """
+        data = await self._state.http.get_auto_moderation_rule(self.id, rule_id)
+        return AutoModRule(data=data, guild=self)
+
     async def fetch_automod_rules(self) -> List[AutoModRule]:
         """|coro|
 
         Retrieves the guild's auto moderation rules.
+        See also :func:`~Guild.fetch_automod_rule`.
 
         Requires the :attr:`~Permissions.manage_guild` permission.
 

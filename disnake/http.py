@@ -2139,7 +2139,6 @@ class HTTPClient:
             Route("GET", "/guilds/{guild_id}/auto-moderation/rules", guild_id=guild_id)
         )
 
-    # unused
     def get_auto_moderation_rule(
         self, guild_id: Snowflake, rule_id: Snowflake
     ) -> Response[auto_moderation.AutoModRule]:
