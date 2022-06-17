@@ -31,7 +31,7 @@ from .snowflake import Snowflake, SnowflakeList
 AutoModTriggerType = Literal[1, 2, 3, 4]
 AutoModEventType = Literal[1]
 AutoModActionType = Literal[1, 2]
-AutoModListType = Literal[1, 2, 3]
+AutoModPresetType = Literal[1, 2, 3]
 
 
 class AutoModActionMetadata(TypedDict, total=False):
@@ -49,7 +49,7 @@ class AutoModAction(_AutoModActionOptional):
 
 class AutoModTriggerMetadata(TypedDict, total=False):
     keyword_filter: List[str]
-    presets: List[AutoModListType]
+    presets: List[AutoModPresetType]
 
 
 class AutoModRule(TypedDict):
