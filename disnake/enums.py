@@ -690,6 +690,9 @@ class ThreadArchiveDuration(Enum):
     three_days = 4320
     week = 10080
 
+    def __int__(self):
+        return self.value
+
 
 class WidgetStyle(Enum):
     shield = "shield"
