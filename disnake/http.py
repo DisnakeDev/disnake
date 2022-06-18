@@ -1250,13 +1250,17 @@ class HTTPClient:
         name: str,
         emoji_id: Optional[Snowflake] = None,
         emoji_name: Optional[str] = None,
+        moderated: Optional[bool] = None,
         reason: Optional[str] = None,
     ) -> Response[channel.ForumChannel]:
         payload: threads.CreateThreadTag = {"name": name}
+        # TODO: these ifs are probably not needed
         if emoji_id is not None:
             payload["emoji_id"] = emoji_id
         if emoji_name is not None:
             payload["emoji_name"] = emoji_name
+        if moderated is not None:
+            payload["moderated"] = moderated
 
         r = Route("POST", "/channels/{channel_id}/tags", channel_id=channel_id)
         return self.request(r, json=payload, reason=reason)

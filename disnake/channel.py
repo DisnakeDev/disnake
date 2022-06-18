@@ -3202,6 +3202,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        moderated: bool = False,
         reason: Optional[str] = None,
     ) -> ThreadTag:
         """|coro|
@@ -3218,6 +3219,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The tag name.
         emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
             The tag emoji, if any.
+        moderated: :class:`bool`
+            Whether only moderators can apply this tag to threads.
+            Defaults to ``False``.
         reason: Optional[:class:`str`]
             The reason for creating this tag. Shows up on the audit log.
 
@@ -3239,7 +3243,12 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
         # note: returns updated channel data instead of tag data
         data = await self._state.http.create_thread_tag(
-            self.id, name=name, emoji_id=emoji_id, emoji_name=emoji_name, reason=reason
+            self.id,
+            name=name,
+            emoji_id=emoji_id,
+            emoji_name=emoji_name,
+            moderated=moderated,
+            reason=reason,
         )
         # TODO: parse entire channel here and update cache, instead of just relying on gw event?
         return ThreadTag._find_in_response(data, name, self, self._state)

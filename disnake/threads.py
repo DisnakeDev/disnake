@@ -1040,9 +1040,11 @@ class ThreadTag(Hashable):
         The tag's ID.
     name: :class:`str`
         The tag's name.
+    moderated: :class:`bool`
+        Whether only moderators can apply this tag to threads.
     """
 
-    __slots__ = ("id", "name", "_emoji_id", "_emoji_name", "_channel_id", "_state")
+    __slots__ = ("id", "name", "moderated", "_emoji_id", "_emoji_name", "_channel_id", "_state")
 
     def __init__(self, *, data: ThreadTagPayload, channel: Snowflake, state: ConnectionState):
         self._channel_id = channel.id
@@ -1050,12 +1052,16 @@ class ThreadTag(Hashable):
 
         self.id: int = int(data["id"])
         self.name: str = data["name"]
+        self.moderated: bool = data["moderated"]
         # emoji_id may be `0`, use `None` instead
         self._emoji_id: Optional[int] = _get_as_snowflake(data, "emoji_id") or None
         self._emoji_name: Optional[str] = data.get("emoji_name")
 
     def __repr__(self) -> str:
-        return f"<ThreadTag id={self.id!r} name={self.name!r} emoji={self.emoji!r}>"
+        return (
+            f"<ThreadTag id={self.id!r} name={self.name!r}"
+            f" moderated={self.moderated!r} emoji={self.emoji!r}>"
+        )
 
     def __str__(self) -> str:
         return self.name
@@ -1086,6 +1092,8 @@ class ThreadTag(Hashable):
         *,
         name: str = MISSING,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        moderated: bool = MISSING,
+        # TODO: reason support tbd
         reason: Optional[str] = None,
     ) -> ThreadTag:
         """|coro|
@@ -1101,6 +1109,8 @@ class ThreadTag(Hashable):
             The new tag name.
         emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
             The new tag emoji. Set to ``None`` to remove the emoji.
+        moderated: :class:`bool`
+            Whether only moderators can apply this tag to threads.
         reason: Optional[:class:`str`]
             The reason for editing the tag. Shows up on the audit log.
 
@@ -1118,17 +1128,20 @@ class ThreadTag(Hashable):
         :class:`ThreadTag`
             The newly edited tag.
         """
-        # seems like all fields have to be provided when editing  # TODO
+        # seems like emoji fields always have to be provided when editing  # TODO
         new_name = name or self.name
         if emoji:
             emoji_id, emoji_name = self._get_emoji_params(emoji)
         else:
             emoji_id, emoji_name = self._emoji_id, self._emoji_name
+
         payload: EditThreadTagPayload = {
             "name": new_name,
             "emoji_id": emoji_id,
             "emoji_name": emoji_name,
         }
+        if moderated is not MISSING:
+            payload["moderated"] = moderated
 
         data = await self._state.http.edit_thread_tag(
             self._channel_id, self.id, reason=reason, **payload
