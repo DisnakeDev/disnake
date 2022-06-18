@@ -40,6 +40,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    get_origin,
     overload,
 )
 
@@ -429,8 +430,11 @@ def select(
         Whether the select is disabled. Defaults to ``False``.
     """
 
-    if not issubclass(cls, Select):
-        raise TypeError("cls argument must be a subclass of Select")
+    if (origin := get_origin(cls)) is not None:
+        cls = origin
+
+    if not isinstance(cls, type) or not issubclass(cls, Select):
+        raise TypeError(f"cls argument must be a subclass of Select, got {cls!r}")
 
     def decorator(func: ItemCallbackType[S_co]) -> DecoratedItem[S_co]:
         if not asyncio.iscoroutinefunction(func):

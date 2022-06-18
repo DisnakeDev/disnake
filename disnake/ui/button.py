@@ -38,6 +38,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    get_origin,
     overload,
 )
 
@@ -349,8 +350,11 @@ def button(
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    if not issubclass(cls, Button):
-        raise TypeError("cls argument must be a subclass of Button")
+    if (origin := get_origin(cls)) is not None:
+        cls = origin
+
+    if not isinstance(cls, type) or not issubclass(cls, Button):
+        raise TypeError(f"cls argument must be a subclass of Button, got {cls!r}")
 
     def decorator(func: ItemCallbackType[B_co]) -> DecoratedItem[B_co]:
         if not asyncio.iscoroutinefunction(func):
