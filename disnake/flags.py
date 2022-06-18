@@ -1875,15 +1875,15 @@ class ChannelFlags(BaseFlags):
     def pinned(self):
         """:class:`bool`: Returns ``True`` if the thread is pinned.
 
-        This currently only applies to channel of type :class:`Thread`.
+        This only applies to channels of type :class:`Thread`.
         """
         return 1 << 1
 
     @flag_value
     def require_tag(self):
-        """:class:`bool`: Returns ``True`` if the channel requires all created threads to have a tag.
+        """:class:`bool`: Returns ``True`` if the channel requires all newly created threads to have a tag.
 
-        This currently only applies to channel of type :class:`ForumChannel`.
+        This only applies to channels of type :class:`ForumChannel`.
 
         .. versionadded:: 2.6
         """

@@ -2606,6 +2606,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         """
         return self.nsfw
 
+    # TODO: name, property
+    def requires_tag(self) -> bool:
+        """Whether all newly created threads in this channel are required to have a tag.
+
+        :return type: :class:`bool`
+        """
+        return self.flags.require_tag
+
     @property
     def last_thread(self) -> Optional[Thread]:
         """Gets the last created thread in this channel from the cache.
@@ -2686,6 +2694,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
+        require_tag: bool = ...,
         reason: Optional[str] = ...,
     ) -> ForumChannel:
         ...
@@ -2703,6 +2712,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
+        require_tag: bool = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[ForumChannel]:
@@ -2743,11 +2753,17 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         flags: :class:`ChannelFlags`
             The new flags to set for this channel. This will overwrite any existing flags set on this channel.
+            If parameter ``require_tag`` is provided, that will override the setting of :attr:`ChannelFlags.require_tag`.
 
             .. versionadded:: 2.6
 
         template: Optional[:class:`str`]
             The message template for new forum threads.
+
+            .. versionadded:: 2.6
+
+        require_tag: :class:`bool`
+            Whether all newly created threads are required to have a tag.
 
             .. versionadded:: 2.6
 
@@ -2771,6 +2787,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The newly edited forum channel. If the edit was only positional
             then ``None`` is returned instead.
         """
+        if require_tag is not MISSING:
+            # create base flags if flags are provided, otherwise use the internal flags.
+            flags = ChannelFlags._from_value(self._flags if flags is MISSING else flags.value)
+            flags.require_tag = require_tag
+
         payload = await self._edit(
             name=name,
             topic=topic,
