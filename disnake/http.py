@@ -1438,6 +1438,16 @@ class HTTPClient:
             reason=reason,
         )
 
+    def edit_mfa_level(
+        self, guild_id: Snowflake, mfa_level: guild.MFALevel, *, reason: Optional[str] = None
+    ) -> Response[guild.MFALevelUpdate]:
+        payload: guild.MFALevelUpdate = {"level": mfa_level}
+        return self.request(
+            Route("POST", "/guilds/{guild_id}/mfa", guild_id=guild_id),
+            json=payload,
+            reason=reason,
+        )
+
     def get_all_guild_channels(self, guild_id: Snowflake) -> Response[List[guild.GuildChannel]]:
         return self.request(Route("GET", "/guilds/{guild_id}/channels", guild_id=guild_id))
 
