@@ -2758,7 +2758,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             .. versionadded:: 2.6
 
         template: Optional[:class:`str`]
-            The message template for new forum threads.
+            The message template for new forum threads. Up to 256 characters.
 
             .. versionadded:: 2.6
 
