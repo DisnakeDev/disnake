@@ -88,6 +88,10 @@ class alias_flag_value(flag_value):
     pass
 
 
+def all_flags_value(flags: Dict[str, int]) -> int:
+    return functools.reduce(operator.or_, flags.values())
+
+
 def fill_with_flags(*, inverted: bool = False):
     def decorator(cls: Type[BF]):
         # fmt: off
@@ -99,8 +103,7 @@ def fill_with_flags(*, inverted: bool = False):
         # fmt: on
 
         if inverted:
-            max_bits = max(cls.VALID_FLAGS.values()).bit_length()
-            cls.DEFAULT_VALUE = -1 + (2**max_bits)
+            cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS)
         else:
             cls.DEFAULT_VALUE = 0
 
@@ -559,7 +562,7 @@ class Intents(BaseFlags):
     def all(cls: Type[Intents]) -> Intents:
         """A factory method that creates a :class:`Intents` with everything enabled."""
         self = cls.__new__(cls)
-        self.value = functools.reduce(operator.or_, cls.VALID_FLAGS.values())
+        self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
@@ -1111,8 +1114,7 @@ class MemberCacheFlags(BaseFlags):
     __slots__ = ()
 
     def __init__(self, **kwargs: bool):
-        bits = max(self.VALID_FLAGS.values()).bit_length()
-        self.value = (1 << bits) - 1
+        self.value = all_flags_value(self.VALID_FLAGS)
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
                 raise TypeError(f"{key!r} is not a valid flag name.")
@@ -1121,10 +1123,8 @@ class MemberCacheFlags(BaseFlags):
     @classmethod
     def all(cls: Type[MemberCacheFlags]) -> MemberCacheFlags:
         """A factory method that creates a :class:`MemberCacheFlags` with everything enabled."""
-        bits = max(cls.VALID_FLAGS.values()).bit_length()
-        value = (1 << bits) - 1
         self = cls.__new__(cls)
-        self.value = value
+        self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
@@ -1357,7 +1357,7 @@ class AutoModKeywordPresets(ListBaseFlags):
     def all(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
         """A factory method that creates a :class:`AutoModKeywordPresets` with everything enabled."""
         self = cls.__new__(cls)
-        self.value = functools.reduce(operator.or_, cls.VALID_FLAGS.values())
+        self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
