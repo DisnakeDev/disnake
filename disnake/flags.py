@@ -167,6 +167,12 @@ class BaseFlags:
 
 
 class ListBaseFlags(BaseFlags):
+    """
+    A base class for flags that aren't powers of 2.
+    Instead, values are used as exponents to map to powers of 2 to avoid collisions,
+    and only the combined value is stored, which allows all bitwise operations to work as expected.
+    """
+
     __slots__ = ()
 
     @classmethod
@@ -184,8 +190,11 @@ class ListBaseFlags(BaseFlags):
 
     @property
     def values(self) -> List[int]:
-        # this may look weird but interestingly it's by far the
-        # fastest out of all benchmarked snippets
+        # This essentially converts an int like `0b100110` into `[1, 2, 5]`,
+        # i.e. the exponents of set bits in `self.value`.
+        # This may look weird but interestingly it's by far the
+        # fastest out of all benchmarked snippets, see https://stackoverflow.com/a/49592515/5080607
+        # (this code is a derivative of one of them)
         return [i for i, c in enumerate(bin(self.value)[:1:-1]) if c == "1"]
 
     def __repr__(self) -> str:
