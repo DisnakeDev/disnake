@@ -58,7 +58,7 @@ if TYPE_CHECKING:
     from .view import View
 
 S = TypeVar("S", bound="Select")
-V = TypeVar("V", "View", None, covariant=True)
+V = TypeVar("V", bound="Optional[View]", covariant=True)
 
 
 def _parse_select_options(

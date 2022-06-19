@@ -37,7 +37,7 @@ class GuildScheduledEvents(commands.Cog):
             privacy_level=GuildScheduledEventPrivacyLevel.guild_only,
             scheduled_start_time=disnake.utils.utcnow() + timedelta(days=1),
             entity_type=GuildScheduledEventEntityType.voice,
-            channel_id=channel.id,
+            channel=channel,
             image=image.fp.read(),
         )
         await inter.response.send_message(str(gse.image))

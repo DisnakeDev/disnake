@@ -51,7 +51,11 @@ class IntegrationAccount(TypedDict):
 IntegrationExpireBehavior = Literal[0, 1]
 
 
-class PartialIntegration(TypedDict):
+class _PartialIntegrationOptional(TypedDict, total=False):
+    application_id: Snowflake  # undocumented, only shown in example - used for audit logs
+
+
+class PartialIntegration(_PartialIntegrationOptional):
     id: Snowflake
     name: str
     type: IntegrationType
