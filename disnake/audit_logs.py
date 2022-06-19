@@ -44,7 +44,7 @@ from typing import (
 from . import abc, enums, flags, utils
 from .app_commands import ApplicationCommandPermissions
 from .asset import Asset
-from .auto_moderation import AutoModAction, AutoModTriggerMetadata
+from .auto_moderation import AutoModAction, AutoModTriggerMetadata, _automod_action_factory
 from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
@@ -254,7 +254,7 @@ def _transform_automod_action(
 ) -> Optional[AutoModAction]:
     if data is None:
         return None
-    return AutoModAction._from_dict(data)
+    return _automod_action_factory(data)
 
 
 def _transform_automod_trigger_metadata(

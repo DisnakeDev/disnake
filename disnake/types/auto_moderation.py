@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict, Union
 
 from .snowflake import Snowflake, SnowflakeList
 
@@ -34,9 +34,23 @@ AutoModActionType = Literal[1, 2]
 AutoModPresetType = Literal[1, 2, 3]
 
 
-class AutoModActionMetadata(TypedDict, total=False):
+class AutoModBlockMessageActionMetadata(TypedDict):
+    ...
+
+
+class AutoModSendAlertActionMetadata(TypedDict):
     channel_id: Snowflake
+
+
+class AutoModTimeoutActionMetadata(TypedDict):
     duration_seconds: int
+
+
+AutoModActionMetadata = Union[
+    AutoModBlockMessageActionMetadata,
+    AutoModSendAlertActionMetadata,
+    AutoModTimeoutActionMetadata,
+]
 
 
 class _AutoModActionOptional(TypedDict, total=False):

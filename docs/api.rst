@@ -5206,6 +5206,30 @@ AutoModAction
 .. autoclass:: AutoModAction()
     :members:
 
+AutoModBlockMessageAction
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModBlockMessageAction
+
+.. autoclass:: AutoModBlockMessageAction()
+    :members:
+
+AutoModSendAlertAction
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModSendAlertAction
+
+.. autoclass:: AutoModSendAlertAction()
+    :members:
+
+AutoModTimeoutAction
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModTimeoutAction
+
+.. autoclass:: AutoModTimeoutAction()
+    :members:
+
 AutoModActionExecution
 ~~~~~~~~~~~~~~~~~~~~~~~
 
