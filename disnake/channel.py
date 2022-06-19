@@ -311,6 +311,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         """
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
+    # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
     async def edit(
         self,
@@ -320,6 +321,17 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
     ) -> None:
+        ...
+
+    # only passing `sync_permissions` may or may not return a channel,
+    # depending on whether the channel is in a category
+    @overload
+    async def edit(
+        self,
+        *,
+        sync_permissions: bool,
+        reason: Optional[str] = ...,
+    ) -> Optional[TextChannel]:
         ...
 
     @overload
@@ -1247,6 +1259,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             base.value &= ~denied.value
         return base
 
+    # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
     async def edit(
         self,
@@ -1256,6 +1269,17 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
     ) -> None:
+        ...
+
+    # only passing `sync_permissions` may or may not return a channel,
+    # depending on whether the channel is in a category
+    @overload
+    async def edit(
+        self,
+        *,
+        sync_permissions: bool,
+        reason: Optional[str] = ...,
+    ) -> Optional[VoiceChannel]:
         ...
 
     @overload
@@ -1873,6 +1897,7 @@ class StageChannel(VocalGuildChannel):
         data = await self._state.http.get_stage_instance(self.id)
         return StageInstance(guild=self.guild, state=self._state, data=data)
 
+    # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
     async def edit(
         self,
@@ -1882,6 +1907,17 @@ class StageChannel(VocalGuildChannel):
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
     ) -> None:
+        ...
+
+    # only passing `sync_permissions` may or may not return a channel,
+    # depending on whether the channel is in a category
+    @overload
+    async def edit(
+        self,
+        *,
+        sync_permissions: bool,
+        reason: Optional[str] = ...,
+    ) -> Optional[StageChannel]:
         ...
 
     @overload
@@ -2084,6 +2120,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     ) -> CategoryChannel:
         return await self._clone_impl({"nsfw": self.nsfw}, name=name, reason=reason)
 
+    # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
     async def edit(
         self,
@@ -2551,6 +2588,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     def typing(self) -> Typing:
         return Typing(self)
 
+    # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
     async def edit(
         self,
@@ -2560,6 +2598,17 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
     ) -> None:
+        ...
+
+    # only passing `sync_permissions` may or may not return a channel,
+    # depending on whether the channel is in a category
+    @overload
+    async def edit(
+        self,
+        *,
+        sync_permissions: bool,
+        reason: Optional[str] = ...,
+    ) -> Optional[ForumChannel]:
         ...
 
     @overload
