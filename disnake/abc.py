@@ -54,6 +54,7 @@ from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .invite import Invite
 from .mentions import AllowedMentions
+from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
 from .sticker import GuildSticker, StickerItem
@@ -81,6 +82,7 @@ if TYPE_CHECKING:
     from .channel import CategoryChannel, DMChannel, PartialMessageable
     from .client import Client
     from .embeds import Embed
+    from .emoji import Emoji
     from .enums import InviteTarget
     from .guild import Guild, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
@@ -91,6 +93,7 @@ if TYPE_CHECKING:
     from .threads import AnyThreadArchiveDuration
     from .types.channel import (
         Channel as ChannelPayload,
+        ForumEmoji as ForumEmojiPayload,
         GuildChannel as GuildChannelPayload,
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
@@ -326,6 +329,7 @@ class GuildChannel(ABC):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         flags: ChannelFlags = MISSING,
+        default_reaction_emoji: Union[str, Emoji, PartialEmoji] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
         parent_id: Optional[int]
@@ -401,12 +405,26 @@ class GuildChannel(ABC):
         else:
             type_payload = MISSING
 
+        flags_payload: int
         if flags is not MISSING:
             if not isinstance(flags, ChannelFlags):
                 raise TypeError("flags field must be of type ChannelFlags")
             flags_payload = flags.value
         else:
             flags_payload = MISSING
+
+        default_reaction_emoji_payload: Optional[ForumEmojiPayload]
+        if default_reaction_emoji is not MISSING:
+            if default_reaction_emoji is not None:
+                emoji_name, emoji_id = PartialEmoji._to_name_id(default_reaction_emoji)
+                default_reaction_emoji_payload = {
+                    "emoji_name": emoji_name,
+                    "emoji_id": emoji_id or 0,
+                }
+            else:
+                default_reaction_emoji_payload = None
+        else:
+            default_reaction_emoji_payload = MISSING
 
         options: Dict[str, Any] = {
             "name": name,
@@ -423,6 +441,7 @@ class GuildChannel(ABC):
             "video_quality_mode": video_quality_mode_payload,
             "default_auto_archive_duration": default_auto_archive_duration_payload,
             "flags": flags_payload,
+            "default_reaction_emoji": default_reaction_emoji_payload,
         }
         options = {k: v for k, v in options.items() if v is not MISSING}
 

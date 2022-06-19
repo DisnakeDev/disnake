@@ -143,12 +143,19 @@ class ThreadChannel(_BaseChannel, _ThreadChannelOptional):
     thread_metadata: ThreadMetadata
 
 
+# TODO: naming
+class ForumEmoji(TypedDict):
+    emoji_id: Snowflake  # note: may be 0
+    emoji_name: Optional[str]
+
+
 class _ForumChannelOptional(TypedDict, total=False):
     topic: Optional[str]
     last_message_id: Optional[Snowflake]
     default_auto_archive_duration: ThreadArchiveDurationLiteral
     available_tags: List[ThreadTag]  # TODO: optional?
     template: str
+    default_reaction_emoji: ForumEmoji
 
 
 class ForumChannel(_BaseGuildChannel, _ForumChannelOptional):

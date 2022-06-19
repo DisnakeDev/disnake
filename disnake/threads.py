@@ -27,18 +27,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Literal,
-    Optional,
-    Sequence,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Union
 
 from .abc import Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
@@ -46,7 +35,7 @@ from .errors import ClientException, InvalidData
 from .flags import ChannelFlags
 from .mixins import Hashable
 from .object import Object
-from .partial_emoji import PartialEmoji, _EmojiTag
+from .partial_emoji import PartialEmoji
 from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
@@ -1069,23 +1058,7 @@ class ThreadTag(Hashable):
     @property
     def emoji(self) -> Optional[Union[Emoji, PartialEmoji]]:
         """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]: The emoji associated with this tag, if any."""
-        if not (self._emoji_name or self._emoji_id):
-            return None
-
-        emoji: Optional[Union[Emoji, PartialEmoji]] = None
-        if self._emoji_id:
-            emoji = self._state.get_emoji(self._emoji_id)
-        if not emoji:
-            emoji = PartialEmoji.with_state(
-                state=self._state,
-                # TODO: this renders correctly, but apparently shouldn't be done
-                # according to https://github.com/discord/discord-api-docs/pull/4983
-                name=self._emoji_name or "_",
-                id=self._emoji_id,
-                # note: `animated` is unknown but presumably we already got the (animated)
-                # emoji from the guild cache at this point
-            )
-        return emoji
+        return PartialEmoji._from_name_id(self._emoji_name, self._emoji_id, state=self._state)
 
     async def edit(
         self,
@@ -1131,9 +1104,9 @@ class ThreadTag(Hashable):
         # seems like emoji fields always have to be provided when editing  # TODO
         new_name = name or self.name
         if emoji:
-            emoji_id, emoji_name = self._get_emoji_params(emoji)
+            emoji_name, emoji_id = PartialEmoji._to_name_id(emoji)
         else:
-            emoji_id, emoji_name = self._emoji_id, self._emoji_name
+            emoji_name, emoji_id = self._emoji_name, self._emoji_id
 
         payload: EditThreadTagPayload = {
             "name": new_name,
@@ -1169,15 +1142,6 @@ class ThreadTag(Hashable):
             An error occurred deleting the tag.
         """
         await self._state.http.delete_thread_tag(self._channel_id, self.id, reason=reason)
-
-    @staticmethod
-    def _get_emoji_params(
-        emoji: Optional[Union[str, Emoji, PartialEmoji]]
-    ) -> Tuple[Optional[int], Optional[str]]:
-        if isinstance(emoji, _EmojiTag):
-            return emoji.id, None
-        else:
-            return None, emoji
 
     @staticmethod
     def _find_in_response(
