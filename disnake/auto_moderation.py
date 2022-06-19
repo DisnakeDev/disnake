@@ -238,8 +238,6 @@ class AutoModRule:
         The event type this rule is applied to.
     trigger_type: :class:`AutoModTriggerType`
         The type of trigger that determines whether this rule's actions should run for a specific event.
-    actions: List[:class:`AutoModAction`]
-        The list of actions that will execute if a matching event triggered this rule.
     trigger_metadata: :class:`AutoModTriggerMetadata`
         Additional metadata associated with this rule's :attr:`.trigger_type`.
     """
@@ -252,8 +250,8 @@ class AutoModRule:
         "creator_id",
         "event_type",
         "trigger_type",
-        "actions",
         "trigger_metadata",
+        "_actions",
         "_exempt_role_ids",
         "_exempt_channel_ids",
     )
@@ -267,7 +265,7 @@ class AutoModRule:
         self.creator_id: int = int(data["creator_id"])
         self.event_type: AutoModEventType = try_enum(AutoModEventType, data["event_type"])
         self.trigger_type: AutoModTriggerType = try_enum(AutoModTriggerType, data["trigger_type"])
-        self.actions: List[AutoModAction] = [
+        self._actions: List[AutoModAction] = [
             AutoModAction._from_dict(action) for action in data["actions"]
         ]
         self.trigger_metadata: AutoModTriggerMetadata = AutoModTriggerMetadata._from_dict(
@@ -275,6 +273,12 @@ class AutoModRule:
         )
         self._exempt_role_ids: List[int] = list(map(int, data["exempt_roles"]))
         self._exempt_channel_ids: List[int] = list(map(int, data["exempt_channels"]))
+
+    @property
+    def actions(self) -> List[AutoModAction]:
+        """List[:class:`AutoModAction`]: The list of actions that
+        will execute if a matching event triggered this rule."""
+        return list(self._actions)  # return a copy
 
     @property
     def creator(self) -> Optional[Member]:
@@ -297,7 +301,7 @@ class AutoModRule:
         return (
             f"<AutoModRule id={self.id!r} name={self.name!r} enabled={self.enabled!r}"
             f" creator={self.creator!r} event_type={self.event_type!r} trigger_type={self.trigger_type!r}"
-            f" actions={self.actions!r} exempt_roles={self._exempt_role_ids!r} exempt_channels={self._exempt_channel_ids!r}"
+            f" actions={self._actions!r} exempt_roles={self._exempt_role_ids!r} exempt_channels={self._exempt_channel_ids!r}"
             f" trigger_metadata={self.trigger_metadata!r}>"
         )
 
