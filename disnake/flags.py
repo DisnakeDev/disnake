@@ -164,8 +164,6 @@ class BaseFlags:
 
 
 class ListBaseFlags(BaseFlags):
-    # This is 1-indexed, i.e. value `1` corresponds to bit 0, `2` corresponds to bit 1, ...
-
     __slots__ = ()
 
     @classmethod
@@ -175,9 +173,9 @@ class ListBaseFlags(BaseFlags):
         for n in values:
             # protect against DoS with large shift values
             # n.b. performance overhead of this is negligible
-            if not (0 < n < 64):
-                raise ValueError("Flag values must be within (0, 64)")
-            value += 1 << (n - 1)
+            if not (0 <= n < 64):
+                raise ValueError("Flag values must be within [0, 64)")
+            value += 1 << n
         self.value = value
         return self
 
@@ -185,7 +183,7 @@ class ListBaseFlags(BaseFlags):
     def values(self) -> List[int]:
         # this may look weird but interestingly it's by far the
         # fastest out of all benchmarked snippets
-        return [i for i, c in enumerate(bin(self.value)[:1:-1], 1) if c == "1"]
+        return [i for i, c in enumerate(bin(self.value)[:1:-1]) if c == "1"]
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} values={self.values}>"
