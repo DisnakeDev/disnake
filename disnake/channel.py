@@ -1274,7 +1274,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         nsfw: bool = ...,
         slowmode_delay: Optional[int] = ...,
         reason: Optional[str] = ...,
-    ) -> None:
+    ) -> VoiceChannel:
         ...
 
     async def edit(
@@ -1896,7 +1896,7 @@ class StageChannel(VocalGuildChannel):
         rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
         reason: Optional[str] = ...,
-    ) -> None:
+    ) -> StageChannel:
         ...
 
     async def edit(
@@ -2102,7 +2102,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         nsfw: bool = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         reason: Optional[str] = ...,
-    ) -> None:
+    ) -> CategoryChannel:
         ...
 
     async def edit(
@@ -2576,7 +2576,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         reason: Optional[str] = ...,
-    ) -> None:
+    ) -> ForumChannel:
         ...
 
     async def edit(
