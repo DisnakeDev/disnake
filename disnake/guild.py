@@ -103,6 +103,7 @@ if TYPE_CHECKING:
     from .threads import AnyThreadArchiveDuration
     from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
     from .types.integration import IntegrationType
+    from .types.role import CreateRole as CreateRolePayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
     from .types.voice import GuildVoiceState
@@ -3314,7 +3315,7 @@ class Guild(Hashable):
         :class:`Role`
             The newly created role.
         """
-        fields: Dict[str, Any] = {}
+        fields: CreateRolePayload = {}
         if permissions is not MISSING:
             fields["permissions"] = str(permissions.value)
         else:

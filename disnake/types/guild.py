@@ -26,11 +26,11 @@ DEALINGS IN THE SOFTWARE.
 from typing import List, Literal, Optional, TypedDict
 
 from .activity import PartialPresenceUpdate
-from .channel import GuildChannel, StageInstance
+from .channel import CreateGuildChannel, GuildChannel, StageInstance
 from .emoji import Emoji
 from .guild_scheduled_event import GuildScheduledEvent
 from .member import Member
-from .role import Role
+from .role import CreateRole, Role
 from .snowflake import Snowflake
 from .sticker import GuildSticker
 from .threads import Thread
@@ -180,3 +180,28 @@ class RolePositionUpdate(_RolePositionRequired, total=False):
 
 class MFALevelUpdate(TypedDict):
     level: MFALevel
+
+
+class CreateGuildPlaceholderRole(CreateRole):
+    id: Snowflake
+
+
+class CreateGuildPlaceholderChannel(CreateGuildChannel, total=False):
+    id: Snowflake
+
+
+class _CreateGuildOptional(TypedDict, total=False):
+    icon: str
+    verification_level: VerificationLevel
+    default_message_notifications: DefaultMessageNotificationLevel
+    explicit_content_filter: ExplicitContentFilterLevel
+    roles: List[CreateGuildPlaceholderRole]
+    channels: List[CreateGuildPlaceholderChannel]
+    afk_channel_id: Snowflake
+    afk_timeout: int
+    system_channel_id: Snowflake
+    system_channel_flags: int
+
+
+class CreateGuild(_CreateGuildOptional):
+    name: str
