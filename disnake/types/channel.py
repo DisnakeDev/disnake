@@ -204,7 +204,7 @@ class _CreateGuildChannelOptional(TypedDict, total=False):
     user_limit: Optional[int]
     rate_limit_per_user: Optional[int]
     position: Optional[int]
-    permission_overwrites: PermissionOverwrite
+    permission_overwrites: List[PermissionOverwrite]
     parent_id: Optional[Snowflake]
     nsfw: Optional[bool]
     rtc_region: Optional[str]
