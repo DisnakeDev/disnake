@@ -68,7 +68,7 @@ from .errors import *
 from .errors import SessionStartLimitReached
 from .flags import ApplicationFlags, Intents
 from .gateway import *
-from .guild import Guild
+from .guild import Guild, GuildBuilder
 from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .i18n import LocalizationProtocol, LocalizationStore
@@ -1782,6 +1782,9 @@ class Client:
         else:
             data = await self.http.create_guild(name, icon_base64)
         return Guild(data=data, state=self._connection)
+
+    def guild_builder(self, name: str) -> GuildBuilder:
+        return GuildBuilder(name=name, state=self._connection)
 
     async def fetch_stage_instance(self, channel_id: int, /) -> StageInstance:
         """|coro|

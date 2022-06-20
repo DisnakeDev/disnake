@@ -36,6 +36,7 @@ from typing import (
     List,
     Literal,
     NamedTuple,
+    NewType,
     Optional,
     Sequence,
     Set,
@@ -87,7 +88,10 @@ from .voice_region import VoiceRegion
 from .welcome_screen import WelcomeScreen, WelcomeScreenChannel
 from .widget import Widget, WidgetSettings
 
-__all__ = ("Guild",)
+__all__ = (
+    "Guild",
+    "GuildBuilder",
+)
 
 VocalGuildChannel = Union[VoiceChannel, StageChannel]
 MISSING = utils.MISSING
@@ -101,7 +105,15 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration
-    from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
+    from .types.channel import PermissionOverwrite as PermissionOverwritePayload
+    from .types.guild import (
+        Ban as BanPayload,
+        CreateGuildPlaceholderChannel,
+        CreateGuildPlaceholderRole,
+        Guild as GuildPayload,
+        GuildFeature,
+        MFALevel,
+    )
     from .types.integration import IntegrationType
     from .types.role import CreateRole as CreateRolePayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
@@ -4192,3 +4204,231 @@ class Guild(Hashable):
 
         data = await self._state.http.edit_member(self.id, user.id, reason=reason, **payload)
         return Member(data=data, guild=self, state=self._state)
+
+
+PlaceholderID = NewType("PlaceholderID", int)
+
+
+class GuildBuilder:
+    def __init__(self, *, state: ConnectionState, name: str):
+        self._state = state
+        self.name: str = name
+
+        self._current_id: int = 1
+        # note: the first role corresponds to @everyone
+        self._roles: List[CreateGuildPlaceholderRole] = []
+        self._channels: List[CreateGuildPlaceholderChannel] = []
+
+        self.icon: Optional[AssetBytes] = None
+        self.verification_level: Optional[VerificationLevel] = None
+        self.default_notifications: Optional[NotificationLevel] = None
+        self.explicit_content_filter: Optional[ContentFilter] = None
+        self.afk_channel: Optional[PlaceholderID] = None
+        self.afk_timeout: Optional[int] = None
+        self.system_channel: Optional[PlaceholderID] = None
+        self.system_channel_flags: Optional[SystemChannelFlags] = None
+
+        self._everyone_id: PlaceholderID = self._next_id()
+
+    def _next_id(self) -> PlaceholderID:
+        self._current_id = (_id := self._current_id) + 1
+        return PlaceholderID(_id)
+
+    async def create(self) -> Guild:
+        if self.icon is not None:
+            icon_base64 = await utils._assetbytes_to_base64_data(self.icon)
+        else:
+            icon_base64 = None
+
+        data = await self._state.http.create_guild(
+            name=self.name,
+            icon=icon_base64,
+            roles=self._roles if self._roles else None,
+            channels=self._channels if self._channels else None,
+            verification_level=try_enum_to_int(self.verification_level),
+            default_message_notifications=try_enum_to_int(self.default_notifications),
+            explicit_content_filter=try_enum_to_int(self.explicit_content_filter),
+            afk_channel=self.afk_channel,
+            afk_timeout=self.afk_timeout,
+            system_channel=self.system_channel,
+            system_channel_flags=try_enum_to_int(self.system_channel_flags),
+        )
+        # TODO: insert into cache? otherwise channels will always be empty
+        # or maybe wait for event?
+        return Guild(data=data, state=self._state)
+
+    def update_everyone_role(self, *, permissions: Permissions = MISSING) -> PlaceholderID:
+        role: CreateGuildPlaceholderRole
+        if len(self._roles) == 0:
+            self._roles.append({"id": self._everyone_id})
+        role = self._roles[0]
+
+        if permissions is not MISSING:
+            role["permissions"] = str(permissions.value)
+
+        return self._everyone_id
+
+    def add_role(
+        self,
+        name: str = MISSING,
+        *,
+        permissions: Permissions = MISSING,
+        color: Union[Colour, int] = MISSING,
+        colour: Union[Colour, int] = MISSING,
+        hoist: bool = MISSING,
+        mentionable: bool = MISSING,
+    ) -> PlaceholderID:
+        # always create @everyone role first if not created already
+        if len(self._roles) == 0:
+            self.update_everyone_role()
+
+        _id = self._next_id()
+        data: CreateGuildPlaceholderRole = {"id": _id}
+
+        if name is not MISSING:
+            data["name"] = name
+
+        if permissions is not MISSING:
+            data["permissions"] = str(permissions.value)
+        else:
+            data["permissions"] = "0"
+
+        actual_colour = colour or color or Colour.default()
+        if isinstance(actual_colour, int):
+            data["color"] = actual_colour
+        else:
+            data["color"] = actual_colour.value
+
+        if hoist is not MISSING:
+            data["hoist"] = hoist
+
+        if mentionable is not MISSING:
+            data["mentionable"] = mentionable
+
+        self._roles.append(data)
+        return _id
+
+    def _add_channel(
+        self,
+        *,
+        type: ChannelType,
+        name: str,
+        overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
+        category: PlaceholderID = MISSING,
+        topic: Optional[str] = MISSING,
+        slowmode_delay: int = MISSING,
+        nsfw: bool = MISSING,
+    ) -> Tuple[PlaceholderID, CreateGuildPlaceholderChannel]:
+        _id = self._next_id()
+        data: CreateGuildPlaceholderChannel = {
+            "id": _id,
+            "type": try_enum_to_int(type),
+            "name": name,
+        }
+
+        if overwrites is not MISSING:
+            overwrites_data: List[PermissionOverwritePayload] = []
+            for target, perm in overwrites.items():
+                allow, deny = perm.pair()
+                overwrites_data.append(
+                    {
+                        "allow": str(allow.value),
+                        "deny": str(deny.value),
+                        "id": target,
+                        # can only set overrides for roles here
+                        "type": abc._Overwrites.ROLE,
+                    }
+                )
+            data["permission_overwrites"] = overwrites_data
+
+        if category is not MISSING:
+            data["parent_id"] = category
+
+        if topic is not MISSING:
+            data["topic"] = topic
+
+        if slowmode_delay is not MISSING:
+            data["rate_limit_per_user"] = slowmode_delay
+
+        if nsfw is not MISSING:
+            data["nsfw"] = nsfw
+
+        self._channels.append(data)
+        return _id, data
+
+    def add_category(
+        self,
+        name: str,
+        *,
+        overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
+    ) -> PlaceholderID:
+        _id, _ = self._add_channel(type=ChannelType.category, name=name, overwrites=overwrites)
+        return _id
+
+    add_category_channel = add_category
+
+    def add_text_channel(
+        self,
+        name: str,
+        *,
+        overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
+        category: PlaceholderID = MISSING,
+        topic: Optional[str] = MISSING,
+        slowmode_delay: int = MISSING,
+        nsfw: bool = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+    ) -> PlaceholderID:
+        _id, data = self._add_channel(
+            type=ChannelType.text,
+            name=name,
+            overwrites=overwrites,
+            category=category,
+            topic=topic,
+            slowmode_delay=slowmode_delay,
+            nsfw=nsfw,
+        )
+
+        if default_auto_archive_duration is not MISSING:
+            data["default_auto_archive_duration"] = cast(
+                "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
+            )
+
+        return _id
+
+    def add_voice_channel(
+        self,
+        name: str,
+        *,
+        overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
+        category: PlaceholderID = MISSING,
+        topic: Optional[str] = MISSING,
+        slowmode_delay: int = MISSING,
+        nsfw: bool = MISSING,
+        bitrate: int = MISSING,
+        user_limit: int = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
+    ) -> PlaceholderID:
+        _id, data = self._add_channel(
+            type=ChannelType.voice,
+            name=name,
+            overwrites=overwrites,
+            category=category,
+            topic=topic,
+            slowmode_delay=slowmode_delay,
+            nsfw=nsfw,
+        )
+
+        if bitrate is not MISSING:
+            data["bitrate"] = bitrate
+
+        if user_limit is not MISSING:
+            data["user_limit"] = user_limit
+
+        if rtc_region is not MISSING:
+            data["rtc_region"] = None if rtc_region is None else str(rtc_region)
+
+        if video_quality_mode is not MISSING:
+            data["video_quality_mode"] = try_enum_to_int(video_quality_mode)
+
+        return _id
