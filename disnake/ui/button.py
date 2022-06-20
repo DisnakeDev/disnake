@@ -64,18 +64,22 @@ if TYPE_CHECKING:
     from .item import ItemCallbackType
     from .view import View
 
+T_co = TypeVar("T_co", covariant=True)
 B = TypeVar("B", bound="Button")
 B_co = TypeVar("B_co", bound="Button", covariant=True)
-V = TypeVar("V", bound="Optional[View]", covariant=True)
+V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 P = ParamSpec("P")
 
 
-class ButtonObject(Protocol[B_co, P]):
+class Object(Protocol[T_co, P]):
+    def __new__(cls) -> T_co:
+        ...
+
     def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
         ...
 
 
-class Button(Item[V]):
+class Button(Item[V_co]):
     """Represents a UI button.
 
     .. versionadded:: 2.0
@@ -130,7 +134,7 @@ class Button(Item[V]):
 
     @overload
     def __init__(
-        self: Button[V],
+        self: Button[V_co],
         *,
         style: ButtonStyle = ButtonStyle.secondary,
         label: Optional[str] = None,
@@ -294,19 +298,19 @@ def button(
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[Button[Any]]], DecoratedItem[Button[Any]]]:
+) -> Callable[[ItemCallbackType[Button[V_co]]], DecoratedItem[Button[V_co]]]:
     ...
 
 
 @overload
 def button(
-    cls: Type[ButtonObject[B_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Type[Object[B_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
     ...
 
 
 def button(
-    cls: Type[ButtonObject[B_co, P]] = Button[Any], **kwargs: Any
+    cls: Type[Object[B_co, P]] = Button[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
     """A decorator that attaches a button to a component.
 

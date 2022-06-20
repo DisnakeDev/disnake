@@ -67,13 +67,17 @@ if TYPE_CHECKING:
     from .item import ItemCallbackType
     from .view import View
 
+T_co = TypeVar("T_co", covariant=True)
 S = TypeVar("S", bound="Select")
 S_co = TypeVar("S_co", bound="Select", covariant=True)
-V = TypeVar("V", bound="Optional[View]", covariant=True)
+V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 P = ParamSpec("P")
 
 
-class SelectObject(Protocol[S_co, P]):
+class Object(Protocol[T_co, P]):
+    def __new__(cls) -> T_co:
+        ...
+
     def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
         ...
 
@@ -88,7 +92,7 @@ def _parse_select_options(
     return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
 
 
-class Select(Item[V]):
+class Select(Item[V_co]):
     """Represents a UI select menu.
 
     This is usually represented as a drop down menu.
@@ -155,7 +159,7 @@ class Select(Item[V]):
 
     @overload
     def __init__(
-        self: Select[V],
+        self: Select[V_co],
         *,
         custom_id: str = MISSING,
         placeholder: Optional[str] = None,
@@ -368,19 +372,19 @@ def select(
     options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[Select[Any]]], DecoratedItem[Select[Any]]]:
+) -> Callable[[ItemCallbackType[Select[V_co]]], DecoratedItem[Select[V_co]]]:
     ...
 
 
 @overload
 def select(
-    cls: Type[SelectObject[S_co, P]], *_: P.args, **kwargs: P.kwargs
+    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     ...
 
 
 def select(
-    cls: Type[SelectObject[S_co, P]] = Select[Any],
+    cls: Type[Object[S_co, P]] = Select[Any],
     **kwargs: Any,
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a select menu to a component.
