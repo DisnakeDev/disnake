@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import asyncio
 import os
-import sys
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -42,12 +41,6 @@ from typing import (
     overload,
 )
 
-if sys.version_info >= (3, 10):
-    from typing import ParamSpec
-
-else:
-    from typing_extensions import ParamSpec
-
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
@@ -60,9 +53,14 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import ParamSpec
+
     from ..emoji import Emoji
     from .item import ItemCallbackType
     from .view import View
+
+else:
+    ParamSpec = TypeVar
 
 T_co = TypeVar("T_co", covariant=True)
 B = TypeVar("B", bound="Button")
