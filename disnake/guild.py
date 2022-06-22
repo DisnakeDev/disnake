@@ -4214,7 +4214,6 @@ class GuildBuilder:
         self._state = state
         self.name: str = name
 
-        self._current_id: int = 1
         # note: the first role corresponds to @everyone
         self._roles: List[CreateGuildPlaceholderRole] = []
         self._channels: List[CreateGuildPlaceholderChannel] = []
@@ -4227,6 +4226,8 @@ class GuildBuilder:
         self.afk_timeout: Optional[int] = None
         self.system_channel: Optional[PlaceholderID] = None
         self.system_channel_flags: Optional[SystemChannelFlags] = None
+
+        self._current_id: int = 1
 
         self._everyone_id: PlaceholderID = self._next_id()
 
@@ -4258,7 +4259,6 @@ class GuildBuilder:
         return Guild(data=data, state=self._state)
 
     def update_everyone_role(self, *, permissions: Permissions = MISSING) -> PlaceholderID:
-        role: CreateGuildPlaceholderRole
         if len(self._roles) == 0:
             self._roles.append({"id": self._everyone_id})
         role = self._roles[0]
