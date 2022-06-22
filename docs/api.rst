@@ -1393,6 +1393,9 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     This requires :attr:`Intents.auto_moderation_execution` to be enabled.
 
+    In addition, :attr:`Intents.message_content` must be enabled to receive non-empty values
+    for :attr:`AutoModActionExecution.content` and :attr:`AutoModActionExecution.matched_content`.
+
     .. versionadded:: 2.6
 
     :param execution: The auto moderation action execution data.

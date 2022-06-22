@@ -509,10 +509,17 @@ class AutoModActionExecution:
         See also :attr:`.alert_message`.
     content: :class:`str`
         The content that matched.
+
+        Requires :attr:`Intents.message_content` to be enabled,
+        otherwise this field will be empty.
+
     matched_keyword: Optional[:class:`str`]
         The keyword that matched.
     matched_content: Optional[:class:`str`]
         The substring of :attr:`.content` that matched the rule/keyword.
+
+        Requires :attr:`Intents.message_content` to be enabled,
+        otherwise this field will be empty.
     """
 
     __slots__ = (

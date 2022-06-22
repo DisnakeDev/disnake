@@ -887,7 +887,12 @@ class Intents(BaseFlags):
         - Messages the bot sends
         - Messages the bot receives as a direct message
         - Messages in which the bot is mentioned
-        - Messages received from an interaction payload, these will typically be attributes on :class:`~disnake.MessageInteraction` instances
+        - Messages received from an interaction payload, these will typically be attributes on :class:`~disnake.MessageInteraction` instances.
+
+        In addition, this also corresponds to the following fields:
+
+        - :attr:`AutoModActionExecution.content`
+        - :attr:`AutoModActionExecution.matched_content`
 
         For more information go to the :ref:`message content intent documentation <need_message_content_intent>`.
 
