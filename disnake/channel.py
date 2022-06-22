@@ -2627,7 +2627,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def default_reaction_emoji(self) -> Optional[Union[Emoji, PartialEmoji]]:
-        """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]: TODO"""
+        """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]:
+        The default emoji shown for reacting to new threads.
+
+        .. versionadded:: 2.6
+        """
         return PartialEmoji._from_name_id(
             self._default_reaction_emoji_name, self._default_reaction_emoji_id, state=self._state
         )
@@ -2749,11 +2753,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         Parameters
         ----------
         name: :class:`str`
-            The new channel's name.
+            The channel's new name.
         topic: Optional[:class:`str`]
-            The new channel's topic.
+            The channel's new topic.
         position: :class:`int`
-            The new channel's position.
+            The channel's new position.
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW.
         sync_permissions: :class:`bool`
@@ -2788,7 +2792,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             .. versionadded:: 2.6
 
         default_reaction_emoji: Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]
-            TODO
+            The default emoji shown for reacting to new threads.
 
             .. versionadded:: 2.6
 
