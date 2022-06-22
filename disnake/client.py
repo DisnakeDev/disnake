@@ -1731,7 +1731,9 @@ class Client:
 
         Creates a :class:`.Guild`.
 
-        Bot accounts in more than 10 guilds are not allowed to create guilds.
+        See :func:`guild_builder` for a more comprehensive alternative.
+
+        Bot accounts in 10 or more guilds are not allowed to create guilds.
 
         .. versionchanged:: 2.5
             Removed the ``region`` parameter.
@@ -1769,8 +1771,7 @@ class Client:
         Returns
         -------
         :class:`.Guild`
-            The created guild. This is not the same guild that is
-            added to cache.
+            The created guild. This is not the same guild that is added to cache.
         """
         if icon is not MISSING:
             icon_base64 = await utils._assetbytes_to_base64_data(icon)
@@ -1784,6 +1785,23 @@ class Client:
         return Guild(data=data, state=self._connection)
 
     def guild_builder(self, name: str) -> GuildBuilder:
+        """Creates a builder object that can be used to create more complex guilds.
+
+        This is a more comprehensive alternative to :func:`create_guild`.
+        See :class:`.GuildBuilder` for details and examples.
+
+        Bot accounts in 10 or more guilds are not allowed to create guilds.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The name of the guild.
+
+        Returns
+        -------
+        :class:`.GuildBuilder`
+            The guild builder object for configuring and creating a new guild.
+        """
         return GuildBuilder(name=name, state=self._connection)
 
     async def fetch_stage_instance(self, channel_id: int, /) -> StageInstance:
