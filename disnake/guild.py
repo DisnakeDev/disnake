@@ -4317,6 +4317,11 @@ class GuildBuilder:
         self._current_id = (_id := self._current_id) + 1
         return PlaceholderID(_id)
 
+    @property
+    def everyone(self) -> PlaceholderID:
+        """``PlaceholderID``: The placeholder ID used for the ``@everyone`` role."""
+        return self._everyone_id
+
     async def create(self) -> Guild:
         """|coro|
 
