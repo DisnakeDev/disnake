@@ -4401,7 +4401,6 @@ class GuildBuilder:
         *,
         overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
         category: PlaceholderID = MISSING,
-        topic: Optional[str] = MISSING,
         slowmode_delay: int = MISSING,
         nsfw: bool = MISSING,
         bitrate: int = MISSING,
@@ -4414,7 +4413,6 @@ class GuildBuilder:
             name=name,
             overwrites=overwrites,
             category=category,
-            topic=topic,
             slowmode_delay=slowmode_delay,
             nsfw=nsfw,
         )
