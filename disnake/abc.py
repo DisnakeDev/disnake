@@ -329,7 +329,7 @@ class GuildChannel(ABC):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         flags: ChannelFlags = MISSING,
-        default_reaction_emoji: Union[str, Emoji, PartialEmoji] = MISSING,
+        default_reaction: Union[str, Emoji, PartialEmoji] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
         parent_id: Optional[int]
@@ -414,9 +414,9 @@ class GuildChannel(ABC):
             flags_payload = MISSING
 
         default_reaction_emoji_payload: Optional[ForumEmojiPayload]
-        if default_reaction_emoji is not MISSING:
-            if default_reaction_emoji is not None:
-                emoji_name, emoji_id = PartialEmoji._to_name_id(default_reaction_emoji)
+        if default_reaction is not MISSING:
+            if default_reaction is not None:
+                emoji_name, emoji_id = PartialEmoji._to_name_id(default_reaction)
                 default_reaction_emoji_payload = {
                     "emoji_name": emoji_name,
                     "emoji_id": emoji_id or 0,
