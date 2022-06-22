@@ -4341,8 +4341,11 @@ class GuildBuilder:
         Returns
         -------
         :class:`.Guild`
-            The created guild. This is not the same guild that is added to cache,
-            and notably does not contain any of the configured channels.
+            The created guild. This is not the same guild that is added to cache.
+
+            .. note::
+                Due to API limitations, this returned guild does
+                not contain any of the configured channels.
         """
         if self.icon is not None:
             icon_base64 = await utils._assetbytes_to_base64_data(self.icon)
@@ -4377,7 +4380,7 @@ class GuildBuilder:
         -------
         ``PlaceholderID``
             The placeholder ID for the ``@everyone`` role.
-            Also available under :attr:`everyone`.
+            Also available as :attr:`everyone`.
         """
         if len(self._roles) == 0:
             self._roles.append({"id": self._everyone_id})
