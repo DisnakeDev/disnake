@@ -87,6 +87,7 @@ from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
+from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite
 from .role import Role
 from .stage_instance import StageInstance
@@ -1555,6 +1556,8 @@ class Guild(Hashable):
         default_auto_archive_duration: AnyThreadArchiveDuration = None,
         nsfw: bool = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        # TODO: template currently doesn't seem to be supported?
+        default_reaction: Union[str, Emoji, PartialEmoji] = None,
         reason: Optional[str] = None,
     ) -> ForumChannel:
         """|coro|
@@ -1592,6 +1595,11 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
+        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+            The default emoji shown for reacting to new threads.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1626,6 +1634,13 @@ class Guild(Hashable):
             options["default_auto_archive_duration"] = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
             )
+
+        if default_reaction is not None:
+            emoji_name, emoji_id = PartialEmoji._to_name_id(default_reaction)
+            options["default_reaction_emoji"] = {
+                "emoji_name": emoji_name,
+                "emoji_id": emoji_id,
+            }
 
         data = await self._create_channel(
             name,
