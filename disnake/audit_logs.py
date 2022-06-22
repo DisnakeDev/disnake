@@ -49,6 +49,7 @@ from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
 from .object import Object
+from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 
 __all__ = (
@@ -81,7 +82,10 @@ if TYPE_CHECKING:
         AutoModAction as AutoModActionPayload,
         AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
     )
-    from .types.channel import PermissionOverwrite as PermissionOverwritePayload
+    from .types.channel import (
+        ForumEmoji as ForumEmojiPayload,
+        PermissionOverwrite as PermissionOverwritePayload,
+    )
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
     from .types.threads import ThreadTag as ThreadTagPayload
@@ -299,6 +303,16 @@ def _transform_automod_trigger_metadata(
     return AutoModTriggerMetadata._from_dict(data)
 
 
+def _transform_forum_emoji(
+    entry: AuditLogEntry, data: Optional[ForumEmojiPayload]
+) -> Optional[Union[Emoji, PartialEmoji]]:
+    if data is None:
+        return None
+    return PartialEmoji._from_name_id(
+        data.get("emoji_name"), utils._get_as_snowflake(data, "emoji_id"), state=entry._state
+    )
+
+
 class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
@@ -371,6 +385,7 @@ class AuditLogChanges:
         "exempt_channels":               (None, _list_transformer(_transform_channel)),
         "applied_tags":                  ("tags", _list_transformer(_transform_tag)),
         "available_tags":                (None, _list_transformer(_transform_tag)),
+        "default_reaction_emoji":        ("default_reaction", _transform_forum_emoji),
     }
     # fmt: on
 
