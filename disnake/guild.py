@@ -4325,7 +4325,7 @@ class GuildBuilder:
     async def create(self) -> Guild:
         """|coro|
 
-        Creates the configured :class:`.Guild`.
+        Creates the configured guild.
 
         Raises
         ------
@@ -4551,8 +4551,11 @@ class GuildBuilder:
             A :class:`dict` of roles to :class:`PermissionOverwrite`\\s to apply to the channel.
         category: ``PlaceholderID``
             The category to place the new channel under.
-            The permissions will be automatically synced to this category if no
-            overwrites are provided.
+
+            .. warning::
+                Unlike :func:`Guild.create_text_channel`, the parent category's
+                permissions will *not* be synced to this new channel by default.
+
         topic: Optional[:class:`str`]
             The channel's topic.
         slowmode_delay: :class:`int`
@@ -4611,8 +4614,11 @@ class GuildBuilder:
             A :class:`dict` of roles to :class:`PermissionOverwrite`\\s to apply to the channel.
         category: ``PlaceholderID``
             The category to place the new channel under.
-            The permissions will be automatically synced to this category if no
-            overwrites are provided.
+
+            .. warning::
+                Unlike :func:`Guild.create_voice_channel`, the parent category's
+                permissions will *not* be synced to this new channel by default.
+
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
