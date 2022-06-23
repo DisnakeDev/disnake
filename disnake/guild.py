@@ -2161,6 +2161,10 @@ class Guild(Hashable):
         .. versionchanged:: 2.6
             Removed ``channel_id`` parameter in favor of ``channel``.
 
+        .. versionchanged:: 2.6
+            Naive datetime parameters are now assumed to be in the local
+            timezone instead of UTC.
+
         Parameters
         ----------
         name: :class:`str`
@@ -2184,8 +2188,10 @@ class Guild(Hashable):
             The privacy level of the guild scheduled event.
         scheduled_start_time: :class:`datetime.datetime`
             The time to schedule the guild scheduled event.
+            If the datetime is naive, it is assumed to be local time.
         scheduled_end_time: Optional[:class:`datetime.datetime`]
             The time when the guild scheduled event is scheduled to end.
+            If the datetime is naive, it is assumed to be local time.
         entity_type: :class:`GuildScheduledEventEntityType`
             The entity type of the guild scheduled event.
         entity_metadata: :class:`GuildScheduledEventMetadata`
