@@ -5193,46 +5193,6 @@ AutoModRule
 .. autoclass:: AutoModRule()
     :members:
 
-AutoModTriggerMetadata
-~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: AutoModTriggerMetadata
-
-.. autoclass:: AutoModTriggerMetadata()
-    :members:
-
-AutoModAction
-~~~~~~~~~~~~~~
-
-.. attributetable:: AutoModAction
-
-.. autoclass:: AutoModAction()
-    :members:
-
-AutoModBlockMessageAction
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: AutoModBlockMessageAction
-
-.. autoclass:: AutoModBlockMessageAction()
-    :members:
-
-AutoModSendAlertAction
-~~~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: AutoModSendAlertAction
-
-.. autoclass:: AutoModSendAlertAction()
-    :members:
-
-AutoModTimeoutAction
-~~~~~~~~~~~~~~~~~~~~~
-
-.. attributetable:: AutoModTimeoutAction
-
-.. autoclass:: AutoModTimeoutAction()
-    :members:
-
 AutoModActionExecution
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -5507,6 +5467,46 @@ AutoModKeywordPresets
 .. attributetable:: AutoModKeywordPresets
 
 .. autoclass:: AutoModKeywordPresets
+    :members:
+
+AutoModTriggerMetadata
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModTriggerMetadata
+
+.. autoclass:: AutoModTriggerMetadata()
+    :members:
+
+AutoModAction
+~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModAction
+
+.. autoclass:: AutoModAction()
+    :members:
+
+AutoModBlockMessageAction
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModBlockMessageAction
+
+.. autoclass:: AutoModBlockMessageAction()
+    :members:
+
+AutoModSendAlertAction
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModSendAlertAction
+
+.. autoclass:: AutoModSendAlertAction()
+    :members:
+
+AutoModTimeoutAction
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModTimeoutAction
+
+.. autoclass:: AutoModTimeoutAction()
     :members:
 
 File
