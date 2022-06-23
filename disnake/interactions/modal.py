@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional
 
-from ..components import ActionRow, ModalComponent, TextInput
+from ..enums import ComponentType
 from ..message import Message
 from ..utils import cached_slot_property
 from .base import Interaction
@@ -35,6 +35,8 @@ if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..types.interactions import (
         ModalInteraction as ModalInteractionPayload,
+        ModalInteractionActionRow as ModalInteractionActionRowPayload,
+        ModalInteractionComponentData as ModalInteractionComponentDataPayload,
         ModalInteractionData as ModalInteractionDataPayload,
     )
 
@@ -101,22 +103,26 @@ class ModalInteraction(Interaction):
             message = None
         self.message: Optional[Message] = message
 
-    def walk_components(self) -> Generator[ModalComponent, None, None]:
-        """Returns a generator that yields components from action rows one by one.
-
-        :return type: Generator[:class:`TextInput`, None, None]
+    def walk_component_data(self) -> Generator[ModalInteractionComponentDataPayload, None, None]:
         """
-        for action_row in self.data._components:
-            yield from action_row.children
+        Returns a generator that yields raw component data from action rows one by one.
+
+        Returns
+        -------
+        Generator[:class:`dict`, None, None]
+        """
+        for action_row in self.data.components:
+            yield from action_row["components"]
 
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
         """Dict[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``."""
+        text_input_type = ComponentType.text_input.value
         return {
-            component.custom_id: component.value or ""
-            for component in self.walk_components()
-            if isinstance(component, TextInput)
+            component["custom_id"]: component.get("value") or ""
+            for component in self.walk_component_data()
+            if component.get("type") == text_input_type
         }
 
     @property
@@ -134,19 +140,16 @@ class ModalInteractionData(Dict[str, Any]):
     ----------
     custom_id: :class:`str`
         The custom ID of the modal.
+    components: List[:class:`dict`]
+        The raw component data of the modal interaction.
     """
 
-    __slots__ = ("custom_id", "_components")
+    __slots__ = ("custom_id", "components")
 
     def __init__(self, *, data: ModalInteractionDataPayload):
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
-        # this attribute is not meant to be used since it lacks most of the component data
-        self._components: List[ActionRow[ModalComponent]] = [
-            ActionRow(d) for d in data["components"]
-        ]
+        self.components: List[ModalInteractionActionRowPayload] = data["components"]
 
     def __repr__(self):
-        return (
-            f"<ModalInteractionData custom_id={self.custom_id!r} _components={self._components!r}>"
-        )
+        return f"<ModalInteractionData custom_id={self.custom_id!r} components={self.components!r}>"
