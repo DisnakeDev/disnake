@@ -25,7 +25,18 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Set, Type, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    Union,
+    cast,
+)
 
 from .enums import (
     AutoModActionType,
@@ -301,6 +312,10 @@ class AutoModRule:
         The type of trigger that determines whether this rule's actions should run for a specific event.
     trigger_metadata: :class:`AutoModTriggerMetadata`
         Additional metadata associated with this rule's :attr:`.trigger_type`.
+    exempt_role_ids: FrozenSet[:class:`int`]
+        The role IDs that are exempt from this rule.
+    exempt_channel_ids: FrozenSet[:class:`int`]
+        The channel IDs that are exempt from this rule.
     """
 
     __slots__ = (
@@ -332,13 +347,15 @@ class AutoModRule:
         self.trigger_metadata: AutoModTriggerMetadata = AutoModTriggerMetadata._from_dict(
             data.get("trigger_metadata", {})
         )
-        self.exempt_role_ids: Set[int] = (
-            set(map(int, exempt_roles)) if (exempt_roles := data.get("exempt_roles")) else set()
+        self.exempt_role_ids: FrozenSet[int] = (
+            frozenset(map(int, exempt_roles))
+            if (exempt_roles := data.get("exempt_roles"))
+            else frozenset()
         )
-        self.exempt_channel_ids: Set[int] = (
-            set(map(int, exempt_channels))
+        self.exempt_channel_ids: FrozenSet[int] = (
+            frozenset(map(int, exempt_channels))
             if (exempt_channels := data.get("exempt_channels"))
-            else set()
+            else frozenset()
         )
 
     @property
@@ -380,8 +397,8 @@ class AutoModRule:
         trigger_metadata: AutoModTriggerMetadata = MISSING,
         actions: Sequence[AutoModAction] = MISSING,
         enabled: bool = MISSING,
-        exempt_roles: Optional[Sequence[Snowflake]] = MISSING,
-        exempt_channels: Optional[Sequence[Snowflake]] = MISSING,
+        exempt_roles: Optional[Iterable[Snowflake]] = MISSING,
+        exempt_channels: Optional[Iterable[Snowflake]] = MISSING,
         reason: Optional[str] = None,
     ) -> AutoModRule:
         """|coro|
@@ -404,10 +421,10 @@ class AutoModRule:
             The rule's new actions.
         enabled: :class:`bool`
             Whether to enable the rule.
-        exempt_roles: Optional[Sequence[:class:`abc.Snowflake`]]
+        exempt_roles: Optional[Iterable[:class:`abc.Snowflake`]]
             The rule's new exempt roles, up to 20. If ``[]`` or ``None`` is
             passed then all role exemptions are removed.
-        exempt_channels: Optional[Sequence[:class:`abc.Snowflake`]]
+        exempt_channels: Optional[Iterable[:class:`abc.Snowflake`]]
             The rule's new exempt channels, up to 50.
             Can also include categories, in which case all channels inside that category will be exempt.
             If ``[]`` or ``None`` is passed then all channel exemptions are removed.
