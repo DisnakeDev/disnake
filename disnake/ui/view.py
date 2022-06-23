@@ -25,7 +25,7 @@ from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
     MessageComponent,
-    SelectMenu as SelectComponent,
+    StringSelectMenu as StringSelectComponent,
     _component_factory,
 )
 from ..enums import ComponentType, try_enum_to_int
@@ -57,7 +57,7 @@ def _component_to_item(component: MessageComponent) -> Item:
         from .button import Button
 
         return Button.from_component(component)
-    if isinstance(component, SelectComponent):
+    if isinstance(component, StringSelectComponent):
         from .select import Select
 
         return Select.from_component(component)

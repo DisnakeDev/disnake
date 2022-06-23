@@ -23,7 +23,7 @@ from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
     NestedComponent,
-    SelectMenu as SelectComponent,
+    StringSelectMenu as StringSelectComponent,
 )
 from ..enums import ButtonStyle, ComponentType, TextInputStyle
 from ..utils import MISSING, SequenceProxy, assert_never
@@ -547,7 +547,7 @@ class ActionRow(Generic[UIComponentT]):
             for component in row.children:
                 if isinstance(component, ButtonComponent):
                     current_row.append_item(Button.from_component(component))
-                elif isinstance(component, SelectComponent):
+                elif isinstance(component, StringSelectComponent):
                     current_row.append_item(Select.from_component(component))
                 else:
                     assert_never(component)

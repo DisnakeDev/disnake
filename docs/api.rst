@@ -4858,12 +4858,12 @@ BaseSelectMenu
     :members:
     :inherited-members:
 
-SelectMenu
-~~~~~~~~~~~
+StringSelectMenu
+~~~~~~~~~~~~~~~~~
 
-.. attributetable:: SelectMenu
+.. attributetable:: StringSelectMenu
 
-.. autoclass:: SelectMenu()
+.. autoclass:: StringSelectMenu()
     :members:
     :inherited-members:
 

@@ -16,7 +16,7 @@ from typing import (
     overload,
 )
 
-from ...components import SelectMenu, SelectOption
+from ...components import SelectOption, StringSelectMenu
 from ...enums import ComponentType
 from ...utils import MISSING
 from .base import BaseSelect, P, V_co, _create_decorator
@@ -45,7 +45,7 @@ def _parse_select_options(options: SelectOptionInput) -> List[SelectOption]:
     return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
 
 
-class Select(BaseSelect[SelectMenu, str, V_co]):
+class Select(BaseSelect[StringSelectMenu, str, V_co]):
     """Represents a UI string select menu.
 
     This is usually represented as a drop down menu.
@@ -133,7 +133,7 @@ class Select(BaseSelect[SelectMenu, str, V_co]):
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
-            SelectMenu,
+            StringSelectMenu,
             ComponentType.string_select,
             custom_id=custom_id,
             placeholder=placeholder,
@@ -145,7 +145,7 @@ class Select(BaseSelect[SelectMenu, str, V_co]):
         self._underlying.options = [] if options is MISSING else _parse_select_options(options)
 
     @classmethod
-    def from_component(cls, component: SelectMenu) -> Self:
+    def from_component(cls, component: StringSelectMenu) -> Self:
         return cls(
             custom_id=component.custom_id,
             placeholder=component.placeholder,

@@ -40,7 +40,7 @@ __all__ = (
     "ActionRow",
     "Button",
     "BaseSelectMenu",
-    "SelectMenu",
+    "StringSelectMenu",
     "SelectOption",
     "TextInput",
 )
@@ -50,7 +50,7 @@ C = TypeVar("C", bound="Component")
 if TYPE_CHECKING:  # TODO: remove when we add modal select support
     from typing_extensions import TypeAlias
 
-AnySelectMenu: TypeAlias = "SelectMenu"
+AnySelectMenu: TypeAlias = "StringSelectMenu"
 MessageComponent = Union["Button", "AnySelectMenu"]
 
 # ModalComponent = Union["TextInput", "AnySelectMenu"]
@@ -66,7 +66,7 @@ class Component:
 
     - :class:`ActionRow`
     - :class:`Button`
-    - subtypes of :class:`BaseSelectMenu` (:class:`SelectMenu`)
+    - subtypes of :class:`BaseSelectMenu` (:class:`StringSelectMenu`, ...)
     - :class:`TextInput`
 
     This class is abstract and cannot be instantiated.
@@ -221,7 +221,7 @@ class BaseSelectMenu(Component):
 
     The currently supported select menus are:
 
-    - :class:`~disnake.SelectMenu`
+    - :class:`~disnake.StringSelectMenu`
 
     .. versionadded:: 2.7
 
@@ -276,7 +276,7 @@ class BaseSelectMenu(Component):
         return payload
 
 
-class SelectMenu(BaseSelectMenu):
+class StringSelectMenu(BaseSelectMenu):
     """Represents a string select menu from the Discord Bot UI Kit.
 
     .. note::
@@ -284,6 +284,9 @@ class SelectMenu(BaseSelectMenu):
         string select menu is :class:`disnake.ui.Select`.
 
     .. versionadded:: 2.0
+
+    .. versionchanged:: 2.7
+        Renamed from ``SelectMenu`` to ``StringSelectMenu``.
 
     Attributes
     ----------
@@ -515,7 +518,7 @@ def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> 
     elif component_type == 2:
         return Button(data)  # type: ignore
     elif component_type == 3:
-        return SelectMenu(data)  # type: ignore
+        return StringSelectMenu(data)  # type: ignore
     elif component_type == 4:
         return TextInput(data)  # type: ignore
     else:
