@@ -30,8 +30,8 @@ if TYPE_CHECKING:
         BaseSelectMenu as BaseSelectMenuPayload,
         ButtonComponent as ButtonComponentPayload,
         Component as ComponentPayload,
-        SelectMenu as SelectMenuPayload,
         SelectOption as SelectOptionPayload,
+        StringSelectMenu as StringSelectMenuPayload,
         TextInput as TextInputPayload,
     )
 
@@ -307,14 +307,14 @@ class SelectMenu(BaseSelectMenu):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
 
-    def __init__(self, data: SelectMenuPayload):
+    def __init__(self, data: StringSelectMenuPayload):
         super().__init__(data)
         self.options: List[SelectOption] = [
             SelectOption.from_dict(option) for option in data.get("options", [])
         ]
 
-    def to_dict(self) -> SelectMenuPayload:
-        payload = cast("SelectMenuPayload", super().to_dict())
+    def to_dict(self) -> StringSelectMenuPayload:
+        payload = cast("StringSelectMenuPayload", super().to_dict())
         payload["options"] = [op.to_dict() for op in self.options]
         return payload
 

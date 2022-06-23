@@ -48,15 +48,15 @@ class _SelectMenu(TypedDict):
 
 
 class BaseSelectMenu(_SelectMenu):
-    type: Literal[3]
+    type: Literal[3, 5, 6, 7, 8]
 
 
-class SelectMenu(_SelectMenu):
+class StringSelectMenu(_SelectMenu):
     type: Literal[3]
     options: List[SelectOption]
 
 
-AnySelectMenu = SelectMenu
+AnySelectMenu = StringSelectMenu  # TODO
 
 
 class Modal(TypedDict):
