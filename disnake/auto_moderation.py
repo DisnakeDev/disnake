@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Type, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Set, Type, Union, cast
 
 from .enums import (
     AutoModActionType,
@@ -313,8 +313,8 @@ class AutoModRule:
         "trigger_type",
         "trigger_metadata",
         "_actions",
-        "_exempt_role_ids",
-        "_exempt_channel_ids",
+        "exempt_role_ids",
+        "exempt_channel_ids",
     )
 
     def __init__(self, *, data: AutoModRulePayload, guild: Guild):
@@ -332,8 +332,8 @@ class AutoModRule:
         self.trigger_metadata: AutoModTriggerMetadata = AutoModTriggerMetadata._from_dict(
             data["trigger_metadata"]
         )
-        self._exempt_role_ids: List[int] = list(map(int, data["exempt_roles"]))
-        self._exempt_channel_ids: List[int] = list(map(int, data["exempt_channels"]))
+        self.exempt_role_ids: Set[int] = set(map(int, data["exempt_roles"]))
+        self.exempt_channel_ids: Set[int] = set(map(int, data["exempt_channels"]))
 
     @property
     def actions(self) -> List[AutoModAction]:
@@ -351,18 +351,18 @@ class AutoModRule:
     @property
     def exempt_roles(self) -> List[Role]:
         """List[:class:`Role`]: The list of roles that are exempt from this rule."""
-        return list(filter(None, map(self.guild.get_role, self._exempt_role_ids)))
+        return list(filter(None, map(self.guild.get_role, self.exempt_role_ids)))
 
     @property
     def exempt_channels(self) -> List[GuildChannel]:
         """List[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
-        return list(filter(None, map(self.guild.get_channel, self._exempt_channel_ids)))
+        return list(filter(None, map(self.guild.get_channel, self.exempt_channel_ids)))
 
     def __repr__(self) -> str:
         return (
             f"<AutoModRule id={self.id!r} name={self.name!r} enabled={self.enabled!r}"
             f" creator={self.creator!r} event_type={self.event_type!r} trigger_type={self.trigger_type!r}"
-            f" actions={self._actions!r} exempt_roles={self._exempt_role_ids!r} exempt_channels={self._exempt_channel_ids!r}"
+            f" actions={self._actions!r} exempt_roles={self.exempt_role_ids!r} exempt_channels={self.exempt_channel_ids!r}"
             f" trigger_metadata={self.trigger_metadata!r}>"
         )
 
