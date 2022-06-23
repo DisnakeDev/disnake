@@ -574,7 +574,7 @@ class AutoModActionExecution:
         """Optional[Union[:class:`abc.GuildChannel`, :class:`Thread`]]:
         The channel or thread in which the event occurred, if any.
         """
-        return self.guild.get_channel_or_thread(self.channel_id)  # type: ignore
+        return self.guild._resolve_channel(self.channel_id)
 
     @property
     def message(self) -> Optional[Message]:
