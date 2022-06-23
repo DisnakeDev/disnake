@@ -28,7 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
 
 from .channel import ChannelType
-from .components import ActionRow, Component, ComponentType, Modal
+from .components import Component, Modal
 from .embed import Embed
 from .member import Member, MemberWithUser
 from .role import Role
@@ -188,22 +188,67 @@ class ApplicationCommandInteractionData(_ApplicationCommandInteractionDataOption
     type: ApplicationCommandType
 
 
-class _ComponentInteractionDataOptional(TypedDict, total=False):
+## Interaction components
+
+
+class _BaseComponentInteractionData(TypedDict):
+    custom_id: str
+
+
+### Message interaction components
+
+
+class MessageComponentInteractionButtonData(_BaseComponentInteractionData):
+    component_type: Literal[2]
+
+
+class MessageComponentInteractionSelectData(_BaseComponentInteractionData):
+    component_type: Literal[3]
     values: List[str]
 
 
-class ComponentInteractionData(_ComponentInteractionDataOptional):
-    custom_id: str
-    component_type: ComponentType
+MessageComponentInteractionData = Union[
+    MessageComponentInteractionButtonData,
+    MessageComponentInteractionSelectData,
+]
+
+
+### Modal interaction components
+
+
+class ModalInteractionSelectData(_BaseComponentInteractionData):
+    type: Literal[3]
+    values: List[str]
+
+
+class ModalInteractionTextInputData(_BaseComponentInteractionData):
+    type: Literal[4]
+    value: str
+
+
+ModalInteractionComponentData = Union[
+    ModalInteractionSelectData,
+    ModalInteractionTextInputData,
+]
+
+
+class ModalInteractionActionRow(TypedDict):
+    type: Literal[1]
+    components: List[ModalInteractionComponentData]
 
 
 class ModalInteractionData(TypedDict):
     custom_id: str
-    components: List[ActionRow]
+    components: List[ModalInteractionActionRow]
+
+
+## Interactions
 
 
 InteractionData = Union[
-    ApplicationCommandInteractionData, ComponentInteractionData, ModalInteractionData
+    ApplicationCommandInteractionData,
+    MessageComponentInteractionData,
+    ModalInteractionData,
 ]
 
 
@@ -236,7 +281,7 @@ class ApplicationCommandInteraction(Interaction):
 
 
 class MessageInteraction(Interaction):
-    data: ComponentInteractionData
+    data: MessageComponentInteractionData
     message: Message
 
 
