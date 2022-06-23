@@ -171,7 +171,7 @@ class AutoModSendAlertAction(AutoModAction):
 
     _metadata: AutoModSendAlertActionMetadata
 
-    def __init__(self, *, channel: Snowflake):
+    def __init__(self, channel: Snowflake):
         super().__init__(type=AutoModActionType.send_alert_message)
 
         self._metadata["channel_id"] = channel.id
@@ -202,7 +202,7 @@ class AutoModTimeoutAction(AutoModAction):
 
     _metadata: AutoModTimeoutActionMetadata
 
-    def __init__(self, *, duration: Union[int, timedelta]):
+    def __init__(self, duration: Union[int, timedelta]):
         super().__init__(type=AutoModActionType.timeout)
 
         if isinstance(duration, timedelta):
