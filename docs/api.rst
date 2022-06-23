@@ -4849,6 +4849,15 @@ Button
     :members:
     :inherited-members:
 
+BaseSelectMenu
+~~~~~~~~~~~~~~~
+
+.. attributetable:: BaseSelectMenu
+
+.. autoclass:: BaseSelectMenu()
+    :members:
+    :inherited-members:
+
 SelectMenu
 ~~~~~~~~~~~
 

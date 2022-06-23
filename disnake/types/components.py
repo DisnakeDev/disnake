@@ -13,7 +13,7 @@ ButtonStyle = Literal[1, 2, 3, 4, 5]
 TextInputStyle = Literal[1, 2]
 
 
-Component = Union["ActionRow", "ButtonComponent", "SelectMenu", "TextInput"]
+Component = Union["ActionRow", "ButtonComponent", "AnySelectMenu", "TextInput"]
 
 
 class ActionRow(TypedDict):
@@ -39,14 +39,24 @@ class SelectOption(TypedDict):
     default: NotRequired[bool]
 
 
-class SelectMenu(TypedDict):
-    type: Literal[3]
+class _SelectMenu(TypedDict):
     custom_id: str
-    options: List[SelectOption]
     placeholder: NotRequired[str]
     min_values: NotRequired[int]
     max_values: NotRequired[int]
     disabled: NotRequired[bool]
+
+
+class BaseSelectMenu(_SelectMenu):
+    type: Literal[3]
+
+
+class SelectMenu(_SelectMenu):
+    type: Literal[3]
+    options: List[SelectOption]
+
+
+AnySelectMenu = SelectMenu
 
 
 class Modal(TypedDict):
