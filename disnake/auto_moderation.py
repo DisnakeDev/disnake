@@ -330,10 +330,16 @@ class AutoModRule:
             _automod_action_factory(action) for action in data["actions"]
         ]
         self.trigger_metadata: AutoModTriggerMetadata = AutoModTriggerMetadata._from_dict(
-            data["trigger_metadata"]
+            data.get("trigger_metadata", {})
         )
-        self.exempt_role_ids: Set[int] = set(map(int, data["exempt_roles"]))
-        self.exempt_channel_ids: Set[int] = set(map(int, data["exempt_channels"]))
+        self.exempt_role_ids: Set[int] = (
+            set(map(int, exempt_roles)) if (exempt_roles := data.get("exempt_roles")) else set()
+        )
+        self.exempt_channel_ids: Set[int] = (
+            set(map(int, exempt_channels))
+            if (exempt_channels := data.get("exempt_channels"))
+            else set()
+        )
 
     @property
     def actions(self) -> List[AutoModAction]:
