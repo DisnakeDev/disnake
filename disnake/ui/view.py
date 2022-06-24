@@ -24,8 +24,12 @@ from typing import (
 from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
+    ChannelSelectMenu as ChannelSelectComponent,
+    MentionableSelectMenu as MentionableSelectComponent,
     MessageComponent,
+    RoleSelectMenu as RoleSelectComponent,
     StringSelectMenu as StringSelectComponent,
+    UserSelectMenu as UserSelectComponent,
     _component_factory,
 )
 from ..enums import ComponentType, try_enum_to_int
@@ -61,6 +65,22 @@ def _component_to_item(component: MessageComponent) -> Item:
         from .select import StringSelect
 
         return StringSelect.from_component(component)
+    if isinstance(component, UserSelectComponent):
+        from .select import UserSelect
+
+        return UserSelect.from_component(component)
+    if isinstance(component, RoleSelectComponent):
+        from .select import RoleSelect
+
+        return RoleSelect.from_component(component)
+    if isinstance(component, MentionableSelectComponent):
+        from .select import MentionableSelect
+
+        return MentionableSelect.from_component(component)
+    if isinstance(component, ChannelSelectComponent):
+        from .select import ChannelSelect
+
+        return ChannelSelect.from_component(component)
 
     assert_never(component)
     return Item.from_component(component)

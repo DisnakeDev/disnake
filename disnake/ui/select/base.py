@@ -51,6 +51,10 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     This isn't meant to be used directly, instead use one of the concrete select menu types:
 
     - :class:`disnake.ui.StringSelect`
+    - :class:`disnake.ui.UserSelect`
+    - :class:`disnake.ui.RoleSelect`
+    - :class:`disnake.ui.MentionableSelect`
+    - :class:`disnake.ui.ChannelSelect`
 
     .. versionadded:: 2.7
     """

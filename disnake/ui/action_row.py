@@ -22,14 +22,18 @@ from typing import (
 from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
+    ChannelSelectMenu as ChannelSelectComponent,
+    MentionableSelectMenu as MentionableSelectComponent,
     NestedComponent,
+    RoleSelectMenu as RoleSelectComponent,
     StringSelectMenu as StringSelectComponent,
+    UserSelectMenu as UserSelectComponent,
 )
 from ..enums import ButtonStyle, ComponentType, TextInputStyle
 from ..utils import MISSING, SequenceProxy, assert_never
 from .button import Button
 from .item import WrappedComponent
-from .select import StringSelect
+from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
 from .select.string import SelectOptionInput, V_co
 from .text_input import TextInput
 
@@ -50,10 +54,13 @@ __all__ = (
     "ModalActionRow",
 )
 
-if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
-AnySelect: TypeAlias = "StringSelect[V_co]"
+AnySelect = Union[
+    "StringSelect[V_co]",
+    "UserSelect[V_co]",
+    "RoleSelect[V_co]",
+    "MentionableSelect[V_co]",
+    "ChannelSelect[V_co]",
+]
 
 MessageUIComponent = Union[Button[Any], "AnySelect[Any]"]
 ModalUIComponent = TextInput  # Union[TextInput, "AnySelect[Any]"]
@@ -288,6 +295,7 @@ class ActionRow(Generic[UIComponentT]):
         )
         return self
 
+    # TODO: other select types
     def add_string_select(
         self: SelectCompatibleActionRowT,
         *,
@@ -549,6 +557,14 @@ class ActionRow(Generic[UIComponentT]):
                     current_row.append_item(Button.from_component(component))
                 elif isinstance(component, StringSelectComponent):
                     current_row.append_item(StringSelect.from_component(component))
+                elif isinstance(component, UserSelectComponent):
+                    current_row.append_item(UserSelect.from_component(component))
+                elif isinstance(component, RoleSelectComponent):
+                    current_row.append_item(RoleSelect.from_component(component))
+                elif isinstance(component, MentionableSelectComponent):
+                    current_row.append_item(MentionableSelect.from_component(component))
+                elif isinstance(component, ChannelSelectComponent):
+                    current_row.append_item(ChannelSelect.from_component(component))
                 else:
                     assert_never(component)
                     if strict:
