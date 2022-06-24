@@ -5993,16 +5993,16 @@ BaseSelect
     :members:
     :inherited-members:
 
-Select
-~~~~~~~
+StringSelect
+~~~~~~~~~~~~~
 
-.. attributetable:: disnake.ui.Select
+.. attributetable:: disnake.ui.StringSelect
 
-.. autoclass:: disnake.ui.Select
+.. autoclass:: disnake.ui.StringSelect
     :members:
     :inherited-members:
 
-.. autofunction:: disnake.ui.select(cls=disnake.ui.Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
+.. autofunction:: disnake.ui.string_select(cls=disnake.ui.StringSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
 
 Modal
 ~~~~~

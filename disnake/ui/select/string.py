@@ -30,8 +30,8 @@ if TYPE_CHECKING:
 
 
 __all__ = (
-    "Select",
-    "select",
+    "StringSelect",
+    "string_select",
 )
 
 
@@ -45,7 +45,7 @@ def _parse_select_options(options: SelectOptionInput) -> List[SelectOption]:
     return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
 
 
-class Select(BaseSelect[StringSelectMenu, str, V_co]):
+class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
     """Represents a UI string select menu.
 
     This is usually represented as a drop down menu.
@@ -53,6 +53,9 @@ class Select(BaseSelect[StringSelectMenu, str, V_co]):
     In order to get the selected items that the user has chosen, use :attr:`.values`.
 
     .. versionadded:: 2.0
+
+    .. versionchanged:: 2.7
+        Renamed from ``Select`` to ``StringSelect``.
 
     Parameters
     ----------
@@ -95,7 +98,7 @@ class Select(BaseSelect[StringSelectMenu, str, V_co]):
 
     @overload
     def __init__(
-        self: Select[None],
+        self: StringSelect[None],
         *,
         custom_id: str = ...,
         placeholder: Optional[str] = None,
@@ -109,7 +112,7 @@ class Select(BaseSelect[StringSelectMenu, str, V_co]):
 
     @overload
     def __init__(
-        self: Select[V_co],
+        self: StringSelect[V_co],
         *,
         custom_id: str = ...,
         placeholder: Optional[str] = None,
@@ -235,11 +238,11 @@ class Select(BaseSelect[StringSelectMenu, str, V_co]):
         self._underlying.options.append(option)
 
 
-S_co = TypeVar("S_co", bound="Select", covariant=True)
+S_co = TypeVar("S_co", bound="StringSelect", covariant=True)
 
 
 @overload
-def select(
+def string_select(
     *,
     placeholder: Optional[str] = None,
     custom_id: str = ...,
@@ -248,34 +251,37 @@ def select(
     options: SelectOptionInput = ...,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[Select[V_co]]], DecoratedItem[Select[V_co]]]:
+) -> Callable[[ItemCallbackType[StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]:
     ...
 
 
 @overload
-def select(
+def string_select(
     cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     ...
 
 
-def select(
-    cls: Type[Object[S_co, P]] = Select[Any],
+def string_select(
+    cls: Type[Object[S_co, P]] = StringSelect[Any],
     /,
     **kwargs: Any,
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a string select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
-    the :class:`disnake.ui.View`, the :class:`disnake.ui.Select` that was
+    the :class:`disnake.ui.View`, the :class:`disnake.ui.StringSelect` that was
     interacted with, and the :class:`disnake.MessageInteraction`.
 
     In order to get the selected items that the user has chosen within the callback
-    use :attr:`Select.values`.
+    use :attr:`StringSelect.values`.
+
+    .. versionchanged:: 2.7
+        Renamed from ``select`` to ``string_select``.
 
     Parameters
     ----------
-    cls: Type[:class:`Select`]
+    cls: Type[:class:`StringSelect`]
         The select subclass to create an instance of. If provided, the following parameters
         described below do no apply. Instead, this decorator will accept the same keywords
         as the passed cls does.
@@ -311,4 +317,4 @@ def select(
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
     """
-    return _create_decorator(cls, Select, **kwargs)
+    return _create_decorator(cls, StringSelect, **kwargs)

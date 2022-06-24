@@ -281,7 +281,7 @@ class StringSelectMenu(BaseSelectMenu):
 
     .. note::
         The user constructible and usable type to create a
-        string select menu is :class:`disnake.ui.Select`.
+        string select menu is :class:`disnake.ui.StringSelect`.
 
     .. versionadded:: 2.0
 
