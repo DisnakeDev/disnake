@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 import disnake
-from disnake.ui import ActionRow, Button, Select, TextInput, WrappedComponent
+from disnake.ui import ActionRow, Button, StringSelect, TextInput, WrappedComponent
 from disnake.ui.action_row import components_to_dict, components_to_rows
 
 if TYPE_CHECKING:
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 button1 = Button()
 button2 = Button()
 button3 = Button()
-select = Select()
+select = StringSelect()
 text_input = TextInput(label="a", custom_id="b")
 
 
@@ -79,15 +79,15 @@ class TestActionRow:
 
     def test_add_select(self):
         r = ActionRow.with_message_components()
-        r.add_select(custom_id="asdf")
+        r.add_string_select(custom_id="asdf")
 
         (c,) = r.children
-        assert isinstance(c, Select)
+        assert isinstance(c, StringSelect)
         assert c.custom_id == "asdf"
 
         if TYPE_CHECKING:
-            ActionRow().add_select
-            ActionRow.with_message_components().add_select
+            ActionRow().add_string_select
+            ActionRow.with_message_components().add_string_select
             # should not work  # TODO: revert when modal select support is added.
             ActionRow.with_modal_components().add_select  # type: ignore
 
