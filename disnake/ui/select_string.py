@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
-import os
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -15,37 +13,27 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    get_origin,
     overload,
 )
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
-from ..partial_emoji import PartialEmoji
 from ..utils import MISSING
-from .item import DecoratedItem, Item, Object
+from .select_base import BaseSelect, P, V_co, _create_decorator
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
+    from ..emoji import Emoji
+    from ..partial_emoji import PartialEmoji
+    from .item import DecoratedItem, ItemCallbackType, Object
+
 
 __all__ = (
     "Select",
     "select",
 )
 
-if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
-
-    from ..emoji import Emoji
-    from ..interactions import MessageInteraction
-    from .item import ItemCallbackType
-    from .view import View
-
-else:
-    ParamSpec = TypeVar
-
-
-S = TypeVar("S", bound="Select")
-S_co = TypeVar("S_co", bound="Select", covariant=True)
-V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
-P = ParamSpec("P")
 
 SelectOptionInput = Union[List[SelectOption], List[str], Dict[str, str]]
 
@@ -57,12 +45,12 @@ def _parse_select_options(options: SelectOptionInput) -> List[SelectOption]:
     return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
 
 
-class Select(Item[V_co]):
-    """Represents a UI select menu.
+class Select(BaseSelect[SelectMenu, str, V_co]):
+    """Represents a UI string select menu.
 
     This is usually represented as a drop down menu.
 
-    In order to get the selected items that the user has chosen, use :attr:`Select.values`.
+    In order to get the selected items that the user has chosen, use :attr:`.values`.
 
     .. versionadded:: 2.0
 
@@ -98,15 +86,7 @@ class Select(Item[V_co]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
-        "placeholder",
-        "min_values",
-        "max_values",
-        "options",
-        "disabled",
-    )
-    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
-    _underlying: SelectMenu = MISSING
+    __repr_attributes__: Tuple[str, ...] = BaseSelect.__repr_attributes__ + ("options",)
 
     @overload
     def __init__(
@@ -147,63 +127,29 @@ class Select(Item[V_co]):
         disabled: bool = False,
         row: Optional[int] = None,
     ) -> None:
-        super().__init__()
-        self._selected_values: List[str] = []
-        self._provided_custom_id = custom_id is not MISSING
-        custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        options = [] if options is MISSING else _parse_select_options(options)
-        self._underlying = SelectMenu._raw_construct(
+        super().__init__(
+            SelectMenu,
+            ComponentType.select,
             custom_id=custom_id,
-            type=ComponentType.select,
             placeholder=placeholder,
             min_values=min_values,
             max_values=max_values,
-            options=options,
             disabled=disabled,
+            row=row,
         )
-        self.row = row
+        self._underlying.options = [] if options is MISSING else _parse_select_options(options)
 
-    @property
-    def custom_id(self) -> str:
-        """:class:`str`: The ID of the select menu that gets received during an interaction."""
-        return self._underlying.custom_id
-
-    @custom_id.setter
-    def custom_id(self, value: str):
-        if not isinstance(value, str):
-            raise TypeError("custom_id must be None or str")
-
-        self._underlying.custom_id = value
-
-    @property
-    def placeholder(self) -> Optional[str]:
-        """Optional[:class:`str`]: The placeholder text that is shown if nothing is selected, if any."""
-        return self._underlying.placeholder
-
-    @placeholder.setter
-    def placeholder(self, value: Optional[str]):
-        if value is not None and not isinstance(value, str):
-            raise TypeError("placeholder must be None or str")
-
-        self._underlying.placeholder = value
-
-    @property
-    def min_values(self) -> int:
-        """:class:`int`: The minimum number of items that must be chosen for this select menu."""
-        return self._underlying.min_values
-
-    @min_values.setter
-    def min_values(self, value: int):
-        self._underlying.min_values = int(value)
-
-    @property
-    def max_values(self) -> int:
-        """:class:`int`: The maximum number of items that must be chosen for this select menu."""
-        return self._underlying.max_values
-
-    @max_values.setter
-    def max_values(self, value: int):
-        self._underlying.max_values = int(value)
+    @classmethod
+    def from_component(cls, component: SelectMenu) -> Self:
+        return cls(
+            custom_id=component.custom_id,
+            placeholder=component.placeholder,
+            min_values=component.min_values,
+            max_values=component.max_values,
+            options=component.options,
+            disabled=component.disabled,
+            row=None,
+        )
 
     @property
     def options(self) -> List[SelectOption]:
@@ -283,48 +229,8 @@ class Select(Item[V_co]):
 
         self._underlying.options.append(option)
 
-    @property
-    def disabled(self) -> bool:
-        """:class:`bool`: Whether the select menu is disabled."""
-        return self._underlying.disabled
 
-    @disabled.setter
-    def disabled(self, value: bool):
-        self._underlying.disabled = bool(value)
-
-    @property
-    def values(self) -> List[str]:
-        """List[:class:`str`]: A list of values that have been selected by the user."""
-        return self._selected_values
-
-    @property
-    def width(self) -> int:
-        return 5
-
-    def refresh_component(self, component: SelectMenu) -> None:
-        self._underlying = component
-
-    def refresh_state(self, interaction: MessageInteraction) -> None:
-        self._selected_values = interaction.values  # type: ignore
-
-    @classmethod
-    def from_component(cls, component: SelectMenu) -> Self:
-        return cls(
-            custom_id=component.custom_id,
-            placeholder=component.placeholder,
-            min_values=component.min_values,
-            max_values=component.max_values,
-            options=component.options,
-            disabled=component.disabled,
-            row=None,
-        )
-
-    def is_dispatchable(self) -> bool:
-        """Whether the select menu is dispatchable. This will always return ``True``.
-
-        :return type: :class:`bool`
-        """
-        return True
+S_co = TypeVar("S_co", bound="Select", covariant=True)
 
 
 @overload
@@ -350,9 +256,10 @@ def select(
 
 def select(
     cls: Type[Object[S_co, P]] = Select[Any],
+    /,
     **kwargs: Any,
 ) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a select menu to a component.
+    """A decorator that attaches a string select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.Select` being pressed and
@@ -399,19 +306,4 @@ def select(
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
     """
-
-    if (origin := get_origin(cls)) is not None:
-        cls = origin
-
-    if not isinstance(cls, type) or not issubclass(cls, Select):
-        raise TypeError(f"cls argument must be a subclass of Select, got {cls!r}")
-
-    def decorator(func: ItemCallbackType[S_co]) -> DecoratedItem[S_co]:
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError("select function must be a coroutine function")
-
-        func.__discord_ui_model_type__ = cls
-        func.__discord_ui_model_kwargs__ = kwargs
-        return func  # type: ignore
-
-    return decorator
+    return _create_decorator(cls, Select, **kwargs)

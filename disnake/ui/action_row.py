@@ -29,7 +29,7 @@ from ..enums import ButtonStyle, ComponentType, TextInputStyle
 from ..utils import MISSING, SequenceProxy
 from .button import Button
 from .item import WrappedComponent
-from .select import Select, SelectOptionInput
+from .select_string import Select, SelectOptionInput
 from .text_input import TextInput
 
 if TYPE_CHECKING:
@@ -293,7 +293,7 @@ class ActionRow(Generic[UIComponentT]):
         options: SelectOptionInput = MISSING,
         disabled: bool = False,
     ) -> SelectCompatibleActionRowT:
-        """Add a select menu to the action row. Can only be used if the action
+        """Add a string select menu to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.Select` use the

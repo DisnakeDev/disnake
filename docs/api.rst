@@ -5984,6 +5984,15 @@ Button
 
 .. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
 
+BaseSelect
+~~~~~~~~~~~
+
+.. attributetable:: disnake.ui.BaseSelect
+
+.. autoclass:: disnake.ui.BaseSelect
+    :members:
+    :inherited-members:
+
 Select
 ~~~~~~~
 
