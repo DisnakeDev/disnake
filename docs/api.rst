@@ -4879,6 +4879,42 @@ StringSelectMenu
     :members:
     :inherited-members:
 
+UserSelectMenu
+~~~~~~~~~~~~~~
+
+.. attributetable:: UserSelectMenu
+
+.. autoclass:: UserSelectMenu()
+    :members:
+    :inherited-members:
+
+RoleSelectMenu
+~~~~~~~~~~~~~~
+
+.. attributetable:: RoleSelectMenu
+
+.. autoclass:: RoleSelectMenu()
+    :members:
+    :inherited-members:
+
+MentionableSelectMenu
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: MentionableSelectMenu
+
+.. autoclass:: MentionableSelectMenu()
+    :members:
+    :inherited-members:
+
+ChannelSelectMenu
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ChannelSelectMenu
+
+.. autoclass:: ChannelSelectMenu()
+    :members:
+    :inherited-members:
+
 TextInput
 ~~~~~~~~~
 

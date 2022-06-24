@@ -17,7 +17,7 @@ from typing import (
     cast,
 )
 
-from .enums import ButtonStyle, ComponentType, TextInputStyle, try_enum
+from .enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, assert_never, get_slots
 
@@ -29,10 +29,14 @@ if TYPE_CHECKING:
         ActionRow as ActionRowPayload,
         BaseSelectMenu as BaseSelectMenuPayload,
         ButtonComponent as ButtonComponentPayload,
+        ChannelSelectMenu as ChannelSelectMenuPayload,
         Component as ComponentPayload,
+        MentionableSelectMenu as MentionableSelectMenuPayload,
+        RoleSelectMenu as RoleSelectMenuPayload,
         SelectOption as SelectOptionPayload,
         StringSelectMenu as StringSelectMenuPayload,
         TextInput as TextInputPayload,
+        UserSelectMenu as UserSelectMenuPayload,
     )
 
 __all__ = (
@@ -41,20 +45,31 @@ __all__ = (
     "Button",
     "BaseSelectMenu",
     "StringSelectMenu",
+    "UserSelectMenu",
+    "RoleSelectMenu",
+    "MentionableSelectMenu",
+    "ChannelSelectMenu",
     "SelectOption",
     "TextInput",
 )
 
 C = TypeVar("C", bound="Component")
 
+AnySelectMenu = Union[
+    "StringSelectMenu",
+    "UserSelectMenu",
+    "RoleSelectMenu",
+    "MentionableSelectMenu",
+    "ChannelSelectMenu",
+]
+MessageComponent = Union["Button", "AnySelectMenu"]
+
 if TYPE_CHECKING:  # TODO: remove when we add modal select support
     from typing_extensions import TypeAlias
 
-AnySelectMenu: TypeAlias = "StringSelectMenu"
-MessageComponent = Union["Button", "AnySelectMenu"]
-
 # ModalComponent = Union["TextInput", "AnySelectMenu"]
 ModalComponent: TypeAlias = "TextInput"
+
 NestedComponent = Union[MessageComponent, ModalComponent]
 ComponentT = TypeVar("ComponentT", bound=NestedComponent)
 
@@ -66,7 +81,7 @@ class Component:
 
     - :class:`ActionRow`
     - :class:`Button`
-    - subtypes of :class:`BaseSelectMenu` (:class:`StringSelectMenu`, ...)
+    - subtypes of :class:`BaseSelectMenu` (:class:`StringSelectMenu`, :class:`UserSelectMenu`, :class:`RoleSelectMenu`, :class:`MentionableSelectMenu`, :class:`ChannelSelectMenu`)
     - :class:`TextInput`
 
     This class is abstract and cannot be instantiated.
@@ -222,6 +237,10 @@ class BaseSelectMenu(Component):
     The currently supported select menus are:
 
     - :class:`~disnake.StringSelectMenu`
+    - :class:`~disnake.UserSelectMenu`
+    - :class:`~disnake.RoleSelectMenu`
+    - :class:`~disnake.MentionableSelectMenu`
+    - :class:`~disnake.ChannelSelectMenu`
 
     .. versionadded:: 2.7
 
@@ -319,6 +338,136 @@ class StringSelectMenu(BaseSelectMenu):
     def to_dict(self) -> StringSelectMenuPayload:
         payload = cast("StringSelectMenuPayload", super().to_dict())
         payload["options"] = [op.to_dict() for op in self.options]
+        return payload
+
+
+class UserSelectMenu(BaseSelectMenu):
+    """Represents a user select menu from the Discord Bot UI Kit.
+
+    .. versionadded:: 2.7
+
+    Attributes
+    ----------
+    custom_id: Optional[:class:`str`]
+        The ID of the select menu that gets received during an interaction.
+    placeholder: Optional[:class:`str`]
+        The placeholder text that is shown if nothing is selected, if any.
+    min_values: :class:`int`
+        The minimum number of items that must be chosen for this select menu.
+        Defaults to 1 and must be between 1 and 25.
+    max_values: :class:`int`
+        The maximum number of items that must be chosen for this select menu.
+        Defaults to 1 and must be between 1 and 25.
+    disabled: :class:`bool`
+        Whether the select menu is disabled or not.
+    """
+
+    __slots__: Tuple[str, ...] = ()
+
+    if TYPE_CHECKING:
+
+        def to_dict(self) -> UserSelectMenuPayload:
+            return cast("UserSelectMenuPayload", super().to_dict())
+
+
+class RoleSelectMenu(BaseSelectMenu):
+    """Represents a role select menu from the Discord Bot UI Kit.
+
+    .. versionadded:: 2.7
+
+    Attributes
+    ----------
+    custom_id: Optional[:class:`str`]
+        The ID of the select menu that gets received during an interaction.
+    placeholder: Optional[:class:`str`]
+        The placeholder text that is shown if nothing is selected, if any.
+    min_values: :class:`int`
+        The minimum number of items that must be chosen for this select menu.
+        Defaults to 1 and must be between 1 and 25.
+    max_values: :class:`int`
+        The maximum number of items that must be chosen for this select menu.
+        Defaults to 1 and must be between 1 and 25.
+    disabled: :class:`bool`
+        Whether the select menu is disabled or not.
+    """
+
+    __slots__: Tuple[str, ...] = ()
+
+    if TYPE_CHECKING:
+
+        def to_dict(self) -> RoleSelectMenuPayload:
+            return cast("RoleSelectMenuPayload", super().to_dict())
+
+
+class MentionableSelectMenu(BaseSelectMenu):
+    """Represents a mentionable (user/role) select menu from the Discord Bot UI Kit.
+
+    .. versionadded:: 2.7
+
+    Attributes
+    ----------
+    custom_id: Optional[:class:`str`]
+        The ID of the select menu that gets received during an interaction.
+    placeholder: Optional[:class:`str`]
+        The placeholder text that is shown if nothing is selected, if any.
+    min_values: :class:`int`
+        The minimum number of items that must be chosen for this select menu.
+        Defaults to 1 and must be between 1 and 25.
+    max_values: :class:`int`
+        The maximum number of items that must be chosen for this select menu.
+        Defaults to 1 and must be between 1 and 25.
+    disabled: :class:`bool`
+        Whether the select menu is disabled or not.
+    """
+
+    __slots__: Tuple[str, ...] = ()
+
+    if TYPE_CHECKING:
+
+        def to_dict(self) -> MentionableSelectMenuPayload:
+            return cast("MentionableSelectMenuPayload", super().to_dict())
+
+
+class ChannelSelectMenu(BaseSelectMenu):
+    """Represents a channel select menu from the Discord Bot UI Kit.
+
+    .. versionadded:: 2.7
+
+    Attributes
+    ----------
+    custom_id: Optional[:class:`str`]
+        The ID of the select menu that gets received during an interaction.
+    placeholder: Optional[:class:`str`]
+        The placeholder text that is shown if nothing is selected, if any.
+    min_values: :class:`int`
+        The minimum number of items that must be chosen for this select menu.
+        Defaults to 1 and must be between 1 and 25.
+    max_values: :class:`int`
+        The maximum number of items that must be chosen for this select menu.
+        Defaults to 1 and must be between 1 and 25.
+    disabled: :class:`bool`
+        Whether the select menu is disabled or not.
+    channel_types: Optional[List[:class:`ChannelType`]]
+        A list of channel types that can be selected in this select menu.
+        If ``None``, channels of all types may be selected.
+    """
+
+    __slots__: Tuple[str, ...] = ("channel_types",)
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
+
+    def __init__(self, data: ChannelSelectMenuPayload):
+        super().__init__(data)
+        # TODO: check api typing (missing/none/empty list)
+        channel_types = data.get("channel_types")
+        self.channel_types: Optional[List[ChannelType]] = (
+            [try_enum(ChannelType, t) for t in channel_types] if channel_types is not None else None
+        )
+
+    def to_dict(self) -> ChannelSelectMenuPayload:
+        payload = cast("ChannelSelectMenuPayload", super().to_dict())
+        if self.channel_types is not None:
+            payload["channel_types"] = [t.value for t in self.channel_types]
         return payload
 
 
@@ -521,6 +670,14 @@ def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> 
         return StringSelectMenu(data)  # type: ignore
     elif component_type == 4:
         return TextInput(data)  # type: ignore
+    elif component_type == 5:
+        return UserSelectMenu(data)  # type: ignore
+    elif component_type == 6:
+        return RoleSelectMenu(data)  # type: ignore
+    elif component_type == 7:
+        return MentionableSelectMenu(data)  # type: ignore
+    elif component_type == 8:
+        return ChannelSelectMenu(data)  # type: ignore
     else:
         assert_never(component_type)
         as_enum = try_enum(ComponentType, component_type)
