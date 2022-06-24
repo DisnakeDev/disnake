@@ -267,8 +267,8 @@ def select(
     """A decorator that attaches a string select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
-    the :class:`disnake.ui.View`, the :class:`disnake.ui.Select` being pressed and
-    the :class:`disnake.MessageInteraction` you receive.
+    the :class:`disnake.ui.View`, the :class:`disnake.ui.Select` that was
+    interacted with, and the :class:`disnake.MessageInteraction`.
 
     In order to get the selected items that the user has chosen within the callback
     use :attr:`Select.values`.

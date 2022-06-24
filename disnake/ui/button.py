@@ -280,8 +280,8 @@ def button(
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
-    the :class:`disnake.ui.View`, the :class:`disnake.ui.Button` being pressed and
-    the :class:`disnake.MessageInteraction` you receive.
+    the :class:`disnake.ui.View`, the :class:`disnake.ui.Button` that was
+    interacted with, and the :class:`disnake.MessageInteraction`.
 
     .. note::
 
