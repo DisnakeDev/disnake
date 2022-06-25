@@ -126,8 +126,11 @@ class AutoModAction:
 
     @classmethod
     def _from_dict(cls, data: AutoModActionPayload) -> Self:
-        self = cls(type=try_enum(AutoModActionType, data["type"]))
+        self = cls.__new__(cls)
+
+        self.type = try_enum(AutoModActionType, data["type"])
         self._metadata = data.get("metadata", {})
+
         return self
 
     def to_dict(self) -> AutoModActionPayload:
