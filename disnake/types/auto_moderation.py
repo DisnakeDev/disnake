@@ -64,6 +64,7 @@ class AutoModAction(_AutoModActionOptional):
 class AutoModTriggerMetadata(TypedDict, total=False):
     keyword_filter: List[str]
     presets: List[AutoModPresetType]
+    allow_list: List[str]
 
 
 class AutoModRule(TypedDict):

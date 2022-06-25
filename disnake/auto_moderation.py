@@ -246,9 +246,12 @@ class AutoModTriggerMetadata:
 
     presets: Optional[:class:`AutoModKeywordPresets`]
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
+
+    exempt_keywords: Optional[Sequence[:class:`str`]]
+        The keywords that should be exempt from a preset. Used with :attr:`AutoModTriggerType.keyword_preset`.
     """
 
-    __slots__ = ("keywords", "presets")
+    __slots__ = ("keywords", "presets", "exempt_keywords")
 
     # TODO: add overloads - can we always require exactly one parameter here, or is it
     #       required to be able to construct this class without any parameters?
@@ -257,9 +260,11 @@ class AutoModTriggerMetadata:
         *,
         keywords: Optional[Sequence[str]] = None,
         presets: Optional[AutoModKeywordPresets] = None,
+        exempt_keywords: Optional[Sequence[str]] = None,
     ):
         self.keywords: Optional[Sequence[str]] = keywords
         self.presets: Optional[AutoModKeywordPresets] = presets
+        self.exempt_keywords: Optional[Sequence[str]] = exempt_keywords
 
     @classmethod
     def _from_dict(cls, data: AutoModTriggerMetadataPayload) -> Self:
@@ -271,6 +276,7 @@ class AutoModTriggerMetadata:
         return cls(
             keywords=data.get("keyword_filter"),
             presets=presets,
+            exempt_keywords=data.get("allow_list"),
         )
 
     def to_dict(self) -> AutoModTriggerMetadataPayload:
@@ -280,6 +286,8 @@ class AutoModTriggerMetadata:
         if self.presets is not None:
             values: List[int] = self.presets.values
             data["presets"] = cast("List[AutoModPresetType]", values)
+        if self.exempt_keywords is not None:
+            data["allow_list"] = list(self.exempt_keywords)
         return data
 
     def __repr__(self) -> str:
@@ -288,6 +296,8 @@ class AutoModTriggerMetadata:
             s += f" keywords={self.keywords!r}"
         if self.presets is not None:
             s += f" presets={self.presets!r}"
+        if self.exempt_keywords is not None:
+            s += f" exempt_keywords={self.exempt_keywords!r}"
         return f"{s}>"
 
 
