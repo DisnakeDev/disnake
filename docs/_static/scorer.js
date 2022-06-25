@@ -1,7 +1,7 @@
 'use-strict';
 
-let queryBeingDone = null;
-let pattern = null;
+let queryBeingDone = undefined;
+let pattern = undefined;
 
 const escapedRegex = /[-\/\\^$*+?.()|[\]{}]/g;
 function escapeRegex(e) {
@@ -23,14 +23,28 @@ function __cleanNamespaces(query) {
     return query.replace(/(disnake\.(ext\.)?)?(.+)/, '$3');
 }
 
-Scorer = {
+function __setPattern() {
+    const params = new URLSearchParams(window.location.search);
+    queryBeingDone = params.get('q');
+    if (queryBeingDone) {
+        pattern = new RegExp(Array.from(queryBeingDone).map(escapeRegex).join('.*?'), 'i');
+    } else {
+        queryBeingDone = null;
+        pattern = null;
+    }
+}
 
+Scorer = {
     // Implement the following function to further tweak the score for each result
     // The function takes a result array [filename, title, anchor, descr, score]
     // and returns the new score.
     score: (result) => {
         // only inflate the score of things that are actual API reference things
         const [, title, , , score,] = result;
+
+        if (queryBeingDone === undefined) {
+            __setPattern();
+        }
 
         if (pattern !== null && title.startsWith('disnake.')) {
             let _score = __score(title, pattern);
@@ -64,12 +78,3 @@ Scorer = {
     term: 5,
     partialTerm: 2
 };
-
-document.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    queryBeingDone = params.get('q');
-    if (queryBeingDone) {
-        let _pattern = Array.from(queryBeingDone).map(escapeRegex).join('.*?');
-        pattern = new RegExp(_pattern, 'i');
-    }
-});
