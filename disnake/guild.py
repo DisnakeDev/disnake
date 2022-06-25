@@ -2226,9 +2226,7 @@ class Guild(Hashable):
         fields: Dict[str, Any] = {
             "name": name,
             "privacy_level": privacy_level.value,
-            "scheduled_start_time": scheduled_start_time.astimezone(
-                tz=datetime.timezone.utc
-            ).isoformat(),
+            "scheduled_start_time": utils.isoformat_utc(scheduled_start_time),
             "entity_type": entity_type.value,
         }
 
@@ -2250,11 +2248,7 @@ class Guild(Hashable):
             fields["channel_id"] = channel.id
 
         if scheduled_end_time is not MISSING:
-            fields["scheduled_end_time"] = (
-                scheduled_end_time.astimezone(tz=datetime.timezone.utc).isoformat()
-                if scheduled_end_time is not None
-                else None
-            )
+            fields["scheduled_end_time"] = utils.isoformat_utc(scheduled_end_time)
 
         data = await self._state.http.create_guild_scheduled_event(self.id, reason=reason, **fields)
         return GuildScheduledEvent(state=self._state, data=data)
@@ -4193,11 +4187,7 @@ class Guild(Hashable):
                 until = utils.utcnow() + datetime.timedelta(seconds=duration)
 
         # at this point `until` cannot be `MISSING`
-        if until is not None:
-            until = until.astimezone(datetime.timezone.utc)
-            payload["communication_disabled_until"] = until.isoformat()
-        else:
-            payload["communication_disabled_until"] = None
+        payload["communication_disabled_until"] = utils.isoformat_utc(until)
 
         data = await self._state.http.edit_member(self.id, user.id, reason=reason, **payload)
         return Member(data=data, guild=self, state=self._state)
