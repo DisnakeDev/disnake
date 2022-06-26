@@ -67,7 +67,6 @@ V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 P = ParamSpec("P")
 
 
-
 class Button(Item[V_co]):
     """Represents a UI button.
 
