@@ -107,6 +107,8 @@ class ModalInteraction(Interaction):
         """
         Returns a generator that yields raw component data from action rows one by one.
 
+        .. versionadded:: 2.6
+
         Returns
         -------
         Generator[:class:`dict`, None, None]
@@ -142,6 +144,8 @@ class ModalInteractionData(Dict[str, Any]):
         The custom ID of the modal.
     components: List[:class:`dict`]
         The raw component data of the modal interaction.
+
+        .. versionadded:: 2.6
     """
 
     __slots__ = ("custom_id", "components")
