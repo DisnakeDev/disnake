@@ -2755,7 +2755,7 @@ class Guild(Hashable):
 
         .. note::
 
-            This method does not include the Guild's vanity URL.
+            This method does not include the guild's vanity URL invite.
             To get the vanity URL :class:`Invite`, refer to :meth:`Guild.vanity_invite`.
         """
         data = await self._state.http.invites_from(self.id)
