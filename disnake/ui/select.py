@@ -388,8 +388,9 @@ def select(
     Parameters
     ----------
     cls: Type[:class:`Select`]
-        The select subclass to create an instance of. If passed, the following keywords
-        this decorator accepts will be the same as the class.
+        The select subclass to create an instance of. If provided, the following parameters
+        described below do no apply. Instead, this decorator will accept the same keywords
+        as the passed cls does.
 
         .. versionadded:: 2.6
 
