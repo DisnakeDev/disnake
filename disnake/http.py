@@ -2022,7 +2022,7 @@ class HTTPClient:
         reason: Optional[str] = None,
     ) -> Response[guild_scheduled_event.GuildScheduledEvent]:
         r = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
-        payload = {
+        payload: Dict[str, Any] = {
             "name": name,
             "privacy_level": privacy_level,
             "scheduled_start_time": scheduled_start_time,

@@ -105,11 +105,6 @@ reportImportCycles = false
 reportIncompatibleMethodOverride = false
 reportIncompatibleVariableOverride = false
 
-# TODO: fix these
-strictListInference = false
-strictDictionaryInference = false
-strictSetInference = false
-
 # these are largely due to missing type hints, and make up most of the error count
 reportUnknownMemberType = false
 reportUnknownParameterType = false
