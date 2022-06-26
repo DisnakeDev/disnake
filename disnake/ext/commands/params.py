@@ -440,14 +440,21 @@ class ParamInfo:
         return default
 
     async def verify_type(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
-        """Check if a type of an argument is correct and possibly fix it"""
-        if issubclass_(self.type, disnake.Member):
-            if isinstance(argument, disnake.Member):
-                return argument
+        """Check if the type of an argument is correct and possibly raise if it's not"""
 
+        # The API may return a `User` for options annotated with `Member`,
+        # including `Member` (user option), `Union[User, Member]` (user option) and
+        # `Union[Member, Role]` (mentionable option).
+        # If we received a `User` but didn't expect one, raise.
+        if (
+            isinstance(argument, disnake.User)
+            and issubclass_(self.type, disnake.Member)
+            and not issubclass_(self.type, disnake.User)
+        ):
             raise errors.MemberNotFound(str(argument.id))
 
-        # unexpected types may just be ignored
+        # Other argument types are assumed to match the specified option type,
+        # thanks to server-side validation.
         return argument
 
     async def convert_argument(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
