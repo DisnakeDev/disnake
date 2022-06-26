@@ -75,7 +75,7 @@ exclude-modules = '''
 
 
 [tool.pyright]
-typeCheckingMode = "basic"
+typeCheckingMode = "strict"
 include = [
     "disnake",
     "docs",
@@ -89,22 +89,35 @@ ignore = [
     "noxfile.py",  # this is ignored because nox is not installed in the environment when running pyright
 ]
 
-strictParameterNoneValue = false
-reportInvalidStringEscapeSequence = false
-reportDuplicateImport = true
-reportUntypedFunctionDecorator = true
-reportUntypedClassDecorator = true
-reportUntypedBaseClass = true
-reportInvalidTypeVarUse = true
-reportUnnecessaryCast = true
-reportSelfClsParameterName = true
-reportUnsupportedDunderAll = true
-reportUnusedImport = true
-reportUnusedVariable = true
-reportUntypedNamedTuple = true
-reportUnnecessaryComparison = true
+# this is one of the diagnostics that aren't enabled by default, even in strict mode
 reportUnnecessaryTypeIgnoreComment = true
-reportUnknownLambdaType = true
+
+# it's unlikely that these will ever be enabled
+reportOverlappingOverload = false
+reportPrivateUsage = false
+reportUnnecessaryIsInstance = false
+reportFunctionMemberAccess = false
+reportMissingTypeStubs = false
+reportUnusedFunction = false
+reportUnusedClass = false
+reportConstantRedefinition = false
+reportImportCycles = false
+reportIncompatibleMethodOverride = false
+reportIncompatibleVariableOverride = false
+
+# TODO: fix these
+strictListInference = false
+strictDictionaryInference = false
+strictSetInference = false
+
+# these are largely due to missing type hints, and make up most of the error count
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownArgumentType = false
+reportMissingParameterType = false
+reportUnknownVariableType = false
+reportMissingTypeArgument = false
+strictParameterNoneValue = false
 
 
 [tool.pytest.ini_options]
