@@ -1931,6 +1931,7 @@ class StageChannel(VocalGuildChannel):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
+        bitrate: int = MISSING,
         reason: Optional[str] = ...,
     ) -> StageChannel:
         ...
@@ -1945,6 +1946,7 @@ class StageChannel(VocalGuildChannel):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
+        bitrate: int = MISSING,
         reason: Optional[str] = None,
         **kwargs: NoReturn,
     ) -> Optional[StageChannel]:
@@ -1987,6 +1989,11 @@ class StageChannel(VocalGuildChannel):
 
             .. versionadded:: 2.0
 
+        bitrate: :class:`int`
+            The new channel's bitrate.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
@@ -2015,6 +2022,7 @@ class StageChannel(VocalGuildChannel):
             overwrites=overwrites,
             rtc_region=rtc_region,
             video_quality_mode=video_quality_mode,
+            bitrate=bitrate,
             reason=reason,
             **kwargs,
         )
