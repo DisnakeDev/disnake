@@ -43,7 +43,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    cast,
     get_args,
     get_origin,
     get_type_hints,
@@ -114,8 +113,6 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
 def remove_optionals(annotation: Any) -> Any:
     """remove unwanted optionals from an annotation"""
     if get_origin(annotation) in (Union, UnionType):
-        annotation = cast(Any, annotation)
-
         args = tuple(i for i in annotation.__args__ if i not in (None, type(None)))
         if len(args) == 1:
             annotation = args[0]
