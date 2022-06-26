@@ -46,6 +46,8 @@ I = TypeVar("I", bound="Item")
 V = TypeVar("V", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
+    from typing_extensions import ParamSpec
+
     from ..components import NestedComponent
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
@@ -53,6 +55,9 @@ if TYPE_CHECKING:
     from .view import View
 
     ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
+
+else:
+    ParamSpec = TypeVar
 
 
 class WrappedComponent(ABC):
@@ -189,4 +194,16 @@ class DecoratedItem(Protocol[I_co]):
 
     @overload
     def __get__(self, obj: Any, objtype: Any) -> I_co:
+        ...
+
+
+T_co = TypeVar("T_co", covariant=True)
+P = ParamSpec("P")
+
+
+class Object(Protocol[T_co, P]):
+    def __new__(cls) -> T_co:
+        ...
+
+    def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
         ...

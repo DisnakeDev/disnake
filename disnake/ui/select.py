@@ -34,7 +34,6 @@ from typing import (
     Dict,
     List,
     Optional,
-    Protocol,
     Tuple,
     Type,
     TypeVar,
@@ -47,7 +46,7 @@ from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
 from ..partial_emoji import PartialEmoji
 from ..utils import MISSING
-from .item import DecoratedItem, Item
+from .item import DecoratedItem, Item, Object
 
 __all__ = (
     "Select",
@@ -66,19 +65,10 @@ else:
     ParamSpec = TypeVar
 
 
-T_co = TypeVar("T_co", covariant=True)
 S = TypeVar("S", bound="Select")
 S_co = TypeVar("S_co", bound="Select", covariant=True)
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 P = ParamSpec("P")
-
-
-class Object(Protocol[T_co, P]):
-    def __new__(cls) -> T_co:
-        ...
-
-    def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
-        ...
 
 
 def _parse_select_options(

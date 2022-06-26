@@ -32,7 +32,6 @@ from typing import (
     Any,
     Callable,
     Optional,
-    Protocol,
     Tuple,
     Type,
     TypeVar,
@@ -45,7 +44,7 @@ from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
 from ..utils import MISSING
-from .item import DecoratedItem, Item
+from .item import DecoratedItem, Item, Object
 
 __all__ = (
     "Button",
@@ -62,19 +61,11 @@ if TYPE_CHECKING:
 else:
     ParamSpec = TypeVar
 
-T_co = TypeVar("T_co", covariant=True)
 B = TypeVar("B", bound="Button")
 B_co = TypeVar("B_co", bound="Button", covariant=True)
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 P = ParamSpec("P")
 
-
-class Object(Protocol[T_co, P]):
-    def __new__(cls) -> T_co:
-        ...
-
-    def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
-        ...
 
 
 class Button(Item[V_co]):
