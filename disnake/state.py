@@ -1565,6 +1565,14 @@ class ConnectionState:
     def parse_guild_members_chunk(self, data: gateway.GuildMembersChunkEvent) -> None:
         guild_id = int(data["guild_id"])
         guild = self._get_guild(guild_id)
+        # This should never happen, but it's handled just in case
+        if guild is None:
+            _log.debug(
+                "GUILD_MEMBERS_CHUNK referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
         presences = data.get("presences", [])
 
         members = [
