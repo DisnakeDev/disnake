@@ -1114,7 +1114,7 @@ class ConnectionState:
             return
 
         try:
-            channel_ids = set(data["channel_ids"])
+            channel_ids = set(map(int, data["channel_ids"]))
         except KeyError:
             # If not provided, then the entire guild is being synced
             # So all previous thread data should be overwritten
@@ -1127,7 +1127,7 @@ class ConnectionState:
 
         for member in data.get("members", []):
             try:
-                # note: member['id'] is the thread_id
+                # note: member["id"] is the thread_id
                 thread = threads[member["id"]]
             except KeyError:
                 continue
