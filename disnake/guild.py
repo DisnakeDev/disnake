@@ -2751,6 +2751,11 @@ class Guild(Hashable):
         You must have :attr:`~Permissions.manage_guild` permission to
         use this.
 
+        .. note::
+
+            This method does not include the guild's vanity URL invite.
+            To get the vanity URL :class:`Invite`, refer to :meth:`Guild.vanity_invite`.
+
         Raises
         ------
         Forbidden
@@ -3528,6 +3533,11 @@ class Guild(Hashable):
         use_cached: :class:`bool`
             Whether to use the cached :attr:`Guild.vanity_url_code`
             and attempt to convert it into a full invite.
+
+            .. note::
+
+                If set to ``True``, the :attr:`Invite.uses`
+                information will not be accurate.
 
             .. versionadded:: 2.5
 
