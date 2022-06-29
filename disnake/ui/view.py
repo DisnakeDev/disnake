@@ -34,7 +34,6 @@ from functools import partial
 from itertools import groupby
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
     ClassVar,
     Dict,
@@ -63,7 +62,7 @@ if TYPE_CHECKING:
     from ..interactions import MessageInteraction
     from ..message import Message
     from ..state import ConnectionState
-    from ..types.components import Component as ComponentPayload
+    from ..types.components import ActionRow as ActionRowPayload, Component as ComponentPayload
     from .item import ItemCallbackType
 
 
@@ -205,12 +204,12 @@ class View:
             # Wait N seconds to see if timeout data has been refreshed
             await asyncio.sleep(self.__timeout_expiry - now)
 
-    def to_components(self) -> List[Dict[str, Any]]:
+    def to_components(self) -> List[ActionRowPayload]:
         def key(item: Item) -> int:
             return item._rendered_row or 0
 
         children = sorted(self.children, key=key)
-        components: List[Dict[str, Any]] = []
+        components: List[ActionRowPayload] = []
         for _, group in groupby(children, key=key):
             children = [item.to_component_dict() for item in group]
             if not children:

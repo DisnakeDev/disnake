@@ -1553,7 +1553,7 @@ class Messageable:
                     allowed_mentions=allowed_mentions_payload,
                     message_reference=reference_payload,
                     stickers=stickers_payload,
-                    components=components_payload,  # type: ignore
+                    components=components_payload,
                     flags=flags,
                 )
             finally:
@@ -1569,7 +1569,7 @@ class Messageable:
                 allowed_mentions=allowed_mentions_payload,
                 message_reference=reference_payload,
                 stickers=stickers_payload,
-                components=components_payload,  # type: ignore
+                components=components_payload,
                 flags=flags,
             )
 
