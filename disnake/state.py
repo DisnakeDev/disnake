@@ -881,18 +881,16 @@ class ConnectionState:
                 if reaction:
                     self.dispatch("reaction_clear_emoji", reaction)
 
-    def parse_interaction_create(self, data) -> None:
-        interaction_type = data["type"]
-
-        if interaction_type == 1:
+    def parse_interaction_create(self, data: gateway.InteractionCreateEvent) -> None:
+        if data["type"] == 1:
             # PING interaction should never be received
             return
 
-        elif interaction_type == 2:
+        elif data["type"] == 2:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch("application_command", interaction)
 
-        elif interaction_type == 3:
+        elif data["type"] == 3:
             interaction = MessageInteraction(data=data, state=self)
             self._view_store.dispatch(interaction)
             self.dispatch("message_interaction", interaction)
@@ -901,11 +899,11 @@ class ConnectionState:
             elif interaction.data.component_type is ComponentType.select:
                 self.dispatch("dropdown", interaction)
 
-        elif interaction_type == 4:
+        elif data["type"] == 4:
             interaction = ApplicationCommandInteraction(data=data, state=self)
             self.dispatch("application_command_autocomplete", interaction)
 
-        elif interaction_type == 5:
+        elif data["type"] == 5:
             interaction = ModalInteraction(data=data, state=self)
             self._modal_store.dispatch(interaction)
             self.dispatch("modal_submit", interaction)

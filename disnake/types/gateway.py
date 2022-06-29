@@ -36,7 +36,7 @@ from .emoji import Emoji, PartialEmoji
 from .guild import Guild, UnavailableGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integration import BaseIntegration
-from .interactions import GuildApplicationCommandPermissions, Interaction
+from .interactions import BaseInteraction, GuildApplicationCommandPermissions
 from .invite import InviteTargetType
 from .member import MemberWithUser
 from .message import Message
@@ -337,7 +337,7 @@ class MessageReactionRemoveEmojiEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway#interaction-create
-InteractionCreateEvent = Interaction
+InteractionCreateEvent = BaseInteraction
 
 
 # https://discord.com/developers/docs/topics/gateway#presence-update
