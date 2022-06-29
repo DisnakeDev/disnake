@@ -1603,7 +1603,7 @@ class ConnectionState:
             )
 
     def parse_integration_create(self, data: gateway.IntegrationCreateEvent) -> None:
-        guild_id = int(data.pop("guild_id"))
+        guild_id = int(data["guild_id"])
         guild = self._get_guild(guild_id)
         if guild is not None:
             cls, _ = _integration_factory(data["type"])
@@ -1615,7 +1615,7 @@ class ConnectionState:
             )
 
     def parse_integration_update(self, data: gateway.IntegrationUpdateEvent) -> None:
-        guild_id = int(data.pop("guild_id"))
+        guild_id = int(data["guild_id"])
         guild = self._get_guild(guild_id)
         if guild is not None:
             cls, _ = _integration_factory(data["type"])
