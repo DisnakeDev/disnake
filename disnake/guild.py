@@ -3523,6 +3523,11 @@ class Guild(Hashable):
             Whether to use the cached :attr:`Guild.vanity_url_code`
             and attempt to convert it into a full invite.
 
+            .. note::
+
+                If set to ``True``, the :attr:`Invite.uses`
+                information will not be accurate.
+
             .. versionadded:: 2.5
 
         Raises
