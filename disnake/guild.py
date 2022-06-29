@@ -101,7 +101,13 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration
-    from .types.guild import Ban as BanPayload, Guild as GuildPayload, GuildFeature, MFALevel
+    from .types.guild import (
+        Ban as BanPayload,
+        Guild as GuildPayload,
+        GuildFeature,
+        MFALevel,
+        UnavailableGuild as UnavailableGuildPayload,
+    )
     from .types.integration import IntegrationType
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
@@ -346,7 +352,9 @@ class Guild(Hashable):
         3: _GuildLimit(emoji=250, stickers=60, bitrate=384e3, filesize=104857600),
     }
 
-    def __init__(self, *, data: GuildPayload, state: ConnectionState):
+    def __init__(
+        self, *, data: Union[GuildPayload, UnavailableGuildPayload], state: ConnectionState
+    ):
         self._channels: Dict[int, GuildChannel] = {}
         self._members: Dict[int, Member] = {}
         self._voice_states: Dict[int, VoiceState] = {}
@@ -494,7 +502,7 @@ class Guild(Hashable):
         """
         return self._state._get_guild_command_named(self.id, name)
 
-    def _from_data(self, guild: GuildPayload) -> None:
+    def _from_data(self, guild: Union[GuildPayload, UnavailableGuildPayload]) -> None:
         # according to Stan, this is always available even if the guild is unavailable
         # I don't have this guarantee when someone updates the guild.
         member_count = guild.get("member_count", None)
@@ -576,7 +584,7 @@ class Guild(Hashable):
             if cache_joined or member.id == self_id:
                 self._add_member(member)
 
-        self._sync(guild)
+        self._sync(guild)  # type: ignore
         self._large: Optional[bool] = None if member_count is None else self._member_count >= 250
 
         self.owner_id: Optional[int] = utils._get_as_snowflake(guild, "owner_id")
