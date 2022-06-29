@@ -165,6 +165,7 @@ class Interaction:
         "locale",
         "guild_locale",
         "client",
+        "_app_permissions",
         "_permissions",
         "_state",
         "_session",
@@ -188,6 +189,7 @@ class Interaction:
         self.token: str = data["token"]
         self.version: int = data["version"]
         self.application_id: int = int(data["application_id"])
+        self._app_permissions: int = int(data.get("app_permissions", 0))
 
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
@@ -270,6 +272,16 @@ class Interaction:
         """
         if self._permissions is not None:
             return Permissions(self._permissions)
+        return Permissions.private_channel()
+
+    @property
+    def app_permissions(self) -> Permissions:
+        """:class:`Permissions`: The resolved permissions of ourselves in the channel, including overwrites.
+
+        .. versionadded:: 2.6
+        """
+        if self.guild_id:
+            return Permissions(self._app_permissions)
         return Permissions.private_channel()
 
     @utils.cached_slot_property("_cs_response")
