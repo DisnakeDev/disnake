@@ -215,7 +215,6 @@ class GuildScheduledEvent(Hashable):
             ("id", self.id),
             ("guild_id", self.guild_id),
             ("channel_id", self.channel_id),
-            ("creator_id", self.creator_id),
             ("name", self.name),
             ("description", self.description),
             ("scheduled_start_time", self.scheduled_start_time),
@@ -223,10 +222,8 @@ class GuildScheduledEvent(Hashable):
             ("privacy_level", self.privacy_level),
             ("status", self.status),
             ("entity_type", self.entity_type),
-            ("entity_id", self.entity_id),
             ("entity_metadata", self.entity_metadata),
             ("creator", self.creator),
-            ("user_count", self.user_count),
         )
         inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{self.__class__.__name__} {inner}>"
