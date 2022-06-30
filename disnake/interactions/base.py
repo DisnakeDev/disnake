@@ -268,6 +268,8 @@ class Interaction:
     def permissions(self) -> Permissions:
         """:class:`Permissions`: The resolved permissions of the member in the channel, including overwrites.
 
+        In a guild context, this is provided directly by Discord.
+
         In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
         """
         if self._permissions is not None:
@@ -276,7 +278,10 @@ class Interaction:
 
     @property
     def app_permissions(self) -> Permissions:
-        """:class:`Permissions`: The resolved permissions of ourselves in the channel, including overwrites.
+        """:class:`Permissions`: The resolved permissions of the bot in the channel, including overwrites.
+        In a guild context, this is provided directly by Discord.
+
+        In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
 
         .. versionadded:: 2.6
         """
