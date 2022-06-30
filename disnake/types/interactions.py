@@ -202,8 +202,16 @@ class ModalInteractionData(TypedDict):
     components: List[ActionRow]
 
 
-# common properties in appcmd and component interactions (or generally, non-ping interactions)
-class _BaseInteractionOptional(TypedDict, total=False):
+# base type for *all* interactions
+class _BaseInteraction(TypedDict):
+    id: Snowflake
+    application_id: Snowflake
+    token: str
+    version: int
+
+
+# common properties in non-ping interactions
+class _BaseUserInteractionOptional(TypedDict, total=False):
     guild_id: Snowflake
     # one of these two will always exist, according to docs
     user: User
@@ -211,14 +219,7 @@ class _BaseInteractionOptional(TypedDict, total=False):
     guild_locale: str
 
 
-class _BaseInteraction(_BaseInteractionOptional):
-    id: Snowflake
-    application_id: Snowflake
-    token: str
-    version: int
-
-
-class _BaseUserInteraction(_BaseInteraction):
+class _BaseUserInteraction(_BaseInteraction, _BaseUserInteractionOptional):
     # the docs specify `channel_id` as optional,
     # but it is assumed to always exist on non-ping interactions
     channel_id: Snowflake
@@ -244,7 +245,7 @@ class _ModalInteractionOptional(TypedDict, total=False):
     message: Message
 
 
-class ModalInteraction(_ModalInteractionOptional, _BaseUserInteraction):
+class ModalInteraction(_BaseUserInteraction, _ModalInteractionOptional):
     type: Literal[5]
     data: ModalInteractionData
 
