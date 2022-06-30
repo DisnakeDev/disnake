@@ -174,9 +174,11 @@ class GuildCommandInteraction(ApplicationCommandInteraction):
     Additionally, annotations of some attributes are modified to match the expected types in guilds.
     """
 
+    author: Member
     guild: Guild
-    me: Member
+    guild_id: int
     guild_locale: Locale
+    me: Member
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
