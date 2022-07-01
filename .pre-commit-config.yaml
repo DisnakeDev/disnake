@@ -27,3 +27,14 @@ repos:
     hooks:
       - id: black
         name: Running black in all files.
+
+  - repo: local
+    hooks:
+      - id: flake8
+        name: flake8
+        description: 'lint all of our code'
+        entry: flake8
+        language: python
+        files: ^disnake/
+        types: [python]
+        require_serial: true
