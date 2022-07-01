@@ -440,7 +440,7 @@ class ParamInfo:
         return default
 
     async def verify_type(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
-        """Check if the type of an argument is correct and possibly raise if it's not"""
+        """Check if the type of an argument is correct and possibly raise if it's not."""
         if self.discord_type.value not in (6, 9):
             # not `user` or `mentionable`
             return argument
