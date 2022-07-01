@@ -105,7 +105,8 @@ class ModalInteraction(Interaction):
 
     def walk_component_data(self) -> Generator[ModalInteractionComponentDataPayload, None, None]:
         """
-        Returns a generator that yields raw component data from action rows one by one.
+        Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
+        This does not contain all fields of the components due to API limitations.
 
         .. versionadded:: 2.6
 
@@ -143,7 +144,8 @@ class ModalInteractionData(Dict[str, Any]):
     custom_id: :class:`str`
         The custom ID of the modal.
     components: List[:class:`dict`]
-        The raw component data of the modal interaction.
+        The raw component data of the modal interaction, as provided by Discord.
+        This does not contain all fields of the components due to API limitations.
 
         .. versionadded:: 2.6
     """
@@ -153,6 +155,9 @@ class ModalInteractionData(Dict[str, Any]):
     def __init__(self, *, data: ModalInteractionDataPayload):
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
+        # This uses a stripped-down action row TypedDict, as we only receive
+        # partial data from the API, generally only containing `type`, `custom_id`,
+        # and relevant fields like a select's `values`.
         self.components: List[ModalInteractionActionRowPayload] = data["components"]
 
     def __repr__(self):
