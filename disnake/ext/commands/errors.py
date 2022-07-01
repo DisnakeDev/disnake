@@ -28,6 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Type, Union
 
 from disnake.errors import ClientException, DiscordException
+from disnake.utils import humanize_list
 
 if TYPE_CHECKING:
     from inspect import Parameter
@@ -705,11 +706,7 @@ class MissingAnyRole(CheckFailure):
         self.missing_roles: SnowflakeList = missing_roles
 
         missing = [f"'{role}'" for role in missing_roles]
-
-        if len(missing) > 2:
-            fmt = f"{', '.join(missing[:-1])}, or {missing[-1]}"
-        else:
-            fmt = " or ".join(missing)
+        fmt = humanize_list(missing, "or")
 
         message = f"You are missing at least one of the required roles: {fmt}"
         super().__init__(message)
@@ -735,11 +732,7 @@ class BotMissingAnyRole(CheckFailure):
         self.missing_roles: SnowflakeList = missing_roles
 
         missing = [f"'{role}'" for role in missing_roles]
-
-        if len(missing) > 2:
-            fmt = f"{', '.join(missing[:-1])}, or {missing[-1]}"
-        else:
-            fmt = " or ".join(missing)
+        fmt = humanize_list(missing, "or")
 
         message = f"Bot is missing at least one of the required roles: {fmt}"
         super().__init__(message)
@@ -782,11 +775,8 @@ class MissingPermissions(CheckFailure):
             perm.replace("_", " ").replace("guild", "server").title()
             for perm in missing_permissions
         ]
+        fmt = humanize_list(missing, "and")
 
-        if len(missing) > 2:
-            fmt = f"{', '.join(missing[:-1])}, and {missing[-1]}"
-        else:
-            fmt = " and ".join(missing)
         message = f"You are missing {fmt} permission(s) to run this command."
         super().__init__(message, *args)
 
@@ -810,11 +800,8 @@ class BotMissingPermissions(CheckFailure):
             perm.replace("_", " ").replace("guild", "server").title()
             for perm in missing_permissions
         ]
+        fmt = humanize_list(missing, "and")
 
-        if len(missing) > 2:
-            fmt = f"{', '.join(missing[:-1])}, and {missing[-1]}"
-        else:
-            fmt = " and ".join(missing)
         message = f"Bot requires {fmt} permission(s) to run this command."
         super().__init__(message, *args)
 
