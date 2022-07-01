@@ -838,10 +838,7 @@ class BadUnionArgument(UserInputError):
                 return x.__class__.__name__
 
         to_string = [_get_name(x) for x in converters]
-        if len(to_string) > 2:
-            fmt = f"{', '.join(to_string[:-1])}, or {to_string[-1]}"
-        else:
-            fmt = " or ".join(to_string)
+        fmt = humanize_list(to_string, "or")
 
         super().__init__(f'Could not convert "{param.name}" into {fmt}.')
 
@@ -872,10 +869,7 @@ class BadLiteralArgument(UserInputError):
         self.errors: List[CommandError] = errors
 
         to_string = [repr(l) for l in literals]
-        if len(to_string) > 2:
-            fmt = f"{', '.join(to_string[:-1])}, or {to_string[-1]}"
-        else:
-            fmt = " or ".join(to_string)
+        fmt = humanize_list(to_string, "or")
 
         super().__init__(f'Could not convert "{param.name}" into the literal {fmt}.')
 
