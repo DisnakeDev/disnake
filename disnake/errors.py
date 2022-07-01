@@ -96,7 +96,7 @@ class GatewayNotFound(DiscordException):
 def _flatten_error_dict(d: Dict[str, Any], key: str = "") -> Dict[str, str]:
     items: List[Tuple[str, str]] = []
     for k, v in d.items():
-        new_key = key + "." + k if key else k
+        new_key = f"{key}.{k}" if key else k
 
         if isinstance(v, dict):
             try:
@@ -140,7 +140,7 @@ class HTTPException(DiscordException):
             errors = message.get("errors")
             if errors:
                 errors = _flatten_error_dict(errors)
-                helpful = "\n".join("In %s: %s" % t for t in errors.items())
+                helpful = "\n".join(f"In {k}: {m}" for k, m in errors.items())
                 self.text = base + "\n" + helpful
             else:
                 self.text = base
@@ -281,12 +281,12 @@ class PrivilegedIntentsRequired(ClientException):
     def __init__(self, shard_id: Optional[int]):
         self.shard_id: Optional[int] = shard_id
         msg = (
-            "Shard ID %s is requesting privileged intents that have not been explicitly enabled in the "
+            f"Shard ID {shard_id} is requesting privileged intents that have not been explicitly enabled in the "
             "developer portal. It is recommended to go to https://discord.com/developers/applications/ "
             "and explicitly enable the privileged intents within your application's page. If this is not "
             "possible, then consider disabling the privileged intents instead."
         )
-        super().__init__(msg % shard_id)
+        super().__init__(msg)
 
 
 class InteractionException(ClientException):

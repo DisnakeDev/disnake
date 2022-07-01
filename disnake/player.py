@@ -182,7 +182,7 @@ class FFmpegAudio(AudioSource):
             return subprocess.Popen(args, creationflags=CREATE_NO_WINDOW, **subprocess_kwargs)  # type: ignore
         except FileNotFoundError:
             executable = args.partition(" ")[0] if isinstance(args, str) else args[0]
-            raise ClientException(executable + " was not found.") from None
+            raise ClientException(f"{executable} was not found.") from None
         except subprocess.SubprocessError as exc:
             raise ClientException(f"Popen failed: {exc.__class__.__name__}: {exc}") from exc
 
@@ -541,7 +541,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         probefunc = fallback = None
 
         if isinstance(method, str):
-            probefunc = getattr(cls, "_probe_codec_" + method, None)
+            probefunc = getattr(cls, f"_probe_codec_{method}", None)
             if probefunc is None:
                 raise AttributeError(f"Invalid probe method {method!r}")
 
