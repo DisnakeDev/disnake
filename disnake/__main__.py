@@ -67,15 +67,15 @@ import config
 
 class Bot(commands.{base}):
     def __init__(self, **kwargs):
-        super().__init__(command_prefix=commands.when_mentioned_or("{prefix}", **kwargs)
+        super().__init__(command_prefix=commands.when_mentioned_or("{prefix}"), **kwargs)
         for cog in config.cogs:
             try:
                 self.load_extension(cog)
             except Exception as exc:
-                print(f"Could not load extension {{cog}} due to {{exc.__class__.__name__}}: {{exc}}"
+                print(f"Could not load extension {{cog}} due to {{exc.__class__.__name__}}: {{exc}}")
 
     async def on_ready(self):
-        print(f"Logged on as {{self.user}} (ID: {{self.user.id}})"
+        print(f"Logged on as {{self.user}} (ID: {{self.user.id}})")
 
 
 bot = Bot()
