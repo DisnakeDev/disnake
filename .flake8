@@ -53,3 +53,12 @@ per-file-ignores =
     disnake/ext/commands/params.py:E241
     # pytest uses assert for testing
     tests/**: S101
+
+    # B008: runtime function calls are how Params work,
+    # S311: examples don't misuse random generation
+    # I   : example imports cannot be checked by isort
+    # S105: possible hardcoded passwords TODO
+    examples/**:B008,S311,I,S105
+    # usage of assert and interface binding, allowable for the third party lib at use
+    # also have to reignore whatever is from the last check that pops up here
+    examples/basic_voice.py:S101,S104,I
