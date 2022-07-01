@@ -36,6 +36,8 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Final,
+    FrozenSet,
     List,
     Literal,
     Optional,
@@ -277,6 +279,10 @@ class LargeInt(int):
     """Type for large integers in slash commands."""
 
 
+# option types that require additional handling in verify_type
+_VERIFY_TYPES: Final[FrozenSet[OptionType]] = frozenset((OptionType.user, OptionType.mentionable))
+
+
 class ParamInfo:
     """A class that basically connects function params with slash command options.
     The instances of this class are not created manually, but via the functional interface instead.
@@ -441,8 +447,7 @@ class ParamInfo:
 
     async def verify_type(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
         """Check if the type of an argument is correct and possibly raise if it's not."""
-        if self.discord_type.value not in (6, 9):
-            # not `user` or `mentionable`
+        if self.discord_type not in _VERIFY_TYPES:
             return argument
 
         # The API may return a `User` for options annotated with `Member`,
