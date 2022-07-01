@@ -207,16 +207,17 @@ class _BaseInteraction(TypedDict):
     id: Snowflake
     application_id: Snowflake
     token: str
-    version: int
+    version: Literal[1]
 
 
 # common properties in non-ping interactions
 class _BaseUserInteractionOptional(TypedDict, total=False):
+    app_permissions: str
     guild_id: Snowflake
-    # one of these two will always exist, according to docs
-    user: User
-    member: MemberWithUser
     guild_locale: str
+    # one of these two will always exist, according to docs
+    member: MemberWithUser
+    user: User
 
 
 class _BaseUserInteraction(_BaseInteraction, _BaseUserInteractionOptional):
