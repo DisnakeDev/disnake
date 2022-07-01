@@ -1065,23 +1065,19 @@ class GuildChannel(ABC):
 
         bucket = self._sorting_bucket
         parent_id = kwargs.get("category", MISSING)
-        # fmt: off
         if parent_id not in (MISSING, None):
             parent_id = parent_id.id
             channels = [
                 ch
                 for ch in self.guild.channels
-                if ch._sorting_bucket == bucket
-                and ch.category_id == parent_id
+                if ch._sorting_bucket == bucket and ch.category_id == parent_id
             ]
         else:
             channels = [
                 ch
                 for ch in self.guild.channels
-                if ch._sorting_bucket == bucket
-                and ch.category_id == self.category_id
+                if ch._sorting_bucket == bucket and ch.category_id == self.category_id
             ]
-        # fmt: on
 
         channels.sort(key=lambda c: (c.position, c.id))
         channels = cast(List[GuildChannel], channels)

@@ -1350,3 +1350,12 @@ def as_valid_locale(locale: str) -> Optional[str]:
     if language != locale:
         return as_valid_locale(language)
     return None
+
+
+def humanize_list(values: List[str], combine: str) -> str:
+    if len(values) > 2:
+        return f"{', '.join(values[:-1])}, {combine} {values[-1]}"
+    elif len(values) == 0:
+        return "<none>"
+    else:
+        return f" {combine} ".join(values)
