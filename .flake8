@@ -47,10 +47,9 @@ per-file-ignores =
     # unused imports, star imports
     */__init__.py: F401, F403
     # ignore whitespacing on flags
-    # ignore setattr constants
-    disnake/audit_logs.py:E241,B010
+    disnake/audit_logs.py:E241
     # ignore whitespacing on flags
-    disnake/enums.py:E221,E241,N815
+    disnake/enums.py:E221,E241
     # ignore whitespacing after `:`
     disnake/ext/commands/params.py:E241
     # pytest uses assert for testing
