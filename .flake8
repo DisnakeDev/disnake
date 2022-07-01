@@ -1,6 +1,7 @@
 [flake8]
 max-line-length = 100
 statistics = true
+noqa-require-code = true
 exclude =
     CVS
     .bzr
