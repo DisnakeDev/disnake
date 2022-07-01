@@ -103,7 +103,7 @@ class ModalInteraction(Interaction):
             message = None
         self.message: Optional[Message] = message
 
-    def walk_component_data(self) -> Generator[ModalInteractionComponentDataPayload, None, None]:
+    def walk_raw_components(self) -> Generator[ModalInteractionComponentDataPayload, None, None]:
         """
         Returns a generator that yields raw component data from action rows one by one, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
@@ -124,7 +124,7 @@ class ModalInteraction(Interaction):
         text_input_type = ComponentType.text_input.value
         return {
             component["custom_id"]: component.get("value") or ""
-            for component in self.walk_component_data()
+            for component in self.walk_raw_components()
             if component.get("type") == text_input_type
         }
 
