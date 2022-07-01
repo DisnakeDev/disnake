@@ -212,15 +212,22 @@ class GuildScheduledEvent(Hashable):
         self._image: Optional[str] = data.get("image")
 
     def __repr__(self) -> str:
-        return (
-            "<GuildScheduledEvent "
-            + " ".join(
-                f"{attr}={getattr(self, attr)!r}"
-                for attr in self.__slots__
-                if not attr.startswith("_")
-            )
-            + ">"
+        attrs = (
+            ("id", self.id),
+            ("guild_id", self.guild_id),
+            ("channel_id", self.channel_id),
+            ("name", self.name),
+            ("description", self.description),
+            ("scheduled_start_time", self.scheduled_start_time),
+            ("scheduled_end_time", self.scheduled_end_time),
+            ("privacy_level", self.privacy_level),
+            ("status", self.status),
+            ("entity_type", self.entity_type),
+            ("entity_metadata", self.entity_metadata),
+            ("creator", self.creator),
         )
+        inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
+        return f"<{self.__class__.__name__} {inner}>"
 
     def __str__(self) -> str:
         return self.name

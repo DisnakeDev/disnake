@@ -174,15 +174,15 @@ class VoiceState:
         self.channel: Optional[VocalGuildChannel] = channel
 
     def __repr__(self) -> str:
-        attrs = [
+        attrs = (
             ("self_mute", self.self_mute),
             ("self_deaf", self.self_deaf),
             ("self_stream", self.self_stream),
             ("suppress", self.suppress),
             ("requested_to_speak_at", self.requested_to_speak_at),
             ("channel", self.channel),
-        ]
-        inner = " ".join("%s=%r" % t for t in attrs)
+        )
+        inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{self.__class__.__name__} {inner}>"
 
 
@@ -199,7 +199,7 @@ def flatten_user(cls):
         # if it's a slotted attribute or a property, redirect it
         # slotted members are implemented as member_descriptors in Type.__dict__
         if not hasattr(value, "__annotations__"):
-            getter = attrgetter("_user." + attr)
+            getter = attrgetter(f"_user.{attr}")
             setattr(cls, attr, property(getter, doc=f"Equivalent to :attr:`User.{attr}`"))
         else:
             # Technically, this can also use attrgetter

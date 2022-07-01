@@ -872,3 +872,17 @@ def test_search_directory_exc(tmp_module_root, path, exc):
 )
 def test_as_valid_locale(locale, expected):
     assert utils.as_valid_locale(locale) == expected
+
+
+@pytest.mark.parametrize(
+    ("values", "expected"),
+    [
+        ([], "<none>"),
+        (["one"], "one"),
+        (["one", "two"], "one plus two"),
+        (["one", "two", "three"], "one, two, plus three"),
+        (["one", "two", "three", "four"], "one, two, three, plus four"),
+    ],
+)
+def test_humanize_list(values, expected):
+    assert utils.humanize_list(values, "plus") == expected

@@ -409,7 +409,7 @@ class Guild(Hashable):
             ("chunked", self.chunked),
             ("member_count", getattr(self, "_member_count", None)),
         )
-        inner = " ".join("%s=%r" % t for t in attrs)
+        inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<Guild {inner}>"
 
     def _update_voice_state(
