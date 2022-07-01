@@ -38,7 +38,7 @@ __all__ = (
 if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..types.interactions import (
-        ComponentInteractionData as ComponentInteractionDataPayload,
+        MessageComponentInteractionData as MessageComponentInteractionDataPayload,
         MessageInteraction as MessageInteractionPayload,
     )
 
@@ -130,7 +130,7 @@ class MessageInteractionData(Dict[str, Any]):
 
     __slots__ = ("custom_id", "component_type", "values")
 
-    def __init__(self, *, data: ComponentInteractionDataPayload):
+    def __init__(self, *, data: MessageComponentInteractionDataPayload):
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
