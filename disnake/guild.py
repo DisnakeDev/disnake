@@ -2172,6 +2172,10 @@ class Guild(Hashable):
         .. versionchanged:: 2.6
             Removed ``channel_id`` parameter in favor of ``channel``.
 
+        .. versionchanged:: 2.6
+            Naive datetime parameters are now assumed to be in the local
+            timezone instead of UTC.
+
         Parameters
         ----------
         name: :class:`str`
@@ -2195,8 +2199,10 @@ class Guild(Hashable):
             The privacy level of the guild scheduled event.
         scheduled_start_time: :class:`datetime.datetime`
             The time to schedule the guild scheduled event.
+            If the datetime is naive, it is assumed to be local time.
         scheduled_end_time: Optional[:class:`datetime.datetime`]
             The time when the guild scheduled event is scheduled to end.
+            If the datetime is naive, it is assumed to be local time.
         entity_type: :class:`GuildScheduledEventEntityType`
             The entity type of the guild scheduled event.
         entity_metadata: :class:`GuildScheduledEventMetadata`
@@ -2231,7 +2237,7 @@ class Guild(Hashable):
         fields: Dict[str, Any] = {
             "name": name,
             "privacy_level": privacy_level.value,
-            "scheduled_start_time": scheduled_start_time.isoformat(),
+            "scheduled_start_time": utils.isoformat_utc(scheduled_start_time),
             "entity_type": entity_type.value,
         }
 
@@ -2253,9 +2259,7 @@ class Guild(Hashable):
             fields["channel_id"] = channel.id
 
         if scheduled_end_time is not MISSING:
-            fields["scheduled_end_time"] = (
-                scheduled_end_time.isoformat() if scheduled_end_time is not None else None
-            )
+            fields["scheduled_end_time"] = utils.isoformat_utc(scheduled_end_time)
 
         data = await self._state.http.create_guild_scheduled_event(self.id, reason=reason, **fields)
         return GuildScheduledEvent(state=self._state, data=data)
@@ -4204,11 +4208,7 @@ class Guild(Hashable):
                 until = utils.utcnow() + datetime.timedelta(seconds=duration)
 
         # at this point `until` cannot be `MISSING`
-        if until is not None:
-            until = until.astimezone(datetime.timezone.utc)
-            payload["communication_disabled_until"] = until.isoformat()
-        else:
-            payload["communication_disabled_until"] = None
+        payload["communication_disabled_until"] = utils.isoformat_utc(until)
 
         data = await self._state.http.edit_member(self.id, user.id, reason=reason, **payload)
         return Member(data=data, guild=self, state=self._state)
