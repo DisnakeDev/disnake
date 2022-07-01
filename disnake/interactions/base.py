@@ -279,6 +279,7 @@ class Interaction:
     @property
     def app_permissions(self) -> Permissions:
         """:class:`Permissions`: The resolved permissions of the bot in the channel, including overwrites.
+
         In a guild context, this is provided directly by Discord.
 
         In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
