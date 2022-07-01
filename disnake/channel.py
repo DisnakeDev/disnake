@@ -211,7 +211,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
     def _update(self, guild: Guild, data: TextChannelPayload) -> None:
         self.guild: Guild = guild
-        self.name: str = data["name"]
+        # apparently this can be nullable in the case of a bad api deploy
+        self.name: str = data.get("name") or ""
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
@@ -961,7 +962,8 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 
     def _update(self, guild: Guild, data: Union[VoiceChannelPayload, StageChannelPayload]) -> None:
         self.guild = guild
-        self.name: str = data["name"]
+        # apparently this can be nullable in the case of a bad api deploy
+        self.name: str = data.get("name") or ""
         rtc = data.get("rtc_region")
         self.rtc_region: Optional[str] = rtc
         self.video_quality_mode: VideoQualityMode = try_enum(
@@ -1948,7 +1950,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     def _update(self, guild: Guild, data: CategoryChannelPayload) -> None:
         self.guild: Guild = guild
-        self.name: str = data["name"]
+        # apparently this can be nullable in the case of a bad api deploy
+        self.name: str = data.get("name") or ""
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
@@ -2330,7 +2333,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
     def _update(self, guild: Guild, data: ForumChannelPayload) -> None:
         self.guild: Guild = guild
-        self.name: str = data["name"]
+        # apparently this can be nullable in the case of a bad api deploy
+        self.name: str = data.get("name") or ""
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
