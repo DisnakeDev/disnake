@@ -5,12 +5,12 @@ disnake
 
 <p align="center">
     <a href="https://discord.gg/disnake"><img src="https://img.shields.io/discord/808030843078836254?style=flat-square&color=5865f2&logo=discord&logoColor=ffffff&label=discord" alt="Discord server invite" /></a>
-    <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/v/disnake.svg?style=flat-square" alt="PyPI version info" /></a>
-    <a href="https://pypi.python.org/pypi/disnake"><img src="https://img.shields.io/pypi/pyversions/disnake.svg?style=flat-square" alt="PyPI supported Python versions" /></a>
+    <a href="https://pypi.org/project/disnake/"><img src="https://img.shields.io/pypi/v/disnake.svg?style=flat-square" alt="PyPI version info" /></a>
+    <a href="https://pypi.org/project/disnake/"><img src="https://img.shields.io/pypi/pyversions/disnake.svg?style=flat-square" alt="PyPI supported Python versions" /></a>
     <a href="https://github.com/DisnakeDev/disnake/commits"><img src="https://img.shields.io/github/commit-activity/w/DisnakeDev/disnake.svg?style=flat-square" alt="Commit activity" /></a>
 </p>
 
-A modern, easy to use, feature-rich, and async ready API wrapper for Discord written in Python.
+A modern, easy to use, feature-rich, and async-ready API wrapper for Discord written in Python.
 
 Key Features
 ------------

@@ -30,6 +30,7 @@ from typing import TYPE_CHECKING, List, Optional, Type, TypeVar, Union
 from .appinfo import PartialAppInfo
 from .asset import Asset
 from .enums import ChannelType, InviteTarget, NSFWLevel, VerificationLevel, try_enum
+from .guild_scheduled_event import GuildScheduledEvent
 from .mixins import Hashable
 from .object import Object
 from .utils import _get_as_snowflake, parse_time, snowflake_time
@@ -45,7 +46,10 @@ if TYPE_CHECKING:
     from .abc import GuildChannel
     from .guild import Guild
     from .state import ConnectionState
-    from .types.channel import PartialChannel as InviteChannelPayload
+    from .types.channel import (
+        GroupInviteRecipient as GroupInviteRecipientPayload,
+        InviteChannel as InviteChannelPayload,
+    )
     from .types.guild import GuildFeature
     from .types.invite import (
         GatewayInvite as GatewayInvitePayload,
@@ -66,6 +70,7 @@ class PartialInviteChannel:
     This model will be given when the user is not part of the
     guild the :class:`Invite` resolves to.
 
+
     .. container:: operations
 
         .. describe:: x == y
@@ -84,6 +89,10 @@ class PartialInviteChannel:
 
             Returns the partial channel's name.
 
+            .. versionchanged:: 2.5
+                if the channel is of type :attr:`ChannelType.group`,
+                returns the name that's rendered by the official client.
+
     Attributes
     ----------
     name: Optional[:class:`str`]
@@ -94,17 +103,32 @@ class PartialInviteChannel:
         The partial channel's type.
     """
 
-    __slots__ = ("id", "name", "type")
+    __slots__ = (
+        "id",
+        "name",
+        "type",
+        "_recipients",
+        "_icon",
+        "_state",
+    )
 
-    def __init__(self, data: InviteChannelPayload):
+    def __init__(self, *, state: ConnectionState, data: InviteChannelPayload):
+        self._state = state
         self.id: int = int(data["id"])
         self.name: Optional[str] = data.get("name")
         self.type: ChannelType = try_enum(ChannelType, data["type"])
+        if self.type is ChannelType.group:
+            self._recipients: List[GroupInviteRecipientPayload] = data.get("recipients", [])
+        else:
+            self._recipients = []
+        self._icon: Optional[str] = data.get("icon")
 
     def __str__(self) -> str:
+        if self.name:
+            return self.name
         if self.type is ChannelType.group:
-            return self.name or "Unnamed"
-        return self.name or ""
+            return ", ".join([recipient["username"] for recipient in self._recipients]) or "Unnamed"
+        return ""
 
     def __repr__(self) -> str:
         return f"<PartialInviteChannel id={self.id} name={self.name} type={self.type!r}>"
@@ -118,6 +142,16 @@ class PartialInviteChannel:
     def created_at(self) -> datetime.datetime:
         """:class:`datetime.datetime`: Returns the channel's creation time in UTC."""
         return snowflake_time(self.id)
+
+    @property
+    def icon(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the channel's icon asset if available.
+
+        .. versionadded:: 2.6
+        """
+        if self._icon is None:
+            return None
+        return Asset._from_icon(self._state, self.id, self._icon, path="channel")
 
 
 class PartialInviteGuild:
@@ -434,8 +468,6 @@ class Invite(Hashable):
         )
 
         if scheduled_event := data.get("guild_scheduled_event"):
-            from .guild_scheduled_event import GuildScheduledEvent  # cyclic import
-
             self.guild_scheduled_event: Optional[GuildScheduledEvent] = GuildScheduledEvent(
                 state=state, data=scheduled_event
             )
@@ -457,9 +489,12 @@ class Invite(Hashable):
                 # If it's not cached, then it has to be a partial guild
                 guild = PartialInviteGuild(state, guild_data, guild_id)
 
+        # todo: this is no longer true
         # As far as I know, invites always need a channel
         # So this should never raise.
-        channel: Union[PartialInviteChannel, GuildChannel] = PartialInviteChannel(data["channel"])
+        channel: Union[PartialInviteChannel, GuildChannel] = PartialInviteChannel(
+            data=data["channel"], state=state
+        )
         if guild is not None and not isinstance(guild, PartialInviteGuild):
             # Upgrade the partial data if applicable
             channel = guild.get_channel(channel.id) or channel
@@ -504,7 +539,7 @@ class Invite(Hashable):
         if data is None:
             return None
 
-        return PartialInviteChannel(data)
+        return PartialInviteChannel(data=data, state=self._state)
 
     def __str__(self) -> str:
         return self.url

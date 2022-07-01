@@ -246,6 +246,22 @@ def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
     return None
 
 
+@overload
+def isoformat_utc(dt: datetime.datetime) -> str:
+    ...
+
+
+@overload
+def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
+    ...
+
+
+def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
+    if dt:
+        return dt.astimezone(datetime.timezone.utc).isoformat()
+    return None
+
+
 def copy_doc(original: Callable) -> Callable[[T], T]:
     def decorator(overriden: T) -> T:
         overriden.__doc__ = original.__doc__

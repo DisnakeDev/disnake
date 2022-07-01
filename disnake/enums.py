@@ -471,7 +471,7 @@ class AuditLogAction(Enum):
         elif v < 113:
             return "thread"
         elif v < 122:
-            return "application_command"
+            return "application_command_or_integration"
         else:
             return None
 
@@ -689,6 +689,9 @@ class ThreadArchiveDuration(Enum):
     day = 1440
     three_days = 4320
     week = 10080
+
+    def __int__(self):
+        return self.value
 
 
 class WidgetStyle(Enum):

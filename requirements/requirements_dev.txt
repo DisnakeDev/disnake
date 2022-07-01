@@ -3,7 +3,7 @@
 ## type checking
 typing_extensions~=4.2.0
 # this is not pyright itself, but the python wrapper
-pyright==1.1.245
+pyright==1.1.254
 
 
 ## linting

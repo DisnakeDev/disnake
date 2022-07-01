@@ -48,10 +48,11 @@ class _BaseChannel(TypedDict):
 
 class _BaseGuildChannelOptional(TypedDict, total=False):
     flags: int
+    # In theory, this will never be None and will always be present. In practice...
+    name: Optional[str]
 
 
 class _BaseGuildChannel(_BaseChannel, _BaseGuildChannelOptional):
-    name: str
     guild_id: Snowflake
     position: int
     permission_overwrites: List[PermissionOverwrite]
@@ -61,6 +62,16 @@ class _BaseGuildChannel(_BaseChannel, _BaseGuildChannelOptional):
 
 class PartialChannel(_BaseChannel):
     type: ChannelType
+
+
+class GroupInviteRecipient(TypedDict):
+    username: str
+
+
+class InviteChannel(PartialChannel, total=False):
+    name: Optional[str]
+    recipients: List[GroupInviteRecipient]
+    icon: Optional[str]
 
 
 class _TextChannelOptional(TypedDict, total=False):
