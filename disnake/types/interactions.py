@@ -113,7 +113,7 @@ class GuildApplicationCommandPermissions(TypedDict):
     permissions: List[ApplicationCommandPermissions]
 
 
-InteractionType = Literal[1, 2, 3]
+InteractionType = Literal[1, 2, 3, 4, 5]
 
 
 class _ApplicationCommandInteractionDataOption(TypedDict):
@@ -202,21 +202,16 @@ class ModalInteractionData(TypedDict):
     components: List[ActionRow]
 
 
-InteractionData = Union[
-    ApplicationCommandInteractionData, ComponentInteractionData, ModalInteractionData
-]
-
-
-class BaseInteraction(TypedDict):
+# base type for *all* interactions
+class _BaseInteraction(TypedDict):
     id: Snowflake
     application_id: Snowflake
-    type: InteractionType
     token: str
     version: int
 
 
-# common properties in appcmd and component interactions (or generally, non-ping interactions)
-class _InteractionOptional(TypedDict, total=False):
+# common properties in non-ping interactions
+class _BaseUserInteractionOptional(TypedDict, total=False):
     guild_id: Snowflake
     # one of these two will always exist, according to docs
     user: User
@@ -224,18 +219,24 @@ class _InteractionOptional(TypedDict, total=False):
     guild_locale: str
 
 
-class Interaction(BaseInteraction, _InteractionOptional):
+class _BaseUserInteraction(_BaseInteraction, _BaseUserInteractionOptional):
     # the docs specify `channel_id` as optional,
-    # but it is assumed to always exist on appcmd and component interactions
+    # but it is assumed to always exist on non-ping interactions
     channel_id: Snowflake
     locale: str
 
 
-class ApplicationCommandInteraction(Interaction):
+class PingInteraction(_BaseInteraction):
+    type: Literal[1]
+
+
+class ApplicationCommandInteraction(_BaseUserInteraction):
+    type: Literal[2, 4]
     data: ApplicationCommandInteractionData
 
 
-class MessageInteraction(Interaction):
+class MessageInteraction(_BaseUserInteraction):
+    type: Literal[3]
     data: ComponentInteractionData
     message: Message
 
@@ -244,8 +245,16 @@ class _ModalInteractionOptional(TypedDict, total=False):
     message: Message
 
 
-class ModalInteraction(_ModalInteractionOptional, Interaction):
+class ModalInteraction(_BaseUserInteraction, _ModalInteractionOptional):
+    type: Literal[5]
     data: ModalInteractionData
+
+
+Interaction = Union[
+    ApplicationCommandInteraction,
+    MessageInteraction,
+    ModalInteraction,
+]
 
 
 class InteractionApplicationCommandCallbackData(TypedDict, total=False):
