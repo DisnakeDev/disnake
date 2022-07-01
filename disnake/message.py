@@ -56,6 +56,7 @@ from .file import File
 from .flags import MessageFlags
 from .guild import Guild
 from .member import Member
+from .mentions import AllowedMentions
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .reaction import Reaction
@@ -69,7 +70,6 @@ if TYPE_CHECKING:
     from .abc import GuildChannel, MessageableChannel, Snowflake
     from .channel import DMChannel
     from .guild import GuildMessageable
-    from .mentions import AllowedMentions
     from .role import Role
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration
@@ -1592,8 +1592,13 @@ class Message(Hashable):
             The message that was edited.
         """
         # allowed_mentions can only be changed on the bot's own messages
-        if self._state.allowed_mentions is not None and self.author.id == self._state.self_id:
-            previous_allowed_mentions = self._state.allowed_mentions
+        if self.author.id == self._state.self_id:
+            # make a custom allowed mentions based on the current message state
+            previous_allowed_mentions = AllowedMentions(
+                everyone=self.mention_everyone,
+                users=self.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+                roles=self.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+            )
         else:
             previous_allowed_mentions = None
 

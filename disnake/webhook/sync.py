@@ -42,6 +42,7 @@ from .. import utils
 from ..channel import PartialMessageable
 from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
 from ..http import Route
+from ..mentions import AllowedMentions
 from ..message import Message
 from .async_ import BaseWebhook, _WebhookState, handle_message_parameters
 
@@ -56,7 +57,6 @@ if TYPE_CHECKING:
     from ..abc import Snowflake
     from ..embeds import Embed
     from ..file import File
-    from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..types.webhook import Webhook as WebhookPayload
 
@@ -479,6 +479,17 @@ class SyncWebhookMessage(Message):
         # use current attachments as the base
         if attachments is MISSING and (file or files):
             attachments = self.attachments
+
+        # make a custom allowed mentions based on the current message state
+        previous_allowed_mentions = AllowedMentions(
+            everyone=self.mention_everyone,
+            users=self.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+            roles=self.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+        )
+        if allowed_mentions:
+            allowed_mentions = previous_allowed_mentions.merge(allowed_mentions)
+        else:
+            allowed_mentions = previous_allowed_mentions
 
         return self._state._webhook.edit_message(
             self.id,

@@ -48,6 +48,7 @@ from ..flags import MessageFlags
 from ..guild import Guild
 from ..i18n import Localized
 from ..member import Member
+from ..mentions import AllowedMentions
 from ..message import Attachment, Message
 from ..object import Object
 from ..permissions import Permissions
@@ -79,7 +80,6 @@ if TYPE_CHECKING:
     from ..ext.commands import AutoShardedBot, Bot
     from ..file import File
     from ..guild import GuildMessageable
-    from ..mentions import AllowedMentions
     from ..state import ConnectionState
     from ..threads import Thread
     from ..types.components import Modal as ModalPayload
@@ -1490,6 +1490,17 @@ class InteractionMessage(Message):
         # this isn't necessary when using the superclass, as the implementation there takes care of attachments
         if "attachments" not in fields and (fields.get("file") or fields.get("files")):
             fields["attachments"] = self.attachments
+
+        # make a custom allowed mentions based on the current message state
+        previous_mentions = AllowedMentions(
+            everyone=self.mention_everyone,
+            users=self.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+            roles=self.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+        )
+        if allowed_mentions := fields.get("allowed_mentions"):
+            fields["allowed_mentions"] = previous_mentions.merge(allowed_mentions)
+        else:
+            fields["allowed_mentions"] = previous_mentions
 
         return await self._state._interaction.edit_original_message(content=content, **fields)
 

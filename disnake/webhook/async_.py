@@ -55,6 +55,7 @@ from ..enums import WebhookType, try_enum
 from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
 from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
+from ..mentions import AllowedMentions
 from ..message import Message
 from ..mixins import Hashable
 from ..ui.action_row import MessageUIComponent, components_to_dict
@@ -79,7 +80,6 @@ if TYPE_CHECKING:
     from ..file import File
     from ..guild import Guild
     from ..http import Response
-    from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..state import ConnectionState
     from ..sticker import GuildSticker, StickerItem
@@ -849,6 +849,17 @@ class WebhookMessage(Message):
         # use current attachments as the base
         if attachments is MISSING and (file or files):
             attachments = self.attachments
+
+        # make a custom allowed mentions based on the current message state
+        previous_allowed_mentions = AllowedMentions(
+            everyone=self.mention_everyone,
+            users=self.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+            roles=self.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+        )
+        if allowed_mentions:
+            allowed_mentions = allowed_mentions.merge(previous_allowed_mentions)
+        else:
+            allowed_mentions = previous_allowed_mentions
 
         return await self._state._webhook.edit_message(
             self.id,
