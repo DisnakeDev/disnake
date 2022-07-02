@@ -206,6 +206,15 @@ class Option:
         The minimum value permitted.
     max_value: Union[:class:`int`, :class:`float`]
         The maximum value permitted.
+    min_length: Optional[:class:`str`]
+        The minimum length for this option if the type of this Option is :attr:`OptionType.string`.
+
+        .. versionadded:: 2.6
+
+    max_length: Optional[:class:`str`]
+        The maximum length for this option if the type of this Option is :attr:`OptionType.string`.
+
+        .. versionadded:: 2.6
     """
 
     __slots__ = (
@@ -221,6 +230,8 @@ class Option:
         "max_value",
         "name_localizations",
         "description_localizations",
+        "min_length",
+        "max_length",
     )
 
     def __init__(
@@ -235,6 +246,8 @@ class Option:
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
+        min_length: int = None,
+        max_length: int = None,
     ):
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
@@ -256,6 +269,9 @@ class Option:
 
         self.min_value: Optional[float] = min_value
         self.max_value: Optional[float] = max_value
+
+        self.min_length: Optional[int] = min_length
+        self.max_length: Optional[int] = max_length
 
         if channel_types is not None and not all(isinstance(t, ChannelType) for t in channel_types):
             raise TypeError("channel_types must be a list of `ChannelType`s")
@@ -298,6 +314,8 @@ class Option:
             and self.autocomplete == other.autocomplete
             and self.min_value == other.min_value
             and self.max_value == other.max_value
+            and self.min_length == other.min_length
+            and self.max_length == other.max_length
             and self.name_localizations == other.name_localizations
             and self.description_localizations == other.description_localizations
         )
@@ -323,6 +341,8 @@ class Option:
             autocomplete=data.get("autocomplete", False),
             min_value=data.get("min_value"),
             max_value=data.get("max_value"),
+            min_length=data.get("min_length"),
+            max_length=data.get("max_length"),
         )
 
     def add_choice(
@@ -352,6 +372,8 @@ class Option:
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
+        min_length: int = None,
+        max_length: int = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`."""
@@ -368,6 +390,8 @@ class Option:
                 autocomplete=autocomplete,
                 min_value=min_value,
                 max_value=max_value,
+                min_length=min_length,
+                max_length=max_length,
             )
         )
 
@@ -391,6 +415,10 @@ class Option:
             payload["min_value"] = self.min_value
         if self.max_value is not None:
             payload["max_value"] = self.max_value
+        if self.min_length is not None:
+            payload["min_length"] = self.min_length
+        if self.max_length is not None:
+            payload["max_length"] = self.max_length
         if (loc := self.name_localizations.data) is not None:
             payload["name_localizations"] = loc
         if (loc := self.description_localizations.data) is not None:
