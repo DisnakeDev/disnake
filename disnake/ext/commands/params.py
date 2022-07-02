@@ -87,6 +87,7 @@ CallableT = TypeVar("CallableT", bound=Callable[..., Any])
 
 __all__ = (
     "Range",
+    "String",
     "LargeInt",
     "ParamInfo",
     "Param",
@@ -272,6 +273,43 @@ class Range(type, metaclass=RangeMeta):
     def __repr__(self) -> str:
         a = "..." if self.min_value is None else self.min_value
         b = "..." if self.max_value is None else self.max_value
+        return f"{type(self).__name__}[{a}, {b}]"
+
+
+class StringMeta(type):
+    """Custom Generic implementation for String."""
+
+    def __getitem__(self, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]) -> Type[str]:
+        a, b = [None if x is ... else x for x in args]
+        return String.create(min_length=a, max_length=b)  # type: ignore # these are not ellipsis
+
+
+class String(type, metaclass=StringMeta):
+    """Type depicting a limited length of a string option.
+
+    .. versionadded:: 2.6
+
+    """
+
+    min_length: Optional[int]
+    max_length: Optional[int]
+    underlying_type = str
+
+    @classmethod
+    def create(
+        cls,
+        min_length: int = None,
+        max_length: int = None,
+    ) -> Any:
+        """Construct a new String with constraints."""
+        self = cls(cls.__name__, (), {})
+        self.min_length = min_length
+        self.max_length = max_length
+        return self
+
+    def __repr__(self) -> str:
+        a = "..." if self.min_length is None else self.min_length
+        b = "..." if self.max_length is None else self.max_length
         return f"{type(self).__name__}[{a}, {b}]"
 
 
@@ -542,6 +580,10 @@ class ParamInfo:
         if isinstance(annotation, Range):
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
+            annotation = annotation.underlying_type
+        if isinstance(annotation, String):
+            self.min_length = annotation.min_length
+            self.max_length = annotation.max_length
             annotation = annotation.underlying_type
         if issubclass_(annotation, LargeInt):
             self.large = True
