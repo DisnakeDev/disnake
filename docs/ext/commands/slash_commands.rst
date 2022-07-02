@@ -200,6 +200,48 @@ The type of the option is determined by the range bounds, with the option being 
         [tool.mypy]
         plugins = "disnake.ext.mypy_plugin"
 
+.. _string_lengths:
+
+String Lengths
+++++++++++++++
+
+:class:`str` parameters support minimum and maximum allowed value lengths.
+values using the ``min_length`` and ``max_length`` parameters on :func:`Param <ext.commands.Param>`.
+For instance, you could restrict an option to only accept a single character:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def charinfo(
+        inter: disnake.CommandInteraction,
+        character: str = commands.Param(max_length=1),
+    ):
+        ...
+
+Or restrict a tag command to limit tag names to 20 characters:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def tags(
+        inter: disnake.CommandInteraction,
+        tag: str = commands.Param(max_length=20)
+    ):
+        ...
+
+Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`~ext.commands.String` annotation.
+The lengths bounds are both inclusive; using ``...`` as a bound indicates that this end of the string length is unbounded.
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def strings(
+        inter: disnake.CommandInteraction,
+        a: commands.String[0, 10],       # a str no longer than 10 characters.
+        b: commands.String[10, 100],     # a str that's at least 10 characters but not longer than 100.
+        c: commands.String[50, ...]      # a str that's at least 50 characters.
+    ):
+        ...
 
 .. _docstrings:
 

@@ -287,6 +287,8 @@ class StringMeta(type):
 class String(type, metaclass=StringMeta):
     """Type depicting a limited length of a string option.
 
+    See :ref:`string_lengths` for more information.
+
     .. versionadded:: 2.6
 
     """
