@@ -202,7 +202,7 @@ class RangeMeta(type):
         ...
 
     def __getitem__(self, args: Tuple[Any, ...]) -> Any:
-        a, b = [None if x is Ellipsis else x for x in args]
+        a, b = [None if isinstance(x, type(Ellipsis)) else x for x in args]
         return Range.create(min_value=a, max_value=b)
 
 
@@ -280,8 +280,8 @@ class StringMeta(type):
     """Custom Generic implementation for String."""
 
     def __getitem__(self, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]) -> Type[str]:
-        a, b = [None if x is ... else x for x in args]
-        return String.create(min_length=a, max_length=b)  # type: ignore # these are not ellipsis
+        a, b = [None if isinstance(x, type(Ellipsis)) else x for x in args]
+        return String.create(min_length=a, max_length=b)
 
 
 class String(type, metaclass=StringMeta):
