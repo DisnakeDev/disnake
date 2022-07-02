@@ -563,7 +563,10 @@ class ConnectionState:
         )
 
     def _add_guild_from_data(self, data: Union[GuildPayload, UnavailableGuildPayload]) -> Guild:
-        guild = Guild(data=data, state=self)
+        guild = Guild(
+            data=data,  # type: ignore
+            state=self,
+        )
         self._add_guild(guild)
         return guild
 
@@ -1302,7 +1305,7 @@ class ConnectionState:
         guild.stickers = tuple(self.store_sticker(guild, d) for d in data["stickers"])
         self.dispatch("guild_stickers_update", guild, before_stickers, guild.stickers)
 
-    def _get_create_guild(self, data: Union[GuildPayload, UnavailableGuildPayload]) -> Guild:
+    def _get_create_guild(self, data: gateway.GuildCreateEvent) -> Guild:
         if data.get("unavailable") is False:
             # GUILD_CREATE with unavailable in the response
             # usually means that the guild has become available
@@ -1310,7 +1313,7 @@ class ConnectionState:
             guild = self._get_guild(int(data["id"]))
             if guild is not None:
                 guild.unavailable = False
-                guild._from_data(data)
+                guild._from_data(data)  # type: ignore
                 return guild
 
         return self._add_guild_from_data(data)
