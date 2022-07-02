@@ -184,9 +184,9 @@ The type of the option is determined by the range bounds, with the option being 
 
 .. note::
 
-    Type checker support for :class:`~ext.commands.Range` is limited. Pylance/Pyright seem to handle it correctly;
-    MyPy currently needs a plugin for it to understand :class:`~ext.commands.Range` semantics, which can be added in
-    the configuration file (``setup.cfg``, ``mypy.ini``):
+    Type checker support for :class:`~ext.commands.Range` and :class:`~ext.commands.String` (:ref:`see below <string_lengths>`) is limited.
+    Pylance/Pyright seem to handle it correctly; MyPy currently needs a plugin for it to understand :class:`~ext.commands.Range`
+    and :class:`~ext.commands.String` semantics, which can be added in the configuration file (``setup.cfg``, ``mypy.ini``):
 
     .. code-block:: ini
 
