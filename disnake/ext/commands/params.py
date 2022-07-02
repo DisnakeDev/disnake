@@ -320,6 +320,15 @@ class ParamInfo:
         The function that will suggest possible autocomplete options while typing.
     converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         The function that will convert the original input to a desired format.
+    min_length: :class:`str`
+        The minimum length allowed for this option.
+
+        .. versionadded:: 2.6
+
+    max_length: :class:`str`
+        The maximum length allowed for this option.
+
+        .. versionadded:: 2.6
     """
 
     TYPES: ClassVar[Dict[type, int]] = {
@@ -359,6 +368,8 @@ class ParamInfo:
         gt: float = None,
         ge: float = None,
         large: bool = False,
+        min_length: Optional[int] = None,
+        max_length: Optional[int] = None,
     ) -> None:
         name_loc = Localized._cast(name, False)
         self.name: str = name_loc.string or ""
@@ -378,6 +389,8 @@ class ParamInfo:
         self.channel_types = channel_types or []
         self.max_value = _xt_to_xe(le, lt, -1)
         self.min_value = _xt_to_xe(ge, gt, 1)
+        self.min_length = min_length
+        self.max_length = max_length
         self.large = large
 
     @property
@@ -631,6 +644,8 @@ class ParamInfo:
             autocomplete=self.autocomplete is not None,
             min_value=self.min_value,
             max_value=self.max_value,
+            min_length=self.min_length,
+            max_length=self.max_length,
         )
 
 
@@ -877,6 +892,8 @@ def Param(
     gt: float = None,
     ge: float = None,
     large: bool = False,
+    min_length: int = None,
+    max_length: int = None,
     **kwargs: Any,
 ) -> Any:
     """A special function that creates an instance of :class:`ParamInfo` that contains some information about a
@@ -933,6 +950,16 @@ def Param(
 
         .. versionadded:: 2.3
 
+    min_length: :class:`str`
+        The minimum length this option can be if it is a string option.
+
+        .. versionadded:: 2.6
+
+    max_length: :class:`str`
+        The maximum length this option can be if it is a string option.
+
+        .. versionadded:: 2.6
+
     Raises
     ------
     TypeError
@@ -967,6 +994,8 @@ def Param(
         gt=gt,
         ge=ge,
         large=large,
+        min_length=min_length,
+        max_length=max_length,
     )
 
 
