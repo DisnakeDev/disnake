@@ -334,10 +334,10 @@ class ParamInfo:
         # channels handled separately
         disnake.abc.GuildChannel:                          OptionType.channel.value,
         disnake.Role:                                      OptionType.role.value,
+        disnake.abc.Snowflake:                             OptionType.mentionable.value,
         Union[disnake.Member, disnake.Role]:               OptionType.mentionable.value,
         Union[disnake.User, disnake.Role]:                 OptionType.mentionable.value,
         Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,
-        disnake.abc.Snowflake:                             OptionType.mentionable.value,
         float:                                             OptionType.number.value,
         disnake.Attachment:                                OptionType.attachment.value,
         # fmt: on
