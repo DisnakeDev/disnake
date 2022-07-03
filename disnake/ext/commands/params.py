@@ -285,7 +285,7 @@ class StringMeta(type):
 
 
 class String(type, metaclass=StringMeta):
-    """Type depicting a limited length of a string option.
+    """Type depicting a string option with limited length.
 
     See :ref:`string_lengths` for more information.
 
@@ -295,7 +295,7 @@ class String(type, metaclass=StringMeta):
 
     min_length: Optional[int]
     max_length: Optional[int]
-    underlying_type = str
+    underlying_type: Final[Type[str]] = str
 
     @classmethod
     def create(
