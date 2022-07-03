@@ -251,7 +251,7 @@ The length bounds are both inclusive; using ``...`` as a bound indicates that th
 
 .. note::
 
-    For mypy type checking support, please see the above note :ref:`about the mypy_plugin <type_checker_mypy_plugin>`.
+    For mypy type checking support, please see the above note about the :ref:`mypy plugin <type_checker_mypy_plugin>`.
 
 .. _docstrings:
 
