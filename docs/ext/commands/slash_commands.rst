@@ -182,6 +182,8 @@ The type of the option is determined by the range bounds, with the option being 
     ):
         ...
 
+.. _type_checker_mypy_plugin:
+
 .. note::
 
     Type checker support for :class:`~ext.commands.Range` and :class:`~ext.commands.String` (:ref:`see below <string_lengths>`) is limited.
@@ -249,7 +251,7 @@ The length bounds are both inclusive; using ``...`` as a bound indicates that th
 
 .. note::
 
-    For mypy type checking support, please see the above note on :ref:`param_ranges`.
+    For mypy type checking support, please see the above note :ref:`about the mypy_plugin <type_checker_mypy_plugin>`.
 
 .. _docstrings:
 
