@@ -243,6 +243,14 @@ The lengths bounds are both inclusive; using ``...`` as a bound indicates that t
     ):
         ...
 
+.. note::
+
+    There is a max length of 6000 characters, which is enforced by Discord.
+
+.. note::
+
+    For mypy type checking support, please see the above note on :ref:`param_ranges`.
+
 .. _docstrings:
 
 Docstrings
