@@ -1000,7 +1000,7 @@ def Param(
         .. versionadded:: 2.6
 
     max_length: :class:`int`
-        The maxmium length for this option if this is a string option.
+        The maximum length for this option if this is a string option.
 
         .. versionadded:: 2.6
 
