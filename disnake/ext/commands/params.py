@@ -282,8 +282,10 @@ class Range(type, metaclass=RangeMeta):
 class StringMeta(type):
     """Custom Generic implementation for String."""
 
-    def __getitem__(self, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]) -> Type[str]:
-        a, b = [None if isinstance(x, type(Ellipsis)) else x for x in args]
+    def __getitem__(
+        self, args: Tuple[Union[int, EllipsisType], Union[int, EllipsisType]]
+    ) -> Type[str]:
+        a, b = [None if isinstance(x, EllipsisType) else x for x in args]
         return String.create(min_length=a, max_length=b)
 
 

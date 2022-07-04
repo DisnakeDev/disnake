@@ -27,13 +27,7 @@ jobs:
       uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
-        nox-setup: tools
-
-    - name: Set up environment
-      uses: ./.github/actions/setup-env
-      with:
-        python-version: 3.8
-        nox-setup: "dev"
+        nox-setup: "dev tools"
 
     - name: Run pre-commit
       id: pre-commit
@@ -53,7 +47,6 @@ jobs:
       id: flake8
       if: always() && (steps.pre-commit.outcome == 'success' || steps.pre-commit.outcome == 'failure')
       run: "flake8 \
-      --count \
       --format='::error file=%(path)s,line=%(row)d,col=%(col)d::\
       [flake8] %(code)s: %(text)s'"
 

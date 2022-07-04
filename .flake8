@@ -1,6 +1,7 @@
 [flake8]
 max-line-length = 100
 statistics = true
+count = true
 noqa-require-code = true
 exclude =
     CVS
@@ -22,9 +23,9 @@ exclude =
 
 # For error codes, see this https://flake8.pycqa.org/en/latest/user/error-codes.html
 ignore =
-    # not compatiable with black
+    # whitespace before ':', linebreak before operator. Not compatible with black
     E203,W503,
-    # ignore linebreak after `/`
+    # ignore linebreak after `/` operator
     W504,
     # line too long. Acceptable at the moment since these are mostly comments
     E501,
@@ -38,8 +39,6 @@ ignore =
     S110,
     # ignore using setattr and getattr with constants
     B009,B010,
-    # ignore escaping in docstrings: temporary
-    W605,
     # ignore multiple `##` starting a comment
     E266,
 
@@ -50,6 +49,8 @@ per-file-ignores =
     disnake/audit_logs.py:E241
     # ignore whitespacing on flags
     disnake/enums.py:E221,E241
+    # ignore subprocess usage
+    disnake/player.py:S404,S603
     # ignore whitespacing after `:`
     disnake/ext/commands/params.py:E241
     # pytest uses assert for testing
@@ -57,9 +58,8 @@ per-file-ignores =
 
     # B008: runtime function calls are how Params work,
     # S311: examples don't misuse random generation
-    # I   : example imports cannot be checked by isort
     # S105: possible hardcoded passwords TODO
-    examples/**:B008,S311,I,S105
+    examples/**:B008,S311,S105
     # usage of assert and interface binding, allowable for the third party lib at use
     # also have to reignore whatever is from the last check that pops up here
     examples/basic_voice.py:S101,S104,I

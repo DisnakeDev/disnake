@@ -35,19 +35,7 @@ repos:
         name: flake8
         description: 'Lint all of our code'
         entry: flake8
-        exclude: ^examples/
+        exclude: ^test_bot/
         language: python
-        types: [python]
-        require_serial: true
-
-  - repo: local
-    hooks:
-      - id: flake8
-        name: flake8 (examples)
-        description: 'lint examples'
-        # ignore isort in examples
-        entry: flake8 --extend-ignore='I'
-        language: python
-        files: ^examples/
         types: [python]
         require_serial: true

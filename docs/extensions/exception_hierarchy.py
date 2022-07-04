@@ -1,6 +1,5 @@
 from docutils import nodes
 from docutils.parsers.rst import Directive
-from sphinx.locale import _  # noqa: F401
 
 
 class exception_hierarchy(nodes.General, nodes.Element):

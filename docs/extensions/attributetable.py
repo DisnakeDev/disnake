@@ -52,9 +52,11 @@ def visit_attributetabletitle_node(self, node):
 
 def visit_attributetablebadge_node(self, node):
     """Add a class to each badge of the type that it is."""
-    assert node["badge-type"] in ("coroutine", "decorator", "method", "classmethod")  # noqa: S101
+    badge_type: str = node["badge-type"]
+    if badge_type not in ("coroutine", "decorator", "method", "classmethod"):
+        raise RuntimeError(f"badge_type {badge_type} is currently unsupported")
     attributes = {
-        "class": f"badge-{node['badge-type']}",
+        "class": f"badge-{badge_type}",
     }
     self.body.append(self.starttag(node, "span", **attributes))
 
