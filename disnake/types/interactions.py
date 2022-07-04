@@ -28,7 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
 
 from .channel import ChannelType
-from .components import ActionRow, Component, ComponentType, Modal
+from .components import Component, Modal
 from .embed import Embed
 from .member import Member, MemberWithUser
 from .role import Role
@@ -113,7 +113,7 @@ class GuildApplicationCommandPermissions(TypedDict):
     permissions: List[ApplicationCommandPermissions]
 
 
-InteractionType = Literal[1, 2, 3]
+InteractionType = Literal[1, 2, 3, 4, 5]
 
 
 class _ApplicationCommandInteractionDataOption(TypedDict):
@@ -188,55 +188,100 @@ class ApplicationCommandInteractionData(_ApplicationCommandInteractionDataOption
     type: ApplicationCommandType
 
 
-class _ComponentInteractionDataOptional(TypedDict, total=False):
+## Interaction components
+
+
+class _BaseComponentInteractionData(TypedDict):
+    custom_id: str
+
+
+### Message interaction components
+
+
+class MessageComponentInteractionButtonData(_BaseComponentInteractionData):
+    component_type: Literal[2]
+
+
+class MessageComponentInteractionSelectData(_BaseComponentInteractionData):
+    component_type: Literal[3]
     values: List[str]
 
 
-class ComponentInteractionData(_ComponentInteractionDataOptional):
-    custom_id: str
-    component_type: ComponentType
+MessageComponentInteractionData = Union[
+    MessageComponentInteractionButtonData,
+    MessageComponentInteractionSelectData,
+]
+
+
+### Modal interaction components
+
+
+class ModalInteractionSelectData(_BaseComponentInteractionData):
+    type: Literal[3]
+    values: List[str]
+
+
+class ModalInteractionTextInputData(_BaseComponentInteractionData):
+    type: Literal[4]
+    value: str
+
+
+ModalInteractionComponentData = Union[
+    ModalInteractionSelectData,
+    ModalInteractionTextInputData,
+]
+
+
+class ModalInteractionActionRow(TypedDict):
+    type: Literal[1]
+    components: List[ModalInteractionComponentData]
 
 
 class ModalInteractionData(TypedDict):
     custom_id: str
-    components: List[ActionRow]
+    components: List[ModalInteractionActionRow]
 
 
-InteractionData = Union[
-    ApplicationCommandInteractionData, ComponentInteractionData, ModalInteractionData
-]
+## Interactions
 
 
-class BaseInteraction(TypedDict):
+# base type for *all* interactions
+class _BaseInteraction(TypedDict):
     id: Snowflake
     application_id: Snowflake
-    type: InteractionType
     token: str
-    version: int
+    version: Literal[1]
 
 
-# common properties in appcmd and component interactions (or generally, non-ping interactions)
-class _InteractionOptional(TypedDict, total=False):
+# common properties in non-ping interactions
+class _BaseUserInteractionOptional(TypedDict, total=False):
+    app_permissions: str
     guild_id: Snowflake
-    # one of these two will always exist, according to docs
-    user: User
-    member: MemberWithUser
     guild_locale: str
+    # one of these two will always exist, according to docs
+    member: MemberWithUser
+    user: User
 
 
-class Interaction(BaseInteraction, _InteractionOptional):
+class _BaseUserInteraction(_BaseInteraction, _BaseUserInteractionOptional):
     # the docs specify `channel_id` as optional,
-    # but it is assumed to always exist on appcmd and component interactions
+    # but it is assumed to always exist on non-ping interactions
     channel_id: Snowflake
     locale: str
 
 
-class ApplicationCommandInteraction(Interaction):
+class PingInteraction(_BaseInteraction):
+    type: Literal[1]
+
+
+class ApplicationCommandInteraction(_BaseUserInteraction):
+    type: Literal[2, 4]
     data: ApplicationCommandInteractionData
 
 
-class MessageInteraction(Interaction):
-    data: ComponentInteractionData
+class MessageInteraction(_BaseUserInteraction):
+    type: Literal[3]
+    data: MessageComponentInteractionData
     message: Message
 
 
@@ -244,8 +289,16 @@ class _ModalInteractionOptional(TypedDict, total=False):
     message: Message
 
 
-class ModalInteraction(_ModalInteractionOptional, Interaction):
+class ModalInteraction(_BaseUserInteraction, _ModalInteractionOptional):
+    type: Literal[5]
     data: ModalInteractionData
+
+
+Interaction = Union[
+    ApplicationCommandInteraction,
+    MessageInteraction,
+    ModalInteraction,
+]
 
 
 class InteractionApplicationCommandCallbackData(TypedDict, total=False):
