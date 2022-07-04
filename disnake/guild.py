@@ -4536,6 +4536,8 @@ class GuildBuilder:
         """
         Adds a category channel to the guild builder.
 
+        There is an alias for this named ``add_category_channel``.
+
         Parameters
         ----------
         name: :class:`str`
