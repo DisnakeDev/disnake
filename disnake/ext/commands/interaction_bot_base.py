@@ -707,7 +707,7 @@ class InteractionBotBase(CommonBotBase):
             self._connection._global_application_commands = {
                 command.id: command for command in commands
             }
-        except disnake.HTTPException:
+        except (disnake.HTTPException, TypeError):
             pass
         for guild_id in guilds:
             try:
@@ -716,7 +716,7 @@ class InteractionBotBase(CommonBotBase):
                     self._connection._guild_application_commands[guild_id] = {
                         command.id: command for command in commands
                     }
-            except disnake.HTTPException:
+            except (disnake.HTTPException, TypeError):
                 pass
 
     async def _sync_application_commands(self) -> None:
