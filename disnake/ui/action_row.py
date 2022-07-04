@@ -71,7 +71,7 @@ __all__ = (
 
 
 MessageUIComponent = Union[Button[Any], Select[Any]]
-ModalUIComponent = TextInput  # Union[TextInput, Select[Any]]
+ModalUIComponent = Union[TextInput, Select[Any]]
 UIComponentT = TypeVar("UIComponentT", bound=WrappedComponent)
 StrictUIComponentT = TypeVar("StrictUIComponentT", MessageUIComponent, ModalUIComponent)
 
@@ -269,7 +269,7 @@ class ActionRow(Generic[UIComponentT]):
     def add_select(
         self: Union[
             ActionRow[MessageUIComponent],
-            # ActionRow[ModalUIComponent],
+            ActionRow[ModalUIComponent],
             ActionRow[WrappedComponent],
         ],
         *,
@@ -280,8 +280,7 @@ class ActionRow(Generic[UIComponentT]):
         options: List[SelectOption] = MISSING,
         disabled: bool = False,
     ) -> None:
-        """Add a select menu to the action row. Can only be used if the action
-        row holds message components.
+        """Add a select menu to the action row.
 
         To append a pre-existing :class:`~disnake.ui.Select` use the
         :meth:`append_item` method instead.
