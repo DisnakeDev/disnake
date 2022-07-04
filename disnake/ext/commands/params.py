@@ -36,6 +36,8 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Final,
+    FrozenSet,
     List,
     Literal,
     Optional,
@@ -43,7 +45,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    cast,
     get_args,
     get_origin,
     get_type_hints,
@@ -87,6 +88,7 @@ CallableT = TypeVar("CallableT", bound=Callable[..., Any])
 
 __all__ = (
     "Range",
+    "String",
     "LargeInt",
     "ParamInfo",
     "Param",
@@ -115,8 +117,6 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
 def remove_optionals(annotation: Any) -> Any:
     """remove unwanted optionals from an annotation"""
     if get_origin(annotation) in (Union, UnionType):
-        annotation = cast(Any, annotation)
-
         args = tuple(i for i in annotation.__args__ if i not in (None, type(None)))
         if len(args) == 1:
             annotation = args[0]
@@ -205,7 +205,7 @@ class RangeMeta(type):
         ...
 
     def __getitem__(self, args: Tuple[Any, ...]) -> Any:
-        a, b = [None if x is Ellipsis else x for x in args]
+        a, b = [None if isinstance(x, type(Ellipsis)) else x for x in args]
         return Range.create(min_value=a, max_value=b)
 
 
@@ -279,8 +279,51 @@ class Range(type, metaclass=RangeMeta):
         return f"{type(self).__name__}[{a}, {b}]"
 
 
+class StringMeta(type):
+    """Custom Generic implementation for String."""
+
+    def __getitem__(self, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]) -> Type[str]:
+        a, b = [None if isinstance(x, type(Ellipsis)) else x for x in args]
+        return String.create(min_length=a, max_length=b)
+
+
+class String(type, metaclass=StringMeta):
+    """Type depicting a string option with limited length.
+
+    See :ref:`string_lengths` for more information.
+
+    .. versionadded:: 2.6
+
+    """
+
+    min_length: Optional[int]
+    max_length: Optional[int]
+    underlying_type: Final[Type[str]] = str
+
+    @classmethod
+    def create(
+        cls,
+        min_length: int = None,
+        max_length: int = None,
+    ) -> Any:
+        """Construct a new String with constraints."""
+        self = cls(cls.__name__, (), {})
+        self.min_length = min_length
+        self.max_length = max_length
+        return self
+
+    def __repr__(self) -> str:
+        a = "..." if self.min_length is None else self.min_length
+        b = "..." if self.max_length is None else self.max_length
+        return f"{type(self).__name__}[{a}, {b}]"
+
+
 class LargeInt(int):
     """Type for large integers in slash commands."""
+
+
+# option types that require additional handling in verify_type
+_VERIFY_TYPES: Final[FrozenSet[OptionType]] = frozenset((OptionType.user, OptionType.mentionable))
 
 
 class ParamInfo:
@@ -320,6 +363,15 @@ class ParamInfo:
         The function that will suggest possible autocomplete options while typing.
     converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         The function that will convert the original input to a desired format.
+    min_length: :class:`int`
+        The minimum length for this option, if it is a string option.
+
+        .. versionadded:: 2.6
+
+    max_length: :class:`int`
+        The maximum length for this option, if it is a string option.
+
+        .. versionadded:: 2.6
     """
 
     TYPES: ClassVar[Dict[type, int]] = {
@@ -359,6 +411,8 @@ class ParamInfo:
         gt: float = None,
         ge: float = None,
         large: bool = False,
+        min_length: Optional[int] = None,
+        max_length: Optional[int] = None,
     ) -> None:
         name_loc = Localized._cast(name, False)
         self.name: str = name_loc.string or ""
@@ -378,6 +432,8 @@ class ParamInfo:
         self.channel_types = channel_types or []
         self.max_value = _xt_to_xe(le, lt, -1)
         self.min_value = _xt_to_xe(ge, gt, 1)
+        self.min_length = min_length
+        self.max_length = max_length
         self.large = large
 
     @property
@@ -446,14 +502,21 @@ class ParamInfo:
         return default
 
     async def verify_type(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
-        """Check if a type of an argument is correct and possibly fix it"""
-        if issubclass_(self.type, disnake.Member):
-            if isinstance(argument, disnake.Member):
-                return argument
+        """Check if the type of an argument is correct and possibly raise if it's not."""
+        if self.discord_type not in _VERIFY_TYPES:
+            return argument
 
+        # The API may return a `User` for options annotated with `Member`,
+        # including `Member` (user option), `Union[User, Member]` (user option) and
+        # `Union[Member, Role]` (mentionable option).
+        # If we received a `User` but didn't expect one, raise.
+        if (
+            isinstance(argument, disnake.User)
+            and issubclass_(self.type, disnake.Member)
+            and not issubclass_(self.type, disnake.User)
+        ):
             raise errors.MemberNotFound(str(argument.id))
 
-        # unexpected types may just be ignored
         return argument
 
     async def convert_argument(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
@@ -522,6 +585,10 @@ class ParamInfo:
         if isinstance(annotation, Range):
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
+            annotation = annotation.underlying_type
+        if isinstance(annotation, String):
+            self.min_length = annotation.min_length
+            self.max_length = annotation.max_length
             annotation = annotation.underlying_type
         if issubclass_(annotation, LargeInt):
             self.large = True
@@ -624,6 +691,8 @@ class ParamInfo:
             autocomplete=self.autocomplete is not None,
             min_value=self.min_value,
             max_value=self.max_value,
+            min_length=self.min_length,
+            max_length=self.max_length,
         )
 
 
@@ -870,6 +939,8 @@ def Param(
     gt: float = None,
     ge: float = None,
     large: bool = False,
+    min_length: int = None,
+    max_length: int = None,
     **kwargs: Any,
 ) -> Any:
     """A special function that creates an instance of :class:`ParamInfo` that contains some information about a
@@ -926,6 +997,16 @@ def Param(
 
         .. versionadded:: 2.3
 
+    min_length: :class:`int`
+        The minimum length for this option if this is a string option.
+
+        .. versionadded:: 2.6
+
+    max_length: :class:`int`
+        The maximum length for this option if this is a string option.
+
+        .. versionadded:: 2.6
+
     Raises
     ------
     TypeError
@@ -960,6 +1041,8 @@ def Param(
         gt=gt,
         ge=ge,
         large=large,
+        min_length=min_length,
+        max_length=max_length,
     )
 
 
