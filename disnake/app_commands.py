@@ -299,7 +299,8 @@ class Option:
         return (
             f"<Option name={self.name!r} description={self.description!r}"
             f" type={self.type!r} required={self.required!r} choices={self.choices!r}"
-            f" options={self.options!r} min_value={self.min_value!r} max_value={self.max_value!r}>"
+            f" options={self.options!r} min_value={self.min_value!r} max_value={self.max_value!r}"
+            f" min_length={self.min_length!r} max_length={self.max_length!r}>"
         )
 
     def __eq__(self, other) -> bool:
