@@ -4,20 +4,17 @@ statistics = true
 count = true
 noqa-require-code = true
 exclude =
-    CVS
-    .bzr
-    .hg
     .git
     __pycache__
-    .tox
     .nox
     .eggs
     *.egg
+    *.egg-info
+    .vscode
     .venv
     venv
-    .pytest_cache
     .mypy_cache
-    .nox
+    .pytest_cache
     build
     test_bot
 
