@@ -8,7 +8,12 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 class MyModal(disnake.ui.Modal):
     def __init__(self) -> None:
-        components = disnake.ui.ModalActionRow(
+
+        select_options = [
+            disnake.SelectOption(label="Yes"),
+            disnake.SelectOption(label="No", default=True),
+        ]
+        components = [
             disnake.ui.TextInput(
                 label="Name",
                 placeholder="The name of the tag",
@@ -32,20 +37,15 @@ class MyModal(disnake.ui.Modal):
                 min_length=5,
                 max_length=1024,
             ),
-        )
-
-        select_options = [
-            disnake.SelectOption(label="Yes"),
-            disnake.SelectOption(label="No", default=True),
+            disnake.ui.Select(
+                custom_id="select",
+                placeholder="Send as an embed.",
+                min_values=1,
+                max_values=1,
+                options=select_options,
+            ),
         ]
 
-        components.add_select(
-            custom_id="select",
-            placeholder="Send as an embed.",
-            min_values=1,
-            max_values=1,
-            options=select_options,
-        )
         super().__init__(title="Create Tag", custom_id="create_tag", components=components)
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
@@ -75,7 +75,11 @@ async def create_tag(inter: disnake.CommandInteraction):
 async def create_tag_low(inter: disnake.CommandInteraction):
     # Works same as the above code but using a low level interface.
     # It's recommended to use this if you don't want to increase cache usage.
-    components = disnake.ui.ModalActionRow(
+    select_options = [
+        disnake.SelectOption(label="Yes"),
+        disnake.SelectOption(label="No", default=True),
+    ]
+    components = [
         disnake.ui.TextInput(
             label="Name",
             placeholder="The name of the tag",
@@ -99,19 +103,15 @@ async def create_tag_low(inter: disnake.CommandInteraction):
             min_length=5,
             max_length=1024,
         ),
-    )
-
-    select_options = [
-        disnake.SelectOption(label="Yes"),
-        disnake.SelectOption(label="No", default=True),
+        disnake.ui.Select(
+            custom_id="select",
+            placeholder="Send as an embed.",
+            min_values=1,
+            max_values=1,
+            options=select_options,
+        ),
     ]
-    components.add_select(
-        custom_id="select",
-        placeholder="Send as an embed.",
-        min_values=1,
-        max_values=1,
-        options=select_options,
-    )
+
     await inter.response.send_modal(
         title="Create Tag", custom_id="create_tag_low", components=components
     )
@@ -130,11 +130,11 @@ async def create_tag_low(inter: disnake.CommandInteraction):
 
     embed = disnake.Embed(title="Tag Creation")
 
-    # text_values is a dict of TextInput.custom_id to the inputted value.
+    # text_values is a dict of TextInput.custom_id to the entered value.
     for key, value in modal_inter.text_values.items():
         embed.add_field(name=key.capitalize(), value=value, inline=False)
 
-    # select_values is a dict of Select.custom_id to the selected value.
+    # select_values is a dict of Select.custom_id to the selected values.
     for key, value in modal_inter.select_values.items():
         embed.add_field(name=key.capitalize(), value=value, inline=False)
 

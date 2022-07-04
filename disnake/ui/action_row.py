@@ -280,8 +280,7 @@ class ActionRow(Generic[UIComponentT]):
         options: List[SelectOption] = MISSING,
         disabled: bool = False,
     ) -> None:
-        """Add a select menu to the action row. Can only be used if the action
-        row holds message components.
+        """Add a select menu to the action row.
 
         To append a pre-existing :class:`~disnake.ui.Select` use the
         :meth:`append_item` method instead.
