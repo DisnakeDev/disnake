@@ -71,7 +71,7 @@ __all__ = (
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
-        _cls_name: str
+        _cls_name: ClassVar[str]
 
     name: str
     value: Any
@@ -92,9 +92,9 @@ class _EnumValueComparable(_EnumValueBase):
         return isinstance(other, self.__class__) and self.value < other.value
 
 
-def _create_value_cls(name, comparable):
+def _create_value_cls(name: str, comparable: bool) -> Type[_EnumValueBase]:
     parent = _EnumValueComparable if comparable else _EnumValueBase
-    return type(parent.__name__ + "_" + name, (parent,), {"_cls_name": name})
+    return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # type: ignore
 
 
 def _is_descriptor(obj):
@@ -143,7 +143,7 @@ class EnumMeta(type):
         attrs["_enum_member_names_"] = member_names
         attrs["_enum_value_cls_"] = value_cls
         actual_cls = super().__new__(cls, name, bases, attrs)
-        value_cls._actual_enum_cls_ = actual_cls
+        value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
     def __iter__(cls):
@@ -689,6 +689,9 @@ class ThreadArchiveDuration(Enum):
     day = 1440
     three_days = 4320
     week = 10080
+
+    def __int__(self):
+        return self.value
 
 
 class WidgetStyle(Enum):

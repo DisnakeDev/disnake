@@ -70,14 +70,11 @@ class HeartbeatCommand(TypedDict):
 
 # opcode 2
 
-IdentifyProperties = TypedDict(
-    "IdentifyProperties",
-    {
-        "$os": str,
-        "$browser": str,
-        "$device": str,
-    },
-)
+
+class IdentifyProperties(TypedDict):
+    os: str
+    browser: str
+    device: str
 
 
 class _IdentifyDataOptional(TypedDict, total=False):

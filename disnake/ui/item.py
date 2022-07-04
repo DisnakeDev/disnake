@@ -116,7 +116,7 @@ class Item(WrappedComponent, Generic[V]):
         ...
 
     def __init__(self):
-        self._view: Optional[V] = None
+        self._view: V = None
         self._row: Optional[int] = None
         self._rendered_row: Optional[int] = None
         # This works mostly well but there is a gotcha with
@@ -157,7 +157,7 @@ class Item(WrappedComponent, Generic[V]):
             raise ValueError("row cannot be negative or greater than or equal to 5")
 
     @property
-    def view(self) -> Optional[V]:
+    def view(self) -> V:
         """Optional[:class:`View`]: The underlying view for this item."""
         return self._view
 

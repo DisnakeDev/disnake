@@ -343,6 +343,17 @@ class GuildChannel(ABC):
         else:
             options["video_quality_mode"] = int(video_quality_mode)
 
+        try:
+            default_auto_archive_duration = options.pop("default_auto_archive_duration")
+        except KeyError:
+            pass
+        else:
+            options["default_auto_archive_duration"] = (
+                int(default_auto_archive_duration)
+                if default_auto_archive_duration is not None
+                else None
+            )
+
         lock_permissions = options.pop("sync_permissions", False)
 
         try:
@@ -1054,23 +1065,19 @@ class GuildChannel(ABC):
 
         bucket = self._sorting_bucket
         parent_id = kwargs.get("category", MISSING)
-        # fmt: off
         if parent_id not in (MISSING, None):
             parent_id = parent_id.id
             channels = [
                 ch
                 for ch in self.guild.channels
-                if ch._sorting_bucket == bucket
-                and ch.category_id == parent_id
+                if ch._sorting_bucket == bucket and ch.category_id == parent_id
             ]
         else:
             channels = [
                 ch
                 for ch in self.guild.channels
-                if ch._sorting_bucket == bucket
-                and ch.category_id == self.category_id
+                if ch._sorting_bucket == bucket and ch.category_id == self.category_id
             ]
-        # fmt: on
 
         channels.sort(key=lambda c: (c.position, c.id))
         channels = cast(List[GuildChannel], channels)
@@ -1542,7 +1549,7 @@ class Messageable:
                     allowed_mentions=allowed_mentions_payload,
                     message_reference=reference_payload,
                     stickers=stickers_payload,
-                    components=components_payload,  # type: ignore
+                    components=components_payload,
                     flags=flags,
                 )
             finally:
@@ -1558,7 +1565,7 @@ class Messageable:
                 allowed_mentions=allowed_mentions_payload,
                 message_reference=reference_payload,
                 stickers=stickers_payload,
-                components=components_payload,  # type: ignore
+                components=components_payload,
                 flags=flags,
             )
 

@@ -498,9 +498,9 @@ class DiscordWebSocket:
             "d": {
                 "token": self.token,
                 "properties": {
-                    "$os": sys.platform,
-                    "$browser": "disnake",
-                    "$device": "disnake",
+                    "os": sys.platform,
+                    "browser": "disnake",
+                    "device": "disnake",
                 },
                 "compress": True,
                 "large_threshold": 250,
@@ -939,7 +939,7 @@ class DiscordVoiceWebSocket:
         hook: Optional[HookFunc] = None,
     ) -> VoiceWebSocketT:
         """Creates a voice websocket for the :class:`VoiceClient`."""
-        gateway = "wss://" + client.endpoint + "/?v=4"
+        gateway = f"wss://{client.endpoint}/?v=4"
         http = client._state.http
         socket = await http.ws_connect(gateway, compress=15)
         ws = cls(socket, loop=client.loop, hook=hook)
