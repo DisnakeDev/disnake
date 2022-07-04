@@ -534,6 +534,11 @@ Range
 
 .. autoclass:: disnake.ext.commands.Range
 
+String
+~~~~~~
+
+.. autoclass:: disnake.ext.commands.String
+
 
 .. _ext_commands_api_cogs:
 
