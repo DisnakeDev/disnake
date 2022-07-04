@@ -826,6 +826,8 @@ class SlashCommand(ApplicationCommand):
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
+        min_length: int = None,
+        max_length: int = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`
@@ -842,6 +844,8 @@ class SlashCommand(ApplicationCommand):
                 autocomplete=autocomplete,
                 min_value=min_value,
                 max_value=max_value,
+                min_length=min_length,
+                max_length=max_length,
             )
         )
 
