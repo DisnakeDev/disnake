@@ -360,13 +360,13 @@ class ParamInfo:
         The function that will suggest possible autocomplete options while typing.
     converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         The function that will convert the original input to a desired format.
-    min_length: :class:`str`
-        The minimum length allowed for this option.
+    min_length: :class:`int`
+        The minimum length for this option, if it is a string option.
 
         .. versionadded:: 2.6
 
-    max_length: :class:`str`
-        The maximum length allowed for this option.
+    max_length: :class:`int`
+        The maximum length for this option, if it is a string option.
 
         .. versionadded:: 2.6
     """
@@ -994,13 +994,13 @@ def Param(
 
         .. versionadded:: 2.3
 
-    min_length: :class:`str`
-        The minimum length this option can be if it is a string option.
+    min_length: :class:`int`
+        The minimum length for this option if this is a string option.
 
         .. versionadded:: 2.6
 
-    max_length: :class:`str`
-        The maximum length this option can be if it is a string option.
+    max_length: :class:`int`
+        The maxmium length for this option if this is a string option.
 
         .. versionadded:: 2.6
 

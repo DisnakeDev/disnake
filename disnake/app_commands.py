@@ -206,13 +206,13 @@ class Option:
         The minimum value permitted.
     max_value: Union[:class:`int`, :class:`float`]
         The maximum value permitted.
-    min_length: Optional[:class:`str`]
-        The minimum length for this option if the type of this Option is :attr:`OptionType.string`.
+    min_length: :class:`int`
+        The minimum length for this option if this is a string option.
 
         .. versionadded:: 2.6
 
-    max_length: Optional[:class:`str`]
-        The maximum length for this option if the type of this Option is :attr:`OptionType.string`.
+    max_length: :class:`int`
+        The maxmium length for this option if this is a string option.
 
         .. versionadded:: 2.6
     """
