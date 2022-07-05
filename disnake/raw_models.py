@@ -375,6 +375,8 @@ class RawThreadMemberRemoveEvent(_RawReprMixin):
 class RawTypingEvent(_RawReprMixin):
     """Represents the event payload for an :func:`on_raw_typing` event.
 
+    .. versionadded:: 2.3
+
     Attributes
     ----------
     user_id: :class:`int`

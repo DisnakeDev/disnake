@@ -4,6 +4,7 @@ from disnake.ext import commands
 
 bot = commands.Bot(command_prefix=commands.when_mentioned)
 
+
 # Defines a simple view of row buttons.
 class RowButtons(disnake.ui.View):
     def __init__(self):
