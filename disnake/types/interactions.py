@@ -71,6 +71,8 @@ class _ApplicationCommandOptionOptional(TypedDict, total=False):
     channel_types: List[ChannelType]
     min_value: float
     max_value: float
+    min_length: int
+    max_length: int
     autocomplete: bool
     name_localizations: Optional[ApplicationCommandLocalizations]
     description_localizations: Optional[ApplicationCommandLocalizations]
