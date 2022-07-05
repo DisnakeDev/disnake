@@ -1,0 +1,1 @@
+Add :class:`VoiceChannel` as a possible channel type for :attr:`Message.channel`.

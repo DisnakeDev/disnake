@@ -1,0 +1,1 @@
+Remove notes that app command rollout takes an hour.

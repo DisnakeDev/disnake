@@ -1,0 +1,1 @@
+Remove ``InvalidArgument`` and replace it with :exc:`TypeError` and :exc:`ValueError`

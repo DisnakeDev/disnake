@@ -1,0 +1,8 @@
+Add multiple converters for previously undocumented fields for audit logs.
+
+:class:`AuditLogDiff` can now have the following attributes with the specified types:
+
+- :attr:`~AuditLogDiff.flags` --- :class:`ChannelFlags`
+- :attr:`~AuditLogDiff.system_channel_flags` --- :class:`SystemChannelFlags`
+
+``AuditLogDiff.unicode_emoji`` was renamed to :attr:`AuditLogDiff.emoji`

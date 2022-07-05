@@ -1,0 +1,2 @@
+Add generic parameters to user/message command decorators.
+Update default parameter type to improve compatibilty with callable/dynamic defaults.

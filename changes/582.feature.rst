@@ -1,0 +1,1 @@
+Add the ``slowmode_delay`` parameter to :meth:`Guild.create_voice_channel`

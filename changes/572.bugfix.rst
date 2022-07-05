@@ -1,0 +1,1 @@
+Changed identify properties to remove the ``$`` prefix.

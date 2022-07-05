@@ -1,0 +1,1 @@
+Assume the local timezone instead of utc when providing naive datetimes to scheduled event related methods.

@@ -1,0 +1,2 @@
+Rework :class:`.Embed` internals.
+    This comes with the removal of ``Embed.Empty``.

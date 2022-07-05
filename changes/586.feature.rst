@@ -1,0 +1,1 @@
+:attr:`Interaction.app_permissions` which shows the app permissions in the channel.

@@ -1,0 +1,1 @@
+Expose the icon and recipient data for :class:`Invite`\'s which target a GroupChannel.
