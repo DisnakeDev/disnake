@@ -206,7 +206,6 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             sync_commands: bool = True,
             sync_commands_debug: bool = False,
             sync_commands_on_cog_unload: bool = True,
-            sync_permissions: bool = False,
             test_guilds: Sequence[int] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -227,7 +226,6 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             intents: Intents = ...,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
-            cache_application_command_permissions: bool = True,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ):
@@ -255,7 +253,6 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             sync_commands: bool = True,
             sync_commands_debug: bool = False,
             sync_commands_on_cog_unload: bool = True,
-            sync_permissions: bool = False,
             test_guilds: Sequence[int] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -276,7 +273,6 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             intents: Intents = ...,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
-            cache_application_command_permissions: bool = True,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ):
@@ -369,7 +365,6 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             sync_commands: bool = True,
             sync_commands_debug: bool = False,
             sync_commands_on_cog_unload: bool = True,
-            sync_permissions: bool = False,
             test_guilds: Sequence[int] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -390,7 +385,6 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             intents: Intents = ...,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
-            cache_application_command_permissions: bool = True,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ):
@@ -413,7 +407,6 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             sync_commands: bool = True,
             sync_commands_debug: bool = False,
             sync_commands_on_cog_unload: bool = True,
-            sync_permissions: bool = False,
             test_guilds: Sequence[int] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
@@ -434,7 +427,6 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             intents: Intents = ...,
             chunk_guilds_at_startup: Optional[bool] = None,
             member_cache_flags: MemberCacheFlags = None,
-            cache_application_command_permissions: bool = True,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
         ):

@@ -311,6 +311,10 @@ class Client:
 
         .. versionadded:: 2.5
 
+        .. versionchanged:: 2.6
+            Can no longer be provided together with ``strict_localization``, as it does
+            not apply to the custom localization provider entered in this parameter.
+
     strict_localization: :class:`bool`
         Whether to raise an exception when localizations for a specific key couldn't be found.
         This is mainly useful for testing/debugging, consider disabling this eventually
@@ -319,6 +323,10 @@ class Client:
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+
+        .. versionchanged:: 2.6
+            Can no longer be provided together with ``localization_provider``, as this parameter is
+            ignored for custom localization providers.
 
     Attributes
     ----------
@@ -363,7 +371,6 @@ class Client:
         intents: Intents = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: MemberCacheFlags = None,
-        cache_application_command_permissions: bool = True,
         localization_provider: Optional[LocalizationProtocol] = None,
         strict_localization: bool = False,
     ):
@@ -401,7 +408,6 @@ class Client:
             intents=intents,
             chunk_guilds_at_startup=chunk_guilds_at_startup,
             member_cache_flags=member_cache_flags,
-            cache_application_command_permissions=cache_application_command_permissions,
         )
         self.shard_id = shard_id
         self._connection.shard_count = self.shard_count = shard_count
@@ -414,6 +420,13 @@ class Client:
         if VoiceClient.warn_nacl:
             VoiceClient.warn_nacl = False
             _log.warning("PyNaCl is not installed, voice will NOT be supported")
+
+        if strict_localization and localization_provider is not None:
+            raise ValueError(
+                "Providing both `localization_provider` and `strict_localization` is not supported."
+                " If strict localization is desired for a customized localization provider, this"
+                " should be implemented by that custom provider."
+            )
 
         self.i18n: LocalizationProtocol = (
             LocalizationStore(strict=strict_localization)

@@ -43,8 +43,6 @@ from typing import (
 
 import aiohttp
 
-from disnake.i18n import LocalizationProtocol
-
 from .backoff import ExponentialBackoff
 from .client import Client, SessionStartLimit
 from .enums import Status
@@ -64,6 +62,7 @@ if TYPE_CHECKING:
     from .enums import Status
     from .flags import Intents, MemberCacheFlags
     from .gateway import DiscordWebSocket
+    from .i18n import LocalizationProtocol
     from .mentions import AllowedMentions
 
     EI = TypeVar("EI", bound="EventItem")
@@ -371,7 +370,6 @@ class AutoShardedClient(Client):
         intents: Intents = None,
         chunk_guilds_at_startup: Optional[bool] = None,
         member_cache_flags: MemberCacheFlags = None,
-        cache_application_command_permissions: bool = True,
         localization_provider: Optional[LocalizationProtocol] = None,
         strict_localization: bool = False,
     ):
