@@ -31,10 +31,45 @@ Please be aware of the following things when filing bug reports.
 
 If the bug report is missing this information then it'll take us longer to fix the issue. We will probably ask for clarification, and barring that if no response was given then the issue will be closed.
 
+## Writing a Pull Request
+Submitting a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go.
 
-## Submitting a Pull Request
+Most attributes and data structures are broken up in to a file for each related class. For example, `disnake.Guild` is defined in [disnake/guild.py](disnake/guild.py), and `disnake.GuildPreview` is defined in [disnake/guild_preview.py](disnake/guild_preview.py). For example, writing a new feature to `disnake.Guild` would go in [disnake/guild.py](disnake/guild.py), as part of the `disnake.Guild` class.
 
-Submitting a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go. It would be incredibly lovely if the style is consistent to that found in the project. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
+### Adding a new API Feature
+
+However, adding a new feature that interfaces with the API requires also updating the [disnake/types](disnake/types) directory. We request that when making or receiving payloads from the API, they are typed and the typehints are used on the functions that are processing said data. As an example, we'll take a look at ``disnake.abc.Messageable.pins`` (defined in [disnake/abc.py](disnake/abc.py)).
+
+```py
+    async def pins(self) -> List[Message]:
+        channel = await self._get_channel()
+        state = self._state
+        data = await state.http.pins_from(channel.id)
+        return [state.create_message(channel=channel, data=m) for m in data]
+```
+*docstring removed for breverity*
+
+Here we have several things occuring. First, we have typehinted the return type of this method to return a list of Messages. As disnake supports python 3.8, we must use typing imports instead of subscripting built-ins--hence the capital ``List``.
+
+The next interesting thing is `self._state`. The library uses a state-centric design, which passes the state around to most objects. This is what enables edit methods and most methods on objects. Every Discord model that makes requests uses that internal state and its http attribute to make requests to the Discord API. Each endpoint is processed and defined in [disnake/http.py](disnake/http.py). This is where all of the methods are defined--and its where `pins_from` is defined too!
+
+The source of `pins_from` is as follows:
+
+```py
+    def pins_from(self, channel_id: Snowflake) -> Response[List[message.Message]]:
+        return self.request(Route("GET", "/channels/{channel_id}/pins", channel_id=channel_id))
+```
+
+This is the basic model that all API request methods follow. Define the `Route`, provide the major parameters (in this example `channel_id`), then return a call to self.request(), and finally typehints.
+
+The `Response[]` part in this typehint is referring to `self.request`, as the important thing here is that `pins_from` is **not** a coroutine. Rather, pins_from does preprocessing and self.request does the actual work. The result from `pins_from` is awaited by `disnake.abc.Messageable.pins`.
+
+The Route class is how all routes are processed internally. This, along with `self.request` makes it possible to properly handle all ratelimits, and rarely encounter 429s. This is additionally why `channel_id` is provided as a kwarg to `Route`.
+
+
+## How do I make sure my code is formatted correctly?
+
+It would be incredibly lovely if the style is consistent to that found in the project. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
 We use [`nox`](https://nox.thea.codes/en/stable/) for automating development tasks. Run these commands to
 install `nox` and `taskipy` as well as the required dependencies in your environment,
