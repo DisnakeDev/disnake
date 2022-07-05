@@ -510,7 +510,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
 
 
 def _unique(iterable: Iterable[T]) -> List[T]:
-    return [x for x in dict.fromkeys(iterable)]
+    return list(dict.fromkeys(iterable))
 
 
 def _get_as_snowflake(data: Any, key: str) -> Optional[int]:
