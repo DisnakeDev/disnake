@@ -77,9 +77,10 @@ if TYPE_CHECKING:
     TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
 
 if sys.version_info >= (3, 10):
-    from types import UnionType
+    from types import EllipsisType, UnionType
 else:
     UnionType = object()
+    EllipsisType = type(Ellipsis)
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
@@ -144,13 +145,13 @@ def signature(func: Callable) -> inspect.Signature:
     for name, param in signature.parameters.items():
         if isinstance(param.annotation, str):
             param = param.replace(annotation=typehints.get(name, inspect.Parameter.empty))
-        if param.annotation is type(None):
+        if param.annotation is type(None):  # noqa: E721
             param = param.replace(annotation=None)
 
         parameters.append(param)
 
     return_annotation = typehints.get("return", inspect.Parameter.empty)
-    if return_annotation is type(None):
+    if return_annotation is type(None):  # noqa: E721
         return_annotation = None
 
     return signature.replace(parameters=parameters, return_annotation=return_annotation)
@@ -192,12 +193,14 @@ class RangeMeta(type):
     """Custom Generic implementation for Range"""
 
     @overload
-    def __getitem__(self, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]) -> Type[int]:
+    def __getitem__(
+        self, args: Tuple[Union[int, EllipsisType], Union[int, EllipsisType]]
+    ) -> Type[int]:
         ...
 
     @overload
     def __getitem__(
-        self, args: Tuple[Union[float, ellipsis], Union[float, ellipsis]]
+        self, args: Tuple[Union[float, EllipsisType], Union[float, EllipsisType]]
     ) -> Type[float]:
         ...
 
@@ -279,8 +282,10 @@ class Range(type, metaclass=RangeMeta):
 class StringMeta(type):
     """Custom Generic implementation for String."""
 
-    def __getitem__(self, args: Tuple[Union[int, ellipsis], Union[int, ellipsis]]) -> Type[str]:
-        a, b = [None if isinstance(x, type(Ellipsis)) else x for x in args]
+    def __getitem__(
+        self, args: Tuple[Union[int, EllipsisType], Union[int, EllipsisType]]
+    ) -> Type[str]:
+        a, b = [None if isinstance(x, EllipsisType) else x for x in args]
         return String.create(min_length=a, max_length=b)
 
 
@@ -521,7 +526,7 @@ class ParamInfo:
         if self.large:
             try:
                 argument = int(argument)
-            except ValueError as e:
+            except ValueError:
                 raise errors.LargeIntConversionFailure(argument) from None
 
         if self.converter is None:
