@@ -65,7 +65,6 @@ __all__ = (
 
 if TYPE_CHECKING:
     from .abc import Snowflake
-    from .asset import Asset
     from .channel import DMChannel, StageChannel, VoiceChannel
     from .flags import PublicUserFlags
     from .guild import Guild
@@ -208,7 +207,7 @@ def flatten_user(cls):
             # probably a member function by now
             def generate_function(x):
                 # We want sphinx to properly show coroutine functions as coroutines
-                if asyncio.iscoroutinefunction(value):
+                if asyncio.iscoroutinefunction(value):  # noqa: B023
 
                     async def general(self, *args, **kwargs):  # type: ignore
                         return await getattr(self._user, x)(*args, **kwargs)
