@@ -3109,7 +3109,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         if len(self.recipients) == 0:
             return "Unnamed"
 
-        return ", ".join(map(lambda x: x.name, self.recipients))
+        return ", ".join([x.name for x in self.recipients])
 
     def __repr__(self) -> str:
         return f"<GroupChannel id={self.id} name={self.name!r}>"
