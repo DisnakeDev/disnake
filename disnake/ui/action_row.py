@@ -63,7 +63,7 @@ AnySelect = Union[
 ]
 
 MessageUIComponent = Union[Button[Any], "AnySelect[Any]"]
-ModalUIComponent = TextInput  # Union[TextInput, "AnySelect[Any]"]
+ModalUIComponent = Union[TextInput, AnySelect[Any]]
 UIComponentT = TypeVar("UIComponentT", bound=WrappedComponent)
 StrictUIComponentT = TypeVar("StrictUIComponentT", MessageUIComponent, ModalUIComponent)
 
@@ -80,7 +80,7 @@ ButtonCompatibleActionRowT = TypeVar(
 )
 SelectCompatibleActionRowT = TypeVar(
     "SelectCompatibleActionRowT",
-    bound="Union[ActionRow[MessageUIComponent], ActionRow[WrappedComponent]]",  # to add: ActionRow[ModalUIComponent]
+    bound="Union[ActionRow[MessageUIComponent], ActionRow[ModalUIComponent], ActionRow[WrappedComponent]]",
 )
 TextInputCompatibleActionRowT = TypeVar(
     "TextInputCompatibleActionRowT",

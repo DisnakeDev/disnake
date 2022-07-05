@@ -23,6 +23,10 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 class MyModal(disnake.ui.Modal):
     def __init__(self) -> None:
+        select_options = [
+            disnake.SelectOption(label="Yes"),
+            disnake.SelectOption(label="No", default=True),
+        ]
         components = [
             disnake.ui.TextInput(
                 label="Name",
@@ -40,15 +44,27 @@ class MyModal(disnake.ui.Modal):
                 min_length=5,
                 max_length=1024,
             ),
+            disnake.ui.Select(
+                custom_id="send_as_embed",
+                placeholder="Send as an embed.",
+                min_values=1,
+                max_values=1,
+                options=select_options,
+            ),
         ]
         super().__init__(title="Create Tag", custom_id="create_tag", components=components)
 
-    async def callback(self, inter: disnake.ModalInteraction) -> None:
+    async def callback(self, inter: disnake.interactions.ModalInteraction) -> None:
+        # text_values is a dict of TextInput.custom_id to the inputted value.
         tag_name = inter.text_values["name"]
         tag_content = inter.text_values["content"]
 
+        # select_values is a dict of Select.custom_id to the selected value.
+        send_as_embed = inter.select_values["send_as_embed"]
+
         embed = disnake.Embed(title=f"Tag created: `{tag_name}`")
         embed.add_field(name="Content", value=tag_content)
+        embed.add_field(name="Send as embed?", value=send_as_embed)
         await inter.response.send_message(embed=embed)
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:

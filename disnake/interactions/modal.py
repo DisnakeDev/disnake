@@ -69,7 +69,11 @@ class ModalInteraction(Interaction):
         The interaction client.
     """
 
-    __slots__ = ("message", "_cs_text_values")
+    __slots__ = (
+        "message",
+        "_cs_text_values",
+        "_cs_select_values",
+    )
 
     def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState) -> None:
         super().__init__(data=data, state=state)
@@ -97,13 +101,26 @@ class ModalInteraction(Interaction):
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
         """Dict[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
-        This is a dict of the form ``{custom_id: value}``.
-        """
+        This is a dict of the form ``{custom_id: value, ...}``."""
         text_input_type = ComponentType.text_input.value
         return {
             component["custom_id"]: component.get("value") or ""
             for component in self.walk_raw_components()
             if component.get("type") == text_input_type
+        }
+
+    @cached_slot_property("_cs_select_values")
+    def select_values(self) -> Dict[str, List[str]]:
+        """Dict[:class:`str`, List[:class:`str`]]: Returns the select values the user has entered in the modal.
+        This is a dict of the form ``{custom_id: [value1, value2, ...], ...}``.
+
+        .. versionadded:: 2.7
+        """
+        select_type = ComponentType.select.value
+        return {
+            component["custom_id"]: component.get("values") or []
+            for component in self.walk_raw_components()
+            if component.get("type") == select_type
         }
 
     @property
