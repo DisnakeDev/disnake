@@ -31,6 +31,7 @@ __all__ = ("AllowedMentions",)
 
 if TYPE_CHECKING:
     from .abc import Snowflake
+    from .message import Message
     from .types.message import AllowedMentions as AllowedMentionsPayload
 
 
@@ -110,6 +111,22 @@ class AllowedMentions:
         .. versionadded:: 1.5
         """
         return cls(everyone=False, users=False, roles=False, replied_user=False)
+
+    @classmethod
+    def from_message(cls: Type[A], message: Message) -> A:
+        """A factory method that returns a :class:`AllowedMentions` dervived from the current :class:`.Message` state.
+
+        Note that this is not what AllowedMentions the message was sent with, but what the message actually mentioned.
+        For example, a message that successfully mentioned everyone will have :attr:`~AllowedMentions.everyone` set to ``True``.
+
+        .. versionadded:: 2.6
+        """
+        return cls(
+            everyone=message.mention_everyone,
+            users=message.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+            roles=message.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+            replied_user=False,
+        )
 
     def to_dict(self) -> AllowedMentionsPayload:
         parse = []
