@@ -27,6 +27,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, List, Type, TypeVar, Union
 
+from .enums import MessageType
+
 __all__ = ("AllowedMentions",)
 
 if TYPE_CHECKING:
@@ -121,11 +123,19 @@ class AllowedMentions:
 
         .. versionadded:: 2.6
         """
+        # circular import
+        from .message import Message
+
         return cls(
             everyone=message.mention_everyone,
             users=message.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
             roles=message.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
-            replied_user=False,
+            replied_user=bool(
+                message.type == MessageType.reply
+                and message.reference
+                and isinstance(message.reference.resolved, Message)
+                and message.reference.resolved.author in message.mentions
+            ),
         )
 
     def to_dict(self) -> AllowedMentionsPayload:
