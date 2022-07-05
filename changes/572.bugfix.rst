@@ -1,1 +1,1 @@
-Changed identify properties to remove the ``$`` prefix.
+Remove the ``$`` prefix from ``IDENTIFY`` payload properties.

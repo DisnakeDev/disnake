@@ -1,1 +1,1 @@
-Added :meth:`Guild.edit_mfa_level` for modifying the guild's mfa level.
+Add :meth:`Guild.edit_mfa_level` for modifying the guild's mfa level.

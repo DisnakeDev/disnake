@@ -4,9 +4,9 @@ text that will be added to the next ``CHANGELOG``.
 The ``CHANGELOG`` will be read by **users**, so this description should be aimed to pytest users
 instead of describing internal changes which are only relevant to the developers.
 
-Make sure to use full sentences in the **past or present tense** and use punctuation, examples::
+Make sure to use full sentences in the **present tense** and use punctuation, examples::
 
-    Improved Guild.create_text_channel returning the channel type.
+    Improve Guild.create_text_channel returning the channel type.
 
     Command syncing now uses logging instead of print.
 

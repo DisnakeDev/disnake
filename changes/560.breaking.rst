@@ -1,1 +1,1 @@
-Raise :exc:`TypeError` instead of :exc:`ValueError` in GuildScheduledEvent validation
+Raise :exc:`TypeError` instead of :exc:`ValueError` in :class:`GuildScheduledEvent` validation.
