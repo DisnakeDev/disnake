@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     #
     # sanity check: if `reveal_type` isn't working as intended,
     # the second `type: ignore` will be flagged
-    reveal_type(
+    reveal_type(  # noqa: F821
         42,  # type: ignore
         expected_text="str",  # type: ignore
     )
@@ -34,13 +34,13 @@ class TestDecorators:
             ...
 
         for cd in (commands.command(), base.command()):
-            reveal_type(
+            reveal_type(  # noqa: F821
                 cd(f1),  # type: ignore
                 expected_text="Command[None, (a: int, b: str), bool]",
             )
 
         for gd in (commands.group(), base.group()):
-            reveal_type(
+            reveal_type(  # noqa: F821
                 gd(f1),  # type: ignore
                 expected_text="Group[None, (a: int, b: str), bool]",
             )
@@ -52,13 +52,13 @@ class TestDecorators:
             ...
 
         for cd in (commands.command(), base.command()):
-            reveal_type(
+            reveal_type(  # noqa: F821
                 cd(f2),  # type: ignore
                 expected_text="Command[CustomCog, (a: int, b: str), bool]",
             )
 
         for gd in (commands.group(), base.group()):
-            reveal_type(
+            reveal_type(  # noqa: F821
                 gd(f2),  # type: ignore
                 expected_text="Group[CustomCog, (a: int, b: str), bool]",
             )

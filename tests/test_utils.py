@@ -128,7 +128,7 @@ def test_oauth_url(expected, perms, guild, redirect, scopes, disable_select):
 def test_parse_token():
     # don't get your hopes up, this token isn't valid.
     # taken from https://guide.disnake.dev/getting-started/initial-files
-    token = "OTA4MjgxMjk4NTU1MTA5Mzk2.YYzc4A.TB7Ng6DOnVDlpMS4idjGptsreFg"
+    token = "OTA4MjgxMjk4NTU1MTA5Mzk2.YYzc4A.TB7Ng6DOnVDlpMS4idjGptsreFg"  # noqa: S105
 
     parts = utils.parse_token(token)
     assert parts[0] == 908281298555109396

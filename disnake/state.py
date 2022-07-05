@@ -448,7 +448,8 @@ class ConnectionState:
         application_command: APIApplicationCommand,
         /,
     ) -> None:
-        assert application_command.id
+        if not application_command.id:
+            AssertionError("The provided application command does not have an ID")
         self._global_application_commands[application_command.id] = application_command
 
     def _remove_global_application_command(self, application_command_id: int, /) -> None:
@@ -467,7 +468,8 @@ class ConnectionState:
     def _add_guild_application_command(
         self, guild_id: int, application_command: APIApplicationCommand
     ) -> None:
-        assert application_command.id
+        if not application_command.id:
+            AssertionError("The provided application command does not have an ID")
         try:
             granula = self._guild_application_commands[guild_id]
             granula[application_command.id] = application_command

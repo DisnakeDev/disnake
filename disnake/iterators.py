@@ -64,7 +64,6 @@ __all__ = (
 if TYPE_CHECKING:
     from .abc import Messageable, Snowflake
     from .app_commands import APIApplicationCommand
-    from .audit_logs import AuditLogEntry
     from .guild import Guild
     from .member import Member
     from .message import Message

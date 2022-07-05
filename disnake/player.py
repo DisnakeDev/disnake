@@ -213,7 +213,7 @@ class FFmpegAudio(AudioSource):
             )
 
     def _pipe_writer(self, source: io.BufferedIOBase) -> None:
-        assert self._stdin
+        assert self._stdin  # noqa: S101 # TODO: remove this ignore (didn't want to touch this)
         while self._process:
             # arbitrarily large read size
             data = source.read(8192)
@@ -577,7 +577,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         else:
             _log.info("Probe found codec=%s, bitrate=%s", codec, bitrate)
         finally:
-            return codec, bitrate
+            return codec, bitrate  # noqa: B012
 
     @staticmethod
     def _probe_codec_native(
