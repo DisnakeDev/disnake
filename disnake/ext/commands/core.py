@@ -535,7 +535,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                     # User has an option to cancel the global error handler by returning True
         finally:
             if stop_propagation:
-                return
+                return  # noqa: B012
             ctx.bot.dispatch("command_error", ctx, error)
 
     async def transform(self, ctx: Context, param: inspect.Parameter) -> Any:
@@ -837,7 +837,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                 await self._parse_arguments(ctx)
 
             await self.call_before_hooks(ctx)
-        except:
+        except Exception:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(ctx)  # type: ignore
             raise
@@ -920,7 +920,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         ctx.invoked_subcommand = None
         try:
             await self.callback(*ctx.args, **ctx.kwargs)  # type: ignore
-        except:
+        except Exception:
             ctx.command_failed = True
             raise
         finally:
@@ -1515,7 +1515,7 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
         if early_invoke:
             try:
                 await self.callback(*ctx.args, **ctx.kwargs)  # type: ignore
-            except:
+            except Exception:
                 ctx.command_failed = True
                 raise
             finally:

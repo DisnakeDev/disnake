@@ -15,7 +15,7 @@ import importlib.util
 import inspect
 import os
 import re
-import subprocess
+import subprocess  # noqa: S404
 import sys
 from typing import Any
 
@@ -108,7 +108,7 @@ release = version
 
 
 def git(*args):
-    return subprocess.check_output(["git", *args]).strip().decode()
+    return subprocess.check_output(["git", *args]).strip().decode()  # noqa: S603,S607
 
 
 # Current git reference. Uses branch/tag name if found, otherwise uses commit hash
@@ -345,14 +345,14 @@ htmlhelp_basename = "disnake.pydoc"
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #'papersize': 'letterpaper',
-    # The font size ('10pt', '11pt' or '12pt').
-    #'pointsize': '10pt',
-    # Additional stuff for the LaTeX preamble.
-    #'preamble': '',
-    # Latex figure (float) alignment
-    #'figure_align': 'htbp',
+    # # The paper size ('letterpaper' or 'a4paper').
+    # 'papersize': 'letterpaper',
+    # # The font size ('10pt', '11pt' or '12pt').
+    # 'pointsize': '10pt',
+    # # Additional stuff for the LaTeX preamble.
+    # 'preamble': '',
+    # # Latex figure (float) alignment
+    # 'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples

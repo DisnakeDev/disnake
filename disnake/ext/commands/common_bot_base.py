@@ -130,12 +130,14 @@ class CommonBotBase(Generic[CogT]):
             try:
                 self.unload_extension(extension)
             except Exception:
+                # TODO: consider logging exception
                 pass
 
         for cog in tuple(self.__cogs):
             try:
                 self.remove_cog(cog)
             except Exception:
+                # TODO: consider logging exception
                 pass
 
         await super().close()  # type: ignore
@@ -399,6 +401,7 @@ class CommonBotBase(Generic[CogT]):
             try:
                 func(self)
             except Exception:
+                # TODO: consider logging exception
                 pass
         finally:
             self.__extensions.pop(key, None)
@@ -622,7 +625,7 @@ class CommonBotBase(Generic[CogT]):
         else:
             is_closed = lambda: False
 
-        reload_log.info(f"WATCHDOG: Watching extensions")
+        reload_log.info("WATCHDOG: Watching extensions")
 
         last = time.time()
         while not is_closed():

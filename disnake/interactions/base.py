@@ -67,13 +67,7 @@ if TYPE_CHECKING:
     from aiohttp import ClientSession
 
     from ..app_commands import Choices
-    from ..channel import (
-        CategoryChannel,
-        PartialMessageable,
-        StageChannel,
-        TextChannel,
-        VoiceChannel,
-    )
+    from ..channel import CategoryChannel, StageChannel, TextChannel, VoiceChannel
     from ..client import Client
     from ..embeds import Embed
     from ..ext.commands import AutoShardedBot, Bot
@@ -1233,7 +1227,7 @@ class InteractionResponse:
             This interaction has already been responded to before.
         """
         if modal is not None and any((title, components, custom_id)):
-            raise TypeError(f"Cannot mix modal argument and title, custom_id, components arguments")
+            raise TypeError("Cannot mix modal argument and title, custom_id, components arguments")
 
         parent = self._parent
 

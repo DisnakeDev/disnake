@@ -17,6 +17,7 @@ repos:
       - id: isort
         args: ["--profile", "black", "--extend-skip", "examples"]
         name: Running isort in all files.
+        exclude: ^examples/
       - id: isort
         args: ["--profile", "black", "--thirdparty", "disnake"]
         name: Running isort in examples.
@@ -27,3 +28,14 @@ repos:
     hooks:
       - id: black
         name: Running black in all files.
+
+  - repo: local
+    hooks:
+      - id: flake8
+        name: flake8
+        description: 'Lint all of our code'
+        entry: flake8
+        exclude: ^test_bot/
+        language: python
+        types: [python]
+        require_serial: true

@@ -52,9 +52,11 @@ def visit_attributetabletitle_node(self, node):
 
 def visit_attributetablebadge_node(self, node):
     """Add a class to each badge of the type that it is."""
-    assert node["badge-type"] in ("coroutine", "decorator", "method", "classmethod")
+    badge_type: str = node["badge-type"]
+    if badge_type not in ("coroutine", "decorator", "method", "classmethod"):
+        raise RuntimeError(f"badge_type {badge_type} is currently unsupported")
     attributes = {
-        "class": f"badge-{node['badge-type']}",
+        "class": f"badge-{badge_type}",
     }
     self.body.append(self.starttag(node, "span", **attributes))
 
@@ -157,11 +159,11 @@ def build_lookup_table(env: BuildEnvironment) -> Dict[str, List[str]]:
         "class",
     }
 
-    for (fullname, _, objtype, _, _, _) in domain.get_objects():
+    for (fullname, _unused, objtype, _unused, _unused, _unused) in domain.get_objects():
         if objtype in ignored:
             continue
 
-        classname, _, child = fullname.rpartition(".")
+        classname, _unused, child = fullname.rpartition(".")
         result[classname].append(child)
 
     return result
@@ -174,7 +176,7 @@ class TableElement(NamedTuple):
 
 
 def process_attributetable(app: Sphinx, doctree: nodes.document, docname: str):
-    assert app.builder and app.builder.env
+    assert app.builder and app.builder.env  # noqa: S101
     env = app.builder.env
 
     lookup = build_lookup_table(env)

@@ -3,7 +3,7 @@ from __future__ import annotations
 import functools
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, List, Optional, TypeVar
+from typing import TYPE_CHECKING, Callable, List, TypeVar
 
 import nox
 
