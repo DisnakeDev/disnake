@@ -335,7 +335,7 @@ class Cog(metaclass=CogMeta):
 
                 This does not include subcommands.
         """
-        return [c for c in self.__cog_app_commands__]
+        return list(self.__cog_app_commands__)
 
     def get_slash_commands(self) -> List[InvokableSlashCommand]:
         """
@@ -834,7 +834,7 @@ class Cog(metaclass=CogMeta):
         try:
             if bot._sync_commands_on_cog_unload:
                 bot._schedule_delayed_command_sync()
-        except Exception:
+        except NotImplementedError:
             pass
 
         return self
@@ -900,9 +900,10 @@ class Cog(metaclass=CogMeta):
             try:
                 if bot._sync_commands_on_cog_unload:
                     bot._schedule_delayed_command_sync()
-            except Exception:
+            except NotImplementedError:
                 pass
             try:
                 self.cog_unload()
             except Exception:
+                # TODO: Consider calling the bot's on_error handler here
                 pass

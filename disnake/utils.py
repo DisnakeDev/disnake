@@ -246,6 +246,22 @@ def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
     return None
 
 
+@overload
+def isoformat_utc(dt: datetime.datetime) -> str:
+    ...
+
+
+@overload
+def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
+    ...
+
+
+def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
+    if dt:
+        return dt.astimezone(datetime.timezone.utc).isoformat()
+    return None
+
+
 def copy_doc(original: Callable) -> Callable[[T], T]:
     def decorator(overriden: T) -> T:
         overriden.__doc__ = original.__doc__
@@ -494,7 +510,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
 
 
 def _unique(iterable: Iterable[T]) -> List[T]:
-    return [x for x in dict.fromkeys(iterable)]
+    return list(dict.fromkeys(iterable))
 
 
 def _get_as_snowflake(data: Any, key: str) -> Optional[int]:
@@ -1155,7 +1171,9 @@ def evaluate_annotation(
     if implicit_str and isinstance(tp, str):
         if tp in cache:
             return cache[tp]
-        evaluated = eval(tp, globals, locals)
+        evaluated = eval(  # noqa: S307  # this is how annotations are supposed to be evaled
+            tp, globals, locals
+        )
         cache[tp] = evaluated
         return evaluate_annotation(evaluated, globals, locals, cache)
 
@@ -1334,3 +1352,12 @@ def as_valid_locale(locale: str) -> Optional[str]:
     if language != locale:
         return as_valid_locale(language)
     return None
+
+
+def humanize_list(values: List[str], combine: str) -> str:
+    if len(values) > 2:
+        return f"{', '.join(values[:-1])}, {combine} {values[-1]}"
+    elif len(values) == 0:
+        return "<none>"
+    else:
+        return f" {combine} ".join(values)

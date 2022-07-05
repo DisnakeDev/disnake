@@ -555,7 +555,7 @@ class HTTPClient:
         allowed_mentions: Optional[message.AllowedMentions] = None,
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
-        components: Optional[List[components.Component]] = None,
+        components: Optional[Sequence[components.Component]] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -609,7 +609,7 @@ class HTTPClient:
         allowed_mentions: Optional[message.AllowedMentions] = None,
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
-        components: Optional[List[components.Component]] = None,
+        components: Optional[Sequence[components.Component]] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         payload: Dict[str, Any] = {"tts": tts}
@@ -649,7 +649,7 @@ class HTTPClient:
         allowed_mentions: Optional[message.AllowedMentions] = None,
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
-        components: Optional[List[components.Component]] = None,
+        components: Optional[Sequence[components.Component]] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -2500,7 +2500,7 @@ class HTTPClient:
         self,
         application_id: Snowflake,
         token: str,
-        files: List[File] = [],
+        files: List[File] = None,
         content: Optional[str] = None,
         tts: bool = False,
         embeds: Optional[List[embed.Embed]] = None,
@@ -2512,6 +2512,8 @@ class HTTPClient:
             application_id=application_id,
             interaction_token=token,
         )
+        if files is None:
+            files = []
         return self.send_multipart_helper(
             r,
             content=content,

@@ -182,11 +182,13 @@ The type of the option is determined by the range bounds, with the option being 
     ):
         ...
 
+.. _type_checker_mypy_plugin:
+
 .. note::
 
-    Type checker support for :class:`~ext.commands.Range` is limited. Pylance/Pyright seem to handle it correctly;
-    MyPy currently needs a plugin for it to understand :class:`~ext.commands.Range` semantics, which can be added in
-    the configuration file (``setup.cfg``, ``mypy.ini``):
+    Type checker support for :class:`~ext.commands.Range` and :class:`~ext.commands.String` (:ref:`see below <string_lengths>`) is limited.
+    Pylance/Pyright seem to handle it correctly; MyPy currently needs a plugin for it to understand :class:`~ext.commands.Range`
+    and :class:`~ext.commands.String` semantics, which can be added in the configuration file (``setup.cfg``, ``mypy.ini``):
 
     .. code-block:: ini
 
@@ -200,6 +202,56 @@ The type of the option is determined by the range bounds, with the option being 
         [tool.mypy]
         plugins = "disnake.ext.mypy_plugin"
 
+.. _string_lengths:
+
+String Lengths
+++++++++++++++
+
+:class:`str` parameters support minimum and maximum allowed value lengths
+using the ``min_length`` and ``max_length`` parameters on :func:`Param <ext.commands.Param>`.
+For instance, you could restrict an option to only accept a single character:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def charinfo(
+        inter: disnake.ApplicationCommandInteraction,
+        character: str = commands.Param(max_length=1),
+    ):
+        ...
+
+Or restrict a tag command to limit tag names to 20 characters:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def tags(
+        inter: disnake.ApplicationCommandInteraction,
+        tag: str = commands.Param(max_length=20)
+    ):
+        ...
+
+Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`~ext.commands.String` annotation.
+The length bounds are both inclusive; using ``...`` as a bound indicates that this end of the string length is unbounded.
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def strings(
+        inter: disnake.ApplicationCommandInteraction,
+        a: commands.String[0, 10],       # a str no longer than 10 characters.
+        b: commands.String[10, 100],     # a str that's at least 10 characters but not longer than 100.
+        c: commands.String[50, ...]      # a str that's at least 50 characters.
+    ):
+        ...
+
+.. note::
+
+    There is a max length of 6000 characters, which is enforced by Discord.
+
+.. note::
+
+    For mypy type checking support, please see the above note about the :ref:`mypy plugin <type_checker_mypy_plugin>`.
 
 .. _docstrings:
 
@@ -392,12 +444,12 @@ create autocomplete options with the :func:`autocomplete <ext.commands.Invokable
 .. code-block:: python3
 
     @bot.slash_command()
-    async def languages(inter: disnake.CommandInteraction, language: str):
+    async def languages(inter: disnake.ApplicationCommandInteraction, language: str):
         pass
 
 
     @languages.autocomplete("language")
-    async def language_autocomp(inter: disnake.CommandInteraction, string: str):
+    async def language_autocomp(inter: disnake.ApplicationCommandInteraction, string: str):
         string = string.lower()
         return [lang for lang in LANGUAGES if string in lang.lower()]
         ...

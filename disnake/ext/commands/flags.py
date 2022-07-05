@@ -210,7 +210,7 @@ def get_flags(
                 # typing.Union
                 if flag.max_args is MISSING:
                     flag.max_args = 1
-                if annotation.__args__[-1] is type(None) and flag.default is MISSING:
+                if annotation.__args__[-1] is type(None) and flag.default is MISSING:  # noqa: E721
                     # typing.Optional
                     flag.default = None
             elif origin is tuple:
@@ -348,7 +348,7 @@ class FlagsMeta(type):
             aliases = {key.casefold(): value.casefold() for key, value in aliases.items()}
             regex_flags = re.IGNORECASE
 
-        keys = list(re.escape(k) for k in flags)
+        keys = [re.escape(k) for k in flags]
         keys.extend(re.escape(a) for a in aliases)
         keys = sorted(keys, key=lambda t: len(t), reverse=True)
 
@@ -434,7 +434,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
             # typing.List[x]
             annotation = args[0]
             return await convert_flag(ctx, argument, flag, annotation)
-        elif origin is Union and args[-1] is type(None):
+        elif origin is Union and args[-1] is type(None):  # noqa: E721
             # typing.Optional[x]
             annotation = Union[args[:-1]]  # type: ignore
             return await run_converters(ctx, annotation, argument, param)

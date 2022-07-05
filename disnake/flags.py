@@ -94,13 +94,11 @@ def all_flags_value(flags: Dict[str, int]) -> int:
 
 def fill_with_flags(*, inverted: bool = False):
     def decorator(cls: Type[BF]):
-        # fmt: off
         cls.VALID_FLAGS = {
             name: value.flag
             for name, value in cls.__dict__.items()
             if isinstance(value, flag_value)
         }
-        # fmt: on
 
         if inverted:
             cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS)
