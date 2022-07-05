@@ -68,7 +68,11 @@ C = TypeVar("C", bound="Component")
 
 MessageComponent = Union["Button", "SelectMenu"]
 
-ModalComponent = Union["TextInput", "SelectMenu"]
+if TYPE_CHECKING:  # TODO: remove when we add modal select support
+    from typing_extensions import TypeAlias
+
+# ModalComponent = Union["TextInput", "SelectMenu"]
+ModalComponent: TypeAlias = "TextInput"
 NestedComponent = Union[MessageComponent, ModalComponent]
 ComponentT = TypeVar("ComponentT", bound=NestedComponent)
 
