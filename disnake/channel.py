@@ -197,7 +197,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self._update(guild, data)
 
     def __repr__(self) -> str:
-        attrs = [
+        attrs = (
             ("id", self.id),
             ("name", self.name),
             ("position", self.position),
@@ -206,8 +206,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
             ("flags", self.flags),
-        ]
-        joined = " ".join("%s=%r" % t for t in attrs)
+        )
+        joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{self.__class__.__name__} {joined}>"
 
     def _update(self, guild: Guild, data: TextChannelPayload) -> None:
@@ -1056,13 +1056,11 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         Mapping[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
-        # fmt: off
         return {
             key: value
             for key, value in self.guild._voice_states.items()
             if value.channel and value.channel.id == self.id
         }
-        # fmt: on
 
 
 class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
@@ -1145,7 +1143,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     )
 
     def __repr__(self) -> str:
-        attrs = [
+        attrs = (
             ("id", self.id),
             ("name", self.name),
             ("rtc_region", self.rtc_region),
@@ -1156,8 +1154,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             ("category_id", self.category_id),
             ("nsfw", self.nsfw),
             ("flags", self.flags),
-        ]
-        joined = " ".join("%s=%r" % t for t in attrs)
+        )
+        joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{self.__class__.__name__} {joined}>"
 
     def _update(self, guild: Guild, data: VoiceChannelPayload) -> None:
@@ -1703,7 +1701,7 @@ class StageChannel(VocalGuildChannel):
     __slots__ = ("topic",)
 
     def __repr__(self) -> str:
-        attrs = [
+        attrs = (
             ("id", self.id),
             ("name", self.name),
             ("topic", self.topic),
@@ -1714,8 +1712,8 @@ class StageChannel(VocalGuildChannel):
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
             ("flags", self.flags),
-        ]
-        joined = " ".join("%s=%r" % t for t in attrs)
+        )
+        joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{self.__class__.__name__} {joined}>"
 
     def _update(self, guild: Guild, data: StageChannelPayload) -> None:
@@ -2485,7 +2483,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self._update(guild, data)
 
     def __repr__(self) -> str:
-        atts = [
+        attrs = (
             ("id", self.id),
             ("name", self.name),
             ("topic", self.topic),
@@ -2494,8 +2492,8 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
             ("flags", self.flags),
-        ]
-        joined = " ".join("%s=%r" % t for t in atts)
+        )
+        joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{type(self).__name__} {joined}>"
 
     def _update(self, guild: Guild, data: ForumChannelPayload) -> None:

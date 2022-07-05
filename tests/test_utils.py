@@ -128,7 +128,7 @@ def test_oauth_url(expected, perms, guild, redirect, scopes, disable_select):
 def test_parse_token():
     # don't get your hopes up, this token isn't valid.
     # taken from https://guide.disnake.dev/getting-started/initial-files
-    token = "OTA4MjgxMjk4NTU1MTA5Mzk2.YYzc4A.TB7Ng6DOnVDlpMS4idjGptsreFg"
+    token = "OTA4MjgxMjk4NTU1MTA5Mzk2.YYzc4A.TB7Ng6DOnVDlpMS4idjGptsreFg"  # noqa: S105
 
     parts = utils.parse_token(token)
     assert parts[0] == 908281298555109396
@@ -872,3 +872,17 @@ def test_search_directory_exc(tmp_module_root, path, exc):
 )
 def test_as_valid_locale(locale, expected):
     assert utils.as_valid_locale(locale) == expected
+
+
+@pytest.mark.parametrize(
+    ("values", "expected"),
+    [
+        ([], "<none>"),
+        (["one"], "one"),
+        (["one", "two"], "one plus two"),
+        (["one", "two", "three"], "one, two, plus three"),
+        (["one", "two", "three", "four"], "one, two, three, plus four"),
+    ],
+)
+def test_humanize_list(values, expected):
+    assert utils.humanize_list(values, "plus") == expected

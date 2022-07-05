@@ -223,7 +223,7 @@ class KeepAliveHandler(threading.Thread):
                     _log.exception("An error occurred while stopping the gateway. Ignoring.")
                 finally:
                     self.stop()
-                    return
+                    return  # noqa: B012
 
             data = self.get_payload()
             _log.debug(self.msg, self.shard_id, data["d"])
@@ -939,7 +939,7 @@ class DiscordVoiceWebSocket:
         hook: Optional[HookFunc] = None,
     ) -> VoiceWebSocketT:
         """Creates a voice websocket for the :class:`VoiceClient`."""
-        gateway = "wss://" + client.endpoint + "/?v=4"
+        gateway = f"wss://{client.endpoint}/?v=4"
         http = client._state.http
         socket = await http.ws_connect(gateway, compress=15)
         ws = cls(socket, loop=client.loop, hook=hook)

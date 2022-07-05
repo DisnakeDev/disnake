@@ -409,7 +409,7 @@ class Guild(Hashable):
             ("chunked", self.chunked),
             ("member_count", getattr(self, "_member_count", None)),
         )
-        inner = " ".join("%s=%r" % t for t in attrs)
+        inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<Guild {inner}>"
 
     def _update_voice_state(
@@ -1329,6 +1329,7 @@ class Guild(Hashable):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
+        slowmode_delay: int = MISSING,
         overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> VoiceChannel:
         """|coro|
@@ -1373,6 +1374,13 @@ class Guild(Hashable):
 
             .. versionadded:: 2.5
 
+        slowmode_delay: :class:`int`
+            Specifies the slowmode rate limit for users in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+            If not provided, slowmode is disabled.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for creating this channel. Shows up on the audit log.
 
@@ -1408,6 +1416,9 @@ class Guild(Hashable):
 
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
+
+        if slowmode_delay is not MISSING:
+            options["rate_limit_per_user"] = slowmode_delay
 
         data = await self._create_channel(
             name,
@@ -2161,6 +2172,10 @@ class Guild(Hashable):
         .. versionchanged:: 2.6
             Removed ``channel_id`` parameter in favor of ``channel``.
 
+        .. versionchanged:: 2.6
+            Naive datetime parameters are now assumed to be in the local
+            timezone instead of UTC.
+
         Parameters
         ----------
         name: :class:`str`
@@ -2184,8 +2199,10 @@ class Guild(Hashable):
             The privacy level of the guild scheduled event.
         scheduled_start_time: :class:`datetime.datetime`
             The time to schedule the guild scheduled event.
+            If the datetime is naive, it is assumed to be local time.
         scheduled_end_time: Optional[:class:`datetime.datetime`]
             The time when the guild scheduled event is scheduled to end.
+            If the datetime is naive, it is assumed to be local time.
         entity_type: :class:`GuildScheduledEventEntityType`
             The entity type of the guild scheduled event.
         entity_metadata: :class:`GuildScheduledEventMetadata`
@@ -2220,7 +2237,7 @@ class Guild(Hashable):
         fields: Dict[str, Any] = {
             "name": name,
             "privacy_level": privacy_level.value,
-            "scheduled_start_time": scheduled_start_time.isoformat(),
+            "scheduled_start_time": utils.isoformat_utc(scheduled_start_time),
             "entity_type": entity_type.value,
         }
 
@@ -2242,9 +2259,7 @@ class Guild(Hashable):
             fields["channel_id"] = channel.id
 
         if scheduled_end_time is not MISSING:
-            fields["scheduled_end_time"] = (
-                scheduled_end_time.isoformat() if scheduled_end_time is not None else None
-            )
+            fields["scheduled_end_time"] = utils.isoformat_utc(scheduled_end_time)
 
         data = await self._state.http.create_guild_scheduled_event(self.id, reason=reason, **fields)
         return GuildScheduledEvent(state=self._state, data=data)
@@ -2740,6 +2755,11 @@ class Guild(Hashable):
         You must have :attr:`~Permissions.manage_guild` permission to
         use this.
 
+        .. note::
+
+            This method does not include the guild's vanity URL invite.
+            To get the vanity URL :class:`Invite`, refer to :meth:`Guild.vanity_invite`.
+
         Raises
         ------
         Forbidden
@@ -3205,7 +3225,7 @@ class Guild(Hashable):
         try:
             member = await self.fetch_member(member_id)
             self._add_member(member)
-        except:
+        except HTTPException:
             if strict:
                 raise
             return None
@@ -3517,6 +3537,11 @@ class Guild(Hashable):
         use_cached: :class:`bool`
             Whether to use the cached :attr:`Guild.vanity_url_code`
             and attempt to convert it into a full invite.
+
+            .. note::
+
+                If set to ``True``, the :attr:`Invite.uses`
+                information will not be accurate.
 
             .. versionadded:: 2.5
 
@@ -4183,11 +4208,7 @@ class Guild(Hashable):
                 until = utils.utcnow() + datetime.timedelta(seconds=duration)
 
         # at this point `until` cannot be `MISSING`
-        if until is not None:
-            until = until.astimezone(datetime.timezone.utc)
-            payload["communication_disabled_until"] = until.isoformat()
-        else:
-            payload["communication_disabled_until"] = None
+        payload["communication_disabled_until"] = utils.isoformat_utc(until)
 
         data = await self._state.http.edit_member(self.id, user.id, reason=reason, **payload)
         return Member(data=data, guild=self, state=self._state)
