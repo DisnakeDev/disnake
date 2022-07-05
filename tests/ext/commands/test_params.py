@@ -25,6 +25,8 @@ class TestParamInfo:
             # should accept member or role
             (Union[Member, Role], OptionType.mentionable, [Member, Role]),
             # should accept everything
+            (Union[User, Role], OptionType.mentionable, [User, Member, Role]),
+            (Union[User, Member, Role], OptionType.mentionable, [User, Member, Role]),
             (disnake.abc.Snowflake, OptionType.mentionable, [User, Member, Role]),
         ],
     )
