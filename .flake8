@@ -28,8 +28,6 @@ ignore =
     E501,
     # assigning lambdas to variables
     E731,
-    # may be undefined, or defined from star imports
-    F403,F405,
     # ignore try-except-pass. Bare excepts are caught with B001 and E722
     S110,
     # ignore multiple `##` starting a comment

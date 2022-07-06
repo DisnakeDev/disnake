@@ -45,7 +45,7 @@ from disnake.interactions import ApplicationCommandInteraction
 from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
-from .errors import *
+from .errors import CommandError, CommandInvokeError
 from .params import call_param_func, expand_params
 
 if TYPE_CHECKING:
