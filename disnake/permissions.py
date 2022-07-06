@@ -161,11 +161,11 @@ class Permissions(BaseFlags):
             )
 
     def is_strict_subset(self, other: Permissions) -> bool:
-        """Returns ``True`` if the permissions on other are a strict subset of those on self."""
+        """Returns ``True`` if the permissions on self are a strict subset of those on other."""
         return self.is_subset(other) and self != other
 
     def is_strict_superset(self, other: Permissions) -> bool:
-        """Returns ``True`` if the permissions on other are a strict superset of those on self."""
+        """Returns ``True`` if the permissions on self are a strict superset of those on other."""
         return self.is_superset(other) and self != other
 
     __le__ = is_subset
