@@ -160,6 +160,8 @@ class BaseFlags:
 
     def __invert__(self) -> Self:
         # invert the bit but make sure all truthy values are valid flags
+        # this code means that if a flag class doesn't define 1 << 2 that
+        # value won't suddenly be set to True
         bitmask = functools.reduce(operator.or_, self.VALID_FLAGS.values())
         return self._from_value((self.value ^ bitmask) & bitmask)
 
