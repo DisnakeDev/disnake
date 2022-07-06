@@ -1,1 +1,1 @@
-Add more typing overrides to :class:`GuildCommandInteraction`
+Add more typing overrides to :class:`GuildCommandInteraction`.

@@ -1,1 +1,1 @@
-Make InteractionData\* dataclasses dicts (:class:`InteractionData`, :class:`ApplicationCommandInteractionData`, and so on)
+Make InteractionData\* dataclasses dicts (:class:`InteractionData`, :class:`ApplicationCommandInteractionData`, and so on).

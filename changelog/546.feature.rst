@@ -5,4 +5,4 @@ Add multiple converters for previously undocumented fields for audit logs.
 - :attr:`~AuditLogDiff.flags` --- :class:`ChannelFlags`
 - :attr:`~AuditLogDiff.system_channel_flags` --- :class:`SystemChannelFlags`
 
-``AuditLogDiff.unicode_emoji`` was renamed to :attr:`AuditLogDiff.emoji`
+``AuditLogDiff.unicode_emoji`` was renamed to :attr:`AuditLogDiff.emoji`.
