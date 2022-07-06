@@ -817,7 +817,7 @@ def tmp_module_root(tmp_path_factory):
         "mod/sub1/sub2/abc.py",
     ]:
         (tmpdir / f).touch()
-    yield tmpdir
+    return tmpdir
 
 
 @pytest.mark.parametrize(
