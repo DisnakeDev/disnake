@@ -115,7 +115,7 @@ MISSING: Any = _MissingSentinel()
 class _cached_property:
     def __init__(self, function):
         self.function = function
-        self.__doc__ = getattr(function, "__doc__")
+        self.__doc__: Optional[str] = function.__doc__
 
     def __get__(self, instance, owner):
         if instance is None:
@@ -157,7 +157,7 @@ class CachedSlotProperty(Generic[T, T_co]):
     def __init__(self, name: str, function: Callable[[T], T_co]) -> None:
         self.name = name
         self.function = function
-        self.__doc__ = getattr(function, "__doc__")
+        self.__doc__ = function.__doc__
 
     @overload
     def __get__(self, instance: None, owner: Type[T]) -> Self:

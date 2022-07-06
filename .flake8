@@ -34,8 +34,6 @@ ignore =
     F403,F405,
     # ignore try-except-pass. Bare excepts are caught with B001 and E722
     S110,
-    # ignore using setattr and getattr with constants
-    B009,B010,
     # ignore multiple `##` starting a comment
     E266,
 
