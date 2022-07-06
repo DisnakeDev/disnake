@@ -348,7 +348,7 @@ class FlagsMeta(type):
             aliases = {key.casefold(): value.casefold() for key, value in aliases.items()}
             regex_flags = re.IGNORECASE
 
-        keys = list(re.escape(k) for k in flags)
+        keys = [re.escape(k) for k in flags]
         keys.extend(re.escape(a) for a in aliases)
         keys = sorted(keys, key=lambda t: len(t), reverse=True)
 
