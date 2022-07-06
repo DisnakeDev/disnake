@@ -81,6 +81,7 @@ __all__ = ("InteractionBotBase",)
 
 MISSING: Any = disnake.utils.MISSING
 
+T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
 
 
@@ -1005,10 +1006,10 @@ class InteractionBotBase(CommonBotBase):
             except ValueError:
                 pass
 
-    def slash_command_check(self, func: CFT) -> CFT:
+    def slash_command_check(self, func: T) -> T:
         """Similar to :meth:`.check` but for slash commands."""
         # T was used instead of Check to ensure the type matches on return
-        self.add_app_command_check(func, slash_commands=True)
+        self.add_app_command_check(func, slash_commands=True)  # type: ignore
         return func
 
     def slash_command_check_once(self, func: CFT) -> CFT:
@@ -1016,10 +1017,10 @@ class InteractionBotBase(CommonBotBase):
         self.add_app_command_check(func, call_once=True, slash_commands=True)
         return func
 
-    def user_command_check(self, func: CFT) -> CFT:
+    def user_command_check(self, func: T) -> T:
         """Similar to :meth:`.check` but for user commands."""
         # T was used instead of Check to ensure the type matches on return
-        self.add_app_command_check(func, user_commands=True)
+        self.add_app_command_check(func, user_commands=True)  # type: ignore
         return func
 
     def user_command_check_once(self, func: CFT) -> CFT:
@@ -1027,10 +1028,10 @@ class InteractionBotBase(CommonBotBase):
         self.add_app_command_check(func, call_once=True, user_commands=True)
         return func
 
-    def message_command_check(self, func: CFT) -> CFT:
+    def message_command_check(self, func: T) -> T:
         """Similar to :meth:`.check` but for message commands."""
         # T was used instead of Check to ensure the type matches on return
-        self.add_app_command_check(func, message_commands=True)
+        self.add_app_command_check(func, message_commands=True)  # type: ignore
         return func
 
     def message_command_check_once(self, func: CFT) -> CFT:

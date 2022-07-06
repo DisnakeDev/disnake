@@ -71,6 +71,7 @@ __all__ = (
 
 MISSING: Any = disnake.utils.MISSING
 
+T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
 CXT = TypeVar("CXT", bound="Context")
 
@@ -265,7 +266,7 @@ class BotBase(CommonBotBase, GroupMixin):
         except ValueError:
             pass
 
-    def check(self, func: CFT) -> CFT:
+    def check(self, func: T) -> T:
         """
         A decorator that adds a global check to the bot.
 
@@ -293,7 +294,8 @@ class BotBase(CommonBotBase, GroupMixin):
                 return ctx.command.qualified_name in allowed_commands
 
         """
-        self.add_check(func)
+        # T was used instead of Check to ensure the type matches on return
+        self.add_check(func)  # type: ignore
         return func
 
     def check_once(self, func: CFT) -> CFT:
