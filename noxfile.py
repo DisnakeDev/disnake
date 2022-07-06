@@ -115,7 +115,7 @@ def docs(session: nox.Session):
                 "--watch",
                 "../disnake",
                 "--watch",
-                "../changes",
+                "../changelog",
                 "--port",
                 "8009",
                 *args,
