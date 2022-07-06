@@ -10,7 +10,7 @@ Make sure to use full sentences in the **present tense** and use punctuation, ex
 
     Command syncing now uses logging instead of print.
 
-Each file should be named like ``<ISSUE>.<TYPE>.rst``, where
+Each file should use the following naming: ``<ISSUE>.<TYPE>.rst``, where
 ``<ISSUE>`` is an issue number, and ``<TYPE>`` is one of:
 
 * ``feature``: new user facing features, like new command-line options and new behavior.
