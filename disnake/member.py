@@ -39,8 +39,6 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
-    Type,
-    TypeVar,
     Union,
     cast,
     overload,
@@ -64,6 +62,8 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .abc import Snowflake
     from .channel import DMChannel, StageChannel, VoiceChannel
     from .flags import PublicUserFlags
@@ -227,9 +227,6 @@ def flatten_user(cls):
     return cls
 
 
-M = TypeVar("M", bound="Member")
-
-
 @flatten_user
 class Member(disnake.abc.Messageable, _UserTag):
     """Represents a Discord member to a :class:`Guild`.
@@ -381,7 +378,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         return hash(self._user)
 
     @classmethod
-    def _from_message(cls: Type[M], *, message: Message, data: MemberPayload) -> M:
+    def _from_message(cls, *, message: Message, data: MemberPayload) -> Self:
         user_data = message.author._to_minimal_user_json()  # type: ignore
         return cls(
             data=data,
@@ -399,8 +396,8 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @classmethod
     def _try_upgrade(
-        cls: Type[M], *, data: UserWithMemberPayload, guild: Guild, state: ConnectionState
-    ) -> Union[User, M]:
+        cls, *, data: UserWithMemberPayload, guild: Guild, state: ConnectionState
+    ) -> Union[User, Self]:
         # A User object with a 'member' key
         try:
             member_data = data.pop("member")
@@ -410,8 +407,8 @@ class Member(disnake.abc.Messageable, _UserTag):
             return cls(data=member_data, user_data=data, guild=guild, state=state)
 
     @classmethod
-    def _copy(cls: Type[M], member: M) -> M:
-        self: M = cls.__new__(cls)  # to bypass __init__
+    def _copy(cls, member: Member) -> Self:
+        self = cls.__new__(cls)  # to bypass __init__
 
         self._roles = utils.SnowflakeList(member._roles, is_sorted=True)
         self.joined_at = member.joined_at

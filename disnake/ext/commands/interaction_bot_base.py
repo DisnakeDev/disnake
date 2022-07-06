@@ -51,7 +51,6 @@ from disnake.enums import ApplicationCommandType
 from . import errors
 from .base_core import InvokableApplicationCommand
 from .common_bot_base import CommonBotBase
-from .context import Context
 from .ctx_menus_core import (
     InvokableMessageCommand,
     InvokableUserCommand,
@@ -82,9 +81,7 @@ __all__ = ("InteractionBotBase",)
 
 MISSING: Any = disnake.utils.MISSING
 
-T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
-CXT = TypeVar("CXT", bound="Context")
 
 
 _log = logging.getLogger(__name__)
@@ -1008,10 +1005,10 @@ class InteractionBotBase(CommonBotBase):
             except ValueError:
                 pass
 
-    def slash_command_check(self, func: T) -> T:
+    def slash_command_check(self, func: CFT) -> CFT:
         """Similar to :meth:`.check` but for slash commands."""
         # T was used instead of Check to ensure the type matches on return
-        self.add_app_command_check(func, slash_commands=True)  # type: ignore
+        self.add_app_command_check(func, slash_commands=True)
         return func
 
     def slash_command_check_once(self, func: CFT) -> CFT:
@@ -1019,10 +1016,10 @@ class InteractionBotBase(CommonBotBase):
         self.add_app_command_check(func, call_once=True, slash_commands=True)
         return func
 
-    def user_command_check(self, func: T) -> T:
+    def user_command_check(self, func: CFT) -> CFT:
         """Similar to :meth:`.check` but for user commands."""
         # T was used instead of Check to ensure the type matches on return
-        self.add_app_command_check(func, user_commands=True)  # type: ignore
+        self.add_app_command_check(func, user_commands=True)
         return func
 
     def user_command_check_once(self, func: CFT) -> CFT:
@@ -1030,10 +1027,10 @@ class InteractionBotBase(CommonBotBase):
         self.add_app_command_check(func, call_once=True, user_commands=True)
         return func
 
-    def message_command_check(self, func: T) -> T:
+    def message_command_check(self, func: CFT) -> CFT:
         """Similar to :meth:`.check` but for message commands."""
         # T was used instead of Check to ensure the type matches on return
-        self.add_app_command_check(func, message_commands=True)  # type: ignore
+        self.add_app_command_check(func, message_commands=True)
         return func
 
     def message_command_check_once(self, func: CFT) -> CFT:

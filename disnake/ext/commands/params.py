@@ -64,6 +64,8 @@ from . import errors
 from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
@@ -464,7 +466,7 @@ class ParamInfo:
         param: inspect.Parameter,
         type_hints: Dict[str, Any],
         parsed_docstring: Dict[str, disnake.utils._DocstringParam] = None,
-    ) -> ParamInfo:
+    ) -> Self:
         # hopefully repeated parsing won't cause any problems
         parsed_docstring = parsed_docstring or {}
 

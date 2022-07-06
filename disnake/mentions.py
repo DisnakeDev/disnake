@@ -25,13 +25,15 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, List, Union
 
 from .enums import MessageType
 
 __all__ = ("AllowedMentions",)
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .abc import Snowflake
     from .message import Message
     from .types.message import AllowedMentions as AllowedMentionsPayload
@@ -49,8 +51,6 @@ class _FakeBool:
 
 
 default: Any = _FakeBool()
-
-A = TypeVar("A", bound="AllowedMentions")
 
 
 class AllowedMentions:
@@ -99,7 +99,7 @@ class AllowedMentions:
         self.replied_user = replied_user
 
     @classmethod
-    def all(cls: Type[A]) -> A:
+    def all(cls) -> Self:
         """A factory method that returns a :class:`AllowedMentions` with all fields explicitly set to ``True``
 
         .. versionadded:: 1.5
@@ -107,7 +107,7 @@ class AllowedMentions:
         return cls(everyone=True, users=True, roles=True, replied_user=True)
 
     @classmethod
-    def none(cls: Type[A]) -> A:
+    def none(cls) -> Self:
         """A factory method that returns a :class:`AllowedMentions` with all fields set to ``False``
 
         .. versionadded:: 1.5
@@ -115,7 +115,7 @@ class AllowedMentions:
         return cls(everyone=False, users=False, roles=False, replied_user=False)
 
     @classmethod
-    def from_message(cls: Type[A], message: Message) -> A:
+    def from_message(cls, message: Message) -> Self:
         """A factory method that returns a :class:`AllowedMentions` dervived from the current :class:`.Message` state.
 
         Note that this is not what AllowedMentions the message was sent with, but what the message actually mentioned.

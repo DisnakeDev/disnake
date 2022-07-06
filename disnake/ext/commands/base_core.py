@@ -37,7 +37,7 @@ from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import *
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
+    from typing_extensions import Concatenate, ParamSpec, Self
 
     from disnake.interactions import ApplicationCommandInteraction
 
@@ -132,7 +132,7 @@ class InvokableApplicationCommand(ABC):
     __original_kwargs__: Dict[str, Any]
     body: ApplicationCommand
 
-    def __new__(cls, *args: Any, **kwargs: Any) -> InvokableApplicationCommand:
+    def __new__(cls, *args: Any, **kwargs: Any) -> Self:
         self = super().__new__(cls)
         # todo: refactor to not require None and change this to be based on the presence of a kwarg
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
