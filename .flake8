@@ -2,7 +2,10 @@
 max-line-length = 100
 statistics = true
 count = true
+
 noqa-require-code = true
+pytest-mark-no-parentheses = true
+
 exclude =
     .git
     __pycache__
