@@ -41,7 +41,7 @@ from typing import (
 
 __all__ = ("Item", "WrappedComponent")
 
-I = TypeVar("I", bound="Item")
+ItemT = TypeVar("ItemT", bound="Item")
 V = TypeVar("V", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
@@ -53,7 +53,7 @@ if TYPE_CHECKING:
     from ..types.components import Component as ComponentPayload
     from .view import View
 
-    ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
+    ItemCallbackType = Callable[[Any, ItemT, MessageInteraction], Coroutine[Any, Any, Any]]
 
 
 class WrappedComponent(ABC):

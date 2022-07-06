@@ -28,8 +28,6 @@ ignore =
     E501,
     # assigning lambdas to variables
     E731,
-    # ambiguous variable names
-    E741,
     # may be undefined, or defined from star imports
     F403,F405,
     # ignore try-except-pass. Bare excepts are caught with B001 and E722
@@ -57,4 +55,7 @@ per-file-ignores =
     examples/**:B008,S311,S105
     # usage of assert and interface binding, allowable for the third party lib at use
     # also have to reignore whatever is from the last check that pops up here
-    examples/basic_voice.py:S101,S104,I
+    examples/basic_voice.py:S101,S104
+    # ignore ambiguous variable names
+    # Todo: remove this check
+    examples/views/tic_tac_toe.py:E741
