@@ -131,7 +131,7 @@ class AllowedMentions:
             users=message.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
             roles=message.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
             replied_user=bool(
-                message.type == MessageType.reply
+                message.type is MessageType.reply
                 and message.reference
                 and isinstance(message.reference.resolved, Message)
                 and message.reference.resolved.author in message.mentions
