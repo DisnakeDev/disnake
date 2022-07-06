@@ -100,6 +100,29 @@ class Permissions(BaseFlags):
         .. describe:: x > y
 
              Checks if a permission is a strict superset of another permission.
+        .. describe:: x | y, x |= y
+
+            Returns a new Permissions with all enabled permissions from both x and y.
+            (Using `|=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x & y, x &= y
+
+            Returns a new Permissions with only permissions enabled on both x and y.
+            (Using `&=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x ^ y, x ^= y
+
+            Returns a new Permissions with only permissions enabled on one of x or y, but not both.
+            (Using `^=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe ~x
+
+            Returns a new Permissions with all permissions inverted from x.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the permission's hash.

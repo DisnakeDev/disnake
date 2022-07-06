@@ -131,11 +131,37 @@ class BaseFlags:
         self.value = value
         return self
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: Self) -> bool:
         return isinstance(other, self.__class__) and self.value == other.value
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: Self) -> bool:
         return not self.__eq__(other)
+
+    def __and__(self, other: Self) -> Self:
+        return self._from_value(self.value & other.value)
+
+    def __iand__(self, other: Self) -> Self:
+        self.value &= other.value
+        return self
+
+    def __or__(self, other: Self) -> Self:
+        return self._from_value(self.value | other.value)
+
+    def __ior__(self, other: Self) -> Self:
+        self.value |= other.value
+        return self
+
+    def __xor__(self, other: Self) -> Self:
+        return self._from_value(self.value ^ other.value)
+
+    def __ixor__(self, other: Self) -> Self:
+        self.value ^= other.value
+        return self
+
+    def __invert__(self) -> Self:
+        # invert the bit but make sure all truthy values are valid flags
+        bitmask = functools.reduce(operator.or_, self.VALID_FLAGS.values())
+        return self._from_value((self.value ^ bitmask) & bitmask)
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -183,6 +209,29 @@ class SystemChannelFlags(BaseFlags):
         .. describe:: x != y
 
             Checks if two flags are not equal.
+        .. describe:: x | y, x |= y
+
+            Returns a new SystemChannelFlags with all enabled flags from both x and y.
+            (Using `|=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x & y, x &= y
+
+            Returns a new SystemChannelFlags with only flags enabled on both x and y.
+            (Using `&=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x ^ y, x ^= y
+
+            Returns a new SystemChannelFlags with only flags enabled on one of x or y, but not both.
+            (Using `^=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe ~x
+
+            Returns a new SystemChannelFlags with all flags inverted from x.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -260,6 +309,29 @@ class MessageFlags(BaseFlags):
         .. describe:: x != y
 
             Checks if two flags are not equal.
+        .. describe:: x | y, x |= y
+
+            Returns a new MessageFlags with all enabled flags from both x and y.
+            (Using `|=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x & y, x &= y
+
+            Returns a new MessageFlags with only flags enabled on both x and y.
+            (Using `&=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x ^ y, x ^= y
+
+            Returns a new MessageFlags with only flags enabled on one of x or y, but not both.
+            (Using `^=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe ~x
+
+            Returns a new MessageFlags with all flags inverted from x.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -356,6 +428,29 @@ class PublicUserFlags(BaseFlags):
         .. describe:: x != y
 
             Checks if two PublicUserFlags are not equal.
+        .. describe:: x | y, x |= y
+
+            Returns a new PublicUserFlags with all enabled flags from both x and y.
+            (Using `|=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x & y, x &= y
+
+            Returns a new PublicUserFlags with only flags enabled on both x and y.
+            (Using `&=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x ^ y, x ^= y
+
+            Returns a new PublicUserFlags with only flags enabled on one of x or y, but not both.
+            (Using `^=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe ~x
+
+            Returns a new PublicUserFlags with all flags inverted from x.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
@@ -501,10 +596,33 @@ class Intents(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two intents are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two intents are not equal.
+        .. describe:: x | y, x |= y
+
+            Returns a new Intents with all enabled intents from both x and y.
+            (Using `|=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x & y, x &= y
+
+            Returns a new Intents with only intents enabled on both x and y.
+            (Using `&=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x ^ y, x ^= y
+
+            Returns a new Intents with only intents enabled on one of x or y, but not both.
+            (Using `^=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe ~x
+
+            Returns a new Intents with all intents inverted from x.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -1027,6 +1145,29 @@ class MemberCacheFlags(BaseFlags):
         .. describe:: x != y
 
             Checks if two flags are not equal.
+        .. describe:: x | y, x |= y
+
+            Returns a new MemberCacheFlags with all enabled flags from both x and y.
+            (Using `|=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x & y, x &= y
+
+            Returns a new MemberCacheFlags with only flags enabled on both x and y.
+            (Using `&=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x ^ y, x ^= y
+
+            Returns a new MemberCacheFlags with only flags enabled on one of x or y, but not both.
+            (Using `^=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe ~x
+
+            Returns a new MemberCacheFlags with all flags inverted from x.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -1141,6 +1282,29 @@ class ApplicationFlags(BaseFlags):
         .. describe:: x != y
 
             Checks if two ApplicationFlags are not equal.
+        .. describe:: x | y, x |= y
+
+            Returns a new ApplicationFlags with all enabled flags from both x and y.
+            (Using `|=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x & y, x &= y
+
+            Returns a new ApplicationFlags with only flags enabled on both x and y.
+            (Using `&=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x ^ y, x ^= y
+
+            Returns a new ApplicationFlags with only flags enabled on one of x or y, but not both.
+            (Using `^=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe ~x
+
+            Returns a new ApplicationFlags with all flags inverted from x.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
@@ -1228,6 +1392,29 @@ class ChannelFlags(BaseFlags):
         .. describe:: x != y
 
             Checks if two flags are not equal.
+        .. describe:: x | y, x |= y
+
+            Returns a new ChannelFlags with all enabled flags from both x and y.
+            (Using `|=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x & y, x &= y
+
+            Returns a new ChannelFlags with only flags enabled on both x and y.
+            (Using `&=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe x ^ y, x ^= y
+
+            Returns a new ChannelFlags with only flags enabled on one of x or y, but not both.
+            (Using `^=` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe ~x
+
+            Returns a new ChannelFlags with all flags inverted from x.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
