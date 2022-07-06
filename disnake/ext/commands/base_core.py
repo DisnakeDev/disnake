@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import Check, Coro, Error, Hook
-    from .cog import Cog, CogT
+    from .cog import Cog
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
@@ -52,7 +52,7 @@ if TYPE_CHECKING:
 
     CommandCallback = Callable[..., Coro[Any]]
     InteractionCommandCallback = Union[
-        Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coro[Any]],
+        Callable[Concatenate["CogT", ApplicationCommandInteractionT, P], Coro[Any]],
         Callable[Concatenate[ApplicationCommandInteractionT, P], Coro[Any]],
     ]
 
