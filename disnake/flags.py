@@ -158,6 +158,26 @@ class BaseFlags:
         self.value ^= other.value
         return self
 
+    def __le__(self, other: Self) -> bool:
+        if isinstance(other, type(self)):
+            return (self.value & other.value) == self.value
+        raise TypeError(f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}")
+
+    def __ge__(self, other: Self) -> bool:
+        if isinstance(other, type(self)):
+            return (self.value | other.value) == self.value
+        raise TypeError(f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}")
+
+    def __lt__(self, other: Self) -> bool:
+        if isinstance(other, type(self)):
+            return (self.value & other.value) == self.value and self.value != other.value
+        raise TypeError(f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}")
+
+    def __gt__(self, other: Self) -> bool:
+        if isinstance(other, type(self)):
+            return (self.value | other.value) == self.value and self.value != other.value
+        raise TypeError(f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}")
+
     def __invert__(self) -> Self:
         # invert the bit but make sure all truthy values are valid flags
         # this code means that if a flag class doesn't define 1 << 2 that

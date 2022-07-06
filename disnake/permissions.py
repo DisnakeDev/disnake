@@ -154,7 +154,7 @@ class Permissions(BaseFlags):
                 raise TypeError(f"{key!r} is not a valid permission name.")
             setattr(self, key, value)
 
-    def is_subset(self, other: Permissions) -> bool:
+    def is_subset(self, other: Self) -> bool:
         """Returns ``True`` if self has the same or fewer permissions as other."""
         if isinstance(other, Permissions):
             return (self.value & other.value) == self.value
@@ -163,7 +163,7 @@ class Permissions(BaseFlags):
                 f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
             )
 
-    def is_superset(self, other: Permissions) -> bool:
+    def is_superset(self, other: Self) -> bool:
         """Returns ``True`` if self has the same or more permissions as other."""
         if isinstance(other, Permissions):
             return (self.value | other.value) == self.value
@@ -172,11 +172,11 @@ class Permissions(BaseFlags):
                 f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
             )
 
-    def is_strict_subset(self, other: Permissions) -> bool:
+    def is_strict_subset(self, other: Self) -> bool:
         """Returns ``True`` if the permissions on self are a strict subset of those on other."""
         return self.is_subset(other) and self != other
 
-    def is_strict_superset(self, other: Permissions) -> bool:
+    def is_strict_superset(self, other: Self) -> bool:
         """Returns ``True`` if the permissions on self are a strict superset of those on other."""
         return self.is_superset(other) and self != other
 
