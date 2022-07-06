@@ -66,6 +66,96 @@ The `Response[]` part in this typehint is referring to `self.request`, as the im
 
 The Route class is how all routes are processed internally. This, along with `self.request` makes it possible to properly handle all ratelimits, and rarely encounter 429s. This is additionally why `channel_id` is provided as a kwarg to `Route`.
 
+### Writing Documentation
+
+While a new feature can be useful, it requires documentation to be useful too. When updating a class or method, we ask that you use
+[sphinx directives](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-versionadded) in the docstring to notate when it was updated, and what about it was updated.
+
+For example, the docstring below for `pins()`.
+
+```py
+      """|coro|
+
+      Retrieves all messages that are currently pinned in the channel.
+
+      .. note::
+
+          Due to a limitation with the Discord API, the :class:`.Message`
+          objects returned by this method do not contain complete
+          :attr:`.Message.reactions` data.
+
+      Raises
+      ------
+      HTTPException
+          Retrieving the pinned messages failed.
+
+      Returns
+      -------
+      List[:class:`.Message`]
+          The messages that are currently pinned.
+      """
+```
+
+If we were to add a new parameter to this method, we would need to add a few things to this docstring. Lets pretend we're adding a parameter, ``oldest_first``.
+
+We use NumPy style docstrings parsed with sphinx's napoleon extension, the primary documentation for these docstrings is [here](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html).
+
+```py
+      """
+      ...
+
+      Parameters
+      ----------
+      oldest_first: bool
+          Whether to order the result by the oldest or newest pins first.
+
+          .. versionadded:: 2.9
+
+      ...
+      """
+```
+
+It is important that the section header comes **after** any description and admonitions that exist, as it will stop the parsing of the description.
+
+It is also desired to put a .. versionchanged:: 2.9 directly below the section header with which parameter was changed, if the function has multiple arguments.
+
+The end result of these changes would be as follows:
+```py
+      """|coro|
+
+      Retrieves all messages that are currently pinned in the channel.
+
+      .. versionchanged:: 2.9
+
+          Added the ``oldest_first`` parameter.
+
+      .. note::
+
+          Due to a limitation with the Discord API, the :class:`.Message`
+          objects returned by this method do not contain complete
+          :attr:`.Message.reactions` data.
+
+      Parameters
+      ----------
+      oldest_first: bool
+          Whether to order the result by the oldest or newest pins first.
+
+          .. versionadded:: 2.9
+
+      Raises
+      ------
+      HTTPException
+          Retrieving the pinned messages failed.
+
+      Returns
+      -------
+      List[:class:`.Message`]
+          The messages that are currently pinned.
+      """
+  ```
+
+*If you have trouble with adding or modifying documentation, don't be afraid to reach out!
+We understand that the documentation can be intimidating, and there's quite a few quirks and limitations to be aware of.*
 
 ## How do I make sure my code is formatted correctly?
 
