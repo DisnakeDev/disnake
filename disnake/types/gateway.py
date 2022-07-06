@@ -64,7 +64,9 @@ class GatewayBot(Gateway):
     session_start_limit: SessionStartLimit
 
 
-# websocket payloads (receive)
+#####
+# Websocket payloads (receive)
+#####
 
 
 class GatewayPayload(TypedDict):
@@ -74,7 +76,9 @@ class GatewayPayload(TypedDict):
     t: Optional[str]  # event name
 
 
-# websocket payloads (send)
+#####
+# Websocket payloads (send)
+#####
 
 # opcode 1
 
@@ -175,7 +179,9 @@ class RequestMembersCommand(TypedDict):
     d: RequestMembersData
 
 
-# voice payloads (receive)
+#####
+# Voice payloads (receive)
+#####
 
 
 class VoicePayload(TypedDict):
@@ -195,7 +201,9 @@ class VoiceSessionDescriptionPayload(TypedDict):
     secret_key: List[int]
 
 
-# voice payloads (send)
+#####
+# Voice payloads (send)
+#####
 
 # voice opcode 0
 
@@ -259,7 +267,9 @@ class VoiceResumeCommand(TypedDict):
     d: VoiceResumeData
 
 
-# events
+#####
+# Gateway events
+#####
 
 # https://discord.com/developers/docs/topics/gateway#ready
 class ReadyEvent(TypedDict):
