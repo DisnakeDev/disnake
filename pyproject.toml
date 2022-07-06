@@ -38,23 +38,24 @@ issue_format = ":issue:`{issue}`"
     showcontent = true
 
     [[tool.towncrier.type]]
+    directory = 'removal'
+    name = "Deprecations"
+    showcontent = true
+
+    [[tool.towncrier.type]]
     directory = 'feature'
-    name = "Features"
+    name = "New Features"
     showcontent = true
 
     [[tool.towncrier.type]]
     directory = 'bugfix'
-    name = "Bugfixes"
+    name = "Bug Fixes"
     showcontent = true
 
-    [[tool.towncrier.type]]
-    directory = 'removal'
-    name = "Deprecations and Removals"
-    showcontent = true
 
     [[tool.towncrier.type]]
     directory = 'doc'
-    name = "Improved Documentation"
+    name = "Documentation"
     showcontent = true
 
     [[tool.towncrier.type]]
@@ -64,8 +65,8 @@ issue_format = ":issue:`{issue}`"
 
     [[tool.towncrier.type]]
     directory = 'misc'
-    name = "Misc"
-    showcontent = false
+    name = "Miscellaneous"
+    showcontent = true
 
 
 [tool.slotscheck]
