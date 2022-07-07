@@ -9,7 +9,7 @@ from disnake.utils import MISSING, utcnow
 _BASE = {"type": "rich"}
 
 
-@pytest.fixture
+@pytest.fixture()
 def embed() -> Embed:
     time = utcnow() + timedelta(days=42)
     return Embed(
@@ -22,7 +22,7 @@ def embed() -> Embed:
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def file() -> File:
     return File(io.BytesIO(b"abcd"), filename="data.txt")
 

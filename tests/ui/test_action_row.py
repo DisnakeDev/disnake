@@ -160,7 +160,8 @@ class TestActionRow:
 
         # check non-strict behavior
         non_strict = ActionRow.rows_from_message(message, strict=False)
-        assert len(non_strict) == 1 and len(non_strict[0]) == 0
+        assert len(non_strict) == 1
+        assert len(non_strict[0]) == 0
 
         # check (default) strict behavior
         with pytest.raises(TypeError, match=r"Encountered unknown component type: .*text_input"):

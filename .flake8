@@ -2,7 +2,10 @@
 max-line-length = 100
 statistics = true
 count = true
+
 noqa-require-code = true
+pytest-mark-no-parentheses = true
+
 exclude =
     .git
     __pycache__
@@ -52,6 +55,10 @@ per-file-ignores =
     disnake/ext/commands/params.py:E241
     # pytest uses assert for testing
     tests/**: S101
+    # ignore pytest issues outside of tests directory
+    disnake/**: PT
+    docs/**: PT
+    examples/**: PT
 
     # B008: runtime function calls are how Params work,
     # S311: examples don't misuse random generation
