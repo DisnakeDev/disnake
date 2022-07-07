@@ -723,7 +723,7 @@ def test_as_chunks_size(max_size):
 @pytest.mark.parametrize(
     ("params", "expected"),
     [
-        ([], tuple()),
+        ([], ()),
         ([disnake.CommandInter, int, Optional[str]], (disnake.CommandInter, int, Optional[str])),
         # check flattening + deduplication (both of these are done automatically in 3.9.1+)
         ([float, Literal[1, 2, Literal[3, 4]], Literal["a", "bc"]], (float, 1, 2, 3, 4, "a", "bc")),

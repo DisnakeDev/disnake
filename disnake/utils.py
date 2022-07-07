@@ -130,7 +130,7 @@ class _cached_property:
 if TYPE_CHECKING:
     from functools import cached_property as cached_property
 
-    from typing_extensions import ParamSpec
+    from typing_extensions import ParamSpec, Self
 
     from .abc import Snowflake
     from .asset import AssetBytes
@@ -160,7 +160,7 @@ class CachedSlotProperty(Generic[T, T_co]):
         self.__doc__ = getattr(function, "__doc__")
 
     @overload
-    def __get__(self, instance: None, owner: Type[T]) -> CachedSlotProperty[T, T_co]:
+    def __get__(self, instance: None, owner: Type[T]) -> Self:
         ...
 
     @overload
@@ -510,7 +510,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
 
 
 def _unique(iterable: Iterable[T]) -> List[T]:
-    return [x for x in dict.fromkeys(iterable)]
+    return list(dict.fromkeys(iterable))
 
 
 def _get_as_snowflake(data: Any, key: str) -> Optional[int]:

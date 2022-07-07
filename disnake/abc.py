@@ -74,6 +74,8 @@ T = TypeVar("T", bound=VoiceProtocol)
 if TYPE_CHECKING:
     from datetime import datetime
 
+    from typing_extensions import Self
+
     from .asset import Asset
     from .channel import CategoryChannel, DMChannel, PartialMessageable
     from .client import Client
@@ -218,9 +220,6 @@ class _Overwrites:
 
     def is_member(self) -> bool:
         return self.type == 1
-
-
-GCH = TypeVar("GCH", bound="GuildChannel")
 
 
 class GuildChannel(ABC):
@@ -891,12 +890,12 @@ class GuildChannel(ABC):
             raise TypeError("Invalid overwrite type provided.")
 
     async def _clone_impl(
-        self: GCH,
+        self,
         base_attrs: Dict[str, Any],
         *,
         name: Optional[str] = None,
         reason: Optional[str] = None,
-    ) -> GCH:
+    ) -> Self:
         base_attrs["permission_overwrites"] = [x._asdict() for x in self._overwrites]
         base_attrs["parent_id"] = self.category_id
         base_attrs["name"] = name or self.name
@@ -911,7 +910,7 @@ class GuildChannel(ABC):
         self.guild._channels[obj.id] = obj  # type: ignore
         return obj
 
-    async def clone(self: GCH, *, name: Optional[str] = None, reason: Optional[str] = None) -> GCH:
+    async def clone(self, *, name: Optional[str] = None, reason: Optional[str] = None) -> Self:
         """|coro|
 
         Clones this channel. This creates a channel with the same properties

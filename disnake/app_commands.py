@@ -42,6 +42,8 @@ from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .i18n import LocalizationProtocol, LocalizationValue, LocalizedOptional, LocalizedRequired
     from .state import ConnectionState
     from .types.interactions import (
@@ -650,7 +652,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     __repr_info__ = UserCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> APIUserCommand:
+    def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.user.value:
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
@@ -733,7 +735,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     __repr_info__ = MessageCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> APIMessageCommand:
+    def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.message.value:
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
@@ -912,7 +914,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     __repr_info__ = SlashCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> APISlashCommand:
+    def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.chat_input.value:
             raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")

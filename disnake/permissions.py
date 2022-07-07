@@ -26,21 +26,13 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from functools import wraps
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Dict,
-    Iterator,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, Iterator, Optional, Set, Tuple
 
 from .flags import BaseFlags, alias_flag_value, fill_with_flags, flag_value
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 
 __all__ = (
     "Permissions",
@@ -74,9 +66,6 @@ def cached_creation(func):
         return cls(value)
 
     return wrapped
-
-
-P = TypeVar("P", bound="Permissions")
 
 
 @fill_with_flags()
@@ -161,11 +150,11 @@ class Permissions(BaseFlags):
             )
 
     def is_strict_subset(self, other: Permissions) -> bool:
-        """Returns ``True`` if the permissions on other are a strict subset of those on self."""
+        """Returns ``True`` if the permissions on self are a strict subset of those on other."""
         return self.is_subset(other) and self != other
 
     def is_strict_superset(self, other: Permissions) -> bool:
-        """Returns ``True`` if the permissions on other are a strict superset of those on self."""
+        """Returns ``True`` if the permissions on self are a strict superset of those on other."""
         return self.is_superset(other) and self != other
 
     __le__ = is_subset
@@ -175,14 +164,14 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def none(cls: Type[P]) -> P:
+    def none(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``False``."""
         return cls(0)
 
     @classmethod
     @cached_creation
-    def all(cls: Type[P]) -> P:
+    def all(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
@@ -190,7 +179,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def all_channel(cls: Type[P]) -> P:
+    def all_channel(cls) -> Self:
         """A :class:`Permissions` with all channel-specific permissions set to
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
         permissions are currently:
@@ -234,7 +223,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def general(cls: Type[P]) -> P:
+    def general(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "General" permissions from the official Discord UI set to ``True``.
 
@@ -257,7 +246,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def membership(cls: Type[P]) -> P:
+    def membership(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Membership" permissions from the official Discord UI set to ``True``.
 
@@ -277,7 +266,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def text(cls: Type[P]) -> P:
+    def text(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Text" permissions from the official Discord UI set to ``True``.
 
@@ -309,7 +298,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def voice(cls: Type[P]) -> P:
+    def voice(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Voice" permissions from the official Discord UI set to ``True``.
 
@@ -330,7 +319,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def stage(cls: Type[P]) -> P:
+    def stage(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Channel" permissions from the official Discord UI set to ``True``.
 
@@ -342,7 +331,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def stage_moderator(cls: Type[P]) -> P:
+    def stage_moderator(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Moderator" permissions from the official Discord UI set to ``True``.
 
@@ -356,7 +345,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def events(cls: Type[P]) -> P:
+    def events(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Events" permissions from the official Discord UI set to ``True``.
 
@@ -368,7 +357,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def advanced(cls: Type[P]) -> P:
+    def advanced(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Advanced" permissions from the official Discord UI set to ``True``.
 
@@ -380,7 +369,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def private_channel(cls: Type[P]) -> P:
+    def private_channel(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with the
         best representation of a PrivateChannel's permissions.
 
@@ -744,9 +733,6 @@ class Permissions(BaseFlags):
         return 1 << 40
 
 
-PO = TypeVar("PO", bound="PermissionOverwrite")
-
-
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
     aliases = set()
@@ -899,7 +885,7 @@ class PermissionOverwrite:
         return allow, deny
 
     @classmethod
-    def from_pair(cls: Type[PO], allow: Permissions, deny: Permissions) -> PO:
+    def from_pair(cls, allow: Permissions, deny: Permissions) -> Self:
         """Creates an overwrite from an allow/deny pair of :class:`Permissions`."""
         ret = cls()
         for key, value in allow:
