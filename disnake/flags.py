@@ -518,12 +518,25 @@ class Intents(BaseFlags):
     value: :class:`int`
         The raw value. You should query flags via the properties
         rather than using this raw value.
+
+        .. versionchanged:: 2.6
+
+            This can be now be provided on initialisation.
     """
 
     __slots__ = ()
 
-    def __init__(self, **kwargs: bool):
-        self.value = self.DEFAULT_VALUE
+    def __init__(self, value: Optional[int] = None, **kwargs: bool):
+        if value is not None:
+            if not isinstance(value, int):
+                raise TypeError(
+                    f"Expected int, received {type(value).__name__} for argument 'value'."
+                )
+            if value < 0:
+                raise ValueError("Expected a non-negative value.")
+            self.value = value
+        else:
+            self.value = self.DEFAULT_VALUE
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
                 raise TypeError(f"{key!r} is not a valid flag name.")
