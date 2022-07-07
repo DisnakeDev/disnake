@@ -1,0 +1,22 @@
+name: changelog entry
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, unlabeled, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check-changelog-entry:
+    name: Check for changelog entry
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for the changelog entry
+        if: contains(github.event.pull_request.labels.*.name, 'skip news') != true
+        run: |
+          test -f changelog/${{ github.event.pull_request.number }}.*.rst || \
+          (echo "Please create a changelog entry in the changelog directory (or if appropriate, ask a maintainer to add the 'skip news' label)" && \
+          exit 1)
