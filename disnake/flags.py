@@ -33,16 +33,19 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Generic,
     Iterator,
     List,
     Optional,
     Tuple,
     Type,
     TypeVar,
+    Union,
     overload,
 )
 
 from .enums import UserFlags
+from .utils import MISSING
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -59,15 +62,21 @@ __all__ = (
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
+T = TypeVar("T", bound="BaseFlags")
 
 
-class flag_value:
+class flag_value(Generic[T]):
     def __init__(self, func: Callable[[Any], int]):
         self.flag = func(None)
         self.__doc__ = func.__doc__
+        self._parent: Type[T] = MISSING
+
+    def __or__(self, other: flag_value[T]) -> T:
+        assert self._parent is other._parent  # noqa: S101
+        return self._parent._from_value(self.flag | other.flag)
 
     @overload
-    def __get__(self, instance: None, owner: Type[BF]) -> Self:
+    def __get__(self, instance: None, owner: Type[BF]) -> flag_value[BF]:
         ...
 
     @overload
@@ -96,11 +105,11 @@ def all_flags_value(flags: Dict[str, int]) -> int:
 
 def fill_with_flags(*, inverted: bool = False):
     def decorator(cls: Type[BF]) -> Type[BF]:
-        cls.VALID_FLAGS = {
-            name: value.flag
-            for name, value in cls.__dict__.items()
-            if isinstance(value, flag_value)
-        }
+        cls.VALID_FLAGS = {}
+        for name, value in cls.__dict__.items():
+            if isinstance(value, flag_value):
+                value._parent = cls
+                cls.VALID_FLAGS[name] = value.flag
 
         if inverted:
             cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS)
@@ -155,7 +164,10 @@ class BaseFlags:
         self.value &= other.value
         return self
 
-    def __or__(self, other: Self) -> Self:
+    def __or__(self, other: Union[Self, flag_value[Self]]) -> Self:
+        if isinstance(other, flag_value):
+            assert type(self) is other._parent  # noqa: S101
+            return self._from_value(self.value | other.flag)
         if not isinstance(other, self.__class__):
             raise TypeError(
                 f"unsupported operand type(s) for |: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
@@ -171,13 +183,20 @@ class BaseFlags:
         return self
 
     def __xor__(self, other: Self) -> Self:
+        if isinstance(other, flag_value):
+            assert type(self) is other._parent  # noqa: S101
+            return self._from_value(self.value ^ other.flag)
         if not isinstance(other, self.__class__):
             raise TypeError(
                 f"unsupported operand type(s) for ^: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
             )
         return self._from_value(self.value ^ other.value)
 
-    def __ixor__(self, other: Self) -> Self:
+    def __ixor__(self, other: Union[Self, flag_value[Self]]) -> Self:
+        if isinstance(other, flag_value):
+            assert type(self) is other._parent  # noqa: S101
+            self.value ^= other.flag
+            return self
         if not isinstance(other, self.__class__):
             raise TypeError(
                 f"unsupported operand type(s) for ^=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
@@ -249,80 +268,80 @@ class BaseFlags:
 @fill_with_flags(inverted=True)
 class SystemChannelFlags(BaseFlags):
     """
-    Wraps up a Discord system channel flag value.
+        Wraps up a Discord system channel flag value.
 
-    Similar to :class:`Permissions`\\, the properties provided are two way.
-    You can set and retrieve individual bits using the properties as if they
-    were regular bools. This allows you to edit the system flags easily.
+        Similar to :class:`Permissions`\\, the properties provided are two way.
+        You can set and retrieve individual bits using the properties as if they
+        were regular bools. This allows you to edit the system flags easily.
 
-    To construct an object you can pass keyword arguments denoting the flags
-    to enable or disable.
+        To construct an object you can pass keyword arguments denoting the flags
+        to enable or disable.
 
-    .. container:: operations
+        .. container:: operations
 
-        .. describe:: x == y
+            .. describe:: x == y
 
-            Checks if two SystemChannelFlags instances are equal.
-        .. describe:: x != y
+                Checks if two SystemChannelFlags instances are equal.
+            .. describe:: x != y
 
-            Checks if two SystemChannelFlags instances are not equal.
-        .. describe:: x <= y
+                Checks if two SystemChannelFlags instances are not equal.
+            .. describe:: x <= y
 
-            Checks if a SystemChannelFlags instance is a subset of another SystemChannelFlags instance.
+                Checks if a SystemChannelFlags instance is a subset of another SystemChannelFlags instance.
 
-            .. versionadded:: 2.6
-        .. describe:: x >= y
+                .. versionadded:: 2.6
+            .. describe:: x >= y
 
-            Checks if a SystemChannelFlags instance is a superset of another SystemChannelFlags instance.
+                Checks if a SystemChannelFlags instance is a superset of another SystemChannelFlags instance.
 
-            .. versionadded:: 2.6
-        .. describe:: x < y
+                .. versionadded:: 2.6
+            .. describe:: x < y
 
-            Checks if a SystemChannelFlags instance is a strict subset of another SystemChannelFlags instance.
+                Checks if a SystemChannelFlags instance is a strict subset of another SystemChannelFlags instance.
 
-            .. versionadded:: 2.6
-        .. describe:: x > y
+                .. versionadded:: 2.6
+            .. describe:: x > y
 
-            Checks if a SystemChannelFlags instance is a strict superset of another SystemChannelFlags instance.
+                Checks if a SystemChannelFlags instance is a strict superset of another SystemChannelFlags instance.
 
-            .. versionadded:: 2.6
-        .. describe:: x | y, x |= y
+                .. versionadded:: 2.6
+            .. describe:: x | y, x |= y
 
-            Returns a new SystemChannelFlags instance with all enabled flags from both x and y.
-            (Using ``|=`` will update in place).
+                Returns a new SystemChannelFlags instance with all enabled flags from both x and y.
+                (Using ``|=`` will update in place).
 
-            .. versionadded:: 2.6
-        .. describe:: x & y, x &= y
+                .. versionadded:: 2.6
+            .. describe:: x & y, x &= y
 
-            Returns a new SystemChannelFlags instance with only flags enabled on both x and y.
-            (Using ``&=`` will update in place).
+                Returns a new SystemChannelFlags instance with only flags enabled on both x and y.
+                (Using ``&=`` will update in place).
 
-            .. versionadded:: 2.6
-        .. describe:: x ^ y, x ^= y
+                .. versionadded:: 2.6
+            .. describe:: x ^ y, x ^= y
 
-            Returns a new SystemChannelFlags instance with only flags enabled on one of x or y, but not both.
-            (Using ``^=`` will update in place).
+                Returns a new SystemChannelFlags instance with only flags enabled on one of x or y, but not both.
+                (Using ``^=`` will update in place).
 
-            .. versionadded:: 2.6
-        .. describe:: ~x
+                .. versionadded:: 2.6
+            .. describe:: ~x
 
-            Returns a new SystemChannelFlags instance with all flags from x inverted.
+                Returns a new SystemChannelFlags instance with all flags from x inverted.
 
-            .. versionadded:: 2.6
-        .. describe:: hash(x)
+                .. versionadded:: 2.6
+            .. describe:: hash(x)
 
-               Return the flag's hash.
-        .. describe:: iter(x)
+                   Return the flag's hash.
+            .. describe:: iter(x)
 
-               Returns an iterator of ``(name, value)`` pairs. This allows it
-               to be, for example, constructed as a dict or a list of pairs.
+                   Returns an iterator of ``(name, value)`` pairs. This allows it
+                   to be, for example, constructed as a dict or a list of pairs.
 
-    Attributes
-    ----------
-    value: :class:`int`
-        The raw value. This value is a bit array field of a 53-bit integer
-        representing the currently available flags. You should query
-        flags via the properties rather than using this raw value.
+        Attributes
+        ----------
+        value: :class:`int`
+            The raw value. This value is a bit array field of a 53-bit integer
+            representing the currently available flags. You should query
+            flags via the properties rather than using this raw value.
     """
 
     __slots__ = ()
