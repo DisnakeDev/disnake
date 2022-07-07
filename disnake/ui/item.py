@@ -35,7 +35,6 @@ from typing import (
     Optional,
     Protocol,
     Tuple,
-    Type,
     TypeVar,
     overload,
 )
@@ -46,6 +45,8 @@ I = TypeVar("I", bound="Item")
 V = TypeVar("V", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ..components import NestedComponent
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
@@ -134,7 +135,7 @@ class Item(WrappedComponent, Generic[V]):
         return None
 
     @classmethod
-    def from_component(cls: Type[I], component: NestedComponent) -> I:
+    def from_component(cls, component: NestedComponent) -> Self:
         return cls()
 
     def is_dispatchable(self) -> bool:

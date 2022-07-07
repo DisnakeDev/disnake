@@ -104,7 +104,6 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
 
     T = TypeVar("T")
-    CS = TypeVar("CS", bound="ConnectionState")
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
     PartialChannel = Union[Channel, PartialMessageable]
 
