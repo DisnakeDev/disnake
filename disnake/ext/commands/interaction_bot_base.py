@@ -51,7 +51,6 @@ from disnake.enums import ApplicationCommandType
 from . import errors
 from .base_core import InvokableApplicationCommand
 from .common_bot_base import CommonBotBase
-from .context import Context
 from .ctx_menus_core import (
     InvokableMessageCommand,
     InvokableUserCommand,
@@ -84,7 +83,6 @@ MISSING: Any = disnake.utils.MISSING
 
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
-CXT = TypeVar("CXT", bound="Context")
 
 
 _log = logging.getLogger(__name__)

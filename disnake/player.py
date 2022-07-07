@@ -35,7 +35,7 @@ import sys
 import threading
 import time
 import traceback
-from typing import IO, TYPE_CHECKING, Any, Callable, Generic, Optional, Tuple, Type, TypeVar, Union
+from typing import IO, TYPE_CHECKING, Any, Callable, Generic, Optional, Tuple, TypeVar, Union
 
 from . import utils
 from .errors import ClientException
@@ -43,13 +43,15 @@ from .oggparse import OggStream
 from .opus import Encoder as OpusEncoder
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .voice_client import VoiceClient
+
 
 MISSING = utils.MISSING
 
 
 AT = TypeVar("AT", bound="AudioSource")
-FT = TypeVar("FT", bound="FFmpegOpusAudio")
 
 _log = logging.getLogger(__name__)
 
@@ -432,14 +434,14 @@ class FFmpegOpusAudio(FFmpegAudio):
 
     @classmethod
     async def from_probe(
-        cls: Type[FT],
+        cls,
         source: str,
         *,
         method: Optional[
             Union[str, Callable[[str, str], Tuple[Optional[str], Optional[int]]]]
         ] = None,
         **kwargs: Any,
-    ) -> FT:
+    ) -> Self:
         """|coro|
 
         A factory method that creates a :class:`FFmpegOpusAudio` after probing

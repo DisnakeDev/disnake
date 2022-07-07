@@ -64,7 +64,6 @@ if TYPE_CHECKING:
 __all__ = ("CommonBotBase",)
 
 CogT = TypeVar("CogT", bound="Cog")
-FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 CFT = TypeVar("CFT", bound="CoroFunc")
 
 MISSING: Any = disnake.utils.MISSING

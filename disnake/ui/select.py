@@ -27,18 +27,7 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, TypeVar, Union, overload
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
@@ -52,12 +41,13 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ..emoji import Emoji
     from ..interactions import MessageInteraction
     from .item import ItemCallbackType
     from .view import View
 
-S = TypeVar("S", bound="Select")
 V = TypeVar("V", bound="Optional[View]", covariant=True)
 
 
@@ -322,7 +312,7 @@ class Select(Item[V]):
         self._selected_values = interaction.values  # type: ignore
 
     @classmethod
-    def from_component(cls: Type[S], component: SelectMenu) -> S:
+    def from_component(cls, component: SelectMenu) -> Self:
         return cls(
             custom_id=component.custom_id,
             placeholder=component.placeholder,

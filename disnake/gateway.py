@@ -47,7 +47,6 @@ from typing import (
     NamedTuple,
     Optional,
     Protocol,
-    Type,
     TypeVar,
     Union,
 )
@@ -60,6 +59,8 @@ from .enums import SpeakingState
 from .errors import ConnectionClosed
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .client import Client
     from .state import ConnectionState
     from .types.gateway import (
@@ -82,8 +83,6 @@ if TYPE_CHECKING:
     from .voice_client import VoiceClient
 
     T = TypeVar("T")
-    WebSocketT = TypeVar("WebSocketT", bound="DiscordWebSocket")
-    VoiceWebSocketT = TypeVar("VoiceWebSocketT", bound="DiscordVoiceWebSocket")
 
     class DispatchFunc(Protocol):
         def __call__(self, event: str, *args: Any) -> None:
@@ -407,7 +406,7 @@ class DiscordWebSocket:
 
     @classmethod
     async def from_client(
-        cls: Type[WebSocketT],
+        cls,
         client: Client,
         *,
         initial: bool = False,
@@ -416,7 +415,7 @@ class DiscordWebSocket:
         session: Optional[str] = None,
         sequence: Optional[int] = None,
         resume: bool = False,
-    ) -> WebSocketT:
+    ) -> Self:
         """Creates a main websocket for Discord from a :class:`Client`.
 
         This is for internal use only.
@@ -932,12 +931,12 @@ class DiscordVoiceWebSocket:
 
     @classmethod
     async def from_client(
-        cls: Type[VoiceWebSocketT],
+        cls,
         client: VoiceClient,
         *,
         resume: bool = False,
         hook: Optional[HookFunc] = None,
-    ) -> VoiceWebSocketT:
+    ) -> Self:
         """Creates a voice websocket for the :class:`VoiceClient`."""
         gateway = f"wss://{client.endpoint}/?v=4"
         http = client._state.http
