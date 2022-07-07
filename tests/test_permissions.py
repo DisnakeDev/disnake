@@ -20,21 +20,23 @@ class TestPermissions:
 
     def test_init_invalid_value(self) -> None:
         with pytest.raises(TypeError, match="Expected int parameter, received str instead."):
-            Permissions("h")  # type:ignore
+            Permissions("h")  # type: ignore
 
     def test_init_invalid_perms(self) -> None:
         with pytest.raises(TypeError, match="'h' is not a valid permission name."):
             Permissions(h=True)
 
     @pytest.mark.parametrize(
-        ("perms", "other", "expected"),
+        ("perms_int", "other_int", "expected"),
         [
-            (Permissions(3), Permissions(2), False),
-            (Permissions(2), Permissions(2), True),
-            (Permissions(1), Permissions(3), True),
+            (0b11, 0b10, False),
+            (0b10, 0b10, True),
+            (0b01, 0b11, True),
         ],
     )
-    def test_is_subset(self, perms: Permissions, other: Permissions, expected: bool) -> None:
+    def test_is_subset(self, perms_int: int, other_int: int, expected: bool) -> None:
+        perms = Permissions(perms_int)
+        other = Permissions(other_int)
         assert perms.is_subset(other) is expected
 
     def test_is_subset_only_permissions(self) -> None:
@@ -43,14 +45,16 @@ class TestPermissions:
             perms.is_subset(5)  # type: ignore
 
     @pytest.mark.parametrize(
-        ("perms", "other", "expected"),
+        ("perms_int", "other_int", "expected"),
         [
-            (Permissions(3), Permissions(2), True),
-            (Permissions(2), Permissions(2), True),
-            (Permissions(1), Permissions(3), False),
+            (0b11, 0b10, True),
+            (0b10, 0b10, True),
+            (0b01, 0b11, False),
         ],
     )
-    def test_is_superset(self, perms: Permissions, other: Permissions, expected: bool) -> None:
+    def test_is_superset(self, perms_int: int, other_int: int, expected: bool) -> None:
+        perms = Permissions(perms_int)
+        other = Permissions(other_int)
         assert perms.is_superset(other) is expected
 
     def test_is_superset_only_permissions(self) -> None:
@@ -59,42 +63,49 @@ class TestPermissions:
             perms.is_superset(5)  # type: ignore
 
     @pytest.mark.parametrize(
-        ("perms", "other", "expected"),
+        ("perms_int", "other_int", "expected"),
         [
-            (Permissions(3), Permissions(2), False),
-            (Permissions(2), Permissions(2), False),
-            (Permissions(1), Permissions(3), True),
+            (0b11, 0b10, False),
+            (0b10, 0b10, False),
+            (0b01, 0b11, True),
         ],
     )
-    def test_is_strict_subset(self, perms: Permissions, other: Permissions, expected: bool) -> None:
+    def test_is_strict_subset(self, perms_int: int, other_int: int, expected: bool) -> None:
+        perms = Permissions(perms_int)
+        other = Permissions(other_int)
         assert perms.is_strict_subset(other) is expected
 
     @pytest.mark.parametrize(
-        ("perms", "other", "expected"),
+        ("perms_int", "other_int", "expected"),
         [
-            (Permissions(3), Permissions(2), True),
-            (Permissions(2), Permissions(2), False),
-            (Permissions(1), Permissions(3), False),
+            (0b11, 0b10, True),
+            (0b10, 0b10, False),
+            (0b01, 0b11, False),
         ],
     )
-    def test_is_strict_superset(
-        self, perms: Permissions, other: Permissions, expected: bool
-    ) -> None:
+    def test_is_strict_superset(self, perms_int: int, other_int: int, expected: bool) -> None:
+        perms = Permissions(perms_int)
+        other = Permissions(other_int)
+
         assert perms.is_strict_superset(other) is expected
 
     @pytest.mark.parametrize(
-        ("perms", "update", "expected"),
+        ("perms_dict", "update", "expected"),
         [
-            [
-                Permissions(view_channel=True),
+            (
+                {"view_channel": True},
                 {"move_members": True},
                 {"view_channel": True, "move_members": True},
-            ],
+            ),
         ],
     )
     def test_update(
-        self, perms: Permissions, update: Dict[str, bool], expected: Dict[str, Literal[True]]
+        self,
+        perms_dict: Dict[str, bool],
+        update: Dict[str, bool],
+        expected: Dict[str, Literal[True]],
     ) -> None:
+        perms = Permissions(**perms_dict)
         perms.update(**update)
 
         expected_perms = Permissions(**expected)
@@ -112,26 +123,26 @@ class TestPermissions:
             ),
         ],
     )
-    def test_dict(self, parameters: dict, expected: Optional[dict]) -> None:
+    def test_iter(self, parameters: Dict[str, bool], expected: Optional[Dict[str, bool]]) -> None:
         perms = Permissions(**parameters)
-        perms_dict = dict(perms)
         if expected is None:
             expected = parameters
-        for key in perms_dict:
+        for key, value in iter(perms):
             if key in expected:
-                assert perms_dict[key] == expected[key]
+                assert value == expected.pop(key)
             else:
-                assert perms_dict[key] is False
+                assert value is False
+        assert not len(expected)
 
-    def test_dict_ignores(self) -> None:
+    def test_update_ignores(self) -> None:
         perms = Permissions()
         perms.update(h=True)
 
     @pytest.mark.parametrize(
         ("initial", "allow", "deny", "expected"),
         [
-            (0x1010, 0x0101, 0x1111, 0x0101),
-            (0x1010, 0x0101, 0x1111, 0x0101),
+            (0b1010, 0b0101, 0b1111, 0b0101),
+            (0b0011, 0b0100, 0b0001, 0b0110),
             (0x0400, 0x0401, 0x5001, 0x0401),
         ],
     )
@@ -181,7 +192,7 @@ class TestPermissionOverwrite:
         assert perms.manage_messages is True
 
     def test_init_invalid_perms(self) -> None:
-        with pytest.raises(TypeError, match="'h' is not a valid permission name."):
+        with pytest.raises(ValueError, match="'h' is not a valid permission name."):
             PermissionOverwrite(h=True)
 
     def test_equality(self) -> None:
@@ -210,25 +221,38 @@ class TestPermissionOverwrite:
         with pytest.raises(TypeError, match="Expected bool or NoneType, received str"):
             po.connect = "h"  # type: ignore
 
+        with pytest.raises(
+            AttributeError, match="'PermissionOverwrite' object has no attribute 'oh'"
+        ):
+            po.oh = False  # type: ignore
+
     @pytest.mark.parametrize(
         ("allow", "deny"),
         [
-            [0x1, 0x2],
-            [0x313, 0x313],
-            [0x69420, 0x3600],
+            ({"view_channel": True}, {"ban_members": True}),
+            ({"view_channel": True}, {"view_channel": True}),
+            ({"administrator": True}, {"manage_channels": False}),
         ],
     )
-    def test_from_pair(self, allow: int, deny: int) -> None:
-        p_allow = Permissions(allow)
-        p_deny = Permissions(deny)
-        po = PermissionOverwrite.from_pair(p_allow, p_deny)
-        for perm, allowed in p_allow:
-            if allowed and not getattr(p_deny, perm):
+    def test_from_pair(
+        self,
+        allow: Dict[str, bool],
+        deny: Dict[str, bool],
+    ) -> None:
+        perm_allow = Permissions(**allow)
+        perm_deny = Permissions(**deny)
+
+        po = PermissionOverwrite.from_pair(perm_allow, perm_deny)
+
+        # iterate over the allowed perms and assert that the overwrite is what the allowed perms are
+        for perm, allowed in perm_allow:
+            # get the attr from the denied perms as denied perms override the allow list in from_pair
+            if allowed and not getattr(perm_deny, perm):
                 assert getattr(po, perm) is True
             else:
                 assert getattr(po, perm) is not True
 
-        for perm, denied in p_deny:
+        for perm, denied in deny.items():
             if denied:
                 assert getattr(po, perm) is False
             else:
@@ -238,9 +262,9 @@ class TestPermissionOverwrite:
         ("allow", "deny"),
         [
             # these intentionally do not interfere with each other
-            [0x1, 0x2],
-            [0x313, 0x424],
-            [0x69420, 0x2301],
+            (0b1, 0b10),
+            (0x313, 0x424),
+            (0x69420, 0x2301),
         ],
     )
     def test_pair(self, allow: int, deny: int) -> None:

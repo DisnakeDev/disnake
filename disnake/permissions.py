@@ -854,7 +854,7 @@ class PermissionOverwrite:
 
         for key, value in kwargs.items():
             if key not in self.VALID_NAMES:
-                raise TypeError(f"{key!r} is not a valid permission name.")
+                raise ValueError(f"{key!r} is not a valid permission name.")
 
             setattr(self, key, value)
 
