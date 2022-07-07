@@ -68,6 +68,8 @@ _log = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from types import TracebackType
 
+    from typing_extensions import Self
+
     from .enums import InteractionResponseType
     from .file import File
     from .message import Attachment
@@ -100,8 +102,6 @@ if TYPE_CHECKING:
     from .types.snowflake import Snowflake, SnowflakeList
 
     T = TypeVar("T")
-    BE = TypeVar("BE", bound=BaseException)
-    MU = TypeVar("MU", bound="MaybeUnlock")
     Response = Coroutine[Any, Any, T]
 
 _API_VERSION = 10
@@ -220,7 +220,7 @@ class MaybeUnlock:
         self.lock: asyncio.Lock = lock
         self._unlock: bool = True
 
-    def __enter__(self: MU) -> MU:
+    def __enter__(self) -> Self:
         return self
 
     def defer(self) -> None:
@@ -228,8 +228,8 @@ class MaybeUnlock:
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BE]],
-        exc: Optional[BE],
+        exc_type: Optional[Type[BaseException]],
+        exc: Optional[BaseException],
         traceback: Optional[TracebackType],
     ) -> None:
         if self._unlock:

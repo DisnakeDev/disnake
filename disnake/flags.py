@@ -28,6 +28,7 @@ from __future__ import annotations
 import functools
 import operator
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
@@ -44,6 +45,10 @@ from typing import (
 
 from .enums import UserFlags
 
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
+
 __all__ = (
     "SystemChannelFlags",
     "MessageFlags",
@@ -55,7 +60,6 @@ __all__ = (
     "AutoModKeywordPresets",
 )
 
-FV = TypeVar("FV", bound="flag_value")
 BF = TypeVar("BF", bound="BaseFlags")
 
 
@@ -65,7 +69,7 @@ class flag_value:
         self.__doc__ = func.__doc__
 
     @overload
-    def __get__(self: FV, instance: None, owner: Type[BF]) -> FV:
+    def __get__(self, instance: None, owner: Type[BF]) -> Self:
         ...
 
     @overload
@@ -93,7 +97,7 @@ def all_flags_value(flags: Dict[str, int]) -> int:
 
 
 def fill_with_flags(*, inverted: bool = False):
-    def decorator(cls: Type[BF]):
+    def decorator(cls: Type[BF]) -> Type[BF]:
         cls.VALID_FLAGS = {
             name: value.flag
             for name, value in cls.__dict__.items()
@@ -127,7 +131,7 @@ class BaseFlags:
             setattr(self, key, value)
 
     @classmethod
-    def _from_value(cls, value):
+    def _from_value(cls, value: int) -> Self:
         self = cls.__new__(cls)
         self.value = value
         return self
@@ -554,33 +558,46 @@ class Intents(BaseFlags):
     value: :class:`int`
         The raw value. You should query flags via the properties
         rather than using this raw value.
+
+        .. versionchanged:: 2.6
+
+            This can be now be provided on initialisation.
     """
 
     __slots__ = ()
 
-    def __init__(self, **kwargs: bool):
-        self.value = self.DEFAULT_VALUE
+    def __init__(self, value: Optional[int] = None, **kwargs: bool):
+        if value is not None:
+            if not isinstance(value, int):
+                raise TypeError(
+                    f"Expected int, received {type(value).__name__} for argument 'value'."
+                )
+            if value < 0:
+                raise ValueError("Expected a non-negative value.")
+            self.value = value
+        else:
+            self.value = self.DEFAULT_VALUE
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
                 raise TypeError(f"{key!r} is not a valid flag name.")
             setattr(self, key, value)
 
     @classmethod
-    def all(cls: Type[Intents]) -> Intents:
+    def all(cls) -> Self:
         """A factory method that creates a :class:`Intents` with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
-    def none(cls: Type[Intents]) -> Intents:
+    def none(cls) -> Self:
         """A factory method that creates a :class:`Intents` with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
 
     @classmethod
-    def default(cls: Type[Intents]) -> Intents:
+    def default(cls) -> Self:
         """A factory method that creates a :class:`Intents` with everything enabled
         except :attr:`presences`, :attr:`members`, and :attr:`message_content`.
         """
@@ -1133,14 +1150,14 @@ class MemberCacheFlags(BaseFlags):
             setattr(self, key, value)
 
     @classmethod
-    def all(cls: Type[MemberCacheFlags]) -> MemberCacheFlags:
+    def all(cls) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
-    def none(cls: Type[MemberCacheFlags]) -> MemberCacheFlags:
+    def none(cls) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
@@ -1172,7 +1189,7 @@ class MemberCacheFlags(BaseFlags):
         return 2
 
     @classmethod
-    def from_intents(cls: Type[MemberCacheFlags], intents: Intents) -> MemberCacheFlags:
+    def from_intents(cls, intents: Intents) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` based on
         the currently selected :class:`Intents`.
 

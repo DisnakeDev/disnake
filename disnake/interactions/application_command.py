@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
 
 from .. import utils
 from ..channel import _threaded_channel_factory
@@ -82,9 +82,6 @@ if TYPE_CHECKING:
         VoiceChannel,
         ForumChannel,
     ]
-
-
-AppCmdDataOptionT = TypeVar("AppCmdDataOptionT", bound="ApplicationCommandInteractionDataOption")
 
 
 class ApplicationCommandInteraction(Interaction):
