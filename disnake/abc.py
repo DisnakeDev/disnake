@@ -69,7 +69,7 @@ __all__ = (
     "Connectable",
 )
 
-T = TypeVar("T", bound=VoiceProtocol)
+VoiceProtocolT = TypeVar("VoiceProtocolT", bound=VoiceProtocol)
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -1765,8 +1765,8 @@ class Connectable(Protocol):
         *,
         timeout: float = 60.0,
         reconnect: bool = True,
-        cls: Callable[[Client, Connectable], T] = VoiceClient,
-    ) -> T:
+        cls: Callable[[Client, Connectable], VoiceProtocolT] = VoiceClient,
+    ) -> VoiceProtocolT:
         """|coro|
 
         Connects to voice and creates a :class:`VoiceClient` to establish
