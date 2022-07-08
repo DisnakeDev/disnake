@@ -159,11 +159,6 @@ class Embed:
         The colour code of the embed. Aliased to ``color`` as well.
         In addition to :class:`Colour`, :class:`int` can also be assigned to it,
         in which case the value will be converted to a :class:`Colour` object.
-
-    Raises
-    ------
-    ValueError
-        The description or title is too long.
     """
 
     __slots__ = (
@@ -197,19 +192,11 @@ class Embed:
         colour: Optional[Union[int, Colour]] = MISSING,
         color: Optional[Union[int, Colour]] = MISSING,
     ):
-        title = str(title) if title is not None else None
-        if title and len(title.strip()) > 256:
-            raise ValueError("Embed title cannot be longer than 256 characters")
-
-        description = str(description) if description is not None else None
-        if description and len(description.strip()) > 4096:
-            raise ValueError("Embed description cannot be longer than 4096 characters")
-
-        self.description: Optional[str] = description
-        self.title: Optional[str] = title
-
+        self.title: Optional[str] = str(title) if title is not None else None
         self.type: Optional[EmbedType] = type
+        self.description: Optional[str] = str(description) if description is not None else None
         self.url: Optional[str] = str(url) if url is not None else None
+
         self.timestamp = timestamp
 
         # possible values:
@@ -242,41 +229,17 @@ class Embed:
         ----------
         data: :class:`dict`
             The dictionary to convert into an embed.
-
-        Raises
-        ------
-        ValueError
-            Any field is too long or causes the embed to excees the maximum size.
         """
         # we are bypassing __init__ here since it doesn't apply here
         self = cls.__new__(cls)
 
-        # fill in the basic fields and check that each field is within the limits
-        title = str(title) if (title := data.get("title")) is not None else None
-        if title and len(title.strip()) > 256:
-            raise ValueError("Embed title cannot be longer than 256 characters")
+        # fill in the basic fields
 
-        description = (
+        self.title = str(title) if (title := data.get("title")) is not None else None
+        self.type = data.get("type")
+        self.description = (
             str(description) if (description := data.get("description")) is not None else None
         )
-        if description and len(description.strip()) > 4096:
-            raise ValueError("Embed description cannot be longer than 4096 characters")
-
-        fields = data.get("fields")
-        footer = data.get("footer")
-        author = data.get("author")
-
-        # make sure the combined size does not exceed the limit
-        if self.__len(title, description, fields, footer, author) > 6000:
-            raise ValueError("Embed total size cannot be longer than 6000 characters")
-
-        self.title = title
-        self.description = description
-        self._fields = fields
-        self._footer = footer
-        self._author = author
-
-        self.type = data.get("type")
         self.url = str(url) if (url := data.get("url")) is not None else None
 
         self._files = {}
@@ -289,7 +252,10 @@ class Embed:
         self._thumbnail = data.get("thumbnail")
         self._video = data.get("video")
         self._provider = data.get("provider")
+        self._author = data.get("author")
         self._image = data.get("image")
+        self._footer = data.get("footer")
+        self._fields = data.get("fields")
 
         return self
 
@@ -420,21 +386,10 @@ class Embed:
 
         icon_url: Optional[:class:`str`]
             The URL of the footer icon. Only HTTP(S) is supported.
-
-        Raises
-        ------
-        ValueError
-            The text is too long or causes the embed to excees the maximum size.
         """
-        footer: Optional[EmbedFooterPayload] = {
+        self._footer = {
             "text": str(text),
         }
-        if len(footer["text"].strip()) > 2048:
-            raise ValueError("Embed footer text cannot be longer than 2048 characters")
-        if self.__len(self.title, self.description, self._fields, footer, self._author) > 6000:
-            raise ValueError("Embed total size cannot be longer than 6000 characters")
-
-        self._footer = footer
 
         if icon_url is not None:
             self._footer["icon_url"] = str(icon_url)
@@ -601,21 +556,10 @@ class Embed:
             The URL for the author.
         icon_url: Optional[:class:`str`]
             The URL of the author icon. Only HTTP(S) is supported.
-
-        Raises
-        ------
-        ValueError
-            The name is too long or causes the embed to excees the maximum size.
         """
-        author: Optional[EmbedAuthorPayload] = {
+        self._author = {
             "name": str(name),
         }
-        if len(author["name"].strip()) > 256:
-            raise ValueError("Embed author name cannot be longer than 256 characters")
-        if self.__len(self.title, self.description, self._fields, self._footer, author) > 6000:
-            raise ValueError("Embed total size cannot be longer than 6000 characters")
-
-        self._author = author
 
         if url is not None:
             self._author["url"] = str(url)
@@ -646,19 +590,6 @@ class Embed:
         """
         return cast("List[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
 
-    def _new_field_limit_check(self, field):
-        if (name_length := len(field["name"].strip())) > 256:
-            raise ValueError("Embed field name cannot be longer than 256 characters")
-        if (value_length := len(field["value"].strip())) > 1024:
-            raise ValueError("Embed field value cannot be longer than 1024 characters")
-        if self._fields and len(self._fields) >= 25:
-            raise ValueError("Embeds cannot have more than 25 fields")
-        if (
-            self.__len(self.title, self.description, self._fields, self._footer, self._author)
-            > 6000 - name_length - value_length
-        ):
-            raise ValueError("Embed total size cannot be longer than 6000 characters")
-
     def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
         """Adds a field to the embed object.
 
@@ -674,22 +605,7 @@ class Embed:
         inline: :class:`bool`
             Whether the field should be displayed inline.
             Defaults to ``True``.
-
-        Raises
-        ------
-        ValueError
-            Would exceed the 25 field maximum, the name or value is too long,
-            or causes the embed to excees the maximum size.
         """
-
-        field = {
-            "inline": inline,
-            "name": str(name),
-            "value": str(value),
-        }
-
-        self._new_field_limit_check(field)
-
         field: EmbedFieldPayload = {
             "inline": inline,
             "name": str(name),
@@ -722,22 +638,12 @@ class Embed:
         inline: :class:`bool`
             Whether the field should be displayed inline.
             Defaults to ``True``.
-
-        Raises
-        ------
-        ValueError
-            Would exceed the 25 field maximum, the name or value is too long,
-            or causes the embed to excees the maximum size.
         """
-        field = {
+        field: EmbedFieldPayload = {
             "inline": inline,
             "name": str(name),
             "value": str(value),
         }
-
-        self._new_field_limit_check(field)
-
-        field: EmbedFieldPayload = field
 
         if self._fields is not None:
             self._fields.insert(index, field)
@@ -796,9 +702,6 @@ class Embed:
         ------
         IndexError
             An invalid index was provided.
-        ValueError
-            The name or value is too long,
-            or causes the embed to excees the maximum size.
         """
         if not self._fields:
             raise IndexError("field index out of range")
@@ -807,17 +710,9 @@ class Embed:
         except IndexError:
             raise IndexError("field index out of range")
 
-        new_field = {
-            "inline": inline,
-            "name": str(name),
-            "value": str(value),
-        }
-
-        self._new_field_limit_check(new_field)
-
-        field["name"] = new_field["name"]
-        field["value"] = new_field["value"]
-        field["inline"] = new_field["inline"]
+        field["name"] = str(name)
+        field["value"] = str(value)
+        field["inline"] = inline
         return self
 
     def to_dict(self) -> EmbedData:
@@ -915,3 +810,67 @@ class Embed:
         else:
             self._files.pop(key, None)
             return str(url) if url is not None else None
+
+    def check_limits(self):
+        """
+        Checks if this embed fits within the limits dictated by Discord.
+
+        +--------------------------+------------------------------------+
+        |   Field                  |              Limit                 |
+        +--------------------------+------------------------------------+
+        | title                    |        256 characters              |
+        +--------------------------+------------------------------------+
+        | description              |        4096 characters             |
+        +--------------------------+------------------------------------+
+        | fields                   |        Up to 25 field objects      |
+        +--------------------------+------------------------------------+
+        | field.name               |        256 characters              |
+        +--------------------------+------------------------------------+
+        | field.value              |        1024 characters             |
+        +--------------------------+------------------------------------+
+        | footer.text              |        2048 characters             |
+        +--------------------------+------------------------------------+
+        | author.name              |        256 characters              |
+        +--------------------------+------------------------------------+
+
+
+        Returns:
+            bool: True if the embed fits within Discord limits
+
+        Raises:
+            ValueError: If the embed is not valid and Discord would return an exception if sent
+        """
+
+        if self.title and len(self.title.strip()) > 256:
+            raise ValueError("Embed title cannot be longer than 256 characters")
+
+        if self.description and len(self.description.strip()) > 4096:
+            raise ValueError("Embed description cannot be longer than 4096 characters")
+
+        if self._footer and len(self._footer["text"].strip()) > 2048:
+            raise ValueError("Embed footer text cannot be longer than 2048 characters")
+
+        if self.author and len(self._author["name"].strip()) > 256:
+            raise ValueError("Embed author name cannot be longer than 256 characters")
+
+        if self._fields:
+            if len(self._fields) > 25:
+                raise ValueError("Embeds cannot have more than 25 fields")
+
+            for field_index, field in enumerate(self._fields):
+                if len(field["name"].strip()) > 256:
+                    raise ValueError(
+                        f"Embed field {field_index} name cannot be longer than 256 characters"
+                    )
+                if len(field["value"].strip()) > 1024:
+                    raise ValueError(
+                        f"Embed field {field_index} value cannot be longer than 1024 characters"
+                    )
+
+        if (
+            self.__len(self.title, self.description, self._fields, self._footer, self._author)
+            > 6000
+        ):
+            raise ValueError("Embed total size cannot be longer than 6000 characters")
+
+        return True

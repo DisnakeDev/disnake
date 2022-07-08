@@ -296,31 +296,70 @@ def test_field_restraints() -> None:
     embed.add_field(name="A" * 256, value="B" * 1024)  # Size = 4864
     embed.add_field(name="A" * 112, value="B" * 1024)  # Size = 6000
     assert len(embed) == 6000
+    assert embed.check_limits()
 
+    embed.add_field(name="A", value="B")  # Breaks limit of 6000 chars
     with pytest.raises(ValueError):
-        embed.add_field(name="A", value="B")  # Breaks limit of 6000 chars
+        embed.check_limits()
+    embed.remove_field(3)
 
+    assert embed.check_limits()
+    embed.insert_field_at(index=3, name="A", value="B")  # Breaks limit of 6000 chars
     with pytest.raises(ValueError):
-        embed.insert_field_at(index=3, name="A", value="B")  # Breaks limit of 6000 chars
+        embed.check_limits()
+    embed.remove_field(3)
 
+    embed.set_field_at(index=2, name="A" * 113, value="B" * 1024)  # Breaks limit of 6000 chars
+    assert len(embed) == 6001
     with pytest.raises(ValueError):
-        embed.set_field_at(index=2, name="A" * 113, value="B" * 1024)  # Breaks limit of 6000 chars
-
+        embed.check_limits()
+    embed.set_field_at(index=2, name="A" * 112, value="B" * 1024)
     assert len(embed) == 6000
 
+    embed.set_author(name="A")  # Breaks limit of 6000 chars
     with pytest.raises(ValueError):
-        embed.set_author(name="A")  # Breaks limit of 6000 chars
+        embed.check_limits()
+    embed.remove_author()
 
     embed.set_footer(
         text="T" * 2048 + " " * 500
     )  # Would break the 6000 limit, but leading + trailing whitespace doesn't count
+    assert embed.check_limits()
 
     embed = Embed(title="Too many fields :WAYTOODANK:")
     for _ in range(25):
         embed.add_field(name="OK", value=":D")
+    assert embed.check_limits()
 
+    embed.add_field(name="NOTOK", value="D:")
     with pytest.raises(ValueError):
-        embed.add_field(name="YOU CANT ADD ANOTHER", value="25 MAX")  # Breaks limit of 6000 chars
+        embed.check_limits()
+
+    embed = Embed(title="author_check")
+    embed.set_author(name="A" * 256)
+    embed.check_limits()
+    embed.set_author(name="B" * 257)
+    with pytest.raises(ValueError):
+        embed.check_limits()
+
+    embed = Embed(title="footer_check")
+    embed.set_footer(text="A" * 2048)
+    embed.check_limits()
+    embed.set_footer(text="B" * 2049)
+    with pytest.raises(ValueError):
+        embed.check_limits()
+
+    embed = Embed(title="title_check" + "A" * 245)
+    embed.check_limits()
+    embed = Embed(title="title_check" + "A" * 246)
+    with pytest.raises(ValueError):
+        embed.check_limits()
+
+    embed = Embed(description="desc_check" + "A" * 4086)
+    embed.check_limits()
+    embed = Embed(description="desc_check" + "A" * 4087)
+    with pytest.raises(ValueError):
+        embed.check_limits()
 
 
 def test_copy(embed: Embed, file: File) -> None:
