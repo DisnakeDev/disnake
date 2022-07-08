@@ -40,6 +40,7 @@ from .utils import (
     _assetbytes_to_base64_data,
     _get_as_snowflake,
     cached_slot_property,
+    isoformat_utc,
     parse_time,
     snowflake_time,
 )
@@ -211,15 +212,22 @@ class GuildScheduledEvent(Hashable):
         self._image: Optional[str] = data.get("image")
 
     def __repr__(self) -> str:
-        return (
-            "<GuildScheduledEvent "
-            + " ".join(
-                f"{attr}={getattr(self, attr)!r}"
-                for attr in self.__slots__
-                if not attr.startswith("_")
-            )
-            + ">"
+        attrs = (
+            ("id", self.id),
+            ("guild_id", self.guild_id),
+            ("channel_id", self.channel_id),
+            ("name", self.name),
+            ("description", self.description),
+            ("scheduled_start_time", self.scheduled_start_time),
+            ("scheduled_end_time", self.scheduled_end_time),
+            ("privacy_level", self.privacy_level),
+            ("status", self.status),
+            ("entity_type", self.entity_type),
+            ("entity_metadata", self.entity_metadata),
+            ("creator", self.creator),
         )
+        inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
+        return f"<{self.__class__.__name__} {inner}>"
 
     def __str__(self) -> str:
         return self.name
@@ -372,6 +380,10 @@ class GuildScheduledEvent(Hashable):
         .. versionchanged:: 2.6
             Removed ``channel_id`` parameter in favor of ``channel``.
 
+        .. versionchanged:: 2.6
+            Naive datetime parameters are now assumed to be in the local
+            timezone instead of UTC.
+
         Parameters
         ----------
         name: :class:`str`
@@ -396,8 +408,10 @@ class GuildScheduledEvent(Hashable):
             The privacy level of the guild scheduled event.
         scheduled_start_time: :class:`datetime.datetime`
             The time to schedule the guild scheduled event.
+            If the datetime is naive, it is assumed to be local time.
         scheduled_end_time: Optional[:class:`datetime.datetime`]
             The time when the guild scheduled event is scheduled to end.
+            If the datetime is naive, it is assumed to be local time.
         entity_type: :class:`GuildScheduledEventEntityType`
             The entity type of the guild scheduled event.
         entity_metadata: Optional[:class:`GuildScheduledEventMetadata`]
@@ -475,12 +489,10 @@ class GuildScheduledEvent(Hashable):
             fields["channel_id"] = None
 
         if scheduled_start_time is not MISSING:
-            fields["scheduled_start_time"] = scheduled_start_time.isoformat()
+            fields["scheduled_start_time"] = isoformat_utc(scheduled_start_time)
 
         if scheduled_end_time is not MISSING:
-            fields["scheduled_end_time"] = (
-                scheduled_end_time.isoformat() if scheduled_end_time is not None else None
-            )
+            fields["scheduled_end_time"] = isoformat_utc(scheduled_end_time)
 
         data = await self._state.http.edit_guild_scheduled_event(
             guild_id=self.guild_id, event_id=self.id, reason=reason, **fields

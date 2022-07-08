@@ -30,7 +30,7 @@ from disnake.i18n import Localized
 from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
-from .errors import *
+from .errors import CommandError
 from .params import safe_call
 
 if TYPE_CHECKING:
@@ -136,7 +136,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
                     # User has an option to cancel the global error handler by returning True
         finally:
             if stop_propagation:
-                return
+                return  # noqa: B012
             inter.bot.dispatch("user_command_error", inter, error)
 
     async def __call__(
@@ -236,7 +236,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
                     # User has an option to cancel the global error handler by returning True
         finally:
             if stop_propagation:
-                return
+                return  # noqa: B012
             inter.bot.dispatch("message_command_error", inter, error)
 
     async def __call__(

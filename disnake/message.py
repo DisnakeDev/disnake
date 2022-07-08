@@ -39,8 +39,6 @@ from typing import (
     List,
     Optional,
     Tuple,
-    Type,
-    TypeVar,
     Union,
     cast,
     overload,
@@ -66,6 +64,8 @@ from .user import User
 from .utils import MISSING, escape_mentions
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .abc import GuildChannel, MessageableChannel, Snowflake
     from .channel import DMChannel
     from .guild import GuildMessageable
@@ -93,7 +93,6 @@ if TYPE_CHECKING:
     from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
 
-    MR = TypeVar("MR", bound="MessageReference")
     EmojiInputType = Union[Emoji, PartialEmoji, str]
 
 __all__ = (
@@ -573,7 +572,7 @@ class MessageReference:
         self.fail_if_not_exists: bool = fail_if_not_exists
 
     @classmethod
-    def with_state(cls: Type[MR], state: ConnectionState, data: MessageReferencePayload) -> MR:
+    def with_state(cls, state: ConnectionState, data: MessageReferencePayload) -> Self:
         self = cls.__new__(cls)
         self.message_id = utils._get_as_snowflake(data, "message_id")
         self.channel_id = int(data.pop("channel_id"))
@@ -584,7 +583,7 @@ class MessageReference:
         return self
 
     @classmethod
-    def from_message(cls: Type[MR], message: Message, *, fail_if_not_exists: bool = True) -> MR:
+    def from_message(cls, message: Message, *, fail_if_not_exists: bool = True) -> Self:
         """Creates a :class:`MessageReference` from an existing :class:`~disnake.Message`.
 
         .. versionadded:: 1.6
@@ -1015,7 +1014,7 @@ class Message(Hashable):
 
     def _clear_emoji(self, emoji) -> Optional[Reaction]:
         to_check = str(emoji)
-        for index, reaction in enumerate(self.reactions):
+        for index, reaction in enumerate(self.reactions):  # noqa: B007
             if str(reaction.emoji) == to_check:
                 break
         else:
@@ -1188,21 +1187,17 @@ class Message(Hashable):
             or remove markdown then use :func:`utils.escape_markdown` or :func:`utils.remove_markdown`
             respectively, along with this function.
         """
-        # fmt: off
         transformations = {
-            re.escape(f'<#{channel.id}>'): '#' + channel.name
-            for channel in self.channel_mentions
+            re.escape(f"<#{channel.id}>"): f"#{channel.name}" for channel in self.channel_mentions
         }
 
         mention_transforms = {
-            re.escape(f'<@{member.id}>'): '@' + member.display_name
-            for member in self.mentions
+            re.escape(f"<@{member.id}>"): f"@{member.display_name}" for member in self.mentions
         }
 
         # add the <@!user_id> cases as well..
         second_mention_transforms = {
-            re.escape(f'<@!{member.id}>'): '@' + member.display_name
-            for member in self.mentions
+            re.escape(f"<@!{member.id}>"): f"@{member.display_name}" for member in self.mentions
         }
 
         transformations.update(mention_transforms)
@@ -1210,12 +1205,9 @@ class Message(Hashable):
 
         if self.guild is not None:
             role_transforms = {
-                re.escape(f'<@&{role.id}>'): '@' + role.name
-                for role in self.role_mentions
+                re.escape(f"<@&{role.id}>"): f"@{role.name}" for role in self.role_mentions
             }
             transformations.update(role_transforms)
-
-        # fmt: on
 
         def repl(obj):
             return transformations.get(re.escape(obj.group(0)), "")

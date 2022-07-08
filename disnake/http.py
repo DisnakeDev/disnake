@@ -68,6 +68,8 @@ _log = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from types import TracebackType
 
+    from typing_extensions import Self
+
     from .enums import InteractionResponseType
     from .file import File
     from .message import Attachment
@@ -99,8 +101,6 @@ if TYPE_CHECKING:
     from .types.snowflake import Snowflake, SnowflakeList
 
     T = TypeVar("T")
-    BE = TypeVar("BE", bound=BaseException)
-    MU = TypeVar("MU", bound="MaybeUnlock")
     Response = Coroutine[Any, Any, T]
 
 _API_VERSION = 10
@@ -219,7 +219,7 @@ class MaybeUnlock:
         self.lock: asyncio.Lock = lock
         self._unlock: bool = True
 
-    def __enter__(self: MU) -> MU:
+    def __enter__(self) -> Self:
         return self
 
     def defer(self) -> None:
@@ -227,8 +227,8 @@ class MaybeUnlock:
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BE]],
-        exc: Optional[BE],
+        exc_type: Optional[Type[BaseException]],
+        exc: Optional[BaseException],
         traceback: Optional[TracebackType],
     ) -> None:
         if self._unlock:
@@ -554,7 +554,7 @@ class HTTPClient:
         allowed_mentions: Optional[message.AllowedMentions] = None,
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
-        components: Optional[List[components.Component]] = None,
+        components: Optional[Sequence[components.Component]] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -608,7 +608,7 @@ class HTTPClient:
         allowed_mentions: Optional[message.AllowedMentions] = None,
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
-        components: Optional[List[components.Component]] = None,
+        components: Optional[Sequence[components.Component]] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         payload: Dict[str, Any] = {"tts": tts}
@@ -648,7 +648,7 @@ class HTTPClient:
         allowed_mentions: Optional[message.AllowedMentions] = None,
         message_reference: Optional[message.MessageReference] = None,
         stickers: Optional[Sequence[Snowflake]] = None,
-        components: Optional[List[components.Component]] = None,
+        components: Optional[Sequence[components.Component]] = None,
         flags: Optional[int] = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -1434,6 +1434,16 @@ class HTTPClient:
         payload: Dict[str, Any] = {"code": code}
         return self.request(
             Route("PATCH", "/guilds/{guild_id}/vanity-url", guild_id=guild_id),
+            json=payload,
+            reason=reason,
+        )
+
+    def edit_mfa_level(
+        self, guild_id: Snowflake, mfa_level: guild.MFALevel, *, reason: Optional[str] = None
+    ) -> Response[guild.MFALevelUpdate]:
+        payload: guild.MFALevelUpdate = {"level": mfa_level}
+        return self.request(
+            Route("POST", "/guilds/{guild_id}/mfa", guild_id=guild_id),
             json=payload,
             reason=reason,
         )
@@ -2398,7 +2408,7 @@ class HTTPClient:
         self,
         application_id: Snowflake,
         token: str,
-        files: List[File] = [],
+        files: List[File] = None,
         content: Optional[str] = None,
         tts: bool = False,
         embeds: Optional[List[embed.Embed]] = None,
@@ -2410,6 +2420,8 @@ class HTTPClient:
             application_id=application_id,
             interaction_token=token,
         )
+        if files is None:
+            files = []
         return self.send_multipart_helper(
             r,
             content=content,
