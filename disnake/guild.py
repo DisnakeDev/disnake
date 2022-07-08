@@ -2105,12 +2105,12 @@ class Guild(Hashable):
         self,
         *,
         name: str,
+        channel: Optional[Snowflake],
+        scheduled_start_time: datetime.datetime,
         entity_type: Literal[
             GuildScheduledEventEntityType.voice,
             GuildScheduledEventEntityType.stage_instance,
-        ],
-        channel: Snowflake,
-        scheduled_start_time: datetime.datetime,
+        ] = ...,
         scheduled_end_time: Optional[datetime.datetime] = ...,
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         description: str = ...,
@@ -2123,10 +2123,10 @@ class Guild(Hashable):
         self,
         *,
         name: str,
-        entity_type: GuildScheduledEventEntityType,
         scheduled_start_time: datetime.datetime,
+        channel: Optional[Snowflake] = MISSING,
+        entity_type: GuildScheduledEventEntityType = MISSING,
         scheduled_end_time: Optional[datetime.datetime] = MISSING,
-        channel: Snowflake = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         description: str = MISSING,
@@ -2136,6 +2136,13 @@ class Guild(Hashable):
         """|coro|
 
         Creates a :class:`GuildScheduledEvent`.
+
+        If ``channel`` is provided and has a type matching to a type of :class:`GuildScheduledEventEntityType`,
+            the ``entity_type`` is not required and will automatically match.
+
+        If ``channel`` is not provided, then ``entity_type`` must be provided.
+
+        If ``channel`` is None, then ``entity_type`` is assumed to be :class:`GuildScheduledEventEntityType.external`
 
         If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
 
@@ -2166,8 +2173,9 @@ class Guild(Hashable):
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel: :class:`.abc.Snowflake`
+        channel: Optional[:class:`.abc.Snowflake]`
             The channel in which the guild scheduled event will be hosted.
+            Passing in `None` assumes the ``entity_type`` to be :class:`GuildScheduledEventEntityType.external`
 
             .. versionadded:: 2.6
 
@@ -2192,14 +2200,27 @@ class Guild(Hashable):
             The request failed.
         TypeError
             The ``image`` asset is a lottie sticker (see :func:`Sticker.read`),
-            or one of ``entity_type``, ``privacy_level``, or ``entity_metadata``
-            is not of the correct type.
+            one of ``entity_type``, ``privacy_level``, or ``entity_metadata``
+            is not of the correct type, or the ``entity_type`` was not provided and
+            could not be assumed from the ``channel``.
 
         Returns
         -------
         :class:`GuildScheduledEvent`
             The newly created guild scheduled event.
         """
+
+        if channel is None:
+            entity_type = GuildScheduledEventEntityType.external
+        elif hasattr(channel, "type"):
+            if channel.type == ChannelType.voice:
+                entity_type = GuildScheduledEventEntityType.voice
+            elif channel.type == ChannelType.stage_voice:
+                entity_type = GuildScheduledEventEntityType.stage_instance
+        elif entity_type is MISSING:
+            raise TypeError("entity_type must be provided if the channel does not have a type")
+
+
         if not isinstance(entity_type, GuildScheduledEventEntityType):
             raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
 
@@ -2229,7 +2250,7 @@ class Guild(Hashable):
         if image is not MISSING:
             fields["image"] = await utils._assetbytes_to_base64_data(image)
 
-        if channel is not MISSING:
+        if channel is not MISSING and channel is not None:
             fields["channel_id"] = channel.id
 
         if scheduled_end_time is not MISSING:
