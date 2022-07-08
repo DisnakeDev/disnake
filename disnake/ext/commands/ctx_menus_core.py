@@ -30,7 +30,7 @@ from disnake.i18n import Localized
 from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
-from .errors import *
+from .errors import CommandError
 from .params import safe_call
 
 if TYPE_CHECKING:

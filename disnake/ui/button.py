@@ -47,10 +47,10 @@ if TYPE_CHECKING:
     from .item import ItemCallbackType
     from .view import View
 
-V = TypeVar("V", bound="Optional[View]", covariant=True)
+ViewT = TypeVar("ViewT", bound="Optional[View]", covariant=True)
 
 
-class Button(Item[V]):
+class Button(Item[ViewT]):
     """Represents a UI button.
 
     .. versionadded:: 2.0
@@ -105,7 +105,7 @@ class Button(Item[V]):
 
     @overload
     def __init__(
-        self: Button[V],
+        self: Button[ViewT],
         *,
         style: ButtonStyle = ButtonStyle.secondary,
         label: Optional[str] = None,

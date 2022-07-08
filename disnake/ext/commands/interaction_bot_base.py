@@ -986,23 +986,25 @@ class InteractionBotBase(CommonBotBase):
             Whether this check was for message commands.
         """
         if slash_commands:
-            l = self._slash_command_check_once if call_once else self._slash_command_checks
+            check_list = self._slash_command_check_once if call_once else self._slash_command_checks
             try:
-                l.remove(func)
+                check_list.remove(func)
             except ValueError:
                 pass
 
         if user_commands:
-            l = self._user_command_check_once if call_once else self._user_command_checks
+            check_list = self._user_command_check_once if call_once else self._user_command_checks
             try:
-                l.remove(func)
+                check_list.remove(func)
             except ValueError:
                 pass
 
         if message_commands:
-            l = self._message_command_check_once if call_once else self._message_command_checks
+            check_list = (
+                self._message_command_check_once if call_once else self._message_command_checks
+            )
             try:
-                l.remove(func)
+                check_list.remove(func)
             except ValueError:
                 pass
 

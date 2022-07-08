@@ -49,7 +49,30 @@ from typing import (
 import disnake
 
 from .context import AnyContext, Context
-from .errors import *
+from .errors import (
+    BadArgument,
+    BadBoolArgument,
+    BadColourArgument,
+    BadInviteArgument,
+    BadLiteralArgument,
+    BadUnionArgument,
+    ChannelNotFound,
+    ChannelNotReadable,
+    CommandError,
+    ConversionError,
+    EmojiNotFound,
+    GuildNotFound,
+    GuildScheduledEventNotFound,
+    GuildStickerNotFound,
+    MemberNotFound,
+    MessageNotFound,
+    NoPrivateMessage,
+    ObjectNotFound,
+    PartialEmojiConversionFailure,
+    RoleNotFound,
+    ThreadNotFound,
+    UserNotFound,
+)
 
 if TYPE_CHECKING:
     from disnake.abc import MessageableChannel

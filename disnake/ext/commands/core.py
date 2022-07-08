@@ -55,7 +55,28 @@ from .cog import Cog
 from .context import AnyContext, Context
 from .converter import Greedy, get_converter, run_converters
 from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
-from .errors import *
+from .errors import (
+    ArgumentParsingError,
+    BotMissingAnyRole,
+    BotMissingPermissions,
+    BotMissingRole,
+    CheckAnyFailure,
+    CheckFailure,
+    CommandError,
+    CommandInvokeError,
+    CommandOnCooldown,
+    CommandRegistrationError,
+    DisabledCommand,
+    MissingAnyRole,
+    MissingPermissions,
+    MissingRequiredArgument,
+    MissingRole,
+    NoPrivateMessage,
+    NotOwner,
+    NSFWChannelRequired,
+    PrivateMessageOnly,
+    TooManyArguments,
+)
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
