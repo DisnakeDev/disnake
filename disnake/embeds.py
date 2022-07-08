@@ -850,7 +850,7 @@ class Embed:
         if self._footer and len(self._footer["text"].strip()) > 2048:
             raise ValueError("Embed footer text cannot be longer than 2048 characters")
 
-        if self.author and len(self._author["name"].strip()) > 256:
+        if self._author and len(self._author["name"].strip()) > 256:
             raise ValueError("Embed author name cannot be longer than 256 characters")
 
         if self._fields:
