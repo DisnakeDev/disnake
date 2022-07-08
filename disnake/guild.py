@@ -419,7 +419,7 @@ class Guild(Hashable):
         return f"<Guild {inner}>"
 
     def _update_voice_state(
-        self, data: GuildVoiceState, channel_id: Optional[int]
+            self, data: GuildVoiceState, channel_id: Optional[int]
     ) -> Tuple[Optional[Member], VoiceState, VoiceState]:
         user_id = int(data["user_id"])
         channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # type: ignore
@@ -586,7 +586,8 @@ class Guild(Hashable):
         self._large: Optional[bool] = None if member_count is None else self._member_count >= 250
 
         self.owner_id: Optional[int] = utils._get_as_snowflake(guild, "owner_id")
-        self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(utils._get_as_snowflake(guild, "afk_channel_id"))  # type: ignore
+        self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(
+            utils._get_as_snowflake(guild, "afk_channel_id"))  # type: ignore
 
         for obj in guild.get("voice_states", []):
             self._update_voice_state(obj, utils._get_as_snowflake(obj, "channel_id"))
@@ -1142,12 +1143,12 @@ class Guild(Hashable):
         return utils.find(pred, members)
 
     def _create_channel(
-        self,
-        name: str,
-        channel_type: ChannelType,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
-        category: Optional[Snowflake] = None,
-        **options: Any,
+            self,
+            name: str,
+            channel_type: ChannelType,
+            overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+            category: Optional[Snowflake] = None,
+            **options: Any,
     ) -> Any:
         if overwrites is MISSING:
             overwrites = {}
@@ -1180,18 +1181,18 @@ class Guild(Hashable):
         )
 
     async def create_text_channel(
-        self,
-        name: str,
-        *,
-        reason: Optional[str] = None,
-        category: Optional[CategoryChannel] = None,
-        position: int = MISSING,
-        topic: Optional[str] = MISSING,
-        slowmode_delay: int = MISSING,
-        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
-        nsfw: bool = MISSING,
-        news: bool = MISSING,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+            self,
+            name: str,
+            *,
+            reason: Optional[str] = None,
+            category: Optional[CategoryChannel] = None,
+            position: int = MISSING,
+            topic: Optional[str] = MISSING,
+            slowmode_delay: int = MISSING,
+            default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
+            nsfw: bool = MISSING,
+            news: bool = MISSING,
+            overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> TextChannel:
         """|coro|
 
@@ -1324,19 +1325,19 @@ class Guild(Hashable):
         return channel
 
     async def create_voice_channel(
-        self,
-        name: str,
-        *,
-        reason: Optional[str] = None,
-        category: Optional[CategoryChannel] = None,
-        position: int = MISSING,
-        bitrate: int = MISSING,
-        user_limit: int = MISSING,
-        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
-        video_quality_mode: VideoQualityMode = MISSING,
-        nsfw: bool = MISSING,
-        slowmode_delay: int = MISSING,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+            self,
+            name: str,
+            *,
+            reason: Optional[str] = None,
+            category: Optional[CategoryChannel] = None,
+            position: int = MISSING,
+            bitrate: int = MISSING,
+            user_limit: int = MISSING,
+            rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+            video_quality_mode: VideoQualityMode = MISSING,
+            nsfw: bool = MISSING,
+            slowmode_delay: int = MISSING,
+            overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> VoiceChannel:
         """|coro|
 
@@ -1441,16 +1442,16 @@ class Guild(Hashable):
         return channel
 
     async def create_stage_channel(
-        self,
-        name: str,
-        *,
-        topic: Optional[str] = MISSING,
-        position: int = MISSING,
-        bitrate: int = MISSING,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
-        category: Optional[CategoryChannel] = None,
-        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
-        reason: Optional[str] = None,
+            self,
+            name: str,
+            *,
+            topic: Optional[str] = MISSING,
+            position: int = MISSING,
+            bitrate: int = MISSING,
+            overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+            category: Optional[CategoryChannel] = None,
+            rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+            reason: Optional[str] = None,
     ) -> StageChannel:
         """|coro|
 
@@ -1539,17 +1540,17 @@ class Guild(Hashable):
         return channel
 
     async def create_forum_channel(
-        self,
-        name: str,
-        *,
-        topic: Optional[str] = None,
-        category: Optional[CategoryChannel] = None,
-        position: int = MISSING,
-        slowmode_delay: int = MISSING,
-        default_auto_archive_duration: AnyThreadArchiveDuration = None,
-        nsfw: bool = MISSING,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
-        reason: Optional[str] = None,
+            self,
+            name: str,
+            *,
+            topic: Optional[str] = None,
+            category: Optional[CategoryChannel] = None,
+            position: int = MISSING,
+            slowmode_delay: int = MISSING,
+            default_auto_archive_duration: AnyThreadArchiveDuration = None,
+            nsfw: bool = MISSING,
+            overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+            reason: Optional[str] = None,
     ) -> ForumChannel:
         """|coro|
 
@@ -1636,12 +1637,12 @@ class Guild(Hashable):
         return channel
 
     async def create_category(
-        self,
-        name: str,
-        *,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
-        reason: Optional[str] = None,
-        position: int = MISSING,
+            self,
+            name: str,
+            *,
+            overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+            reason: Optional[str] = None,
+            position: int = MISSING,
     ) -> CategoryChannel:
         """|coro|
 
@@ -1730,29 +1731,29 @@ class Guild(Hashable):
         await self._state.http.delete_guild(self.id)
 
     async def edit(
-        self,
-        *,
-        reason: Optional[str] = MISSING,
-        name: str = MISSING,
-        description: Optional[str] = MISSING,
-        icon: Optional[AssetBytes] = MISSING,
-        banner: Optional[AssetBytes] = MISSING,
-        splash: Optional[AssetBytes] = MISSING,
-        discovery_splash: Optional[AssetBytes] = MISSING,
-        community: bool = MISSING,
-        afk_channel: Optional[VoiceChannel] = MISSING,
-        owner: Snowflake = MISSING,
-        afk_timeout: int = MISSING,
-        default_notifications: NotificationLevel = MISSING,
-        verification_level: VerificationLevel = MISSING,
-        explicit_content_filter: ContentFilter = MISSING,
-        vanity_code: str = MISSING,
-        system_channel: Optional[TextChannel] = MISSING,
-        system_channel_flags: SystemChannelFlags = MISSING,
-        preferred_locale: Locale = MISSING,
-        rules_channel: Optional[TextChannel] = MISSING,
-        public_updates_channel: Optional[TextChannel] = MISSING,
-        premium_progress_bar_enabled: bool = MISSING,
+            self,
+            *,
+            reason: Optional[str] = MISSING,
+            name: str = MISSING,
+            description: Optional[str] = MISSING,
+            icon: Optional[AssetBytes] = MISSING,
+            banner: Optional[AssetBytes] = MISSING,
+            splash: Optional[AssetBytes] = MISSING,
+            discovery_splash: Optional[AssetBytes] = MISSING,
+            community: bool = MISSING,
+            afk_channel: Optional[VoiceChannel] = MISSING,
+            owner: Snowflake = MISSING,
+            afk_timeout: int = MISSING,
+            default_notifications: NotificationLevel = MISSING,
+            verification_level: VerificationLevel = MISSING,
+            explicit_content_filter: ContentFilter = MISSING,
+            vanity_code: str = MISSING,
+            system_channel: Optional[TextChannel] = MISSING,
+            system_channel_flags: SystemChannelFlags = MISSING,
+            preferred_locale: Locale = MISSING,
+            rules_channel: Optional[TextChannel] = MISSING,
+            public_updates_channel: Optional[TextChannel] = MISSING,
+            premium_progress_bar_enabled: bool = MISSING,
     ) -> Guild:
         """
         |coro|
@@ -2051,7 +2052,7 @@ class Guild(Hashable):
         return threads
 
     async def fetch_scheduled_events(
-        self, *, with_user_count: bool = False
+            self, *, with_user_count: bool = False
     ) -> List[GuildScheduledEvent]:
         """|coro|
 
@@ -2080,7 +2081,7 @@ class Guild(Hashable):
         return [GuildScheduledEvent(state=self._state, data=data) for data in raw_events]
 
     async def fetch_scheduled_event(
-        self, event_id: int, *, with_user_count: bool = False
+            self, event_id: int, *, with_user_count: bool = False
     ) -> GuildScheduledEvent:
         """|coro|
 
@@ -2112,52 +2113,52 @@ class Guild(Hashable):
 
     @overload
     async def create_scheduled_event(
-        self,
-        *,
-        name: str,
-        entity_type: Literal[GuildScheduledEventEntityType.external],
-        scheduled_start_time: datetime.datetime,
-        scheduled_end_time: datetime.datetime,
-        entity_metadata: GuildScheduledEventMetadata,
-        privacy_level: GuildScheduledEventPrivacyLevel = ...,
-        description: str = ...,
-        image: AssetBytes = ...,
-        reason: Optional[str] = ...,
+            self,
+            *,
+            name: str,
+            entity_type: Literal[GuildScheduledEventEntityType.external],
+            scheduled_start_time: datetime.datetime,
+            scheduled_end_time: datetime.datetime,
+            entity_metadata: GuildScheduledEventMetadata,
+            privacy_level: GuildScheduledEventPrivacyLevel = ...,
+            description: str = ...,
+            image: AssetBytes = ...,
+            reason: Optional[str] = ...,
     ) -> GuildScheduledEvent:
         ...
 
     @overload
     async def create_scheduled_event(
-        self,
-        *,
-        name: str,
-        channel: Optional[Snowflake],
-        scheduled_start_time: datetime.datetime,
-        entity_type: Literal[
-            GuildScheduledEventEntityType.voice,
-            GuildScheduledEventEntityType.stage_instance,
-        ] = ...,
-        scheduled_end_time: Optional[datetime.datetime] = ...,
-        privacy_level: GuildScheduledEventPrivacyLevel = ...,
-        description: str = ...,
-        image: AssetBytes = ...,
-        reason: Optional[str] = ...,
+            self,
+            *,
+            name: str,
+            channel: Optional[Snowflake],
+            scheduled_start_time: datetime.datetime,
+            entity_type: Literal[
+                GuildScheduledEventEntityType.voice,
+                GuildScheduledEventEntityType.stage_instance,
+            ] = ...,
+            scheduled_end_time: Optional[datetime.datetime] = ...,
+            privacy_level: GuildScheduledEventPrivacyLevel = ...,
+            description: str = ...,
+            image: AssetBytes = ...,
+            reason: Optional[str] = ...,
     ) -> GuildScheduledEvent:
         ...
 
     async def create_scheduled_event(
-        self,
-        *,
-        name: str,
-        scheduled_start_time: datetime.datetime,
-        channel: Optional[Snowflake] = MISSING,
-        entity_type: GuildScheduledEventEntityType = MISSING,
-        scheduled_end_time: Optional[datetime.datetime] = MISSING,
-        privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
-        entity_metadata: GuildScheduledEventMetadata = MISSING,
-        description: str = MISSING,
-        image: AssetBytes = MISSING,
-        reason: Optional[str] = None,
+            self,
+            *,
+            name: str,
+            scheduled_start_time: datetime.datetime,
+            channel: Optional[Snowflake] = MISSING,
+            entity_type: GuildScheduledEventEntityType = MISSING,
+            scheduled_end_time: Optional[datetime.datetime] = MISSING,
+            privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
+            entity_metadata: GuildScheduledEventMetadata = MISSING,
+            description: str = MISSING,
+            image: AssetBytes = MISSING,
+            reason: Optional[str] = None,
     ) -> GuildScheduledEvent:
         """|coro|
 
@@ -2244,14 +2245,13 @@ class Guild(Hashable):
 
         if channel is None:
             entity_type = GuildScheduledEventEntityType.external
-        elif hasattr(channel, "type"):
-            if channel.type == ChannelType.voice:
+        elif hasattr(channel, "type") and isinstance(channel.type, ChannelType):  # type: ignore
+            if channel.type == ChannelType.voice:  # type: ignore
                 entity_type = GuildScheduledEventEntityType.voice
-            elif channel.type == ChannelType.stage_voice:
+            elif channel.type == ChannelType.stage_voice:  # type: ignore
                 entity_type = GuildScheduledEventEntityType.stage_instance
         elif entity_type is MISSING:
             raise TypeError("entity_type must be provided if the channel does not have a type")
-
 
         if not isinstance(entity_type, GuildScheduledEventEntityType):
             raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
@@ -2321,12 +2321,12 @@ class Guild(Hashable):
         return WelcomeScreen(state=self._state, data=data, guild=self)
 
     async def edit_welcome_screen(
-        self,
-        *,
-        enabled: bool = MISSING,
-        channels: Optional[List[WelcomeScreenChannel]] = MISSING,
-        description: Optional[str] = MISSING,
-        reason: Optional[str] = None,
+            self,
+            *,
+            enabled: bool = MISSING,
+            channels: Optional[List[WelcomeScreenChannel]] = MISSING,
+            description: Optional[str] = MISSING,
+            reason: Optional[str] = None,
     ) -> WelcomeScreen:
         """|coro|
 
@@ -2389,7 +2389,7 @@ class Guild(Hashable):
 
     # TODO: Remove Optional typing here when async iterators are refactored
     def fetch_members(
-        self, *, limit: int = 1000, after: Optional[SnowflakeTime] = None
+            self, *, limit: int = 1000, after: Optional[SnowflakeTime] = None
     ) -> MemberIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving the guild's members. In order to use this,
         :meth:`Intents.members` must be enabled.
@@ -2547,11 +2547,11 @@ class Guild(Hashable):
         return channel
 
     def bans(
-        self,
-        *,
-        limit: Optional[int] = 1000,
-        before: Optional[Snowflake] = None,
-        after: Optional[Snowflake] = None,
+            self,
+            *,
+            limit: Optional[int] = 1000,
+            before: Optional[Snowflake] = None,
+            after: Optional[Snowflake] = None,
     ) -> BanIterator:
         """Returns an :class:`~disnake.AsyncIterator` that enables receiving the destination's bans.
 
@@ -2605,12 +2605,12 @@ class Guild(Hashable):
         return BanIterator(self, limit=limit, before=before, after=after)
 
     async def prune_members(
-        self,
-        *,
-        days: int,
-        compute_prune_count: bool = True,
-        roles: List[Snowflake] = MISSING,
-        reason: Optional[str] = None,
+            self,
+            *,
+            days: int,
+            compute_prune_count: bool = True,
+            roles: List[Snowflake] = MISSING,
+            reason: Optional[str] = None,
     ) -> Optional[int]:
         """
         |coro|
@@ -2961,13 +2961,13 @@ class Guild(Hashable):
         return GuildSticker(state=self._state, data=data)
 
     async def create_sticker(
-        self,
-        *,
-        name: str,
-        description: Optional[str] = None,
-        emoji: str,
-        file: File,
-        reason: Optional[str] = None,
+            self,
+            *,
+            name: str,
+            description: Optional[str] = None,
+            emoji: str,
+            file: File,
+            reason: Optional[str] = None,
     ) -> GuildSticker:
         """|coro|
 
@@ -3097,12 +3097,12 @@ class Guild(Hashable):
         return Emoji(guild=self, state=self._state, data=data)
 
     async def create_custom_emoji(
-        self,
-        *,
-        name: str,
-        image: AssetBytes,
-        roles: Sequence[Role] = MISSING,
-        reason: Optional[str] = None,
+            self,
+            *,
+            name: str,
+            image: AssetBytes,
+            roles: Sequence[Role] = MISSING,
+            reason: Optional[str] = None,
     ) -> Emoji:
         """
         |coro|
@@ -3218,7 +3218,7 @@ class Guild(Hashable):
 
     @overload
     async def get_or_fetch_member(
-        self, member_id: int, *, strict: Literal[False] = ...
+            self, member_id: int, *, strict: Literal[False] = ...
     ) -> Optional[Member]:
         ...
 
@@ -3227,7 +3227,7 @@ class Guild(Hashable):
         ...
 
     async def get_or_fetch_member(
-        self, member_id: int, *, strict: bool = False
+            self, member_id: int, *, strict: bool = False
     ) -> Optional[Member]:
         """|coro|
 
@@ -3262,46 +3262,46 @@ class Guild(Hashable):
 
     @overload
     async def create_role(
-        self,
-        *,
-        reason: Optional[str] = ...,
-        name: str = ...,
-        permissions: Permissions = ...,
-        colour: Union[Colour, int] = ...,
-        hoist: bool = ...,
-        icon: AssetBytes = ...,
-        emoji: str = ...,
-        mentionable: bool = ...,
+            self,
+            *,
+            reason: Optional[str] = ...,
+            name: str = ...,
+            permissions: Permissions = ...,
+            colour: Union[Colour, int] = ...,
+            hoist: bool = ...,
+            icon: AssetBytes = ...,
+            emoji: str = ...,
+            mentionable: bool = ...,
     ) -> Role:
         ...
 
     @overload
     async def create_role(
-        self,
-        *,
-        reason: Optional[str] = ...,
-        name: str = ...,
-        permissions: Permissions = ...,
-        color: Union[Colour, int] = ...,
-        hoist: bool = ...,
-        icon: AssetBytes = ...,
-        emoji: str = ...,
-        mentionable: bool = ...,
+            self,
+            *,
+            reason: Optional[str] = ...,
+            name: str = ...,
+            permissions: Permissions = ...,
+            color: Union[Colour, int] = ...,
+            hoist: bool = ...,
+            icon: AssetBytes = ...,
+            emoji: str = ...,
+            mentionable: bool = ...,
     ) -> Role:
         ...
 
     async def create_role(
-        self,
-        *,
-        name: str = MISSING,
-        permissions: Permissions = MISSING,
-        color: Union[Colour, int] = MISSING,
-        colour: Union[Colour, int] = MISSING,
-        hoist: bool = MISSING,
-        icon: AssetBytes = MISSING,
-        emoji: str = MISSING,
-        mentionable: bool = MISSING,
-        reason: Optional[str] = None,
+            self,
+            *,
+            name: str = MISSING,
+            permissions: Permissions = MISSING,
+            color: Union[Colour, int] = MISSING,
+            colour: Union[Colour, int] = MISSING,
+            hoist: bool = MISSING,
+            icon: AssetBytes = MISSING,
+            emoji: str = MISSING,
+            mentionable: bool = MISSING,
+            reason: Optional[str] = None,
     ) -> Role:
         """|coro|
 
@@ -3395,7 +3395,7 @@ class Guild(Hashable):
         return role
 
     async def edit_role_positions(
-        self, positions: Dict[Snowflake, int], *, reason: Optional[str] = None
+            self, positions: Dict[Snowflake, int], *, reason: Optional[str] = None
     ) -> List[Role]:
         """|coro|
 
@@ -3448,7 +3448,6 @@ class Guild(Hashable):
 
         role_positions: List[Any] = []
         for role, position in positions.items():
-
             payload = {"id": role.id, "position": position}
 
             role_positions.append(payload)
@@ -3489,11 +3488,11 @@ class Guild(Hashable):
         await self._state.http.kick(user.id, self.id, reason=reason)
 
     async def ban(
-        self,
-        user: Snowflake,
-        *,
-        reason: Optional[str] = None,
-        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
+            self,
+            user: Snowflake,
+            *,
+            reason: Optional[str] = None,
+            delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
     ) -> None:
         """|coro|
 
@@ -3608,13 +3607,13 @@ class Guild(Hashable):
 
     # TODO: use MISSING when async iterators get refactored
     def audit_logs(
-        self,
-        *,
-        limit: Optional[int] = 100,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
-        user: Snowflake = None,
-        action: AuditLogAction = None,
+            self,
+            *,
+            limit: Optional[int] = 100,
+            before: Optional[SnowflakeTime] = None,
+            after: Optional[SnowflakeTime] = None,
+            user: Snowflake = None,
+            action: AuditLogAction = None,
     ) -> AuditLogIterator:
         """Returns an :class:`AsyncIterator` that enables receiving the guild's audit logs.
 
@@ -3734,11 +3733,11 @@ class Guild(Hashable):
         return WidgetSettings(state=self._state, guild=self, data=data)
 
     async def edit_widget(
-        self,
-        *,
-        enabled: bool = MISSING,
-        channel: Optional[Snowflake] = MISSING,
-        reason: Optional[str] = None,
+            self,
+            *,
+            enabled: bool = MISSING,
+            channel: Optional[Snowflake] = MISSING,
+            reason: Optional[str] = None,
     ) -> WidgetSettings:
         """|coro|
 
@@ -3870,13 +3869,13 @@ class Guild(Hashable):
             return await self._state.chunk_guild(self, cache=cache)
 
     async def query_members(
-        self,
-        query: Optional[str] = None,
-        *,
-        limit: int = 5,
-        user_ids: Optional[List[int]] = None,
-        presences: bool = False,
-        cache: bool = True,
+            self,
+            query: Optional[str] = None,
+            *,
+            limit: int = 5,
+            user_ids: Optional[List[int]] = None,
+            presences: bool = False,
+            cache: bool = True,
     ) -> List[Member]:
         """|coro|
 
@@ -3947,11 +3946,11 @@ class Guild(Hashable):
         )
 
     async def search_members(
-        self,
-        query: str,
-        *,
-        limit: int = 1,
-        cache: bool = True,
+            self,
+            query: str,
+            *,
+            limit: int = 1,
+            cache: bool = True,
     ):
         """|coro|
 
@@ -4000,11 +3999,11 @@ class Guild(Hashable):
         return resp
 
     async def get_or_fetch_members(
-        self,
-        user_ids: List[int],
-        *,
-        presences: bool = False,
-        cache: bool = True,
+            self,
+            user_ids: List[int],
+            *,
+            presences: bool = False,
+            cache: bool = True,
     ) -> List[Member]:
         """|coro|
 
@@ -4072,7 +4071,7 @@ class Guild(Hashable):
                     self,
                     query=None,
                     limit=limit,
-                    user_ids=unresolved_ids[i : i + 100],
+                    user_ids=unresolved_ids[i: i + 100],
                     presences=presences,
                     cache=cache,
                 )
@@ -4097,7 +4096,7 @@ class Guild(Hashable):
         return [VoiceRegion(data=region) for region in data]
 
     async def change_voice_state(
-        self, *, channel: Optional[Snowflake], self_mute: bool = False, self_deaf: bool = False
+            self, *, channel: Optional[Snowflake], self_mute: bool = False, self_deaf: bool = False
     ):
         """|coro|
 
@@ -4130,7 +4129,7 @@ class Guild(Hashable):
         return await self._state.bulk_fetch_command_permissions(self.id)
 
     async def fetch_command_permissions(
-        self, command_id: int
+            self, command_id: int
     ) -> GuildApplicationCommandPermissions:
         """|coro|
 
@@ -4155,31 +4154,31 @@ class Guild(Hashable):
 
     @overload
     async def timeout(
-        self,
-        user: Snowflake,
-        *,
-        duration: Optional[Union[float, datetime.timedelta]],
-        reason: Optional[str] = None,
+            self,
+            user: Snowflake,
+            *,
+            duration: Optional[Union[float, datetime.timedelta]],
+            reason: Optional[str] = None,
     ) -> Member:
         ...
 
     @overload
     async def timeout(
-        self,
-        user: Snowflake,
-        *,
-        until: Optional[datetime.datetime],
-        reason: Optional[str] = None,
+            self,
+            user: Snowflake,
+            *,
+            until: Optional[datetime.datetime],
+            reason: Optional[str] = None,
     ) -> Member:
         ...
 
     async def timeout(
-        self,
-        user: Snowflake,
-        *,
-        duration: Optional[Union[float, datetime.timedelta]] = MISSING,
-        until: Optional[datetime.datetime] = MISSING,
-        reason: Optional[str] = None,
+            self,
+            user: Snowflake,
+            *,
+            duration: Optional[Union[float, datetime.timedelta]] = MISSING,
+            until: Optional[datetime.datetime] = MISSING,
+            reason: Optional[str] = None,
     ) -> Member:
         """|coro|
 

@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import traceback
+from datetime import datetime
 
 import disnake
 from disnake.ext import commands
@@ -50,6 +51,26 @@ class TestBot(commands.Bot):
             f"ID: {self.user.id}\n"
         )
         # fmt: on
+
+        channel = self.get_channel(994638920040059082)
+        guild = channel.guild
+        event = await channel.guild.create_scheduled_event(channel=channel, name="Test",
+                                                           scheduled_start_time=datetime.now())
+        #
+        # metadata = disnake.GuildScheduledEventMetadata(location='https://example.com')
+        # event = await channel.guild.create_scheduled_event(entity_type=disnake.GuildScheduledEventEntityType.external,
+        #                                                    entity_metadata=metadata,
+        #                                                    name="Test",
+        #                                                    scheduled_start_time=datetime.now(),
+        #                                                    scheduled_end_time=datetime.now())
+
+        # channel: disnake.Snowflake = disnake.Object(826958140263104522)
+        # await guild.create_scheduled_event(
+        #     channel=channel,
+        #     entity_type=disnake.GuildScheduledEventEntityType.voice,
+        #     name="Test",
+        #     scheduled_start_time=datetime.now(),
+        # )
 
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError) -> None:
         embed = disnake.Embed(
