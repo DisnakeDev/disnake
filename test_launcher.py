@@ -6,4 +6,4 @@ if __name__ == "__main__":
 
     os.environ["BOT_TOKEN"] = token
 
-    import test_bot.main  # type: ignore
+    import test_bot.main  # type: ignore # noqa: F401

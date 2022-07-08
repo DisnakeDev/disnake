@@ -67,13 +67,7 @@ if TYPE_CHECKING:
     from aiohttp import ClientSession
 
     from ..app_commands import Choices
-    from ..channel import (
-        CategoryChannel,
-        PartialMessageable,
-        StageChannel,
-        TextChannel,
-        VoiceChannel,
-    )
+    from ..channel import CategoryChannel, StageChannel, TextChannel, VoiceChannel
     from ..client import Client
     from ..embeds import Embed
     from ..ext.commands import AutoShardedBot, Bot
@@ -165,6 +159,7 @@ class Interaction:
         "locale",
         "guild_locale",
         "client",
+        "_app_permissions",
         "_permissions",
         "_state",
         "_session",
@@ -188,6 +183,7 @@ class Interaction:
         self.token: str = data["token"]
         self.version: int = data["version"]
         self.application_id: int = int(data["application_id"])
+        self._app_permissions: int = int(data.get("app_permissions", 0))
 
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
@@ -266,10 +262,26 @@ class Interaction:
     def permissions(self) -> Permissions:
         """:class:`Permissions`: The resolved permissions of the member in the channel, including overwrites.
 
+        In a guild context, this is provided directly by Discord.
+
         In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
         """
         if self._permissions is not None:
             return Permissions(self._permissions)
+        return Permissions.private_channel()
+
+    @property
+    def app_permissions(self) -> Permissions:
+        """:class:`Permissions`: The resolved permissions of the bot in the channel, including overwrites.
+
+        In a guild context, this is provided directly by Discord.
+
+        In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
+
+        .. versionadded:: 2.6
+        """
+        if self.guild_id:
+            return Permissions(self._app_permissions)
         return Permissions.private_channel()
 
     @utils.cached_slot_property("_cs_response")
@@ -1215,7 +1227,7 @@ class InteractionResponse:
             This interaction has already been responded to before.
         """
         if modal is not None and any((title, components, custom_id)):
-            raise TypeError(f"Cannot mix modal argument and title, custom_id, components arguments")
+            raise TypeError("Cannot mix modal argument and title, custom_id, components arguments")
 
         parent = self._parent
 

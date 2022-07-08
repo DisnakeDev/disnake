@@ -55,10 +55,31 @@ from .cog import Cog
 from .context import AnyContext, Context
 from .converter import Greedy, get_converter, run_converters
 from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
-from .errors import *
+from .errors import (
+    ArgumentParsingError,
+    BotMissingAnyRole,
+    BotMissingPermissions,
+    BotMissingRole,
+    CheckAnyFailure,
+    CheckFailure,
+    CommandError,
+    CommandInvokeError,
+    CommandOnCooldown,
+    CommandRegistrationError,
+    DisabledCommand,
+    MissingAnyRole,
+    MissingPermissions,
+    MissingRequiredArgument,
+    MissingRole,
+    NoPrivateMessage,
+    NotOwner,
+    NSFWChannelRequired,
+    PrivateMessageOnly,
+    TooManyArguments,
+)
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec, TypeGuard
+    from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
 
     from disnake.message import Message
 
@@ -287,7 +308,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     __original_kwargs__: Dict[str, Any]
 
-    def __new__(cls: Type[CommandT], *args: Any, **kwargs: Any) -> CommandT:
+    def __new__(cls, *args: Any, **kwargs: Any) -> Self:
         # if you're wondering why this is done, it's because we need to ensure
         # we have a complete original copy of **kwargs even for classes that
         # mess with it by popping before delegating to the subclass __init__.
@@ -535,7 +556,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                     # User has an option to cancel the global error handler by returning True
         finally:
             if stop_propagation:
-                return
+                return  # noqa: B012
             ctx.bot.dispatch("command_error", ctx, error)
 
     async def transform(self, ctx: Context, param: inspect.Parameter) -> Any:
@@ -703,7 +724,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         parent = self.full_parent_name
         if parent:
-            return parent + " " + self.name
+            return f"{parent} {self.name}"
         else:
             return self.name
 
@@ -762,7 +783,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                         break
 
         if not self.ignore_extra and not view.eof:
-            raise TooManyArguments("Too many arguments passed to " + self.qualified_name)
+            raise TooManyArguments(f"Too many arguments passed to {self.qualified_name}")
 
     async def call_before_hooks(self, ctx: Context) -> None:
         # now that we're done preparing we can call the pre-command hooks
@@ -837,7 +858,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                 await self._parse_arguments(ctx)
 
             await self.call_before_hooks(ctx)
-        except:
+        except Exception:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(ctx)  # type: ignore
             raise
@@ -920,7 +941,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         ctx.invoked_subcommand = None
         try:
             await self.callback(*ctx.args, **ctx.kwargs)  # type: ignore
-        except:
+        except Exception:
             ctx.command_failed = True
             raise
         finally:
@@ -1515,7 +1536,7 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
         if early_invoke:
             try:
                 await self.callback(*ctx.args, **ctx.kwargs)  # type: ignore
-            except:
+            except Exception:
                 ctx.command_failed = True
                 raise
             finally:

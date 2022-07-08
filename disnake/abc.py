@@ -69,10 +69,12 @@ __all__ = (
     "Connectable",
 )
 
-T = TypeVar("T", bound=VoiceProtocol)
+VoiceProtocolT = TypeVar("VoiceProtocolT", bound=VoiceProtocol)
 
 if TYPE_CHECKING:
     from datetime import datetime
+
+    from typing_extensions import Self
 
     from .asset import Asset
     from .channel import CategoryChannel, DMChannel, PartialMessageable
@@ -218,9 +220,6 @@ class _Overwrites:
 
     def is_member(self) -> bool:
         return self.type == 1
-
-
-GCH = TypeVar("GCH", bound="GuildChannel")
 
 
 class GuildChannel(ABC):
@@ -891,12 +890,12 @@ class GuildChannel(ABC):
             raise TypeError("Invalid overwrite type provided.")
 
     async def _clone_impl(
-        self: GCH,
+        self,
         base_attrs: Dict[str, Any],
         *,
         name: Optional[str] = None,
         reason: Optional[str] = None,
-    ) -> GCH:
+    ) -> Self:
         base_attrs["permission_overwrites"] = [x._asdict() for x in self._overwrites]
         base_attrs["parent_id"] = self.category_id
         base_attrs["name"] = name or self.name
@@ -911,7 +910,7 @@ class GuildChannel(ABC):
         self.guild._channels[obj.id] = obj  # type: ignore
         return obj
 
-    async def clone(self: GCH, *, name: Optional[str] = None, reason: Optional[str] = None) -> GCH:
+    async def clone(self, *, name: Optional[str] = None, reason: Optional[str] = None) -> Self:
         """|coro|
 
         Clones this channel. This creates a channel with the same properties
@@ -1065,23 +1064,19 @@ class GuildChannel(ABC):
 
         bucket = self._sorting_bucket
         parent_id = kwargs.get("category", MISSING)
-        # fmt: off
         if parent_id not in (MISSING, None):
             parent_id = parent_id.id
             channels = [
                 ch
                 for ch in self.guild.channels
-                if ch._sorting_bucket == bucket
-                and ch.category_id == parent_id
+                if ch._sorting_bucket == bucket and ch.category_id == parent_id
             ]
         else:
             channels = [
                 ch
                 for ch in self.guild.channels
-                if ch._sorting_bucket == bucket
-                and ch.category_id == self.category_id
+                if ch._sorting_bucket == bucket and ch.category_id == self.category_id
             ]
-        # fmt: on
 
         channels.sort(key=lambda c: (c.position, c.id))
         channels = cast(List[GuildChannel], channels)
@@ -1770,8 +1765,8 @@ class Connectable(Protocol):
         *,
         timeout: float = 60.0,
         reconnect: bool = True,
-        cls: Callable[[Client, Connectable], T] = VoiceClient,
-    ) -> T:
+        cls: Callable[[Client, Connectable], VoiceProtocolT] = VoiceClient,
+    ) -> VoiceProtocolT:
         """|coro|
 
         Connects to voice and creates a :class:`VoiceClient` to establish

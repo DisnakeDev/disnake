@@ -845,7 +845,7 @@ class Embed:
             result["color"] = self.colour.value
 
         if self._timestamp:
-            result["timestamp"] = self._timestamp.astimezone(tz=datetime.timezone.utc).isoformat()
+            result["timestamp"] = utils.isoformat_utc(self._timestamp)
 
         # add in the non raw attribute ones
         if self.type:

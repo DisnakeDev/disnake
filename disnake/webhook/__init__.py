@@ -9,6 +9,7 @@ Webhook support
 
 """
 
+from . import async_, sync
 from .async_ import *
 from .sync import *
 
