@@ -5,6 +5,7 @@ from disnake.ext import commands
 
 bot = commands.Bot(command_prefix=commands.when_mentioned)
 
+
 # Defines a simple paginator of buttons for the embed.
 class Menu(disnake.ui.View):
     def __init__(self, embeds: List[disnake.Embed]):

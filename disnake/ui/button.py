@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import TYPE_CHECKING, Callable, Optional, Tuple, Type, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Callable, Optional, Tuple, TypeVar, Union, overload
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
@@ -41,15 +41,16 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ..emoji import Emoji
     from .item import ItemCallbackType
     from .view import View
 
-B = TypeVar("B", bound="Button")
-V = TypeVar("V", bound="Optional[View]", covariant=True)
+ViewT = TypeVar("ViewT", bound="Optional[View]", covariant=True)
 
 
-class Button(Item[V]):
+class Button(Item[ViewT]):
     """Represents a UI button.
 
     .. versionadded:: 2.0
@@ -104,7 +105,7 @@ class Button(Item[V]):
 
     @overload
     def __init__(
-        self: Button[V],
+        self: Button[ViewT],
         *,
         style: ButtonStyle = ButtonStyle.secondary,
         label: Optional[str] = None,
@@ -236,7 +237,7 @@ class Button(Item[V]):
             self._underlying.emoji = None
 
     @classmethod
-    def from_component(cls: Type[B], button: ButtonComponent) -> B:
+    def from_component(cls, button: ButtonComponent) -> Self:
         return cls(
             style=button.style,
             label=button.label,

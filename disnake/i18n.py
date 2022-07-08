@@ -424,7 +424,7 @@ class LocalizationStore(LocalizationProtocol):
     def _load_file(self, path: Path) -> None:
         try:
             if path.suffix != ".json":
-                raise ValueError(f"not a .json file")
+                raise ValueError("not a .json file")
             locale = path.stem
 
             if not (api_locale := utils.as_valid_locale(locale)):

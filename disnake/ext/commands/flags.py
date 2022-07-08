@@ -40,8 +40,6 @@ from typing import (
     Pattern,
     Set,
     Tuple,
-    Type,
-    TypeVar,
     Union,
     get_args,
     get_origin,
@@ -67,6 +65,8 @@ __all__ = (
 
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .context import Context
 
 
@@ -210,7 +210,7 @@ def get_flags(
                 # typing.Union
                 if flag.max_args is MISSING:
                     flag.max_args = 1
-                if annotation.__args__[-1] is type(None) and flag.default is MISSING:
+                if annotation.__args__[-1] is type(None) and flag.default is MISSING:  # noqa: E721
                     # typing.Optional
                     flag.default = None
             elif origin is tuple:
@@ -276,7 +276,7 @@ class FlagsMeta(type):
         __commands_flag_prefix__: str
 
     def __new__(
-        cls: Type[type],
+        cls,
         name: str,
         bases: Tuple[type, ...],
         attrs: Dict[str, Any],
@@ -348,7 +348,7 @@ class FlagsMeta(type):
             aliases = {key.casefold(): value.casefold() for key, value in aliases.items()}
             regex_flags = re.IGNORECASE
 
-        keys = list(re.escape(k) for k in flags)
+        keys = [re.escape(k) for k in flags]
         keys.extend(re.escape(a) for a in aliases)
         keys = sorted(keys, key=lambda t: len(t), reverse=True)
 
@@ -434,7 +434,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
             # typing.List[x]
             annotation = args[0]
             return await convert_flag(ctx, argument, flag, annotation)
-        elif origin is Union and args[-1] is type(None):
+        elif origin is Union and args[-1] is type(None):  # noqa: E721
             # typing.Optional[x]
             annotation = Union[args[:-1]]  # type: ignore
             return await run_converters(ctx, annotation, argument, param)
@@ -448,9 +448,6 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
         raise
     except Exception as e:
         raise BadFlagArgument(flag) from e
-
-
-F = TypeVar("F", bound="FlagConverter")
 
 
 class FlagConverter(metaclass=FlagsMeta):
@@ -499,8 +496,8 @@ class FlagConverter(metaclass=FlagsMeta):
             yield (flag.name, getattr(self, flag.attribute))
 
     @classmethod
-    async def _construct_default(cls: Type[F], ctx: Context) -> F:
-        self: F = cls.__new__(cls)
+    async def _construct_default(cls, ctx: Context) -> Self:
+        self = cls.__new__(cls)
         flags = cls.__commands_flags__
         for flag in flags.values():
             if callable(flag.default):
@@ -570,7 +567,7 @@ class FlagConverter(metaclass=FlagsMeta):
         return result
 
     @classmethod
-    async def convert(cls: Type[F], ctx: Context, argument: str) -> F:
+    async def convert(cls, ctx: Context, argument: str) -> Self:
         """|coro|
 
         The method that actually converters an argument to the flag mapping.
@@ -599,7 +596,7 @@ class FlagConverter(metaclass=FlagsMeta):
         arguments = cls.parse_flags(argument)
         flags = cls.__commands_flags__
 
-        self: F = cls.__new__(cls)
+        self = cls.__new__(cls)
         for name, flag in flags.items():
             try:
                 values = arguments[name]

@@ -42,7 +42,6 @@ from typing import (
     Sequence,
     Tuple,
     Type,
-    TypeVar,
     Union,
     cast,
     overload,
@@ -77,6 +76,8 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .abc import Snowflake, SnowflakeTime
     from .asset import AssetBytes
     from .embeds import Embed
@@ -196,7 +197,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self._update(guild, data)
 
     def __repr__(self) -> str:
-        attrs = [
+        attrs = (
             ("id", self.id),
             ("name", self.name),
             ("position", self.position),
@@ -205,13 +206,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
             ("flags", self.flags),
-        ]
-        joined = " ".join("%s=%r" % t for t in attrs)
+        )
+        joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{self.__class__.__name__} {joined}>"
 
     def _update(self, guild: Guild, data: TextChannelPayload) -> None:
         self.guild: Guild = guild
-        self.name: str = data["name"]
+        # apparently this can be nullable in the case of a bad api deploy
+        self.name: str = data.get("name") or ""
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
@@ -961,7 +963,8 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 
     def _update(self, guild: Guild, data: Union[VoiceChannelPayload, StageChannelPayload]) -> None:
         self.guild = guild
-        self.name: str = data["name"]
+        # apparently this can be nullable in the case of a bad api deploy
+        self.name: str = data.get("name") or ""
         rtc = data.get("rtc_region")
         self.rtc_region: Optional[str] = rtc
         self.video_quality_mode: VideoQualityMode = try_enum(
@@ -1006,13 +1009,11 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         Mapping[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
-        # fmt: off
         return {
             key: value
             for key, value in self.guild._voice_states.items()
             if value.channel and value.channel.id == self.id
         }
-        # fmt: on
 
 
 class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
@@ -1095,7 +1096,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     )
 
     def __repr__(self) -> str:
-        attrs = [
+        attrs = (
             ("id", self.id),
             ("name", self.name),
             ("rtc_region", self.rtc_region),
@@ -1106,8 +1107,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             ("category_id", self.category_id),
             ("nsfw", self.nsfw),
             ("flags", self.flags),
-        ]
-        joined = " ".join("%s=%r" % t for t in attrs)
+        )
+        joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{self.__class__.__name__} {joined}>"
 
     def _update(self, guild: Guild, data: VoiceChannelPayload) -> None:
@@ -1604,7 +1605,7 @@ class StageChannel(VocalGuildChannel):
     __slots__ = ("topic",)
 
     def __repr__(self) -> str:
-        attrs = [
+        attrs = (
             ("id", self.id),
             ("name", self.name),
             ("topic", self.topic),
@@ -1615,8 +1616,8 @@ class StageChannel(VocalGuildChannel):
             ("user_limit", self.user_limit),
             ("category_id", self.category_id),
             ("flags", self.flags),
-        ]
-        joined = " ".join("%s=%r" % t for t in attrs)
+        )
+        joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{self.__class__.__name__} {joined}>"
 
     def _update(self, guild: Guild, data: StageChannelPayload) -> None:
@@ -1948,7 +1949,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     def _update(self, guild: Guild, data: CategoryChannelPayload) -> None:
         self.guild: Guild = guild
-        self.name: str = data["name"]
+        # apparently this can be nullable in the case of a bad api deploy
+        self.name: str = data.get("name") or ""
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
@@ -2315,7 +2317,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         self._update(guild, data)
 
     def __repr__(self) -> str:
-        atts = [
+        attrs = (
             ("id", self.id),
             ("name", self.name),
             ("topic", self.topic),
@@ -2324,13 +2326,14 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             ("category_id", self.category_id),
             ("default_auto_archive_duration", self.default_auto_archive_duration),
             ("flags", self.flags),
-        ]
-        joined = " ".join("%s=%r" % t for t in atts)
+        )
+        joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{type(self).__name__} {joined}>"
 
     def _update(self, guild: Guild, data: ForumChannelPayload) -> None:
         self.guild: Guild = guild
-        self.name: str = data["name"]
+        # apparently this can be nullable in the case of a bad api deploy
+        self.name: str = data.get("name") or ""
         self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
         self.topic: Optional[str] = data.get("topic")
         self.position: int = data["position"]
@@ -2869,9 +2872,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         return Webhook.from_state(data, state=self._state)
 
 
-DMC = TypeVar("DMC", bound="DMChannel")
-
-
 class DMChannel(disnake.abc.Messageable, Hashable):
     """Represents a Discord direct message channel.
 
@@ -2940,8 +2940,8 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         return f"<DMChannel id={self.id} recipient={self.recipient!r}>"
 
     @classmethod
-    def _from_message(cls: Type[DMC], state: ConnectionState, channel_id: int, user_id: int) -> DMC:
-        self: DMC = cls.__new__(cls)
+    def _from_message(cls, state: ConnectionState, channel_id: int, user_id: int) -> Self:
+        self = cls.__new__(cls)
         self._state = state
         self.id = channel_id
         # state.user won't be None here
@@ -3107,7 +3107,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         if len(self.recipients) == 0:
             return "Unnamed"
 
-        return ", ".join(map(lambda x: x.name, self.recipients))
+        return ", ".join([x.name for x in self.recipients])
 
     def __repr__(self) -> str:
         return f"<GroupChannel id={self.id} name={self.name!r}>"
