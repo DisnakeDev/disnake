@@ -95,9 +95,9 @@ For example, the docstring below for `pins()`.
       """
 ```
 
-If we were to add a new parameter to this method, we would need to add a few things to this docstring. Lets pretend we're adding a parameter, ``oldest_first``.
+If we were to add a new parameter to this method, a few things would need to be added to this docstring. Lets pretend we're adding a parameter, ``oldest_first``.
 
-We use NumPy style docstrings parsed with sphinx's napoleon extension, the primary documentation for these docstrings is [here](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html).
+We use NumPy style docstrings parsed with sphinx's napoleon extension, the primary documentation for these docstrings can be found [here](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html).
 
 ```py
       """
