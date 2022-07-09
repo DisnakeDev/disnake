@@ -227,31 +227,43 @@ class SystemChannelFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two SystemChannelFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two SystemChannelFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a SystemChannelFlags instance is a subset of another SystemChannelFlags instance.
+        .. describe:: x >= y
+
+            Checks if a SystemChannelFlags instance is a superset of another SystemChannelFlags instance.
+        .. describe:: x < y
+
+             Checks if a SystemChannelFlags instance is a strict subset of another SystemChannelFlags instance.
+        .. describe:: x > y
+
+             Checks if a SystemChannelFlags instance is a strict superset of another SystemChannelFlags instance.
         .. describe:: x | y, x |= y
 
-            Returns a new SystemChannelFlags with all enabled flags from both x and y.
-            (Using `|=` will update in place).
+            Returns a new SystemChannelFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe x & y, x &= y
+        .. describe:: x & y, x &= y
 
-            Returns a new SystemChannelFlags with only flags enabled on both x and y.
-            (Using `&=` will update in place).
-
-            .. versionadded:: 2.6
-        .. describe x ^ y, x ^= y
-
-            Returns a new SystemChannelFlags with only flags enabled on one of x or y, but not both.
-            (Using `^=` will update in place).
+            Returns a new SystemChannelFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe ~x
+        .. describe:: x ^ y, x ^= y
 
-            Returns a new SystemChannelFlags with all flags inverted from x.
+            Returns a new SystemChannelFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new SystemChannelFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -327,31 +339,43 @@ class MessageFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two MessageFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two MessageFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a MessageFlags instance is a subset of another MessageFlags instance.
+        .. describe:: x >= y
+
+            Checks if a MessageFlags instance is a superset of another MessageFlags instance.
+        .. describe:: x < y
+
+             Checks if a MessageFlags instance is a strict subset of another MessageFlags instance.
+        .. describe:: x > y
+
+             Checks if a MessageFlags instance is a strict superset of another MessageFlags instance.
         .. describe:: x | y, x |= y
 
-            Returns a new MessageFlags with all enabled flags from both x and y.
-            (Using `|=` will update in place).
+            Returns a new MessageFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe x & y, x &= y
+        .. describe:: x & y, x &= y
 
-            Returns a new MessageFlags with only flags enabled on both x and y.
-            (Using `&=` will update in place).
-
-            .. versionadded:: 2.6
-        .. describe x ^ y, x ^= y
-
-            Returns a new MessageFlags with only flags enabled on one of x or y, but not both.
-            (Using `^=` will update in place).
+            Returns a new MessageFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe ~x
+        .. describe:: x ^ y, x ^= y
 
-            Returns a new MessageFlags with all flags inverted from x.
+            Returns a new MessageFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new MessageFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -446,31 +470,43 @@ class PublicUserFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two PublicUserFlags are equal.
+            Checks if two PublicUserFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two PublicUserFlags are not equal.
+            Checks if two PublicUserFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a PublicUserFlags instance is a subset of another PublicUserFlags instance.
+        .. describe:: x >= y
+
+            Checks if a PublicUserFlags instance is a superset of another PublicUserFlags instance.
+        .. describe:: x < y
+
+             Checks if a PublicUserFlags instance is a strict subset of another PublicUserFlags instance.
+        .. describe:: x > y
+
+             Checks if a PublicUserFlags instance is a strict superset of another PublicUserFlags instance.
         .. describe:: x | y, x |= y
 
-            Returns a new PublicUserFlags with all enabled flags from both x and y.
-            (Using `|=` will update in place).
+            Returns a new PublicUserFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe x & y, x &= y
+        .. describe:: x & y, x &= y
 
-            Returns a new PublicUserFlags with only flags enabled on both x and y.
-            (Using `&=` will update in place).
-
-            .. versionadded:: 2.6
-        .. describe x ^ y, x ^= y
-
-            Returns a new PublicUserFlags with only flags enabled on one of x or y, but not both.
-            (Using `^=` will update in place).
+            Returns a new PublicUserFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe ~x
+        .. describe:: x ^ y, x ^= y
 
-            Returns a new PublicUserFlags with all flags inverted from x.
+            Returns a new PublicUserFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new PublicUserFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -618,31 +654,43 @@ class Intents(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two intents are equal.
+            Checks if two Intents instances are equal.
         .. describe:: x != y
 
-            Checks if two intents are not equal.
+            Checks if two Intents instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an Intents instance is a subset of another Intents instance.
+        .. describe:: x >= y
+
+            Checks if an Intents instance is a superset of another Intents instance.
+        .. describe:: x < y
+
+             Checks if an Intents instance is a strict subset of another Intents instance.
+        .. describe:: x > y
+
+             Checks if an Intents instance is a strict superset of another Intents instance.
         .. describe:: x | y, x |= y
 
-            Returns a new Intents with all enabled intents from both x and y.
-            (Using `|=` will update in place).
+            Returns a new Intents instance with all enabled intents from both x and y.
+            (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe x & y, x &= y
+        .. describe:: x & y, x &= y
 
-            Returns a new Intents with only intents enabled on both x and y.
-            (Using `&=` will update in place).
-
-            .. versionadded:: 2.6
-        .. describe x ^ y, x ^= y
-
-            Returns a new Intents with only intents enabled on one of x or y, but not both.
-            (Using `^=` will update in place).
+            Returns a new Intents instance with only intents enabled on both x and y.
+            (Using ``&=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe ~x
+        .. describe:: x ^ y, x ^= y
 
-            Returns a new Intents with all intents inverted from x.
+            Returns a new Intents instance with only intents enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new Intents instance with all intents inverted from x.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -1163,31 +1211,43 @@ class MemberCacheFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two MemberCacheFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two MemberCacheFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an MemberCacheFlags instance is a subset of another MemberCacheFlags instance.
+        .. describe:: x >= y
+
+            Checks if an MemberCacheFlags instance is a superset of another MemberCacheFlags instance.
+        .. describe:: x < y
+
+             Checks if an MemberCacheFlags instance is a strict subset of another MemberCacheFlags instance.
+        .. describe:: x > y
+
+             Checks if an MemberCacheFlags instance is a strict superset of another MemberCacheFlags instance.
         .. describe:: x | y, x |= y
 
-            Returns a new MemberCacheFlags with all enabled flags from both x and y.
-            (Using `|=` will update in place).
+            Returns a new MemberCacheFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe x & y, x &= y
+        .. describe:: x & y, x &= y
 
-            Returns a new MemberCacheFlags with only flags enabled on both x and y.
-            (Using `&=` will update in place).
-
-            .. versionadded:: 2.6
-        .. describe x ^ y, x ^= y
-
-            Returns a new MemberCacheFlags with only flags enabled on one of x or y, but not both.
-            (Using `^=` will update in place).
+            Returns a new MemberCacheFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe ~x
+        .. describe:: x ^ y, x ^= y
 
-            Returns a new MemberCacheFlags with all flags inverted from x.
+            Returns a new MemberCacheFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new MemberCacheFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -1300,31 +1360,43 @@ class ApplicationFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two ApplicationFlags are equal.
+            Checks if two ApplicationFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two ApplicationFlags are not equal.
+            Checks if two ApplicationFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an ApplicationFlags instance is a subset of another ApplicationFlags instance.
+        .. describe:: x >= y
+
+            Checks if an ApplicationFlags instance is a superset of another ApplicationFlags instance.
+        .. describe:: x < y
+
+             Checks if an ApplicationFlags instance is a strict subset of another ApplicationFlags instance.
+        .. describe:: x > y
+
+             Checks if an ApplicationFlags instance is a strict superset of another ApplicationFlags instance.
         .. describe:: x | y, x |= y
 
-            Returns a new ApplicationFlags with all enabled flags from both x and y.
-            (Using `|=` will update in place).
+            Returns a new ApplicationFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe x & y, x &= y
+        .. describe:: x & y, x &= y
 
-            Returns a new ApplicationFlags with only flags enabled on both x and y.
-            (Using `&=` will update in place).
-
-            .. versionadded:: 2.6
-        .. describe x ^ y, x ^= y
-
-            Returns a new ApplicationFlags with only flags enabled on one of x or y, but not both.
-            (Using `^=` will update in place).
+            Returns a new ApplicationFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe ~x
+        .. describe:: x ^ y, x ^= y
 
-            Returns a new ApplicationFlags with all flags inverted from x.
+            Returns a new ApplicationFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new ApplicationFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -1410,31 +1482,43 @@ class ChannelFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two ChannelFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two ChannelFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an ChannelFlags instance is a subset of another ChannelFlags instance.
+        .. describe:: x >= y
+
+            Checks if an ChannelFlags instance is a superset of another ChannelFlags instance.
+        .. describe:: x < y
+
+             Checks if an ChannelFlags instance is a strict subset of another ChannelFlags instance.
+        .. describe:: x > y
+
+             Checks if an ChannelFlags instance is a strict superset of another ChannelFlags instance.
         .. describe:: x | y, x |= y
 
-            Returns a new ChannelFlags with all enabled flags from both x and y.
-            (Using `|=` will update in place).
+            Returns a new ChannelFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe x & y, x &= y
+        .. describe:: x & y, x &= y
 
-            Returns a new ChannelFlags with only flags enabled on both x and y.
-            (Using `&=` will update in place).
-
-            .. versionadded:: 2.6
-        .. describe x ^ y, x ^= y
-
-            Returns a new ChannelFlags with only flags enabled on one of x or y, but not both.
-            (Using `^=` will update in place).
+            Returns a new ChannelFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe ~x
+        .. describe:: x ^ y, x ^= y
 
-            Returns a new ChannelFlags with all flags inverted from x.
+            Returns a new ChannelFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new ChannelFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
