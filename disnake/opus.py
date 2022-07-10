@@ -516,4 +516,3 @@ class Decoder(_OpusStruct):
         )
 
         return array.array("h", pcm[: ret * channel_count]).tobytes()
-        
