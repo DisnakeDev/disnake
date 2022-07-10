@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import array
 import ctypes
-import ctypes
 import ctypes.util
 import logging
 import math
@@ -48,7 +47,7 @@ from typing import (
     overload,
 )
 
-from .errors import DiscordException, InvalidArgument
+from .errors import DiscordException
 from .utils import MISSING
 
 if TYPE_CHECKING:
@@ -261,7 +260,8 @@ def _load_default() -> bool:
             _lib = libopus_loader(_filename)
         else:
             path = ctypes.util.find_library("opus")
-            assert path
+            if not path:
+                raise AssertionError("could not find the opus library")
             _lib = libopus_loader(path)
     except Exception:
         _lib = MISSING
@@ -497,7 +497,7 @@ class Decoder(_OpusStruct):
 
     def decode(self, data: Optional[bytes], *, fec: bool = False) -> bytes:
         if data is None and fec:
-            raise InvalidArgument("Invalid arguments: FEC cannot be used with null data")
+            raise TypeError("Invalid arguments: FEC cannot be used with null data")
 
         if data is None:
             frame_size = self._get_last_packet_duration() or self.SAMPLES_PER_FRAME
