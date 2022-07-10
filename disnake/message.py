@@ -137,7 +137,7 @@ async def _edit_handler(
     file: File,
     files: List[File],
     attachments: Optional[List[Attachment]],
-    suppress: bool,
+    suppress: bool,  # deprecated
     suppress_embeds: bool,
     allowed_mentions: Optional[AllowedMentions],
     view: Optional[View],
@@ -1487,7 +1487,7 @@ class Message(Hashable):
         file: File = MISSING,
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
-        suppress: bool = MISSING,
+        suppress: bool = MISSING,  # deprecated
         suppress_embeds: bool = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
@@ -2173,7 +2173,7 @@ class PartialMessage(Hashable):
         file: File = MISSING,
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
-        suppress: bool = MISSING,
+        suppress: bool = MISSING,  # deprecated
         suppress_embeds: bool = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
