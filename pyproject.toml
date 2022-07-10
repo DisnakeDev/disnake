@@ -24,7 +24,7 @@ test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 
 [tool.towncrier]
-template = 'changelog/_template.rst'
+template = 'changelog/_template.rst.jinja'
 package = "disnake"
 filename = "docs/whats_new.rst"
 directory = "changelog/"
