@@ -1,4 +1,4 @@
-## Contributing to disnake
+# Contributing to disnake
 
 First off, thanks for taking the time to contribute. It makes the library substantially better. :+1:
 
@@ -31,9 +31,59 @@ Please be aware of the following things when filing bug reports.
 
 If the bug report is missing this information then it'll take us longer to fix the issue. We will probably ask for clarification, and barring that if no response was given then the issue will be closed.
 
-## Writing a Pull Request
+## Creating a Pull Request
 
 Submitting a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go.
+
+### Formatting
+
+It would be incredibly lovely if the style is consistent to that found in the project. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
+
+We use [`nox`](https://nox.thea.codes/en/stable/) for automating development tasks. Run these commands to
+install `nox` and `taskipy` as well as the required dependencies in your environment,
+and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.  
+Make sure you have a virtualenv activated if you don't want it to install the packages globally!
+```
+pip install nox taskipy
+task setup_env
+```
+
+The installed `pre-commit` hooks will automatically run before every commit, which will format/lint the code
+to match the project's style. Note that you will have to stage and commit again if anything was updated!
+
+
+### Tasks
+
+To run all important checks and tests, use `nox`:
+```sh
+nox -R
+```
+
+You can also choose to only run a single task; run `task --list` to view all available tasks and use `task <name>` to run them.
+
+Some notes (all of the mentioned tasks are automatically run by `nox -R`, see above):
+- If `pre-commit` hooks aren't installed, run `task lint` manually to check and fix the formatting in all files.  
+  **Note**: If the code is formatted incorrectly, `pre-commit` will apply fixes and exit without committing the changes - just stage and commit again.
+- For type-checking, run `task pyright`. You can use `task pyright -w` to automatically re-check on every file change.  
+  **Note**: If you're using VSCode and pylance, it will use the same type-checking settings, which generally means that you don't necessarily have to run `pyright` separately. However, there can be version differences which may lead to different results when later run in CI on GitHub.
+- Tests can be run using `task test`. If you changed some functionality, you may have to adjust a few tests - if you added new features, it would be great if you added new tests for them as well.
+
+A PR cannot be merged as long as there are any failing tasks.
+
+
+### Git Commit Guidelines
+
+- Use present tense (e.g. "Add feature" not "Added feature")
+- Reference issues or pull requests outside of the first line.
+    - Please use the shorthand `#123` and not the full URL.
+
+If you do not meet any of these guidelines, don't fret. Chances are they will be fixed upon rebasing but please do try to meet them to remove some of the workload.
+
+
+## How do I add a new feature?<a name="first-contrib"></a>
+
+Welcome! If you've made it to this point you are likely a new contributor! This section will go through how to add a new feature to disnake.
+
 
 Most attributes and data structures are broken up in to a file for each related class. For example, `disnake.Guild` is defined in [disnake/guild.py](disnake/guild.py), and `disnake.GuildPreview` is defined in [disnake/guild_preview.py](disnake/guild_preview.py). For example, writing a new feature to `disnake.Guild` would go in [disnake/guild.py](disnake/guild.py), as part of the `disnake.Guild` class.
 
@@ -65,7 +115,7 @@ The `Response[]` part in this typehint is referring to `self.request`, as the im
 
 The Route class is how all routes are processed internally. This, along with `self.request` makes it possible to properly handle all ratelimits, and rarely encounter 429s. This is additionally why `channel_id` is provided as a kwarg to `Route`.
 
-### Writing Documentation
+#### Writing Documentation
 
 While a new feature can be useful, it requires documentation to be useful too. When updating a class or method, we ask that you use
 [sphinx directives](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-versionadded) in the docstring to note when it was added/updated, and what about it was updated.
@@ -155,48 +205,3 @@ The end result of these changes would be as follows:
 
 *If you have trouble with adding or modifying documentation, don't be afraid to reach out!
 We understand that the documentation can be intimidating, and there's quite a few quirks and limitations to be aware of.*
-
-## How do I make sure my code is formatted correctly?
-
-It would be incredibly lovely if the style is consistent to that found in the project. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
-
-We use [`nox`](https://nox.thea.codes/en/stable/) for automating development tasks. Run these commands to
-install `nox` and `taskipy` as well as the required dependencies in your environment,
-and to set up [`pre-commit`](https://pre-commit.com/#quick-start) hooks.  
-Make sure you have a virtualenv activated if you don't want it to install the packages globally!
-```
-pip install nox taskipy
-task setup_env
-```
-
-The installed `pre-commit` hooks will automatically run before every commit, which will format/lint the code
-to match the project's style. Note that you will have to stage and commit again if anything was updated!
-
-
-### Tasks
-
-**tl;dr:**  
-To run all important checks and tests, use `nox`:
-```sh
-nox -R
-```
-
-You can also choose to only run a single task; run `task --list` to view all available tasks and use `task <name>` to run them.
-
-Some notes (all of the mentioned tasks are automatically run by `nox -R`, see above):
-- If `pre-commit` hooks aren't installed, run `task lint` manually to check and fix the formatting in all files.  
-  **Note**: If the code is formatted incorrectly, `pre-commit` will apply fixes and exit without committing the changes - just stage and commit again.
-- For type-checking, run `task pyright`. You can use `task pyright -w` to automatically re-check on every file change.  
-  **Note**: If you're using VSCode and pylance, it will use the same type-checking settings, which generally means that you don't necessarily have to run `pyright` separately. However, there can be version differences which may lead to different results when later run in CI on GitHub.
-- Tests can be run using `task test`. If you changed some functionality, you may have to adjust a few tests - if you added new features, it would be great if you added new tests for them as well.
-
-A PR cannot be merged as long as there are any failing tasks.
-
-
-### Git Commit Guidelines
-
-- Use present tense (e.g. "Add feature" not "Added feature")
-- Reference issues or pull requests outside of the first line.
-    - Please use the shorthand `#123` and not the full URL.
-
-If you do not meet any of these guidelines, don't fret. Chances are they will be fixed upon rebasing but please do try to meet them to remove some of the workload.
