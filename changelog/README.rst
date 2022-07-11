@@ -1,4 +1,4 @@
-This directory contains "newsfragments" which are short files that contain a small **ReST**-formatted
+This directory contains "news fragments" which are short files that contain a small **ReST**-formatted
 text that will be added to the next changelog.
 
 The changelog will be read by **users**, so this description should be aimed at users

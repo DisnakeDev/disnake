@@ -1,1 +1,2 @@
-Use :attr:`SessionStartLimit.remaining` when attempting to connect to Discord and raise :exc:`SessionStartLimitReached` if there are not enough starts remaining to start the Client.
+Use :attr:`SessionStartLimit.remaining` when attempting to connect to Discord.
+Now raise :exc:`SessionStartLimitReached` if there are not enough remaining starts to start the Client.
