@@ -141,45 +141,77 @@ class BaseFlags:
         return not self.__eq__(other)
 
     def __and__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for &: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
         return self._from_value(self.value & other.value)
 
     def __iand__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for &=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
         self.value &= other.value
         return self
 
     def __or__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for |: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
         return self._from_value(self.value | other.value)
 
     def __ior__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for |=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
         self.value |= other.value
         return self
 
     def __xor__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for ^: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
         return self._from_value(self.value ^ other.value)
 
     def __ixor__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for ^=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
         self.value ^= other.value
         return self
 
     def __le__(self, other: Self) -> bool:
-        if isinstance(other, type(self)):
-            return (self.value & other.value) == self.value
-        raise TypeError(f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}")
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'<=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value & other.value) == self.value
 
     def __ge__(self, other: Self) -> bool:
-        if isinstance(other, type(self)):
-            return (self.value | other.value) == self.value
-        raise TypeError(f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}")
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'>=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value | other.value) == self.value
 
     def __lt__(self, other: Self) -> bool:
-        if isinstance(other, type(self)):
-            return (self.value & other.value) == self.value and self.value != other.value
-        raise TypeError(f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}")
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'<' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value & other.value) == self.value and self.value != other.value
 
     def __gt__(self, other: Self) -> bool:
-        if isinstance(other, type(self)):
-            return (self.value | other.value) == self.value and self.value != other.value
-        raise TypeError(f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}")
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'>' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value | other.value) == self.value and self.value != other.value
 
     def __invert__(self) -> Self:
         # invert the bit but make sure all truthy values are valid flags
