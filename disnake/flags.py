@@ -90,6 +90,10 @@ class alias_flag_value(flag_value):
     pass
 
 
+def all_flags_value(flags: Dict[str, int]) -> int:
+    return functools.reduce(operator.or_, flags.values())
+
+
 def fill_with_flags(*, inverted: bool = False):
     def decorator(cls: Type[BF]) -> Type[BF]:
         cls.VALID_FLAGS = {
@@ -99,8 +103,7 @@ def fill_with_flags(*, inverted: bool = False):
         }
 
         if inverted:
-            max_bits = max(cls.VALID_FLAGS.values()).bit_length()
-            cls.DEFAULT_VALUE = -1 + (2**max_bits)
+            cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS)
         else:
             cls.DEFAULT_VALUE = 0
 
@@ -182,7 +185,7 @@ class BaseFlags:
         # invert the bit but make sure all truthy values are valid flags
         # this code means that if a flag class doesn't define 1 << 2 that
         # value won't suddenly be set to True
-        bitmask = functools.reduce(operator.or_, self.VALID_FLAGS.values())
+        bitmask = all_flags_value(self.VALID_FLAGS)
         return self._from_value((self.value ^ bitmask) & bitmask)
 
     def __hash__(self) -> int:
@@ -734,7 +737,7 @@ class Intents(BaseFlags):
     def all(cls) -> Self:
         """A factory method that creates a :class:`Intents` with everything enabled."""
         self = cls.__new__(cls)
-        self.value = functools.reduce(operator.or_, cls.VALID_FLAGS.values())
+        self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
@@ -1278,10 +1281,8 @@ class MemberCacheFlags(BaseFlags):
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` with everything enabled."""
-        bits = max(cls.VALID_FLAGS.values()).bit_length()
-        value = (1 << bits) - 1
         self = cls.__new__(cls)
-        self.value = value
+        self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
