@@ -1,26 +1,29 @@
 This directory contains "newsfragments" which are short files that contain a small **ReST**-formatted
-text that will be added to the next ``CHANGELOG``.
+text that will be added to the next changelog.
 
-The ``CHANGELOG`` will be read by **users**, so this description should be aimed to pytest users
+The changelog will be read by **users**, so this description should be aimed at users
 instead of describing internal changes which are only relevant to the developers.
 
 Make sure to use full sentences in the **present tense** and use punctuation, examples::
 
-    Improve Guild.create_text_channel returning the channel type.
+    Improve Guild.create_text_channel by returning the channel type.
 
     Command syncing now uses logging instead of print.
 
 Each file should use the following naming: ``<ISSUE>.<TYPE>.rst``, where
 ``<ISSUE>`` is an issue number, and ``<TYPE>`` is one of:
 
-* ``feature``: new user facing features, like new command-line options and new behavior.
+* ``feature``: new user facing features, support of new API features, and/or otherwise new behavior.
 * ``bugfix``: fixes a bug.
-* ``doc``: documentation improvement, like rewording an entire session or adding missing docs.
+* ``doc``: documentation improvement.
 * ``removal``: feature deprecation.
-* ``breaking``: a change which may break existing suites, such as feature removal or behavior change.
+* ``breaking``: a change which may break existing code, such as feature removal or behavior change.
 * ``misc``: fixing a small typo or internal change that might be noteworthy.
 
 So for example: ``123.feature.rst``, ``456.bugfix.rst``.
+
+If there are multiple changes of the same type for the same issue, use the following naming for the conflicting changes:
+``<ISSUE>.<TYPE>.<number>.rst``
 
 If your PR fixes an issue, use that number here. If there is no issue,
 then after you submit the PR and get the PR number you can add a
@@ -32,7 +35,7 @@ If you are not sure what issue type to use, don't hesitate to ask in your PR.
 other than ``features`` it is usually better to stick to a single paragraph to keep it concise.
 
 You can also run ``nox -s docs`` to build the documentation
-with the draft changelog (``docs/en/_build/html/whats_new.html``) if you want to get a preview of how your change will look in the final release notes.
+with the draft changelog (http://127.0.0.1:8009/whats_new.html) if you want to get a preview of how your change will look in the final release notes.
 
 
 ~~~~~
