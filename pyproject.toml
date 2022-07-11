@@ -38,7 +38,7 @@ issue_format = ":issue:`{issue}`"
     showcontent = true
 
     [[tool.towncrier.type]]
-    directory = 'removal'
+    directory = 'deprecate'
     name = "Deprecations"
     showcontent = true
 
@@ -56,11 +56,6 @@ issue_format = ":issue:`{issue}`"
     [[tool.towncrier.type]]
     directory = 'doc'
     name = "Documentation"
-    showcontent = true
-
-    [[tool.towncrier.type]]
-    directory = 'typing'
-    name = "Typings"
     showcontent = true
 
     [[tool.towncrier.type]]
