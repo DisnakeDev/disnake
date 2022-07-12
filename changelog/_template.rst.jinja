@@ -16,7 +16,7 @@
 {% else %}
 {% set first_line, rest = text.strip().split('\n', 1) %}
 - {{ first_line }} ({{ issues|join(', ') }})
-  {{ rest }}
+  {{ rest.split('\n')|join('\n  ') }}
 {% endif %}
 {% endfor %}
 
