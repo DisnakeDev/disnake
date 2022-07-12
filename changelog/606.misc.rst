@@ -1,0 +1,2 @@
+Don't use star imports except in ``__init__.py`` files.
+Plus other minor flake8 issues.
