@@ -24,7 +24,7 @@ test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 
 [tool.towncrier]
-template = 'changelog/_template.rst.jinja'
+template = "changelog/_template.rst.jinja"
 package = "disnake"
 filename = "docs/whats_new.rst"
 directory = "changelog/"
@@ -33,33 +33,33 @@ underlines = "-~"
 issue_format = ":issue:`{issue}`"
 
     [[tool.towncrier.type]]
-    directory = 'breaking'
+    directory = "breaking"
     name = "Breaking Changes"
     showcontent = true
 
     [[tool.towncrier.type]]
-    directory = 'deprecate'
+    directory = "deprecate"
     name = "Deprecations"
     showcontent = true
 
     [[tool.towncrier.type]]
-    directory = 'feature'
+    directory = "feature"
     name = "New Features"
     showcontent = true
 
     [[tool.towncrier.type]]
-    directory = 'bugfix'
+    directory = "bugfix"
     name = "Bug Fixes"
     showcontent = true
 
 
     [[tool.towncrier.type]]
-    directory = 'doc'
+    directory = "doc"
     name = "Documentation"
     showcontent = true
 
     [[tool.towncrier.type]]
-    directory = 'misc'
+    directory = "misc"
     name = "Miscellaneous"
     showcontent = true
 
