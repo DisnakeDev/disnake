@@ -1,1 +1,0 @@
-Add support for :class:`.ui.Select` in :class:`.ui.Modal` and :class:`.ModalInteraction` instances (pending further support by Discord).
