@@ -89,7 +89,7 @@ class ActionRow(Generic[UIComponentT]):
 
         .. describe:: x[i]
 
-            Returns the component at position ``i``.
+            Returns the component at position ``i``. Also supports slices.
 
     To handle interactions created by components sent in action rows or entirely independently,
     event listeners must be used. For buttons and selects, the related events are
@@ -429,10 +429,26 @@ class ActionRow(Generic[UIComponentT]):
     def to_component_dict(self) -> ActionRowPayload:
         return self._underlying.to_dict()
 
+    @overload
     def __delitem__(self, index: int) -> None:
+        ...
+
+    @overload
+    def __delitem__(self, index: slice) -> None:
+        ...
+
+    def __delitem__(self, index: Union[int, slice]) -> None:
         del self._children[index]
 
+    @overload
     def __getitem__(self, index: int) -> UIComponentT:
+        ...
+
+    @overload
+    def __getitem__(self, index: slice) -> Sequence[UIComponentT]:
+        ...
+
+    def __getitem__(self, index: Union[int, slice]) -> Union[UIComponentT, Sequence[UIComponentT]]:
         return self._children[index]
 
     @classmethod
