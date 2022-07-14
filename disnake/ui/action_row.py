@@ -30,6 +30,7 @@ from typing import (
     ClassVar,
     Generator,
     Generic,
+    Iterator,
     List,
     Literal,
     Optional,
@@ -450,6 +451,9 @@ class ActionRow(Generic[UIComponentT]):
 
     def __getitem__(self, index: Union[int, slice]) -> Union[UIComponentT, Sequence[UIComponentT]]:
         return self._children[index]
+
+    def __iter__(self) -> Iterator[UIComponentT]:
+        return iter(self._children)
 
     @classmethod
     def with_modal_components(cls) -> ActionRow[ModalUIComponent]:
