@@ -1,3 +1,2 @@
 Update the Guild Iterator to not get stuck in an infinite loop.
-
 Add a missing import for the scheduled event user iterator.

@@ -1,1 +1,1 @@
-Handle when ``default_auto_archive_duration`` is a :class:`ThreadAutoArchiveDuration` instance when editing channels.
+Handle :class:`ThreadAutoArchiveDuration` instances for ``default_auto_archive_duration`` when editing channels.

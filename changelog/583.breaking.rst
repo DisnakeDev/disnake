@@ -1,3 +1,3 @@
 Update :class:`ModalInteraction` typings.
 
-Remove ``ModalInteraction.walk_components`` and replace it with :meth:`ModalInteraction.walk_raw_components`.
+``ModalInteraction.walk_components`` is replaced by :meth:`ModalInteraction.walk_raw_components`.

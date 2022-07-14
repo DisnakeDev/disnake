@@ -1,2 +1,2 @@
 Add ``towncrier`` and ``sphinxcontrib-towncrier`` to manage changelogs.
-Adds ``sphinxcontrib-towncrier`` to build changelogs for the in-development documentation.
+Add ``sphinxcontrib-towncrier`` to build changelogs for the in-development documentation.

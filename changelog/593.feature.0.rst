@@ -1,1 +1,1 @@
-Add ``min_length`` and ``max_length`` support to :class:`.Option`.
+Add ``min_length`` and ``max_length`` support to :class:`.Option` and :class:`.ext.commands.Param`.

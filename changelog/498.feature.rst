@@ -1,1 +1,1 @@
-Expose the icon and recipient data for :class:`Invite`\'s whose target is a channel of type :attr:`ChannelType.group`.
+Expose the icon and recipient data for :class:`Invite`\s whose target is a channel of type :attr:`ChannelType.group`.
