@@ -22,12 +22,12 @@ Each file should use the following naming: ``<ISSUE>.<TYPE>.rst``, where
 
 So for example: ``123.feature.rst``, ``456.bugfix.rst``.
 
-If there are multiple changes of the same type for the same issue, use the following naming for the conflicting changes:
-``<ISSUE>.<TYPE>.<number>.rst``
-
 If your PR fixes an issue, use that number here. If there is no issue,
 then after you submit the PR and get the PR number you can add a
 changelog using that instead.
+
+If there are multiple changes of the same type for the same issue, use the following naming for the conflicting changes:
+``<ISSUE>.<TYPE>.<COUNTER>.rst``
 
 If you are not sure what issue type to use, don't hesitate to ask in your PR.
 
