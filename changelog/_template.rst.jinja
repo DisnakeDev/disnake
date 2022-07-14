@@ -11,12 +11,10 @@
 {{ underline * category_data['name']|length }}
 {% if category_data['showcontent'] %}
 {% for text, issues in sections[section][category].items() %}
-{% if '\n' not in text.strip() %}
-- {{ text }} ({{ issues|join(', ') }})
-{% else %}
-{% set first_line, rest = text.strip().split('\n', 1) %}
-- {{ first_line }} ({{ issues|join(', ') }})
-  {{ rest.split('\n')|join('\n  ') }}
+{% set lines = text.strip().splitlines() %}
+- {{ lines[0] }} ({{ issues|join(', ') }})
+{% if lines|length > 1 %}
+  {{ lines[1:]|join('\n  ') }}
 {% endif %}
 {% endfor %}
 
