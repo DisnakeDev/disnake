@@ -438,14 +438,6 @@ class ActionRow(Generic[UIComponentT]):
     def to_component_dict(self) -> ActionRowPayload:
         return self._underlying.to_dict()
 
-    @overload
-    def __delitem__(self, index: int) -> None:
-        ...
-
-    @overload
-    def __delitem__(self, index: slice) -> None:
-        ...
-
     def __delitem__(self, index: Union[int, slice]) -> None:
         del self._children[index]
 
