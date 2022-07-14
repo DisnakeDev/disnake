@@ -92,6 +92,14 @@ class ActionRow(Generic[UIComponentT]):
 
             Returns the component at position ``i``. Also supports slices.
 
+        .. describe:: len(x)
+
+            Returns the number of components in this row.
+
+        .. describe:: iter(x)
+
+            Returns an iterator for the components in this row.
+
     To handle interactions created by components sent in action rows or entirely independently,
     event listeners must be used. For buttons and selects, the related events are
     :func:`disnake.on_button_click` and :func:`disnake.on_dropdown`, respectively. Alternatively,
