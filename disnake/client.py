@@ -64,10 +64,16 @@ from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
 from .enums import ApplicationCommandType, ChannelType, Status
-from .errors import *
-from .errors import SessionStartLimitReached
+from .errors import (
+    ConnectionClosed,
+    GatewayNotFound,
+    HTTPException,
+    InvalidData,
+    PrivilegedIntentsRequired,
+    SessionStartLimitReached,
+)
 from .flags import ApplicationFlags, Intents
-from .gateway import *
+from .gateway import DiscordWebSocket, ReconnectWebSocket
 from .guild import Guild
 from .guild_preview import GuildPreview
 from .http import HTTPClient

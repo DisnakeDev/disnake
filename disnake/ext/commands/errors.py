@@ -868,7 +868,7 @@ class BadLiteralArgument(UserInputError):
         self.literals: Tuple[Any, ...] = literals
         self.errors: List[CommandError] = errors
 
-        to_string = [repr(l) for l in literals]
+        to_string = [repr(literal) for literal in literals]
         fmt = humanize_list(to_string, "or")
 
         super().__init__(f'Could not convert "{param.name}" into the literal {fmt}.')

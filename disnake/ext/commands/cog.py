@@ -217,11 +217,7 @@ class CogMeta(type):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
                 elif asyncio.iscoroutinefunction(value):
-                    try:
-                        getattr(value, "__cog_listener__")
-                    except AttributeError:
-                        continue
-                    else:
+                    if hasattr(value, "__cog_listener__"):
                         if elem.startswith(("cog_", "bot_")):
                             raise TypeError(no_bot_cog.format(base, elem))
                         listeners[elem] = value
