@@ -52,7 +52,6 @@ issue_format = ":issue:`{issue}`"
     name = "Bug Fixes"
     showcontent = true
 
-
     [[tool.towncrier.type]]
     directory = "doc"
     name = "Documentation"

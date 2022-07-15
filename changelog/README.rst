@@ -13,11 +13,11 @@ Make sure to use full sentences in the **present tense** and use punctuation, ex
 Each file should use the following naming: ``<ISSUE>.<TYPE>.rst``, where
 ``<ISSUE>`` is an issue number, and ``<TYPE>`` is one of:
 
+* ``breaking``: a change which may break existing code, such as feature removal or behavior change.
+* ``deprecate``: feature deprecation.
 * ``feature``: new user facing features, support of new API features, and/or otherwise new behavior.
 * ``bugfix``: fixes a bug.
 * ``doc``: documentation improvement.
-* ``removal``: feature deprecation.
-* ``breaking``: a change which may break existing code, such as feature removal or behavior change.
 * ``misc``: fixing a small typo or internal change that might be noteworthy.
 
 So for example: ``123.feature.rst``, ``456.bugfix.rst``.
