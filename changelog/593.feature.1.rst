@@ -1,0 +1,1 @@
+|commands| Introduce :class:`commands.String <disnake.ext.commands.String>` for defining string option length limitations.

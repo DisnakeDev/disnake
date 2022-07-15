@@ -1,0 +1,1 @@
+Update :attr:`Guild.bitrate_limit` to use the correct value for the ``VIP_REGIONS`` feature flag.

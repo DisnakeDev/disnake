@@ -1,0 +1,1 @@
+Assume that ``None`` is an empty channel name and keep ``channel.name`` a string.

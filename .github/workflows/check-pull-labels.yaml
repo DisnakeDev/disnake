@@ -2,7 +2,7 @@ name: check-pull-labels
 
 on:
   pull_request_target:
-    types: [opened, synchronize, labeled, unlabeled, reopened]
+    types: [opened, labeled, unlabeled, reopened]
 
 permissions:
   pull-requests: read

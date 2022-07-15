@@ -1,0 +1,1 @@
+Implement :class:`ChannelFlags` on all channel types.

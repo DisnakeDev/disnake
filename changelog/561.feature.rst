@@ -1,0 +1,1 @@
+Add :attr:`GuildScheduledEvent.created_at` and :attr:`GuildScheduledEvent.url` properties.
