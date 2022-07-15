@@ -1,1 +1,4 @@
-Don't use star imports except in ``__init__.py`` files, and resolve other minor flake8 issues.
+Resolve minor flake8 issues.
+- Don't use star imports except in ``__init__.py`` files.
+- Don't use ambigious variable names.
+- Don't use setattr and getattr with constant variable names.

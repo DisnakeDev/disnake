@@ -1,2 +1,2 @@
 Add new :class:`.ui.ActionRow` methods: :meth:`~.ui.ActionRow.insert_item`, :meth:`~.ui.ActionRow.clear_items`, :meth:`~.ui.ActionRow.remove_item`, :meth:`~.ui.ActionRow.pop`, as well as an ``index`` parameter for :meth:`~.ui.ActionRow.add_button`.
-Also support item access/deletion through ``row[i]``.
+- Also support item access/deletion through ``row[i]``.

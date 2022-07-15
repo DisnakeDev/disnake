@@ -1,2 +1,2 @@
 Update the type field handling for audit logs.
-:attr:`AuditLogDiff.type` objects are no longer always :class:`ChannelType` instances.
+- :attr:`AuditLogDiff.type` objects are no longer always :class:`ChannelType` instances.
