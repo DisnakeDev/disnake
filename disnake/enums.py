@@ -678,6 +678,7 @@ class GuildScheduledEventStatus(Enum):
     active = 2
     completed = 3
     canceled = 4
+    cancelled = 4
 
 
 class GuildScheduledEventPrivacyLevel(Enum):
