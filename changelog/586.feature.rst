@@ -1,0 +1,1 @@
+Add the :attr:`Interaction.app_permissions` property, which shows the app permissions in the channel.

@@ -50,7 +50,7 @@ from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple
 from . import opus, utils
 from .backoff import ExponentialBackoff
 from .errors import ClientException, ConnectionClosed
-from .gateway import *
+from .gateway import DiscordVoiceWebSocket
 from .player import AudioPlayer, AudioSource
 from .utils import MISSING
 

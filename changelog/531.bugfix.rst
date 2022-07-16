@@ -1,0 +1,1 @@
+Change the default guild :class:`.GuildSticker` limit to 5.

@@ -35,24 +35,25 @@ from typing import (
     Optional,
     Protocol,
     Tuple,
-    Type,
     TypeVar,
     overload,
 )
 
 __all__ = ("Item", "WrappedComponent")
 
-I = TypeVar("I", bound="Item")
-V = TypeVar("V", bound="Optional[View]", covariant=True)
+ItemT = TypeVar("ItemT", bound="Item")
+ViewT = TypeVar("ViewT", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ..components import NestedComponent
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
     from ..types.components import Component as ComponentPayload
     from .view import View
 
-    ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
+    ItemCallbackType = Callable[[Any, ItemT, MessageInteraction], Coroutine[Any, Any, Any]]
 
 
 class WrappedComponent(ABC):
@@ -91,7 +92,7 @@ class WrappedComponent(ABC):
         return self._underlying.to_dict()
 
 
-class Item(WrappedComponent, Generic[V]):
+class Item(WrappedComponent, Generic[ViewT]):
     """Represents the base UI item that all UI items inherit from.
 
     This class adds more functionality on top of the :class:`WrappedComponent` base class.
@@ -112,11 +113,11 @@ class Item(WrappedComponent, Generic[V]):
         ...
 
     @overload
-    def __init__(self: Item[V]):
+    def __init__(self: Item[ViewT]):
         ...
 
     def __init__(self):
-        self._view: V = None
+        self._view: ViewT = None
         self._row: Optional[int] = None
         self._rendered_row: Optional[int] = None
         # This works mostly well but there is a gotcha with
@@ -134,7 +135,7 @@ class Item(WrappedComponent, Generic[V]):
         return None
 
     @classmethod
-    def from_component(cls: Type[I], component: NestedComponent) -> I:
+    def from_component(cls, component: NestedComponent) -> Self:
         return cls()
 
     def is_dispatchable(self) -> bool:
@@ -157,7 +158,7 @@ class Item(WrappedComponent, Generic[V]):
             raise ValueError("row cannot be negative or greater than or equal to 5")
 
     @property
-    def view(self) -> V:
+    def view(self) -> ViewT:
         """Optional[:class:`View`]: The underlying view for this item."""
         return self._view
 
