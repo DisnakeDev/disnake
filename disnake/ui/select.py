@@ -54,7 +54,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec
+    from typing_extensions import ParamSpec, Self
 
     from ..emoji import Emoji
     from ..interactions import MessageInteraction
@@ -332,7 +332,7 @@ class Select(Item[V_co]):
         self._selected_values = interaction.values  # type: ignore
 
     @classmethod
-    def from_component(cls: Type[S], component: SelectMenu) -> S:
+    def from_component(cls, component: SelectMenu) -> Self:
         return cls(
             custom_id=component.custom_id,
             placeholder=component.placeholder,

@@ -52,7 +52,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec
+    from typing_extensions import ParamSpec, Self
 
     from ..emoji import Emoji
     from .item import ItemCallbackType
@@ -254,7 +254,7 @@ class Button(Item[V_co]):
             self._underlying.emoji = None
 
     @classmethod
-    def from_component(cls: Type[B], button: ButtonComponent) -> B:
+    def from_component(cls, button: ButtonComponent) -> Self:
         return cls(
             style=button.style,
             label=button.label,

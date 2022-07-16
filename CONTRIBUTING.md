@@ -68,6 +68,9 @@ Some notes (all of the mentioned tasks are automatically run by `nox -R`, see ab
 
 A PR cannot be merged as long as there are any failing tasks.
 
+### Changelogs
+
+We use [towncrier](https://github.com/twisted/towncrier) for managing our changelogs. Each change is required to have at least one file in the [`changes/`](changes/README.md) directory. There is more documentation in that directory on how to create a changelog entry.
 
 ### Git Commit Guidelines
 

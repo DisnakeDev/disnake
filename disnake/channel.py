@@ -42,7 +42,6 @@ from typing import (
     Sequence,
     Tuple,
     Type,
-    TypeVar,
     Union,
     cast,
     overload,
@@ -77,6 +76,8 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .abc import Snowflake, SnowflakeTime
     from .asset import AssetBytes
     from .embeds import Embed
@@ -2871,9 +2872,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         return Webhook.from_state(data, state=self._state)
 
 
-DMC = TypeVar("DMC", bound="DMChannel")
-
-
 class DMChannel(disnake.abc.Messageable, Hashable):
     """Represents a Discord direct message channel.
 
@@ -2942,8 +2940,8 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         return f"<DMChannel id={self.id} recipient={self.recipient!r}>"
 
     @classmethod
-    def _from_message(cls: Type[DMC], state: ConnectionState, channel_id: int, user_id: int) -> DMC:
-        self: DMC = cls.__new__(cls)
+    def _from_message(cls, state: ConnectionState, channel_id: int, user_id: int) -> Self:
+        self = cls.__new__(cls)
         self._state = state
         self.id = channel_id
         # state.user won't be None here
@@ -3109,7 +3107,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         if len(self.recipients) == 0:
             return "Unnamed"
 
-        return ", ".join(map(lambda x: x.name, self.recipients))
+        return ", ".join([x.name for x in self.recipients])
 
     def __repr__(self) -> str:
         return f"<GroupChannel id={self.id} name={self.name!r}>"
