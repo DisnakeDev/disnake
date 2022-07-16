@@ -205,4 +205,4 @@ The end result of these changes would be as follows:
   ```
 
 *If you have trouble with adding or modifying documentation, don't be afraid to reach out!
-We understand that the documentation can be intimidating, and there's quite a few quirks and limitations to be aware of.*
+We understand that the documentation can be intimidating, and there are quite a few quirks and limitations to be aware of.*
