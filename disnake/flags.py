@@ -90,6 +90,10 @@ class alias_flag_value(flag_value):
     pass
 
 
+def all_flags_value(flags: Dict[str, int]) -> int:
+    return functools.reduce(operator.or_, flags.values())
+
+
 def fill_with_flags(*, inverted: bool = False):
     def decorator(cls: Type[BF]) -> Type[BF]:
         cls.VALID_FLAGS = {
@@ -99,8 +103,7 @@ def fill_with_flags(*, inverted: bool = False):
         }
 
         if inverted:
-            max_bits = max(cls.VALID_FLAGS.values()).bit_length()
-            cls.DEFAULT_VALUE = -1 + (2**max_bits)
+            cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS)
         else:
             cls.DEFAULT_VALUE = 0
 
@@ -136,6 +139,86 @@ class BaseFlags:
 
     def __ne__(self, other: Any) -> bool:
         return not self.__eq__(other)
+
+    def __and__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for &: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return self._from_value(self.value & other.value)
+
+    def __iand__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for &=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        self.value &= other.value
+        return self
+
+    def __or__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for |: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return self._from_value(self.value | other.value)
+
+    def __ior__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for |=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        self.value |= other.value
+        return self
+
+    def __xor__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for ^: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return self._from_value(self.value ^ other.value)
+
+    def __ixor__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for ^=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        self.value ^= other.value
+        return self
+
+    def __le__(self, other: Self) -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'<=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value & other.value) == self.value
+
+    def __ge__(self, other: Self) -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'>=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value | other.value) == self.value
+
+    def __lt__(self, other: Self) -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'<' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value & other.value) == self.value and self.value != other.value
+
+    def __gt__(self, other: Self) -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'>' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value | other.value) == self.value and self.value != other.value
+
+    def __invert__(self) -> Self:
+        # invert the bit but make sure all truthy values are valid flags
+        # this code means that if a flag class doesn't define 1 << 2 that
+        # value won't suddenly be set to True
+        bitmask = all_flags_value(self.VALID_FLAGS)
+        return self._from_value((self.value ^ bitmask) & bitmask)
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -179,10 +262,53 @@ class SystemChannelFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two SystemChannelFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two SystemChannelFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a SystemChannelFlags instance is a subset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if a SystemChannelFlags instance is a superset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if a SystemChannelFlags instance is a strict subset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if a SystemChannelFlags instance is a strict superset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new SystemChannelFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new SystemChannelFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new SystemChannelFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new SystemChannelFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -256,10 +382,53 @@ class MessageFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two MessageFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two MessageFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a MessageFlags instance is a subset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if a MessageFlags instance is a superset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if a MessageFlags instance is a strict subset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if a MessageFlags instance is a strict superset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new MessageFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new MessageFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new MessageFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new MessageFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -352,10 +521,53 @@ class PublicUserFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two PublicUserFlags are equal.
+            Checks if two PublicUserFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two PublicUserFlags are not equal.
+            Checks if two PublicUserFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a PublicUserFlags instance is a subset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if a PublicUserFlags instance is a superset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if a PublicUserFlags instance is a strict subset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if a PublicUserFlags instance is a strict superset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new PublicUserFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new PublicUserFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new PublicUserFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new PublicUserFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
@@ -501,10 +713,53 @@ class Intents(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two Intents instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two Intents instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an Intents instance is a subset of another Intents instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if an Intents instance is a superset of another Intents instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if an Intents instance is a strict subset of another Intents instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if an Intents instance is a strict superset of another Intents instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new Intents instance with all enabled intents from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new Intents instance with only intents enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new Intents instance with only intents enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new Intents instance with all intents inverted from x.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -546,7 +801,7 @@ class Intents(BaseFlags):
     def all(cls) -> Self:
         """A factory method that creates a :class:`Intents` with everything enabled."""
         self = cls.__new__(cls)
-        self.value = functools.reduce(operator.or_, cls.VALID_FLAGS.values())
+        self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
@@ -1023,10 +1278,53 @@ class MemberCacheFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two MemberCacheFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two MemberCacheFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a MemberCacheFlags instance is a subset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if a MemberCacheFlags instance is a superset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if a MemberCacheFlags instance is a strict subset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if a MemberCacheFlags instance is a strict superset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new MemberCacheFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new MemberCacheFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new MemberCacheFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new MemberCacheFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -1045,8 +1343,7 @@ class MemberCacheFlags(BaseFlags):
     __slots__ = ()
 
     def __init__(self, **kwargs: bool):
-        bits = max(self.VALID_FLAGS.values()).bit_length()
-        self.value = (1 << bits) - 1
+        self.value = all_flags_value(self.VALID_FLAGS)
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
                 raise TypeError(f"{key!r} is not a valid flag name.")
@@ -1055,10 +1352,8 @@ class MemberCacheFlags(BaseFlags):
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` with everything enabled."""
-        bits = max(cls.VALID_FLAGS.values()).bit_length()
-        value = (1 << bits) - 1
         self = cls.__new__(cls)
-        self.value = value
+        self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
@@ -1137,10 +1432,53 @@ class ApplicationFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two ApplicationFlags are equal.
+            Checks if two ApplicationFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two ApplicationFlags are not equal.
+            Checks if two ApplicationFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an ApplicationFlags instance is a subset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if an ApplicationFlags instance is a superset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if an ApplicationFlags instance is a strict subset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if an ApplicationFlags instance is a strict superset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new ApplicationFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new ApplicationFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new ApplicationFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new ApplicationFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
@@ -1224,10 +1562,53 @@ class ChannelFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two ChannelFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two ChannelFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a ChannelFlags instance is a subset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if a ChannelFlags instance is a superset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if a ChannelFlags instance is a strict subset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if a ChannelFlags instance is a strict superset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new ChannelFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new ChannelFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new ChannelFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new ChannelFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
