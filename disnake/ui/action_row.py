@@ -92,13 +92,19 @@ class ActionRow(Generic[UIComponentT]):
 
             Returns the component at position ``i``. Also supports slices.
 
+            .. versionadded:: 2.6
+
         .. describe:: len(x)
 
             Returns the number of components in this row.
 
+            .. versionadded:: 2.6
+
         .. describe:: iter(x)
 
             Returns an iterator for the components in this row.
+
+            .. versionadded:: 2.6
 
     To handle interactions created by components sent in action rows or entirely independently,
     event listeners must be used. For buttons and selects, the related events are
