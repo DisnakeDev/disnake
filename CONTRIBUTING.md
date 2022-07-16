@@ -102,7 +102,8 @@ However, adding a new feature that interfaces with the API requires also updatin
 
 Here we have several things occuring. First, we have typehinted the return type of this method to return a list of Messages. As disnake supports python 3.8, we must use typing imports instead of subscripting built-ins — hence the capital ``List``.
 
-The next interesting thing is `self._state`. The library uses a state-centric design, which passes the state around to most objects, which is what enables edit methods and most methods on objects. Every Discord model that makes requests uses that internal state and its http attribute to make requests to the Discord API. Each endpoint is processed and defined in [disnake/http.py](disnake/http.py) — and it's where `http.pins_from` is defined too, which looks like this:
+The next interesting thing is `self._state`. The library uses a state-centric design, which means the state is passed around to most objects.
+Every Discord model that makes requests uses that internal state and its http attribute to make requests to the Discord API. Each endpoint is processed and defined in [disnake/http.py](disnake/http.py) — and it's where `http.pins_from` is defined too, which looks like this:
 
 ```py
     def pins_from(self, channel_id: Snowflake) -> Response[List[message.Message]]:
