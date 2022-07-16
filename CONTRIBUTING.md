@@ -80,7 +80,7 @@ A PR cannot be merged as long as there are any failing tasks.
 If you do not meet any of these guidelines, don't fret. Chances are they will be fixed upon rebasing but please do try to meet them to remove some of the workload.
 
 
-## How do I add a new feature?<a name="first-contrib"></a>
+## How do I add a new feature?
 
 Welcome! If you've made it to this point you are likely a new contributor! This section will go through how to add a new feature to disnake.
 
