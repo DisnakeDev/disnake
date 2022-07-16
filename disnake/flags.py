@@ -1284,22 +1284,22 @@ class MemberCacheFlags(BaseFlags):
             Checks if two MemberCacheFlags instances are not equal.
         .. describe:: x <= y
 
-            Checks if an MemberCacheFlags instance is a subset of another MemberCacheFlags instance.
+            Checks if a MemberCacheFlags instance is a subset of another MemberCacheFlags instance.
 
             .. versionadded:: 2.6
         .. describe:: x >= y
 
-            Checks if an MemberCacheFlags instance is a superset of another MemberCacheFlags instance.
+            Checks if a MemberCacheFlags instance is a superset of another MemberCacheFlags instance.
 
             .. versionadded:: 2.6
         .. describe:: x < y
 
-            Checks if an MemberCacheFlags instance is a strict subset of another MemberCacheFlags instance.
+            Checks if a MemberCacheFlags instance is a strict subset of another MemberCacheFlags instance.
 
             .. versionadded:: 2.6
         .. describe:: x > y
 
-            Checks if an MemberCacheFlags instance is a strict superset of another MemberCacheFlags instance.
+            Checks if a MemberCacheFlags instance is a strict superset of another MemberCacheFlags instance.
 
             .. versionadded:: 2.6
         .. describe:: x | y, x |= y
@@ -1568,22 +1568,22 @@ class ChannelFlags(BaseFlags):
             Checks if two ChannelFlags instances are not equal.
         .. describe:: x <= y
 
-            Checks if an ChannelFlags instance is a subset of another ChannelFlags instance.
+            Checks if a ChannelFlags instance is a subset of another ChannelFlags instance.
 
             .. versionadded:: 2.6
         .. describe:: x >= y
 
-            Checks if an ChannelFlags instance is a superset of another ChannelFlags instance.
+            Checks if a ChannelFlags instance is a superset of another ChannelFlags instance.
 
             .. versionadded:: 2.6
         .. describe:: x < y
 
-            Checks if an ChannelFlags instance is a strict subset of another ChannelFlags instance.
+            Checks if a ChannelFlags instance is a strict subset of another ChannelFlags instance.
 
             .. versionadded:: 2.6
         .. describe:: x > y
 
-            Checks if an ChannelFlags instance is a strict superset of another ChannelFlags instance.
+            Checks if a ChannelFlags instance is a strict superset of another ChannelFlags instance.
 
             .. versionadded:: 2.6
         .. describe:: x | y, x |= y
