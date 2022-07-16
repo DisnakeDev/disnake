@@ -2,20 +2,18 @@ name: check-pull-labels
 
 on:
   pull_request_target:
-    types: [opened, labeled, unlabeled, reopened]
+    types: [opened, synchronize, labeled, unlabeled, reopened]
 
 permissions:
   pull-requests: read
 
 jobs:
   check-pull-labels:
-    name:
-
     runs-on: ubuntu-latest
 
     steps:
       - name: Check for the do not merge label
-        if: ${{ contains(github.event.pull_request.labels.*.name, 'do not merge') == true }}
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'do not merge') == true }}"
         run: exit 1
 
       - name: Check for the blocked label
