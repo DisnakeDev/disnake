@@ -180,6 +180,7 @@ class Permissions(BaseFlags):
         """Returns ``True`` if the permissions on self are a strict superset of those on other."""
         return self.is_superset(other) and self != other
 
+    # the parent uses `Self` for the `other` typehint but we use `Permissions` here for backwards compat.
     __le__ = is_subset  # type: ignore
     __ge__ = is_superset  # type: ignore
     __lt__ = is_strict_subset  # type: ignore
