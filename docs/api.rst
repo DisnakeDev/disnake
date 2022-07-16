@@ -3214,6 +3214,12 @@ of :class:`enum.Enum`.
 
         Represents a canceled event.
 
+    .. attribute:: cancelled
+
+        An alias for :attr:`canceled`.
+
+        .. versionadded:: 2.6
+
 .. class:: GuildScheduledEventPrivacyLevel
 
     Represents the privacy level of a guild scheduled event.
