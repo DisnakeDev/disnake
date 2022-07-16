@@ -1343,8 +1343,7 @@ class MemberCacheFlags(BaseFlags):
     __slots__ = ()
 
     def __init__(self, **kwargs: bool):
-        bits = max(self.VALID_FLAGS.values()).bit_length()
-        self.value = (1 << bits) - 1
+        self.value = all_flags_value(self.VALID_FLAGS)
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
                 raise TypeError(f"{key!r} is not a valid flag name.")
