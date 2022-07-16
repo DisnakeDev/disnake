@@ -38,7 +38,6 @@ from typing import (
     Literal,
     Mapping,
     NamedTuple,
-    NoReturn,
     Optional,
     Sequence,
     Tuple,
@@ -77,7 +76,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import Never, Self
 
     from .abc import Snowflake, SnowflakeTime
     from .asset import AssetBytes
@@ -367,7 +366,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         type: ChannelType = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
-        **kwargs: NoReturn,
+        **kwargs: Never,
     ) -> Optional[TextChannel]:
         """|coro|
 
@@ -1315,7 +1314,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         nsfw: bool = MISSING,
         slowmode_delay: Optional[int] = MISSING,
         reason: Optional[str] = None,
-        **kwargs: NoReturn,
+        **kwargs: Never,
     ) -> Optional[VoiceChannel]:
         """|coro|
 
@@ -1947,7 +1946,7 @@ class StageChannel(VocalGuildChannel):
         video_quality_mode: VideoQualityMode = MISSING,
         bitrate: int = MISSING,
         reason: Optional[str] = None,
-        **kwargs: NoReturn,
+        **kwargs: Never,
     ) -> Optional[StageChannel]:
         """|coro|
 
@@ -2157,7 +2156,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         nsfw: bool = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
-        **kwargs: NoReturn,
+        **kwargs: Never,
     ) -> Optional[CategoryChannel]:
         """|coro|
 
@@ -2648,7 +2647,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
-        **kwargs: NoReturn,
+        **kwargs: Never,
     ) -> Optional[ForumChannel]:
         """|coro|
 
