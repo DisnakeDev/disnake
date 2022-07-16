@@ -220,7 +220,7 @@ def setup(session: nox.Session):
             " Consider using a virtual environment (virtualenv/venv) instead. Continue anyway? [y/N]"
         )
         if confirm.lower() != "y":
-            session.error("Canceled")
+            session.error("Cancelled")
 
     session.log("Installing dependencies to the external environment.")
 
