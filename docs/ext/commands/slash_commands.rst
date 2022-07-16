@@ -120,10 +120,11 @@ Discord itself supports only a few built-in types which are guaranteed to be enf
 - :class:`int`
 - :class:`float`
 - :class:`bool`
-- :class:`disnake.User` or :class:`disnake.Member`
 - :class:`disnake.abc.GuildChannel`\*
+- :class:`disnake.User` or :class:`disnake.Member`\*\*
 - :class:`disnake.Role`\*\*
 - :class:`disnake.Attachment`
+- :class:`disnake.abc.Snowflake`\*\*\*
 
 All the other types may be converted implicitly, similarly to :ref:`ext_commands_basic_converters`
 
@@ -142,9 +143,18 @@ All the other types may be converted implicitly, similarly to :ref:`ext_commands
         ...
 
 .. note::
-  \* All channel subclasses and unions are also supported. See :attr:`ParamInfo.channel_types <ext.commands.ParamInfo>` for more fine-grained control
+  \* All channel subclasses and unions (e.g. ``Union[TextChannel, StageChannel]``) are also supported.
+  See :attr:`ParamInfo.channel_types <ext.commands.ParamInfo>` for more fine-grained control.
 
-  \*\* Role and Member may be used together to create a "mentionable" (``Union[Role, Member]``)
+  \*\* Some combinations of types are also allowed, including:
+    - ``Union[User, Member]`` (results in :class:`OptionType.user`)
+    - ``Union[Member, Role]`` (results in :class:`OptionType.mentionable`)
+    - ``Union[User, Role]`` (results in :class:`OptionType.mentionable`)
+    - ``Union[User, Member, Role]`` (results in :class:`OptionType.mentionable`)
+
+  Note that a :class:`~disnake.User` annotation can also result in a :class:`~disnake.Member` being received.
+
+  \*\*\* Corresponds to any mentionable type, currently equivalent to ``Union[User, Member, Role]``.
 
 
 .. _param_ranges:

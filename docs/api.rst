@@ -1296,8 +1296,8 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param guild: The guild the user got banned from.
     :type guild: :class:`Guild`
     :param user: The user that got banned.
-                 Can be either :class:`User` or :class:`Member` depending if
-                 the user was in the guild or not at the time of removal.
+                 Can be either :class:`User` or :class:`Member` depending on
+                 whether the user was in the guild at the time of removal.
     :type user: Union[:class:`User`, :class:`Member`]
 
 .. function:: on_member_unban(guild, user)

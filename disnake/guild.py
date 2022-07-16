@@ -50,8 +50,15 @@ from . import abc, utils
 from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
 from .bans import BanEntry
-from .channel import *
-from .channel import _guild_channel_factory, _threaded_guild_channel_factory
+from .channel import (
+    CategoryChannel,
+    ForumChannel,
+    StageChannel,
+    TextChannel,
+    VoiceChannel,
+    _guild_channel_factory,
+    _threaded_guild_channel_factory,
+)
 from .colour import Colour
 from .emoji import Emoji
 from .enums import (
@@ -100,7 +107,6 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
-    from .channel import CategoryChannel, ForumChannel, StageChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
@@ -538,10 +544,10 @@ class Guild(Hashable):
 
         self.mfa_level: MFALevel = guild.get("mfa_level", 0)
         self.emojis: Tuple[Emoji, ...] = tuple(
-            map(lambda d: state.store_emoji(self, d), guild.get("emojis", []))
+            state.store_emoji(self, d) for d in guild.get("emojis", [])
         )
         self.stickers: Tuple[GuildSticker, ...] = tuple(
-            map(lambda d: state.store_sticker(self, d), guild.get("stickers", []))
+            state.store_sticker(self, d) for d in guild.get("stickers", [])
         )
         self.features: List[GuildFeature] = guild.get("features", [])
         self._splash: Optional[str] = guild.get("splash")
@@ -605,7 +611,7 @@ class Guild(Hashable):
         except KeyError:
             pass
 
-        empty_tuple = tuple()
+        empty_tuple = ()
         for presence in data.get("presences", []):
             user_id = int(presence["user"]["id"])
             member = self.get_member(user_id)
