@@ -64,6 +64,8 @@ from . import errors
 from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
@@ -378,20 +380,22 @@ class ParamInfo:
 
     TYPES: ClassVar[Dict[type, int]] = {
         # fmt: off
-        str:                                 OptionType.string.value,
-        int:                                 OptionType.integer.value,
-        bool:                                OptionType.boolean.value,
-        disnake.abc.User:                    OptionType.user.value,
-        disnake.User:                        OptionType.user.value,
-        disnake.Member:                      OptionType.user.value,
-        Union[disnake.User, disnake.Member]: OptionType.user.value,
+        str:                                               OptionType.string.value,
+        int:                                               OptionType.integer.value,
+        bool:                                              OptionType.boolean.value,
+        disnake.abc.User:                                  OptionType.user.value,
+        disnake.User:                                      OptionType.user.value,
+        disnake.Member:                                    OptionType.user.value,
+        Union[disnake.User, disnake.Member]:               OptionType.user.value,
         # channels handled separately
-        disnake.abc.GuildChannel:            OptionType.channel.value,
-        disnake.Role:                        OptionType.role.value,
-        Union[disnake.Member, disnake.Role]: OptionType.mentionable.value,
-        disnake.abc.Snowflake:               OptionType.mentionable.value,
-        float:                               OptionType.number.value,
-        disnake.Attachment:                  OptionType.attachment.value,
+        disnake.abc.GuildChannel:                          OptionType.channel.value,
+        disnake.Role:                                      OptionType.role.value,
+        disnake.abc.Snowflake:                             OptionType.mentionable.value,
+        Union[disnake.Member, disnake.Role]:               OptionType.mentionable.value,
+        Union[disnake.User, disnake.Role]:                 OptionType.mentionable.value,
+        Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,
+        float:                                             OptionType.number.value,
+        disnake.Attachment:                                OptionType.attachment.value,
         # fmt: on
     }
     _registered_converters: ClassVar[Dict[type, Callable]] = {}
@@ -462,7 +466,7 @@ class ParamInfo:
         param: inspect.Parameter,
         type_hints: Dict[str, Any],
         parsed_docstring: Dict[str, disnake.utils._DocstringParam] = None,
-    ) -> ParamInfo:
+    ) -> Self:
         # hopefully repeated parsing won't cause any problems
         parsed_docstring = parsed_docstring or {}
 

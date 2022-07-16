@@ -50,6 +50,8 @@ from .ctx_menus_core import InvokableMessageCommand, InvokableUserCommand
 from .slash_core import InvokableSlashCommand
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from disnake.interactions import ApplicationCommandInteraction
 
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
@@ -63,7 +65,6 @@ __all__ = (
     "Cog",
 )
 
-CogT = TypeVar("CogT", bound="Cog")
 FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 MISSING: Any = disnake.utils.MISSING
@@ -216,11 +217,7 @@ class CogMeta(type):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
                 elif asyncio.iscoroutinefunction(value):
-                    try:
-                        getattr(value, "__cog_listener__")
-                    except AttributeError:
-                        continue
-                    else:
+                    if hasattr(value, "__cog_listener__"):
                         if elem.startswith(("cog_", "bot_")):
                             raise TypeError(no_bot_cog.format(base, elem))
                         listeners[elem] = value
@@ -263,7 +260,7 @@ class Cog(metaclass=CogMeta):
     __cog_app_commands__: ClassVar[List[InvokableApplicationCommand]]
     __cog_listeners__: ClassVar[List[Tuple[str, str]]]
 
-    def __new__(cls: Type[CogT], *args: Any, **kwargs: Any) -> CogT:
+    def __new__(cls, *args: Any, **kwargs: Any) -> Self:
         # For issue 426, we need to store a copy of the command objects
         # since we modify them to inject `self` to them.
         # To do this, we need to interfere with the Cog creation process.
@@ -335,7 +332,7 @@ class Cog(metaclass=CogMeta):
 
                 This does not include subcommands.
         """
-        return [c for c in self.__cog_app_commands__]
+        return list(self.__cog_app_commands__)
 
     def get_slash_commands(self) -> List[InvokableSlashCommand]:
         """
@@ -745,7 +742,7 @@ class Cog(metaclass=CogMeta):
         """Similar to :meth:`cog_after_slash_command_invoke` but for message commands."""
         pass
 
-    def _inject(self: CogT, bot: AnyBot) -> CogT:
+    def _inject(self, bot: AnyBot) -> Self:
         cls = self.__class__
 
         # realistically, the only thing that can cause loading errors

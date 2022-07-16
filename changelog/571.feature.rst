@@ -1,0 +1,1 @@
+Add ``bitrate`` parameter to :meth:`Guild.create_stage_channel`.
