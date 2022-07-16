@@ -96,10 +96,33 @@ class Permissions(BaseFlags):
             Checks if a permission is a superset of another permission.
         .. describe:: x < y
 
-             Checks if a permission is a strict subset of another permission.
+            Checks if a permission is a strict subset of another permission.
         .. describe:: x > y
 
-             Checks if a permission is a strict superset of another permission.
+            Checks if a permission is a strict superset of another permission.
+        .. describe:: x | y, x |= y
+
+            Returns a new Permissions instance with all enabled permissions from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new Permissions instance with only permissions enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new Permissions instance with only permissions enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new Permissions instance with all permissions from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the permission's hash.
@@ -157,10 +180,11 @@ class Permissions(BaseFlags):
         """Returns ``True`` if the permissions on self are a strict superset of those on other."""
         return self.is_superset(other) and self != other
 
-    __le__ = is_subset
-    __ge__ = is_superset
-    __lt__ = is_strict_subset
-    __gt__ = is_strict_superset
+    # the parent uses `Self` for the `other` typehint but we use `Permissions` here for backwards compat.
+    __le__ = is_subset  # type: ignore
+    __ge__ = is_superset  # type: ignore
+    __lt__ = is_strict_subset  # type: ignore
+    __gt__ = is_strict_superset  # type: ignore
 
     @classmethod
     @cached_creation
