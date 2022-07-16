@@ -96,10 +96,10 @@ class Permissions(BaseFlags):
             Checks if a permission is a superset of another permission.
         .. describe:: x < y
 
-             Checks if a permission is a strict subset of another permission.
+            Checks if a permission is a strict subset of another permission.
         .. describe:: x > y
 
-             Checks if a permission is a strict superset of another permission.
+            Checks if a permission is a strict superset of another permission.
         .. describe:: x | y, x |= y
 
             Returns a new Permissions instance with all enabled permissions from both x and y.

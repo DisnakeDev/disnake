@@ -269,15 +269,23 @@ class SystemChannelFlags(BaseFlags):
         .. describe:: x <= y
 
             Checks if a SystemChannelFlags instance is a subset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x >= y
 
             Checks if a SystemChannelFlags instance is a superset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x < y
 
-             Checks if a SystemChannelFlags instance is a strict subset of another SystemChannelFlags instance.
+            Checks if a SystemChannelFlags instance is a strict subset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x > y
 
-             Checks if a SystemChannelFlags instance is a strict superset of another SystemChannelFlags instance.
+            Checks if a SystemChannelFlags instance is a strict superset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x | y, x |= y
 
             Returns a new SystemChannelFlags instance with all enabled flags from both x and y.
@@ -381,15 +389,23 @@ class MessageFlags(BaseFlags):
         .. describe:: x <= y
 
             Checks if a MessageFlags instance is a subset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x >= y
 
             Checks if a MessageFlags instance is a superset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x < y
 
-             Checks if a MessageFlags instance is a strict subset of another MessageFlags instance.
+            Checks if a MessageFlags instance is a strict subset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x > y
 
-             Checks if a MessageFlags instance is a strict superset of another MessageFlags instance.
+            Checks if a MessageFlags instance is a strict superset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x | y, x |= y
 
             Returns a new MessageFlags instance with all enabled flags from both x and y.
@@ -512,15 +528,23 @@ class PublicUserFlags(BaseFlags):
         .. describe:: x <= y
 
             Checks if a PublicUserFlags instance is a subset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x >= y
 
             Checks if a PublicUserFlags instance is a superset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x < y
 
-             Checks if a PublicUserFlags instance is a strict subset of another PublicUserFlags instance.
+            Checks if a PublicUserFlags instance is a strict subset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x > y
 
-             Checks if a PublicUserFlags instance is a strict superset of another PublicUserFlags instance.
+            Checks if a PublicUserFlags instance is a strict superset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x | y, x |= y
 
             Returns a new PublicUserFlags instance with all enabled flags from both x and y.
@@ -696,15 +720,23 @@ class Intents(BaseFlags):
         .. describe:: x <= y
 
             Checks if an Intents instance is a subset of another Intents instance.
+
+            .. versionadded:: 2.6
         .. describe:: x >= y
 
             Checks if an Intents instance is a superset of another Intents instance.
+
+            .. versionadded:: 2.6
         .. describe:: x < y
 
-             Checks if an Intents instance is a strict subset of another Intents instance.
+            Checks if an Intents instance is a strict subset of another Intents instance.
+
+            .. versionadded:: 2.6
         .. describe:: x > y
 
-             Checks if an Intents instance is a strict superset of another Intents instance.
+            Checks if an Intents instance is a strict superset of another Intents instance.
+
+            .. versionadded:: 2.6
         .. describe:: x | y, x |= y
 
             Returns a new Intents instance with all enabled intents from both x and y.
@@ -1253,15 +1285,23 @@ class MemberCacheFlags(BaseFlags):
         .. describe:: x <= y
 
             Checks if an MemberCacheFlags instance is a subset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x >= y
 
             Checks if an MemberCacheFlags instance is a superset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x < y
 
-             Checks if an MemberCacheFlags instance is a strict subset of another MemberCacheFlags instance.
+            Checks if an MemberCacheFlags instance is a strict subset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x > y
 
-             Checks if an MemberCacheFlags instance is a strict superset of another MemberCacheFlags instance.
+            Checks if an MemberCacheFlags instance is a strict superset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x | y, x |= y
 
             Returns a new MemberCacheFlags instance with all enabled flags from both x and y.
@@ -1400,15 +1440,23 @@ class ApplicationFlags(BaseFlags):
         .. describe:: x <= y
 
             Checks if an ApplicationFlags instance is a subset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x >= y
 
             Checks if an ApplicationFlags instance is a superset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x < y
 
-             Checks if an ApplicationFlags instance is a strict subset of another ApplicationFlags instance.
+            Checks if an ApplicationFlags instance is a strict subset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x > y
 
-             Checks if an ApplicationFlags instance is a strict superset of another ApplicationFlags instance.
+            Checks if an ApplicationFlags instance is a strict superset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x | y, x |= y
 
             Returns a new ApplicationFlags instance with all enabled flags from both x and y.
@@ -1522,15 +1570,23 @@ class ChannelFlags(BaseFlags):
         .. describe:: x <= y
 
             Checks if an ChannelFlags instance is a subset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x >= y
 
             Checks if an ChannelFlags instance is a superset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x < y
 
-             Checks if an ChannelFlags instance is a strict subset of another ChannelFlags instance.
+            Checks if an ChannelFlags instance is a strict subset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x > y
 
-             Checks if an ChannelFlags instance is a strict superset of another ChannelFlags instance.
+            Checks if an ChannelFlags instance is a strict superset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
         .. describe:: x | y, x |= y
 
             Returns a new ChannelFlags instance with all enabled flags from both x and y.
