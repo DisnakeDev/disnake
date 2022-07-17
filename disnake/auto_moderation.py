@@ -25,7 +25,18 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING, Dict, FrozenSet, Iterable, List, Optional, Sequence, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    Union,
+    overload,
+)
 
 from .enums import (
     AutoModActionType,
@@ -217,7 +228,6 @@ class AutoModTimeoutAction(AutoModAction):
         return f"<{type(self).__name__} duration={self.duration!r}>"
 
 
-# TODO: perhaps this should just be a typeddict instead?
 class AutoModTriggerMetadata:
     """
     Metadata for an auto moderation trigger.
@@ -241,8 +251,19 @@ class AutoModTriggerMetadata:
 
     __slots__ = ("keyword_filter", "presets", "allow_list")
 
-    # TODO: add overloads - can we always require exactly one parameter here, or is it
-    #       required to be able to construct this class without any parameters?
+    @overload
+    def __init__(self, *, keyword_filter: Sequence[str]):
+        ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        presets: AutoModKeywordPresets,
+        allow_list: Optional[Sequence[str]] = None,
+    ):
+        ...
+
     def __init__(
         self,
         *,
@@ -261,7 +282,7 @@ class AutoModTriggerMetadata:
         else:
             presets = None
 
-        return cls(
+        return cls(  # type: ignore  # call doesn't match any overloads
             keyword_filter=data.get("keyword_filter"),
             presets=presets,
             allow_list=data.get("allow_list"),
