@@ -48,7 +48,7 @@ if TYPE_CHECKING:
     from .item import ItemCallbackType
     from .view import View
 
-V = TypeVar("V", bound="Optional[View]", covariant=True)
+ViewT = TypeVar("ViewT", bound="Optional[View]", covariant=True)
 
 
 def _parse_select_options(
@@ -61,7 +61,7 @@ def _parse_select_options(
     return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
 
 
-class Select(Item[V]):
+class Select(Item[ViewT]):
     """Represents a UI select menu.
 
     This is usually represented as a drop down menu.
@@ -128,7 +128,7 @@ class Select(Item[V]):
 
     @overload
     def __init__(
-        self: Select[V],
+        self: Select[ViewT],
         *,
         custom_id: str = MISSING,
         placeholder: Optional[str] = None,

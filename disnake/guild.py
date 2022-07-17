@@ -50,8 +50,15 @@ from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
 from .auto_moderation import AutoModRule
 from .bans import BanEntry
-from .channel import *
-from .channel import _guild_channel_factory, _threaded_guild_channel_factory
+from .channel import (
+    CategoryChannel,
+    ForumChannel,
+    StageChannel,
+    TextChannel,
+    VoiceChannel,
+    _guild_channel_factory,
+    _threaded_guild_channel_factory,
+)
 from .colour import Colour
 from .emoji import Emoji
 from .enums import (
@@ -100,7 +107,6 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .auto_moderation import AutoModAction, AutoModTriggerMetadata
-    from .channel import CategoryChannel, ForumChannel, StageChannel, TextChannel, VoiceChannel
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template

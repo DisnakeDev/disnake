@@ -34,7 +34,7 @@ from disnake.permissions import Permissions
 from disnake.utils import async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
-from .errors import *
+from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self

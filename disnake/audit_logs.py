@@ -409,7 +409,7 @@ class AuditLogChanges:
         elem: List[RolePayload],
     ) -> None:
         if not hasattr(first, "roles"):
-            setattr(first, "roles", [])
+            first.roles = []
 
         data = []
         g: Guild = entry.guild
@@ -424,7 +424,7 @@ class AuditLogChanges:
 
             data.append(role)
 
-        setattr(second, "roles", data)
+        second.roles = data
 
     def _handle_command_permissions(
         self,

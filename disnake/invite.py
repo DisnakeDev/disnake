@@ -43,6 +43,8 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    import datetime
+
     from typing_extensions import Self
 
     from .abc import GuildChannel
@@ -62,8 +64,6 @@ if TYPE_CHECKING:
 
     InviteGuildType = Union[Guild, "PartialInviteGuild", Object]
     InviteChannelType = Union[GuildChannel, "PartialInviteChannel", Object]
-
-    import datetime
 
 
 class PartialInviteChannel:
