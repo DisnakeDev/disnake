@@ -26,7 +26,7 @@ from .app_commands import *
 from .appinfo import *
 from .asset import *
 from .audit_logs import *
-from .auto_moderation import *
+from .automod import *
 from .bans import *
 from .channel import *
 from .client import *

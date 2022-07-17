@@ -54,7 +54,7 @@ from typing import (
 from . import utils
 from .activity import BaseActivity
 from .app_commands import GuildApplicationCommandPermissions, application_command_factory
-from .auto_moderation import AutoModActionExecution, AutoModRule
+from .automod import AutoModActionExecution, AutoModRule
 from .channel import (
     DMChannel,
     ForumChannel,
@@ -108,7 +108,7 @@ if TYPE_CHECKING:
     from .guild import GuildChannel, VocalGuildChannel
     from .http import HTTPClient
     from .types.activity import Activity as ActivityPayload
-    from .types.auto_moderation import (
+    from .types.automod import (
         AutoModActionExecutionEvent as AutoModActionExecutionEventPayload,
         AutoModRule as AutoModRulePayload,
     )

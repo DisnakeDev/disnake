@@ -76,7 +76,7 @@ if TYPE_CHECKING:
     from .types import (
         appinfo,
         audit_log,
-        auto_moderation,
+        automod,
         channel,
         components,
         embed,
@@ -2142,16 +2142,14 @@ class HTTPClient:
         r = Route("PATCH", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
         return self.request(r, json=payload, reason=reason)
 
-    def get_auto_moderation_rules(
-        self, guild_id: Snowflake
-    ) -> Response[List[auto_moderation.AutoModRule]]:
+    def get_auto_moderation_rules(self, guild_id: Snowflake) -> Response[List[automod.AutoModRule]]:
         return self.request(
             Route("GET", "/guilds/{guild_id}/auto-moderation/rules", guild_id=guild_id)
         )
 
     def get_auto_moderation_rule(
         self, guild_id: Snowflake, rule_id: Snowflake
-    ) -> Response[auto_moderation.AutoModRule]:
+    ) -> Response[automod.AutoModRule]:
         return self.request(
             Route(
                 "GET",
@@ -2166,16 +2164,16 @@ class HTTPClient:
         guild_id: Snowflake,
         *,
         name: str,
-        event_type: auto_moderation.AutoModEventType,
-        trigger_type: auto_moderation.AutoModTriggerType,
-        actions: List[auto_moderation.AutoModAction],
-        trigger_metadata: Optional[auto_moderation.AutoModTriggerMetadata] = None,
+        event_type: automod.AutoModEventType,
+        trigger_type: automod.AutoModTriggerType,
+        actions: List[automod.AutoModAction],
+        trigger_metadata: Optional[automod.AutoModTriggerMetadata] = None,
         enabled: Optional[bool] = None,
         exempt_roles: Optional[SnowflakeList] = None,
         exempt_channels: Optional[SnowflakeList] = None,
         reason: Optional[str] = None,
-    ) -> Response[auto_moderation.AutoModRule]:
-        payload: auto_moderation.CreateAutoModRule = {
+    ) -> Response[automod.AutoModRule]:
+        payload: automod.CreateAutoModRule = {
             "name": name,
             "event_type": event_type,
             "trigger_type": trigger_type,
@@ -2204,7 +2202,7 @@ class HTTPClient:
         *,
         reason: Optional[str] = None,
         **fields: Any,
-    ) -> Response[auto_moderation.AutoModRule]:
+    ) -> Response[automod.AutoModRule]:
         return self.request(
             Route(
                 "PATCH",

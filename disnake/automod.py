@@ -58,7 +58,7 @@ if TYPE_CHECKING:
     from .message import Message
     from .role import Role
     from .threads import Thread
-    from .types.auto_moderation import (
+    from .types.automod import (
         AutoModAction as AutoModActionPayload,
         AutoModActionExecutionEvent as AutoModActionExecutionEventPayload,
         AutoModActionMetadata,

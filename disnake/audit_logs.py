@@ -44,7 +44,7 @@ from typing import (
 from . import abc, enums, flags, utils
 from .app_commands import ApplicationCommandPermissions
 from .asset import Asset
-from .auto_moderation import AutoModAction, AutoModTriggerMetadata, _automod_action_factory
+from .automod import AutoModAction, AutoModTriggerMetadata, _automod_action_factory
 from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
@@ -62,7 +62,7 @@ if TYPE_CHECKING:
     import datetime
 
     from .app_commands import APIApplicationCommand
-    from .auto_moderation import AutoModRule
+    from .automod import AutoModRule
     from .emoji import Emoji
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
@@ -77,7 +77,7 @@ if TYPE_CHECKING:
         AuditLogEntry as AuditLogEntryPayload,
         _AuditLogChange_ApplicationCommandPermissions as AuditLogChangeAppCmdPermsPayload,
     )
-    from .types.auto_moderation import (
+    from .types.automod import (
         AutoModAction as AutoModActionPayload,
         AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
     )

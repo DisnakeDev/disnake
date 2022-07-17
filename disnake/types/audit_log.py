@@ -28,7 +28,7 @@ from __future__ import annotations
 import datetime
 from typing import List, Literal, Optional, TypedDict, Union
 
-from .auto_moderation import (
+from .automod import (
     AutoModAction,
     AutoModEventType,
     AutoModRule,

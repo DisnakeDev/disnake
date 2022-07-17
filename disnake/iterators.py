@@ -43,7 +43,7 @@ from typing import (
 
 from .app_commands import application_command_factory
 from .audit_logs import AuditLogEntry
-from .auto_moderation import AutoModRule
+from .automod import AutoModRule
 from .bans import BanEntry
 from .errors import NoMoreItems
 from .guild_scheduled_event import GuildScheduledEvent
