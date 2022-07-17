@@ -205,6 +205,9 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     errors. In order to turn a function into a coroutine they must be ``async def``
     functions.
 
+Client Events
+~~~~~~~~~~~~~
+
 .. function:: on_connect()
 
     Called when the client has successfully connected to Discord. This is not
@@ -356,6 +359,9 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param payload: The message that is about to be passed on to the
                     WebSocket library. It can be :class:`bytes` to denote a binary
                     message or :class:`str` to denote a regular text message.
+
+Chat Message Events
+~~~~~~~~~~~~~~~~~~~
 
 .. function:: on_typing(channel, user, when)
 
@@ -661,6 +667,9 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param payload: The raw event payload data.
     :type payload: :class:`RawReactionClearEmojiEvent`
 
+Interaction Events
+~~~~~~~~~~~~~~~~~~
+
 .. function:: on_application_command_permissions_update(permissions)
 
     Called when the permissions of an application command or
@@ -766,6 +775,9 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
     :param interaction: The interaction object.
     :type interaction: :class:`ModalInteraction`
+
+Channel/Thread Events
+~~~~~~~~~~~~~~~~~~~~~
 
 .. function:: on_private_channel_update(before, after)
 
@@ -968,58 +980,63 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param thread: The updated thread.
     :type thread: :class:`Thread`
 
-.. function:: on_guild_integrations_update(guild)
+.. function:: on_group_join(channel, user)
+              on_group_remove(channel, user)
 
-    Called whenever an integration is created, modified, or removed from a guild.
+    Called when someone joins or leaves a :class:`GroupChannel`.
 
-    This requires :attr:`Intents.integrations` to be enabled.
+    :param channel: The group that the user joined or left.
+    :type channel: :class:`GroupChannel`
+    :param user: The user that joined or left.
+    :type user: :class:`User`
 
-    .. versionadded:: 1.4
+Guild Events
+~~~~~~~~~~~~
 
-    :param guild: The guild that had its integrations updated.
+Guild Generic Events
+++++++++++++++++++++
+
+.. function:: on_guild_join(guild)
+
+    Called when a :class:`Guild` is either created by the :class:`Client` or when the
+    :class:`Client` joins a guild.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    :param guild: The guild that was joined.
     :type guild: :class:`Guild`
 
-.. function:: on_integration_create(integration)
+.. function:: on_guild_remove(guild)
 
-    Called when an integration is created.
+    Called when a :class:`Guild` is removed from the :class:`Client`.
 
-    This requires :attr:`Intents.integrations` to be enabled.
+    This happens through, but not limited to, these circumstances:
 
-    .. versionadded:: 2.0
+    - The client got banned.
+    - The client got kicked.
+    - The client left the guild.
+    - The client or the guild owner deleted the guild.
 
-    :param integration: The integration that was created.
-    :type integration: :class:`Integration`
+    In order for this event to be invoked then the :class:`Client` must have
+    been part of the guild to begin with. (i.e. it is part of :attr:`Client.guilds`)
 
-.. function:: on_integration_update(integration)
+    This requires :attr:`Intents.guilds` to be enabled.
 
-    Called when an integration is updated.
+    :param guild: The guild that got removed.
+    :type guild: :class:`Guild`
 
-    This requires :attr:`Intents.integrations` to be enabled.
+.. function:: on_guild_available(guild)
+              on_guild_unavailable(guild)
 
-    .. versionadded:: 2.0
+    Called when a guild becomes available or unavailable. The guild must have
+    existed in the :attr:`Client.guilds` cache.
 
-    :param integration: The integration that was created.
-    :type integration: :class:`Integration`
+    This requires :attr:`Intents.guilds` to be enabled.
 
-.. function:: on_raw_integration_delete(payload)
+    :param guild: The :class:`Guild` that has changed availability.
 
-    Called when an integration is deleted.
-
-    This requires :attr:`Intents.integrations` to be enabled.
-
-    .. versionadded:: 2.0
-
-    :param payload: The raw event payload data.
-    :type payload: :class:`RawIntegrationDeleteEvent`
-
-.. function:: on_webhooks_update(channel)
-
-    Called whenever a webhook is created, modified, or removed from a guild channel.
-
-    This requires :attr:`Intents.webhooks` to be enabled.
-
-    :param channel: The channel that had its webhooks updated.
-    :type channel: :class:`abc.GuildChannel`
+Guild User/Member Events
+++++++++++++++++++++++++
 
 .. function:: on_member_join(member)
               on_member_remove(member)
@@ -1085,131 +1102,81 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param after: The updated user's updated info.
     :type after: :class:`User`
 
-.. function:: on_guild_join(guild)
+.. function:: on_member_ban(guild, user)
 
-    Called when a :class:`Guild` is either created by the :class:`Client` or when the
-    :class:`Client` joins a guild.
+    Called when user gets banned from a :class:`Guild`.
 
-    This requires :attr:`Intents.guilds` to be enabled.
+    This requires :attr:`Intents.bans` to be enabled.
 
-    :param guild: The guild that was joined.
+    :param guild: The guild the user got banned from.
     :type guild: :class:`Guild`
+    :param user: The user that got banned.
+                 Can be either :class:`User` or :class:`Member` depending on
+                 whether the user was in the guild at the time of removal.
+    :type user: Union[:class:`User`, :class:`Member`]
 
-.. function:: on_guild_remove(guild)
+.. function:: on_member_unban(guild, user)
 
-    Called when a :class:`Guild` is removed from the :class:`Client`.
+    Called when a :class:`User` gets unbanned from a :class:`Guild`.
 
-    This happens through, but not limited to, these circumstances:
+    This requires :attr:`Intents.bans` to be enabled.
 
-    - The client got banned.
-    - The client got kicked.
-    - The client left the guild.
-    - The client or the guild owner deleted the guild.
-
-    In order for this event to be invoked then the :class:`Client` must have
-    been part of the guild to begin with. (i.e. it is part of :attr:`Client.guilds`)
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param guild: The guild that got removed.
+    :param guild: The guild the user got unbanned from.
     :type guild: :class:`Guild`
+    :param user: The user that got unbanned.
+    :type user: :class:`User`
 
-.. function:: on_guild_update(before, after)
+Guild Invite Events
++++++++++++++++++++
 
-    Called when a :class:`Guild` updates, for example:
+.. function:: on_invite_create(invite)
 
-    - Changed name
-    - Changed AFK channel
-    - Changed AFK timeout
-    - etc
+    Called when an :class:`Invite` is created.
+    You must have the :attr:`~Permissions.manage_channels` permission to receive this.
 
-    This requires :attr:`Intents.guilds` to be enabled.
+    .. versionadded:: 1.3
 
-    :param before: The guild prior to being updated.
-    :type before: :class:`Guild`
-    :param after: The guild after being updated.
-    :type after: :class:`Guild`
+    .. note::
 
-.. function:: on_guild_role_create(role)
-              on_guild_role_delete(role)
+        There is a rare possibility that the :attr:`Invite.guild` and :attr:`Invite.channel`
+        attributes will be of :class:`Object` rather than the respective models.
 
-    Called when a :class:`Guild` creates or deletes a new :class:`Role`.
+    This requires :attr:`Intents.invites` to be enabled.
 
-    To get the guild it belongs to, use :attr:`Role.guild`.
+    :param invite: The invite that was created.
+    :type invite: :class:`Invite`
 
-    This requires :attr:`Intents.guilds` to be enabled.
+.. function:: on_invite_delete(invite)
 
-    :param role: The role that was created or deleted.
-    :type role: :class:`Role`
+    Called when an :class:`Invite` is deleted.
+    You must have the :attr:`~Permissions.manage_channels` permission to receive this.
 
-.. function:: on_guild_role_update(before, after)
+    .. versionadded:: 1.3
 
-    Called when a :class:`Role` is changed guild-wide.
+    .. note::
 
-    This requires :attr:`Intents.guilds` to be enabled.
+        There is a rare possibility that the :attr:`Invite.guild` and :attr:`Invite.channel`
+        attributes will be of :class:`Object` rather than the respective models.
 
-    :param before: The updated role's old info.
-    :type before: :class:`Role`
-    :param after: The updated role's updated info.
-    :type after: :class:`Role`
+        Outside of those two attributes, the only other attribute guaranteed to be
+        filled by the Discord gateway for this event is :attr:`Invite.code`.
 
-.. function:: on_guild_emojis_update(guild, before, after)
+    This requires :attr:`Intents.invites` to be enabled.
 
-    Called when a :class:`Guild` adds or removes :class:`Emoji`.
+    :param invite: The invite that was deleted.
+    :type invite: :class:`Invite`
 
-    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
+Guild Settings Events
++++++++++++++++++++++
 
-    :param guild: The guild who got their emojis updated.
-    :type guild: :class:`Guild`
-    :param before: A list of emojis before the update.
-    :type before: Sequence[:class:`Emoji`]
-    :param after: A list of emojis after the update.
-    :type after: Sequence[:class:`Emoji`]
+.. function:: on_webhooks_update(channel)
 
-.. function:: on_guild_stickers_update(guild, before, after)
+    Called whenever a webhook is created, modified, or removed from a guild channel.
 
-    Called when a :class:`Guild` updates its stickers.
+    This requires :attr:`Intents.webhooks` to be enabled.
 
-    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
-
-    .. versionadded:: 2.0
-
-    :param guild: The guild who got their stickers updated.
-    :type guild: :class:`Guild`
-    :param before: A list of stickers before the update.
-    :type before: Sequence[:class:`GuildSticker`]
-    :param after: A list of stickers after the update.
-    :type after: Sequence[:class:`GuildSticker`]
-
-.. function:: on_guild_available(guild)
-              on_guild_unavailable(guild)
-
-    Called when a guild becomes available or unavailable. The guild must have
-    existed in the :attr:`Client.guilds` cache.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param guild: The :class:`Guild` that has changed availability.
-
-.. function:: on_voice_state_update(member, before, after)
-
-    Called when a :class:`Member` changes their :class:`VoiceState`.
-
-    The following, but not limited to, examples illustrate when this event is called:
-
-    - A member joins a voice or stage channel.
-    - A member leaves a voice or stage channel.
-    - A member is muted or deafened by their own accord.
-    - A member is muted or deafened by a guild administrator.
-
-    This requires :attr:`Intents.voice_states` to be enabled.
-
-    :param member: The member whose voice states changed.
-    :type member: :class:`Member`
-    :param before: The voice state prior to the changes.
-    :type before: :class:`VoiceState`
-    :param after: The voice state after the changes.
-    :type after: :class:`VoiceState`
+    :param channel: The channel that had its webhooks updated.
+    :type channel: :class:`abc.GuildChannel`
 
 .. function:: on_guild_scheduled_event_create(event)
               on_guild_scheduled_event_delete(event)
@@ -1287,76 +1254,143 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param after: The stage instance after the update.
     :type after: :class:`StageInstance`
 
-.. function:: on_member_ban(guild, user)
 
-    Called when user gets banned from a :class:`Guild`.
+.. function:: on_guild_update(before, after)
 
-    This requires :attr:`Intents.bans` to be enabled.
+    Called when a :class:`Guild` updates, for example:
 
-    :param guild: The guild the user got banned from.
+    - Changed name
+    - Changed AFK channel
+    - Changed AFK timeout
+    - etc
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    :param before: The guild prior to being updated.
+    :type before: :class:`Guild`
+    :param after: The guild after being updated.
+    :type after: :class:`Guild`
+
+.. function:: on_guild_role_create(role)
+              on_guild_role_delete(role)
+
+    Called when a :class:`Guild` creates or deletes a new :class:`Role`.
+
+    To get the guild it belongs to, use :attr:`Role.guild`.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    :param role: The role that was created or deleted.
+    :type role: :class:`Role`
+
+.. function:: on_guild_role_update(before, after)
+
+    Called when a :class:`Role` is changed guild-wide.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    :param before: The updated role's old info.
+    :type before: :class:`Role`
+    :param after: The updated role's updated info.
+    :type after: :class:`Role`
+
+.. function:: on_guild_emojis_update(guild, before, after)
+
+    Called when a :class:`Guild` adds or removes :class:`Emoji`.
+
+    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
+
+    :param guild: The guild who got their emojis updated.
     :type guild: :class:`Guild`
-    :param user: The user that got banned.
-                 Can be either :class:`User` or :class:`Member` depending on
-                 whether the user was in the guild at the time of removal.
-    :type user: Union[:class:`User`, :class:`Member`]
+    :param before: A list of emojis before the update.
+    :type before: Sequence[:class:`Emoji`]
+    :param after: A list of emojis after the update.
+    :type after: Sequence[:class:`Emoji`]
 
-.. function:: on_member_unban(guild, user)
+.. function:: on_guild_stickers_update(guild, before, after)
 
-    Called when a :class:`User` gets unbanned from a :class:`Guild`.
+    Called when a :class:`Guild` updates its stickers.
 
-    This requires :attr:`Intents.bans` to be enabled.
+    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
 
-    :param guild: The guild the user got unbanned from.
+    .. versionadded:: 2.0
+
+    :param guild: The guild who got their stickers updated.
     :type guild: :class:`Guild`
-    :param user: The user that got unbanned.
-    :type user: :class:`User`
+    :param before: A list of stickers before the update.
+    :type before: Sequence[:class:`GuildSticker`]
+    :param after: A list of stickers after the update.
+    :type after: Sequence[:class:`GuildSticker`]
 
-.. function:: on_invite_create(invite)
+Guild Integration Events
+++++++++++++++++++++++++
 
-    Called when an :class:`Invite` is created.
-    You must have the :attr:`~Permissions.manage_channels` permission to receive this.
+.. function:: on_guild_integrations_update(guild)
 
-    .. versionadded:: 1.3
+    Called whenever an integration is created, modified, or removed from a guild.
 
-    .. note::
+    This requires :attr:`Intents.integrations` to be enabled.
 
-        There is a rare possibility that the :attr:`Invite.guild` and :attr:`Invite.channel`
-        attributes will be of :class:`Object` rather than the respective models.
+    .. versionadded:: 1.4
 
-    This requires :attr:`Intents.invites` to be enabled.
+    :param guild: The guild that had its integrations updated.
+    :type guild: :class:`Guild`
 
-    :param invite: The invite that was created.
-    :type invite: :class:`Invite`
+.. function:: on_integration_create(integration)
 
-.. function:: on_invite_delete(invite)
+    Called when an integration is created.
 
-    Called when an :class:`Invite` is deleted.
-    You must have the :attr:`~Permissions.manage_channels` permission to receive this.
+    This requires :attr:`Intents.integrations` to be enabled.
 
-    .. versionadded:: 1.3
+    .. versionadded:: 2.0
 
-    .. note::
+    :param integration: The integration that was created.
+    :type integration: :class:`Integration`
 
-        There is a rare possibility that the :attr:`Invite.guild` and :attr:`Invite.channel`
-        attributes will be of :class:`Object` rather than the respective models.
+.. function:: on_integration_update(integration)
 
-        Outside of those two attributes, the only other attribute guaranteed to be
-        filled by the Discord gateway for this event is :attr:`Invite.code`.
+    Called when an integration is updated.
 
-    This requires :attr:`Intents.invites` to be enabled.
+    This requires :attr:`Intents.integrations` to be enabled.
 
-    :param invite: The invite that was deleted.
-    :type invite: :class:`Invite`
+    .. versionadded:: 2.0
 
-.. function:: on_group_join(channel, user)
-              on_group_remove(channel, user)
+    :param integration: The integration that was created.
+    :type integration: :class:`Integration`
 
-    Called when someone joins or leaves a :class:`GroupChannel`.
+.. function:: on_raw_integration_delete(payload)
 
-    :param channel: The group that the user joined or left.
-    :type channel: :class:`GroupChannel`
-    :param user: The user that joined or left.
-    :type user: :class:`User`
+    Called when an integration is deleted.
+
+    This requires :attr:`Intents.integrations` to be enabled.
+
+    .. versionadded:: 2.0
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawIntegrationDeleteEvent`
+
+Voice Events
+~~~~~~~~~~~~
+
+.. function:: on_voice_state_update(member, before, after)
+
+    Called when a :class:`Member` changes their :class:`VoiceState`.
+
+    The following, but not limited to, examples illustrate when this event is called:
+
+    - A member joins a voice or stage channel.
+    - A member leaves a voice or stage channel.
+    - A member is muted or deafened by their own accord.
+    - A member is muted or deafened by a guild administrator.
+
+    This requires :attr:`Intents.voice_states` to be enabled.
+
+    :param member: The member whose voice states changed.
+    :type member: :class:`Member`
+    :param before: The voice state prior to the changes.
+    :type before: :class:`VoiceState`
+    :param after: The voice state after the changes.
+    :type after: :class:`VoiceState`
 
 .. _discord-api-utils:
 
