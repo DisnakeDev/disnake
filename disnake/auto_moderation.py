@@ -275,6 +275,28 @@ class AutoModTriggerMetadata:
         self.presets: Optional[AutoModKeywordPresets] = presets
         self.allow_list: Optional[Sequence[str]] = allow_list
 
+    def with_edits(
+        self,
+        *,
+        keyword_filter: Optional[Sequence[str]] = MISSING,
+        presets: Optional[AutoModKeywordPresets] = MISSING,
+        allow_list: Optional[Sequence[str]] = MISSING,
+    ) -> Self:
+        """
+        Returns a new instance with the given edits applied.
+        All other fields will be kept intact.
+
+        Returns
+        -------
+        :class:`AutoModTriggerMetadata`
+            The new metadata instance.
+        """
+        return self.__class__(  # type: ignore  # call doesn't match any overloads
+            keyword_filter=self.keyword_filter if keyword_filter is MISSING else keyword_filter,
+            presets=self.presets if presets is MISSING else presets,
+            allow_list=self.allow_list if allow_list is MISSING else allow_list,
+        )
+
     @classmethod
     def _from_dict(cls, data: AutoModTriggerMetadataPayload) -> Self:
         if (presets_data := data.get("presets")) is not None:
