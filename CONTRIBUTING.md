@@ -170,18 +170,12 @@ We use NumPy style docstrings parsed with Sphinx's Napoleon extension — the pr
 
 It is important that the section header comes **after** any description and admonitions that exist, as it will stop the parsing of the description.
 
-It is also desired to put a ``.. versionchanged:: 2.9`` directly below the section header with which parameter was changed, if the function has multiple arguments.
-
 The end result of these changes would be as follows:
 
 ```py
       """|coro|
 
       Retrieves all messages that are currently pinned in the channel.
-
-      .. versionchanged:: 2.9
-
-          Added the ``oldest_first`` parameter.
 
       .. note::
 
