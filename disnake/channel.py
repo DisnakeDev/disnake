@@ -365,6 +365,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         type: ChannelType = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[TextChannel]:
@@ -416,6 +417,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+        flags: :class:`ChannelFlags`
+            The new flags to set for this channel.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
@@ -447,6 +453,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             default_auto_archive_duration=default_auto_archive_duration,
             type=type,
             overwrites=overwrites,
+            flags=flags,
             reason=reason,
             **kwargs,
         )
@@ -1295,6 +1302,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         video_quality_mode: VideoQualityMode = ...,
         nsfw: bool = ...,
         slowmode_delay: Optional[int] = ...,
+        flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
     ) -> VoiceChannel:
         ...
@@ -1313,6 +1321,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
         slowmode_delay: Optional[int] = MISSING,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[VoiceChannel]:
@@ -1375,6 +1384,11 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
             .. versionadded:: 2.3
 
+        flags: :class:`ChannelFlags`
+            The new flags to set for this channel.
+
+            .. versionadded:: 2.6
+
         Raises
         ------
         Forbidden
@@ -1404,6 +1418,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             video_quality_mode=video_quality_mode,
             nsfw=nsfw,
             slowmode_delay=slowmode_delay,
+            flags=flags,
             reason=reason,
             **kwargs,
         )
@@ -1930,6 +1945,7 @@ class StageChannel(VocalGuildChannel):
         rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
         bitrate: int = MISSING,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = ...,
     ) -> StageChannel:
         ...
@@ -1945,6 +1961,7 @@ class StageChannel(VocalGuildChannel):
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         bitrate: int = MISSING,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[StageChannel]:
@@ -1992,6 +2009,11 @@ class StageChannel(VocalGuildChannel):
 
             .. versionadded:: 2.6
 
+        flags: :class:`ChannelFlags`
+            The new flags to set for this channel.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
@@ -2021,6 +2043,7 @@ class StageChannel(VocalGuildChannel):
             rtc_region=rtc_region,
             video_quality_mode=video_quality_mode,
             bitrate=bitrate,
+            flags=flags,
             reason=reason,
             **kwargs,
         )
@@ -2155,6 +2178,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         position: int = MISSING,
         nsfw: bool = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[CategoryChannel]:
@@ -2185,6 +2209,11 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the category.
+        flags: :class:`ChannelFlags`
+            The new flags to set for this channel.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for editing this category. Shows up on the audit log.
 
@@ -2210,6 +2239,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             position=position,
             nsfw=nsfw,
             overwrites=overwrites,
+            flags=flags,
             reason=reason,
             **kwargs,
         )
@@ -2630,6 +2660,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         slowmode_delay: Optional[int] = ...,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
     ) -> ForumChannel:
         ...
@@ -2646,6 +2677,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[ForumChannel]:
@@ -2684,6 +2716,11 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+        flags: :class:`ChannelFlags`
+            The new flags to set for this channel.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
@@ -2714,6 +2751,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             slowmode_delay=slowmode_delay,
             default_auto_archive_duration=default_auto_archive_duration,
             overwrites=overwrites,
+            flags=flags,
             reason=reason,
             **kwargs,
         )

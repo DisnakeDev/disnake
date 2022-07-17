@@ -324,6 +324,7 @@ class GuildChannel(ABC):
         user_limit: int = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
         parent_id: Optional[int]
@@ -413,6 +414,7 @@ class GuildChannel(ABC):
             "rtc_region": rtc_region_payload,
             "video_quality_mode": video_quality_mode_payload,
             "default_auto_archive_duration": default_auto_archive_duration_payload,
+            "flags": flags.value if flags is not MISSING else flags,
         }
         options = {k: v for k, v in options.items() if v is not MISSING}
 

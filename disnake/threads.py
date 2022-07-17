@@ -620,6 +620,7 @@ class Thread(Messageable, Hashable):
         slowmode_delay: int = MISSING,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         pinned: bool = MISSING,
+        flags: ChannelFlags = None,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
@@ -655,6 +656,11 @@ class Thread(Messageable, Hashable):
 
             .. versionadded:: 2.5
 
+        flags: :class:`ChannelFlags`
+            The new channel flags to set for this thread.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for editing this thread. Shows up on the audit log.
 
@@ -685,9 +691,14 @@ class Thread(Messageable, Hashable):
             payload["invitable"] = invitable
         if slowmode_delay is not MISSING:
             payload["rate_limit_per_user"] = slowmode_delay
+
         if pinned is not MISSING:
-            flags = ChannelFlags._from_value(self._flags)
+            # create base flags if flags are provided, otherwise use the internal flags.
+            if flags is None:
+                flags = ChannelFlags._from_value(self._flags)
             flags.pinned = pinned
+            payload["flags"] = flags.value
+        if flags is not None:
             payload["flags"] = flags.value
 
         data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
