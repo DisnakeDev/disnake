@@ -25,18 +25,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    FrozenSet,
-    Iterable,
-    List,
-    Optional,
-    Sequence,
-    Type,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Dict, FrozenSet, Iterable, List, Optional, Sequence, Type, Union
 
 from .enums import (
     AutoModActionType,
@@ -63,7 +52,6 @@ if TYPE_CHECKING:
         AutoModActionExecutionEvent as AutoModActionExecutionEventPayload,
         AutoModActionMetadata,
         AutoModBlockMessageActionMetadata,
-        AutoModPresetType,
         AutoModRule as AutoModRulePayload,
         AutoModSendAlertActionMetadata,
         AutoModTimeoutActionMetadata,
@@ -238,7 +226,7 @@ class AutoModTriggerMetadata:
 
     Attributes
     ----------
-    keywords: Optional[Sequence[:class:`str`]]
+    keyword_filter: Optional[Sequence[:class:`str`]]
         The list of keywords to check for. Used with :attr:`AutoModTriggerType.keyword`.
 
         See `api docs <https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`__
@@ -247,24 +235,24 @@ class AutoModTriggerMetadata:
     presets: Optional[:class:`AutoModKeywordPresets`]
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
-    exempt_keywords: Optional[Sequence[:class:`str`]]
+    allow_list: Optional[Sequence[:class:`str`]]
         The keywords that should be exempt from a preset. Used with :attr:`AutoModTriggerType.keyword_preset`.
     """
 
-    __slots__ = ("keywords", "presets", "exempt_keywords")
+    __slots__ = ("keyword_filter", "presets", "allow_list")
 
     # TODO: add overloads - can we always require exactly one parameter here, or is it
     #       required to be able to construct this class without any parameters?
     def __init__(
         self,
         *,
-        keywords: Optional[Sequence[str]] = None,
+        keyword_filter: Optional[Sequence[str]] = None,
         presets: Optional[AutoModKeywordPresets] = None,
-        exempt_keywords: Optional[Sequence[str]] = None,
+        allow_list: Optional[Sequence[str]] = None,
     ):
-        self.keywords: Optional[Sequence[str]] = keywords
+        self.keyword_filter: Optional[Sequence[str]] = keyword_filter
         self.presets: Optional[AutoModKeywordPresets] = presets
-        self.exempt_keywords: Optional[Sequence[str]] = exempt_keywords
+        self.allow_list: Optional[Sequence[str]] = allow_list
 
     @classmethod
     def _from_dict(cls, data: AutoModTriggerMetadataPayload) -> Self:
@@ -274,30 +262,29 @@ class AutoModTriggerMetadata:
             presets = None
 
         return cls(
-            keywords=data.get("keyword_filter"),
+            keyword_filter=data.get("keyword_filter"),
             presets=presets,
-            exempt_keywords=data.get("allow_list"),
+            allow_list=data.get("allow_list"),
         )
 
     def to_dict(self) -> AutoModTriggerMetadataPayload:
         data: AutoModTriggerMetadataPayload = {}
-        if self.keywords is not None:
-            data["keyword_filter"] = list(self.keywords)
+        if self.keyword_filter is not None:
+            data["keyword_filter"] = list(self.keyword_filter)
         if self.presets is not None:
-            values: List[int] = self.presets.values
-            data["presets"] = cast("List[AutoModPresetType]", values)
-        if self.exempt_keywords is not None:
-            data["allow_list"] = list(self.exempt_keywords)
+            data["presets"] = self.presets.values  # type: ignore  # `values` contains ints instead of preset literal values
+        if self.allow_list is not None:
+            data["allow_list"] = list(self.allow_list)
         return data
 
     def __repr__(self) -> str:
         s = f"<{type(self).__name__}"
-        if self.keywords is not None:
-            s += f" keywords={self.keywords!r}"
+        if self.keyword_filter is not None:
+            s += f" keyword_filter={self.keyword_filter!r}"
         if self.presets is not None:
             s += f" presets={self.presets!r}"
-        if self.exempt_keywords is not None:
-            s += f" exempt_keywords={self.exempt_keywords!r}"
+        if self.allow_list is not None:
+            s += f" allow_list={self.allow_list!r}"
         return f"{s}>"
 
 
