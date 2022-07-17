@@ -27,19 +27,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, overload, Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import aiohttp
 
@@ -54,7 +42,7 @@ from .errors import (
     PrivilegedIntentsRequired,
     SessionStartLimitReached,
 )
-from .gateway import *
+from .gateway import DiscordWebSocket, ReconnectWebSocket
 from .state import AutoShardedConnectionState
 
 if TYPE_CHECKING:
@@ -64,8 +52,9 @@ if TYPE_CHECKING:
     from .gateway import DiscordWebSocket
     from .i18n import LocalizationProtocol
     from .mentions import AllowedMentions
+    from typing_extensions import Self
 
-    EI = TypeVar("EI", bound="EventItem")
+    from .activity import BaseActivity
 
 __all__ = (
     "AutoShardedClient",
@@ -92,12 +81,12 @@ class EventItem:
         self.shard: Optional["Shard"] = shard
         self.error: Optional[Exception] = error
 
-    def __lt__(self: EI, other: EI) -> bool:
+    def __lt__(self, other: Self) -> bool:
         if not isinstance(other, EventItem):
             return NotImplemented
         return self.type < other.type
 
-    def __eq__(self: EI, other: EI) -> bool:
+    def __eq__(self, other: Self) -> bool:
         if not isinstance(other, EventItem):
             return NotImplemented
         return self.type == other.type

@@ -64,10 +64,16 @@ from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
 from .enums import ApplicationCommandType, ChannelType, Status
-from .errors import *
-from .errors import SessionStartLimitReached
+from .errors import (
+    ConnectionClosed,
+    GatewayNotFound,
+    HTTPException,
+    InvalidData,
+    PrivilegedIntentsRequired,
+    SessionStartLimitReached,
+)
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
-from .gateway import *
+from .gateway import DiscordWebSocket, ReconnectWebSocket
 from .guild import Guild
 from .guild_preview import GuildPreview
 from .http import HTTPClient
@@ -102,7 +108,7 @@ if TYPE_CHECKING:
 
 __all__ = ("Client", "SessionStartLimit")
 
-Coro = TypeVar("Coro", bound=Callable[..., Coroutine[Any, Any, Any]])
+CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
 
 
 _log = logging.getLogger(__name__)
@@ -1067,7 +1073,7 @@ class Client:
 
         .. versionadded:: 2.0
         """
-        if self._connection._status in set(state.value for state in Status):
+        if self._connection._status in {state.value for state in Status}:
             return Status(self._connection._status)
         return Status.online
 
@@ -1539,7 +1545,7 @@ class Client:
 
     # event registration
 
-    def event(self, coro: Coro) -> Coro:
+    def event(self, coro: CoroT) -> CoroT:
         """A decorator that registers an event to listen to.
 
         You can find more info about the events on the :ref:`documentation below <discord-api-events>`.

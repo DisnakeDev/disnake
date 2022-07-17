@@ -28,7 +28,7 @@ from __future__ import annotations
 import asyncio
 import time
 from collections import deque
-from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
 
 from disnake.enums import Enum
 
@@ -36,6 +36,8 @@ from ...abc import PrivateChannel
 from .errors import MaxConcurrencyReached
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ...message import Message
 
 __all__ = (
@@ -45,9 +47,6 @@ __all__ = (
     "DynamicCooldownMapping",
     "MaxConcurrency",
 )
-
-C = TypeVar("C", bound="CooldownMapping")
-MC = TypeVar("MC", bound="MaxConcurrency")
 
 
 class BucketType(Enum):
@@ -222,7 +221,7 @@ class CooldownMapping:
         return self._type
 
     @classmethod
-    def from_cooldown(cls: Type[C], rate, per, type) -> C:
+    def from_cooldown(cls, rate, per, type) -> Self:
         return cls(Cooldown(rate, per), type)
 
     def _bucket_key(self, msg: Message) -> Any:
@@ -336,7 +335,7 @@ class _Semaphore:
             self._waiters.append(future)
             try:
                 await future
-            except:
+            except Exception:
                 future.cancel()
                 if self.value > 0 and not future.cancelled():
                     self.wake_up()
@@ -365,7 +364,7 @@ class MaxConcurrency:
         if not isinstance(per, BucketType):
             raise TypeError(f"max_concurrency 'per' must be of type BucketType not {type(per)!r}")
 
-    def copy(self: MC) -> MC:
+    def copy(self) -> Self:
         return self.__class__(self.number, per=self.per, wait=self.wait)
 
     def __repr__(self) -> str:

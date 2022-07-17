@@ -25,12 +25,11 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, Set, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, Set, Union
 
 import disnake
 
 from .bot_base import BotBase, when_mentioned, when_mentioned_or
-from .context import Context
 from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
@@ -45,7 +44,6 @@ if TYPE_CHECKING:
     from disnake.i18n import LocalizationProtocol
     from disnake.mentions import AllowedMentions
 
-    from ._types import CoroFunc
     from .help import HelpCommand
 
 
@@ -60,10 +58,6 @@ __all__ = (
 )
 
 MISSING: Any = disnake.utils.MISSING
-
-T = TypeVar("T")
-CFT = TypeVar("CFT", bound="CoroFunc")
-CXT = TypeVar("CXT", bound="Context")
 
 
 class Bot(BotBase, InteractionBotBase, disnake.Client):
