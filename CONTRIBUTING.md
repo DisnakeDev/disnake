@@ -33,11 +33,11 @@ If the bug report is missing this information then it'll take us longer to fix t
 
 ## Creating a Pull Request
 
-Submitting a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go.
+Creating a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go.
 
 ### Formatting
 
-It would be incredibly lovely if the style is consistent to that found in the project. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
+We would greatly appreciate the code submitted to be of a consistent style with other code in disnake. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
 We use [`nox`](https://nox.thea.codes/en/stable/) for automating development tasks. Run these commands to
 install `nox` and `taskipy` as well as the required dependencies in your environment,
@@ -87,12 +87,12 @@ If you do not meet any of these guidelines, don't fret. Chances are they will be
 
 Welcome! If you've made it to this point you are likely a new contributor! This section will go through how to add a new feature to disnake.
 
-
 Most attributes and data structures are broken up in to a file for each related class. For example, `disnake.Guild` is defined in [disnake/guild.py](disnake/guild.py), and `disnake.GuildPreview` is defined in [disnake/guild_preview.py](disnake/guild_preview.py). For example, writing a new feature to `disnake.Guild` would go in [disnake/guild.py](disnake/guild.py), as part of the `disnake.Guild` class.
 
 ### Adding a new API Feature
 
-However, adding a new feature that interfaces with the API requires also updating the [disnake/types](disnake/types) directory to match the relevant [API specifications](https://discord.com/developers/docs). We ask that when making or receiving payloads from the API, they are typed and typehints are used on the functions that are processing said data. As an example, we'll take a look at `disnake.abc.Messageable.pins` (defined in [disnake/abc.py](disnake/abc.py)).
+However, adding a new feature that interfaces with the API requires also updating the [disnake/types](disnake/types) directory to match the relevant [API specifications](https://discord.com/developers/docs). We ask that when making or receiving payloads from the API, they are typed and typehints are used on the functions that are processing said data. For example, take a look at `disnake.abc.Messageable.pins` (defined in [disnake/abc.py](disnake/abc.py)).
+
 
 ```py
     async def pins(self) -> List[Message]:
@@ -106,25 +106,25 @@ However, adding a new feature that interfaces with the API requires also updatin
 Here we have several things occuring. First, we have typehinted the return type of this method to return a list of Messages. As disnake supports python 3.8, we must use typing imports instead of subscripting built-ins — hence the capital ``List``.
 
 The next interesting thing is `self._state`. The library uses a state-centric design, which means the state is passed around to most objects.
-Every Discord model that makes requests uses that internal state and its http attribute to make requests to the Discord API. Each endpoint is processed and defined in [disnake/http.py](disnake/http.py) — and it's where `http.pins_from` is defined too, which looks like this:
+Every Discord model that makes requests uses that internal state and its `http` attribute to make requests to the Discord API. Each endpoint is processed and defined in [disnake/http.py](disnake/http.py) — and it's where `http.pins_from` is defined too, which looks like this:
 
 ```py
     def pins_from(self, channel_id: Snowflake) -> Response[List[message.Message]]:
         return self.request(Route("GET", "/channels/{channel_id}/pins", channel_id=channel_id))
 ```
 
-This is the basic model that all API request methods follow. Define the `Route`, provide the major parameters (in this example `channel_id`), then return a call to self.request(), and finally typehints.
+This is the basic model that all API request methods follow. Define the `Route`, provide the major parameters (in this example `channel_id`), then return a call to `self.request()`, and finally typehints.
 
-The `Response[]` part in this typehint is referring to `self.request`, as the important thing here is that `pins_from` is **not** a coroutine. Rather, pins_from does preprocessing and self.request does the actual work. The result from `pins_from` is awaited by `disnake.abc.Messageable.pins`.
+The `Response[]` part in this typehint is referring to `self.request`, as the important thing here is that `pins_from` is **not** a coroutine. Rather, `pins_from` does preprocessing and `self.request` does the actual work. The result from `pins_from` is awaited by `disnake.abc.Messageable.pins`.
 
-The Route class is how all routes are processed internally. This, along with `self.request` makes it possible to properly handle all ratelimits, and rarely encounter 429s. This is additionally why `channel_id` is provided as a kwarg to `Route`.
+The Route class is how all routes are processed internally. This, along with `self.request` makes it possible to properly handle all ratelimits, and rarely encounter 429s. This is why `channel_id` is provided as a kwarg to `Route`.
 
 #### Writing Documentation
 
 While a new feature can be useful, it requires documentation to be useful too. When updating a class or method, we ask that you use
-[sphinx directives](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-versionadded) in the docstring to note when it was added/updated, and what about it was updated.
+[Sphinx directives](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-versionadded) in the docstring to note when it was added or updated, and what about it was updated.
 
-For example, the docstring below for `pins()`.
+For example, here is the docstring for `pins()`:
 
 ```py
       """|coro|
@@ -151,7 +151,7 @@ For example, the docstring below for `pins()`.
 
 If we were to add a new parameter to this method, a few things would need to be added to this docstring. Lets pretend we're adding a parameter, ``oldest_first``.
 
-We use NumPy style docstrings parsed with sphinx's napoleon extension, the primary documentation for these docstrings can be found [here](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html).
+We use NumPy style docstrings parsed with Sphinx's Napoleon extension, the primary documentation for these docstrings can be found [here](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html).
 
 ```py
       """
@@ -173,6 +173,7 @@ It is important that the section header comes **after** any description and admo
 It is also desired to put a ``.. versionchanged:: 2.9`` directly below the section header with which parameter was changed, if the function has multiple arguments.
 
 The end result of these changes would be as follows:
+
 ```py
       """|coro|
 
