@@ -1,0 +1,8 @@
+Implement auto moderation.
+- New types: :class:`AutoModAction`, :class:`AutoModTriggerMetadata`, :class:`AutoModRule`, :class:`AutoModActionExecution`
+- New enums: :class:`AutoModTriggerType`, :class:`AutoModEventType`, :class:`AutoModActionType`
+- New flags: :class:`AutoModKeywordPresets`
+- New methods: :func:`Guild.fetch_automod_rule`, :func:`Guild.fetch_automod_rules`, :func:`Guild.create_automod_rule`
+- New intents: :attr:`Intents.auto_moderation_configuration`, :attr:`Intents.auto_moderation_execution` (+ :attr:`Intents.auto_moderation` shortcut for both)
+- New events: :func:`on_auto_moderation_rule_create`, :func:`on_auto_moderation_rule_update`, :func:`on_auto_moderation_rule_delete`, :func:`on_auto_moderation_action_execution`
+- \+ all the relevant audit log fields.
