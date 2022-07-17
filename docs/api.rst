@@ -208,6 +208,8 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 Client Events
 ~~~~~~~~~~~~~
 
+This section documents events related to :class:`Client` and its connectivity to Discord.
+
 .. function:: on_connect()
 
     Called when the client has successfully connected to Discord. This is not
@@ -362,6 +364,8 @@ Client Events
 
 Chat Message Events
 ~~~~~~~~~~~~~~~~~~~
+
+This section documents events related to Discord chat messages.
 
 .. function:: on_typing(channel, user, when)
 
@@ -670,6 +674,8 @@ Chat Message Events
 Interaction Events
 ~~~~~~~~~~~~~~~~~~
 
+This section documents events related to application commands and other interactions.
+
 .. function:: on_application_command_permissions_update(permissions)
 
     Called when the permissions of an application command or
@@ -778,6 +784,8 @@ Interaction Events
 
 Channel/Thread Events
 ~~~~~~~~~~~~~~~~~~~~~
+
+This section documents events related to Discord channels and threads.
 
 .. function:: on_private_channel_update(before, after)
 
@@ -992,6 +1000,8 @@ Channel/Thread Events
 
 Guild Events
 ~~~~~~~~~~~~
+
+This section documents events related to Discord guilds.
 
 Guild Generic Events
 ++++++++++++++++++++
@@ -1371,6 +1381,8 @@ Guild Integration Events
 
 Voice Events
 ~~~~~~~~~~~~
+
+This section documents events related to changes in voice state.
 
 .. function:: on_voice_state_update(member, before, after)
 
