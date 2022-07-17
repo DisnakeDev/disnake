@@ -452,6 +452,34 @@ class AutoModRule:
 
         All fields are optional.
 
+        Examples
+        --------
+
+        Edit name and enable rule:
+
+        .. code-block:: python3
+
+            await rule.edit(name="cool new rule", enabled=True)
+
+        Add an action:
+
+        .. code-block:: python3
+
+            await rule.edit(
+                actions=rule.actions + [AutoModTimeoutAction(3600)],
+            )
+
+        Add a keyword to a keyword filter rule:
+
+        .. code-block:: python3
+
+            meta = rule.trigger_metadata
+            await rule.edit(
+                trigger_metadata=meta.with_edits(
+                    keyword_filter=meta.keyword_filter + ["stuff"],
+                ),
+            )
+
         Parameters
         ----------
         name: :class:`str`
