@@ -103,7 +103,7 @@ However, adding a new feature that interfaces with the API requires also updatin
 ```
 *docstring removed for brevity*
 
-Here we have several things occuring. First, we have typehinted the return type of this method to return a list of Messages. As disnake supports python 3.8, we must use typing imports instead of subscripting built-ins — hence the capital ``List``.
+Here we have several things occuring. First, we have annotated the return type of this method to return a list of `Message`s. As disnake supports Python 3.8, we use typing imports instead of subscripting built-ins — hence the capital ``List``.
 
 The next interesting thing is `self._state`. The library uses a state-centric design, which means the state is passed around to most objects.
 Every Discord model that makes requests uses that internal state and its `http` attribute to make requests to the Discord API. Each endpoint is processed and defined in [disnake/http.py](disnake/http.py) — and it's where `http.pins_from` is defined too, which looks like this:
@@ -113,15 +113,15 @@ Every Discord model that makes requests uses that internal state and its `http` 
         return self.request(Route("GET", "/channels/{channel_id}/pins", channel_id=channel_id))
 ```
 
-This is the basic model that all API request methods follow. Define the `Route`, provide the major parameters (in this example `channel_id`), then return a call to `self.request()`, and finally typehints.
+This is the basic model that all API request methods follow. Define the `Route`, provide the major parameters (in this example `channel_id`), then return a call to `self.request()`.
 
-The `Response[]` part in this typehint is referring to `self.request`, as the important thing here is that `pins_from` is **not** a coroutine. Rather, `pins_from` does preprocessing and `self.request` does the actual work. The result from `pins_from` is awaited by `disnake.abc.Messageable.pins`.
+The `Response[]` part in the typehint is referring to `self.request`, as the important thing here is that `pins_from` is **not** a coroutine. Rather, `pins_from` does preprocessing and `self.request` does the actual work. The result from `pins_from` is awaited by `disnake.abc.Messageable.pins`.
 
-The Route class is how all routes are processed internally. This, along with `self.request` makes it possible to properly handle all ratelimits, and rarely encounter 429s. This is why `channel_id` is provided as a kwarg to `Route`.
+The Route class is how all routes are processed internally. Along with `self.request`, this makes it possible to properly handle all ratelimits. This is why `channel_id` is provided as a kwarg to `Route`, as it is considered a major parameter for ratelimit handling.
 
 #### Writing Documentation
 
-While a new feature can be useful, it requires documentation to be useful too. When updating a class or method, we ask that you use
+While a new feature can be useful, it requires documentation to be usable by everyone. When updating a class or method, we ask that you use
 [Sphinx directives](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-versionadded) in the docstring to note when it was added or updated, and what about it was updated.
 
 For example, here is the docstring for `pins()`:
@@ -151,7 +151,7 @@ For example, here is the docstring for `pins()`:
 
 If we were to add a new parameter to this method, a few things would need to be added to this docstring. Lets pretend we're adding a parameter, ``oldest_first``.
 
-We use NumPy style docstrings parsed with Sphinx's Napoleon extension, the primary documentation for these docstrings can be found [here](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html).
+We use NumPy style docstrings parsed with Sphinx's Napoleon extension — the primary documentation for these docstrings can be found [here](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html).
 
 ```py
       """
@@ -208,5 +208,5 @@ The end result of these changes would be as follows:
       """
   ```
 
-*If you have trouble with adding or modifying documentation, don't be afraid to reach out!
+*If you're having trouble with adding or modifying documentation, don't be afraid to reach out!
 We understand that the documentation can be intimidating, and there are quite a few quirks and limitations to be aware of.*
