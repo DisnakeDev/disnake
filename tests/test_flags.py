@@ -23,14 +23,70 @@ class TestFlags(flags.BaseFlags):
     def four(self):
         return 1 << 2
 
+    @flags.alias_flag_value
+    def three(self):
+        return 1 << 0 | 1 << 1
+
+    @flags.flag_value
+    def sixteen(self):
+        return 1 << 4
+
 
 def test_flag_value_creation() -> None:
     flag = flags.flag_value(lambda x: 1 << 2)
     assert 1 << 2 == flag.flag
 
 
+def test_all_flags_value() -> None:
+    assert flags.all_flags_value(TestFlags.VALID_FLAGS) == 0b10111
+
+
 def test_fill_with_flags() -> None:
-    assert TestFlags.VALID_FLAGS == {"one": 1, "two": 2, "four": 4}
+    assert TestFlags.VALID_FLAGS == {
+        "one": 1,
+        "two": 2,
+        "three": 3,
+        "four": 4,
+        "sixteen": 16,
+    }
+
+    assert TestFlags.DEFAULT_VALUE == 0
+
+
+def test_fill_with_flags_inverted() -> None:
+    @flags.fill_with_flags(inverted=True)
+    class InvertedFlags(flags.BaseFlags):
+        @flags.flag_value
+        def one(self):
+            return 1 << 0
+
+        @flags.flag_value
+        def two(self):
+            return 1 << 1
+
+        @flags.flag_value
+        def four(self):
+            return 1 << 2
+
+        @flags.alias_flag_value
+        def three(self):
+            return 1 << 0 | 1 << 1
+
+        @flags.flag_value
+        def sixteen(self):
+            return 1 << 4
+
+    assert flags.all_flags_value(InvertedFlags.VALID_FLAGS) == 0b10111
+
+    assert InvertedFlags.VALID_FLAGS == {
+        "one": 1,
+        "two": 2,
+        "three": 3,
+        "four": 4,
+        "sixteen": 16,
+    }
+
+    assert InvertedFlags.DEFAULT_VALUE == 0b10111
 
 
 class TestBaseFlags:
@@ -105,14 +161,20 @@ class TestBaseFlags:
 
         third = ins | other
         assert third is not ins
-        assert third.value == 0b011
         assert ins.value == 0b001
         assert other.value == 0b010
+        assert third.value == 0b011
 
         ins.one = False
         third = ins | other
         assert third.value == 0b010
         assert third is not ins
+
+        ins.value = 0b10
+        other.value = ins.value
+        third = ins | other
+        assert third is not ins
+        assert third.value == 0b10
 
     def test__ior__(self) -> None:
         ins = TestFlags(one=True, two=False)
@@ -167,6 +229,9 @@ class TestBaseFlags:
         ):
             ins <= 4  # type: ignore  # noqa: B015
 
+        other.value = ins.value
+        assert ins <= other
+
     def test__ge__(self) -> None:
         ins = TestFlags(one=True, two=False)
         other = TestFlags(one=False, two=True)
@@ -179,6 +244,9 @@ class TestBaseFlags:
             TypeError, match="'>=' not supported between instances of 'TestFlags' and 'int'"
         ):
             _ = ins >= 4  # type: ignore
+
+        other.value = ins.value
+        assert ins >= other
 
     def test__lt__(self) -> None:
         ins = TestFlags(one=True, two=False)
@@ -193,6 +261,9 @@ class TestBaseFlags:
         ):
             _ = ins < 4  # type: ignore
 
+        other.value = ins.value
+        assert not ins < other
+
     def test__gt__(self) -> None:
         ins = TestFlags(one=True, two=False)
         other = TestFlags(one=False, two=True)
@@ -206,12 +277,16 @@ class TestBaseFlags:
         ):
             _ = ins > 4  # type: ignore
 
+        other.value = ins.value
+        assert not ins > other
+
     def test__invert__(self) -> None:
         ins = TestFlags(one=True)
         assert ins.value == 0b0001
         other = ~ins
         assert ins.value == 0b0001
         # the other `0` here is because invert does not invert values that are not defined
+        # assert other.value == goal
         assert other.value == 0b10110
 
     def test__hash__(self) -> None:
