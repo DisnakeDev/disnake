@@ -205,8 +205,8 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     errors. In order to turn a function into a coroutine they must be ``async def``
     functions.
 
-Client Events
-~~~~~~~~~~~~~
+Client
+~~~~~~
 
 This section documents events related to :class:`Client` and its connectivity to Discord.
 
@@ -362,8 +362,8 @@ This section documents events related to :class:`Client` and its connectivity to
                     WebSocket library. It can be :class:`bytes` to denote a binary
                     message or :class:`str` to denote a regular text message.
 
-Chat Message Events
-~~~~~~~~~~~~~~~~~~~
+Messages
+~~~~~~~~
 
 This section documents events related to Discord chat messages.
 
@@ -671,8 +671,8 @@ This section documents events related to Discord chat messages.
     :param payload: The raw event payload data.
     :type payload: :class:`RawReactionClearEmojiEvent`
 
-Interaction Events
-~~~~~~~~~~~~~~~~~~
+Interactions
+~~~~~~~~~~~~
 
 This section documents events related to application commands and other interactions.
 
@@ -782,8 +782,8 @@ This section documents events related to application commands and other interact
     :param interaction: The interaction object.
     :type interaction: :class:`ModalInteraction`
 
-Channel/Thread Events
-~~~~~~~~~~~~~~~~~~~~~
+Channels/Threads
+~~~~~~~~~~~~~~~~
 
 This section documents events related to Discord channels and threads.
 
@@ -998,13 +998,13 @@ This section documents events related to Discord channels and threads.
     :param user: The user that joined or left.
     :type user: :class:`User`
 
-Guild Events
-~~~~~~~~~~~~
+Guilds
+~~~~~~
 
 This section documents events related to Discord guilds.
 
-Guild Generic Events
-++++++++++++++++++++
+Generics
+++++++++
 
 .. function:: on_guild_join(guild)
 
@@ -1045,8 +1045,8 @@ Guild Generic Events
 
     :param guild: The :class:`Guild` that has changed availability.
 
-Guild User/Member Events
-++++++++++++++++++++++++
+Users/Members
++++++++++++++
 
 .. function:: on_member_join(member)
               on_member_remove(member)
@@ -1136,8 +1136,8 @@ Guild User/Member Events
     :param user: The user that got unbanned.
     :type user: :class:`User`
 
-Guild Invite Events
-+++++++++++++++++++
+Invites
++++++++
 
 .. function:: on_invite_create(invite)
 
@@ -1176,8 +1176,8 @@ Guild Invite Events
     :param invite: The invite that was deleted.
     :type invite: :class:`Invite`
 
-Guild Settings Events
-+++++++++++++++++++++
+Settings
+++++++++
 
 .. function:: on_webhooks_update(channel)
 
@@ -1332,8 +1332,8 @@ Guild Settings Events
     :param after: A list of stickers after the update.
     :type after: Sequence[:class:`GuildSticker`]
 
-Guild Integration Events
-++++++++++++++++++++++++
+Integrations
+++++++++++++
 
 .. function:: on_guild_integrations_update(guild)
 
@@ -1379,8 +1379,8 @@ Guild Integration Events
     :param payload: The raw event payload data.
     :type payload: :class:`RawIntegrationDeleteEvent`
 
-Voice Events
-~~~~~~~~~~~~
+Voice
+~~~~~
 
 This section documents events related to changes in voice state.
 
