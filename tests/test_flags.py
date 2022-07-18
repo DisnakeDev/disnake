@@ -46,9 +46,7 @@ def test_fill_with_flags() -> None:
         def four(self):
             return 1 << 2
 
-    ins = TestFlags()
-
-    assert ins
+    assert TestFlags.VALID_FLAGS = {"one": 1, "two": 2, "four": 4}
 
 
 @pytest.fixture()
@@ -70,7 +68,7 @@ def test_flags() -> Type[flags.BaseFlags]:
             return 1 << 2
 
         @flags.flag_value
-        def eight(self):
+        def sixteen(self):
             return 1 << 4
 
     return TestFlags
@@ -132,7 +130,6 @@ class TestBaseFlags:
         other = test_flags(one=True, two=True)
 
         third = ins
-        assert third is ins
         ins &= other
         assert third is ins
         assert ins.value == 0b011
@@ -140,8 +137,8 @@ class TestBaseFlags:
         other.two = False
         other.four = True
         ins &= other
+        assert third is ins
         assert ins.value == 0b001
-        assert ins is third
 
     def test__or__(self, test_flags: Type[TestFlags]) -> None:
         ins = test_flags(one=True, two=False)
@@ -163,7 +160,6 @@ class TestBaseFlags:
         other = test_flags(one=False, two=True)
 
         third = ins
-        assert ins is third
         ins |= other
         assert ins is third
         assert ins.value == 0b011
@@ -210,7 +206,7 @@ class TestBaseFlags:
         with pytest.raises(
             TypeError, match="'<=' not supported between instances of 'TestFlags' and 'int'"
         ):
-            _ = ins <= 4  # type: ignore
+            ins <= 4  # type: ignore  # noqa: B015
 
     def test__ge__(self, test_flags: Type[TestFlags]) -> None:
         ins = test_flags(one=True, two=False)
@@ -265,9 +261,8 @@ class TestBaseFlags:
 
     def test_iter(self, test_flags: Type[TestFlags]) -> None:
         ins = test_flags(one=True, two=False)
-        ran_at_least_once = False
+        assert next(iter(ins))
         for flag, value in iter(ins):
-            ran_at_least_once = True
             assert flag in ins.VALID_FLAGS
             assert getattr(ins, flag) == value
 
