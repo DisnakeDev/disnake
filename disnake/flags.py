@@ -268,80 +268,80 @@ class BaseFlags:
 @fill_with_flags(inverted=True)
 class SystemChannelFlags(BaseFlags):
     """
-        Wraps up a Discord system channel flag value.
+    Wraps up a Discord system channel flag value.
 
-        Similar to :class:`Permissions`\\, the properties provided are two way.
-        You can set and retrieve individual bits using the properties as if they
-        were regular bools. This allows you to edit the system flags easily.
+    Similar to :class:`Permissions`\\, the properties provided are two way.
+    You can set and retrieve individual bits using the properties as if they
+    were regular bools. This allows you to edit the system flags easily.
 
-        To construct an object you can pass keyword arguments denoting the flags
-        to enable or disable.
+    To construct an object you can pass keyword arguments denoting the flags
+    to enable or disable.
 
-        .. container:: operations
+    .. container:: operations
 
-            .. describe:: x == y
+        .. describe:: x == y
 
-                Checks if two SystemChannelFlags instances are equal.
-            .. describe:: x != y
+            Checks if two SystemChannelFlags instances are equal.
+        .. describe:: x != y
 
-                Checks if two SystemChannelFlags instances are not equal.
-            .. describe:: x <= y
+            Checks if two SystemChannelFlags instances are not equal.
+        .. describe:: x <= y
 
-                Checks if a SystemChannelFlags instance is a subset of another SystemChannelFlags instance.
+            Checks if a SystemChannelFlags instance is a subset of another SystemChannelFlags instance.
 
-                .. versionadded:: 2.6
-            .. describe:: x >= y
+            .. versionadded:: 2.6
+        .. describe:: x >= y
 
-                Checks if a SystemChannelFlags instance is a superset of another SystemChannelFlags instance.
+            Checks if a SystemChannelFlags instance is a superset of another SystemChannelFlags instance.
 
-                .. versionadded:: 2.6
-            .. describe:: x < y
+            .. versionadded:: 2.6
+        .. describe:: x < y
 
-                Checks if a SystemChannelFlags instance is a strict subset of another SystemChannelFlags instance.
+            Checks if a SystemChannelFlags instance is a strict subset of another SystemChannelFlags instance.
 
-                .. versionadded:: 2.6
-            .. describe:: x > y
+            .. versionadded:: 2.6
+        .. describe:: x > y
 
-                Checks if a SystemChannelFlags instance is a strict superset of another SystemChannelFlags instance.
+            Checks if a SystemChannelFlags instance is a strict superset of another SystemChannelFlags instance.
 
-                .. versionadded:: 2.6
-            .. describe:: x | y, x |= y
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
 
-                Returns a new SystemChannelFlags instance with all enabled flags from both x and y.
-                (Using ``|=`` will update in place).
+            Returns a new SystemChannelFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
 
-                .. versionadded:: 2.6
-            .. describe:: x & y, x &= y
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
 
-                Returns a new SystemChannelFlags instance with only flags enabled on both x and y.
-                (Using ``&=`` will update in place).
+            Returns a new SystemChannelFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
 
-                .. versionadded:: 2.6
-            .. describe:: x ^ y, x ^= y
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
 
-                Returns a new SystemChannelFlags instance with only flags enabled on one of x or y, but not both.
-                (Using ``^=`` will update in place).
+            Returns a new SystemChannelFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
 
-                .. versionadded:: 2.6
-            .. describe:: ~x
+            .. versionadded:: 2.6
+        .. describe:: ~x
 
-                Returns a new SystemChannelFlags instance with all flags from x inverted.
+            Returns a new SystemChannelFlags instance with all flags from x inverted.
 
-                .. versionadded:: 2.6
-            .. describe:: hash(x)
+            .. versionadded:: 2.6
+        .. describe:: hash(x)
 
-                   Return the flag's hash.
-            .. describe:: iter(x)
+               Return the flag's hash.
+        .. describe:: iter(x)
 
-                   Returns an iterator of ``(name, value)`` pairs. This allows it
-                   to be, for example, constructed as a dict or a list of pairs.
+               Returns an iterator of ``(name, value)`` pairs. This allows it
+               to be, for example, constructed as a dict or a list of pairs.
 
-        Attributes
-        ----------
-        value: :class:`int`
-            The raw value. This value is a bit array field of a 53-bit integer
-            representing the currently available flags. You should query
-            flags via the properties rather than using this raw value.
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. This value is a bit array field of a 53-bit integer
+        representing the currently available flags. You should query
+        flags via the properties rather than using this raw value.
     """
 
     __slots__ = ()
