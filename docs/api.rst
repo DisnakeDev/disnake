@@ -998,6 +998,15 @@ This section documents events related to Discord channels and threads.
     :param user: The user that joined or left.
     :type user: :class:`User`
 
+.. function:: on_webhooks_update(channel)
+
+    Called whenever a webhook is created, modified, or removed from a guild channel.
+
+    This requires :attr:`Intents.webhooks` to be enabled.
+
+    :param channel: The channel that had its webhooks updated.
+    :type channel: :class:`abc.GuildChannel`
+
 Guilds
 ~~~~~~
 
@@ -1178,15 +1187,6 @@ Invites
 
 Settings
 ++++++++
-
-.. function:: on_webhooks_update(channel)
-
-    Called whenever a webhook is created, modified, or removed from a guild channel.
-
-    This requires :attr:`Intents.webhooks` to be enabled.
-
-    :param channel: The channel that had its webhooks updated.
-    :type channel: :class:`abc.GuildChannel`
 
 .. function:: on_guild_scheduled_event_create(event)
               on_guild_scheduled_event_delete(event)
