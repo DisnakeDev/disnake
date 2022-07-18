@@ -659,8 +659,9 @@ class InteractionReference:
     type: :class:`InteractionType`
         The type of interaction.
     name: :class:`str`
-        The full name of the application command, including group and subcommand name if applicable
-        (separated by spaces).
+        The name of the application command.
+        This also includes group and subcommand name if applicable (separated by spaces)
+        for interactions created after July 18th, 2022.
     user: :class:`User`
         The interaction author.
     """
