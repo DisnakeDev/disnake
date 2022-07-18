@@ -1,0 +1,1 @@
+Assume a ScheduledEvent's type based on the provided channel type

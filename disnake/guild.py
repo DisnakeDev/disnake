@@ -2205,7 +2205,7 @@ class Guild(Hashable):
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel: Optional[:class:`.abc.Snowflake]`
+        channel: Optional[:class:`.abc.Snowflake`]
             The channel in which the guild scheduled event will be hosted.
             Passing in `None` assumes the ``entity_type`` to be :class:`GuildScheduledEventEntityType.external`
 
