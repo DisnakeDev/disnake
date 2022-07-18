@@ -75,6 +75,9 @@ class flag_value(Generic[T]):
         assert self._parent is other._parent  # noqa: S101
         return self._parent._from_value(self.flag | other.flag)
 
+    def __invert__(self: flag_value[T]) -> T:
+        return ~self._parent._from_value(self.flag)
+
     @overload
     def __get__(self, instance: None, owner: Type[BF]) -> flag_value[BF]:
         ...
