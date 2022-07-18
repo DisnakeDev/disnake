@@ -279,6 +279,9 @@ footer {
   font-size: 14px;
   text-align: center;
   color: var(--footer-text);
+  /* Elevate above the aside */
+  position: relative;
+  z-index: 5;
 }
 
 footer a {
@@ -304,6 +307,8 @@ aside {
   color: var(--nav-text);
   left: 0;
   padding: 12px;
+  /* Space for footer overlap on bottom */
+  padding-bottom: calc(calc(calc(0.8em * 2) + 12px) + 1em);
   overflow: auto;
   z-index: 3;
   top: 50px; /* Space for sticky header */
