@@ -2285,7 +2285,7 @@ class Guild(Hashable):
             fields["image"] = await utils._assetbytes_to_base64_data(image)
 
         if channel is not MISSING:
-            fields["channel_id"] = channel.id
+            fields["channel_id"] = channel.id  # type: ignore
 
         if scheduled_end_time is not MISSING:
             fields["scheduled_end_time"] = utils.isoformat_utc(scheduled_end_time)
