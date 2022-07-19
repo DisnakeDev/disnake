@@ -1,0 +1,5 @@
+:attr:`Interaction.guild` is now an unavailable guild instance if the guild could not be found in cache.
+
+Importantly, this affects code which used ``inter.guild`` as a logic gate. A simple solution to this is to now use :attr:`Interaction.guild_id` instead.
+To know whether or not the bot is in the guild, check if the guild is present in the client's guild cache.
+If the cache is not enabled, checking if the bot is in the guild can be attempted by fetching the guild, but this is not recommended due to ratelimits.
