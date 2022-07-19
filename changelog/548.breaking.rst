@@ -1,1 +1,2 @@
 Rename ``channel_id`` parameter to ``channel`` on :attr:`Guild.create_scheduled_event` and :meth:`GuildScheduledEvent.edit`.
+Allow ``entity_type`` parameter :attr:`Guild.create_scheduled_event` to be missing.

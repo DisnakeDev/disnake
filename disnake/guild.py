@@ -2244,11 +2244,14 @@ class Guild(Hashable):
 
         if channel is None:
             entity_type = GuildScheduledEventEntityType.external
+            channel = MISSING
         elif hasattr(channel, "type") and isinstance(channel.type, ChannelType):  # type: ignore
             if channel.type == ChannelType.voice:  # type: ignore
                 entity_type = GuildScheduledEventEntityType.voice
             elif channel.type == ChannelType.stage_voice:  # type: ignore
                 entity_type = GuildScheduledEventEntityType.stage_instance
+            else:
+                raise TypeError("channel type must be either 'stage' or 'stage_voice'")
         elif entity_type is MISSING:
             raise TypeError("entity_type must be provided if the channel does not have a type")
 
@@ -2281,7 +2284,7 @@ class Guild(Hashable):
         if image is not MISSING:
             fields["image"] = await utils._assetbytes_to_base64_data(image)
 
-        if channel is not MISSING and channel is not None:
+        if channel is not MISSING:
             fields["channel_id"] = channel.id
 
         if scheduled_end_time is not MISSING:
@@ -3447,6 +3450,7 @@ class Guild(Hashable):
 
         role_positions: List[Any] = []
         for role, position in positions.items():
+
             payload = {"id": role.id, "position": position}
 
             role_positions.append(payload)
