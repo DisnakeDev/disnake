@@ -1,1 +1,1 @@
-Fix the grammatical error in `Guild` channel prepoerties.
+Fix the grammatical error in ``Guild`` channel prepoerties.
