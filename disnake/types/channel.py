@@ -46,8 +46,12 @@ class _BaseChannel(TypedDict):
     id: Snowflake
 
 
-class _BaseGuildChannel(_BaseChannel):
-    name: str
+class _BaseGuildChannelOptional(TypedDict, total=False):
+    # In theory, this will never be None and will always be present. In practice...
+    name: Optional[str]
+
+
+class _BaseGuildChannel(_BaseChannel, _BaseGuildChannelOptional):
     guild_id: Snowflake
     position: int
     permission_overwrites: List[PermissionOverwrite]
