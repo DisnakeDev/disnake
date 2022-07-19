@@ -12,6 +12,52 @@ This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions.
 
 
+.. _vp2p4p1:
+
+v2.4.1
+------
+
+Contains fixes backported from newer versions up to v2.6.1.
+
+
+Bug Fixes
+~~~~~~~~~~
+
+- Fix missing ``create_public_threads`` permission in :attr:`Permissions.private_channel` (:issue:`373`)
+- Fix :attr:`PartialInviteChannel.__str__ <PartialInviteChannel>` (:issue:`383`)
+- Fix role icon/emoji editing (:issue:`403`)
+- Remove cached scheduled events if associated channel was deleted (:issue:`406`)
+- Update some types/parameters of roles, scheduled events and voice states (:issue:`407`)
+- Allow ``content`` parameters in send/edit methods to be positional (:issue:`411`)
+- Fix gateway ratelimiter being too strict (:issue:`413`)
+- Fix caching of stage instances andd scheduled events (:issue:`416`)
+- Fix memory leaks on shard reconnect (:issue:`424`, :issue:`425`)
+- Improve :class:`PartialMessageable` channel handling (:issue:`426`)
+- Fix :func:`~PartialEmoji.read` for activity emojis (:issue:`430`)
+- Fix delay of ``after`` callback in :class:`AudioPlayer` when stopping (:issue:`508`)
+- Change the default guild :class:`.GuildSticker` limit to 5. (:issue:`531`)
+- Dispatch :func:`disnake.on_reaction_remove` for :class:`.Thread` instances. (:issue:`536`)
+- Update :attr:`Guild.bitrate_limit` to use the correct value for the ``VIP_REGIONS`` feature flag. (:issue:`538`)
+- Remove the ``$`` prefix from ``IDENTIFY`` payload properties. (:issue:`572`)
+- Fix opus function calls on arm64 macOS. (:issue:`620`)
+- |commands| Fix :class:`~ext.commands.clean_content` converter (:issue:`396`)
+- |commands| Support interactions in :class:`~ext.commands.UserConverter`, :class:`~ext.commands.MemberConverter` (:issue:`429`)
+- |commands| Fix unloading of listeners with custom names (:issue:`444`)
+- |commands| Handle :class:`.VoiceChannel` in :func:`commands.is_nsfw`. (:issue:`536`)
+
+
+Documentation
+~~~~~~~~~~~~~~
+
+- Update the requests intersphinx url to the new url of the requests documentation. (:issue:`539`)
+
+
+Miscellaneous
+~~~~~~~~~~~~~~
+
+- Update dev dependencies and CI (:issue:`451`)
+
+
 .. _vp2p4p0:
 
 v2.4.0
