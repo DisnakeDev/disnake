@@ -1031,6 +1031,15 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param member: The member who joined or left.
     :type member: :class:`Member`
 
+.. function:: on_raw_member_remove(payload)
+
+    Called when a :class:`Member` leaves a :class:`Guild`.
+
+    This requires :attr:`Intents.members` to be enabled.
+
+    :param payload: The raw event payload data.
+    :type member: :class:`RawGuildMemberRemoveEvent`
+
 .. function:: on_member_update(before, after)
 
     Called when a :class:`Member` updates their profile.
@@ -1049,6 +1058,23 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :type before: :class:`Member`
     :param after: The updated member's updated info.
     :type after: :class:`Member`
+
+.. function:: on_raw_member_update(payload)
+
+    Called when a :class:`Member` updates their profile.
+
+    This is called when one or more of the following things change, but is not limited to:
+
+    - nickname
+    - roles
+    - pending
+    - timeout
+    - guild specific avatar
+
+    This requires :attr:`Intents.members` to be enabled.
+
+    :param payload: The raw event payload data.
+    :type before: :class:`RawGuildMemberUpdateEvent`
 
 .. function:: on_presence_update(before, after)
 
@@ -5047,6 +5073,22 @@ RawTypingEvent
 .. attributetable:: RawTypingEvent
 
 .. autoclass:: RawTypingEvent()
+    :members:
+
+RawGuildMemberRemoveEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawGuildMemberRemoveEvent
+
+.. autoclass:: RawGuildMemberRemoveEvent()
+    :members:
+
+RawGuildMemberUpdateEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawGuildMemberUpdateEvent
+
+.. autoclass:: RawGuildMemberUpdateEvent()
     :members:
 
 PartialWebhookGuild
