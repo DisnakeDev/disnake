@@ -38,7 +38,10 @@ from typing import (
     Dict,
     Final,
     FrozenSet,
+<<<<<<< HEAD
     Generic,
+=======
+>>>>>>> master
     List,
     Literal,
     Optional,
@@ -335,10 +338,13 @@ class LargeInt(int):
 _VERIFY_TYPES: Final[FrozenSet[OptionType]] = frozenset((OptionType.user, OptionType.mentionable))
 
 
+<<<<<<< HEAD
 class Private(Generic[T]):
     """Type depicting a private parameter for application commands."""
 
 
+=======
+>>>>>>> master
 class ParamInfo:
     """A class that basically connects function params with slash command options.
     The instances of this class are not created manually, but via the functional interface instead.
