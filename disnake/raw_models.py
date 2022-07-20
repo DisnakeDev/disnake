@@ -28,8 +28,6 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, List, Optional, Set, cast
 
-from disnake.types.raw_models import GuildMemberUpdateEvent
-
 from .enums import ChannelType, try_enum
 from .utils import get_slots
 
@@ -48,6 +46,7 @@ if TYPE_CHECKING:
         ReactionClearEmojiEvent,
         ReactionClearEvent,
         TypingEvent,
+        GuildMemberUpdateEvent
     )
     from .user import User
 
