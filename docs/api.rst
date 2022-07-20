@@ -1038,7 +1038,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     This requires :attr:`Intents.members` to be enabled.
 
     :param payload: The raw event payload data.
-    :type member: :class:`RawGuildMemberRemoveEvent`
+    :type payload: :class:`RawGuildMemberRemoveEvent`
 
 .. function:: on_member_update(before, after)
 
@@ -1074,7 +1074,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     This requires :attr:`Intents.members` to be enabled.
 
     :param payload: The raw event payload data.
-    :type before: :class:`RawGuildMemberUpdateEvent`
+    :type payload: :class:`RawGuildMemberUpdateEvent`
 
 .. function:: on_presence_update(before, after)
 
