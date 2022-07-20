@@ -448,9 +448,9 @@ class RawGuildMemberUpdateEvent(_RawReprMixin):
         The nickname of the member that was updated.
     avatar: Optional[:class:`str`]
         The avatar hash of the member that was updated.
-    joined_at: Optional[:class:`datetime`]
+    joined_at: Optional[:class:`datetime.datetime`]
         When the member that was updated joined the guild.
-    premium_since: Optional[:class:`datetime`]
+    premium_since: Optional[:class:`datetime.datetime`]
         When the member that was updated started boosting the guild.
     deaf: Optional[:class:`bool`]
         If the member that was updated has been deafened.
@@ -458,7 +458,7 @@ class RawGuildMemberUpdateEvent(_RawReprMixin):
         If the member that was updated has been muted.
     pending: Optional[:class:`bool`]
         If the member that was updated is still pending.
-    communication_disabled_until: Optional[:class:`datetime`]
+    communication_disabled_until: Optional[:class:`datetime.datetime`]
         When the member that was updated was timed out.
     """
 
