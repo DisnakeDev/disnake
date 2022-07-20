@@ -268,35 +268,25 @@ class Embed:
         embed._files = self._files.copy()
         return embed
 
-    @staticmethod
-    def __len(
-        title: Optional[str],
-        description: Optional[str],
-        fields: Optional[List[EmbedFieldPayload]] = None,
-        footer: Optional[EmbedFooterPayload] = None,
-        author: Optional[EmbedAuthorPayload] = None,
-        strip: bool = True,
-    ):
+    def __len(self, strip: bool = False):
         def stripped_length(text: str) -> int:
             return len(text.strip() if strip else text)
 
-        total = stripped_length(title or "") + stripped_length(description or "")
-        if fields:
-            for field in fields:
+        total = stripped_length(self.title or "") + stripped_length(self.description or "")
+        if self._fields:
+            for field in self._fields:
                 total += stripped_length(field["name"]) + stripped_length(field["value"])
 
-        if footer and (footer_text := footer.get("text")):
+        if self._footer and (footer_text := self._footer.get("text")):
             total += stripped_length(footer_text)
 
-        if author and (author_name := author.get("name")):
+        if self._author and (author_name := self._author.get("name")):
             total += stripped_length(author_name)
 
         return total
 
     def __len__(self) -> int:
-        return self.__len(
-            self.title, self.description, self._fields, self._footer, self._author, strip=False
-        )
+        return self.__len(strip=False)
 
     def __bool__(self) -> bool:
         return any(
@@ -850,7 +840,7 @@ class Embed:
         if self._footer and len(self._footer["text"].strip()) > 2048:
             raise ValueError("Embed footer text cannot be longer than 2048 characters")
 
-        if self._author and "name" in self._author and len(self._author["name"].strip()) > 256:
+        if self._author and len(self._author.get("name", "").strip()) > 256:
             raise ValueError("Embed author name cannot be longer than 256 characters")
 
         if self._fields:
@@ -867,10 +857,7 @@ class Embed:
                         f"Embed field {field_index} value cannot be longer than 1024 characters"
                     )
 
-        if (
-            self.__len(self.title, self.description, self._fields, self._footer, self._author)
-            > 6000
-        ):
+        if self.__len(strip=True) > 6000:
             raise ValueError("Embed total size cannot be longer than 6000 characters")
 
         return True
