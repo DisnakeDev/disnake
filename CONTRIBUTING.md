@@ -1,4 +1,4 @@
-## Contributing to disnake
+# Contributing to disnake
 
 First off, thanks for taking the time to contribute. It makes the library substantially better. :+1:
 
@@ -31,10 +31,13 @@ Please be aware of the following things when filing bug reports.
 
 If the bug report is missing this information then it'll take us longer to fix the issue. We will probably ask for clarification, and barring that if no response was given then the issue will be closed.
 
+## Creating a Pull Request
 
-## Submitting a Pull Request
+Creating a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go.
 
-Submitting a pull request is fairly simple, just make sure it focuses on a single aspect and doesn't manage to have scope creep and it's probably good to go. It would be incredibly lovely if the style is consistent to that found in the project. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
+### Formatting
+
+We would greatly appreciate the code submitted to be of a consistent style with other code in disnake. This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters.
 
 We use [`nox`](https://nox.thea.codes/en/stable/) for automating development tasks. Run these commands to
 install `nox` and `taskipy` as well as the required dependencies in your environment,
@@ -51,7 +54,6 @@ to match the project's style. Note that you will have to stage and commit again 
 
 ### Tasks
 
-**tl;dr:**  
 To run all important checks and tests, use `nox`:
 ```sh
 nox -R
@@ -68,6 +70,9 @@ Some notes (all of the mentioned tasks are automatically run by `nox -R`, see ab
 
 A PR cannot be merged as long as there are any failing tasks.
 
+### Changelogs
+
+We use [towncrier](https://github.com/twisted/towncrier) for managing our changelogs. Each change is required to have at least one file in the [`changes/`](changes/README.md) directory. There is more documentation in that directory on how to create a changelog entry.
 
 ### Git Commit Guidelines
 
@@ -76,3 +81,126 @@ A PR cannot be merged as long as there are any failing tasks.
     - Please use the shorthand `#123` and not the full URL.
 
 If you do not meet any of these guidelines, don't fret. Chances are they will be fixed upon rebasing but please do try to meet them to remove some of the workload.
+
+
+## How do I add a new feature?
+
+Welcome! If you've made it to this point you are likely a new contributor! This section will go through how to add a new feature to disnake.
+
+Most attributes and data structures are broken up in to a file for each related class. For example, `disnake.Guild` is defined in [disnake/guild.py](disnake/guild.py), and `disnake.GuildPreview` is defined in [disnake/guild_preview.py](disnake/guild_preview.py). For example, writing a new feature to `disnake.Guild` would go in [disnake/guild.py](disnake/guild.py), as part of the `disnake.Guild` class.
+
+### Adding a new API Feature
+
+However, adding a new feature that interfaces with the API requires also updating the [disnake/types](disnake/types) directory to match the relevant [API specifications](https://discord.com/developers/docs). We ask that when making or receiving payloads from the API, they are typed and typehints are used on the functions that are processing said data. For example, take a look at `disnake.abc.Messageable.pins` (defined in [disnake/abc.py](disnake/abc.py)).
+
+
+```py
+    async def pins(self) -> List[Message]:
+        channel = await self._get_channel()
+        state = self._state
+        data = await state.http.pins_from(channel.id)
+        return [state.create_message(channel=channel, data=m) for m in data]
+```
+*docstring removed for brevity*
+
+Here we have several things occuring. First, we have annotated the return type of this method to return a list of `Message`s. As disnake supports Python 3.8, we use typing imports instead of subscripting built-ins — hence the capital ``List``.
+
+The next interesting thing is `self._state`. The library uses a state-centric design, which means the state is passed around to most objects.
+Every Discord model that makes requests uses that internal state and its `http` attribute to make requests to the Discord API. Each endpoint is processed and defined in [disnake/http.py](disnake/http.py) — and it's where `http.pins_from` is defined too, which looks like this:
+
+```py
+    def pins_from(self, channel_id: Snowflake) -> Response[List[message.Message]]:
+        return self.request(Route("GET", "/channels/{channel_id}/pins", channel_id=channel_id))
+```
+
+This is the basic model that all API request methods follow. Define the `Route`, provide the major parameters (in this example `channel_id`), then return a call to `self.request()`.
+
+The `Response[]` part in the typehint is referring to `self.request`, as the important thing here is that `pins_from` is **not** a coroutine. Rather, `pins_from` does preprocessing and `self.request` does the actual work. The result from `pins_from` is awaited by `disnake.abc.Messageable.pins`.
+
+The Route class is how all routes are processed internally. Along with `self.request`, this makes it possible to properly handle all ratelimits. This is why `channel_id` is provided as a kwarg to `Route`, as it is considered a major parameter for ratelimit handling.
+
+#### Writing Documentation
+
+While a new feature can be useful, it requires documentation to be usable by everyone. When updating a class or method, we ask that you use
+[Sphinx directives](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-versionadded) in the docstring to note when it was added or updated, and what about it was updated.
+
+For example, here is the docstring for `pins()`:
+
+```py
+      """|coro|
+
+      Retrieves all messages that are currently pinned in the channel.
+
+      .. note::
+
+          Due to a limitation with the Discord API, the :class:`.Message`
+          objects returned by this method do not contain complete
+          :attr:`.Message.reactions` data.
+
+      Raises
+      ------
+      HTTPException
+          Retrieving the pinned messages failed.
+
+      Returns
+      -------
+      List[:class:`.Message`]
+          The messages that are currently pinned.
+      """
+```
+
+If we were to add a new parameter to this method, a few things would need to be added to this docstring. Lets pretend we're adding a parameter, ``oldest_first``.
+
+We use NumPy style docstrings parsed with Sphinx's Napoleon extension — the primary documentation for these docstrings can be found [here](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html).
+
+```py
+      """
+      ...
+
+      Parameters
+      ----------
+      oldest_first: bool
+          Whether to order the result by the oldest or newest pins first.
+
+          .. versionadded:: 2.9
+
+      ...
+      """
+```
+
+It is important that the section header comes **after** any description and admonitions that exist, as it will stop the parsing of the description.
+
+The end result of these changes would be as follows:
+
+```py
+      """|coro|
+
+      Retrieves all messages that are currently pinned in the channel.
+
+      .. note::
+
+          Due to a limitation with the Discord API, the :class:`.Message`
+          objects returned by this method do not contain complete
+          :attr:`.Message.reactions` data.
+
+      Parameters
+      ----------
+      oldest_first: bool
+          Whether to order the result by the oldest or newest pins first.
+
+          .. versionadded:: 2.9
+
+      Raises
+      ------
+      HTTPException
+          Retrieving the pinned messages failed.
+
+      Returns
+      -------
+      List[:class:`.Message`]
+          The messages that are currently pinned.
+      """
+  ```
+
+*If you're having trouble with adding or modifying documentation, don't be afraid to reach out!
+We understand that the documentation can be intimidating, and there are quite a few quirks and limitations to be aware of.*

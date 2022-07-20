@@ -1376,9 +1376,9 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1390,9 +1390,9 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1404,9 +1404,9 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1418,13 +1418,25 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
-    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
+    async def edit(
+        self,
+        content: Optional[str] = MISSING,
+        *,
+        embed: Optional[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
+        file: File = MISSING,
+        files: List[File] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
+        allowed_mentions: Optional[AllowedMentions] = MISSING,
+        view: Optional[View] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
+    ) -> Message:
         """|coro|
 
         Edits the message.
@@ -1495,15 +1507,39 @@ class InteractionMessage(Message):
             The newly edited message.
         """
         if self._state._interaction.is_expired():
-            return await super().edit(content=content, **fields)
+            # We have to choose between type-ignoring the entire call,
+            # or not having these specific parameters type-checked,
+            # as we'd otherwise not match any of the overloads if all
+            # parameters were provided
+            params = {"file": file, "embed": embed}
+            return await super().edit(
+                content=content,
+                embeds=embeds,
+                files=files,
+                attachments=attachments,
+                allowed_mentions=allowed_mentions,
+                view=view,
+                components=components,
+                **params,
+            )
 
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         # this isn't necessary when using the superclass, as the implementation there takes care of attachments
-        if "attachments" not in fields and (fields.get("file") or fields.get("files")):
-            fields["attachments"] = self.attachments
+        if attachments is MISSING and (file or files):
+            attachments = self.attachments
 
-        return await self._state._interaction.edit_original_message(content=content, **fields)
+        return await self._state._interaction.edit_original_message(
+            content=content,
+            embed=embed,
+            embeds=embeds,
+            file=file,
+            files=files,
+            attachments=attachments,
+            allowed_mentions=allowed_mentions,
+            view=view,
+            components=components,
+        )
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
         """|coro|

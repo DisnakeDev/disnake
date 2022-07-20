@@ -316,7 +316,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
             elif self.limit == 101:
                 self.limit = 100  # Thanks Discord
 
-            self._retrieve_messages = self._retrieve_messages_around_strategy  # type: ignore
+            self._retrieve_messages = self._retrieve_messages_around_strategy
             if self.before and self.after:
                 self._filter = lambda m: self.after.id < int(m["id"]) < self.before.id  # type: ignore
             elif self.before:
@@ -325,11 +325,11 @@ class HistoryIterator(_AsyncIterator["Message"]):
                 self._filter = lambda m: self.after.id < int(m["id"])
         else:
             if self.reverse:
-                self._retrieve_messages = self._retrieve_messages_after_strategy  # type: ignore
+                self._retrieve_messages = self._retrieve_messages_after_strategy
                 if self.before:
                     self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
             else:
-                self._retrieve_messages = self._retrieve_messages_before_strategy  # type: ignore
+                self._retrieve_messages = self._retrieve_messages_before_strategy
                 if self.after and self.after != OLDEST_OBJECT:
                     self._filter = lambda m: int(m["id"]) > self.after.id
 
