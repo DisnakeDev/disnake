@@ -659,7 +659,6 @@ class InteractionReference:
     type: :class:`InteractionType`
         The type of interaction.
     name: :class:`str`
-        The name of the application command.
         The name of the application command, including group and subcommand name if applicable
         (separated by spaces).
 
