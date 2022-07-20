@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from .threads import Thread, ThreadMember, ThreadType
     from .types.raw_models import (
         BulkMessageDeleteEvent,
+        GuildMemberUpdateEvent,
         GuildScheduledEventUserActionEvent,
         IntegrationDeleteEvent,
         MessageDeleteEvent,
@@ -46,7 +47,6 @@ if TYPE_CHECKING:
         ReactionClearEmojiEvent,
         ReactionClearEvent,
         TypingEvent,
-        GuildMemberUpdateEvent
     )
     from .user import User
 
@@ -421,7 +421,10 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
         The user object of the member that was removed.
     """
 
-    __slots__ = ("guild_id", "user",)
+    __slots__ = (
+        "guild_id",
+        "user",
+    )
 
     def __init__(self, user: User, guild_id: int):
         self.user = user
@@ -460,15 +463,15 @@ class RawGuildMemberUpdateEvent(_RawReprMixin):
     """
 
     __slots__ = (
-        "guild_id", 
-        "roles", 
-        "user", 
-        "nick", 
-        "avatar", 
-        "joined_at", 
-        "premium_since", 
-        "deaf", 
-        "mute", 
+        "guild_id",
+        "roles",
+        "user",
+        "nick",
+        "avatar",
+        "joined_at",
+        "premium_since",
+        "deaf",
+        "mute",
         "pending",
         "communication_disabled_until",
     )
@@ -480,9 +483,7 @@ class RawGuildMemberUpdateEvent(_RawReprMixin):
         self.nick = data.get("nick")
         self.avatar = data["avatar"]
         self.joined_at = (
-            datetime.datetime.fromisoformat(data["joined_at"])
-            if data["joined_at"]
-            else None
+            datetime.datetime.fromisoformat(data["joined_at"]) if data["joined_at"] else None
         )
         self.premium_since = (
             # pyright thinks that the argument provided could be none when it really can't
