@@ -22,11 +22,19 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 from .. import utils
-from ..channel import _threaded_channel_factory
-from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
+from ..channel import (
+    CategoryChannel,
+    ForumChannel,
+    PartialMessageable,
+    StageChannel,
+    TextChannel,
+    VoiceChannel,
+    _threaded_guild_channel_factory,
+)
+from ..enums import ApplicationCommandType, ChannelType, Locale, OptionType, try_enum
 from ..guild import Guild
 from ..member import Member
 from ..message import Attachment, Message
@@ -55,14 +63,7 @@ __all__ = (
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
-    from ..channel import (
-        CategoryChannel,
-        ForumChannel,
-        PartialMessageable,
-        StageChannel,
-        TextChannel,
-        VoiceChannel,
-    )
+    from ..abc import MessageableChannel
     from ..ext.commands import InvokableApplicationCommand
     from ..state import ConnectionState
     from ..threads import Thread
@@ -432,21 +433,31 @@ class ApplicationCommandInteractionDataResolved(Dict[str, Any]):
             self.roles[int(str_id)] = Role(guild=guild, state=state, data=role)  # type: ignore
 
         for str_id, channel in channels.items():
-            factory, _ = _threaded_channel_factory(channel["type"])
+            channel_id = int(str_id)
+            factory, _ = _threaded_guild_channel_factory(channel["type"])
             if factory:
                 channel["position"] = 0  # type: ignore
-                self.channels[int(str_id)] = (  # type: ignore
+                self.channels[channel_id] = (
                     guild
-                    and guild.get_channel(int(str_id))
+                    and guild.get_channel(channel_id)
                     or factory(guild=guild, state=state, data=channel)  # type: ignore
+                )
+            else:
+                self.channels[channel_id] = PartialMessageable(
+                    state=state, id=channel_id, type=try_enum(ChannelType, channel["type"])
                 )
 
         for str_id, message in messages.items():
             channel_id = int(message["channel_id"])
-            channel = guild.get_channel(channel_id) if guild else None
+            channel = cast(
+                "Optional[MessageableChannel]",
+                (guild and guild.get_channel(channel_id) or state.get_channel(channel_id)),
+            )
             if channel is None:
-                channel = state.get_channel(channel_id)
-            self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)  # type: ignore
+                # The channel is not part of `resolved.channels`,
+                # so we need to fall back to partials here.
+                channel = PartialMessageable(state=state, id=channel_id, type=None)
+            self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)
 
         for str_id, attachment in attachments.items():
             self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
