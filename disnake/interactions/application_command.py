@@ -38,6 +38,7 @@ from ..enums import ApplicationCommandType, ChannelType, Locale, OptionType, try
 from ..guild import Guild
 from ..member import Member
 from ..message import Attachment, Message
+from ..object import Object
 from ..role import Role
 from ..user import User
 from .base import Interaction
@@ -139,7 +140,7 @@ class ApplicationCommandInteraction(Interaction):
     def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
         self.data = ApplicationCommandInteractionData(
-            data=data["data"], state=state, guild=self.guild
+            data=data["data"], state=state, guild_id=self.guild_id
         )
         self.application_command: InvokableApplicationCommand = MISSING
         self.command_failed: bool = False
@@ -237,14 +238,14 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         *,
         data: ApplicationCommandInteractionDataPayload,
         state: ConnectionState,
-        guild: Optional[Guild],
+        guild_id: Optional[int],
     ):
         super().__init__(data)
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
         self.resolved = ApplicationCommandInteractionDataResolved(
-            data=data.get("resolved", {}), state=state, guild=guild
+            data=data.get("resolved", {}), state=state, guild_id=guild_id
         )
         self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
         self.target: Optional[Union[User, Member, Message]] = self.resolved.get(self.target_id)  # type: ignore
@@ -393,7 +394,7 @@ class ApplicationCommandInteractionDataResolved(Dict[str, Any]):
         *,
         data: ApplicationCommandInteractionDataResolvedPayload,
         state: ConnectionState,
-        guild: Optional[Guild],
+        guild_id: Optional[int],
     ):
         data = data or {}
         super().__init__(data)
@@ -412,6 +413,14 @@ class ApplicationCommandInteractionDataResolved(Dict[str, Any]):
         messages = data.get("messages", {})
         attachments = data.get("attachments", {})
 
+        guild: Optional[Guild] = None
+        # `guild_fallback` is only used in guild contexts, so this `MISSING` value should never be used.
+        # We need to define it anyway to satisfy the typechecker.
+        guild_fallback: Union[Guild, Object] = MISSING
+        if guild_id is not None:
+            guild = state._get_guild(guild_id)
+            guild_fallback = guild or Object(id=guild_id)
+
         for str_id, user in users.items():
             user_id = int(str_id)
             member = members.get(str_id)
@@ -422,7 +431,7 @@ class ApplicationCommandInteractionDataResolved(Dict[str, Any]):
                     or Member(
                         data=member,
                         user_data=user,
-                        guild=guild,  # type: ignore
+                        guild=guild_fallback,  # type: ignore
                         state=state,
                     )
                 )
@@ -430,7 +439,11 @@ class ApplicationCommandInteractionDataResolved(Dict[str, Any]):
                 self.users[user_id] = User(state=state, data=user)
 
         for str_id, role in roles.items():
-            self.roles[int(str_id)] = Role(guild=guild, state=state, data=role)  # type: ignore
+            self.roles[int(str_id)] = Role(
+                guild=guild_fallback,  # type: ignore
+                state=state,
+                data=role,
+            )
 
         for str_id, channel in channels.items():
             channel_id = int(str_id)
@@ -440,7 +453,11 @@ class ApplicationCommandInteractionDataResolved(Dict[str, Any]):
                 self.channels[channel_id] = (
                     guild
                     and guild.get_channel(channel_id)
-                    or factory(guild=guild, state=state, data=channel)  # type: ignore
+                    or factory(
+                        guild=guild_fallback,  # type: ignore
+                        state=state,
+                        data=channel,  # type: ignore
+                    )
                 )
             else:
                 self.channels[channel_id] = PartialMessageable(
