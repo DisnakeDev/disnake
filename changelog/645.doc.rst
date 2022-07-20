@@ -1,1 +1,1 @@
-Fix the grammatical error in :class:`Guild` channel properties.
+Fix the grammatical errors in :class:`Guild` channel properties.
