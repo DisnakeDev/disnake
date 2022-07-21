@@ -2131,13 +2131,30 @@ class Guild(Hashable):
         self,
         *,
         name: str,
-        channel: Optional[Snowflake],
+        channel: Snowflake,
         scheduled_start_time: datetime.datetime,
         entity_type: Literal[
             GuildScheduledEventEntityType.voice,
             GuildScheduledEventEntityType.stage_instance,
         ] = ...,
         scheduled_end_time: Optional[datetime.datetime] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        description: str = ...,
+        image: AssetBytes = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    @overload
+    async def create_scheduled_event(
+        self,
+        *,
+        name: str,
+        channel: None,
+        scheduled_start_time: datetime.datetime,
+        scheduled_end_time: datetime.datetime,
+        entity_metadata: GuildScheduledEventMetadata,
+        entity_type: Literal[GuildScheduledEventEntityType.external] = ...,
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         description: str = ...,
         image: AssetBytes = ...,
@@ -2163,14 +2180,19 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
-        If ``channel`` is provided and has a type matching to a type of :class:`GuildScheduledEventEntityType`,
-            the ``entity_type`` is not required and will automatically match.
+        Based on the channel/entity type, there are different restrictions regarding
+        other parameter values, as shown in this table:
 
-        If ``channel`` is not provided, then ``entity_type`` must be provided.
 
-        If ``channel`` is None, then ``entity_type`` is assumed to be :class:`GuildScheduledEventEntityType.external`
+        .. csv-table::
+            :widths: 25, 30, 20, 25
+            :header: "``channel``", "``entity_type``", "``scheduled_end_time``", "``entity_metadata`` with location"
 
-        If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
+            :class:`VoiceChannel`, :attr:`~GuildScheduledEventEntityType.voice` (set automatically), optional, unset
+            :class:`StageChannel`, :attr:`~GuildScheduledEventEntityType.stage_instance` (set automatically), optional, unset
+            unspecified snowflake, required, optional, unset
+            ``None``, :attr:`~GuildScheduledEventEntityType.external` (set automatically), required, required
+            unset, :attr:`~GuildScheduledEventEntityType.external`, required, required
 
         - ``channel`` should not be set
         - ``entity_metadata`` with a location field must be provided
@@ -2245,10 +2267,10 @@ class Guild(Hashable):
         if channel is None:
             entity_type = GuildScheduledEventEntityType.external
             channel = MISSING
-        elif hasattr(channel, "type") and isinstance(channel.type, ChannelType):  # type: ignore
-            if channel.type == ChannelType.voice:  # type: ignore
+        elif isinstance(channel_type := getattr(channel, "type", None), ChannelType):
+            if channel_type is ChannelType.voice:
                 entity_type = GuildScheduledEventEntityType.voice
-            elif channel.type == ChannelType.stage_voice:  # type: ignore
+            elif channel_type is ChannelType.stage_voice:
                 entity_type = GuildScheduledEventEntityType.stage_instance
             else:
                 raise TypeError("channel type must be either 'stage' or 'stage_voice'")
