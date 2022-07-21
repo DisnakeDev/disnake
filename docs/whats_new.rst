@@ -17,9 +17,6 @@ in specific versions.
 v2.4.1
 ------
 
-Contains fixes backported from newer versions up to v2.6.1.
-
-
 Bug Fixes
 ~~~~~~~~~~
 
@@ -40,6 +37,7 @@ Bug Fixes
 - Update :attr:`Guild.bitrate_limit` to use the correct value for the ``VIP_REGIONS`` feature flag. (:issue:`538`)
 - Remove the ``$`` prefix from ``IDENTIFY`` payload properties. (:issue:`572`)
 - Fix opus function calls on arm64 macOS. (:issue:`620`)
+- Improve channel/guild fallback in resolved interaction data, using :class:`PartialMessageable` for unhandled/unknown channels instead of using ``None``. (:issue:`646`)
 - |commands| Fix :class:`~ext.commands.clean_content` converter (:issue:`396`)
 - |commands| Support interactions in :class:`~ext.commands.UserConverter`, :class:`~ext.commands.MemberConverter` (:issue:`429`)
 - |commands| Fix unloading of listeners with custom names (:issue:`444`)
