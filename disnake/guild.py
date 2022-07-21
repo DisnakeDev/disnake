@@ -624,7 +624,7 @@ class Guild(Hashable):
 
     @property
     def channels(self) -> List[GuildChannel]:
-        """List[:class:`abc.GuildChannel`]: A list of channels that belongs to this guild."""
+        """List[:class:`abc.GuildChannel`]: A list of channels that belong to this guild."""
         return list(self._channels.values())
 
     @property
@@ -651,7 +651,7 @@ class Guild(Hashable):
 
     @property
     def voice_channels(self) -> List[VoiceChannel]:
-        """List[:class:`VoiceChannel`]: A list of voice channels that belongs to this guild.
+        """List[:class:`VoiceChannel`]: A list of voice channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
         """
@@ -661,7 +661,7 @@ class Guild(Hashable):
 
     @property
     def stage_channels(self) -> List[StageChannel]:
-        """List[:class:`StageChannel`]: A list of stage channels that belongs to this guild.
+        """List[:class:`StageChannel`]: A list of stage channels that belong to this guild.
 
         .. versionadded:: 1.7
 
@@ -673,7 +673,7 @@ class Guild(Hashable):
 
     @property
     def forum_channels(self) -> List[ForumChannel]:
-        """List[:class:`ForumChannel`]: A list of forum channels that belongs to this guild.
+        """List[:class:`ForumChannel`]: A list of forum channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
 
@@ -699,7 +699,7 @@ class Guild(Hashable):
 
     @property
     def text_channels(self) -> List[TextChannel]:
-        """List[:class:`TextChannel`]: A list of text channels that belongs to this guild.
+        """List[:class:`TextChannel`]: A list of text channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
         """
@@ -709,7 +709,7 @@ class Guild(Hashable):
 
     @property
     def categories(self) -> List[CategoryChannel]:
-        """List[:class:`CategoryChannel`]: A list of categories that belongs to this guild.
+        """List[:class:`CategoryChannel`]: A list of categories that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
         """
