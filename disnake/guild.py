@@ -3472,12 +3472,33 @@ class Guild(Hashable):
         """
         await self._state.http.kick(user.id, self.id, reason=reason)
 
+    @overload
     async def ban(
         self,
         user: Snowflake,
         *,
+        delete_message_seconds: int = 86400,
         reason: Optional[str] = None,
-        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
+    ) -> None:
+        ...
+
+    @overload
+    async def ban(
+        self,
+        user: Snowflake,
+        *,
+        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7],
+        reason: Optional[str] = None,
+    ) -> None:
+        ...
+
+    async def ban(
+        self,
+        user: Snowflake,
+        *,
+        delete_message_seconds: int = 86400,
+        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = MISSING,
+        reason: Optional[str] = None,
     ) -> None:
         """|coro|
 
@@ -3492,9 +3513,20 @@ class Guild(Hashable):
         ----------
         user: :class:`abc.Snowflake`
             The user to ban from the guild.
+        delete_message_seconds: :class:`int`
+            The number of seconds worth of messages to delete from the user
+            in the guild, between 0 and 604800 (7 days).
+            Defaults to 86400 (1 day).
+
+            .. versionadded:: 2.6
+
         delete_message_days: :class:`int`
             The number of days worth of messages to delete from the user
             in the guild. The minimum is 0 and the maximum is 7.
+
+            .. deprecated:: 2.6
+                Use ``delete_message_seconds`` instead.
+
         reason: Optional[:class:`str`]
             The reason for banning this user. Shows up on the audit log.
 
@@ -3505,7 +3537,15 @@ class Guild(Hashable):
         HTTPException
             Banning failed.
         """
-        await self._state.http.ban(user.id, self.id, delete_message_days, reason=reason)
+        if delete_message_days is not MISSING:
+            utils.warn_deprecated(
+                "`delete_message_days` is deprecated and will be removed in a future version. Consider using `delete_message_seconds` instead.",
+                stacklevel=2,
+            )
+            delete_message_seconds = delete_message_days * 86400
+        await self._state.http.ban(
+            user.id, self.id, delete_message_seconds=delete_message_seconds, reason=reason
+        )
 
     async def unban(self, user: Snowflake, *, reason: Optional[str] = None) -> None:
         """|coro|
