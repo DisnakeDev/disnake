@@ -248,7 +248,7 @@ def test_components_to_rows__invalid():
             components_to_rows(value)  # type: ignore
     for value in ([[[]]], [[[ActionRow()]]]):
         with pytest.raises(TypeError, match=r"components should be of type"):
-            components_to_rows(value)
+            components_to_rows(value)  # type: ignore
 
 
 def test_components_to_dict():
