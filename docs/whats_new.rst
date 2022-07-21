@@ -17,8 +17,6 @@ in specific versions.
 v2.5.2
 ------
 
-Contains fixes backported from newer versions up to v2.6.1.
-
 Bug Fixes
 ~~~~~~~~~~
 
@@ -37,6 +35,7 @@ Bug Fixes
 - Replace old application command objects in cogs with the new/copied objects. (:issue:`575`)
 - |commands| Handle ``Union[User, Member]`` annotations on slash commands arguments when using the decorator interface. (:issue:`584`)
 - Fix opus function calls on arm64 macOS. (:issue:`620`)
+- Improve channel/guild fallback in resolved interaction data, using :class:`PartialMessageable` for unhandled/unknown channels instead of using ``None``. (:issue:`646`)
 
 Documentation
 ~~~~~~~~~~~~~~
@@ -44,7 +43,7 @@ Documentation
 - Remove notes that global application command rollout takes up to an hour. (:issue:`518`)
 - Update the requests intersphinx url to the new url of the requests documentation. (:issue:`539`)
 - Clarify the targets of :func:`Permissions.is_strict_subset` and :func:`Permissions.is_strict_superset`. (:issue:`612`)
-- Update :attr:`InteractionReference.name` description, now includes group and subcommand. (:issue:`625`)
+- Update :attr:`InteractionReference.name` description, now includes group and subcommand. (:issue:`625`, :issue:`648`)
 
 
 .. _vp2p5p1:
