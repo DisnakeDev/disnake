@@ -1348,50 +1348,50 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param invite: The invite that was deleted.
     :type invite: :class:`Invite`
 
-.. function:: on_auto_moderation_rule_create(rule)
+.. function:: on_automod_rule_create(rule)
 
     Called when an :class:`AutoModRule` is created.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
-    This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
+    This requires :attr:`Intents.automod_configuration` to be enabled.
 
     .. versionadded:: 2.6
 
     :param rule: The auto moderation rule that was created.
     :type rule: :class:`AutoModRule`
 
-.. function:: on_auto_moderation_rule_update(rule)
+.. function:: on_automod_rule_update(rule)
 
     Called when an :class:`AutoModRule` is updated.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
-    This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
+    This requires :attr:`Intents.automod_configuration` to be enabled.
 
     .. versionadded:: 2.6
 
     :param rule: The auto moderation rule that was updated.
     :type rule: :class:`AutoModRule`
 
-.. function:: on_auto_moderation_rule_delete(rule)
+.. function:: on_automod_rule_delete(rule)
 
     Called when an :class:`AutoModRule` is deleted.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
-    This requires :attr:`Intents.auto_moderation_configuration` to be enabled.
+    This requires :attr:`Intents.automod_configuration` to be enabled.
 
     .. versionadded:: 2.6
 
     :param rule: The auto moderation rule that was deleted.
     :type rule: :class:`AutoModRule`
 
-.. function:: on_auto_moderation_action_execution(execution)
+.. function:: on_automod_action_execution(execution)
 
     Called when an auto moderation action is executed due to a rule triggering for a particular event.
     You must have the :attr:`~Permissions.manage_guild` permission to receive this.
 
     The guild this action has taken place in can be accessed using :attr:`AutoModActionExecution.guild`.
 
-    This requires :attr:`Intents.auto_moderation_execution` to be enabled.
+    This requires :attr:`Intents.automod_execution` to be enabled.
 
     In addition, :attr:`Intents.message_content` must be enabled to receive non-empty values
     for :attr:`AutoModActionExecution.content` and :attr:`AutoModActionExecution.matched_content`.
@@ -3000,7 +3000,7 @@ of :class:`enum.Enum`.
         .. versionchanged:: 2.6
             Added support for :class:`PartialIntegration`, and added ``integration`` to :attr:`~AuditLogEntry.extra`.
 
-    .. attribute:: auto_moderation_rule_create
+    .. attribute:: automod_rule_create
 
         An auto moderation rule was created.
 
@@ -3021,7 +3021,7 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.6
 
-    .. attribute:: auto_moderation_rule_update
+    .. attribute:: automod_rule_update
 
         An auto moderation rule was updated.
 
@@ -3042,7 +3042,7 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.6
 
-    .. attribute:: auto_moderation_rule_delete
+    .. attribute:: automod_rule_delete
 
         An auto moderation rule was deleted.
 
@@ -3063,7 +3063,7 @@ of :class:`enum.Enum`.
 
         .. versionadded:: 2.6
 
-    .. attribute:: auto_moderation_block_message
+    .. attribute:: automod_block_message
 
         A message was blocked by an auto moderation rule.
 

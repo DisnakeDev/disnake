@@ -1784,7 +1784,7 @@ class ConnectionState:
             return
 
         rule = AutoModRule(data=data, guild=guild)
-        self.dispatch("auto_moderation_rule_create", rule)
+        self.dispatch("automod_rule_create", rule)
 
     def parse_auto_moderation_rule_update(self, data: AutoModRulePayload) -> None:
         guild = self._get_guild(int(data["guild_id"]))
@@ -1796,7 +1796,7 @@ class ConnectionState:
             return
 
         rule = AutoModRule(data=data, guild=guild)
-        self.dispatch("auto_moderation_rule_update", rule)
+        self.dispatch("automod_rule_update", rule)
 
     def parse_auto_moderation_rule_delete(self, data: AutoModRulePayload) -> None:
         guild = self._get_guild(int(data["guild_id"]))
@@ -1808,7 +1808,7 @@ class ConnectionState:
             return
 
         rule = AutoModRule(data=data, guild=guild)
-        self.dispatch("auto_moderation_rule_delete", rule)
+        self.dispatch("automod_rule_delete", rule)
 
     def parse_auto_moderation_action_execution(
         self, data: AutoModActionExecutionEventPayload
@@ -1822,7 +1822,7 @@ class ConnectionState:
             return
 
         event = AutoModActionExecution(data=data, guild=guild)
-        self.dispatch("auto_moderation_action_execution", event)
+        self.dispatch("automod_action_execution", event)
 
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int

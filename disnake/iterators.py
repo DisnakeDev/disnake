@@ -597,7 +597,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
                 else:
                     appcmds[int(data["id"])] = cmd
 
-            auto_moderation_rules = {
+            automod_rules = {
                 int(data["id"]): AutoModRule(guild=self.guild, data=data)
                 for data in log_data.get("auto_moderation_rules", [])
             }
@@ -633,7 +633,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
                         data=element,
                         guild=self.guild,
                         application_commands=appcmds,
-                        auto_moderation_rules=auto_moderation_rules,
+                        automod_rules=automod_rules,
                         guild_scheduled_events=events,
                         integrations=integrations,
                         threads=threads,

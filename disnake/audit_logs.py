@@ -528,7 +528,7 @@ class AuditLogEntry(Hashable):
         data: AuditLogEntryPayload,
         guild: Guild,
         application_commands: Dict[int, APIApplicationCommand],
-        auto_moderation_rules: Dict[int, AutoModRule],
+        automod_rules: Dict[int, AutoModRule],
         guild_scheduled_events: Dict[int, GuildScheduledEvent],
         integrations: Dict[int, PartialIntegration],
         threads: Dict[int, Thread],
@@ -539,7 +539,7 @@ class AuditLogEntry(Hashable):
         self.guild = guild
 
         self._application_commands = application_commands
-        self._auto_moderation_rules = auto_moderation_rules
+        self._automod_rules = automod_rules
         self._guild_scheduled_events = guild_scheduled_events
         self._integrations = integrations
         self._threads = threads
@@ -608,7 +608,7 @@ class AuditLogEntry(Hashable):
                     "integration": self._get_integration_by_application_id(app_id) or Object(app_id)
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
-            elif self.action is enums.AuditLogAction.auto_moderation_block_message:
+            elif self.action is enums.AuditLogAction.automod_block_message:
                 channel_id = int(extra["channel_id"])
                 elems = {
                     "channel": (
@@ -804,5 +804,5 @@ class AuditLogEntry(Hashable):
         # fall back to object
         return Object(id=target_id)
 
-    def _convert_target_auto_moderation_rule(self, target_id: int) -> Union[AutoModRule, Object]:
-        return self._auto_moderation_rules.get(target_id) or Object(id=target_id)
+    def _convert_target_automod_rule(self, target_id: int) -> Union[AutoModRule, Object]:
+        return self._automod_rules.get(target_id) or Object(id=target_id)
