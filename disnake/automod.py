@@ -81,16 +81,6 @@ __all__ = (
 )
 
 
-def _automod_action_factory(data: AutoModActionPayload) -> AutoModAction:
-    action_map: Dict[int, Type[AutoModAction]] = {
-        AutoModActionType.block_message.value: AutoModBlockMessageAction,
-        AutoModActionType.send_alert_message.value: AutoModSendAlertAction,
-        AutoModActionType.timeout.value: AutoModTimeoutAction,
-    }
-    tp = action_map.get(data["type"], AutoModAction)
-    return tp._from_dict(data)
-
-
 class AutoModAction:
     """
     A base class for auto moderation actions.
@@ -677,3 +667,15 @@ class AutoModActionExecution:
         Only available if :attr:`action.type <AutoModAction.type>` is :attr:`~AutoModActionType.send_alert_message`
         and the message was found in the message cache."""
         return self.guild._state._get_message(self.alert_message_id)
+
+
+_action_map: Dict[int, Type[AutoModAction]] = {
+    AutoModActionType.block_message.value: AutoModBlockMessageAction,
+    AutoModActionType.send_alert_message.value: AutoModSendAlertAction,
+    AutoModActionType.timeout.value: AutoModTimeoutAction,
+}
+
+
+def _automod_action_factory(data: AutoModActionPayload) -> AutoModAction:
+    tp = _action_map.get(data["type"], AutoModAction)
+    return tp._from_dict(data)
