@@ -576,7 +576,7 @@ class AutoModActionExecution:
 
     Attributes
     ----------
-    action: Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]
+    action: :class:`AutoModAction`
         The action that was executed.
     guild: :class:`Guild`
         The guild this action was executed in.
