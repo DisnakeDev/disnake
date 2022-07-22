@@ -101,6 +101,39 @@ if TYPE_CHECKING:
 MISSING: Any = utils.MISSING
 
 
+class _ResponseLock:
+    __slots__ = (
+        "_response",
+        "_lock",
+    )
+
+    def __init__(self, response: InteractionResponse) -> None:
+        self._response = response
+        self._lock = asyncio.Lock()
+
+    async def __aenter__(self):
+        # when we acquire this manager, we are attempting to make a request
+        # the problem is we don't know if the request will success or not
+        # to get around this, we wait and see if it was successful.
+        # if it was successful, we raise an InteractionResponded exception
+        await self._lock.acquire()
+        if self._response._responded:
+            self._lock.release()
+            raise InteractionResponded(self._response._parent)
+
+    async def __aexit__(self, exc_type, exc, tb):
+        # we are no longer making a request so we release the lock
+        # however, we only want to set responded to True if it was success
+        # eg did not raise an Exception
+        self._lock.release()
+        if exc_type is not None:
+            return
+        self._response._responded = True
+
+    def is_responding(self):
+        return self._lock.locked()
+
+
 class Interaction:
     """A base class representing a user-initiated Discord interaction.
 
@@ -631,6 +664,14 @@ class Interaction:
         ValueError
             The length of ``embeds`` was invalid.
         """
+        # this is done before determining which sender to use
+        # if we are currently responding we should use the followup
+        # but there is a chance the response will fail and therefore
+        # we should send the response
+        if self.response._lock.is_responding():
+            async with self.response._lock:
+                pass
+
         if self.response._responded:
             sender = self.followup.send
         else:
@@ -662,11 +703,13 @@ class InteractionResponse:
     __slots__: Tuple[str, ...] = (
         "_responded",
         "_parent",
+        "_lock",
     )
 
     def __init__(self, parent: Interaction):
         self._parent: Interaction = parent
         self._responded: bool = False
+        self._lock = _ResponseLock(self)
 
     def is_done(self) -> bool:
         """Whether an interaction response has been done before.
@@ -743,14 +786,15 @@ class InteractionResponse:
             )
 
         adapter = async_context.get()
-        await adapter.create_interaction_response(
-            parent.id,
-            parent.token,
-            session=parent._session,
-            type=defer_type.value,
-            data=data or None,
-        )
-        self._responded = True
+        async with self._lock:
+            await adapter.create_interaction_response(
+                parent.id,
+                parent.token,
+                session=parent._session,
+                type=defer_type.value,
+                data=data or None,
+            )
+            self._responded = True
 
     async def pong(self) -> None:
         """|coro|
@@ -772,13 +816,14 @@ class InteractionResponse:
         parent = self._parent
         if parent.type is InteractionType.ping:
             adapter = async_context.get()
-            await adapter.create_interaction_response(
-                parent.id,
-                parent.token,
-                session=parent._session,
-                type=InteractionResponseType.pong.value,
-            )
-            self._responded = True
+            async with self._lock:
+                await adapter.create_interaction_response(
+                    parent.id,
+                    parent.token,
+                    session=parent._session,
+                    type=InteractionResponseType.pong.value,
+                )
+                self._responded = True
 
     async def send_message(
         self,
@@ -918,14 +963,17 @@ class InteractionResponse:
         parent = self._parent
         adapter = async_context.get()
         try:
-            await adapter.create_interaction_response(
-                parent.id,
-                parent.token,
-                session=parent._session,
-                type=InteractionResponseType.channel_message.value,
-                data=payload,
-                files=files or None,
-            )
+            async with self._lock:
+                await adapter.create_interaction_response(
+                    parent.id,
+                    parent.token,
+                    session=parent._session,
+                    type=InteractionResponseType.channel_message.value,
+                    data=payload,
+                    files=files or None,
+                )
+                self._responded = True
+
         except NotFound as e:
             if e.code == 10062:
                 raise InteractionTimedOut(self._parent) from e
@@ -934,8 +982,6 @@ class InteractionResponse:
             if files:
                 for f in files:
                     f.close()
-
-        self._responded = True
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
@@ -1100,14 +1146,16 @@ class InteractionResponse:
 
         adapter = async_context.get()
         try:
-            await adapter.create_interaction_response(
-                parent.id,
-                parent.token,
-                session=parent._session,
-                type=InteractionResponseType.message_update.value,
-                data=payload,
-                files=files,
-            )
+            async with self._lock:
+                await adapter.create_interaction_response(
+                    parent.id,
+                    parent.token,
+                    session=parent._session,
+                    type=InteractionResponseType.message_update.value,
+                    data=payload,
+                    files=files,
+                )
+                self._responded = True
         finally:
             if files:
                 for f in files:
@@ -1115,8 +1163,6 @@ class InteractionResponse:
 
         if view and not view.is_finished():
             state.store_view(view, message.id)
-
-        self._responded = True
 
     async def autocomplete(self, *, choices: Choices) -> None:
         """|coro|
@@ -1159,15 +1205,15 @@ class InteractionResponse:
 
         parent = self._parent
         adapter = async_context.get()
-        await adapter.create_interaction_response(
-            parent.id,
-            parent.token,
-            session=parent._session,
-            type=InteractionResponseType.application_command_autocomplete_result.value,
-            data={"choices": choices_data},
-        )
-
-        self._responded = True
+        async with self._lock:
+            await adapter.create_interaction_response(
+                parent.id,
+                parent.token,
+                session=parent._session,
+                type=InteractionResponseType.application_command_autocomplete_result.value,
+                data={"choices": choices_data},
+            )
+            self._responded = True
 
     @overload
     async def send_modal(self, modal: Modal) -> None:
@@ -1258,14 +1304,15 @@ class InteractionResponse:
             raise TypeError("Either modal or title, custom_id, components must be provided")
 
         adapter = async_context.get()
-        await adapter.create_interaction_response(
-            parent.id,
-            parent.token,
-            session=parent._session,
-            type=InteractionResponseType.modal.value,
-            data=modal_data,  # type: ignore
-        )
-        self._responded = True
+        async with self._lock:
+            await adapter.create_interaction_response(
+                parent.id,
+                parent.token,
+                session=parent._session,
+                type=InteractionResponseType.modal.value,
+                data=modal_data,  # type: ignore
+            )
+            self._responded = True
 
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
