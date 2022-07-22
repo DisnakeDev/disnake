@@ -356,25 +356,7 @@ class GuildScheduledEvent(Hashable):
     async def edit(
             self,
             *,
-            channel: Snowflake = ...,
-            name: str = ...,
-            description: Optional[str] = ...,
-            image: Optional[AssetBytes] = ...,
-            privacy_level: GuildScheduledEventPrivacyLevel = ...,
-            scheduled_start_time: datetime = ...,
-            scheduled_end_time: Optional[datetime] = ...,
-            status: GuildScheduledEventStatus = ...,
-            reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
-
-    # no channel, external entity_type
-    @overload
-    async def edit(
-            self,
-            *,
-            channel: None,
-            entity_type: Literal[GuildScheduledEventEntityType.external] = ...,
+            channel: Optional[Snowflake],
             name: str = ...,
             description: Optional[str] = ...,
             image: Optional[AssetBytes] = ...,
@@ -485,7 +467,9 @@ class GuildScheduledEvent(Hashable):
         """
         fields: Dict[str, Any] = {}
 
-        if channel is not MISSING and isinstance(channel_type := getattr(channel, "type", None), ChannelType):
+        if channel is None:
+            entity_type = GuildScheduledEventEntityType.external
+        elif channel is not MISSING and isinstance(channel_type := getattr(channel, "type", None), ChannelType):
             if channel_type is ChannelType.voice:
                 entity_type = GuildScheduledEventEntityType.voice
             elif channel_type is ChannelType.stage_voice:
