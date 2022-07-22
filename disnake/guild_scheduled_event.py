@@ -48,6 +48,7 @@ from .utils import (
 if TYPE_CHECKING:
     from .abc import GuildChannel, Snowflake
     from .asset import AssetBytes
+    from .enums import ChannelType
     from .guild import Guild
     from .iterators import GuildScheduledEventUserIterator
     from .state import ConnectionState
@@ -56,9 +57,6 @@ if TYPE_CHECKING:
         GuildScheduledEventEntityMetadata as GuildScheduledEventEntityMetadataPayload,
     )
     from .user import User
-    from .enums import (
-        ChannelType
-    )
 
 
 __all__ = ("GuildScheduledEventMetadata", "GuildScheduledEvent")
@@ -354,17 +352,17 @@ class GuildScheduledEvent(Hashable):
     # new channel, no entity_type
     @overload
     async def edit(
-            self,
-            *,
-            channel: Optional[Snowflake],
-            name: str = ...,
-            description: Optional[str] = ...,
-            image: Optional[AssetBytes] = ...,
-            privacy_level: GuildScheduledEventPrivacyLevel = ...,
-            scheduled_start_time: datetime = ...,
-            scheduled_end_time: Optional[datetime] = ...,
-            status: GuildScheduledEventStatus = ...,
-            reason: Optional[str] = ...,
+        self,
+        *,
+        channel: Optional[Snowflake],
+        name: str = ...,
+        description: Optional[str] = ...,
+        image: Optional[AssetBytes] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        scheduled_start_time: datetime = ...,
+        scheduled_end_time: Optional[datetime] = ...,
+        status: GuildScheduledEventStatus = ...,
+        reason: Optional[str] = ...,
     ) -> GuildScheduledEvent:
         ...
 
@@ -469,7 +467,9 @@ class GuildScheduledEvent(Hashable):
 
         if channel is None:
             entity_type = GuildScheduledEventEntityType.external
-        elif channel is not MISSING and isinstance(channel_type := getattr(channel, "type", None), ChannelType):
+        elif channel is not MISSING and isinstance(
+            channel_type := getattr(channel, "type", None), ChannelType
+        ):
             if channel_type is ChannelType.voice:
                 entity_type = GuildScheduledEventEntityType.voice
             elif channel_type is ChannelType.stage_voice:
