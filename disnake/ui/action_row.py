@@ -30,6 +30,7 @@ from typing import (
     ClassVar,
     Generator,
     Generic,
+    Iterator,
     List,
     Literal,
     Optional,
@@ -89,7 +90,21 @@ class ActionRow(Generic[UIComponentT]):
 
         .. describe:: x[i]
 
-            Returns the component at position ``i``.
+            Returns the component at position ``i``. Also supports slices.
+
+            .. versionadded:: 2.6
+
+        .. describe:: len(x)
+
+            Returns the number of components in this row.
+
+            .. versionadded:: 2.6
+
+        .. describe:: iter(x)
+
+            Returns an iterator for the components in this row.
+
+            .. versionadded:: 2.6
 
     To handle interactions created by components sent in action rows or entirely independently,
     event listeners must be used. For buttons and selects, the related events are
@@ -139,7 +154,7 @@ class ActionRow(Generic[UIComponentT]):
     def __init__(self: ActionRow[StrictUIComponentT], *components: StrictUIComponentT):
         ...
 
-    def __init__(self, *components: UIComponentT):  # type: ignore
+    def __init__(self, *components: UIComponentT):
         self._children: List[UIComponentT] = []
 
         for component in components:
@@ -429,11 +444,22 @@ class ActionRow(Generic[UIComponentT]):
     def to_component_dict(self) -> ActionRowPayload:
         return self._underlying.to_dict()
 
-    def __delitem__(self, index: int) -> None:
+    def __delitem__(self, index: Union[int, slice]) -> None:
         del self._children[index]
 
+    @overload
     def __getitem__(self, index: int) -> UIComponentT:
+        ...
+
+    @overload
+    def __getitem__(self, index: slice) -> Sequence[UIComponentT]:
+        ...
+
+    def __getitem__(self, index: Union[int, slice]) -> Union[UIComponentT, Sequence[UIComponentT]]:
         return self._children[index]
+
+    def __iter__(self) -> Iterator[UIComponentT]:
+        return iter(self._children)
 
     @classmethod
     def with_modal_components(cls) -> ActionRow[ModalUIComponent]:

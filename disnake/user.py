@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import disnake.abc
 
@@ -37,6 +37,8 @@ from .utils import MISSING, _assetbytes_to_base64_data, snowflake_time
 
 if TYPE_CHECKING:
     from datetime import datetime
+
+    from typing_extensions import Self
 
     from .asset import AssetBytes
     from .channel import DMChannel
@@ -51,8 +53,6 @@ __all__ = (
     "User",
     "ClientUser",
 )
-
-BU = TypeVar("BU", bound="BaseUser")
 
 
 class _UserTag:
@@ -122,7 +122,7 @@ class BaseUser(_UserTag):
         self.system = data.get("system", False)
 
     @classmethod
-    def _copy(cls: Type[BU], user: BU) -> BU:
+    def _copy(cls, user: BaseUser) -> Self:
         self = cls.__new__(cls)  # bypass __init__
 
         self.name = user.name
@@ -462,11 +462,11 @@ class User(BaseUser, disnake.abc.Messageable):
         try:
             if self._stored:
                 self._state.deref_user(self.id)
-        except Exception:
+        except KeyError:
             pass
 
     @classmethod
-    def _copy(cls, user: User):
+    def _copy(cls, user: User) -> Self:
         self = super()._copy(user)
         self._stored = False
         return self

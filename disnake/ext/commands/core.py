@@ -38,6 +38,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Protocol,
     Set,
     Tuple,
     Type,
@@ -54,10 +55,31 @@ from .cog import Cog
 from .context import AnyContext, Context
 from .converter import Greedy, get_converter, run_converters
 from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
-from .errors import *
+from .errors import (
+    ArgumentParsingError,
+    BotMissingAnyRole,
+    BotMissingPermissions,
+    BotMissingRole,
+    CheckAnyFailure,
+    CheckFailure,
+    CommandError,
+    CommandInvokeError,
+    CommandOnCooldown,
+    CommandRegistrationError,
+    DisabledCommand,
+    MissingAnyRole,
+    MissingPermissions,
+    MissingRequiredArgument,
+    MissingRole,
+    NoPrivateMessage,
+    NotOwner,
+    NSFWChannelRequired,
+    PrivateMessageOnly,
+    TooManyArguments,
+)
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec, TypeGuard
+    from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
 
     from disnake.message import Message
 
@@ -94,7 +116,7 @@ __all__ = (
 MISSING: Any = disnake.utils.MISSING
 
 T = TypeVar("T")
-CogT = TypeVar("CogT", bound="Cog")
+CogT = TypeVar("CogT", bound="Optional[Cog]")
 CommandT = TypeVar("CommandT", bound="Command")
 ContextT = TypeVar("ContextT", bound="Context")
 GroupT = TypeVar("GroupT", bound="Group")
@@ -209,6 +231,7 @@ class _CaseInsensitiveDict(dict):
         super().__setitem__(k.casefold(), v)
 
 
+# TODO: ideally, `ContextT` should be bound on the class here as well
 class Command(_BaseCommand, Generic[CogT, P, T]):
     """
     A class that implements the protocol for a bot text command.
@@ -285,7 +308,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     __original_kwargs__: Dict[str, Any]
 
-    def __new__(cls: Type[CommandT], *args: Any, **kwargs: Any) -> CommandT:
+    def __new__(cls, *args: Any, **kwargs: Any) -> Self:
         # if you're wondering why this is done, it's because we need to ensure
         # we have a complete original copy of **kwargs even for classes that
         # mess with it by popping before delegating to the subclass __init__.
@@ -370,7 +393,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.require_var_positional: bool = kwargs.get("require_var_positional", False)
         self.ignore_extra: bool = kwargs.get("ignore_extra", True)
         self.cooldown_after_parsing: bool = kwargs.get("cooldown_after_parsing", False)
-        self.cog: Optional[CogT] = None
+        self.cog: CogT = None
 
         # bandaid for the fact that sometimes parent can be the bot instance
         parent = kwargs.get("parent")
@@ -395,16 +418,11 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.__command_flag__ = None
 
     @property
-    def callback(
-        self,
-    ) -> CommandCallback[CogT, ContextT, P, T]:
+    def callback(self) -> CommandCallback[CogT, ContextT, P, T]:
         return self._callback
 
     @callback.setter
-    def callback(
-        self,
-        function: CommandCallback[CogT, ContextT, P, T],
-    ) -> None:
+    def callback(self, function: CommandCallback[CogT, Any, P, T]) -> None:
         self._callback = function
         unwrap = unwrap_function(function)
         self.module = unwrap.__module__
@@ -538,7 +556,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                     # User has an option to cancel the global error handler by returning True
         finally:
             if stop_propagation:
-                return
+                return  # noqa: B012
             ctx.bot.dispatch("command_error", ctx, error)
 
     async def transform(self, ctx: Context, param: inspect.Parameter) -> Any:
@@ -587,7 +605,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         view.previous = previous
 
         # type-checker fails to narrow argument
-        return await run_converters(ctx, converter, argument, param)
+        return await run_converters(ctx, converter, argument, param)  # type: ignore
 
     async def _transform_greedy_pos(
         self, ctx: Context, param: inspect.Parameter, required: bool, converter: Any
@@ -706,7 +724,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         parent = self.full_parent_name
         if parent:
-            return parent + " " + self.name
+            return f"{parent} {self.name}"
         else:
             return self.name
 
@@ -765,7 +783,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                         break
 
         if not self.ignore_extra and not view.eof:
-            raise TooManyArguments("Too many arguments passed to " + self.qualified_name)
+            raise TooManyArguments(f"Too many arguments passed to {self.qualified_name}")
 
     async def call_before_hooks(self, ctx: Context) -> None:
         # now that we're done preparing we can call the pre-command hooks
@@ -840,7 +858,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                 await self._parse_arguments(ctx)
 
             await self.call_before_hooks(ctx)
-        except:
+        except Exception:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(ctx)  # type: ignore
             raise
@@ -923,7 +941,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         ctx.invoked_subcommand = None
         try:
             await self.callback(*ctx.args, **ctx.kwargs)  # type: ignore
-        except:
+        except Exception:
             ctx.command_failed = True
             raise
         finally:
@@ -1316,33 +1334,44 @@ class GroupMixin(Generic[CogT]):
 
         return obj
 
-    @overload
-    def command(
-        self,
-        name: str = ...,
-        cls: Type[Command[CogT, P, T]] = ...,
-        *args: Any,
-        **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]:
-        ...
+    # see `commands.command` for details regarding these overloads
 
     @overload
     def command(
         self,
-        name: str = ...,
-        cls: Type[CommandT] = ...,
+        name: str,
+        cls: Type[CommandT],
         *args: Any,
         **kwargs: Any,
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
         ...
 
+    @overload
+    def command(
+        self,
+        name: str = ...,
+        *args: Any,
+        cls: Type[CommandT],
+        **kwargs: Any,
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
+        ...
+
+    @overload
+    def command(
+        self,
+        name: str = ...,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]:
+        ...
+
     def command(
         self,
         name: str = MISSING,
-        cls: Union[Type[Command[CogT, P, T]], Type[CommandT]] = MISSING,
+        cls: Type[Command[Any, Any, Any]] = Command,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Union[Command[CogT, P, T], CommandT]]:
+    ) -> Any:
         """A shortcut decorator that invokes :func:`.command` and adds it to
         the internal command list via :meth:`~.GroupMixin.add_command`.
 
@@ -1352,9 +1381,7 @@ class GroupMixin(Generic[CogT]):
             A decorator that converts the provided method into a Command, adds it to the bot, then returns it.
         """
 
-        def decorator(
-            func: CommandCallback[CogT, ContextT, P, T]
-        ) -> Union[Command[CogT, P, T], CommandT]:
+        def decorator(func: CommandCallback[CogT, ContextT, P, T]) -> Command[Any, Any, Any]:
             kwargs.setdefault("parent", self)
             result = command(name=name, cls=cls, *args, **kwargs)(func)
             self.add_command(result)
@@ -1365,30 +1392,39 @@ class GroupMixin(Generic[CogT]):
     @overload
     def group(
         self,
-        name: str = ...,
-        cls: Type[Group[CogT, P, T]] = ...,
+        name: str,
+        cls: Type[GroupT],
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]:
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
         ...
 
     @overload
     def group(
         self,
         name: str = ...,
-        cls: Type[GroupT] = ...,
         *args: Any,
+        cls: Type[GroupT],
         **kwargs: Any,
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
+        ...
+
+    @overload
+    def group(
+        self,
+        name: str = ...,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]:
         ...
 
     def group(
         self,
         name: str = MISSING,
-        cls: Union[Type[Group[CogT, P, T]], Type[GroupT]] = MISSING,
+        cls: Type[Group[Any, Any, Any]] = MISSING,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Union[Group[CogT, P, T], GroupT]]:
+    ) -> Any:
         """A shortcut decorator that invokes :func:`.group` and adds it to
         the internal command list via :meth:`~.GroupMixin.add_command`.
 
@@ -1398,9 +1434,7 @@ class GroupMixin(Generic[CogT]):
             A decorator that converts the provided method into a Group, adds it to the bot, then returns it.
         """
 
-        def decorator(
-            func: CommandCallback[CogT, ContextT, P, T]
-        ) -> Union[Group[CogT, P, T], GroupT]:
+        def decorator(func: CommandCallback[CogT, ContextT, P, T]) -> Group[Any, Any, Any]:
             kwargs.setdefault("parent", self)
             result = group(name=name, cls=cls, *args, **kwargs)(func)
             self.add_command(result)
@@ -1502,7 +1536,7 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
         if early_invoke:
             try:
                 await self.callback(*ctx.args, **ctx.kwargs)  # type: ignore
-            except:
+            except Exception:
                 ctx.command_failed = True
                 raise
             finally:
@@ -1523,30 +1557,74 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
 
 # Decorators
 
+if TYPE_CHECKING:
+
+    class CommandDecorator(Protocol):
+        @overload
+        def __call__(
+            self, func: Callable[Concatenate[ContextT, P], Coro[T]]
+        ) -> Command[None, P, T]:
+            ...
+
+        @overload
+        def __call__(
+            self, func: Callable[Concatenate[CogT, ContextT, P], Coro[T]]
+        ) -> Command[CogT, P, T]:
+            ...
+
+    class GroupDecorator(Protocol):
+        @overload
+        def __call__(self, func: Callable[Concatenate[ContextT, P], Coro[T]]) -> Group[None, P, T]:
+            ...
+
+        @overload
+        def __call__(
+            self, func: Callable[Concatenate[CogT, ContextT, P], Coro[T]]
+        ) -> Group[CogT, P, T]:
+            ...
+
+
+# Small explanation regarding these overloads:
+# The overloads with the `cls` parameter need to be first,
+# as the other overload would otherwise match first even if `cls` is given.
+# To prevent the overloads with `cls` from matching everything, the parameter
+# cannot have a default value, which in turn means it has to be split into two
+# overloads, one with a positional `cls` parameter and one with a kwarg parameter,
+# as `name` should still be optional.
+
 
 @overload
 def command(
-    name: str = ...,
-    cls: Type[Command[CogT, P, T]] = ...,
-    **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]:
-    ...
-
-
-@overload
-def command(
-    name: str = ...,
-    cls: Type[CommandT] = ...,
+    name: str,
+    cls: Type[CommandT],
     **attrs: Any,
 ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
     ...
 
 
+@overload
+def command(
+    name: str = ...,
+    *,
+    cls: Type[CommandT],
+    **attrs: Any,
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
+    ...
+
+
+@overload
+def command(
+    name: str = ...,
+    **attrs: Any,
+) -> CommandDecorator:
+    ...
+
+
 def command(
     name: str = MISSING,
-    cls: Union[Type[Command[CogT, P, T]], Type[CommandT]] = MISSING,
+    cls: Type[Command[Any, Any, Any]] = MISSING,
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Union[Command[CogT, P, T], CommandT]]:
+) -> Any:
     """A decorator that transforms a function into a :class:`.Command`
     or if called with :func:`.group`, :class:`.Group`.
 
@@ -1579,39 +1657,46 @@ def command(
     if cls is MISSING:
         cls = Command
 
-    def decorator(
-        func: CommandCallback[CogT, ContextT, P, T]
-    ) -> Union[Command[CogT, P, T], CommandT]:
+    def decorator(func: CommandCallback[CogT, ContextT, P, T]) -> Command[Any, Any, Any]:
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
-        return cls(func, name=name, **attrs)  # type: ignore
+        return cls(func, name=name, **attrs)
 
     return decorator
 
 
 @overload
 def group(
-    name: str = ...,
-    cls: Type[Group[CogT, P, T]] = ...,
+    name: str,
+    cls: Type[GroupT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]:
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
     ...
 
 
 @overload
 def group(
     name: str = ...,
-    cls: Type[GroupT] = ...,
+    *,
+    cls: Type[GroupT],
     **attrs: Any,
 ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
     ...
 
 
+@overload
+def group(
+    name: str = ...,
+    **attrs: Any,
+) -> GroupDecorator:
+    ...
+
+
 def group(
     name: str = MISSING,
-    cls: Union[Type[Group[CogT, P, T]], Type[GroupT]] = MISSING,
+    cls: Type[Group[Any, Any, Any]] = MISSING,
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Union[Group[CogT, P, T], GroupT]]:
+) -> Any:
     """A decorator that transforms a function into a :class:`.Group`.
 
     This is similar to the :func:`.command` decorator but the ``cls``
@@ -1622,7 +1707,7 @@ def group(
     """
     if cls is MISSING:
         cls = Group
-    return command(name=name, cls=cls, **attrs)  # type: ignore
+    return command(name=name, cls=cls, **attrs)
 
 
 def check(predicate: Check) -> Callable[[T], T]:

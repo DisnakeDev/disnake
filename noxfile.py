@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import functools
 import re
+import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, List, Optional, TypeVar
+from typing import TYPE_CHECKING, Callable, List, TypeVar
 
 import nox
 
@@ -97,6 +98,16 @@ def install(
         session.install(*install_args)
 
 
+def is_venv() -> bool:
+    # https://stackoverflow.com/a/42580137/5080607
+    return (
+        # virtualenv < v20
+        hasattr(sys, "real_prefix")
+        # virtualenv >= v20, others
+        or sys.base_prefix != sys.prefix
+    )
+
+
 @nox.session()
 @depends("docs")
 def docs(session: nox.Session):
@@ -106,7 +117,7 @@ def docs(session: nox.Session):
     If running in CI, will build a production version of the documentation.
     """
     with session.chdir("docs"):
-        args = ["-b", "html", "-j", "auto", "-n", ".", "_build/html"]
+        args = ["-b", "html", "-n", ".", "_build/html", *session.posargs]
         if session.interactive:
             session.run(
                 "sphinx-autobuild",
@@ -114,6 +125,8 @@ def docs(session: nox.Session):
                 "_build",
                 "--watch",
                 "../disnake",
+                "--watch",
+                "../changelog",
                 "--port",
                 "8009",
                 *args,
@@ -200,6 +213,15 @@ def coverage(session: nox.Session):
 @nox.session(python=False)
 def setup(session: nox.Session):
     """Set up the external environment."""
+    if session.interactive and not is_venv():
+        confirm = input(
+            "It looks like you are about to install the dependencies into your *global* python environment."
+            " This may overwrite other versions of the dependencies that you already have installed, including disnake itself."
+            " Consider using a virtual environment (virtualenv/venv) instead. Continue anyway? [y/N]"
+        )
+        if confirm.lower() != "y":
+            session.error("Cancelled")
+
     session.log("Installing dependencies to the external environment.")
 
     if session.posargs:

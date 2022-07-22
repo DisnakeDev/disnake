@@ -1,0 +1,1 @@
+Handle optional :class:`Locale` instances (no longer create an enum value).

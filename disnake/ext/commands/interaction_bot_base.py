@@ -51,7 +51,6 @@ from disnake.enums import ApplicationCommandType
 from . import errors
 from .base_core import InvokableApplicationCommand
 from .common_bot_base import CommonBotBase
-from .context import Context
 from .ctx_menus_core import (
     InvokableMessageCommand,
     InvokableUserCommand,
@@ -62,12 +61,20 @@ from .errors import CommandRegistrationError
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
+    from typing_extensions import ParamSpec
+
     from disnake.i18n import LocalizedOptional
-    from disnake.interactions import ApplicationCommandInteraction
+    from disnake.interactions import (
+        ApplicationCommandInteraction,
+        MessageCommandInteraction,
+        UserCommandInteraction,
+    )
     from disnake.permissions import Permissions
 
     from ._types import Check, CoroFunc
-    from .base_core import CommandCallback, InteractionCommandCallback
+    from .base_core import CogT, CommandCallback, InteractionCommandCallback
+
+    P = ParamSpec("P")
 
 
 __all__ = ("InteractionBotBase",)
@@ -76,7 +83,6 @@ MISSING: Any = disnake.utils.MISSING
 
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
-CXT = TypeVar("CXT", bound="Context")
 
 
 _log = logging.getLogger(__name__)
@@ -226,7 +232,7 @@ class InteractionBotBase(CommonBotBase):
             The slash command passed is not an instance of :class:`InvokableSlashCommand`.
         """
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         if not isinstance(slash_command, InvokableSlashCommand):
             raise TypeError("The slash_command passed must be an instance of InvokableSlashCommand")
@@ -256,7 +262,7 @@ class InteractionBotBase(CommonBotBase):
             The user command passed is not an instance of :class:`InvokableUserCommand`.
         """
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         if not isinstance(user_command, InvokableUserCommand):
             raise TypeError("The user_command passed must be an instance of InvokableUserCommand")
@@ -286,7 +292,7 @@ class InteractionBotBase(CommonBotBase):
             The message command passed is not an instance of :class:`InvokableMessageCommand`.
         """
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         if not isinstance(message_command, InvokableMessageCommand):
             raise TypeError(
@@ -437,6 +443,7 @@ class InteractionBotBase(CommonBotBase):
         description: LocalizedOptional = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
         options: List[Option] = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
@@ -473,6 +480,12 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
+        nsfw: :class:`bool`
+            Whether this command can only be used in NSFW channels.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.6
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
@@ -505,6 +518,7 @@ class InteractionBotBase(CommonBotBase):
                 options=options,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
+                nsfw=nsfw,
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
@@ -522,11 +536,14 @@ class InteractionBotBase(CommonBotBase):
         name: LocalizedOptional = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = None,
         extras: Dict[str, Any] = None,
         **kwargs,
-    ) -> Callable[[InteractionCommandCallback], InvokableUserCommand]:
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
+    ]:
         """A shortcut decorator that invokes :func:`.user_command` and adds it to
         the internal command list.
 
@@ -547,6 +564,12 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
+        nsfw: :class:`bool`
+            Whether this command can only be used in NSFW channels.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.6
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
         guild_ids: Sequence[:class:`int`]
@@ -566,11 +589,14 @@ class InteractionBotBase(CommonBotBase):
             A decorator that converts the provided method into an InvokableUserCommand, adds it to the bot, then returns it.
         """
 
-        def decorator(func: InteractionCommandCallback) -> InvokableUserCommand:
+        def decorator(
+            func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+        ) -> InvokableUserCommand:
             result = user_command(
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
+                nsfw=nsfw,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -587,11 +613,14 @@ class InteractionBotBase(CommonBotBase):
         name: LocalizedOptional = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = None,
         extras: Dict[str, Any] = None,
         **kwargs,
-    ) -> Callable[[InteractionCommandCallback], InvokableMessageCommand]:
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
+    ]:
         """A shortcut decorator that invokes :func:`.message_command` and adds it to
         the internal command list.
 
@@ -612,6 +641,12 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
+        nsfw: :class:`bool`
+            Whether this command can only be used in NSFW channels.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.6
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
@@ -631,11 +666,14 @@ class InteractionBotBase(CommonBotBase):
             A decorator that converts the provided method into an InvokableMessageCommand, adds it to the bot, then returns it.
         """
 
-        def decorator(func: InteractionCommandCallback) -> InvokableMessageCommand:
+        def decorator(
+            func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+        ) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
+                nsfw=nsfw,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -674,11 +712,11 @@ class InteractionBotBase(CommonBotBase):
 
     async def _cache_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         _, guilds = self._ordered_unsynced_commands(self._test_guilds)
 
-        # Here we only cache global commands and commands from guilds that are spcified in the code.
+        # Here we only cache global commands and commands from guilds that are specified in the code.
         # They're collected from the "test_guilds" kwarg of commands.InteractionBotBase
         # and the "guild_ids" kwarg of the decorators. This is the only way to avoid rate limits.
         # If we cache guild commands from everywhere, the limit of invalid requests gets exhausted.
@@ -691,7 +729,7 @@ class InteractionBotBase(CommonBotBase):
             self._connection._global_application_commands = {
                 command.id: command for command in commands
             }
-        except Exception:
+        except (disnake.HTTPException, TypeError):
             pass
         for guild_id in guilds:
             try:
@@ -700,12 +738,12 @@ class InteractionBotBase(CommonBotBase):
                     self._connection._guild_application_commands[guild_id] = {
                         command.id: command for command in commands
                     }
-            except Exception:
+            except (disnake.HTTPException, TypeError):
                 pass
 
     async def _sync_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         if not self._sync_commands or self._is_closed or self.loop.is_closed():
             return
@@ -779,7 +817,7 @@ class InteractionBotBase(CommonBotBase):
 
     async def _prepare_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"Command sync is only possible in disnake.Client subclasses")
+            raise NotImplementedError("Command sync is only possible in disnake.Client subclasses")
 
         self._sync_queued = True
         await self.wait_until_first_connect()
@@ -789,7 +827,7 @@ class InteractionBotBase(CommonBotBase):
 
     async def _delayed_command_sync(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         if (
             not self._sync_commands
@@ -808,7 +846,7 @@ class InteractionBotBase(CommonBotBase):
 
     def _schedule_app_command_preparation(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"Command sync is only possible in disnake.Client subclasses")
+            raise NotImplementedError("Command sync is only possible in disnake.Client subclasses")
 
         self.loop.create_task(
             self._prepare_application_commands(), name="disnake: app_command_preparation"
@@ -816,7 +854,7 @@ class InteractionBotBase(CommonBotBase):
 
     def _schedule_delayed_command_sync(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError(f"This method is only usable in disnake.Client subclasses")
+            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
 
         self.loop.create_task(self._delayed_command_sync(), name="disnake: delayed_command_sync")
 
@@ -972,23 +1010,25 @@ class InteractionBotBase(CommonBotBase):
             Whether this check was for message commands.
         """
         if slash_commands:
-            l = self._slash_command_check_once if call_once else self._slash_command_checks
+            check_list = self._slash_command_check_once if call_once else self._slash_command_checks
             try:
-                l.remove(func)
+                check_list.remove(func)
             except ValueError:
                 pass
 
         if user_commands:
-            l = self._user_command_check_once if call_once else self._user_command_checks
+            check_list = self._user_command_check_once if call_once else self._user_command_checks
             try:
-                l.remove(func)
+                check_list.remove(func)
             except ValueError:
                 pass
 
         if message_commands:
-            l = self._message_command_check_once if call_once else self._message_command_checks
+            check_list = (
+                self._message_command_check_once if call_once else self._message_command_checks
+            )
             try:
-                l.remove(func)
+                check_list.remove(func)
             except ValueError:
                 pass
 

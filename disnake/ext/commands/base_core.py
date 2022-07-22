@@ -26,19 +26,7 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Coroutine,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
 
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
@@ -46,15 +34,15 @@ from disnake.permissions import Permissions
 from disnake.utils import async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
-from .errors import *
+from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
+    from typing_extensions import Concatenate, ParamSpec, Self
 
     from disnake.interactions import ApplicationCommandInteraction
 
-    from ._types import Check, Error, Hook
-    from .cog import Cog, CogT
+    from ._types import Check, Coro, Error, Hook
+    from .cog import Cog
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
@@ -62,10 +50,10 @@ if TYPE_CHECKING:
 
     P = ParamSpec("P")
 
-    CommandCallback = Callable[..., Coroutine]
+    CommandCallback = Callable[..., Coro[Any]]
     InteractionCommandCallback = Union[
-        Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-        Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
+        Callable[Concatenate["CogT", ApplicationCommandInteractionT, P], Coro[Any]],
+        Callable[Concatenate[ApplicationCommandInteractionT, P], Coro[Any]],
     ]
 
 
@@ -144,7 +132,7 @@ class InvokableApplicationCommand(ABC):
     __original_kwargs__: Dict[str, Any]
     body: ApplicationCommand
 
-    def __new__(cls, *args: Any, **kwargs: Any) -> InvokableApplicationCommand:
+    def __new__(cls, *args: Any, **kwargs: Any) -> Self:
         self = super().__new__(cls)
         # todo: refactor to not require None and change this to be based on the presence of a kwarg
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
@@ -336,7 +324,7 @@ class InvokableApplicationCommand(ABC):
         try:
             self._prepare_cooldowns(inter)
             await self.call_before_hooks(inter)
-        except:
+        except Exception:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)  # type: ignore
             raise

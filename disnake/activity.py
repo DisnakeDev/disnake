@@ -255,7 +255,7 @@ class Activity(BaseActivity):
             ("session_id", self.session_id),
             ("emoji", self.emoji),
         )
-        inner = " ".join("%s=%r" % t for t in attrs)
+        inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<Activity {inner}>"
 
     def to_dict(self) -> Dict[str, Any]:
@@ -305,7 +305,7 @@ class Activity(BaseActivity):
         except KeyError:
             return None
         else:
-            return Asset.BASE + f"/app-assets/{self.application_id}/{large_image}.png"
+            return f"{Asset.BASE}/app-assets/{self.application_id}/{large_image}.png"
 
     @property
     def small_image_url(self) -> Optional[str]:
@@ -318,7 +318,7 @@ class Activity(BaseActivity):
         except KeyError:
             return None
         else:
-            return Asset.BASE + f"/app-assets/{self.application_id}/{small_image}.png"
+            return f"{Asset.BASE}/app-assets/{self.application_id}/{small_image}.png"
 
     @property
     def large_image_text(self) -> Optional[str]:
@@ -416,13 +416,7 @@ class Game(BaseActivity):
         if self._end:
             timestamps["end"] = self._end
 
-        # fmt: off
-        return {
-            'type': ActivityType.playing,
-            'name': str(self.name),
-            'timestamps': timestamps
-        }
-        # fmt: on
+        return {"type": ActivityType.playing, "name": str(self.name), "timestamps": timestamps}
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, Game) and other.name == self.name
@@ -519,14 +513,12 @@ class Streaming(BaseActivity):
             return name[7:] if name[:7] == "twitch:" else None
 
     def to_dict(self) -> Dict[str, Any]:
-        # fmt: off
         ret: Dict[str, Any] = {
-            'type': ActivityType.streaming,
-            'name': str(self.name),
-            'url': str(self.url),
-            'assets': self.assets
+            "type": ActivityType.streaming,
+            "name": str(self.name),
+            "url": str(self.url),
+            "assets": self.assets,
         }
-        # fmt: on
         if self.details:
             ret["details"] = self.details
         return ret
@@ -687,7 +679,7 @@ class Spotify:
         if large_image[:8] != "spotify:":
             return ""
         album_image_id = large_image[8:]
-        return "https://i.scdn.co/image/" + album_image_id
+        return f"https://i.scdn.co/image/{album_image_id}"
 
     @property
     def track_id(self) -> str:

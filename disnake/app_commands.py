@@ -42,6 +42,8 @@ from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .i18n import LocalizationProtocol, LocalizationValue, LocalizedOptional, LocalizedRequired
     from .state import ConnectionState
     from .types.interactions import (
@@ -206,6 +208,15 @@ class Option:
         The minimum value permitted.
     max_value: Union[:class:`int`, :class:`float`]
         The maximum value permitted.
+    min_length: :class:`int`
+        The minimum length for this option if this is a string option.
+
+        .. versionadded:: 2.6
+
+    max_length: :class:`int`
+        The maximum length for this option if this is a string option.
+
+        .. versionadded:: 2.6
     """
 
     __slots__ = (
@@ -221,6 +232,8 @@ class Option:
         "max_value",
         "name_localizations",
         "description_localizations",
+        "min_length",
+        "max_length",
     )
 
     def __init__(
@@ -235,6 +248,8 @@ class Option:
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
+        min_length: int = None,
+        max_length: int = None,
     ):
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
@@ -256,6 +271,9 @@ class Option:
 
         self.min_value: Optional[float] = min_value
         self.max_value: Optional[float] = max_value
+
+        self.min_length: Optional[int] = min_length
+        self.max_length: Optional[int] = max_length
 
         if channel_types is not None and not all(isinstance(t, ChannelType) for t in channel_types):
             raise TypeError("channel_types must be a list of `ChannelType`s")
@@ -283,7 +301,8 @@ class Option:
         return (
             f"<Option name={self.name!r} description={self.description!r}"
             f" type={self.type!r} required={self.required!r} choices={self.choices!r}"
-            f" options={self.options!r} min_value={self.min_value!r} max_value={self.max_value!r}>"
+            f" options={self.options!r} min_value={self.min_value!r} max_value={self.max_value!r}"
+            f" min_length={self.min_length!r} max_length={self.max_length!r}>"
         )
 
     def __eq__(self, other) -> bool:
@@ -298,6 +317,8 @@ class Option:
             and self.autocomplete == other.autocomplete
             and self.min_value == other.min_value
             and self.max_value == other.max_value
+            and self.min_length == other.min_length
+            and self.max_length == other.max_length
             and self.name_localizations == other.name_localizations
             and self.description_localizations == other.description_localizations
         )
@@ -323,6 +344,8 @@ class Option:
             autocomplete=data.get("autocomplete", False),
             min_value=data.get("min_value"),
             max_value=data.get("max_value"),
+            min_length=data.get("min_length"),
+            max_length=data.get("max_length"),
         )
 
     def add_choice(
@@ -352,6 +375,8 @@ class Option:
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
+        min_length: int = None,
+        max_length: int = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`."""
@@ -368,6 +393,8 @@ class Option:
                 autocomplete=autocomplete,
                 min_value=min_value,
                 max_value=max_value,
+                min_length=min_length,
+                max_length=max_length,
             )
         )
 
@@ -391,6 +418,10 @@ class Option:
             payload["min_value"] = self.min_value
         if self.max_value is not None:
             payload["max_value"] = self.max_value
+        if self.min_length is not None:
+            payload["min_length"] = self.min_length
+        if self.max_length is not None:
+            payload["max_length"] = self.max_length
         if (loc := self.name_localizations.data) is not None:
             payload["name_localizations"] = loc
         if (loc := self.description_localizations.data) is not None:
@@ -437,6 +468,12 @@ class ApplicationCommand(ABC):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
+
+    nsfw: :class:`bool`
+        Whether this command can only be used in NSFW channels.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.6
     """
 
     __repr_info__: ClassVar[Tuple[str, ...]] = (
@@ -444,6 +481,7 @@ class ApplicationCommand(ABC):
         "name",
         "dm_permission",
         "default_member_permisions",
+        "nsfw",
     )
 
     def __init__(
@@ -452,12 +490,14 @@ class ApplicationCommand(ABC):
         name: LocalizedRequired,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
 
         name_loc = Localized._cast(name, True)
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
+        self.nsfw: bool = False if nsfw is None else nsfw
 
         self.dm_permission: bool = True if dm_permission is None else dm_permission
 
@@ -507,6 +547,7 @@ class ApplicationCommand(ABC):
             self.type == other.type
             and self.name == other.name
             and self.name_localizations == other.name_localizations
+            and self.nsfw == other.nsfw
             and self._default_member_permissions == other._default_member_permissions
             # ignore `dm_permission` if comparing guild commands
             and (
@@ -525,6 +566,7 @@ class ApplicationCommand(ABC):
             "name": self.name,
             "dm_permission": self.dm_permission,
             "default_permission": True,
+            "nsfw": self.nsfw,
         }
 
         if self._default_member_permissions is None:
@@ -570,6 +612,12 @@ class UserCommand(ApplicationCommand):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
+
+    nsfw: :class:`bool`
+        Whether this command can only be used in NSFW channels.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.6
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -579,12 +627,14 @@ class UserCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
     ):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
         )
 
 
@@ -608,6 +658,11 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
+    nsfw: :class:`bool`
+        Whether this command can only be used in NSFW channels.
+
+        .. versionadded:: 2.6
+
     id: :class:`int`
         The user command's ID.
     application_id: :class:`int`
@@ -621,7 +676,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     __repr_info__ = UserCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> APIUserCommand:
+    def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.user:
             raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
@@ -630,6 +685,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
             name=Localized(data["name"], data=data.get("name_localizations")),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
+            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self
@@ -653,6 +709,12 @@ class MessageCommand(ApplicationCommand):
         Defaults to ``True``.
 
         .. versionadded:: 2.5
+
+    nsfw: :class:`bool`
+        Whether this command can only be used in NSFW channels.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.6
     """
 
     __repr_info__ = ("name", "dm_permission", "default_member_permissions")
@@ -662,12 +724,14 @@ class MessageCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
     ):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
         )
 
 
@@ -691,6 +755,11 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
+    nsfw: :class:`bool`
+        Whether this command can only be used in NSFW channels.
+
+        .. versionadded:: 2.6
+
     id: :class:`int`
         The message command's ID.
     application_id: :class:`int`
@@ -704,7 +773,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     __repr_info__ = MessageCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> APIMessageCommand:
+    def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.message:
             raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
@@ -713,6 +782,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
             name=Localized(data["name"], data=data.get("name_localizations")),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
+            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self
@@ -744,6 +814,12 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
+    nsfw: :class:`bool`
+        Whether this command can only be used in NSFW channels.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.6
+
     options: List[:class:`Option`]
         The list of options the slash command has.
     """
@@ -763,12 +839,14 @@ class SlashCommand(ApplicationCommand):
         options: List[Option] = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
     ):
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
         )
         _validate_name(self.name)
 
@@ -798,6 +876,8 @@ class SlashCommand(ApplicationCommand):
         autocomplete: bool = False,
         min_value: float = None,
         max_value: float = None,
+        min_length: int = None,
+        max_length: int = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`
@@ -814,6 +894,8 @@ class SlashCommand(ApplicationCommand):
                 autocomplete=autocomplete,
                 min_value=min_value,
                 max_value=max_value,
+                min_length=min_length,
+                max_length=max_length,
             )
         )
 
@@ -864,6 +946,11 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
+    nsfw: :class:`bool`
+        Whether this command can only be used in NSFW channels.
+
+        .. versionadded:: 2.6
+
     id: :class:`int`
         The slash command's ID.
     options: List[:class:`Option`]
@@ -879,7 +966,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     __repr_info__ = SlashCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandPayload) -> APISlashCommand:
+    def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.chat_input:
             raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
@@ -892,6 +979,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             ),
             dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
+            nsfw=data.get("nsfw"),
         )
         self._update_common(data)
         return self

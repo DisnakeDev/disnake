@@ -45,6 +45,8 @@ from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, get_slots
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .emoji import Emoji
     from .types.components import (
         ActionRow as ActionRowPayload,
@@ -107,8 +109,8 @@ class Component:
         return f"<{self.__class__.__name__} {attrs}>"
 
     @classmethod
-    def _raw_construct(cls: Type[C], **kwargs) -> C:
-        self: C = cls.__new__(cls)
+    def _raw_construct(cls, **kwargs) -> Self:
+        self = cls.__new__(cls)
         for slot in get_slots(cls):
             try:
                 value = kwargs[slot]
@@ -143,9 +145,9 @@ class ActionRow(Component, Generic[ComponentT]):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: ComponentPayload):
+    def __init__(self, data: ActionRowPayload):
         self.type: ComponentType = try_enum(ComponentType, data["type"])
-        self.children: List[ComponentT] = [  # type: ignore
+        self.children: List[ComponentT] = [
             _component_factory(d) for d in data.get("components", [])
         ]
 

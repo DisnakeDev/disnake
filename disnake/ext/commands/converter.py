@@ -49,7 +49,30 @@ from typing import (
 import disnake
 
 from .context import AnyContext, Context
-from .errors import *
+from .errors import (
+    BadArgument,
+    BadBoolArgument,
+    BadColourArgument,
+    BadInviteArgument,
+    BadLiteralArgument,
+    BadUnionArgument,
+    ChannelNotFound,
+    ChannelNotReadable,
+    CommandError,
+    ConversionError,
+    EmojiNotFound,
+    GuildNotFound,
+    GuildScheduledEventNotFound,
+    GuildStickerNotFound,
+    MemberNotFound,
+    MessageNotFound,
+    NoPrivateMessage,
+    ObjectNotFound,
+    PartialEmojiConversionFailure,
+    RoleNotFound,
+    ThreadNotFound,
+    UserNotFound,
+)
 
 if TYPE_CHECKING:
     from disnake.abc import MessageableChannel
@@ -1082,7 +1105,7 @@ class Greedy(List[T]):
 
         @commands.command()
         async def test(ctx, numbers: Greedy[int], reason: str):
-            await ctx.send("numbers: {}, reason: {}".format(numbers, reason))
+            await ctx.send("numbers: {0}, reason: {1}".format(numbers, reason))
 
     An invocation of ``[p]test 1 2 3 4 5 6 hello`` would pass ``numbers`` with
     ``[1, 2, 3, 4, 5, 6]`` and ``reason`` with ``hello``.
@@ -1193,7 +1216,7 @@ async def _actual_conversion(
             if inspect.ismethod(converter.convert):
                 return await converter.convert(ctx, argument)
             else:
-                return await converter().convert(ctx, argument)  # type: ignore
+                return await converter().convert(ctx, argument)
         elif isinstance(converter, Converter):
             return await converter.convert(ctx, argument)  # type: ignore
     except CommandError:
@@ -1202,7 +1225,7 @@ async def _actual_conversion(
         raise ConversionError(converter, exc) from exc
 
     try:
-        return converter(argument)  # type: ignore
+        return converter(argument)
     except CommandError:
         raise
     except Exception as exc:

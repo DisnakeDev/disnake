@@ -41,7 +41,7 @@ from typing import (
     cast,
 )
 
-from . import abc, enums, utils
+from . import abc, enums, flags, utils
 from .app_commands import ApplicationCommandPermissions
 from .asset import Asset
 from .colour import Colour
@@ -64,6 +64,7 @@ if TYPE_CHECKING:
     from .emoji import Emoji
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
+    from .integrations import PartialIntegration
     from .member import Member
     from .role import Role
     from .stage_instance import StageInstance
@@ -78,6 +79,7 @@ if TYPE_CHECKING:
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
     from .user import User
+    from .webhook import Webhook
 
 
 def _transform_permissions(entry: AuditLogEntry, data: str) -> Permissions:
@@ -143,6 +145,8 @@ def _transform_overwrites(
 def _transform_icon(entry: AuditLogEntry, data: Optional[str]) -> Optional[Asset]:
     if data is None:
         return None
+    if entry.action.name.startswith("role_"):
+        return Asset._from_role_icon(entry._state, entry._target_id, data)  # type: ignore
     return Asset._from_guild_icon(entry._state, entry.guild.id, data)
 
 
@@ -161,12 +165,22 @@ def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]
     return _transform
 
 
-T = TypeVar("T", bound=enums.Enum)
+EnumT = TypeVar("EnumT", bound=enums.Enum)
+FlagsT = TypeVar("FlagsT", bound=flags.BaseFlags)
 
 
-def _enum_transformer(enum: Type[T]) -> Callable[[AuditLogEntry, int], T]:
-    def _transform(entry: AuditLogEntry, data: int) -> T:
+def _enum_transformer(enum: Type[EnumT]) -> Callable[[AuditLogEntry, int], EnumT]:
+    def _transform(entry: AuditLogEntry, data: int) -> EnumT:
         return enums.try_enum(enum, data)
+
+    return _transform
+
+
+def _flags_transformer(
+    flags_type: Type[FlagsT],
+) -> Callable[[AuditLogEntry, Optional[int]], Optional[FlagsT]]:
+    def _transform(entry: AuditLogEntry, data: Optional[int]) -> Optional[FlagsT]:
+        return flags_type._from_value(data) if data is not None else None
 
     return _transform
 
@@ -216,7 +230,7 @@ class AuditLogDiff:
         yield from self.__dict__.items()
 
     def __repr__(self) -> str:
-        values = " ".join("%s=%r" % item for item in self.__dict__.items())
+        values = " ".join(f"{k!s}={v!r}" for k, v in self.__dict__.items())
         return f"<AuditLogDiff {values}>"
 
     if TYPE_CHECKING:
@@ -234,41 +248,44 @@ Transformer = Callable[["AuditLogEntry", Any], Any]
 class AuditLogChanges:
     # fmt: off
     TRANSFORMERS: ClassVar[Dict[str, Tuple[Optional[str], Optional[Transformer]]]] = {
-        'verification_level':            (None, _enum_transformer(enums.VerificationLevel)),
-        'explicit_content_filter':       (None, _enum_transformer(enums.ContentFilter)),
-        'allow':                         (None, _transform_permissions),
-        'deny':                          (None, _transform_permissions),
-        'permissions':                   (None, _transform_permissions),
-        'id':                            (None, _transform_snowflake),
-        'application_id':                (None, _transform_snowflake),
-        'color':                         ('colour', _transform_color),
-        'owner_id':                      ('owner', _transform_member_id),
-        'inviter_id':                    ('inviter', _transform_member_id),
-        'channel_id':                    ('channel', _transform_channel),
-        'afk_channel_id':                ('afk_channel', _transform_channel),
-        'system_channel_id':             ('system_channel', _transform_channel),
-        'widget_channel_id':             ('widget_channel', _transform_channel),
-        'rules_channel_id':              ('rules_channel', _transform_channel),
-        'public_updates_channel_id':     ('public_updates_channel', _transform_channel),
-        'permission_overwrites':         ('overwrites', _transform_overwrites),
-        'splash_hash':                   ('splash', _guild_hash_transformer('splashes')),
-        'banner_hash':                   ('banner', _guild_hash_transformer('banners')),
-        'discovery_splash_hash':         ('discovery_splash', _guild_hash_transformer('discovery-splashes')),
-        'icon_hash':                     ('icon', _transform_icon),
-        'avatar_hash':                   ('avatar', _transform_avatar),
-        'rate_limit_per_user':           ('slowmode_delay', None),
-        'guild_id':                      ('guild', _transform_guild_id),
-        'tags':                          ('emoji', None),
-        'default_message_notifications': ('default_notifications', _enum_transformer(enums.NotificationLevel)),
-        'communication_disabled_until':  ('timeout', _transform_datetime),
-        'image_hash':                    ('image', _transform_guild_scheduled_event_image),
-        'video_quality_mode':            (None, _enum_transformer(enums.VideoQualityMode)),
-        'preferred_locale':              (None, _enum_transformer(enums.Locale)),
-        'privacy_level':                 (None, _transform_privacy_level),
-        'format_type':                   (None, _enum_transformer(enums.StickerFormatType)),
-        'entity_type':                   (None, _enum_transformer(enums.GuildScheduledEventEntityType)),
-        'status':                        (None, _enum_transformer(enums.GuildScheduledEventStatus)),
-        'type':                          (None, _transform_type),
+        "verification_level":            (None, _enum_transformer(enums.VerificationLevel)),
+        "explicit_content_filter":       (None, _enum_transformer(enums.ContentFilter)),
+        "allow":                         (None, _transform_permissions),
+        "deny":                          (None, _transform_permissions),
+        "permissions":                   (None, _transform_permissions),
+        "id":                            (None, _transform_snowflake),
+        "application_id":                (None, _transform_snowflake),
+        "color":                         ("colour", _transform_color),
+        "owner_id":                      ("owner", _transform_member_id),
+        "inviter_id":                    ("inviter", _transform_member_id),
+        "channel_id":                    ("channel", _transform_channel),
+        "afk_channel_id":                ("afk_channel", _transform_channel),
+        "system_channel_id":             ("system_channel", _transform_channel),
+        "widget_channel_id":             ("widget_channel", _transform_channel),
+        "rules_channel_id":              ("rules_channel", _transform_channel),
+        "public_updates_channel_id":     ("public_updates_channel", _transform_channel),
+        "permission_overwrites":         ("overwrites", _transform_overwrites),
+        "splash_hash":                   ("splash", _guild_hash_transformer("splashes")),
+        "banner_hash":                   ("banner", _guild_hash_transformer("banners")),
+        "discovery_splash_hash":         ("discovery_splash", _guild_hash_transformer("discovery-splashes")),
+        "icon_hash":                     ("icon", _transform_icon),
+        "avatar_hash":                   ("avatar", _transform_avatar),
+        "rate_limit_per_user":           ("slowmode_delay", None),
+        "guild_id":                      ("guild", _transform_guild_id),
+        "tags":                          ("emoji", None),
+        "unicode_emoji":                 ("emoji", None),
+        "default_message_notifications": ("default_notifications", _enum_transformer(enums.NotificationLevel)),
+        "communication_disabled_until":  ("timeout", _transform_datetime),
+        "image_hash":                    ("image", _transform_guild_scheduled_event_image),
+        "video_quality_mode":            (None, _enum_transformer(enums.VideoQualityMode)),
+        "preferred_locale":              (None, _enum_transformer(enums.Locale)),
+        "privacy_level":                 (None, _transform_privacy_level),
+        "format_type":                   (None, _enum_transformer(enums.StickerFormatType)),
+        "entity_type":                   (None, _enum_transformer(enums.GuildScheduledEventEntityType)),
+        "status":                        (None, _enum_transformer(enums.GuildScheduledEventStatus)),
+        "type":                          (None, _transform_type),
+        "flags":                         (None, _flags_transformer(flags.ChannelFlags)),
+        "system_channel_flags":          (None, _flags_transformer(flags.SystemChannelFlags)),
     }
     # fmt: on
 
@@ -343,7 +360,7 @@ class AuditLogChanges:
         elem: List[RolePayload],
     ) -> None:
         if not hasattr(first, "roles"):
-            setattr(first, "roles", [])
+            first.roles = []
 
         data = []
         g: Guild = entry.guild
@@ -358,7 +375,7 @@ class AuditLogChanges:
 
             data.append(role)
 
-        setattr(second, "roles", data)
+        second.roles = data
 
     def _handle_command_permissions(
         self,
@@ -450,10 +467,28 @@ class AuditLogEntry(Hashable):
         The reason this action was done.
     """
 
-    def __init__(self, *, users: Dict[int, User], data: AuditLogEntryPayload, guild: Guild):
+    def __init__(
+        self,
+        *,
+        data: AuditLogEntryPayload,
+        guild: Guild,
+        application_commands: Dict[int, APIApplicationCommand],
+        guild_scheduled_events: Dict[int, GuildScheduledEvent],
+        integrations: Dict[int, PartialIntegration],
+        threads: Dict[int, Thread],
+        users: Dict[int, User],
+        webhooks: Dict[int, Webhook],
+    ):
         self._state = guild._state
         self.guild = guild
+
+        self._application_commands = application_commands
+        self._guild_scheduled_events = guild_scheduled_events
+        self._integrations = integrations
+        self._threads = threads
         self._users = users
+        self._webhooks = webhooks
+
         self._from_data(data)
 
     def _from_data(self, data: AuditLogEntryPayload) -> None:
@@ -462,53 +497,59 @@ class AuditLogEntry(Hashable):
 
         # this key is technically not usually present
         self.reason = data.get("reason")
-        self.extra = data.get("options")
+        self.extra = extra = data.get("options")
 
-        if isinstance(self.action, enums.AuditLogAction) and self.extra:
+        if isinstance(self.action, enums.AuditLogAction) and extra:
             if self.action is enums.AuditLogAction.member_prune:
                 # member prune has two keys with useful information
                 self.extra = type(
-                    "_AuditLogProxy", (), {k: int(v) for k, v in self.extra.items()}
+                    "_AuditLogProxy", (), {k: int(v) for k, v in extra.items()}  # type: ignore
                 )()
             elif (
                 self.action is enums.AuditLogAction.member_move
                 or self.action is enums.AuditLogAction.message_delete
             ):
-                channel_id = int(self.extra["channel_id"])
+                channel_id = int(extra["channel_id"])
                 elems = {
-                    "count": int(self.extra["count"]),
+                    "count": int(extra["count"]),
                     "channel": self.guild.get_channel(channel_id) or Object(id=channel_id),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action is enums.AuditLogAction.member_disconnect:
                 # The member disconnect action has a dict with some information
                 elems = {
-                    "count": int(self.extra["count"]),
+                    "count": int(extra["count"]),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action.name.endswith("pin"):
                 # the pin actions have a dict with some information
-                channel_id = int(self.extra["channel_id"])
+                channel_id = int(extra["channel_id"])
                 elems = {
                     "channel": self.guild.get_channel(channel_id) or Object(id=channel_id),
-                    "message_id": int(self.extra["message_id"]),
+                    "message_id": int(extra["message_id"]),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
             elif self.action.name.startswith("overwrite_"):
                 # the overwrite_ actions have a dict with some information
-                instance_id = int(self.extra["id"])
-                the_type = self.extra.get("type")
+                instance_id = int(extra["id"])
+                the_type = extra.get("type")
                 if the_type == "1":
                     self.extra = self._get_member(instance_id)
                 elif the_type == "0":
                     role = self.guild.get_role(instance_id)
                     if role is None:
                         role = Object(id=instance_id)
-                        role.name = self.extra.get("role_name")  # type: ignore
+                        role.name = extra.get("role_name")  # type: ignore
                     self.extra = role
             elif self.action.name.startswith("stage_instance"):
-                channel_id = int(self.extra["channel_id"])
+                channel_id = int(extra["channel_id"])
                 elems = {"channel": self.guild.get_channel(channel_id) or Object(id=channel_id)}
+                self.extra = type("_AuditLogProxy", (), elems)()
+            elif self.action is enums.AuditLogAction.application_command_permission_update:
+                app_id = int(extra["application_id"])
+                elems = {
+                    "integration": self._get_integration_by_application_id(app_id) or Object(app_id)
+                }
                 self.extra = type("_AuditLogProxy", (), elems)()
 
         self.extra: Any
@@ -536,6 +577,17 @@ class AuditLogEntry(Hashable):
     def _get_member(self, user_id: int) -> Union[Member, User, None]:
         return self.guild.get_member(user_id) or self._users.get(user_id)
 
+    def _get_integration_by_application_id(
+        self, application_id: int
+    ) -> Optional[PartialIntegration]:
+        if not application_id:
+            return None
+
+        for integration in self._integrations.values():
+            if integration.application_id == application_id:
+                return integration
+        return None
+
     def __repr__(self) -> str:
         return f"<AuditLogEntry id={self.id} action={self.action} user={self.user!r}>"
 
@@ -554,7 +606,9 @@ class AuditLogEntry(Hashable):
         User,
         Role,
         Invite,
+        Webhook,
         Emoji,
+        PartialIntegration,
         StageInstance,
         GuildSticker,
         Thread,
@@ -567,7 +621,7 @@ class AuditLogEntry(Hashable):
             return Object(id=self._target_id) if self._target_id else None
 
         try:
-            converter = getattr(self, "_convert_target_" + self.action.target_type)
+            converter = getattr(self, f"_convert_target_{self.action.target_type}")
         except AttributeError:
             return Object(id=self._target_id) if self._target_id else None
         else:
@@ -627,11 +681,17 @@ class AuditLogEntry(Hashable):
             pass
         return obj
 
+    def _convert_target_webhook(self, target_id: int) -> Union[Webhook, Object]:
+        return self._webhooks.get(target_id) or Object(id=target_id)
+
     def _convert_target_emoji(self, target_id: int) -> Union[Emoji, Object]:
         return self._state.get_emoji(target_id) or Object(id=target_id)
 
     def _convert_target_message(self, target_id: int) -> Union[Member, User, None]:
         return self._get_member(target_id)
+
+    def _convert_target_integration(self, target_id: int) -> Union[PartialIntegration, Object]:
+        return self._integrations.get(target_id) or Object(id=target_id)
 
     def _convert_target_stage_instance(self, target_id: int) -> Union[StageInstance, Object]:
         return self.guild.get_stage_instance(target_id) or Object(id=target_id)
@@ -640,18 +700,34 @@ class AuditLogEntry(Hashable):
         return self._state.get_sticker(target_id) or Object(id=target_id)
 
     def _convert_target_thread(self, target_id: int) -> Union[Thread, Object]:
-        return self.guild.get_thread(target_id) or Object(id=target_id)
+        return (
+            self.guild.get_thread(target_id) or self._threads.get(target_id) or Object(id=target_id)
+        )
 
     def _convert_target_guild_scheduled_event(
         self, target_id: int
     ) -> Union[GuildScheduledEvent, Object]:
-        return self.guild.get_scheduled_event(target_id) or Object(id=target_id)
-
-    def _convert_target_application_command(
-        self, target_id: int
-    ) -> Union[APIApplicationCommand, Object]:
         return (
-            self._state._get_guild_application_command(self.guild.id, target_id)
-            or self._state._get_global_application_command(target_id)
+            self.guild.get_scheduled_event(target_id)
+            or self._guild_scheduled_events.get(target_id)
             or Object(id=target_id)
         )
+
+    def _convert_target_application_command_or_integration(
+        self, target_id: int
+    ) -> Union[APIApplicationCommand, PartialIntegration, Object]:
+        # try application command
+        if target := (
+            self._state._get_guild_application_command(self.guild.id, target_id)
+            or self._state._get_global_application_command(target_id)
+            or self._application_commands.get(target_id)
+        ):
+            return target
+
+        # permissions may also be changed for the entire application,
+        # however the target ID is the application ID, not the integration ID
+        if target := self._get_integration_by_application_id(target_id):
+            return target
+
+        # fall back to object
+        return Object(id=target_id)

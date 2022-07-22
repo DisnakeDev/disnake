@@ -1449,7 +1449,7 @@ class AuditLogAction(int, Enum):
         elif v < 113:
             return "thread"
         elif v < 122:
-            return "application_command"
+            return "application_command_or_integration"
         else:
             return None
 
@@ -1916,6 +1916,11 @@ class GuildScheduledEventStatus(int, Enum):
     """Represents a completed event."""
     canceled = 4
     """Represents a canceled event."""
+    cancelled = 4
+    """An alias for :attr:`canceled`
+
+    .. versionadded:: 2.6
+    """
 
 
 class GuildScheduledEventPrivacyLevel(int, Enum):
@@ -2060,7 +2065,7 @@ def enum_if_int(cls: Type[EnumT], val: Any) -> EnumT:
 
     If it fails it returns a proxy invalid value instead.
     """
-    return try_enum(cls, val) if isinstance(val, int) else val  # type: ignore
+    return try_enum(cls, val) if isinstance(val, int) else val
 
 
 def try_enum_to_int(val: Any) -> Any:

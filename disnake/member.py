@@ -39,8 +39,6 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
-    Type,
-    TypeVar,
     Union,
     cast,
     overload,
@@ -64,8 +62,9 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .abc import Snowflake
-    from .asset import Asset
     from .channel import DMChannel, StageChannel, VoiceChannel
     from .flags import PublicUserFlags
     from .guild import Guild
@@ -174,15 +173,15 @@ class VoiceState:
         self.channel: Optional[VocalGuildChannel] = channel
 
     def __repr__(self) -> str:
-        attrs = [
+        attrs = (
             ("self_mute", self.self_mute),
             ("self_deaf", self.self_deaf),
             ("self_stream", self.self_stream),
             ("suppress", self.suppress),
             ("requested_to_speak_at", self.requested_to_speak_at),
             ("channel", self.channel),
-        ]
-        inner = " ".join("%s=%r" % t for t in attrs)
+        )
+        inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{self.__class__.__name__} {inner}>"
 
 
@@ -199,7 +198,7 @@ def flatten_user(cls):
         # if it's a slotted attribute or a property, redirect it
         # slotted members are implemented as member_descriptors in Type.__dict__
         if not hasattr(value, "__annotations__"):
-            getter = attrgetter("_user." + attr)
+            getter = attrgetter(f"_user.{attr}")
             setattr(cls, attr, property(getter, doc=f"Equivalent to :attr:`User.{attr}`"))
         else:
             # Technically, this can also use attrgetter
@@ -208,7 +207,7 @@ def flatten_user(cls):
             # probably a member function by now
             def generate_function(x):
                 # We want sphinx to properly show coroutine functions as coroutines
-                if asyncio.iscoroutinefunction(value):
+                if asyncio.iscoroutinefunction(value):  # noqa: B023
 
                     async def general(self, *args, **kwargs):  # type: ignore
                         return await getattr(self._user, x)(*args, **kwargs)
@@ -226,9 +225,6 @@ def flatten_user(cls):
             setattr(cls, attr, func)
 
     return cls
-
-
-M = TypeVar("M", bound="Member")
 
 
 @flatten_user
@@ -356,7 +352,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         )
         self._roles: utils.SnowflakeList = utils.SnowflakeList(map(int, data["roles"]))
         self._client_status: Dict[Optional[str], str] = {None: "offline"}
-        self.activities: Tuple[ActivityTypes, ...] = tuple()
+        self.activities: Tuple[ActivityTypes, ...] = ()
         self.nick: Optional[str] = data.get("nick")
         self.pending: bool = data.get("pending", False)
         self._avatar: Optional[str] = data.get("avatar")
@@ -382,7 +378,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         return hash(self._user)
 
     @classmethod
-    def _from_message(cls: Type[M], *, message: Message, data: MemberPayload) -> M:
+    def _from_message(cls, *, message: Message, data: MemberPayload) -> Self:
         user_data = message.author._to_minimal_user_json()  # type: ignore
         return cls(
             data=data,
@@ -400,8 +396,8 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @classmethod
     def _try_upgrade(
-        cls: Type[M], *, data: UserWithMemberPayload, guild: Guild, state: ConnectionState
-    ) -> Union[User, M]:
+        cls, *, data: UserWithMemberPayload, guild: Guild, state: ConnectionState
+    ) -> Union[User, Self]:
         # A User object with a 'member' key
         try:
             member_data = data.pop("member")
@@ -411,8 +407,8 @@ class Member(disnake.abc.Messageable, _UserTag):
             return cls(data=member_data, user_data=data, guild=guild, state=state)
 
     @classmethod
-    def _copy(cls: Type[M], member: M) -> M:
-        self: M = cls.__new__(cls)  # to bypass __init__
+    def _copy(cls, member: Member) -> Self:
+        self = cls.__new__(cls)  # to bypass __init__
 
         self._roles = utils.SnowflakeList(member._roles, is_sorted=True)
         self.joined_at = member.joined_at
