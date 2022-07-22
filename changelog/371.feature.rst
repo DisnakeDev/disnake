@@ -1,0 +1,2 @@
+Update ``Client`` classes such that their initialization kwargs are explicitly stated and typehinted.
+- replaced ``**kwargs`` / ``**options`` with explicit keyword arguments for the ``__init__`` methods of ``Client``, ``Bot``, ``InteractionBot``, all ``AutoSharded*`` variants, and all relevant parent classes.

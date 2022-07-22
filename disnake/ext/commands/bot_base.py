@@ -147,6 +147,7 @@ class BotBase(CommonBotBase, GroupMixin):
         ] = None,
         help_command: HelpCommand = _default,
         description: str = None,
+        strip_after_prefix: bool = False,
         **options: Any,
     ):
         super().__init__(**options)
@@ -175,7 +176,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         self._help_command = None
         self.description: str = inspect.cleandoc(description) if description else ""
-        self.strip_after_prefix: bool = options.get("strip_after_prefix", False)
+        self.strip_after_prefix: bool = strip_after_prefix
 
         if help_command is _default:
             self.help_command = DefaultHelpCommand()
