@@ -268,9 +268,9 @@ class Embed:
         embed._files = self._files.copy()
         return embed
 
-    def __len(self, strip: bool = False):
-        def stripped_length(text: str) -> int:
-            return len(text.strip() if strip else text)
+    def __len__(self):
+        def stripped_length(text):
+            return len(text.strip())
 
         total = stripped_length(self.title or "") + stripped_length(self.description or "")
         if self._fields:
@@ -284,9 +284,6 @@ class Embed:
             total += stripped_length(author_name)
 
         return total
-
-    def __len__(self) -> int:
-        return self.__len(strip=False)
 
     def __bool__(self) -> bool:
         return any(
@@ -804,6 +801,7 @@ class Embed:
     def check_limits(self):
         """
         Checks if this embed fits within the limits dictated by Discord.
+        There is also a 6000 character limit across all embeds in a message.
 
         +--------------------------+------------------------------------+
         |   Field                  |              Limit                 |
@@ -823,12 +821,13 @@ class Embed:
         | author.name              |        256 characters              |
         +--------------------------+------------------------------------+
 
+        .. versionadded:: 2.6
 
         Returns:
             bool: True if the embed fits within Discord limits
 
         Raises:
-            ValueError: If the embed is not valid and Discord would return an exception if sent
+            ValueError: One or more of the embed attributes are too long.
         """
 
         if self.title and len(self.title.strip()) > 256:
@@ -857,7 +856,7 @@ class Embed:
                         f"Embed field {field_index} value cannot be longer than 1024 characters"
                     )
 
-        if self.__len(strip=True) > 6000:
+        if len(self) > 6000:
             raise ValueError("Embed total size cannot be longer than 6000 characters")
 
         return True
