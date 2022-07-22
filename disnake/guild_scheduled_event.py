@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, overload
 
 from .asset import Asset
 from .enums import (
+    ChannelType,
     GuildScheduledEventEntityType,
     GuildScheduledEventPrivacyLevel,
     GuildScheduledEventStatus,
@@ -48,7 +49,6 @@ from .utils import (
 if TYPE_CHECKING:
     from .abc import GuildChannel, Snowflake
     from .asset import AssetBytes
-    from .enums import ChannelType
     from .guild import Guild
     from .iterators import GuildScheduledEventUserIterator
     from .state import ConnectionState
@@ -391,11 +391,11 @@ class GuildScheduledEvent(Hashable):
         - ``entity_metadata`` with a location field must be provided
         - ``scheduled_end_time`` must be provided
 
-        If updating ``channel`` to ``None``, ``entity_type`` will be set to
-        :attr:`GuildScheduledEventEntityType.external`.
-
-        If updating ``channel`` to :class:`.abc.Snowflake`, ``entity_type`` will be set to the channel's type
-        if the type is either :class:`ChannelType.voice` or :class:`ChannelType.stage_voice`.
+        .. versionchanged:: 2.6
+            Now when updating ``channel`` to ``None``, ``entity_type`` will be set to
+            :attr:`GuildScheduledEventEntityType.external`.
+            Now when updating ``channel`` to :class:`.abc.Snowflake`, ``entity_type`` will be set to the channel's type
+            if the type is either :class:`ChannelType.voice` or :class:`ChannelType.stage_voice`.
 
         .. versionchanged:: 2.6
             Now raises :exc:`TypeError` instead of :exc:`ValueError` for
@@ -455,8 +455,9 @@ class GuildScheduledEvent(Hashable):
             Editing the event failed.
         TypeError
             The ``image`` asset is a lottie sticker (see :func:`Sticker.read`),
-            or one of ``entity_type``, ``privacy_level``, ``entity_metadata`` or ``status``
-            is not of the correct type.
+            one of ``entity_type``, ``privacy_level``, ``entity_metadata`` or ``status``
+            is not of the correct type, or the provided channel's type is neither :class:`ChannelType.voice` nor
+            :class:`ChannelType.stage_voice`.
 
         Returns
         -------
