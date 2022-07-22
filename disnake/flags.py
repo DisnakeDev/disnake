@@ -1778,7 +1778,10 @@ class ApplicationFlags(BaseFlags):
 
     @flag_value
     def application_command_badge(self):
-        ":class:`bool`: Returns ``True`` if the application has registered global application commands."
+        """:class:`bool`: Returns ``True`` if the application has registered global application commands.
+
+        .. versionadded:: 2.6
+        """
         return 1 << 23
 
 
