@@ -80,7 +80,7 @@ class CommonBotBase(Generic[CogT]):
         owner_id: Optional[int] = None,
         owner_ids: Optional[Set[int]] = None,
         reload: bool = False,
-        **kwargs
+        **kwargs,
     ):
         self.__cogs: Dict[str, Cog] = {}
         self.__extensions: Dict[str, types.ModuleType] = {}

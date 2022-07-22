@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, overload, Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Type, Union, overload
 
 import aiohttp
 
@@ -46,15 +46,12 @@ from .gateway import DiscordWebSocket, ReconnectWebSocket
 from .state import AutoShardedConnectionState
 
 if TYPE_CHECKING:
-    from .activity import BaseActivity
-    from .enums import Status
-    from .flags import Intents, MemberCacheFlags
-    from .gateway import DiscordWebSocket
-    from .i18n import LocalizationProtocol
-    from .mentions import AllowedMentions
     from typing_extensions import Self
 
     from .activity import BaseActivity
+    from .flags import Intents, MemberCacheFlags
+    from .i18n import LocalizationProtocol
+    from .mentions import AllowedMentions
 
 __all__ = (
     "AutoShardedClient",
