@@ -1739,10 +1739,37 @@ class AutoModKeywordPresets(ListBaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two AutoModKeywordPresets instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two AutoModKeywordPresets instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an AutoModKeywordPresets instance is a subset of another AutoModKeywordPresets instance.
+        .. describe:: x >= y
+
+            Checks if an AutoModKeywordPresets instance is a superset of another AutoModKeywordPresets instance.
+        .. describe:: x < y
+
+            Checks if an AutoModKeywordPresets instance is a strict subset of another AutoModKeywordPresets instance.
+        .. describe:: x > y
+
+            Checks if an AutoModKeywordPresets instance is a strict superset of another AutoModKeywordPresets instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new AutoModKeywordPresets instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new AutoModKeywordPresets instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new AutoModKeywordPresets instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new AutoModKeywordPresets instance with all flags from x inverted.
         .. describe:: hash(x)
 
             Return the flag's hash.
