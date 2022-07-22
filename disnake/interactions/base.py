@@ -243,18 +243,20 @@ class Interaction:
 
     @utils.cached_slot_property("_cs_channel")
     def channel(self) -> Union[GuildMessageable, PartialMessageable]:
-        """Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]: The channel the interaction was sent from.
+        """Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]: The channel the interaction was sent from.
 
-        Note that due to a Discord limitation, DM channels are not resolved since there is
-        no data to complete them. These are :class:`PartialMessageable` instead.
+        Note that due to a Discord limitation, threads that the bot cannot access and DM channels
+        are not resolved since there is no data to complete them.
+        These are :class:`PartialMessageable` instead.
+
+        If you want to compute the interaction author's or bot's permissions in the channel,
+        consider using :attr:`permissions` or :attr:`app_permissions` instead.
         """
-        # the actual typing of these is a bit complicated, we just leave it at text channels
         guild = self.guild
         channel = guild and guild._resolve_channel(self.channel_id)
         if channel is None:
-            type = (
-                None if self.guild_id is not None else ChannelType.private
-            )  # could be a text, voice, or thread channel in a guild
+            # could be a thread channel in a guild, or a DM channel
+            type = None if self.guild_id is not None else ChannelType.private
             return PartialMessageable(state=self._state, id=self.channel_id, type=type)
         return channel  # type: ignore
 
