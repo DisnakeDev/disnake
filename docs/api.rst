@@ -1011,8 +1011,8 @@ Guilds
 
 This section documents events related to Discord guilds.
 
-Generics
-++++++++
+General
++++++++
 
 .. function:: on_guild_join(guild)
 
