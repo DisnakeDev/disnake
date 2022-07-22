@@ -1,0 +1,1 @@
+Add :class:`GuildBuilder` for full coverage of the guild creation endpoint.

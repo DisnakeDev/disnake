@@ -4476,6 +4476,15 @@ Guild
 
         :type: :class:`User`
 
+GuildBuilder
+~~~~~~~~~~~~~
+
+.. attributetable:: GuildBuilder
+
+.. autoclass:: GuildBuilder()
+    :members:
+    :exclude-members: add_category_channel
+
 GuildPreview
 ~~~~~~~~~~~~~
 
