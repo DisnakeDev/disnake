@@ -1,0 +1,1 @@
+Refactor channel edit overloads and internals, improving typing.
