@@ -32,6 +32,10 @@ class TestListBaseFlags:
         assert flags.value == expected_value
         assert flags.values == expected_values
 
+    def test_class_vars(self) -> None:
+        assert _ListFlags.DEFAULT_VALUE == 0
+        assert _ListFlags.VALID_FLAGS == {"flag1": 1, "flag2": 2, "flag3": 4}
+
     def test_from_values(self) -> None:
         flags = _ListFlags._from_values([0, 2, 3, 4, 5, 10])
         assert flags.value == 1085
@@ -48,3 +52,10 @@ class TestListBaseFlags:
         flags.flag3 = True
         assert flags.value == 4
         assert flags.values == [2]
+
+    def test_operators(self) -> None:
+        a = _ListFlags(flag1=True, flag3=True)
+        b = _ListFlags(flag1=False, flag3=True)
+        assert a.values == [0, 2]
+        assert b.values == [2]
+        assert (~(a & b)).values == [0, 1]
