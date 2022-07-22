@@ -240,13 +240,13 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         This always returns :attr:`ChannelType.text` or :attr:`ChannelType.news`.
         """
-        if self._type == ChannelType.text.value:
+        if self._type == ChannelType.text:
             return ChannelType.text
         return ChannelType.news
 
     @property
     def _sorting_bucket(self) -> int:
-        return ChannelType.text.value
+        return ChannelType.text
 
     @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
     def permissions_for(
@@ -288,7 +288,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         :return type: :class:`bool`
         """
-        return self._type == ChannelType.news.value
+        return self._type == ChannelType.news
 
     @property
     def last_message(self) -> Optional[Message]:
@@ -1027,7 +1027,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 
     @property
     def _sorting_bucket(self) -> int:
-        return ChannelType.voice.value
+        return ChannelType.voice
 
     @property
     def members(self) -> List[Member]:
@@ -2103,7 +2103,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def _sorting_bucket(self) -> int:
-        return ChannelType.category.value
+        return ChannelType.category
 
     @property
     def type(self) -> Literal[ChannelType.category]:
@@ -2525,7 +2525,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def _sorting_bucket(self) -> int:
-        return ChannelType.text.value
+        return ChannelType.text
 
     @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
     def permissions_for(
@@ -2956,7 +2956,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
                 rate_limit_per_user=slowmode_delay or 0,
-                type=ChannelType.public_thread.value,
+                type=ChannelType.public_thread,
                 files=params.files,
                 flags=flags,
                 reason=reason,
