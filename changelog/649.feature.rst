@@ -1,0 +1,1 @@
+Add the new ``APPLICATION_COMMAND_BADGE`` flag.
