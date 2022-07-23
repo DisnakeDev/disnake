@@ -732,19 +732,6 @@ This section documents events related to application commands and other interact
     :param interaction: The interaction object.
     :type interaction: :class:`ApplicationCommandInteraction`
 
-.. function:: on_application_command_permissions_update(permissions)
-
-    Called when the permissions of an application command or
-    the application-wide command permissions are updated.
-
-    Note that this will also be called when permissions of other applications change,
-    not just this application's permissions.
-
-    .. versionadded:: 2.5
-
-    :param permissions: The updated permission object.
-    :type permissions: :class:`GuildApplicationCommandPermissions`
-
 .. function:: on_button_click(interaction)
 
     Called when a button is clicked.
@@ -1138,6 +1125,22 @@ Integrations
 
     :param payload: The raw event payload data.
     :type payload: :class:`RawIntegrationDeleteEvent`
+
+Interactions
+++++++++++++
+
+.. function:: on_application_command_permissions_update(permissions)
+
+    Called when the permissions of an application command or
+    the application-wide command permissions are updated.
+
+    Note that this will also be called when permissions of other applications change,
+    not just this application's permissions.
+
+    .. versionadded:: 2.5
+
+    :param permissions: The updated permission object.
+    :type permissions: :class:`GuildApplicationCommandPermissions`
 
 Invites
 +++++++
