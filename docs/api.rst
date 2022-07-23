@@ -1060,6 +1060,125 @@ General
     :param guild: The guild that got removed.
     :type guild: :class:`Guild`
 
+.. function:: on_guild_update(before, after)
+
+    Called when a :class:`Guild` updates, for example:
+
+    - Changed name
+    - Changed AFK channel
+    - Changed AFK timeout
+    - etc
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    :param before: The guild prior to being updated.
+    :type before: :class:`Guild`
+    :param after: The guild after being updated.
+    :type after: :class:`Guild`
+
+Emojis
+++++++
+
+.. function:: on_guild_emojis_update(guild, before, after)
+
+    Called when a :class:`Guild` adds or removes :class:`Emoji`.
+
+    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
+
+    :param guild: The guild who got their emojis updated.
+    :type guild: :class:`Guild`
+    :param before: A list of emojis before the update.
+    :type before: Sequence[:class:`Emoji`]
+    :param after: A list of emojis after the update.
+    :type after: Sequence[:class:`Emoji`]
+
+Integrations
+++++++++++++
+
+.. function:: on_guild_integrations_update(guild)
+
+    Called whenever an integration is created, modified, or removed from a guild.
+
+    This requires :attr:`Intents.integrations` to be enabled.
+
+    .. versionadded:: 1.4
+
+    :param guild: The guild that had its integrations updated.
+    :type guild: :class:`Guild`
+
+.. function:: on_integration_create(integration)
+
+    Called when an integration is created.
+
+    This requires :attr:`Intents.integrations` to be enabled.
+
+    .. versionadded:: 2.0
+
+    :param integration: The integration that was created.
+    :type integration: :class:`Integration`
+
+.. function:: on_integration_update(integration)
+
+    Called when an integration is updated.
+
+    This requires :attr:`Intents.integrations` to be enabled.
+
+    .. versionadded:: 2.0
+
+    :param integration: The integration that was created.
+    :type integration: :class:`Integration`
+
+.. function:: on_raw_integration_delete(payload)
+
+    Called when an integration is deleted.
+
+    This requires :attr:`Intents.integrations` to be enabled.
+
+    .. versionadded:: 2.0
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawIntegrationDeleteEvent`
+
+Invites
++++++++
+
+.. function:: on_invite_create(invite)
+
+    Called when an :class:`Invite` is created.
+    You must have the :attr:`~Permissions.manage_channels` permission to receive this.
+
+    .. versionadded:: 1.3
+
+    .. note::
+
+        There is a rare possibility that the :attr:`Invite.guild` and :attr:`Invite.channel`
+        attributes will be of :class:`Object` rather than the respective models.
+
+    This requires :attr:`Intents.invites` to be enabled.
+
+    :param invite: The invite that was created.
+    :type invite: :class:`Invite`
+
+.. function:: on_invite_delete(invite)
+
+    Called when an :class:`Invite` is deleted.
+    You must have the :attr:`~Permissions.manage_channels` permission to receive this.
+
+    .. versionadded:: 1.3
+
+    .. note::
+
+        There is a rare possibility that the :attr:`Invite.guild` and :attr:`Invite.channel`
+        attributes will be of :class:`Object` rather than the respective models.
+
+        Outside of those two attributes, the only other attribute guaranteed to be
+        filled by the Discord gateway for this event is :attr:`Invite.code`.
+
+    This requires :attr:`Intents.invites` to be enabled.
+
+    :param invite: The invite that was deleted.
+    :type invite: :class:`Invite`
+
 Members
 +++++++
 
@@ -1134,46 +1253,6 @@ Members
     :param after: The updated member's updated info.
     :type after: :class:`Member`
 
-Invites
-+++++++
-
-.. function:: on_invite_create(invite)
-
-    Called when an :class:`Invite` is created.
-    You must have the :attr:`~Permissions.manage_channels` permission to receive this.
-
-    .. versionadded:: 1.3
-
-    .. note::
-
-        There is a rare possibility that the :attr:`Invite.guild` and :attr:`Invite.channel`
-        attributes will be of :class:`Object` rather than the respective models.
-
-    This requires :attr:`Intents.invites` to be enabled.
-
-    :param invite: The invite that was created.
-    :type invite: :class:`Invite`
-
-.. function:: on_invite_delete(invite)
-
-    Called when an :class:`Invite` is deleted.
-    You must have the :attr:`~Permissions.manage_channels` permission to receive this.
-
-    .. versionadded:: 1.3
-
-    .. note::
-
-        There is a rare possibility that the :attr:`Invite.guild` and :attr:`Invite.channel`
-        attributes will be of :class:`Object` rather than the respective models.
-
-        Outside of those two attributes, the only other attribute guaranteed to be
-        filled by the Discord gateway for this event is :attr:`Invite.code`.
-
-    This requires :attr:`Intents.invites` to be enabled.
-
-    :param invite: The invite that was deleted.
-    :type invite: :class:`Invite`
-
 
 Scheduled Events
 ++++++++++++++++
@@ -1228,76 +1307,8 @@ Scheduled Events
     :param payload: The raw event payload data.
     :type payload: :class:`RawGuildScheduledEventUserActionEvent`
 
-
-Settings
-++++++++
-
-.. function:: on_guild_update(before, after)
-
-    Called when a :class:`Guild` updates, for example:
-
-    - Changed name
-    - Changed AFK channel
-    - Changed AFK timeout
-    - etc
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param before: The guild prior to being updated.
-    :type before: :class:`Guild`
-    :param after: The guild after being updated.
-    :type after: :class:`Guild`
-
-.. function:: on_guild_emojis_update(guild, before, after)
-
-    Called when a :class:`Guild` adds or removes :class:`Emoji`.
-
-    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
-
-    :param guild: The guild who got their emojis updated.
-    :type guild: :class:`Guild`
-    :param before: A list of emojis before the update.
-    :type before: Sequence[:class:`Emoji`]
-    :param after: A list of emojis after the update.
-    :type after: Sequence[:class:`Emoji`]
-
-.. function:: on_guild_role_create(role)
-              on_guild_role_delete(role)
-
-    Called when a :class:`Guild` creates or deletes a new :class:`Role`.
-
-    To get the guild it belongs to, use :attr:`Role.guild`.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param role: The role that was created or deleted.
-    :type role: :class:`Role`
-
-.. function:: on_guild_role_update(before, after)
-
-    Called when a :class:`Role` is changed guild-wide.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param before: The updated role's old info.
-    :type before: :class:`Role`
-    :param after: The updated role's updated info.
-    :type after: :class:`Role`
-
-.. function:: on_guild_stickers_update(guild, before, after)
-
-    Called when a :class:`Guild` updates its stickers.
-
-    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
-
-    .. versionadded:: 2.0
-
-    :param guild: The guild who got their stickers updated.
-    :type guild: :class:`Guild`
-    :param before: A list of stickers before the update.
-    :type before: Sequence[:class:`GuildSticker`]
-    :param after: A list of stickers after the update.
-    :type after: Sequence[:class:`GuildSticker`]
+Stage Instances
++++++++++++++++
 
 .. function:: on_stage_instance_create(stage_instance)
               on_stage_instance_delete(stage_instance)
@@ -1325,57 +1336,52 @@ Settings
     :param after: The stage instance after the update.
     :type after: :class:`StageInstance`
 
-Integrations
-++++++++++++
+Stickers
+++++++++
 
-.. function:: on_guild_integrations_update(guild)
+.. function:: on_guild_stickers_update(guild, before, after)
 
-    Called whenever an integration is created, modified, or removed from a guild.
+    Called when a :class:`Guild` updates its stickers.
 
-    This requires :attr:`Intents.integrations` to be enabled.
+    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
 
-    .. versionadded:: 1.4
+    .. versionadded:: 2.0
 
-    :param guild: The guild that had its integrations updated.
+    :param guild: The guild who got their stickers updated.
     :type guild: :class:`Guild`
+    :param before: A list of stickers before the update.
+    :type before: Sequence[:class:`GuildSticker`]
+    :param after: A list of stickers after the update.
+    :type after: Sequence[:class:`GuildSticker`]
 
-.. function:: on_integration_create(integration)
+Roles
++++++
 
-    Called when an integration is created.
+.. function:: on_guild_role_create(role)
+              on_guild_role_delete(role)
 
-    This requires :attr:`Intents.integrations` to be enabled.
+    Called when a :class:`Guild` creates or deletes a new :class:`Role`.
 
-    .. versionadded:: 2.0
+    To get the guild it belongs to, use :attr:`Role.guild`.
 
-    :param integration: The integration that was created.
-    :type integration: :class:`Integration`
+    This requires :attr:`Intents.guilds` to be enabled.
 
-.. function:: on_integration_update(integration)
+    :param role: The role that was created or deleted.
+    :type role: :class:`Role`
 
-    Called when an integration is updated.
+.. function:: on_guild_role_update(before, after)
 
-    This requires :attr:`Intents.integrations` to be enabled.
+    Called when a :class:`Role` is changed guild-wide.
 
-    .. versionadded:: 2.0
+    This requires :attr:`Intents.guilds` to be enabled.
 
-    :param integration: The integration that was created.
-    :type integration: :class:`Integration`
-
-.. function:: on_raw_integration_delete(payload)
-
-    Called when an integration is deleted.
-
-    This requires :attr:`Intents.integrations` to be enabled.
-
-    .. versionadded:: 2.0
-
-    :param payload: The raw event payload data.
-    :type payload: :class:`RawIntegrationDeleteEvent`
+    :param before: The updated role's old info.
+    :type before: :class:`Role`
+    :param after: The updated role's updated info.
+    :type after: :class:`Role`
 
 Voice
-~~~~~
-
-This section documents events related to changes in voice state.
++++++
 
 .. function:: on_voice_state_update(member, before, after)
 
