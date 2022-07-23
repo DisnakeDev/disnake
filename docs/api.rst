@@ -5381,7 +5381,7 @@ Button
     :members:
     :inherited-members:
 
-.. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=None, url=None, emoji=None, row=None)
+.. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
 
 Select
 ~~~~~~~
