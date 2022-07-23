@@ -803,16 +803,6 @@ Channels/Threads
 
 This section documents events related to Discord channels and threads.
 
-.. function:: on_group_join(channel, user)
-              on_group_remove(channel, user)
-
-    Called when someone joins or leaves a :class:`GroupChannel`.
-
-    :param channel: The group that the user joined or left.
-    :type channel: :class:`GroupChannel`
-    :param user: The user that joined or left.
-    :type user: :class:`User`
-
 .. function:: on_guild_channel_delete(channel)
               on_guild_channel_create(channel)
 
