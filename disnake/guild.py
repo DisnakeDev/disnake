@@ -4313,6 +4313,7 @@ class Guild(Hashable):
             The type of trigger that determines whether this rule's actions should run for a specific event.
             If set to :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.keyword_preset`,
             ``trigger_metadata`` must be set accordingly.
+            This cannot be changed after creation.
         actions: Sequence[:class:`AutoModAction`]
             The list of actions that will execute if a matching event triggered this rule.
             Must contain at least one action.
