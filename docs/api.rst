@@ -5480,7 +5480,7 @@ AutoModTriggerMetadata
 
 .. attributetable:: AutoModTriggerMetadata
 
-.. autoclass:: AutoModTriggerMetadata()
+.. autoclass:: AutoModTriggerMetadata
     :members:
 
 AutoModAction
@@ -5496,7 +5496,7 @@ AutoModBlockMessageAction
 
 .. attributetable:: AutoModBlockMessageAction
 
-.. autoclass:: AutoModBlockMessageAction()
+.. autoclass:: AutoModBlockMessageAction
     :members:
 
 AutoModSendAlertAction
@@ -5504,7 +5504,7 @@ AutoModSendAlertAction
 
 .. attributetable:: AutoModSendAlertAction
 
-.. autoclass:: AutoModSendAlertAction()
+.. autoclass:: AutoModSendAlertAction
     :members:
 
 AutoModTimeoutAction
@@ -5512,7 +5512,7 @@ AutoModTimeoutAction
 
 .. attributetable:: AutoModTimeoutAction
 
-.. autoclass:: AutoModTimeoutAction()
+.. autoclass:: AutoModTimeoutAction
     :members:
 
 File
