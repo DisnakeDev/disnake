@@ -92,6 +92,9 @@ class AutoModAction:
     - :class:`AutoModSendAlertAction`
     - :class:`AutoModTimeoutAction`
 
+    Actions received from the API may be of this type
+    (and not one of the subtypes above) if the action type is not implemented yet.
+
     .. versionadded:: 2.6
 
     Attributes
@@ -488,7 +491,7 @@ class AutoModRule:
             The rule's new event type.
         trigger_metadata: :class:`AutoModTriggerMetadata`
             The rule's new associated trigger metadata.
-        actions: Sequence[:class:`AutoModAction`]
+        actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
             The rule's new actions.
             If provided, must contain at least one action.
         enabled: :class:`bool`
@@ -581,7 +584,7 @@ class AutoModActionExecution:
 
     Attributes
     ----------
-    action: :class:`AutoModAction`
+    action: Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]
         The action that was executed.
     guild: :class:`Guild`
         The guild this action was executed in.

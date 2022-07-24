@@ -4314,7 +4314,7 @@ class Guild(Hashable):
             If set to :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.keyword_preset`,
             ``trigger_metadata`` must be set accordingly.
             This cannot be changed after creation.
-        actions: Sequence[:class:`AutoModAction`]
+        actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
             The list of actions that will execute if a matching event triggered this rule.
             Must contain at least one action.
         trigger_metadata: :class:`AutoModTriggerMetadata`
