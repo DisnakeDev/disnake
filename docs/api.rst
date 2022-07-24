@@ -3536,38 +3536,6 @@ of :class:`enum.Enum`.
 
         The ``zh_TW`` (Chinese, Taiwan) locale.
 
-.. class:: AutoModTriggerType
-
-    Represents the trigger type of an auto moderation rule.
-
-    .. versionadded:: 2.6
-
-    .. attribute:: keyword
-
-        The rule will filter messages based on a custom keyword list.
-
-    .. attribute:: harmful_link
-
-        The rule will filter messages containing malicious links.
-
-    .. attribute:: spam
-
-        The rule will filter messages suspected of being spam.
-
-    .. attribute:: keyword_preset
-
-        The rule will filter messages based on predefined lists containing commonly flagged words.
-
-.. class:: AutoModEventType
-
-    Represents the event type of an auto moderation rule.
-
-    .. versionadded:: 2.6
-
-    .. attribute:: message_send
-
-        The rule will apply to messages sent in the guild.
-
 .. class:: AutoModActionType
 
     Represents an action of an auto moderation rule.
@@ -3590,6 +3558,38 @@ of :class:`enum.Enum`.
             This action type is only available for rules with trigger type
             :attr:`~AutoModTriggerType.keyword`, and :attr:`~Permissions.moderate_members`
             permissions are required to use it.
+
+.. class:: AutoModEventType
+
+    Represents the event type of an auto moderation rule.
+
+    .. versionadded:: 2.6
+
+    .. attribute:: message_send
+
+        The rule will apply to messages sent in the guild.
+
+.. class:: AutoModTriggerType
+
+    Represents the trigger type of an auto moderation rule.
+
+    .. versionadded:: 2.6
+
+    .. attribute:: keyword
+
+        The rule will filter messages based on a custom keyword list.
+
+    .. attribute:: harmful_link
+
+        The rule will filter messages containing malicious links.
+
+    .. attribute:: spam
+
+        The rule will filter messages suspected of being spam.
+
+    .. attribute:: keyword_preset
+
+        The rule will filter messages based on predefined lists containing commonly flagged words.
 
 Async Iterator
 ----------------
