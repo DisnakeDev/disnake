@@ -4315,6 +4315,7 @@ class Guild(Hashable):
             ``trigger_metadata`` must be set accordingly.
         actions: Sequence[:class:`AutoModAction`]
             The list of actions that will execute if a matching event triggered this rule.
+            Must contain at least one action.
         trigger_metadata: :class:`AutoModTriggerMetadata`
             Additional metadata associated with the trigger type.
         enabled: :class:`bool`
@@ -4329,6 +4330,9 @@ class Guild(Hashable):
 
         Raises
         ------
+        ValueError
+            The specified trigger type requires `trigger_metadata` to be set,
+            or no actions have been provided.
         Forbidden
             You do not have proper permissions to create auto moderation rules.
         HTTPException
@@ -4346,6 +4350,9 @@ class Guild(Hashable):
             AutoModTriggerType.keyword_preset.value,
         ):
             raise ValueError("Specified trigger type requires `trigger_metadata` to not be empty")
+
+        if len(actions) == 0:
+            raise ValueError("At least one action must be provided.")
 
         data = await self._state.http.create_auto_moderation_rule(
             self.id,

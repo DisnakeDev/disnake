@@ -480,6 +480,7 @@ class AutoModRule:
             The rule's new associated trigger metadata.
         actions: Sequence[:class:`AutoModAction`]
             The rule's new actions.
+            If provided, must contain at least one action.
         enabled: :class:`bool`
             Whether to enable the rule.
         exempt_roles: Optional[Iterable[:class:`abc.Snowflake`]]
@@ -494,6 +495,8 @@ class AutoModRule:
 
         Raises
         ------
+        ValueError
+            When editing the list of actions, at least one action must be provided.
         Forbidden
             You do not have proper permissions to edit the rule.
         NotFound
@@ -516,6 +519,8 @@ class AutoModRule:
         if trigger_metadata is not MISSING:
             payload["trigger_metadata"] = trigger_metadata.to_dict()
         if actions is not MISSING:
+            if len(actions) == 0:
+                raise ValueError("At least one action must be provided.")
             payload["actions"] = [a.to_dict() for a in actions]
         if enabled is not MISSING:
             payload["enabled"] = enabled
