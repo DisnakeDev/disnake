@@ -485,10 +485,10 @@ class AuditLogAction(Enum):
             return "application_command_or_integration"
         elif v < 140:
             return None
-        elif v == 143:
-            return "user"
         elif v < 143:
             return "automod_rule"
+        elif v == 143:
+            return "user"
         else:
             return None
 

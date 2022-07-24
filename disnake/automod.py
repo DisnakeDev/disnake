@@ -212,7 +212,7 @@ class AutoModTimeoutAction(AutoModAction):
     def duration(self) -> int:
         """:class:`int`: The duration (in seconds) for which to timeout
         the user when the rule is triggered."""
-        return int(self._metadata["duration_seconds"])
+        return self._metadata["duration_seconds"]
 
     def __repr__(self) -> str:
         return f"<{type(self).__name__} duration={self.duration!r}>"

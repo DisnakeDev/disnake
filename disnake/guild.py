@@ -4280,8 +4280,8 @@ class Guild(Hashable):
 
     async def create_automod_rule(
         self,
-        name: str,
         *,
+        name: str,
         event_type: AutoModEventType,
         trigger_type: AutoModTriggerType,
         actions: Sequence[AutoModAction],
