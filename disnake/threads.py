@@ -694,10 +694,9 @@ class Thread(Messageable, Hashable):
 
         if pinned is not MISSING:
             # create base flags if flags are provided, otherwise use the internal flags.
-            if flags is None:
-                flags = ChannelFlags._from_value(self._flags)
+            flags = ChannelFlags._from_value(self._flags if flags is None else flags.value)
             flags.pinned = pinned
-            payload["flags"] = flags.value
+
         if flags is not None:
             payload["flags"] = flags.value
 

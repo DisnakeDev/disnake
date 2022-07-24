@@ -348,6 +348,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
         type: ChannelType = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
     ) -> TextChannel:
         ...
@@ -1944,8 +1945,8 @@ class StageChannel(VocalGuildChannel):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
-        bitrate: int = MISSING,
-        flags: ChannelFlags = MISSING,
+        bitrate: int = ...,
+        flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
     ) -> StageChannel:
         ...
@@ -2167,6 +2168,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         position: int = ...,
         nsfw: bool = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
     ) -> CategoryChannel:
         ...
