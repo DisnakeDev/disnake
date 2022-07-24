@@ -657,7 +657,8 @@ class Thread(Messageable, Hashable):
             .. versionadded:: 2.5
 
         flags: :class:`ChannelFlags`
-            The new channel flags to set for this thread.
+            The new channel flags to set for this thread. This will overwrite any existing flags set on this channel.
+            If parameter ``pinned`` is provided, that will override the setting of :attr:`ChannelFlags.pinned`.
 
             .. versionadded:: 2.6
 

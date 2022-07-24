@@ -419,7 +419,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         flags: :class:`ChannelFlags`
-            The new flags to set for this channel.
+            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
 
             .. versionadded:: 2.6
 
@@ -1386,7 +1386,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             .. versionadded:: 2.3
 
         flags: :class:`ChannelFlags`
-            The new flags to set for this channel.
+            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
 
             .. versionadded:: 2.6
 
@@ -2011,7 +2011,7 @@ class StageChannel(VocalGuildChannel):
             .. versionadded:: 2.6
 
         flags: :class:`ChannelFlags`
-            The new flags to set for this channel.
+            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
 
             .. versionadded:: 2.6
 
@@ -2212,7 +2212,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the category.
         flags: :class:`ChannelFlags`
-            The new flags to set for this channel.
+            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
 
             .. versionadded:: 2.6
 
@@ -2719,7 +2719,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         flags: :class:`ChannelFlags`
-            The new flags to set for this channel.
+            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
 
             .. versionadded:: 2.6
 
