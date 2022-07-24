@@ -642,7 +642,7 @@ class AutoModActionExecution:
         self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
         self.message_id: Optional[int] = _get_as_snowflake(data, "message_id")
         self.alert_message_id: Optional[int] = _get_as_snowflake(data, "alert_system_message_id")
-        self.content: str = data["content"]
+        self.content: str = data.get("content") or ""
         self.matched_keyword: Optional[str] = data.get("matched_keyword")
         self.matched_content: Optional[str] = data.get("matched_content")
 
