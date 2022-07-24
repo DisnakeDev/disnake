@@ -3579,6 +3579,8 @@ of :class:`enum.Enum`.
 
         The rule will filter messages based on a custom keyword list.
 
+        This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+
     .. attribute:: harmful_link
 
         The rule will filter messages containing malicious links.
@@ -3590,6 +3592,8 @@ of :class:`enum.Enum`.
     .. attribute:: keyword_preset
 
         The rule will filter messages based on predefined lists containing commonly flagged words.
+
+        This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
 
 Async Iterator
 ----------------
