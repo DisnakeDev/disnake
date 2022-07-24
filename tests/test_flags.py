@@ -76,8 +76,6 @@ def test_fill_with_flags_inverted() -> None:
         def sixteen(self):
             return 1 << 4
 
-    assert flags.all_flags_value(InvertedFlags.VALID_FLAGS) == 0b10111
-
     assert InvertedFlags.VALID_FLAGS == {
         "one": 1,
         "two": 2,
@@ -95,7 +93,6 @@ class TestBaseFlags:
         assert ins.DEFAULT_VALUE is ins.value
 
     def test__init__kwargs(self) -> None:
-
         ins = TestFlags(one=True, two=False)
         assert ins.one is True
         assert ins.two is False
@@ -122,7 +119,6 @@ class TestBaseFlags:
         assert not ins != other
 
         ins.two = False
-        assert ins is not other
         assert not ins == other
         assert ins != other
 
@@ -170,8 +166,7 @@ class TestBaseFlags:
         assert third.value == 0b010
         assert third is not ins
 
-        ins.value = 0b10
-        other.value = ins.value
+        ins.value = other.value
         third = ins | other
         assert third is not ins
         assert third.value == 0b10
@@ -227,7 +222,7 @@ class TestBaseFlags:
         with pytest.raises(
             TypeError, match="'<=' not supported between instances of 'TestFlags' and 'int'"
         ):
-            ins <= 4  # type: ignore  # noqa: B015
+            _ = ins <= 4  # type: ignore
 
         other.value = ins.value
         assert ins <= other
@@ -284,6 +279,7 @@ class TestBaseFlags:
         ins = TestFlags(one=True)
         assert ins.value == 0b0001
         other = ~ins
+        # assert that invert does not modify anything in-place
         assert ins.value == 0b0001
         # the other `0` here is because invert does not invert values that are not defined
         # assert other.value == goal
@@ -296,6 +292,9 @@ class TestBaseFlags:
     def test_iter(self) -> None:
         ins = TestFlags(one=True, two=False)
         ran_at_least_once = False
+
+        assert len(list(iter(ins))) == 4
+
         for flag, value in iter(ins):
             ran_at_least_once = True
             assert flag in ins.VALID_FLAGS
@@ -306,13 +305,6 @@ class TestBaseFlags:
     def test_from_value(self) -> None:
         ins = TestFlags._from_value(0b101)
         assert ins.value == 0b101
-
-    def test_has_flag(self) -> None:
-        ins = TestFlags()
-
-        ins.two = True
-
-        assert ins.two is True
 
     def test_set_and_get_flag(self) -> None:
         ins = TestFlags()
