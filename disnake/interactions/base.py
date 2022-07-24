@@ -229,8 +229,19 @@ class Interaction:
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild the interaction was sent from."""
-        return self._state._get_guild(self.guild_id)
+        """Optional[:class:`Guild`]: The guild the interaction was sent from.
+
+        .. versionchanged:: 2.6
+
+            Returns an unavailable :class:`Guild` object when the guild could not be resolved from cache.
+        """
+        if self.guild_id is None:
+            return None
+
+        return self._state._get_guild(self.guild_id) or Guild(
+            data={"unavailable": True, "id": self.guild_id},  # type: ignore # this is a valid guild payload
+            state=self._state,
+        )
 
     @utils.cached_slot_property("_cs_me")
     def me(self) -> Union[Member, ClientUser]:
