@@ -159,6 +159,11 @@ class AutoModSendAlertAction(AutoModAction):
 
     .. versionadded:: 2.6
 
+    Parameters
+    ----------
+    channel: :class:`abc.Snowflake`
+        The channel to send an alert in when the rule is triggered.
+
     Attributes
     ----------
     type: :class:`AutoModActionType`
@@ -189,6 +194,11 @@ class AutoModTimeoutAction(AutoModAction):
     Represents an auto moderation action that times out the user.
 
     .. versionadded:: 2.6
+
+    Parameters
+    ----------
+    duration: Union[:class:`int`, :class:`datetime.timedelta`]
+        The duration (seconds or timedelta) for which to timeout the user when the rule is triggered.
 
     Attributes
     ----------
