@@ -3538,7 +3538,7 @@ of :class:`enum.Enum`.
 
 .. class:: AutoModActionType
 
-    Represents an action of an auto moderation rule.
+    Represents the type of action an auto moderation rule will take upon execution.
 
     .. versionadded:: 2.6
 
@@ -3561,17 +3561,17 @@ of :class:`enum.Enum`.
 
 .. class:: AutoModEventType
 
-    Represents the event type of an auto moderation rule.
+    Represents the type of event/context an auto moderation rule will be checked in.
 
     .. versionadded:: 2.6
 
     .. attribute:: message_send
 
-        The rule will apply to messages sent in the guild.
+        The rule will apply when a member sends or edits a message in the guild.
 
 .. class:: AutoModTriggerType
 
-    Represents the trigger type of an auto moderation rule.
+    Represents the type of content that can trigger an auto moderation rule.
 
     .. versionadded:: 2.6
 
