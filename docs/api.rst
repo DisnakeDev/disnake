@@ -1396,6 +1396,10 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     In addition, :attr:`Intents.message_content` must be enabled to receive non-empty values
     for :attr:`AutoModActionExecution.content` and :attr:`AutoModActionExecution.matched_content`.
 
+    .. note::
+        This event will fire once per executed :class:`AutoModAction`, which means it
+        will run multiple times when a rule is triggered, if that rule has multiple actions defined.
+
     .. versionadded:: 2.6
 
     :param execution: The auto moderation action execution data.
