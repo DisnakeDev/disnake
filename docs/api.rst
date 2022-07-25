@@ -657,6 +657,66 @@ General
     :param after: The guild after being updated.
     :type after: :class:`Guild`
 
+AutoMod
++++++++
+
+.. function:: on_automod_rule_create(rule)
+
+    Called when an :class:`AutoModRule` is created.
+    You must have the :attr:`~Permissions.manage_guild` permission to receive this.
+
+    This requires :attr:`Intents.automod_configuration` to be enabled.
+
+    .. versionadded:: 2.6
+
+    :param rule: The auto moderation rule that was created.
+    :type rule: :class:`AutoModRule`
+
+.. function:: on_automod_rule_update(rule)
+
+    Called when an :class:`AutoModRule` is updated.
+    You must have the :attr:`~Permissions.manage_guild` permission to receive this.
+
+    This requires :attr:`Intents.automod_configuration` to be enabled.
+
+    .. versionadded:: 2.6
+
+    :param rule: The auto moderation rule that was updated.
+    :type rule: :class:`AutoModRule`
+
+.. function:: on_automod_rule_delete(rule)
+
+    Called when an :class:`AutoModRule` is deleted.
+    You must have the :attr:`~Permissions.manage_guild` permission to receive this.
+
+    This requires :attr:`Intents.automod_configuration` to be enabled.
+
+    .. versionadded:: 2.6
+
+    :param rule: The auto moderation rule that was deleted.
+    :type rule: :class:`AutoModRule`
+
+.. function:: on_automod_action_execution(execution)
+
+    Called when an auto moderation action is executed due to a rule triggering for a particular event.
+    You must have the :attr:`~Permissions.manage_guild` permission to receive this.
+
+    The guild this action has taken place in can be accessed using :attr:`AutoModActionExecution.guild`.
+
+    This requires :attr:`Intents.automod_execution` to be enabled.
+
+    In addition, :attr:`Intents.message_content` must be enabled to receive non-empty values
+    for :attr:`AutoModActionExecution.content` and :attr:`AutoModActionExecution.matched_content`.
+
+    .. note::
+        This event will fire once per executed :class:`AutoModAction`, which means it
+        will run multiple times when a rule is triggered, if that rule has multiple actions defined.
+
+    .. versionadded:: 2.6
+
+    :param execution: The auto moderation action execution data.
+    :type execution: :class:`AutoModActionExecution`
+
 Emojis
 ++++++
 
@@ -706,7 +766,7 @@ Integrations
 
     .. versionadded:: 2.0
 
-    :param integration: The integration that was created.
+    :param integration: The integration that was updated.
     :type integration: :class:`Integration`
 
 .. function:: on_raw_integration_delete(payload)
@@ -1638,7 +1698,7 @@ of :class:`enum.Enum`.
         .. versionadded:: 2.3
     .. attribute:: auto_moderation_action
 
-        The system message denoting that Auto Moderation has taken an action on a message.
+        The system message denoting that an auto moderation action was executed.
 
         .. versionadded:: 2.5
 
@@ -2995,6 +3055,83 @@ of :class:`enum.Enum`.
         .. versionchanged:: 2.6
             Added support for :class:`PartialIntegration`, and added ``integration`` to :attr:`~AuditLogEntry.extra`.
 
+    .. attribute:: automod_rule_create
+
+        An auto moderation rule was created.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`AutoModRule` or :class:`Object` with the ID of the auto moderation rule which
+        was created.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.name`
+        - :attr:`~AuditLogDiff.enabled`
+        - :attr:`~AuditLogDiff.trigger_type`
+        - :attr:`~AuditLogDiff.event_type`
+        - :attr:`~AuditLogDiff.actions`
+        - :attr:`~AuditLogDiff.trigger_metadata`
+        - :attr:`~AuditLogDiff.exempt_roles`
+        - :attr:`~AuditLogDiff.exempt_channels`
+
+        .. versionadded:: 2.6
+
+    .. attribute:: automod_rule_update
+
+        An auto moderation rule was updated.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`AutoModRule` or :class:`Object` with the ID of the auto moderation rule which
+        was updated.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.name`
+        - :attr:`~AuditLogDiff.enabled`
+        - :attr:`~AuditLogDiff.trigger_type`
+        - :attr:`~AuditLogDiff.event_type`
+        - :attr:`~AuditLogDiff.actions`
+        - :attr:`~AuditLogDiff.trigger_metadata`
+        - :attr:`~AuditLogDiff.exempt_roles`
+        - :attr:`~AuditLogDiff.exempt_channels`
+
+        .. versionadded:: 2.6
+
+    .. attribute:: automod_rule_delete
+
+        An auto moderation rule was deleted.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Object` with the ID of the auto moderation rule which
+        was deleted.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.name`
+        - :attr:`~AuditLogDiff.enabled`
+        - :attr:`~AuditLogDiff.trigger_type`
+        - :attr:`~AuditLogDiff.event_type`
+        - :attr:`~AuditLogDiff.actions`
+        - :attr:`~AuditLogDiff.trigger_metadata`
+        - :attr:`~AuditLogDiff.exempt_roles`
+        - :attr:`~AuditLogDiff.exempt_channels`
+
+        .. versionadded:: 2.6
+
+    .. attribute:: automod_block_message
+
+        A message was blocked by an auto moderation rule.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Member` or :class:`User` who had their message blocked.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` is
+        set to an unspecified proxy object with these attributes:
+
+        - ``channel``: A :class:`~abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked.
+        - ``rule_name``: A :class:`str` with the name of the rule that matched.
+        - ``rule_trigger_type``: A :class:`AutoModTriggerType` value with the trigger type of the rule.
+
 .. class:: AuditLogActionCategory
 
     Represents the category that the :class:`AuditLogAction` belongs to.
@@ -3454,6 +3591,64 @@ of :class:`enum.Enum`.
 
         The ``zh_TW`` (Chinese, Taiwan) locale.
 
+.. class:: AutoModActionType
+
+    Represents the type of action an auto moderation rule will take upon execution.
+
+    .. versionadded:: 2.6
+
+    .. attribute:: block_message
+
+        The rule will prevent matching messages from being posted.
+
+    .. attribute:: send_alert_message
+
+        The rule will send an alert to a specified channel.
+
+    .. attribute:: timeout
+
+        The rule will timeout the user that sent the message.
+
+        .. note::
+            This action type is only available for rules with trigger type
+            :attr:`~AutoModTriggerType.keyword`, and :attr:`~Permissions.moderate_members`
+            permissions are required to use it.
+
+.. class:: AutoModEventType
+
+    Represents the type of event/context an auto moderation rule will be checked in.
+
+    .. versionadded:: 2.6
+
+    .. attribute:: message_send
+
+        The rule will apply when a member sends or edits a message in the guild.
+
+.. class:: AutoModTriggerType
+
+    Represents the type of content that can trigger an auto moderation rule.
+
+    .. versionadded:: 2.6
+
+    .. attribute:: keyword
+
+        The rule will filter messages based on a custom keyword list.
+
+        This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+
+    .. attribute:: harmful_link
+
+        The rule will filter messages containing malicious links.
+
+    .. attribute:: spam
+
+        The rule will filter messages suspected of being spam.
+
+    .. attribute:: keyword_preset
+
+        The rule will filter messages based on predefined lists containing commonly flagged words.
+
+        This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
 
 Async Iterator
 ----------------
@@ -4203,6 +4398,52 @@ AuditLogDiff
         See also :attr:`Guild.system_channel_flags`.
 
         :type: :class:`SystemChannelFlags`
+
+    .. attribute:: enabled
+
+        Whether something was enabled or disabled.
+
+        :type: :class:`bool`
+
+    .. attribute:: trigger_type
+
+        The trigger type of an auto moderation rule being changed.
+
+        :type: :class:`AutoModTriggerType`
+
+    .. attribute:: event_type
+
+        The event type of an auto moderation rule being changed.
+
+        :type: :class:`AutoModEventType`
+
+    .. attribute:: actions
+
+        The list of actions of an auto moderation rule being changed.
+
+        :type: List[:class:`AutoModAction`]
+
+    .. attribute:: trigger_metadata
+
+        The additional trigger metadata of an auto moderation rule being changed.
+
+        :type: :class:`AutoModTriggerMetadata`
+
+    .. attribute:: exempt_roles
+
+        The list of roles that are exempt from an auto moderation rule being changed.
+
+        If a role is not found then it is an :class:`Object` with the ID being set.
+
+        :type: List[Union[:class:`Role`, :class:`Object`]]
+
+    .. attribute:: exempt_channels
+
+        The list of channels that are exempt from an auto moderation rule being changed.
+
+        If a channel is not found then it is an :class:`Object` with the ID being set.
+
+        :type: List[Union[:class:`abc.GuildChannel`, :class:`Object`]]
 
 Webhook Support
 ------------------
@@ -5009,6 +5250,22 @@ GuildSticker
     :members:
     :inherited-members:
 
+AutoModRule
+~~~~~~~~~~~~
+
+.. attributetable:: AutoModRule
+
+.. autoclass:: AutoModRule()
+    :members:
+
+AutoModActionExecution
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModActionExecution
+
+.. autoclass:: AutoModActionExecution()
+    :members:
+
 RawMessageDeleteEvent
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -5269,6 +5526,54 @@ ChannelFlags
 .. autoclass:: ChannelFlags
     :members:
 
+AutoModKeywordPresets
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModKeywordPresets
+
+.. autoclass:: AutoModKeywordPresets
+    :members:
+
+AutoModTriggerMetadata
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModTriggerMetadata
+
+.. autoclass:: AutoModTriggerMetadata
+    :members:
+
+AutoModAction
+~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModAction
+
+.. autoclass:: AutoModAction()
+    :members:
+
+AutoModBlockMessageAction
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModBlockMessageAction
+
+.. autoclass:: AutoModBlockMessageAction
+    :members:
+
+AutoModSendAlertAction
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModSendAlertAction
+
+.. autoclass:: AutoModSendAlertAction
+    :members:
+
+AutoModTimeoutAction
+~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModTimeoutAction
+
+.. autoclass:: AutoModTimeoutAction
+    :members:
+
 File
 ~~~~~
 
@@ -5429,7 +5734,7 @@ Button
     :members:
     :inherited-members:
 
-.. autofunction:: disnake.ui.button
+.. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
 
 Select
 ~~~~~~~
@@ -5440,7 +5745,7 @@ Select
     :members:
     :inherited-members:
 
-.. autofunction:: disnake.ui.select
+.. autofunction:: disnake.ui.select(cls=disnake.ui.Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
 
 Modal
 ~~~~~
