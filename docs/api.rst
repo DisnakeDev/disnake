@@ -926,20 +926,6 @@ Scheduled Events
     :param event: The guild scheduled event that was created or deleted.
     :type event: :class:`GuildScheduledEvent`
 
-.. function:: on_guild_scheduled_event_subscribe(event, user)
-              on_guild_scheduled_event_unsubscribe(event, user)
-
-    Called when a user subscribes to or unsubscribes from a guild scheduled event.
-
-    This requires :attr:`Intents.guild_scheduled_events` and :attr:`Intents.members` to be enabled.
-
-    .. versionadded:: 2.3
-
-    :param event: The guild scheduled event that the user subscribed to or unsubscribed from.
-    :type event: :class:`GuildScheduledEvent`
-    :param user: The user who subscribed to or unsubscribed from the event.
-    :type user: Union[:class:`Member`, :class:`User`]
-
 .. function:: on_guild_scheduled_event_update(before, after)
 
     Called when a guild scheduled event is updated.
@@ -953,6 +939,20 @@ Scheduled Events
     :type before: :class:`GuildScheduledEvent`
     :param after: The guild scheduled event after the update.
     :type after: :class:`GuildScheduledEvent`
+
+.. function:: on_guild_scheduled_event_subscribe(event, user)
+              on_guild_scheduled_event_unsubscribe(event, user)
+
+    Called when a user subscribes to or unsubscribes from a guild scheduled event.
+
+    This requires :attr:`Intents.guild_scheduled_events` and :attr:`Intents.members` to be enabled.
+
+    .. versionadded:: 2.3
+
+    :param event: The guild scheduled event that the user subscribed to or unsubscribed from.
+    :type event: :class:`GuildScheduledEvent`
+    :param user: The user who subscribed to or unsubscribed from the event.
+    :type user: Union[:class:`Member`, :class:`User`]
 
 .. function:: on_raw_guild_scheduled_event_subscribe(payload)
               on_raw_guild_scheduled_event_unsubscribe(payload)
