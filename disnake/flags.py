@@ -314,6 +314,11 @@ class SystemChannelFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
+        .. describe:: SystemChannelFlags.y | SystemChannelFlags.z, SystemChannelFlags(y=True) | SystemChannelFlags.z
+
+            Returns a SystemChannelFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new SystemChannelFlags instance with only flags enabled on both x and y.
@@ -329,6 +334,11 @@ class SystemChannelFlags(BaseFlags):
         .. describe:: ~x
 
             Returns a new SystemChannelFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
+        .. describe:: ~SystemChannelFlags.y
+
+            Returns a SystemChannelFlags instance with all flags except ``y`` inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -434,6 +444,11 @@ class MessageFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
+        .. describe:: MessageFlags.y | MessageFlags.z, MessageFlags(y=True) | MessageFlags.z
+
+            Returns a MessageFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new MessageFlags instance with only flags enabled on both x and y.
@@ -449,6 +464,11 @@ class MessageFlags(BaseFlags):
         .. describe:: ~x
 
             Returns a new MessageFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
+        .. describe:: ~MessageFlags.y
+
+            Returns a MessageFlags instance with all flags except ``y`` inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -573,6 +593,11 @@ class PublicUserFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
+        .. describe:: PublicUserFlags.y | PublicUserFlags.z, PublicUserFlags(y=True) | PublicUserFlags.z
+
+            Returns a PublicUserFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new PublicUserFlags instance with only flags enabled on both x and y.
@@ -588,6 +613,11 @@ class PublicUserFlags(BaseFlags):
         .. describe:: ~x
 
             Returns a new PublicUserFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
+        .. describe:: ~PublicUserFlags.y
+
+            Returns a PublicUserFlags instance with all flags except ``y`` inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -765,6 +795,11 @@ class Intents(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
+        .. describe:: Intents.y | Intents.z, Intents(y=True) | Intents.z
+
+            Returns an Intents instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new Intents instance with only intents enabled on both x and y.
@@ -780,6 +815,11 @@ class Intents(BaseFlags):
         .. describe:: ~x
 
             Returns a new Intents instance with all intents inverted from x.
+
+            .. versionadded:: 2.6
+        .. describe:: ~Intents.y
+
+            Returns an Intents instance with all flags except ``y`` inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -1330,6 +1370,11 @@ class MemberCacheFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
+        .. describe:: MemberCacheFlags.y | MemberCacheFlags.z, MemberCacheFlags(y=True) | MemberCacheFlags.z
+
+            Returns a MemberCacheFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new MemberCacheFlags instance with only flags enabled on both x and y.
@@ -1345,6 +1390,11 @@ class MemberCacheFlags(BaseFlags):
         .. describe:: ~x
 
             Returns a new MemberCacheFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
+        .. describe:: ~MemberCacheFlags.y
+
+            Returns a MemberCacheFlags instance with all flags except ``y`` inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -1484,6 +1534,11 @@ class ApplicationFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
+        .. describe:: ApplicationFlags.y | ApplicationFlags.z, ApplicationFlags(y=True) | ApplicationFlags.z
+
+            Returns an ApplicationFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new ApplicationFlags instance with only flags enabled on both x and y.
@@ -1499,6 +1554,11 @@ class ApplicationFlags(BaseFlags):
         .. describe:: ~x
 
             Returns a new ApplicationFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
+        .. describe:: ~ApplicationFlags.y
+
+            Returns an ApplicationFlags instance with all flags except ``y`` inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
@@ -1614,6 +1674,11 @@ class ChannelFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
+        .. describe:: ChannelFlags.y | ChannelFlags.z, ChannelFlags(y=True) | ChannelFlags.z
+
+            Returns a ChannelFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new ChannelFlags instance with only flags enabled on both x and y.
@@ -1629,6 +1694,11 @@ class ChannelFlags(BaseFlags):
         .. describe:: ~x
 
             Returns a new ChannelFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
+        .. describe:: ~ChannelFlags.y
+
+            Returns a ChannelFlags instance with all flags except ``y`` inverted.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
