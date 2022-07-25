@@ -612,16 +612,6 @@ General
     :param guild: The guild that was joined.
     :type guild: :class:`Guild`
 
-.. function:: on_guild_available(guild)
-              on_guild_unavailable(guild)
-
-    Called when a guild becomes available or unavailable. The guild must have
-    existed in the :attr:`Client.guilds` cache.
-
-    This requires :attr:`Intents.guilds` to be enabled.
-
-    :param guild: The :class:`Guild` that has changed availability.
-
 .. function:: on_guild_remove(guild)
 
     Called when a :class:`Guild` is removed from the :class:`Client`.
@@ -656,6 +646,16 @@ General
     :type before: :class:`Guild`
     :param after: The guild after being updated.
     :type after: :class:`Guild`
+
+.. function:: on_guild_available(guild)
+              on_guild_unavailable(guild)
+
+    Called when a guild becomes available or unavailable. The guild must have
+    existed in the :attr:`Client.guilds` cache.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    :param guild: The :class:`Guild` that has changed availability.
 
 AutoMod
 +++++++
