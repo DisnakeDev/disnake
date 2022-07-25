@@ -1062,17 +1062,10 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_raw_member_update(payload)
 
-    Called when a :class:`Member` updates their profile.
+    Called when a member updates their profile.
+    Unlike :func:`on_member_update`, this is called regardless of the member cache.
 
-    This is called when one or more of the following things change, but is not limited to:
-
-    - nickname
-    - roles
-    - pending
-    - timeout
-    - guild specific avatar
-
-    This requires :attr:`Intents.members` to be enabled.
+    .. versionadded:: 2.6
 
     :param payload: The raw event payload data.
     :type payload: :class:`RawGuildMemberUpdateEvent`
