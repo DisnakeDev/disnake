@@ -660,6 +660,27 @@ General
 AutoMod
 +++++++
 
+.. function:: on_automod_action_execution(execution)
+
+    Called when an auto moderation action is executed due to a rule triggering for a particular event.
+    You must have the :attr:`~Permissions.manage_guild` permission to receive this.
+
+    The guild this action has taken place in can be accessed using :attr:`AutoModActionExecution.guild`.
+
+    This requires :attr:`Intents.automod_execution` to be enabled.
+
+    In addition, :attr:`Intents.message_content` must be enabled to receive non-empty values
+    for :attr:`AutoModActionExecution.content` and :attr:`AutoModActionExecution.matched_content`.
+
+    .. note::
+        This event will fire once per executed :class:`AutoModAction`, which means it
+        will run multiple times when a rule is triggered, if that rule has multiple actions defined.
+
+    .. versionadded:: 2.6
+
+    :param execution: The auto moderation action execution data.
+    :type execution: :class:`AutoModActionExecution`
+
 .. function:: on_automod_rule_create(rule)
 
     Called when an :class:`AutoModRule` is created.
@@ -695,27 +716,6 @@ AutoMod
 
     :param rule: The auto moderation rule that was deleted.
     :type rule: :class:`AutoModRule`
-
-.. function:: on_automod_action_execution(execution)
-
-    Called when an auto moderation action is executed due to a rule triggering for a particular event.
-    You must have the :attr:`~Permissions.manage_guild` permission to receive this.
-
-    The guild this action has taken place in can be accessed using :attr:`AutoModActionExecution.guild`.
-
-    This requires :attr:`Intents.automod_execution` to be enabled.
-
-    In addition, :attr:`Intents.message_content` must be enabled to receive non-empty values
-    for :attr:`AutoModActionExecution.content` and :attr:`AutoModActionExecution.matched_content`.
-
-    .. note::
-        This event will fire once per executed :class:`AutoModAction`, which means it
-        will run multiple times when a rule is triggered, if that rule has multiple actions defined.
-
-    .. versionadded:: 2.6
-
-    :param execution: The auto moderation action execution data.
-    :type execution: :class:`AutoModActionExecution`
 
 Emojis
 ++++++
