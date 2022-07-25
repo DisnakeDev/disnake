@@ -31,13 +31,26 @@ import inspect
 import sys
 import traceback
 from collections.abc import Sequence
-from typing import Any, Awaitable, Callable, Generic, List, Optional, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    Generic,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+)
 
 import aiohttp
-
 import disnake
 from disnake.backoff import ExponentialBackoff
 from disnake.utils import MISSING, utcnow
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__ = ("loop",)
 
@@ -195,8 +208,13 @@ class Loop(Generic[LF]):
     def __get__(self, obj: T, objtype: Type[T]) -> Loop[LF]:
         if obj is None:
             return self
+        clone = self.clone()
+        clone._injected = obj
+        setattr(obj, self.coro.__name__, clone)
+        return clone
 
-        copy: Loop[LF] = Loop(
+    def clone(self) -> Self:
+        instance = self.__class__(
             self.coro,
             seconds=self._seconds,
             hours=self._hours,
@@ -206,12 +224,11 @@ class Loop(Generic[LF]):
             reconnect=self.reconnect,
             loop=self.loop,
         )
-        copy._injected = obj
-        copy._before_loop = self._before_loop
-        copy._after_loop = self._after_loop
-        copy._error = self._error
-        setattr(obj, self.coro.__name__, copy)
-        return copy
+        instance._before_loop = self._before_loop
+        instance._after_loop = self._after_loop
+        instance._error = self._error
+        instance._injected = self._injected
+        return instance
 
     @property
     def seconds(self) -> Optional[float]:
