@@ -100,7 +100,7 @@ def _validate_name(name: str) -> None:
 
     if not isinstance(name, str):
         raise TypeError(
-            f"slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
+            f"Slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
         )
 
     if name != name.lower() or not re.fullmatch(r"[\w-]{1,32}", name):
