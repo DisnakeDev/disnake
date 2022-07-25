@@ -1,0 +1,1 @@
+Update and standardise all internal Snowflake regexes to match between 17 and 19 characters (inclusive).
