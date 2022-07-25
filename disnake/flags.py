@@ -36,6 +36,7 @@ from typing import (
     Iterator,
     List,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
@@ -56,6 +57,7 @@ __all__ = (
     "MemberCacheFlags",
     "ApplicationFlags",
     "ChannelFlags",
+    "AutoModKeywordPresets",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -244,6 +246,41 @@ class BaseFlags:
             self.value &= ~o
         else:
             raise TypeError(f"Value to set for {self.__class__.__name__} must be a bool.")
+
+
+class ListBaseFlags(BaseFlags):
+    """
+    A base class for flags that aren't powers of 2.
+    Instead, values are used as exponents to map to powers of 2 to avoid collisions,
+    and only the combined value is stored, which allows all bitwise operations to work as expected.
+    """
+
+    __slots__ = ()
+
+    @classmethod
+    def _from_values(cls, values: Sequence[int]):
+        self = cls.__new__(cls)
+        value = 0
+        for n in values:
+            # protect against DoS with large shift values
+            # n.b. performance overhead of this is negligible
+            if not (0 <= n < 64):
+                raise ValueError("Flag values must be within [0, 64)")
+            value += 1 << n
+        self.value = value
+        return self
+
+    @property
+    def values(self) -> List[int]:
+        # This essentially converts an int like `0b100110` into `[1, 2, 5]`,
+        # i.e. the exponents of set bits in `self.value`.
+        # This may look weird but interestingly it's by far the
+        # fastest out of all benchmarked snippets, see https://stackoverflow.com/a/49592515/5080607
+        # (this code is a derivative of one of them)
+        return [i for i, c in enumerate(bin(self.value)[:1:-1]) if c == "1"]
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} values={self.values}>"
 
 
 @fill_with_flags(inverted=True)
@@ -1103,6 +1140,8 @@ class Intents(BaseFlags):
     def message_content(self):
         """:class:`bool`: Whether messages will have access to message content.
 
+        .. versionadded:: 2.5
+
         This applies to the following fields on :class:`~disnake.Message` instances:
 
         - :attr:`~disnake.Message.content`
@@ -1115,7 +1154,12 @@ class Intents(BaseFlags):
         - Messages the bot sends
         - Messages the bot receives as a direct message
         - Messages in which the bot is mentioned
-        - Messages received from an interaction payload, these will typically be attributes on :class:`~disnake.MessageInteraction` instances
+        - Messages received from an interaction payload, these will typically be attributes on :class:`~disnake.MessageInteraction` instances.
+
+        In addition, this also corresponds to the following fields:
+
+        - :attr:`AutoModActionExecution.content`
+        - :attr:`AutoModActionExecution.matched_content`
 
         For more information go to the :ref:`message content intent documentation <need_message_content_intent>`.
 
@@ -1235,6 +1279,8 @@ class Intents(BaseFlags):
     def guild_scheduled_events(self):
         """:class:`bool`: Whether guild scheduled event related events are enabled.
 
+        .. versionadded:: 2.3
+
         This corresponds to the following events:
 
         - :func:`on_guild_scheduled_event_create`
@@ -1252,6 +1298,55 @@ class Intents(BaseFlags):
         - :attr:`StageInstance.guild_scheduled_event`
         """
         return 1 << 16
+
+    @flag_value
+    def automod_configuration(self):
+        """:class:`bool`: Whether auto moderation configuration related events are enabled.
+
+        .. versionadded:: 2.6
+
+        This corresponds to the following events:
+
+        - :func:`on_automod_rule_create`
+        - :func:`on_automod_rule_delete`
+        - :func:`on_automod_rule_update`
+
+        This does not correspond to any attributes or classes in the library in terms of cache.
+        """
+        return 1 << 20
+
+    @flag_value
+    def automod_execution(self):
+        """:class:`bool`: Whether auto moderation execution related events are enabled.
+
+        .. versionadded:: 2.6
+
+        This corresponds to the following events:
+
+        - :func:`on_automod_action_execution`
+
+        This does not correspond to any attributes or classes in the library in terms of cache.
+        """
+        return 1 << 21
+
+    @alias_flag_value
+    def automod(self):
+        """:class:`bool`: Whether auto moderation related events are enabled.
+
+        .. versionadded:: 2.6
+
+        This is a shortcut to set or get both :attr:`automod_configuration` and :attr:`automod_execution`.
+
+        This corresponds to the following events:
+
+        - :func:`on_automod_rule_create`
+        - :func:`on_automod_rule_delete`
+        - :func:`on_automod_rule_update`
+        - :func:`on_automod_action_execution`
+
+        This does not correspond to any attributes or classes in the library in terms of cache.
+        """
+        return (1 << 20) | (1 << 21)
 
 
 @fill_with_flags()
@@ -1633,3 +1728,99 @@ class ChannelFlags(BaseFlags):
     def pinned(self):
         """:class:`bool`: Returns ``True`` if the thread is pinned."""
         return 1 << 1
+
+
+@fill_with_flags()
+class AutoModKeywordPresets(ListBaseFlags):
+    """
+    Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two AutoModKeywordPresets instances are equal.
+        .. describe:: x != y
+
+            Checks if two AutoModKeywordPresets instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an AutoModKeywordPresets instance is a subset of another AutoModKeywordPresets instance.
+        .. describe:: x >= y
+
+            Checks if an AutoModKeywordPresets instance is a superset of another AutoModKeywordPresets instance.
+        .. describe:: x < y
+
+            Checks if an AutoModKeywordPresets instance is a strict subset of another AutoModKeywordPresets instance.
+        .. describe:: x > y
+
+            Checks if an AutoModKeywordPresets instance is a strict superset of another AutoModKeywordPresets instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new AutoModKeywordPresets instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new AutoModKeywordPresets instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new AutoModKeywordPresets instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new AutoModKeywordPresets instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Return the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    values: :class:`int`
+        The raw values. You should query flags via the properties
+        rather than using these raw values.
+    """
+
+    __slots__ = ()
+
+    @classmethod
+    def all(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
+        """A factory method that creates a :class:`AutoModKeywordPresets` with everything enabled."""
+        self = cls.__new__(cls)
+        self.value = all_flags_value(cls.VALID_FLAGS)
+        return self
+
+    @classmethod
+    def none(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
+        """A factory method that creates a :class:`AutoModKeywordPresets` with everything disabled."""
+        self = cls.__new__(cls)
+        self.value = self.DEFAULT_VALUE
+        return self
+
+    @flag_value
+    def profanity(self):
+        """:class:`bool`: Returns ``True`` if the profanity preset is enabled
+        (contains words that may be considered swearing or cursing).
+        """
+        return 1 << 0
+
+    @flag_value
+    def sexual_content(self):
+        """:class:`bool`: Returns ``True`` if the sexual content preset is enabled
+        (contains sexually explicit words).
+        """
+        return 1 << 1
+
+    @flag_value
+    def slurs(self):
+        """:class:`bool`: Returns ``True`` if the slurs preset is enabled
+        (contains insults or words that may be considered hate speech).
+        """
+        return 1 << 2

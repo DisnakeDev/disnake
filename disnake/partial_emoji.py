@@ -93,7 +93,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     __slots__ = ("animated", "name", "id")
 
     _CUSTOM_EMOJI_RE = re.compile(
-        r"<?(?P<animated>a)?:?(?P<name>[A-Za-z0-9\_]+):(?P<id>[0-9]{13,20})>?"
+        r"<?(?P<animated>a)?:?(?P<name>[A-Za-z0-9\_]+):(?P<id>[0-9]{17,19})>?"
     )
 
     if TYPE_CHECKING:
