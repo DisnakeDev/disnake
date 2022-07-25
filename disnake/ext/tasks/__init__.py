@@ -39,9 +39,12 @@ from typing import (
     Generic,
     List,
     Optional,
+    Protocol,
     Type,
     TypeVar,
     Union,
+    cast,
+    overload,
 )
 
 import aiohttp
@@ -50,14 +53,17 @@ from disnake.backoff import ExponentialBackoff
 from disnake.utils import MISSING, utcnow
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import Self, ParamSpec, Concatenate
+
+else:
+    ParamSpec = TypeVar
 
 __all__ = ("loop",)
 
 T = TypeVar("T")
-_func = Callable[..., Awaitable[Any]]
-LF = TypeVar("LF", bound=_func)
-FT = TypeVar("FT", bound=_func)
+CoroP = ParamSpec("CoroP")
+Coro = Callable[CoroP, Awaitable[Any]]
+FT = TypeVar("FT", bound=Callable[..., Awaitable[Any]])
 ET = TypeVar("ET", bound=Callable[[Any, BaseException], Awaitable[Any]])
 
 
@@ -86,7 +92,7 @@ class SleepHandle:
         self.future.cancel()
 
 
-class Loop(Generic[LF]):
+class Loop(Generic[CoroP]):
     """A background task helper that abstracts the loop and reconnection logic for you.
 
     The main interface to create this is through :func:`loop`.
@@ -94,16 +100,16 @@ class Loop(Generic[LF]):
 
     def __init__(
         self,
-        coro: LF,
-        seconds: float,
-        hours: float,
-        minutes: float,
-        time: Union[datetime.time, Sequence[datetime.time]],
-        count: Optional[int],
-        reconnect: bool,
-        loop: asyncio.AbstractEventLoop,
+        coro: Coro[CoroP],
+        seconds: float = 0,
+        minutes: float = 0,
+        hours: float = 0,
+        time: Union[datetime.time, Sequence[datetime.time]] = MISSING,
+        count: Optional[int] = None,
+        reconnect: bool = True,
+        loop: asyncio.AbstractEventLoop = MISSING,
     ) -> None:
-        self.coro: LF = coro
+        self.coro: Coro[CoroP] = coro
         self.reconnect: bool = reconnect
         self.loop: asyncio.AbstractEventLoop = loop
         self.count: Optional[int] = count
@@ -712,6 +718,20 @@ class Loop(Generic[LF]):
                 self._handle.recalculate(self._next_iteration)
 
 
+P = ParamSpec("P")
+T_co = TypeVar("T_co", covariant=True)
+L_co = TypeVar("L_co", bound=Loop, covariant=True)
+
+
+class Object(Protocol[T_co, P]):
+    def __new__(cls) -> T_co:
+        ...
+
+    def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
+        ...
+
+
+@overload
 def loop(
     *,
     seconds: float = MISSING,
@@ -721,12 +741,33 @@ def loop(
     count: Optional[int] = None,
     reconnect: bool = True,
     loop: asyncio.AbstractEventLoop = MISSING,
-) -> Callable[[LF], Loop[LF]]:
+) -> Callable[[Coro[CoroP]], Loop[CoroP]]:
+    ...
+
+
+@overload
+def loop(
+    cls: Type[Object[L_co, Concatenate[Coro[CoroP], P]]], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[Coro[CoroP]], L_co]:
+    ...
+
+
+def loop(
+    cls: Type[Object[L_co, Concatenate[Coro[CoroP], P]]] = Loop[CoroP],
+    **kwargs: Any,
+) -> Callable[[Coro[CoroP]], L_co]:
     """A decorator that schedules a task in the background for you with
     optional reconnect logic. The decorator returns a :class:`Loop`.
 
     Parameters
     ----------
+    cls: Type[:class:`Loop`]
+        The loop subclass to create an instance of. If provided, the following parameters
+        described below do no apply. Instead, this decorator will accept the same keywords
+        as the passed cls does.
+
+        .. versionadded:: 2.6
+
     seconds: :class:`float`
         The number of seconds between every iteration.
     minutes: :class:`float`
@@ -766,16 +807,10 @@ def loop(
         or ``time`` parameter was passed in conjunction with relative time parameters.
     """
 
-    def decorator(func: LF) -> Loop[LF]:
-        return Loop[LF](
-            func,
-            seconds=seconds,
-            minutes=minutes,
-            hours=hours,
-            count=count,
-            time=time,
-            reconnect=reconnect,
-            loop=loop,
-        )
+    def decorator(func: Coro[CoroP]) -> L_co:
+        if not asyncio.iscoroutinefunction(func):
+            raise TypeError("decorated function must be a coroutine")
+
+        return cast(Type[L_co], cls)(func, **kwargs)
 
     return decorator
