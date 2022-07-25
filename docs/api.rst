@@ -1025,6 +1025,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
               on_member_remove(member)
 
     Called when a :class:`Member` leaves or joins a :class:`Guild`.
+    If :func:`on_member_remove` is being used then consider using :func:`on_raw_member_remove` which will be called regardless of the cache.
 
     This requires :attr:`Intents.members` to be enabled.
 
@@ -1044,6 +1045,7 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 .. function:: on_member_update(before, after)
 
     Called when a :class:`Member` updates their profile.
+    Consider using :func:`on_raw_member_update` which will be called regardless of the cache.
 
     This is called when one or more of the following things change, but is not limited to:
 
