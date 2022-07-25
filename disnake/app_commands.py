@@ -98,6 +98,11 @@ def _validate_name(name: str) -> None:
     # used for slash command names and option names
     # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
 
+    if not isinstance(name, str):
+        raise TypeError(
+            f"slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
+        )
+
     if name != name.lower() or not re.fullmatch(r"[\w-]{1,32}", name):
         raise ValueError(
             f"Slash command or option name '{name}' should be lowercase, "
