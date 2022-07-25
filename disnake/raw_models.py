@@ -26,10 +26,10 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, List, Optional, Set, cast
+from typing import TYPE_CHECKING, List, Optional, Set, Union, cast
 
 from .enums import ChannelType, try_enum
-from .utils import get_slots
+from .utils import get_slots, parse_time
 
 if TYPE_CHECKING:
     from .member import Member
@@ -417,7 +417,7 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
     ----------
     guild_id: :class:`int`
         The ID of the guild where the member was removed from.
-    user: :class:`User`
+    user: Union[:class:`User`, :class:`Member`]
         The user object of the member that was removed.
     """
 
@@ -426,8 +426,8 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
         "user",
     )
 
-    def __init__(self, user: User, guild_id: int):
-        self.user: User = user
+    def __init__(self, user: Union[User, Member], guild_id: int):
+        self.user: Union[User, Member] = user
         self.guild_id: int = guild_id
 
 
@@ -442,7 +442,7 @@ class RawGuildMemberUpdateEvent(_RawReprMixin):
         The ID of the guild where the member was edited.
     roles: List[:class:`int`]
         The IDs of the roles the member has.
-    user: :class:`User`
+    user: Union[:class:`User`, :class:`Member`]
         The user object of the member that was updated.
     nick: Optional[:class:`str`]
         The nickname of the member that was updated.
@@ -476,10 +476,10 @@ class RawGuildMemberUpdateEvent(_RawReprMixin):
         "communication_disabled_until",
     )
 
-    def __init__(self, data: GuildMemberUpdateEvent, user: User):
+    def __init__(self, data: GuildMemberUpdateEvent, user: Union[User, Member]):
         self.guild_id: int = int(data["guild_id"])
         self.roles: List[int] = [int(rid) for rid in data["roles"]]
-        self.user: User = user
+        self.user: Union[User, Member] = user
         self.nick: Optional[str] = data.get("nick")
         self.avatar: Optional[str] = data.get("avatar")
         self.joined_at: Optional[datetime.datetime] = parse_time(data.get("joined_at"))

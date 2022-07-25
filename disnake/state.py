@@ -1257,9 +1257,7 @@ class ConnectionState:
 
     def parse_guild_member_update(self, data) -> None:
         guild = self._get_guild(int(data["guild_id"]))
-        user = data["user"]
-        user_id = int(user["id"])
-        raw = RawGuildMemberUpdateEvent(data, User(state=self, data=user))
+        user_id = int(data["user"]["id"])
         if guild is None:
             _log.debug(
                 "GUILD_MEMBER_UPDATE referencing an unknown guild ID: %s. Discarding.",
@@ -1267,22 +1265,23 @@ class ConnectionState:
             )
             return
 
-        self.dispatch("raw_member_update", raw)
         member = guild.get_member(user_id)
         if member is not None:
             old_member = Member._copy(member)
             member._update(data)
-            user_update = member._update_inner_user(user)
+            user_update = member._update_inner_user(data["user"])
             if user_update:
                 self.dispatch("user_update", user_update[0], user_update[1])
 
             self.dispatch("member_update", old_member, member)
+            user = member
         else:
+            user = self.store_user(data["user"])
             if self.member_cache_flags.joined:
                 member = Member(data=data, guild=guild, state=self)
 
                 # Force an update on the inner user if necessary
-                user_update = member._update_inner_user(user)
+                user_update = member._update_inner_user(data["user"])
                 if user_update:
                     self.dispatch("user_update", user_update[0], user_update[1])
 
@@ -1290,6 +1289,9 @@ class ConnectionState:
             _log.debug(
                 "GUILD_MEMBER_UPDATE referencing an unknown member ID: %s. Discarding.", user_id
             )
+
+        raw = RawGuildMemberUpdateEvent(data, user)
+        self.dispatch("raw_member_update", raw)
 
     def parse_guild_emojis_update(self, data) -> None:
         guild = self._get_guild(int(data["guild_id"]))
