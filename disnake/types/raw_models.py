@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from .emoji import PartialEmoji
     from .member import MemberWithUser
     from .snowflake import Snowflake
+    from .user import User
 
 
 class _MessageEventOptional(TypedDict, total=False):
@@ -122,3 +123,20 @@ class ThreadDeleteEvent(TypedDict):
     guild_id: Snowflake
     parent_id: Snowflake
     type: Literal[10, 11, 12]
+
+
+class _GuildMemberUpdateEventOptional(TypedDict, total=False):
+    nick: Optional[str]
+    premium_since: Optional[str]
+    deaf: bool
+    mute: bool
+    pending: bool
+    communication_disabled_until: Optional[str]
+
+
+class GuildMemberUpdateEvent(_GuildMemberUpdateEventOptional):
+    guild_id: Snowflake
+    roles: List[Snowflake]
+    user: User
+    avatar: Optional[str]
+    joined_at: Optional[str]

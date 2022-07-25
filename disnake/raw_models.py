@@ -26,10 +26,10 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, List, Optional, Set, cast
+from typing import TYPE_CHECKING, List, Optional, Set, Union, cast
 
 from .enums import ChannelType, try_enum
-from .utils import get_slots
+from .utils import get_slots, parse_time
 
 if TYPE_CHECKING:
     from .member import Member
@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from .threads import Thread, ThreadMember, ThreadType
     from .types.raw_models import (
         BulkMessageDeleteEvent,
+        GuildMemberUpdateEvent,
         GuildScheduledEventUserActionEvent,
         IntegrationDeleteEvent,
         MessageDeleteEvent,
@@ -47,6 +48,7 @@ if TYPE_CHECKING:
         ReactionClearEvent,
         TypingEvent,
     )
+    from .user import User
 
 
 __all__ = (
@@ -61,6 +63,8 @@ __all__ = (
     "RawThreadDeleteEvent",
     "RawThreadMemberRemoveEvent",
     "RawTypingEvent",
+    "RawGuildMemberRemoveEvent",
+    "RawGuildMemberUpdateEvent",
 )
 
 
@@ -402,3 +406,87 @@ class RawTypingEvent(_RawReprMixin):
             self.guild_id: Optional[int] = int(data["guild_id"])
         except KeyError:
             self.guild_id: Optional[int] = None
+
+
+class RawGuildMemberRemoveEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_member_remove` event.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    guild_id: :class:`int`
+        The ID of the guild where the member was removed from.
+    user: Union[:class:`User`, :class:`Member`]
+        The user object of the member that was removed.
+    """
+
+    __slots__ = (
+        "guild_id",
+        "user",
+    )
+
+    def __init__(self, user: Union[User, Member], guild_id: int):
+        self.user: Union[User, Member] = user
+        self.guild_id: int = guild_id
+
+
+class RawGuildMemberUpdateEvent(_RawReprMixin):
+    """Represents the event payload for an :func:`on_raw_member_update` event.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    guild_id: :class:`int`
+        The ID of the guild where the member was edited.
+    roles: List[:class:`int`]
+        The IDs of the roles the member has.
+    user: Union[:class:`User`, :class:`Member`]
+        The user object of the member that was updated.
+    nick: Optional[:class:`str`]
+        The nickname of the member that was updated.
+    avatar: Optional[:class:`str`]
+        The avatar hash of the member that was updated.
+    joined_at: Optional[:class:`datetime.datetime`]
+        When the member that was updated joined the guild.
+    premium_since: Optional[:class:`datetime.datetime`]
+        When the member that was updated started boosting the guild.
+    deaf: Optional[:class:`bool`]
+        If the member that was updated has been deafened.
+    mute: Optional[:class:`bool`]
+        If the member that was updated has been muted.
+    pending: Optional[:class:`bool`]
+        If the member that was updated is still pending.
+    communication_disabled_until: Optional[:class:`datetime.datetime`]
+        When the member that was updated was timed out.
+    """
+
+    __slots__ = (
+        "guild_id",
+        "roles",
+        "user",
+        "nick",
+        "avatar",
+        "joined_at",
+        "premium_since",
+        "deaf",
+        "mute",
+        "pending",
+        "communication_disabled_until",
+    )
+
+    def __init__(self, data: GuildMemberUpdateEvent, user: Union[User, Member]):
+        self.guild_id: int = int(data["guild_id"])
+        self.roles: List[int] = [int(rid) for rid in data["roles"]]
+        self.user: Union[User, Member] = user
+        self.nick: Optional[str] = data.get("nick")
+        self.avatar: Optional[str] = data.get("avatar")
+        self.joined_at: Optional[datetime.datetime] = parse_time(data.get("joined_at"))
+        self.premium_since: Optional[datetime.datetime] = parse_time(data.get("premium_since"))
+        self.deaf: Optional[bool] = data.get("deaf")
+        self.mute: Optional[bool] = data.get("mute")
+        self.pending: Optional[bool] = data.get("pending")
+        self.communication_disabled_until: Optional[datetime.datetime] = parse_time(
+            data.get("communication_disabled_until")
+        )
