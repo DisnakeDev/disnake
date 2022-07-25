@@ -74,7 +74,10 @@ class flag_value(Generic[T]):
         self._parent: Type[T] = MISSING
 
     def __or__(self, other: flag_value[T]) -> T:
-        assert self._parent is other._parent  # noqa: S101
+        if self._parent is not other._parent:
+            raise TypeError(
+                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
+            )
         return self._parent._from_value(self.flag | other.flag)
 
     def __invert__(self: flag_value[T]) -> T:
@@ -171,7 +174,10 @@ class BaseFlags:
 
     def __or__(self, other: Union[Self, flag_value[Self]]) -> Self:
         if isinstance(other, flag_value):
-            assert type(self) is other._parent  # noqa: S101
+            if self is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
             return self._from_value(self.value | other.flag)
         if not isinstance(other, self.__class__):
             raise TypeError(
