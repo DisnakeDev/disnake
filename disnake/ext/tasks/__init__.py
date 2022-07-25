@@ -31,7 +31,21 @@ import inspect
 import sys
 import traceback
 from collections.abc import Sequence
-from typing import Any, Awaitable, Callable, Generic, List, Optional, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    Generic,
+    List,
+    Optional,
+    Protocol,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 import aiohttp
 
@@ -39,12 +53,18 @@ import disnake
 from disnake.backoff import ExponentialBackoff
 from disnake.utils import MISSING, utcnow
 
+if TYPE_CHECKING:
+    from typing_extensions import Concatenate, ParamSpec, Self
+
+else:
+    ParamSpec = TypeVar
+
 __all__ = ("loop",)
 
 T = TypeVar("T")
-_func = Callable[..., Awaitable[Any]]
-LF = TypeVar("LF", bound=_func)
-FT = TypeVar("FT", bound=_func)
+CoroP = ParamSpec("CoroP")
+Coro = Callable[CoroP, Awaitable[Any]]
+FT = TypeVar("FT", bound=Callable[..., Awaitable[Any]])
 ET = TypeVar("ET", bound=Callable[[Any, BaseException], Awaitable[Any]])
 
 
@@ -53,16 +73,16 @@ class SleepHandle:
 
     def __init__(self, dt: datetime.datetime, *, loop: asyncio.AbstractEventLoop) -> None:
         self.loop = loop
-        self.future = future = loop.create_future()
+        self.future: asyncio.Future[bool] = loop.create_future()
         relative_delta = disnake.utils.compute_timedelta(dt)
-        self.handle = loop.call_later(relative_delta, future.set_result, True)
+        self.handle = loop.call_later(relative_delta, self.future.set_result, True)
 
     def recalculate(self, dt: datetime.datetime) -> None:
         self.handle.cancel()
         relative_delta = disnake.utils.compute_timedelta(dt)
         self.handle = self.loop.call_later(relative_delta, self.future.set_result, True)
 
-    def wait(self) -> asyncio.Future[Any]:
+    def wait(self) -> asyncio.Future[bool]:
         return self.future
 
     def done(self) -> bool:
@@ -73,7 +93,7 @@ class SleepHandle:
         self.future.cancel()
 
 
-class Loop(Generic[LF]):
+class Loop(Generic[CoroP]):
     """A background task helper that abstracts the loop and reconnection logic for you.
 
     The main interface to create this is through :func:`loop`.
@@ -81,16 +101,16 @@ class Loop(Generic[LF]):
 
     def __init__(
         self,
-        coro: LF,
-        seconds: float,
-        hours: float,
-        minutes: float,
-        time: Union[datetime.time, Sequence[datetime.time]],
-        count: Optional[int],
-        reconnect: bool,
-        loop: asyncio.AbstractEventLoop,
+        coro: Coro[CoroP],
+        seconds: float = 0,
+        minutes: float = 0,
+        hours: float = 0,
+        time: Union[datetime.time, Sequence[datetime.time]] = MISSING,
+        count: Optional[int] = None,
+        reconnect: bool = True,
+        loop: asyncio.AbstractEventLoop = MISSING,
     ) -> None:
-        self.coro: LF = coro
+        self.coro: Coro[CoroP] = coro
         self.reconnect: bool = reconnect
         self.loop: asyncio.AbstractEventLoop = loop
         self.count: Optional[int] = count
@@ -137,7 +157,7 @@ class Loop(Generic[LF]):
         self._handle = SleepHandle(dt=dt, loop=self.loop)
         return self._handle.wait()
 
-    async def _loop(self, *args: Any, **kwargs: Any) -> None:
+    async def _loop(self, *args: CoroP.args, **kwargs: CoroP.kwargs) -> None:
         backoff = ExponentialBackoff()
         await self._call_loop_function("before_loop")
         self._last_iteration_failed = False
@@ -192,11 +212,16 @@ class Loop(Generic[LF]):
             self._stop_next_iteration = False
             self._has_failed = False
 
-    def __get__(self, obj: T, objtype: Type[T]) -> Loop[LF]:
+    def __get__(self, obj: T, objtype: Type[T]) -> Self:
         if obj is None:
             return self
+        clone = self.clone()
+        clone._injected = obj
+        setattr(obj, self.coro.__name__, clone)
+        return clone
 
-        copy: Loop[LF] = Loop(
+    def clone(self) -> Self:
+        instance = self.__class__(
             self.coro,
             seconds=self._seconds,
             hours=self._hours,
@@ -206,12 +231,11 @@ class Loop(Generic[LF]):
             reconnect=self.reconnect,
             loop=self.loop,
         )
-        copy._injected = obj
-        copy._before_loop = self._before_loop
-        copy._after_loop = self._after_loop
-        copy._error = self._error
-        setattr(obj, self.coro.__name__, copy)
-        return copy
+        instance._before_loop = self._before_loop
+        instance._after_loop = self._after_loop
+        instance._error = self._error
+        instance._injected = self._injected
+        return instance
 
     @property
     def seconds(self) -> Optional[float]:
@@ -270,7 +294,7 @@ class Loop(Generic[LF]):
             return None
         return self._next_iteration
 
-    async def __call__(self, *args: Any, **kwargs: Any) -> Any:
+    async def __call__(self, *args: CoroP.args, **kwargs: CoroP.kwargs) -> Any:
         """
         |coro|
 
@@ -286,7 +310,7 @@ class Loop(Generic[LF]):
             The keyword arguments to use.
         """
         if self._injected is not None:
-            args = (self._injected, *args)
+            args = (self._injected, *args)  # type: ignore
 
         return await self.coro(*args, **kwargs)
 
@@ -695,6 +719,20 @@ class Loop(Generic[LF]):
                 self._handle.recalculate(self._next_iteration)
 
 
+P = ParamSpec("P")
+T_co = TypeVar("T_co", covariant=True)
+L_co = TypeVar("L_co", bound=Loop, covariant=True)
+
+
+class Object(Protocol[T_co, P]):
+    def __new__(cls) -> T_co:
+        ...
+
+    def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
+        ...
+
+
+@overload
 def loop(
     *,
     seconds: float = MISSING,
@@ -704,12 +742,33 @@ def loop(
     count: Optional[int] = None,
     reconnect: bool = True,
     loop: asyncio.AbstractEventLoop = MISSING,
-) -> Callable[[LF], Loop[LF]]:
+) -> Callable[[Coro[CoroP]], Loop[CoroP]]:
+    ...
+
+
+@overload
+def loop(
+    cls: Type[Object[L_co, Concatenate[Coro[CoroP], P]]], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[Coro[CoroP]], L_co]:
+    ...
+
+
+def loop(
+    cls: Type[Object[L_co, Concatenate[Coro[CoroP], P]]] = Loop[CoroP],
+    **kwargs: Any,
+) -> Callable[[Coro[CoroP]], L_co]:
     """A decorator that schedules a task in the background for you with
     optional reconnect logic. The decorator returns a :class:`Loop`.
 
     Parameters
     ----------
+    cls: Type[:class:`Loop`]
+        The loop subclass to create an instance of. If provided, the following parameters
+        described below do no apply. Instead, this decorator will accept the same keywords
+        as the passed cls does.
+
+        .. versionadded:: 2.6
+
     seconds: :class:`float`
         The number of seconds between every iteration.
     minutes: :class:`float`
@@ -749,16 +808,10 @@ def loop(
         or ``time`` parameter was passed in conjunction with relative time parameters.
     """
 
-    def decorator(func: LF) -> Loop[LF]:
-        return Loop[LF](
-            func,
-            seconds=seconds,
-            minutes=minutes,
-            hours=hours,
-            count=count,
-            time=time,
-            reconnect=reconnect,
-            loop=loop,
-        )
+    def decorator(func: Coro[CoroP]) -> L_co:
+        if not asyncio.iscoroutinefunction(func):
+            raise TypeError("decorated function must be a coroutine")
+
+        return cast(Type[L_co], cls)(func, **kwargs)
 
     return decorator
