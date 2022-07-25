@@ -2136,13 +2136,30 @@ class Guild(Hashable):
         self,
         *,
         name: str,
+        channel: Snowflake,
+        scheduled_start_time: datetime.datetime,
         entity_type: Literal[
             GuildScheduledEventEntityType.voice,
             GuildScheduledEventEntityType.stage_instance,
-        ],
-        channel: Snowflake,
-        scheduled_start_time: datetime.datetime,
+        ] = ...,
         scheduled_end_time: Optional[datetime.datetime] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        description: str = ...,
+        image: AssetBytes = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    @overload
+    async def create_scheduled_event(
+        self,
+        *,
+        name: str,
+        channel: None,
+        scheduled_start_time: datetime.datetime,
+        scheduled_end_time: datetime.datetime,
+        entity_metadata: GuildScheduledEventMetadata,
+        entity_type: Literal[GuildScheduledEventEntityType.external] = ...,
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         description: str = ...,
         image: AssetBytes = ...,
@@ -2154,10 +2171,10 @@ class Guild(Hashable):
         self,
         *,
         name: str,
-        entity_type: GuildScheduledEventEntityType,
         scheduled_start_time: datetime.datetime,
+        channel: Optional[Snowflake] = MISSING,
+        entity_type: GuildScheduledEventEntityType = MISSING,
         scheduled_end_time: Optional[datetime.datetime] = MISSING,
-        channel: Snowflake = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         entity_metadata: GuildScheduledEventMetadata = MISSING,
         description: str = MISSING,
@@ -2168,7 +2185,19 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
-        If ``entity_type`` is :class:`GuildScheduledEventEntityType.external`:
+        Based on the channel/entity type, there are different restrictions regarding
+        other parameter values, as shown in this table:
+
+
+        .. csv-table::
+            :widths: 25, 30, 20, 25
+            :header: "``channel``", "``entity_type``", "``scheduled_end_time``", "``entity_metadata`` with location"
+
+            :class:`VoiceChannel`, :attr:`~GuildScheduledEventEntityType.voice` (set automatically), optional, unset
+            :class:`StageChannel`, :attr:`~GuildScheduledEventEntityType.stage_instance` (set automatically), optional, unset
+            unspecified snowflake, required, optional, unset
+            ``None``, :attr:`~GuildScheduledEventEntityType.external` (set automatically), required, required
+            unset, :attr:`~GuildScheduledEventEntityType.external`, required, required
 
         - ``channel`` should not be set
         - ``entity_metadata`` with a location field must be provided
@@ -2201,8 +2230,9 @@ class Guild(Hashable):
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel: :class:`.abc.Snowflake`
+        channel: Optional[:class:`.abc.Snowflake`]
             The channel in which the guild scheduled event will be hosted.
+            Passing in `None` assumes the ``entity_type`` to be :class:`GuildScheduledEventEntityType.external`
 
             .. versionadded:: 2.6
 
@@ -2229,14 +2259,29 @@ class Guild(Hashable):
             The request failed.
         TypeError
             The ``image`` asset is a lottie sticker (see :func:`Sticker.read`),
-            or one of ``entity_type``, ``privacy_level``, or ``entity_metadata``
-            is not of the correct type.
+            one of ``entity_type``, ``privacy_level``, or ``entity_metadata``
+            is not of the correct type, or the ``entity_type`` was not provided and
+            could not be assumed from the ``channel``.
 
         Returns
         -------
         :class:`GuildScheduledEvent`
             The newly created guild scheduled event.
         """
+
+        if channel is None:
+            entity_type = GuildScheduledEventEntityType.external
+            channel = MISSING
+        elif isinstance(channel_type := getattr(channel, "type", None), ChannelType):
+            if channel_type is ChannelType.voice:
+                entity_type = GuildScheduledEventEntityType.voice
+            elif channel_type is ChannelType.stage_voice:
+                entity_type = GuildScheduledEventEntityType.stage_instance
+            else:
+                raise TypeError("channel type must be either 'stage' or 'stage_voice'")
+        elif entity_type is MISSING:
+            raise TypeError("entity_type must be provided if the channel does not have a type")
+
         if not isinstance(entity_type, GuildScheduledEventEntityType):
             raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
 
@@ -2267,7 +2312,7 @@ class Guild(Hashable):
             fields["image"] = await utils._assetbytes_to_base64_data(image)
 
         if channel is not MISSING:
-            fields["channel_id"] = channel.id
+            fields["channel_id"] = channel.id  # type: ignore
 
         if scheduled_end_time is not MISSING:
             fields["scheduled_end_time"] = utils.isoformat_utc(scheduled_end_time)
