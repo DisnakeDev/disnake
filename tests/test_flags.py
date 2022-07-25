@@ -291,16 +291,12 @@ class TestBaseFlags:
 
     def test_iter(self) -> None:
         ins = TestFlags(one=True, two=False)
-        ran_at_least_once = False
 
         assert len(list(iter(ins))) == 4
 
         for flag, value in iter(ins):
-            ran_at_least_once = True
             assert flag in ins.VALID_FLAGS
             assert getattr(ins, flag) == value
-
-        assert ran_at_least_once
 
     def test_from_value(self) -> None:
         ins = TestFlags._from_value(0b101)
