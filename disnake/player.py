@@ -35,7 +35,7 @@ import sys
 import threading
 import time
 import traceback
-from typing import IO, TYPE_CHECKING, Any, Callable, Generic, Optional, Tuple, Type, TypeVar, Union
+from typing import IO, TYPE_CHECKING, Any, Callable, Generic, Optional, Tuple, TypeVar, Union
 
 from . import utils
 from .errors import ClientException
@@ -43,13 +43,15 @@ from .oggparse import OggStream
 from .opus import Encoder as OpusEncoder
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .voice_client import VoiceClient
+
 
 MISSING = utils.MISSING
 
 
 AT = TypeVar("AT", bound="AudioSource")
-FT = TypeVar("FT", bound="FFmpegOpusAudio")
 
 _log = logging.getLogger(__name__)
 
@@ -181,7 +183,7 @@ class FFmpegAudio(AudioSource):
             return subprocess.Popen(args, creationflags=CREATE_NO_WINDOW, **subprocess_kwargs)  # type: ignore
         except FileNotFoundError:
             executable = args.partition(" ")[0] if isinstance(args, str) else args[0]
-            raise ClientException(executable + " was not found.") from None
+            raise ClientException(f"{executable} was not found.") from None
         except subprocess.SubprocessError as exc:
             raise ClientException(f"Popen failed: {exc.__class__.__name__}: {exc}") from exc
 
@@ -213,7 +215,7 @@ class FFmpegAudio(AudioSource):
             )
 
     def _pipe_writer(self, source: io.BufferedIOBase) -> None:
-        assert self._stdin
+        assert self._stdin  # noqa: S101 # TODO: remove this ignore (didn't want to touch this)
         while self._process:
             # arbitrarily large read size
             data = source.read(8192)
@@ -432,14 +434,14 @@ class FFmpegOpusAudio(FFmpegAudio):
 
     @classmethod
     async def from_probe(
-        cls: Type[FT],
+        cls,
         source: str,
         *,
         method: Optional[
             Union[str, Callable[[str, str], Tuple[Optional[str], Optional[int]]]]
         ] = None,
         **kwargs: Any,
-    ) -> FT:
+    ) -> Self:
         """|coro|
 
         A factory method that creates a :class:`FFmpegOpusAudio` after probing
@@ -540,7 +542,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         probefunc = fallback = None
 
         if isinstance(method, str):
-            probefunc = getattr(cls, "_probe_codec_" + method, None)
+            probefunc = getattr(cls, f"_probe_codec_{method}", None)
             if probefunc is None:
                 raise AttributeError(f"Invalid probe method {method!r}")
 
@@ -577,7 +579,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         else:
             _log.info("Probe found codec=%s, bitrate=%s", codec, bitrate)
         finally:
-            return codec, bitrate
+            return codec, bitrate  # noqa: B012
 
     @staticmethod
     def _probe_codec_native(

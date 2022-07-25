@@ -1,0 +1,1 @@
+Clarify when the user is a :class:`Member` or a :class:`User` in :func:`disnake.on_member_ban` events.

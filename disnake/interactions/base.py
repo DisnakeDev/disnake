@@ -67,13 +67,7 @@ if TYPE_CHECKING:
     from aiohttp import ClientSession
 
     from ..app_commands import Choices
-    from ..channel import (
-        CategoryChannel,
-        PartialMessageable,
-        StageChannel,
-        TextChannel,
-        VoiceChannel,
-    )
+    from ..channel import CategoryChannel, StageChannel, TextChannel, VoiceChannel
     from ..client import Client
     from ..embeds import Embed
     from ..ext.commands import AutoShardedBot, Bot
@@ -165,6 +159,7 @@ class Interaction:
         "locale",
         "guild_locale",
         "client",
+        "_app_permissions",
         "_permissions",
         "_state",
         "_session",
@@ -188,6 +183,7 @@ class Interaction:
         self.token: str = data["token"]
         self.version: int = data["version"]
         self.application_id: int = int(data["application_id"])
+        self._app_permissions: int = int(data.get("app_permissions", 0))
 
         self.channel_id: int = int(data["channel_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
@@ -247,18 +243,20 @@ class Interaction:
 
     @utils.cached_slot_property("_cs_channel")
     def channel(self) -> Union[GuildMessageable, PartialMessageable]:
-        """Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]: The channel the interaction was sent from.
+        """Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]: The channel the interaction was sent from.
 
-        Note that due to a Discord limitation, DM channels are not resolved since there is
-        no data to complete them. These are :class:`PartialMessageable` instead.
+        Note that due to a Discord limitation, threads that the bot cannot access and DM channels
+        are not resolved since there is no data to complete them.
+        These are :class:`PartialMessageable` instead.
+
+        If you want to compute the interaction author's or bot's permissions in the channel,
+        consider using :attr:`permissions` or :attr:`app_permissions` instead.
         """
-        # the actual typing of these is a bit complicated, we just leave it at text channels
         guild = self.guild
         channel = guild and guild._resolve_channel(self.channel_id)
         if channel is None:
-            type = (
-                None if self.guild_id is not None else ChannelType.private
-            )  # could be a text, voice, or thread channel in a guild
+            # could be a thread channel in a guild, or a DM channel
+            type = None if self.guild_id is not None else ChannelType.private
             return PartialMessageable(state=self._state, id=self.channel_id, type=type)
         return channel  # type: ignore
 
@@ -266,10 +264,26 @@ class Interaction:
     def permissions(self) -> Permissions:
         """:class:`Permissions`: The resolved permissions of the member in the channel, including overwrites.
 
+        In a guild context, this is provided directly by Discord.
+
         In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
         """
         if self._permissions is not None:
             return Permissions(self._permissions)
+        return Permissions.private_channel()
+
+    @property
+    def app_permissions(self) -> Permissions:
+        """:class:`Permissions`: The resolved permissions of the bot in the channel, including overwrites.
+
+        In a guild context, this is provided directly by Discord.
+
+        In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
+
+        .. versionadded:: 2.6
+        """
+        if self.guild_id:
+            return Permissions(self._app_permissions)
         return Permissions.private_channel()
 
     @utils.cached_slot_property("_cs_response")
@@ -1215,7 +1229,7 @@ class InteractionResponse:
             This interaction has already been responded to before.
         """
         if modal is not None and any((title, components, custom_id)):
-            raise TypeError(f"Cannot mix modal argument and title, custom_id, components arguments")
+            raise TypeError("Cannot mix modal argument and title, custom_id, components arguments")
 
         parent = self._parent
 
@@ -1364,9 +1378,9 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1378,9 +1392,9 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1392,9 +1406,9 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1406,13 +1420,25 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
-    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
+    async def edit(
+        self,
+        content: Optional[str] = MISSING,
+        *,
+        embed: Optional[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
+        file: File = MISSING,
+        files: List[File] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
+        allowed_mentions: Optional[AllowedMentions] = MISSING,
+        view: Optional[View] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
+    ) -> Message:
         """|coro|
 
         Edits the message.
@@ -1483,15 +1509,39 @@ class InteractionMessage(Message):
             The newly edited message.
         """
         if self._state._interaction.is_expired():
-            return await super().edit(content=content, **fields)
+            # We have to choose between type-ignoring the entire call,
+            # or not having these specific parameters type-checked,
+            # as we'd otherwise not match any of the overloads if all
+            # parameters were provided
+            params = {"file": file, "embed": embed}
+            return await super().edit(
+                content=content,
+                embeds=embeds,
+                files=files,
+                attachments=attachments,
+                allowed_mentions=allowed_mentions,
+                view=view,
+                components=components,
+                **params,
+            )
 
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         # this isn't necessary when using the superclass, as the implementation there takes care of attachments
-        if "attachments" not in fields and (fields.get("file") or fields.get("files")):
-            fields["attachments"] = self.attachments
+        if attachments is MISSING and (file or files):
+            attachments = self.attachments
 
-        return await self._state._interaction.edit_original_message(content=content, **fields)
+        return await self._state._interaction.edit_original_message(
+            content=content,
+            embed=embed,
+            embeds=embeds,
+            file=file,
+            files=files,
+            attachments=attachments,
+            allowed_mentions=allowed_mentions,
+            view=view,
+            components=components,
+        )
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
         """|coro|

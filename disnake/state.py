@@ -54,8 +54,15 @@ from typing import (
 from . import utils
 from .activity import BaseActivity
 from .app_commands import GuildApplicationCommandPermissions, application_command_factory
-from .channel import *
-from .channel import _channel_factory
+from .channel import (
+    DMChannel,
+    ForumChannel,
+    GroupChannel,
+    PartialMessageable,
+    TextChannel,
+    VoiceChannel,
+    _channel_factory,
+)
 from .emoji import Emoji
 from .enums import ApplicationCommandType, ChannelType, ComponentType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
@@ -69,7 +76,19 @@ from .mentions import AllowedMentions
 from .message import Message
 from .object import Object
 from .partial_emoji import PartialEmoji
-from .raw_models import *
+from .raw_models import (
+    RawBulkMessageDeleteEvent,
+    RawGuildScheduledEventUserActionEvent,
+    RawIntegrationDeleteEvent,
+    RawMessageDeleteEvent,
+    RawMessageUpdateEvent,
+    RawReactionActionEvent,
+    RawReactionClearEmojiEvent,
+    RawReactionClearEvent,
+    RawThreadDeleteEvent,
+    RawThreadMemberRemoveEvent,
+    RawTypingEvent,
+)
 from .role import Role
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
@@ -104,7 +123,6 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
 
     T = TypeVar("T")
-    CS = TypeVar("CS", bound="ConnectionState")
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
     PartialChannel = Union[Channel, PartialMessageable]
 
@@ -255,8 +273,8 @@ class ConnectionState:
         self._intents: Intents = intents
 
         if not intents.members or cache_flags._empty:
-            self.store_user = self.create_user  # type: ignore
-            self.deref_user = self.deref_user_no_intents  # type: ignore
+            self.store_user = self.create_user
+            self.deref_user = self.deref_user_no_intents
 
         self.parsers = parsers = {}
         for attr, func in inspect.getmembers(self):
@@ -448,7 +466,8 @@ class ConnectionState:
         application_command: APIApplicationCommand,
         /,
     ) -> None:
-        assert application_command.id
+        if not application_command.id:
+            AssertionError("The provided application command does not have an ID")
         self._global_application_commands[application_command.id] = application_command
 
     def _remove_global_application_command(self, application_command_id: int, /) -> None:
@@ -467,7 +486,8 @@ class ConnectionState:
     def _add_guild_application_command(
         self, guild_id: int, application_command: APIApplicationCommand
     ) -> None:
-        assert application_command.id
+        if not application_command.id:
+            AssertionError("The provided application command does not have an ID")
         try:
             granula = self._guild_application_commands[guild_id]
             granula[application_command.id] = application_command

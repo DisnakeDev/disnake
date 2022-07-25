@@ -64,7 +64,6 @@ __all__ = (
 if TYPE_CHECKING:
     from .abc import Messageable, Snowflake
     from .app_commands import APIApplicationCommand
-    from .audit_logs import AuditLogEntry
     from .guild import Guild
     from .member import Member
     from .message import Message
@@ -317,7 +316,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
             elif self.limit == 101:
                 self.limit = 100  # Thanks Discord
 
-            self._retrieve_messages = self._retrieve_messages_around_strategy  # type: ignore
+            self._retrieve_messages = self._retrieve_messages_around_strategy
             if self.before and self.after:
                 self._filter = lambda m: self.after.id < int(m["id"]) < self.before.id  # type: ignore
             elif self.before:
@@ -326,11 +325,11 @@ class HistoryIterator(_AsyncIterator["Message"]):
                 self._filter = lambda m: self.after.id < int(m["id"])
         else:
             if self.reverse:
-                self._retrieve_messages = self._retrieve_messages_after_strategy  # type: ignore
+                self._retrieve_messages = self._retrieve_messages_after_strategy
                 if self.before:
                     self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
             else:
-                self._retrieve_messages = self._retrieve_messages_before_strategy  # type: ignore
+                self._retrieve_messages = self._retrieve_messages_before_strategy
                 if self.after and self.after != OLDEST_OBJECT:
                     self._filter = lambda m: int(m["id"]) > self.after.id
 
@@ -344,13 +343,13 @@ class HistoryIterator(_AsyncIterator["Message"]):
             raise NoMoreItems()
 
     def _get_retrieve(self):
-        l = self.limit
-        if l is None or l > 100:
-            r = 100
+        limit = self.limit
+        if limit is None or limit > 100:
+            retrieve = 100
         else:
-            r = l
-        self.retrieve = r
-        return r > 0
+            retrieve = limit
+        self.retrieve = retrieve
+        return retrieve > 0
 
     async def fill_messages(self):
         if not hasattr(self, "channel"):
@@ -568,13 +567,13 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
             raise NoMoreItems()
 
     def _get_retrieve(self):
-        l = self.limit
-        if l is None or l > 100:
-            r = 100
+        limit = self.limit
+        if limit is None or limit > 100:
+            retrieve = 100
         else:
-            r = l
-        self.retrieve = r
-        return r > 0
+            retrieve = limit
+        self.retrieve = retrieve
+        return retrieve > 0
 
     async def _fill(self):
         if self._get_retrieve():
@@ -701,13 +700,13 @@ class GuildIterator(_AsyncIterator["Guild"]):
             raise NoMoreItems()
 
     def _get_retrieve(self):
-        l = self.limit
-        if l is None or l > 200:
-            r = 200
+        limit = self.limit
+        if limit is None or limit > 200:
+            retrieve = 200
         else:
-            r = l
-        self.retrieve = r
-        return r > 0
+            retrieve = limit
+        self.retrieve = retrieve
+        return retrieve > 0
 
     def create_guild(self, data):
         from .guild import Guild
@@ -777,13 +776,13 @@ class MemberIterator(_AsyncIterator["Member"]):
             raise NoMoreItems()
 
     def _get_retrieve(self):
-        l = self.limit
-        if l is None or l > 1000:
-            r = 1000
+        limit = self.limit
+        if limit is None or limit > 1000:
+            retrieve = 1000
         else:
-            r = l
-        self.retrieve = r
-        return r > 0
+            retrieve = limit
+        self.retrieve = retrieve
+        return retrieve > 0
 
     async def fill_members(self):
         if self._get_retrieve():
@@ -939,13 +938,13 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
             raise NoMoreItems()
 
     def _get_retrieve(self) -> bool:
-        l = self.limit
-        if l is None or l > 100:
-            r = 100
+        limit = self.limit
+        if limit is None or limit > 100:
+            retrieve = 100
         else:
-            r = l
-        self.retrieve: int = r
-        return r > 0
+            retrieve = limit
+        self.retrieve: int = retrieve
+        return retrieve > 0
 
     def create_user(self, data: GuildScheduledEventUserPayload) -> Union[User, Member]:
         from .member import Member

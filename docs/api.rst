@@ -1296,8 +1296,8 @@ to handle it, which defaults to print a traceback and ignoring the exception.
     :param guild: The guild the user got banned from.
     :type guild: :class:`Guild`
     :param user: The user that got banned.
-                 Can be either :class:`User` or :class:`Member` depending if
-                 the user was in the guild or not at the time of removal.
+                 Can be either :class:`User` or :class:`Member` depending on
+                 whether the user was in the guild at the time of removal.
     :type user: Union[:class:`User`, :class:`Member`]
 
 .. function:: on_member_unban(guild, user)
@@ -3213,6 +3213,12 @@ of :class:`enum.Enum`.
     .. attribute:: canceled
 
         Represents a canceled event.
+
+    .. attribute:: cancelled
+
+        An alias for :attr:`canceled`.
+
+        .. versionadded:: 2.6
 
 .. class:: GuildScheduledEventPrivacyLevel
 
@@ -5375,7 +5381,7 @@ Button
     :members:
     :inherited-members:
 
-.. autofunction:: disnake.ui.button
+.. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
 
 Select
 ~~~~~~~
@@ -5386,7 +5392,7 @@ Select
     :members:
     :inherited-members:
 
-.. autofunction:: disnake.ui.select
+.. autofunction:: disnake.ui.select(cls=disnake.ui.Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
 
 Modal
 ~~~~~

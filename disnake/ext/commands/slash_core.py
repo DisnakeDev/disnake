@@ -45,7 +45,7 @@ from disnake.interactions import ApplicationCommandInteraction
 from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
-from .errors import *
+from .errors import CommandError, CommandInvokeError
 from .params import call_param_func, expand_params
 
 if TYPE_CHECKING:
@@ -397,6 +397,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         options: List[Option] = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
         auto_sync: bool = None,
@@ -437,6 +438,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             options=options or [],
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
         )
 
     def _ensure_assignment_on_copy(self, other: SlashCommandT) -> SlashCommandT:
@@ -602,7 +604,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                     # User has an option to cancel the global error handler by returning True
         finally:
             if stop_propagation:
-                return
+                return  # noqa: B012
             inter.bot.dispatch("slash_command_error", inter, error)
 
     async def _call_autocompleter(
@@ -619,7 +621,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             subcmd = self.children.get(chain[0])
         elif len(chain) == 2:
             group = self.children.get(chain[0])
-            assert isinstance(group, SubCommandGroup)
+            if not isinstance(group, SubCommandGroup):
+                raise AssertionError("the first subcommand is not a SubCommandGroup instance")
             subcmd = group.children.get(chain[1]) if group is not None else None
         else:
             raise ValueError("Command chain is too long")
@@ -647,7 +650,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             subcmd = self.children.get(chain[0])
         elif len(chain) == 2:
             group = self.children.get(chain[0])
-            assert isinstance(group, SubCommandGroup)
+            if not isinstance(group, SubCommandGroup):
+                raise AssertionError("the first subcommand is not a SubCommandGroup instance")
             subcmd = group.children.get(chain[1]) if group is not None else None
         else:
             raise ValueError("Command chain is too long")
@@ -701,6 +705,7 @@ def slash_command(
     description: LocalizedOptional = None,
     dm_permission: bool = None,
     default_member_permissions: Optional[Union[Permissions, int]] = None,
+    nsfw: bool = None,
     options: List[Option] = None,
     guild_ids: Sequence[int] = None,
     connectors: Dict[str, str] = None,
@@ -725,6 +730,12 @@ def slash_command(
 
         .. versionchanged:: 2.5
             Added support for localizations.
+
+    nsfw: :class:`bool`
+        Whether this command can only be used in NSFW channels.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.6
 
     options: List[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.
@@ -775,6 +786,7 @@ def slash_command(
             options=options,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,

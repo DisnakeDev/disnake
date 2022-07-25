@@ -29,6 +29,7 @@ import asyncio
 import os
 from typing import (
     TYPE_CHECKING,
+    Any,
     Callable,
     Dict,
     List,
@@ -37,6 +38,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    get_origin,
     overload,
 )
 
@@ -44,7 +46,7 @@ from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
 from ..partial_emoji import PartialEmoji
 from ..utils import MISSING
-from .item import DecoratedItem, Item
+from .item import DecoratedItem, Item, Object
 
 __all__ = (
     "Select",
@@ -52,13 +54,21 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import ParamSpec, Self
+
     from ..emoji import Emoji
     from ..interactions import MessageInteraction
     from .item import ItemCallbackType
     from .view import View
 
+else:
+    ParamSpec = TypeVar
+
+
 S = TypeVar("S", bound="Select")
-V = TypeVar("V", bound="Optional[View]", covariant=True)
+S_co = TypeVar("S_co", bound="Select", covariant=True)
+V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
+P = ParamSpec("P")
 
 
 def _parse_select_options(
@@ -71,7 +81,7 @@ def _parse_select_options(
     return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
 
 
-class Select(Item[V]):
+class Select(Item[V_co]):
     """Represents a UI select menu.
 
     This is usually represented as a drop down menu.
@@ -138,7 +148,7 @@ class Select(Item[V]):
 
     @overload
     def __init__(
-        self: Select[V],
+        self: Select[V_co],
         *,
         custom_id: str = MISSING,
         placeholder: Optional[str] = None,
@@ -322,7 +332,7 @@ class Select(Item[V]):
         self._selected_values = interaction.values  # type: ignore
 
     @classmethod
-    def from_component(cls: Type[S], component: SelectMenu) -> S:
+    def from_component(cls, component: SelectMenu) -> Self:
         return cls(
             custom_id=component.custom_id,
             placeholder=component.placeholder,
@@ -341,6 +351,7 @@ class Select(Item[V]):
         return True
 
 
+@overload
 def select(
     *,
     placeholder: Optional[str] = None,
@@ -350,7 +361,21 @@ def select(
     options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[Select]], DecoratedItem[Select]]:
+) -> Callable[[ItemCallbackType[Select[V_co]]], DecoratedItem[Select[V_co]]]:
+    ...
+
+
+@overload
+def select(
+    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    ...
+
+
+def select(
+    cls: Type[Object[S_co, P]] = Select[Any],
+    **kwargs: Any,
+) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -362,6 +387,13 @@ def select(
 
     Parameters
     ----------
+    cls: Type[:class:`Select`]
+        The select subclass to create an instance of. If provided, the following parameters
+        described below do no apply. Instead, this decorator will accept the same keywords
+        as the passed cls does.
+
+        .. versionadded:: 2.6
+
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
@@ -392,20 +424,18 @@ def select(
         Whether the select is disabled. Defaults to ``False``.
     """
 
-    def decorator(func: ItemCallbackType[Select]) -> DecoratedItem[Select]:
+    if (origin := get_origin(cls)) is not None:
+        cls = origin
+
+    if not isinstance(cls, type) or not issubclass(cls, Select):
+        raise TypeError(f"cls argument must be a subclass of Select, got {cls!r}")
+
+    def decorator(func: ItemCallbackType[S_co]) -> DecoratedItem[S_co]:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 
-        func.__discord_ui_model_type__ = Select
-        func.__discord_ui_model_kwargs__ = {
-            "placeholder": placeholder,
-            "custom_id": custom_id,
-            "row": row,
-            "min_values": min_values,
-            "max_values": max_values,
-            "options": options,
-            "disabled": disabled,
-        }
+        func.__discord_ui_model_type__ = cls
+        func.__discord_ui_model_kwargs__ = kwargs
         return func  # type: ignore
 
     return decorator

@@ -260,9 +260,9 @@ class BotBase(CommonBotBase, GroupMixin):
             If the function was added with ``call_once=True`` in
             the :meth:`.Bot.add_check` call or using :meth:`.check_once`.
         """
-        l = self._check_once if call_once else self._checks
+        check_list = self._check_once if call_once else self._checks
         try:
-            l.remove(func)
+            check_list.remove(func)
         except ValueError:
             pass
 

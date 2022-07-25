@@ -28,6 +28,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Type, Union
 
 from disnake.errors import ClientException, DiscordException
+from disnake.utils import humanize_list
 
 if TYPE_CHECKING:
     from inspect import Parameter
@@ -639,9 +640,8 @@ class MaxConcurrencyReached(CommandError):
         self.number: int = number
         self.per: BucketType = per
         name = per.name
-        suffix = "per %s" % name if per.name != "default" else "globally"
-        plural = "%s times %s" if number > 1 else "%s time %s"
-        fmt = plural % (number, suffix)
+        suffix = f"per {name}" if per.name != "default" else "globally"
+        fmt = f"{number} times {suffix}" if number > 1 else f"{number} time {suffix}"
         super().__init__(
             f"Too many people are using this command. It can only be used {fmt} concurrently."
         )
@@ -706,11 +706,7 @@ class MissingAnyRole(CheckFailure):
         self.missing_roles: SnowflakeList = missing_roles
 
         missing = [f"'{role}'" for role in missing_roles]
-
-        if len(missing) > 2:
-            fmt = "{}, or {}".format(", ".join(missing[:-1]), missing[-1])
-        else:
-            fmt = " or ".join(missing)
+        fmt = humanize_list(missing, "or")
 
         message = f"You are missing at least one of the required roles: {fmt}"
         super().__init__(message)
@@ -736,11 +732,7 @@ class BotMissingAnyRole(CheckFailure):
         self.missing_roles: SnowflakeList = missing_roles
 
         missing = [f"'{role}'" for role in missing_roles]
-
-        if len(missing) > 2:
-            fmt = "{}, or {}".format(", ".join(missing[:-1]), missing[-1])
-        else:
-            fmt = " or ".join(missing)
+        fmt = humanize_list(missing, "or")
 
         message = f"Bot is missing at least one of the required roles: {fmt}"
         super().__init__(message)
@@ -783,11 +775,8 @@ class MissingPermissions(CheckFailure):
             perm.replace("_", " ").replace("guild", "server").title()
             for perm in missing_permissions
         ]
+        fmt = humanize_list(missing, "and")
 
-        if len(missing) > 2:
-            fmt = "{}, and {}".format(", ".join(missing[:-1]), missing[-1])
-        else:
-            fmt = " and ".join(missing)
         message = f"You are missing {fmt} permission(s) to run this command."
         super().__init__(message, *args)
 
@@ -811,11 +800,8 @@ class BotMissingPermissions(CheckFailure):
             perm.replace("_", " ").replace("guild", "server").title()
             for perm in missing_permissions
         ]
+        fmt = humanize_list(missing, "and")
 
-        if len(missing) > 2:
-            fmt = "{}, and {}".format(", ".join(missing[:-1]), missing[-1])
-        else:
-            fmt = " and ".join(missing)
         message = f"Bot requires {fmt} permission(s) to run this command."
         super().__init__(message, *args)
 
@@ -852,10 +838,7 @@ class BadUnionArgument(UserInputError):
                 return x.__class__.__name__
 
         to_string = [_get_name(x) for x in converters]
-        if len(to_string) > 2:
-            fmt = "{}, or {}".format(", ".join(to_string[:-1]), to_string[-1])
-        else:
-            fmt = " or ".join(to_string)
+        fmt = humanize_list(to_string, "or")
 
         super().__init__(f'Could not convert "{param.name}" into {fmt}.')
 
@@ -885,11 +868,8 @@ class BadLiteralArgument(UserInputError):
         self.literals: Tuple[Any, ...] = literals
         self.errors: List[CommandError] = errors
 
-        to_string = [repr(l) for l in literals]
-        if len(to_string) > 2:
-            fmt = "{}, or {}".format(", ".join(to_string[:-1]), to_string[-1])
-        else:
-            fmt = " or ".join(to_string)
+        to_string = [repr(literal) for literal in literals]
+        fmt = humanize_list(to_string, "or")
 
         super().__init__(f'Could not convert "{param.name}" into the literal {fmt}.')
 
