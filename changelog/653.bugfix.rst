@@ -1,0 +1,1 @@
+Check the type of the provided parameter when validating names to improve end-user errors when passing an incorrect object to slash command and option names.
