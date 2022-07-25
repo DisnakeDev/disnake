@@ -2,6 +2,8 @@
 An example on how to send and process components without using views.
 """
 
+import os
+
 import disnake
 from disnake.ext import commands
 
@@ -112,4 +114,4 @@ async def grid_listener(inter: disnake.MessageInteraction):
 # the listener would have to be self.
 
 
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))

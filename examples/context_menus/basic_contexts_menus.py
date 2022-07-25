@@ -1,3 +1,5 @@
+import os
+
 import disnake
 from disnake.ext import commands
 
@@ -35,4 +37,4 @@ async def reverse(inter: disnake.ApplicationCommandInteraction, message: disnake
     await inter.response.send_message(message.content[::-1])
 
 
-bot.run("TOKEN")
+bot.run(os.getenv("BOT_TOKEN"))

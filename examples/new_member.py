@@ -1,5 +1,7 @@
 # This example requires the 'members' privileged intents
 
+import os
+
 import disnake
 
 
@@ -19,4 +21,4 @@ intents = disnake.Intents.default()
 intents.members = True
 
 client = MyClient(intents=intents)
-client.run("token")
+client.run(os.getenv("BOT_TOKEN"))

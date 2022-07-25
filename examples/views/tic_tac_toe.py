@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import disnake
@@ -138,4 +139,4 @@ async def tic(ctx: commands.Context):
     await ctx.send("Tic Tac Toe: X goes first", view=TicTacToe())
 
 
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))

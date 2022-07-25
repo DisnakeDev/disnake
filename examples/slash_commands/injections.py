@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from typing import Any, Literal, Optional
 
@@ -116,3 +117,6 @@ async def get_game_user(
 @bot.slash_command()
 async def implicit_injection(inter: disnake.CommandInteraction, user: GameUser):
     """A command which uses an implicit injection"""
+
+
+bot.run(os.getenv("BOT_TOKEN"))

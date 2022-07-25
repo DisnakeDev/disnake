@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import disnake
@@ -98,4 +99,4 @@ async def paginator(ctx: commands.Context):
     await ctx.send(embed=embeds[0], view=Menu(embeds))
 
 
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))

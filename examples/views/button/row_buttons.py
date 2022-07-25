@@ -1,3 +1,5 @@
+import os
+
 import disnake
 from disnake.enums import ButtonStyle
 from disnake.ext import commands
@@ -52,4 +54,4 @@ async def buttons(ctx):
     # This is how the command would look like: https://i.imgur.com/ZYdX1Jw.png
 
 
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))

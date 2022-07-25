@@ -1,3 +1,5 @@
+import os
+
 import disnake
 from disnake.ext import commands
 
@@ -39,4 +41,4 @@ async def counter(ctx: commands.Context):
     await ctx.send("Press!", view=Counter())
 
 
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))

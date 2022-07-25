@@ -1,3 +1,5 @@
+import os
+
 import disnake
 from disnake.ext import tasks
 
@@ -32,4 +34,4 @@ class MyClient(disnake.Client):
 
 
 client = MyClient()
-client.run("token")
+client.run(os.getenv("BOT_TOKEN"))

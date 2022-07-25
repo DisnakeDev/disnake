@@ -1,5 +1,6 @@
 # This example requires the 'members' privileged intents
 
+import os
 import random
 
 import disnake
@@ -79,4 +80,4 @@ async def bot_(ctx):
     await ctx.send("Yes, the bot is cool.")
 
 
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))

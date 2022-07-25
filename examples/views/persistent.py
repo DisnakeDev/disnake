@@ -1,3 +1,5 @@
+import os
+
 import disnake
 from disnake.ext import commands
 
@@ -64,4 +66,4 @@ async def prepare(ctx: commands.Context):
     await ctx.send("What's your favourite colour?", view=PersistentView())
 
 
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))

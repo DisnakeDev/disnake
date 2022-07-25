@@ -1,3 +1,4 @@
+import os
 from urllib.parse import quote_plus
 
 import disnake
@@ -37,4 +38,4 @@ async def google(ctx: commands.Context, *, query: str):
     await ctx.send(f"Google Result for: `{query}`", view=Google(query))
 
 
-bot.run("token")
+bot.run(os.getenv("BOT_TOKEN"))

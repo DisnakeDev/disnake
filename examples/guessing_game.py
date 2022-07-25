@@ -1,4 +1,5 @@
 import asyncio
+import os
 import random
 
 import disnake
@@ -34,4 +35,4 @@ class MyClient(disnake.Client):
 
 
 client = MyClient()
-client.run("token")
+client.run(os.getenv("BOT_TOKEN"))
