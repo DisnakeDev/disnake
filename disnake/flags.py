@@ -204,9 +204,12 @@ class BaseFlags:
         self.value |= other.value
         return self
 
-    def __xor__(self, other: Self) -> Self:
+    def __xor__(self, other: Union[Self, flag_value]) -> Self:
         if isinstance(other, flag_value):
-            assert type(self) is other._parent  # noqa: S101
+            if self.__class__ is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
             return self._from_value(self.value ^ other.flag)
         if not isinstance(other, self.__class__):
             raise TypeError(
@@ -216,7 +219,10 @@ class BaseFlags:
 
     def __ixor__(self, other: Union[Self, flag_value[Self]]) -> Self:
         if isinstance(other, flag_value):
-            assert type(self) is other._parent  # noqa: S101
+            if self.__class__ is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
             self.value ^= other.flag
             return self
         if not isinstance(other, self.__class__):
