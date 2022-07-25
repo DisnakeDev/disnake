@@ -72,7 +72,7 @@ from .errors import (
     PrivilegedIntentsRequired,
     SessionStartLimitReached,
 )
-from .flags import ApplicationFlags, Intents
+from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .gateway import DiscordWebSocket, ReconnectWebSocket
 from .guild import Guild
 from .guild_preview import GuildPreview
@@ -317,6 +317,10 @@ class Client:
 
         .. versionadded:: 2.5
 
+        .. versionchanged:: 2.6
+            Can no longer be provided together with ``strict_localization``, as it does
+            not apply to the custom localization provider entered in this parameter.
+
     strict_localization: :class:`bool`
         Whether to raise an exception when localizations for a specific key couldn't be found.
         This is mainly useful for testing/debugging, consider disabling this eventually
@@ -325,6 +329,10 @@ class Client:
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+
+        .. versionchanged:: 2.6
+            Can no longer be provided together with ``localization_provider``, as this parameter is
+            ignored for custom localization providers.
 
     Attributes
     ----------
@@ -352,23 +360,39 @@ class Client:
         *,
         asyncio_debug: bool = False,
         loop: Optional[asyncio.AbstractEventLoop] = None,
-        **options: Any,
+        shard_id: Optional[int] = None,
+        shard_count: Optional[int] = None,
+        enable_debug_events: bool = False,
+        connector: Optional[aiohttp.BaseConnector] = None,
+        proxy: Optional[str] = None,
+        proxy_auth: Optional[aiohttp.BasicAuth] = None,
+        assume_unsync_clock: bool = True,
+        max_messages: Optional[int] = 1000,
+        application_id: Optional[int] = None,
+        heartbeat_timeout: float = 60.0,
+        guild_ready_timeout: float = 2.0,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        activity: Optional[BaseActivity] = None,
+        status: Optional[Union[Status, str]] = None,
+        intents: Intents = None,
+        chunk_guilds_at_startup: Optional[bool] = None,
+        member_cache_flags: MemberCacheFlags = None,
+        localization_provider: Optional[LocalizationProtocol] = None,
+        strict_localization: bool = False,
     ):
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # type: ignore
         self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop() if loop is None else loop
         self.loop.set_debug(asyncio_debug)
         self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
-        self.shard_id: Optional[int] = options.get("shard_id")
-        self.shard_count: Optional[int] = options.get("shard_count")
         self.session_start_limit: Optional[SessionStartLimit] = None
 
-        connector: Optional[aiohttp.BaseConnector] = options.pop("connector", None)
-        proxy: Optional[str] = options.pop("proxy", None)
-        proxy_auth: Optional[aiohttp.BasicAuth] = options.pop("proxy_auth", None)
-        unsync_clock: bool = options.pop("assume_unsync_clock", True)
         self.http: HTTPClient = HTTPClient(
-            connector, proxy=proxy, proxy_auth=proxy_auth, unsync_clock=unsync_clock, loop=self.loop
+            connector,
+            proxy=proxy,
+            proxy_auth=proxy_auth,
+            unsync_clock=assume_unsync_clock,
+            loop=self.loop,
         )
 
         self._handlers: Dict[str, Callable] = {
@@ -378,9 +402,21 @@ class Client:
 
         self._hooks: Dict[str, Callable] = {"before_identify": self._call_before_identify_hook}
 
-        self._enable_debug_events: bool = options.pop("enable_debug_events", False)
-        self._connection: ConnectionState = self._get_state(**options)
-        self._connection.shard_count = self.shard_count
+        self._enable_debug_events: bool = enable_debug_events
+        self._connection: ConnectionState = self._get_state(
+            max_messages=max_messages,
+            application_id=application_id,
+            heartbeat_timeout=heartbeat_timeout,
+            guild_ready_timeout=guild_ready_timeout,
+            allowed_mentions=allowed_mentions,
+            activity=activity,
+            status=status,
+            intents=intents,
+            chunk_guilds_at_startup=chunk_guilds_at_startup,
+            member_cache_flags=member_cache_flags,
+        )
+        self.shard_id = shard_id
+        self._connection.shard_count = self.shard_count = shard_count
         self._closed: bool = False
         self._ready: asyncio.Event = asyncio.Event()
         self._first_connect: asyncio.Event = asyncio.Event()
@@ -391,11 +427,18 @@ class Client:
             VoiceClient.warn_nacl = False
             _log.warning("PyNaCl is not installed, voice will NOT be supported")
 
-        i18n_strict: bool = options.pop("strict_localization", False)
-        i18n = options.pop("localization_provider", None)
-        if i18n is None:
-            i18n = LocalizationStore(strict=i18n_strict)
-        self.i18n: LocalizationProtocol = i18n
+        if strict_localization and localization_provider is not None:
+            raise ValueError(
+                "Providing both `localization_provider` and `strict_localization` is not supported."
+                " If strict localization is desired for a customized localization provider, this"
+                " should be implemented by that custom provider."
+            )
+
+        self.i18n: LocalizationProtocol = (
+            LocalizationStore(strict=strict_localization)
+            if localization_provider is None
+            else localization_provider
+        )
 
     # internals
 
@@ -404,14 +447,35 @@ class Client:
     ) -> DiscordWebSocket:
         return self.ws
 
-    def _get_state(self, **options: Any) -> ConnectionState:
+    def _get_state(  # Keep this as **options such that we can have ConnectionState handle defaults?
+        self,
+        max_messages: Optional[int] = 1000,
+        application_id: Optional[int] = None,
+        heartbeat_timeout: float = 60.0,
+        guild_ready_timeout: float = 2.0,
+        allowed_mentions: Optional[AllowedMentions] = None,
+        activity: Optional[BaseActivity] = None,
+        status: Optional[Union[str, Status]] = None,
+        intents: Optional[Intents] = None,
+        chunk_guilds_at_startup: Optional[bool] = None,
+        member_cache_flags: Optional[MemberCacheFlags] = None,
+    ) -> ConnectionState:
         return ConnectionState(
             dispatch=self.dispatch,
             handlers=self._handlers,
             hooks=self._hooks,
             http=self.http,
             loop=self.loop,
-            **options,
+            max_messages=max_messages,
+            application_id=application_id,
+            heartbeat_timeout=heartbeat_timeout,
+            guild_ready_timeout=guild_ready_timeout,
+            allowed_mentions=allowed_mentions,
+            activity=activity,
+            status=status,
+            intents=intents,
+            chunk_guilds_at_startup=chunk_guilds_at_startup,
+            member_cache_flags=member_cache_flags,
         )
 
     def _handle_ready(self) -> None:
