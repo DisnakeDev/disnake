@@ -14,9 +14,10 @@ class TestPermissions:
         # check we only have the manage message permission
         assert perms.value == Permissions.manage_messages.flag
 
-    @pytest.mark.skip("this behavior is currently undefined")
     def test_init_permissions_keyword_arguments_with_aliases(self) -> None:
         assert Permissions(read_messages=True, view_channel=False).value == 0
+
+        assert Permissions(read_messages=False, view_channel=True).view_channel is True
 
     def test_init_invalid_value(self) -> None:
         with pytest.raises(TypeError, match="Expected int parameter, received str instead."):
@@ -128,10 +129,7 @@ class TestPermissions:
         if expected is None:
             expected = parameters
         for key, value in iter(perms):
-            if key in expected:
-                assert value == expected.pop(key)
-            else:
-                assert value is False
+            assert value == expected.pop(key, False)
         assert not len(expected)
 
     def test_update_ignores(self) -> None:
@@ -304,16 +302,20 @@ class TestPermissionOverwrite:
         po.update(h=True)
         assert not hasattr(po, "h")
 
-    def test_iter(self) -> None:
-        po = PermissionOverwrite()
-        to_update = {
-            "manage_channels": True,
-            "add_reactions": True,
-            "create_instant_invite": False,
-            "attach_files": False,
-            "use_slash_commands": None,
-        }
-        po.update(**to_update)
+    @pytest.mark.parametrize(
+        ("expected"),
+        [
+            ({"view_channel": True}),
+            ({"ban_members": None}),
+            ({"view_channel": True, "administrator": False, "ban_members": None}),
+            ({"kick_members": False}),
+        ],
+    )
+    def test_iter(
+        self,
+        expected: Dict[str, bool],
+    ) -> None:
+        po = PermissionOverwrite(**expected)
 
         for perm, value in po:
-            assert to_update.get(perm, None) is value
+            assert expected.get(perm, None) is value
