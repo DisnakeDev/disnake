@@ -393,11 +393,10 @@ class TestListBaseFlags:
 
 
 class TestIntents:
-    # Does nothing as automod is not merged
-    @pytest.mark.skip
     def test_all_only_valid(self) -> None:
         """Test that Intents.all() doesn't include flags that aren't defined."""
 
         intents = flags.Intents.all()
 
         assert not (1 << 18 | 1 << 17) & intents.value
+        assert 1 << 20 & intents.value
