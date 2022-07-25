@@ -310,8 +310,33 @@ class TestBaseFlags:
         assert ins.two is True
         assert ins.value == TestFlags.two.flag == 1 << 1
 
+    def test_alias_flag_value(self) -> None:
+        ins = TestFlags(three=True)
+        assert ins.value == 0b11
+        ins.three = False
+        assert ins.value == 0
+
+    def test_alias_priority(self) -> None:
+        ins = TestFlags(three=False, two=True, one=False)
+        assert ins.value == 0b10
+        assert ins.three is False
+        assert ins.two is True
+        assert ins.one is False
+
+        ins = TestFlags(three=True, two=False, one=False)
+        assert ins.three is False
+        assert ins.two is False
+        assert ins.one is False
+
+        ins = TestFlags(three=True, two=False)
+        assert ins.three is False
+        assert ins.two is False
+        assert ins.one is True
+
 
 class TestIntents:
+    # Does nothing as automod is not merged
+    @pytest.mark.skip
     def test_all_only_valid(self) -> None:
         """Test that Intents.all() doesn't include flags that aren't defined."""
 
