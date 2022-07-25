@@ -620,7 +620,7 @@ class Thread(Messageable, Hashable):
         slowmode_delay: int = MISSING,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         pinned: bool = MISSING,
-        flags: ChannelFlags = None,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
     ) -> Thread:
         """|coro|
@@ -695,10 +695,12 @@ class Thread(Messageable, Hashable):
 
         if pinned is not MISSING:
             # create base flags if flags are provided, otherwise use the internal flags.
-            flags = ChannelFlags._from_value(self._flags if flags is None else flags.value)
+            flags = ChannelFlags._from_value(self._flags if flags is MISSING else flags.value)
             flags.pinned = pinned
 
-        if flags is not None:
+        if flags is not MISSING:
+            if not isinstance(flags, ChannelFlags):
+                raise TypeError("flags field must be of type ChannelFlags")
             payload["flags"] = flags.value
 
         data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
