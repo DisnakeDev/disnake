@@ -443,6 +443,7 @@ class InteractionBotBase(CommonBotBase):
         description: LocalizedOptional = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
         options: List[Option] = None,
         guild_ids: Sequence[int] = None,
         connectors: Dict[str, str] = None,
@@ -479,6 +480,12 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
+        nsfw: :class:`bool`
+            Whether this command can only be used in NSFW channels.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.6
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
@@ -511,6 +518,7 @@ class InteractionBotBase(CommonBotBase):
                 options=options,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
+                nsfw=nsfw,
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
@@ -528,6 +536,7 @@ class InteractionBotBase(CommonBotBase):
         name: LocalizedOptional = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = None,
         extras: Dict[str, Any] = None,
@@ -555,6 +564,12 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
+        nsfw: :class:`bool`
+            Whether this command can only be used in NSFW channels.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.6
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
         guild_ids: Sequence[:class:`int`]
@@ -581,6 +596,7 @@ class InteractionBotBase(CommonBotBase):
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
+                nsfw=nsfw,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -597,6 +613,7 @@ class InteractionBotBase(CommonBotBase):
         name: LocalizedOptional = None,
         dm_permission: bool = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
         guild_ids: Sequence[int] = None,
         auto_sync: bool = None,
         extras: Dict[str, Any] = None,
@@ -624,6 +641,12 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.5
 
+        nsfw: :class:`bool`
+            Whether this command can only be used in NSFW channels.
+            Defaults to ``False``.
+
+            .. versionadded:: 2.6
+
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
         guild_ids: Sequence[:class:`int`]
@@ -650,6 +673,7 @@ class InteractionBotBase(CommonBotBase):
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
+                nsfw=nsfw,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -986,23 +1010,25 @@ class InteractionBotBase(CommonBotBase):
             Whether this check was for message commands.
         """
         if slash_commands:
-            l = self._slash_command_check_once if call_once else self._slash_command_checks
+            check_list = self._slash_command_check_once if call_once else self._slash_command_checks
             try:
-                l.remove(func)
+                check_list.remove(func)
             except ValueError:
                 pass
 
         if user_commands:
-            l = self._user_command_check_once if call_once else self._user_command_checks
+            check_list = self._user_command_check_once if call_once else self._user_command_checks
             try:
-                l.remove(func)
+                check_list.remove(func)
             except ValueError:
                 pass
 
         if message_commands:
-            l = self._message_command_check_once if call_once else self._message_command_checks
+            check_list = (
+                self._message_command_check_once if call_once else self._message_command_checks
+            )
             try:
-                l.remove(func)
+                check_list.remove(func)
             except ValueError:
                 pass
 

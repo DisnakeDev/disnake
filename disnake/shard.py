@@ -42,14 +42,13 @@ from .errors import (
     PrivilegedIntentsRequired,
     SessionStartLimitReached,
 )
-from .gateway import *
+from .gateway import DiscordWebSocket, ReconnectWebSocket
 from .state import AutoShardedConnectionState
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .activity import BaseActivity
-    from .gateway import DiscordWebSocket
 
 __all__ = (
     "AutoShardedClient",

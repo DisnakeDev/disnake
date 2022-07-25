@@ -217,11 +217,7 @@ class CogMeta(type):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
                 elif asyncio.iscoroutinefunction(value):
-                    try:
-                        getattr(value, "__cog_listener__")
-                    except AttributeError:
-                        continue
-                    else:
+                    if hasattr(value, "__cog_listener__"):
                         if elem.startswith(("cog_", "bot_")):
                             raise TypeError(no_bot_cog.format(base, elem))
                         listeners[elem] = value
@@ -275,8 +271,6 @@ class Cog(metaclass=CogMeta):
         message_cmd_attrs = cls.__cog_message_settings__
 
         # Either update the command with the cog provided defaults or copy it.
-        # r.e type ignore, type-checker complains about overriding a ClassVar
-        self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore
         cog_app_commands: List[InvokableApplicationCommand] = []
         for c in cls.__cog_app_commands__:
             if isinstance(c, InvokableSlashCommand):
@@ -288,11 +282,14 @@ class Cog(metaclass=CogMeta):
 
             cog_app_commands.append(c)
 
-        self.__cog_app_commands__ = tuple(cog_app_commands)  # type: ignore
+        self.__cog_app_commands__ = tuple(cog_app_commands)  # type: ignore  # overriding ClassVar
+        # Replace the old command objects with the new copies
+        for app_command in self.__cog_app_commands__:
+            setattr(self, app_command.callback.__name__, app_command)
+
+        self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore  # overriding ClassVar
 
         lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}
-
-        # Update the Command instances dynamically as well
         for command in self.__cog_commands__:
             setattr(self, command.callback.__name__, command)
             parent = command.parent
