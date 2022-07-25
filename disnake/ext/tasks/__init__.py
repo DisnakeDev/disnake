@@ -48,12 +48,13 @@ from typing import (
 )
 
 import aiohttp
+
 import disnake
 from disnake.backoff import ExponentialBackoff
 from disnake.utils import MISSING, utcnow
 
 if TYPE_CHECKING:
-    from typing_extensions import Self, ParamSpec, Concatenate
+    from typing_extensions import Concatenate, ParamSpec, Self
 
 else:
     ParamSpec = TypeVar
