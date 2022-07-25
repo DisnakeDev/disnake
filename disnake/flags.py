@@ -1851,6 +1851,9 @@ class AutoModKeywordPresets(ListBaseFlags):
 
             Returns a new AutoModKeywordPresets instance with all enabled flags from both x and y.
             (Using ``|=`` will update in place).
+        .. describe:: AutoModKeywordPresets.y | AutoModKeywordPresets.z, AutoModKeywordPresets(y=True) | AutoModKeywordPresets.z
+
+            Returns an AutoModKeywordPresets instance with all provided flags enabled.
         .. describe:: x & y, x &= y
 
             Returns a new AutoModKeywordPresets instance with only flags enabled on both x and y.
@@ -1862,6 +1865,11 @@ class AutoModKeywordPresets(ListBaseFlags):
         .. describe:: ~x
 
             Returns a new AutoModKeywordPresets instance with all flags from x inverted.
+        .. describe:: ~AutoModKeywordPresets.y
+
+            Returns an AutoModKeywordPresets instance with all flags except ``y`` inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
