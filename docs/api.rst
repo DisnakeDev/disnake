@@ -5381,7 +5381,7 @@ Button
     :members:
     :inherited-members:
 
-.. autofunction:: disnake.ui.button
+.. autofunction:: disnake.ui.button(cls=disnake.ui.Button, *, style=ButtonStyle.secondary, label=None, disabled=False, custom_id=..., url=None, emoji=None, row=None)
 
 Select
 ~~~~~~~
@@ -5392,7 +5392,7 @@ Select
     :members:
     :inherited-members:
 
-.. autofunction:: disnake.ui.select
+.. autofunction:: disnake.ui.select(cls=disnake.ui.Select, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
 
 Modal
 ~~~~~

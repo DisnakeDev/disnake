@@ -923,7 +923,7 @@ def escape_mentions(text: str) -> str:
     :class:`str`
         The text with the mentions removed.
     """
-    return re.sub(r"@(everyone|here|[!&]?[0-9]{17,20})", "@\u200b\\1", text)
+    return re.sub(r"@(everyone|here|[!&]?[0-9]{17,19})", "@\u200b\\1", text)
 
 
 # Custom docstring parser
