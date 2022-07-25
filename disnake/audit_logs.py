@@ -44,6 +44,7 @@ from typing import (
 from . import abc, enums, flags, utils
 from .app_commands import ApplicationCommandPermissions
 from .asset import Asset
+from .automod import AutoModAction, AutoModTriggerMetadata, _automod_action_factory
 from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
@@ -61,6 +62,7 @@ if TYPE_CHECKING:
     import datetime
 
     from .app_commands import APIApplicationCommand
+    from .automod import AutoModRule
     from .emoji import Emoji
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
@@ -74,6 +76,10 @@ if TYPE_CHECKING:
         AuditLogChange as AuditLogChangePayload,
         AuditLogEntry as AuditLogEntryPayload,
         _AuditLogChange_ApplicationCommandPermissions as AuditLogChangeAppCmdPermsPayload,
+    )
+    from .types.automod import (
+        AutoModAction as AutoModActionPayload,
+        AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
     )
     from .types.channel import PermissionOverwrite as PermissionOverwritePayload
     from .types.role import Role as RolePayload
@@ -99,8 +105,17 @@ def _transform_channel(
 ) -> Optional[Union[abc.GuildChannel, Object]]:
     if data is None:
         return None
-    channel = cast(abc.GuildChannel, entry.guild.get_channel(int(data)))
+    channel = entry.guild.get_channel(int(data))
     return channel or Object(id=data)
+
+
+def _transform_role(
+    entry: AuditLogEntry, data: Optional[Snowflake]
+) -> Optional[Union[Role, Object]]:
+    if data is None:
+        return None
+    role = entry.guild.get_role(int(data))
+    return role or Object(id=data)
 
 
 def _transform_member_id(
@@ -165,6 +180,7 @@ def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]
     return _transform
 
 
+T = TypeVar("T")
 EnumT = TypeVar("EnumT", bound=enums.Enum)
 FlagsT = TypeVar("FlagsT", bound=flags.BaseFlags)
 
@@ -181,6 +197,17 @@ def _flags_transformer(
 ) -> Callable[[AuditLogEntry, Optional[int]], Optional[FlagsT]]:
     def _transform(entry: AuditLogEntry, data: Optional[int]) -> Optional[FlagsT]:
         return flags_type._from_value(data) if data is not None else None
+
+    return _transform
+
+
+def _list_transformer(
+    func: Callable[[AuditLogEntry, Any], T]
+) -> Callable[[AuditLogEntry, Any], List[T]]:
+    def _transform(entry: AuditLogEntry, data: Any) -> List[T]:
+        if not data:
+            return []
+        return [func(entry, value) for value in data if value is not None]
 
     return _transform
 
@@ -220,6 +247,22 @@ def _transform_guild_scheduled_event_image(
     if data is None:
         return None
     return Asset._from_guild_scheduled_event_image(entry._state, entry._target_id, data)  # type: ignore
+
+
+def _transform_automod_action(
+    entry: AuditLogEntry, data: Optional[AutoModActionPayload]
+) -> Optional[AutoModAction]:
+    if data is None:
+        return None
+    return _automod_action_factory(data)
+
+
+def _transform_automod_trigger_metadata(
+    entry: AuditLogEntry, data: Optional[AutoModTriggerMetadataPayload]
+) -> Optional[AutoModTriggerMetadata]:
+    if data is None:
+        return None
+    return AutoModTriggerMetadata._from_dict(data)
 
 
 class AuditLogDiff:
@@ -286,6 +329,12 @@ class AuditLogChanges:
         "type":                          (None, _transform_type),
         "flags":                         (None, _flags_transformer(flags.ChannelFlags)),
         "system_channel_flags":          (None, _flags_transformer(flags.SystemChannelFlags)),
+        "trigger_type":                  (None, _enum_transformer(enums.AutoModTriggerType)),
+        "event_type":                    (None, _enum_transformer(enums.AutoModEventType)),
+        "actions":                       (None, _list_transformer(_transform_automod_action)),
+        "trigger_metadata":              (None, _transform_automod_trigger_metadata),
+        "exempt_roles":                  (None, _list_transformer(_transform_role)),
+        "exempt_channels":               (None, _list_transformer(_transform_channel)),
     }
     # fmt: on
 
@@ -311,6 +360,8 @@ class AuditLogChanges:
                 )
                 continue
 
+            transformer: Optional[Transformer]
+
             try:
                 key, transformer = self.TRANSFORMERS[attr]
             except (ValueError, KeyError):
@@ -318,8 +369,6 @@ class AuditLogChanges:
             else:
                 if key:
                     attr = key
-
-            transformer: Optional[Transformer]
 
             try:
                 before = elem["old_value"]
@@ -423,6 +472,12 @@ class _AuditLogProxyStageInstanceAction:
     channel: abc.GuildChannel
 
 
+class _AuditLogProxyAutoModBlockMessage:
+    channel: abc.GuildChannel
+    rule_name: str
+    rule_trigger_type: enums.AutoModTriggerType
+
+
 class AuditLogEntry(Hashable):
     """
     Represents an Audit Log entry.
@@ -473,6 +528,7 @@ class AuditLogEntry(Hashable):
         data: AuditLogEntryPayload,
         guild: Guild,
         application_commands: Dict[int, APIApplicationCommand],
+        automod_rules: Dict[int, AutoModRule],
         guild_scheduled_events: Dict[int, GuildScheduledEvent],
         integrations: Dict[int, PartialIntegration],
         threads: Dict[int, Thread],
@@ -483,6 +539,7 @@ class AuditLogEntry(Hashable):
         self.guild = guild
 
         self._application_commands = application_commands
+        self._automod_rules = automod_rules
         self._guild_scheduled_events = guild_scheduled_events
         self._integrations = integrations
         self._threads = threads
@@ -551,6 +608,19 @@ class AuditLogEntry(Hashable):
                     "integration": self._get_integration_by_application_id(app_id) or Object(app_id)
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
+            elif self.action is enums.AuditLogAction.automod_block_message:
+                channel_id = int(extra["channel_id"])
+                elems = {
+                    "channel": (
+                        self.guild.get_channel_or_thread(channel_id) or Object(id=channel_id)
+                    ),
+                    "rule_name": extra["auto_moderation_rule_name"],
+                    "rule_trigger_type": enums.try_enum(
+                        enums.AutoModTriggerType,
+                        int(extra["auto_moderation_rule_trigger_type"]),
+                    ),
+                }
+                self.extra = type("_AuditLogProxy", (), elems)()
 
         self.extra: Any
         # actually this but there's no reason to annoy users with this:
@@ -560,6 +630,7 @@ class AuditLogEntry(Hashable):
         #     _AuditLogProxyMemberDisconnect,
         #     _AuditLogProxyPinAction,
         #     _AuditLogProxyStageInstanceAction,
+        #     _AuditLogProxyAutoModBlockMessage,
         #     Member, User, None,
         #     Role,
         # ]
@@ -614,6 +685,7 @@ class AuditLogEntry(Hashable):
         Thread,
         GuildScheduledEvent,
         APIApplicationCommand,
+        AutoModRule,
         Object,
         None,
     ]:
@@ -731,3 +803,6 @@ class AuditLogEntry(Hashable):
 
         # fall back to object
         return Object(id=target_id)
+
+    def _convert_target_automod_rule(self, target_id: int) -> Union[AutoModRule, Object]:
+        return self._automod_rules.get(target_id) or Object(id=target_id)
