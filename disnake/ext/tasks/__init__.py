@@ -72,16 +72,16 @@ class SleepHandle:
 
     def __init__(self, dt: datetime.datetime, *, loop: asyncio.AbstractEventLoop) -> None:
         self.loop = loop
-        self.future = future = loop.create_future()
+        self.future: asyncio.Future[bool] = loop.create_future()
         relative_delta = disnake.utils.compute_timedelta(dt)
-        self.handle = loop.call_later(relative_delta, future.set_result, True)
+        self.handle = loop.call_later(relative_delta, self.future.set_result, True)
 
     def recalculate(self, dt: datetime.datetime) -> None:
         self.handle.cancel()
         relative_delta = disnake.utils.compute_timedelta(dt)
         self.handle = self.loop.call_later(relative_delta, self.future.set_result, True)
 
-    def wait(self) -> asyncio.Future[Any]:
+    def wait(self) -> asyncio.Future[bool]:
         return self.future
 
     def done(self) -> bool:
@@ -156,7 +156,7 @@ class Loop(Generic[CoroP]):
         self._handle = SleepHandle(dt=dt, loop=self.loop)
         return self._handle.wait()
 
-    async def _loop(self, *args: Any, **kwargs: Any) -> None:
+    async def _loop(self, *args: CoroP.args, **kwargs: CoroP.kwargs) -> None:
         backoff = ExponentialBackoff()
         await self._call_loop_function("before_loop")
         self._last_iteration_failed = False
@@ -211,7 +211,7 @@ class Loop(Generic[CoroP]):
             self._stop_next_iteration = False
             self._has_failed = False
 
-    def __get__(self, obj: T, objtype: Type[T]) -> Loop[LF]:
+    def __get__(self, obj: T, objtype: Type[T]) -> Self:
         if obj is None:
             return self
         clone = self.clone()
@@ -293,7 +293,7 @@ class Loop(Generic[CoroP]):
             return None
         return self._next_iteration
 
-    async def __call__(self, *args: Any, **kwargs: Any) -> Any:
+    async def __call__(self, *args: CoroP.args, **kwargs: CoroP.kwargs) -> Any:
         """
         |coro|
 
@@ -309,7 +309,7 @@ class Loop(Generic[CoroP]):
             The keyword arguments to use.
         """
         if self._injected is not None:
-            args = (self._injected, *args)
+            args = (self._injected, *args)  # type: ignore
 
         return await self.coro(*args, **kwargs)
 
