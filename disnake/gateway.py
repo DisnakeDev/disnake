@@ -885,7 +885,7 @@ class DiscordVoiceWebSocket:
         self.secret_key: Optional[List[int]] = None
         self.thread_id: int = threading.get_ident()
         if hook:
-            self._hook = hook  # type: ignore
+            self._hook = hook
 
         # set in `from_client`
         self.gateway: str
