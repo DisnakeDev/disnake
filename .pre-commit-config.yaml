@@ -2,7 +2,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0
+    rev: v4.2.0
     hooks:
       - id: check-case-conflict
       - id: check-toml
@@ -17,13 +17,25 @@ repos:
       - id: isort
         args: ["--profile", "black", "--extend-skip", "examples"]
         name: Running isort in all files.
+        exclude: ^examples/
       - id: isort
         args: ["--profile", "black", "--thirdparty", "disnake"]
         name: Running isort in examples.
         files: ^examples/
 
   - repo: https://github.com/psf/black
-    rev: 22.1.0
+    rev: 22.3.0
     hooks:
       - id: black
         name: Running black in all files.
+
+  - repo: local
+    hooks:
+      - id: flake8
+        name: flake8
+        description: 'Lint all of our code'
+        entry: flake8
+        exclude: ^test_bot/
+        language: python
+        types: [python]
+        require_serial: true

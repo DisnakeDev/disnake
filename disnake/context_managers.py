@@ -26,14 +26,15 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Optional, Type, Union
 
 if TYPE_CHECKING:
     from types import TracebackType
 
-    from .abc import Messageable
+    from typing_extensions import Self
 
-    TypingT = TypeVar("TypingT", bound="Typing")
+    from .abc import Messageable
+    from .channel import ForumChannel
 
 __all__ = ("Typing",)
 
@@ -47,9 +48,9 @@ def _typing_done_callback(fut: asyncio.Future) -> None:
 
 
 class Typing:
-    def __init__(self, messageable: Messageable) -> None:
+    def __init__(self, messageable: Union[Messageable, ForumChannel]) -> None:
         self.loop: asyncio.AbstractEventLoop = messageable._state.loop
-        self.messageable: Messageable = messageable
+        self.messageable: Union[Messageable, ForumChannel] = messageable
 
     async def do_typing(self) -> None:
         try:
@@ -63,7 +64,7 @@ class Typing:
             await typing(channel.id)
             await asyncio.sleep(5)
 
-    def __enter__(self: TypingT) -> TypingT:
+    def __enter__(self) -> Self:
         self.task: asyncio.Task = self.loop.create_task(self.do_typing())
         self.task.add_done_callback(_typing_done_callback)
         return self
@@ -76,7 +77,7 @@ class Typing:
     ) -> None:
         self.task.cancel()
 
-    async def __aenter__(self: TypingT) -> TypingT:
+    async def __aenter__(self) -> Self:
         self._channel = channel = await self.messageable._get_channel()
         await channel._state.http.send_typing(channel.id)
         return self.__enter__()

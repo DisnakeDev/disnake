@@ -47,7 +47,6 @@ from typing import (
     NamedTuple,
     Optional,
     Protocol,
-    Type,
     TypeVar,
     Union,
 )
@@ -57,9 +56,11 @@ import aiohttp
 from . import utils
 from .activity import BaseActivity
 from .enums import SpeakingState
-from .errors import ConnectionClosed, InvalidArgument
+from .errors import ConnectionClosed
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .client import Client
     from .state import ConnectionState
     from .types.gateway import (
@@ -82,8 +83,6 @@ if TYPE_CHECKING:
     from .voice_client import VoiceClient
 
     T = TypeVar("T")
-    WebSocketT = TypeVar("WebSocketT", bound="DiscordWebSocket")
-    VoiceWebSocketT = TypeVar("VoiceWebSocketT", bound="DiscordVoiceWebSocket")
 
     class DispatchFunc(Protocol):
         def __call__(self, event: str, *args: Any) -> None:
@@ -166,12 +165,8 @@ class GatewayRatelimiter:
         if self.remaining == 0:
             return self.per - (current - self.window)
 
+        # subtract one command in current window, return no delay
         self.remaining -= 1
-        # TODO: these two lines don't seem to be required; adds a delay of 60 seconds when the
-        # limit is exhausted, instead of just waiting for the current 60 seconds to be over
-        if self.remaining == 0:
-            self.window = current
-
         return 0.0
 
     async def block(self) -> None:
@@ -227,7 +222,7 @@ class KeepAliveHandler(threading.Thread):
                     _log.exception("An error occurred while stopping the gateway. Ignoring.")
                 finally:
                     self.stop()
-                    return
+                    return  # noqa: B012
 
             data = self.get_payload()
             _log.debug(self.msg, self.shard_id, data["d"])
@@ -312,7 +307,7 @@ class HeartbeatWebSocket(Protocol):
 
 
 class DiscordWebSocket:
-    """Implements a WebSocket for Discord's gateway v9.
+    """Implements a WebSocket for Discord's gateway v10.
 
     Attributes
     ----------
@@ -370,7 +365,7 @@ class DiscordWebSocket:
         self.loop: asyncio.AbstractEventLoop = loop
 
         # an empty dispatcher to prevent crashes
-        self._dispatch: DispatchFunc = lambda *args: None
+        self._dispatch: DispatchFunc = lambda event, *args: None
         # generic event listeners
         self._dispatch_listeners: List[EventListener] = []
         # the keep alive
@@ -411,7 +406,7 @@ class DiscordWebSocket:
 
     @classmethod
     async def from_client(
-        cls: Type[WebSocketT],
+        cls,
         client: Client,
         *,
         initial: bool = False,
@@ -420,7 +415,7 @@ class DiscordWebSocket:
         session: Optional[str] = None,
         sequence: Optional[int] = None,
         resume: bool = False,
-    ) -> WebSocketT:
+    ) -> Self:
         """Creates a main websocket for Discord from a :class:`Client`.
 
         This is for internal use only.
@@ -502,9 +497,9 @@ class DiscordWebSocket:
             "d": {
                 "token": self.token,
                 "properties": {
-                    "$os": sys.platform,
-                    "$browser": "disnake",
-                    "$device": "disnake",
+                    "os": sys.platform,
+                    "browser": "disnake",
+                    "device": "disnake",
                 },
                 "compress": True,
                 "large_threshold": 250,
@@ -758,7 +753,7 @@ class DiscordWebSocket:
     ) -> None:
         if activity is not None:
             if not isinstance(activity, BaseActivity):
-                raise InvalidArgument("activity must derive from BaseActivity.")
+                raise TypeError("activity must derive from BaseActivity.")
             activity_data = (activity.to_dict(),)
         else:
             activity_data = ()
@@ -890,7 +885,7 @@ class DiscordVoiceWebSocket:
         self.secret_key: Optional[List[int]] = None
         self.thread_id: int = threading.get_ident()
         if hook:
-            self._hook = hook  # type: ignore
+            self._hook = hook
 
         # set in `from_client`
         self.gateway: str
@@ -936,14 +931,14 @@ class DiscordVoiceWebSocket:
 
     @classmethod
     async def from_client(
-        cls: Type[VoiceWebSocketT],
+        cls,
         client: VoiceClient,
         *,
         resume: bool = False,
         hook: Optional[HookFunc] = None,
-    ) -> VoiceWebSocketT:
+    ) -> Self:
         """Creates a voice websocket for the :class:`VoiceClient`."""
-        gateway = "wss://" + client.endpoint + "/?v=4"
+        gateway = f"wss://{client.endpoint}/?v=4"
         http = client._state.http
         socket = await http.ws_connect(gateway, compress=15)
         ws = cls(socket, loop=client.loop, hook=hook)

@@ -3,7 +3,7 @@ import asyncio
 import disnake
 from disnake.ext import commands
 
-bot = commands.Bot()
+bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
 class MyModal(disnake.ui.Modal):

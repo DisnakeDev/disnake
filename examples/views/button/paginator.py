@@ -3,7 +3,8 @@ from typing import List
 import disnake
 from disnake.ext import commands
 
-bot = commands.Bot(command_prefix="-")
+bot = commands.Bot(command_prefix=commands.when_mentioned)
+
 
 # Defines a simple paginator of buttons for the embed.
 class Menu(disnake.ui.View):

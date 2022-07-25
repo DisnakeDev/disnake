@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState
     from ..types.components import Modal as ModalPayload
-    from .action_row import Components
+    from .action_row import Components, ModalUIComponent
 
 
 __all__ = ("Modal",)
@@ -69,7 +69,7 @@ class Modal:
         self,
         *,
         title: str,
-        components: Components,
+        components: Components[ModalUIComponent],
         custom_id: str = MISSING,
         timeout: float = 600,
     ) -> None:

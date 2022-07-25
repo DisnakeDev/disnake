@@ -1,0 +1,1 @@
+Expand contributing documentation to include more information on creating pull requests and writing features.

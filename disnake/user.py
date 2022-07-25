@@ -25,19 +25,22 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import disnake.abc
 
 from .asset import Asset
 from .colour import Colour
-from .enums import DefaultAvatar
+from .enums import DefaultAvatar, Locale, try_enum
 from .flags import PublicUserFlags
-from .utils import MISSING, _bytes_to_base64_data, snowflake_time
+from .utils import MISSING, _assetbytes_to_base64_data, snowflake_time
 
 if TYPE_CHECKING:
     from datetime import datetime
 
+    from typing_extensions import Self
+
+    from .asset import AssetBytes
     from .channel import DMChannel
     from .guild import Guild
     from .message import Message
@@ -50,8 +53,6 @@ __all__ = (
     "User",
     "ClientUser",
 )
-
-BU = TypeVar("BU", bound="BaseUser")
 
 
 class _UserTag:
@@ -121,7 +122,7 @@ class BaseUser(_UserTag):
         self.system = data.get("system", False)
 
     @classmethod
-    def _copy(cls: Type[BU], user: BU) -> BU:
+    def _copy(cls, user: BaseUser) -> Self:
         self = cls.__new__(cls)  # bypass __init__
 
         self.name = user.name
@@ -318,8 +319,12 @@ class ClientUser(BaseUser):
 
     verified: :class:`bool`
         Specifies if the user's email is verified.
-    locale: Optional[:class:`str`]
+    locale: Optional[:class:`Locale`]
         The IETF language tag used to identify the language the user is using.
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
     mfa_enabled: :class:`bool`
         Specifies if the user has MFA turned on and working.
     """
@@ -328,7 +333,7 @@ class ClientUser(BaseUser):
 
     if TYPE_CHECKING:
         verified: bool
-        locale: Optional[str]
+        locale: Optional[Locale]
         mfa_enabled: bool
         _flags: int
 
@@ -343,42 +348,52 @@ class ClientUser(BaseUser):
 
     def _update(self, data: UserPayload) -> None:
         super()._update(data)
-        # There's actually an Optional[str] phone field as well but I won't use it
         self.verified = data.get("verified", False)
-        self.locale = data.get("locale")
+        locale = data.get("locale")
+        self.locale = try_enum(Locale, locale) if locale else None
         self._flags = data.get("flags", 0)
         self.mfa_enabled = data.get("mfa_enabled", False)
 
-    async def edit(self, *, username: str = MISSING, avatar: bytes = MISSING) -> ClientUser:
+    async def edit(
+        self, *, username: str = MISSING, avatar: Optional[AssetBytes] = MISSING
+    ) -> ClientUser:
         """|coro|
 
         Edits the current profile of the client.
 
         .. note::
 
-            To upload an avatar, a :term:`py:bytes-like object` must be passed in that
-            represents the image being uploaded. If this is done through a file
-            then the file must be opened via ``open('some_filename', 'rb')`` and
-            the :term:`py:bytes-like object` is given through the use of ``fp.read()``.
+            To upload an avatar, a resource (see below) or a :term:`py:bytes-like object`
+            must be passed in that represents the image being uploaded.
 
-            The only image formats supported for uploading is JPEG and PNG.
+            The only image formats supported for uploading are JPG and PNG.
 
         .. versionchanged:: 2.0
             The edit is no longer in-place, instead the newly edited client user is returned.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
         username: :class:`str`
             The new username you wish to change to.
-        avatar: :class:`bytes`
-            A :term:`py:bytes-like object` representing the image to upload.
+        avatar: Optional[|resource_type|]
+            A :term:`py:bytes-like object` or asset representing the image to upload.
             Could be ``None`` to denote no avatar.
+
+            .. versionchanged:: 2.5
+                Now accepts various resource types in addition to :class:`bytes`.
 
         Raises
         ------
+        NotFound
+            The ``avatar`` asset couldn't be found.
         HTTPException
             Editing your profile failed.
-        InvalidArgument
+        TypeError
+            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+        ValueError
             Wrong image format passed for ``avatar``.
 
         Returns
@@ -391,7 +406,7 @@ class ClientUser(BaseUser):
             payload["username"] = username
 
         if avatar is not MISSING:
-            payload["avatar"] = _bytes_to_base64_data(avatar)
+            payload["avatar"] = await _assetbytes_to_base64_data(avatar)
 
         data: UserPayload = await self._state.http.edit_profile(payload)
         return ClientUser(state=self._state, data=data)
@@ -447,11 +462,11 @@ class User(BaseUser, disnake.abc.Messageable):
         try:
             if self._stored:
                 self._state.deref_user(self.id)
-        except Exception:
+        except KeyError:
             pass
 
     @classmethod
-    def _copy(cls, user: User):
+    def _copy(cls, user: User) -> Self:
         self = super()._copy(user)
         self._stored = False
         return self

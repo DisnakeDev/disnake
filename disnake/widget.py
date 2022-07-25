@@ -190,7 +190,7 @@ class WidgetMember(BaseUser):
         except KeyError:
             activity = None
         else:
-            activity = create_activity(game)
+            activity = create_activity(game, state=state)
 
         self.activity: Optional[Union[BaseActivity, Spotify]] = activity
 
@@ -308,7 +308,7 @@ class Widget:
         The guild's name.
     channels: List[:class:`WidgetChannel`]
         The accessible voice channels in the guild.
-    members: List[:class:`Member`]
+    members: List[:class:`WidgetMember`]
         The online members in the server. Offline members
         do not appear in the widget.
 
@@ -341,7 +341,7 @@ class Widget:
         for member in data.get("members", []):
             connected_channel = _get_as_snowflake(member, "channel_id")
             if connected_channel in channels:
-                connected_channel = channels[connected_channel]  # type: ignore
+                connected_channel = channels[connected_channel]
             elif connected_channel:
                 connected_channel = WidgetChannel(id=connected_channel, name="", position=0)
 

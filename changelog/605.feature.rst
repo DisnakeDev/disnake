@@ -1,0 +1,3 @@
+Add support of more operators to all ``Flag`` classes. This list includes :class:`Intents` and :class:`Permissions`.
+- ``&``, ``|``, ``^``, and ``~`` bitwise operator support.
+- ``<``, ``<=``, ``>``, and ``>=`` comparsion operator support.

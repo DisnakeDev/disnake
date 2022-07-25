@@ -326,6 +326,8 @@ Helper Functions
 
 .. autofunction:: disnake.ext.commands.Param
 
+.. autofunction:: disnake.ext.commands.option_enum
+
 .. autofunction:: disnake.ext.commands.inject
 
 .. autofunction:: disnake.ext.commands.register_injection
@@ -532,6 +534,11 @@ Range
 
 .. autoclass:: disnake.ext.commands.Range
 
+String
+~~~~~~
+
+.. autoclass:: disnake.ext.commands.String
+
 
 .. _ext_commands_api_cogs:
 
@@ -688,7 +695,7 @@ Checks
 .. autofunction:: disnake.ext.commands.is_nsfw(,)
     :decorator:
 
-.. autofunction:: disnake.ext.commands.guild_permissions(guild_id, *, roles=None, users=None, owner=None)
+.. autofunction:: disnake.ext.commands.default_member_permissions
     :decorator:
 
 .. _ext_commands_api_context:
@@ -755,7 +762,7 @@ Converters
 .. autoclass:: disnake.ext.commands.CategoryChannelConverter
     :members:
 
-.. autoclass:: disnake.ext.commands.StoreChannelConverter
+.. autoclass:: disnake.ext.commands.ForumChannelConverter
     :members:
 
 .. autoclass:: disnake.ext.commands.ThreadConverter
@@ -928,6 +935,9 @@ Exceptions
 .. autoexception:: disnake.ext.commands.BadBoolArgument
     :members:
 
+.. autoexception:: disnake.ext.commands.LargeIntConversionFailure
+    :members:
+
 .. autoexception:: disnake.ext.commands.MissingPermissions
     :members:
 
@@ -1014,6 +1024,7 @@ Exception Hierarchy
                     - :exc:`~.commands.GuildStickerNotFound`
                     - :exc:`~.commands.GuildScheduledEventNotFound`
                     - :exc:`~.commands.BadBoolArgument`
+                    - :exc:`~.commands.LargeIntConversionFailure`
                     - :exc:`~.commands.FlagError`
                         - :exc:`~.commands.BadFlagArgument`
                         - :exc:`~.commands.MissingFlagArgument`
@@ -1050,3 +1061,16 @@ Exception Hierarchy
             - :exc:`~.commands.ExtensionNotFound`
     - :exc:`~.ClientException`
         - :exc:`~.commands.CommandRegistrationError`
+
+Warnings
+----------
+
+.. autoclass:: disnake.ext.commands.MessageContentPrefixWarning
+
+Warning Hierarchy
+~~~~~~~~~~~~~~~~~~~
+
+.. exception_hierarchy::
+
+    - :class:`DiscordWarning`
+        - :class:`~.commands.MessageContentPrefixWarning`

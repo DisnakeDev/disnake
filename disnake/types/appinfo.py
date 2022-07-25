@@ -41,6 +41,11 @@ class BaseAppInfo(TypedDict):
     description: str
 
 
+class InstallParams(TypedDict):
+    scopes: List[str]
+    permissions: str
+
+
 class _AppInfoOptional(TypedDict, total=False):
     team: Team
     guild_id: Snowflake
@@ -50,6 +55,9 @@ class _AppInfoOptional(TypedDict, total=False):
     privacy_policy_url: str
     hook: bool
     max_participants: int
+    tags: List[str]
+    install_params: InstallParams
+    custom_install_url: str
 
 
 class AppInfo(BaseAppInfo, _AppInfoOptional):

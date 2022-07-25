@@ -1,0 +1,2 @@
+Expose additional provided objects by Discord in audit log handling.
+- Also adds :class:`PartialIntegration`, and an ``integration`` attribute on :attr:`AuditLogEntry.extra` when the type is :attr:`AuditLogAction.application_command_permission_update`.

@@ -47,7 +47,7 @@ from typing import (
     overload,
 )
 
-from .errors import DiscordException, InvalidArgument
+from .errors import DiscordException
 from .utils import MISSING
 
 if TYPE_CHECKING:
@@ -155,7 +155,7 @@ exported_functions: List[
     Tuple[str, Optional[List[Type[ctypes._CData]]], Optional[Type[ctypes._CData]], Any]
 ] = [
     # Generic
-    ("opus_get_version_string", None, ctypes.c_char_p, None),
+    ("opus_get_version_string", [], ctypes.c_char_p, None),
     ("opus_strerror", [ctypes.c_int], ctypes.c_char_p, None),
     # Encoder functions
     ("opus_encoder_get_size", [ctypes.c_int], ctypes.c_int, None),
@@ -177,7 +177,7 @@ exported_functions: List[
         ctypes.c_int32,
         _err_lt,
     ),
-    ("opus_encoder_ctl", None, ctypes.c_int32, _err_lt),
+    ("opus_encoder_ctl", [EncoderStructPtr, ctypes.c_int], ctypes.c_int32, _err_lt),
     ("opus_encoder_destroy", [EncoderStructPtr], None, None),
     # Decoder functions
     ("opus_decoder_get_size", [ctypes.c_int], ctypes.c_int, None),
@@ -208,7 +208,7 @@ exported_functions: List[
         ctypes.c_int,
         _err_lt,
     ),
-    ("opus_decoder_ctl", None, ctypes.c_int32, _err_lt),
+    ("opus_decoder_ctl", [DecoderStructPtr, ctypes.c_int], ctypes.c_int32, _err_lt),
     ("opus_decoder_destroy", [DecoderStructPtr], None, None),
     (
         "opus_decoder_get_nb_samples",
@@ -260,7 +260,8 @@ def _load_default() -> bool:
             _lib = libopus_loader(_filename)
         else:
             path = ctypes.util.find_library("opus")
-            assert path
+            if not path:
+                raise AssertionError("could not find the opus library")
             _lib = libopus_loader(path)
     except Exception:
         _lib = MISSING
@@ -413,7 +414,7 @@ class Encoder(_OpusStruct):
         _lib.opus_encoder_ctl(self._state, CTL_SET_FEC, 1 if enabled else 0)
 
     def set_expected_packet_loss_percent(self, percentage: float) -> None:
-        _lib.opus_encoder_ctl(self._state, CTL_SET_PLP, min(100, max(0, int(percentage * 100))))  # type: ignore
+        _lib.opus_encoder_ctl(self._state, CTL_SET_PLP, min(100, max(0, int(percentage * 100))))
 
     def encode(self, pcm: bytes, frame_size: int) -> bytes:
         max_data_bytes = len(pcm)
@@ -423,8 +424,7 @@ class Encoder(_OpusStruct):
 
         ret = _lib.opus_encode(self._state, pcm_ptr, frame_size, data, max_data_bytes)
 
-        # array can be initialized with bytes but mypy doesn't know
-        return array.array("b", data[:ret]).tobytes()  # type: ignore
+        return array.array("b", data[:ret]).tobytes()
 
 
 class Decoder(_OpusStruct):
@@ -497,7 +497,7 @@ class Decoder(_OpusStruct):
 
     def decode(self, data: Optional[bytes], *, fec: bool = False) -> bytes:
         if data is None and fec:
-            raise InvalidArgument("Invalid arguments: FEC cannot be used with null data")
+            raise TypeError("Invalid arguments: FEC cannot be used with null data")
 
         if data is None:
             frame_size = self._get_last_packet_duration() or self.SAMPLES_PER_FRAME

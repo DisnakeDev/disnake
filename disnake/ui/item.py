@@ -31,35 +31,38 @@ from typing import (
     Any,
     Callable,
     Coroutine,
-    Dict,
     Generic,
     Optional,
     Protocol,
     Tuple,
-    Type,
     TypeVar,
     overload,
 )
 
 __all__ = ("Item", "WrappedComponent")
 
-I = TypeVar("I", bound="Item")
-V = TypeVar("V", bound="View", covariant=True)
+ItemT = TypeVar("ItemT", bound="Item")
+V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
+    from typing_extensions import ParamSpec, Self
+
     from ..components import NestedComponent
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
     from ..types.components import Component as ComponentPayload
     from .view import View
 
-    ItemCallbackType = Callable[[Any, I, MessageInteraction], Coroutine[Any, Any, Any]]
+    ItemCallbackType = Callable[[Any, ItemT, MessageInteraction], Coroutine[Any, Any, Any]]
+
+else:
+    ParamSpec = TypeVar
 
 
 class WrappedComponent(ABC):
     """Represents the base UI component that all UI components inherit from.
 
-    The current UI components supported are:
+    The following classes implement this ABC:
 
     - :class:`disnake.ui.Button`
     - :class:`disnake.ui.Select`
@@ -92,7 +95,7 @@ class WrappedComponent(ABC):
         return self._underlying.to_dict()
 
 
-class Item(WrappedComponent, Generic[V]):
+class Item(WrappedComponent, Generic[V_co]):
     """Represents the base UI item that all UI items inherit from.
 
     This class adds more functionality on top of the :class:`WrappedComponent` base class.
@@ -108,8 +111,16 @@ class Item(WrappedComponent, Generic[V]):
 
     __repr_attributes__: Tuple[str, ...] = ("row",)
 
+    @overload
+    def __init__(self: Item[None]):
+        ...
+
+    @overload
+    def __init__(self: Item[V_co]):
+        ...
+
     def __init__(self):
-        self._view: Optional[V] = None
+        self._view: V_co = None
         self._row: Optional[int] = None
         self._rendered_row: Optional[int] = None
         # This works mostly well but there is a gotcha with
@@ -127,7 +138,7 @@ class Item(WrappedComponent, Generic[V]):
         return None
 
     @classmethod
-    def from_component(cls: Type[I], component: NestedComponent) -> I:
+    def from_component(cls, component: NestedComponent) -> Self:
         return cls()
 
     def is_dispatchable(self) -> bool:
@@ -150,7 +161,7 @@ class Item(WrappedComponent, Generic[V]):
             raise ValueError("row cannot be negative or greater than or equal to 5")
 
     @property
-    def view(self) -> Optional[V]:
+    def view(self) -> V_co:
         """Optional[:class:`View`]: The underlying view for this item."""
         return self._view
 
@@ -182,4 +193,16 @@ class DecoratedItem(Protocol[I_co]):
 
     @overload
     def __get__(self, obj: Any, objtype: Any) -> I_co:
+        ...
+
+
+T_co = TypeVar("T_co", covariant=True)
+P = ParamSpec("P")
+
+
+class Object(Protocol[T_co, P]):
+    def __new__(cls) -> T_co:
+        ...
+
+    def __init__(*args: P.args, **kwargs: P.kwargs) -> None:
         ...

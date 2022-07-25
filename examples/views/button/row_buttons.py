@@ -2,7 +2,8 @@ import disnake
 from disnake.enums import ButtonStyle
 from disnake.ext import commands
 
-bot = commands.Bot(command_prefix="-")
+bot = commands.Bot(command_prefix=commands.when_mentioned)
+
 
 # Defines a simple view of row buttons.
 class RowButtons(disnake.ui.View):

@@ -7,7 +7,7 @@ import disnake
 import pytz
 from disnake.ext import commands
 
-bot = commands.Bot("!")
+bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 # Instead of repeating boiler-plate code you may use injections
 # Here we give each command a config and a few options in case they're not set
@@ -41,7 +41,7 @@ async def get_config(
     """
     # if a locale is not provided use the guild's locale
     if locale is None:
-        locale = inter.guild and inter.guild.preferred_locale or "en-US"
+        locale = inter.guild and str(inter.guild.preferred_locale) or "en-US"
 
     # parse a timezone from a string using pytz (maybe even use the locale if you feel like it)
     tzinfo = pytz.timezone(timezone)

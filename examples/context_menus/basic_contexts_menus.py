@@ -2,11 +2,11 @@ import disnake
 from disnake.ext import commands
 
 bot = commands.Bot(
-    command_prefix="$",
+    command_prefix=commands.when_mentioned,
     # Insert IDs of your test guilds below, if
     # you want the context menus to instantly appear.
     # Without test_guilds specified, your commands will
-    # register globally in ~1 hour.
+    # register globally.
     test_guilds=[12345],
 )
 

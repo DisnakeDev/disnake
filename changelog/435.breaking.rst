@@ -1,0 +1,4 @@
+Rework :class:`.Embed` internals.
+- This comes with the removal of ``Embed.Empty``. Use ``None`` instead.
+- :meth:`Embed.set_footer()` now requires the ``text`` parameter.
+- :attr:`Embed.type` is now optional, although this could previously be ``Embed.Empty``.

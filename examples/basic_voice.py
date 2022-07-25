@@ -1,7 +1,9 @@
+# pyright: reportUnknownLambdaType=false
+
 import asyncio
 
 import disnake
-import youtube_dl
+import youtube_dl  # type: ignore
 from disnake.ext import commands
 
 # Suppress noise about console usage from errors
@@ -126,7 +128,7 @@ class Music(commands.Cog):
 
 
 bot = commands.Bot(
-    command_prefix=commands.when_mentioned_or("!"),
+    command_prefix=commands.when_mentioned,
     description="Relatively simple music bot example",
 )
 

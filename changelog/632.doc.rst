@@ -1,0 +1,1 @@
+Note that :attr:`Interaction.channel` may be a :class:`PartialMessageable` in inaccessible threads, in addition to DMs.

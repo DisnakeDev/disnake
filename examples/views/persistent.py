@@ -33,7 +33,7 @@ class PersistentView(disnake.ui.View):
 
 class PersistentViewBot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or("$"))
+        super().__init__(command_prefix=commands.when_mentioned)
         self.persistent_views_added = False
 
     async def on_ready(self):

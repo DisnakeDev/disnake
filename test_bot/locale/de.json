@@ -1,0 +1,21 @@
+{
+    "MY_LOC_CMD_NAME": "lokalisierter_befehl",
+    "MY_LOC_CMD_DESCRIPTION": "Macht absolut gar nichts",
+    "CHOICE_PARAM_NAME": "umlaut",
+    "CHOICE_PARAM_DESCRIPTION": "Zeigt Umlaute für deutsche User an",
+    "CHOICE_A": "ä",
+    "CHOICE_O": "ö",
+    "CHOICE_U": "ü",
+    "OTHER_NAME": "andere_option",
+
+    "AUTOCOMP_1": "eins (1)",
+    "AUTOCOMP_2": "zwei (2)",
+    "AUTOCOMP_3": "drei (3)",
+    "AUTOCOMP_4": "vier (4)",
+    "AUTOCOMP_5": "fünf (5)",
+
+    "MY_SUBCMD_DESC": "Unterbefehl in Gruppe",
+    "A_VERY_COOL_PARAM_NAME": "wert",
+
+    "MSG_REVERSE": "Rückwärts"
+}

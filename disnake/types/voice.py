@@ -48,7 +48,7 @@ class _VoiceState(_PartialVoiceStateOptional):
 
 
 class GuildVoiceState(_VoiceState):
-    channel_id: Snowflake
+    channel_id: Optional[Snowflake]
 
 
 class VoiceState(_VoiceState, total=False):

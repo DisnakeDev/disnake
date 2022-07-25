@@ -27,18 +27,23 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Literal, Optional, Tuple, Union
 
 import yarl
 
 from . import utils
-from .errors import DiscordException, InvalidArgument
+from .errors import DiscordException
+from .file import File
 
 __all__ = ("Asset",)
 
 if TYPE_CHECKING:
+    from .state import ConnectionState
+
     ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
     ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
+
+AssetBytes = Union[bytes, "AssetMixin"]
 
 VALID_STATIC_FORMATS = frozenset({"jpeg", "jpg", "webp", "png"})
 VALID_ASSET_FORMATS = VALID_STATIC_FORMATS | {"gif"}
@@ -49,7 +54,7 @@ MISSING = utils.MISSING
 
 class AssetMixin:
     url: str
-    _state: Optional[Any]
+    _state: Optional[ConnectionState]
 
     __slots__: Tuple[str, ...] = ("_state",)
 
@@ -87,7 +92,7 @@ class AssetMixin:
         Parameters
         ----------
         fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
-            The file-like object to save this attachment to or the filename
+            The file-like object to save this asset to or the filename
             to use. If a filename is passed then a file is created with that
             filename and used instead.
         seek_begin: :class:`bool`
@@ -117,6 +122,53 @@ class AssetMixin:
         else:
             with open(fp, "wb") as f:
                 return f.write(data)
+
+    async def to_file(
+        self,
+        *,
+        spoiler: bool = False,
+        filename: Optional[str] = None,
+        description: Optional[str] = None,
+    ) -> File:
+        """|coro|
+
+        Converts the asset into a :class:`File` suitable for sending via
+        :meth:`abc.Messageable.send`.
+
+        .. versionadded:: 2.5
+
+        .. versionchanged:: 2.6
+            Raises :exc:`TypeError` instead of ``InvalidArgument``.
+
+        Parameters
+        -----------
+        spoiler: :class:`bool`
+            Whether the file is a spoiler.
+        filename: Optional[:class:`str`]
+            The filename to display when uploading to Discord. If this is not given, it defaults to
+            the name of the asset's URL.
+        description: Optional[:class:`str`]
+            The file's description.
+
+        Raises
+        ------
+        DiscordException
+            The asset does not have an associated state.
+        HTTPException
+            Downloading the asset failed.
+        NotFound
+            The asset was deleted.
+        TypeError
+            The asset is a unicode emoji or a sticker with lottie type.
+
+        Returns
+        -------
+        :class:`File`
+            The asset as a file suitable for sending.
+        """
+        data = await self.read()
+        filename = filename or yarl.URL(self.url).name
+        return File(io.BytesIO(data), filename=filename, spoiler=spoiler, description=description)
 
 
 class Asset(AssetMixin):
@@ -310,6 +362,9 @@ class Asset(AssetMixin):
     ) -> Asset:
         """Returns a new asset with the passed components replaced.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         size: :class:`int`
@@ -323,7 +378,7 @@ class Asset(AssetMixin):
 
         Raises
         ------
-        InvalidArgument
+        ValueError
             An invalid size or format was passed.
 
         Returns
@@ -337,20 +392,20 @@ class Asset(AssetMixin):
         if format is not MISSING:
             if self._animated:
                 if format not in VALID_ASSET_FORMATS:
-                    raise InvalidArgument(f"format must be one of {VALID_ASSET_FORMATS}")
+                    raise ValueError(f"format must be one of {VALID_ASSET_FORMATS}")
             else:
                 if format not in VALID_STATIC_FORMATS:
-                    raise InvalidArgument(f"format must be one of {VALID_STATIC_FORMATS}")
+                    raise ValueError(f"format must be one of {VALID_STATIC_FORMATS}")
             url = url.with_path(f"{path}.{format}")
 
         if static_format is not MISSING and not self._animated:
             if static_format not in VALID_STATIC_FORMATS:
-                raise InvalidArgument(f"static_format must be one of {VALID_STATIC_FORMATS}")
+                raise ValueError(f"static_format must be one of {VALID_STATIC_FORMATS}")
             url = url.with_path(f"{path}.{static_format}")
 
         if size is not MISSING:
             if not utils.valid_icon_size(size):
-                raise InvalidArgument("size must be a power of 2 between 16 and 4096")
+                raise ValueError("size must be a power of 2 between 16 and 4096")
             url = url.with_query(size=size)
         else:
             url = url.with_query(url.raw_query_string)
@@ -361,6 +416,9 @@ class Asset(AssetMixin):
     def with_size(self, size: int, /) -> Asset:
         """Returns a new asset with the specified size.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         size: :class:`int`
@@ -368,7 +426,7 @@ class Asset(AssetMixin):
 
         Raises
         ------
-        InvalidArgument
+        ValueError
             The asset had an invalid size.
 
         Returns
@@ -377,13 +435,16 @@ class Asset(AssetMixin):
             The newly updated asset.
         """
         if not utils.valid_icon_size(size):
-            raise InvalidArgument("size must be a power of 2 between 16 and 4096")
+            raise ValueError("size must be a power of 2 between 16 and 4096")
 
         url = str(yarl.URL(self._url).with_query(size=size))
         return Asset(state=self._state, url=url, key=self._key, animated=self._animated)
 
     def with_format(self, format: ValidAssetFormatTypes, /) -> Asset:
         """Returns a new asset with the specified format.
+
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
 
         Parameters
         ----------
@@ -392,7 +453,7 @@ class Asset(AssetMixin):
 
         Raises
         ------
-        InvalidArgument
+        ValueError
             The asset had an invalid format.
 
         Returns
@@ -402,10 +463,10 @@ class Asset(AssetMixin):
         """
         if self._animated:
             if format not in VALID_ASSET_FORMATS:
-                raise InvalidArgument(f"format must be one of {VALID_ASSET_FORMATS}")
+                raise ValueError(f"format must be one of {VALID_ASSET_FORMATS}")
         else:
             if format not in VALID_STATIC_FORMATS:
-                raise InvalidArgument(f"format must be one of {VALID_STATIC_FORMATS}")
+                raise ValueError(f"format must be one of {VALID_STATIC_FORMATS}")
 
         url = yarl.URL(self._url)
         path, _ = os.path.splitext(url.path)
@@ -418,6 +479,9 @@ class Asset(AssetMixin):
         This only changes the format if the underlying asset is
         not animated. Otherwise, the asset is not changed.
 
+        .. versionchanged:: 2.6
+            Raises :exc:`ValueError` instead of ``InvalidArgument``.
+
         Parameters
         ----------
         format: :class:`str`
@@ -425,7 +489,7 @@ class Asset(AssetMixin):
 
         Raises
         ------
-        InvalidArgument
+        ValueError
             The asset had an invalid format.
 
         Returns
