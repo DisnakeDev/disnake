@@ -427,8 +427,8 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
     )
 
     def __init__(self, user: User, guild_id: int):
-        self.user = user
-        self.guild_id = guild_id
+        self.user: User = user
+        self.guild_id: int = guild_id
 
 
 class RawGuildMemberUpdateEvent(_RawReprMixin):
@@ -477,26 +477,16 @@ class RawGuildMemberUpdateEvent(_RawReprMixin):
     )
 
     def __init__(self, data: GuildMemberUpdateEvent, user: User):
-        self.guild_id = int(data["guild_id"])
-        self.roles = [int(rid) for rid in data["roles"]]
-        self.user = user
-        self.nick = data.get("nick")
-        self.avatar = data["avatar"]
-        self.joined_at = (
-            datetime.datetime.fromisoformat(data["joined_at"]) if data["joined_at"] else None
-        )
-        self.premium_since = (
-            # pyright thinks that the argument provided could be none when it really can't
-            datetime.datetime.fromisoformat(data.get("premium_since"))  # type: ignore
-            if data.get("premium_since") is not None
-            else None
-        )
-        self.deaf = data.get("deaf")
-        self.mute = data.get("mute")
-        self.pending = data.get("pending")
-        self.communication_disabled_until = (
-            # see the comment above
-            datetime.datetime.fromisoformat(data.get("communication_disabled_until"))  # type: ignore
-            if data.get("communication_disabled_until") is not None
-            else None
+        self.guild_id: int = int(data["guild_id"])
+        self.roles: List[int] = [int(rid) for rid in data["roles"]]
+        self.user: User = user
+        self.nick: Optional[str] = data.get("nick")
+        self.avatar: Optional[str] = data.get("avatar")
+        self.joined_at: Optional[datetime.datetime] = parse_time(data.get("joined_at"))
+        self.premium_since: Optional[datetime.datetime] = parse_time(data.get("premium_since"))
+        self.deaf: Optional[bool] = data.get("deaf")
+        self.mute: Optional[bool] = data.get("mute")
+        self.pending: Optional[bool] = data.get("pending")
+        self.communication_disabled_until: Optional[datetime.datetime] = parse_time(
+            data.get("communication_disabled_until")
         )

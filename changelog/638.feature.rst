@@ -1,3 +1,3 @@
-Add on_raw_member_remove and on_raw_member_update events.
+Add :func:`on_raw_member_remove` and :func:`on_raw_member_update` events.
 
-Along with these new events are the RawGuildMemberRemoveEvent and RawGuildMemberUpdateEvent models.
+Along with these new events are the :class:`RawGuildMemberRemoveEvent` and :class:`RawGuildMemberUpdateEvent` models.

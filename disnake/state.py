@@ -1238,14 +1238,16 @@ class ConnectionState:
             except AttributeError:
                 pass
 
-            user = User(state=self, data=data["user"])
-            raw = RawGuildMemberRemoveEvent(user, data["guild_id"])
             user_id = int(data["user"]["id"])
             member = guild.get_member(user_id)
 
             if member is not None:
                 guild._remove_member(member)
                 self.dispatch("member_remove", member)
+                user = member
+            else:
+                user = self.store_user(data["user"])
+            raw = RawGuildMemberRemoveEvent(user, data["guild_id"])
             self.dispatch("raw_member_remove", raw)
         else:
             _log.debug(

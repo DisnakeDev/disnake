@@ -1033,9 +1033,10 @@ to handle it, which defaults to print a traceback and ignoring the exception.
 
 .. function:: on_raw_member_remove(payload)
 
-    Called when a :class:`Member` leaves a :class:`Guild`.
+    Called when a member leaves a :class:`Guild`.
+    Unlike :func:`on_member_remove`, this is called regardless of the member cache.
 
-    This requires :attr:`Intents.members` to be enabled.
+    .. versionadded:: 2.6
 
     :param payload: The raw event payload data.
     :type payload: :class:`RawGuildMemberRemoveEvent`
