@@ -376,11 +376,6 @@ class SystemChannelFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe:: SystemChannelFlags.y | SystemChannelFlags.z, SystemChannelFlags(y=True) | SystemChannelFlags.z
-
-            Returns a SystemChannelFlags instance with all provided flags enabled.
-
-            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new SystemChannelFlags instance with only flags enabled on both x and y.
@@ -398,11 +393,6 @@ class SystemChannelFlags(BaseFlags):
             Returns a new SystemChannelFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
-        .. describe:: ~SystemChannelFlags.y
-
-            Returns a SystemChannelFlags instance with all flags except ``y`` inverted.
-
-            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -410,6 +400,17 @@ class SystemChannelFlags(BaseFlags):
 
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: SystemChannelFlags.y | SystemChannelFlags.z, SystemChannelFlags(y=True) | SystemChannelFlags.z
+
+            Returns a SystemChannelFlags instance with all provided flags enabled.
+
+        .. describe:: ~SystemChannelFlags.y
+
+            Returns a SystemChannelFlags instance with all flags except ``y`` inverted.
 
     Attributes
     ----------
@@ -506,11 +507,6 @@ class MessageFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe:: MessageFlags.y | MessageFlags.z, MessageFlags(y=True) | MessageFlags.z
-
-            Returns a MessageFlags instance with all provided flags enabled.
-
-            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new MessageFlags instance with only flags enabled on both x and y.
@@ -528,11 +524,6 @@ class MessageFlags(BaseFlags):
             Returns a new MessageFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
-        .. describe:: ~MessageFlags.y
-
-            Returns a MessageFlags instance with all flags except ``y`` inverted.
-
-            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -540,6 +531,20 @@ class MessageFlags(BaseFlags):
 
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: MessageFlags.y | MessageFlags.z, MessageFlags(y=True) | MessageFlags.z
+
+            Returns a MessageFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~MessageFlags.y
+
+            Returns a MessageFlags instance with all flags except ``y`` inverted.
+
+            .. versionadded:: 2.6
 
     .. versionadded:: 1.3
 
@@ -655,11 +660,6 @@ class PublicUserFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe:: PublicUserFlags.y | PublicUserFlags.z, PublicUserFlags(y=True) | PublicUserFlags.z
-
-            Returns a PublicUserFlags instance with all provided flags enabled.
-
-            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new PublicUserFlags instance with only flags enabled on both x and y.
@@ -677,11 +677,6 @@ class PublicUserFlags(BaseFlags):
             Returns a new PublicUserFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
-        .. describe:: ~PublicUserFlags.y
-
-            Returns a PublicUserFlags instance with all flags except ``y`` inverted.
-
-            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
@@ -690,6 +685,20 @@ class PublicUserFlags(BaseFlags):
             Returns an iterator of ``(name, value)`` pairs. This allows it
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: PublicUserFlags.y | PublicUserFlags.z, PublicUserFlags(y=True) | PublicUserFlags.z
+
+            Returns a PublicUserFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~PublicUserFlags.y
+
+            Returns a PublicUserFlags instance with all flags except ``y`` inverted.
+
+            .. versionadded:: 2.6
 
     .. versionadded:: 1.4
 
@@ -857,11 +866,6 @@ class Intents(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe:: Intents.y | Intents.z, Intents(y=True) | Intents.z
-
-            Returns an Intents instance with all provided flags enabled.
-
-            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new Intents instance with only intents enabled on both x and y.
@@ -879,11 +883,6 @@ class Intents(BaseFlags):
             Returns a new Intents instance with all intents inverted from x.
 
             .. versionadded:: 2.6
-        .. describe:: ~Intents.y
-
-            Returns an Intents instance with all flags except ``y`` inverted.
-
-            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -891,6 +890,20 @@ class Intents(BaseFlags):
 
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: Intents.y | Intents.z, Intents(y=True) | Intents.z
+
+            Returns a Intents instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~Intents.y
+
+            Returns a Intents instance with all flags except ``y`` inverted.
+
+            .. versionadded:: 2.6
 
     Attributes
     ----------
@@ -1490,11 +1503,6 @@ class MemberCacheFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe:: MemberCacheFlags.y | MemberCacheFlags.z, MemberCacheFlags(y=True) | MemberCacheFlags.z
-
-            Returns a MemberCacheFlags instance with all provided flags enabled.
-
-            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new MemberCacheFlags instance with only flags enabled on both x and y.
@@ -1512,11 +1520,6 @@ class MemberCacheFlags(BaseFlags):
             Returns a new MemberCacheFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
-        .. describe:: ~MemberCacheFlags.y
-
-            Returns a MemberCacheFlags instance with all flags except ``y`` inverted.
-
-            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -1524,6 +1527,20 @@ class MemberCacheFlags(BaseFlags):
 
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: MemberCacheFlags.y | MemberCacheFlags.z, MemberCacheFlags(y=True) | MemberCacheFlags.z
+
+            Returns a MemberCacheFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~MemberCacheFlags.y
+
+            Returns a MemberCacheFlags instance with all flags except ``y`` inverted.
+
+            .. versionadded:: 2.6
 
     Attributes
     ----------
@@ -1654,11 +1671,6 @@ class ApplicationFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe:: ApplicationFlags.y | ApplicationFlags.z, ApplicationFlags(y=True) | ApplicationFlags.z
-
-            Returns an ApplicationFlags instance with all provided flags enabled.
-
-            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new ApplicationFlags instance with only flags enabled on both x and y.
@@ -1676,11 +1688,6 @@ class ApplicationFlags(BaseFlags):
             Returns a new ApplicationFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
-        .. describe:: ~ApplicationFlags.y
-
-            Returns an ApplicationFlags instance with all flags except ``y`` inverted.
-
-            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
@@ -1689,6 +1696,20 @@ class ApplicationFlags(BaseFlags):
             Returns an iterator of ``(name, value)`` pairs. This allows it
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: ApplicationFlags.y | ApplicationFlags.z, ApplicationFlags(y=True) | ApplicationFlags.z
+
+            Returns a ApplicationFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~ApplicationFlags.y
+
+            Returns a ApplicationFlags instance with all flags except ``y`` inverted.
+
+            .. versionadded:: 2.6
 
     .. versionadded:: 2.0
 
@@ -1794,11 +1815,6 @@ class ChannelFlags(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe:: ChannelFlags.y | ChannelFlags.z, ChannelFlags(y=True) | ChannelFlags.z
-
-            Returns a ChannelFlags instance with all provided flags enabled.
-
-            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new ChannelFlags instance with only flags enabled on both x and y.
@@ -1816,11 +1832,6 @@ class ChannelFlags(BaseFlags):
             Returns a new ChannelFlags instance with all flags from x inverted.
 
             .. versionadded:: 2.6
-        .. describe:: ~ChannelFlags.y
-
-            Returns a ChannelFlags instance with all flags except ``y`` inverted.
-
-            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
@@ -1829,6 +1840,20 @@ class ChannelFlags(BaseFlags):
             Returns an iterator of ``(name, value)`` pairs. This allows it
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: ChannelFlags.y | ChannelFlags.z, ChannelFlags(y=True) | ChannelFlags.z
+
+            Returns a ChannelFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~ChannelFlags.y
+
+            Returns a ChannelFlags instance with all flags except ``y`` inverted.
+
+            .. versionadded:: 2.6
 
     .. versionadded:: 2.5
 
@@ -1876,9 +1901,6 @@ class AutoModKeywordPresets(ListBaseFlags):
 
             Returns a new AutoModKeywordPresets instance with all enabled flags from both x and y.
             (Using ``|=`` will update in place).
-        .. describe:: AutoModKeywordPresets.y | AutoModKeywordPresets.z, AutoModKeywordPresets(y=True) | AutoModKeywordPresets.z
-
-            Returns an AutoModKeywordPresets instance with all provided flags enabled.
         .. describe:: x & y, x &= y
 
             Returns a new AutoModKeywordPresets instance with only flags enabled on both x and y.
@@ -1890,11 +1912,6 @@ class AutoModKeywordPresets(ListBaseFlags):
         .. describe:: ~x
 
             Returns a new AutoModKeywordPresets instance with all flags from x inverted.
-        .. describe:: ~AutoModKeywordPresets.y
-
-            Returns an AutoModKeywordPresets instance with all flags except ``y`` inverted.
-
-            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
@@ -1903,6 +1920,17 @@ class AutoModKeywordPresets(ListBaseFlags):
             Returns an iterator of ``(name, value)`` pairs. This allows it
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: AutoModKeywordPresets.y | AutoModKeywordPresets.z, AutoModKeywordPresets(y=True) | AutoModKeywordPresets.z
+
+            Returns a AutoModKeywordPresets instance with all provided flags enabled.
+
+        .. describe:: ~AutoModKeywordPresets.y
+
+            Returns a AutoModKeywordPresets instance with all flags except ``y`` inverted.
 
     .. versionadded:: 2.6
 
