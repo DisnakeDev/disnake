@@ -106,11 +106,6 @@ class Permissions(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
-        .. describe:: Permissions.y | Permissions.z, Permissions(y=True) | Permissions.z
-
-            Returns a Permissions instance with all provided permissions enabled.
-
-            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new Permissions instance with only permissions enabled on both x and y.
@@ -128,11 +123,6 @@ class Permissions(BaseFlags):
             Returns a new Permissions instance with all permissions from x inverted.
 
             .. versionadded:: 2.6
-        .. describe:: Permissions.y | Permissions.z, Permissions(y=True) | Permissions.z
-
-            Returns a Permissions instance with all provided flags enabled.
-
-            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the permission's hash.
@@ -141,6 +131,20 @@ class Permissions(BaseFlags):
                Returns an iterator of ``(perm, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
                Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: Permissions.y | Permissions.z, Permissions(y=True) | Permissions.z
+
+            Returns a Permissions instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~Permissions.y
+
+            Returns a Permissions instance with all flags except ``y`` inverted.
+
+            .. versionadded:: 2.6
 
     Attributes
     ----------
