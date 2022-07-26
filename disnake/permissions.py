@@ -878,7 +878,7 @@ class PermissionOverwrite:
 
         for key, value in kwargs.items():
             if key not in self.VALID_NAMES:
-                raise ValueError(f"no permission called {key}.")
+                raise ValueError(f"{key!r} is not a valid permission name.")
 
             setattr(self, key, value)
 
@@ -935,7 +935,7 @@ class PermissionOverwrite:
         """
         return len(self._values) == 0
 
-    def update(self, **kwargs: bool) -> None:
+    def update(self, **kwargs: Optional[bool]) -> None:
         """
         Bulk updates this permission overwrite object.
 

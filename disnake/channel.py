@@ -76,7 +76,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import Never, Self
 
     from .abc import Snowflake, SnowflakeTime
     from .asset import AssetBytes
@@ -311,29 +311,65 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         """
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
+    # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
     async def edit(
         self,
         *,
+        position: int,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
         reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    # only passing `sync_permissions` may or may not return a channel,
+    # depending on whether the channel is in a category
+    @overload
+    async def edit(
+        self,
+        *,
+        sync_permissions: bool,
+        reason: Optional[str] = ...,
+    ) -> Optional[TextChannel]:
+        ...
+
+    @overload
+    async def edit(
+        self,
+        *,
         name: str = ...,
         topic: Optional[str] = ...,
         position: int = ...,
         nsfw: bool = ...,
         sync_permissions: bool = ...,
-        category: Optional[CategoryChannel] = ...,
-        slowmode_delay: int = ...,
-        default_auto_archive_duration: AnyThreadArchiveDuration = ...,
+        category: Optional[Snowflake] = ...,
+        slowmode_delay: Optional[int] = ...,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
         type: ChannelType = ...,
-        overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = ...,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        flags: ChannelFlags = ...,
+        reason: Optional[str] = ...,
+    ) -> TextChannel:
+        ...
+
+    async def edit(
+        self,
+        *,
+        name: str = MISSING,
+        topic: Optional[str] = MISSING,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        sync_permissions: bool = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        type: ChannelType = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        flags: ChannelFlags = MISSING,
+        reason: Optional[str] = None,
+        **kwargs: Never,
     ) -> Optional[TextChannel]:
-        ...
-
-    @overload
-    async def edit(self) -> Optional[TextChannel]:
-        ...
-
-    async def edit(self, *, reason=None, **options):
         """|coro|
 
         Edits the channel.
@@ -366,10 +402,10 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The new category for this channel. Can be ``None`` to remove the
             category.
-        slowmode_delay: :class:`int`
+        slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         type: :class:`ChannelType`
@@ -379,9 +415,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+        flags: :class:`ChannelFlags`
+            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
@@ -402,7 +443,21 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The newly edited text channel. If the edit was only positional
             then ``None`` is returned instead.
         """
-        payload = await self._edit(options, reason=reason)
+        payload = await self._edit(
+            name=name,
+            topic=topic,
+            position=position,
+            nsfw=nsfw,
+            sync_permissions=sync_permissions,
+            category=category,
+            slowmode_delay=slowmode_delay,
+            default_auto_archive_duration=default_auto_archive_duration,
+            type=type,
+            overwrites=overwrites,
+            flags=flags,
+            reason=reason,
+            **kwargs,
+        )
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
@@ -1210,6 +1265,29 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             base.value &= ~denied.value
         return base
 
+    # if only these parameters are passed, `_move` is called and no channel will be returned
+    @overload
+    async def edit(
+        self,
+        *,
+        position: int,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    # only passing `sync_permissions` may or may not return a channel,
+    # depending on whether the channel is in a category
+    @overload
+    async def edit(
+        self,
+        *,
+        sync_permissions: bool,
+        reason: Optional[str] = ...,
+    ) -> Optional[VoiceChannel]:
+        ...
+
     @overload
     async def edit(
         self,
@@ -1218,22 +1296,36 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         bitrate: int = ...,
         user_limit: int = ...,
         position: int = ...,
-        sync_permissions: int = ...,
-        category: Optional[CategoryChannel] = ...,
+        sync_permissions: bool = ...,
+        category: Optional[Snowflake] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         rtc_region: Optional[Union[str, VoiceRegion]] = ...,
         video_quality_mode: VideoQualityMode = ...,
         nsfw: bool = ...,
-        slowmode_delay: int = ...,
+        slowmode_delay: Optional[int] = ...,
+        flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
+    ) -> VoiceChannel:
+        ...
+
+    async def edit(
+        self,
+        *,
+        name: str = MISSING,
+        bitrate: int = MISSING,
+        user_limit: int = MISSING,
+        position: int = MISSING,
+        sync_permissions: bool = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
+        nsfw: bool = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        flags: ChannelFlags = MISSING,
+        reason: Optional[str] = None,
+        **kwargs: Never,
     ) -> Optional[VoiceChannel]:
-        ...
-
-    @overload
-    async def edit(self) -> Optional[VoiceChannel]:
-        ...
-
-    async def edit(self, *, reason=None, **options):
         """|coro|
 
         Edits the channel.
@@ -1263,7 +1355,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The new category for this channel. Can be ``None`` to remove the
             category.
         reason: Optional[:class:`str`]
@@ -1287,11 +1379,16 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
             .. versionadded:: 2.3
 
-        slowmode_delay: :class:`int`
+        slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
 
             .. versionadded:: 2.3
+
+        flags: :class:`ChannelFlags`
+            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
+
+            .. versionadded:: 2.6
 
         Raises
         ------
@@ -1310,7 +1407,22 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             The newly edited voice channel. If the edit was only positional
             then ``None`` is returned instead.
         """
-        payload = await self._edit(options, reason=reason)
+        payload = await self._edit(
+            name=name,
+            bitrate=bitrate,
+            user_limit=user_limit,
+            position=position,
+            sync_permissions=sync_permissions,
+            category=category,
+            overwrites=overwrites,
+            rtc_region=rtc_region,
+            video_quality_mode=video_quality_mode,
+            nsfw=nsfw,
+            slowmode_delay=slowmode_delay,
+            flags=flags,
+            reason=reason,
+            **kwargs,
+        )
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
@@ -1799,27 +1911,61 @@ class StageChannel(VocalGuildChannel):
         data = await self._state.http.get_stage_instance(self.id)
         return StageInstance(guild=self.guild, state=self._state, data=data)
 
+    # if only these parameters are passed, `_move` is called and no channel will be returned
     @overload
     async def edit(
         self,
         *,
-        name: str = ...,
-        topic: Optional[str] = ...,
-        position: int = ...,
-        sync_permissions: int = ...,
-        category: Optional[CategoryChannel] = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
-        rtc_region: Optional[Union[str, VoiceRegion]] = ...,
-        video_quality_mode: VideoQualityMode = ...,
+        position: int,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    # only passing `sync_permissions` may or may not return a channel,
+    # depending on whether the channel is in a category
+    @overload
+    async def edit(
+        self,
+        *,
+        sync_permissions: bool,
         reason: Optional[str] = ...,
     ) -> Optional[StageChannel]:
         ...
 
     @overload
-    async def edit(self) -> Optional[StageChannel]:
+    async def edit(
+        self,
+        *,
+        name: str = ...,
+        position: int = ...,
+        sync_permissions: bool = ...,
+        category: Optional[Snowflake] = ...,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        rtc_region: Optional[Union[str, VoiceRegion]] = ...,
+        video_quality_mode: VideoQualityMode = ...,
+        bitrate: int = ...,
+        flags: ChannelFlags = ...,
+        reason: Optional[str] = ...,
+    ) -> StageChannel:
         ...
 
-    async def edit(self, *, reason=None, **options):
+    async def edit(
+        self,
+        *,
+        name: str = MISSING,
+        position: int = MISSING,
+        sync_permissions: bool = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
+        bitrate: int = MISSING,
+        flags: ChannelFlags = MISSING,
+        reason: Optional[str] = None,
+        **kwargs: Never,
+    ) -> Optional[StageChannel]:
         """|coro|
 
         Edits the channel.
@@ -1845,7 +1991,7 @@ class StageChannel(VocalGuildChannel):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The new category for this channel. Can be ``None`` to remove the
             category.
         overwrites: :class:`Mapping`
@@ -1858,6 +2004,16 @@ class StageChannel(VocalGuildChannel):
             The camera video quality for the stage channel's participants.
 
             .. versionadded:: 2.0
+
+        bitrate: :class:`int`
+            The new channel's bitrate.
+
+            .. versionadded:: 2.6
+
+        flags: :class:`ChannelFlags`
+            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
+
+            .. versionadded:: 2.6
 
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
@@ -1879,7 +2035,19 @@ class StageChannel(VocalGuildChannel):
             The newly edited stage channel. If the edit was only positional
             then ``None`` is returned instead.
         """
-        payload = await self._edit(options, reason=reason)
+        payload = await self._edit(
+            name=name,
+            position=position,
+            sync_permissions=sync_permissions,
+            category=category,
+            overwrites=overwrites,
+            rtc_region=rtc_region,
+            video_quality_mode=video_quality_mode,
+            bitrate=bitrate,
+            flags=flags,
+            reason=reason,
+            **kwargs,
+        )
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
@@ -1982,6 +2150,16 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     ) -> CategoryChannel:
         return await self._clone_impl({"nsfw": self.nsfw}, name=name, reason=reason)
 
+    # if only these parameters are passed, `_move` is called and no channel will be returned
+    @overload
+    async def edit(
+        self,
+        *,
+        position: int,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
     @overload
     async def edit(
         self,
@@ -1990,15 +2168,22 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         position: int = ...,
         nsfw: bool = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
+    ) -> CategoryChannel:
+        ...
+
+    async def edit(
+        self,
+        *,
+        name: str = MISSING,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        flags: ChannelFlags = MISSING,
+        reason: Optional[str] = None,
+        **kwargs: Never,
     ) -> Optional[CategoryChannel]:
-        ...
-
-    @overload
-    async def edit(self) -> Optional[CategoryChannel]:
-        ...
-
-    async def edit(self, *, reason=None, **options):
         """|coro|
 
         Edits the category.
@@ -2026,6 +2211,11 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the category.
+        flags: :class:`ChannelFlags`
+            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for editing this category. Shows up on the audit log.
 
@@ -2046,7 +2236,15 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly edited category channel. If the edit was only positional
             then ``None`` is returned instead.
         """
-        payload = await self._edit(options, reason=reason)
+        payload = await self._edit(
+            name=name,
+            position=position,
+            nsfw=nsfw,
+            overwrites=overwrites,
+            flags=flags,
+            reason=reason,
+            **kwargs,
+        )
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
@@ -2428,6 +2626,29 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     def typing(self) -> Typing:
         return Typing(self)
 
+    # if only these parameters are passed, `_move` is called and no channel will be returned
+    @overload
+    async def edit(
+        self,
+        *,
+        position: int,
+        category: Optional[Snowflake] = ...,
+        sync_permissions: bool = ...,
+        reason: Optional[str] = ...,
+    ) -> None:
+        ...
+
+    # only passing `sync_permissions` may or may not return a channel,
+    # depending on whether the channel is in a category
+    @overload
+    async def edit(
+        self,
+        *,
+        sync_permissions: bool,
+        reason: Optional[str] = ...,
+    ) -> Optional[ForumChannel]:
+        ...
+
     @overload
     async def edit(
         self,
@@ -2437,19 +2658,31 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         position: int = ...,
         nsfw: bool = ...,
         sync_permissions: bool = ...,
-        category: Optional[CategoryChannel] = ...,
+        category: Optional[Snowflake] = ...,
         slowmode_delay: Optional[int] = ...,
-        default_auto_archive_duration: AnyThreadArchiveDuration = ...,
-        overwrites: Mapping[Union[Role, Member, Snowflake], PermissionOverwrite] = ...,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
+    ) -> ForumChannel:
+        ...
+
+    async def edit(
+        self,
+        *,
+        name: str = MISSING,
+        topic: Optional[str] = MISSING,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        sync_permissions: bool = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        flags: ChannelFlags = MISSING,
+        reason: Optional[str] = None,
+        **kwargs: Never,
     ) -> Optional[ForumChannel]:
-        ...
-
-    @overload
-    async def edit(self) -> Optional[ForumChannel]:
-        ...
-
-    async def edit(self, *, reason: Optional[str] = None, **options):
         """|coro|
 
         Edits the channel.
@@ -2473,18 +2706,23 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`CategoryChannel`]
+        category: Optional[:class:`abc.Snowflake`]
             The new category for this channel. Can be ``None`` to remove the
             category.
-        slowmode_delay: :class:`int`
+        slowmode_delay: Optional[:class:`int`]
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
+        flags: :class:`ChannelFlags`
+            The new flags to set for this channel. This will overwrite any existing flags set on this channel.
+
+            .. versionadded:: 2.6
+
         reason: Optional[:class:`str`]
             The reason for editing this channel. Shows up on the audit log.
 
@@ -2505,7 +2743,20 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The newly edited forum channel. If the edit was only positional
             then ``None`` is returned instead.
         """
-        payload = await self._edit(options, reason=reason)
+        payload = await self._edit(
+            name=name,
+            topic=topic,
+            position=position,
+            nsfw=nsfw,
+            sync_permissions=sync_permissions,
+            category=category,
+            slowmode_delay=slowmode_delay,
+            default_auto_archive_duration=default_auto_archive_duration,
+            overwrites=overwrites,
+            flags=flags,
+            reason=reason,
+            **kwargs,
+        )
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
