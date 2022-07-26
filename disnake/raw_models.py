@@ -26,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, List, Optional, Set, cast
+from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
 
 from .enums import ChannelType, try_enum
 from .utils import get_slots
@@ -36,16 +36,19 @@ if TYPE_CHECKING:
     from .message import Message
     from .partial_emoji import PartialEmoji
     from .threads import Thread, ThreadMember, ThreadType
-    from .types.raw_models import (
-        BulkMessageDeleteEvent,
-        GuildScheduledEventUserActionEvent,
+    from .types.gateway import (
+        GuildScheduledEventUserAddEvent,
+        GuildScheduledEventUserRemoveEvent,
         IntegrationDeleteEvent,
+        MessageDeleteBulkEvent,
         MessageDeleteEvent,
+        MessageReactionAddEvent,
+        MessageReactionRemoveAllEvent,
+        MessageReactionRemoveEmojiEvent,
+        MessageReactionRemoveEvent,
         MessageUpdateEvent,
-        ReactionActionEvent,
-        ReactionClearEmojiEvent,
-        ReactionClearEvent,
-        TypingEvent,
+        ThreadDeleteEvent,
+        TypingStartEvent,
     )
 
 
@@ -116,7 +119,7 @@ class RawBulkMessageDeleteEvent(_RawReprMixin):
 
     __slots__ = ("message_ids", "channel_id", "guild_id", "cached_messages")
 
-    def __init__(self, data: BulkMessageDeleteEvent) -> None:
+    def __init__(self, data: MessageDeleteBulkEvent) -> None:
         self.message_ids: Set[int] = {int(x) for x in data.get("ids", [])}
         self.channel_id: int = int(data["channel_id"])
         self.cached_messages: List[Message] = []
@@ -163,6 +166,9 @@ class RawMessageUpdateEvent(_RawReprMixin):
             self.guild_id: Optional[int] = None
 
 
+ReactionEventType = Literal["REACTION_ADD", "REACTION_REMOVE"]
+
+
 class RawReactionActionEvent(_RawReprMixin):
     """Represents the event payload for :func:`on_raw_reaction_add` and
     :func:`on_raw_reaction_remove` events.
@@ -194,12 +200,17 @@ class RawReactionActionEvent(_RawReprMixin):
 
     __slots__ = ("message_id", "user_id", "channel_id", "guild_id", "emoji", "event_type", "member")
 
-    def __init__(self, data: ReactionActionEvent, emoji: PartialEmoji, event_type: str) -> None:
+    def __init__(
+        self,
+        data: Union[MessageReactionAddEvent, MessageReactionRemoveEvent],
+        emoji: PartialEmoji,
+        event_type: ReactionEventType,
+    ) -> None:
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
         self.user_id: int = int(data["user_id"])
         self.emoji: PartialEmoji = emoji
-        self.event_type: str = event_type
+        self.event_type: ReactionEventType = event_type
         self.member: Optional[Member] = None
         try:
             self.guild_id: Optional[int] = int(data["guild_id"])
@@ -222,7 +233,7 @@ class RawReactionClearEvent(_RawReprMixin):
 
     __slots__ = ("message_id", "channel_id", "guild_id")
 
-    def __init__(self, data: ReactionClearEvent) -> None:
+    def __init__(self, data: MessageReactionRemoveAllEvent) -> None:
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
         try:
@@ -250,7 +261,7 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
 
     __slots__ = ("message_id", "channel_id", "guild_id", "emoji")
 
-    def __init__(self, data: ReactionClearEmojiEvent, emoji: PartialEmoji) -> None:
+    def __init__(self, data: MessageReactionRemoveEmojiEvent, emoji: PartialEmoji) -> None:
         self.emoji: PartialEmoji = emoji
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
@@ -304,7 +315,9 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
 
     __slots__ = ("event_id", "user_id", "guild_id")
 
-    def __init__(self, data: GuildScheduledEventUserActionEvent):
+    def __init__(
+        self, data: Union[GuildScheduledEventUserAddEvent, GuildScheduledEventUserRemoveEvent]
+    ):
         self.event_id: int = int(data["guild_scheduled_event_id"])
         self.user_id: int = int(data["user_id"])
         self.guild_id: int = int(data["guild_id"])
@@ -337,7 +350,7 @@ class RawThreadDeleteEvent(_RawReprMixin):
         "thread",
     )
 
-    def __init__(self, data):
+    def __init__(self, data: ThreadDeleteEvent):
         self.thread_id: int = int(data["id"])
         self.thread_type: ThreadType = cast("ThreadType", try_enum(ChannelType, data["type"]))
         self.guild_id: int = int(data["guild_id"])
@@ -393,7 +406,7 @@ class RawTypingEvent(_RawReprMixin):
 
     __slots__ = ("user_id", "channel_id", "guild_id", "member", "timestamp")
 
-    def __init__(self, data: TypingEvent) -> None:
+    def __init__(self, data: TypingStartEvent) -> None:
         self.user_id: int = int(data["user_id"])
         self.channel_id: int = int(data["channel_id"])
         self.member: Optional[Member] = None

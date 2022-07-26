@@ -303,6 +303,8 @@ Interaction = Union[
     ModalInteraction,
 ]
 
+BaseInteraction = Union[Interaction, PingInteraction]
+
 
 class InteractionApplicationCommandCallbackData(TypedDict, total=False):
     tts: bool

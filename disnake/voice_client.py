@@ -60,11 +60,8 @@ if TYPE_CHECKING:
     from .guild import Guild
     from .opus import Encoder
     from .state import ConnectionState
-    from .types.voice import (
-        GuildVoiceState as GuildVoiceStatePayload,
-        SupportedModes,
-        VoiceServerUpdate as VoiceServerUpdatePayload,
-    )
+    from .types.gateway import VoiceServerUpdateEvent
+    from .types.voice import GuildVoiceState as GuildVoiceStatePayload, SupportedModes
     from .user import ClientUser
 
 
@@ -129,7 +126,7 @@ class VoiceProtocol:
         """
         raise NotImplementedError
 
-    async def on_voice_server_update(self, data: VoiceServerUpdatePayload) -> None:
+    async def on_voice_server_update(self, data: VoiceServerUpdateEvent) -> None:
         """|coro|
 
         An abstract method that is called when initially connecting to voice.
@@ -303,7 +300,7 @@ class VoiceClient(VoiceProtocol):
         else:
             self._voice_state_complete.set()
 
-    async def on_voice_server_update(self, data: VoiceServerUpdatePayload) -> None:
+    async def on_voice_server_update(self, data: VoiceServerUpdateEvent) -> None:
         if self._voice_server_complete.is_set():
             _log.info("Ignoring extraneous voice server update.")
             return

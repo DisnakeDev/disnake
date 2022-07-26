@@ -28,17 +28,20 @@ from __future__ import annotations
 from typing import List, Literal, Optional, TypedDict
 
 from .snowflake import Snowflake
-from .user import PartialUser
+from .user import User
 
 StatusType = Literal["idle", "dnd", "online", "offline"]
 
 
-class PartialPresenceUpdate(TypedDict):
-    user: PartialUser
-    guild_id: Snowflake
+class PresenceData(TypedDict):
+    user: User
     status: StatusType
     activities: List[Activity]
     client_status: ClientStatus
+
+
+class PartialPresenceUpdate(PresenceData):
+    guild_id: Snowflake
 
 
 class ClientStatus(TypedDict, total=False):

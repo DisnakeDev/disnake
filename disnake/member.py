@@ -72,7 +72,8 @@ if TYPE_CHECKING:
     from .partial_emoji import PartialEmoji
     from .role import Role
     from .state import ConnectionState
-    from .types.activity import PartialPresenceUpdate
+    from .types.activity import PresenceData
+    from .types.gateway import GuildMemberUpdateEvent
     from .types.member import (
         BaseMember as BaseMemberPayload,
         Member as MemberPayload,
@@ -315,7 +316,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     def __init__(
         self,
         *,
-        data: MemberWithUserPayload,
+        data: Union[MemberWithUserPayload, GuildMemberUpdateEvent],
         guild: Guild,
         state: ConnectionState,
     ):
@@ -335,7 +336,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     def __init__(
         self,
         *,
-        data: Union[BaseMemberPayload, MemberWithUserPayload],
+        data: Union[BaseMemberPayload, MemberWithUserPayload, GuildMemberUpdateEvent],
         guild: Guild,
         state: ConnectionState,
         user_data: Optional[UserPayload] = None,
@@ -431,7 +432,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         ch = await self.create_dm()
         return ch
 
-    def _update(self, data: MemberPayload) -> None:
+    def _update(self, data: GuildMemberUpdateEvent) -> None:
         # the nickname change is optional,
         # if it isn't in the payload then it didn't change
         try:
@@ -451,7 +452,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._communication_disabled_until = timeout_datetime
 
     def _presence_update(
-        self, data: PartialPresenceUpdate, user: UserPayload
+        self, data: PresenceData, user: UserPayload
     ) -> Optional[Tuple[User, User]]:
         self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
