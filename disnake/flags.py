@@ -73,9 +73,13 @@ class flag_value(Generic[T]):
         self.__doc__ = func.__doc__
         self._parent: Type[T] = MISSING
 
-    def __or__(self, other: flag_value[T]) -> T:
+    def __or__(self, other: Union[flag_value[T], T]) -> T:
         if isinstance(other, BaseFlags):
-            return NotImplemented
+            if self._parent is not other.__class__:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
+                )
+            return other._from_value(self.flag | other.value)
         if self._parent is not other._parent:
             raise TypeError(
                 f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
@@ -187,16 +191,14 @@ class BaseFlags:
             )
         return self._from_value(self.value | other.value)
 
-    def __ror__(self, other: flag_value[Self]) -> Self:
-        if not isinstance(other, flag_value):
-            return NotImplemented
-        if self is not other._parent:
-            raise TypeError(
-                f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
-            )
-        return self._from_value(self.value | other.flag)
-
-    def __ior__(self, other: Self) -> Self:
+    def __ior__(self, other: Union[Self, flag_value[Self]]) -> Self:
+        if isinstance(other, flag_value):
+            if self.__class__ is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
+            self.value |= other.flag
+            return self
         if not isinstance(other, self.__class__):
             raise TypeError(
                 f"unsupported operand type(s) for |=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
