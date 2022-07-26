@@ -1,0 +1,1 @@
+Call current loop's exception handler instead of crashing the process if an unhandled exception occurs while deserializing a received gateway event.
