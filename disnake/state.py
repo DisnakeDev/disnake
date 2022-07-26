@@ -70,7 +70,12 @@ from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import _integration_factory
-from .interactions import ApplicationCommandInteraction, MessageInteraction, ModalInteraction
+from .interactions import (
+    ApplicationCommandInteraction,
+    Interaction,
+    MessageInteraction,
+    ModalInteraction,
+)
 from .invite import Invite
 from .member import Member
 from .mentions import AllowedMentions
@@ -585,7 +590,7 @@ class ConnectionState:
 
     def _add_guild_from_data(self, data: Union[GuildPayload, UnavailableGuildPayload]) -> Guild:
         guild = Guild(
-            data=data,  # type: ignore
+            data=data,  # type: ignore  # may be unavailable guild
             state=self,
         )
         self._add_guild(guild)
@@ -865,6 +870,8 @@ class ConnectionState:
         emoji = PartialEmoji.with_state(
             self,
             id=emoji_id,
+            # may be `None` in gateway events if custom emoji data isn't available anymore
+            # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
             name=emoji["name"],  # type: ignore
         )
         raw = RawReactionActionEvent(data, emoji, "REACTION_REMOVE")
@@ -890,6 +897,8 @@ class ConnectionState:
         emoji = PartialEmoji.with_state(
             self,
             id=emoji_id,
+            # may be `None` in gateway events if custom emoji data isn't available anymore
+            # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
             name=emoji["name"],  # type: ignore
         )
         raw = RawReactionClearEmojiEvent(data, emoji)
@@ -906,6 +915,12 @@ class ConnectionState:
                     self.dispatch("reaction_clear_emoji", reaction)
 
     def parse_interaction_create(self, data: gateway.InteractionCreateEvent) -> None:
+        # note: this does not use an intermediate variable for `data["type"]` since
+        # it wouldn't allow automatically narrowing the `data` union type based
+        # on the `["type"]` field
+
+        interaction: Interaction
+
         if data["type"] == 1:
             # PING interaction should never be received
             return
@@ -1334,7 +1349,7 @@ class ConnectionState:
             guild = self._get_guild(int(data["id"]))
             if guild is not None:
                 guild.unavailable = False
-                guild._from_data(data)  # type: ignore
+                guild._from_data(data)  # type: ignore  # data type not narrowed correctly to full guild
                 return guild
 
         return self._add_guild_from_data(data)

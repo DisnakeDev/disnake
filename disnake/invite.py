@@ -512,6 +512,7 @@ class Invite(Hashable):
         return cls(
             state=state,
             data=data,
+            # objects may be partial due to missing cache
             guild=guild,  # type: ignore
             channel=channel,  # type: ignore
         )
