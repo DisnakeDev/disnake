@@ -316,6 +316,7 @@ class GuildScheduledEvent(Hashable):
         self,
         *,
         entity_type: Literal[GuildScheduledEventEntityType.external],
+        channel: None = ...,
         name: str = ...,
         description: Optional[str] = ...,
         image: Optional[AssetBytes] = ...,
@@ -349,12 +350,30 @@ class GuildScheduledEvent(Hashable):
     ) -> GuildScheduledEvent:
         ...
 
-    # new channel, no entity_type
+    # channel=None, no entity_type
     @overload
     async def edit(
         self,
         *,
-        channel: Optional[Snowflake],
+        channel: None,
+        name: str = ...,
+        description: Optional[str] = ...,
+        image: Optional[AssetBytes] = ...,
+        privacy_level: GuildScheduledEventPrivacyLevel = ...,
+        scheduled_start_time: datetime = ...,
+        scheduled_end_time: datetime = ...,
+        entity_metadata: GuildScheduledEventMetadata = ...,
+        status: GuildScheduledEventStatus = ...,
+        reason: Optional[str] = ...,
+    ) -> GuildScheduledEvent:
+        ...
+
+    # valid channel, no entity_type
+    @overload
+    async def edit(
+        self,
+        *,
+        channel: Snowflake,
         name: str = ...,
         description: Optional[str] = ...,
         image: Optional[AssetBytes] = ...,
@@ -385,17 +404,8 @@ class GuildScheduledEvent(Hashable):
 
         Edits the guild scheduled event.
 
-        If updating ``entity_type`` to :attr:`GuildScheduledEventEntityType.external`:
-
-        - ``channel`` should not be set
-        - ``entity_metadata`` with a location field must be provided
-        - ``scheduled_end_time`` must be provided
-
         .. versionchanged:: 2.6
-            Now when updating ``channel`` to ``None``, ``entity_type`` will be set to
-            :attr:`GuildScheduledEventEntityType.external`.
-            Now when updating ``channel`` to :class:`.abc.Snowflake`, ``entity_type`` will be set to the channel's type
-            if the type is either :class:`ChannelType.voice` or :class:`ChannelType.stage_voice`.
+            Updates must follow requirements of :func:`Guild.create_scheduled_event`
 
         .. versionchanged:: 2.6
             Now raises :exc:`TypeError` instead of :exc:`ValueError` for
@@ -476,7 +486,7 @@ class GuildScheduledEvent(Hashable):
             elif channel_type is ChannelType.stage_voice:
                 entity_type = GuildScheduledEventEntityType.stage_instance
             else:
-                raise TypeError("channel type must be either 'stage' or 'stage_voice'")
+                raise TypeError("channel type must be either 'voice' or 'stage_voice'")
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):

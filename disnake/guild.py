@@ -2264,18 +2264,20 @@ class Guild(Hashable):
             The newly created guild scheduled event.
         """
 
-        if channel is None:
-            entity_type = GuildScheduledEventEntityType.external
-            channel = MISSING
-        elif isinstance(channel_type := getattr(channel, "type", None), ChannelType):
-            if channel_type is ChannelType.voice:
-                entity_type = GuildScheduledEventEntityType.voice
-            elif channel_type is ChannelType.stage_voice:
-                entity_type = GuildScheduledEventEntityType.stage_instance
+        if entity_type is MISSING:
+            if channel is None:
+                entity_type = GuildScheduledEventEntityType.external
+            elif isinstance(channel_type := getattr(channel, "type", None), ChannelType):
+                if channel_type is ChannelType.voice:
+                    entity_type = GuildScheduledEventEntityType.voice
+                elif channel_type is ChannelType.stage_voice:
+                    entity_type = GuildScheduledEventEntityType.stage_instance
+                else:
+                    raise TypeError("channel type must be either 'voice' or 'stage_voice'")
             else:
-                raise TypeError("channel type must be either 'stage' or 'stage_voice'")
-        elif entity_type is MISSING:
-            raise TypeError("entity_type must be provided if the channel does not have a type")
+                raise TypeError(
+                    "`entity_type` must be provided if it cannot be derived from `channel`"
+                )
 
         if not isinstance(entity_type, GuildScheduledEventEntityType):
             raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
@@ -2306,8 +2308,8 @@ class Guild(Hashable):
         if image is not MISSING:
             fields["image"] = await utils._assetbytes_to_base64_data(image)
 
-        if channel is not MISSING:
-            fields["channel_id"] = channel.id  # type: ignore
+        if channel:
+            fields["channel_id"] = channel.id
 
         if scheduled_end_time is not MISSING:
             fields["scheduled_end_time"] = utils.isoformat_utc(scheduled_end_time)
