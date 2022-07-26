@@ -410,7 +410,7 @@ class SystemChannelFlags(BaseFlags):
 
         .. describe:: ~SystemChannelFlags.y
 
-            Returns a SystemChannelFlags instance with all flags except ``y`` inverted.
+            Returns a SystemChannelFlags instance with all flags except ``y`` inverted from their default value.
 
     Attributes
     ----------
@@ -542,7 +542,7 @@ class MessageFlags(BaseFlags):
             .. versionadded:: 2.6
         .. describe:: ~MessageFlags.y
 
-            Returns a MessageFlags instance with all flags except ``y`` inverted.
+            Returns a MessageFlags instance with all flags except ``y`` inverted from their default value.
 
             .. versionadded:: 2.6
 
@@ -696,7 +696,7 @@ class PublicUserFlags(BaseFlags):
             .. versionadded:: 2.6
         .. describe:: ~PublicUserFlags.y
 
-            Returns a PublicUserFlags instance with all flags except ``y`` inverted.
+            Returns a PublicUserFlags instance with all flags except ``y`` inverted from their default value.
 
             .. versionadded:: 2.6
 
@@ -901,7 +901,7 @@ class Intents(BaseFlags):
             .. versionadded:: 2.6
         .. describe:: ~Intents.y
 
-            Returns a Intents instance with all flags except ``y`` inverted.
+            Returns a Intents instance with all flags except ``y`` inverted from their default value.
 
             .. versionadded:: 2.6
 
@@ -1538,7 +1538,7 @@ class MemberCacheFlags(BaseFlags):
             .. versionadded:: 2.6
         .. describe:: ~MemberCacheFlags.y
 
-            Returns a MemberCacheFlags instance with all flags except ``y`` inverted.
+            Returns a MemberCacheFlags instance with all flags except ``y`` inverted from their default value.
 
             .. versionadded:: 2.6
 
@@ -1707,7 +1707,7 @@ class ApplicationFlags(BaseFlags):
             .. versionadded:: 2.6
         .. describe:: ~ApplicationFlags.y
 
-            Returns a ApplicationFlags instance with all flags except ``y`` inverted.
+            Returns a ApplicationFlags instance with all flags except ``y`` inverted from their default value.
 
             .. versionadded:: 2.6
 
@@ -1851,7 +1851,7 @@ class ChannelFlags(BaseFlags):
             .. versionadded:: 2.6
         .. describe:: ~ChannelFlags.y
 
-            Returns a ChannelFlags instance with all flags except ``y`` inverted.
+            Returns a ChannelFlags instance with all flags except ``y`` inverted from their default value.
 
             .. versionadded:: 2.6
 
@@ -1930,7 +1930,7 @@ class AutoModKeywordPresets(ListBaseFlags):
 
         .. describe:: ~AutoModKeywordPresets.y
 
-            Returns a AutoModKeywordPresets instance with all flags except ``y`` inverted.
+            Returns a AutoModKeywordPresets instance with all flags except ``y`` inverted from their default value.
 
     .. versionadded:: 2.6
 

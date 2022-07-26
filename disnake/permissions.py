@@ -137,12 +137,12 @@ class Permissions(BaseFlags):
 
         .. describe:: Permissions.y | Permissions.z, Permissions(y=True) | Permissions.z
 
-            Returns a Permissions instance with all provided flags enabled.
+            Returns a Permissions instance with all provided permissions enabled.
 
             .. versionadded:: 2.6
         .. describe:: ~Permissions.y
 
-            Returns a Permissions instance with all flags except ``y`` inverted.
+            Returns a Permissions instance with all permissions except ``y`` inverted from their default value.
 
             .. versionadded:: 2.6
 
