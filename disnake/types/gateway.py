@@ -31,6 +31,7 @@ from typing_extensions import NotRequired
 
 from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
 from .appinfo import PartialAppInfo, PartialGatewayAppInfo
+from .automod import AutoModAction, AutoModRule, AutoModTriggerType
 from .channel import Channel, GuildChannel, StageInstance
 from .emoji import Emoji, PartialEmoji
 from .guild import Guild, UnavailableGuild
@@ -616,3 +617,30 @@ class TypingStartEvent(TypedDict):
     user_id: Snowflake
     timestamp: int
     member: NotRequired[MemberWithUser]
+
+
+# https://discord.com/developers/docs/topics/gateway#auto-moderation-rule-create
+AutoModerationRuleCreateEvent = AutoModRule
+
+
+# https://discord.com/developers/docs/topics/gateway#auto-moderation-rule-update
+AutoModerationRuleUpdateEvent = AutoModRule
+
+
+# https://discord.com/developers/docs/topics/gateway#auto-moderation-rule-delete
+AutoModerationRuleDeleteEvent = AutoModRule
+
+
+# https://discord.com/developers/docs/topics/gateway#auto-moderation-action-execution
+class AutoModerationActionExecutionEvent(TypedDict):
+    guild_id: Snowflake
+    action: AutoModAction
+    rule_id: Snowflake
+    rule_trigger_type: AutoModTriggerType
+    user_id: Snowflake
+    channel_id: NotRequired[Optional[Snowflake]]
+    message_id: NotRequired[Optional[Snowflake]]
+    alert_system_message_id: NotRequired[Optional[Snowflake]]
+    content: NotRequired[str]
+    matched_content: NotRequired[Optional[str]]
+    matched_keyword: NotRequired[Optional[str]]

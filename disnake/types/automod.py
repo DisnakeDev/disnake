@@ -24,7 +24,7 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict, Union
+from typing import List, Literal, TypedDict, Union
 
 from .snowflake import Snowflake, SnowflakeList
 
@@ -103,21 +103,3 @@ class CreateAutoModRule(_CreateAutoModRuleOptional):
     event_type: AutoModEventType
     trigger_type: AutoModTriggerType
     actions: List[AutoModAction]
-
-
-# TODO: gateway event, move once full state typings are added
-class _AutoModActionExecutionEventOptional(TypedDict, total=False):
-    channel_id: Optional[Snowflake]
-    message_id: Optional[Snowflake]
-    alert_system_message_id: Optional[Snowflake]
-    content: str
-    matched_content: Optional[str]
-    matched_keyword: Optional[str]
-
-
-class AutoModActionExecutionEvent(_AutoModActionExecutionEventOptional):
-    guild_id: Snowflake
-    action: AutoModAction
-    rule_id: Snowflake
-    rule_trigger_type: AutoModTriggerType
-    user_id: Snowflake

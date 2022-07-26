@@ -109,10 +109,6 @@ if TYPE_CHECKING:
     from .http import HTTPClient
     from .types import gateway
     from .types.activity import Activity as ActivityPayload
-    from .types.automod import (
-        AutoModActionExecutionEvent as AutoModActionExecutionEventPayload,
-        AutoModRule as AutoModRulePayload,
-    )
     from .types.channel import DMChannel as DMChannelPayload
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload, UnavailableGuild as UnavailableGuildPayload
@@ -1799,7 +1795,9 @@ class ConnectionState:
                 )
                 self.dispatch("typing", channel, member, timestamp)
 
-    def parse_auto_moderation_rule_create(self, data: AutoModRulePayload) -> None:
+    def parse_auto_moderation_rule_create(
+        self, data: gateway.AutoModerationRuleCreateEvent
+    ) -> None:
         guild = self._get_guild(int(data["guild_id"]))
         if guild is None:
             _log.debug(
@@ -1811,7 +1809,9 @@ class ConnectionState:
         rule = AutoModRule(data=data, guild=guild)
         self.dispatch("automod_rule_create", rule)
 
-    def parse_auto_moderation_rule_update(self, data: AutoModRulePayload) -> None:
+    def parse_auto_moderation_rule_update(
+        self, data: gateway.AutoModerationRuleUpdateEvent
+    ) -> None:
         guild = self._get_guild(int(data["guild_id"]))
         if guild is None:
             _log.debug(
@@ -1823,7 +1823,9 @@ class ConnectionState:
         rule = AutoModRule(data=data, guild=guild)
         self.dispatch("automod_rule_update", rule)
 
-    def parse_auto_moderation_rule_delete(self, data: AutoModRulePayload) -> None:
+    def parse_auto_moderation_rule_delete(
+        self, data: gateway.AutoModerationRuleDeleteEvent
+    ) -> None:
         guild = self._get_guild(int(data["guild_id"]))
         if guild is None:
             _log.debug(
@@ -1836,7 +1838,7 @@ class ConnectionState:
         self.dispatch("automod_rule_delete", rule)
 
     def parse_auto_moderation_action_execution(
-        self, data: AutoModActionExecutionEventPayload
+        self, data: gateway.AutoModerationActionExecutionEvent
     ) -> None:
         guild = self._get_guild(int(data["guild_id"]))
         if guild is None:
