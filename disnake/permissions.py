@@ -106,6 +106,11 @@ class Permissions(BaseFlags):
             (Using ``|=`` will update in place).
 
             .. versionadded:: 2.6
+        .. describe:: Permissions.y | Permissions.z, Permissions(y=True) | Permissions.z
+
+            Returns a Permissions instance with all provided permissions enabled.
+
+            .. versionadded:: 2.6
         .. describe:: x & y, x &= y
 
             Returns a new Permissions instance with only permissions enabled on both x and y.
@@ -121,6 +126,11 @@ class Permissions(BaseFlags):
         .. describe:: ~x
 
             Returns a new Permissions instance with all permissions from x inverted.
+
+            .. versionadded:: 2.6
+        .. describe:: Permissions.y | Permissions.z, Permissions(y=True) | Permissions.z
+
+            Returns a Permissions instance with all provided flags enabled.
 
             .. versionadded:: 2.6
         .. describe:: hash(x)
