@@ -76,6 +76,12 @@ except ModuleNotFoundError:
 else:
     HAS_ORJSON = True
 
+try:
+    import ciso8601
+except ModuleNotFoundError:
+    HAS_CISO8601 = False
+else:
+    HAS_CISO8601 = True
 
 __all__ = (
     "oauth_url",
@@ -226,24 +232,48 @@ class SequenceProxy(Sequence[T_co]):
 
 
 @overload
-def parse_time(timestamp: None) -> None:
+def _parse_time_ciso8601(timestamp: None) -> None:
     ...
 
 
 @overload
-def parse_time(timestamp: str) -> datetime.datetime:
+def _parse_time_ciso8601(timestamp: str) -> datetime.datetime:
     ...
 
 
 @overload
-def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
+def _parse_time_ciso8601(timestamp: Optional[str]) -> Optional[datetime.datetime]:
     ...
 
 
-def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
+def _parse_time_ciso8601(timestamp: Optional[str]) -> Optional[datetime.datetime]:
+    if timestamp:
+        return ciso8601.parse_datetime(timestamp)
+    return None
+
+
+@overload
+def _parse_time_std(timestamp: None) -> None:
+    ...
+
+
+@overload
+def _parse_time_std(timestamp: str) -> datetime.datetime:
+    ...
+
+
+@overload
+def _parse_time_std(timestamp: Optional[str]) -> Optional[datetime.datetime]:
+    ...
+
+
+def _parse_time_std(timestamp: Optional[str]) -> Optional[datetime.datetime]:
     if timestamp:
         return datetime.datetime.fromisoformat(timestamp)
     return None
+
+
+parse_time = _parse_time_ciso8601 if HAS_CISO8601 else _parse_time_std
 
 
 @overload
