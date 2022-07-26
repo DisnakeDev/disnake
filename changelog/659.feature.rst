@@ -1,0 +1,1 @@
+Add ``delete_message_seconds`` parameter to :func:`Guild.ban` and :func:`Member.ban`.
