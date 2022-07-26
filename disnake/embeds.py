@@ -125,6 +125,7 @@ class Embed:
 
             Returns the total size of the embed.
             Useful for checking if it's within the 6000 character limit.
+            Check if all aspects of the embed are within the limits with :func:`Embed.check_limits`.
 
         .. describe:: bool(b)
 
@@ -268,20 +269,17 @@ class Embed:
         embed._files = self._files.copy()
         return embed
 
-    def __len__(self):
-        def stripped_length(text):
-            return len(text.strip())
-
-        total = stripped_length(self.title or "") + stripped_length(self.description or "")
+    def __len__(self) -> int:
+        total = len((self.title or "").strip()) + len((self.description or "").strip())
         if self._fields:
             for field in self._fields:
-                total += stripped_length(field["name"]) + stripped_length(field["value"])
+                total += len(field["name"].strip()) + len(field["value"].strip())
 
         if self._footer and (footer_text := self._footer.get("text")):
-            total += stripped_length(footer_text)
+            total += len(footer_text.strip())
 
         if self._author and (author_name := self._author.get("name")):
-            total += stripped_length(author_name)
+            total += len(author_name.strip())
 
         return total
 
@@ -798,10 +796,12 @@ class Embed:
             self._files.pop(key, None)
             return str(url) if url is not None else None
 
-    def check_limits(self):
+    def check_limits(self) -> None:
         """
         Checks if this embed fits within the limits dictated by Discord.
         There is also a 6000 character limit across all embeds in a message.
+
+        Returns nothing on success, raises :exc:`ValueError` if an attribute exceeds the limits.
 
         +--------------------------+------------------------------------+
         |   Field                  |              Limit                 |
@@ -823,11 +823,10 @@ class Embed:
 
         .. versionadded:: 2.6
 
-        Returns:
-            bool: True if the embed fits within Discord limits
-
-        Raises:
-            ValueError: One or more of the embed attributes are too long.
+        Raises
+        ------
+        ValueError
+            One or more of the embed attributes are too long.
         """
 
         if self.title and len(self.title.strip()) > 256:
@@ -836,7 +835,7 @@ class Embed:
         if self.description and len(self.description.strip()) > 4096:
             raise ValueError("Embed description cannot be longer than 4096 characters")
 
-        if self._footer and len(self._footer["text"].strip()) > 2048:
+        if self._footer and len(self._footer.get("text", "").strip()) > 2048:
             raise ValueError("Embed footer text cannot be longer than 2048 characters")
 
         if self._author and len(self._author.get("name", "").strip()) > 256:
@@ -858,5 +857,3 @@ class Embed:
 
         if len(self) > 6000:
             raise ValueError("Embed total size cannot be longer than 6000 characters")
-
-        return True
