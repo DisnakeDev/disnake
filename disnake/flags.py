@@ -176,7 +176,7 @@ class BaseFlags:
 
     def __or__(self, other: Union[Self, flag_value[Self]]) -> Self:
         if isinstance(other, flag_value):
-            if self is not other._parent:
+            if self.__class__ is not other._parent:
                 raise TypeError(
                     f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
                 )
