@@ -245,7 +245,6 @@ html_context = {
         ("disnake.ext.commands", "ext/commands"),
         ("disnake.ext.tasks", "ext/tasks"),
     ],
-    "enable_search_shortcuts": True,
 }
 
 resource_links = {
@@ -258,8 +257,9 @@ resource_links = {
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {
-# }
+html_theme_options = {
+    "enable_search_shortcuts": True,
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
