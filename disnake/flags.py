@@ -206,7 +206,7 @@ class BaseFlags:
         self.value |= other.value
         return self
 
-    def __xor__(self, other: Union[Self, flag_value]) -> Self:
+    def __xor__(self, other: Union[Self, flag_value[Self]]) -> Self:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 raise TypeError(
