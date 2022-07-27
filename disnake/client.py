@@ -340,6 +340,11 @@ class Client:
         Only available after initiating the connection.
 
         .. versionadded:: 2.5
+    i18n: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` used for localization of
+        application commands.
+
+        .. versionadded:: 2.5
     """
 
     def __init__(
@@ -390,7 +395,7 @@ class Client:
         i18n = options.pop("localization_provider", None)
         if i18n is None:
             i18n = LocalizationStore(strict=i18n_strict)
-        self._i18n: LocalizationProtocol = i18n
+        self.i18n: LocalizationProtocol = i18n
 
     # internals
 
@@ -416,14 +421,6 @@ class Client:
         if self._first_connect.is_set():
             return
         self._first_connect.set()
-
-    @property
-    def i18n(self) -> LocalizationProtocol:
-        """:class:`.LocalizationProtocol`: An implementation of :class:`.LocalizationProtocol` used for localization of application commands.
-
-        .. versionadded:: 2.5
-        """
-        return self._i18n
 
     @property
     def latency(self) -> float:
