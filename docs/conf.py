@@ -58,9 +58,11 @@ github_repo = "https://github.com/DisnakeDev/disnake"
 dpy_github_repo = "https://github.com/Rapptz/discord.py"
 
 extlinks = {
-    "issue": (f"{github_repo}/issues/%s", "#"),
-    "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#"),
+    "issue": (f"{github_repo}/issues/%s", "#%s"),
+    "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#%s"),
 }
+
+extlinks_detect_hardcoded_links = True
 
 # Links used for cross-referencing stuff in other documentation
 intersphinx_mapping = {
@@ -136,7 +138,7 @@ towncrier_draft_working_directory = ".."
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 locale_dirs = ["locale/"]
 gettext_compact = False
@@ -255,8 +257,9 @@ resource_links = {
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {
-# }
+html_theme_options = {
+    "enable_search_shortcuts": True,
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []

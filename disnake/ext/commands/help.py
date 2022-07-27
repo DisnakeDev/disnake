@@ -298,8 +298,8 @@ class HelpCommand:
     MENTION_TRANSFORMS = {
         "@everyone": "@\u200beveryone",
         "@here": "@\u200bhere",
-        r"<@!?[0-9]{17,22}>": "@deleted-user",
-        r"<@&[0-9]{17,22}>": "@deleted-role",
+        r"<@!?[0-9]{17,19}>": "@deleted-user",
+        r"<@&[0-9]{17,19}>": "@deleted-role",
     }
 
     MENTION_PATTERN = re.compile("|".join(MENTION_TRANSFORMS.keys()))
