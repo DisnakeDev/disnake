@@ -132,6 +132,20 @@ class Permissions(BaseFlags):
                to be, for example, constructed as a dict or a list of pairs.
                Note that aliases are not shown.
 
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: Permissions.y | Permissions.z, Permissions(y=True) | Permissions.z
+
+            Returns a Permissions instance with all provided permissions enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~Permissions.y
+
+            Returns a Permissions instance with all permissions except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
+
     Attributes
     ----------
     value: :class:`int`
