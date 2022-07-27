@@ -1016,11 +1016,14 @@ class CommandRegistrationError(ClientException):
         Whether the name that conflicts is an alias of the command we try to add.
     """
 
-    def __init__(self, name: str, *, alias_conflict: bool = False) -> None:
+    def __init__(self, name: str, *, alias_conflict: bool = False, guild_id: int = None) -> None:
         self.name: str = name
         self.alias_conflict: bool = alias_conflict
+        self.guild_id: Optional[int] = guild_id
         type_ = "alias" if alias_conflict else "command"
-        super().__init__(f"The {type_} {name} is already an existing command or alias.")
+        msg = f"The {type_} {name} is already an existing command or alias"
+        msg += "." if not guild_id else f" in guild ID {guild_id}."
+        super().__init__(msg)
 
 
 class FlagError(BadArgument):
