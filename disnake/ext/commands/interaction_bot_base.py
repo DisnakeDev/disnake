@@ -195,27 +195,27 @@ class InteractionBotBase(CommonBotBase):
     @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:
         """Set[:class:`InvokableSlashCommand`]: A set of all slash commands the bot has."""
-        return {
+        return {  # type: ignore # this will always be a slash command
             command
-            for meta, command in self._all_app_commands
+            for meta, command in self._all_app_commands.items()
             if meta.type is ApplicationCommandType.chat_input
         }
 
     @property
     def user_commands(self) -> Set[InvokableUserCommand]:
         """Set[:class:`InvokableUserCommand`]: A set of all user commands the bot has."""
-        return {
+        return {  # type: ignore # this will always be a user command
             command
-            for meta, command in self._all_app_commands
+            for meta, command in self._all_app_commands.items()
             if meta.type is ApplicationCommandType.user
         }
 
     @property
     def message_commands(self) -> Set[InvokableMessageCommand]:
         """Set[:class:`InvokableMessageCommand`]: A set of all message commands the bot has."""
-        return {
+        return {  # type: ignore # this will always be a message command
             command
-            for meta, command in self._all_app_commands
+            for meta, command in self._all_app_commands.items()
             if meta.type is ApplicationCommandType.message
         }
 
@@ -1361,7 +1361,7 @@ class InteractionBotBase(CommonBotBase):
         inter: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process.
         """
-        slash_command: InvokableSlashCommand = self._all_app_commands.get(
+        slash_command: InvokableSlashCommand = self._all_app_commands.get(  # type: ignore :3
             AppCommandMetadata(
                 name=inter.data.name,
                 type=ApplicationCommandType.chat_input,
