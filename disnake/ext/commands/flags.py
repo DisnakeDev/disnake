@@ -138,7 +138,6 @@ class ApplicationCommandSyncFlags(BaseFlags):
         """A factory method that creates a :class:`ApplicationCommandSyncFlags` with the default settings."""
         instance = cls.all()
         instance.sync_commands_debug = False
-        instance.never_delete = False
         return instance
 
     @alias_flag_value
@@ -162,7 +161,7 @@ class ApplicationCommandSyncFlags(BaseFlags):
         return 1 << 2
 
     @flag_value
-    def never_delete(self):
+    def allow_command_deletion(self):
         return 1 << 3
 
     @flag_value
