@@ -2647,7 +2647,16 @@ class Client:
         """
         for cmd in application_commands:
             cmd.localize(self.i18n)
-        return await self._connection.bulk_overwrite_guild_commands(guild_id, application_commands)
+        res = await self._connection.bulk_overwrite_guild_commands(guild_id, application_commands)
+
+        for api_command in res:
+            cmd = utils.get(application_commands, name=api_command.name)
+            if not cmd:
+                # consider a warning
+                continue
+            cmd.id = api_command.id
+
+        return res
 
     # Application command permissions
 
@@ -2659,6 +2668,10 @@ class Client:
         Retrieves a list of :class:`.GuildApplicationCommandPermissions` configured for the guild with the given ID.
 
         .. versionadded:: 2.1
+
+        .. versionchanged:: 2.6
+
+            Modifies the commands' ``id`` attribute to correspond to the version on the API.
 
         Parameters
         ----------
