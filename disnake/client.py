@@ -2501,8 +2501,7 @@ class Client:
             if not cmd:
                 # consider a warning
                 continue
-            if cmd.id is None:
-                cmd.id = api_command.id
+            cmd.id = api_command.id
 
         return res
 

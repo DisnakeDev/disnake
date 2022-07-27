@@ -679,11 +679,15 @@ class InteractionBotBase(CommonBotBase):
 
         try:
             commands = await self.fetch_global_commands(with_localizations=True)
-            self._connection._global_application_commands = {
+            self._connection._global_application_commands = global_commands = {
                 command.id: command for command in commands
             }
         except (disnake.HTTPException, TypeError):
             pass
+        else:
+            for command in self.application_commands_iterator():
+                if command.body.id is not None and command.body.id not in global_commands:
+                    command.body.id = None
 
         for guild_id in guilds:
             try:
