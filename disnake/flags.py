@@ -137,7 +137,10 @@ class BaseFlags:
         # add a way to bypass filling flags, eg for ListBaseFlags.
         if no_fill_flags:
             return cls
-        cls.VALID_FLAGS = {}
+
+        # use the parent's current flags as a base if they exist
+        cls.VALID_FLAGS = getattr(cls, "VALID_FLAGS", {}).copy()
+
         for name, value in cls.__dict__.items():
             if isinstance(value, flag_value):
                 value._parent = cls
