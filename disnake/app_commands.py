@@ -468,12 +468,14 @@ class ApplicationCommand(ABC):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        id: int = None,
     ):
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
 
         name_loc = Localized._cast(name, True)
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
+        self.id: Optional[int] = id
 
         self.dm_permission: bool = True if dm_permission is None else dm_permission
 
@@ -595,12 +597,14 @@ class UserCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        id: int = None,
     ):
         super().__init__(
             type=ApplicationCommandType.user,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
+            id=id,
         )
 
 
@@ -635,6 +639,9 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     """
 
     __repr_info__ = UserCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+
+    if TYPE_CHECKING:
+        id: int
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
@@ -678,12 +685,14 @@ class MessageCommand(ApplicationCommand):
         name: LocalizedRequired,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        id: int = None,
     ):
         super().__init__(
             type=ApplicationCommandType.message,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
+            id=id,
         )
 
 
@@ -718,6 +727,9 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     """
 
     __repr_info__ = MessageCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+
+    if TYPE_CHECKING:
+        id: int
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
@@ -779,12 +791,14 @@ class SlashCommand(ApplicationCommand):
         options: Optional[List[Option]] = None,
         dm_permission: Optional[bool] = None,
         default_member_permissions: Optional[Union[Permissions, int]] = None,
+        id: int = None,
     ):
         super().__init__(
             type=ApplicationCommandType.chat_input,
             name=name,
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
+            id=id,
         )
         _validate_name(self.name)
 
@@ -897,6 +911,9 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     """
 
     __repr_info__ = SlashCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+
+    if TYPE_CHECKING:
+        id: int
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:

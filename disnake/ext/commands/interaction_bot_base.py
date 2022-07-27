@@ -684,6 +684,14 @@ class InteractionBotBase(CommonBotBase):
             }
         except (disnake.HTTPException, TypeError):
             pass
+        else:
+            for api_command in commands:
+                cmd = disnake.utils.get(self.all_slash_commands.values(), name=api_command.name)
+                if not cmd:
+                    # consider logging
+                    continue
+                cmd.body.id = api_command.id
+
         for guild_id in guilds:
             try:
                 commands = await self.fetch_guild_commands(guild_id, with_localizations=True)
@@ -693,6 +701,9 @@ class InteractionBotBase(CommonBotBase):
                     }
             except (disnake.HTTPException, TypeError):
                 pass
+            else:
+                # add ID info to guild slash commands as well.
+                ...
 
     async def _sync_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):
@@ -721,6 +732,7 @@ class InteractionBotBase(CommonBotBase):
             f"| Update is required: {update_required}\n{_format_diff(diff)}"
         )
 
+        # update all commands with their corresponding command
         if update_required:
             # Notice that we don't do any API requests if there're no changes.
             try:
