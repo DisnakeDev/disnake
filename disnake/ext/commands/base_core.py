@@ -236,6 +236,10 @@ class InvokableApplicationCommand(ABC):
             return self.copy()
 
     @property
+    def id(self) -> Optional[int]:
+        return self.body.id
+
+    @property
     def dm_permission(self) -> bool:
         """:class:`bool`: Whether this command can be used in DMs."""
         return self.body.dm_permission

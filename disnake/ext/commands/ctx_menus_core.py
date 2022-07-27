@@ -78,6 +78,7 @@ class InvokableUserCommand(InvokableApplicationCommand, UserCommand):
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
+        id: Optional[int] = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
@@ -102,6 +103,7 @@ class InvokableUserCommand(InvokableApplicationCommand, UserCommand):
             name=name_loc._upgrade(self.name),
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
+            id=id,
         )
 
         self._name_localised = name_loc
@@ -192,6 +194,7 @@ class InvokableMessageCommand(InvokableApplicationCommand, MessageCommand):
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
+        id: Optional[int] = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
@@ -210,6 +213,7 @@ class InvokableMessageCommand(InvokableApplicationCommand, MessageCommand):
             name=name_loc._upgrade(self.name),
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
+            id=id,
         )
         self._name_localised = name_loc
 

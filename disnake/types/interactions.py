@@ -305,6 +305,8 @@ class InteractionMessageReference(TypedDict):
 
 class EditApplicationCommand(TypedDict):
     name: str
+    # TODO: properly seperate these payloads
+    id: NotRequired[Snowflake] # when this is provided we are able to change the name, this is also slightly wrong in this payload
     name_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]
     description: NotRequired[str]
     description_localizations: NotRequired[Optional[ApplicationCommandLocalizations]]

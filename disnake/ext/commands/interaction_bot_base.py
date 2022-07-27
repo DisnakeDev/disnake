@@ -89,7 +89,7 @@ def _app_commands_diff(
         elif new_cmd._always_synced:
             diff["no_changes"].append(old_cmd)
             continue
-        elif new_cmd != old_cmd:
+        elif new_cmd.need_sync(old_cmd):
             diff["edit"].append(new_cmd)
         else:
             diff["no_changes"].append(new_cmd)
@@ -684,13 +684,6 @@ class InteractionBotBase(CommonBotBase):
             }
         except (disnake.HTTPException, TypeError):
             pass
-        else:
-            for api_command in commands:
-                cmd = disnake.utils.get(self.all_slash_commands.values(), name=api_command.name)
-                if not cmd:
-                    # consider logging
-                    continue
-                cmd.body.id = api_command.id
 
         for guild_id in guilds:
             try:
@@ -732,7 +725,6 @@ class InteractionBotBase(CommonBotBase):
             f"| Update is required: {update_required}\n{_format_diff(diff)}"
         )
 
-        # update all commands with their corresponding command
         if update_required:
             # Notice that we don't do any API requests if there're no changes.
             try:
@@ -788,7 +780,23 @@ class InteractionBotBase(CommonBotBase):
         await self.wait_until_first_connect()
         await self._cache_application_commands()
         await self._sync_application_commands()
+        self._fill_app_command_ids()
         self._sync_queued = False
+
+    def _fill_app_command_ids(self):
+        # this requires that _cache_application_commands was ran first
+        if not isinstance(self, disnake.Client):
+            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
+
+        all_commands = self.all_slash_commands.values()
+        for api_command in self._connection._global_application_commands.values():
+            cmd = disnake.utils.get(all_commands, name=api_command.name)
+            if not cmd:
+                # consider logging
+                continue
+            # todo: think about body usage
+            if cmd.body.id is None:
+                cmd.body.id = api_command.id
 
     async def _delayed_command_sync(self) -> None:
         if not isinstance(self, disnake.Client):

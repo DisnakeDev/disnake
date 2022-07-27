@@ -458,6 +458,7 @@ class InvokableSlashCommand(InvokableApplicationCommand, SlashCommand):
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
         auto_sync: Optional[bool] = None,
+        id: Optional[int] = None,
         **kwargs,
     ):
         name_loc = Localized._cast(name, False)
@@ -495,6 +496,7 @@ class InvokableSlashCommand(InvokableApplicationCommand, SlashCommand):
             options=options or [],
             dm_permission=dm_permission and not self._guild_only,
             default_member_permissions=default_member_permissions,
+            id=id,
         )
 
     @property
