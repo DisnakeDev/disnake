@@ -143,10 +143,12 @@ class BaseFlags:
                 value._parent = cls
                 cls.VALID_FLAGS[name] = value.flag
 
-        if inverted:
-            cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS)
-        else:
-            cls.DEFAULT_VALUE = 0
+        if not cls.VALID_FLAGS:
+            raise TypeError(
+                "At least one flag must be defined in a BaseFlags subclass, or 'no_fill_flags' must be set to True"
+            )
+
+        cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS) if inverted else 0
 
         return cls
 
