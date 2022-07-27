@@ -19,6 +19,7 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    TypedDict,
     TypeVar,
     Union,
 )
@@ -69,14 +70,21 @@ CFT = TypeVar("CFT", bound="CoroFunc")
 _log = logging.getLogger(__name__)
 
 
+class _Diff(TypedDict):
+    no_changes: List[ApplicationCommand]
+    upsert: List[ApplicationCommand]
+    edit: List[ApplicationCommand]
+    delete: List[ApplicationCommand]
+
+
 def _app_commands_diff(
     new_commands: Iterable[ApplicationCommand],
     old_commands: Iterable[ApplicationCommand],
-) -> Dict[str, List[ApplicationCommand]]:
+) -> _Diff:
     new_cmds = {(cmd.name, cmd.type): cmd for cmd in new_commands}
     old_cmds = {(cmd.name, cmd.type): cmd for cmd in old_commands}
 
-    diff = {
+    diff: _Diff = {
         "no_changes": [],
         "upsert": [],
         "edit": [],
@@ -110,7 +118,7 @@ _diff_map = {
 }
 
 
-def _format_diff(diff: Dict[str, List[ApplicationCommand]]) -> str:
+def _format_diff(diff: _Diff) -> str:
     lines: List[str] = []
     for key, label in _diff_map.items():
         lines.append(label)
@@ -712,54 +720,64 @@ class InteractionBotBase(CommonBotBase):
         # We assume that all commands are already cached.
         # Sort all invokable commands between guild IDs:
         global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
-        if global_cmds is None:
-            return
 
-        # Update global commands first
-        diff = _app_commands_diff(
-            global_cmds, self._connection._global_application_commands.values()
-        )
-        update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
+        if global_cmds is not None and self._command_sync.global_commands:
+            # Update global commands first
+            diff = _app_commands_diff(
+                global_cmds, self._connection._global_application_commands.values()
+            )
+            if self._command_sync.never_delete:
+                # because never_delete is enabled, we want to never delete a command, so we move the delete commands to no_changes
+                diff["no_changes"] += diff["delete"]
+                diff["delete"].clear()
+            update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
 
-        # Show the difference
-        self._log_sync_debug(
-            "Application command synchronization:\n"
-            "GLOBAL COMMANDS\n"
-            "===============\n"
-            f"| Update is required: {update_required}\n{_format_diff(diff)}"
-        )
+            # Show the difference
+            self._log_sync_debug(
+                "Application command synchronization:\n"
+                "GLOBAL COMMANDS\n"
+                "===============\n"
+                f"| Update is required: {update_required}\n{_format_diff(diff)}"
+            )
 
-        if update_required:
-            # Notice that we don't do any API requests if there're no changes.
-            try:
-                to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
-                await self.bulk_overwrite_global_commands(to_send)
-            except Exception as e:
-                warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
+            if update_required:
+                # Notice that we don't do any API requests if there're no changes.
+                try:
+                    to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
+                    await self.bulk_overwrite_global_commands(to_send)
+                except Exception as e:
+                    warnings.warn(f"Failed to overwrite global commands due to {e}", SyncWarning)
         # Same process but for each specified guild individually.
         # Notice that we're not doing this for every single guild for optimisation purposes.
         # See the note in :meth:`_cache_application_commands` about guild app commands.
-        for guild_id, cmds in guild_cmds.items():
-            current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
-            diff = _app_commands_diff(cmds, current_guild_cmds.values())
-            update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
-            # Show diff
-            self._log_sync_debug(
-                "Application command synchronization:\n"
-                f"COMMANDS IN {guild_id}\n"
-                "===============================\n"
-                f"| Update is required: {update_required}\n{_format_diff(diff)}"
-            )
-            # Do API requests and cache
-            if update_required:
-                try:
-                    to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
-                    await self.bulk_overwrite_guild_commands(guild_id, to_send)
-                except Exception as e:
-                    warnings.warn(
-                        f"Failed to overwrite commands in <Guild id={guild_id}> due to {e}",
-                        SyncWarning,
-                    )
+        if guild_cmds is not None and self._command_sync.guild_commands:
+            for guild_id, cmds in guild_cmds.items():
+                current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
+                diff = _app_commands_diff(cmds, current_guild_cmds.values())
+                if self._command_sync.never_delete:
+                    # because never_delete is enabled, we want to never delete a command, so we move the delete commands to no_changes
+                    diff["no_changes"] += diff["delete"]
+                    diff["delete"].clear()
+                update_required = bool(diff["upsert"]) or bool(diff["edit"]) or bool(diff["delete"])
+
+                # Show diff
+                self._log_sync_debug(
+                    "Application command synchronization:\n"
+                    f"COMMANDS IN {guild_id}\n"
+                    "===============================\n"
+                    f"| Update is required: {update_required}\n{_format_diff(diff)}"
+                )
+
+                # Do API requests and cache
+                if update_required:
+                    try:
+                        to_send = diff["no_changes"] + diff["edit"] + diff["upsert"]
+                        await self.bulk_overwrite_guild_commands(guild_id, to_send)
+                    except Exception as e:
+                        warnings.warn(
+                            f"Failed to overwrite commands in <Guild id={guild_id}> due to {e}",
+                            SyncWarning,
+                        )
         # Last debug message
         self._log_sync_debug("Command synchronization task has finished")
 
