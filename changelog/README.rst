@@ -4,11 +4,11 @@ text that will be added to the next changelog.
 The changelog will be read by **users**, so this description should be aimed at users
 instead of describing internal changes which are only relevant to the developers.
 
-Make sure to use full sentences in the **present tense** and use punctuation, examples::
+Make sure to use full sentences in the **present tense** and use punctuation, examples:
 
-    Improve Guild.create_text_channel by returning the channel type.
+- Improve Guild.create_text_channel by returning the channel type.
 
-    Command syncing now uses logging instead of print.
+- Command syncing now uses logging instead of print.
 
 Each file should use the following naming: ``<ISSUE>.<TYPE>.rst``, where
 ``<ISSUE>`` is an issue number, and ``<TYPE>`` is one of:
