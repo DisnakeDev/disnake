@@ -4,11 +4,11 @@ text that will be added to the next changelog.
 The changelog will be read by **users**, so this description should be aimed at users
 instead of describing internal changes which are only relevant to the developers.
 
-Make sure to use full sentences in the **present tense** and use punctuation, examples::
+Make sure to use full sentences in the **present tense** and use punctuation, examples:
 
-    Improve Guild.create_text_channel by returning the channel type.
+- Improve Guild.create_text_channel by returning the channel type.
 
-    Command syncing now uses logging instead of print.
+- Command syncing now uses logging instead of print.
 
 Each file should use the following naming: ``<ISSUE>.<TYPE>.rst``, where
 ``<ISSUE>`` is an issue number, and ``<TYPE>`` is one of:
@@ -40,4 +40,4 @@ with the draft changelog (http://127.0.0.1:8009/whats_new.html) if you want to g
 
 ~~~~~
 
-This file is adapted from [pytest's changelog documentation](https://github.com/pytest-dev/pytest/blob/4414c4adaeb06f1c883df2ccc3f4d469886b788d/changelog/README.rst).
+This file is adapted from `pytest's changelog documentation <https://github.com/pytest-dev/pytest/blob/4414c4adaeb06f1c883df2ccc3f4d469886b788d/changelog/README.rst>`_
