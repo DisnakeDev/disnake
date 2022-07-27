@@ -1,1 +1,1 @@
-:class:`.ext.commands.Bot` and :class:`.ext.commands.InteractionBot` class references now document :class:`Client.i18n` attribute
+|commands| Document the ``i18n`` attribute on :class:`.ext.commands.Bot` and :class:`.ext.commands.InteractionBot` classes.
