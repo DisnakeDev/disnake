@@ -40,4 +40,4 @@ with the draft changelog (http://127.0.0.1:8009/whats_new.html) if you want to g
 
 ~~~~~
 
-This file is adapted from [pytest's changelog documentation](https://github.com/pytest-dev/pytest/blob/4414c4adaeb06f1c883df2ccc3f4d469886b788d/changelog/README.rst).
+This file is adapted from `pytest's changelog documentation <https://github.com/pytest-dev/pytest/blob/4414c4adaeb06f1c883df2ccc3f4d469886b788d/changelog/README.rst>`_
