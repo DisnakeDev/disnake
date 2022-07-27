@@ -61,6 +61,11 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.1
 
+    command_sync: :class:`ApplicationCommandSyncFlags`
+        The configuration for application command sync.
+
+        .. versionadded:: 2.6
+
     sync_commands: :class:`bool`
         Whether to enable automatic synchronization of application commands in your code.
         Defaults to ``True``, which means that commands in API are automatically synced
