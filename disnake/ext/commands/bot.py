@@ -259,6 +259,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+
     i18n: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` used for localization of
         application commands.
