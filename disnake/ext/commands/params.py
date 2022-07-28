@@ -100,6 +100,7 @@ __all__ = (
     "param",
     "inject",
     "injection",
+    "Injection",
     "option_enum",
     "register_injection",
     "converter_method",
@@ -181,18 +182,54 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
 
 
 class Injection:
+    """Represents a slash command injection
+
+    Attributes
+    ----------
+    function: Callable
+        The injection's underlying function
+    autocompleters: Union[..., Dict[str, Callable[..., Any]]]
+        Mapping from param names to it's autocomplete callback
+    """
+
     _registered: ClassVar[Dict[Any, Injection]] = {}
 
     function: Callable
+    autocompleters: Dict[str, Callable]
 
-    def __init__(self, function: Callable) -> None:
+    def __init__(self, function: Callable, autocompleters: Dict[str, Callable] = ...) -> None:
         self.function = function
+        self.autocompleters = autocompleters
 
     @classmethod
-    def register(cls, function: CallableT, annotation: Any) -> CallableT:
+    def register(cls, function: Callable, annotation: Any) -> Self:
         self = cls(function)
         cls._registered[annotation] = self
         return self
+
+    def autocomplete(self, param_name: str) -> Callable:
+        """A decorator that adds an autocomplete for a given parameter
+
+        Parameters
+        ----------
+        param_name: :class:`str`
+            The name of the parameter to assign autocomplete to
+
+        Raises
+        ------
+        ValueError
+            This injection already have autocompleter set for the given param
+        """
+        if self.autocompleters.get(param_name) is not None:
+            raise ValueError(
+                "This injection already have autocompleter set for param '{}'".format(param_name)
+            )
+
+        def decorator(func: CallableT) -> CallableT:
+            self.autocompleters[param_name] = func
+            return func
+
+        return decorator
 
 
 class RangeMeta(type):
@@ -917,7 +954,12 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
         raise TypeError(f"Couldn't find an interaction parameter in {command.callback}")
 
     for injection in injections.values():
-        params += collect_nested_params(injection.function)
+        collected = collect_nested_params(injection.function)
+        if injection.autocompleters is not Ellipsis:
+            for p in collected:
+                if f := injection.autocompleters.get(p.name):
+                    p.autocomplete = f
+        params += collected
 
     params = sorted(params, key=lambda param: not param.required)
 
@@ -1059,20 +1101,24 @@ def Param(
 param = Param
 
 
-def inject(function: Callable[..., Any], autocompleters: Union[..., Dict[str, Callable[..., Any]]]) -> Any:
+def inject(function: Callable[..., Any], autocompleters: Dict[str, Callable] = ...) -> Any:
     """A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your slash command.
 
     .. versionadded:: 2.3
+
+    .. versionchanged:: 2.6
+        The ``autocompleters`` argument was added
     """
-    return Injection(function)
+    return Injection(function, autocompleters)
 
 
-def injection(autocompleters: Union[..., Dict[str, Callable[..., Any]]]) -> Any:
+def injection(autocompleters: Dict[str, Callable] = ...) -> Any:
     """Decorator interface for :func:`inject`.
 
-    .. versionadded 2.6
+    .. versionadded:: 2.6
     """
+
     def decorator(function: Callable[..., Any]) -> Any:
         return inject(function, autocompleters)
 
@@ -1127,10 +1173,13 @@ else:
         return ConverterMethod(function)
 
 
-def register_injection(function: CallableT) -> CallableT:
+def register_injection(function: Callable) -> Injection:
     """A decorator to register a global injection.
 
     .. versionadded:: 2.3
+
+    .. versionchanged:: 2.6
+        Now returns :class:`disnake.ext.commands.Injection`
     """
     sig = signature(function)
     tp = sig.return_annotation

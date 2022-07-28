@@ -153,7 +153,7 @@ def slotscheck(session: nox.Session):
 
 
 @nox.session()
-@depends("dev", "docs", "speed", "voice", install_cwd=True)
+@depends("dev", "docs", "voice", install_cwd=True)
 def pyright(session: nox.Session):
     """Run pyright."""
     env = {

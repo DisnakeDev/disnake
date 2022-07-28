@@ -328,11 +328,6 @@ Helper Functions
 
 .. autofunction:: disnake.ext.commands.option_enum
 
-.. autofunction:: disnake.ext.commands.inject
-
-.. autofunction:: disnake.ext.commands.register_injection
-    :decorator:
-
 .. autofunction:: disnake.ext.commands.converter_method
     :decorator:
 
@@ -424,6 +419,26 @@ ParamInfo
 .. attributetable:: disnake.ext.commands.ParamInfo
 
 .. autoclass:: disnake.ext.commands.ParamInfo
+
+Injections
+~~~~~~~~~~
+
+.. attributetable:: disnake.ext.commands.Injection
+
+.. autoclass:: disnake.ext.commands.Injection
+    :members:
+    :exclude-members: autocomplete
+
+    .. automethod:: Injection.autocomplete()
+        :decorator:
+
+.. autofunction:: disnake.ext.commands.inject
+
+.. autofunction:: disnake.ext.commands.register_injection
+    :decorator:
+
+.. autofunction:: disnake.ext.commands.injection
+    :decorator:
 
 User Command
 ~~~~~~~~~~~~
