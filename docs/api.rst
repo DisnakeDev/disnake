@@ -362,23 +362,6 @@ This section documents events related to :class:`Client` and its connectivity to
                     WebSocket library. It can be :class:`bytes` to denote a binary
                     message or :class:`str` to denote a regular text message.
 
-.. function:: on_user_update(before, after)
-
-    Called when a :class:`User` updates their profile.
-
-    This is called when one or more of the following things change:
-
-    - avatar
-    - username
-    - discriminator
-
-    This requires :attr:`Intents.members` to be enabled.
-
-    :param before: The updated user's old info.
-    :type before: :class:`User`
-    :param after: The updated user's updated info.
-    :type after: :class:`User`
-
 Channels/Threads
 ~~~~~~~~~~~~~~~~
 
@@ -909,6 +892,23 @@ Members
     :type before: :class:`Member`
     :param after: The updated member's updated info.
     :type after: :class:`Member`
+
+.. function:: on_user_update(before, after)
+
+    Called when a :class:`User` updates their profile.
+
+    This is called when one or more of the following things change:
+
+    - avatar
+    - username
+    - discriminator
+
+    This requires :attr:`Intents.members` to be enabled.
+
+    :param before: The updated user's old info.
+    :type before: :class:`User`
+    :param after: The updated user's updated info.
+    :type after: :class:`User`
 
 
 Scheduled Events
