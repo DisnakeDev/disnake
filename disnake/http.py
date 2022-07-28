@@ -17,6 +17,7 @@ from typing import (
     Iterable,
     List,
     Literal,
+    NamedTuple,
     Optional,
     Sequence,
     Tuple,
@@ -38,6 +39,7 @@ from .errors import (
     LoginFailure,
     NotFound,
 )
+from .flags import MessageFlags
 from .gateway import DiscordClientWebSocketResponse
 from .utils import MISSING
 
@@ -48,9 +50,13 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
+    from .abc import Snowflake
+    from .embeds import Embed
     from .enums import InteractionResponseType
     from .file import File
+    from .mentions import AllowedMentions
     from .message import Attachment
+    from .sticker import GuildSticker, StickerItem
     from .types import (
         appinfo,
         application_role_connection,
@@ -78,7 +84,9 @@ if TYPE_CHECKING:
         welcome_screen,
         widget,
     )
-    from .types.snowflake import Snowflake, SnowflakeList
+    from .types.snowflake import SnowflakeList
+    from .ui.action_row import Components, MessageUIComponent, components_to_dict
+    from .ui.view import View
 
     T = TypeVar("T")
     Response = Coroutine[Any, Any, T]
@@ -167,6 +175,153 @@ def to_multipart_with_attachments(
 
     set_attachments(payload, files)
     return to_multipart(payload, files)
+
+
+class DictPayloadParameters(NamedTuple):
+    payload: Dict[str, Any]
+    files: Optional[List[File]]
+
+
+class PayloadParameters(NamedTuple):
+    payload: Optional[Dict[str, Any]]
+    multipart: Optional[List[Dict[str, Any]]]
+    files: Optional[List[File]]
+
+
+def handle_message_parameters_dict(
+    content: Optional[str] = MISSING,
+    *,
+    username: str = MISSING,
+    avatar_url: Any = MISSING,
+    tts: bool = False,
+    ephemeral: Optional[bool] = MISSING,
+    suppress_embeds: Optional[bool] = MISSING,
+    flags: MessageFlags = MISSING,
+    file: File = MISSING,
+    files: List[File] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
+    embed: Optional[Embed] = MISSING,
+    embeds: List[Embed] = MISSING,
+    view: Optional[View] = MISSING,
+    components: Optional[Components[MessageUIComponent]] = MISSING,
+    allowed_mentions: Optional[AllowedMentions] = MISSING,
+    previous_allowed_mentions: Optional[AllowedMentions] = None,
+    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+    thread_name: Optional[str] = None,
+) -> DictPayloadParameters:
+    if files is not MISSING and file is not MISSING:
+        raise TypeError("Cannot mix file and files keyword arguments.")
+    if embeds is not MISSING and embed is not MISSING:
+        raise TypeError("Cannot mix embed and embeds keyword arguments.")
+    if view is not MISSING and components is not MISSING:
+        raise TypeError("Cannot mix view and components keyword arguments.")
+
+    if file is not MISSING:
+        files = [file]
+
+    payload = {}
+    if embed is not MISSING:
+        embeds = [embed] if embed else []
+    if embeds is not MISSING:
+        if len(embeds) > 10:
+            raise ValueError("embeds has a maximum of 10 elements.")
+        payload["embeds"] = [e.to_dict() for e in embeds]
+        for embed in embeds:
+            if embed._files:
+                files = files or []
+                files.extend(embed._files.values())
+
+    if content is not MISSING:
+        payload["content"] = str(content) if content is not None else None
+    if view is not MISSING:
+        payload["components"] = view.to_components() if view is not None else []
+    if components is not MISSING:
+        payload["components"] = [] if components is None else components_to_dict(components)
+
+    if attachments is not MISSING:
+        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
+
+    payload["tts"] = tts
+    if avatar_url:
+        payload["avatar_url"] = str(avatar_url)
+    if username:
+        payload["username"] = username
+
+    if ephemeral not in (None, MISSING) or suppress_embeds not in (None, MISSING):
+        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        if suppress_embeds not in (None, MISSING):
+            flags.suppress_embeds = suppress_embeds
+        if ephemeral not in (None, MISSING):
+            flags.ephemeral = ephemeral
+    if flags is not MISSING:
+        payload["flags"] = flags.value
+
+    if allowed_mentions:
+        if previous_allowed_mentions is not None:
+            payload["allowed_mentions"] = previous_allowed_mentions.merge(
+                allowed_mentions
+            ).to_dict()
+        else:
+            payload["allowed_mentions"] = allowed_mentions.to_dict()
+    elif previous_allowed_mentions is not None:
+        payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
+
+    if stickers is not MISSING:
+        payload["sticker_ids"] = [s.id for s in stickers]
+
+    if thread_name is not None:
+        payload["thread_name"] = thread_name
+
+    return DictPayloadParameters(payload=payload, files=files)
+
+
+def handle_message_parameters(
+    content: Optional[str] = MISSING,
+    *,
+    username: str = MISSING,
+    avatar_url: Any = MISSING,
+    tts: bool = False,
+    ephemeral: Optional[bool] = MISSING,
+    suppress_embeds: Optional[bool] = MISSING,
+    flags: MessageFlags = MISSING,
+    file: File = MISSING,
+    files: List[File] = MISSING,
+    attachments: Optional[List[Attachment]] = MISSING,
+    embed: Optional[Embed] = MISSING,
+    embeds: List[Embed] = MISSING,
+    view: Optional[View] = MISSING,
+    components: Optional[Components[MessageUIComponent]] = MISSING,
+    allowed_mentions: Optional[AllowedMentions] = MISSING,
+    previous_allowed_mentions: Optional[AllowedMentions] = None,
+    stickers: Sequence[Union[GuildSticker, StickerItem]] = MISSING,
+    thread_name: Optional[str] = None,
+) -> PayloadParameters:
+    params = handle_message_parameters_dict(
+        content=content,
+        username=username,
+        avatar_url=avatar_url,
+        tts=tts,
+        ephemeral=ephemeral,
+        suppress_embeds=suppress_embeds,
+        flags=flags,
+        file=file,
+        files=files,
+        attachments=attachments,
+        embed=embed,
+        embeds=embeds,
+        view=view,
+        components=components,
+        allowed_mentions=allowed_mentions,
+        previous_allowed_mentions=previous_allowed_mentions,
+        stickers=stickers,
+        thread_name=thread_name,
+    )
+
+    if params.files:
+        multipart = to_multipart_with_attachments(params.payload, params.files)
+        return PayloadParameters(payload=None, multipart=multipart, files=params.files)
+
+    return PayloadParameters(payload=params.payload, multipart=None, files=params.files)
 
 
 class Route:

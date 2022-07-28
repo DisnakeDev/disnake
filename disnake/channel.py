@@ -41,6 +41,7 @@ from .enums import (
 from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags, MessageFlags
+from .http import handle_message_parameters_dict
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
@@ -3168,7 +3169,6 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             These values can also be accessed through the ``thread`` and ``message`` fields.
         """
         from .message import Message
-        from .webhook.async_ import handle_message_parameters_dict
 
         params = handle_message_parameters_dict(
             content,

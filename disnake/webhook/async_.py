@@ -14,10 +14,8 @@ from typing import (
     Generic,
     List,
     Literal,
-    NamedTuple,
     NoReturn,
     Optional,
-    Sequence,
     Tuple,
     Type,
     TypeVar,
@@ -33,21 +31,11 @@ from ..asset import Asset
 from ..channel import PartialMessageable
 from ..enums import WebhookType, try_enum
 from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
-from ..flags import MessageFlags
-from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
+from ..http import Route, handle_message_parameters, set_attachments, to_multipart
 from ..message import Message
 from ..mixins import Hashable
-from ..ui.action_row import MessageUIComponent, components_to_dict
+from ..ui.action_row import MessageUIComponent
 from ..user import BaseUser, User
-
-__all__ = (
-    "Webhook",
-    "WebhookMessage",
-    "PartialWebhookChannel",
-    "PartialWebhookGuild",
-)
-
-_log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import datetime
@@ -63,12 +51,20 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..state import ConnectionState
-    from ..sticker import GuildSticker, StickerItem
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui.action_row import Components
     from ..ui.view import View
 
+
+__all__ = (
+    "Webhook",
+    "WebhookMessage",
+    "PartialWebhookChannel",
+    "PartialWebhookGuild",
+)
+
+_log = logging.getLogger(__name__)
 MISSING = utils.MISSING
 
 
@@ -479,9 +475,8 @@ def handle_message_parameters_dict(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: Optional[bool] = MISSING,
-    suppress_embeds: Optional[bool] = MISSING,
-    flags: MessageFlags = MISSING,
+    ephemeral: bool = None,
+    suppress_embeds: bool = None,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: Optional[List[Attachment]] = MISSING,
@@ -532,14 +527,12 @@ def handle_message_parameters_dict(
     if username:
         payload["username"] = username
 
-    if ephemeral not in (None, MISSING) or suppress_embeds not in (None, MISSING):
-        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
-        if suppress_embeds not in (None, MISSING):
-            flags.suppress_embeds = suppress_embeds
-        if ephemeral not in (None, MISSING):
-            flags.ephemeral = ephemeral
-    if flags is not MISSING:
-        payload["flags"] = flags.value
+    if ephemeral is not None or suppress_embeds is not None:
+        payload["flags"] = 0
+        if suppress_embeds:
+            payload["flags"] |= MessageFlags.suppress_embeds.flag
+        if ephemeral:
+            payload["flags"] |= MessageFlags.ephemeral.flag
 
     if allowed_mentions:
         if previous_allowed_mentions is not None:
@@ -566,9 +559,8 @@ def handle_message_parameters(
     username: str = MISSING,
     avatar_url: Any = MISSING,
     tts: bool = False,
-    ephemeral: Optional[bool] = MISSING,
-    suppress_embeds: Optional[bool] = MISSING,
-    flags: MessageFlags = MISSING,
+    ephemeral: bool = None,
+    suppress_embeds: bool = None,
     file: File = MISSING,
     files: List[File] = MISSING,
     attachments: Optional[List[Attachment]] = MISSING,
@@ -588,7 +580,6 @@ def handle_message_parameters(
         tts=tts,
         ephemeral=ephemeral,
         suppress_embeds=suppress_embeds,
-        flags=flags,
         file=file,
         files=files,
         attachments=attachments,
