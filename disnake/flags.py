@@ -147,7 +147,7 @@ class BaseFlags:
                 cls.VALID_FLAGS[name] = value.flag
 
         if not cls.VALID_FLAGS:
-            raise TypeError(
+            raise RuntimeError(
                 "At least one flag must be defined in a BaseFlags subclass, or 'no_fill_flags' must be set to True"
             )
 
