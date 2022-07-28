@@ -194,6 +194,20 @@ class SubCommandGroup(InvokableApplicationCommand):
     def parent(self) -> Optional[InvokableSlashCommand]:
         return self._parent
 
+    @property
+    def parents(
+        self,
+    ) -> Tuple[InvokableSlashCommand]:
+        """Tuple[:class:`InvokableSlashCommand`]: Retrieves the parents of this command.
+
+        If the command has no parents then it returns an empty :class:`tuple`.
+
+        For example in commands ``/a b test``, the parents are ``(b, a)``.
+
+        .. versionadded:: 2.6
+        """
+        return (self.parent,)  # type: ignore
+
     def sub_command(
         self,
         name: LocalizedOptional = None,
@@ -359,6 +373,26 @@ class SubCommand(InvokableApplicationCommand):
     @property
     def parent(self) -> Optional[Union[InvokableSlashCommand, SubCommandGroup]]:
         return self._parent
+
+    @property
+    def parents(
+        self,
+    ) -> Union[Tuple[InvokableSlashCommand], Tuple[SubCommandGroup, InvokableSlashCommand]]:
+        """Union[Tuple[:class:`InvokableSlashCommand`], Tuple[:class:`SubCommandGroup`, :class:`InvokableSlashCommand`]]: Retrieves the parents of this command.
+
+        If the command has no parents then it returns an empty :class:`tuple`.
+
+        For example in commands ``/a b test``, the parents are ``(b, a)``.
+
+        .. versionadded:: 2.6
+        """
+        entries = []
+        command = self
+        while command.parent is not None:  # type: ignore
+            command = command.parent  # type: ignore
+            entries.append(command)
+
+        return tuple(entries)
 
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str
