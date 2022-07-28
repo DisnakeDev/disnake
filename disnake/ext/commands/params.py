@@ -99,6 +99,7 @@ __all__ = (
     "Param",
     "param",
     "inject",
+    "injection",
     "option_enum",
     "register_injection",
     "converter_method",
@@ -191,7 +192,7 @@ class Injection:
     def register(cls, function: CallableT, annotation: Any) -> CallableT:
         self = cls(function)
         cls._registered[annotation] = self
-        return function
+        return self
 
 
 class RangeMeta(type):
@@ -1058,13 +1059,24 @@ def Param(
 param = Param
 
 
-def inject(function: Callable[..., Any]) -> Any:
+def inject(function: Callable[..., Any], autocompleters: Union[..., Dict[str, Callable[..., Any]]]) -> Any:
     """A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your slash command.
 
     .. versionadded:: 2.3
     """
     return Injection(function)
+
+
+def injection(autocompleters: Union[..., Dict[str, Callable[..., Any]]]) -> Any:
+    """Decorator interface for :func:`inject`.
+
+    .. versionadded 2.6
+    """
+    def decorator(function: Callable[..., Any]) -> Any:
+        return inject(function, autocompleters)
+
+    return decorator
 
 
 def option_enum(
@@ -1128,5 +1140,4 @@ def register_injection(function: CallableT) -> CallableT:
     if tp in ParamInfo.TYPES:
         raise TypeError("Injection cannot overwrite builtin types")
 
-    Injection.register(function, sig.return_annotation)
-    return function
+    return Injection.register(function, sig.return_annotation)

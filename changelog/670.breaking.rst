@@ -1,0 +1,3 @@
+|commands| :meth:`.ext.commands.Injection.register` now returns :class:`.ext.commands.Injection`
+|commands| :func:`.ext.commands.register_injection` now returns :class:`.ext.commands.Injection`
+|commands| Add decorator interface for :func:`.ext.commands.inject`: :func:`.ext.commands.injection`
