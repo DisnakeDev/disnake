@@ -117,25 +117,6 @@ def all_flags_value(flags: Dict[str, int]) -> int:
     return functools.reduce(operator.or_, flags.values())
 
 
-def fill_with_flags(*, inverted: bool = False):
-    def decorator(cls: Type[BF]) -> Type[BF]:
-        cls.VALID_FLAGS = {}
-        for name, value in cls.__dict__.items():
-            if isinstance(value, flag_value):
-                value._parent = cls
-                cls.VALID_FLAGS[name] = value.flag
-
-        if inverted:
-            cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS)
-        else:
-            cls.DEFAULT_VALUE = 0
-
-        return cls
-
-    return decorator
-
-
-# n.b. flags must inherit from this and use the decorator above
 class BaseFlags:
     VALID_FLAGS: ClassVar[Dict[str, int]]
     DEFAULT_VALUE: ClassVar[int]
@@ -150,6 +131,29 @@ class BaseFlags:
             if key not in self.VALID_FLAGS:
                 raise TypeError(f"{key!r} is not a valid flag name.")
             setattr(self, key, value)
+
+    @classmethod
+    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False):
+        # add a way to bypass filling flags, eg for ListBaseFlags.
+        if no_fill_flags:
+            return cls
+
+        # use the parent's current flags as a base if they exist
+        cls.VALID_FLAGS = getattr(cls, "VALID_FLAGS", {}).copy()
+
+        for name, value in cls.__dict__.items():
+            if isinstance(value, flag_value):
+                value._parent = cls
+                cls.VALID_FLAGS[name] = value.flag
+
+        if not cls.VALID_FLAGS:
+            raise RuntimeError(
+                "At least one flag must be defined in a BaseFlags subclass, or 'no_fill_flags' must be set to True"
+            )
+
+        cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS) if inverted else 0
+
+        return cls
 
     @classmethod
     def _from_value(cls, value: int) -> Self:
@@ -295,7 +299,7 @@ class BaseFlags:
             raise TypeError(f"Value to set for {self.__class__.__name__} must be a bool.")
 
 
-class ListBaseFlags(BaseFlags):
+class ListBaseFlags(BaseFlags, no_fill_flags=True):
     """
     A base class for flags that aren't powers of 2.
     Instead, values are used as exponents to map to powers of 2 to avoid collisions,
@@ -330,8 +334,7 @@ class ListBaseFlags(BaseFlags):
         return f"<{self.__class__.__name__} values={self.values}>"
 
 
-@fill_with_flags(inverted=True)
-class SystemChannelFlags(BaseFlags):
+class SystemChannelFlags(BaseFlags, inverted=True):
     """
     Wraps up a Discord system channel flag value.
 
@@ -466,7 +469,6 @@ class SystemChannelFlags(BaseFlags):
         return 8
 
 
-@fill_with_flags()
 class MessageFlags(BaseFlags):
     """
     Wraps up a Discord Message flag value.
@@ -621,7 +623,6 @@ class MessageFlags(BaseFlags):
         return 1 << 8
 
 
-@fill_with_flags()
 class PublicUserFlags(BaseFlags):
     """
     Wraps up the Discord User Public flags.
@@ -814,7 +815,6 @@ class PublicUserFlags(BaseFlags):
         return [public_flag for public_flag in UserFlags if self._has_flag(public_flag.value)]
 
 
-@fill_with_flags()
 class Intents(BaseFlags):
     """
     Wraps up a Discord gateway intent flag.
@@ -1449,7 +1449,6 @@ class Intents(BaseFlags):
         return (1 << 20) | (1 << 21)
 
 
-@fill_with_flags()
 class MemberCacheFlags(BaseFlags):
     """Controls the library's cache policy when it comes to members.
 
@@ -1632,7 +1631,6 @@ class MemberCacheFlags(BaseFlags):
         return self.value == 1
 
 
-@fill_with_flags()
 class ApplicationFlags(BaseFlags):
     """
     Wraps up the Discord Application flags.
@@ -1777,7 +1775,6 @@ class ApplicationFlags(BaseFlags):
         return 1 << 19
 
 
-@fill_with_flags()
 class ChannelFlags(BaseFlags):
     """Wraps up the Discord Channel flags.
 
@@ -1872,7 +1869,6 @@ class ChannelFlags(BaseFlags):
         return 1 << 1
 
 
-@fill_with_flags()
 class AutoModKeywordPresets(ListBaseFlags):
     """
     Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
