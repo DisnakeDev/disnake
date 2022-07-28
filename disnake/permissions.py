@@ -132,6 +132,20 @@ class Permissions(BaseFlags):
                to be, for example, constructed as a dict or a list of pairs.
                Note that aliases are not shown.
 
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: Permissions.y | Permissions.z, Permissions(y=True) | Permissions.z
+
+            Returns a Permissions instance with all provided permissions enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~Permissions.y
+
+            Returns a Permissions instance with all permissions except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
+
     Attributes
     ----------
     value: :class:`int`
@@ -878,7 +892,7 @@ class PermissionOverwrite:
 
         for key, value in kwargs.items():
             if key not in self.VALID_NAMES:
-                raise ValueError(f"no permission called {key}.")
+                raise ValueError(f"{key!r} is not a valid permission name.")
 
             setattr(self, key, value)
 
@@ -935,7 +949,7 @@ class PermissionOverwrite:
         """
         return len(self._values) == 0
 
-    def update(self, **kwargs: bool) -> None:
+    def update(self, **kwargs: Optional[bool]) -> None:
         """
         Bulk updates this permission overwrite object.
 

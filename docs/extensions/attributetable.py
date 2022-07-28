@@ -259,7 +259,7 @@ def get_class_results(
 def class_results_to_node(key: str, elements: List[TableElement]) -> attributetablecolumn:
     title = attributetabletitle(key, key)
     ul = nodes.bullet_list("")
-    ul.set_class("py-attribute-table-list")
+    ul["classes"].append("py-attribute-table-list")
     for element in elements:
         ref = nodes.reference(
             "",
