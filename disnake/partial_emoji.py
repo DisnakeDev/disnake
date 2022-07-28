@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
     from .state import ConnectionState
     from .types.activity import ActivityEmoji as ActivityEmojiPayload
-    from .types.message import PartialEmoji as PartialEmojiPayload
+    from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
 
 
 class _EmojiTag:
@@ -150,10 +150,11 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
         return cls(name=value, id=None, animated=False)
 
-    def to_dict(self) -> Dict[str, Any]:
-        o: Dict[str, Any] = {"name": self.name}
-        if self.id:
-            o["id"] = self.id
+    def to_dict(self) -> EmojiPayload:
+        o: EmojiPayload = {
+            "name": self.name,
+            "id": self.id,
+        }
         if self.animated:
             o["animated"] = self.animated
         return o
