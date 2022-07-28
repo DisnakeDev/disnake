@@ -657,6 +657,22 @@ General
 
     :param guild: The :class:`Guild` that has changed availability.
 
+Application Commands
+++++++++++++++++++++
+
+.. function:: on_application_command_permissions_update(permissions)
+
+    Called when the permissions of an application command or
+    the application-wide command permissions are updated.
+
+    Note that this will also be called when permissions of other applications change,
+    not just this application's permissions.
+
+    .. versionadded:: 2.5
+
+    :param permissions: The updated permission object.
+    :type permissions: :class:`GuildApplicationCommandPermissions`
+
 AutoMod
 +++++++
 
@@ -779,22 +795,6 @@ Integrations
 
     :param payload: The raw event payload data.
     :type payload: :class:`RawIntegrationDeleteEvent`
-
-Interactions
-++++++++++++
-
-.. function:: on_application_command_permissions_update(permissions)
-
-    Called when the permissions of an application command or
-    the application-wide command permissions are updated.
-
-    Note that this will also be called when permissions of other applications change,
-    not just this application's permissions.
-
-    .. versionadded:: 2.5
-
-    :param permissions: The updated permission object.
-    :type permissions: :class:`GuildApplicationCommandPermissions`
 
 Invites
 +++++++
