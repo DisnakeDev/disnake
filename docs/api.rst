@@ -362,23 +362,6 @@ This section documents events related to :class:`Client` and its connectivity to
                     WebSocket library. It can be :class:`bytes` to denote a binary
                     message or :class:`str` to denote a regular text message.
 
-.. function:: on_user_update(before, after)
-
-    Called when a :class:`User` updates their profile.
-
-    This is called when one or more of the following things change:
-
-    - avatar
-    - username
-    - discriminator
-
-    This requires :attr:`Intents.members` to be enabled.
-
-    :param before: The updated user's old info.
-    :type before: :class:`User`
-    :param after: The updated user's updated info.
-    :type after: :class:`User`
-
 Channels/Threads
 ~~~~~~~~~~~~~~~~
 
@@ -851,21 +834,22 @@ Members
 
 .. function:: on_member_update(before, after)
 
-    Called when a :class:`Member` updates their profile.
+    Called when a :class:`Member` is updated.
 
     This is called when one or more of the following things change, but is not limited to:
 
+    - avatar (guild-specific)
+    - current_timeout
     - nickname
-    - roles
     - pending
-    - timeout
-    - guild specific avatar
+    - premium_since
+    - roles
 
     This requires :attr:`Intents.members` to be enabled.
 
-    :param before: The updated member's old info.
+    :param before: The member's old info.
     :type before: :class:`Member`
-    :param after: The updated member's updated info.
+    :param after: The member's updated info.
     :type after: :class:`Member`
 
 .. function:: on_member_ban(guild, user)
@@ -909,6 +893,24 @@ Members
     :type before: :class:`Member`
     :param after: The updated member's updated info.
     :type after: :class:`Member`
+
+.. function:: on_user_update(before, after)
+
+    Called when a :class:`User` is updated.
+
+    This is called when one or more of the following things change, but is not limited to:
+
+    - avatar
+    - discriminator
+    - name
+    - public_flags
+
+    This requires :attr:`Intents.members` to be enabled.
+
+    :param before: The user's old info.
+    :type before: :class:`User`
+    :param after: The user's updated info.
+    :type after: :class:`User`
 
 
 Scheduled Events
