@@ -143,3 +143,23 @@ exclude_lines = [
     "^\\s*raise NotImplementedError$",
     "^\\s*\\.\\.\\.$",
 ]
+
+
+[tool.check-manifest]
+ignore = [
+    # CI
+    ".flake8",
+    ".pre-commit-config.yaml",
+    ".readthedocs.yml",
+    "noxfile.py",
+    # docs
+    "CONTRIBUTING.md",
+    "assets/**",
+    "changelog/**",
+    "docs/**",
+    "examples/**",
+    # tests
+    "test_bot/**",
+    "test_launcher.py",
+    "tests/**",
+]
