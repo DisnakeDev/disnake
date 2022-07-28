@@ -253,6 +253,11 @@ class InvokableApplicationCommand(ABC):
         return self.name
 
     @property
+    def mention(self) -> str:
+        # todo: add docs and make ID non-nullable
+        return f"</{self.qualified_name}:{self.id}>"
+
+    @property
     def default_member_permissions(self) -> Optional[Permissions]:
         """Optional[:class:`.Permissions`]: The default required member permissions for this command.
         A member must have *all* these permissions to be able to invoke the command in a guild.
