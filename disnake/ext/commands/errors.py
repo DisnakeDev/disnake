@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
     from .context import Context
     from .cooldowns import BucketType, Cooldown
-    from .flags import Flag
+    from .flag_converter import Flag
 
 
 __all__ = (
