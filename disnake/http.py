@@ -517,6 +517,11 @@ class HTTPClient:
             json=payload,
             reason=reason,
         )
+    def get_application(self, application_id: Snowflake, /) -> Response[appinfo.PartialAppInfo]:
+        return self.request(Route('GET', '/applications/{application_id}/rpc', application_id=application_id))
+
+    def application_info(self) -> Response[appinfo.AppInfo]:
+        return self.request(Route('GET', '/oauth2/applications/@me'))
 
     # Group functionality
 
