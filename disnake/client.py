@@ -607,6 +607,84 @@ class Client:
         :return type: :class:`bool`
         """
         return self._ready.is_set()
+    
+    async def fetch_application(self, application_id: int, /) -> PartialAppInfo:
+        """|coro|
+
+        Retrieves a :class:`.PartialAppInfo` from an application ID.
+
+        Parameters
+        -----------
+        application_id: :class:`int`
+            The application ID to retrieve information from.
+
+        Raises
+        -------
+        NotFound
+            An application with this ID does not exist.
+        HTTPException
+            Retrieving the application failed.
+
+        Returns
+        --------
+        :class:`.PartialAppInfo`
+            The application information.
+        """
+        data = await self.http.get_application(application_id)
+        return PartialAppInfo(state=self._connection, data=data)
+
+    async def fetch_widget(self, guild_id: int, /) -> Widget:
+        """|coro|
+
+        Gets a :class:`.Widget` from a guild ID.
+
+        .. note::
+
+            The guild must have the widget enabled to get this information.
+
+       
+
+        Parameters
+        -----------
+        guild_id: :class:`int`
+            The ID of the guild.
+
+        Raises
+        -------
+        Forbidden
+            The widget for this guild is disabled.
+        HTTPException
+            Retrieving the widget failed.
+
+        Returns
+        --------
+        :class:`.Widget`
+            The guild's widget.
+        """
+        data = await self.http.get_widget(guild_id)
+
+        return Widget(state=self._connection, data=data)
+
+    async def application_info(self) -> AppInfo:
+        """|coro|
+
+        Retrieves the bot's application information.
+
+        Raises
+        -------
+        HTTPException
+            Retrieving the information failed somehow.
+
+        Returns
+        --------
+        :class:`.AppInfo`
+            The bot's application information.
+        """
+        data = await self.http.application_info()
+        if 'rpc_origins' not in data:
+            data['rpc_origins'] = None
+        return AppInfo(self._connection, data)
+
 
     async def _run_event(
         self,
