@@ -26,6 +26,7 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
+from copy import copy
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
 
 from disnake.app_commands import ApplicationCommand
@@ -202,6 +203,8 @@ class InvokableApplicationCommand(ABC):
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
             other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+        if self.body != other.body:
+            other.body = copy(self.body)
 
         try:
             other.on_error = self.on_error
