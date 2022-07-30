@@ -1115,6 +1115,7 @@ def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] 
     .. versionchanged:: 2.6
         Added ``autocompleters`` keyword-only argument
 
+    .. versionchanged:: 2.6
         Now returns :class:`Injection`
 
     Parameters
