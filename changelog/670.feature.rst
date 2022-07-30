@@ -9,4 +9,6 @@
 
 	Add :meth:`.ext.commands.Injection.autocomplete` decorator
 
-	Add ``autocompleters`` keyword-only argument to :class:`.ext.commands.Injection` constructor and :func:`.ext.commands.inject`
+	Add ``autocompleters`` keyword-only argument to :class:`.ext.commands.Injection` constructor
+
+	Add ``autocompleters`` keyword-only argument to :func:`.ext.commands.inject`

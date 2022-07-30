@@ -188,13 +188,6 @@ class Injection:
 
     .. versionchanged:: 2.6
         Constructor now accept keyword-only argument ``autocompleters``
-
-    Attributes
-    ----------
-    function: Callable
-        The injection's underlying function
-    autocompleters: Union[..., Dict[str, Callable[..., Any]]]
-        Mapping from param names to it's autocomplete callback
     """
 
     _registered: ClassVar[Dict[Any, Injection]] = {}
