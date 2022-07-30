@@ -212,12 +212,15 @@ class Button(Component):
             self.emoji = None
 
     def to_dict(self) -> ButtonComponentPayload:
-        payload = {
+        payload: ButtonComponentPayload = {
             "type": 2,
-            "style": int(self.style),
-            "label": self.label,
+            "style": self.style.value,
             "disabled": self.disabled,
         }
+
+        if self.label:
+            payload["label"] = self.label
+
         if self.custom_id:
             payload["custom_id"] = self.custom_id
 
@@ -227,7 +230,7 @@ class Button(Component):
         if self.emoji:
             payload["emoji"] = self.emoji.to_dict()
 
-        return payload  # type: ignore
+        return payload
 
 
 class SelectMenu(Component):
@@ -397,7 +400,7 @@ class SelectOption:
         }
 
         if self.emoji:
-            payload["emoji"] = self.emoji.to_dict()  # type: ignore
+            payload["emoji"] = self.emoji.to_dict()
 
         if self.description:
             payload["description"] = self.description

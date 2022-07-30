@@ -854,7 +854,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             if self.voice is None or self.voice.channel is None:
                 raise Exception("Cannot suppress a member which isn't in a vc")
 
-            voice_state_payload = {
+            voice_state_payload: Dict[str, Any] = {
                 "channel_id": self.voice.channel.id,
                 "suppress": suppress,
             }

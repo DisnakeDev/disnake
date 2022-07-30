@@ -28,7 +28,7 @@ from __future__ import annotations
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, Iterator, Optional, Set, Tuple
 
-from .flags import BaseFlags, alias_flag_value, fill_with_flags, flag_value
+from .flags import BaseFlags, alias_flag_value, flag_value
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -68,7 +68,6 @@ def cached_creation(func):
     return wrapped
 
 
-@fill_with_flags()
 class Permissions(BaseFlags):
     """Wraps up the Discord permission value.
 

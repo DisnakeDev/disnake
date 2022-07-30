@@ -1,9 +1,8 @@
 import pytest
 
-from disnake.flags import ListBaseFlags, fill_with_flags, flag_value
+from disnake.flags import ListBaseFlags, flag_value
 
 
-@fill_with_flags()
 class _ListFlags(ListBaseFlags):
     @flag_value
     def flag1(self):
