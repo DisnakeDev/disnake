@@ -93,7 +93,7 @@ def install(
         install_args.extend(["-r", REQUIREMENTS[d]])
 
     if run:
-        session.run("python", "-m", "pip", "install", *install_args)
+        session.run("python", "-m", "pip", "install", *install_args, "--user")
     else:
         session.install(*install_args)
 
@@ -153,7 +153,7 @@ def slotscheck(session: nox.Session):
 
 
 @nox.session()
-@depends("dev", "docs", "voice", install_cwd=True)
+@depends("dev", "docs", "voice", "speed", install_cwd=True)
 def pyright(session: nox.Session):
     """Run pyright."""
     env = {

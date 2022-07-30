@@ -184,6 +184,11 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
 class Injection:
     """Represents a slash command injection
 
+    .. versionadded:: 2.3
+
+    .. versionchanged:: 2.6
+        Constructor now accept keyword-only argument ``autocompleters``
+
     Attributes
     ----------
     function: Callable
@@ -197,7 +202,7 @@ class Injection:
     function: Callable
     autocompleters: Dict[str, Callable]
 
-    def __init__(self, function: Callable, autocompleters: Dict[str, Callable] = ...) -> None:
+    def __init__(self, function: Callable, *, autocompleters: Dict[str, Callable] = ...) -> None:
         self.function = function
         self.autocompleters = autocompleters
 
@@ -1101,26 +1106,46 @@ def Param(
 param = Param
 
 
-def inject(function: Callable[..., Any], autocompleters: Dict[str, Callable] = ...) -> Any:
+def inject(function: Callable[..., Any], *, autocompleters: Dict[str, Callable] = ...) -> Any:
     """A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your slash command.
 
     .. versionadded:: 2.3
 
     .. versionchanged:: 2.6
-        The ``autocompleters`` argument was added
+        Added ``autocompleters`` keyword-only argument
+
+        Now returns :class:`Injection`
+
+    Parameters
+    ----------
+    function: Callable
+        The injection
+    autocompleters: Dict[:class:`str`, Callable]
+        A mapping of injection's parameter names to their respective autocompleters
+
+    Returns
+    -------
+    :class:`Injection`
+        The resulting injection
     """
-    return Injection(function, autocompleters)
+    return Injection(function, autocompleters=autocompleters)
 
 
-def injection(autocompleters: Dict[str, Callable] = ...) -> Any:
+def injection(*, autocompleters: Dict[str, Callable] = ...) -> Any:
     """Decorator interface for :func:`inject`.
+    You can then assign this value to your slash commands' parameters.
 
     .. versionadded:: 2.6
+
+    Parameters
+    ----------
+    autocompleters: Dict[:class:`str`, Callable]
+        A mapping of injection's parameter names to their respective autocompleters
     """
 
-    def decorator(function: Callable[..., Any]) -> Any:
-        return inject(function, autocompleters)
+    def decorator(function: Callable[..., Any]) -> Injection:
+        return inject(function, autocompleters=autocompleters)
 
     return decorator
 
