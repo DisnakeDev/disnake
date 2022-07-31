@@ -1220,15 +1220,15 @@ class ConnectionState:
             return
 
         member = Member(guild=guild, data=data, state=self)
-
         if self.member_cache_flags.joined:
             guild._add_member(member)
-        self.dispatch("member_join", member)
 
         try:
             guild._member_count += 1
         except AttributeError:
             pass
+
+        self.dispatch("member_join", member)
 
     def parse_guild_member_remove(self, data) -> None:
         guild = self._get_guild(int(data["guild_id"]))
@@ -1276,7 +1276,6 @@ class ConnectionState:
             self.dispatch("member_update", old_member, member)
             user = member
         else:
-            user = self.store_user(data["user"])
             if self.member_cache_flags.joined:
                 member = Member(data=data, guild=guild, state=self)
 
@@ -1286,6 +1285,9 @@ class ConnectionState:
                     self.dispatch("user_update", user_update[0], user_update[1])
 
                 guild._add_member(member)
+                user = member
+            else:
+                user = self.store_user(data["user"])
             _log.debug(
                 "GUILD_MEMBER_UPDATE referencing an unknown member ID: %s. Discarding.", user_id
             )
