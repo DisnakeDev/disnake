@@ -1247,7 +1247,7 @@ class ConnectionState:
                 user = member
             else:
                 user = self.store_user(data["user"])
-            raw = RawGuildMemberRemoveEvent(user, data["guild_id"])
+            raw = RawGuildMemberRemoveEvent(user, guild.id)
             self.dispatch("raw_member_remove", raw)
         else:
             _log.debug(
