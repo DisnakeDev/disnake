@@ -86,8 +86,8 @@ PremiumTier = Literal[0, 1, 2, 3]
 GuildFeature = Literal[
     "ANIMATED_BANNER",
     "ANIMATED_ICON",
+    "AUTO_MODERATION",
     "BANNER",
-    "COMMERCE",
     "COMMUNITY",
     "DISCOVERABLE",
     "ENABLED_DISCOVERABLE_BEFORE",
@@ -177,3 +177,7 @@ class _RolePositionRequired(TypedDict):
 
 class RolePositionUpdate(_RolePositionRequired, total=False):
     position: Optional[Snowflake]
+
+
+class MFALevelUpdate(TypedDict):
+    level: MFALevel

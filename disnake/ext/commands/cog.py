@@ -24,6 +24,7 @@ DEALINGS IN THE SOFTWARE.
 """
 from __future__ import annotations
 
+import asyncio
 import inspect
 from typing import (
     TYPE_CHECKING,
@@ -49,6 +50,8 @@ from .ctx_menus_core import InvokableMessageCommand, InvokableUserCommand
 from .slash_core import InvokableSlashCommand
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from disnake.interactions import ApplicationCommandInteraction
 
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
@@ -62,7 +65,6 @@ __all__ = (
     "Cog",
 )
 
-CogT = TypeVar("CogT", bound="Cog")
 FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 MISSING: Any = disnake.utils.MISSING
@@ -115,7 +117,7 @@ class CogMeta(type):
 
         .. versionadded:: 1.6
 
-    command_attrs: :class:`dict`
+    command_attrs: Dict[:class:`str`, Any]
         A list of attributes to apply to every command inside this cog. The dictionary
         is passed into the :class:`Command` options at ``__init__``.
         If you specify attributes inside the command attribute in the class, it will
@@ -131,10 +133,36 @@ class CogMeta(type):
                 @commands.command(hidden=False)
                 async def bar(self, ctx):
                     pass # hidden -> False
+
+    slash_command_attrs: Dict[:class:`str`, Any]
+        A list of attributes to apply to every slash command inside this cog. The dictionary
+        is passed into the options of every :class:`InvokableSlashCommand` at ``__init__``.
+        Usage of this kwarg is otherwise the same as with ``command_attrs``.
+
+        .. note:: This does not apply to instances of :class:`SubCommand` or :class:`SubCommandGroup`.
+
+        .. versionadded:: 2.5
+
+    user_command_attrs: Dict[:class:`str`, Any]
+        A list of attributes to apply to every user command inside this cog. The dictionary
+        is passed into the options of every :class:`InvokableUserCommand` at ``__init__``.
+        Usage of this kwarg is otherwise the same as with ``command_attrs``.
+
+        .. versionadded:: 2.5
+
+    message_command_attrs: Dict[:class:`str`, Any]
+        A list of attributes to apply to every message command inside this cog. The dictionary
+        is passed into the options of every :class:`InvokableMessageCommand` at ``__init__``.
+        Usage of this kwarg is otherwise the same as with ``command_attrs``.
+
+        .. versionadded:: 2.5
     """
 
     __cog_name__: str
     __cog_settings__: Dict[str, Any]
+    __cog_slash_settings__: Dict[str, Any]
+    __cog_user_settings__: Dict[str, Any]
+    __cog_message_settings__: Dict[str, Any]
     __cog_commands__: List[Command]
     __cog_app_commands__: List[InvokableApplicationCommand]
     __cog_listeners__: List[Tuple[str, str]]
@@ -143,6 +171,9 @@ class CogMeta(type):
         name, bases, attrs = args
         attrs["__cog_name__"] = kwargs.pop("name", name)
         attrs["__cog_settings__"] = kwargs.pop("command_attrs", {})
+        attrs["__cog_slash_settings__"] = kwargs.pop("slash_command_attrs", {})
+        attrs["__cog_user_settings__"] = kwargs.pop("user_command_attrs", {})
+        attrs["__cog_message_settings__"] = kwargs.pop("message_command_attrs", {})
 
         description = kwargs.pop("description", None)
         if description is None:
@@ -185,12 +216,8 @@ class CogMeta(type):
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
-                elif inspect.iscoroutinefunction(value):
-                    try:
-                        getattr(value, "__cog_listener__")
-                    except AttributeError:
-                        continue
-                    else:
+                elif asyncio.iscoroutinefunction(value):
+                    if hasattr(value, "__cog_listener__"):
                         if elem.startswith(("cog_", "bot_")):
                             raise TypeError(no_bot_cog.format(base, elem))
                         listeners[elem] = value
@@ -233,22 +260,38 @@ class Cog(metaclass=CogMeta):
     __cog_app_commands__: ClassVar[List[InvokableApplicationCommand]]
     __cog_listeners__: ClassVar[List[Tuple[str, str]]]
 
-    def __new__(cls: Type[CogT], *args: Any, **kwargs: Any) -> CogT:
+    def __new__(cls, *args: Any, **kwargs: Any) -> Self:
         # For issue 426, we need to store a copy of the command objects
         # since we modify them to inject `self` to them.
         # To do this, we need to interfere with the Cog creation process.
         self = super().__new__(cls)
         cmd_attrs = cls.__cog_settings__
+        slash_cmd_attrs = cls.__cog_slash_settings__
+        user_cmd_attrs = cls.__cog_user_settings__
+        message_cmd_attrs = cls.__cog_message_settings__
 
         # Either update the command with the cog provided defaults or copy it.
-        # r.e type ignore, type-checker complains about overriding a ClassVar
-        self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore
+        cog_app_commands: List[InvokableApplicationCommand] = []
+        for c in cls.__cog_app_commands__:
+            if isinstance(c, InvokableSlashCommand):
+                c = c._update_copy(slash_cmd_attrs)
+            elif isinstance(c, InvokableUserCommand):
+                c = c._update_copy(user_cmd_attrs)
+            elif isinstance(c, InvokableMessageCommand):
+                c = c._update_copy(message_cmd_attrs)
 
-        lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}  # type: ignore
+            cog_app_commands.append(c)
 
-        # Update the Command instances dynamically as well
+        self.__cog_app_commands__ = tuple(cog_app_commands)  # type: ignore  # overriding ClassVar
+        # Replace the old command objects with the new copies
+        for app_command in self.__cog_app_commands__:
+            setattr(self, app_command.callback.__name__, app_command)
+
+        self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore  # overriding ClassVar
+
+        lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}
         for command in self.__cog_commands__:
-            setattr(self, command.callback.__name__, command)  # type: ignore
+            setattr(self, command.callback.__name__, command)
             parent = command.parent
             if parent is not None:
                 # Get the latest parent reference
@@ -267,7 +310,7 @@ class Cog(metaclass=CogMeta):
         Returns
         -------
         List[:class:`.Command`]
-            A :class:`list` of :class:`.Command`\s that are
+            A :class:`list` of :class:`.Command`\\s that are
             defined inside this cog.
 
             .. note::
@@ -283,14 +326,14 @@ class Cog(metaclass=CogMeta):
         Returns
         -------
         List[:class:`.InvokableApplicationCommand`]
-            A :class:`list` of :class:`.InvokableApplicationCommand`\s that are
+            A :class:`list` of :class:`.InvokableApplicationCommand`\\s that are
             defined inside this cog.
 
             .. note::
 
                 This does not include subcommands.
         """
-        return [c for c in self.__cog_app_commands__]
+        return list(self.__cog_app_commands__)
 
     def get_slash_commands(self) -> List[InvokableSlashCommand]:
         """
@@ -299,7 +342,7 @@ class Cog(metaclass=CogMeta):
         Returns
         -------
         List[:class:`.InvokableSlashCommand`]
-            A :class:`list` of :class:`.InvokableSlashCommand`\s that are
+            A :class:`list` of :class:`.InvokableSlashCommand`\\s that are
             defined inside this cog.
 
             .. note::
@@ -315,7 +358,7 @@ class Cog(metaclass=CogMeta):
         Returns
         -------
         List[:class:`.InvokableUserCommand`]
-            A :class:`list` of :class:`.InvokableUserCommand`\s that are
+            A :class:`list` of :class:`.InvokableUserCommand`\\s that are
             defined inside this cog.
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableUserCommand)]
@@ -327,7 +370,7 @@ class Cog(metaclass=CogMeta):
         Returns
         -------
         List[:class:`.InvokableMessageCommand`]
-            A :class:`list` of :class:`.InvokableMessageCommand`\s that are
+            A :class:`list` of :class:`.InvokableMessageCommand`\\s that are
             defined inside this cog.
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableMessageCommand)]
@@ -404,7 +447,7 @@ class Cog(metaclass=CogMeta):
             actual = func
             if isinstance(actual, staticmethod):
                 actual = actual.__func__
-            if not inspect.iscoroutinefunction(actual):
+            if not asyncio.iscoroutinefunction(actual):
                 raise TypeError("Listener function must be a coroutine function.")
             actual.__cog_listener__ = True
             to_assign = name or actual.__name__
@@ -700,7 +743,7 @@ class Cog(metaclass=CogMeta):
         """Similar to :meth:`cog_after_slash_command_invoke` but for message commands."""
         pass
 
-    def _inject(self: CogT, bot: AnyBot) -> CogT:
+    def _inject(self, bot: AnyBot) -> Self:
         cls = self.__class__
 
         # realistically, the only thing that can cause loading errors
@@ -789,7 +832,7 @@ class Cog(metaclass=CogMeta):
         try:
             if bot._sync_commands_on_cog_unload:
                 bot._schedule_delayed_command_sync()
-        except Exception:
+        except NotImplementedError:
             pass
 
         return self
@@ -810,8 +853,8 @@ class Cog(metaclass=CogMeta):
                 elif isinstance(app_command, InvokableMessageCommand):
                     bot.remove_message_command(app_command.name)
 
-            for _, method_name in self.__cog_listeners__:
-                bot.remove_listener(getattr(self, method_name))
+            for name, method_name in self.__cog_listeners__:
+                bot.remove_listener(getattr(self, method_name), name)
 
             if cls.bot_check is not Cog.bot_check:
                 bot.remove_check(self.bot_check)  # type: ignore
@@ -855,9 +898,10 @@ class Cog(metaclass=CogMeta):
             try:
                 if bot._sync_commands_on_cog_unload:
                     bot._schedule_delayed_command_sync()
-            except Exception:
+            except NotImplementedError:
                 pass
             try:
                 self.cog_unload()
             except Exception:
+                # TODO: Consider calling the bot's on_error handler here
                 pass

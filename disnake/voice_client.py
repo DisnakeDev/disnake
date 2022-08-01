@@ -50,7 +50,7 @@ from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple
 from . import opus, utils
 from .backoff import ExponentialBackoff
 from .errors import ClientException, ConnectionClosed
-from .gateway import *
+from .gateway import DiscordVoiceWebSocket
 from .player import AudioPlayer, AudioSource
 from .utils import MISSING
 
@@ -71,8 +71,8 @@ if TYPE_CHECKING:
 has_nacl: bool
 
 try:
-    import nacl.secret  # type: ignore
-    import nacl.utils  # type: ignore
+    import nacl.secret
+    import nacl.utils
 
     has_nacl = True
 except ImportError:
@@ -543,7 +543,7 @@ class VoiceClient(VoiceProtocol):
         struct.pack_into(">I", header, 4, self.timestamp)
         struct.pack_into(">I", header, 8, self.ssrc)
 
-        encrypt_packet = getattr(self, "_encrypt_" + self.mode)
+        encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
         return encrypt_packet(header, data)
 
     def _encrypt_xsalsa20_poly1305(self, header: bytes, data) -> bytes:

@@ -53,13 +53,17 @@ from typing import (
 
 from . import utils
 from .activity import BaseActivity
-from .app_commands import (
-    GuildApplicationCommandPermissions,
-    PartialGuildApplicationCommandPermissions,
-    application_command_factory,
+from .app_commands import GuildApplicationCommandPermissions, application_command_factory
+from .automod import AutoModActionExecution, AutoModRule
+from .channel import (
+    DMChannel,
+    ForumChannel,
+    GroupChannel,
+    PartialMessageable,
+    TextChannel,
+    VoiceChannel,
+    _channel_factory,
 )
-from .channel import *
-from .channel import _channel_factory
 from .emoji import Emoji
 from .enums import ApplicationCommandType, ChannelType, ComponentType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
@@ -73,7 +77,19 @@ from .mentions import AllowedMentions
 from .message import Message
 from .object import Object
 from .partial_emoji import PartialEmoji
-from .raw_models import *
+from .raw_models import (
+    RawBulkMessageDeleteEvent,
+    RawGuildScheduledEventUserActionEvent,
+    RawIntegrationDeleteEvent,
+    RawMessageDeleteEvent,
+    RawMessageUpdateEvent,
+    RawReactionActionEvent,
+    RawReactionClearEmojiEvent,
+    RawReactionClearEvent,
+    RawThreadDeleteEvent,
+    RawThreadMemberRemoveEvent,
+    RawTypingEvent,
+)
 from .role import Role
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
@@ -82,31 +98,36 @@ from .ui.modal import Modal, ModalStore
 from .ui.view import View, ViewStore
 from .user import ClientUser, User
 from .utils import MISSING
+from .webhook import Webhook
 
 if TYPE_CHECKING:
-    from .abc import PrivateChannel
+    from .abc import MessageableChannel, PrivateChannel
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
     from .gateway import DiscordWebSocket
     from .guild import GuildChannel, VocalGuildChannel
     from .http import HTTPClient
-    from .message import MessageableChannel
     from .types.activity import Activity as ActivityPayload
+    from .types.automod import (
+        AutoModActionExecutionEvent as AutoModActionExecutionEventPayload,
+        AutoModRule as AutoModRulePayload,
+    )
     from .types.channel import DMChannel as DMChannelPayload
     from .types.emoji import Emoji as EmojiPayload
     from .types.guild import Guild as GuildPayload
     from .types.message import Message as MessagePayload
     from .types.raw_models import (
+        ChannelPinsUpdate,
         GuildScheduledEventUserActionEvent,
         ReactionActionEvent,
         TypingEvent,
     )
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
+    from .types.webhook import Webhook as WebhookPayload
     from .voice_client import VoiceProtocol
 
     T = TypeVar("T")
-    CS = TypeVar("CS", bound="ConnectionState")
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
     PartialChannel = Union[Channel, PartialMessageable]
 
@@ -251,18 +272,14 @@ class ConnectionState:
 
             cache_flags._verify_intents(intents)
 
-        # TODO: maybe we don't need to cache permissions at all
-        self._cache_application_command_permissions: bool = options.get(
-            "cache_application_command_permissions", True
-        )
         self.member_cache_flags: MemberCacheFlags = cache_flags
         self._activity: Optional[ActivityPayload] = activity
         self._status: Optional[str] = status
         self._intents: Intents = intents
 
         if not intents.members or cache_flags._empty:
-            self.store_user = self.create_user  # type: ignore
-            self.deref_user = self.deref_user_no_intents  # type: ignore
+            self.store_user = self.create_user
+            self.deref_user = self.deref_user_no_intents
 
         self.parsers = parsers = {}
         for attr, func in inspect.getmembers(self):
@@ -295,9 +312,6 @@ class ConnectionState:
         if application_commands:
             self._global_application_commands: Dict[int, APIApplicationCommand] = {}
             self._guild_application_commands: Dict[int, Dict[int, APIApplicationCommand]] = {}
-            self._application_command_permissions: Dict[
-                int, Dict[int, GuildApplicationCommandPermissions]
-            ] = {}
 
         if views:
             self._view_store: ViewStore = ViewStore(self)
@@ -453,14 +467,16 @@ class ConnectionState:
         return self._global_application_commands.get(application_command_id)
 
     def _add_global_application_command(
-        self, application_command: APIApplicationCommand, /
+        self,
+        application_command: APIApplicationCommand,
+        /,
     ) -> None:
-        assert application_command.id
+        if not application_command.id:
+            AssertionError("The provided application command does not have an ID")
         self._global_application_commands[application_command.id] = application_command
 
     def _remove_global_application_command(self, application_command_id: int, /) -> None:
         self._global_application_commands.pop(application_command_id, None)
-        self._unset_command_permissions(application_command_id)
 
     def _clear_global_application_commands(self) -> None:
         self._global_application_commands.clear()
@@ -475,7 +491,8 @@ class ConnectionState:
     def _add_guild_application_command(
         self, guild_id: int, application_command: APIApplicationCommand
     ) -> None:
-        assert application_command.id
+        if not application_command.id:
+            AssertionError("The provided application command does not have an ID")
         try:
             granula = self._guild_application_commands[guild_id]
             granula[application_command.id] = application_command
@@ -490,7 +507,6 @@ class ConnectionState:
             granula.pop(application_command_id, None)
         except KeyError:
             pass
-        self._unset_command_permissions(application_command_id, guild_id)
 
     def _clear_guild_application_commands(self, guild_id: int) -> None:
         self._guild_application_commands.pop(guild_id, None)
@@ -509,34 +525,6 @@ class ConnectionState:
         for cmd in granula.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
-
-    def _set_command_permissions(self, permissions: GuildApplicationCommandPermissions) -> None:
-        if not self._cache_application_command_permissions:
-            return
-        try:
-            granula = self._application_command_permissions[permissions.guild_id]
-            granula[permissions.id] = permissions
-        except KeyError:
-            self._application_command_permissions[permissions.guild_id] = {
-                permissions.id: permissions
-            }
-
-    def _unset_command_permissions(self, command_id: int, guild_id: int = None) -> None:
-        if guild_id is None:
-            for granula in self._application_command_permissions.values():
-                granula.pop(command_id, None)
-            return
-        try:
-            granula = self._application_command_permissions[guild_id]
-            granula.pop(command_id, None)
-        except KeyError:
-            pass
-
-    def _get_command_permissions(self, guild_id: int, command_id: int):
-        try:
-            return self._application_command_permissions[guild_id][command_id]
-        except KeyError:
-            pass
 
     @property
     def emojis(self) -> List[Emoji]:
@@ -586,7 +574,7 @@ class ConnectionState:
 
     def add_dm_channel(self, data: DMChannelPayload) -> DMChannel:
         # self.user is *always* cached when this is called
-        channel = DMChannel(me=self.user, state=self, data=data)  # type: ignore
+        channel = DMChannel(me=self.user, state=self, data=data)
         self._add_private_channel(channel)
         return channel
 
@@ -629,7 +617,7 @@ class ConnectionState:
             if channel is None:
                 if "author" in data:
                     # MessagePayload
-                    data = cast(MessagePayload, data)
+                    data = cast("MessagePayload", data)
                     user_id = int(data["author"]["id"])
                 else:
                     # TypingEvent
@@ -748,7 +736,7 @@ class ConnectionState:
         if self._ready_task is not None:
             self._ready_task.cancel()
 
-        self._ready_state = asyncio.Queue()
+        self._ready_state: asyncio.Queue[Guild] = asyncio.Queue()
         self.clear(views=False, application_commands=False, modals=False)
         self.user = ClientUser(state=self, data=data["user"])
         self.store_user(data["user"])
@@ -761,7 +749,7 @@ class ConnectionState:
             else:
                 self.application_id = utils._get_as_snowflake(application, "id")
                 # flags will always be present here
-                self.application_flags = ApplicationFlags._from_value(application["flags"])  # type: ignore
+                self.application_flags = ApplicationFlags._from_value(application["flags"])
 
         for guild_data in data["guilds"]:
             self._add_guild_from_data(guild_data)
@@ -772,6 +760,10 @@ class ConnectionState:
 
     def parse_resumed(self, data) -> None:
         self.dispatch("resumed")
+
+    def parse_application_command_permissions_update(self, data) -> None:
+        app_command_perms = GuildApplicationCommandPermissions(data=data, state=self)
+        self.dispatch("application_command_permissions_update", app_command_perms)
 
     def parse_message_create(self, data) -> None:
         channel, _ = self._get_guild_channel(data)
@@ -965,7 +957,7 @@ class ConnectionState:
 
     def parse_user_update(self, data) -> None:
         # self.user is *always* cached when this is called
-        user: ClientUser = self.user  # type: ignore
+        user: ClientUser = self.user
         user._update(data)
         ref = self._users.get(user.id)
         if ref:
@@ -981,12 +973,22 @@ class ConnectionState:
 
     def parse_channel_delete(self, data) -> None:
         guild = self._get_guild(utils._get_as_snowflake(data, "guild_id"))
+        if guild is None:
+            return
+
         channel_id = int(data["id"])
-        if guild is not None:
-            channel = guild.get_channel(channel_id)
-            if channel is not None:
-                guild._remove_channel(channel)
-                self.dispatch("guild_channel_delete", channel)
+        channel = guild.get_channel(channel_id)
+        if channel is None:
+            return
+
+        guild._remove_channel(channel)
+        self.dispatch("guild_channel_delete", channel)
+
+        if channel.type in (ChannelType.voice, ChannelType.stage_voice):
+            for event_id, scheduled_event in list(guild._scheduled_events.items()):
+                if scheduled_event.channel_id == channel_id:
+                    guild._scheduled_events.pop(event_id)
+                    self.dispatch("guild_scheduled_event_delete", scheduled_event)
 
     def parse_channel_update(self, data) -> None:
         channel_type = try_enum(ChannelType, data.get("type"))
@@ -1015,7 +1017,7 @@ class ConnectionState:
             _log.debug("CHANNEL_UPDATE referencing an unknown guild ID: %s. Discarding.", guild_id)
 
     def parse_channel_create(self, data) -> None:
-        factory, ch_type = _channel_factory(data["type"])
+        factory, _ = _channel_factory(data["type"])
         if factory is None:
             _log.debug(
                 "CHANNEL_CREATE referencing an unknown channel type %s. Discarding.", data["type"]
@@ -1033,7 +1035,7 @@ class ConnectionState:
             _log.debug("CHANNEL_CREATE referencing an unknown guild ID: %s. Discarding.", guild_id)
             return
 
-    def parse_channel_pins_update(self, data) -> None:
+    def parse_channel_pins_update(self, data: ChannelPinsUpdate) -> None:
         channel_id = int(data["channel_id"])
         try:
             guild = self._get_guild(int(data["guild_id"]))
@@ -1049,9 +1051,12 @@ class ConnectionState:
             )
             return
 
-        last_pin = (
-            utils.parse_time(data["last_pin_timestamp"]) if data["last_pin_timestamp"] else None
-        )
+        last_pin = None
+        if "last_pin_timestamp" in data:
+            last_pin = utils.parse_time(data["last_pin_timestamp"])
+
+        if isinstance(channel, (DMChannel, TextChannel, Thread)):
+            channel.last_pin_timestamp = last_pin
 
         if guild is None:
             self.dispatch("private_channel_pins_update", channel, last_pin)
@@ -1069,7 +1074,13 @@ class ConnectionState:
         has_thread = guild.get_thread(thread.id)
         guild._add_thread(thread)
         if not has_thread:
-            self.dispatch("thread_join", thread)
+            if data.get("newly_created"):
+                if isinstance(thread.parent, ForumChannel):
+                    thread.parent.last_thread_id = thread.id
+
+                self.dispatch("thread_create", thread)
+            else:
+                self.dispatch("thread_join", thread)
 
     def parse_thread_update(self, data) -> None:
         guild_id = int(data["guild_id"])
@@ -1089,6 +1100,8 @@ class ConnectionState:
             guild._add_thread(thread)
             self.dispatch("thread_join", thread)
 
+        self.dispatch("raw_thread_update", thread)
+
     def parse_thread_delete(self, data) -> None:
         guild_id = int(data["guild_id"])
         guild = self._get_guild(guild_id)
@@ -1098,9 +1111,12 @@ class ConnectionState:
 
         thread_id = int(data["id"])
         thread = guild.get_thread(thread_id)
+        raw = RawThreadDeleteEvent(data)
         if thread is not None:
-            guild._remove_thread(thread)  # type: ignore
+            raw.thread = thread
+            guild._remove_thread(thread)
             self.dispatch("thread_delete", thread)
+        self.dispatch("raw_thread_delete", raw)
 
     def parse_thread_list_sync(self, data) -> None:
         guild_id = int(data["guild_id"])
@@ -1188,9 +1204,12 @@ class ConnectionState:
 
         for member_id in removed_member_ids:
             if member_id != self_id:
+                raw = RawThreadMemberRemoveEvent(thread, member_id)
                 member = thread._pop_member(member_id)
                 if member is not None:
+                    raw.cached_member = member
                     self.dispatch("thread_member_remove", member)
+                self.dispatch("raw_thread_member_remove", raw)
             else:
                 self.dispatch("thread_remove", thread)
 
@@ -1225,7 +1244,7 @@ class ConnectionState:
             user_id = int(data["user"]["id"])
             member = guild.get_member(user_id)
             if member is not None:
-                guild._remove_member(member)  # type: ignore
+                guild._remove_member(member)
                 self.dispatch("member_remove", member)
         else:
             _log.debug(
@@ -1279,8 +1298,7 @@ class ConnectionState:
         before_emojis = guild.emojis
         for emoji in before_emojis:
             self._emojis.pop(emoji.id, None)
-        # guild won't be None here
-        guild.emojis = tuple(map(lambda d: self.store_emoji(guild, d), data["emojis"]))  # type: ignore
+        guild.emojis = tuple(self.store_emoji(guild, d) for d in data["emojis"])
         self.dispatch("guild_emojis_update", guild, before_emojis, guild.emojis)
 
     def parse_guild_stickers_update(self, data) -> None:
@@ -1296,7 +1314,7 @@ class ConnectionState:
         for emoji in before_stickers:
             self._stickers.pop(emoji.id, None)
         # guild won't be None here
-        guild.stickers = tuple(map(lambda d: self.store_sticker(guild, d), data["stickers"]))  # type: ignore
+        guild.stickers = tuple(self.store_sticker(guild, d) for d in data["stickers"])
         self.dispatch("guild_stickers_update", guild, before_stickers, guild.stickers)
 
     def _get_create_guild(self, data):
@@ -1685,7 +1703,7 @@ class ConnectionState:
         channel_id = utils._get_as_snowflake(data, "channel_id")
         flags = self.member_cache_flags
         # self.user is *always* cached when this is called
-        self_id = self.user.id  # type: ignore
+        self_id = self.user.id
         if guild is not None:
             if int(data["user_id"]) == self_id:
                 voice = self._get_voice_client(guild.id)
@@ -1695,13 +1713,13 @@ class ConnectionState:
                         logging_coroutine(coro, info="Voice Protocol voice state update handler")
                     )
 
-            member, before, after = guild._update_voice_state(data, channel_id)  # type: ignore
+            member, before, after = guild._update_voice_state(data, channel_id)
             if member is not None:
                 if flags.voice:
                     if channel_id is None and flags._voice_only and member.id != self_id:
                         # Only remove from cache if we only have the voice flag enabled
                         # Member doesn't meet the Snowflake protocol currently
-                        guild._remove_member(member)  # type: ignore
+                        guild._remove_member(member)
                     elif channel_id is not None:
                         guild._add_member(member)
 
@@ -1756,10 +1774,60 @@ class ConnectionState:
                 )
                 self.dispatch("typing", channel, member, timestamp)
 
+    def parse_auto_moderation_rule_create(self, data: AutoModRulePayload) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "AUTO_MODERATION_RULE_CREATE referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        rule = AutoModRule(data=data, guild=guild)
+        self.dispatch("automod_rule_create", rule)
+
+    def parse_auto_moderation_rule_update(self, data: AutoModRulePayload) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "AUTO_MODERATION_RULE_UPDATE referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        rule = AutoModRule(data=data, guild=guild)
+        self.dispatch("automod_rule_update", rule)
+
+    def parse_auto_moderation_rule_delete(self, data: AutoModRulePayload) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "AUTO_MODERATION_RULE_DELETE referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        rule = AutoModRule(data=data, guild=guild)
+        self.dispatch("automod_rule_delete", rule)
+
+    def parse_auto_moderation_action_execution(
+        self, data: AutoModActionExecutionEventPayload
+    ) -> None:
+        guild = self._get_guild(int(data["guild_id"]))
+        if guild is None:
+            _log.debug(
+                "AUTO_MODERATION_ACTION_EXECUTION referencing unknown guild ID: %s. Discarding.",
+                data["guild_id"],
+            )
+            return
+
+        event = AutoModActionExecution(data=data, guild=guild)
+        self.dispatch("automod_action_execution", event)
+
     def _get_reaction_user(
         self, channel: MessageableChannel, user_id: int
     ) -> Optional[Union[User, Member]]:
-        if isinstance(channel, (TextChannel, VoiceChannel)):
+        if isinstance(channel, (TextChannel, VoiceChannel, Thread)):
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 
@@ -1801,17 +1869,24 @@ class ConnectionState:
     def create_message(
         self,
         *,
-        channel: Union[TextChannel, Thread, DMChannel, PartialMessageable, VoiceChannel],
+        channel: MessageableChannel,
         data: MessagePayload,
     ) -> Message:
         return Message(state=self, channel=channel, data=data)
+
+    def create_webhook(self, data: WebhookPayload) -> Webhook:
+        return Webhook.from_state(data=data, state=self)
 
     # Application commands (global)
     # All these methods (except fetchers) update the application command cache as well,
     # since there're no events related to application command updates
 
-    async def fetch_global_commands(self) -> List[APIApplicationCommand]:
-        results = await self.http.get_global_commands(self.application_id)  # type: ignore
+    async def fetch_global_commands(
+        self,
+        *,
+        with_localizations: bool = True,
+    ) -> List[APIApplicationCommand]:
+        results = await self.http.get_global_commands(self.application_id, with_localizations=with_localizations)  # type: ignore
         return [application_command_factory(data) for data in results]
 
     async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
@@ -1853,8 +1928,13 @@ class ConnectionState:
 
     # Application commands (guild)
 
-    async def fetch_guild_commands(self, guild_id: int) -> List[APIApplicationCommand]:
-        results = await self.http.get_guild_commands(self.application_id, guild_id)  # type: ignore
+    async def fetch_guild_commands(
+        self,
+        guild_id: int,
+        *,
+        with_localizations: bool = True,
+    ) -> List[APIApplicationCommand]:
+        results = await self.http.get_guild_commands(self.application_id, guild_id, with_localizations=with_localizations)  # type: ignore
         return [application_command_factory(data) for data in results]
 
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
@@ -1916,30 +1996,6 @@ class ConnectionState:
         )
         return GuildApplicationCommandPermissions(state=self, data=data)
 
-    async def edit_command_permissions(
-        self, guild_id: int, permissions: PartialGuildApplicationCommandPermissions
-    ) -> GuildApplicationCommandPermissions:
-        result = await self.http.edit_application_command_permissions(
-            self.application_id, guild_id, permissions.id, permissions.to_dict()  # type: ignore
-        )
-        perms = GuildApplicationCommandPermissions(state=self, data=result)
-        self._set_command_permissions(perms)
-        return perms
-
-    async def bulk_edit_command_permissions(
-        self, guild_id: int, permissions: List[PartialGuildApplicationCommandPermissions]
-    ) -> List[GuildApplicationCommandPermissions]:
-        payload = [perm.to_dict() for perm in permissions]
-
-        array = await self.http.bulk_edit_guild_application_command_permissions(
-            self.application_id, guild_id=guild_id, payload=payload  # type: ignore
-        )
-
-        perms = [GuildApplicationCommandPermissions(state=self, data=obj) for obj in array]
-        if self._cache_application_command_permissions:
-            self._application_command_permissions[guild_id] = {elem.id: elem for elem in perms}
-        return perms
-
 
 class AutoShardedConnectionState(ConnectionState):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -1947,9 +2003,10 @@ class AutoShardedConnectionState(ConnectionState):
         self.shard_ids: Union[List[int], range] = []
         self.shards_launched: asyncio.Event = asyncio.Event()
 
-    def _update_message_references(self) -> None:
-        # self._messages won't be None when this is called
-        for msg in self._messages:  # type: ignore
+    def _update_guild_channel_references(self) -> None:
+        if not self._messages:
+            return
+        for msg in self._messages:
             if not msg.guild:
                 continue
 
@@ -1957,8 +2014,36 @@ class AutoShardedConnectionState(ConnectionState):
             if new_guild is not None and new_guild is not msg.guild:
                 channel_id = msg.channel.id
                 channel = new_guild._resolve_channel(channel_id) or Object(id=channel_id)
-                # channel will either be a TextChannel, Thread or Object
+                # channel will either be a TextChannel, VoiceChannel, Thread or Object
                 msg._rebind_cached_references(new_guild, channel)  # type: ignore
+
+        # these generally get deallocated once the voice reconnect times out
+        # (it never succeeds after gateway reconnects)
+        # but we rebind the channel reference just in case
+        for vc in self._voice_clients.values():
+            if not getattr(vc.channel, "guild", None):
+                continue
+
+            new_guild = self._get_guild(vc.channel.guild.id)
+            if new_guild is None:
+                continue
+
+            new_channel = new_guild._resolve_channel(vc.channel.id) or Object(id=vc.channel.id)
+            if new_channel is not vc.channel:
+                vc.channel = new_channel  # type: ignore
+
+    def _update_member_references(self) -> None:
+        messages: Sequence[Message] = self._messages or []
+        for msg in messages:
+            if not msg.guild:
+                continue
+
+            # note that unlike with channels, this doesn't fall back to `Object` in case
+            # guild chunking is disabled, but still shouldn't lead to old references being
+            # kept as `msg.author.guild` was already rebound (see above) at this point.
+            new_author = msg.guild.get_member(msg.author.id)
+            if new_author is not None and new_author is not msg.author:
+                msg.author = new_author
 
     async def chunker(
         self,
@@ -1977,7 +2062,7 @@ class AutoShardedConnectionState(ConnectionState):
 
     async def _delay_ready(self) -> None:
         await self.shards_launched.wait()
-        processed = []
+        processed: List[Tuple[Guild, asyncio.Future[List[Member]]]] = []
         max_concurrency = len(self.shard_ids) * 2
         current_bucket = []
         while True:
@@ -1990,6 +2075,7 @@ class AutoShardedConnectionState(ConnectionState):
             except asyncio.TimeoutError:
                 break
             else:
+                future: asyncio.Future[List[Member]]
                 if self._guild_needs_chunking(guild):
                     _log.debug(
                         "Guild ID %d requires chunking, will be done in the background.", guild.id
@@ -2014,9 +2100,18 @@ class AutoShardedConnectionState(ConnectionState):
 
                 processed.append((guild, future))
 
+        # update references once the guild cache is repopulated
+        self._update_guild_channel_references()
+
         guilds = sorted(processed, key=lambda g: g[0].shard_id)
         for shard_id, info in itertools.groupby(guilds, key=lambda g: g[0].shard_id):
-            children, futures = zip(*info)
+            # this is equivalent to `children, futures = zip(*info)`, but typed properly
+            children: List[Guild] = []
+            futures: List[asyncio.Future[List[Member]]] = []
+            for c, f in info:
+                children.append(c)
+                futures.append(f)
+
             # 110 reqs/minute w/ 1 req/guild plus some buffer
             timeout = 61 * (len(children) / 110)
             try:
@@ -2042,10 +2137,14 @@ class AutoShardedConnectionState(ConnectionState):
         except AttributeError:
             pass  # already been deleted somehow
 
-        # regular users cannot shard so we won't worry about it here.
-
         # clear the current task
         self._ready_task = None
+
+        # update member references once guilds are chunked
+        # note: this is always called regardless of whether chunking/caching is enabled;
+        #       the bot member is always cached, so if any of the bot's own messages are
+        #       cached, their `author` should be rebound to the new member object
+        self._update_member_references()
 
         # dispatch the event
         self.call_handlers("ready")
@@ -2070,9 +2169,6 @@ class AutoShardedConnectionState(ConnectionState):
 
         for guild_data in data["guilds"]:
             self._add_guild_from_data(guild_data)
-
-        if self._messages:
-            self._update_message_references()
 
         self.dispatch("connect")
         self.dispatch("shard_connect", data["__shard_id__"])

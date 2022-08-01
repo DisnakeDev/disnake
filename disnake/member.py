@@ -25,8 +25,8 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+import asyncio
 import datetime
-import inspect
 import itertools
 import sys
 from operator import attrgetter
@@ -37,9 +37,8 @@ from typing import (
     List,
     Literal,
     Optional,
+    Sequence,
     Tuple,
-    Type,
-    TypeVar,
     Union,
     cast,
     overload,
@@ -63,12 +62,14 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .abc import Snowflake
-    from .asset import Asset
     from .channel import DMChannel, StageChannel, VoiceChannel
     from .flags import PublicUserFlags
     from .guild import Guild
     from .message import Message
+    from .partial_emoji import PartialEmoji
     from .role import Role
     from .state import ConnectionState
     from .types.activity import PartialPresenceUpdate
@@ -172,15 +173,15 @@ class VoiceState:
         self.channel: Optional[VocalGuildChannel] = channel
 
     def __repr__(self) -> str:
-        attrs = [
+        attrs = (
             ("self_mute", self.self_mute),
             ("self_deaf", self.self_deaf),
             ("self_stream", self.self_stream),
             ("suppress", self.suppress),
             ("requested_to_speak_at", self.requested_to_speak_at),
             ("channel", self.channel),
-        ]
-        inner = " ".join("%s=%r" % t for t in attrs)
+        )
+        inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{self.__class__.__name__} {inner}>"
 
 
@@ -197,7 +198,7 @@ def flatten_user(cls):
         # if it's a slotted attribute or a property, redirect it
         # slotted members are implemented as member_descriptors in Type.__dict__
         if not hasattr(value, "__annotations__"):
-            getter = attrgetter("_user." + attr)
+            getter = attrgetter(f"_user.{attr}")
             setattr(cls, attr, property(getter, doc=f"Equivalent to :attr:`User.{attr}`"))
         else:
             # Technically, this can also use attrgetter
@@ -206,7 +207,7 @@ def flatten_user(cls):
             # probably a member function by now
             def generate_function(x):
                 # We want sphinx to properly show coroutine functions as coroutines
-                if inspect.iscoroutinefunction(value):
+                if asyncio.iscoroutinefunction(value):  # noqa: B023
 
                     async def general(self, *args, **kwargs):  # type: ignore
                         return await getattr(self._user, x)(*args, **kwargs)
@@ -224,9 +225,6 @@ def flatten_user(cls):
             setattr(cls, attr, func)
 
     return cls
-
-
-M = TypeVar("M", bound="Member")
 
 
 @flatten_user
@@ -354,7 +352,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         )
         self._roles: utils.SnowflakeList = utils.SnowflakeList(map(int, data["roles"]))
         self._client_status: Dict[Optional[str], str] = {None: "offline"}
-        self.activities: Tuple[ActivityTypes, ...] = tuple()
+        self.activities: Tuple[ActivityTypes, ...] = ()
         self.nick: Optional[str] = data.get("nick")
         self.pending: bool = data.get("pending", False)
         self._avatar: Optional[str] = data.get("avatar")
@@ -380,7 +378,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         return hash(self._user)
 
     @classmethod
-    def _from_message(cls: Type[M], *, message: Message, data: MemberPayload) -> M:
+    def _from_message(cls, *, message: Message, data: MemberPayload) -> Self:
         user_data = message.author._to_minimal_user_json()  # type: ignore
         return cls(
             data=data,
@@ -398,8 +396,8 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @classmethod
     def _try_upgrade(
-        cls: Type[M], *, data: UserWithMemberPayload, guild: Guild, state: ConnectionState
-    ) -> Union[User, M]:
+        cls, *, data: UserWithMemberPayload, guild: Guild, state: ConnectionState
+    ) -> Union[User, Self]:
         # A User object with a 'member' key
         try:
             member_data = data.pop("member")
@@ -409,8 +407,8 @@ class Member(disnake.abc.Messageable, _UserTag):
             return cls(data=member_data, user_data=data, guild=guild, state=state)
 
     @classmethod
-    def _copy(cls: Type[M], member: M) -> M:
-        self: M = cls.__new__(cls)  # to bypass __init__
+    def _copy(cls, member: Member) -> Self:
+        self = cls.__new__(cls)  # to bypass __init__
 
         self._roles = utils.SnowflakeList(member._roles, is_sorted=True)
         self.joined_at = member.joined_at
@@ -455,7 +453,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     def _presence_update(
         self, data: PartialPresenceUpdate, user: UserPayload
     ) -> Optional[Tuple[User, User]]:
-        self.activities = tuple(map(create_activity, data["activities"]))
+        self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
             sys.intern(key): sys.intern(value) for key, value in data.get("client_status", {}).items()  # type: ignore
         }
@@ -668,6 +666,19 @@ class Member(disnake.abc.Messageable, _UserTag):
         return max(guild.get_role(rid) or guild.default_role for rid in self._roles)
 
     @property
+    def role_icon(self) -> Optional[Union[Asset, PartialEmoji]]:
+        """Optional[Union[:class:`Asset`, :class:`PartialEmoji`]]: Returns the member's displayed role icon, if any.
+
+        .. versionadded:: 2.5
+        """
+        roles = self.roles[1:]  # remove @everyone
+
+        for role in reversed(roles):
+            if icon := (role.icon or role.emoji):
+                return icon
+        return None
+
+    @property
     def guild_permissions(self) -> Permissions:
         """:class:`Permissions`: Returns the member's guild permissions.
 
@@ -745,7 +756,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         mute: bool = MISSING,
         deafen: bool = MISSING,
         suppress: bool = MISSING,
-        roles: List[disnake.abc.Snowflake] = MISSING,
+        roles: Sequence[disnake.abc.Snowflake] = MISSING,
         voice_channel: Optional[VocalGuildChannel] = MISSING,
         timeout: Optional[Union[float, datetime.timedelta, datetime.datetime]] = MISSING,
         reason: Optional[str] = None,
@@ -793,7 +804,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
             .. versionadded:: 1.7
 
-        roles: List[:class:`Role`]
+        roles: Sequence[:class:`Role`]
             The member's new list of roles. This *replaces* the roles.
         voice_channel: Optional[:class:`VoiceChannel`]
             The voice channel to move the member to.
@@ -843,7 +854,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             if self.voice is None or self.voice.channel is None:
                 raise Exception("Cannot suppress a member which isn't in a vc")
 
-            voice_state_payload = {
+            voice_state_payload: Dict[str, Any] = {
                 "channel_id": self.voice.channel.id,
                 "suppress": suppress,
             }
@@ -946,15 +957,15 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         |coro|
 
-        Gives the member a number of :class:`Role`\s.
+        Gives the member a number of :class:`Role`\\s.
 
         You must have :attr:`~Permissions.manage_roles` permission to
-        use this, and the added :class:`Role`\s must appear lower in the list
+        use this, and the added :class:`Role`\\s must appear lower in the list
         of roles than the highest role of the member.
 
         Parameters
         ----------
-        \*roles: :class:`abc.Snowflake`
+        *roles: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing a :class:`Role`
             to give to the member.
         reason: Optional[:class:`str`]
@@ -987,15 +998,15 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         |coro|
 
-        Removes :class:`Role`\s from this member.
+        Removes :class:`Role`\\s from this member.
 
         You must have :attr:`~Permissions.manage_roles` permission to
-        use this, and the removed :class:`Role`\s must appear lower in the list
+        use this, and the removed :class:`Role`\\s must appear lower in the list
         of roles than the highest role of the member.
 
         Parameters
         ----------
-        \*roles: :class:`abc.Snowflake`
+        *roles: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing a :class:`Role`
             to remove from the member.
         reason: Optional[:class:`str`]

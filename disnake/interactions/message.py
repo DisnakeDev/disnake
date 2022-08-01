@@ -22,9 +22,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from ..components import ActionRow, Button, SelectMenu
+from ..components import MessageComponent
 from ..enums import ComponentType, try_enum
 from ..message import Message
 from ..utils import cached_slot_property
@@ -38,7 +38,7 @@ __all__ = (
 if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..types.interactions import (
-        ComponentInteractionData as ComponentInteractionDataPayload,
+        MessageComponentInteractionData as MessageComponentInteractionDataPayload,
         MessageInteraction as MessageInteractionPayload,
     )
 
@@ -66,17 +66,23 @@ class MessageInteraction(Interaction):
         The channel ID the interaction was sent from.
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
-    locale: :class:`str`
+    locale: :class:`Locale`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
 
-    guild_locale: Optional[:class:`str`]
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
+    guild_locale: Optional[:class:`Locale`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
 
     message: Optional[:class:`Message`]
         The message that sent this interaction.
@@ -97,22 +103,17 @@ class MessageInteraction(Interaction):
         return self.data.values
 
     @cached_slot_property("_cs_component")
-    def component(self) -> Union[Button, SelectMenu]:
+    def component(self) -> MessageComponent:
         """Union[:class:`Button`, :class:`SelectMenu`]: The component the user interacted with"""
         for action_row in self.message.components:
-            if not isinstance(action_row, ActionRow):
-                continue
             for component in action_row.children:
-                if not isinstance(component, (Button, SelectMenu)):
-                    continue
-
                 if component.custom_id == self.data.custom_id:
                     return component
 
         raise Exception("MessageInteraction is malformed - no component found")
 
 
-class MessageInteractionData:
+class MessageInteractionData(Dict[str, Any]):
     """Represents the data of an interaction with a message component.
 
     .. versionadded:: 2.1
@@ -129,7 +130,14 @@ class MessageInteractionData:
 
     __slots__ = ("custom_id", "component_type", "values")
 
-    def __init__(self, *, data: ComponentInteractionDataPayload):
+    def __init__(self, *, data: MessageComponentInteractionDataPayload):
+        super().__init__(data)
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
         self.values: Optional[List[str]] = data.get("values")
+
+    def __repr__(self):
+        return (
+            f"<MessageInteractionData custom_id={self.custom_id!r} "
+            f"component_type={self.component_type!r} values={self.values!r}>"
+        )

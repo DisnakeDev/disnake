@@ -1,0 +1,1 @@
+Add :class:`slice` to :class:`.ui.ActionRow` ``__getattr__`` and ``__delattr__`` annotations.

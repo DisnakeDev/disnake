@@ -1,16 +1,12 @@
 'use-strict';
 
-let queryBeingDone = null;
-let pattern = null;
+let queryBeingDone = undefined;
+let pattern = undefined;
 
 const escapedRegex = /[-\/\\^$*+?.()|[\]{}]/g;
 function escapeRegex(e) {
     return e.replace(escapedRegex, '\\$&');
 }
-
-// for some reason Sphinx shows some entries twice
-// if something has been scored already I'd rather sort it to the bottom
-const beenScored = new Set();
 
 function __score(haystack, regex) {
     let match = regex.exec(haystack);
@@ -27,24 +23,34 @@ function __cleanNamespaces(query) {
     return query.replace(/(disnake\.(ext\.)?)?(.+)/, '$3');
 }
 
-Scorer = {
+function __setPattern() {
+    const params = new URLSearchParams(window.location.search);
+    queryBeingDone = params.get('q');
+    if (queryBeingDone) {
+        pattern = new RegExp(Array.from(queryBeingDone).map(escapeRegex).join('.*?'), 'i');
+    } else {
+        queryBeingDone = null;
+        pattern = null;
+    }
+}
 
+Scorer = {
     // Implement the following function to further tweak the score for each result
     // The function takes a result array [filename, title, anchor, descr, score]
     // and returns the new score.
     score: (result) => {
         // only inflate the score of things that are actual API reference things
-        const [, title, , , score] = result;
+        const [, title, , , score,] = result;
+
+        if (queryBeingDone === undefined) {
+            __setPattern();
+        }
 
         if (pattern !== null && title.startsWith('disnake.')) {
             let _score = __score(title, pattern);
             if (_score === Number.MAX_VALUE) {
                 return score;
             }
-            if (beenScored.has(title)) {
-                return 0;
-            }
-            beenScored.add(title);
             let newScore = 100 + queryBeingDone.length - _score;
             // console.log(`${title}: ${score} -> ${newScore} (${_score})`);
             return newScore;
@@ -72,12 +78,3 @@ Scorer = {
     term: 5,
     partialTerm: 2
 };
-
-document.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    queryBeingDone = params.get('q');
-    if (queryBeingDone) {
-        let pattern = Array.from(queryBeingDone).map(escapeRegex).join('.*?');
-        pattern = new RegExp(pattern, 'i');
-    }
-});

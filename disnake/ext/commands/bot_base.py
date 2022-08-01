@@ -29,9 +29,22 @@ import asyncio
 import collections
 import collections.abc
 import inspect
+import logging
 import sys
 import traceback
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Type, TypeVar, Union, cast
+import warnings
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Iterable,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import disnake
 
@@ -39,13 +52,16 @@ from . import errors
 from .common_bot_base import CommonBotBase
 from .context import Context
 from .core import GroupMixin
+from .custom_warnings import MessageContentPrefixWarning
 from .help import DefaultHelpCommand, HelpCommand
 from .view import StringView
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from disnake.message import Message
 
-    from ._types import Check, CoroFunc
+    from ._types import Check, CoroFunc, MaybeCoro
 
 __all__ = (
     "when_mentioned",
@@ -58,6 +74,10 @@ MISSING: Any = disnake.utils.MISSING
 T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
 CXT = TypeVar("CXT", bound="Context")
+
+PrefixType = Union[str, Iterable[str]]
+
+_log = logging.getLogger(__name__)
 
 
 def when_mentioned(bot: BotBase, msg: Message) -> List[str]:
@@ -122,13 +142,30 @@ _default: Any = _DefaultRepr()
 class BotBase(CommonBotBase, GroupMixin):
     def __init__(
         self,
-        command_prefix: Optional[Union[str, List[str], Callable]] = None,
+        command_prefix: Optional[
+            Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
+        ] = None,
         help_command: HelpCommand = _default,
         description: str = None,
         **options: Any,
     ):
         super().__init__(**options)
         self.command_prefix = command_prefix
+        if (
+            command_prefix is not when_mentioned
+            and not self.intents.message_content  # type: ignore
+        ):
+
+            warnings.warn(
+                "Message Content intent is not enabled and a prefix is configured. "
+                "This may cause limited functionality for prefix commands. "
+                "If you want prefix commands, pass an intents object with message_content set to True. "
+                "If you don't need any prefix functionality, "
+                "consider using InteractionBot instead. "
+                "Alternatively, set prefix to disnake.ext.commands.when_mentioned to silence this warning.",
+                MessageContentPrefixWarning,
+                stacklevel=2,
+            )
 
         self._checks: List[Check] = []
         self._check_once = []
@@ -223,9 +260,9 @@ class BotBase(CommonBotBase, GroupMixin):
             If the function was added with ``call_once=True`` in
             the :meth:`.Bot.add_check` call or using :meth:`.check_once`.
         """
-        l = self._check_once if call_once else self._checks
+        check_list = self._check_once if call_once else self._checks
         try:
-            l.remove(func)
+            check_list.remove(func)
         except ValueError:
             pass
 
@@ -243,7 +280,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
             This function can either be a regular function or a coroutine.
 
-        Similar to a command :func:`.check`\, this takes a single parameter
+        Similar to a command :func:`.check`\\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
         :exc:`.CommandError`.
 
@@ -285,7 +322,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
             This function can either be a regular function or a coroutine.
 
-        Similar to a command :func:`.check`\, this takes a single parameter
+        Similar to a command :func:`.check`\\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
         :exc:`.CommandError`.
 
@@ -359,10 +396,10 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            Similar to :meth:`~.Bot.before_invoke`\, this is not called unless
+            Similar to :meth:`~.Bot.before_invoke`\\, this is not called unless
             checks and argument parsing procedures succeed. This hook is,
             however, **always** called regardless of the internal command
-            callback raising an error (i.e. :exc:`.CommandInvokeError`\).
+            callback raising an error (i.e. :exc:`.CommandInvokeError`\\).
             This makes it ideal for clean-up scenarios.
 
         Parameters
@@ -432,16 +469,16 @@ class BotBase(CommonBotBase, GroupMixin):
             A list of prefixes or a single prefix that the bot is
             listening for. None if the bot isn't listening for prefixes.
         """
-        prefix = ret = self.command_prefix
-        if callable(prefix):
-            ret = await disnake.utils.maybe_coroutine(prefix, self, message)
+        ret = self.command_prefix
+        if callable(ret):
+            ret = await disnake.utils.maybe_coroutine(ret, self, message)
 
         if ret is None:
             return None
 
         if not isinstance(ret, str):
             try:
-                ret = list(ret)  # type: ignore
+                ret = list(ret)
             except TypeError:
                 # It's possible that a generator raised this exception.  Don't
                 # replace it with our own error if that's the case.

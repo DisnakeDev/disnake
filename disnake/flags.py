@@ -25,21 +25,32 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
+import functools
+import operator
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
     Dict,
+    Generic,
     Iterator,
     List,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
+    Union,
     overload,
 )
 
 from .enums import UserFlags
+from .utils import MISSING
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 
 __all__ = (
     "SystemChannelFlags",
@@ -48,19 +59,38 @@ __all__ = (
     "Intents",
     "MemberCacheFlags",
     "ApplicationFlags",
+    "ChannelFlags",
+    "AutoModKeywordPresets",
 )
 
-FV = TypeVar("FV", bound="flag_value")
 BF = TypeVar("BF", bound="BaseFlags")
+T = TypeVar("T", bound="BaseFlags")
 
 
-class flag_value:
+class flag_value(Generic[T]):
     def __init__(self, func: Callable[[Any], int]):
         self.flag = func(None)
         self.__doc__ = func.__doc__
+        self._parent: Type[T] = MISSING
+
+    def __or__(self, other: Union[flag_value[T], T]) -> T:
+        if isinstance(other, BaseFlags):
+            if self._parent is not other.__class__:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
+                )
+            return other._from_value(self.flag | other.value)
+        if self._parent is not other._parent:
+            raise TypeError(
+                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
+            )
+        return self._parent._from_value(self.flag | other.flag)
+
+    def __invert__(self: flag_value[T]) -> T:
+        return ~self._parent._from_value(self.flag)
 
     @overload
-    def __get__(self: FV, instance: None, owner: Type[BF]) -> FV:
+    def __get__(self, instance: None, owner: Type[BF]) -> flag_value[BF]:
         ...
 
     @overload
@@ -83,28 +113,10 @@ class alias_flag_value(flag_value):
     pass
 
 
-def fill_with_flags(*, inverted: bool = False):
-    def decorator(cls: Type[BF]):
-        # fmt: off
-        cls.VALID_FLAGS = {
-            name: value.flag
-            for name, value in cls.__dict__.items()
-            if isinstance(value, flag_value)
-        }
-        # fmt: on
-
-        if inverted:
-            max_bits = max(cls.VALID_FLAGS.values()).bit_length()
-            cls.DEFAULT_VALUE = -1 + (2**max_bits)
-        else:
-            cls.DEFAULT_VALUE = 0
-
-        return cls
-
-    return decorator
+def all_flags_value(flags: Dict[str, int]) -> int:
+    return functools.reduce(operator.or_, flags.values())
 
 
-# n.b. flags must inherit from this and use the decorator above
 class BaseFlags:
     VALID_FLAGS: ClassVar[Dict[str, int]]
     DEFAULT_VALUE: ClassVar[int]
@@ -121,7 +133,30 @@ class BaseFlags:
             setattr(self, key, value)
 
     @classmethod
-    def _from_value(cls, value):
+    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False):
+        # add a way to bypass filling flags, eg for ListBaseFlags.
+        if no_fill_flags:
+            return cls
+
+        # use the parent's current flags as a base if they exist
+        cls.VALID_FLAGS = getattr(cls, "VALID_FLAGS", {}).copy()
+
+        for name, value in cls.__dict__.items():
+            if isinstance(value, flag_value):
+                value._parent = cls
+                cls.VALID_FLAGS[name] = value.flag
+
+        if not cls.VALID_FLAGS:
+            raise RuntimeError(
+                "At least one flag must be defined in a BaseFlags subclass, or 'no_fill_flags' must be set to True"
+            )
+
+        cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS) if inverted else 0
+
+        return cls
+
+    @classmethod
+    def _from_value(cls, value: int) -> Self:
         self = cls.__new__(cls)
         self.value = value
         return self
@@ -131,6 +166,112 @@ class BaseFlags:
 
     def __ne__(self, other: Any) -> bool:
         return not self.__eq__(other)
+
+    def __and__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for &: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return self._from_value(self.value & other.value)
+
+    def __iand__(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for &=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        self.value &= other.value
+        return self
+
+    def __or__(self, other: Union[Self, flag_value[Self]]) -> Self:
+        if isinstance(other, flag_value):
+            if self.__class__ is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
+            return self._from_value(self.value | other.flag)
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for |: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return self._from_value(self.value | other.value)
+
+    def __ior__(self, other: Union[Self, flag_value[Self]]) -> Self:
+        if isinstance(other, flag_value):
+            if self.__class__ is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
+            self.value |= other.flag
+            return self
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for |=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        self.value |= other.value
+        return self
+
+    def __xor__(self, other: Union[Self, flag_value[Self]]) -> Self:
+        if isinstance(other, flag_value):
+            if self.__class__ is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
+            return self._from_value(self.value ^ other.flag)
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for ^: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return self._from_value(self.value ^ other.value)
+
+    def __ixor__(self, other: Union[Self, flag_value[Self]]) -> Self:
+        if isinstance(other, flag_value):
+            if self.__class__ is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
+            self.value ^= other.flag
+            return self
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"unsupported operand type(s) for ^=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        self.value ^= other.value
+        return self
+
+    def __le__(self, other: Self) -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'<=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value & other.value) == self.value
+
+    def __ge__(self, other: Self) -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'>=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value | other.value) == self.value
+
+    def __lt__(self, other: Self) -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'<' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value & other.value) == self.value and self.value != other.value
+
+    def __gt__(self, other: Self) -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                f"'>' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            )
+        return (self.value | other.value) == self.value and self.value != other.value
+
+    def __invert__(self) -> Self:
+        # invert the bit but make sure all truthy values are valid flags
+        # this code means that if a flag class doesn't define 1 << 2 that
+        # value won't suddenly be set to True
+        bitmask = all_flags_value(self.VALID_FLAGS)
+        return self._from_value((self.value ^ bitmask) & bitmask)
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -158,12 +299,46 @@ class BaseFlags:
             raise TypeError(f"Value to set for {self.__class__.__name__} must be a bool.")
 
 
-@fill_with_flags(inverted=True)
-class SystemChannelFlags(BaseFlags):
+class ListBaseFlags(BaseFlags, no_fill_flags=True):
+    """
+    A base class for flags that aren't powers of 2.
+    Instead, values are used as exponents to map to powers of 2 to avoid collisions,
+    and only the combined value is stored, which allows all bitwise operations to work as expected.
+    """
+
+    __slots__ = ()
+
+    @classmethod
+    def _from_values(cls, values: Sequence[int]):
+        self = cls.__new__(cls)
+        value = 0
+        for n in values:
+            # protect against DoS with large shift values
+            # n.b. performance overhead of this is negligible
+            if not (0 <= n < 64):
+                raise ValueError("Flag values must be within [0, 64)")
+            value += 1 << n
+        self.value = value
+        return self
+
+    @property
+    def values(self) -> List[int]:
+        # This essentially converts an int like `0b100110` into `[1, 2, 5]`,
+        # i.e. the exponents of set bits in `self.value`.
+        # This may look weird but interestingly it's by far the
+        # fastest out of all benchmarked snippets, see https://stackoverflow.com/a/49592515/5080607
+        # (this code is a derivative of one of them)
+        return [i for i, c in enumerate(bin(self.value)[:1:-1]) if c == "1"]
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} values={self.values}>"
+
+
+class SystemChannelFlags(BaseFlags, inverted=True):
     """
     Wraps up a Discord system channel flag value.
 
-    Similar to :class:`Permissions`\, the properties provided are two way.
+    Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
     were regular bools. This allows you to edit the system flags easily.
 
@@ -174,10 +349,53 @@ class SystemChannelFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two SystemChannelFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two SystemChannelFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a SystemChannelFlags instance is a subset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if a SystemChannelFlags instance is a superset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if a SystemChannelFlags instance is a strict subset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if a SystemChannelFlags instance is a strict superset of another SystemChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new SystemChannelFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new SystemChannelFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new SystemChannelFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new SystemChannelFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -185,6 +403,17 @@ class SystemChannelFlags(BaseFlags):
 
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: SystemChannelFlags.y | SystemChannelFlags.z, SystemChannelFlags(y=True) | SystemChannelFlags.z
+
+            Returns a SystemChannelFlags instance with all provided flags enabled.
+
+        .. describe:: ~SystemChannelFlags.y
+
+            Returns a SystemChannelFlags instance with all flags except ``y`` inverted from their default value.
 
     Attributes
     ----------
@@ -240,7 +469,6 @@ class SystemChannelFlags(BaseFlags):
         return 8
 
 
-@fill_with_flags()
 class MessageFlags(BaseFlags):
     """
     Wraps up a Discord Message flag value.
@@ -251,10 +479,53 @@ class MessageFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two MessageFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two MessageFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a MessageFlags instance is a subset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if a MessageFlags instance is a superset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if a MessageFlags instance is a strict subset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if a MessageFlags instance is a strict superset of another MessageFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new MessageFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new MessageFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new MessageFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new MessageFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -262,6 +533,20 @@ class MessageFlags(BaseFlags):
 
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: MessageFlags.y | MessageFlags.z, MessageFlags(y=True) | MessageFlags.z
+
+            Returns a MessageFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~MessageFlags.y
+
+            Returns a MessageFlags instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
 
     .. versionadded:: 1.3
 
@@ -278,22 +563,22 @@ class MessageFlags(BaseFlags):
     @flag_value
     def crossposted(self):
         """:class:`bool`: Returns ``True`` if the message is the original crossposted message."""
-        return 1
+        return 1 << 0
 
     @flag_value
     def is_crossposted(self):
         """:class:`bool`: Returns ``True`` if the message was crossposted from another channel."""
-        return 2
+        return 1 << 1
 
     @flag_value
     def suppress_embeds(self):
         """:class:`bool`: Returns ``True`` if the message's embeds have been suppressed."""
-        return 4
+        return 1 << 2
 
     @flag_value
     def source_message_deleted(self):
         """:class:`bool`: Returns ``True`` if the source message for this crosspost has been deleted."""
-        return 8
+        return 1 << 3
 
     @flag_value
     def urgent(self):
@@ -301,7 +586,7 @@ class MessageFlags(BaseFlags):
 
         An urgent message is one sent by Discord Trust and Safety.
         """
-        return 16
+        return 1 << 4
 
     @flag_value
     def has_thread(self):
@@ -309,7 +594,7 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.0
         """
-        return 32
+        return 1 << 5
 
     @flag_value
     def ephemeral(self):
@@ -317,7 +602,7 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.0
         """
-        return 64
+        return 1 << 6
 
     @flag_value
     def loading(self):
@@ -326,7 +611,7 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.3
         """
-        return 128
+        return 1 << 7
 
     @flag_value
     def failed_to_mention_roles_in_thread(self):
@@ -335,10 +620,9 @@ class MessageFlags(BaseFlags):
 
         .. versionadded:: 2.4
         """
-        return 256
+        return 1 << 8
 
 
-@fill_with_flags()
 class PublicUserFlags(BaseFlags):
     """
     Wraps up the Discord User Public flags.
@@ -347,10 +631,53 @@ class PublicUserFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two PublicUserFlags are equal.
+            Checks if two PublicUserFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two PublicUserFlags are not equal.
+            Checks if two PublicUserFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a PublicUserFlags instance is a subset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if a PublicUserFlags instance is a superset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if a PublicUserFlags instance is a strict subset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if a PublicUserFlags instance is a strict superset of another PublicUserFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new PublicUserFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new PublicUserFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new PublicUserFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new PublicUserFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
@@ -359,6 +686,20 @@ class PublicUserFlags(BaseFlags):
             Returns an iterator of ``(name, value)`` pairs. This allows it
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: PublicUserFlags.y | PublicUserFlags.z, PublicUserFlags(y=True) | PublicUserFlags.z
+
+            Returns a PublicUserFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~PublicUserFlags.y
+
+            Returns a PublicUserFlags instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
 
     .. versionadded:: 1.4
 
@@ -474,12 +815,11 @@ class PublicUserFlags(BaseFlags):
         return [public_flag for public_flag in UserFlags if self._has_flag(public_flag.value)]
 
 
-@fill_with_flags()
 class Intents(BaseFlags):
     """
     Wraps up a Discord gateway intent flag.
 
-    Similar to :class:`Permissions`\, the properties provided are two way.
+    Similar to :class:`Permissions`\\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
     were regular bools.
 
@@ -496,10 +836,53 @@ class Intents(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two Intents instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two Intents instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an Intents instance is a subset of another Intents instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if an Intents instance is a superset of another Intents instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if an Intents instance is a strict subset of another Intents instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if an Intents instance is a strict superset of another Intents instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new Intents instance with all enabled intents from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new Intents instance with only intents enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new Intents instance with only intents enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new Intents instance with all intents inverted from x.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -508,46 +891,72 @@ class Intents(BaseFlags):
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
 
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: Intents.y | Intents.z, Intents(y=True) | Intents.z
+
+            Returns a Intents instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~Intents.y
+
+            Returns a Intents instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
+
     Attributes
     ----------
     value: :class:`int`
         The raw value. You should query flags via the properties
         rather than using this raw value.
+
+        .. versionchanged:: 2.6
+
+            This can be now be provided on initialisation.
     """
 
     __slots__ = ()
 
-    def __init__(self, **kwargs: bool):
-        self.value = self.DEFAULT_VALUE
+    def __init__(self, value: Optional[int] = None, **kwargs: bool):
+        if value is not None:
+            if not isinstance(value, int):
+                raise TypeError(
+                    f"Expected int, received {type(value).__name__} for argument 'value'."
+                )
+            if value < 0:
+                raise ValueError("Expected a non-negative value.")
+            self.value = value
+        else:
+            self.value = self.DEFAULT_VALUE
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
                 raise TypeError(f"{key!r} is not a valid flag name.")
             setattr(self, key, value)
 
     @classmethod
-    def all(cls: Type[Intents]) -> Intents:
+    def all(cls) -> Self:
         """A factory method that creates a :class:`Intents` with everything enabled."""
-        bits = max(cls.VALID_FLAGS.values()).bit_length()
-        value = (1 << bits) - 1
         self = cls.__new__(cls)
-        self.value = value
+        self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
-    def none(cls: Type[Intents]) -> Intents:
+    def none(cls) -> Self:
         """A factory method that creates a :class:`Intents` with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
 
     @classmethod
-    def default(cls: Type[Intents]) -> Intents:
+    def default(cls) -> Self:
         """A factory method that creates a :class:`Intents` with everything enabled
-        except :attr:`presences` and :attr:`members`.
+        except :attr:`presences`, :attr:`members`, and :attr:`message_content`.
         """
         self = cls.all()
         self.presences = False
         self.members = False
+        self.message_content = False
         return self
 
     @flag_value
@@ -766,6 +1175,10 @@ class Intents(BaseFlags):
         - :func:`on_reaction_add` (both guilds and DMs)
         - :func:`on_reaction_remove` (both guilds and DMs)
         - :func:`on_reaction_clear` (both guilds and DMs)
+
+        .. note::
+
+            :attr:`.Intents.message_content` is required to receive the content of messages.
         """
         return (1 << 9) | (1 << 12)
 
@@ -822,6 +1235,40 @@ class Intents(BaseFlags):
         - :func:`on_reaction_clear` (only for DMs)
         """
         return 1 << 12
+
+    @flag_value
+    def message_content(self):
+        """:class:`bool`: Whether messages will have access to message content.
+
+        .. versionadded:: 2.5
+
+        This applies to the following fields on :class:`~disnake.Message` instances:
+
+        - :attr:`~disnake.Message.content`
+        - :attr:`~disnake.Message.embeds`
+        - :attr:`~disnake.Message.attachments`
+        - :attr:`~disnake.Message.components`
+
+        The following cases will always have the above fields:
+
+        - Messages the bot sends
+        - Messages the bot receives as a direct message
+        - Messages in which the bot is mentioned
+        - Messages received from an interaction payload, these will typically be attributes on :class:`~disnake.MessageInteraction` instances.
+
+        In addition, this also corresponds to the following fields:
+
+        - :attr:`AutoModActionExecution.content`
+        - :attr:`AutoModActionExecution.matched_content`
+
+        For more information go to the :ref:`message content intent documentation <need_message_content_intent>`.
+
+        .. note::
+
+            Currently, this requires opting in explicitly via the developer portal as well.
+            Bots in over 100 guilds will need to apply to Discord for verification.
+        """
+        return 1 << 15
 
     @alias_flag_value
     def reactions(self):
@@ -932,6 +1379,8 @@ class Intents(BaseFlags):
     def guild_scheduled_events(self):
         """:class:`bool`: Whether guild scheduled event related events are enabled.
 
+        .. versionadded:: 2.3
+
         This corresponds to the following events:
 
         - :func:`on_guild_scheduled_event_create`
@@ -946,11 +1395,60 @@ class Intents(BaseFlags):
 
         - :attr:`Guild.scheduled_events`
         - :meth:`Guild.get_scheduled_event`
+        - :attr:`StageInstance.guild_scheduled_event`
         """
         return 1 << 16
 
+    @flag_value
+    def automod_configuration(self):
+        """:class:`bool`: Whether auto moderation configuration related events are enabled.
 
-@fill_with_flags()
+        .. versionadded:: 2.6
+
+        This corresponds to the following events:
+
+        - :func:`on_automod_rule_create`
+        - :func:`on_automod_rule_delete`
+        - :func:`on_automod_rule_update`
+
+        This does not correspond to any attributes or classes in the library in terms of cache.
+        """
+        return 1 << 20
+
+    @flag_value
+    def automod_execution(self):
+        """:class:`bool`: Whether auto moderation execution related events are enabled.
+
+        .. versionadded:: 2.6
+
+        This corresponds to the following events:
+
+        - :func:`on_automod_action_execution`
+
+        This does not correspond to any attributes or classes in the library in terms of cache.
+        """
+        return 1 << 21
+
+    @alias_flag_value
+    def automod(self):
+        """:class:`bool`: Whether auto moderation related events are enabled.
+
+        .. versionadded:: 2.6
+
+        This is a shortcut to set or get both :attr:`automod_configuration` and :attr:`automod_execution`.
+
+        This corresponds to the following events:
+
+        - :func:`on_automod_rule_create`
+        - :func:`on_automod_rule_delete`
+        - :func:`on_automod_rule_update`
+        - :func:`on_automod_action_execution`
+
+        This does not correspond to any attributes or classes in the library in terms of cache.
+        """
+        return (1 << 20) | (1 << 21)
+
+
 class MemberCacheFlags(BaseFlags):
     """Controls the library's cache policy when it comes to members.
 
@@ -974,10 +1472,53 @@ class MemberCacheFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two flags are equal.
+            Checks if two MemberCacheFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two flags are not equal.
+            Checks if two MemberCacheFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a MemberCacheFlags instance is a subset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if a MemberCacheFlags instance is a superset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if a MemberCacheFlags instance is a strict subset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if a MemberCacheFlags instance is a strict superset of another MemberCacheFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new MemberCacheFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new MemberCacheFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new MemberCacheFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new MemberCacheFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the flag's hash.
@@ -985,6 +1526,20 @@ class MemberCacheFlags(BaseFlags):
 
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: MemberCacheFlags.y | MemberCacheFlags.z, MemberCacheFlags(y=True) | MemberCacheFlags.z
+
+            Returns a MemberCacheFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~MemberCacheFlags.y
+
+            Returns a MemberCacheFlags instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
 
     Attributes
     ----------
@@ -996,24 +1551,21 @@ class MemberCacheFlags(BaseFlags):
     __slots__ = ()
 
     def __init__(self, **kwargs: bool):
-        bits = max(self.VALID_FLAGS.values()).bit_length()
-        self.value = (1 << bits) - 1
+        self.value = all_flags_value(self.VALID_FLAGS)
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
                 raise TypeError(f"{key!r} is not a valid flag name.")
             setattr(self, key, value)
 
     @classmethod
-    def all(cls: Type[MemberCacheFlags]) -> MemberCacheFlags:
+    def all(cls) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` with everything enabled."""
-        bits = max(cls.VALID_FLAGS.values()).bit_length()
-        value = (1 << bits) - 1
         self = cls.__new__(cls)
-        self.value = value
+        self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
-    def none(cls: Type[MemberCacheFlags]) -> MemberCacheFlags:
+    def none(cls) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
@@ -1045,7 +1597,7 @@ class MemberCacheFlags(BaseFlags):
         return 2
 
     @classmethod
-    def from_intents(cls: Type[MemberCacheFlags], intents: Intents) -> MemberCacheFlags:
+    def from_intents(cls, intents: Intents) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` based on
         the currently selected :class:`Intents`.
 
@@ -1079,7 +1631,6 @@ class MemberCacheFlags(BaseFlags):
         return self.value == 1
 
 
-@fill_with_flags()
 class ApplicationFlags(BaseFlags):
     """
     Wraps up the Discord Application flags.
@@ -1088,10 +1639,53 @@ class ApplicationFlags(BaseFlags):
 
         .. describe:: x == y
 
-            Checks if two ApplicationFlags are equal.
+            Checks if two ApplicationFlags instances are equal.
         .. describe:: x != y
 
-            Checks if two ApplicationFlags are not equal.
+            Checks if two ApplicationFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an ApplicationFlags instance is a subset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if an ApplicationFlags instance is a superset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if an ApplicationFlags instance is a strict subset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if an ApplicationFlags instance is a strict superset of another ApplicationFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new ApplicationFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new ApplicationFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new ApplicationFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new ApplicationFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
             Return the flag's hash.
@@ -1101,6 +1695,20 @@ class ApplicationFlags(BaseFlags):
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
 
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: ApplicationFlags.y | ApplicationFlags.z, ApplicationFlags(y=True) | ApplicationFlags.z
+
+            Returns a ApplicationFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~ApplicationFlags.y
+
+            Returns a ApplicationFlags instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
+
     .. versionadded:: 2.0
 
     Attributes
@@ -1109,6 +1717,8 @@ class ApplicationFlags(BaseFlags):
         The raw value. You should query flags via the properties
         rather than using this raw value.
     """
+
+    __slots__ = ()
 
     @flag_value
     def gateway_presence(self):
@@ -1163,3 +1773,203 @@ class ApplicationFlags(BaseFlags):
         receive limited message content over the gateway.
         """
         return 1 << 19
+
+
+class ChannelFlags(BaseFlags):
+    """Wraps up the Discord Channel flags.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two ChannelFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two ChannelFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if a ChannelFlags instance is a subset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x >= y
+
+            Checks if a ChannelFlags instance is a superset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x < y
+
+            Checks if a ChannelFlags instance is a strict subset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x > y
+
+            Checks if a ChannelFlags instance is a strict superset of another ChannelFlags instance.
+
+            .. versionadded:: 2.6
+        .. describe:: x | y, x |= y
+
+            Returns a new ChannelFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new ChannelFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new ChannelFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new ChannelFlags instance with all flags from x inverted.
+
+            .. versionadded:: 2.6
+        .. describe:: hash(x)
+
+            Return the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: ChannelFlags.y | ChannelFlags.z, ChannelFlags(y=True) | ChannelFlags.z
+
+            Returns a ChannelFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~ChannelFlags.y
+
+            Returns a ChannelFlags instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
+    """
+
+    __slots__ = ()
+
+    @flag_value
+    def pinned(self):
+        """:class:`bool`: Returns ``True`` if the thread is pinned."""
+        return 1 << 1
+
+
+class AutoModKeywordPresets(ListBaseFlags):
+    """
+    Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two AutoModKeywordPresets instances are equal.
+        .. describe:: x != y
+
+            Checks if two AutoModKeywordPresets instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an AutoModKeywordPresets instance is a subset of another AutoModKeywordPresets instance.
+        .. describe:: x >= y
+
+            Checks if an AutoModKeywordPresets instance is a superset of another AutoModKeywordPresets instance.
+        .. describe:: x < y
+
+            Checks if an AutoModKeywordPresets instance is a strict subset of another AutoModKeywordPresets instance.
+        .. describe:: x > y
+
+            Checks if an AutoModKeywordPresets instance is a strict superset of another AutoModKeywordPresets instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new AutoModKeywordPresets instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new AutoModKeywordPresets instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new AutoModKeywordPresets instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new AutoModKeywordPresets instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Return the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: AutoModKeywordPresets.y | AutoModKeywordPresets.z, AutoModKeywordPresets(y=True) | AutoModKeywordPresets.z
+
+            Returns a AutoModKeywordPresets instance with all provided flags enabled.
+
+        .. describe:: ~AutoModKeywordPresets.y
+
+            Returns a AutoModKeywordPresets instance with all flags except ``y`` inverted from their default value.
+
+    .. versionadded:: 2.6
+
+    Attributes
+    ----------
+    values: :class:`int`
+        The raw values. You should query flags via the properties
+        rather than using these raw values.
+    """
+
+    __slots__ = ()
+
+    @classmethod
+    def all(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
+        """A factory method that creates a :class:`AutoModKeywordPresets` with everything enabled."""
+        self = cls.__new__(cls)
+        self.value = all_flags_value(cls.VALID_FLAGS)
+        return self
+
+    @classmethod
+    def none(cls: Type[AutoModKeywordPresets]) -> AutoModKeywordPresets:
+        """A factory method that creates a :class:`AutoModKeywordPresets` with everything disabled."""
+        self = cls.__new__(cls)
+        self.value = self.DEFAULT_VALUE
+        return self
+
+    @flag_value
+    def profanity(self):
+        """:class:`bool`: Returns ``True`` if the profanity preset is enabled
+        (contains words that may be considered swearing or cursing).
+        """
+        return 1 << 0
+
+    @flag_value
+    def sexual_content(self):
+        """:class:`bool`: Returns ``True`` if the sexual content preset is enabled
+        (contains sexually explicit words).
+        """
+        return 1 << 1
+
+    @flag_value
+    def slurs(self):
+        """:class:`bool`: Returns ``True`` if the slurs preset is enabled
+        (contains insults or words that may be considered hate speech).
+        """
+        return 1 << 2

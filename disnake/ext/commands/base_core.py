@@ -26,33 +26,23 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Coroutine,
-    Dict,
-    List,
-    Mapping,
-    Optional,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
 
-from disnake.app_commands import ApplicationCommand, UnresolvedGuildApplicationCommandPermissions
+from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
-from disnake.utils import async_all, maybe_coroutine, warn_deprecated
+from disnake.permissions import Permissions
+from disnake.utils import async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
-from .errors import *
+from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
+    from typing_extensions import Concatenate, ParamSpec, Self
 
     from disnake.interactions import ApplicationCommandInteraction
 
-    from ._types import Check, Error, Hook
-    from .cog import Cog, CogT
+    from ._types import Check, Coro, Error, Hook
+    from .cog import Cog
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
@@ -60,14 +50,14 @@ if TYPE_CHECKING:
 
     P = ParamSpec("P")
 
-    CommandCallback = Callable[..., Coroutine]
+    CommandCallback = Callable[..., Coro[Any]]
     InteractionCommandCallback = Union[
-        Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-        Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
+        Callable[Concatenate["CogT", ApplicationCommandInteractionT, P], Coro[Any]],
+        Callable[Concatenate[ApplicationCommandInteractionT, P], Coro[Any]],
     ]
 
 
-__all__ = ("InvokableApplicationCommand", "guild_permissions")
+__all__ = ("InvokableApplicationCommand", "default_member_permissions")
 
 
 T = TypeVar("T")
@@ -102,26 +92,70 @@ class InvokableApplicationCommand(ABC):
 
     These are not created manually, instead they are created via the
     decorator or functional interface.
+
+    The following classes implement this ABC:
+
+    - :class:`~.InvokableSlashCommand`
+    - :class:`~.InvokableMessageCommand`
+    - :class:`~.InvokableUserCommand`
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The name of the command.
+    qualified_name: :class:`str`
+        The full command name, including parent names in the case of slash subcommands or groups.
+        For example, the qualified name for ``/one two three`` would be ``one two three``.
+    body: :class:`.ApplicationCommand`
+        An object being registered in the API.
+    callback: :ref:`coroutine <coroutine>`
+        The coroutine that is executed when the command is called.
+    cog: Optional[:class:`Cog`]
+        The cog that this command belongs to. ``None`` if there isn't one.
+    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+        A list of predicates that verifies if the command could be executed
+        with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
+        is necessary to be thrown to signal failure, then one inherited from
+        :exc:`.CommandError` should be used. Note that if the checks fail then
+        :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
+        event.
+    guild_ids: Optional[Tuple[:class:`int`, ...]]
+        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
+    auto_sync: :class:`bool`
+        Whether to automatically register the command.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. versionadded:: 2.5
     """
 
+    __original_kwargs__: Dict[str, Any]
     body: ApplicationCommand
+
+    def __new__(cls, *args: Any, **kwargs: Any) -> Self:
+        self = super().__new__(cls)
+        # todo: refactor to not require None and change this to be based on the presence of a kwarg
+        self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
+        return self
 
     def __init__(self, func: CommandCallback, *, name: str = None, **kwargs):
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
-        # only an internal feature for now
-        self.guild_only: bool = kwargs.get("guild_only", False)
+        # Annotation parser needs this attribute because body doesn't exist at this moment.
+        # We will use this attribute later in order to set the dm_permission.
+        self._guild_only: bool = kwargs.get("guild_only", False)
+        self.extras: Dict[str, Any] = kwargs.get("extras") or {}
 
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
 
-        try:
-            perms = func.__app_command_permissions__
-        except AttributeError:
-            perms = {}
-        self.permissions: Dict[int, UnresolvedGuildApplicationCommandPermissions] = perms
+        if "default_permission" in kwargs:
+            raise TypeError(
+                "`default_permission` is deprecated and will always be set to `True`. "
+                "See `default_member_permissions` and `dm_permission` instead."
+            )
 
         try:
             checks = func.__commands_checks__
@@ -152,15 +186,73 @@ class InvokableApplicationCommand(ABC):
         self._max_concurrency: Optional[MaxConcurrency] = max_concurrency
 
         self.cog: Optional[Cog] = None
-        self.guild_ids: Optional[List[int]] = None
+        self.guild_ids: Optional[Tuple[int, ...]] = None
         self.auto_sync: bool = True
 
         self._before_invoke: Optional[Hook] = None
         self._after_invoke: Optional[Hook] = None
 
+    def _ensure_assignment_on_copy(self, other: AppCommandT) -> AppCommandT:
+        other._before_invoke = self._before_invoke
+        other._after_invoke = self._after_invoke
+        if self.checks != other.checks:
+            other.checks = self.checks.copy()
+        if self._buckets.valid and not other._buckets.valid:
+            other._buckets = self._buckets.copy()
+        if self._max_concurrency != other._max_concurrency:
+            # _max_concurrency won't be None at this point
+            other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+
+        try:
+            other.on_error = self.on_error
+        except AttributeError:
+            pass
+
+        return other
+
+    def copy(self: AppCommandT) -> AppCommandT:
+        """Create a copy of this application command.
+
+        Returns
+        -------
+        :class:`InvokableApplicationCommand`
+            A new instance of this application command.
+        """
+        copy = type(self)(self.callback, **self.__original_kwargs__)
+        return self._ensure_assignment_on_copy(copy)
+
+    def _update_copy(self: AppCommandT, kwargs: Dict[str, Any]) -> AppCommandT:
+        if kwargs:
+            kw = kwargs.copy()
+            kw.update(self.__original_kwargs__)
+            copy = type(self)(self.callback, **kw)
+            return self._ensure_assignment_on_copy(copy)
+        else:
+            return self.copy()
+
+    @property
+    def dm_permission(self) -> bool:
+        """:class:`bool`: Whether this command can be used in DMs."""
+        return self.body.dm_permission
+
+    @property
+    def default_member_permissions(self) -> Optional[Permissions]:
+        """Optional[:class:`.Permissions`]: The default required member permissions for this command.
+        A member must have *all* these permissions to be able to invoke the command in a guild.
+
+        This is a default value, the set of users/roles that may invoke this command can be
+        overridden by moderators on a guild-specific basis, disregarding this setting.
+
+        If ``None`` is returned, it means everyone can use the command by default.
+        If an empty :class:`.Permissions` object is returned (that is, all permissions set to ``False``),
+        this means no one can use the command.
+
+        .. versionadded:: 2.5
+        """
+        return self.body.default_member_permissions
+
     @property
     def callback(self) -> CommandCallback:
-        """Callable[..., Coroutine]: The callback associated with the interaction."""
         return self._callback
 
     def add_check(self, func: Check) -> None:
@@ -231,8 +323,8 @@ class InvokableApplicationCommand(ABC):
 
         try:
             self._prepare_cooldowns(inter)
-            await self.call_before_hooks(inter)  # type: ignore
-        except:
+            await self.call_before_hooks(inter)
+        except Exception:
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)  # type: ignore
             raise
@@ -296,10 +388,6 @@ class InvokableApplicationCommand(ABC):
         """
         This method isn't really usable in this class, but it's usable in subclasses.
         """
-        if self.guild_only and inter.guild_id is None:
-            await inter.response.send_message("This command cannot be used in DMs", ephemeral=True)
-            return
-
         await self.prepare(inter)
 
         try:
@@ -547,50 +635,62 @@ class InvokableApplicationCommand(ABC):
             inter.application_command = original
 
 
-# kwargs are annotated as None to ensure the user gets a linter error when using them
-def guild_permissions(
-    guild_id: int,
-    *,
-    roles: Optional[Mapping[int, bool]] = None,
-    users: Optional[Mapping[int, bool]] = None,
-    owner: Optional[bool] = None,
-    **kwargs: None,
-) -> Callable[[T], T]:
+def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[[T], T]:
     """
-    A decorator that sets application command permissions in the specified guild.
-    This type of permissions "greys out" the command in the command picker.
-    If you want to change this type of permissions dynamically, this decorator is not useful.
+    A decorator that sets default required member permissions for the command.
+    Unlike :func:`~.ext.commands.has_permissions`, this decorator does not add any checks.
+    Instead, it prevents the command from being run by members without *all* required permissions,
+    if not overridden by moderators on a guild-specific basis.
+
+    See also the ``default_member_permissions`` parameter for application command decorators.
+
+    .. note::
+        This does not work with slash subcommands/groups.
+
+    Example
+    -------
+
+    This would only allow members with :attr:`~.Permissions.manage_messages` *and*
+    :attr:`~.Permissions.view_audit_log` permissions to use the command by default,
+    however moderators can override this and allow/disallow specific users and
+    roles to use the command in their guilds regardless of this setting.
+
+    .. code-block:: python3
+
+        @bot.slash_command()
+        @commands.default_member_permissions(manage_messages=True, view_audit_log=True)
+        async def purge(inter, num: int):
+            ...
 
     Parameters
     ----------
-    guild_id: :class:`int`
-        The ID of the guild to apply the permissions to.
-    roles: Optional[Mapping[:class:`int`, :class:`bool`]]
-        A mapping of role IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
-    users: Optional[Mapping[:class:`int`, :class:`bool`]]
-        A mapping of user IDs to boolean values indicating the permission. ``True`` = allow, ``False`` = deny.
-    owner: Optional[:class:`bool`]
-        Whether to allow/deny the bot owner(s) to use the command. Set to ``None`` to ignore.
+    value: :class:`int`
+        A raw permission bitfield of an integer representing the required permissions.
+        May be used instead of specifying kwargs.
+    **permissions: bool
+        The required permissions for a command. A member must have *all* these
+        permissions to be able to invoke the command.
+        Setting a permission to ``False`` does not affect the result.
     """
-    if kwargs:
-        warn_deprecated(
-            f"guild_permissions got unexpected deprecated keyword arguments: {', '.join(map(repr, kwargs))}",
-            stacklevel=2,
-        )
-        roles = roles or kwargs.get("role_ids")
-        users = users or kwargs.get("user_ids")
-
-    perms = UnresolvedGuildApplicationCommandPermissions(
-        role_ids=roles, user_ids=users, owner=owner
-    )
+    if isinstance(value, bool):
+        raise TypeError("`value` cannot be a bool value")
+    perms_value = Permissions(value, **permissions).value
 
     def decorator(func: T) -> T:
+        from .slash_core import SubCommand, SubCommandGroup
+
         if isinstance(func, InvokableApplicationCommand):
-            func.permissions[guild_id] = perms
+            if isinstance(func, (SubCommand, SubCommandGroup)):
+                raise TypeError(
+                    "Cannot set `default_member_permissions` on subcommands or subcommand groups"
+                )
+            if func.body._default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both parameter and decorator"
+                )
+            func.body._default_member_permissions = perms_value
         else:
-            if not hasattr(func, "__app_command_permissions__"):
-                func.__app_command_permissions__ = {}  # type: ignore
-            func.__app_command_permissions__[guild_id] = perms  # type: ignore
+            func.__default_member_permissions__ = perms_value  # type: ignore
         return func
 
     return decorator

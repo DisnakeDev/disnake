@@ -26,7 +26,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union, overload
 
 from .asset import Asset
 from .colour import Colour
@@ -92,10 +92,12 @@ t.ActivityFlags = {
 """
 
 if TYPE_CHECKING:
+    from .state import ConnectionState
     from .types.activity import (
         Activity as ActivityPayload,
         ActivityAssets,
         ActivityButton,
+        ActivityEmoji as ActivityEmojiPayload,
         ActivityParty,
         ActivityTimestamps,
     )
@@ -253,7 +255,7 @@ class Activity(BaseActivity):
             ("session_id", self.session_id),
             ("emoji", self.emoji),
         )
-        inner = " ".join("%s=%r" % t for t in attrs)
+        inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<Activity {inner}>"
 
     def to_dict(self) -> Dict[str, Any]:
@@ -303,7 +305,7 @@ class Activity(BaseActivity):
         except KeyError:
             return None
         else:
-            return Asset.BASE + f"/app-assets/{self.application_id}/{large_image}.png"
+            return f"{Asset.BASE}/app-assets/{self.application_id}/{large_image}.png"
 
     @property
     def small_image_url(self) -> Optional[str]:
@@ -316,7 +318,7 @@ class Activity(BaseActivity):
         except KeyError:
             return None
         else:
-            return Asset.BASE + f"/app-assets/{self.application_id}/{small_image}.png"
+            return f"{Asset.BASE}/app-assets/{self.application_id}/{small_image}.png"
 
     @property
     def large_image_text(self) -> Optional[str]:
@@ -379,7 +381,7 @@ class Game(BaseActivity):
             self._end = timestamps.get("end", 0)
 
     @property
-    def type(self) -> ActivityType:
+    def type(self) -> Literal[ActivityType.playing]:
         """:class:`ActivityType`: Returns the game's type. This is for compatibility with :class:`Activity`.
 
         It always returns :attr:`ActivityType.playing`.
@@ -414,13 +416,11 @@ class Game(BaseActivity):
         if self._end:
             timestamps["end"] = self._end
 
-        # fmt: off
         return {
-            'type': ActivityType.playing.value,
-            'name': str(self.name),
-            'timestamps': timestamps
+            "type": ActivityType.playing.value,
+            "name": str(self.name),
+            "timestamps": timestamps,
         }
-        # fmt: on
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, Game) and other.name == self.name
@@ -489,7 +489,7 @@ class Streaming(BaseActivity):
         self.assets: ActivityAssets = extra.pop("assets", {})
 
     @property
-    def type(self) -> ActivityType:
+    def type(self) -> Literal[ActivityType.streaming]:
         """:class:`ActivityType`: Returns the game's type. This is for compatibility with :class:`Activity`.
 
         It always returns :attr:`ActivityType.streaming`.
@@ -517,14 +517,12 @@ class Streaming(BaseActivity):
             return name[7:] if name[:7] == "twitch:" else None
 
     def to_dict(self) -> Dict[str, Any]:
-        # fmt: off
         ret: Dict[str, Any] = {
-            'type': ActivityType.streaming.value,
-            'name': str(self.name),
-            'url': str(self.url),
-            'assets': self.assets
+            "type": ActivityType.streaming.value,
+            "name": str(self.name),
+            "url": str(self.url),
+            "assets": self.assets,
         }
-        # fmt: on
         if self.details:
             ret["details"] = self.details
         return ret
@@ -584,7 +582,7 @@ class Spotify:
         self._created_at: Optional[float] = data.pop("created_at", None)
 
     @property
-    def type(self) -> ActivityType:
+    def type(self) -> Literal[ActivityType.listening]:
         """:class:`ActivityType`: Returns the activity's type. This is for compatibility with :class:`Activity`.
 
         It always returns :attr:`ActivityType.listening`.
@@ -685,7 +683,7 @@ class Spotify:
         if large_image[:8] != "spotify:":
             return ""
         album_image_id = large_image[8:]
-        return "https://i.scdn.co/image/" + album_image_id
+        return f"https://i.scdn.co/image/{album_image_id}"
 
     @property
     def track_id(self) -> str:
@@ -758,7 +756,13 @@ class CustomActivity(BaseActivity):
 
     __slots__ = ("name", "emoji", "state")
 
-    def __init__(self, name: Optional[str], *, emoji: Optional[PartialEmoji] = None, **extra: Any):
+    def __init__(
+        self,
+        name: Optional[str],
+        *,
+        emoji: Optional[Union[ActivityEmojiPayload, str, PartialEmoji]] = None,
+        **extra: Any,
+    ):
         super().__init__(**extra)
         self.name: Optional[str] = name
         self.state: Optional[str] = extra.pop("state", None)
@@ -780,7 +784,7 @@ class CustomActivity(BaseActivity):
             )
 
     @property
-    def type(self) -> ActivityType:
+    def type(self) -> Literal[ActivityType.custom]:
         """:class:`ActivityType`: Returns the activity's type. This is for compatibility with :class:`Activity`.
 
         It always returns :attr:`ActivityType.custom`.
@@ -788,6 +792,7 @@ class CustomActivity(BaseActivity):
         return ActivityType.custom
 
     def to_dict(self) -> Dict[str, Any]:
+        o: Dict[str, Any]
         if self.name == self.state:
             o = {
                 "type": ActivityType.custom.value,
@@ -833,37 +838,38 @@ ActivityTypes = Union[Activity, Game, CustomActivity, Streaming, Spotify]
 
 
 @overload
-def create_activity(data: ActivityPayload) -> ActivityTypes:
+def create_activity(
+    data: ActivityPayload, *, state: Optional[ConnectionState] = None
+) -> ActivityTypes:
     ...
 
 
 @overload
-def create_activity(data: None) -> None:
+def create_activity(data: None, *, state: Optional[ConnectionState] = None) -> None:
     ...
 
 
-def create_activity(data: Optional[ActivityPayload]) -> Optional[ActivityTypes]:
+def create_activity(
+    data: Optional[ActivityPayload], *, state: Optional[ConnectionState] = None
+) -> Optional[ActivityTypes]:
     if not data:
         return None
 
+    activity: ActivityTypes
     game_type = try_enum(ActivityType, data.get("type", -1))
-    if game_type is ActivityType.playing:
-        if "application_id" in data or "session_id" in data:
-            return Activity(**data)
-        return Game(**data)
-    elif game_type is ActivityType.custom:
-        try:
-            name = data.pop("name")
-        except KeyError:
-            return Activity(**data)
-        else:
-            # we removed the name key from data already
-            return CustomActivity(name=name, **data)  # type: ignore
-    elif game_type is ActivityType.streaming:
-        if "url" in data:
-            # the url won't be None here
-            return Streaming(**data)  # type: ignore
-        return Activity(**data)
+    if game_type is ActivityType.playing and not ("application_id" in data or "session_id" in data):
+        activity = Game(**data)
+    elif game_type is ActivityType.custom and "name" in data:
+        activity = CustomActivity(**data)
+    elif game_type is ActivityType.streaming and "url" in data:
+        # url won't be None here
+        activity = Streaming(**data)  # type: ignore
     elif game_type is ActivityType.listening and "sync_id" in data and "session_id" in data:
-        return Spotify(**data)
-    return Activity(**data)
+        activity = Spotify(**data)
+    else:
+        activity = Activity(**data)
+
+    if isinstance(activity, (Activity, CustomActivity)) and activity.emoji and state:
+        activity.emoji._state = state
+
+    return activity
