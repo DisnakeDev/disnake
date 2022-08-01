@@ -928,8 +928,17 @@ class GuildChannel(ABC):
     async def clone(self, *, name: Optional[str] = None, reason: Optional[str] = None) -> Self:
         """|coro|
 
-        Clones this channel. This creates a channel with the same properties
-        as this channel.
+        Clones this channel identically to how a user's Discord client would clone the channel.
+        This creates a channel with the following identical properties as the current channel:
+
+        * Topic
+        * NSFW
+        * Rate Limit (Slowmode)
+        * Default Thread Auto-Archive Duration
+
+        .. note::
+            This does ***not*** clone *all* attributes/properties of the current channel to a new
+            channel. Only the above properties are copied to the new channel.
 
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
