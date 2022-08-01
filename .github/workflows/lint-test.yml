@@ -145,6 +145,12 @@ jobs:
       if: (success() || failure()) && steps.setup.outcome == 'success'
       run: nox -s check-manifest
 
+    # This only runs if the previous steps were successful, no point in running it otherwise
+    - name: Build package
+      run: |
+        pip install -U build
+        python -m build
+
   pytest:
     # Thanks to black for this rule
     # We want to run on external PRs, but not on our own internal PRs as they'll be run
