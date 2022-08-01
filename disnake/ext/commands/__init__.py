@@ -18,7 +18,7 @@ from .core import *
 from .ctx_menus_core import *
 from .custom_warnings import *
 from .errors import *
-from .flags import *
+from .flag_converter import *
 from .help import *
 from .params import *
 from .slash_core import *

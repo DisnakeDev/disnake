@@ -1,0 +1,1 @@
+Update fields listed in :func:`on_user_update` and :func:`on_member_update` docs.

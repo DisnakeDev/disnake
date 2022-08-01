@@ -33,6 +33,7 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Generic,
     Iterator,
     List,
     Optional,
@@ -40,10 +41,12 @@ from typing import (
     Tuple,
     Type,
     TypeVar,
+    Union,
     overload,
 )
 
 from .enums import UserFlags
+from .utils import MISSING
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -61,15 +64,33 @@ __all__ = (
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
+T = TypeVar("T", bound="BaseFlags")
 
 
-class flag_value:
+class flag_value(Generic[T]):
     def __init__(self, func: Callable[[Any], int]):
         self.flag = func(None)
         self.__doc__ = func.__doc__
+        self._parent: Type[T] = MISSING
+
+    def __or__(self, other: Union[flag_value[T], T]) -> T:
+        if isinstance(other, BaseFlags):
+            if self._parent is not other.__class__:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
+                )
+            return other._from_value(self.flag | other.value)
+        if self._parent is not other._parent:
+            raise TypeError(
+                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
+            )
+        return self._parent._from_value(self.flag | other.flag)
+
+    def __invert__(self: flag_value[T]) -> T:
+        return ~self._parent._from_value(self.flag)
 
     @overload
-    def __get__(self, instance: None, owner: Type[BF]) -> Self:
+    def __get__(self, instance: None, owner: Type[BF]) -> flag_value[BF]:
         ...
 
     @overload
@@ -96,25 +117,6 @@ def all_flags_value(flags: Dict[str, int]) -> int:
     return functools.reduce(operator.or_, flags.values())
 
 
-def fill_with_flags(*, inverted: bool = False):
-    def decorator(cls: Type[BF]) -> Type[BF]:
-        cls.VALID_FLAGS = {
-            name: value.flag
-            for name, value in cls.__dict__.items()
-            if isinstance(value, flag_value)
-        }
-
-        if inverted:
-            cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS)
-        else:
-            cls.DEFAULT_VALUE = 0
-
-        return cls
-
-    return decorator
-
-
-# n.b. flags must inherit from this and use the decorator above
 class BaseFlags:
     VALID_FLAGS: ClassVar[Dict[str, int]]
     DEFAULT_VALUE: ClassVar[int]
@@ -129,6 +131,29 @@ class BaseFlags:
             if key not in self.VALID_FLAGS:
                 raise TypeError(f"{key!r} is not a valid flag name.")
             setattr(self, key, value)
+
+    @classmethod
+    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False):
+        # add a way to bypass filling flags, eg for ListBaseFlags.
+        if no_fill_flags:
+            return cls
+
+        # use the parent's current flags as a base if they exist
+        cls.VALID_FLAGS = getattr(cls, "VALID_FLAGS", {}).copy()
+
+        for name, value in cls.__dict__.items():
+            if isinstance(value, flag_value):
+                value._parent = cls
+                cls.VALID_FLAGS[name] = value.flag
+
+        if not cls.VALID_FLAGS:
+            raise RuntimeError(
+                "At least one flag must be defined in a BaseFlags subclass, or 'no_fill_flags' must be set to True"
+            )
+
+        cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS) if inverted else 0
+
+        return cls
 
     @classmethod
     def _from_value(cls, value: int) -> Self:
@@ -157,14 +182,27 @@ class BaseFlags:
         self.value &= other.value
         return self
 
-    def __or__(self, other: Self) -> Self:
+    def __or__(self, other: Union[Self, flag_value[Self]]) -> Self:
+        if isinstance(other, flag_value):
+            if self.__class__ is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
+            return self._from_value(self.value | other.flag)
         if not isinstance(other, self.__class__):
             raise TypeError(
                 f"unsupported operand type(s) for |: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
             )
         return self._from_value(self.value | other.value)
 
-    def __ior__(self, other: Self) -> Self:
+    def __ior__(self, other: Union[Self, flag_value[Self]]) -> Self:
+        if isinstance(other, flag_value):
+            if self.__class__ is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
+            self.value |= other.flag
+            return self
         if not isinstance(other, self.__class__):
             raise TypeError(
                 f"unsupported operand type(s) for |=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
@@ -172,14 +210,27 @@ class BaseFlags:
         self.value |= other.value
         return self
 
-    def __xor__(self, other: Self) -> Self:
+    def __xor__(self, other: Union[Self, flag_value[Self]]) -> Self:
+        if isinstance(other, flag_value):
+            if self.__class__ is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
+            return self._from_value(self.value ^ other.flag)
         if not isinstance(other, self.__class__):
             raise TypeError(
                 f"unsupported operand type(s) for ^: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
             )
         return self._from_value(self.value ^ other.value)
 
-    def __ixor__(self, other: Self) -> Self:
+    def __ixor__(self, other: Union[Self, flag_value[Self]]) -> Self:
+        if isinstance(other, flag_value):
+            if self.__class__ is not other._parent:
+                raise TypeError(
+                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                )
+            self.value ^= other.flag
+            return self
         if not isinstance(other, self.__class__):
             raise TypeError(
                 f"unsupported operand type(s) for ^=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
@@ -248,7 +299,7 @@ class BaseFlags:
             raise TypeError(f"Value to set for {self.__class__.__name__} must be a bool.")
 
 
-class ListBaseFlags(BaseFlags):
+class ListBaseFlags(BaseFlags, no_fill_flags=True):
     """
     A base class for flags that aren't powers of 2.
     Instead, values are used as exponents to map to powers of 2 to avoid collisions,
@@ -283,8 +334,7 @@ class ListBaseFlags(BaseFlags):
         return f"<{self.__class__.__name__} values={self.values}>"
 
 
-@fill_with_flags(inverted=True)
-class SystemChannelFlags(BaseFlags):
+class SystemChannelFlags(BaseFlags, inverted=True):
     """
     Wraps up a Discord system channel flag value.
 
@@ -354,6 +404,17 @@ class SystemChannelFlags(BaseFlags):
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
 
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: SystemChannelFlags.y | SystemChannelFlags.z, SystemChannelFlags(y=True) | SystemChannelFlags.z
+
+            Returns a SystemChannelFlags instance with all provided flags enabled.
+
+        .. describe:: ~SystemChannelFlags.y
+
+            Returns a SystemChannelFlags instance with all flags except ``y`` inverted from their default value.
+
     Attributes
     ----------
     value: :class:`int`
@@ -408,7 +469,6 @@ class SystemChannelFlags(BaseFlags):
         return 8
 
 
-@fill_with_flags()
 class MessageFlags(BaseFlags):
     """
     Wraps up a Discord Message flag value.
@@ -473,6 +533,20 @@ class MessageFlags(BaseFlags):
 
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: MessageFlags.y | MessageFlags.z, MessageFlags(y=True) | MessageFlags.z
+
+            Returns a MessageFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~MessageFlags.y
+
+            Returns a MessageFlags instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
 
     .. versionadded:: 1.3
 
@@ -549,7 +623,6 @@ class MessageFlags(BaseFlags):
         return 1 << 8
 
 
-@fill_with_flags()
 class PublicUserFlags(BaseFlags):
     """
     Wraps up the Discord User Public flags.
@@ -613,6 +686,20 @@ class PublicUserFlags(BaseFlags):
             Returns an iterator of ``(name, value)`` pairs. This allows it
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: PublicUserFlags.y | PublicUserFlags.z, PublicUserFlags(y=True) | PublicUserFlags.z
+
+            Returns a PublicUserFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~PublicUserFlags.y
+
+            Returns a PublicUserFlags instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
 
     .. versionadded:: 1.4
 
@@ -728,7 +815,6 @@ class PublicUserFlags(BaseFlags):
         return [public_flag for public_flag in UserFlags if self._has_flag(public_flag.value)]
 
 
-@fill_with_flags()
 class Intents(BaseFlags):
     """
     Wraps up a Discord gateway intent flag.
@@ -804,6 +890,20 @@ class Intents(BaseFlags):
 
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: Intents.y | Intents.z, Intents(y=True) | Intents.z
+
+            Returns a Intents instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~Intents.y
+
+            Returns a Intents instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
 
     Attributes
     ----------
@@ -1349,7 +1449,6 @@ class Intents(BaseFlags):
         return (1 << 20) | (1 << 21)
 
 
-@fill_with_flags()
 class MemberCacheFlags(BaseFlags):
     """Controls the library's cache policy when it comes to members.
 
@@ -1427,6 +1526,20 @@ class MemberCacheFlags(BaseFlags):
 
                Returns an iterator of ``(name, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: MemberCacheFlags.y | MemberCacheFlags.z, MemberCacheFlags(y=True) | MemberCacheFlags.z
+
+            Returns a MemberCacheFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~MemberCacheFlags.y
+
+            Returns a MemberCacheFlags instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
 
     Attributes
     ----------
@@ -1518,7 +1631,6 @@ class MemberCacheFlags(BaseFlags):
         return self.value == 1
 
 
-@fill_with_flags()
 class ApplicationFlags(BaseFlags):
     """
     Wraps up the Discord Application flags.
@@ -1582,6 +1694,20 @@ class ApplicationFlags(BaseFlags):
             Returns an iterator of ``(name, value)`` pairs. This allows it
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: ApplicationFlags.y | ApplicationFlags.z, ApplicationFlags(y=True) | ApplicationFlags.z
+
+            Returns a ApplicationFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~ApplicationFlags.y
+
+            Returns a ApplicationFlags instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
 
     .. versionadded:: 2.0
 
@@ -1649,7 +1775,6 @@ class ApplicationFlags(BaseFlags):
         return 1 << 19
 
 
-@fill_with_flags()
 class ChannelFlags(BaseFlags):
     """Wraps up the Discord Channel flags.
 
@@ -1713,6 +1838,20 @@ class ChannelFlags(BaseFlags):
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
 
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: ChannelFlags.y | ChannelFlags.z, ChannelFlags(y=True) | ChannelFlags.z
+
+            Returns a ChannelFlags instance with all provided flags enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~ChannelFlags.y
+
+            Returns a ChannelFlags instance with all flags except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
+
     .. versionadded:: 2.5
 
     Attributes
@@ -1730,7 +1869,6 @@ class ChannelFlags(BaseFlags):
         return 1 << 1
 
 
-@fill_with_flags()
 class AutoModKeywordPresets(ListBaseFlags):
     """
     Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
@@ -1778,6 +1916,17 @@ class AutoModKeywordPresets(ListBaseFlags):
             Returns an iterator of ``(name, value)`` pairs. This allows it
             to be, for example, constructed as a dict or a list of pairs.
             Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: AutoModKeywordPresets.y | AutoModKeywordPresets.z, AutoModKeywordPresets(y=True) | AutoModKeywordPresets.z
+
+            Returns a AutoModKeywordPresets instance with all provided flags enabled.
+
+        .. describe:: ~AutoModKeywordPresets.y
+
+            Returns a AutoModKeywordPresets instance with all flags except ``y`` inverted from their default value.
 
     .. versionadded:: 2.6
 
