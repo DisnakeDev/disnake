@@ -1293,9 +1293,6 @@ class ConnectionState:
                 user = member
             else:
                 user = self.store_user(data["user"])
-            _log.debug(
-                "GUILD_MEMBER_UPDATE referencing an unknown member ID: %s. Discarding.", user_id
-            )
 
         raw = RawGuildMemberUpdateEvent(data, user)
         self.dispatch("raw_member_update", raw)
