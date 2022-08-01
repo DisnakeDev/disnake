@@ -467,7 +467,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self, *, name: Optional[str] = None, reason: Optional[str] = None
     ) -> TextChannel:
         return await self._clone_impl(
-            {"topic": self.topic, "nsfw": self.nsfw, "rate_limit_per_user": self.slowmode_delay},
+            {
+                "topic": self.topic,
+                "nsfw": self.nsfw,
+                "rate_limit_per_user": self.slowmode_delay,
+                "default_auto_archive_duration": self.default_auto_archive_duration,
+            },
             name=name,
             reason=reason,
         )
