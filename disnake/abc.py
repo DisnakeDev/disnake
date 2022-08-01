@@ -937,7 +937,7 @@ class GuildChannel(ABC):
         * Default Thread Auto-Archive Duration
 
         .. note::
-            This does ***not*** clone *all* attributes/properties of the current channel to a new
+            This does **not** clone *all* attributes/properties of the current channel to a new
             channel. Only the above properties are copied to the new channel.
 
         You must have :attr:`.Permissions.manage_channels` permission to
