@@ -118,7 +118,7 @@ jobs:
         warnings: true
 
 
-  slotscheck:
+  misc:
     # We want to run on external PRs, but not on our own internal PRs as they'll be run
     # by the push to the branch. Without this if check, checks are duplicated since
     # internal PRs match both the push and pull_request events.
@@ -137,7 +137,10 @@ jobs:
         nox-setup: tools
 
     - name: Run slotscheck
-      run: task slotscheck
+      run: nox -s slotscheck
+
+    - name: Run check-manifest
+      run: nox -s check-manifest
 
   pytest:
     # Thanks to black for this rule
