@@ -7,8 +7,9 @@ from disnake.ext import commands
 
 intents = disnake.Intents.default()
 intents.members = True
+intents.message_content = True
 
-bot = commands.Bot("!", intents=intents)
+bot = commands.Bot(commands.when_mentioned_or("!"), intents=intents)
 
 
 @bot.command()
@@ -67,8 +68,8 @@ async def multiply(ctx: commands.Context, number: int, maybe: bool):
     # See: https://docs.disnake.dev/en/latest/ext/commands/commands.html#bool
 
     if maybe is True:
-        return await ctx.send(number * 2)
-    await ctx.send(number * 5)
+        return await ctx.send(str(number * 2))
+    await ctx.send(str(number * 5))
 
 
 bot.run("token")

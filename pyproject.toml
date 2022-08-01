@@ -13,12 +13,54 @@ filter_files = true
 
 [tool.taskipy.tasks]
 black = { cmd = "task lint black", help = "Run black" }
-docs = { cmd = "cd docs && sphinx-autobuild . _build/html --ignore _build --watch ../disnake --port 8009", help = "Build the documentation on an autoreloading server."}
+docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development"}
+flake8 = { cmd = "flake8", help = "Run flake8"}
 isort = { cmd = "task lint isort", help = "Run isort" }
-lint = { cmd = "pre-commit run --all-files", help = "Check all files for linting errors" }
-precommit = { cmd = "pre-commit install --install-hooks", help = "Install the precommit hook" }
-pyright = { cmd = "dotenv -f task.env run -- pyright", help = "Run pyright" }
-slotscheck = { cmd = "python -m slotscheck --verbose -m disnake", help = "Run slotscheck" }
+lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
+pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
+slotscheck = { cmd = "nox -Rs slotscheck --", help = "Run slotscheck" }
+setup_env = {cmd = 'nox -s setup --', help = 'Setup the local environment and set up all dependencies'}
+test = { cmd = "nox -Rs test --", help = "Run pytest" }
+
+
+[tool.towncrier]
+template = "changelog/_template.rst.jinja"
+package = "disnake"
+filename = "docs/whats_new.rst"
+directory = "changelog/"
+title_format = "v{version}"
+underlines = "-~"
+issue_format = ":issue:`{issue}`"
+
+    [[tool.towncrier.type]]
+    directory = "breaking"
+    name = "Breaking Changes"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = "deprecate"
+    name = "Deprecations"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = "feature"
+    name = "New Features"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = "bugfix"
+    name = "Bug Fixes"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = "doc"
+    name = "Documentation"
+    showcontent = true
+
+    [[tool.towncrier.type]]
+    directory = "misc"
+    name = "Miscellaneous"
+    showcontent = true
 
 
 [tool.slotscheck]
@@ -33,22 +75,71 @@ exclude-modules = '''
 
 
 [tool.pyright]
-typeCheckingMode = "basic"
+typeCheckingMode = "strict"
 include = [
     "disnake",
     "docs",
+    "examples",
     "test_bot",
+    "tests",
     "*.py",
 ]
+ignore = [
+    "disnake/ext/mypy_plugin",
+    "noxfile.py",  # this is ignored because nox is not installed in the environment when running pyright
+]
 
+# this is one of the diagnostics that aren't enabled by default, even in strict mode
+reportUnnecessaryTypeIgnoreComment = true
+
+# it's unlikely that these will ever be enabled
+reportOverlappingOverload = false
+reportPrivateUsage = false
+reportUnnecessaryIsInstance = false
+reportFunctionMemberAccess = false
+reportMissingTypeStubs = false
+reportUnusedFunction = false
+reportUnusedClass = false
+reportConstantRedefinition = false
+reportImportCycles = false
+reportIncompatibleMethodOverride = false
+reportIncompatibleVariableOverride = false
+
+# these are largely due to missing type hints, and make up most of the error count
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownArgumentType = false
+reportMissingParameterType = false
+reportUnknownVariableType = false
+reportMissingTypeArgument = false
 strictParameterNoneValue = false
-reportInvalidStringEscapeSequence = false
-reportPropertyTypeMismatch = true
-reportDuplicateImport = true
-reportUntypedFunctionDecorator = true
-reportUntypedClassDecorator = true
-reportUntypedBaseClass = true
-reportInvalidTypeVarUse = true
-reportUnnecessaryCast = true
-reportSelfClsParameterName = true
-reportUnsupportedDunderAll = true
+
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+addopts = "--strict-markers -Werror -s"
+xfail_strict = true
+asyncio_mode = "strict"
+
+[tool.coverage.run]
+branch = true
+include = [
+    "disnake/*",
+    "tests/*",
+]
+omit = [
+    "disnake/ext/mypy_plugin/*",
+    "disnake/types/*",
+    "disnake/__main__.py",
+]
+
+[tool.coverage.report]
+precision = 1
+exclude_lines = [
+    "# pragma: no cov(er(age)?)?$",
+    "^\\s*def __repr__",
+    "^\\s*@overload",
+    "^\\s*if TYPE_CHECKING",
+    "^\\s*raise NotImplementedError$",
+    "^\\s*\\.\\.\\.$",
+]

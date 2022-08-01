@@ -459,7 +459,7 @@ class GuildSticker(Sticker):
             The sticker's new description. Can be ``None``.
         emoji: :class:`str`
             The name of a unicode emoji that represents the sticker's expression.
-        reason: :class:`str`
+        reason: Optional[:class:`str`]
             The reason for editing this sticker. Shows up on the audit log.
 
         Raises

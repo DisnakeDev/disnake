@@ -28,6 +28,13 @@ from __future__ import annotations
 import datetime
 from typing import List, Literal, Optional, TypedDict, Union
 
+from .automod import (
+    AutoModAction,
+    AutoModEventType,
+    AutoModRule,
+    AutoModTriggerMetadata,
+    AutoModTriggerType,
+)
 from .channel import ChannelType, PermissionOverwrite, VideoQualityMode
 from .guild import (
     DefaultMessageNotificationLevel,
@@ -35,7 +42,9 @@ from .guild import (
     MFALevel,
     VerificationLevel,
 )
+from .guild_scheduled_event import GuildScheduledEvent
 from .integration import IntegrationExpireBehavior, PartialIntegration
+from .interactions import ApplicationCommand, ApplicationCommandPermissions
 from .role import Role
 from .snowflake import Snowflake
 from .threads import Thread
@@ -84,9 +93,17 @@ AuditLogEvent = Literal[
     90,
     91,
     92,
+    100,
+    101,
+    102,
     110,
     111,
     112,
+    121,
+    140,
+    141,
+    142,
+    143,
 ]
 
 
@@ -155,6 +172,7 @@ class _AuditLogChange_Bool(TypedDict):
         "archived",
         "locked",
         "premium_progress_bar_enabled",
+        "enabled",
     ]
     new_value: bool
     old_value: bool
@@ -176,6 +194,12 @@ class _AuditLogChange_Int(TypedDict):
     ]
     new_value: int
     old_value: int
+
+
+class _AuditLogChange_ListSnowflake(TypedDict):
+    key: Literal["exempt_roles", "exempt_channels"]
+    new_value: List[Snowflake]
+    old_value: List[Snowflake]
 
 
 class _AuditLogChange_ListRole(TypedDict):
@@ -238,12 +262,43 @@ class _AuditLogChange_Datetime(TypedDict):
     old_value: datetime.datetime
 
 
+class _AuditLogChange_ApplicationCommandPermissions(TypedDict):
+    key: str
+    new_value: ApplicationCommandPermissions
+    old_value: ApplicationCommandPermissions
+
+
+class _AuditLogChange_AutoModTriggerType(TypedDict):
+    key: Literal["trigger_type"]
+    new_value: AutoModTriggerType
+    old_value: AutoModTriggerType
+
+
+class _AuditLogChange_AutoModEventType(TypedDict):
+    key: Literal["event_type"]
+    new_value: AutoModEventType
+    old_value: AutoModEventType
+
+
+class _AuditLogChange_AutoModActions(TypedDict):
+    key: Literal["actions"]
+    new_value: List[AutoModAction]
+    old_value: List[AutoModAction]
+
+
+class _AuditLogChange_AutoModTriggerMetadata(TypedDict):
+    key: Literal["trigger_metadata"]
+    new_value: AutoModTriggerMetadata
+    old_value: AutoModTriggerMetadata
+
+
 AuditLogChange = Union[
     _AuditLogChange_Str,
     _AuditLogChange_AssetHash,
     _AuditLogChange_Snowflake,
     _AuditLogChange_Int,
     _AuditLogChange_Bool,
+    _AuditLogChange_ListSnowflake,
     _AuditLogChange_ListRole,
     _AuditLogChange_MFALevel,
     _AuditLogChange_VerificationLevel,
@@ -254,6 +309,11 @@ AuditLogChange = Union[
     _AuditLogChange_VideoQualityMode,
     _AuditLogChange_Overwrites,
     _AuditLogChange_Datetime,
+    _AuditLogChange_ApplicationCommandPermissions,
+    _AuditLogChange_AutoModTriggerType,
+    _AuditLogChange_AutoModEventType,
+    _AuditLogChange_AutoModActions,
+    _AuditLogChange_AutoModTriggerMetadata,
 ]
 
 
@@ -266,6 +326,9 @@ class AuditEntryInfo(TypedDict):
     id: Snowflake
     type: Literal["0", "1"]
     role_name: str
+    application_id: Snowflake
+    auto_moderation_rule_name: str
+    auto_moderation_rule_trigger_type: str
 
 
 class _AuditLogEntryOptional(TypedDict, total=False):
@@ -282,8 +345,11 @@ class AuditLogEntry(_AuditLogEntryOptional):
 
 
 class AuditLog(TypedDict):
-    webhooks: List[Webhook]
-    users: List[User]
     audit_log_entries: List[AuditLogEntry]
+    application_commands: List[ApplicationCommand]
+    auto_moderation_rules: List[AutoModRule]
+    guild_scheduled_events: List[GuildScheduledEvent]
     integrations: List[PartialIntegration]
     threads: List[Thread]
+    users: List[User]
+    webhooks: List[Webhook]

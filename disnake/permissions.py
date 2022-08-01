@@ -26,26 +26,19 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from functools import wraps
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Dict,
-    Iterator,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, Iterator, Optional, Set, Tuple
 
-from .flags import BaseFlags, alias_flag_value, fill_with_flags, flag_value
+from .flags import BaseFlags, alias_flag_value, flag_value
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 
 __all__ = (
     "Permissions",
     "PermissionOverwrite",
 )
+
 
 # A permission alias works like a regular flag but is marked
 # So the PermissionOverwrite knows to work with it
@@ -75,10 +68,6 @@ def cached_creation(func):
     return wrapped
 
 
-P = TypeVar("P", bound="Permissions")
-
-
-@fill_with_flags()
 class Permissions(BaseFlags):
     """Wraps up the Discord permission value.
 
@@ -106,10 +95,33 @@ class Permissions(BaseFlags):
             Checks if a permission is a superset of another permission.
         .. describe:: x < y
 
-             Checks if a permission is a strict subset of another permission.
+            Checks if a permission is a strict subset of another permission.
         .. describe:: x > y
 
-             Checks if a permission is a strict superset of another permission.
+            Checks if a permission is a strict superset of another permission.
+        .. describe:: x | y, x |= y
+
+            Returns a new Permissions instance with all enabled permissions from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new Permissions instance with only permissions enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new Permissions instance with only permissions enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new Permissions instance with all permissions from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the permission's hash.
@@ -118,6 +130,20 @@ class Permissions(BaseFlags):
                Returns an iterator of ``(perm, value)`` pairs. This allows it
                to be, for example, constructed as a dict or a list of pairs.
                Note that aliases are not shown.
+
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: Permissions.y | Permissions.z, Permissions(y=True) | Permissions.z
+
+            Returns a Permissions instance with all provided permissions enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~Permissions.y
+
+            Returns a Permissions instance with all permissions except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
 
     Attributes
     ----------
@@ -160,28 +186,29 @@ class Permissions(BaseFlags):
             )
 
     def is_strict_subset(self, other: Permissions) -> bool:
-        """Returns ``True`` if the permissions on other are a strict subset of those on self."""
+        """Returns ``True`` if the permissions on self are a strict subset of those on other."""
         return self.is_subset(other) and self != other
 
     def is_strict_superset(self, other: Permissions) -> bool:
-        """Returns ``True`` if the permissions on other are a strict superset of those on self."""
+        """Returns ``True`` if the permissions on self are a strict superset of those on other."""
         return self.is_superset(other) and self != other
 
-    __le__ = is_subset
-    __ge__ = is_superset
-    __lt__ = is_strict_subset
-    __gt__ = is_strict_superset
+    # the parent uses `Self` for the `other` typehint but we use `Permissions` here for backwards compat.
+    __le__ = is_subset  # type: ignore
+    __ge__ = is_superset  # type: ignore
+    __lt__ = is_strict_subset  # type: ignore
+    __gt__ = is_strict_superset  # type: ignore
 
     @classmethod
     @cached_creation
-    def none(cls: Type[P]) -> P:
+    def none(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``False``."""
         return cls(0)
 
     @classmethod
     @cached_creation
-    def all(cls: Type[P]) -> P:
+    def all(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
@@ -189,7 +216,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def all_channel(cls: Type[P]) -> P:
+    def all_channel(cls) -> Self:
         """A :class:`Permissions` with all channel-specific permissions set to
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
         permissions are currently:
@@ -233,7 +260,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def general(cls: Type[P]) -> P:
+    def general(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "General" permissions from the official Discord UI set to ``True``.
 
@@ -256,7 +283,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def membership(cls: Type[P]) -> P:
+    def membership(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Membership" permissions from the official Discord UI set to ``True``.
 
@@ -276,7 +303,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def text(cls: Type[P]) -> P:
+    def text(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Text" permissions from the official Discord UI set to ``True``.
 
@@ -308,7 +335,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def voice(cls: Type[P]) -> P:
+    def voice(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Voice" permissions from the official Discord UI set to ``True``.
 
@@ -329,7 +356,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def stage(cls: Type[P]) -> P:
+    def stage(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Channel" permissions from the official Discord UI set to ``True``.
 
@@ -341,7 +368,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def stage_moderator(cls: Type[P]) -> P:
+    def stage_moderator(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Moderator" permissions from the official Discord UI set to ``True``.
 
@@ -355,7 +382,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def events(cls: Type[P]) -> P:
+    def events(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Events" permissions from the official Discord UI set to ``True``.
 
@@ -367,7 +394,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def advanced(cls: Type[P]) -> P:
+    def advanced(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Advanced" permissions from the official Discord UI set to ``True``.
 
@@ -379,7 +406,7 @@ class Permissions(BaseFlags):
 
     @classmethod
     @cached_creation
-    def private_channel(cls: Type[P]) -> P:
+    def private_channel(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with the
         best representation of a PrivateChannel's permissions.
 
@@ -416,7 +443,7 @@ class Permissions(BaseFlags):
 
         Parameters
         ----------
-        \*\*kwargs
+        **kwargs
             A list of key/value pairs to bulk update permissions with.
         """
         for key, value in kwargs.items():
@@ -511,7 +538,16 @@ class Permissions(BaseFlags):
 
     @flag_value
     def send_messages(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels."""
+        """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels
+        and create threads in forum channels."""
+        return 1 << 11
+
+    @make_permission_alias("send_messages")
+    def create_forum_threads(self) -> int:
+        """:class:`bool`: An alias for :attr:`send_messages`.
+
+        .. versionadded:: 2.5
+        """
         return 1 << 11
 
     @flag_value
@@ -734,9 +770,6 @@ class Permissions(BaseFlags):
         return 1 << 40
 
 
-PO = TypeVar("PO", bound="PermissionOverwrite")
-
-
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
     aliases = set()
@@ -770,7 +803,7 @@ class PermissionOverwrite:
     """
     A type that is used to represent a channel specific permission.
 
-    Unlike a regular :class:`Permissions`\, the default value of a
+    Unlike a regular :class:`Permissions`\\, the default value of a
     permission is equivalent to ``None`` and not ``False``. Setting
     a value to ``False`` is **explicitly** denying that permission,
     while setting a value to ``True`` is **explicitly** allowing
@@ -795,7 +828,7 @@ class PermissionOverwrite:
 
     Parameters
     ----------
-    \*\*kwargs
+    **kwargs
         Set the value of permissions by their name.
     """
 
@@ -818,6 +851,7 @@ class PermissionOverwrite:
         read_messages: Optional[bool]
         view_channel: Optional[bool]
         send_messages: Optional[bool]
+        create_forum_threads: Optional[bool]
         send_tts_messages: Optional[bool]
         manage_messages: Optional[bool]
         embed_links: Optional[bool]
@@ -857,7 +891,7 @@ class PermissionOverwrite:
 
         for key, value in kwargs.items():
             if key not in self.VALID_NAMES:
-                raise ValueError(f"no permission called {key}.")
+                raise ValueError(f"{key!r} is not a valid permission name.")
 
             setattr(self, key, value)
 
@@ -888,7 +922,7 @@ class PermissionOverwrite:
         return allow, deny
 
     @classmethod
-    def from_pair(cls: Type[PO], allow: Permissions, deny: Permissions) -> PO:
+    def from_pair(cls, allow: Permissions, deny: Permissions) -> Self:
         """Creates an overwrite from an allow/deny pair of :class:`Permissions`."""
         ret = cls()
         for key, value in allow:
@@ -914,7 +948,7 @@ class PermissionOverwrite:
         """
         return len(self._values) == 0
 
-    def update(self, **kwargs: bool) -> None:
+    def update(self, **kwargs: Optional[bool]) -> None:
         """
         Bulk updates this permission overwrite object.
 
@@ -924,7 +958,7 @@ class PermissionOverwrite:
 
         Parameters
         ----------
-        \*\*kwargs
+        **kwargs
             A list of key/value pairs to bulk update with.
         """
         for key, value in kwargs.items():

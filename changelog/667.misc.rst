@@ -1,0 +1,1 @@
+Rename internal module ``disnake.ext.commands.flags`` to ``disnake.ext.commands.flag_converter``.

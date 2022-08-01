@@ -25,13 +25,28 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from .enums import ButtonStyle, ComponentType, TextInputStyle, try_enum
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, get_slots
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from .emoji import Emoji
     from .types.components import (
         ActionRow as ActionRowPayload,
@@ -41,7 +56,6 @@ if TYPE_CHECKING:
         SelectOption as SelectOptionPayload,
         TextInput as TextInputPayload,
     )
-
 
 __all__ = (
     "Component",
@@ -53,7 +67,16 @@ __all__ = (
 )
 
 C = TypeVar("C", bound="Component")
-NestedComponent = Union["Button", "SelectMenu", "TextInput"]
+
+MessageComponent = Union["Button", "SelectMenu"]
+
+if TYPE_CHECKING:  # TODO: remove when we add modal select support
+    from typing_extensions import TypeAlias
+
+# ModalComponent = Union["TextInput", "SelectMenu"]
+ModalComponent: TypeAlias = "TextInput"
+NestedComponent = Union[MessageComponent, ModalComponent]
+ComponentT = TypeVar("ComponentT", bound=NestedComponent)
 
 
 class Component:
@@ -86,8 +109,8 @@ class Component:
         return f"<{self.__class__.__name__} {attrs}>"
 
     @classmethod
-    def _raw_construct(cls: Type[C], **kwargs) -> C:
-        self: C = cls.__new__(cls)
+    def _raw_construct(cls, **kwargs) -> Self:
+        self = cls.__new__(cls)
         for slot in get_slots(cls):
             try:
                 value = kwargs[slot]
@@ -101,7 +124,7 @@ class Component:
         raise NotImplementedError
 
 
-class ActionRow(Component):
+class ActionRow(Component, Generic[ComponentT]):
     """Represents an action row.
 
     This is a component that holds up to 5 children components in a row.
@@ -122,9 +145,9 @@ class ActionRow(Component):
 
     __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
-    def __init__(self, data: ComponentPayload):
+    def __init__(self, data: ActionRowPayload):
         self.type: ComponentType = try_enum(ComponentType, data["type"])
-        self.children: List[NestedComponent] = [  # type: ignore
+        self.children: List[ComponentT] = [
             _component_factory(d) for d in data.get("components", [])
         ]
 
@@ -189,12 +212,15 @@ class Button(Component):
             self.emoji = None
 
     def to_dict(self) -> ButtonComponentPayload:
-        payload = {
+        payload: ButtonComponentPayload = {
             "type": 2,
-            "style": int(self.style),
-            "label": self.label,
+            "style": self.style.value,
             "disabled": self.disabled,
         }
+
+        if self.label:
+            payload["label"] = self.label
+
         if self.custom_id:
             payload["custom_id"] = self.custom_id
 
@@ -204,7 +230,7 @@ class Button(Component):
         if self.emoji:
             payload["emoji"] = self.emoji.to_dict()
 
-        return payload  # type: ignore
+        return payload
 
 
 class SelectMenu(Component):
@@ -374,7 +400,7 @@ class SelectOption:
         }
 
         if self.emoji:
-            payload["emoji"] = self.emoji.to_dict()  # type: ignore
+            payload["emoji"] = self.emoji.to_dict()
 
         if self.description:
             payload["description"] = self.description
@@ -441,8 +467,8 @@ class TextInput(Component):
     def to_dict(self) -> TextInputPayload:
         payload: TextInputPayload = {
             "type": self.type.value,
-            "style": self.style.value,  # type: ignore
-            "label": self.label,  # type: ignore
+            "style": self.style.value,
+            "label": cast(str, self.label),
             "custom_id": self.custom_id,
             "required": self.required,
         }
@@ -462,12 +488,13 @@ class TextInput(Component):
         return payload
 
 
-def _component_factory(data: ComponentPayload) -> Component:
+def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
     # NOTE: due to speed, this method does not use the ComponentType enum
     #       as this runs every single time a component is received from the api
+    # NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
     component_type = data["type"]
     if component_type == 1:
-        return ActionRow(data)
+        return ActionRow(data)  # type: ignore
     elif component_type == 2:
         return Button(data)  # type: ignore
     elif component_type == 3:
@@ -476,4 +503,4 @@ def _component_factory(data: ComponentPayload) -> Component:
         return TextInput(data)  # type: ignore
     else:
         as_enum = try_enum(ComponentType, component_type)
-        return Component._raw_construct(type=as_enum)
+        return Component._raw_construct(type=as_enum)  # type: ignore

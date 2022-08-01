@@ -1,0 +1,1 @@
+Add support for :class:`.Webhook` in :class:`ForumChannel` instances.
