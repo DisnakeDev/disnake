@@ -131,15 +131,18 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Set up environment
+      id: setup
       uses: ./.github/actions/setup-env
       with:
         python-version: 3.8
         nox-setup: tools
 
     - name: Run slotscheck
+      if: (success() || failure()) && steps.setup.outcome == 'success'
       run: nox -s slotscheck
 
     - name: Run check-manifest
+      if: (success() || failure()) && steps.setup.outcome == 'success'
       run: nox -s check-manifest
 
   pytest:
