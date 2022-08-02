@@ -27,6 +27,8 @@ from __future__ import annotations
 
 from typing import List, Literal, Optional, TypedDict
 
+from .activity import PresenceData
+from .member import Member
 from .message import Message
 from .snowflake import Snowflake
 
@@ -39,6 +41,12 @@ class ThreadMember(TypedDict):
     user_id: Snowflake
     join_timestamp: str
     flags: int
+
+
+class ThreadMemberWithPresence(ThreadMember):
+    # currently unused, also not really documented properly
+    member: Member
+    presence: Optional[PresenceData]
 
 
 class _ThreadMetadataOptional(TypedDict, total=False):
