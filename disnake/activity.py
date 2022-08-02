@@ -103,25 +103,7 @@ if TYPE_CHECKING:
     from .types.emoji import PartialEmoji as PartialEmojiPayload
 
 
-class BaseActivity:
-    """The base activity that all user-settable activities inherit from.
-    A user-settable activity is one that can be used in :meth:`Client.change_presence`.
-
-    The following types currently count as user-settable:
-
-    - :class:`Activity`
-    - :class:`Game`
-    - :class:`Streaming`
-    - :class:`CustomActivity`
-
-    Note that although these types are considered user-settable by the library,
-    Discord typically ignores certain combinations of activity depending on
-    what is currently set. This behaviour may change in the future so there are
-    no guarantees on whether Discord will actually let you set these types.
-
-    .. versionadded:: 1.3
-    """
-
+class _BaseActivity:
     __slots__ = ("_created_at",)
 
     def __init__(
@@ -145,6 +127,29 @@ class BaseActivity:
 
     def to_dict(self) -> ActivityPayload:
         raise NotImplementedError
+
+
+# tag type for user-settable activities
+class BaseActivity(_BaseActivity):
+    """The base activity that all user-settable activities inherit from.
+    A user-settable activity is one that can be used in :meth:`Client.change_presence`.
+
+    The following types currently count as user-settable:
+
+    - :class:`Activity`
+    - :class:`Game`
+    - :class:`Streaming`
+    - :class:`CustomActivity`
+
+    Note that although these types are considered user-settable by the library,
+    Discord typically ignores certain combinations of activity depending on
+    what is currently set. This behaviour may change in the future so there are
+    no guarantees on whether Discord will actually let you set these types.
+
+    .. versionadded:: 1.3
+    """
+
+    __slots__ = ()
 
 
 class Activity(BaseActivity):
@@ -583,7 +588,7 @@ class Streaming(BaseActivity):
         return hash(self.name)
 
 
-class Spotify:
+class Spotify(_BaseActivity):
     """Represents a Spotify listening activity from Discord.
 
     .. container:: operations
@@ -613,13 +618,11 @@ class Spotify:
         "_party",
         "_sync_id",
         "_session_id",
-        "_created_at",
     )
 
     def __init__(
         self,
         *,
-        created_at: Optional[float] = None,
         state: Optional[str] = None,
         details: Optional[str] = None,
         timestamps: Optional[ActivityTimestamps] = None,
@@ -629,6 +632,7 @@ class Spotify:
         session_id: Optional[str] = None,
         **kwargs: Any,
     ):
+        super().__init__(**kwargs)
         self._state: str = state or ""
         self._details: str = details or ""
         self._timestamps: ActivityTimestamps = timestamps or {}
@@ -636,7 +640,6 @@ class Spotify:
         self._party: ActivityParty = party or {}
         self._sync_id: str = sync_id or ""
         self._session_id: Optional[str] = session_id
-        self._created_at: Optional[float] = created_at
 
     @property
     def type(self) -> Literal[ActivityType.listening]:
@@ -645,17 +648,6 @@ class Spotify:
         It always returns :attr:`ActivityType.listening`.
         """
         return ActivityType.listening
-
-    @property
-    def created_at(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the user started listening in UTC.
-
-        .. versionadded:: 1.3
-        """
-        if self._created_at is not None:
-            return datetime.datetime.fromtimestamp(
-                self._created_at / 1000, tz=datetime.timezone.utc
-            )
 
     @property
     def colour(self) -> Colour:
