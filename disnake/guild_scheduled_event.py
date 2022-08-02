@@ -476,17 +476,18 @@ class GuildScheduledEvent(Hashable):
         """
         fields: Dict[str, Any] = {}
 
-        if channel is None:
-            entity_type = GuildScheduledEventEntityType.external
-        elif channel is not MISSING and isinstance(
-            channel_type := getattr(channel, "type", None), ChannelType
-        ):
-            if channel_type is ChannelType.voice:
-                entity_type = GuildScheduledEventEntityType.voice
-            elif channel_type is ChannelType.stage_voice:
-                entity_type = GuildScheduledEventEntityType.stage_instance
-            else:
-                raise TypeError("channel type must be either 'voice' or 'stage_voice'")
+        if entity_type is MISSING:
+            if channel is None:
+                entity_type = GuildScheduledEventEntityType.external
+            elif channel is not MISSING and isinstance(
+                channel_type := getattr(channel, "type", None), ChannelType
+            ):
+                if channel_type is ChannelType.voice:
+                    entity_type = GuildScheduledEventEntityType.voice
+                elif channel_type is ChannelType.stage_voice:
+                    entity_type = GuildScheduledEventEntityType.stage_instance
+                else:
+                    raise TypeError("channel type must be either 'voice' or 'stage_voice'")
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):

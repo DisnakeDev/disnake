@@ -2194,10 +2194,6 @@ class Guild(Hashable):
             ``None``, :attr:`~GuildScheduledEventEntityType.external` (set automatically), required, required
             unset, :attr:`~GuildScheduledEventEntityType.external`, required, required
 
-        - ``channel`` should not be set
-        - ``entity_metadata`` with a location field must be provided
-        - ``scheduled_end_time`` must be provided
-
         .. versionadded:: 2.3
 
         .. versionchanged:: 2.6
@@ -2210,6 +2206,9 @@ class Guild(Hashable):
         .. versionchanged:: 2.6
             Naive datetime parameters are now assumed to be in the local
             timezone instead of UTC.
+
+        .. versionchanged:: 2.6
+            Infer ``entity_type`` from channel if provided.
 
         Parameters
         ----------
