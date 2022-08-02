@@ -84,11 +84,6 @@ class ActivityEmoji(_ActivityEmojiOptional):
     name: str
 
 
-class ActivityButton(TypedDict):
-    label: str
-    url: str
-
-
 class _SendableActivityOptional(TypedDict, total=False):
     url: Optional[str]
 
@@ -113,5 +108,7 @@ class Activity(SendableActivity, total=False):
     secrets: ActivitySecrets
     instance: bool
     flags: int
-    buttons: List[ActivityButton]
+    # `buttons` is a list of strings when received over gw,
+    # bots cannot access the full button data (like urls)
+    buttons: List[str]
     session_id: Optional[str]

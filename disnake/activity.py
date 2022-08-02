@@ -74,9 +74,7 @@ type: int
 sync_id: str
 session_id: str
 flags: int
-buttons: list[dict]
-    label: str (max: 32)
-    url: str (max: 512)
+buttons: list[str (max: 32)]
 
 There are also activity flags which are mostly uninteresting for the library atm.
 
@@ -95,7 +93,6 @@ if TYPE_CHECKING:
     from .types.activity import (
         Activity as ActivityPayload,
         ActivityAssets,
-        ActivityButton,
         ActivityEmoji as ActivityEmojiPayload,
         ActivityParty,
         ActivityTimestamps,
@@ -230,14 +227,13 @@ class Activity(BaseActivity):
 
         - ``id``: A string representing the party ID.
         - ``size``: A list of two integers denoting (current_size, maximum_size).
-    buttons: List[:class:`dict`]
-        A list of dictionaries representing custom buttons shown in a rich presence.
-        Each dictionary contains the following keys:
-
-        - ``label``: A string representing the text shown on the button.
-        - ``url``: A string representing the URL opened upon clicking the button.
+    buttons: List[str]
+        A list of strings representing the labels of custom buttons shown in a rich presence.
 
         .. versionadded:: 2.0
+
+        .. versionchanged:: 2.6
+            Changed type to ``List[str]`` to match API types.
 
     emoji: Optional[:class:`PartialEmoji`]
         The emoji that belongs to this activity.
@@ -273,7 +269,7 @@ class Activity(BaseActivity):
         flags: Optional[int] = None,
         sync_id: Optional[str] = None,
         session_id: Optional[str] = None,
-        buttons: Optional[List[ActivityButton]] = None,
+        buttons: Optional[List[str]] = None,
         emoji: Optional[Union[PartialEmojiPayload, ActivityEmojiPayload]] = None,
         **kwargs: Any,
     ):
@@ -290,7 +286,7 @@ class Activity(BaseActivity):
         self.flags: int = flags or 0
         self.sync_id: Optional[str] = sync_id
         self.session_id: Optional[str] = session_id
-        self.buttons: List[ActivityButton] = buttons or []
+        self.buttons: List[str] = buttons or []
 
         activity_type = type if type is not None else -1  # TODO: 0?
         self.type: ActivityType = (
