@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import asyncio
 import collections.abc
+import enum
 import inspect
 import itertools
 import math
@@ -38,7 +39,6 @@ from typing import (
     Dict,
     Final,
     FrozenSet,
-    Generic,
     List,
     Literal,
     Optional,
@@ -46,6 +46,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
     get_args,
     get_origin,
     get_type_hints,
@@ -65,7 +66,7 @@ from . import errors
 from .converter import CONVERTER_MAPPING
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import Annotated, Self
 
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
@@ -335,8 +336,21 @@ class LargeInt(int):
 _VERIFY_TYPES: Final[FrozenSet[OptionType]] = frozenset((OptionType.user, OptionType.mentionable))
 
 
-class Private(Generic[T]):
-    """Type depicting a private parameter for application commands."""
+class _PrivateEnum(enum.Enum):
+    # An enum to generate sentinel values for Annotated
+    PRIVATE = enum.auto()
+
+
+if TYPE_CHECKING:
+    Private = Annotated[T, _PrivateEnum.PRIVATE]
+else:
+
+    class Private:
+        def __init__(self, tp: Any) -> None:
+            self.tp = tp
+
+        def __class_getitem__(self, tp: T) -> Any:
+            return cast(T, Private(tp))
 
 
 class ParamInfo:
@@ -782,12 +796,11 @@ def isolate_self(
         if issubclass_(annot, ApplicationCommandInteraction) or annot is inspect.Parameter.empty:
             inter_param = parameters.pop(parametersl[0].name)
         # we remove all the private parameters.
-        # private parameters start with an _ or that are annotated with Private class
+        # private parameters are annotated with Private type
         for param in parametersl:
-            name = param.name
-            tpe = get_origin(param.annotation)
-            if name.startswith("_") or issubclass_(tpe, Private):
-                parameters.pop(name)
+            tpe = param.annotation
+            if isinstance(tpe, Private):
+                parameters.pop(param.name)
 
     return (cog_param, inter_param), parameters
 

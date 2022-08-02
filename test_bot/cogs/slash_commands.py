@@ -80,7 +80,7 @@ class SlashCommands(commands.Cog):
     async def privateparam_type(
         self,
         inter: disnake.CommandInteraction,
-        number: int,
+        number: commands.Private[int],
         letter: commands.Private[str] = "autofill",
     ):
         await inter.send(
