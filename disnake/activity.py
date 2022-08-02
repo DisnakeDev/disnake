@@ -104,15 +104,17 @@ if TYPE_CHECKING:
 
 
 class _BaseActivity:
-    __slots__ = ("_created_at",)
+    __slots__ = ("_created_at", "_timestamps")
 
     def __init__(
         self,
         *,
         created_at: Optional[float] = None,
-        **kwargs: Any,
+        timestamps: Optional[ActivityTimestamps] = None,
+        **kwargs: Any,  # discarded
     ):
         self._created_at: Optional[float] = created_at
+        self._timestamps: ActivityTimestamps = timestamps or {}
 
     @property
     def created_at(self) -> Optional[datetime.datetime]:
@@ -124,6 +126,34 @@ class _BaseActivity:
             return datetime.datetime.fromtimestamp(
                 self._created_at / 1000, tz=datetime.timezone.utc
             )
+
+    @property
+    def start(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: When the user started doing this activity in UTC, if applicable.
+
+        .. versionchanged:: 2.6
+            This attribute can now be ``None``.
+        """
+        try:
+            timestamp = self._timestamps["start"] / 1000
+        except KeyError:
+            return None
+        else:
+            return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
+
+    @property
+    def end(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: When the user will stop doing this activity in UTC, if applicable.
+
+        .. versionchanged:: 2.6
+            This attribute can now be ``None``.
+        """
+        try:
+            timestamp = self._timestamps["end"] / 1000
+        except KeyError:
+            return None
+        else:
+            return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
 
     def to_dict(self) -> ActivityPayload:
         raise NotImplementedError
@@ -187,13 +217,6 @@ class Activity(BaseActivity):
         The user's current state. For example, "In Game".
     details: Optional[:class:`str`]
         The detail of the user's current activity.
-    timestamps: :class:`dict`
-        A dictionary of timestamps. It contains the following optional keys:
-
-        - ``start``: Corresponds to when the user started doing the
-          activity in milliseconds since Unix epoch.
-        - ``end``: Corresponds to when the user will finish doing the
-          activity in milliseconds since Unix epoch.
     assets: :class:`dict`
         A dictionary representing the images and their hover text of an activity.
         It contains the following optional keys:
@@ -223,7 +246,6 @@ class Activity(BaseActivity):
     __slots__ = (
         "state",
         "details",
-        "timestamps",
         "assets",
         "party",
         "flags",
@@ -245,7 +267,6 @@ class Activity(BaseActivity):
         type: Optional[Union[ActivityType, int]] = None,
         state: Optional[str] = None,
         details: Optional[str] = None,
-        timestamps: Optional[ActivityTimestamps] = None,
         assets: Optional[ActivityAssets] = None,
         party: Optional[ActivityParty] = None,
         application_id: Optional[Union[str, int]] = None,
@@ -259,7 +280,6 @@ class Activity(BaseActivity):
         super().__init__(**kwargs)
         self.state: Optional[str] = state
         self.details: Optional[str] = details
-        self.timestamps: ActivityTimestamps = timestamps or {}
         self.assets: ActivityAssets = assets or {}
         self.party: ActivityParty = party or {}
         self.application_id: Optional[int] = (
@@ -307,30 +327,16 @@ class Activity(BaseActivity):
                 continue
 
             ret[attr] = value
+
+        # fix type field
         ret["type"] = int(self.type)
+
         if self.emoji:
             ret["emoji"] = self.emoji.to_dict()
+        # defined in base class slots
+        if self._timestamps:
+            ret["timestamps"] = self._timestamps
         return ret
-
-    @property
-    def start(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the user started doing this activity in UTC, if applicable."""
-        try:
-            timestamp = self.timestamps["start"] / 1000
-        except KeyError:
-            return None
-        else:
-            return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
-
-    @property
-    def end(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the user will stop doing this activity in UTC, if applicable."""
-        try:
-            timestamp = self.timestamps["end"] / 1000
-        except KeyError:
-            return None
-        else:
-            return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
 
     @property
     def large_image_url(self) -> Optional[str]:
@@ -403,24 +409,15 @@ class Game(BaseActivity):
         The game's name.
     """
 
-    __slots__ = ("name", "_end", "_start")
+    __slots__ = ("name",)
 
     def __init__(
         self,
         name: str,
-        *,
-        timestamps: Optional[ActivityTimestamps] = None,
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
         self.name: str = name
-
-        if timestamps:
-            self._start: int = timestamps.get("start", 0)
-            self._end: int = timestamps.get("end", 0)
-        else:
-            self._start = 0
-            self._end = 0
 
     @property
     def type(self) -> Literal[ActivityType.playing]:
@@ -430,20 +427,6 @@ class Game(BaseActivity):
         """
         return ActivityType.playing
 
-    @property
-    def start(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the user started playing this game in UTC, if applicable."""
-        if self._start:
-            return datetime.datetime.fromtimestamp(self._start / 1000, tz=datetime.timezone.utc)
-        return None
-
-    @property
-    def end(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the user will stop playing this game in UTC, if applicable."""
-        if self._end:
-            return datetime.datetime.fromtimestamp(self._end / 1000, tz=datetime.timezone.utc)
-        return None
-
     def __str__(self) -> str:
         return str(self.name)
 
@@ -451,17 +434,10 @@ class Game(BaseActivity):
         return f"<Game name={self.name!r}>"
 
     def to_dict(self) -> ActivityPayload:
-        timestamps: ActivityTimestamps = {}
-        if self._start:
-            timestamps["start"] = self._start
-
-        if self._end:
-            timestamps["end"] = self._end
-
         return {
             "type": ActivityType.playing.value,
             "name": str(self.name),
-            "timestamps": timestamps,
+            "timestamps": self._timestamps,
         }
 
     def __eq__(self, other: Any) -> bool:
@@ -613,7 +589,6 @@ class Spotify(_BaseActivity):
     __slots__ = (
         "_state",
         "_details",
-        "_timestamps",
         "_assets",
         "_party",
         "_sync_id",
@@ -625,7 +600,6 @@ class Spotify(_BaseActivity):
         *,
         state: Optional[str] = None,
         details: Optional[str] = None,
-        timestamps: Optional[ActivityTimestamps] = None,
         assets: Optional[ActivityAssets] = None,
         party: Optional[ActivityParty] = None,
         sync_id: Optional[str] = None,
@@ -635,7 +609,6 @@ class Spotify(_BaseActivity):
         super().__init__(**kwargs)
         self._state: str = state or ""
         self._details: str = details or ""
-        self._timestamps: ActivityTimestamps = timestamps or {}
         self._assets: ActivityAssets = assets or {}
         self._party: ActivityParty = party or {}
         self._sync_id: str = sync_id or ""
@@ -748,23 +721,16 @@ class Spotify(_BaseActivity):
         return f"https://open.spotify.com/track/{self.track_id}"
 
     @property
-    def start(self) -> datetime.datetime:
-        """:class:`datetime.datetime`: When the user started playing this song in UTC."""
-        return datetime.datetime.fromtimestamp(
-            self._timestamps["start"] / 1000, tz=datetime.timezone.utc
-        )
+    def duration(self) -> Optional[datetime.timedelta]:
+        """Optional[:class:`datetime.timedelta`]: The duration of the song being played, if applicable.
 
-    @property
-    def end(self) -> datetime.datetime:
-        """:class:`datetime.datetime`: When the user will stop playing this song in UTC."""
-        return datetime.datetime.fromtimestamp(
-            self._timestamps["end"] / 1000, tz=datetime.timezone.utc
-        )
-
-    @property
-    def duration(self) -> datetime.timedelta:
-        """:class:`datetime.timedelta`: The duration of the song being played."""
-        return self.end - self.start
+        .. versionchanged:: 2.6
+            This attribute can now be ``None``.
+        """
+        start, end = self.start, self.end
+        if start and end:
+            return end - start
+        return None
 
     @property
     def party_id(self) -> str:
