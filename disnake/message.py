@@ -75,6 +75,11 @@ if TYPE_CHECKING:
     from .threads import AnyThreadArchiveDuration
     from .types.components import Component as ComponentPayload
     from .types.embed import Embed as EmbedPayload
+    from .types.gateway import (
+        MessageReactionAddEvent,
+        MessageReactionRemoveEvent,
+        MessageUpdateEvent,
+    )
     from .types.interactions import (
         InteractionMessageReference as InteractionMessageReferencePayload,
     )
@@ -87,7 +92,6 @@ if TYPE_CHECKING:
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
     )
-    from .types.raw_models import ReactionActionEvent
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
     from .ui.action_row import Components, MessageUIComponent
@@ -979,7 +983,7 @@ class Message(Hashable):
                 setattr(self, key, transform(value))
 
     def _add_reaction(
-        self, data: ReactionActionEvent, emoji: EmojiInputType, user_id: int
+        self, data: MessageReactionAddEvent, emoji: EmojiInputType, user_id: int
     ) -> Reaction:
         reaction = utils.find(lambda r: r.emoji == emoji, self.reactions)
         is_me = user_id == self._state.self_id
@@ -1000,7 +1004,7 @@ class Message(Hashable):
         return reaction
 
     def _remove_reaction(
-        self, data: ReactionPayload, emoji: EmojiInputType, user_id: int
+        self, data: MessageReactionRemoveEvent, emoji: EmojiInputType, user_id: int
     ) -> Reaction:
         reaction = utils.find(lambda r: r.emoji == emoji, self.reactions)
 
@@ -1032,7 +1036,7 @@ class Message(Hashable):
         del self.reactions[index]
         return reaction
 
-    def _update(self, data):
+    def _update(self, data: MessageUpdateEvent) -> None:
         # In an update scheme, 'author' key has to be handled before 'member'
         # otherwise they overwrite each other which is undesirable.
         # Since there's no good way to do this we have to iterate over every
