@@ -142,6 +142,14 @@ class BaseActivity:
         raise NotImplementedError
 
 
+# there are additional urls for twitch/youtube/spotify, however
+# it appears that Discord does not want to document those:
+# https://github.com/discord/discord-api-docs/pull/4617
+_ACTIVITY_URLS = {
+    "mp": "https://media.discordapp.net/{}",
+}
+
+
 class Activity(BaseActivity):
     """Represents an activity in Discord.
 
@@ -274,6 +282,19 @@ class Activity(BaseActivity):
             ret["emoji"] = self.emoji.to_dict()
         return ret
 
+    def _create_image_url(self, asset: str) -> Optional[str]:
+        # `asset` can be a simple ID, or a string of the format `<prefix>:<id>`
+        prefix, _, asset_id = asset.partition(":")
+
+        if not asset_id:
+            if not self.application_id:
+                return None
+            return f"{Asset.BASE}/app-assets/{self.application_id}/{prefix}.png"
+
+        if url_fmt := _ACTIVITY_URLS.get(prefix):
+            return url_fmt.format(asset_id)
+        return None
+
     @property
     def start(self) -> Optional[datetime.datetime]:
         """Optional[:class:`datetime.datetime`]: When the user started doing this activity in UTC, if applicable."""
@@ -297,28 +318,22 @@ class Activity(BaseActivity):
     @property
     def large_image_url(self) -> Optional[str]:
         """Optional[:class:`str`]: Returns a URL pointing to the large image asset of this activity, if applicable."""
-        if self.application_id is None:
-            return None
-
         try:
             large_image = self.assets["large_image"]
         except KeyError:
             return None
         else:
-            return f"{Asset.BASE}/app-assets/{self.application_id}/{large_image}.png"
+            return self._create_image_url(large_image)
 
     @property
     def small_image_url(self) -> Optional[str]:
         """Optional[:class:`str`]: Returns a URL pointing to the small image asset of this activity, if applicable."""
-        if self.application_id is None:
-            return None
-
         try:
             small_image = self.assets["small_image"]
         except KeyError:
             return None
         else:
-            return f"{Asset.BASE}/app-assets/{self.application_id}/{small_image}.png"
+            return self._create_image_url(small_image)
 
     @property
     def large_image_text(self) -> Optional[str]:
