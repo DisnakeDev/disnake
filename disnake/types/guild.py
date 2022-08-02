@@ -86,6 +86,7 @@ PremiumTier = Literal[0, 1, 2, 3]
 GuildFeature = Literal[
     "ANIMATED_BANNER",
     "ANIMATED_ICON",
+    "AUTO_MODERATION",
     "BANNER",
     "COMMUNITY",
     "DISCOVERABLE",

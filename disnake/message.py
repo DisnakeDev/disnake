@@ -75,6 +75,11 @@ if TYPE_CHECKING:
     from .threads import AnyThreadArchiveDuration
     from .types.components import Component as ComponentPayload
     from .types.embed import Embed as EmbedPayload
+    from .types.gateway import (
+        MessageReactionAddEvent,
+        MessageReactionRemoveEvent,
+        MessageUpdateEvent,
+    )
     from .types.interactions import (
         InteractionMessageReference as InteractionMessageReferencePayload,
     )
@@ -87,7 +92,6 @@ if TYPE_CHECKING:
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
     )
-    from .types.raw_models import ReactionActionEvent
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
     from .ui.action_row import Components, MessageUIComponent
@@ -128,18 +132,20 @@ async def _edit_handler(
     *,
     default_flags: int,
     previous_allowed_mentions: Optional[AllowedMentions],
-    content: Optional[str] = MISSING,
-    embed: Optional[Embed] = MISSING,
-    embeds: List[Embed] = MISSING,
-    file: File = MISSING,
-    files: List[File] = MISSING,
-    attachments: Optional[List[Attachment]] = MISSING,
-    suppress: bool = MISSING,
-    suppress_embeds: bool = MISSING,
-    delete_after: Optional[float] = None,
-    allowed_mentions: Optional[AllowedMentions] = MISSING,
-    view: Optional[View] = MISSING,
-    components: Optional[Components[MessageUIComponent]] = MISSING,
+    delete_after: Optional[float],
+    # these are the actual edit kwargs,
+    # all of which can be set to `MISSING`
+    content: Optional[str],
+    embed: Optional[Embed],
+    embeds: List[Embed],
+    file: File,
+    files: List[File],
+    attachments: Optional[List[Attachment]],
+    suppress: bool,  # deprecated
+    suppress_embeds: bool,
+    allowed_mentions: Optional[AllowedMentions],
+    view: Optional[View],
+    components: Optional[Components[MessageUIComponent]],
 ) -> Message:
     if embed is not MISSING and embeds is not MISSING:
         raise TypeError("Cannot mix embed and embeds keyword arguments.")
@@ -659,7 +665,13 @@ class InteractionReference:
     type: :class:`InteractionType`
         The type of interaction.
     name: :class:`str`
-        The name of the application command.
+        The name of the application command, including group and subcommand name if applicable
+        (separated by spaces).
+
+        .. note::
+
+            For interaction references created before July 18th, 2022, this will not include group or subcommand names.
+
     user: :class:`User`
         The interaction author.
     """
@@ -971,7 +983,7 @@ class Message(Hashable):
                 setattr(self, key, transform(value))
 
     def _add_reaction(
-        self, data: ReactionActionEvent, emoji: EmojiInputType, user_id: int
+        self, data: MessageReactionAddEvent, emoji: EmojiInputType, user_id: int
     ) -> Reaction:
         reaction = utils.find(lambda r: r.emoji == emoji, self.reactions)
         is_me = user_id == self._state.self_id
@@ -992,7 +1004,7 @@ class Message(Hashable):
         return reaction
 
     def _remove_reaction(
-        self, data: ReactionPayload, emoji: EmojiInputType, user_id: int
+        self, data: MessageReactionRemoveEvent, emoji: EmojiInputType, user_id: int
     ) -> Reaction:
         reaction = utils.find(lambda r: r.emoji == emoji, self.reactions)
 
@@ -1024,7 +1036,7 @@ class Message(Hashable):
         del self.reactions[index]
         return reaction
 
-    def _update(self, data):
+    def _update(self, data: MessageUpdateEvent) -> None:
         # In an update scheme, 'author' key has to be handled before 'member'
         # otherwise they overwrite each other which is undesirable.
         # Since there's no good way to do this we have to iterate over every
@@ -1146,21 +1158,21 @@ class Message(Hashable):
         This allows you to receive the user IDs of mentioned users
         even in a private message context.
         """
-        return [int(x) for x in re.findall(r"<@!?([0-9]{15,20})>", self.content)]
+        return [int(x) for x in re.findall(r"<@!?([0-9]{17,19})>", self.content)]
 
     @utils.cached_slot_property("_cs_raw_channel_mentions")
     def raw_channel_mentions(self) -> List[int]:
         """List[:class:`int`]: A property that returns an array of channel IDs matched with
         the syntax of ``<#channel_id>`` in the message content.
         """
-        return [int(x) for x in re.findall(r"<#([0-9]{15,20})>", self.content)]
+        return [int(x) for x in re.findall(r"<#([0-9]{17,19})>", self.content)]
 
     @utils.cached_slot_property("_cs_raw_role_mentions")
     def raw_role_mentions(self) -> List[int]:
         """List[:class:`int`]: A property that returns an array of role IDs matched with
         the syntax of ``<@&role_id>`` in the message content.
         """
-        return [int(x) for x in re.findall(r"<@&([0-9]{15,20})>", self.content)]
+        return [int(x) for x in re.findall(r"<@&([0-9]{17,19})>", self.content)]
 
     @utils.cached_slot_property("_cs_channel_mentions")
     def channel_mentions(self) -> List[GuildChannel]:
@@ -1421,10 +1433,10 @@ class Message(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
-        delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> Message:
         ...
 
@@ -1437,10 +1449,10 @@ class Message(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
-        delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> Message:
         ...
 
@@ -1453,10 +1465,10 @@ class Message(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
-        delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> Message:
         ...
 
@@ -1469,14 +1481,29 @@ class Message(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
-        delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> Message:
         ...
 
-    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
+    async def edit(
+        self,
+        content: Optional[str] = MISSING,
+        *,
+        embed: Optional[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
+        file: File = MISSING,
+        files: List[File] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
+        suppress: bool = MISSING,  # deprecated
+        suppress_embeds: bool = MISSING,
+        allowed_mentions: Optional[AllowedMentions] = MISSING,
+        view: Optional[View] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
+        delete_after: Optional[float] = None,
+    ) -> Message:
         """|coro|
 
         Edits the message.
@@ -1591,15 +1618,25 @@ class Message(Hashable):
 
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
-        if "attachments" not in fields and (fields.get("file") or fields.get("files")):
-            fields["attachments"] = self.attachments
+        if attachments is MISSING and (file or files):
+            attachments = self.attachments
 
         return await _edit_handler(
             self,
             default_flags=self.flags.value,
             previous_allowed_mentions=previous_allowed_mentions,
             content=content,
-            **fields,
+            embed=embed,
+            embeds=embeds,
+            file=file,
+            files=files,
+            attachments=attachments,
+            suppress=suppress,
+            suppress_embeds=suppress_embeds,
+            allowed_mentions=allowed_mentions,
+            view=view,
+            components=components,
+            delete_after=delete_after,
         )
 
     async def publish(self) -> None:
@@ -2082,10 +2119,10 @@ class PartialMessage(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
-        delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> Message:
         ...
 
@@ -2098,10 +2135,10 @@ class PartialMessage(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
-        delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> Message:
         ...
 
@@ -2114,10 +2151,10 @@ class PartialMessage(Hashable):
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
-        delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> Message:
         ...
 
@@ -2130,14 +2167,29 @@ class PartialMessage(Hashable):
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
-        delete_after: Optional[float] = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components] = ...,
+        components: Optional[Components[MessageUIComponent]] = ...,
+        delete_after: Optional[float] = ...,
     ) -> Message:
         ...
 
-    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
+    async def edit(
+        self,
+        content: Optional[str] = MISSING,
+        *,
+        embed: Optional[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
+        file: File = MISSING,
+        files: List[File] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
+        suppress: bool = MISSING,  # deprecated
+        suppress_embeds: bool = MISSING,
+        allowed_mentions: Optional[AllowedMentions] = MISSING,
+        view: Optional[View] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
+        delete_after: Optional[float] = None,
+    ) -> Message:
         """|coro|
 
         Edits the message.
@@ -2249,13 +2301,23 @@ class PartialMessage(Hashable):
         """
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
-        if "attachments" not in fields and (fields.get("file") or fields.get("files")):
-            fields["attachments"] = (await self.fetch()).attachments
+        if attachments is MISSING and (file or files):
+            attachments = (await self.fetch()).attachments
 
         return await _edit_handler(
             self,
             default_flags=0,
             previous_allowed_mentions=None,
             content=content,
-            **fields,
+            embed=embed,
+            embeds=embeds,
+            file=file,
+            files=files,
+            attachments=attachments,
+            suppress=suppress,
+            suppress_embeds=suppress_embeds,
+            allowed_mentions=allowed_mentions,
+            view=view,
+            components=components,
+            delete_after=delete_after,
         )

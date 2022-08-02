@@ -166,7 +166,7 @@ class Converter(Protocol[T_co]):
         raise NotImplementedError("Derived classes need to implement this.")
 
 
-_ID_REGEX = re.compile(r"([0-9]{15,20})$")
+_ID_REGEX = re.compile(r"([0-9]{17,19})$")
 
 
 class IDConverter(Converter[T_co]):
@@ -190,7 +190,7 @@ class ObjectConverter(IDConverter[disnake.Object]):
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Object:
         match = self._get_id_match(argument) or re.match(
-            r"<(?:@(?:!|&)?|#)([0-9]{15,20})>$", argument
+            r"<(?:@(?:!|&)?|#)([0-9]{17,19})>$", argument
         )
 
         if match is None:
@@ -260,7 +260,7 @@ class MemberConverter(IDConverter[disnake.Member]):
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Member:
         bot: disnake.Client = ctx.bot
-        match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{15,20})>$", argument)
+        match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{17,19})>$", argument)
         guild = ctx.guild
         result: Optional[disnake.Member] = None
         user_id: Optional[int] = None
@@ -321,7 +321,7 @@ class UserConverter(IDConverter[disnake.User]):
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.User:
-        match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{15,20})>$", argument)
+        match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{17,19})>$", argument)
         state = ctx._state
         bot: disnake.Client = ctx.bot
         result: Optional[Union[disnake.User, disnake.Member]] = None
@@ -385,11 +385,11 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
 
     @staticmethod
     def _get_id_matches(ctx: AnyContext, argument: str) -> Tuple[Optional[int], int, int]:
-        id_regex = re.compile(r"(?:(?P<channel_id>[0-9]{15,20})-)?(?P<message_id>[0-9]{15,20})$")
+        id_regex = re.compile(r"(?:(?P<channel_id>[0-9]{17,19})-)?(?P<message_id>[0-9]{17,19})$")
         link_regex = re.compile(
             r"https?://(?:(ptb|canary|www)\.)?discord(?:app)?\.com/channels/"
-            r"(?P<guild_id>[0-9]{15,20}|@me)"
-            r"/(?P<channel_id>[0-9]{15,20})/(?P<message_id>[0-9]{15,20})/?$"
+            r"(?P<guild_id>[0-9]{17,19}|@me)"
+            r"/(?P<channel_id>[0-9]{17,19})/(?P<message_id>[0-9]{17,19})/?$"
         )
         match = id_regex.match(argument) or link_regex.match(argument)
         if not match:
@@ -481,7 +481,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
     def _resolve_channel(ctx: AnyContext, argument: str, attribute: str, type: Type[CT]) -> CT:
         bot: disnake.Client = ctx.bot
 
-        match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{15,20})>$", argument)
+        match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{17,19})>$", argument)
         result: Optional[disnake.abc.GuildChannel] = None
         guild = ctx.guild
 
@@ -508,7 +508,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
 
     @staticmethod
     def _resolve_thread(ctx: AnyContext, argument: str, attribute: str, type: Type[TT]) -> TT:
-        match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{15,20})>$", argument)
+        match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{17,19})>$", argument)
         result: Optional[disnake.Thread] = None
         guild = ctx.guild
 
@@ -763,7 +763,7 @@ class RoleConverter(IDConverter[disnake.Role]):
         if not guild:
             raise NoPrivateMessage()
 
-        match = self._get_id_match(argument) or re.match(r"<@&([0-9]{15,20})>$", argument)
+        match = self._get_id_match(argument) or re.match(r"<@&([0-9]{17,19})>$", argument)
         if match:
             result = guild.get_role(int(match.group(1)))
         else:
@@ -843,7 +843,7 @@ class EmojiConverter(IDConverter[disnake.Emoji]):
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Emoji:
         match = self._get_id_match(argument) or re.match(
-            r"<a?:[a-zA-Z0-9\_]{1,32}:([0-9]{15,20})>$", argument
+            r"<a?:[a-zA-Z0-9\_]{1,32}:([0-9]{17,19})>$", argument
         )
         result: Optional[disnake.Emoji] = None
         bot = ctx.bot
@@ -876,7 +876,7 @@ class PartialEmojiConverter(Converter[disnake.PartialEmoji]):
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.PartialEmoji:
-        match = re.match(r"<(a?):([a-zA-Z0-9\_]{1,32}):([0-9]{15,20})>$", argument)
+        match = re.match(r"<(a?):([a-zA-Z0-9\_]{1,32}):([0-9]{17,19})>$", argument)
 
         if match:
             emoji_animated = bool(match.group(1))
@@ -987,7 +987,7 @@ class GuildScheduledEventConverter(IDConverter[disnake.GuildScheduledEvent]):
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.GuildScheduledEvent:
         event_regex = re.compile(
             r"https?://(?:(?:ptb|canary|www)\.)?discord(?:app)?\.com/events/"
-            r"([0-9]{15,20})/([0-9]{15,20})/?$"
+            r"([0-9]{17,19})/([0-9]{17,19})/?$"
         )
         bot: disnake.Client = ctx.bot
         result: Optional[disnake.GuildScheduledEvent] = None
@@ -1080,7 +1080,7 @@ class clean_content(Converter[str]):
             id = int(match[2])
             return transforms[type](id)
 
-        result = re.sub(r"<(@[!&]?|#)([0-9]{15,20})>", repl, argument)
+        result = re.sub(r"<(@[!&]?|#)([0-9]{17,19})>", repl, argument)
         if self.escape_markdown:
             result = disnake.utils.escape_markdown(result)
         elif self.remove_markdown:
@@ -1216,7 +1216,7 @@ async def _actual_conversion(
             if inspect.ismethod(converter.convert):
                 return await converter.convert(ctx, argument)
             else:
-                return await converter().convert(ctx, argument)  # type: ignore
+                return await converter().convert(ctx, argument)
         elif isinstance(converter, Converter):
             return await converter.convert(ctx, argument)  # type: ignore
     except CommandError:
