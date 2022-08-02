@@ -32,7 +32,6 @@ from .asset import Asset
 from .colour import Colour
 from .enums import ActivityType, try_enum
 from .partial_emoji import PartialEmoji
-from .utils import _get_as_snowflake
 
 __all__ = (
     "BaseActivity",
@@ -101,6 +100,7 @@ if TYPE_CHECKING:
         ActivityParty,
         ActivityTimestamps,
     )
+    from .types.emoji import PartialEmoji as PartialEmojiPayload
 
 
 class BaseActivity:
@@ -124,8 +124,13 @@ class BaseActivity:
 
     __slots__ = ("_created_at",)
 
-    def __init__(self, **kwargs):
-        self._created_at: Optional[float] = kwargs.pop("created_at", None)
+    def __init__(
+        self,
+        *,
+        created_at: Optional[float] = None,
+        **kwargs: Any,
+    ):
+        self._created_at: Optional[float] = created_at
 
     @property
     def created_at(self) -> Optional[datetime.datetime]:
@@ -153,6 +158,15 @@ class Activity(BaseActivity):
 
     - :class:`Game`
     - :class:`Streaming`
+
+    Parameters
+    ----------
+    name: Optional[:class:`str`]
+        The name of the activity.
+    url: Optional[:class:`str`]
+        A stream URL that the activity could be doing.
+    type: :class:`ActivityType`
+        The type of activity currently being done.
 
     Attributes
     ----------
@@ -187,7 +201,7 @@ class Activity(BaseActivity):
         A dictionary representing the activity party. It contains the following optional keys:
 
         - ``id``: A string representing the party ID.
-        - ``size``: A list of up to two integer elements denoting (current_size, maximum_size).
+        - ``size``: A list of two integers denoting (current_size, maximum_size).
     buttons: List[:class:`dict`]
         A list of dictionaries representing custom buttons shown in a rich presence.
         Each dictionary contains the following keys:
@@ -218,29 +232,48 @@ class Activity(BaseActivity):
         "buttons",
     )
 
-    def __init__(self, **kwargs):
+    def __init__(
+        self,
+        *,
+        name: Optional[str] = None,
+        url: Optional[str] = None,
+        type: Optional[Union[ActivityType, int]] = None,
+        state: Optional[str] = None,
+        details: Optional[str] = None,
+        timestamps: Optional[ActivityTimestamps] = None,
+        assets: Optional[ActivityAssets] = None,
+        party: Optional[ActivityParty] = None,
+        application_id: Optional[Union[str, int]] = None,
+        flags: Optional[int] = None,
+        sync_id: Optional[str] = None,
+        session_id: Optional[str] = None,
+        buttons: Optional[List[ActivityButton]] = None,
+        emoji: Optional[Union[PartialEmojiPayload, ActivityEmojiPayload]] = None,
+        **kwargs: Any,
+    ):
         super().__init__(**kwargs)
-        self.state: Optional[str] = kwargs.pop("state", None)
-        self.details: Optional[str] = kwargs.pop("details", None)
-        self.timestamps: ActivityTimestamps = kwargs.pop("timestamps", {})
-        self.assets: ActivityAssets = kwargs.pop("assets", {})
-        self.party: ActivityParty = kwargs.pop("party", {})
-        self.application_id: Optional[int] = _get_as_snowflake(kwargs, "application_id")
-        self.name: Optional[str] = kwargs.pop("name", None)
-        self.url: Optional[str] = kwargs.pop("url", None)
-        self.flags: int = kwargs.pop("flags", 0)
-        self.sync_id: Optional[str] = kwargs.pop("sync_id", None)
-        self.session_id: Optional[str] = kwargs.pop("session_id", None)
-        self.buttons: List[ActivityButton] = kwargs.pop("buttons", [])
+        self.state: Optional[str] = state
+        self.details: Optional[str] = details
+        self.timestamps: ActivityTimestamps = timestamps or {}
+        self.assets: ActivityAssets = assets or {}
+        self.party: ActivityParty = party or {}
+        self.application_id: Optional[int] = (
+            int(application_id) if application_id is not None else None
+        )
+        self.name: Optional[str] = name
+        self.url: Optional[str] = url
+        self.flags: int = flags or 0
+        self.sync_id: Optional[str] = sync_id
+        self.session_id: Optional[str] = session_id
+        self.buttons: List[ActivityButton] = buttons or []
 
-        activity_type = kwargs.pop("type", -1)
+        activity_type = type if type is not None else -1  # TODO: 0?
         self.type: ActivityType = (
             activity_type
             if isinstance(activity_type, ActivityType)
             else try_enum(ActivityType, activity_type)
         )
 
-        emoji = kwargs.pop("emoji", None)
         self.emoji: Optional[PartialEmoji] = (
             PartialEmoji.from_dict(emoji) if emoji is not None else None
         )
@@ -367,18 +400,22 @@ class Game(BaseActivity):
 
     __slots__ = ("name", "_end", "_start")
 
-    def __init__(self, name: str, **extra):
-        super().__init__(**extra)
+    def __init__(
+        self,
+        name: str,
+        *,
+        timestamps: Optional[ActivityTimestamps] = None,
+        **kwargs: Any,
+    ):
+        super().__init__(**kwargs)
         self.name: str = name
 
-        try:
-            timestamps: ActivityTimestamps = extra["timestamps"]
-        except KeyError:
+        if timestamps:
+            self._start: int = timestamps.get("start", 0)
+            self._end: int = timestamps.get("end", 0)
+        else:
             self._start = 0
             self._end = 0
-        else:
-            self._start = timestamps.get("start", 0)
-            self._end = timestamps.get("end", 0)
 
     @property
     def type(self) -> Literal[ActivityType.playing]:
@@ -408,8 +445,8 @@ class Game(BaseActivity):
     def __repr__(self) -> str:
         return f"<Game name={self.name!r}>"
 
-    def to_dict(self) -> Dict[str, Any]:
-        timestamps: Dict[str, Any] = {}
+    def to_dict(self) -> ActivityPayload:
+        timestamps: ActivityTimestamps = {}
         if self._start:
             timestamps["start"] = self._start
 
@@ -479,14 +516,23 @@ class Streaming(BaseActivity):
 
     __slots__ = ("platform", "name", "game", "url", "details", "assets")
 
-    def __init__(self, *, name: Optional[str], url: str, **extra: Any):
-        super().__init__(**extra)
+    def __init__(
+        self,
+        *,
+        name: Optional[str],
+        url: str,
+        details: Optional[str] = None,
+        state: Optional[str] = None,
+        assets: Optional[ActivityAssets] = None,
+        **kwargs: Any,
+    ):
+        super().__init__(**kwargs)
         self.platform: Optional[str] = name
-        self.name: Optional[str] = extra.pop("details", name)
-        self.game: Optional[str] = extra.pop("state", None)
+        self.name: Optional[str] = details or name
+        self.details: Optional[str] = self.name  # compatibility
         self.url: str = url
-        self.details: Optional[str] = extra.pop("details", self.name)  # compatibility
-        self.assets: ActivityAssets = extra.pop("assets", {})
+        self.game: Optional[str] = state
+        self.assets: ActivityAssets = assets or {}
 
     @property
     def type(self) -> Literal[ActivityType.streaming]:
@@ -538,8 +584,7 @@ class Streaming(BaseActivity):
 
 
 class Spotify:
-    """Represents a Spotify listening activity from Discord. This is a special case of
-    :class:`Activity` that makes it easier to work with the Spotify integration.
+    """Represents a Spotify listening activity from Discord.
 
     .. container:: operations
 
@@ -571,15 +616,27 @@ class Spotify:
         "_created_at",
     )
 
-    def __init__(self, **data):
-        self._state: str = data.pop("state", "")
-        self._details: str = data.pop("details", "")
-        self._timestamps: Dict[str, int] = data.pop("timestamps", {})
-        self._assets: ActivityAssets = data.pop("assets", {})
-        self._party: ActivityParty = data.pop("party", {})
-        self._sync_id: str = data.pop("sync_id")
-        self._session_id: str = data.pop("session_id")
-        self._created_at: Optional[float] = data.pop("created_at", None)
+    def __init__(
+        self,
+        *,
+        created_at: Optional[float] = None,
+        state: Optional[str] = None,
+        details: Optional[str] = None,
+        timestamps: Optional[ActivityTimestamps] = None,
+        assets: Optional[ActivityAssets] = None,
+        party: Optional[ActivityParty] = None,
+        sync_id: Optional[str] = None,
+        session_id: Optional[str] = None,
+        **kwargs: Any,
+    ):
+        self._state: str = state or ""
+        self._details: str = details or ""
+        self._timestamps: ActivityTimestamps = timestamps or {}
+        self._assets: ActivityAssets = assets or {}
+        self._party: ActivityParty = party or {}
+        self._sync_id: str = sync_id or ""
+        self._session_id: Optional[str] = session_id
+        self._created_at: Optional[float] = created_at
 
     @property
     def type(self) -> Literal[ActivityType.listening]:
@@ -761,11 +818,12 @@ class CustomActivity(BaseActivity):
         name: Optional[str],
         *,
         emoji: Optional[Union[ActivityEmojiPayload, str, PartialEmoji]] = None,
-        **extra: Any,
+        state: Optional[str] = None,
+        **kwargs: Any,
     ):
-        super().__init__(**extra)
+        super().__init__(**kwargs)
         self.name: Optional[str] = name
-        self.state: Optional[str] = extra.pop("state", None)
+        self.state: Optional[str] = state
         if self.name == "Custom Status":
             self.name = self.state
 
@@ -791,8 +849,8 @@ class CustomActivity(BaseActivity):
         """
         return ActivityType.custom
 
-    def to_dict(self) -> Dict[str, Any]:
-        o: Dict[str, Any]
+    def to_dict(self) -> ActivityPayload:
+        o: ActivityPayload
         if self.name == self.state:
             o = {
                 "type": ActivityType.custom.value,
@@ -802,11 +860,11 @@ class CustomActivity(BaseActivity):
         else:
             o = {
                 "type": ActivityType.custom.value,
-                "name": self.name,
+                "name": self.name or "",
             }
 
         if self.emoji:
-            o["emoji"] = self.emoji.to_dict()
+            o["emoji"] = self.emoji.to_dict()  # type: ignore
         return o
 
     def __eq__(self, other: Any) -> bool:
