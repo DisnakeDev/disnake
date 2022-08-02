@@ -111,4 +111,8 @@ class Activity(SendableActivity, total=False):
     # `buttons` is a list of strings when received over gw,
     # bots cannot access the full button data (like urls)
     buttons: List[str]
+    # all of these are undocumented, but still useful in some cases:
+    id: Optional[str]
+    platform: Optional[str]
+    sync_id: Optional[str]
     session_id: Optional[str]
