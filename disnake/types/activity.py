@@ -57,10 +57,12 @@ class ActivityTimestamps(TypedDict, total=False):
 
 class ActivityParty(TypedDict, total=False):
     id: str
-    size: List[int]
+    size: List[int]  # (current size, max size)
 
 
 class ActivityAssets(TypedDict, total=False):
+    # large_image/small_image may be a snowflake or prefixed media proxy ID, see:
+    # https://discord.com/developers/docs/topics/gateway#activity-object-activity-asset-image
     large_image: str
     large_text: str
     small_image: str
@@ -91,7 +93,7 @@ class _SendableActivityOptional(TypedDict, total=False):
     url: Optional[str]
 
 
-ActivityType = Literal[0, 1, 2, 4, 5]
+ActivityType = Literal[0, 1, 2, 3, 4, 5]
 
 
 class SendableActivity(_SendableActivityOptional):
@@ -99,20 +101,17 @@ class SendableActivity(_SendableActivityOptional):
     type: ActivityType
 
 
-class _BaseActivity(SendableActivity):
-    created_at: int
-
-
-class Activity(_BaseActivity, total=False):
-    state: Optional[str]
-    details: Optional[str]
+class Activity(SendableActivity, total=False):
+    created_at: int  # required according to docs, but we treat it as optional for simplicity
     timestamps: ActivityTimestamps
-    assets: ActivityAssets
-    party: ActivityParty
     application_id: Snowflake
-    flags: int
+    details: Optional[str]
+    state: Optional[str]
     emoji: Optional[ActivityEmoji]
+    party: ActivityParty
+    assets: ActivityAssets
     secrets: ActivitySecrets
-    session_id: Optional[str]
     instance: bool
+    flags: int
     buttons: List[ActivityButton]
+    session_id: Optional[str]
