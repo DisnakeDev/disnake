@@ -60,7 +60,6 @@ if TYPE_CHECKING:
     from .threads import Thread
     from .types.automod import (
         AutoModAction as AutoModActionPayload,
-        AutoModActionExecutionEvent as AutoModActionExecutionEventPayload,
         AutoModActionMetadata,
         AutoModBlockMessageActionMetadata,
         AutoModRule as AutoModRulePayload,
@@ -69,6 +68,7 @@ if TYPE_CHECKING:
         AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
         EditAutoModRule as EditAutoModRulePayload,
     )
+    from .types.gateway import AutoModerationActionExecutionEvent
 
 __all__ = (
     "AutoModAction",
@@ -634,7 +634,7 @@ class AutoModActionExecution:
         "matched_content",
     )
 
-    def __init__(self, *, data: AutoModActionExecutionEventPayload, guild: Guild) -> None:
+    def __init__(self, *, data: AutoModerationActionExecutionEvent, guild: Guild) -> None:
         self.guild: Guild = guild
         self.action: AutoModAction = _automod_action_factory(data["action"])
         self.rule_id: int = int(data["rule_id"])

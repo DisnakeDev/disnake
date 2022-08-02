@@ -64,12 +64,6 @@ class VoiceRegion(TypedDict):
     custom: bool
 
 
-class VoiceServerUpdate(TypedDict):
-    token: str
-    guild_id: Snowflake
-    endpoint: Optional[str]
-
-
 class VoiceIdentify(TypedDict):
     server_id: Snowflake
     user_id: Snowflake
