@@ -288,7 +288,7 @@ class Activity(BaseActivity):
         self.session_id: Optional[str] = session_id
         self.buttons: List[str] = buttons or []
 
-        activity_type = type if type is not None else -1  # TODO: 0?
+        activity_type = type if type is not None else 0
         self.type: ActivityType = (
             activity_type
             if isinstance(activity_type, ActivityType)
