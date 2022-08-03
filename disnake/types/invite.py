@@ -25,13 +25,12 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict, Union
+from typing import Literal, Optional, TypedDict
 
 from .appinfo import PartialAppInfo
 from .channel import InviteChannel
 from .guild import InviteGuild
 from .guild_scheduled_event import GuildScheduledEvent
-from .snowflake import Snowflake
 from .user import PartialUser
 
 InviteTargetType = Literal[1, 2]
@@ -68,33 +67,3 @@ class IncompleteInvite(_InviteMetadata):
 
 class Invite(IncompleteInvite, _InviteOptional):
     ...
-
-
-class _GatewayInviteCreateOptional(TypedDict, total=False):
-    guild_id: Snowflake
-    inviter: PartialUser
-    target_type: InviteTargetType
-    target_user: PartialUser
-    target_application: PartialAppInfo
-
-
-class GatewayInviteCreate(_GatewayInviteCreateOptional):
-    channel_id: Snowflake
-    code: str
-    created_at: str
-    max_age: int
-    max_uses: int
-    temporary: bool
-    uses: bool
-
-
-class _GatewayInviteDeleteOptional(TypedDict, total=False):
-    guild_id: Snowflake
-
-
-class GatewayInviteDelete(_GatewayInviteDeleteOptional):
-    channel_id: Snowflake
-    code: str
-
-
-GatewayInvite = Union[GatewayInviteCreate, GatewayInviteDelete]
