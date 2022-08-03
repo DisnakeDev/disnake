@@ -3,3 +3,6 @@ taskipy~=1.10.1
 
 # changelog
 towncrier==21.9.0
+
+# checks MANIFEST.in + sdist
+check-manifest==0.48
