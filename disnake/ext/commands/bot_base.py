@@ -152,10 +152,12 @@ class BotBase(CommonBotBase, GroupMixin):
         super().__init__(**options)
         self.command_prefix = command_prefix
         if (
-            command_prefix is not when_mentioned
+            # note: no need to check for empty iterables,
+            # as they won't be allowed by `get_prefix`
+            command_prefix is not None
+            and command_prefix is not when_mentioned
             and not self.intents.message_content  # type: ignore
         ):
-
             warnings.warn(
                 "Message Content intent is not enabled and a prefix is configured. "
                 "This may cause limited functionality for prefix commands. "
