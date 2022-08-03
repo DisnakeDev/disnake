@@ -18,7 +18,6 @@ flake8 = { cmd = "flake8", help = "Run flake8"}
 isort = { cmd = "task lint isort", help = "Run isort" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-slotscheck = { cmd = "nox -Rs slotscheck --", help = "Run slotscheck" }
 setup_env = {cmd = 'nox -s setup --', help = 'Setup the local environment and set up all dependencies'}
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
@@ -142,4 +141,24 @@ exclude_lines = [
     "^\\s*if TYPE_CHECKING",
     "^\\s*raise NotImplementedError$",
     "^\\s*\\.\\.\\.$",
+]
+
+
+[tool.check-manifest]
+ignore = [
+    # CI
+    ".flake8",
+    ".pre-commit-config.yaml",
+    ".readthedocs.yml",
+    "noxfile.py",
+    # docs
+    "CONTRIBUTING.md",
+    "assets/**",
+    "changelog/**",
+    "docs/**",
+    "examples/**",
+    # tests
+    "test_bot/**",
+    "test_launcher.py",
+    "tests/**",
 ]
