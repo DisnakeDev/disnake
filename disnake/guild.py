@@ -2185,12 +2185,12 @@ class Guild(Hashable):
 
 
         .. csv-table::
-            :widths: 25, 30, 20, 25
+            :widths: 30, 30, 20, 20
             :header: "``channel``", "``entity_type``", "``scheduled_end_time``", "``entity_metadata`` with location"
 
-            :class:`VoiceChannel`, :attr:`~GuildScheduledEventEntityType.voice` (set automatically), optional, unset
-            :class:`StageChannel`, :attr:`~GuildScheduledEventEntityType.stage_instance` (set automatically), optional, unset
-            unspecified snowflake, required, optional, unset
+            :class:`.abc.Snowflake` with ``type`` attribute being :class:`ChannelType.voice` , :attr:`~GuildScheduledEventEntityType.voice` (set automatically), optional, unset
+            :class:`.abc.Snowflake` with ``type`` attribute being :class:`ChannelType.stage_voice`, :attr:`~GuildScheduledEventEntityType.stage_instance` (set automatically), optional, unset
+            :class:`.abc.Snowflake` with missing/other ``type`` attribute, required, optional, unset
             ``None``, :attr:`~GuildScheduledEventEntityType.external` (set automatically), required, required
             unset, :attr:`~GuildScheduledEventEntityType.external`, required, required
 
