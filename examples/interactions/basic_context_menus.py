@@ -1,34 +1,33 @@
+"""
+A simple example showing context menu commands.
+User commands show up in the context menu (right-click/tap) of users,
+while message commands show up in the context menu of messages.
+"""
+
 import os
 
 import disnake
 from disnake.ext import commands
 
-bot = commands.Bot(
-    command_prefix=commands.when_mentioned,
-)
+bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
-@bot.event
-async def on_ready():
-    print("Bot is ready")
+# The decorated function only has one required parameter, the interaction.
+# Optionally, the function may also take a second parameter,
+# which is the target of the interaction, i.e. the user/member or message
+# (a shortcut to `inter.target`).
 
 
-# Here we create a user command. The function below the decorator
-# should only have one requierd argument, which is
-# an instance of ApplicationCommandInteraction.
-@bot.user_command(name="Avatar")  # optional
-async def avatar(inter: disnake.ApplicationCommandInteraction, user: disnake.User):
-    emb = disnake.Embed(title=f"{user}'s avatar")
-    emb.set_image(url=user.display_avatar.url)
-    await inter.response.send_message(embed=emb)
+@bot.user_command(name="Avatar")  # name is optional
+async def avatar(inter: disnake.UserCommandInteraction, user: disnake.User):
+    embed = disnake.Embed(title=f"{user}'s avatar")
+    embed.set_image(url=user.display_avatar.url)
+    await inter.response.send_message(embed=embed)
 
 
-# Here we create a message command. The function below the decorator
-# should only have one required argument, which is
-# an instance of ApplicationCommandInteraction.
-@bot.message_command(name="Reverse")  # optional
-async def reverse(inter: disnake.ApplicationCommandInteraction, message: disnake.Message):
-    # Let's reverse it and send back
+@bot.message_command(name="Reverse")  # name is optional
+async def reverse(inter: disnake.MessageCommandInteraction, message: disnake.Message):
+    # Let's reverse it and send it back
     await inter.response.send_message(message.content[::-1])
 
 

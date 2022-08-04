@@ -1,3 +1,7 @@
+"""
+An example demonstrating two methods of sending modals and handling modal responses.
+"""
+
 import asyncio
 import os
 
@@ -5,6 +9,16 @@ import disnake
 from disnake.ext import commands
 
 bot = commands.Bot(command_prefix=commands.when_mentioned)
+
+
+# One way of sending modals is using a "high-level" implementation similar to views,
+# in which a class representing the modal is defined, complete with a callback and error handler.
+
+# Sent modals are stored internally for a certain amount of time, taking up some amount of memory.
+# Since there is no way of knowing whether the user closed the modal without submitting it,
+# they time out after 10 minutes by default, at which point they will be removed
+# from the internal storage, and any submission by the user will fail.
+# This timeout can be adjusted through the use of the `timeout` parameter of the modal class.
 
 
 class MyModal(disnake.ui.Modal):
@@ -48,8 +62,17 @@ class MyModal(disnake.ui.Modal):
 
 @bot.slash_command()
 async def create_tag(inter: disnake.CommandInteraction):
-    # Sends a modal using a high level implementation.
     await inter.response.send_modal(modal=MyModal())
+
+
+# Similar to the views and low-level components duality,
+# you can also send modals using a more "low-level" implementation
+# without creating a custom modal class, and instead using event listeners.
+
+# Naturally, these are persistent, unlike modal classes which don't persist
+# over bot restarts and generally time out after a certain period of time.
+# Similarly, the listener approach doesn't impact memory usage for every sent modal
+# as much as the method shown above.
 
 
 @bot.slash_command()

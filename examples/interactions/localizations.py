@@ -14,7 +14,6 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 # For more details, see https://docs.disnake.dev/en/latest/ext/commands/slash_commands.html#localizations
 
-
 # Consider an example file `locale/de.json` containing:
 #
 # {
@@ -35,9 +34,6 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 #     "GAME_CHESS": "Schach",
 #     "GAME_RISK": "Risiko"
 # }
-
-
-db: Any = ...  # a placeholder for a database connection used in this example
 
 
 @bot.slash_command()
@@ -63,13 +59,14 @@ async def highscore(
     game: Which game to check scores in. {{ HIGHSCORE_GAME }}
     interval: The time interval to use. {{ HIGHSCORE_RANGE }}
     """
+    db: Any = ...  # a placeholder for an actual database connection
     data = await db.highscores.find(user=user.id, game=game).filter(interval).max()
     await inter.send(f"max: {data}")
 
 
 @highscore.autocomplete("game")
 async def game_autocomp(inter: disnake.CommandInteraction, string: str):
-    # this clearly isn't great autocompletion, and it autocompletes based on the English name,
+    # this clearly isn't great autocompletion as it autocompletes based on the English name,
     # but for the purposes of this example it'll do
     games = ("Tic-tac-toe", "Chess", "Risk")
     return [
@@ -79,5 +76,7 @@ async def game_autocomp(inter: disnake.CommandInteraction, string: str):
     ]
 
 
+# Don't forget to load the localizations:
 bot.i18n.load("locale/")
+
 bot.run(os.getenv("BOT_TOKEN"))

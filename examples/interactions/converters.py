@@ -1,3 +1,7 @@
+"""
+An example using converters with slash commands.
+"""
+
 import os
 
 import disnake
@@ -6,18 +10,19 @@ from disnake.ext import commands
 bot = commands.Bot(command_prefix=commands.when_mentioned)
 
 
-# classic commands.Converter classes have been replaced by more user-friendly converter functions
-# These can be set using a parameter of Param
+# Classic commands.Converter classes have been replaced by more user-friendly converter functions,
+# which can be set using `Param` and the `converter` argument.
 @bot.slash_command()
-async def clean_content_converter(
+async def clean_command(
     inter: disnake.CommandInteraction,
     text: str = commands.Param(converter=lambda inter, text: text.replace("@", "\\@")),
 ):
     ...
 
 
-# Converters may also set the type of the option using annotations
-# here the converter is actually using a user option despite the actual command being annotated as str
+# Converters may also set the type of the option using annotations.
+# Here the converter (and therefore, the slash command) is actually using a user option,
+# while the command callback will receive a str.
 def avatar_converter(inter: disnake.CommandInteraction, user: disnake.User) -> str:
     return user.display_avatar.url
 
@@ -30,7 +35,7 @@ async def command_with_avatar(
     ...
 
 
-# Converting to custom classes is also very easy using class methods
+# Converting to custom classes is also very easy using class methods.
 class SomeCustomClass:
     def __init__(self, username: str, discriminator: str) -> None:
         self.username = username
@@ -49,8 +54,10 @@ async def command_with_clsmethod(
     ...
 
 
-# an even better approach is to register a method
-# as the class converter to be able to use only an annotation
+# An even better approach is to register a method as the class converter,
+# to be able to use only an annotation for the slash command option.
+# Here, `@converter_method` works similarly to `@classmethod`,
+# except it also stores the converter callback in an internal registry.
 class OtherCustomClass:
     def __init__(self, username: str, discriminator: str) -> None:
         self.username = username
