@@ -181,10 +181,10 @@ class BotBase(CommonBotBase, GroupMixin):
             )
 
         self._checks: List[Check] = []
-        self._check_once = []
+        self._check_once: List[Check] = []
 
-        self._before_invoke = None
-        self._after_invoke = None
+        self._before_invoke: Optional[CoroFunc] = None
+        self._after_invoke: Optional[CoroFunc] = None
 
         self._help_command = None
         self.description: str = inspect.cleandoc(description) if description else ""
