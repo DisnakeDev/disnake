@@ -150,7 +150,9 @@ class BotBase(CommonBotBase, GroupMixin):
         **options: Any,
     ):
         super().__init__(**options)
-        self.command_prefix = command_prefix
+
+        if not isinstance(self, disnake.Client):
+            raise RuntimeError("BotBase mixin must be used with disnake.Client")
 
         alternative = (
             "AutoShardedInteractionBot"
@@ -168,7 +170,7 @@ class BotBase(CommonBotBase, GroupMixin):
             # note: no need to check for empty iterables,
             # as they won't be allowed by `get_prefix`
             command_prefix is not when_mentioned
-            and not self.intents.message_content  # type: ignore
+            and not self.intents.message_content
         ):
             warnings.warn(
                 "Message Content intent is not enabled and a prefix is configured. "
@@ -179,6 +181,8 @@ class BotBase(CommonBotBase, GroupMixin):
                 MessageContentPrefixWarning,
                 stacklevel=2,
             )
+
+        self.command_prefix = command_prefix
 
         self._checks: List[Check] = []
         self._check_once: List[Check] = []
