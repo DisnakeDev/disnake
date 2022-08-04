@@ -1,1 +1,0 @@
-|commands| Disable message content intent warning when using ``command_prefix=None``.
