@@ -29,13 +29,6 @@ class MyModal(disnake.ui.Modal):
                 placeholder="The name of the tag",
                 custom_id="name",
                 style=disnake.TextInputStyle.short,
-                max_length=50,
-            ),
-            disnake.ui.TextInput(
-                label="Description",
-                placeholder="The description of the tag",
-                custom_id="description",
-                style=disnake.TextInputStyle.short,
                 min_length=5,
                 max_length=50,
             ),
@@ -51,9 +44,11 @@ class MyModal(disnake.ui.Modal):
         super().__init__(title="Create Tag", custom_id="create_tag", components=components)
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
-        embed = disnake.Embed(title="Tag Creation")
-        for key, value in inter.text_values.items():
-            embed.add_field(name=key.capitalize(), value=value, inline=False)
+        tag_name = inter.text_values["name"]
+        tag_content = inter.text_values["content"]
+
+        embed = disnake.Embed(title=f"Tag created: `{tag_name}`")
+        embed.add_field(name="Content", value=tag_content)
         await inter.response.send_message(embed=embed)
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
@@ -88,13 +83,6 @@ async def create_tag_low(inter: disnake.CommandInteraction):
                 placeholder="The name of the tag",
                 custom_id="name",
                 style=disnake.TextInputStyle.short,
-                max_length=50,
-            ),
-            disnake.ui.TextInput(
-                label="Description",
-                placeholder="The description of the tag",
-                custom_id="description",
-                style=disnake.TextInputStyle.short,
                 min_length=5,
                 max_length=50,
             ),
@@ -114,16 +102,18 @@ async def create_tag_low(inter: disnake.CommandInteraction):
         modal_inter: disnake.ModalInteraction = await bot.wait_for(
             "modal_submit",
             check=lambda i: i.custom_id == "create_tag_low" and i.author.id == inter.author.id,
-            timeout=300,
+            timeout=600,
         )
     except asyncio.TimeoutError:
         # The user didn't submit the modal in the specified period of time.
         # This is done since Discord doesn't dispatch any event for when a modal is closed/dismissed.
         return
 
-    embed = disnake.Embed(title="Tag Creation")
-    for custom_id, value in modal_inter.text_values.items():
-        embed.add_field(name=custom_id.capitalize(), value=value, inline=False)
+    tag_name = modal_inter.text_values["name"]
+    tag_content = modal_inter.text_values["content"]
+
+    embed = disnake.Embed(title=f"Tag created: `{tag_name}`")
+    embed.add_field(name="Content", value=tag_content)
     await modal_inter.response.send_message(embed=embed)
 
 
