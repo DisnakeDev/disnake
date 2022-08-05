@@ -1,5 +1,6 @@
+import functools
 import inspect
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, Type
 
 from _types import SphinxExtensionMeta
 from docutils import nodes
@@ -21,30 +22,6 @@ class DPYHTML5Translator(HTML5Translator):
 
 
 class DPYStandaloneHTMLBuilder(StandaloneHTMLBuilder):
-    # This is mostly copy pasted from Sphinx.
-    def write_genindex(self) -> None:
-        # the total count of lines for each index letter, used to distribute
-        # the entries into two columns
-        genindex = IndexEntries(self.env).create_index(self, group_entries=False)
-        indexcounts: List[int] = []
-        for _k, entries in genindex:
-            indexcounts.append(sum(1 + len(subitems) for _, (_, subitems, _) in entries))
-
-        genindexcontext = {
-            "genindexentries": genindex,
-            "genindexcounts": indexcounts,
-            "split_index": self.config.html_split_index,
-        }
-
-        if self.config.html_split_index:
-            self.handle_page("genindex", genindexcontext, "genindex-split.html")
-            self.handle_page("genindex-all", genindexcontext, "genindex.html")
-            for (key, entries), count in zip(genindex, indexcounts):
-                ctx = {"key": key, "entries": entries, "count": count, "genindexentries": genindex}
-                self.handle_page("genindex-" + key, ctx, "genindex-single.html")
-        else:
-            self.handle_page("genindex", genindexcontext, "genindex.html")
-
     def post_process_images(self, doctree: nodes.document) -> None:
         super().post_process_images(doctree)
 
@@ -77,6 +54,14 @@ def add_builders(app: Sphinx) -> None:
         app.add_builder(new_builder, override=True)
 
 
+def patch_genindex() -> None:
+    # Instead of overriding `write_genindex` in a custom builder and
+    # copying the entire method body while only changing one parameter (group_entries),
+    # we just patch the method we want to change instead.
+    new_create_index = functools.partialmethod(IndexEntries.create_index, group_entries=False)
+    IndexEntries.create_index = new_create_index  # type: ignore
+
+
 def disable_mathjax(app: Sphinx, config: Config) -> None:
     # prevent installation of mathjax script, which gets installed due to
     # https://github.com/readthedocs/sphinx-hoverxref/commit/7c4655092c482bd414b1816bdb4f393da117062a
@@ -93,5 +78,6 @@ def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.add_config_value("copy_static_images", [], "env")
 
     add_builders(app)
+    patch_genindex()
     app.connect("config-inited", disable_mathjax)
     app.connect("builder-inited", add_custom_jinja2)
