@@ -1,6 +1,6 @@
 import functools
 import inspect
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 from _types import SphinxExtensionMeta
 from docutils import nodes
@@ -44,12 +44,6 @@ def set_translator(app: Sphinx) -> None:
         app.set_translator(name, translator, override=True)
 
 
-def add_custom_jinja2(app: Sphinx) -> None:
-    tests: Dict[str, Any] = app.builder.templates.environment.tests
-    tests["prefixedwith"] = str.startswith
-    tests["suffixedwith"] = str.endswith
-
-
 def patch_genindex(*args: Any) -> None:
     # Instead of overriding `write_genindex` in a custom builder and
     # copying the entire method body while only changing one parameter (group_entries),
@@ -74,4 +68,3 @@ def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.connect("config-inited", patch_genindex)
     app.connect("config-inited", disable_mathjax)
     app.connect("builder-inited", set_translator)
-    app.connect("builder-inited", add_custom_jinja2)

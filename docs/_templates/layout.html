@@ -63,7 +63,7 @@
         <a href="{{ pathto('api')|e }}" class="extension-nav">API Reference</a>
         {%- for ext, p in discord_extensions %}
           {% set ext_name = ext.split('.') %}
-        <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename is prefixedwith p %}current-page{% endif %}">{{ ext_name[-1] }}</a>
+        <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename.startswith(p) %}current-page{% endif %}">{{ ext_name[-1] }}</a>
         {%- endfor %}
         </div>
       </nav>
@@ -77,7 +77,7 @@
           <a href="{{ pathto('api')|e }}" class="extension-nav">{{ _('API Reference') }}</a>
           {%- for ext, p in discord_extensions %}
           {% set ext_name = ext.split('.') %}
-          <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename is prefixedwith p %}current-page{% endif %}">{{ ext_name[-1] }}</a>
+          <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename.startswith(p) %}current-page{% endif %}">{{ ext_name[-1] }}</a>
           {%- endfor %}
         </div>
         <div class="header-breakpoint search-breakpoint">
@@ -112,7 +112,7 @@
     <a href="{{ pathto('api')|e }}" class="extension-nav">API Reference</a>
     {%- for ext, p in discord_extensions %}
     {% set ext_name = ext.split('.') %}
-    <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename is prefixedwith p %}current-page{% endif %}">{{ ext_name[-1] }}</a>
+    <a href="{{ pathto(p + '/index')|e }}" class="extension-nav {% if pagename.startswith(p) %}current-page{% endif %}">{{ ext_name[-1] }}</a>
     {%- endfor %}
   </div>
   <div id="sidebar">
