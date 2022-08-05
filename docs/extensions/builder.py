@@ -11,14 +11,6 @@ from sphinx.writers.html5 import HTML5Translator
 
 
 class DPYHTML5Translator(HTML5Translator):
-    def visit_section(self, node: nodes.section) -> None:
-        self.section_level += 1
-        self.body.append(self.starttag(node, "section"))
-
-    def depart_section(self, node: nodes.section) -> None:
-        self.section_level -= 1
-        self.body.append("</section>\n")
-
     def visit_table(self, node: nodes.table) -> None:
         self.body.append('<div class="table-wrapper">')
         super().visit_table(node)
