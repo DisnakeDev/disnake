@@ -22,11 +22,7 @@ class DPYHTML5Translator(HTML5Translator):
 
 
 class DPYStandaloneHTMLBuilder(StandaloneHTMLBuilder):
-    def post_process_images(self, doctree: nodes.document) -> None:
-        super().post_process_images(doctree)
-
-        for path in self.app.config.copy_static_images:
-            self.images[path] = path.split("/")[-1]
+    pass
 
 
 def add_custom_jinja2(app: Sphinx) -> None:
@@ -75,8 +71,6 @@ def disable_mathjax(app: Sphinx, config: Config) -> None:
 
 
 def setup(app: Sphinx) -> SphinxExtensionMeta:
-    app.add_config_value("copy_static_images", [], "env")
-
     add_builders(app)
     patch_genindex()
     app.connect("config-inited", disable_mathjax)

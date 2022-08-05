@@ -188,13 +188,6 @@ nitpick_ignore_files = [
 ]
 
 
-# unreferenced static images to copy
-copy_static_images = [
-    "images/drop_down_icon.svg",
-    "images/disnake.svg",
-]
-
-
 _spec = importlib.util.find_spec("disnake")
 if not (_spec and _spec.origin):
     # this should never happen

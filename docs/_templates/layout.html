@@ -71,7 +71,7 @@
     <header class="sticky-header">
       <nav>
         <a href="{{ pathto(master_doc)|e }}" class="main-heading desktop">
-          <img class="disnake-main-logo" src="{{ pathto('_images/' + 'disnake.svg', 1)|e }}" alt="disnake">
+          <img class="disnake-main-logo" src="{{ pathto('_static/disnake.svg', 1)|e }}" alt="disnake">
         </a>
         <div class="header-breakpoint desktop extension-breakpoint desktop">
           <a href="{{ pathto('api')|e }}" class="extension-nav">{{ _('API Reference') }}</a>
@@ -106,7 +106,7 @@
     {#- The sidebar component #}
 <aside>
   <a href="{{ pathto(master_doc)|e }}" class="mobile-heading">
-    <img class="disnake-mobile-logo" src="{{ pathto('_images/' + 'disnake.svg', 1)|e }}" alt="disnake">
+    <img class="disnake-mobile-logo" src="{{ pathto('_static/disnake.svg', 1)|e }}" alt="disnake">
   </a>
   <div class="sidebar-extension-list mobile-heading">
     <a href="{{ pathto('api')|e }}" class="extension-nav">API Reference</a>
