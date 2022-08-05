@@ -50,7 +50,7 @@ def add_custom_jinja2(app: Sphinx) -> None:
     tests["suffixedwith"] = str.endswith
 
 
-def patch_genindex() -> None:
+def patch_genindex(*args: Any) -> None:
     # Instead of overriding `write_genindex` in a custom builder and
     # copying the entire method body while only changing one parameter (group_entries),
     # we just patch the method we want to change instead.
@@ -71,7 +71,7 @@ def disable_mathjax(app: Sphinx, config: Config) -> None:
 
 
 def setup(app: Sphinx) -> SphinxExtensionMeta:
-    patch_genindex()
+    app.connect("config-inited", patch_genindex)
     app.connect("config-inited", disable_mathjax)
     app.connect("builder-inited", set_translator)
     app.connect("builder-inited", add_custom_jinja2)
