@@ -1,6 +1,7 @@
 import inspect
 from typing import Any, Dict, List, Type
 
+from _types import SphinxExtensionMeta
 from docutils import nodes
 from sphinx.application import Sphinx
 from sphinx.builders.html import StandaloneHTMLBuilder
@@ -96,7 +97,7 @@ def disable_mathjax(app: Sphinx, config: Config) -> None:
             app.disconnect(listener.id)
 
 
-def setup(app: Sphinx):
+def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.add_config_value("copy_static_images", [], "env")
 
     add_builders(app)

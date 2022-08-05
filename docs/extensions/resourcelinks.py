@@ -5,6 +5,7 @@
 from typing import Any, Dict, List, Optional, Tuple
 
 import sphinx
+from _types import SphinxExtensionMeta
 from docutils import nodes, utils
 from docutils.nodes import Node, system_message
 from docutils.parsers.rst.states import Inliner
@@ -38,7 +39,7 @@ def add_link_role(app: Sphinx) -> None:
     app.add_role("resource", make_link_role(app.config.resource_links))
 
 
-def setup(app: Sphinx) -> Dict[str, Any]:
+def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.add_config_value("resource_links", {}, "env")
     app.connect("builder-inited", add_link_role)
     return {"version": sphinx.__display_version__, "parallel_read_safe": True}

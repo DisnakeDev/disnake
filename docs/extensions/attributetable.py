@@ -5,6 +5,7 @@ import re
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, NamedTuple, Optional, Tuple
 
+from _types import SphinxExtensionMeta
 from docutils import nodes
 from sphinx import addnodes
 from sphinx.application import Sphinx
@@ -279,7 +280,7 @@ def class_results_to_node(key: str, elements: List[TableElement]) -> attributeta
     return attributetablecolumn("", title, ul)
 
 
-def setup(app: Sphinx) -> None:
+def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.add_directive("attributetable", PyAttributeTable)
     app.add_node(attributetable, html=(visit_attributetable_node, depart_attributetable_node))
     app.add_node(

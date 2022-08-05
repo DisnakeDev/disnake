@@ -1,3 +1,4 @@
+from _types import SphinxExtensionMeta
 from docutils import nodes
 from docutils.parsers.rst import Directive
 from sphinx.application import Sphinx
@@ -26,7 +27,7 @@ class ExceptionHierarchyDirective(Directive):
         return [node]
 
 
-def setup(app: Sphinx):
+def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.add_node(
         exception_hierarchy, html=(visit_exception_hierarchy_node, depart_exception_hierarchy_node)
     )
