@@ -1,17 +1,21 @@
 import functools
 import inspect
-from typing import Any, Dict, Type
+from typing import TYPE_CHECKING, Any, Dict
 
 from _types import SphinxExtensionMeta
 from docutils import nodes
 from sphinx.application import Sphinx
-from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.config import Config
 from sphinx.environment.adapters.indexentries import IndexEntries
 from sphinx.writers.html5 import HTML5Translator
 
+if TYPE_CHECKING:
+    translator_base = HTML5Translator
+else:
+    translator_base = object
 
-class DPYHTML5Translator(HTML5Translator):
+
+class CustomHTML5TranslatorMixin(translator_base):
     def visit_table(self, node: nodes.table) -> None:
         self.body.append('<div class="table-wrapper">')
         super().visit_table(node)
@@ -21,33 +25,29 @@ class DPYHTML5Translator(HTML5Translator):
         self.body.append("</div>")
 
 
-class DPYStandaloneHTMLBuilder(StandaloneHTMLBuilder):
-    pass
+def set_translator(app: Sphinx) -> None:
+    if app.builder.format != "html":
+        return
+
+    # Insert the `CustomHTML5TranslatorMixin` mixin into all defined
+    # translator types, as well as the default translator if not registered already
+
+    translators = app.registry.translators.copy()
+    translators.setdefault(app.builder.name, app.builder.default_translator_class)
+
+    for name, cls in translators.items():
+        translator = type(
+            "CustomHTML5Translator",
+            (CustomHTML5TranslatorMixin, cls),
+            {},
+        )
+        app.set_translator(name, translator, override=True)
 
 
 def add_custom_jinja2(app: Sphinx) -> None:
     tests: Dict[str, Any] = app.builder.templates.environment.tests
     tests["prefixedwith"] = str.startswith
     tests["suffixedwith"] = str.endswith
-
-
-def add_builders(app: Sphinx) -> None:
-    """This is necessary because RTD injects their own for some reason."""
-    app.set_translator("html", DPYHTML5Translator, override=True)
-    app.add_builder(DPYStandaloneHTMLBuilder, override=True)
-
-    try:
-        original = app.registry.builders["readthedocs"]
-    except KeyError:
-        pass
-    else:
-        injected_mro = tuple(
-            base if base is not StandaloneHTMLBuilder else DPYStandaloneHTMLBuilder
-            for base in original.mro()[1:]
-        )
-        new_builder: Type[DPYStandaloneHTMLBuilder] = type(original.__name__, injected_mro, {"name": "readthedocs"})  # type: ignore
-        app.set_translator("readthedocs", DPYHTML5Translator, override=True)
-        app.add_builder(new_builder, override=True)
 
 
 def patch_genindex() -> None:
@@ -71,7 +71,7 @@ def disable_mathjax(app: Sphinx, config: Config) -> None:
 
 
 def setup(app: Sphinx) -> SphinxExtensionMeta:
-    add_builders(app)
     patch_genindex()
     app.connect("config-inited", disable_mathjax)
+    app.connect("builder-inited", set_translator)
     app.connect("builder-inited", add_custom_jinja2)
