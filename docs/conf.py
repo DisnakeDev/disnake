@@ -17,7 +17,9 @@ import os
 import re
 import subprocess  # noqa: S404
 import sys
-from typing import Any
+from typing import Any, Dict, Optional
+
+from sphinx.application import Sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -110,7 +112,7 @@ with open("../disnake/__init__.py") as f:
 release = version
 
 
-def git(*args):
+def git(*args: str) -> str:
     return subprocess.check_output(["git", *args]).strip().decode()  # noqa: S603,S607
 
 
@@ -193,10 +195,14 @@ copy_static_images = [
 ]
 
 
-_disnake_module_path = os.path.dirname(importlib.util.find_spec("disnake").origin)  # type: ignore
+_spec = importlib.util.find_spec("disnake")
+if not (_spec and _spec.origin):
+    # this should never happen
+    raise RuntimeError("Unable to find module spec")
+_disnake_module_path = os.path.dirname(_spec.origin)
 
 
-def linkcode_resolve(domain, info):
+def linkcode_resolve(domain: str, info: Dict[str, Any]) -> Optional[str]:
     if domain != "py":
         return None
 
@@ -431,7 +437,7 @@ texinfo_documents = [
 # texinfo_no_detailmenu = False
 
 
-def setup(app):
+def setup(app: Sphinx) -> None:
     if app.config.language == "ja":
         app.config.intersphinx_mapping["py"] = ("https://docs.python.org/ja/3", None)
         app.config.html_context["discord_invite"] = "https://discord.gg/disnake"

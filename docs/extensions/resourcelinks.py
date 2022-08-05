@@ -2,7 +2,7 @@
 # Copyright 2007-2020 by the Sphinx team
 # Licensed under BSD.
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import sphinx
 from docutils import nodes, utils
@@ -20,8 +20,8 @@ def make_link_role(resource_links: Dict[str, str]) -> RoleFunction:
         text: str,
         lineno: int,
         inliner: Inliner,
-        options: Dict = None,
-        content: List[str] = None,
+        options: Optional[Dict[str, Any]] = None,
+        content: Optional[List[str]] = None,
     ) -> Tuple[List[Node], List[system_message]]:
         text = utils.unescape(text)
         has_explicit_title, title, key = split_explicit_title(text)

@@ -1,5 +1,7 @@
 import inspect
+from typing import Any, Dict, List, Type
 
+from docutils import nodes
 from sphinx.application import Sphinx
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.config import Config
@@ -8,19 +10,19 @@ from sphinx.writers.html5 import HTML5Translator
 
 
 class DPYHTML5Translator(HTML5Translator):
-    def visit_section(self, node):
+    def visit_section(self, node: nodes.section) -> None:
         self.section_level += 1
         self.body.append(self.starttag(node, "section"))
 
-    def depart_section(self, node):
+    def depart_section(self, node: nodes.section) -> None:
         self.section_level -= 1
         self.body.append("</section>\n")
 
-    def visit_table(self, node):
+    def visit_table(self, node: nodes.table) -> None:
         self.body.append('<div class="table-wrapper">')
         super().visit_table(node)
 
-    def depart_table(self, node):
+    def depart_table(self, node: nodes.table) -> None:
         super().depart_table(node)
         self.body.append("</div>")
 
@@ -31,7 +33,7 @@ class DPYStandaloneHTMLBuilder(StandaloneHTMLBuilder):
         # the total count of lines for each index letter, used to distribute
         # the entries into two columns
         genindex = IndexEntries(self.env).create_index(self, group_entries=False)
-        indexcounts = []
+        indexcounts: List[int] = []
         for _k, entries in genindex:
             indexcounts.append(sum(1 + len(subitems) for _, (_, subitems, _) in entries))
 
@@ -50,20 +52,20 @@ class DPYStandaloneHTMLBuilder(StandaloneHTMLBuilder):
         else:
             self.handle_page("genindex", genindexcontext, "genindex.html")
 
-    def post_process_images(self, doctree) -> None:
+    def post_process_images(self, doctree: nodes.document) -> None:
         super().post_process_images(doctree)
 
         for path in self.app.config.copy_static_images:
             self.images[path] = path.split("/")[-1]
 
 
-def add_custom_jinja2(app):
-    env = app.builder.templates.environment
-    env.tests["prefixedwith"] = str.startswith
-    env.tests["suffixedwith"] = str.endswith
+def add_custom_jinja2(app: Sphinx) -> None:
+    tests: Dict[str, Any] = app.builder.templates.environment.tests
+    tests["prefixedwith"] = str.startswith
+    tests["suffixedwith"] = str.endswith
 
 
-def add_builders(app):
+def add_builders(app: Sphinx) -> None:
     """This is necessary because RTD injects their own for some reason."""
     app.set_translator("html", DPYHTML5Translator, override=True)
     app.add_builder(DPYStandaloneHTMLBuilder, override=True)
@@ -77,7 +79,7 @@ def add_builders(app):
             base if base is not StandaloneHTMLBuilder else DPYStandaloneHTMLBuilder
             for base in original.mro()[1:]
         )
-        new_builder = type(original.__name__, injected_mro, {"name": "readthedocs"})
+        new_builder: Type[DPYStandaloneHTMLBuilder] = type(original.__name__, injected_mro, {"name": "readthedocs"})  # type: ignore
         app.set_translator("readthedocs", DPYHTML5Translator, override=True)
         app.add_builder(new_builder, override=True)
 
@@ -94,7 +96,7 @@ def disable_mathjax(app: Sphinx, config: Config) -> None:
             app.disconnect(listener.id)
 
 
-def setup(app):
+def setup(app: Sphinx):
     app.add_config_value("copy_static_images", [], "env")
 
     add_builders(app)
