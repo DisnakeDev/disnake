@@ -10,7 +10,7 @@ from docutils import nodes
 from sphinx import addnodes
 from sphinx.application import Sphinx
 from sphinx.environment import BuildEnvironment
-from sphinx.locale import _
+from sphinx.locale import _ as __
 from sphinx.util.docutils import SphinxDirective
 from sphinx.writers.html import HTMLTranslator
 
@@ -116,7 +116,7 @@ class PyAttributeTable(SphinxDirective):
 
         <div class="py-attribute-table">
             <div class="py-attribute-table-column">
-                <span>_('Attributes')</span>
+                <span>__('Attributes')</span>
                 <ul>
                     <li>
                         <a href="...">
@@ -124,7 +124,7 @@ class PyAttributeTable(SphinxDirective):
                 </ul>
             </div>
             <div class="py-attribute-table-column">
-                <span>_('Methods')</span>
+                <span>__('Methods')</span>
                 <ul>
                     <li>
                         <a href="..."></a>
@@ -161,11 +161,11 @@ def build_lookup_table(env: BuildEnvironment) -> Dict[str, List[str]]:
         "class",
     }
 
-    for (fullname, _unused, objtype, _unused, _unused, _unused) in domain.get_objects():
+    for (fullname, _, objtype, _, _, _) in domain.get_objects():
         if objtype in ignored:
             continue
 
-        classname, _unused, child = fullname.rpartition(".")
+        classname, _, child = fullname.rpartition(".")
         result[classname].append(child)
 
     return result
@@ -210,8 +210,8 @@ def get_class_results(
     cls = getattr(module, name)
 
     groups: Dict[str, List[TableElement]] = {
-        _("Attributes"): [],
-        _("Methods"): [],
+        __("Attributes"): [],
+        __("Methods"): [],
     }
 
     try:
@@ -221,7 +221,7 @@ def get_class_results(
 
     for attr in members:
         attrlookup = f"{fullname}.{attr}"
-        key = _("Attributes")
+        key = __("Attributes")
         badge = None
         label = attr
         value = None
@@ -234,24 +234,24 @@ def get_class_results(
         if value is not None:
             doc = value.__doc__ or ""
             if asyncio.iscoroutinefunction(value) or doc.startswith("|coro|"):
-                key = _("Methods")
+                key = __("Methods")
                 badge = attributetablebadge("async", "async")
-                badge["badge-type"] = _("coroutine")
+                badge["badge-type"] = __("coroutine")
             elif isinstance(value, classmethod):
-                key = _("Methods")
+                key = __("Methods")
                 label = f"{name}.{attr}"
                 badge = attributetablebadge("cls", "cls")
-                badge["badge-type"] = _("classmethod")
+                badge["badge-type"] = __("classmethod")
             elif inspect.isfunction(value):
                 if doc.lstrip().startswith(("A decorator", "A shortcut decorator")):
                     # finicky but surprisingly consistent
                     badge = attributetablebadge("@", "@")
-                    badge["badge-type"] = _("decorator")
-                    key = _("Methods")
+                    badge["badge-type"] = __("decorator")
+                    key = __("Methods")
                 else:
-                    key = _("Methods")
+                    key = __("Methods")
                     badge = attributetablebadge("def", "def")
-                    badge["badge-type"] = _("method")
+                    badge["badge-type"] = __("method")
 
         groups[key].append(TableElement(fullname=attrlookup, label=label, badge=badge))
 
