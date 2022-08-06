@@ -52,6 +52,8 @@ class TestGuildChannelEdit:
             user_limit=3,
             rtc_region="there",
             video_quality_mode=disnake.VideoQualityMode.full,
+            flags=disnake.ChannelFlags(pinned=False, require_tag=True),
+            default_reaction=disnake.PartialEmoji(name="woo", id=9876),
             reason="stuff",
         )
         assert res is channel._state.http.edit_channel.return_value
@@ -75,6 +77,8 @@ class TestGuildChannelEdit:
             user_limit=3,
             rtc_region="there",
             video_quality_mode=2,
+            flags=16,
+            default_reaction_emoji={"emoji_name": None, "emoji_id": 9876},
             reason="stuff",
         )
 
