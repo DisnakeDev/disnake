@@ -1001,6 +1001,7 @@ class HTTPClient:
             "position",
             "permission_overwrites",
             "rate_limit_per_user",
+            "default_thread_rate_limit_per_user",
             "type",
             "rtc_region",
             "video_quality_mode",

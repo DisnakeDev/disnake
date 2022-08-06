@@ -156,6 +156,7 @@ class _ForumChannelOptional(TypedDict, total=False):
     available_tags: List[ThreadTag]  # TODO: optional?
     template: str
     default_reaction_emoji: ForumEmoji
+    default_thread_rate_limit_per_user: int
 
 
 class ForumChannel(_BaseGuildChannel, _ForumChannelOptional):

@@ -2342,6 +2342,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
         - :attr:`~AuditLogDiff.template`
         - :attr:`~AuditLogDiff.available_tags`
@@ -2369,6 +2370,7 @@ of :class:`enum.Enum`.
         - :attr:`~AuditLogDiff.default_auto_archive_duration`
         - :attr:`~AuditLogDiff.user_limit`
         - :attr:`~AuditLogDiff.slowmode_delay`
+        - :attr:`~AuditLogDiff.thread_slowmode_delay`
         - :attr:`~AuditLogDiff.nsfw`
         - :attr:`~AuditLogDiff.template`
         - :attr:`~AuditLogDiff.available_tags`
@@ -4297,6 +4299,15 @@ AuditLogDiff
 
         See also :attr:`TextChannel.slowmode_delay`, :attr:`VoiceChannel.slowmode_delay`,
         :attr:`ForumChannel.slowmode_delay` or :attr:`Thread.slowmode_delay`.
+
+        :type: :class:`int`
+
+    .. attribute:: thread_slowmode_delay
+
+        The number of seconds members have to wait before
+        sending another message in new threads created in the channel.
+
+        See also :attr:`ForumChannel.thread_slowmode_delay`.
 
         :type: :class:`int`
 

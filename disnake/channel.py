@@ -2491,6 +2491,19 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between creating threads
         in this channel. A value of `0` denotes that it is disabled.
+        Bots and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages` bypass slowmode.
+
+        See also :attr:`thread_slowmode_delay`.
+
+    thread_slowmode_delay: :class:`int`
+        The number of seconds a member must wait between sending messages
+        in newly created threads in this channel.
+        A value of `0` denotes that it is disabled.
+        Bots and users with :attr:`~Permissions.manage_channels` or
+        :attr:`~Permissions.manage_messages` bypass slowmode.
+
+        .. versionadded:: 2.6
 
     template: Optional[:class:`str`]
         The message template for new forum threads, if any.
@@ -2510,6 +2523,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         "default_auto_archive_duration",
         "guild",
         "slowmode_delay",
+        "thread_slowmode_delay",
         "template",
         "_available_tags",
         "_default_reaction_emoji_id",
@@ -2553,6 +2567,9 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             "default_auto_archive_duration", 1440
         )
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
+        # TODO: add to .clone and Guild.create_forum_channel, unsupported atm
+        # TODO: naming
+        self.thread_slowmode_delay: int = data.get("default_thread_rate_limit_per_user", 0)
 
         tags = [
             ThreadTag(data=tag, channel=self, state=self._state)
@@ -2713,6 +2730,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = ...,
         category: Optional[Snowflake] = ...,
         slowmode_delay: Optional[int] = ...,
+        thread_slowmode_delay: Optional[int] = ...,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
@@ -2732,6 +2750,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
         sync_permissions: bool = MISSING,
         category: Optional[Snowflake] = MISSING,
         slowmode_delay: Optional[int] = MISSING,
+        thread_slowmode_delay: Optional[int] = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
@@ -2767,8 +2786,16 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             The new category for this channel. Can be ``None`` to remove the
             category.
         slowmode_delay: Optional[:class:`int`]
-            Specifies the slowmode rate limit for users in this channel, in seconds.
+            Specifies the slowmode rate limit at which users can create
+            threads in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+        thread_slowmode_delay: Optional[:class:`int`]
+            Specifies the slowmode rate limit at which users can send messages
+            in newly created threads in this channel, in seconds.
+            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
+
+            .. versionadded:: 2.6
+
         overwrites: :class:`Mapping`
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
@@ -2829,6 +2856,7 @@ class ForumChannel(disnake.abc.GuildChannel, Hashable):
             sync_permissions=sync_permissions,
             category=category,
             slowmode_delay=slowmode_delay,
+            thread_slowmode_delay=thread_slowmode_delay,
             default_auto_archive_duration=default_auto_archive_duration,
             overwrites=overwrites,
             flags=flags,

@@ -42,6 +42,7 @@ class TestGuildChannelEdit:
             sync_permissions=False,
             category=disnake.Object(321),
             slowmode_delay=8,
+            thread_slowmode_delay=42,
             default_auto_archive_duration=disnake.ThreadArchiveDuration.hour,
             type=disnake.ChannelType.news,
             overwrites={
@@ -67,6 +68,7 @@ class TestGuildChannelEdit:
             topic="talk about things here",
             nsfw=True,
             rate_limit_per_user=8,
+            default_thread_rate_limit_per_user=42,
             default_auto_archive_duration=60,
             type=5,
             permission_overwrites=[
