@@ -208,7 +208,7 @@ class Guild(Hashable):
         A list of features that the guild has. The features that a guild can have are
         subject to arbitrary change by Discord.
 
-        They are currently as follows:
+        A partial list of features is below:
 
         - ``ANIMATED_BANNER``: Guild can upload an animated banner.
         - ``ANIMATED_ICON``: Guild can upload an animated icon.
@@ -222,6 +222,7 @@ class Guild(Hashable):
         - ``HUB``: Guild is a student hub.
         - ``INVITE_SPLASH``: Guild's invite page can have a special splash.
         - ``LINKED_TO_HUB``: Guild is linked to a student hub.
+        - ``MEMBER_PROFILES``: Guild members can set per-guild profiles if they have nitro.
         - ``MEMBER_VERIFICATION_GATE_ENABLED``: Guild has Membership Screening enabled.
         - ``MONETIZATION_ENABLED``: Guild has enabled monetization.
         - ``MORE_EMOJI``: Guild has increased custom emoji slots.
@@ -232,9 +233,10 @@ class Guild(Hashable):
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
         - ``PRIVATE_THREADS``: Guild has access to create private threads.
         - ``ROLE_ICONS``: Guild has access to role icons.
-        - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads.
-        - ``THREE_DAY_THREAD_ARCHIVE``: Guild has access to the three day archive time for threads.
-        - ``THREADS_ENABLED``: Guild had early access to threads.
+        - ``SEVEN_DAY_THREAD_ARCHIVE``: Guild has access to the seven day archive time for threads (no longer has any effect).
+        - ``TEXT_IN_VOICE_ENABLED``: Guild has text in voice channels enabled.
+        - ``THREE_DAY_THREAD_ARCHIVE``: Guild has access to the three day archive time for threads (no longer has any effect).
+        - ``THREADS_ENABLED``: Guild has access to threads.
         - ``TICKETED_EVENTS_ENABLED``: Guild has enabled ticketed events.
         - ``VANITY_URL``: Guild can have a vanity invite URL (e.g. discord.gg/disnake).
         - ``VERIFIED``: Guild is a verified server.
