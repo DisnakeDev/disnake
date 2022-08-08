@@ -35,10 +35,10 @@ from .user import User
 class BaseAppInfo(TypedDict):
     id: Snowflake
     name: str
-    verify_key: str
     icon: Optional[str]
-    summary: str
     description: str
+    summary: str
+    verify_key: str
 
 
 class PartialAppInfo(BaseAppInfo, total=False):
@@ -57,21 +57,19 @@ class _AppInfoOptional(TypedDict, total=False):
     guild_id: Snowflake
     primary_sku_id: Snowflake
     slug: str
-    hook: bool
-    max_participants: int
+    cover_image: str
+    flags: int
     tags: List[str]
     install_params: InstallParams
     custom_install_url: str
-    cover_image: str
-    hook: bool
-    max_participants: int
-    flags: int
+    max_participants: int  # undocumented
+    hook: bool  # undocumented
 
 
 class AppInfo(PartialAppInfo, _AppInfoOptional):
-    owner: User
     bot_public: bool
     bot_require_code_grant: bool
+    owner: User
 
 
 class PartialGatewayAppInfo(TypedDict):
