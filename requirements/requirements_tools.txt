@@ -6,3 +6,6 @@ towncrier==21.9.0
 
 # checks MANIFEST.in + sdist
 check-manifest==0.48
+
+# run codemods on the respository (mostly automated typing)
+libcst~=0.4.7
