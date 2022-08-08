@@ -151,6 +151,16 @@ jobs:
         pip install -U build
         python -m build
 
+    # run the libcst parsers and check for errors
+    - name: libcst codemod
+      run: |
+        nox -s codemod
+        if [ -n "$(git status --porcelain disnake/)" ]; then
+          exit 1;
+        else
+          exit 0;
+        fi
+
   pytest:
     # Thanks to black for this rule
     # We want to run on external PRs, but not on our own internal PRs as they'll be run
