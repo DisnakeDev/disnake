@@ -1361,3 +1361,10 @@ def humanize_list(values: List[str], combine: str) -> str:
         return "<none>"
     else:
         return f" {combine} ".join(values)
+
+
+# n.b. This must be imported and used as @ _overload_with_permissions (without the space)
+# this is used by the libcst parser and has no runtime purpose
+# it is merely a marker not unlike pytest.mark
+def _overload_with_permissions(func: T) -> T:
+    return func

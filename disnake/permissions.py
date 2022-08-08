@@ -26,9 +26,21 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, Iterator, Optional, Set, Tuple
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    Iterator,
+    Optional,
+    Set,
+    Tuple,
+    overload,
+)
 
 from .flags import BaseFlags, alias_flag_value, flag_value
+from .utils import _overload_with_permissions
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -155,6 +167,71 @@ class Permissions(BaseFlags):
 
     __slots__ = ()
 
+    @overload
+    @_overload_with_permissions
+    def __init__(
+        self,
+        permissions: int = 0,
+        *,
+        add_reactions: bool = ...,
+        administrator: bool = ...,
+        attach_files: bool = ...,
+        ban_members: bool = ...,
+        change_nickname: bool = ...,
+        connect: bool = ...,
+        create_forum_threads: bool = ...,
+        create_instant_invite: bool = ...,
+        create_private_threads: bool = ...,
+        create_public_threads: bool = ...,
+        deafen_members: bool = ...,
+        embed_links: bool = ...,
+        external_emojis: bool = ...,
+        external_stickers: bool = ...,
+        kick_members: bool = ...,
+        manage_channels: bool = ...,
+        manage_emojis: bool = ...,
+        manage_emojis_and_stickers: bool = ...,
+        manage_events: bool = ...,
+        manage_guild: bool = ...,
+        manage_messages: bool = ...,
+        manage_nicknames: bool = ...,
+        manage_permissions: bool = ...,
+        manage_roles: bool = ...,
+        manage_threads: bool = ...,
+        manage_webhooks: bool = ...,
+        mention_everyone: bool = ...,
+        moderate_members: bool = ...,
+        move_members: bool = ...,
+        mute_members: bool = ...,
+        priority_speaker: bool = ...,
+        read_message_history: bool = ...,
+        read_messages: bool = ...,
+        request_to_speak: bool = ...,
+        send_messages: bool = ...,
+        send_messages_in_threads: bool = ...,
+        send_tts_messages: bool = ...,
+        speak: bool = ...,
+        start_embedded_activities: bool = ...,
+        stream: bool = ...,
+        use_external_emojis: bool = ...,
+        use_external_stickers: bool = ...,
+        use_slash_commands: bool = ...,
+        use_voice_activation: bool = ...,
+        view_audit_log: bool = ...,
+        view_channel: bool = ...,
+        view_guild_insights: bool = ...,
+    ):
+        ...
+
+    @overload
+    @_overload_with_permissions
+    def __init__(
+        self,
+        permissions: int = 0,
+    ):
+        ...
+
+    @_overload_with_permissions
     def __init__(self, permissions: int = 0, **kwargs: bool):
         if not isinstance(permissions, int):
             raise TypeError(
@@ -433,6 +510,69 @@ class Permissions(BaseFlags):
         base.create_private_threads = False
         return base
 
+    @overload
+    @_overload_with_permissions
+    def update(
+        self,
+        *,
+        add_reactions: bool = ...,
+        administrator: bool = ...,
+        attach_files: bool = ...,
+        ban_members: bool = ...,
+        change_nickname: bool = ...,
+        connect: bool = ...,
+        create_forum_threads: bool = ...,
+        create_instant_invite: bool = ...,
+        create_private_threads: bool = ...,
+        create_public_threads: bool = ...,
+        deafen_members: bool = ...,
+        embed_links: bool = ...,
+        external_emojis: bool = ...,
+        external_stickers: bool = ...,
+        kick_members: bool = ...,
+        manage_channels: bool = ...,
+        manage_emojis: bool = ...,
+        manage_emojis_and_stickers: bool = ...,
+        manage_events: bool = ...,
+        manage_guild: bool = ...,
+        manage_messages: bool = ...,
+        manage_nicknames: bool = ...,
+        manage_permissions: bool = ...,
+        manage_roles: bool = ...,
+        manage_threads: bool = ...,
+        manage_webhooks: bool = ...,
+        mention_everyone: bool = ...,
+        moderate_members: bool = ...,
+        move_members: bool = ...,
+        mute_members: bool = ...,
+        priority_speaker: bool = ...,
+        read_message_history: bool = ...,
+        read_messages: bool = ...,
+        request_to_speak: bool = ...,
+        send_messages: bool = ...,
+        send_messages_in_threads: bool = ...,
+        send_tts_messages: bool = ...,
+        speak: bool = ...,
+        start_embedded_activities: bool = ...,
+        stream: bool = ...,
+        use_external_emojis: bool = ...,
+        use_external_stickers: bool = ...,
+        use_slash_commands: bool = ...,
+        use_voice_activation: bool = ...,
+        view_audit_log: bool = ...,
+        view_channel: bool = ...,
+        view_guild_insights: bool = ...,
+    ) -> None:
+        ...
+
+    @overload
+    @_overload_with_permissions
+    def update(
+        self,
+    ) -> None:
+        ...
+
+    @_overload_with_permissions
     def update(self, **kwargs: bool) -> None:
         """
         Bulk updates this permission object.
@@ -886,6 +1026,69 @@ class PermissionOverwrite:
         start_embedded_activities: Optional[bool]
         moderate_members: Optional[bool]
 
+    @overload
+    @_overload_with_permissions
+    def __init__(
+        self,
+        *,
+        add_reactions: bool = ...,
+        administrator: bool = ...,
+        attach_files: bool = ...,
+        ban_members: bool = ...,
+        change_nickname: bool = ...,
+        connect: bool = ...,
+        create_forum_threads: bool = ...,
+        create_instant_invite: bool = ...,
+        create_private_threads: bool = ...,
+        create_public_threads: bool = ...,
+        deafen_members: bool = ...,
+        embed_links: bool = ...,
+        external_emojis: bool = ...,
+        external_stickers: bool = ...,
+        kick_members: bool = ...,
+        manage_channels: bool = ...,
+        manage_emojis: bool = ...,
+        manage_emojis_and_stickers: bool = ...,
+        manage_events: bool = ...,
+        manage_guild: bool = ...,
+        manage_messages: bool = ...,
+        manage_nicknames: bool = ...,
+        manage_permissions: bool = ...,
+        manage_roles: bool = ...,
+        manage_threads: bool = ...,
+        manage_webhooks: bool = ...,
+        mention_everyone: bool = ...,
+        moderate_members: bool = ...,
+        move_members: bool = ...,
+        mute_members: bool = ...,
+        priority_speaker: bool = ...,
+        read_message_history: bool = ...,
+        read_messages: bool = ...,
+        request_to_speak: bool = ...,
+        send_messages: bool = ...,
+        send_messages_in_threads: bool = ...,
+        send_tts_messages: bool = ...,
+        speak: bool = ...,
+        start_embedded_activities: bool = ...,
+        stream: bool = ...,
+        use_external_emojis: bool = ...,
+        use_external_stickers: bool = ...,
+        use_slash_commands: bool = ...,
+        use_voice_activation: bool = ...,
+        view_audit_log: bool = ...,
+        view_channel: bool = ...,
+        view_guild_insights: bool = ...,
+    ):
+        ...
+
+    @overload
+    @_overload_with_permissions
+    def __init__(
+        self,
+    ):
+        ...
+
+    @_overload_with_permissions
     def __init__(self, **kwargs: Optional[bool]):
         self._values: Dict[str, Optional[bool]] = {}
 
@@ -948,6 +1151,69 @@ class PermissionOverwrite:
         """
         return len(self._values) == 0
 
+    @overload
+    @_overload_with_permissions
+    def update(
+        self,
+        *,
+        add_reactions: bool = ...,
+        administrator: bool = ...,
+        attach_files: bool = ...,
+        ban_members: bool = ...,
+        change_nickname: bool = ...,
+        connect: bool = ...,
+        create_forum_threads: bool = ...,
+        create_instant_invite: bool = ...,
+        create_private_threads: bool = ...,
+        create_public_threads: bool = ...,
+        deafen_members: bool = ...,
+        embed_links: bool = ...,
+        external_emojis: bool = ...,
+        external_stickers: bool = ...,
+        kick_members: bool = ...,
+        manage_channels: bool = ...,
+        manage_emojis: bool = ...,
+        manage_emojis_and_stickers: bool = ...,
+        manage_events: bool = ...,
+        manage_guild: bool = ...,
+        manage_messages: bool = ...,
+        manage_nicknames: bool = ...,
+        manage_permissions: bool = ...,
+        manage_roles: bool = ...,
+        manage_threads: bool = ...,
+        manage_webhooks: bool = ...,
+        mention_everyone: bool = ...,
+        moderate_members: bool = ...,
+        move_members: bool = ...,
+        mute_members: bool = ...,
+        priority_speaker: bool = ...,
+        read_message_history: bool = ...,
+        read_messages: bool = ...,
+        request_to_speak: bool = ...,
+        send_messages: bool = ...,
+        send_messages_in_threads: bool = ...,
+        send_tts_messages: bool = ...,
+        speak: bool = ...,
+        start_embedded_activities: bool = ...,
+        stream: bool = ...,
+        use_external_emojis: bool = ...,
+        use_external_stickers: bool = ...,
+        use_slash_commands: bool = ...,
+        use_voice_activation: bool = ...,
+        view_audit_log: bool = ...,
+        view_channel: bool = ...,
+        view_guild_insights: bool = ...,
+    ) -> None:
+        ...
+
+    @overload
+    @_overload_with_permissions
+    def update(
+        self,
+    ) -> None:
+        ...
+
+    @_overload_with_permissions
     def update(self, **kwargs: Optional[bool]) -> None:
         """
         Bulk updates this permission overwrite object.
