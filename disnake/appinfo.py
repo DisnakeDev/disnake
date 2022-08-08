@@ -88,6 +88,81 @@ class InstallParams:
         return utils.oauth_url(self._app_id, scopes=self.scopes, permissions=self.permissions)
 
 
+class PartialAppInfo:
+    """Represents a partial AppInfo given by :func:`~disnake.abc.GuildChannel.create_invite`.
+
+    .. versionadded:: 2.0
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The application's ID.
+    name: :class:`str`
+        The application's name.
+    description: :class:`str`
+        The application's description.
+    rpc_origins: Optional[List[:class:`str`]]
+        A list of RPC origin URLs, if RPC is enabled.
+    verify_key: :class:`str`
+        The hex encoded key for verification in interactions and the
+        GameSDK's `GetTicket <https://discord.com/developers/docs/game-sdk/applications#getticket>`_.
+    terms_of_service_url: Optional[:class:`str`]
+        The application's terms of service URL, if set.
+    privacy_policy_url: Optional[:class:`str`]
+        The application's privacy policy URL, if set.
+    """
+
+    __slots__ = (
+        "_state",
+        "id",
+        "name",
+        "description",
+        "rpc_origins",
+        "_summary",
+        "verify_key",
+        "terms_of_service_url",
+        "privacy_policy_url",
+        "_icon",
+    )
+
+    def __init__(self, *, state: ConnectionState, data: PartialAppInfoPayload):
+        self._state: ConnectionState = state
+        self.id: int = int(data["id"])
+        self.name: str = data["name"]
+        self._icon: Optional[str] = data.get("icon")
+        self.description: str = data["description"]
+        self.rpc_origins: Optional[List[str]] = data.get("rpc_origins")
+        self._summary: str = data.get("summary", "")
+        self.verify_key: str = data["verify_key"]
+        self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")
+        self.privacy_policy_url: Optional[str] = data.get("privacy_policy_url")
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} id={self.id} name={self.name!r} description={self.description!r}>"
+
+    @property
+    def icon(self) -> Optional[Asset]:
+        """Optional[:class:`.Asset`]: Retrieves the application's icon asset, if any."""
+        if self._icon is None:
+            return None
+        return Asset._from_icon(self._state, self.id, self._icon, path="app")
+
+    @property
+    def summary(self) -> str:
+        """:class:`str`: If this application is a game sold on Discord,
+        this field will be the summary field for the store page of its primary SKU.
+
+        .. deprecated:: 2.5
+
+            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
+        """
+        utils.warn_deprecated(
+            "summary is deprecated and will be removed in a future version. Consider using description instead.",
+            stacklevel=2,
+        )
+        return self._summary
+
+
 class AppInfo:
     """Represents the application info for the bot provided by Discord.
 
@@ -271,81 +346,6 @@ class AppInfo:
         this field will be the summary field for the store page of its primary SKU.
 
         .. versionadded:: 1.3
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        utils.warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
-        )
-        return self._summary
-
-
-class PartialAppInfo:
-    """Represents a partial AppInfo given by :func:`~disnake.abc.GuildChannel.create_invite`.
-
-    .. versionadded:: 2.0
-
-    Attributes
-    ----------
-    id: :class:`int`
-        The application's ID.
-    name: :class:`str`
-        The application's name.
-    description: :class:`str`
-        The application's description.
-    rpc_origins: Optional[List[:class:`str`]]
-        A list of RPC origin URLs, if RPC is enabled.
-    verify_key: :class:`str`
-        The hex encoded key for verification in interactions and the
-        GameSDK's `GetTicket <https://discord.com/developers/docs/game-sdk/applications#getticket>`_.
-    terms_of_service_url: Optional[:class:`str`]
-        The application's terms of service URL, if set.
-    privacy_policy_url: Optional[:class:`str`]
-        The application's privacy policy URL, if set.
-    """
-
-    __slots__ = (
-        "_state",
-        "id",
-        "name",
-        "description",
-        "rpc_origins",
-        "_summary",
-        "verify_key",
-        "terms_of_service_url",
-        "privacy_policy_url",
-        "_icon",
-    )
-
-    def __init__(self, *, state: ConnectionState, data: PartialAppInfoPayload):
-        self._state: ConnectionState = state
-        self.id: int = int(data["id"])
-        self.name: str = data["name"]
-        self._icon: Optional[str] = data.get("icon")
-        self.description: str = data["description"]
-        self.rpc_origins: Optional[List[str]] = data.get("rpc_origins")
-        self._summary: str = data.get("summary", "")
-        self.verify_key: str = data["verify_key"]
-        self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")
-        self.privacy_policy_url: Optional[str] = data.get("privacy_policy_url")
-
-    def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} id={self.id} name={self.name!r} description={self.description!r}>"
-
-    @property
-    def icon(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the application's icon asset, if any."""
-        if self._icon is None:
-            return None
-        return Asset._from_icon(self._state, self.id, self._icon, path="app")
-
-    @property
-    def summary(self) -> str:
-        """:class:`str`: If this application is a game sold on Discord,
-        this field will be the summary field for the store page of its primary SKU.
 
         .. deprecated:: 2.5
 
