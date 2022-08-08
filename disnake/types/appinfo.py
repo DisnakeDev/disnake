@@ -37,7 +37,6 @@ class BaseAppInfo(TypedDict):
     name: str
     icon: Optional[str]
     description: str
-    summary: str
     verify_key: str
 
 

@@ -40,7 +40,6 @@ class IntegrationApplication(_IntegrationApplicationOptional):
     name: str
     icon: Optional[str]
     description: str
-    summary: str
 
 
 class IntegrationAccount(TypedDict):

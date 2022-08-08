@@ -118,7 +118,6 @@ class PartialAppInfo:
         "name",
         "description",
         "rpc_origins",
-        "_summary",
         "verify_key",
         "terms_of_service_url",
         "privacy_policy_url",
@@ -132,7 +131,6 @@ class PartialAppInfo:
         self._icon: Optional[str] = data.get("icon")
         self.description: str = data["description"]
         self.rpc_origins: List[str] = data.get("rpc_origins") or []
-        self._summary: str = data.get("summary", "")
         self.verify_key: str = data["verify_key"]
         self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")
         self.privacy_policy_url: Optional[str] = data.get("privacy_policy_url")
@@ -146,21 +144,6 @@ class PartialAppInfo:
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="app")
-
-    @property
-    def summary(self) -> str:
-        """:class:`str`: If this application is a game sold on Discord,
-        this field will be the summary field for the store page of its primary SKU.
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        utils.warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
-        )
-        return self._summary
 
 
 class AppInfo(PartialAppInfo):
