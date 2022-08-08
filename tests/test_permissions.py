@@ -25,7 +25,7 @@ class TestPermissions:
 
     def test_init_invalid_perms(self) -> None:
         with pytest.raises(TypeError, match="'h' is not a valid permission name."):
-            Permissions(h=True)
+            Permissions(h=True)  # type: ignore
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -134,7 +134,7 @@ class TestPermissions:
 
     def test_update_ignores(self) -> None:
         perms = Permissions()
-        perms.update(h=True)
+        perms.update(h=True)  # type: ignore
 
     @pytest.mark.parametrize(
         ("initial", "allow", "deny", "expected"),
