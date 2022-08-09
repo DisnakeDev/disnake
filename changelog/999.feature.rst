@@ -1,0 +1,3 @@
+Improve :class:`AppInfo` and :class:`PartialAppInfo` types.
+- :attr:`PartialAppInfo.rpc_origins`` is no longer optional
+- :class:`AppInfo` now inherits from :class:`PartialAppInfo`, most of the functionality was moved into :class:`PartialAppInfo`
