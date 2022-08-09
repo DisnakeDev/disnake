@@ -40,19 +40,17 @@ class BaseAppInfo(TypedDict):
     verify_key: str
 
 
-class PartialAppInfo(BaseAppInfo, total=False):
-    rpc_origins: List[str]
-    terms_of_service_url: str
-    privacy_policy_url: str
-
-
 class InstallParams(TypedDict):
     scopes: List[str]
     permissions: str
 
 
-class _AppInfoOptional(TypedDict, total=False):
-    team: Team
+class PartialAppInfo(BaseAppInfo, total=False):
+    rpc_origins: List[str]
+    terms_of_service_url: str
+    privacy_policy_url: str
+    bot_public: bool
+    bot_require_code_grant: bool
     guild_id: Snowflake
     primary_sku_id: Snowflake
     slug: str
@@ -65,9 +63,11 @@ class _AppInfoOptional(TypedDict, total=False):
     hook: bool  # undocumented
 
 
+class _AppInfoOptional(TypedDict, total=False):
+    team: Team
+
+
 class AppInfo(PartialAppInfo, _AppInfoOptional):
-    bot_public: bool
-    bot_require_code_grant: bool
     owner: User
 
 
