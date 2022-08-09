@@ -28,6 +28,7 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Type
 
+from .appinfo import PartialAppInfo
 from .enums import ExpireBehaviour, try_enum
 from .user import User
 from .utils import MISSING, _get_as_snowflake, deprecated, parse_time
@@ -44,6 +45,7 @@ __all__ = (
 if TYPE_CHECKING:
     from .guild import Guild
     from .role import Role
+    from .state import ConnectionState
     from .types.integration import (
         BotIntegration as BotIntegrationPayload,
         Integration as IntegrationPayload,
@@ -334,38 +336,26 @@ class StreamIntegration(Integration):
         self.synced_at = datetime.datetime.now(datetime.timezone.utc)
 
 
-class IntegrationApplication:
+class IntegrationApplication(PartialAppInfo):
     """Represents an application for a bot integration.
 
     .. versionadded:: 2.0
 
+    .. versionchanged:: 2.6
+        Now inherits from :class:`PartialAppInfo`, :attr:`icon` type
+        changed to :class:`Asset`.
+
     Attributes
     ----------
-    id: :class:`int`
-        The application's ID.
-    name: :class:`str`
-        The application's name.
-    icon: Optional[:class:`str`]
-        The application's icon hash.
-    description: :class:`str`
-        The application's description. Can be an empty string.
     user: Optional[:class:`User`]
         The bot user associated with this application.
     """
 
-    __slots__ = (
-        "id",
-        "name",
-        "icon",
-        "description",
-        "user",
-    )
+    __slots__ = ("user",)
 
-    def __init__(self, *, data: IntegrationApplicationPayload, state):
-        self.id: int = int(data["id"])
-        self.name: str = data["name"]
-        self.icon: Optional[str] = data["icon"]
-        self.description: str = data["description"]
+    def __init__(self, *, state: ConnectionState, data: IntegrationApplicationPayload):
+        super().__init__(state=state, data=data)
+
         user = data.get("bot")
         self.user: Optional[User] = User(state=state, data=user) if user else None
 

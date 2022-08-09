@@ -27,19 +27,13 @@ from __future__ import annotations
 
 from typing import Literal, Optional, TypedDict, Union
 
+from .appinfo import PartialAppInfo
 from .snowflake import Snowflake
 from .user import User
 
 
-class _IntegrationApplicationOptional(TypedDict, total=False):
+class IntegrationApplication(PartialAppInfo, total=False):
     bot: User
-
-
-class IntegrationApplication(_IntegrationApplicationOptional):
-    id: Snowflake
-    name: str
-    icon: Optional[str]
-    description: str
 
 
 class IntegrationAccount(TypedDict):

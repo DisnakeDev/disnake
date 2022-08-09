@@ -2,3 +2,4 @@ Refactor application models:
 - Remove :attr:`BotAppInfo.summary`, :attr:`AppInfo.summary`, and :attr:`IntegrationApplication.summary`.
 - :attr:`AppInfo.bot_public` and :attr:`AppInfo.bot_require_code_grant` are now optional.
 - :attr:`Message.application` is now a :class:`PartialAppInfo` object instead of a :class:`dict`.
+- :attr:`IntegrationApplication.icon` is now an :class:`Asset`.
