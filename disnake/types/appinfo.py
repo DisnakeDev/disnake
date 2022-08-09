@@ -59,8 +59,6 @@ class PartialAppInfo(BaseAppInfo, total=False):
     tags: List[str]
     install_params: InstallParams
     custom_install_url: str
-    max_participants: int  # undocumented
-    hook: bool  # undocumented
 
 
 class _AppInfoOptional(TypedDict, total=False):
