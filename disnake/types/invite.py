@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from typing import Literal, Optional, TypedDict
 
-from .appinfo import PartialAppInfo
+from .appinfo import AppInfo
 from .channel import InviteChannel
 from .guild import InviteGuild
 from .guild_scheduled_event import GuildScheduledEvent
@@ -41,7 +41,7 @@ class _InviteOptional(TypedDict, total=False):
     inviter: PartialUser
     target_user: PartialUser
     target_type: InviteTargetType
-    target_application: PartialAppInfo
+    target_application: AppInfo
     approximate_member_count: int
     approximate_presence_count: int
     guild_scheduled_event: GuildScheduledEvent

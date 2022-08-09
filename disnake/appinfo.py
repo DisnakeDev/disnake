@@ -37,15 +37,15 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .types.appinfo import (
         AppInfo as AppInfoPayload,
+        BotAppInfo as BotAppInfoPayload,
         InstallParams as InstallParamsPayload,
-        PartialAppInfo as PartialAppInfoPayload,
         Team as TeamPayload,
     )
     from .user import User
 
 __all__ = (
+    "BotAppInfo",
     "AppInfo",
-    "PartialAppInfo",
     "InstallParams",
 )
 
@@ -69,7 +69,7 @@ class InstallParams:
         "permissions",
     )
 
-    def __init__(self, data: InstallParamsPayload, parent: PartialAppInfo):
+    def __init__(self, data: InstallParamsPayload, parent: AppInfo):
         self._app_id = parent.id
         self.scopes = data["scopes"]
         self.permissions = Permissions(int(data["permissions"]))
@@ -88,7 +88,7 @@ class InstallParams:
         return utils.oauth_url(self._app_id, scopes=self.scopes, permissions=self.permissions)
 
 
-class PartialAppInfo:
+class AppInfo:
     """Represents partial application information, for example applications in invites.
 
     .. versionadded:: 2.0
@@ -178,7 +178,7 @@ class PartialAppInfo:
         "_cover_image",
     )
 
-    def __init__(self, *, state: ConnectionState, data: PartialAppInfoPayload):
+    def __init__(self, *, state: ConnectionState, data: AppInfoPayload):
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.name: str = data["name"]
@@ -239,7 +239,7 @@ class PartialAppInfo:
         return self._state._get_guild(self.guild_id)
 
 
-class AppInfo(PartialAppInfo):
+class BotAppInfo(AppInfo):
     """Represents the application info for the bot provided by Discord.
 
     Attributes
@@ -257,7 +257,7 @@ class AppInfo(PartialAppInfo):
         "team",
     )
 
-    def __init__(self, state: ConnectionState, data: AppInfoPayload):
+    def __init__(self, state: ConnectionState, data: BotAppInfoPayload):
         super().__init__(state=state, data=data)
 
         self.owner: User = state.create_user(data["owner"])

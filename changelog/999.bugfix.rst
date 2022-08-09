@@ -1,1 +1,1 @@
-Fix broken :attr:`PartialAppInfo.cover_image` url.
+Fix broken :attr:`AppInfo.cover_image` url.

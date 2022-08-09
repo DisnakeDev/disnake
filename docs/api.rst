@@ -59,20 +59,20 @@ AutoShardedClient
 Application Info
 ------------------
 
-AppInfo
+BotAppInfo
 ~~~~~~~~
+
+.. attributetable:: BotAppInfo
+
+.. autoclass:: BotAppInfo()
+    :members:
+
+AppInfo
+~~~~~~~~~~~~~~~
 
 .. attributetable:: AppInfo
 
 .. autoclass:: AppInfo()
-    :members:
-
-PartialAppInfo
-~~~~~~~~~~~~~~~
-
-.. attributetable:: PartialAppInfo
-
-.. autoclass:: PartialAppInfo()
     :members:
 
 Team

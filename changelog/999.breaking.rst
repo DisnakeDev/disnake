@@ -1,1 +1,1 @@
-Remove :attr:`AppInfo.summary`, :attr:`PartialAppInfo.summary`, and :attr:`IntegrationApplication.summary`, :attr:`PartialAppInfo.bot_public` and :attr:`PartialAppInfo.bot_require_code_grant` are now optional.
+Remove :attr:`BotAppInfo.summary`, :attr:`AppInfo.summary`, and :attr:`IntegrationApplication.summary`. :attr:`AppInfo.bot_public` and :attr:`AppInfo.bot_require_code_grant` are now optional.

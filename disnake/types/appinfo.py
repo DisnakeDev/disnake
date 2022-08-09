@@ -45,7 +45,7 @@ class InstallParams(TypedDict):
     permissions: str
 
 
-class PartialAppInfo(BaseAppInfo, total=False):
+class AppInfo(BaseAppInfo, total=False):
     rpc_origins: List[str]
     terms_of_service_url: str
     privacy_policy_url: str
@@ -61,11 +61,11 @@ class PartialAppInfo(BaseAppInfo, total=False):
     custom_install_url: str
 
 
-class _AppInfoOptional(TypedDict, total=False):
+class _BotAppInfoOptional(TypedDict, total=False):
     team: Team
 
 
-class AppInfo(PartialAppInfo, _AppInfoOptional):
+class BotAppInfo(AppInfo, _BotAppInfoOptional):
     owner: User
 
 

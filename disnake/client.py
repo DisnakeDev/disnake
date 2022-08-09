@@ -59,7 +59,7 @@ from .app_commands import (
     ApplicationCommand,
     GuildApplicationCommandPermissions,
 )
-from .appinfo import AppInfo
+from .appinfo import BotAppInfo
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
@@ -1974,7 +1974,7 @@ class Client:
         data = await self.http.get_widget(guild_id)
         return Widget(state=self._connection, data=data)
 
-    async def application_info(self) -> AppInfo:
+    async def application_info(self) -> BotAppInfo:
         """|coro|
 
         Retrieves the bot's application information.
@@ -1986,11 +1986,11 @@ class Client:
 
         Returns
         -------
-        :class:`.AppInfo`
+        :class:`.BotAppInfo`
             The bot's application information.
         """
         data = await self.http.application_info()
-        return AppInfo(self._connection, data)
+        return BotAppInfo(self._connection, data)
 
     async def fetch_user(self, user_id: int, /) -> User:
         """|coro|
