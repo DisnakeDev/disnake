@@ -39,13 +39,15 @@ if TYPE_CHECKING:
         AppInfo as AppInfoPayload,
         BotAppInfo as BotAppInfoPayload,
         InstallParams as InstallParamsPayload,
+        PartialAppInfo as PartialAppInfoPayload,
         Team as TeamPayload,
     )
     from .user import User
 
 __all__ = (
-    "BotAppInfo",
+    "PartialAppInfo",
     "AppInfo",
+    "BotAppInfo",
     "InstallParams",
 )
 
@@ -88,8 +90,9 @@ class InstallParams:
         return utils.oauth_url(self._app_id, scopes=self.scopes, permissions=self.permissions)
 
 
-class AppInfo:
-    """Represents partial application information, for example applications in invites.
+class PartialAppInfo:
+    """Represents partial application information, for example applications in
+    game/stream invites in messages.
 
     .. versionadded:: 2.0
 
@@ -101,6 +104,54 @@ class AppInfo:
         The application's name.
     description: :class:`str`
         The application's description.
+    """
+
+    __slots__ = (
+        "_state",
+        "id",
+        "name",
+        "description",
+        "_icon",
+        "_cover_image",
+    )
+
+    def __init__(self, *, state: ConnectionState, data: PartialAppInfoPayload):
+        self._state: ConnectionState = state
+
+        self.id: int = int(data["id"])
+        self.name: str = data["name"]
+        self.description: str = data.get("description") or ""
+        self._icon: Optional[str] = data.get("icon")
+        self._cover_image: Optional[str] = data.get("cover_image")
+
+    def __repr__(self) -> str:
+        return (
+            f"<{self.__class__.__name__} id={self.id}"
+            f" name={self.name!r} description={self.description!r}>"
+        )
+
+    @property
+    def icon(self) -> Optional[Asset]:
+        """Optional[:class:`.Asset`]: Retrieves the application's icon asset, if any."""
+        if self._icon is None:
+            return None
+        return Asset._from_icon(self._state, self.id, self._icon, path="app")
+
+    @property
+    def cover_image(self) -> Optional[Asset]:
+        """Optional[:class:`.Asset`]: Retrieves the cover image on a store embed, if any."""
+        if self._cover_image is None:
+            return None
+        return Asset._from_icon(self._state, self.id, self._cover_image, path="app")
+
+
+class AppInfo(PartialAppInfo):
+    """Represents application information, for example applications in invites.
+
+    .. versionadded:: 2.0
+
+    Attributes
+    ----------
     rpc_origins: List[:class:`str`]
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
@@ -157,10 +208,6 @@ class AppInfo:
     """
 
     __slots__ = (
-        "_state",
-        "id",
-        "name",
-        "description",
         "rpc_origins",
         "verify_key",
         "terms_of_service_url",
@@ -174,16 +221,11 @@ class AppInfo:
         "tags",
         "install_params",
         "custom_install_url",
-        "_icon",
-        "_cover_image",
     )
 
     def __init__(self, *, state: ConnectionState, data: AppInfoPayload):
-        self._state: ConnectionState = state
-        self.id: int = int(data["id"])
-        self.name: str = data["name"]
-        self._icon: Optional[str] = data.get("icon")
-        self.description: str = data["description"]
+        super().__init__(state=state, data=data)
+
         self.verify_key: str = data["verify_key"]
 
         self.rpc_origins: List[str] = data.get("rpc_origins") or []
@@ -197,7 +239,6 @@ class AppInfo:
 
         self.primary_sku_id: Optional[int] = utils._get_as_snowflake(data, "primary_sku_id")
         self.slug: Optional[str] = data.get("slug")
-        self._cover_image: Optional[str] = data.get("cover_image")
 
         flags: Optional[int] = data.get("flags")
         self.flags: Optional[ApplicationFlags] = (
@@ -208,26 +249,6 @@ class AppInfo:
             InstallParams(data["install_params"], parent=self) if "install_params" in data else None
         )
         self.custom_install_url: Optional[str] = data.get("custom_install_url")
-
-    def __repr__(self) -> str:
-        return f"<{self.__class__.__name__} id={self.id} name={self.name!r} description={self.description!r}>"
-
-    @property
-    def icon(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the application's icon asset, if any."""
-        if self._icon is None:
-            return None
-        return Asset._from_icon(self._state, self.id, self._icon, path="app")
-
-    @property
-    def cover_image(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the cover image on a store embed, if any.
-
-        This is only available if the application is a game sold on Discord.
-        """
-        if self._cover_image is None:
-            return None
-        return Asset._from_icon(self._state, self.id, self._cover_image, path="app")
 
     @property
     def guild(self) -> Optional[Guild]:
@@ -241,6 +262,8 @@ class AppInfo:
 
 class BotAppInfo(AppInfo):
     """Represents the application info for the bot provided by Discord.
+
+    .. versionadded:: 2.6
 
     Attributes
     ----------

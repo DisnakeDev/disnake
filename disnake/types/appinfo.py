@@ -32,12 +32,15 @@ from .team import Team
 from .user import User
 
 
-class BaseAppInfo(TypedDict):
+class _PartialAppInfoOptional(TypedDict, total=False):
+    cover_image: str
+
+
+class PartialAppInfo(_PartialAppInfoOptional):
     id: Snowflake
     name: str
     icon: Optional[str]
     description: str
-    verify_key: str
 
 
 class InstallParams(TypedDict):
@@ -45,7 +48,7 @@ class InstallParams(TypedDict):
     permissions: str
 
 
-class AppInfo(BaseAppInfo, total=False):
+class _AppInfoOptional(PartialAppInfo, total=False):
     rpc_origins: List[str]
     terms_of_service_url: str
     privacy_policy_url: str
@@ -54,11 +57,14 @@ class AppInfo(BaseAppInfo, total=False):
     guild_id: Snowflake
     primary_sku_id: Snowflake
     slug: str
-    cover_image: str
     flags: int
     tags: List[str]
     install_params: InstallParams
     custom_install_url: str
+
+
+class AppInfo(_AppInfoOptional):
+    verify_key: str
 
 
 class _BotAppInfoOptional(TypedDict, total=False):
