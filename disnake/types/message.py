@@ -27,6 +27,7 @@ from __future__ import annotations
 
 from typing import List, Literal, Optional, TypedDict, Union
 
+from .appinfo import PartialAppInfo
 from .channel import ChannelType
 from .components import Component
 from .embed import Embed
@@ -71,20 +72,12 @@ class Attachment(_AttachmentOptional):
 MessageActivityType = Literal[1, 2, 3, 5]
 
 
-class MessageActivity(TypedDict):
-    type: MessageActivityType
+class _MessageActivityOptional(TypedDict, total=False):
     party_id: str
 
 
-class _MessageApplicationOptional(TypedDict, total=False):
-    cover_image: str
-
-
-class MessageApplication(_MessageApplicationOptional):
-    id: Snowflake
-    description: str
-    icon: Optional[str]
-    name: str
+class MessageActivity(_MessageActivityOptional):
+    type: MessageActivityType
 
 
 class MessageReference(TypedDict, total=False):
@@ -102,7 +95,7 @@ class _MessageOptional(TypedDict, total=False):
     nonce: Union[int, str]
     webhook_id: Snowflake
     activity: MessageActivity
-    application: MessageApplication
+    application: PartialAppInfo
     application_id: Snowflake
     message_reference: MessageReference
     flags: int
