@@ -227,7 +227,7 @@ class PartialAppInfo:
         """
         if self._cover_image is None:
             return None
-        return Asset._from_cover_image(self._state, self.id, self._cover_image)
+        return Asset._from_icon(self._state, self.id, self._cover_image, path="app")
 
     @property
     def guild(self) -> Optional[Guild]:
