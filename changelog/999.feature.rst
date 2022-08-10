@@ -1,3 +1,0 @@
-Improve :class:`BotAppInfo` and :class:`AppInfo` types.
-- :attr:`AppInfo.rpc_origins`` is no longer optional
-- :class:`BotAppInfo` now inherits from :class:`AppInfo`, most of the functionality was moved into :class:`AppInfo`

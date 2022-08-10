@@ -1,0 +1,8 @@
+Refactor application models:
+- :class:`AppInfo` now inherits from :class:`PartialAppInfo`, new type :class:`BotAppInfo` (corresponds to old ``AppInfo``) inherits from :class:`AppInfo`.
+  As a result of this, attributes that were previously present in :class:`PartialAppInfo` are now only in :class:`AppInfo`.
+  This should not have any noticeable effect unless you're instantiating these types yourself.
+- Remove deprecated attributes :attr:`BotAppInfo.summary`, :attr:`AppInfo.summary`, and :attr:`IntegrationApplication.summary`.
+- :attr:`AppInfo.bot_public` and :attr:`AppInfo.bot_require_code_grant` are now optional.
+- :attr:`Message.application` is now a :class:`PartialAppInfo` object instead of a :class:`dict`.
+- :attr:`IntegrationApplication.icon` is now an :class:`Asset`.

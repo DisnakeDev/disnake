@@ -1,1 +1,0 @@
-Fix broken :attr:`AppInfo.cover_image` url.

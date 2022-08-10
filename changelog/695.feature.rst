@@ -1,0 +1,4 @@
+Improve application models:
+- Add previously missing attributes to :attr:`Invite.target_application`.
+- :attr:`AppInfo.rpc_origins` is no longer optional.
+- Add :attr:`IntegrationApplication.cover_image`.
