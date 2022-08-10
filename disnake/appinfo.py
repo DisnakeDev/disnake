@@ -139,7 +139,7 @@ class PartialAppInfo:
 
     @property
     def cover_image(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the cover image on a store embed, if any."""
+        """Optional[:class:`.Asset`]: Retrieves the application's cover image asset, if any."""
         if self._cover_image is None:
             return None
         return Asset._from_icon(self._state, self.id, self._cover_image, path="app")
