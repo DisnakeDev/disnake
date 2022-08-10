@@ -152,6 +152,12 @@ class AppInfo(PartialAppInfo):
 
     Attributes
     ----------
+    id: :class:`int`
+        The application's ID.
+    name: :class:`str`
+        The application's name.
+    description: :class:`str`
+        The application's description.
     rpc_origins: List[:class:`str`]
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
@@ -267,6 +273,66 @@ class BotAppInfo(AppInfo):
 
     Attributes
     ----------
+    id: :class:`int`
+        The application's ID.
+    name: :class:`str`
+        The application's name.
+    description: :class:`str`
+        The application's description.
+    rpc_origins: List[:class:`str`]
+        A list of RPC origin URLs, if RPC is enabled.
+    verify_key: :class:`str`
+        The hex encoded key for verification in interactions and the
+        GameSDK's `GetTicket <https://discord.com/developers/docs/game-sdk/applications#getticket>`_.
+    terms_of_service_url: Optional[:class:`str`]
+        The application's terms of service URL, if set.
+    privacy_policy_url: Optional[:class:`str`]
+        The application's privacy policy URL, if set.
+    bot_public: Optional[:class:`bool`]
+        Whether the bot can be invited by anyone or if it is locked
+        to the application owner.
+    bot_require_code_grant: Optional[:class:`bool`]
+        Whether the bot requires the completion of the full oauth2 code
+        grant flow to join.
+    guild_id: Optional[:class:`int`]
+        If this application is a game sold on Discord,
+        this field will be the guild to which it has been linked to.
+
+        .. versionadded:: 1.3
+
+    primary_sku_id: Optional[:class:`int`]
+        If this application is a game sold on Discord,
+        this field will be the ID of the "Game SKU" that is created,
+        if it exists.
+
+        .. versionadded:: 1.3
+
+    slug: Optional[:class:`str`]
+        If this application is a game sold on Discord,
+        this field will be the URL slug that links to the store page.
+
+        .. versionadded:: 1.3
+
+    flags: Optional[:class:`ApplicationFlags`]
+        The application's public flags.
+
+        .. versionadded:: 2.3
+
+    tags: Optional[List[:class:`str`]]
+        The application's tags.
+
+        .. versionadded:: 2.5
+
+    install_params: Optional[:class:`InstallParams`]
+        The installation parameters for this application.
+
+        .. versionadded:: 2.5
+
+    custom_install_url: Optional[:class:`str`]
+        The custom installation url for this application.
+
+        .. versionadded:: 2.5
+
     owner: :class:`User`
         The application's owner.
     team: Optional[:class:`Team`]

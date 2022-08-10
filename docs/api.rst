@@ -59,21 +59,31 @@ AutoShardedClient
 Application Info
 ------------------
 
-BotAppInfo
-~~~~~~~~
+PartialAppInfo
+~~~~~~~~~~~~~~~
 
-.. attributetable:: BotAppInfo
+.. attributetable:: PartialAppInfo
 
-.. autoclass:: BotAppInfo()
+.. autoclass:: PartialAppInfo()
     :members:
 
 AppInfo
-~~~~~~~~~~~~~~~
+~~~~~~~~
 
 .. attributetable:: AppInfo
 
 .. autoclass:: AppInfo()
     :members:
+    :inherited-members:
+
+BotAppInfo
+~~~~~~~~~~~
+
+.. attributetable:: BotAppInfo
+
+.. autoclass:: BotAppInfo()
+    :members:
+    :inherited-members:
 
 Team
 ~~~~~
@@ -4809,6 +4819,7 @@ Integration
 
 .. autoclass:: IntegrationApplication()
     :members:
+    :inherited-members:
 
 .. autoclass:: StreamIntegration()
     :members:

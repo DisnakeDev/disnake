@@ -347,6 +347,12 @@ class IntegrationApplication(PartialAppInfo):
 
     Attributes
     ----------
+    id: :class:`int`
+        The application's ID.
+    name: :class:`str`
+        The application's name.
+    description: :class:`str`
+        The application's description.
     user: Optional[:class:`User`]
         The bot user associated with this application.
     """
