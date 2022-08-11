@@ -1,0 +1,1 @@
+Limit installation of ``cchardet`` in the ``[speed]`` extra to Python versions below 3.10.
