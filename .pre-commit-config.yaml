@@ -15,7 +15,7 @@ repos:
     hooks:
       - id: no-symlinks
         name: no symlinks
-        description: 'Check for symlinks'
+        description: "Check for symlinks"
         entry: ".*"
         language: fail
         types: [symlink]
