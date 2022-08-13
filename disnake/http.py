@@ -2601,11 +2601,8 @@ class HTTPClient:
             data: gateway.Gateway = await self.request(Route("GET", "/gateway"))
         except HTTPException as exc:
             raise GatewayNotFound() from exc
-        if zlib:
-            value = "{url}?encoding={encoding}&v={version}&compress=zlib-stream"
-        else:
-            value = "{url}?encoding={encoding}&v={version}"
-        return value.format(url=data["url"], encoding=encoding, version=_API_VERSION)
+
+        return self._format_gateway_url(data["url"], encoding=encoding, zlib=zlib)
 
     async def get_bot_gateway(
         self, *, encoding: str = "json", zlib: bool = True
@@ -2615,15 +2612,18 @@ class HTTPClient:
         except HTTPException as exc:
             raise GatewayNotFound() from exc
 
-        if zlib:
-            value = "{url}?encoding={encoding}&v={version}&compress=zlib-stream"
-        else:
-            value = "{url}?encoding={encoding}&v={version}"
         return (
             data["shards"],
-            value.format(url=data["url"], encoding=encoding, version=_API_VERSION),
+            self._format_gateway_url(data["url"], encoding=encoding, zlib=zlib),
             data["session_start_limit"],
         )
+
+    @staticmethod
+    def _format_gateway_url(url: str, *, encoding: str, zlib: bool) -> str:
+        value = f"{url}?v={_API_VERSION}&encoding={encoding}"
+        if zlib:
+            value += "&compress=zlib-stream"
+        return value
 
     def get_user(self, user_id: Snowflake) -> Response[user.User]:
         return self.request(Route("GET", "/users/{user_id}", user_id=user_id))
