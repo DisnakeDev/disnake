@@ -298,3 +298,8 @@ def setup(app: Sphinx) -> SphinxExtensionMeta:
     )
     app.add_node(attributetableplaceholder)
     app.connect("doctree-resolved", process_attributetable)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }

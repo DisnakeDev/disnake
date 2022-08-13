@@ -68,3 +68,8 @@ def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.connect("config-inited", patch_genindex)
     app.connect("config-inited", disable_mathjax)
     app.connect("builder-inited", set_translator)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }

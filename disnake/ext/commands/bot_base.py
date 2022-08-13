@@ -150,28 +150,45 @@ class BotBase(CommonBotBase, GroupMixin):
         **options: Any,
     ):
         super().__init__(**options)
-        self.command_prefix = command_prefix
-        if (
-            command_prefix is not when_mentioned
-            and not self.intents.message_content  # type: ignore
-        ):
 
+        if not isinstance(self, disnake.Client):
+            raise RuntimeError("BotBase mixin must be used with disnake.Client")
+
+        alternative = (
+            "AutoShardedInteractionBot"
+            if isinstance(self, disnake.AutoShardedClient)
+            else "InteractionBot"
+        )
+        if command_prefix is None:
+            disnake.utils.warn_deprecated(
+                "Using `command_prefix=None` is deprecated and will result in "
+                "an error in future versions. "
+                f"If you don't need any prefix functionality, consider using {alternative}.",
+                stacklevel=2,
+            )
+        elif (
+            # note: no need to check for empty iterables,
+            # as they won't be allowed by `get_prefix`
+            command_prefix is not when_mentioned
+            and not self.intents.message_content
+        ):
             warnings.warn(
                 "Message Content intent is not enabled and a prefix is configured. "
                 "This may cause limited functionality for prefix commands. "
                 "If you want prefix commands, pass an intents object with message_content set to True. "
-                "If you don't need any prefix functionality, "
-                "consider using InteractionBot instead. "
+                f"If you don't need any prefix functionality, consider using {alternative}. "
                 "Alternatively, set prefix to disnake.ext.commands.when_mentioned to silence this warning.",
                 MessageContentPrefixWarning,
                 stacklevel=2,
             )
 
-        self._checks: List[Check] = []
-        self._check_once = []
+        self.command_prefix = command_prefix
 
-        self._before_invoke = None
-        self._after_invoke = None
+        self._checks: List[Check] = []
+        self._check_once: List[Check] = []
+
+        self._before_invoke: Optional[CoroFunc] = None
+        self._after_invoke: Optional[CoroFunc] = None
 
         self._help_command = None
         self.description: str = inspect.cleandoc(description) if description else ""
