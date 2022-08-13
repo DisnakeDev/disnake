@@ -222,7 +222,6 @@ class Guild(Hashable):
         - ``HUB``: Guild is a student hub.
         - ``INVITE_SPLASH``: Guild's invite page can have a special splash.
         - ``LINKED_TO_HUB``: Guild is linked to a student hub.
-        - ``MEMBER_PROFILES``: Guild members can set per-guild profiles if they have nitro.
         - ``MEMBER_VERIFICATION_GATE_ENABLED``: Guild has Membership Screening enabled.
         - ``MONETIZATION_ENABLED``: Guild has enabled monetization.
         - ``MORE_EMOJI``: Guild has increased custom emoji slots.
