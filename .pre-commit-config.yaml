@@ -16,7 +16,7 @@ repos:
       - id: no-symlinks
         name: no symlinks
         description: "Check for symlinks"
-        entry: ".*"
+        entry: "symlinks may not be committed due to platform support"
         language: fail
         types: [symlink]
 
