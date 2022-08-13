@@ -18,7 +18,6 @@ flake8 = { cmd = "flake8", help = "Run flake8"}
 isort = { cmd = "task lint isort", help = "Run isort" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-slotscheck = { cmd = "nox -Rs slotscheck --", help = "Run slotscheck" }
 setup_env = {cmd = 'nox -s setup --', help = 'Setup the local environment and set up all dependencies'}
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
@@ -75,7 +74,7 @@ exclude-modules = '''
 
 
 [tool.pyright]
-typeCheckingMode = "basic"
+typeCheckingMode = "strict"
 include = [
     "disnake",
     "docs",
@@ -89,22 +88,30 @@ ignore = [
     "noxfile.py",  # this is ignored because nox is not installed in the environment when running pyright
 ]
 
-strictParameterNoneValue = false
-reportInvalidStringEscapeSequence = false
-reportDuplicateImport = true
-reportUntypedFunctionDecorator = true
-reportUntypedClassDecorator = true
-reportUntypedBaseClass = true
-reportInvalidTypeVarUse = true
-reportUnnecessaryCast = true
-reportSelfClsParameterName = true
-reportUnsupportedDunderAll = true
-reportUnusedImport = true
-reportUnusedVariable = true
-reportUntypedNamedTuple = true
-reportUnnecessaryComparison = true
+# this is one of the diagnostics that aren't enabled by default, even in strict mode
 reportUnnecessaryTypeIgnoreComment = true
-reportUnknownLambdaType = true
+
+# it's unlikely that these will ever be enabled
+reportOverlappingOverload = false
+reportPrivateUsage = false
+reportUnnecessaryIsInstance = false
+reportFunctionMemberAccess = false
+reportMissingTypeStubs = false
+reportUnusedFunction = false
+reportUnusedClass = false
+reportConstantRedefinition = false
+reportImportCycles = false
+reportIncompatibleMethodOverride = false
+reportIncompatibleVariableOverride = false
+
+# these are largely due to missing type hints, and make up most of the error count
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownArgumentType = false
+reportMissingParameterType = false
+reportUnknownVariableType = false
+reportMissingTypeArgument = false
+strictParameterNoneValue = false
 
 
 [tool.pytest.ini_options]
@@ -134,4 +141,24 @@ exclude_lines = [
     "^\\s*if TYPE_CHECKING",
     "^\\s*raise NotImplementedError$",
     "^\\s*\\.\\.\\.$",
+]
+
+
+[tool.check-manifest]
+ignore = [
+    # CI
+    ".flake8",
+    ".pre-commit-config.yaml",
+    ".readthedocs.yml",
+    "noxfile.py",
+    # docs
+    "CONTRIBUTING.md",
+    "assets/**",
+    "changelog/**",
+    "docs/**",
+    "examples/**",
+    # tests
+    "test_bot/**",
+    "test_launcher.py",
+    "tests/**",
 ]

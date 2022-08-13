@@ -792,6 +792,7 @@ class CustomActivity(BaseActivity):
         return ActivityType.custom
 
     def to_dict(self) -> Dict[str, Any]:
+        o: Dict[str, Any]
         if self.name == self.state:
             o = {
                 "type": ActivityType.custom.value,

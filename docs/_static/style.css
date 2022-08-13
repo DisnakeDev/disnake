@@ -1507,7 +1507,7 @@ div.code-block-caption {
 
 /* hoverxref stuff (hoverxref custom additions) */
 
-.hoverxref {
+.hxr-hoverxref {
   border-bottom: 1px dotted;
   border-color: gray;
 }

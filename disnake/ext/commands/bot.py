@@ -182,6 +182,12 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+
+    i18n: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` used for localization of
+        application commands.
+
+        .. versionadded:: 2.5
     """
 
     if TYPE_CHECKING:
@@ -344,6 +350,12 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         as missing localized names will automatically fall back to the default/base name without it.
         Only applicable if the ``localization_provider`` parameter is not provided.
         Defaults to ``False``.
+
+        .. versionadded:: 2.5
+
+    i18n: :class:`.LocalizationProtocol`
+        An implementation of :class:`.LocalizationProtocol` used for localization of
+        application commands.
 
         .. versionadded:: 2.5
     """
