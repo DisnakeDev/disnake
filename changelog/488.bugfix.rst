@@ -1,0 +1,1 @@
+Properly close sockets when receiving a voice server update event.
