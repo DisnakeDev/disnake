@@ -1,0 +1,1 @@
+|commands| Using ``command_prefix=None`` with :class:`~disnake.ext.commands.Bot` is now deprecated in favour of :class:`~disnake.ext.commands.InteractionBot`.
