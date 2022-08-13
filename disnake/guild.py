@@ -1975,16 +1975,36 @@ class Guild(Hashable):
             fields["system_channel_flags"] = system_channel_flags.value
 
         if community is not MISSING:
-            features = []
+            # if we don't have complete feature information for the guild
+            # it is possible to disable or enable other features that we didn't intend to touch
+            # The issue is removing community also removes partner status, and discord is adding the ability to
+            # enable or disable invite usage for guilds, which is problematically triggered by a feature.
+            # To enable or disable that feature, we will need to provide all of the existing features in advance.
+            # That is problematic to say the least. By reimplementing this list to only provide the features if we make a change
+            # we minimize the possible times that we will provide features when no changes are made, and possibly affect other features.
+            if self.unavailable:
+                raise RuntimeError(
+                    "cannot modify features of an unavailable guild due to potentially destructive results."
+                )
+            features = self.features
             if community:
                 if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
-                    features.append("COMMUNITY")
+                    if "COMMUNITY" not in features:
+                        features.append("COMMUNITY")
+                    else:
+                        features = MISSING
                 else:
                     raise ValueError(
                         "community field requires both rules_channel and public_updates_channel fields to be provided"
                     )
+            else:
+                try:
+                    features.remove("COMMUNITY")
+                except ValueError:
+                    features = MISSING
 
-            fields["features"] = features
+            if features is not MISSING:
+                fields["features"] = features
 
         if premium_progress_bar_enabled is not MISSING:
             fields["premium_progress_bar_enabled"] = premium_progress_bar_enabled
