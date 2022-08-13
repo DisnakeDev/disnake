@@ -1,1 +1,1 @@
-548.breaking.rst
+Rename ``channel_id`` parameter to ``channel`` on :attr:`Guild.create_scheduled_event` and :meth:`GuildScheduledEvent.edit`.
