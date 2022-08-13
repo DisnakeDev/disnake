@@ -235,7 +235,7 @@ class VoiceClient(VoiceProtocol):
         super().__init__(client, channel)
         state = client._connection
         self.token: str = MISSING
-        self.socket = MISSING
+        self.socket: socket.socket = MISSING
         self.loop: asyncio.AbstractEventLoop = state.loop
         self._state: ConnectionState = state
         # this will be used in the AudioPlayer thread
@@ -324,12 +324,15 @@ class VoiceClient(VoiceProtocol):
         # This gets set later
         self.endpoint_ip = MISSING
 
+        if self.socket:
+            self.socket.close()
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setblocking(False)
 
         if not self._handshaking:
             # If we're not handshaking then we need to terminate our previous connection in the websocket
-            await self.ws.close(4000)
+            if self.ws:
+                await self.ws.close(4000)
             return
 
         self._voice_server_complete.set()

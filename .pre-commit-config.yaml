@@ -11,31 +11,39 @@ repos:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
 
+  - repo: local
+    hooks:
+      - id: no-symlinks
+        name: no symlinks
+        description: "Check for symlinks"
+        entry: "symlinks may not be committed due to platform support"
+        language: fail
+        types: [symlink]
+
   - repo: https://github.com/pycqa/isort
     rev: 5.10.1
     hooks:
       - id: isort
         args: ["--profile", "black", "--extend-skip", "examples"]
-        name: Running isort in all files.
+        name: "run isort in all files"
         exclude: ^examples/
       - id: isort
         args: ["--profile", "black", "--thirdparty", "disnake"]
-        name: Running isort in examples.
+        name: "run isort in examples"
         files: ^examples/
 
   - repo: https://github.com/psf/black
     rev: 22.3.0
     hooks:
       - id: black
-        name: Running black in all files.
+        name: "run black in all files"
 
   - repo: local
     hooks:
       - id: flake8
         name: flake8
-        description: 'Lint all of our code'
+        description: "Lint all of our code"
         entry: flake8
-        exclude: ^test_bot/
-        language: python
+        language: system
         types: [python]
         require_serial: true
