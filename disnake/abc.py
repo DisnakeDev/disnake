@@ -48,7 +48,7 @@ from typing import (
 
 from . import utils
 from .context_managers import Typing
-from .enums import ChannelType, PartyType, try_enum_to_int
+from .enums import ChannelType, PartyType, VideoQualityMode, try_enum_to_int
 from .errors import ClientException
 from .file import File
 from .flags import ChannelFlags, MessageFlags
@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .state import ConnectionState
+    from .threads import AnyThreadArchiveDuration
     from .types.channel import (
         Channel as ChannelPayload,
         GuildChannel as GuildChannelPayload,
@@ -96,19 +97,12 @@ if TYPE_CHECKING:
     from .ui.action_row import Components, MessageUIComponent
     from .ui.view import View
     from .user import ClientUser
+    from .voice_region import VoiceRegion
 
     MessageableChannel = Union[GuildMessageable, DMChannel, PartialMessageable]
     SnowflakeTime = Union["Snowflake", datetime]
 
 MISSING = utils.MISSING
-
-
-class _Undefined:
-    def __repr__(self) -> str:
-        return "see-below"
-
-
-_undefined: Any = _Undefined()
 
 
 @runtime_checkable
@@ -276,7 +270,7 @@ class GuildChannel(ABC):
     async def _move(
         self,
         position: int,
-        parent_id: Optional[Any] = None,
+        parent_id: Optional[int] = None,
         lock_permissions: bool = False,
         *,
         reason: Optional[str],
@@ -307,108 +301,129 @@ class GuildChannel(ABC):
         payload = []
         for index, c in enumerate(channels):
             d: Dict[str, Any] = {"id": c.id, "position": index}
-            if parent_id is not _undefined and c.id == self.id:
+            if parent_id is not MISSING and c.id == self.id:
                 d.update(parent_id=parent_id, lock_permissions=lock_permissions)
             payload.append(d)
 
         await http.bulk_channel_update(self.guild.id, payload, reason=reason)
 
     async def _edit(
-        self, options: Dict[str, Any], reason: Optional[str]
+        self,
+        *,
+        name: str = MISSING,
+        topic: Optional[str] = MISSING,
+        position: int = MISSING,
+        nsfw: bool = MISSING,
+        sync_permissions: bool = MISSING,
+        category: Optional[Snowflake] = MISSING,
+        slowmode_delay: Optional[int] = MISSING,
+        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        type: ChannelType = MISSING,
+        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        bitrate: int = MISSING,
+        user_limit: int = MISSING,
+        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        video_quality_mode: VideoQualityMode = MISSING,
+        flags: ChannelFlags = MISSING,
+        reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
-        try:
-            parent = options.pop("category")
-        except KeyError:
-            parent_id = _undefined
+        parent_id: Optional[int]
+        if category is not MISSING:
+            # if category is given, it's either `None` (no parent) or a category channel
+            parent_id = category.id if category else None
         else:
-            parent_id = parent and parent.id
+            # if it's not given, don't change the category
+            parent_id = MISSING
 
-        try:
-            options["rate_limit_per_user"] = options.pop("slowmode_delay")
-        except KeyError:
-            pass
-
-        try:
-            rtc_region = options.pop("rtc_region")
-        except KeyError:
-            pass
+        rtc_region_payload: Optional[str]
+        if rtc_region is not MISSING:
+            rtc_region_payload = str(rtc_region) if rtc_region is not None else None
         else:
-            options["rtc_region"] = None if rtc_region is None else str(rtc_region)
+            rtc_region_payload = MISSING
 
-        try:
-            video_quality_mode = options.pop("video_quality_mode")
-        except KeyError:
-            pass
+        video_quality_mode_payload: Optional[int]
+        if video_quality_mode is not MISSING:
+            video_quality_mode_payload = int(video_quality_mode)
         else:
-            options["video_quality_mode"] = int(video_quality_mode)
+            video_quality_mode_payload = MISSING
 
-        try:
-            default_auto_archive_duration = options.pop("default_auto_archive_duration")
-        except KeyError:
-            pass
-        else:
-            options["default_auto_archive_duration"] = (
+        default_auto_archive_duration_payload: Optional[int]
+        if default_auto_archive_duration is not MISSING:
+            default_auto_archive_duration_payload = (
                 int(default_auto_archive_duration)
                 if default_auto_archive_duration is not None
-                else None
+                else default_auto_archive_duration
             )
-
-        lock_permissions = options.pop("sync_permissions", False)
-
-        try:
-            position = options.pop("position")
-        except KeyError:
-            if parent_id is not _undefined:
-                if lock_permissions:
-                    category = self.guild.get_channel(parent_id)
-                    if category:
-                        options["permission_overwrites"] = [
-                            c._asdict() for c in category._overwrites
-                        ]
-                options["parent_id"] = parent_id
-            elif lock_permissions and self.category_id is not None:
-                # if we're syncing permissions on a pre-existing channel category without changing it
-                # we need to update the permissions to point to the pre-existing category
-                category = self.guild.get_channel(self.category_id)
-                if category:
-                    options["permission_overwrites"] = [c._asdict() for c in category._overwrites]
         else:
+            default_auto_archive_duration_payload = MISSING
+
+        lock_permissions: bool = bool(sync_permissions)
+
+        overwrites_payload: List[PermissionOverwritePayload] = MISSING
+
+        if position is not MISSING:
             await self._move(
                 position, parent_id=parent_id, lock_permissions=lock_permissions, reason=reason
             )
+            parent_id = MISSING  # no need to change it again in the edit request below
+        elif lock_permissions:
+            if parent_id is not MISSING:
+                p_id = parent_id
+            else:
+                p_id = self.category_id
 
-        overwrites = options.get("overwrites", None)
-        if overwrites is not None:
-            perms = []
+            if p_id is not None and (parent := self.guild.get_channel(p_id)):
+                overwrites_payload = [c._asdict() for c in parent._overwrites]
+
+        if overwrites is not MISSING and overwrites is not None:
+            overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
                     raise TypeError(
-                        f"Expected PermissionOverwrite received {perm.__class__.__name__}"
+                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
                     )
 
                 allow, deny = perm.pair()
-                payload = {
-                    "allow": allow.value,
-                    "deny": deny.value,
+                payload: PermissionOverwritePayload = {
+                    "allow": str(allow.value),
+                    "deny": str(deny.value),
                     "id": target.id,
+                    "type": _Overwrites.ROLE if isinstance(target, Role) else _Overwrites.MEMBER,
                 }
+                overwrites_payload.append(payload)
 
-                if isinstance(target, Role):
-                    payload["type"] = _Overwrites.ROLE
-                else:
-                    payload["type"] = _Overwrites.MEMBER
-
-                perms.append(payload)
-            options["permission_overwrites"] = perms
-
-        try:
-            ch_type = options["type"]
-        except KeyError:
-            pass
-        else:
-            if not isinstance(ch_type, ChannelType):
+        type_payload: int
+        if type is not MISSING:
+            if not isinstance(type, ChannelType):
                 raise TypeError("type field must be of type ChannelType")
-            options["type"] = ch_type.value
+            type_payload = type.value
+        else:
+            type_payload = MISSING
+
+        if flags is not MISSING:
+            if not isinstance(flags, ChannelFlags):
+                raise TypeError("flags field must be of type ChannelFlags")
+            flags_payload = flags.value
+        else:
+            flags_payload = MISSING
+
+        options: Dict[str, Any] = {
+            "name": name,
+            "parent_id": parent_id,
+            "topic": topic,
+            "bitrate": bitrate,
+            "nsfw": nsfw,
+            "user_limit": user_limit,
+            # note: not passing `position` as it already got updated before, if passed
+            "permission_overwrites": overwrites_payload,
+            "rate_limit_per_user": slowmode_delay,
+            "type": type_payload,
+            "rtc_region": rtc_region_payload,
+            "video_quality_mode": video_quality_mode_payload,
+            "default_auto_archive_duration": default_auto_archive_duration_payload,
+            "flags": flags_payload,
+        }
+        options = {k: v for k, v in options.items() if v is not MISSING}
 
         if options:
             return await self._state.http.edit_channel(self.id, reason=reason, **options)
@@ -609,13 +624,17 @@ class GuildChannel(ABC):
             are not computed.
         ignore_timeout: :class:`bool`
             Whether or not to ignore the user's timeout.
-            Defaults to ``True`` for backwards compatibility.
+            Defaults to ``False``.
 
             .. versionadded:: 2.4
 
             .. note::
 
                 This only applies to :class:`~disnake.Member` objects.
+
+            .. versionchanged:: 2.6
+
+                The default was changed to ``False``.
 
         Raises
         ------
@@ -645,7 +664,7 @@ class GuildChannel(ABC):
             raise TypeError("ignore_timeout is only supported for disnake.Member objects")
 
         if ignore_timeout is MISSING:
-            ignore_timeout = True
+            ignore_timeout = False
 
         if self.guild.owner_id == obj.id:
             return Permissions.all()
@@ -768,7 +787,7 @@ class GuildChannel(ABC):
         self,
         target: Union[Member, Role],
         *,
-        overwrite: Optional[Union[PermissionOverwrite, _Undefined]] = ...,
+        overwrite: Optional[PermissionOverwrite] = ...,
         reason: Optional[str] = ...,
     ) -> None:
         ...
@@ -783,7 +802,7 @@ class GuildChannel(ABC):
     ) -> None:
         ...
 
-    async def set_permissions(self, target, *, overwrite=_undefined, reason=None, **permissions):
+    async def set_permissions(self, target, *, overwrite=MISSING, reason=None, **permissions):
         """
         |coro|
 
@@ -866,7 +885,7 @@ class GuildChannel(ABC):
         else:
             raise TypeError("target parameter must be either Member or Role")
 
-        if overwrite is _undefined:
+        if overwrite is MISSING:
             if len(permissions) == 0:
                 raise TypeError("No overwrite provided.")
             try:

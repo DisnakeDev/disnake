@@ -243,18 +243,20 @@ class Interaction:
 
     @utils.cached_slot_property("_cs_channel")
     def channel(self) -> Union[GuildMessageable, PartialMessageable]:
-        """Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]: The channel the interaction was sent from.
+        """Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]: The channel the interaction was sent from.
 
-        Note that due to a Discord limitation, DM channels are not resolved since there is
-        no data to complete them. These are :class:`PartialMessageable` instead.
+        Note that due to a Discord limitation, threads that the bot cannot access and DM channels
+        are not resolved since there is no data to complete them.
+        These are :class:`PartialMessageable` instead.
+
+        If you want to compute the interaction author's or bot's permissions in the channel,
+        consider using :attr:`permissions` or :attr:`app_permissions` instead.
         """
-        # the actual typing of these is a bit complicated, we just leave it at text channels
         guild = self.guild
         channel = guild and guild._resolve_channel(self.channel_id)
         if channel is None:
-            type = (
-                None if self.guild_id is not None else ChannelType.private
-            )  # could be a text, voice, or thread channel in a guild
+            # could be a thread channel in a guild, or a DM channel
+            type = None if self.guild_id is not None else ChannelType.private
             return PartialMessageable(state=self._state, id=self.channel_id, type=type)
         return channel  # type: ignore
 
@@ -1376,9 +1378,9 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1390,9 +1392,9 @@ class InteractionMessage(Message):
         embed: Optional[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1404,9 +1406,9 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         file: File = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
@@ -1418,13 +1420,25 @@ class InteractionMessage(Message):
         embeds: List[Embed] = ...,
         files: List[File] = ...,
         attachments: Optional[List[Attachment]] = ...,
+        allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
         components: Optional[Components[MessageUIComponent]] = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
     ) -> InteractionMessage:
         ...
 
-    async def edit(self, content: Optional[str] = MISSING, **fields: Any) -> Message:
+    async def edit(
+        self,
+        content: Optional[str] = MISSING,
+        *,
+        embed: Optional[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
+        file: File = MISSING,
+        files: List[File] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
+        allowed_mentions: Optional[AllowedMentions] = MISSING,
+        view: Optional[View] = MISSING,
+        components: Optional[Components[MessageUIComponent]] = MISSING,
+    ) -> Message:
         """|coro|
 
         Edits the message.
@@ -1495,15 +1509,39 @@ class InteractionMessage(Message):
             The newly edited message.
         """
         if self._state._interaction.is_expired():
-            return await super().edit(content=content, **fields)
+            # We have to choose between type-ignoring the entire call,
+            # or not having these specific parameters type-checked,
+            # as we'd otherwise not match any of the overloads if all
+            # parameters were provided
+            params = {"file": file, "embed": embed}
+            return await super().edit(
+                content=content,
+                embeds=embeds,
+                files=files,
+                attachments=attachments,
+                allowed_mentions=allowed_mentions,
+                view=view,
+                components=components,
+                **params,
+            )
 
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         # this isn't necessary when using the superclass, as the implementation there takes care of attachments
-        if "attachments" not in fields and (fields.get("file") or fields.get("files")):
-            fields["attachments"] = self.attachments
+        if attachments is MISSING and (file or files):
+            attachments = self.attachments
 
-        return await self._state._interaction.edit_original_message(content=content, **fields)
+        return await self._state._interaction.edit_original_message(
+            content=content,
+            embed=embed,
+            embeds=embeds,
+            file=file,
+            files=files,
+            attachments=attachments,
+            allowed_mentions=allowed_mentions,
+            view=view,
+            components=components,
+        )
 
     async def delete(self, *, delay: Optional[float] = None) -> None:
         """|coro|

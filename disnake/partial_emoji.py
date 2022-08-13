@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
     from .state import ConnectionState
     from .types.activity import ActivityEmoji as ActivityEmojiPayload
-    from .types.message import PartialEmoji as PartialEmojiPayload
+    from .types.emoji import Emoji as EmojiPayload, PartialEmoji as PartialEmojiPayload
 
 
 class _EmojiTag:
@@ -93,7 +93,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     __slots__ = ("animated", "name", "id")
 
     _CUSTOM_EMOJI_RE = re.compile(
-        r"<?(?P<animated>a)?:?(?P<name>[A-Za-z0-9\_]+):(?P<id>[0-9]{13,20})>?"
+        r"<?(?P<animated>a)?:?(?P<name>[A-Za-z0-9\_]+):(?P<id>[0-9]{17,19})>?"
     )
 
     if TYPE_CHECKING:
@@ -150,10 +150,11 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
         return cls(name=value, id=None, animated=False)
 
-    def to_dict(self) -> Dict[str, Any]:
-        o: Dict[str, Any] = {"name": self.name}
-        if self.id:
-            o["id"] = self.id
+    def to_dict(self) -> EmojiPayload:
+        o: EmojiPayload = {
+            "name": self.name,
+            "id": self.id,
+        }
         if self.animated:
             o["animated"] = self.animated
         return o

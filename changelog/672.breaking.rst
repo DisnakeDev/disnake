@@ -1,0 +1,1 @@
+Change the default of the ``ignore_timeout`` parameter for all ``permissions_for`` methods to ``False``.

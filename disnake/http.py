@@ -76,6 +76,7 @@ if TYPE_CHECKING:
     from .types import (
         appinfo,
         audit_log,
+        automod,
         channel,
         components,
         embed,
@@ -2021,7 +2022,7 @@ class HTTPClient:
         reason: Optional[str] = None,
     ) -> Response[guild_scheduled_event.GuildScheduledEvent]:
         r = Route("POST", "/guilds/{guild_id}/scheduled-events", guild_id=guild_id)
-        payload = {
+        payload: Dict[str, Any] = {
             "name": name,
             "privacy_level": privacy_level,
             "scheduled_start_time": scheduled_start_time,
@@ -2140,6 +2141,95 @@ class HTTPClient:
 
         r = Route("PATCH", "/guilds/{guild_id}/welcome-screen", guild_id=guild_id)
         return self.request(r, json=payload, reason=reason)
+
+    def get_auto_moderation_rules(self, guild_id: Snowflake) -> Response[List[automod.AutoModRule]]:
+        return self.request(
+            Route("GET", "/guilds/{guild_id}/auto-moderation/rules", guild_id=guild_id)
+        )
+
+    def get_auto_moderation_rule(
+        self, guild_id: Snowflake, rule_id: Snowflake
+    ) -> Response[automod.AutoModRule]:
+        return self.request(
+            Route(
+                "GET",
+                "/guilds/{guild_id}/auto-moderation/rules/{rule_id}",
+                guild_id=guild_id,
+                rule_id=rule_id,
+            )
+        )
+
+    def create_auto_moderation_rule(
+        self,
+        guild_id: Snowflake,
+        *,
+        name: str,
+        event_type: automod.AutoModEventType,
+        trigger_type: automod.AutoModTriggerType,
+        actions: List[automod.AutoModAction],
+        trigger_metadata: Optional[automod.AutoModTriggerMetadata] = None,
+        enabled: Optional[bool] = None,
+        exempt_roles: Optional[SnowflakeList] = None,
+        exempt_channels: Optional[SnowflakeList] = None,
+        reason: Optional[str] = None,
+    ) -> Response[automod.AutoModRule]:
+        payload: automod.CreateAutoModRule = {
+            "name": name,
+            "event_type": event_type,
+            "trigger_type": trigger_type,
+            "actions": actions,
+        }
+
+        if trigger_metadata is not None:
+            payload["trigger_metadata"] = trigger_metadata
+        if enabled is not None:
+            payload["enabled"] = enabled
+        if exempt_roles is not None:
+            payload["exempt_roles"] = exempt_roles
+        if exempt_channels is not None:
+            payload["exempt_channels"] = exempt_channels
+
+        return self.request(
+            Route("POST", "/guilds/{guild_id}/auto-moderation/rules", guild_id=guild_id),
+            json=payload,
+            reason=reason,
+        )
+
+    def edit_auto_moderation_rule(
+        self,
+        guild_id: Snowflake,
+        rule_id: Snowflake,
+        *,
+        reason: Optional[str] = None,
+        **fields: Any,
+    ) -> Response[automod.AutoModRule]:
+        return self.request(
+            Route(
+                "PATCH",
+                "/guilds/{guild_id}/auto-moderation/rules/{rule_id}",
+                guild_id=guild_id,
+                rule_id=rule_id,
+            ),
+            json=fields,
+            reason=reason,
+        )
+
+    def delete_auto_moderation_rule(
+        self,
+        guild_id: Snowflake,
+        rule_id: Snowflake,
+        *,
+        reason: Optional[str] = None,
+    ) -> Response[None]:
+        return self.request(
+            Route(
+                "DELETE",
+                "/guilds/{guild_id}/auto-moderation/rules/{rule_id}",
+                guild_id=guild_id,
+                rule_id=rule_id,
+            ),
+            reason=reason,
+        )
 
     # Application commands (global)
 

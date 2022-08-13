@@ -51,6 +51,7 @@ extras_require = {
 
 packages = [
     "disnake",
+    "disnake.bin",
     "disnake.types",
     "disnake.ui",
     "disnake.webhook",
