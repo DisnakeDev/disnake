@@ -5690,6 +5690,15 @@ SessionStartLimit
 .. autoclass:: SessionStartLimit()
     :members:
 
+GatewayParams
+~~~~~~~~~~~~~~
+
+.. attributetable:: GatewayParams
+
+.. autoclass:: GatewayParams()
+    :members:
+    :exclude-members: encoding, zlib
+
 SystemChannelFlags
 ~~~~~~~~~~~~~~~~~~~~
 

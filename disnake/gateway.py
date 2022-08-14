@@ -420,7 +420,16 @@ class DiscordWebSocket:
 
         This is for internal use only.
         """
-        gateway = gateway or await client.http.get_gateway()
+        params = client.gateway_params
+        if gateway:
+            gateway = client.http._format_gateway_url(
+                gateway,
+                encoding=params.encoding,
+                zlib=params.zlib,
+            )
+        else:
+            gateway = await client.http.get_gateway(encoding=params.encoding, zlib=params.zlib)
+
         socket = await client.http.ws_connect(gateway)
         ws = cls(socket, loop=client.loop)
 
@@ -501,7 +510,6 @@ class DiscordWebSocket:
                     "browser": "disnake",
                     "device": "disnake",
                 },
-                "compress": True,
                 "large_threshold": 250,
                 "intents": state._intents.value,
             },

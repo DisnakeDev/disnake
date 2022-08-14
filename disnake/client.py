@@ -40,6 +40,7 @@ from typing import (
     Generator,
     List,
     Literal,
+    NamedTuple,
     Optional,
     Sequence,
     Tuple,
@@ -106,7 +107,11 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
 
 
-__all__ = ("Client", "SessionStartLimit")
+__all__ = (
+    "Client",
+    "SessionStartLimit",
+    "GatewayParams",
+)
 
 CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
 
@@ -192,6 +197,26 @@ class SessionStartLimit:
             f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
             f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}>"
         )
+
+
+class GatewayParams(NamedTuple):
+    """
+    Container type for configuring gateway connections.
+
+    .. versionadded:: 2.6
+
+    Parameters
+    ----------
+    encoding: :class:`str`
+        The payload encoding (``json`` is the only supported encoding currently).
+        Defaults to ``json``.
+    zlib: :class:`bool`
+        Whether to enable transport compression.
+        Defaults to ``True``.
+    """
+
+    encoding: str = "json"
+    zlib: bool = True
 
 
 class Client:
@@ -326,6 +351,13 @@ class Client:
 
         .. versionadded:: 2.5
 
+    gateway_params: :class:`.GatewayParams`
+        Allows configuring parameters used for establishing gateway connections,
+        notably enabling/disabling compression (enabled by default).
+        Encodings other than JSON are not supported.
+
+        .. versionadded:: 2.6
+
     Attributes
     ----------
     ws
@@ -396,6 +428,8 @@ class Client:
         if i18n is None:
             i18n = LocalizationStore(strict=i18n_strict)
         self.i18n: LocalizationProtocol = i18n
+
+        self.gateway_params: GatewayParams = options.get("gateway_params", GatewayParams())
 
     # internals
 
@@ -791,7 +825,10 @@ class Client:
             However, if ``ignore_session_start_limit`` is ``True``, the client will connect regardless
             and this exception will not be raised.
         """
-        _, gateway, session_start_limit = await self.http.get_bot_gateway()
+        _, gateway, session_start_limit = await self.http.get_bot_gateway(
+            encoding=self.gateway_params.encoding,
+            zlib=self.gateway_params.zlib,
+        )
         self.session_start_limit = SessionStartLimit(session_start_limit)
 
         if not ignore_session_start_limit and self.session_start_limit.remaining == 0:
