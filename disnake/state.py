@@ -1316,7 +1316,9 @@ class ConnectionState:
                 guild._add_member(member)
                 user = member
             else:
-                user = self.store_user(data["user"]) # TODO: https://github.com/DisnakeDev/disnake/pull/643#discussion_r934047176 
+                user = self.store_user(
+                    data["user"]
+                )  # TODO: https://github.com/DisnakeDev/disnake/pull/643#discussion_r934047176
 
         raw = RawGuildMemberUpdateEvent(data, user)
         self.dispatch("raw_member_update", raw)
