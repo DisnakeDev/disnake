@@ -324,6 +324,7 @@ class GuildChannel(ABC):
         user_limit: int = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
+        flags: ChannelFlags = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[ChannelPayload]:
         parent_id: Optional[int]
@@ -399,6 +400,13 @@ class GuildChannel(ABC):
         else:
             type_payload = MISSING
 
+        if flags is not MISSING:
+            if not isinstance(flags, ChannelFlags):
+                raise TypeError("flags field must be of type ChannelFlags")
+            flags_payload = flags.value
+        else:
+            flags_payload = MISSING
+
         options: Dict[str, Any] = {
             "name": name,
             "parent_id": parent_id,
@@ -413,6 +421,7 @@ class GuildChannel(ABC):
             "rtc_region": rtc_region_payload,
             "video_quality_mode": video_quality_mode_payload,
             "default_auto_archive_duration": default_auto_archive_duration_payload,
+            "flags": flags_payload,
         }
         options = {k: v for k, v in options.items() if v is not MISSING}
 
@@ -615,13 +624,17 @@ class GuildChannel(ABC):
             are not computed.
         ignore_timeout: :class:`bool`
             Whether or not to ignore the user's timeout.
-            Defaults to ``True`` for backwards compatibility.
+            Defaults to ``False``.
 
             .. versionadded:: 2.4
 
             .. note::
 
                 This only applies to :class:`~disnake.Member` objects.
+
+            .. versionchanged:: 2.6
+
+                The default was changed to ``False``.
 
         Raises
         ------
@@ -651,7 +664,7 @@ class GuildChannel(ABC):
             raise TypeError("ignore_timeout is only supported for disnake.Member objects")
 
         if ignore_timeout is MISSING:
-            ignore_timeout = True
+            ignore_timeout = False
 
         if self.guild.owner_id == obj.id:
             return Permissions.all()

@@ -79,6 +79,9 @@ __all__ = (
     "ThreadArchiveDuration",
     "WidgetStyle",
     "Locale",
+    "AutoModTriggerType",
+    "AutoModEventType",
+    "AutoModActionType",
 )
 
 
@@ -1355,6 +1358,79 @@ class AuditLogAction(int, Enum):
 
     .. versionadded:: 2.5
     """
+    automod_rule_create                   = 140
+    """An auto moderation rule was created.
+
+    When this is the action, the type of :attr:`~AuditLogEntry.target` is
+    the :class:`AutoModRule` or :class:`Object` with the ID of the auto moderation rule which
+    was created.
+
+    Possible attributes for :class:`AuditLogDiff`:
+
+    - :attr:`~AuditLogDiff.name`
+    - :attr:`~AuditLogDiff.enabled`
+    - :attr:`~AuditLogDiff.trigger_type`
+    - :attr:`~AuditLogDiff.event_type`
+    - :attr:`~AuditLogDiff.actions`
+    - :attr:`~AuditLogDiff.trigger_metadata`
+    - :attr:`~AuditLogDiff.exempt_roles`
+    - :attr:`~AuditLogDiff.exempt_channels`
+
+    .. versionadded:: 2.6
+    """
+    automod_rule_update                   = 141
+    """An auto moderation rule was updated.
+
+    When this is the action, the type of :attr:`~AuditLogEntry.target` is
+    the :class:`AutoModRule` or :class:`Object` with the ID of the auto moderation rule which
+    was updated.
+
+    Possible attributes for :class:`AuditLogDiff`:
+
+    - :attr:`~AuditLogDiff.name`
+    - :attr:`~AuditLogDiff.enabled`
+    - :attr:`~AuditLogDiff.trigger_type`
+    - :attr:`~AuditLogDiff.event_type`
+    - :attr:`~AuditLogDiff.actions`
+    - :attr:`~AuditLogDiff.trigger_metadata`
+    - :attr:`~AuditLogDiff.exempt_roles`
+    - :attr:`~AuditLogDiff.exempt_channels`
+
+    .. versionadded:: 2.6
+    """
+    automod_rule_delete                   = 142
+    """An auto moderation rule was deleted.
+
+    When this is the action, the type of :attr:`~AuditLogEntry.target` is
+    the :class:`Object` with the ID of the auto moderation rule which
+    was deleted.
+
+    Possible attributes for :class:`AuditLogDiff`:
+
+    - :attr:`~AuditLogDiff.name`
+    - :attr:`~AuditLogDiff.enabled`
+    - :attr:`~AuditLogDiff.trigger_type`
+    - :attr:`~AuditLogDiff.event_type`
+    - :attr:`~AuditLogDiff.actions`
+    - :attr:`~AuditLogDiff.trigger_metadata`
+    - :attr:`~AuditLogDiff.exempt_roles`
+    - :attr:`~AuditLogDiff.exempt_channels`
+
+    .. versionadded:: 2.6
+    """
+    automod_block_message                 = 143
+    """A message was blocked by an auto moderation rule.
+
+    When this is the action, the type of :attr:`~AuditLogEntry.target` is
+    the :class:`Member` or :class:`User` who had their message blocked.
+
+    When this is the action, the type of :attr:`~AuditLogEntry.extra` is
+    set to an unspecified proxy object with these attributes:
+
+    - ``channel``: A :class:`~abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked.
+    - ``rule_name``: A :class:`str` with the name of the rule that matched.
+    - ``rule_trigger_type``: A :class:`AutoModTriggerType` value with the trigger type of the rule.
+    """
     # fmt: on
 
     @property
@@ -1362,54 +1438,58 @@ class AuditLogAction(int, Enum):
         """The category of this :class:`AuditLogAction`."""
         # fmt: off
         lookup: Dict[AuditLogAction, Optional[AuditLogActionCategory]] = {
-            AuditLogAction.guild_update:                 AuditLogActionCategory.update,
-            AuditLogAction.channel_create:               AuditLogActionCategory.create,
-            AuditLogAction.channel_update:               AuditLogActionCategory.update,
-            AuditLogAction.channel_delete:               AuditLogActionCategory.delete,
-            AuditLogAction.overwrite_create:             AuditLogActionCategory.create,
-            AuditLogAction.overwrite_update:             AuditLogActionCategory.update,
-            AuditLogAction.overwrite_delete:             AuditLogActionCategory.delete,
-            AuditLogAction.kick:                         None,
-            AuditLogAction.member_prune:                 None,
-            AuditLogAction.ban:                          None,
-            AuditLogAction.unban:                        None,
-            AuditLogAction.member_update:                AuditLogActionCategory.update,
-            AuditLogAction.member_role_update:           AuditLogActionCategory.update,
-            AuditLogAction.member_move:                  None,
-            AuditLogAction.member_disconnect:            None,
-            AuditLogAction.bot_add:                      None,
-            AuditLogAction.role_create:                  AuditLogActionCategory.create,
-            AuditLogAction.role_update:                  AuditLogActionCategory.update,
-            AuditLogAction.role_delete:                  AuditLogActionCategory.delete,
-            AuditLogAction.invite_create:                AuditLogActionCategory.create,
-            AuditLogAction.invite_update:                AuditLogActionCategory.update,
-            AuditLogAction.invite_delete:                AuditLogActionCategory.delete,
-            AuditLogAction.webhook_create:               AuditLogActionCategory.create,
-            AuditLogAction.webhook_update:               AuditLogActionCategory.update,
-            AuditLogAction.webhook_delete:               AuditLogActionCategory.delete,
-            AuditLogAction.emoji_create:                 AuditLogActionCategory.create,
-            AuditLogAction.emoji_update:                 AuditLogActionCategory.update,
-            AuditLogAction.emoji_delete:                 AuditLogActionCategory.delete,
-            AuditLogAction.message_delete:               AuditLogActionCategory.delete,
-            AuditLogAction.message_bulk_delete:          AuditLogActionCategory.delete,
-            AuditLogAction.message_pin:                  None,
-            AuditLogAction.message_unpin:                None,
-            AuditLogAction.integration_create:           AuditLogActionCategory.create,
-            AuditLogAction.integration_update:           AuditLogActionCategory.update,
-            AuditLogAction.integration_delete:           AuditLogActionCategory.delete,
-            AuditLogAction.stage_instance_create:        AuditLogActionCategory.create,
-            AuditLogAction.stage_instance_update:        AuditLogActionCategory.update,
-            AuditLogAction.stage_instance_delete:        AuditLogActionCategory.delete,
-            AuditLogAction.sticker_create:               AuditLogActionCategory.create,
-            AuditLogAction.sticker_update:               AuditLogActionCategory.update,
-            AuditLogAction.sticker_delete:               AuditLogActionCategory.delete,
-            AuditLogAction.thread_create:                AuditLogActionCategory.create,
-            AuditLogAction.thread_update:                AuditLogActionCategory.update,
-            AuditLogAction.thread_delete:                AuditLogActionCategory.delete,
-            AuditLogAction.guild_scheduled_event_create: AuditLogActionCategory.create,
-            AuditLogAction.guild_scheduled_event_update: AuditLogActionCategory.update,
-            AuditLogAction.guild_scheduled_event_delete: AuditLogActionCategory.delete,
+            AuditLogAction.guild_update:                          AuditLogActionCategory.update,
+            AuditLogAction.channel_create:                        AuditLogActionCategory.create,
+            AuditLogAction.channel_update:                        AuditLogActionCategory.update,
+            AuditLogAction.channel_delete:                        AuditLogActionCategory.delete,
+            AuditLogAction.overwrite_create:                      AuditLogActionCategory.create,
+            AuditLogAction.overwrite_update:                      AuditLogActionCategory.update,
+            AuditLogAction.overwrite_delete:                      AuditLogActionCategory.delete,
+            AuditLogAction.kick:                                  None,
+            AuditLogAction.member_prune:                          None,
+            AuditLogAction.ban:                                   None,
+            AuditLogAction.unban:                                 None,
+            AuditLogAction.member_update:                         AuditLogActionCategory.update,
+            AuditLogAction.member_role_update:                    AuditLogActionCategory.update,
+            AuditLogAction.member_move:                           None,
+            AuditLogAction.member_disconnect:                     None,
+            AuditLogAction.bot_add:                               None,
+            AuditLogAction.role_create:                           AuditLogActionCategory.create,
+            AuditLogAction.role_update:                           AuditLogActionCategory.update,
+            AuditLogAction.role_delete:                           AuditLogActionCategory.delete,
+            AuditLogAction.invite_create:                         AuditLogActionCategory.create,
+            AuditLogAction.invite_update:                         AuditLogActionCategory.update,
+            AuditLogAction.invite_delete:                         AuditLogActionCategory.delete,
+            AuditLogAction.webhook_create:                        AuditLogActionCategory.create,
+            AuditLogAction.webhook_update:                        AuditLogActionCategory.update,
+            AuditLogAction.webhook_delete:                        AuditLogActionCategory.delete,
+            AuditLogAction.emoji_create:                          AuditLogActionCategory.create,
+            AuditLogAction.emoji_update:                          AuditLogActionCategory.update,
+            AuditLogAction.emoji_delete:                          AuditLogActionCategory.delete,
+            AuditLogAction.message_delete:                        AuditLogActionCategory.delete,
+            AuditLogAction.message_bulk_delete:                   AuditLogActionCategory.delete,
+            AuditLogAction.message_pin:                           None,
+            AuditLogAction.message_unpin:                         None,
+            AuditLogAction.integration_create:                    AuditLogActionCategory.create,
+            AuditLogAction.integration_update:                    AuditLogActionCategory.update,
+            AuditLogAction.integration_delete:                    AuditLogActionCategory.delete,
+            AuditLogAction.stage_instance_create:                 AuditLogActionCategory.create,
+            AuditLogAction.stage_instance_update:                 AuditLogActionCategory.update,
+            AuditLogAction.stage_instance_delete:                 AuditLogActionCategory.delete,
+            AuditLogAction.sticker_create:                        AuditLogActionCategory.create,
+            AuditLogAction.sticker_update:                        AuditLogActionCategory.update,
+            AuditLogAction.sticker_delete:                        AuditLogActionCategory.delete,
+            AuditLogAction.thread_create:                         AuditLogActionCategory.create,
+            AuditLogAction.thread_update:                         AuditLogActionCategory.update,
+            AuditLogAction.thread_delete:                         AuditLogActionCategory.delete,
+            AuditLogAction.guild_scheduled_event_create:          AuditLogActionCategory.create,
+            AuditLogAction.guild_scheduled_event_update:          AuditLogActionCategory.update,
+            AuditLogAction.guild_scheduled_event_delete:          AuditLogActionCategory.delete,
             AuditLogAction.application_command_permission_update: AuditLogActionCategory.update,
+            AuditLogAction.automod_rule_create:                   AuditLogActionCategory.create,
+            AuditLogAction.automod_rule_update:                   AuditLogActionCategory.update,
+            AuditLogAction.automod_rule_delete:                   AuditLogActionCategory.delete,
+            AuditLogAction.automod_block_message:                 None,
         }
         # fmt: on
         return lookup[self]
@@ -1450,6 +1530,12 @@ class AuditLogAction(int, Enum):
             return "thread"
         elif v < 122:
             return "application_command_or_integration"
+        elif v < 140:
+            return None
+        elif v < 143:
+            return "automod_rule"
+        elif v == 143:
+            return "user"
         else:
             return None
 
@@ -2035,6 +2121,58 @@ class Locale(str, Enum):
     """The ``zh-CN`` (Chinese, China | 中文) locale."""
     zh_TW = "zh-TW"
     """The ``zh-TW`` (Chinese, Taiwan | 繁體中文) locale."""
+
+
+class AutoModActionType(int, Enum):
+    """Represents the type of action an auto moderation rule will take upon execution.
+
+    .. versionadded:: 2.6
+    """
+
+    block_message = 1
+    """The rule will prevent matching messages from being posted."""
+    send_alert_message = 2
+    """The rule will send an alert to a specified channel."""
+    timeout = 3
+    """The rule will timeout the user that sent the message.
+
+    .. note::
+        This action type is only available for rules with trigger type
+        :attr:`~AutoModTriggerType.keyword`, and :attr:`~Permissions.moderate_members`
+        permissions are required to use it.
+    """
+
+
+class AutoModEventType(int, Enum):
+    """Represents the type of event/context an auto moderation rule will be checked in.
+
+    .. versionadded:: 2.6
+    """
+
+    message_send = 1
+    """The rule will apply when a member sends or edits a message in the guild."""
+
+
+class AutoModTriggerType(int, Enum):
+    """Represents the type of content that can trigger an auto moderation rule.
+
+    .. versionadded:: 2.6
+    """
+
+    keyword = 1
+    """The rule will filter messages based on a custom keyword list.
+
+    This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+    """
+    harmful_link = 2
+    """The rule will filter messages containing malicious links."""
+    spam = 3
+    """The rule will filter messages suspected of being spam."""
+    keyword_preset = 4
+    """The rule will filter messages based on predefined lists containing commonly flagged words.
+
+    This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+    """
 
 
 EnumT = TypeVar("EnumT", bound=Enum)
