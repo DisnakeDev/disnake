@@ -7,7 +7,6 @@ import logging
 import sys
 import traceback
 import warnings
-from itertools import chain
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -468,7 +467,7 @@ class InteractionBotBase(CommonBotBase):
         # this does not get commands by ID, use (some other method) to do that
         if not isinstance(name, str):
             raise TypeError(f"Expected name to be str, not {name.__class__}")
-        command = self._all_app_commands.get(AppCommandMetadata(chain[0], type=type, guild_id=guild_id))  # type: ignore
+        command = self._all_app_commands.get(AppCommandMetadata(name, type=type, guild_id=guild_id))
         if command is None:
             return None
         return command
@@ -884,7 +883,7 @@ class InteractionBotBase(CommonBotBase):
             for guild_id, cmds in guild_cmds.items():
                 current_guild_cmds = self._connection._guild_application_commands.get(guild_id, {})
                 diff = _app_commands_diff(cmds, current_guild_cmds.values())
-                if self._command_sync.allow_command_deletion:
+                if not self._command_sync.allow_command_deletion:
                     # because allow_command_deletion is disabled, we want to never delete a command, so we move the delete commands to no_changes
                     diff["no_changes"] += diff["delete"]
                     diff["delete"].clear()
@@ -1429,7 +1428,7 @@ class InteractionBotBase(CommonBotBase):
                 app_command = command
                 break
             elif command.body.id is None:
-                str()
+                ...
         else:
             app_command = None
 
