@@ -52,6 +52,11 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
                 'a function cannot be decorated with "_overload_with_permissions" and not take any kwargs.'
             )
 
+        # use the existing annotation if one exists
+        annotation = node.params.star_kwarg.annotation
+        if annotation is None:
+            raise RuntimeError(f"parameter {node.params.star_kwarg.name.value} must be annotated.")
+
         # remove all of the existing permissions from the params
         def remove_existing_permissions(params: cst.Parameters) -> cst.Parameters:
 
@@ -89,11 +94,13 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
         )
 
         perms = []
+        # we use the annotation of kwargs
+
         for perm in self.permissions:
             perms.append(
                 cst.Param(
                     cst.Name(perm),
-                    cst.Annotation(cst.Name("bool")),
+                    annotation,
                     default=cst.Ellipsis(),
                 )
             )

@@ -191,7 +191,7 @@ class TestPermissionOverwrite:
 
     def test_init_invalid_perms(self) -> None:
         with pytest.raises(ValueError, match="'h' is not a valid permission name."):
-            PermissionOverwrite(h=True)
+            PermissionOverwrite(h=True)  # pyright: ignore[reportGeneralTypeIssues]
 
     def test_equality(self) -> None:
         one = PermissionOverwrite()
