@@ -66,8 +66,8 @@ __all__ = (
     "RawThreadDeleteEvent",
     "RawThreadMemberRemoveEvent",
     "RawTypingEvent",
-    # "RawGuildMemberRemoveEvent",
-    # "RawGuildMemberUpdateEvent",
+    "RawGuildMemberRemoveEvent",
+    "RawGuildMemberUpdateEvent",
 )
 
 
