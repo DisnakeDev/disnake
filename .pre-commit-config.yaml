@@ -19,6 +19,12 @@ repos:
         entry: "symlinks may not be committed due to platform support"
         language: fail
         types: [symlink]
+      - id: changelogs-name
+        name: check changelog fragment name
+        entry: changelog filenames should be formatted like `<issue>.<type>.rst`
+        language: fail
+        files: 'changelog/'
+        exclude: '/(\d+\.[a-z]+(\.\d+)?\.rst|_template.rst.jinja|README.rst)$'
 
   - repo: https://github.com/pycqa/isort
     rev: 5.10.1
