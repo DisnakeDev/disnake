@@ -28,7 +28,7 @@ from typing import List, Literal, TypedDict, Union
 
 from .snowflake import Snowflake, SnowflakeList
 
-AutoModTriggerType = Literal[1, 2, 3, 4]
+AutoModTriggerType = Literal[1, 2, 3, 4, 5]
 AutoModEventType = Literal[1]
 AutoModActionType = Literal[1, 2]
 AutoModPresetType = Literal[1, 2, 3]
@@ -65,6 +65,7 @@ class AutoModTriggerMetadata(TypedDict, total=False):
     keyword_filter: List[str]
     presets: List[AutoModPresetType]
     allow_list: List[str]
+    mention_total_limit: int
 
 
 class AutoModRule(TypedDict):

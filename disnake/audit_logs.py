@@ -608,7 +608,11 @@ class AuditLogEntry(Hashable):
                     "integration": self._get_integration_by_application_id(app_id) or Object(app_id)
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
-            elif self.action is enums.AuditLogAction.automod_block_message:
+            elif self.action in (
+                enums.AuditLogAction.automod_block_message,
+                enums.AuditLogAction.automod_send_alert_message,
+                enums.AuditLogAction.automod_timeout,
+            ):
                 channel_id = int(extra["channel_id"])
                 elems = {
                     "channel": (
