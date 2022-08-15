@@ -10,9 +10,6 @@ EllipsisType = type(Ellipsis)
 class EllipsisOverloads(codemod.VisitorBasedCodemodCommand):
     DESCRIPTION = "Ensure that `MISSING` is not used in any overloads as a default."
 
-    def on_visit(self, node: cst.CSTNode) -> bool:
-        return super().on_visit(node)
-
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         return False
 

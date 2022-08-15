@@ -22,9 +22,6 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
             )
         return super().transform_module(tree)
 
-    def on_visit(self, node: cst.CSTNode) -> bool:
-        return super().on_visit(node)
-
     def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
         return False
 
@@ -41,10 +38,10 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
             elif name == "overload":
                 is_overload = True
 
-        if has_overload_deco is False:
+        if not has_overload_deco:
             return node
 
-        if is_overload is True:
+        if is_overload:
             return cst.RemovalSentinel.REMOVE
 
         if not node.params.star_kwarg:
