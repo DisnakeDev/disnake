@@ -825,7 +825,7 @@ class Client:
             However, if ``ignore_session_start_limit`` is ``True``, the client will connect regardless
             and this exception will not be raised.
         """
-        _, gateway, session_start_limit = await self.http.get_bot_gateway(
+        _, initial_gateway, session_start_limit = await self.http.get_bot_gateway(
             encoding=self.gateway_params.encoding,
             zlib=self.gateway_params.zlib,
         )
@@ -837,22 +837,37 @@ class Client:
         ws_params = {
             "initial": True,
             "shard_id": self.shard_id,
-            "gateway": gateway,
+            "gateway": initial_gateway,
         }
 
         backoff = ExponentialBackoff()
         while not self.is_closed():
+            # "connecting" in this case means "waiting for HELLO"
+            connecting = True
+
             try:
                 coro = DiscordWebSocket.from_client(self, **ws_params)
                 self.ws = await asyncio.wait_for(coro, timeout=60.0)
+
+                # If we got to this point:
+                # - connection was established
+                # - received a HELLO
+                # - and sent an IDENTIFY or RESUME
+                connecting = False
                 ws_params["initial"] = False
+
                 while True:
                     await self.ws.poll_event()
             except ReconnectWebSocket as e:
                 _log.info("Got a request to %s the websocket.", e.op)
                 self.dispatch("disconnect")
                 ws_params.update(
-                    sequence=self.ws.sequence, resume=e.resume, session=self.ws.session_id
+                    sequence=self.ws.sequence,
+                    resume=e.resume,
+                    session=self.ws.session_id,
+                    # use current (possibly new) gateway if resuming,
+                    # reset to default if not
+                    gateway=self.ws.gateway if e.resume else initial_gateway,
                 )
                 continue
             except (
@@ -863,7 +878,6 @@ class Client:
                 aiohttp.ClientError,
                 asyncio.TimeoutError,
             ) as exc:
-
                 self.dispatch("disconnect")
                 if not reconnect:
                     await self.close()
@@ -882,6 +896,7 @@ class Client:
                         initial=False,
                         resume=True,
                         session=self.ws.session_id,
+                        gateway=self.ws.gateway,
                     )
                     continue
 
@@ -899,10 +914,24 @@ class Client:
                 retry = backoff.delay()
                 _log.exception("Attempting a reconnect in %.2fs", retry)
                 await asyncio.sleep(retry)
-                # Always try to RESUME the connection
-                # If the connection is not RESUME-able then the gateway will invalidate the session.
-                # This is apparently what the official Discord client does.
-                ws_params.update(sequence=self.ws.sequence, resume=True, session=self.ws.session_id)
+
+                if connecting:
+                    # Always identify back to the initial gateway if we failed while connecting.
+                    # This is just in case the resume gateway instance is broken.
+                    ws_params.update(
+                        resume=False,
+                        gateway=initial_gateway,
+                    )
+                else:
+                    # Just try to resume the session.
+                    # If it's not RESUME-able then the gateway will invalidate the session.
+                    # This is apparently what the official Discord client does.
+                    ws_params.update(
+                        sequence=self.ws.sequence,
+                        resume=True,
+                        session=self.ws.session_id,
+                        gateway=self.ws.gateway,
+                    )
 
     async def close(self) -> None:
         """|coro|

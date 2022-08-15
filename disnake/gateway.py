@@ -384,7 +384,7 @@ class DiscordWebSocket:
         self.token: str
         self._connection: ConnectionState
         self._discord_parsers: Dict[str, Callable[[Dict[str, Any]], Any]]
-        self.gateway: str
+        self.gateway: Optional[str]
         self.call_hooks: CallHooksFunc
         self._initial_identify: bool
         self.shard_id: Optional[int]
@@ -610,6 +610,7 @@ class DiscordWebSocket:
 
                 self.sequence = None
                 self.session_id = None
+                self.gateway = None
                 _log.info("Shard ID %s session has been invalidated.", self.shard_id)
                 await self.close(code=1000)
                 raise ReconnectWebSocket(self.shard_id, resume=False)
@@ -621,13 +622,15 @@ class DiscordWebSocket:
             self._trace = trace = data.get("_trace", [])
             self.sequence = seq
             self.session_id = data["session_id"]
+            self.gateway = data["resume_gateway_url"]
             # pass back shard ID to ready handler
             data["__shard_id__"] = self.shard_id
             _log.info(
-                "Shard ID %s has connected to Gateway: %s (Session ID: %s).",
+                "Shard ID %s has connected to Gateway: %s (Session ID: %s, Resume URL: %s).",
                 self.shard_id,
                 ", ".join(trace),
                 self.session_id,
+                self.gateway,
             )
 
         elif event == "RESUMED":
