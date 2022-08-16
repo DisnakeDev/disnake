@@ -22,4 +22,4 @@ class Config:
     )
     debug = os.environ.get("DEBUG", "false") == "true"
     debug_loggers = os.environ.get("DEBUG_LOGGERS")
-    log_to_file = bool(os.environ.get("LOG_TO_FILE", "false").lower() == "true")
+    log_to_file = os.environ.get("LOG_TO_FILE", "false").lower() == "true"
