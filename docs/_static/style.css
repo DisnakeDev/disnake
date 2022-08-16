@@ -41,8 +41,10 @@ Historically however, thanks to:
   --blue-5: #002275;
   --blue-6: #000f40;
 
-  --settings: var(--grey-1);
-  --settings-hover: var(--grey-1-8);
+  --disnake-yellow: #ffd444;
+  --disnake-blue: #376fa1;
+  --disnake-light-blue: #578fc1;
+
   --main-background: var(--grey-1);
   --link-text: var(--blue-2);
   --link-hover-text: var(--blue-6);
@@ -55,8 +57,10 @@ Historically however, thanks to:
   --nav-text: var(--grey-6);
   --nav-hover-text: var(--grey-6);
   --nav-header-text: var(--black);
-  --sub-header-background: var(--grey-6);
-  --search-border: var(--grey-4);
+  --nav-link-text: var(--white);
+  --nav-link-hover-text: var(--blue-1);
+  --sub-header-background: var(--grey-8);
+  --search-border: var(--grey-5);
   --search-text: var(--white);
   --search-focus: var(--blue-1);
   --search-button: var(--grey-1);
@@ -100,86 +104,88 @@ Historically however, thanks to:
   --rtd-version-background: #272525;
   --rtd-version-main-text: #fcfcfc;
   --attribute-table-title: var(--grey-6);
-  --attribute-table-entry-border: var(--grey-3);
-  --attribute-table-entry-text: var(--grey-5);
-  --attribute-table-entry-hover-border: var(--blue-2);
-  --attribute-table-entry-hover-background: var(--grey-2);
-  --attribute-table-entry-hover-text: var(--blue-2);
+  --attribute-table-list-border: var(--grey-3);
+  --attribute-table-list-text: var(--grey-5);
+  --attribute-table-list-hover-border: var(--blue-2);
+  --attribute-table-list-hover-background: var(--grey-2);
+  --attribute-table-list-hover-text: var(--blue-2);
   --attribute-table-badge: var(--grey-7);
   --highlighted-text: rgb(252, 233, 103);
   --tooltip-background: #f8f8f8;
 }
 
-:root[data-font="serif"] {
-  --font-family: 'Georgia', 'Yu Gothic', 'Noto Sans CJK JP Regular', serif;
-}
 
-:root[data-theme="dark"] {
-  --main-background: var(--grey-7);
-  --link-text: var(--blue-1);
-  --link-hover-text: var(--blue-2);
-  --main-text: var(--white);
-  --sub-header-background: var(--grey-8);
-  --search-border: var(--grey-5);
-  --nav-background: var(--main-background);
-  --nav-text: var(--grey-1);
-  --nav-hover-text: var(--grey-2);
-  --nav-header-text: var(--white);
-  --footer-text: var(--grey-2);
-  --footer-link: var(--grey-1);
-  --hr-border: var(--grey-1);
-  --main-big-headers-text: var(--grey-1);
-  --main-big-headers-border: var(--grey-1);
-  --main-h5-header-text: var(--grey-4);
-  --main-h6-header-text: var(--grey-5);
-  --main-h4-header-border: var(--grey-2);
-  --header-link: var(--grey-2);
-  --header-link-hover-text: var(--grey-6);
-  --admonition-background: var(--grey-8);
-  --note-background: var(--blue-3);
-  --note-text: var(--white);
-  --warning-background: #d7b600;
-  --warning-text: var(--black);
-  --error-background:  #d70022;
-  --error-text: var(--white);
-  --helpful-background: #008ea4;
-  --helpful-text: var(--white);
-  --codeblock-background: var(--grey-6);
-  --codeblock-border: var(--black);
-  --codeblock-text: var(--grey-1);
-  --inline-code-background: var(--grey-8);
-  --xref-code-background: transparent;
-  --api-entry-background: var(--grey-6);
-  --table-header-background: var(--grey-6);
-  --table-text: var(--grey-1);
-  --table-border: var(--grey-4);
-  --active-toc: var(--grey-6);
-  --scrollbar: rgba(0,0,0,0.5);
-  --scrollbar-hover: rgba(0,0,0,0.7);
-  --rtd-ad-border: var(--grey-6);
-  --rtd-ad-background: var(--grey-5);
-  --rtd-ad-main-text: var(--grey-2);
-  --rtd-ad-small-text: var(--grey-1);
-  --attribute-table-title: var(--grey-3);
-  --attribute-table-entry-border: var(--grey-5);
-  --attribute-table-entry-text: var(--grey-3);
-  --attribute-table-entry-hover-border: var(--blue-1);
-  --attribute-table-entry-hover-background: var(--grey-6);
-  --attribute-table-entry-hover-text: var(--blue-1);
-  --attribute-table-badge: var(--grey-4);
-  --highlighted-text: rgba(250, 166, 26, 0.2);
-  --tooltip-background: rgba(10, 10, 10, 0.95);
-}
-
-img[src$="snake_dark.svg"]  {
+img[src$="/snake_dark.svg"]  {
   display: none;
 }
-:root[data-theme="dark"] img[src$="snake.svg"] {
-  display: none;
+
+@media screen and (prefers-color-scheme: dark) {
+  :root {
+    --main-background: var(--grey-7);
+    --link-text: var(--blue-1);
+    --link-hover-text: var(--blue-2);
+    --main-text: var(--white);
+    --sub-header-background: var(--grey-8);
+    --search-border: var(--grey-6);
+    --nav-background: var(--main-background);
+    --nav-text: var(--grey-1);
+    --nav-hover-text: var(--grey-2);
+    --nav-header-text: var(--white);
+    --footer-text: var(--grey-2);
+    --footer-link: var(--grey-1);
+    --hr-border: var(--grey-1);
+    --main-big-headers-text: var(--grey-1);
+    --main-big-headers-border: var(--grey-1);
+    --main-h5-header-text: var(--grey-4);
+    --main-h6-header-text: var(--grey-5);
+    --main-h4-header-border: var(--grey-2);
+    --header-link: var(--grey-2);
+    --header-link-hover-text: var(--grey-6);
+    --admonition-background: var(--grey-8);
+    --note-background: var(--blue-3);
+    --note-text: var(--white);
+    --warning-background: #d7b600;
+    --warning-text: var(--black);
+    --error-background: #d70022;
+    --error-text: var(--white);
+    --helpful-background: #008ea4;
+    --helpful-text: var(--white);
+    --codeblock-background: var(--grey-6);
+    --codeblock-border: var(--black);
+    --codeblock-text: var(--grey-1);
+    --inline-code-background: var(--grey-8);
+    --xref-code-background: transparent;
+    --api-entry-background: var(--grey-6);
+    --table-header-background: var(--grey-6);
+    --table-text: var(--grey-1);
+    --table-border: var(--grey-4);
+    --active-toc: var(--grey-6);
+    --scrollbar: rgba(0, 0, 0, 0.5);
+    --scrollbar-hover: rgba(0, 0, 0, 0.7);
+    --rtd-ad-border: var(--grey-6);
+    --rtd-ad-background: var(--grey-5);
+    --rtd-ad-main-text: var(--grey-2);
+    --rtd-ad-small-text: var(--grey-1);
+    --attribute-table-title: var(--grey-3);
+    --attribute-table-list-border: var(--grey-5);
+    --attribute-table-list-text: var(--grey-3);
+    --attribute-table-list-hover-border: var(--blue-1);
+    --attribute-table-list-hover-background: var(--grey-6);
+    --attribute-table-list-hover-text: var(--blue-1);
+    --attribute-table-badge: var(--grey-4);
+    --highlighted-text: rgba(250, 166, 26, 0.2);
+    --tooltip-background: rgba(10, 10, 10, 0.95);
+  }
+
+  img[src$="/snake.svg"] {
+    display: none;
+  }
+
+  img[src$="/snake_dark.svg"] {
+    display: inherit;
+  }
 }
-:root[data-theme="dark"] img[src$="snake_dark.svg"] {
-  display: inherit;
-}
+
 
 body {
   font-family: var(--font-family);
@@ -191,74 +197,51 @@ body {
   color: var(--main-text);
 }
 
-
-/* Scrollbar related */
-
-#sidebar::-webkit-scrollbar {
-  width: 0.5em;
-}
-
-#sidebar::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar);
-  border-radius: 0.25em;
-}
-
-#sidebar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scrollbar-hover);
-}
-
-
-/* grid related */
-
-.main-grid {
-  display: grid;
-  min-height: 100%;
-  grid-auto-rows: min-content auto min-content;
-  grid-template-areas:
-    "s"
-    "h"
-    "n"
-    "c"
-    "f";
-}
-
-.grid-item {
-  max-width: 100vw;
-  padding: 0.8em;
-}
-
 /* all URLs only show underline on hover */
 a {
   text-decoration: none;
   color: var(--link-text);
+  transition: color 0.3s;
 }
 
 a:hover {
   text-decoration: underline;
   color: var(--link-hover-text);
+  transition: color 0.05s;
 }
 
 /* headers */
 
-header.grid-item {
-  grid-area: h;
+header {
   color: var(--main-text);
-  position: relative;
-  z-index: 1;
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 40;
   padding: 0;
+  background-color: var(--sub-header-background);
+  box-shadow: rgba(0, 0, 0, 0.2) 0 3px 6px;
 }
 
 header > nav {
-  background-color: var(--sub-header-background);
-  padding: 0.8em;
+  color: var(--nav-text);
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
+  flex-wrap: wrap;
   align-items: center;
+  line-height: 1em; /* It defaults to 1.2, pushing some icons out of vertical alignment */
 }
 
 header > nav a {
-  color: var(--white);
+  color: var(--nav-link-text);
+  margin: 0 0.5em;
+}
+
+header > nav a:hover {
+  color: var(--nav-link-hover-text);
+  text-decoration: none;
 }
 
 header > nav.mobile-only {
@@ -279,12 +262,10 @@ header > nav.mobile-only .search-wrapper {
   background-color: var(--sub-header-background);
 }
 
-.main-heading {
-  margin-right: auto;
-}
-
-header > nav a:not(.main-heading) {
-  margin: 0 0.5em;
+.main-heading img {
+  padding-left: 6px;
+  max-width: 100%;
+  max-height: 24px;
 }
 
 header > nav > a:hover {
@@ -292,69 +273,15 @@ header > nav > a:hover {
   text-decoration: underline;
 }
 
-.sub-header {
-  grid-area: n;
-  background-color: var(--sub-header-background);
-  color: var(--white);
-  display: none;
-}
-
-/* these aren't shown on mobile */
-
-.sub-header > label {
-  display: none;
-  margin-right: 1em;
-}
-
-.sub-header > select {
-  display: none;
-  background-color: transparent;
-  padding: 0.4em 0;
-  font-size: 1em;
-  width: 13.5%;
-  color: white;
-  border: none;
-  border-bottom: 1px solid var(--search-border);
-
-  appearance: none;
-  background-image: url('../_images/drop_down_icon.svg');
-  background-repeat: no-repeat;
-  background-position-x: 100%;
-  background-position-y: 50%;
-
-  cursor: pointer;
-}
-
-.sub-header option {
-    color: black;
-}
-
-.sub-header > select:focus {
-  outline: none;
-}
-
-.sub-header > .settings {
-  color: var(--settings);
-  display: none;
-  margin-left: 1em;
-  margin-right: 0.5em;
-}
-
-.setting h3 {
-  display: inline-block;
-  margin-left: 2em;
-}
-
-.sub-header > .settings:hover {
-  color: var(--settings-hover);
-}
-
 /* footer stuff */
 footer {
-  grid-area: f;
+  padding: 0.8em;
   font-size: 14px;
-  text-align: right;
+  text-align: center;
   color: var(--footer-text);
+  /* Elevate above the aside */
+  position: relative;
+  z-index: 5;
 }
 
 footer a {
@@ -364,25 +291,308 @@ footer a {
 
 /* sidebar stuff */
 
+main {
+  /* aside width + 10px because of scrollbar gutter */
+  margin-left: 395px;
+  padding: 12px;
+  z-index: 1;
+}
+
 aside {
-  grid-area: s;
   font-size: 14px;
   line-height: 1.75em;
-  top: 0;
-  position: -webkit-sticky; /* safari */
-  position: sticky;
-  background-color: var(--mobile-nav-background);
-  color: var(--mobile-nav-text);
-  z-index: 2;
-  max-height: 100vh;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
+  position: fixed;
+  /* top: 0; Intentionally missing to give space for sticky header */
+  background-color: var(--nav-background);
+  color: var(--nav-text);
+  left: 0;
+  padding: 12px;
+  /* Space for footer overlap on bottom */
+  padding-bottom: calc(calc(calc(0.8em * 2) + 12px) + 1em);
+  overflow: auto;
+  z-index: 3;
+  top: 50px; /* Space for sticky header */
+  bottom: 0;
+  width: 385px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+header .header-breakpoint {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 6px;
+}
+
+header .extension-breakpoint {
+  flex-grow: 1;
+  justify-content: flex-end;
+}
+
+header form.search {
+  padding-right: 6px;
+}
+
+.main-heading {
+  line-height: 0; /* avoid layout issue */
+}
+
+.main-heading img.small {
+  display: none;
+}
+
+.extension-nav {
+  text-transform: capitalize;
+}
+
+#hamburger-toggle {
+  display: none;
+}
+
+.mobile {
+  display: none !important;
+}
+
+.mobile-heading {
+  display: none !important;
+}
+
+@media screen and (max-width: 1050px) {
+  main {
+    margin-left: 0;
+    overflow: hidden;
+  }
+
+  .desktop {
+    display: none !important;
+  }
+
+  .mobile-heading {
+    display: flex !important;
+    background-color: var(--sub-header-background);
+    width: 100%;
+    height: 50px;
+    align-items: center;
+    padding: 0 0.5em;
+  }
+
+  .disnake-mobile-logo {
+    max-height: 24px;
+    margin: 0 0.5em;
+  }
+
+  #sidebar {
+    height: auto !important;
+    padding: 12px;
+  }
+
+  header nav {
+    justify-content: center;
+    align-items: center;
+  }
+
+  header.top-header {
+    position: relative;
+  }
+
+  .main-heading {
+    display: block;
+    flex-basis: 100%;
+    text-align: center;
+    width: 100%;
+    background-image: linear-gradient(to right, #ffd545 0%, #ffd545 50%, #3773a5 50%, #3773a5 100%);
+  }
+
+  .disnake-main-logo {
+    display: none;
+  }
+
+  .main-heading img.small {
+    display: inline-block;
+    max-height: 50px;
+  }
+
+  header .header-breakpoint {
+    flex-basis: 100%;
+  }
+
+  .top-header .header-breakpoint {
+    padding: 10px;
+    padding-left: 42px;
+  }
+
+  header .search-breakpoint {
+    padding-left: 42px;
+  }
+
+  header .search-breakpoint > *  {
+    margin: 0 0.5em;
+  }
+
+  header .extension-nav {
+    padding: 6px 10px;
+    flex-basis: 50px;
+    flex-grow: 1;
+    text-align: center;
+    text-transform: capitalize;
+  }
+
+  header form.search {
+    flex-grow: 1;
+    max-width: 400px;
+    margin-left: auto;
+    padding-right: 0;
+  }
+
+  header .search-wrapper {
+    margin: auto;
+  }
+
+  #hamburger-toggle {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    display: block;
+    z-index: 60;
+    color: white;
+    transition: left 0.3s, right 0.3s, color 0.3s;
+    cursor: pointer;
+    background-color: var(--sub-header-background);
+    border-radius: 50%;
+    line-height: 0;
+  }
+
+  /* a nice clickbox for the X */
+  #hamburger-toggle::before {
+    position: absolute;
+    content: " ";
+    display: block;
+    background: transparent;
+    z-index: -1;
+    top: -12px;
+    left: -36px;
+    width: 72px;
+    height: 48px;
+  }
+
+  #hamburger-toggle.opened {
+    left: calc(100vw - 44px);
+    color: white;
+  }
+
+  aside {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: -100vw;
+    width: 100vw;
+    transition: left 0.3s, visibility 0.3s;
+    max-width: 100%;
+    max-height: unset;
+    padding: 0;
+    visibility: hidden;
+    overflow: auto;
+    z-index: 50;
+  }
+
+  .small-toc aside {
+    bottom: auto;
+  }
+
+  aside.sidebar-toggle {
+    visibility: visible;
+    left: 0;
+  }
+
+  .sidebar-extension-list {
+    background: var(--sub-header-background);
+    display: flex !important;
+    justify-content: space-around;
+    height: auto;
+  }
+
+  #sidebar > h3:first-child {
+    margin-top: 0;
+  }
+
+  .search-wrapper > input[type=search] {
+    width: 130px; /* Minimum width, low for small screens */
+  }
+}
+
+
+@media screen and (min-width: 1500px) {
+  main {
+    margin-left: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  main > * {
+    margin-left: calc(calc(calc(calc(100vw - 1500px) / 2) + 395px) + 12px) !important;
+    max-width: calc(1500px - 395px);
+    padding-right: 12px;
+  }
+
+  main > .admonition {
+    max-width: calc(calc(1500px - 395px) - 12px);
+  }
+
+  aside {
+    left: calc(calc(100vw - 1500px) / 2);
+  }
+
+  header > nav {
+    margin-left: calc(calc(100vw - 1500px) / 2);
+    margin-right: auto;
+    max-width: 1500px;
+  }
+
+  footer {
+    margin-left: calc(calc(100vw - 1500px) / 2);
+    max-width: 1500px;
+  }
+}
+
+/* Shrink inter-icon padding to fit stuff on very small screens */
+@media screen and (max-width: 425px) {
+  header .search-breakpoint > * {
+    margin: 0 0.15em;
+  }
+
+  #hamburger-toggle {
+    left: 8px;
+  }
+}
+
+@media screen and (max-width: 365px) {
+  #dark-mode-switch {
+    display: none;
+  }
+}
+
+#scrollbar {
+  height: auto !important;
+  overflow: scroll;
 }
 
 aside h3 {
   color: var(--mobile-nav-header-text);
   font-size: 24px;
   font-weight: normal;
+}
+
+.sidebar-extension-list a {
+  margin: 0.25em 0.5em;
+  padding: 0.5em;
+  color: var(--nav-link-text);
+  font-size: 16px;
+}
+
+.sidebar-extension-list a:hover {
+  color: var(--nav-link-hover-text);
 }
 
 .collapsible-arrow {
@@ -406,30 +616,25 @@ aside h3 {
   left: -20px;
 }
 
-#settings-toggle {
-  float: right;
-}
-
-aside .material-icons,
-.settings > .material-icons {
+aside .material-icons {
   cursor: pointer;
   font-size: 2em;
+}
+
+.material-icons {
+  max-width: 24px;
 }
 
 .sidebar-toggle {
   display: unset !important;
 }
 
-#sidebar {
-  display: none;
-}
-
 #sidebar a {
-  color: var(--mobile-nav-text);
+  color: var(--nav-text);
 }
 
 #sidebar a:hover {
-  color: var(--mobile-nav-hover-text);
+  color: var(--nav-hover-text);
 }
 
 #sidebar h3 {
@@ -439,8 +644,11 @@ aside .material-icons,
 
 #sidebar ul {
   list-style: none;
-  margin: 1em 2em 2em 1em;
   padding: 0;
+}
+
+#sidebar > ul {
+  margin-left: 2px;
 }
 
 #sidebar ul ul {
@@ -459,6 +667,20 @@ aside .material-icons,
   align-items: baseline;
 }
 
+aside::-webkit-scrollbar {
+  width: 0.5em;
+  overflow-y: overlay;
+}
+
+aside::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar);
+  border-radius: 0.25em;
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-hover);
+}
+
 /* search button stuff */
 
 .search-wrapper {
@@ -473,22 +695,35 @@ aside .material-icons,
   font-size: 1em;
 }
 
+.search-wrapper > input[type=search]::-webkit-search-cancel-button {
+  /* As of 2022, the search cancel button ignores all sorts of properties and looks bad by default in this theme so we hide it */
+  -webkit-appearance: none;
+  display: none;
+}
+
 .search-wrapper > input[type=search],
 .search-wrapper > button[type=submit] {
   background-color: var(--sub-header-background);
   border: none;
   color: var(--search-text);
-  padding: 0.5em;
-  min-height: 2.5em;
+  padding: 0.25em 0.5em;
   flex: 9;
 }
 
+.search-wrapper > button[type=submit] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .search-wrapper {
-  border-bottom: 1px solid var(--search-border);
+  border: 2px solid var(--search-border);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .search-wrapper:focus-within {
-  border-bottom: 1px solid var(--search-focus);
+  border-color: var(--search-focus);
 }
 
 /* .search-wrapper > input[type=search] {
@@ -525,63 +760,32 @@ input[type=search]:focus ~ button[type=submit] {
   color: var(--search-button-hover);
 }
 
-/* main content area */
-
-main {
-  grid-area: c;
-}
-
 p {
   margin-bottom: 8px;
 }
 
-/* modal stuff */
-
-div.modal {
-  position: fixed;
-  z-index: 10;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background-color: rgba(0,0,0,0.4);
-  cursor: pointer;
-  display: none;
+dt.sig {
+  overflow: auto;
+  max-width: 100%;
 }
 
-div.modal-content {
-  background-color: var(--main-background);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.54);
-  padding: 24px;
-  border-radius: 4px;
-  max-width: 40%;
-  min-width: 350px;
-  cursor: initial;
-  flex: 1;
-  margin: auto;
+section h3 {
+  max-width: 100%;
+  overflow: auto;
 }
 
-div.modal-content > span.close {
-  color: #888;
-  float: right;
-  font-weight: bold;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  cursor: pointer;
+/* jumplinks and sticky header */
+:target {
+  overflow: initial; /* chrome bug */
+  scroll-margin-top: 60px;
 }
 
-div.modal-content > span.close:hover,
-div.modal-content > span.close:focus {
-  color: #444;
-}
-
-div.modal input {
-  cursor: pointer;
+.sig[id] {
+  overflow: initial;
+  scroll-margin-top: 60px;
 }
 
 /* scroll to top button */
-
 #to-top {
   position: fixed;
   bottom: 50px;
@@ -627,6 +831,13 @@ div.modal input {
   padding: 0.2em 0.5em;
   border-bottom-left-radius: 4px;
   display: flex;
+  opacity: 0.65;
+  transition: opacity 0.5s;
+}
+
+.copy:hover {
+  opacity: 1;
+  transition: opacity 0.2s;
 }
 
 /* -- body styles --------------------------------------------------------- */
@@ -777,7 +988,7 @@ div.admonition {
   padding: 0 0.8em 0.8em 0.8em !important;
   margin: 0.8em 0;
   border-radius: 2.5px;
-  border-left-width: 6px;
+  border-left-width: 3px;
   border-left-style: solid;
   background-color: var(--admonition-background);
 }
@@ -933,10 +1144,6 @@ a.reference.rfc > strong {
   flex: 1 1 auto;
 }
 
-.py-attribute-table-column:not(:first-child) {
-  margin-top: 1em;
-}
-
 .py-attribute-table-column > span {
   font-weight: bold;
   color: var(--attribute-table-title);
@@ -949,33 +1156,40 @@ main .py-attribute-table-column > ul {
   font-size: 0.95em;
 }
 
-.py-attribute-table-entry {
+.py-attribute-table-list > li {
   margin: 0;
-  padding: 2px 0;
-  padding-left: 0.2em;
-  border-left: 2px solid var(--attribute-table-entry-border);
+  padding: 0;
+  padding-left: 0.5em;
+  border-left: 2px solid var(--attribute-table-list-border);
   display: flex;
   line-height: 1.2em;
 }
 
-.py-attribute-table-entry > a {
-  padding-left: 0.5em;
-  color: var(--attribute-table-entry-text);
+.py-attribute-table-list > li > span:first-child {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.py-attribute-table-list > li > a {
+  padding-left: 0.2em;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  color: var(--attribute-table-list-text);
   flex-grow: 1;
 }
 
-.py-attribute-table-entry > a:hover {
-  color: var(--attribute-table-entry-hover-text);
+.py-attribute-table-list > li > a:hover {
+  color: var(--attribute-table-list-hover-text);
   text-decoration: none;
 }
 
-.py-attribute-table-entry:hover {
-  background-color: var(--attribute-table-entry-hover-background);
-  border-left: 2px solid var(--attribute-table-entry-hover-border);
+.py-attribute-table-list > li:hover {
+  background-color: var(--attribute-table-list-hover-background);
+  border-left: 2px solid var(--attribute-table-list-hover-border);
   text-decoration: none;
 }
 
-.py-attribute-table-badge {
+.py-attribute-table-list :where(.badge-coroutine, .badge-method, .badge-decorator, .badge-classmethod) {
   flex-basis: 3em;
   text-align: right;
   font-size: 0.9em;
@@ -1174,8 +1388,31 @@ section#welcome-to-disnake-py > h1 {
 }
 
 .active {
-  background-color: var(--mobile-active-toc);
-  border-left: 5px solid var(--mobile-active-toc);
+  background-color: var(--active-toc);
+  position: relative;
+  font-weight: bold;
+}
+
+.active::before {
+  content:"";
+  display:inline-block;
+  background-color:var(--active-toc);
+  position:absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  width:calc(100% + 0.5em);
+  border-radius:4px;
+  z-index:-1
+}
+
+/* Only mark the label if it's a tree */
+li.active {
+  font-weight: normal;
+}
+
+li.active > a {
+  font-weight: bold;
 }
 
 div.code-block-caption {
@@ -1186,150 +1423,6 @@ div.code-block-caption {
 .viewcode-link {
   font-size: small;
   margin-top: 2px;
-}
-
-
-/* desktop stuff */
-
-@media screen and (min-width: 600px) {
-  .grid-item {
-    max-width: unset;
-  }
-
-  .main-grid {
-    grid-template-areas:
-      "h h h h h h"
-      "n n n n n n"
-      "s s c c c c"
-      "s s f f f f";
-  }
-
-  .mobile-only {
-    display: none;
-  }
-
-  header {
-    background-color: var(--black);
-  }
-
-  header > nav {
-    background-color: unset;
-  }
-
-  .sub-header {
-    display: flex;
-    align-items: center;
-  }
-
-  .sub-header > label {
-    display: initial;
-  }
-
-  .sub-header > select {
-    display: initial;
-    margin-right: auto;
-  }
-
-  .sub-header > .settings {
-    display: initial;
-  }
-
-  aside {
-    top: initial;
-    position: initial;
-    background-color: var(--nav-background);
-    color: var(--nav-text);
-    max-height: unset;
-    overflow-y: unset;
-    overscroll-behavior-y: unset;
-  }
-
-  aside h3 {
-    color: var(--nav-header-text);
-  }
-
-  #sidebar {
-    display: inline-block;
-    position: sticky;
-    top: 1em;
-    max-height: calc(100vh - 2em);
-    overflow-y: auto;
-    margin: 1em;
-  }
-
-  #sidebar a {
-    color: var(--nav-text);
-  }
-
-  .active {
-    background-color: transparent;
-    border-left: none;
-    position: relative;
-  }
-
-  .active::before {
-    content: "";
-    display: inline-block;
-    background-color: var(--active-toc);
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    width: calc(100% + 0.5em);
-    border-radius: 4px;
-    z-index: -1;
-  }
-
-  #sidebar a:hover {
-    color: var(--nav-hover-text);
-  }
-
-  #hamburger-toggle, #settings-toggle {
-    display: none;
-
-  }
-}
-
-@media screen and (min-width: 1200px) {
-  .main-grid {
-    /* 62.5% width => multiple of 5/8 content */
-    /* sidebar takes up 20% of the inner area */
-    grid-template-columns: repeat(16, 1fr);
-    grid-template-areas:
-      "h h h h h h h h h h h h h h h h"
-      "n n n n n n n n n n n n n n n n"
-      "s s s . . c c c c c c c c c . ."
-      "s s s f f f f f f f f f f f f f"
-  }
-
-  header > nav {
-    margin-left: 18.75%;
-    margin-right: 18.75%;
-  }
-
-  .sub-header > label {
-    margin-left: 18.75%;
-    margin-right: 1em;
-  }
-
-  .sub-header > .settings {
-    margin-right: 18.75%;
-    margin-left: 1em;
-  }
-
-  .sub-header > .search {
-    width: 20%;
-  }
-
-  .py-attribute-table-column:not(:first-child) {
-    margin-top: unset;
-  }
-
-  main img {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
 }
 
 
@@ -1414,7 +1507,7 @@ div.code-block-caption {
 
 /* hoverxref stuff (hoverxref custom additions) */
 
-.hoverxref {
+.hxr-hoverxref {
   border-bottom: 1px dotted;
   border-color: gray;
 }
@@ -1434,4 +1527,95 @@ div.code-block-caption {
 
 .tooltipster-sidetip.tooltipster-custom .tooltipster-content .headerlink {
   visibility: hidden;
+}
+
+
+/* Dark mode toggle */
+
+#dark-mode-switch {
+  position: relative;
+  height: 1.5em;
+  width: 3em;
+  cursor: pointer;
+  user-select: none;
+}
+
+#dark-mode-switch .switch-outer {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  border-radius: 2em;
+  transition: background-color 0.1s ease-out;
+}
+
+#dark-mode-switch.dark .switch-outer {
+  background-color: var(--black);
+}
+
+#dark-mode-switch.light .switch-outer {
+  background-color: var(--black);
+}
+
+#dark-mode-switch .switch-inner {
+  display: absolute;
+  height: 90%;
+  width: 95%;
+  top: 50%;
+  transform: translate(2.5%, 5%);
+  border-radius: 2em;
+  transition: background-color 0.1s ease-out;
+}
+#dark-mode-switch.light .switch-inner {
+  background-color: var(--grey-5);
+}
+#dark-mode-switch.dark .switch-inner {
+  background-color: var(--black);
+}
+
+#dark-mode-switch .knob {
+  display: absolute;
+  height: 75%;
+  width: 37.5%;
+  top: 50%;
+  transform: translate(0%, -120%);
+  border-radius: 10em;
+  transition: all 0.15s ease-out;
+}
+
+#dark-mode-switch .knob.dark {
+  background-color: var(--grey-5);
+  margin: 6% auto auto 8%;
+}
+
+#dark-mode-switch .knob.light {
+  background-color: var(--grey-4);
+  margin: 6% auto auto 56%;
+}
+
+#dark-mode-switch .theme-icon {
+  position: absolute !important;
+  opacity: 100%;
+  transition: opacity 0.1s ease-out;
+  top: 18%;
+  bottom: auto;
+  font-size: 1em;
+}
+
+#dark-mode-switch .theme-icon.light {
+  left: 11%;
+  color: var(--disnake-yellow);
+}
+
+#dark-mode-switch .theme-icon.dark {
+  right: 11%;
+  top: 18%;
+  color: var(--disnake-light-blue);
+}
+
+#dark-mode-switch.dark .theme-icon.light {
+  opacity: 0%;
+}
+
+#dark-mode-switch.light .theme-icon.dark {
+  opacity: 0%;
 }

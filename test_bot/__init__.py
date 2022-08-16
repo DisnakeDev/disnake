@@ -22,7 +22,7 @@ def _log_to_file():
     # File handler rotates logs every 5 MB
     file_handler = logging.handlers.RotatingFileHandler(
         log_file,
-        maxBytes=5 * (2 ** 17),
+        maxBytes=5 * (2**17),
         backupCount=2,
         encoding="utf-8",
     )

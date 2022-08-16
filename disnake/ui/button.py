@@ -25,14 +25,26 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import inspect
+import asyncio
 import os
-from typing import TYPE_CHECKING, Callable, Optional, Tuple, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    get_origin,
+    overload,
+)
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
-from .item import DecoratedItem, Item
+from ..utils import MISSING
+from .item import DecoratedItem, Item, Object
 
 __all__ = (
     "Button",
@@ -40,21 +52,28 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import ParamSpec, Self
+
     from ..emoji import Emoji
     from .item import ItemCallbackType
     from .view import View
 
+else:
+    ParamSpec = TypeVar
+
 B = TypeVar("B", bound="Button")
-V = TypeVar("V", bound="View", covariant=True)
+B_co = TypeVar("B_co", bound="Button", covariant=True)
+V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
+P = ParamSpec("P")
 
 
-class Button(Item[V]):
+class Button(Item[V_co]):
     """Represents a UI button.
 
     .. versionadded:: 2.0
 
     Parameters
-    ------------
+    ----------
     style: :class:`disnake.ButtonStyle`
         The style of the button.
     custom_id: Optional[:class:`str`]
@@ -63,7 +82,7 @@ class Button(Item[V]):
     url: Optional[:class:`str`]
         The URL this button sends you to.
     disabled: :class:`bool`
-        Whether the button is disabled or not.
+        Whether the button is disabled.
     label: Optional[:class:`str`]
         The label of the button, if any.
     emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
@@ -76,7 +95,7 @@ class Button(Item[V]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __item_repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: Tuple[str, ...] = (
         "style",
         "url",
         "disabled",
@@ -84,6 +103,36 @@ class Button(Item[V]):
         "emoji",
         "row",
     )
+    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    _underlying: ButtonComponent = MISSING
+
+    @overload
+    def __init__(
+        self: Button[None],
+        *,
+        style: ButtonStyle = ButtonStyle.secondary,
+        label: Optional[str] = None,
+        disabled: bool = False,
+        custom_id: Optional[str] = None,
+        url: Optional[str] = None,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        row: Optional[int] = None,
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self: Button[V_co],
+        *,
+        style: ButtonStyle = ButtonStyle.secondary,
+        label: Optional[str] = None,
+        disabled: bool = False,
+        custom_id: Optional[str] = None,
+        url: Optional[str] = None,
+        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        row: Optional[int] = None,
+    ):
+        ...
 
     def __init__(
         self,
@@ -129,6 +178,10 @@ class Button(Item[V]):
         self.row = row
 
     @property
+    def width(self) -> int:
+        return 1
+
+    @property
     def style(self) -> ButtonStyle:
         """:class:`disnake.ButtonStyle`: The style of the button."""
         return self._underlying.style
@@ -165,7 +218,7 @@ class Button(Item[V]):
 
     @property
     def disabled(self) -> bool:
-        """:class:`bool`: Whether the button is disabled or not."""
+        """:class:`bool`: Whether the button is disabled."""
         return self._underlying.disabled
 
     @disabled.setter
@@ -187,7 +240,7 @@ class Button(Item[V]):
         return self._underlying.emoji
 
     @emoji.setter
-    def emoji(self, value: Optional[Union[str, Emoji, PartialEmoji]]):  # type: ignore
+    def emoji(self, value: Optional[Union[str, Emoji, PartialEmoji]]):
         if value is not None:
             if isinstance(value, str):
                 self._underlying.emoji = PartialEmoji.from_str(value)
@@ -201,7 +254,7 @@ class Button(Item[V]):
             self._underlying.emoji = None
 
     @classmethod
-    def from_component(cls: Type[B], button: ButtonComponent) -> B:
+    def from_component(cls, button: ButtonComponent) -> Self:
         return cls(
             style=button.style,
             label=button.label,
@@ -211,13 +264,6 @@ class Button(Item[V]):
             emoji=button.emoji,
             row=None,
         )
-
-    @property
-    def type(self) -> ComponentType:
-        return self._underlying.type
-
-    def to_component_dict(self):
-        return self._underlying.to_dict()
 
     def is_dispatchable(self) -> bool:
         return self.custom_id is not None
@@ -231,6 +277,7 @@ class Button(Item[V]):
         self._underlying = button
 
 
+@overload
 def button(
     *,
     label: Optional[str] = None,
@@ -239,7 +286,20 @@ def button(
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], DecoratedItem[Button]]:
+) -> Callable[[ItemCallbackType[Button[V_co]]], DecoratedItem[Button[V_co]]]:
+    ...
+
+
+@overload
+def button(
+    cls: Type[Object[B_co, P]], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
+    ...
+
+
+def button(
+    cls: Type[Object[B_co, P]] = Button[Any], **kwargs: Any
+) -> Callable[[ItemCallbackType[B_co]], DecoratedItem[B_co]]:
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -255,7 +315,14 @@ def button(
         with it.
 
     Parameters
-    ------------
+    ----------
+    cls: Type[:class:`Button`]
+        The button subclass to create an instance of. If provided, the following parameters
+        described below do no apply. Instead, this decorator will accept the same keywords
+        as the passed cls does.
+
+        .. versionadded:: 2.6
+
     label: Optional[:class:`str`]
         The label of the button, if any.
     custom_id: Optional[:class:`str`]
@@ -264,7 +331,7 @@ def button(
     style: :class:`.ButtonStyle`
         The style of the button. Defaults to :attr:`.ButtonStyle.grey`.
     disabled: :class:`bool`
-        Whether the button is disabled or not. Defaults to ``False``.
+        Whether the button is disabled. Defaults to ``False``.
     emoji: Optional[Union[:class:`str`, :class:`.Emoji`, :class:`.PartialEmoji`]]
         The emoji of the button. This can be in string form or a :class:`.PartialEmoji`
         or a full :class:`.Emoji`.
@@ -276,20 +343,18 @@ def button(
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    def decorator(func: ItemCallbackType) -> DecoratedItem[Button]:
-        if not inspect.iscoroutinefunction(func):
+    if (origin := get_origin(cls)) is not None:
+        cls = origin
+
+    if not isinstance(cls, type) or not issubclass(cls, Button):
+        raise TypeError(f"cls argument must be a subclass of Button, got {cls!r}")
+
+    def decorator(func: ItemCallbackType[B_co]) -> DecoratedItem[B_co]:
+        if not asyncio.iscoroutinefunction(func):
             raise TypeError("button function must be a coroutine function")
 
-        func.__discord_ui_model_type__ = Button
-        func.__discord_ui_model_kwargs__ = {
-            "style": style,
-            "custom_id": custom_id,
-            "url": None,
-            "disabled": disabled,
-            "label": label,
-            "emoji": emoji,
-            "row": row,
-        }
+        func.__discord_ui_model_type__ = cls
+        func.__discord_ui_model_kwargs__ = kwargs
         return func  # type: ignore
 
     return decorator

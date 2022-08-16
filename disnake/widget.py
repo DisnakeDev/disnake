@@ -25,23 +25,30 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from .activity import BaseActivity, Spotify, create_activity
-from .enums import Status, try_enum
+from .enums import Status, WidgetStyle, try_enum
 from .invite import Invite
 from .user import BaseUser
-from .utils import _get_as_snowflake, resolve_invite, snowflake_time
+from .utils import MISSING, _get_as_snowflake, resolve_invite, snowflake_time
 
 if TYPE_CHECKING:
     import datetime
 
+    from .abc import GuildChannel, Snowflake
+    from .guild import Guild
     from .state import ConnectionState
-    from .types.widget import Widget as WidgetPayload, WidgetMember as WidgetMemberPayload
+    from .types.widget import (
+        Widget as WidgetPayload,
+        WidgetMember as WidgetMemberPayload,
+        WidgetSettings as WidgetSettingsPayload,
+    )
 
 __all__ = (
     "WidgetChannel",
     "WidgetMember",
+    "WidgetSettings",
     "Widget",
 )
 
@@ -68,7 +75,7 @@ class WidgetChannel:
             Returns the partial channel's name.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The channel's ID.
     name: :class:`str`
@@ -123,7 +130,7 @@ class WidgetMember(BaseUser):
             Returns the widget member's `name#discriminator`.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The member's ID.
     name: :class:`str`
@@ -151,13 +158,9 @@ class WidgetMember(BaseUser):
     """
 
     __slots__ = (
-        "name",
         "status",
         "nick",
         "avatar",
-        "discriminator",
-        "id",
-        "bot",
         "activity",
         "deafened",
         "suppress",
@@ -187,7 +190,7 @@ class WidgetMember(BaseUser):
         except KeyError:
             activity = None
         else:
-            activity = create_activity(game)
+            activity = create_activity(game, state=state)
 
         self.activity: Optional[Union[BaseActivity, Spotify]] = activity
 
@@ -203,6 +206,81 @@ class WidgetMember(BaseUser):
     def display_name(self) -> str:
         """:class:`str`: Returns the member's display name."""
         return self.nick or self.name
+
+
+class WidgetSettings:
+    """Represents a :class:`Guild`'s widget settings.
+
+    .. versionadded:: 2.5
+
+    Attributes
+    ----------
+    guild: :class:`Guild`
+        The widget's guild.
+    enabled: :class:`bool`
+        Whether the widget is enabled.
+    channel_id: Optional[:class:`int`]
+        The widget channel ID. If set, an invite link for this channel will be generated,
+        which allows users to join the guild from the widget.
+    """
+
+    __slots__ = ("_state", "guild", "enabled", "channel_id")
+
+    def __init__(
+        self, *, state: ConnectionState, guild: Guild, data: WidgetSettingsPayload
+    ) -> None:
+        self._state: ConnectionState = state
+        self.guild: Guild = guild
+        self.enabled: bool = data["enabled"]
+        self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
+
+    def __repr__(self) -> str:
+        return f"<WidgetSettings enabled={self.enabled!r} channel_id={self.channel_id!r} guild={self.guild!r}>"
+
+    @property
+    def channel(self) -> Optional[GuildChannel]:
+        """Optional[:class:`abc.GuildChannel`]: The widget channel, if set."""
+        return self.guild.get_channel(self.channel_id) if self.channel_id is not None else None
+
+    async def edit(
+        self,
+        *,
+        enabled: bool = MISSING,
+        channel: Optional[Snowflake] = MISSING,
+        reason: Optional[str] = None,
+    ) -> WidgetSettings:
+        """|coro|
+
+        Edits the widget.
+
+        You must have :attr:`~Permissions.manage_guild` permission to
+        do this.
+
+        Parameters
+        ----------
+        enabled: :class:`bool`
+            Whether to enable the widget.
+        channel: Optional[:class:`~disnake.abc.Snowflake`]
+            The new widget channel. Pass ``None`` to remove the widget channel.
+            If set, an invite link for this channel will be generated,
+            which allows users to join the guild from the widget.
+        reason: Optional[:class:`str`]
+            The reason for editing the widget. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permission to edit the widget.
+        HTTPException
+            Editing the widget failed.
+
+        Returns
+        -------
+        :class:`WidgetSettings`
+            The new widget settings.
+        """
+
+        return await self.guild.edit_widget(enabled=enabled, channel=channel, reason=reason)
 
 
 class Widget:
@@ -223,14 +301,14 @@ class Widget:
             Returns the widget's JSON URL.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The guild's ID.
     name: :class:`str`
         The guild's name.
     channels: List[:class:`WidgetChannel`]
         The accessible voice channels in the guild.
-    members: List[:class:`Member`]
+    members: List[:class:`WidgetMember`]
         The online members in the server. Offline members
         do not appear in the widget.
 
@@ -263,7 +341,7 @@ class Widget:
         for member in data.get("members", []):
             connected_channel = _get_as_snowflake(member, "channel_id")
             if connected_channel in channels:
-                connected_channel = channels[connected_channel]  # type: ignore
+                connected_channel = channels[connected_channel]
             elif connected_channel:
                 connected_channel = WidgetChannel(id=connected_channel, name="", position=0)
 
@@ -303,17 +381,75 @@ class Widget:
         code is abstracted away.
 
         Parameters
-        -----------
+        ----------
         with_counts: :class:`bool`
             Whether to include count information in the invite. This fills the
             :attr:`Invite.approximate_member_count` and :attr:`Invite.approximate_presence_count`
             fields.
 
         Returns
-        --------
+        -------
         :class:`Invite`
             The invite from the widget's invite URL.
         """
         invite_id = resolve_invite(self._invite)
         data = await self._state.http.get_invite(invite_id, with_counts=with_counts)
         return Invite.from_incomplete(state=self._state, data=data)
+
+    async def edit(
+        self,
+        *,
+        enabled: bool = MISSING,
+        channel: Optional[Snowflake] = MISSING,
+        reason: Optional[str] = None,
+    ) -> None:
+        """|coro|
+
+        Edits the widget.
+
+        You must have :attr:`~Permissions.manage_guild` permission to
+        do this
+
+        .. versionadded:: 2.4
+
+        Parameters
+        ----------
+        enabled: :class:`bool`
+            Whether to enable the widget.
+        channel: Optional[:class:`~disnake.abc.Snowflake`]
+            The new widget channel. Pass ``None`` to remove the widget channel.
+        reason: Optional[:class:`str`]
+            The reason for editing the widget. Shows up on the audit log.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permission to edit the widget.
+        HTTPException
+            Editing the widget failed.
+        """
+        payload: Dict[str, Any] = {}
+        if enabled is not MISSING:
+            payload["enabled"] = enabled
+        if channel is not MISSING:
+            payload["channel_id"] = None if channel is None else channel.id
+
+        await self._state.http.edit_widget(self.id, payload, reason=reason)
+
+    def image_url(self, style: WidgetStyle = WidgetStyle.shield) -> str:
+        """Returns an URL to the widget's .png image.
+
+        .. versionadded:: 2.5
+
+        Parameters
+        ----------
+        style: :class:`WidgetStyle`
+            The widget style.
+
+        Returns
+        -------
+        :class:`str`
+            The widget image URL.
+
+        """
+        return self._state.http.widget_image_url(self.id, style=str(style))

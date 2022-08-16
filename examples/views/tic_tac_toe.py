@@ -20,7 +20,7 @@ class TicTacToeButton(disnake.ui.Button["TicTacToe"]):
     # This function is called whenever this particular button is pressed
     # This is part of the "meat" of the game logic
     async def callback(self, interaction: disnake.MessageInteraction):
-        assert self.view is not None
+        assert self.view is not None  # noqa: S101
         view: TicTacToe = self.view
         state = view.board[self.y][self.x]
         if state in (view.X, view.O):
@@ -122,7 +122,7 @@ class TicTacToe(disnake.ui.View):
 
 class TicTacToeBot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or("$"))
+        super().__init__(command_prefix=commands.when_mentioned)
 
     async def on_ready(self):
         print(f"Logged in as {self.user} (ID: {self.user.id})")

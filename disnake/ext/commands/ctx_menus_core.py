@@ -23,23 +23,27 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Callable, Coroutine, Optional, Sequence, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.i18n import Localized
+from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
-from .errors import *
+from .errors import CommandError
 from .params import safe_call
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
+    from typing_extensions import ParamSpec
 
-    from disnake.interactions import ApplicationCommandInteraction
-
-    ApplicationCommandInteractionT = TypeVar(
-        "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
+    from disnake.i18n import LocalizedOptional
+    from disnake.interactions import (
+        ApplicationCommandInteraction,
+        MessageCommandInteraction,
+        UserCommandInteraction,
     )
-    from .cog import CogT
+
+    from .base_core import CogT, InteractionCommandCallback
 
     P = ParamSpec("P")
 
@@ -53,9 +57,11 @@ class InvokableUserCommand(InvokableApplicationCommand):
     decorator or functional interface.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the user command.
+    qualified_name: :class:`str`
+        The full command name, equivalent to :attr:`.name` for this type of command.
     body: :class:`.UserCommand`
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
@@ -69,26 +75,55 @@ class InvokableUserCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_user_command_error`
         event.
-    guild_ids: Optional[List[:class:`int`]]
+    guild_ids: Optional[Tuple[:class:`int`, ...]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
-        Whether to sync the command in the API with ``body`` or not.
+        Whether to automatically register the command.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded:: 2.5
     """
 
     def __init__(
         self,
-        func,
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         *,
-        name: str = None,
-        default_permission: bool = True,
+        name: LocalizedOptional = None,
+        dm_permission: bool = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
         guild_ids: Sequence[int] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
-        self.guild_ids: Optional[Sequence[int]] = guild_ids
-        self.auto_sync: bool = auto_sync
-        self.body = UserCommand(name=self.name, default_permission=default_permission)
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
+        self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
+        self.auto_sync: bool = True if auto_sync is None else auto_sync
+
+        try:
+            default_perms: int = func.__default_member_permissions__
+        except AttributeError:
+            pass
+        else:
+            if default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both parameter and decorator"
+                )
+            default_member_permissions = default_perms
+
+        dm_permission = True if dm_permission is None else dm_permission
+
+        self.body = UserCommand(
+            name=name_loc._upgrade(self.name),
+            dm_permission=dm_permission and not self._guild_only,
+            default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -103,7 +138,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
                     # User has an option to cancel the global error handler by returning True
         finally:
             if stop_propagation:
-                return
+                return  # noqa: B012
             inter.bot.dispatch("user_command_error", inter, error)
 
     async def __call__(
@@ -124,9 +159,11 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     decorator or functional interface.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The name of the message command.
+    qualified_name: :class:`str`
+        The full command name, equivalent to :attr:`.name` for this type of command.
     body: :class:`.MessageCommand`
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
@@ -140,26 +177,55 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_message_command_error`
         event.
-    guild_ids: Optional[List[:class:`int`]]
+    guild_ids: Optional[Tuple[:class:`int`, ...]]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
-        Whether to sync the command in the API with ``body`` or not.
+        Whether to automatically register the command.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded:: 2.5
     """
 
     def __init__(
         self,
-        func,
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         *,
-        name: str = None,
-        default_permission: bool = True,
+        name: LocalizedOptional = None,
+        dm_permission: bool = None,
+        default_member_permissions: Optional[Union[Permissions, int]] = None,
+        nsfw: bool = None,
         guild_ids: Sequence[int] = None,
-        auto_sync: bool = True,
+        auto_sync: bool = None,
         **kwargs,
     ):
-        super().__init__(func, name=name, **kwargs)
-        self.guild_ids: Optional[Sequence[int]] = guild_ids
-        self.auto_sync: bool = auto_sync
-        self.body = MessageCommand(name=self.name, default_permission=default_permission)
+        name_loc = Localized._cast(name, False)
+        super().__init__(func, name=name_loc.string, **kwargs)
+        self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
+        self.auto_sync: bool = True if auto_sync is None else auto_sync
+
+        try:
+            default_perms: int = func.__default_member_permissions__
+        except AttributeError:
+            pass
+        else:
+            if default_member_permissions is not None:
+                raise ValueError(
+                    "Cannot set `default_member_permissions` in both parameter and decorator"
+                )
+            default_member_permissions = default_perms
+
+        dm_permission = True if dm_permission is None else dm_permission
+
+        self.body = MessageCommand(
+            name=name_loc._upgrade(self.name),
+            dm_permission=dm_permission and not self._guild_only,
+            default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
+        )
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -174,7 +240,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
                     # User has an option to cancel the global error handler by returning True
         finally:
             if stop_propagation:
-                return
+                return  # noqa: B012
             inter.bot.dispatch("message_command_error", inter, error)
 
     async def __call__(
@@ -190,57 +256,77 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 
 def user_command(
     *,
-    name: str = None,
-    default_permission: bool = True,
+    name: LocalizedOptional = None,
+    dm_permission: bool = None,
+    default_member_permissions: Optional[Union[Permissions, int]] = None,
+    nsfw: bool = None,
     guild_ids: Sequence[int] = None,
-    auto_sync: bool = True,
+    auto_sync: bool = None,
+    extras: Dict[str, Any] = None,
     **kwargs,
-) -> Callable[
-    [
-        Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-        ]
-    ],
-    InvokableUserCommand,
-]:
-    """
-    A shortcut decorator that builds a user command.
+) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
+    """A shortcut decorator that builds a user command.
 
     Parameters
     ----------
-    name: :class:`str`
-        name of the user command you want to respond to (equals to function name by default).
-    default_permission: :class:`bool`
-        whether the command is enabled by default when the app is added to a guild.
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+        The name of the user command (defaults to the function name).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
+    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+        The default required permissions for this command.
+        See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+        .. versionadded:: 2.5
+
+    nsfw: :class:`bool`
+        Whether this command can only be used in NSFW channels.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.6
+
     auto_sync: :class:`bool`
-        whether to automatically register / edit the command or not. Defaults to ``True``.
+        Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
-        if specified, the client will register the command in these guilds.
-        Otherwise this command will be registered globally in ~1 hour.
+        If specified, the client will register the command in these guilds.
+        Otherwise, this command will be registered globally.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded:: 2.5
 
     Returns
-    --------
+    -------
     Callable[..., :class:`InvokableUserCommand`]
-        A decorator that converts the provided method into a InvokableUserCommand and returns it.
+        A decorator that converts the provided method into an InvokableUserCommand and returns it.
     """
 
     def decorator(
-        func: Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-        ]
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
     ) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
+        if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
+            raise ValueError("guild_ids must be a sequence of int.")
         return InvokableUserCommand(
             func,
             name=name,
-            default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
+            extras=extras,
             **kwargs,
         )
 
@@ -249,57 +335,80 @@ def user_command(
 
 def message_command(
     *,
-    name: str = None,
-    default_permission: bool = True,
+    name: LocalizedOptional = None,
+    dm_permission: bool = None,
+    default_member_permissions: Optional[Union[Permissions, int]] = None,
+    nsfw: bool = None,
     guild_ids: Sequence[int] = None,
-    auto_sync: bool = True,
+    auto_sync: bool = None,
+    extras: Dict[str, Any] = None,
     **kwargs,
 ) -> Callable[
-    [
-        Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-        ]
-    ],
+    [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
     InvokableMessageCommand,
 ]:
-    """
-    A decorator that builds a message command.
+    """A shortcut decorator that builds a message command.
 
     Parameters
     ----------
-    name: :class:`str`
-        name of the message command you want to respond to (equals to function name by default).
-    default_permission: :class:`bool`
-        whether the command is enabled by default when the app is added to a guild.
+    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+        The name of the message command (defaults to the function name).
+
+        .. versionchanged:: 2.5
+            Added support for localizations.
+
+    dm_permission: :class:`bool`
+        Whether this command can be used in DMs.
+        Defaults to ``True``.
+    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+        The default required permissions for this command.
+        See :attr:`.ApplicationCommand.default_member_permissions` for details.
+
+        .. versionadded:: 2.5
+
+    nsfw: :class:`bool`
+        Whether this command can only be used in NSFW channels.
+        Defaults to ``False``.
+
+        .. versionadded:: 2.6
+
     auto_sync: :class:`bool`
-        whether to automatically register / edit the command or not. Defaults to ``True``.
+        Whether to automatically register the command. Defaults to ``True``.
     guild_ids: Sequence[:class:`int`]
-        if specified, the client will register the command in these guilds.
-        Otherwise this command will be registered globally in ~1 hour.
+        If specified, the client will register the command in these guilds.
+        Otherwise, this command will be registered globally.
+    extras: Dict[:class:`str`, Any]
+        A dict of user provided extras to attach to the command.
+
+        .. note::
+            This object may be copied by the library.
+
+        .. versionadded:: 2.5
 
     Returns
-    --------
+    -------
     Callable[..., :class:`InvokableMessageCommand`]
-        A decorator that converts the provided method into a InvokableMessageCommand and then returns it.
+        A decorator that converts the provided method into an InvokableMessageCommand and then returns it.
     """
 
     def decorator(
-        func: Union[
-            Callable[Concatenate[CogT, ApplicationCommandInteractionT, P], Coroutine],
-            Callable[Concatenate[ApplicationCommandInteractionT, P], Coroutine],
-        ]
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
     ) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
+        if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
+            raise ValueError("guild_ids must be a sequence of int.")
         return InvokableMessageCommand(
             func,
             name=name,
-            default_permission=default_permission,
+            dm_permission=dm_permission,
+            default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
+            extras=extras,
             **kwargs,
         )
 

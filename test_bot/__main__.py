@@ -1,9 +1,14 @@
+import asyncio
 import logging
 import os
+import sys
 import traceback
 
 import disnake
 from disnake.ext import commands
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from .config import Config
 
@@ -26,10 +31,12 @@ class TestBot(commands.Bot):
             intents=disnake.Intents.all(),
             help_command=None,  # type: ignore
             sync_commands_debug=Config.sync_commands_debug,
-            sync_permissions=Config.sync_permissions,
+            strict_localization=Config.strict_localization,
             test_guilds=Config.test_guilds,
             reload=Config.auto_reload,
         )
+
+        self.i18n.load("test_bot/locale")
 
     def load_all_extensions(self, folder: str) -> None:
         py_path = f"test_bot.{folder}"

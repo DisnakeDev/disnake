@@ -1,3 +1,0 @@
-pre-commit~=2.16.0
-python-dotenv~=0.19.2
-taskipy>=1.9.0

@@ -19,7 +19,7 @@ class MyClient(disnake.Client):
     @tasks.loop(seconds=60)  # task runs every 60 seconds
     async def my_background_task(self):
         self.counter += 1
-        await self.channel.send(self.counter)
+        await self.channel.send(str(self.counter))
 
     @my_background_task.before_loop
     async def before_my_task(self):

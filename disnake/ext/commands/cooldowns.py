@@ -28,7 +28,7 @@ from __future__ import annotations
 import asyncio
 import time
 from collections import deque
-from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
 
 from disnake.enums import Enum
 
@@ -36,6 +36,8 @@ from ...abc import PrivateChannel
 from .errors import MaxConcurrencyReached
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ...message import Message
 
 __all__ = (
@@ -45,9 +47,6 @@ __all__ = (
     "DynamicCooldownMapping",
     "MaxConcurrency",
 )
-
-C = TypeVar("C", bound="CooldownMapping")
-MC = TypeVar("MC", bound="MaxConcurrency")
 
 
 class BucketType(Enum):
@@ -85,7 +84,7 @@ class Cooldown:
     """Represents a cooldown for a command.
 
     Attributes
-    -----------
+    ----------
     rate: :class:`int`
         The total number of tokens available per :attr:`per` seconds.
     per: :class:`float`
@@ -105,13 +104,13 @@ class Cooldown:
         """Returns the number of available tokens before rate limiting is applied.
 
         Parameters
-        ------------
+        ----------
         current: Optional[:class:`float`]
             The time in seconds since Unix epoch to calculate tokens at.
             If not supplied then :func:`time.time()` is used.
 
         Returns
-        --------
+        -------
         :class:`int`
             The number of tokens available before the cooldown is to be applied.
         """
@@ -128,7 +127,7 @@ class Cooldown:
         """Returns the time in seconds until the cooldown will be reset.
 
         Parameters
-        -------------
+        ----------
         current: Optional[:class:`float`]
             The current time in seconds since Unix epoch.
             If not supplied, then :func:`time.time()` is used.
@@ -150,7 +149,7 @@ class Cooldown:
         """Updates the cooldown rate limit.
 
         Parameters
-        -------------
+        ----------
         current: Optional[:class:`float`]
             The time in seconds since Unix epoch to update the rate limit at.
             If not supplied, then :func:`time.time()` is used.
@@ -185,7 +184,7 @@ class Cooldown:
         """Creates a copy of this cooldown.
 
         Returns
-        --------
+        -------
         :class:`Cooldown`
             A new instance of this cooldown.
         """
@@ -222,7 +221,7 @@ class CooldownMapping:
         return self._type
 
     @classmethod
-    def from_cooldown(cls: Type[C], rate, per, type) -> C:
+    def from_cooldown(cls, rate, per, type) -> Self:
         return cls(Cooldown(rate, per), type)
 
     def _bucket_key(self, msg: Message) -> Any:
@@ -237,11 +236,15 @@ class CooldownMapping:
         for k in dead_keys:
             del self._cache[k]
 
+    def _is_default(self) -> bool:
+        # This method can be overridden in subclasses
+        return self._type is BucketType.default
+
     def create_bucket(self, message: Message) -> Cooldown:
         return self._cooldown.copy()  # type: ignore
 
     def get_bucket(self, message: Message, current: Optional[float] = None) -> Cooldown:
-        if self._type is BucketType.default:
+        if self._is_default():
             return self._cooldown  # type: ignore
 
         self._verify_cache_integrity(current)
@@ -277,6 +280,10 @@ class DynamicCooldownMapping(CooldownMapping):
     @property
     def valid(self) -> bool:
         return True
+
+    def _is_default(self) -> bool:
+        # In dynamic mappings even default bucket types may have custom behavior
+        return False
 
     def create_bucket(self, message: Message) -> Cooldown:
         return self._factory(message)
@@ -328,7 +335,7 @@ class _Semaphore:
             self._waiters.append(future)
             try:
                 await future
-            except:
+            except Exception:
                 future.cancel()
                 if self.value > 0 and not future.cancelled():
                     self.wake_up()
@@ -357,7 +364,7 @@ class MaxConcurrency:
         if not isinstance(per, BucketType):
             raise TypeError(f"max_concurrency 'per' must be of type BucketType not {type(per)!r}")
 
-    def copy(self: MC) -> MC:
+    def copy(self) -> Self:
         return self.__class__(self.number, per=self.per, wait=self.wait)
 
     def __repr__(self) -> str:

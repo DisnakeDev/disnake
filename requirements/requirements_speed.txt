@@ -1,0 +1,5 @@
+orjson~=3.6
+# taken from aiohttp[speedups]
+aiodns>=1.1
+Brotli
+cchardet; python_version < "3.10"

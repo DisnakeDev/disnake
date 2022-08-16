@@ -25,15 +25,28 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-import inspect
+import asyncio
 import os
-from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    get_origin,
+    overload,
+)
 
 from ..components import SelectMenu, SelectOption
 from ..enums import ComponentType
 from ..partial_emoji import PartialEmoji
 from ..utils import MISSING
-from .item import DecoratedItem, Item
+from .item import DecoratedItem, Item, Object
 
 __all__ = (
     "Select",
@@ -41,17 +54,34 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import ParamSpec, Self
+
     from ..emoji import Emoji
     from ..interactions import MessageInteraction
-    from ..types.components import SelectMenu as SelectMenuPayload
     from .item import ItemCallbackType
     from .view import View
 
+else:
+    ParamSpec = TypeVar
+
+
 S = TypeVar("S", bound="Select")
-V = TypeVar("V", bound="View", covariant=True)
+S_co = TypeVar("S_co", bound="Select", covariant=True)
+V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
+P = ParamSpec("P")
 
 
-class Select(Item[V]):
+def _parse_select_options(
+    options: Union[List[SelectOption], List[str], Dict[str, str]]
+) -> List[SelectOption]:
+
+    if isinstance(options, dict):
+        return [SelectOption(label=key, value=val) for key, val in options.items()]
+
+    return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
+
+
+class Select(Item[V_co]):
     """Represents a UI select menu.
 
     This is usually represented as a drop down menu.
@@ -61,7 +91,7 @@ class Select(Item[V]):
     .. versionadded:: 2.0
 
     Parameters
-    ------------
+    ----------
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
         If not given then one is generated for you.
@@ -73,10 +103,17 @@ class Select(Item[V]):
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: List[:class:`disnake.SelectOption`]
-        A list of options that can be selected in this menu.
+    options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
+        for fine-grained control over the options. Alternatively, a list of strings will be treated
+        as a list of labels, and a dict will be treated as a mapping of labels to values.
+
+        .. versionchanged:: 2.5
+            Now also accepts a list of str or a dict of str to str, which are then appropriately parsed as
+            :class:`.SelectOption` labels and values.
+
     disabled: :class:`bool`
-        Whether the select is disabled or not.
+        Whether the select is disabled.
     row: Optional[:class:`int`]
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -85,13 +122,43 @@ class Select(Item[V]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __item_repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: Tuple[str, ...] = (
         "placeholder",
         "min_values",
         "max_values",
         "options",
         "disabled",
     )
+    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    _underlying: SelectMenu = MISSING
+
+    @overload
+    def __init__(
+        self: Select[None],
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        disabled: bool = False,
+        row: Optional[int] = None,
+    ):
+        ...
+
+    @overload
+    def __init__(
+        self: Select[V_co],
+        *,
+        custom_id: str = MISSING,
+        placeholder: Optional[str] = None,
+        min_values: int = 1,
+        max_values: int = 1,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
+        disabled: bool = False,
+        row: Optional[int] = None,
+    ):
+        ...
 
     def __init__(
         self,
@@ -100,7 +167,7 @@ class Select(Item[V]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: List[SelectOption] = MISSING,
+        options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
         disabled: bool = False,
         row: Optional[int] = None,
     ) -> None:
@@ -108,7 +175,7 @@ class Select(Item[V]):
         self._selected_values: List[str] = []
         self._provided_custom_id = custom_id is not MISSING
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        options = [] if options is MISSING else options
+        options = [] if options is MISSING else _parse_select_options(options)
         self._underlying = SelectMenu._raw_construct(
             custom_id=custom_id,
             type=ComponentType.select,
@@ -164,7 +231,7 @@ class Select(Item[V]):
 
     @property
     def options(self) -> List[SelectOption]:
-        """List[:class:`disnake.SelectOption`]: A list of options that can be selected in this menu."""
+        """List[:class:`disnake.SelectOption`]: A list of options that can be selected in this select menu."""
         return self._underlying.options
 
     @options.setter
@@ -187,11 +254,11 @@ class Select(Item[V]):
     ):
         """Adds an option to the select menu.
 
-        To append a pre-existing :class:`disnake.SelectOption` use the
+        To append a pre-existing :class:`.SelectOption` use the
         :meth:`append_option` method instead.
 
         Parameters
-        -----------
+        ----------
         label: :class:`str`
             The label of the option. This is displayed to users.
             Can only be up to 100 characters.
@@ -208,11 +275,10 @@ class Select(Item[V]):
             Whether this option is selected by default.
 
         Raises
-        -------
+        ------
         ValueError
             The number of options exceeds 25.
         """
-
         option = SelectOption(
             label=label,
             value=value,
@@ -227,16 +293,15 @@ class Select(Item[V]):
         """Appends an option to the select menu.
 
         Parameters
-        -----------
+        ----------
         option: :class:`disnake.SelectOption`
             The option to append to the select menu.
 
         Raises
-        -------
+        ------
         ValueError
             The number of options exceeds 25.
         """
-
         if len(self._underlying.options) >= 25:
             raise ValueError("maximum number of options already provided")
 
@@ -244,7 +309,7 @@ class Select(Item[V]):
 
     @property
     def disabled(self) -> bool:
-        """:class:`bool`: Whether the select is disabled or not."""
+        """:class:`bool`: Whether the select menu is disabled."""
         return self._underlying.disabled
 
     @disabled.setter
@@ -260,9 +325,6 @@ class Select(Item[V]):
     def width(self) -> int:
         return 5
 
-    def to_component_dict(self) -> SelectMenuPayload:
-        return self._underlying.to_dict()
-
     def refresh_component(self, component: SelectMenu) -> None:
         self._underlying = component
 
@@ -270,7 +332,7 @@ class Select(Item[V]):
         self._selected_values = interaction.values  # type: ignore
 
     @classmethod
-    def from_component(cls: Type[S], component: SelectMenu) -> S:
+    def from_component(cls, component: SelectMenu) -> Self:
         return cls(
             custom_id=component.custom_id,
             placeholder=component.placeholder,
@@ -281,24 +343,39 @@ class Select(Item[V]):
             row=None,
         )
 
-    @property
-    def type(self) -> ComponentType:
-        return self._underlying.type
-
     def is_dispatchable(self) -> bool:
+        """Whether the select menu is dispatchable. This will always return ``True``.
+
+        :return type: :class:`bool`
+        """
         return True
 
 
+@overload
 def select(
     *,
     placeholder: Optional[str] = None,
     custom_id: str = MISSING,
     min_values: int = 1,
     max_values: int = 1,
-    options: List[SelectOption] = MISSING,
+    options: Union[List[SelectOption], List[str], Dict[str, str]] = MISSING,
     disabled: bool = False,
     row: Optional[int] = None,
-) -> Callable[[ItemCallbackType], DecoratedItem[Select]]:
+) -> Callable[[ItemCallbackType[Select[V_co]]], DecoratedItem[Select[V_co]]]:
+    ...
+
+
+@overload
+def select(
+    cls: Type[Object[S_co, P]], *_: P.args, **kwargs: P.kwargs
+) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+    ...
+
+
+def select(
+    cls: Type[Object[S_co, P]] = Select[Any],
+    **kwargs: Any,
+) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
@@ -309,7 +386,14 @@ def select(
     use :attr:`Select.values`.
 
     Parameters
-    ------------
+    ----------
+    cls: Type[:class:`Select`]
+        The select subclass to create an instance of. If provided, the following parameters
+        described below do no apply. Instead, this decorator will accept the same keywords
+        as the passed cls does.
+
+        .. versionadded:: 2.6
+
     placeholder: Optional[:class:`str`]
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
@@ -327,26 +411,31 @@ def select(
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: List[:class:`disnake.SelectOption`]
-        A list of options that can be selected in this menu.
+    options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
+        for fine-grained control over the options. Alternatively, a list of strings will be treated
+        as a list of labels, and a dict will be treated as a mapping of labels to values.
+
+        .. versionchanged:: 2.5
+            Now also accepts a list of str or a dict of str to str, which are then appropriately parsed as
+            :class:`.SelectOption` labels and values.
+
     disabled: :class:`bool`
-        Whether the select is disabled or not. Defaults to ``False``.
+        Whether the select is disabled. Defaults to ``False``.
     """
 
-    def decorator(func: ItemCallbackType) -> DecoratedItem[Select]:
-        if not inspect.iscoroutinefunction(func):
+    if (origin := get_origin(cls)) is not None:
+        cls = origin
+
+    if not isinstance(cls, type) or not issubclass(cls, Select):
+        raise TypeError(f"cls argument must be a subclass of Select, got {cls!r}")
+
+    def decorator(func: ItemCallbackType[S_co]) -> DecoratedItem[S_co]:
+        if not asyncio.iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 
-        func.__discord_ui_model_type__ = Select
-        func.__discord_ui_model_kwargs__ = {
-            "placeholder": placeholder,
-            "custom_id": custom_id,
-            "row": row,
-            "min_values": min_values,
-            "max_values": max_values,
-            "options": options,
-            "disabled": disabled,
-        }
+        func.__discord_ui_model_type__ = cls
+        func.__discord_ui_model_kwargs__ = kwargs
         return func  # type: ignore
 
     return decorator

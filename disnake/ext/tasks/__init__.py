@@ -37,7 +37,7 @@ import aiohttp
 
 import disnake
 from disnake.backoff import ExponentialBackoff
-from disnake.utils import MISSING
+from disnake.utils import MISSING, utcnow
 
 __all__ = ("loop",)
 
@@ -120,7 +120,7 @@ class Loop(Generic[LF]):
         self._last_iteration: datetime.datetime = MISSING
         self._next_iteration = None
 
-        if not inspect.iscoroutinefunction(self.coro):
+        if not asyncio.iscoroutinefunction(self.coro):
             raise TypeError(f"Expected coroutine function, not {type(self.coro).__name__!r}.")
 
     async def _call_loop_function(self, name: str, *args: Any, **kwargs: Any) -> None:
@@ -146,7 +146,7 @@ class Loop(Generic[LF]):
             self._prepare_time_index()
             self._next_iteration = self._get_next_sleep_time()
         else:
-            self._next_iteration = datetime.datetime.now(datetime.timezone.utc)
+            self._next_iteration = utcnow()
         try:
             await self._try_sleep_until(self._next_iteration)
             while True:
@@ -167,7 +167,7 @@ class Loop(Generic[LF]):
                     if self._stop_next_iteration:
                         return
 
-                    now = datetime.datetime.now(datetime.timezone.utc)
+                    now = utcnow()
                     if now > self._next_iteration:
                         self._next_iteration = now
                         if self._time is not MISSING:
@@ -271,46 +271,46 @@ class Loop(Generic[LF]):
         return self._next_iteration
 
     async def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        r"""|coro|
+        """
+        |coro|
 
         Calls the internal callback that the task holds.
 
         .. versionadded:: 1.6
 
         Parameters
-        ------------
-        \*args
+        ----------
+        *args
             The arguments to use.
-        \*\*kwargs
+        **kwargs
             The keyword arguments to use.
         """
-
         if self._injected is not None:
             args = (self._injected, *args)
 
         return await self.coro(*args, **kwargs)
 
     def start(self, *args: Any, **kwargs: Any) -> asyncio.Task[None]:
-        r"""Starts the internal task in the event loop.
+        """
+        Starts the internal task in the event loop.
 
         Parameters
-        ------------
-        \*args
+        ----------
+        *args
             The arguments to use.
-        \*\*kwargs
+        **kwargs
             The keyword arguments to use.
 
         Raises
-        --------
+        ------
         RuntimeError
             A task has already been launched and is running.
 
         Returns
-        ---------
+        -------
         :class:`asyncio.Task`
             The task that has been created.
         """
-
         if self._task is not MISSING and not self._task.done():
             raise RuntimeError("Task is already launched and is not completed.")
 
@@ -324,9 +324,10 @@ class Loop(Generic[LF]):
         return self._task
 
     def stop(self) -> None:
-        r"""Gracefully stops the task from running.
+        """
+        Gracefully stops the task from running.
 
-        Unlike :meth:`cancel`\, this allows the task to finish its
+        Unlike :meth:`cancel`\\, this allows the task to finish its
         current iteration before gracefully exiting.
 
         .. note::
@@ -353,7 +354,8 @@ class Loop(Generic[LF]):
             self._task.cancel()
 
     def restart(self, *args: Any, **kwargs: Any) -> None:
-        r"""A convenience method to restart the internal task.
+        """
+        A convenience method to restart the internal task.
 
         .. note::
 
@@ -361,10 +363,10 @@ class Loop(Generic[LF]):
             returned like :meth:`start`.
 
         Parameters
-        ------------
-        \*args
+        ----------
+        *args
             The arguments to use.
-        \*\*kwargs
+        **kwargs
             The keyword arguments to use.
         """
 
@@ -377,26 +379,26 @@ class Loop(Generic[LF]):
             self._task.cancel()
 
     def add_exception_type(self, *exceptions: Type[BaseException]) -> None:
-        r"""Adds exception types to be handled during the reconnect logic.
+        """
+        Adds exception types to be handled during the reconnect logic.
 
         By default the exception types handled are those handled by
-        :meth:`disnake.Client.connect`\, which includes a lot of internet disconnection
+        :meth:`disnake.Client.connect`\\, which includes a lot of internet disconnection
         errors.
 
         This function is useful if you're interacting with a 3rd party library that
         raises its own set of exceptions.
 
         Parameters
-        ------------
-        \*exceptions: Type[:class:`BaseException`]
+        ----------
+        *exceptions: Type[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Raises
-        --------
+        ------
         TypeError
             An exception passed is either not a class or not inherited from :class:`BaseException`.
         """
-
         for exc in exceptions:
             if not inspect.isclass(exc):
                 raise TypeError(f"{exc!r} must be a class.")
@@ -412,18 +414,19 @@ class Loop(Generic[LF]):
 
             This operation obviously cannot be undone!
         """
-        self._valid_exception = tuple()
+        self._valid_exception = ()
 
     def remove_exception_type(self, *exceptions: Type[BaseException]) -> bool:
-        r"""Removes exception types from being handled during the reconnect logic.
+        """
+        Removes exception types from being handled during the reconnect logic.
 
         Parameters
-        ------------
-        \*exceptions: Type[:class:`BaseException`]
+        ----------
+        *exceptions: Type[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Returns
-        ---------
+        -------
         :class:`bool`
             Whether all exceptions were successfully removed.
         """
@@ -432,24 +435,34 @@ class Loop(Generic[LF]):
         return len(self._valid_exception) == old_length - len(exceptions)
 
     def get_task(self) -> Optional[asyncio.Task[None]]:
-        """Optional[:class:`asyncio.Task`]: Fetches the internal task or ``None`` if there isn't one running."""
+        """Fetches the internal task or ``None`` if there isn't one running.
+
+        :return type: Optional[:class:`asyncio.Task`]
+        """
         return self._task if self._task is not MISSING else None
 
     def is_being_cancelled(self) -> bool:
-        """Whether the task is being cancelled."""
+        """Whether the task is being cancelled.
+
+        :return type: :class:`bool`
+        """
         return self._is_being_cancelled
 
     def failed(self) -> bool:
-        """:class:`bool`: Whether the internal task has failed.
+        """Whether the internal task has failed.
 
         .. versionadded:: 1.2
+
+        :return type: :class:`bool`
         """
         return self._has_failed
 
     def is_running(self) -> bool:
-        """:class:`bool`: Check if the task is currently running.
+        """Check if the task is currently running.
 
         .. versionadded:: 1.4
+
+        :return type: :class:`bool`
         """
         return not bool(self._task.done()) if self._task is not MISSING else False
 
@@ -472,17 +485,16 @@ class Loop(Generic[LF]):
         The coroutine must take no arguments (except ``self`` in a class context).
 
         Parameters
-        ------------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register before the loop runs.
 
         Raises
-        -------
+        ------
         TypeError
             The function was not a coroutine.
         """
-
-        if not inspect.iscoroutinefunction(coro):
+        if not asyncio.iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
         self._before_loop = coro
@@ -500,17 +512,16 @@ class Loop(Generic[LF]):
             whether :meth:`is_being_cancelled` is ``True`` or not.
 
         Parameters
-        ------------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register after the loop finishes.
 
         Raises
-        -------
+        ------
         TypeError
             The function was not a coroutine.
         """
-
-        if not inspect.iscoroutinefunction(coro):
+        if not asyncio.iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
         self._after_loop = coro
@@ -527,16 +538,16 @@ class Loop(Generic[LF]):
         .. versionadded:: 1.4
 
         Parameters
-        ------------
+        ----------
         coro: :ref:`coroutine <coroutine>`
             The coroutine to register in the event of an unhandled exception.
 
         Raises
-        -------
+        ------
         TypeError
             The function was not a coroutine.
         """
-        if not inspect.iscoroutinefunction(coro):
+        if not asyncio.iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
         self._error = coro  # type: ignore
@@ -551,7 +562,7 @@ class Loop(Generic[LF]):
             if self._current_loop == 0:
                 # if we're at the last index on the first iteration, we need to sleep until tomorrow
                 return datetime.datetime.combine(
-                    datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=1),
+                    utcnow() + datetime.timedelta(days=1),
                     self._time[0],
                 )
 
@@ -559,13 +570,16 @@ class Loop(Generic[LF]):
 
         if self._current_loop == 0:
             self._time_index += 1
-            return datetime.datetime.combine(
-                datetime.datetime.now(datetime.timezone.utc), next_time
-            )
+            if next_time > utcnow().timetz():
+                return datetime.datetime.combine(utcnow(), next_time)
+            else:
+                return datetime.datetime.combine(
+                    utcnow() + datetime.timedelta(days=1),
+                    next_time,
+                )
 
         next_date = self._last_iteration
-        if self._time_index == 0:
-            # we can assume that the earliest time should be scheduled for "tomorrow"
+        if next_time < next_date.timetz():
             next_date += datetime.timedelta(days=1)
 
         self._time_index += 1
@@ -576,11 +590,7 @@ class Loop(Generic[LF]):
         # to calculate the next time index from
 
         # pre-condition: self._time is set
-        time_now = (
-            now
-            if now is not MISSING
-            else datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
-        ).timetz()
+        time_now = (now if now is not MISSING else utcnow().replace(microsecond=0)).timetz()
         for idx, time in enumerate(self._time):
             if time >= time_now:
                 self._time_index = idx
@@ -629,7 +639,7 @@ class Loop(Generic[LF]):
         .. versionadded:: 1.2
 
         Parameters
-        ------------
+        ----------
         seconds: :class:`float`
             The number of seconds between every iteration.
         minutes: :class:`float`
@@ -648,14 +658,13 @@ class Loop(Generic[LF]):
                 Duplicate times will be ignored, and only run once.
 
         Raises
-        -------
+        ------
         ValueError
             An invalid value was given.
         TypeError
             An invalid value for the ``time`` parameter was passed, or the
             ``time`` parameter was passed in conjunction with relative time parameters.
         """
-
         if time is MISSING:
             seconds = seconds or 0
             minutes = minutes or 0
@@ -700,7 +709,7 @@ def loop(
     optional reconnect logic. The decorator returns a :class:`Loop`.
 
     Parameters
-    ------------
+    ----------
     seconds: :class:`float`
         The number of seconds between every iteration.
     minutes: :class:`float`
@@ -732,7 +741,7 @@ def loop(
         defaults to :func:`asyncio.get_event_loop`.
 
     Raises
-    --------
+    ------
     ValueError
         An invalid value was given.
     TypeError

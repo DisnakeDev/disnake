@@ -27,6 +27,9 @@ from __future__ import annotations
 
 from typing import List, Literal, Optional, TypedDict
 
+from .activity import PresenceData
+from .member import Member
+from .message import Message
 from .snowflake import Snowflake
 
 ThreadType = Literal[10, 11, 12]
@@ -40,10 +43,16 @@ class ThreadMember(TypedDict):
     flags: int
 
 
+class ThreadMemberWithPresence(ThreadMember):
+    # currently unused, also not really documented properly
+    member: Member
+    presence: Optional[PresenceData]
+
+
 class _ThreadMetadataOptional(TypedDict, total=False):
-    archiver_id: Snowflake
     locked: bool
     invitable: bool
+    create_timestamp: str
 
 
 class ThreadMetadata(_ThreadMetadataOptional):
@@ -56,7 +65,8 @@ class _ThreadOptional(TypedDict, total=False):
     member: ThreadMember
     owner_id: Snowflake
     last_message_id: Optional[Snowflake]
-    last_pin_timestamp: Optional[Snowflake]
+    last_pin_timestamp: Optional[str]
+    flags: int
 
 
 class Thread(_ThreadOptional):
@@ -69,6 +79,10 @@ class Thread(_ThreadOptional):
     message_count: int
     rate_limit_per_user: int
     thread_metadata: ThreadMetadata
+
+
+class ForumThread(Thread):
+    message: Message
 
 
 class ThreadPaginationPayload(TypedDict):

@@ -76,13 +76,10 @@ class StickerPack(TypedDict):
     banner_asset_id: Snowflake
 
 
-class _CreateGuildStickerOptional(TypedDict, total=False):
-    description: str
-
-
-class CreateGuildSticker(_CreateGuildStickerOptional):
+class CreateGuildSticker(TypedDict):
     name: str
     tags: str
+    description: str
 
 
 class EditGuildSticker(TypedDict, total=False):

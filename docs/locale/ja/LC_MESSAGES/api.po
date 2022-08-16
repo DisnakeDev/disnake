@@ -4261,7 +4261,7 @@ msgstr "ユーザーがBANされたギルド。"
 #: ../../api.rst:748
 msgid ""
 "The user that got banned. Can be either :class:`User` or :class:`Member` "
-"depending if the user was in the guild or not at the time of removal."
+"depending on whether the user was in the guild at the time of removal."
 msgstr "BANされたユーザー。BAN時にユーザーがギルドにいたかによって、 :class:`User` か :class:`Member` になります。"
 
 #: ../../api.rst:755
@@ -19683,4 +19683,3 @@ msgstr ":class:`~disnake.User`"
 
 #~ msgid ":class:`int` -- The error code returned."
 #~ msgstr ""
-

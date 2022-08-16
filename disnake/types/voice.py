@@ -48,7 +48,7 @@ class _VoiceState(_PartialVoiceStateOptional):
 
 
 class GuildVoiceState(_VoiceState):
-    channel_id: Snowflake
+    channel_id: Optional[Snowflake]
 
 
 class VoiceState(_VoiceState, total=False):
@@ -59,16 +59,9 @@ class VoiceState(_VoiceState, total=False):
 class VoiceRegion(TypedDict):
     id: str
     name: str
-    vip: bool
     optimal: bool
     deprecated: bool
     custom: bool
-
-
-class VoiceServerUpdate(TypedDict):
-    token: str
-    guild_id: Snowflake
-    endpoint: Optional[str]
 
 
 class VoiceIdentify(TypedDict):

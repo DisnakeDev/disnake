@@ -34,7 +34,6 @@ from functools import partial
 from itertools import groupby
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
     ClassVar,
     Dict,
@@ -48,11 +47,12 @@ from typing import (
 from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
-    Component,
+    MessageComponent,
+    NestedComponent,
     SelectMenu as SelectComponent,
     _component_factory,
 )
-from ..enums import try_enum_to_int
+from ..enums import ComponentType, try_enum_to_int
 from .item import Item
 
 __all__ = ("View",)
@@ -62,19 +62,18 @@ if TYPE_CHECKING:
     from ..interactions import MessageInteraction
     from ..message import Message
     from ..state import ConnectionState
-    from ..types.components import Component as ComponentPayload
+    from ..types.components import ActionRow as ActionRowPayload, Component as ComponentPayload
     from .item import ItemCallbackType
 
 
-def _walk_all_components(components: List[Component]) -> Iterator[Component]:
+def _walk_all_components(
+    components: List[ActionRowComponent[MessageComponent]],
+) -> Iterator[NestedComponent]:
     for item in components:
-        if isinstance(item, ActionRowComponent):
-            yield from item.children
-        else:
-            yield item
+        yield from item.children
 
 
-def _component_to_item(component: Component) -> Item:
+def _component_to_item(component: NestedComponent) -> Item:
     if isinstance(component, ButtonComponent):
         from .button import Button
 
@@ -92,9 +91,9 @@ class _ViewWeights:
     def __init__(self, children: List[Item]):
         self.weights: List[int] = [0, 0, 0, 0, 0]
 
-        key = lambda i: sys.maxsize if i.row is None else i.row
+        key: Callable[[Item[View]], int] = lambda i: sys.maxsize if i.row is None else i.row
         children = sorted(children, key=key)
-        for row, group in groupby(children, key=key):
+        for _, group in groupby(children, key=key):
             for item in group:
                 self.add_item(item)
 
@@ -131,16 +130,20 @@ class View:
 
     This object must be inherited to create a UI within Discord.
 
+    Alternatively, components can be handled with :class:`disnake.ui.ActionRow`\\s and event
+    listeners for a more low-level approach. Relevant events are :func:`disnake.on_button_click`,
+    :func:`disnake.on_dropdown`, and the more generic :func:`disnake.on_message_interaction`.
+
     .. versionadded:: 2.0
 
     Parameters
-    -----------
+    ----------
     timeout: Optional[:class:`float`]
         Timeout in seconds from last interaction with the UI before no longer accepting input.
         If ``None`` then there is no timeout.
 
     Attributes
-    ------------
+    ----------
     timeout: Optional[:class:`float`]
         Timeout from last interaction with the UI before no longer accepting input.
         If ``None`` then there is no timeout.
@@ -149,10 +152,10 @@ class View:
     """
 
     __discord_ui_view__: ClassVar[bool] = True
-    __view_children_items__: ClassVar[List[ItemCallbackType]] = []
+    __view_children_items__: ClassVar[List[ItemCallbackType[Item]]] = []
 
     def __init_subclass__(cls) -> None:
-        children: List[ItemCallbackType] = []
+        children: List[ItemCallbackType[Item]] = []
         for base in reversed(cls.__mro__):
             for member in base.__dict__.values():
                 if hasattr(member, "__discord_ui_model_type__"):
@@ -201,12 +204,12 @@ class View:
             # Wait N seconds to see if timeout data has been refreshed
             await asyncio.sleep(self.__timeout_expiry - now)
 
-    def to_components(self) -> List[Dict[str, Any]]:
+    def to_components(self) -> List[ActionRowPayload]:
         def key(item: Item) -> int:
             return item._rendered_row or 0
 
         children = sorted(self.children, key=key)
-        components: List[Dict[str, Any]] = []
+        components: List[ActionRowPayload] = []
         for _, group in groupby(children, key=key):
             children = [item.to_component_dict() for item in group]
             if not children:
@@ -231,14 +234,14 @@ class View:
         converted into a :class:`View` first.
 
         Parameters
-        -----------
+        ----------
         message: :class:`disnake.Message`
             The message with components to convert into a view.
         timeout: Optional[:class:`float`]
             The timeout of the converted view.
 
         Returns
-        --------
+        -------
         :class:`View`
             The converted view. This always returns a :class:`View` and not
             one of its subclasses.
@@ -258,19 +261,18 @@ class View:
         """Adds an item to the view.
 
         Parameters
-        -----------
+        ----------
         item: :class:`Item`
             The item to add to the view.
 
         Raises
-        --------
+        ------
         TypeError
             An :class:`Item` was not passed.
         ValueError
             Maximum number of children has been exceeded (25)
             or the row the item is trying to be added to is full.
         """
-
         if len(self.children) > 25:
             raise ValueError("maximum number of children exceeded")
 
@@ -286,11 +288,10 @@ class View:
         """Removes an item from the view.
 
         Parameters
-        -----------
+        ----------
         item: :class:`Item`
             The item to remove from the view.
         """
-
         try:
             self.children.remove(item)
         except ValueError:
@@ -320,12 +321,12 @@ class View:
             is considered a failure and :meth:`on_error` is called.
 
         Parameters
-        -----------
-        interaction: :class:`~disnake.MessageInteraction`
+        ----------
+        interaction: :class:`.MessageInteraction`
             The interaction that occurred.
 
         Returns
-        ---------
+        -------
         :class:`bool`
             Whether the view children's callbacks should be called.
         """
@@ -347,12 +348,12 @@ class View:
         The default implementation prints the traceback to stderr.
 
         Parameters
-        -----------
+        ----------
         error: :class:`Exception`
             The exception that was raised.
         item: :class:`Item`
             The item that failed the dispatch.
-        interaction: :class:`~disnake.MessageInteraction`
+        interaction: :class:`.MessageInteraction`
             The interaction that led to the failure.
         """
         print(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)
@@ -396,24 +397,35 @@ class View:
             self._scheduled_task(item, interaction), name=f"disnake-ui-view-dispatch-{self.id}"
         )
 
-    def refresh(self, components: List[Component]):
-        # This is pretty hacky at the moment
-        # fmt: off
+    def refresh(self, components: List[ActionRowComponent[MessageComponent]]):
+        # TODO: this is pretty hacky at the moment
         old_state: Dict[Tuple[int, str], Item] = {
             (item.type.value, item.custom_id): item  # type: ignore
             for item in self.children
             if item.is_dispatchable()
         }
-        # fmt: on
         children: List[Item] = []
         for component in _walk_all_components(components):
+            older: Optional[Item] = None
             try:
                 older = old_state[(component.type.value, component.custom_id)]  # type: ignore
             except (KeyError, AttributeError):
-                children.append(_component_to_item(component))
-            else:
+                # workaround for url buttons, since they're not part of `old_state`
+                if isinstance(component, ButtonComponent):
+                    for child in self.children:
+                        if (
+                            child.type is ComponentType.button
+                            and child.label == component.label  # type: ignore
+                            and child.url == component.url  # type: ignore
+                        ):
+                            older = child
+                            break
+
+            if older:
                 older.refresh_component(component)
                 children.append(older)
+            else:
+                children.append(_component_to_item(component))
 
         self.children = children
 
@@ -465,7 +477,7 @@ class View:
         or it times out.
 
         Returns
-        --------
+        -------
         :class:`bool`
             If ``True``, then the view timed out. If ``False`` then
             the view finished normally.
@@ -483,13 +495,7 @@ class ViewStore:
 
     @property
     def persistent_views(self) -> Sequence[View]:
-        # fmt: off
-        views = {
-            view.id: view
-            for (_, (view, _)) in self._views.items()
-            if view.is_persistent()
-        }
-        # fmt: on
+        views = {view.id: view for view, _ in self._views.values() if view.is_persistent()}
         return list(views.values())
 
     def __verify_integrity(self):
@@ -547,4 +553,6 @@ class ViewStore:
     def update_from_message(self, message_id: int, components: List[ComponentPayload]):
         # pre-req: is_message_tracked == true
         view = self._synced_message_views[message_id]
-        view.refresh([_component_factory(d) for d in components])
+        view.refresh(
+            [_component_factory(d, type=ActionRowComponent[MessageComponent]) for d in components]
+        )

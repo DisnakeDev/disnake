@@ -22,16 +22,25 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 
-from ..channel import _threaded_channel_factory
-from ..enums import ApplicationCommandType, OptionType, try_enum
+from .. import utils
+from ..channel import (
+    CategoryChannel,
+    ForumChannel,
+    PartialMessageable,
+    StageChannel,
+    TextChannel,
+    VoiceChannel,
+    _threaded_guild_channel_factory,
+)
+from ..enums import ApplicationCommandType, ChannelType, Locale, OptionType, try_enum
 from ..guild import Guild
 from ..member import Member
-from ..message import Message
+from ..message import Attachment, Message
+from ..object import Object
 from ..role import Role
 from ..user import User
-from ..utils import MISSING
 from .base import Interaction
 
 __all__ = (
@@ -52,39 +61,29 @@ __all__ = (
     "AppCmdInter",
 )
 
+MISSING = utils.MISSING
+
 if TYPE_CHECKING:
-    from ..channel import (
-        CategoryChannel,
-        PartialMessageable,
-        StageChannel,
-        StoreChannel,
-        TextChannel,
-        VoiceChannel,
-    )
-    from ..ext.commands import AutoShardedBot, Bot, InvokableApplicationCommand
+    from ..abc import MessageableChannel
+    from ..ext.commands import InvokableApplicationCommand
     from ..state import ConnectionState
     from ..threads import Thread
     from ..types.interactions import (
+        ApplicationCommandInteraction as ApplicationCommandInteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
         ApplicationCommandInteractionDataResolved as ApplicationCommandInteractionDataResolvedPayload,
-        Interaction as InteractionPayload,
     )
-
-    BotBase = Union[Bot, AutoShardedBot]
 
     InteractionChannel = Union[
         VoiceChannel,
         StageChannel,
         TextChannel,
         CategoryChannel,
-        StoreChannel,
         Thread,
         PartialMessageable,
         VoiceChannel,
+        ForumChannel,
     ]
-
-
-AppCmdDataOptionT = TypeVar("AppCmdDataOptionT", bound="ApplicationCommandInteractionDataOption")
 
 
 class ApplicationCommandInteraction(Interaction):
@@ -95,56 +94,53 @@ class ApplicationCommandInteraction(Interaction):
     .. versionadded:: 2.1
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The interaction's ID.
     type: :class:`InteractionType`
-        The interaction type.
-    guild_id: Optional[:class:`int`]
-        The guild ID the interaction was sent from.
-    channel_id: Optional[:class:`int`]
-        The channel ID the interaction was sent from.
+        The interaction's type.
     application_id: :class:`int`
         The application ID that the interaction was for.
-    bot: Optional[:class:`.Bot`]
-        The interaction's bot. There is an alias for this named ``client``.
-    author: Optional[Union[:class:`User`, :class:`Member`]]
+    guild_id: Optional[:class:`int`]
+        The guild ID the interaction was sent from.
+    channel_id: :class:`int`
+        The channel ID the interaction was sent from.
+    author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
-    locale: :class:`str`
+    locale: :class:`Locale`
         The selected language of the interaction's author.
 
         .. versionadded:: 2.4
-    guild: Optional[:class:`Guild`]
-        The guild the interaction was sent from.
-    guild_locale: Optional[:class:`str`]
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
+    guild_locale: Optional[:class:`Locale`]
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
         If the interaction was in a DM, then this value is ``None``.
 
         .. versionadded:: 2.4
-    channel: Optional[Union[:class:`abc.GuildChannel`, :class:`PartialMessageable`, :class:`Thread`]]
-        The channel the interaction was sent from.
-    me: Union[:class:`.Member`, :class:`.ClientUser`]
-        Similar to :attr:`.Guild.me`
-    permissions: :class:`Permissions`
-        The resolved permissions of the member in the channel, including overwrites.
-    response: :class:`InteractionResponse`
-        Returns an object responsible for handling responding to the interaction.
-    followup: :class:`Webhook`
-        Returns the follow up webhook for follow up interactions.
+
+        .. versionchanged:: 2.5
+            Changed to :class:`Locale` instead of :class:`str`.
+
     token: :class:`str`
-        The token to continue the interaction. These are valid
-        for 15 minutes.
+        The token to continue the interaction. These are valid for 15 minutes.
     data: :class:`ApplicationCommandInteractionData`
         The wrapped interaction data.
+    client: :class:`Client`
+        The interaction client.
+    application_command: :class:`.InvokableApplicationCommand`
+        The command invoked by the interaction.
+    command_failed: :class:`bool`
+        Whether the command failed to be checked or invoked.
     """
 
-    bot: BotBase
-
-    def __init__(self, *, data: InteractionPayload, state: ConnectionState):
+    def __init__(self, *, data: ApplicationCommandInteractionPayload, state: ConnectionState):
         super().__init__(data=data, state=state)
         self.data = ApplicationCommandInteractionData(
-            data=data["data"], state=state, guild=self.guild  # type: ignore
+            data=data["data"], state=state, guild_id=self.guild_id
         )
         self.application_command: InvokableApplicationCommand = MISSING
         self.command_failed: bool = False
@@ -167,20 +163,25 @@ class ApplicationCommandInteraction(Interaction):
 
 
 class GuildCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation
+    """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
+    This prevents the command from being invoked in DMs by automatically setting
+    :attr:`ApplicationCommand.dm_permission` to ``False`` for user/message commands and top-level slash commands.
 
-    No runtime behavior is changed but annotations are modified
-    to seem like the interaction can only ever be invoked in guilds.
+    Note that this does not apply to slash subcommands, subcommand groups, or autocomplete callbacks.
+
+    Additionally, annotations of some attributes are modified to match the expected types in guilds.
     """
 
+    author: Member
     guild: Guild
+    guild_id: int
+    guild_locale: Locale
     me: Member
-    guild_locale: str
 
 
 class UserCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation
+    """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a user command.
@@ -190,7 +191,7 @@ class UserCommandInteraction(ApplicationCommandInteraction):
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction):
-    """An ApplicationCommandInteraction Context subclass meant for annotation
+    """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
 
     No runtime behavior is changed but annotations are modified
     to seem like the interaction is specifically a message command.
@@ -199,7 +200,7 @@ class MessageCommandInteraction(ApplicationCommandInteraction):
     target: Message
 
 
-class ApplicationCommandInteractionData:
+class ApplicationCommandInteractionData(Dict[str, Any]):
     """Represents the data of an interaction with an application command.
 
     .. versionadded:: 2.1
@@ -237,21 +238,27 @@ class ApplicationCommandInteractionData:
         *,
         data: ApplicationCommandInteractionDataPayload,
         state: ConnectionState,
-        guild: Optional[Guild],
+        guild_id: Optional[int],
     ):
+        super().__init__(data)
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data.get("type"))
+        self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
         self.resolved = ApplicationCommandInteractionDataResolved(
-            data=data.get("resolved", {}), state=state, guild=guild
+            data=data.get("resolved", {}), state=state, guild_id=guild_id
         )
-        target_id = data.get("target_id")
-        self.target_id: Optional[int] = None if target_id is None else int(target_id)
+        self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
         self.target: Optional[Union[User, Member, Message]] = self.resolved.get(self.target_id)  # type: ignore
         self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
             for d in data.get("options", [])
         ]
+
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionData id={self.id!r} name={self.name!r} type={self.type!r} "
+            f"target_id={self.target_id!r} target={self.target!r} resolved={self.resolved!r} options={self.options!r}>"
+        )
 
     def _get_chain_and_kwargs(
         self, chain: Tuple[str, ...] = None
@@ -287,23 +294,22 @@ class ApplicationCommandInteractionData:
         return self._get_focused_option()  # type: ignore
 
 
-class ApplicationCommandInteractionDataOption:
-    """
-    This class represents the structure of an interaction data option from the API.
+class ApplicationCommandInteractionDataOption(Dict[str, Any]):
+    """This class represents the structure of an interaction data option from the API.
 
     Attributes
     ----------
     name: :class:`str`
-        The name of the option.
+        The option's name.
     type: :class:`OptionType`
-        The type of the option.
+        The option's type.
     value: :class:`Any`
-        The value of the option.
+        The option's value.
     options: List[:class:`ApplicationCommandInteractionDataOption`]
         The list of options of this option. Only exists for subcommands and groups.
     focused: :class:`bool`
         Whether this option is focused by the user. May be ``True`` in
-        case of :class:`ApplicationCommandAutocompleteInteraction`.
+        autocomplete interactions.
     """
 
     __slots__ = ("name", "type", "value", "options", "focused")
@@ -311,6 +317,7 @@ class ApplicationCommandInteractionDataOption:
     def __init__(
         self, *, data: Mapping[str, Any], resolved: ApplicationCommandInteractionDataResolved
     ):
+        super().__init__(data)
         self.name: str = data["name"]
         self.type: OptionType = try_enum(OptionType, data["type"])
         value = data.get("value")
@@ -323,6 +330,12 @@ class ApplicationCommandInteractionDataOption:
             for d in data.get("options", [])
         ]
         self.focused: bool = data.get("focused", False)
+
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionDataOption name={self.name!r} type={self.type!r}>"
+            f"value={self.value!r} focused={self.focused!r} options={self.options!r}>"
+        )
 
     def _simplified_value(self) -> Any:
         if self.value is not None:
@@ -350,49 +363,63 @@ class ApplicationCommandInteractionDataOption:
         return chain, {}
 
 
-class ApplicationCommandInteractionDataResolved:
-    """Represents the resolved data related to
-    an interaction with an application command.
+class ApplicationCommandInteractionDataResolved(Dict[str, Any]):
+    """Represents the resolved data related to an interaction with an application command.
 
     .. versionadded:: 2.1
 
     Attributes
     ----------
     members: Dict[:class:`int`, :class:`Member`]
-        IDs and partial members (missing ``deaf`` and ``mute``)
+        A mapping of IDs to partial members (``deaf`` and ``mute`` attributes are missing).
     users: Dict[:class:`int`, :class:`User`]
-        IDs and users
+        A mapping of IDs to users.
     roles: Dict[:class:`int`, :class:`Role`]
-        IDs and roles
-    channels: Dict[:class:`int`, :class:`Channel`]
-        IDs and partial channels (only ``id``, ``name`` and ``permissions`` are included,
+        A mapping of IDs to roles.
+    channels: Dict[:class:`int`, Channel]
+        A mapping of IDs to partial channels (only ``id``, ``name`` and ``permissions`` are included,
         threads also have ``thread_metadata`` and ``parent_id``).
     messages: Dict[:class:`int`, :class:`Message`]
-        IDs and messages
+        A mapping of IDs to messages.
+    attachments: Dict[:class:`int`, :class:`Attachment`]
+        A mapping of IDs to attachments.
+
+        .. versionadded:: 2.4
     """
 
-    __slots__ = ("members", "users", "roles", "channels", "messages")
+    __slots__ = ("members", "users", "roles", "channels", "messages", "attachments")
 
     def __init__(
         self,
         *,
         data: ApplicationCommandInteractionDataResolvedPayload,
         state: ConnectionState,
-        guild: Optional[Guild],
+        guild_id: Optional[int],
     ):
         data = data or {}
+        super().__init__(data)
 
         self.members: Dict[int, Member] = {}
         self.users: Dict[int, User] = {}
         self.roles: Dict[int, Role] = {}
         self.channels: Dict[int, InteractionChannel] = {}
         self.messages: Dict[int, Message] = {}
+        self.attachments: Dict[int, Attachment] = {}
 
         users = data.get("users", {})
         members = data.get("members", {})
         roles = data.get("roles", {})
         channels = data.get("channels", {})
         messages = data.get("messages", {})
+        attachments = data.get("attachments", {})
+
+        guild: Optional[Guild] = None
+        # `guild_fallback` is only used in guild contexts, so this `MISSING` value should never be used.
+        # We need to define it anyway to satisfy the typechecker.
+        guild_fallback: Union[Guild, Object] = MISSING
+        if guild_id is not None:
+            guild = state._get_guild(guild_id)
+            guild_fallback = guild or Object(id=guild_id)
 
         for str_id, user in users.items():
             user_id = int(str_id)
@@ -402,8 +429,9 @@ class ApplicationCommandInteractionDataResolved:
                     guild
                     and guild.get_member(user_id)
                     or Member(
-                        data={**member, "user": user},  # type: ignore
-                        guild=guild,  # type: ignore
+                        data=member,
+                        user_data=user,
+                        guild=guild_fallback,  # type: ignore
                         state=state,
                     )
                 )
@@ -411,24 +439,51 @@ class ApplicationCommandInteractionDataResolved:
                 self.users[user_id] = User(state=state, data=user)
 
         for str_id, role in roles.items():
-            self.roles[int(str_id)] = Role(guild=guild, state=state, data=role)  # type: ignore
+            self.roles[int(str_id)] = Role(
+                guild=guild_fallback,  # type: ignore
+                state=state,
+                data=role,
+            )
 
         for str_id, channel in channels.items():
-            factory, ch_type = _threaded_channel_factory(channel["type"])
+            channel_id = int(str_id)
+            factory, _ = _threaded_guild_channel_factory(channel["type"])
             if factory:
                 channel["position"] = 0  # type: ignore
-                self.channels[int(str_id)] = (  # type: ignore
+                self.channels[channel_id] = (
                     guild
-                    and guild.get_channel(int(str_id))
-                    or factory(guild=guild, state=state, data=channel)  # type: ignore
+                    and guild.get_channel(channel_id)
+                    or factory(
+                        guild=guild_fallback,  # type: ignore
+                        state=state,
+                        data=channel,  # type: ignore
+                    )
+                )
+            else:
+                self.channels[channel_id] = PartialMessageable(
+                    state=state, id=channel_id, type=try_enum(ChannelType, channel["type"])
                 )
 
         for str_id, message in messages.items():
             channel_id = int(message["channel_id"])
-            channel = guild.get_channel(channel_id) if guild else None
+            channel = cast(
+                "Optional[MessageableChannel]",
+                (guild and guild.get_channel(channel_id) or state.get_channel(channel_id)),
+            )
             if channel is None:
-                channel = state.get_channel(channel_id)
-            self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)  # type: ignore
+                # The channel is not part of `resolved.channels`,
+                # so we need to fall back to partials here.
+                channel = PartialMessageable(state=state, id=channel_id, type=None)
+            self.messages[int(str_id)] = Message(state=state, channel=channel, data=message)
+
+        for str_id, attachment in attachments.items():
+            self.attachments[int(str_id)] = Attachment(data=attachment, state=state)
+
+    def __repr__(self):
+        return (
+            f"<ApplicationCommandInteractionDataResolved members={self.members!r} users={self.users!r} "
+            f"roles={self.roles!r} channels={self.channels!r} messages={self.messages!r} attachments={self.attachments!r}>"
+        )
 
     def get_with_type(self, key: Any, option_type: OptionType, default: Any = None):
         if isinstance(option_type, int):
@@ -456,11 +511,15 @@ class ApplicationCommandInteractionDataResolved:
         if option_type is OptionType.role:
             return self.roles.get(int(key), default)
 
+        if option_type is OptionType.attachment:
+            return self.attachments.get(int(key), default)
+
         return default
 
     def get(self, key: int):
         if key is None:
             return None
+
         res = self.members.get(key)
         if res is not None:
             return res
@@ -473,7 +532,14 @@ class ApplicationCommandInteractionDataResolved:
         res = self.channels.get(key)
         if res is not None:
             return res
-        return self.messages.get(key)
+        res = self.messages.get(key)
+        if res is not None:
+            return res
+        res = self.attachments.get(key)
+        if res is not None:
+            return res
+
+        return None
 
 
 # People asked about shorter aliases, let's see which one catches on the most

@@ -25,26 +25,20 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Dict,
-    Iterator,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-)
+from functools import wraps
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, Iterator, Optional, Set, Tuple
 
-from .flags import BaseFlags, alias_flag_value, fill_with_flags, flag_value
+from .flags import BaseFlags, alias_flag_value, flag_value
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 
 __all__ = (
     "Permissions",
     "PermissionOverwrite",
 )
+
 
 # A permission alias works like a regular flag but is marked
 # So the PermissionOverwrite knows to work with it
@@ -61,10 +55,19 @@ def make_permission_alias(alias: str) -> Callable[[Callable[[Any], int]], permis
     return decorator
 
 
-P = TypeVar("P", bound="Permissions")
+def cached_creation(func):
+    @wraps(func)
+    def wrapped(cls):
+        try:
+            value = func.__stored_value__
+        except AttributeError:
+            value = func(cls).value
+            func.__stored_value__ = value
+        return cls(value)
+
+    return wrapped
 
 
-@fill_with_flags()
 class Permissions(BaseFlags):
     """Wraps up the Discord permission value.
 
@@ -92,10 +95,33 @@ class Permissions(BaseFlags):
             Checks if a permission is a superset of another permission.
         .. describe:: x < y
 
-             Checks if a permission is a strict subset of another permission.
+            Checks if a permission is a strict subset of another permission.
         .. describe:: x > y
 
-             Checks if a permission is a strict superset of another permission.
+            Checks if a permission is a strict superset of another permission.
+        .. describe:: x | y, x |= y
+
+            Returns a new Permissions instance with all enabled permissions from both x and y.
+            (Using ``|=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x & y, x &= y
+
+            Returns a new Permissions instance with only permissions enabled on both x and y.
+            (Using ``&=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new Permissions instance with only permissions enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+
+            .. versionadded:: 2.6
+        .. describe:: ~x
+
+            Returns a new Permissions instance with all permissions from x inverted.
+
+            .. versionadded:: 2.6
         .. describe:: hash(x)
 
                Return the permission's hash.
@@ -105,8 +131,22 @@ class Permissions(BaseFlags):
                to be, for example, constructed as a dict or a list of pairs.
                Note that aliases are not shown.
 
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: Permissions.y | Permissions.z, Permissions(y=True) | Permissions.z
+
+            Returns a Permissions instance with all provided permissions enabled.
+
+            .. versionadded:: 2.6
+        .. describe:: ~Permissions.y
+
+            Returns a Permissions instance with all permissions except ``y`` inverted from their default value.
+
+            .. versionadded:: 2.6
+
     Attributes
-    -----------
+    ----------
     value: :class:`int`
         The raw value. This value is a bit array field of a 53-bit integer
         representing the currently available permissions. You should query
@@ -146,33 +186,37 @@ class Permissions(BaseFlags):
             )
 
     def is_strict_subset(self, other: Permissions) -> bool:
-        """Returns ``True`` if the permissions on other are a strict subset of those on self."""
+        """Returns ``True`` if the permissions on self are a strict subset of those on other."""
         return self.is_subset(other) and self != other
 
     def is_strict_superset(self, other: Permissions) -> bool:
-        """Returns ``True`` if the permissions on other are a strict superset of those on self."""
+        """Returns ``True`` if the permissions on self are a strict superset of those on other."""
         return self.is_superset(other) and self != other
 
-    __le__ = is_subset
-    __ge__ = is_superset
-    __lt__ = is_strict_subset
-    __gt__ = is_strict_superset
+    # the parent uses `Self` for the `other` typehint but we use `Permissions` here for backwards compat.
+    __le__ = is_subset  # type: ignore
+    __ge__ = is_superset  # type: ignore
+    __lt__ = is_strict_subset  # type: ignore
+    __gt__ = is_strict_superset  # type: ignore
 
     @classmethod
-    def none(cls: Type[P]) -> P:
+    @cached_creation
+    def none(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``False``."""
         return cls(0)
 
     @classmethod
-    def all(cls: Type[P]) -> P:
+    @cached_creation
+    def all(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
-        return cls(0b11111111111111111111111111111111111111111)
+        return cls(**dict.fromkeys(cls.VALID_FLAGS.keys(), True))
 
     @classmethod
-    def all_channel(cls: Type[P]) -> P:
+    @cached_creation
+    def all_channel(cls) -> Self:
         """A :class:`Permissions` with all channel-specific permissions set to
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
         permissions are currently:
@@ -198,10 +242,25 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`start_embedded_activities` permission.
         """
-        return cls(0b1111110110110011111101111111111101010001)
+        guild_specific_perms = {
+            "administrator",
+            "ban_members",
+            "change_nickname",
+            "kick_members",
+            "manage_emojis",
+            "manage_guild",
+            "manage_nicknames",
+            "moderate_members",
+            "view_audit_log",
+            "view_guild_insights",
+        }
+        instance = cls.all()
+        instance.update(**dict.fromkeys(guild_specific_perms, False))
+        return instance
 
     @classmethod
-    def general(cls: Type[P]) -> P:
+    @cached_creation
+    def general(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "General" permissions from the official Discord UI set to ``True``.
 
@@ -211,10 +270,20 @@ class Permissions(BaseFlags):
            :attr:`ban_members`, :attr:`change_nickname` and :attr:`manage_nicknames` are
            no longer part of the general permissions.
         """
-        return cls(0b01110000000010000000010010110000)
+        return cls(
+            view_channel=True,
+            manage_channels=True,
+            manage_roles=True,
+            manage_emojis_and_stickers=True,
+            view_audit_log=True,
+            view_guild_insights=True,
+            manage_webhooks=True,
+            manage_guild=True,
+        )
 
     @classmethod
-    def membership(cls: Type[P]) -> P:
+    @cached_creation
+    def membership(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Membership" permissions from the official Discord UI set to ``True``.
 
@@ -223,10 +292,18 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.3
             Added :attr:`moderate_members` permission.
         """
-        return cls(0b10000000000001100000000000000000000000111)
+        return cls(
+            create_instant_invite=True,
+            change_nickname=True,
+            manage_nicknames=True,
+            kick_members=True,
+            ban_members=True,
+            moderate_members=True,
+        )
 
     @classmethod
-    def text(cls: Type[P]) -> P:
+    @cached_creation
+    def text(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Text" permissions from the official Discord UI set to ``True``.
 
@@ -238,55 +315,135 @@ class Permissions(BaseFlags):
            Added :attr:`create_public_threads`, :attr:`create_private_threads`, :attr:`manage_threads`,
            :attr:`send_messages_in_threads` and :attr:`use_external_stickers` permissions.
         """
-        return cls(0b111110010000000000001111111100001000000)
+        return cls(
+            send_messages=True,
+            send_messages_in_threads=True,
+            create_public_threads=True,
+            create_private_threads=True,
+            embed_links=True,
+            attach_files=True,
+            add_reactions=True,
+            use_external_emojis=True,
+            use_external_stickers=True,
+            mention_everyone=True,
+            manage_messages=True,
+            manage_threads=True,
+            read_message_history=True,
+            send_tts_messages=True,
+            use_slash_commands=True,
+        )
 
     @classmethod
-    def voice(cls: Type[P]) -> P:
+    @cached_creation
+    def voice(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Voice" permissions from the official Discord UI set to ``True``.
 
         .. versionchanged:: 2.3
             Added :attr:`start_embedded_activities` permission.
         """
-        return cls(0b1000000000000011111100000000001100000000)
+        return cls(
+            connect=True,
+            speak=True,
+            stream=True,
+            start_embedded_activities=True,
+            use_voice_activation=True,
+            priority_speaker=True,
+            mute_members=True,
+            deafen_members=True,
+            move_members=True,
+        )
 
     @classmethod
-    def stage(cls: Type[P]) -> P:
+    @cached_creation
+    def stage(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Channel" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        return cls(1 << 32)
+        return cls(
+            request_to_speak=True,
+        )
 
     @classmethod
-    def stage_moderator(cls: Type[P]) -> P:
+    @cached_creation
+    def stage_moderator(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Stage Moderator" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        return cls(0b100000001010000000000000000000000)
+        return cls(
+            manage_channels=True,
+            mute_members=True,
+            move_members=True,
+        )
 
     @classmethod
-    def advanced(cls: Type[P]) -> P:
+    @cached_creation
+    def events(cls) -> Self:
+        """A factory method that creates a :class:`Permissions` with all
+        "Events" permissions from the official Discord UI set to ``True``.
+
+        .. versionadded:: 2.4
+        """
+        return cls(
+            manage_events=True,
+        )
+
+    @classmethod
+    @cached_creation
+    def advanced(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         "Advanced" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
         """
-        return cls(1 << 3)
+        return cls(
+            administrator=True,
+        )
+
+    @classmethod
+    @cached_creation
+    def private_channel(cls) -> Self:
+        """A factory method that creates a :class:`Permissions` with the
+        best representation of a PrivateChannel's permissions.
+
+        This exists to maintain compatibility with other channel types.
+
+        This is equivalent to :meth:`Permissions.text` with :attr:`~Permissions.view_channel` with the following set to False:
+
+        - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
+        - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        - :attr:`~Permissions.manage_threads`: You cannot manage threads in a DM.
+        - :attr:`~Permissions.send_messages_in_threads`: You cannot make threads in a DM.
+        - :attr:`~Permissions.create_public_threads`: You cannot make public threads in a DM.
+        - :attr:`~Permissions.create_private_threads`: You cannot make private threads in a DM.
+
+        .. versionadded:: 2.4
+        """
+        base = cls.text()
+        base.read_messages = True
+        base.send_tts_messages = False
+        base.manage_messages = False
+        base.manage_threads = False
+        base.send_messages_in_threads = False
+        base.create_public_threads = False
+        base.create_private_threads = False
+        return base
 
     def update(self, **kwargs: bool) -> None:
-        r"""Bulk updates this permission object.
+        """
+        Bulk updates this permission object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties
         listed. Extraneous key/value pairs will be silently ignored.
 
         Parameters
-        ------------
-        \*\*kwargs
+        ----------
+        **kwargs
             A list of key/value pairs to bulk update permissions with.
         """
         for key, value in kwargs.items():
@@ -364,21 +521,33 @@ class Permissions(BaseFlags):
         return 1 << 9
 
     @flag_value
-    def read_messages(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can read messages from all or specific text channels."""
-        return 1 << 10
-
-    @make_permission_alias("read_messages")
     def view_channel(self) -> int:
-        """:class:`bool`: An alias for :attr:`read_messages`.
+        """:class:`bool`: Returns ``True`` if a user can view all or specific channels.
 
         .. versionadded:: 1.3
+
+        .. versionchanged:: 2.4
+            :attr:`~Permissions.read_messages` is now an alias of :attr:`~Permissions.view_channel`.
         """
+        return 1 << 10
+
+    @make_permission_alias("view_channel")
+    def read_messages(self) -> int:
+        """:class:`bool`: An alias for :attr:`view_channel`."""
         return 1 << 10
 
     @flag_value
     def send_messages(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels."""
+        """:class:`bool`: Returns ``True`` if a user can send messages from all or specific text channels
+        and create threads in forum channels."""
+        return 1 << 11
+
+    @make_permission_alias("send_messages")
+    def create_forum_threads(self) -> int:
+        """:class:`bool`: An alias for :attr:`send_messages`.
+
+        .. versionadded:: 2.5
+        """
         return 1 << 11
 
     @flag_value
@@ -601,9 +770,6 @@ class Permissions(BaseFlags):
         return 1 << 40
 
 
-PO = TypeVar("PO", bound="PermissionOverwrite")
-
-
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
     aliases = set()
@@ -634,9 +800,10 @@ def _augment_from_permissions(cls):
 
 @_augment_from_permissions
 class PermissionOverwrite:
-    r"""A type that is used to represent a channel specific permission.
+    """
+    A type that is used to represent a channel specific permission.
 
-    Unlike a regular :class:`Permissions`\, the default value of a
+    Unlike a regular :class:`Permissions`\\, the default value of a
     permission is equivalent to ``None`` and not ``False``. Setting
     a value to ``False`` is **explicitly** denying that permission,
     while setting a value to ``True`` is **explicitly** allowing
@@ -660,8 +827,8 @@ class PermissionOverwrite:
            Note that aliases are not shown.
 
     Parameters
-    -----------
-    \*\*kwargs
+    ----------
+    **kwargs
         Set the value of permissions by their name.
     """
 
@@ -684,6 +851,7 @@ class PermissionOverwrite:
         read_messages: Optional[bool]
         view_channel: Optional[bool]
         send_messages: Optional[bool]
+        create_forum_threads: Optional[bool]
         send_tts_messages: Optional[bool]
         manage_messages: Optional[bool]
         embed_links: Optional[bool]
@@ -723,7 +891,7 @@ class PermissionOverwrite:
 
         for key, value in kwargs.items():
             if key not in self.VALID_NAMES:
-                raise ValueError(f"no permission called {key}.")
+                raise ValueError(f"{key!r} is not a valid permission name.")
 
             setattr(self, key, value)
 
@@ -754,7 +922,7 @@ class PermissionOverwrite:
         return allow, deny
 
     @classmethod
-    def from_pair(cls: Type[PO], allow: Permissions, deny: Permissions) -> PO:
+    def from_pair(cls, allow: Permissions, deny: Permissions) -> Self:
         """Creates an overwrite from an allow/deny pair of :class:`Permissions`."""
         ret = cls()
         for key, value in allow:
@@ -780,16 +948,17 @@ class PermissionOverwrite:
         """
         return len(self._values) == 0
 
-    def update(self, **kwargs: bool) -> None:
-        r"""Bulk updates this permission overwrite object.
+    def update(self, **kwargs: Optional[bool]) -> None:
+        """
+        Bulk updates this permission overwrite object.
 
         Allows you to set multiple attributes by using keyword
         arguments. The names must be equivalent to the properties
         listed. Extraneous key/value pairs will be silently ignored.
 
         Parameters
-        ------------
-        \*\*kwargs
+        ----------
+        **kwargs
             A list of key/value pairs to bulk update with.
         """
         for key, value in kwargs.items():

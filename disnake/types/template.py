@@ -34,7 +34,7 @@ from .user import User
 
 class CreateTemplate(TypedDict):
     name: str
-    icon: Optional[bytes]
+    description: Optional[str]
 
 
 class Template(TypedDict):

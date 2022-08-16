@@ -1,3 +1,5 @@
+# pyright: reportUnknownLambdaType=false
+
 from __future__ import annotations
 
 from pprint import pformat
@@ -19,7 +21,7 @@ def injected(user: disnake.User, channel: disnake.TextChannel):
 
 
 async def converter(interaction, number: float) -> float:
-    return number ** 0.5
+    return number**0.5
 
 
 class PrefixConverter:
@@ -80,13 +82,13 @@ class InjectionSlashCommands(commands.Cog):
         ----------
         number: A number which will be squared, 3^2 == 9 by default
         """
-        return number ** self.exponent
+        return number**self.exponent
 
     @commands.slash_command()
     async def injection_command(
         self,
         inter: disnake.CommandInteraction,
-        sqrt: Optional[float] = commands.Param(None, converter=lambda i, x: x ** 0.5),
+        sqrt: Optional[float] = commands.Param(None, converter=lambda i, x: x**0.5),
         prefixed: str = commands.Param(converter=PrefixConverter("__", "__")),
         other: Tuple[int, str] = commands.inject(injected),
         some: int = commands.inject(injected_method),

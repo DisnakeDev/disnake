@@ -33,16 +33,16 @@ __all__ = ("File",)
 
 
 class File:
-    r"""A parameter object used for :meth:`abc.Messageable.send`
-    for sending file objects.
+    """
+    A parameter object used for sending file objects.
 
     .. note::
 
         File objects are single use and are not meant to be reused in
-        multiple :meth:`abc.Messageable.send`\s.
+        multiple :meth:`abc.Messageable.send`\\s.
 
     Attributes
-    -----------
+    ----------
     fp: Union[:class:`os.PathLike`, :class:`io.BufferedIOBase`]
         A file-like object opened in binary mode and read mode
         or a filename representing a file in the hard drive to

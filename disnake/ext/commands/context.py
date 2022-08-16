@@ -30,13 +30,14 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, TypeVar, U
 
 import disnake.abc
 import disnake.utils
+from disnake import ApplicationCommandInteraction
 from disnake.message import Message
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
 
-    from disnake.channel import DMChannel, TextChannel, Thread, VoiceChannel
-    from disnake.guild import Guild
+    from disnake.channel import DMChannel
+    from disnake.guild import Guild, GuildMessageable
     from disnake.member import Member
     from disnake.state import ConnectionState
     from disnake.user import ClientUser, User
@@ -63,16 +64,17 @@ else:
 
 
 class Context(disnake.abc.Messageable, Generic[BotT]):
-    r"""Represents the context in which a command is being invoked under.
+    """
+    Represents the context in which a command is being invoked under.
 
     This class contains a lot of meta data to help you understand more about
     the invocation context. This class is not created manually and is instead
     passed around to commands as the first parameter.
 
-    This class implements the :class:`~disnake.abc.Messageable` ABC.
+    This class implements the :class:`.abc.Messageable` ABC.
 
     Attributes
-    -----------
+    ----------
     message: :class:`.Message`
         The message that triggered the command being executed.
     bot: :class:`.Bot`
@@ -83,13 +85,14 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         then this list could be incomplete.
     kwargs: :class:`dict`
         A dictionary of transformed arguments that were passed into the command.
-        Similar to :attr:`args`\, if this is accessed in the
+        Similar to :attr:`args`\\, if this is accessed in the
         :func:`.on_command_error` event then this dict could be incomplete.
     current_parameter: Optional[:class:`inspect.Parameter`]
         The parameter that is currently being inspected and converted.
         This is only of use for within converters.
 
         .. versionadded:: 2.0
+
     prefix: Optional[:class:`str`]
         The prefix that was used to invoke the command.
     command: Optional[:class:`Command`]
@@ -114,8 +117,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         nonsense string. If nothing was passed to attempt a call to a
         subcommand then this is set to ``None``.
     command_failed: :class:`bool`
-        A boolean that indicates if the command failed to be parsed, checked,
-        or invoked.
+        Whether the command failed to be parsed, checked, or invoked.
     """
 
     def __init__(
@@ -151,7 +153,8 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         self._state: ConnectionState = self.message._state
 
     async def invoke(self, command: Command[CogT, P, T], /, *args: P.args, **kwargs: P.kwargs) -> T:
-        r"""|coro|
+        """
+        |coro|
 
         Calls a command with the arguments given.
 
@@ -168,16 +171,16 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
             using this function.
 
         Parameters
-        -----------
+        ----------
         command: :class:`.Command`
             The command that is going to be called.
-        \*args
+        *args
             The arguments to use.
-        \*\*kwargs
+        **kwargs
             The keyword arguments to use.
 
         Raises
-        -------
+        ------
         TypeError
             The command argument to invoke is missing.
         """
@@ -188,19 +191,19 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
         Calls the command again.
 
-        This is similar to :meth:`~.Context.invoke` except that it bypasses
+        This is similar to :meth:`.invoke` except that it bypasses
         checks, cooldowns, and error handlers.
 
         .. note::
 
             If you want to bypass :exc:`.UserInputError` derived exceptions,
-            it is recommended to use the regular :meth:`~.Context.invoke`
+            it is recommended to use the regular :meth:`.invoke`
             as it will work more naturally. After all, this will end up
             using the old arguments the user has used and will thus just
             fail again.
 
         Parameters
-        ------------
+        ----------
         call_hooks: :class:`bool`
             Whether to call the before and after invoke hooks.
         restart: :class:`bool`
@@ -209,7 +212,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
             The default is to start where we left off.
 
         Raises
-        -------
+        ------
         ValueError
             The context to reinvoke is not valid.
         """
@@ -247,7 +250,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
     @property
     def valid(self) -> bool:
-        """:class:`bool`: Checks if the invocation context is valid to be invoked with."""
+        """:class:`bool`: Whether the invocation context is valid to be invoked with."""
         return self.prefix is not None and self.command is not None
 
     async def _get_channel(self) -> disnake.abc.Messageable:
@@ -267,28 +270,27 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         # consider this to be an *incredibly* strange use case. I'd rather go
         # for this common use case rather than waste performance for the
         # odd one.
-        pattern = re.compile(r"<@!?%s>" % user.id)
-        return pattern.sub("@%s" % user.display_name.replace("\\", r"\\"), self.prefix)
+        pattern = re.compile(rf"<@!?{user.id}>")
+        return pattern.sub("@" + user.display_name.replace("\\", r"\\"), self.prefix)
 
     @property
     def cog(self) -> Optional[Cog]:
-        """Optional[:class:`.Cog`]: Returns the cog associated with this context's command. None if it does not exist."""
-
+        """Optional[:class:`.Cog`]: Returns the cog associated with this context's command. Returns ``None`` if it does not exist."""
         if self.command is None:
             return None
         return self.command.cog
 
     @disnake.utils.cached_property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`.Guild`]: Returns the guild associated with this context's command. None if not available."""
+        """Optional[:class:`.Guild`]: Returns the guild associated with this context's command. Returns ``None`` if not available."""
         return self.message.guild
 
     @disnake.utils.cached_property
-    def channel(self) -> Union[TextChannel, Thread, DMChannel, VoiceChannel]:
+    def channel(self) -> Union[GuildMessageable, DMChannel]:
         """Union[:class:`.abc.Messageable`]: Returns the channel associated with this context's command.
         Shorthand for :attr:`.Message.channel`.
         """
-        return self.message.channel  # type: ignore
+        return self.message.channel
 
     @disnake.utils.cached_property
     def author(self) -> Union[User, Member]:
@@ -303,7 +305,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
         """
         # bot.user will never be None at this point.
-        return self.guild.me if self.guild is not None else self.bot.user  # type: ignore
+        return self.guild.me if self.guild is not None else self.bot.user
 
     @property
     def voice_client(self) -> Optional[VoiceProtocol]:
@@ -332,12 +334,12 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
             this returns :class:`None` on bad input or no help command.
 
         Parameters
-        ------------
+        ----------
         entity: Optional[Union[:class:`Command`, :class:`Cog`, :class:`str`]]
             The entity to show help for.
 
         Returns
-        --------
+        -------
         Any
             The result of the help command, if any.
         """
@@ -401,10 +403,13 @@ class GuildContext(Context):
     """A Context subclass meant for annotation
 
     No runtime behavior is changed but annotations are modified
-    to seem like the context may never be invoked ina  dm.
+    to seem like the context may never be invoked in a DM.
     """
 
     guild: Guild
-    channel: Union[TextChannel, Thread, VoiceChannel]
+    channel: GuildMessageable
     author: Member
     me: Member
+
+
+AnyContext = Union[Context, ApplicationCommandInteraction]

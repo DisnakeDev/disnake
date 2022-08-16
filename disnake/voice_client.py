@@ -50,7 +50,7 @@ from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple
 from . import opus, utils
 from .backoff import ExponentialBackoff
 from .errors import ClientException, ConnectionClosed
-from .gateway import *
+from .gateway import DiscordVoiceWebSocket
 from .player import AudioPlayer, AudioSource
 from .utils import MISSING
 
@@ -60,18 +60,16 @@ if TYPE_CHECKING:
     from .guild import Guild
     from .opus import Encoder
     from .state import ConnectionState
-    from .types.voice import (
-        GuildVoiceState as GuildVoiceStatePayload,
-        SupportedModes,
-        VoiceServerUpdate as VoiceServerUpdatePayload,
-    )
+    from .types.gateway import VoiceServerUpdateEvent
+    from .types.voice import GuildVoiceState as GuildVoiceStatePayload, SupportedModes
     from .user import ClientUser
 
 
 has_nacl: bool
 
 try:
-    import nacl.secret  # type: ignore
+    import nacl.secret
+    import nacl.utils
 
     has_nacl = True
 except ImportError:
@@ -100,7 +98,7 @@ class VoiceProtocol:
     .. _Lavalink: https://github.com/freyacodes/Lavalink
 
     Parameters
-    ------------
+    ----------
     client: :class:`Client`
         The client (or its subclasses) that started the connection request.
     channel: :class:`abc.Connectable`
@@ -118,7 +116,7 @@ class VoiceProtocol:
         has changed. This corresponds to ``VOICE_STATE_UPDATE``.
 
         Parameters
-        ------------
+        ----------
         data: :class:`dict`
             The raw `voice state payload`__.
 
@@ -128,14 +126,14 @@ class VoiceProtocol:
         """
         raise NotImplementedError
 
-    async def on_voice_server_update(self, data: VoiceServerUpdatePayload) -> None:
+    async def on_voice_server_update(self, data: VoiceServerUpdateEvent) -> None:
         """|coro|
 
         An abstract method that is called when initially connecting to voice.
         This corresponds to ``VOICE_SERVER_UPDATE``.
 
         Parameters
-        ------------
+        ----------
         data: :class:`dict`
             The raw `voice server update payload`__.
 
@@ -160,7 +158,7 @@ class VoiceProtocol:
         The order that these two are called is unspecified.
 
         Parameters
-        ------------
+        ----------
         timeout: :class:`float`
             The timeout for the connection.
         reconnect: :class:`bool`
@@ -176,7 +174,7 @@ class VoiceProtocol:
         See :meth:`cleanup`.
 
         Parameters
-        ------------
+        ----------
         force: :class:`bool`
             Whether the disconnection was forced.
         """
@@ -210,7 +208,7 @@ class VoiceClient(VoiceProtocol):
     or the library will not be able to transmit audio.
 
     Attributes
-    -----------
+    ----------
     session_id: :class:`str`
         The voice connection session ID.
     token: :class:`str`
@@ -227,6 +225,8 @@ class VoiceClient(VoiceProtocol):
     voice_port: int
     secret_key: List[int]
     ssrc: int
+    ip: str
+    port: int
 
     def __init__(self, client: Client, channel: abc.Connectable):
         if not has_nacl:
@@ -235,7 +235,7 @@ class VoiceClient(VoiceProtocol):
         super().__init__(client, channel)
         state = client._connection
         self.token: str = MISSING
-        self.socket = MISSING
+        self.socket: socket.socket = MISSING
         self.loop: asyncio.AbstractEventLoop = state.loop
         self._state: ConnectionState = state
         # this will be used in the AudioPlayer thread
@@ -265,9 +265,9 @@ class VoiceClient(VoiceProtocol):
     )
 
     @property
-    def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild we're connected to, if applicable."""
-        return getattr(self.channel, "guild", None)
+    def guild(self) -> Guild:
+        """:class:`Guild`: The guild we're connected to."""
+        return self.channel.guild
 
     @property
     def user(self) -> ClientUser:
@@ -300,12 +300,12 @@ class VoiceClient(VoiceProtocol):
         else:
             self._voice_state_complete.set()
 
-    async def on_voice_server_update(self, data: VoiceServerUpdatePayload) -> None:
+    async def on_voice_server_update(self, data: VoiceServerUpdateEvent) -> None:
         if self._voice_server_complete.is_set():
             _log.info("Ignoring extraneous voice server update.")
             return
 
-        self.token = data.get("token")
+        self.token = data["token"]
         self.server_id = int(data["guild_id"])
         endpoint = data.get("endpoint")
 
@@ -324,12 +324,15 @@ class VoiceClient(VoiceProtocol):
         # This gets set later
         self.endpoint_ip = MISSING
 
+        if self.socket:
+            self.socket.close()
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.setblocking(False)
 
         if not self._handshaking:
             # If we're not handshaking then we need to terminate our previous connection in the websocket
-            await self.ws.close(4000)
+            if self.ws:
+                await self.ws.close(4000)
             return
 
         self._voice_server_complete.set()
@@ -518,7 +521,7 @@ class VoiceClient(VoiceProtocol):
         Moves you to a different voice channel.
 
         Parameters
-        -----------
+        ----------
         channel: :class:`abc.Snowflake`
             The channel to move to. Must be a voice channel.
         """
@@ -540,7 +543,7 @@ class VoiceClient(VoiceProtocol):
         struct.pack_into(">I", header, 4, self.timestamp)
         struct.pack_into(">I", header, 8, self.ssrc)
 
-        encrypt_packet = getattr(self, "_encrypt_" + self.mode)
+        encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
         return encrypt_packet(header, data)
 
     def _encrypt_xsalsa20_poly1305(self, header: bytes, data) -> bytes:
@@ -578,7 +581,7 @@ class VoiceClient(VoiceProtocol):
         passed, any caught exception will be displayed as if it were raised.
 
         Parameters
-        -----------
+        ----------
         source: :class:`AudioSource`
             The audio source we're reading from.
         after: Callable[[Optional[:class:`Exception`]], Any]
@@ -587,7 +590,7 @@ class VoiceClient(VoiceProtocol):
             denotes an optional exception that was raised during playing.
 
         Raises
-        -------
+        ------
         ClientException
             Already playing audio or not connected.
         TypeError
@@ -666,7 +669,7 @@ class VoiceClient(VoiceProtocol):
             Indicates if ``data`` should be encoded into Opus.
 
         Raises
-        -------
+        ------
         ClientException
             You are not connected.
         opus.OpusError

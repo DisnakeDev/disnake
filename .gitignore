@@ -23,4 +23,9 @@ secrets/
 *.env
 !example.env
 venvs/
+.nox/
 .idea
+.coverage*
+coverage.xml
+
+!test_bot/locale/*.json

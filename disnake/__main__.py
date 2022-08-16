@@ -37,19 +37,20 @@ import disnake
 def show_version():
     entries = []
 
+    sys_ver = sys.version_info
     entries.append(
-        "- Python v{0.major}.{0.minor}.{0.micro}-{0.releaselevel}".format(sys.version_info)
+        f"- Python v{sys_ver.major}.{sys_ver.minor}.{sys_ver.micro}-{sys_ver.releaselevel}"
     )
-    version_info = disnake.version_info
-    entries.append("- disnake v{0.major}.{0.minor}.{0.micro}-{0.releaselevel}".format(version_info))
-    if version_info.releaselevel != "final":
-        pkg = pkg_resources.get_distribution("disnake")
-        if pkg:
-            entries.append(f"    - disnake pkg_resources: v{pkg.version}")
+    disnake_ver = disnake.version_info
+    entries.append(
+        f"- disnake v{disnake_ver.major}.{disnake_ver.minor}.{disnake_ver.micro}-{disnake_ver.releaselevel}"
+    )
+    if pkg := pkg_resources.get_distribution("disnake"):
+        entries.append(f"    - disnake pkg_resources: v{pkg.version}")
 
     entries.append(f"- aiohttp v{aiohttp.__version__}")
     uname = platform.uname()
-    entries.append("- system info: {0.system} {0.release} {0.version}".format(uname))
+    entries.append(f"- system info: {uname.system} {uname.release} {uname.version}")
     print("\n".join(entries))
 
 
@@ -66,15 +67,15 @@ import config
 
 class Bot(commands.{base}):
     def __init__(self, **kwargs):
-        super().__init__(command_prefix=commands.when_mentioned_or('{prefix}'), **kwargs)
+        super().__init__(command_prefix=commands.when_mentioned_or("{prefix}"), **kwargs)
         for cog in config.cogs:
             try:
                 self.load_extension(cog)
             except Exception as exc:
-                print(f'Could not load extension {{cog}} due to {{exc.__class__.__name__}}: {{exc}}')
+                print(f"Could not load extension {{cog}} due to {{exc.__class__.__name__}}: {{exc}}")
 
     async def on_ready(self):
-        print(f'Logged on as {{self.user}} (ID: {{self.user.id}})')
+        print(f"Logged on as {{self.user}} (ID: {{self.user.id}})")
 
 
 bot = Bot()

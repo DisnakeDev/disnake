@@ -26,11 +26,13 @@ DEALINGS IN THE SOFTWARE.
 from typing import List, Literal, Optional, TypedDict
 
 from .activity import PartialPresenceUpdate
-from .channel import GuildChannel
+from .channel import GuildChannel, StageInstance
 from .emoji import Emoji
+from .guild_scheduled_event import GuildScheduledEvent
 from .member import Member
 from .role import Role
 from .snowflake import Snowflake
+from .sticker import GuildSticker
 from .threads import Thread
 from .user import User
 from .voice import GuildVoiceState
@@ -70,6 +72,9 @@ class _GuildOptional(TypedDict, total=False):
     max_video_channel_users: int
     approximate_member_count: int
     approximate_presence_count: int
+    stage_instances: List[StageInstance]
+    stickers: List[GuildSticker]
+    guild_scheduled_events: List[GuildScheduledEvent]
 
 
 DefaultMessageNotificationLevel = Literal[0, 1]
@@ -81,8 +86,8 @@ PremiumTier = Literal[0, 1, 2, 3]
 GuildFeature = Literal[
     "ANIMATED_BANNER",
     "ANIMATED_ICON",
+    "AUTO_MODERATION",
     "BANNER",
-    "COMMERCE",
     "COMMUNITY",
     "DISCOVERABLE",
     "ENABLED_DISCOVERABLE_BEFORE",
@@ -120,6 +125,7 @@ class _BaseGuildPreview(UnavailableGuild):
     emojis: List[Emoji]
     features: List[GuildFeature]
     description: Optional[str]
+    stickers: List[GuildSticker]
 
 
 class GuildPreview(_BaseGuildPreview):
@@ -171,3 +177,7 @@ class _RolePositionRequired(TypedDict):
 
 class RolePositionUpdate(_RolePositionRequired, total=False):
     position: Optional[Snowflake]
+
+
+class MFALevelUpdate(TypedDict):
+    level: MFALevel

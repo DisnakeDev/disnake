@@ -1,0 +1,1 @@
+Run docs creation in GitHub actions to test for warnings before a pull is merged.
