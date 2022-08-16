@@ -1,6 +1,5 @@
 import logging
 import logging.handlers
-import os
 import pathlib
 
 from .config import Config
