@@ -38,13 +38,6 @@ class TestBot(commands.Bot):
 
         self.i18n.load("test_bot/locale")
 
-    def load_all_extensions(self, folder: str) -> None:
-        py_path = f"test_bot.{folder}"
-        folder = f"test_bot/{folder}"
-        for name in os.listdir(folder):
-            if name.endswith(".py") and os.path.isfile(f"{folder}/{name}"):
-                self.load_extension(f"{py_path}.{name[:-3]}")
-
     async def on_ready(self):
         # fmt: off
         print(
@@ -120,5 +113,5 @@ print(f"disnake: {disnake.__version__}\n")
 
 if __name__ == "__main__":
     bot = TestBot()
-    bot.load_all_extensions(Config.cogs_folder)
+    bot.load_extensions(os.path.join(__package__, Config.cogs_folder))
     bot.run(Config.token)
