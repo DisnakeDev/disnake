@@ -423,7 +423,9 @@ class RawTypingEvent(_RawReprMixin):
 
 class RawGuildMemberRemoveEvent(_RawReprMixin):
     """Represents the event payload for an :func:`on_raw_member_remove` event.
+
     .. versionadded:: 2.6
+
     Attributes
     ----------
     guild_id: :class:`int`
@@ -444,7 +446,9 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
 
 class RawGuildMemberUpdateEvent(_RawReprMixin):
     """Represents the event payload for an :func:`on_raw_member_update` event.
+
     .. versionadded:: 2.6
+
     Attributes
     ----------
     guild_id: :class:`int`
