@@ -104,12 +104,6 @@ class _EnumDict(Dict[str, Any]):
         self.member_map: Dict[str, Any] = {}
         self.value_map: Dict[Any, str] = {}
 
-    def __getitem__(self, name: str) -> Any:
-        try:
-            return super().__getitem__(name)
-        except KeyError:
-            return self.value_map[name]
-
     def __setitem__(self, name: str, value: Any) -> None:
         if name in {"mro", ""}:  # illegal names defined in original python enums
             raise ValueError(f"Invalid Enum member name: {name}")
@@ -124,7 +118,7 @@ class _EnumDict(Dict[str, Any]):
             )
 
         if name in self.member_map:
-            raise TypeError(f"Attempted to reuse key: '{name!r}'")
+            raise TypeError(f"Cannot create multiple members with the same name: {name!r}")
         if value in self.value_map:
             # We'll have to settle for slower value lookup in case of a dupe
             self.member_map[name] = value
@@ -173,7 +167,8 @@ class EnumMeta(type):
             member = cls.__new__(cls, value_)  # type: ignore
             member._name_ = name_
             member._value_ = value_
-            name_map[name_] = value_map[value_] = member
+            name_map[name_] = member
+            value_map.setdefault(value_, member)  # Prioritize first defined in case of alias
             setattr(cls, name_, member)
 
         return cls
@@ -216,7 +211,7 @@ class EnumMeta(type):
         yield from cls._name_map_.values()
 
     @property
-    def __members__(cls) -> types.MappingProxyType[str, Enum]:
+    def __members__(cls) -> Mapping[str, Enum]:
         return types.MappingProxyType(cls._name_map_)
 
     @property
@@ -239,12 +234,12 @@ else:
 
         @property
         def name(self) -> str:
-            """Return the name of the enum member as a `builtins.str`."""
+            """The name of the enum member."""
             return self._name_
 
         @property
         def value(self):
-            """Return the value of the enum member."""
+            """The value of the enum member."""
             return self._value_
 
         def __repr__(self) -> str:
@@ -2178,13 +2173,6 @@ class AutoModTriggerType(int, Enum):
 EnumT = TypeVar("EnumT", bound=Enum)
 
 
-def create_unknown_value(cls: Type[EnumT], val: Any) -> EnumT:
-    unknown = cls.__new__(cls)  # type: ignore  # skip Enum type validation
-    unknown._name_ = f"unknown_{val}"
-    unknown._value_ = val
-    return unknown
-
-
 def try_enum(cls: Type[EnumT], val: Any) -> EnumT:
     """A function that tries to turn the value into enum ``cls``.
     If it fails it returns a proxy invalid value instead.
@@ -2192,7 +2180,7 @@ def try_enum(cls: Type[EnumT], val: Any) -> EnumT:
     try:
         return cls._value2member_map_[val]  # type: ignore
     except KeyError:
-        return create_unknown_value(cls, val)
+        return val
 
 
 # These can probably be deprecated:
