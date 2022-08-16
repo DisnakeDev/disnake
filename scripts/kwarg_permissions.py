@@ -49,6 +49,11 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
         if not has_overload_deco:
             return node
 
+        # create permission matchers
+        perm_matchers = m.Name(self.permissions[0])
+        for perm in self.permissions[1:]:
+            perm_matchers |= m.Name(perm)
+
         if not node.params.star_kwarg and not is_overload:
             raise RuntimeError(
                 'a function cannot be decorated with "_overload_with_permissions" and not take any kwargs unless it is an overload.'
@@ -65,13 +70,10 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
         else:
             # use the first permission annotation if it exists, otherwise default to `bool`
             # make a matcher instance of all valid permission names
-            matches = m.Name(self.permissions[0])
-            for perm in self.permissions[1:]:
-                matches |= m.Name(perm)
             for kw_param in node.params.kwonly_params:
                 if (
                     kw_param.annotation
-                    and m.matches(kw_param.name, matches)
+                    and m.matches(kw_param.name, perm_matchers)
                     and m.matches(kw_param.annotation, m.Annotation())
                 ):
                     annotation = kw_param.annotation
@@ -87,10 +89,21 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
                 if param.name.value in self.permissions:
                     existing_params.remove(param)
 
+            # unlike params, these may contain generated objects
+            # we only have to do this for overloads, as we only change overloads directly
             existing_kwonly_params = list(params.kwonly_params)
-            for param in existing_kwonly_params.copy():
-                if param.name.value in self.permissions:
-                    existing_kwonly_params.remove(param)
+            if is_overload:
+                # make matches
+                found_start = False
+                for param in existing_kwonly_params.copy():
+                    if m.matches(param.name, perm_matchers):
+                        found_start = True
+                    if found_start:
+                        existing_kwonly_params.remove(param)
+            else:
+                for param in existing_kwonly_params.copy():
+                    if m.matches(param.name, perm_matchers):
+                        existing_kwonly_params.remove(param)
 
             star_arg = params.star_arg if existing_kwonly_params else cst.MaybeSentinel.DEFAULT
             return params.with_changes(
