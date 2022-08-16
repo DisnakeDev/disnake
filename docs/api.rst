@@ -833,16 +833,6 @@ Members
     :param member: The member who joined or left.
     :type member: :class:`Member`
 
-.. function:: on_raw_member_remove(payload)
-
-    Called when a member leaves a :class:`Guild`.
-    Unlike :func:`on_member_remove`, this is called regardless of the member cache.
-
-    .. versionadded:: 2.6
-
-    :param payload: The raw event payload data.
-    :type payload: :class:`RawGuildMemberRemoveEvent`
-
 .. function:: on_member_update(before, after)
 
     Called when a :class:`Member` updates their profile.
@@ -863,6 +853,16 @@ Members
     :type before: :class:`Member`
     :param after: The member's updated info.
     :type after: :class:`Member`
+
+.. function:: on_raw_member_remove(payload)
+
+    Called when a member leaves a :class:`Guild`.
+    Unlike :func:`on_member_remove`, this is called regardless of the member cache.
+
+    .. versionadded:: 2.6
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawGuildMemberRemoveEvent`
 
 .. function:: on_raw_member_update(payload)
 
