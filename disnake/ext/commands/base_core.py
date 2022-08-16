@@ -43,7 +43,7 @@ from typing import (
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.permissions import Permissions
-from disnake.utils import _overload_with_permissions, async_all, maybe_coroutine
+from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
@@ -648,7 +648,7 @@ class InvokableApplicationCommand(ABC):
 
 
 @overload
-@_overload_with_permissions
+@_generated
 def default_member_permissions(
     value: int = 0,
     *,
@@ -704,7 +704,7 @@ def default_member_permissions(
 
 
 @overload
-@_overload_with_permissions
+@_generated
 def default_member_permissions(
     value: int = 0,
 ) -> Callable[[T], T]:

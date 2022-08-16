@@ -1368,3 +1368,8 @@ def humanize_list(values: List[str], combine: str) -> str:
 # it is merely a marker not unlike pytest.mark
 def _overload_with_permissions(func: T) -> T:
     return func
+
+
+# this is used as a marker for functions or classes that were created by codemodding
+def _generated(func: T) -> T:
+    return func

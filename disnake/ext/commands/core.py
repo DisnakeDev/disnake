@@ -49,7 +49,7 @@ from typing import (
 )
 
 import disnake
-from disnake.utils import _overload_with_permissions
+from disnake.utils import _generated, _overload_with_permissions
 
 from ._types import _BaseCommand
 from .cog import Cog
@@ -2030,7 +2030,7 @@ def bot_has_any_role(*items: int) -> Callable[[T], T]:
 
 
 @overload
-@_overload_with_permissions
+@_generated
 def has_permissions(
     *,
     add_reactions: bool = ...,
@@ -2085,7 +2085,7 @@ def has_permissions(
 
 
 @overload
-@_overload_with_permissions
+@_generated
 def has_permissions() -> Callable[[T], T]:
     ...
 
@@ -2139,7 +2139,7 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
 
 
 @overload
-@_overload_with_permissions
+@_generated
 def bot_has_permissions(
     *,
     add_reactions: bool = ...,
@@ -2194,7 +2194,7 @@ def bot_has_permissions(
 
 
 @overload
-@_overload_with_permissions
+@_generated
 def bot_has_permissions() -> Callable[[T], T]:
     ...
 
@@ -2225,7 +2225,7 @@ def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
 
 
 @overload
-@_overload_with_permissions
+@_generated
 def has_guild_permissions(
     *,
     add_reactions: bool = ...,
@@ -2280,7 +2280,7 @@ def has_guild_permissions(
 
 
 @overload
-@_overload_with_permissions
+@_generated
 def has_guild_permissions() -> Callable[[T], T]:
     ...
 
@@ -2315,7 +2315,7 @@ def has_guild_permissions(**perms: bool) -> Callable[[T], T]:
 
 
 @overload
-@_overload_with_permissions
+@_generated
 def bot_has_guild_permissions(
     *,
     add_reactions: bool = ...,
@@ -2370,7 +2370,7 @@ def bot_has_guild_permissions(
 
 
 @overload
-@_overload_with_permissions
+@_generated
 def bot_has_guild_permissions() -> Callable[[T], T]:
     ...
 

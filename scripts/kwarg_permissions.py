@@ -2,6 +2,7 @@ from typing import Optional
 
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
+import libcst.matchers as m
 from libcst import codemod
 
 from disnake import Permissions
@@ -26,10 +27,10 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
         return False
 
     def leave_FunctionDef(self, node: cst.FunctionDef, new_node: cst.FunctionDef):
-        node = new_node
         has_overload_deco = False
         is_overload = False
-        for deco in node.decorators:
+        previously_generated = False
+        for deco in new_node.decorators:
             if isinstance(deco.decorator, cst.Call):
                 continue
             name = deco.decorator.value
@@ -37,22 +38,45 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
                 has_overload_deco = True
             elif name == "overload":
                 is_overload = True
+            elif name == "_generated":
+                previously_generated = True
 
-        if not has_overload_deco:
-            return node
-
-        if is_overload:
+        if previously_generated:
             return cst.RemovalSentinel.REMOVE
 
-        if not node.params.star_kwarg:
+        if not has_overload_deco:
+            return new_node
+
+        node = new_node
+
+        # if the function is not an overload and is decorated with the deco
+        if not node.params.star_kwarg and not is_overload:
             raise RuntimeError(
                 'a function cannot be decorated with "_overload_with_permissions" and not take any kwargs.'
             )
-
-        # use the existing annotation if one exists
-        annotation = node.params.star_kwarg.annotation
-        if annotation is None:
-            raise RuntimeError(f"parameter {node.params.star_kwarg.name.value} must be annotated.")
+        elif node.params.star_kwarg:
+            # use the existing annotation if one exists
+            annotation = node.params.star_kwarg.annotation
+            if annotation is None:
+                raise RuntimeError(
+                    f"parameter {node.params.star_kwarg.name.value} must be annotated."
+                )
+        else:
+            # use the first permission annotation if it exists, otherwise default to `bool`
+            # make a matcher instance of all valid permission names
+            matches = m.Name(self.permissions[0])
+            for perm in self.permissions[1:]:
+                matches |= m.Name(perm)
+            for kw_param in node.params.kwonly_params:
+                if (
+                    kw_param.annotation
+                    and m.matches(kw_param.name, matches)
+                    and m.matches(kw_param.annotation, m.Annotation())
+                ):
+                    annotation = kw_param.annotation
+                    break
+            else:
+                annotation = cst.Annotation(cst.Name("bool"))
 
         # remove all of the existing permissions from the params
         def remove_existing_permissions(params: cst.Parameters) -> cst.Parameters:
@@ -86,7 +110,7 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
             body=cst.IndentedBlock([cst.SimpleStatementLine([cst.Expr(cst.Ellipsis())])]),
             decorators=[
                 cst.Decorator(cst.Name("overload")),
-                cst.Decorator(cst.Name("_overload_with_permissions")),
+                cst.Decorator(cst.Name("_generated")),
             ],
         )
 
@@ -101,12 +125,23 @@ class PermissionTypings(codemod.VisitorBasedCodemodCommand):
                     default=cst.Ellipsis(),
                 )
             )
-        # may need to codemod an overload import as well
+
         codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "overload")
+
         overload = empty_overload.deep_clone()
         params = remove_existing_permissions(overload.params)
         kwonly_params = list(params.kwonly_params)
         kwonly_params.extend(perms)
         params = params.with_changes(kwonly_params=kwonly_params, star_kwarg=None)
+        if is_overload:
+            node = node.with_changes(params=params)
+            return node
+
         overload = overload.with_changes(params=params)
+
+        # only add the import if we're using the empty overload
+        codevisitors.AddImportsVisitor.add_needed_import(
+            self.context, "disnake.utils", "_generated"
+        )
+
         return cst.FlattenSentinel([overload, empty_overload, node])

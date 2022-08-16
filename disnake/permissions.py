@@ -40,7 +40,7 @@ from typing import (
 )
 
 from .flags import BaseFlags, alias_flag_value, flag_value
-from .utils import _overload_with_permissions
+from .utils import _generated, _overload_with_permissions
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -168,7 +168,7 @@ class Permissions(BaseFlags):
     __slots__ = ()
 
     @overload
-    @_overload_with_permissions
+    @_generated
     def __init__(
         self,
         permissions: int = 0,
@@ -224,7 +224,7 @@ class Permissions(BaseFlags):
         ...
 
     @overload
-    @_overload_with_permissions
+    @_generated
     def __init__(
         self,
         permissions: int = 0,
@@ -511,7 +511,7 @@ class Permissions(BaseFlags):
         return base
 
     @overload
-    @_overload_with_permissions
+    @_generated
     def update(
         self,
         *,
@@ -566,7 +566,7 @@ class Permissions(BaseFlags):
         ...
 
     @overload
-    @_overload_with_permissions
+    @_generated
     def update(
         self,
     ) -> None:
@@ -1027,7 +1027,7 @@ class PermissionOverwrite:
         moderate_members: Optional[bool]
 
     @overload
-    @_overload_with_permissions
+    @_generated
     def __init__(
         self,
         *,
@@ -1082,7 +1082,7 @@ class PermissionOverwrite:
         ...
 
     @overload
-    @_overload_with_permissions
+    @_generated
     def __init__(
         self,
     ):
