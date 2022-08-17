@@ -1426,6 +1426,24 @@ class AuditLogAction(int, Enum):
     - ``rule_name``: A :class:`str` with the name of the rule that matched.
     - ``rule_trigger_type``: A :class:`AutoModTriggerType` value with the trigger type of the rule.
     """
+    automod_send_alert_message            = 144
+    """An alert message was sent by an auto moderation rule.
+
+    When this is the action, the type of :attr:`~AuditLogEntry.target` is
+    the :class:`Member` or :class:`User` who had their message flagged.
+
+    See :attr:`automod_block_message` for more information on how the
+    :attr:`~AuditLogEntry.extra` field is set.
+    """
+    automod_timeout                       = 145
+    """A user was timed out by an auto moderation rule.
+
+    When this is the action, the type of :attr:`~AuditLogEntry.target` is
+    the :class:`Member` or :class:`User` who was timed out.
+
+    See :attr:`automod_block_message` for more information on how the
+    :attr:`~AuditLogEntry.extra` field is set.
+    """
     # fmt: on
 
     @property
@@ -1485,6 +1503,8 @@ class AuditLogAction(int, Enum):
             AuditLogAction.automod_rule_update:                   AuditLogActionCategory.update,
             AuditLogAction.automod_rule_delete:                   AuditLogActionCategory.delete,
             AuditLogAction.automod_block_message:                 None,
+            AuditLogAction.automod_send_alert_message:            None,
+            AuditLogAction.automod_timeout:                       None,
         }
         # fmt: on
         return lookup[self]
@@ -1529,7 +1549,7 @@ class AuditLogAction(int, Enum):
             return None
         elif v < 143:
             return "automod_rule"
-        elif v == 143:
+        elif v < 146:
             return "user"
         else:
             return None
@@ -2165,6 +2185,11 @@ class AutoModTriggerType(int, Enum):
     """The rule will filter messages suspected of being spam."""
     keyword_preset = 4
     """The rule will filter messages based on predefined lists containing commonly flagged words.
+
+    This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+    """
+    mention_spam = 5
+    """The rule will filter messages based on the number of member/role mentions they contain.
 
     This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
     """
